@@ -1,14 +1,14 @@
 import 'server-only';
 
-import { BookingConfirmationGuest, renderEmailHtml, renderEmailText } from '@cct/emails';
+import { BookingConfirmationGuest, renderEmailHtml, renderEmailText } from '@mch/emails';
 import {
   buildIdempotencyKey,
   confirmBooking,
   generateBookingRef,
   type BookingDraft,
-} from '@cct/domain/booking';
-import { err, ok, type Result } from '@cct/domain/shared';
-import { sendBrevoTransactionalEmail } from '@cct/integrations/brevo';
+} from '@mch/domain/booking';
+import { err, ok, type Result } from '@mch/domain/shared';
+import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
 
 import { env } from '@/lib/env';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';

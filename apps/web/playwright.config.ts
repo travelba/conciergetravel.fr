@@ -23,7 +23,7 @@ const CI = !!process.env['CI'];
  */
 const TEST_PUBLIC_ENV = {
   NEXT_PUBLIC_SITE_URL: BASE_URL,
-  NEXT_PUBLIC_SITE_NAME: 'ConciergeTravel',
+  NEXT_PUBLIC_SITE_NAME: 'MyConciergeHotel',
   NEXT_PUBLIC_DEFAULT_LOCALE: 'fr',
   // Real Supabase URLs/keys aren't needed: the test build skips Auth and
   // `getOptionalUser()` returns null when the request lacks a Supabase cookie.
@@ -91,12 +91,12 @@ export default defineConfig({
       ...TEST_PUBLIC_ENV,
       // E2E seam — surface a synthetic hotel for the email-mode tunnel
       // specs. Never set in real deployments; see `dev-fake-hotel.ts`.
-      CCT_E2E_FAKE_HOTEL_ID: E2E_FAKE_HOTEL_ID,
+      MCH_E2E_FAKE_HOTEL_ID: E2E_FAKE_HOTEL_ID,
       // Paid-tunnel counterpart — synthetic `booking_mode = 'amadeus'`
       // hotel for the `booking-paid.spec` (offer-lock → invite → recap
       // → payment). Pairs with the in-memory Redis stub activated when
       // either seam env var is present.
-      CCT_E2E_FAKE_PAID_HOTEL_ID: E2E_FAKE_PAID_HOTEL_ID,
+      MCH_E2E_FAKE_PAID_HOTEL_ID: E2E_FAKE_PAID_HOTEL_ID,
     },
   },
 });

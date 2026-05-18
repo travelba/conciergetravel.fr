@@ -1,4 +1,4 @@
-import type { CompetitorProvider } from '@cct/domain/price-comparison';
+import type { CompetitorProvider } from '@mch/domain/price-comparison';
 
 /**
  * Makcorps raw → domain entries (skill: competitive-pricing-comparison).

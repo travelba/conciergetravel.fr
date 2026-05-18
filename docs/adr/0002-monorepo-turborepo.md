@@ -21,7 +21,7 @@ Le projet est organisé en monorepo `pnpm workspaces` orchestré par **Turborepo
 
 ## Conséquences
 
-- Exposition de packages internes via `@cct/*` paths (configurés dans `tsconfig.base.json`).
+- Exposition de packages internes via `@mch/*` paths (configurés dans `tsconfig.base.json`).
 - Discipline d'imports : pas d'import direct entre apps ; tout passe par `packages/`.
 - Cache Turborepo : significativement plus rapide en CI (`build`, `lint`, `typecheck` cachés par hash d'entrées).
 - Une lockfile unique `pnpm-lock.yaml` à la racine.

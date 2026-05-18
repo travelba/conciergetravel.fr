@@ -5,7 +5,7 @@ import { env } from '@/lib/env';
 
 /**
  * Supabase server client — RSC-safe, cookie-based session.
- * For service-role operations, use `@cct/db` `createSupabaseAdminClient`.
+ * For service-role operations, use `@mch/db` `createSupabaseAdminClient`.
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();

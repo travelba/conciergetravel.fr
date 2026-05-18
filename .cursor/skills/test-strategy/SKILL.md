@@ -1,9 +1,9 @@
 ---
 name: test-strategy
-description: Test strategy for ConciergeTravel.fr — unit (Vitest), integration (Vitest + MSW), E2E (Playwright), accessibility (axe), Lighthouse CI. Use whenever you add or change tests, test config, or coverage rules.
+description: Test strategy for MyConciergeHotel.com — unit (Vitest), integration (Vitest + MSW), E2E (Playwright), accessibility (axe), Lighthouse CI. Use whenever you add or change tests, test config, or coverage rules.
 ---
 
-# Test strategy — ConciergeTravel.fr
+# Test strategy — MyConciergeHotel.com
 
 We follow the **trophy** model: a thick base of unit tests on `packages/domain/`, a strong integration layer on `packages/integrations/` with mocked vendors, and focused E2E on critical user journeys. Lighthouse CI guards performance.
 

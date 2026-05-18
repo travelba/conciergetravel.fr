@@ -171,7 +171,7 @@ export async function pushRankingV2(
         ranking.meta_desc_fr,
         ranking.meta_desc_en,
         todayIso,
-        'ConciergeTravel Éditorial',
+        'MyConciergeHotel Éditorial',
         '/equipe/editorial',
         options.publish,
         JSON.stringify(ranking.tables),

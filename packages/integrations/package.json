@@ -1,5 +1,5 @@
 {
-  "name": "@cct/integrations",
+  "name": "@mch/integrations",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -10,6 +10,9 @@
     "./makcorps": "./src/makcorps/index.ts",
     "./apify": "./src/apify/index.ts",
     "./google-places": "./src/google-places/index.ts",
+    "./wikimedia-commons": "./src/wikimedia-commons/index.ts",
+    "./overpass": "./src/overpass/index.ts",
+    "./cloudinary": "./src/cloudinary/index.ts",
     "./brevo": "./src/brevo/index.ts",
     "./algolia-admin": "./src/algolia-admin/index.ts",
     "./algolia-hotel-catalog": "./src/algolia-admin/hotel-catalog-public.ts",
@@ -22,11 +25,12 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@cct/config": "workspace:*",
-    "@cct/domain": "workspace:*",
+    "@mch/config": "workspace:*",
+    "@mch/domain": "workspace:*",
     "@upstash/ratelimit": "catalog:",
     "@upstash/redis": "catalog:",
     "algoliasearch": "^5.20.0",
+    "cloudinary": "^2.10.0",
     "zod": "catalog:"
   },
   "devDependencies": {

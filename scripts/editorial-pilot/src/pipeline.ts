@@ -3,7 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import type { LlmClient } from './llm.js';
 import { lintReport, type LinterReport } from './linter.js';
-import { BriefSchema, FactCheckReportSchema, type Brief, type FactCheckReport } from './schemas.js';
+import {
+  BriefSchema,
+  ConciergePass8OutputSchema,
+  FactCheckReportSchema,
+  type Brief,
+  type ConciergePass8Output,
+  type FactCheckReport,
+} from './schemas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,6 +50,10 @@ export interface PipelineResult {
   readonly finalLintReport: LinterReport;
   /** Pass 7 — final anchor-scrub (suppresses residual hallucinations). Null when feature flag is off. */
   readonly anchorScrub: PassResult | null;
+  /** Pass 8 — Concierge voice humanizer (rewrites lead + emits concierge_advice). Null when feature flag is off. */
+  readonly conciergeVoice: PassResult | null;
+  /** Parsed Pass 8 output. Null when pass 8 disabled or its output failed schema validation. */
+  readonly conciergeAdvice: ConciergePass8Output | null;
   readonly final: string;
   readonly totalTokens: { input: number; output: number };
 }
@@ -122,7 +133,7 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
   console.log(`\n━━━ ${slug} ━━━`);
 
   const brief = await loadBrief(slug);
-  const [prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt7] = await Promise.all([
+  const [prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt7, prompt8] = await Promise.all([
     loadPrompt('01-draft-factuel.md'),
     loadPrompt('02-variation-syntaxique.md'),
     loadPrompt('03-humanisation-magazine.md'),
@@ -130,10 +141,14 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
     loadPrompt('05-correctrice-post-fact-check.md'),
     loadPrompt('06-linter-fixer.md'),
     loadPrompt('07-anchor-scrub.md'),
+    loadPrompt('08-concierge-voice.md'),
   ]);
 
   // Pass 7 anchor-scrub can be disabled via env flag for A/B comparisons.
   const anchorScrubEnabled = process.env['EDITORIAL_PILOT_ANCHOR_SCRUB'] !== 'false';
+  // Pass 8 Concierge voice humanizer can be disabled via env flag for A/B
+  // (default ON — required by ADR-0011).
+  const conciergeVoiceEnabled = process.env['EDITORIAL_PILOT_CONCIERGE_VOICE'] !== 'false';
 
   const outputDir = resolve(OUTPUT_DIR, slug);
   await mkdir(outputDir, { recursive: true });
@@ -306,6 +321,43 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
     }
   }
 
+  // Pass 8 — Concierge voice humanizer : reformule le lead + produit le
+  // bloc `concierge_advice` (FR + EN). Voir ADR-0011, EDITORIAL_VOICE.md.
+  let conciergeVoice: PassResult | null = null;
+  let conciergeAdvice: ConciergePass8Output | null = null;
+  if (conciergeVoiceEnabled) {
+    conciergeVoice = await runPass(
+      llm,
+      'pass-8',
+      'concierge-voice humanizer',
+      prompt8,
+      `=== BRIEF JSON ===\n${JSON.stringify(brief, null, 2)}\n\n=== TEXTE FINAL POST-PASS-7 ===\n${final}`,
+      { temperature: 0.7, maxTokens: 2500, jsonMode: llm.provider === 'openai' },
+    );
+    const rawPass8 = extractJson(conciergeVoice.content);
+    const parsed = ConciergePass8OutputSchema.safeParse(rawPass8);
+    if (parsed.success) {
+      conciergeAdvice = parsed.data;
+      final = spliceConciergeLead(final, conciergeAdvice.lead_concierge);
+      await writeFile(
+        resolve(outputDir, '08-concierge-advice.json'),
+        JSON.stringify(conciergeAdvice, null, 2),
+        'utf-8',
+      );
+      await writeFile(resolve(outputDir, '08-concierge-voice.md'), final, 'utf-8');
+      console.log(
+        `  → Pass 8 Concierge voice applied (lead spliced, advice FR ${countWords(conciergeAdvice.concierge_advice.fr.body)}w / EN ${countWords(conciergeAdvice.concierge_advice.en?.body ?? '')}w)`,
+      );
+    } else {
+      const issues = parsed.error.issues
+        .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
+        .join('\n');
+      console.warn(
+        `  ⚠ Pass 8 schema validation failed — keeping pre-pass-8 markdown, no concierge_advice persisted:\n${issues}`,
+      );
+    }
+  }
+
   await writeFile(resolve(outputDir, 'final.md'), final, 'utf-8');
 
   await mkdir(DOCS_PILOT_DIR, { recursive: true });
@@ -324,7 +376,8 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
       factCheck.inputTokens +
       (correction?.inputTokens ?? 0) +
       linterFixerTokens.input +
-      (anchorScrub?.inputTokens ?? 0),
+      (anchorScrub?.inputTokens ?? 0) +
+      (conciergeVoice?.inputTokens ?? 0),
     output:
       draft.outputTokens +
       variation.outputTokens +
@@ -332,7 +385,8 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
       factCheck.outputTokens +
       (correction?.outputTokens ?? 0) +
       linterFixerTokens.output +
-      (anchorScrub?.outputTokens ?? 0),
+      (anchorScrub?.outputTokens ?? 0) +
+      (conciergeVoice?.outputTokens ?? 0),
   };
 
   const summary = {
@@ -354,6 +408,8 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
     blockers: factCheckReport.blockers_for_publication,
     pass_5_applied: correction !== null,
     pass_7_applied: anchorScrub !== null,
+    pass_8_applied: conciergeVoice !== null,
+    pass_8_advice_persisted: conciergeAdvice !== null,
     linter: {
       initial: initialLintReport.counts,
       final: currentLintReport.counts,
@@ -383,9 +439,35 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
     initialLintReport,
     finalLintReport: currentLintReport,
     anchorScrub,
+    conciergeVoice,
+    conciergeAdvice,
     final,
     totalTokens: totals,
   };
+}
+
+/**
+ * Splices the new Concierge-voice lead into the final markdown.
+ *
+ * Strategy: keep the H1 line untouched, drop everything between the H1
+ * and the first `## ` H2, then insert the rewritten lead in between.
+ * Falls back to prepending the lead under the H1 if no H2 is found
+ * (defensive — every fiche has at least one H2 in practice).
+ */
+function spliceConciergeLead(markdown: string, newLead: string): string {
+  const lines = markdown.split('\n');
+  const h1Index = lines.findIndex((l) => /^#\s/.test(l));
+  if (h1Index === -1) return `${newLead.trim()}\n\n${markdown}`;
+  const h2Index = lines.findIndex((l, i) => i > h1Index && /^##\s/.test(l));
+  const head = lines.slice(0, h1Index + 1).join('\n');
+  const tail = h2Index === -1 ? '' : lines.slice(h2Index).join('\n');
+  return `${head}\n\n${newLead.trim()}\n\n${tail}`.trimEnd() + '\n';
+}
+
+function countWords(s: string): number {
+  const trimmed = s.trim();
+  if (trimmed.length === 0) return 0;
+  return trimmed.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0).length;
 }
 
 export async function listAvailableBriefs(): Promise<string[]> {
@@ -393,6 +475,9 @@ export async function listAvailableBriefs(): Promise<string[]> {
   const entries = await readdir(BRIEFS_DIR);
   return entries
     .filter((f) => f.endsWith('.json'))
+    // Skip internal metadata files like _palaces-discovered.json that share
+    // the same folder but are not actual hotel briefs.
+    .filter((f) => !f.startsWith('_'))
     .map((f) => f.replace(/\.json$/, ''))
     .sort();
 }

@@ -11,9 +11,9 @@
  * spa, amenities). Outputs are typed by Zod before persist.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-signature-experiences.ts --all
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-signature-experiences.ts --slug=plaza-athenee-paris [--force]
  */
 
@@ -49,9 +49,9 @@ const SignatureExperienceSchema = z.object({
       .max(60),
   ),
   title_fr: z.string().min(3).max(120),
-  title_en: z.string().min(3).max(120).optional().default(''),
+  title_en: z.string().min(3).max(120),
   description_fr: z.string().min(40).max(800),
-  description_en: z.string().max(800).optional().default(''),
+  description_en: z.string().min(40).max(800),
   badge_fr: z.string().max(60).optional().nullable(),
   badge_en: z.string().max(60).optional().nullable(),
   booking_required: z.boolean().default(false),
@@ -103,7 +103,7 @@ async function withClient<T>(fn: (c: import('pg').Client) => Promise<T>): Promis
   }
 }
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour ConciergeTravel.fr.
+const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com.
 
 Tu produis les "expériences signature" d'un Palace : programmes exclusifs in-situ qui distinguent l'hôtel d'un 5★ classique. Style "long-read Condé Nast Traveler", précis et factuel — JAMAIS de superlatifs creux ("magique", "à couper le souffle", "incroyable").
 
@@ -174,7 +174,12 @@ function buildPrompt(h: HotelRow): string {
   lines.push('');
   lines.push('Contraintes :');
   lines.push('- `key` : kebab-case ASCII (ex: "petit-dejeuner-terrasse", "ski-valet-prive")');
-  lines.push("- Anglais britannique (en-GB), peut être vide si tu n'es pas sûr");
+  lines.push(
+    "- Anglais britannique (en-GB) **OBLIGATOIRE** sur title_en + description_en + badge_en (si présent). Pas d'oubli.",
+  );
+  lines.push(
+    "- title_en = traduction directe du title_fr ; description_en = traduction directe (60-180 mots), pas un résumé.",
+  );
   lines.push(
     '- Adapter les signatures à la SAISON et au LIEU (montagne en hiver, mer en été, urbain à Paris…)',
   );
@@ -218,25 +223,28 @@ interface Args {
   readonly slug: string | null;
   readonly all: boolean;
   readonly force: boolean;
+  readonly missingEn: boolean;
 }
 function parseArgs(): Args {
   const args = process.argv.slice(2);
   let slug: string | null = null;
   let all = false;
   let force = false;
+  let missingEn = false;
   for (const a of args) {
     if (a === '--all') all = true;
     else if (a === '--force') force = true;
+    else if (a === '--missing-en') missingEn = true;
     else if (a.startsWith('--slug=')) slug = a.slice('--slug='.length).trim();
   }
-  return { slug, all, force };
+  return { slug, all, force, missingEn };
 }
 
 async function main(): Promise<void> {
   const args = parseArgs();
-  if (args.slug === null && !args.all) {
+  if (args.slug === null && !args.all && !args.missingEn) {
     console.error(
-      'Usage: tsx src/enrichment/enrich-signature-experiences.ts --slug=<slug> | --all [--force]',
+      'Usage: tsx src/enrichment/enrich-signature-experiences.ts --slug=<slug> | --all | --missing-en [--force]',
     );
     process.exit(1);
   }
@@ -248,7 +256,15 @@ async function main(): Promise<void> {
       filters.push(`slug = $${params.length + 1}`);
       params.push(args.slug);
     }
-    if (!args.force) {
+    if (args.missingEn) {
+      // Hotels where the first signature lacks a meaningful EN description.
+      filters.push(
+        `(signature_experiences is null
+          or jsonb_array_length(signature_experiences) < 4
+          or (signature_experiences -> 0 ->> 'description_en') is null
+          or length(signature_experiences -> 0 ->> 'description_en') < 30)`,
+      );
+    } else if (!args.force) {
       filters.push(
         '(signature_experiences is null or jsonb_array_length(signature_experiences) < 4)',
       );

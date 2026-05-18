@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { buildEmailRequestIdempotencyKey } from '@cct/domain/booking';
+import { buildEmailRequestIdempotencyKey } from '@mch/domain/booking';
 
 import { redis } from '@/lib/redis';
 

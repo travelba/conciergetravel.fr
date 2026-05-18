@@ -419,6 +419,412 @@ export const DESTINATIONS: readonly DestinationGuideSeed[] = [
     ],
     toneFr: 'sauvage, méditerranéen, intemporel',
   },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Sprint 6 — combler le delta Yonder : 16 nouvelles destinations FR
+  // Couverture demandée pour aligner notre maillage interne (top-down)
+  // avec celui des comparateurs éditoriaux (Yonder, Magazine du Voyageur).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // ── Deauville ─────────────────────────────────────────────────────────────
+  {
+    slug: 'deauville',
+    nameFr: 'Deauville',
+    nameEn: 'Deauville',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['deauville', 'trouville', 'trouville-sur-mer'],
+    keywordsFr: [
+      'Deauville — reine de la Côte Fleurie depuis 1860 (Duc de Morny)',
+      'Adresses : Hôtel Barrière Le Normandy, Hôtel Barrière Le Royal, Les Manoirs de Tourgéville',
+      'Planches, casino, hippodromes (La Touques, Clairefontaine)',
+      'American Film Festival (septembre), Polo Gold Cup, Lancel Trophy',
+      'Cinéma : Un homme et une femme (Lelouch), Coco Chanel',
+      'Côte Fleurie : Honfleur, Trouville, Cabourg (Proust)',
+      'Aéroport Deauville-Saint-Gatien, Paris (2h en voiture)',
+    ],
+    keywordsEn: [
+      'Deauville — queen of the Côte Fleurie since 1860 (Duke of Morny)',
+      'Hôtel Barrière Le Normandy, Hôtel Barrière Le Royal',
+      'Boardwalks, casino, racecourses, American Film Festival',
+    ],
+    toneFr: 'normand, équestre, chic balnéaire',
+  },
+
+  // ── Marseille ─────────────────────────────────────────────────────────────
+  {
+    slug: 'marseille',
+    nameFr: 'Marseille',
+    nameEn: 'Marseille',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['marseille', 'cassis'],
+    keywordsFr: [
+      'Marseille — plus ancienne ville de France (Phocée, 600 av. J.-C.)',
+      "Adresses : InterContinental Hôtel-Dieu, Sofitel Vieux-Port, NH Collection Marseille, C2 Hotel, Les Bords de Mer",
+      'Vieux-Port, MUCEM, Notre-Dame de la Garde, Le Panier',
+      'Calanques : Sormiou, Morgiou, En-Vau, Cassis',
+      'Gastronomie : bouillabaisse, Gérald Passédat (Le Petit Nice ***), AM par Alexandre Mazzia ***',
+      'Îles du Frioul, Château d\'If',
+      'Aéroport Marseille-Provence, TGV Paris (3h)',
+    ],
+    keywordsEn: [
+      'Marseille — oldest city in France (600 BC)',
+      'InterContinental Hôtel-Dieu, Sofitel Vieux-Port',
+      'Vieux-Port, MUCEM, Notre-Dame de la Garde, Calanques',
+    ],
+    toneFr: 'méditerranéen, phocéen, authentique',
+  },
+
+  // ── Lyon ──────────────────────────────────────────────────────────────────
+  {
+    slug: 'lyon',
+    nameFr: 'Lyon',
+    nameEn: 'Lyon',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['lyon'],
+    keywordsFr: [
+      'Lyon — capitale mondiale de la gastronomie (Curnonsky, 1935)',
+      'Adresses : InterContinental Lyon Hôtel-Dieu, Villa Maïa, Cour des Loges, Sofitel Bellecour',
+      'Vieux Lyon (UNESCO), traboules, Croix-Rousse, presqu\'île',
+      'Gastronomie : Paul Bocuse ***, Mère Brazier **, Têtedoie *, bouchons lyonnais',
+      'Fête des Lumières (8 décembre), Quais du Polar',
+      'Vignobles : Beaujolais, Côtes-du-Rhône (Côte-Rôtie, Condrieu)',
+      'Aéroport Saint-Exupéry, TGV Paris (2h)',
+    ],
+    keywordsEn: [
+      'Lyon — world gastronomy capital (Curnonsky, 1935)',
+      'InterContinental Lyon Hôtel-Dieu, Villa Maïa, Cour des Loges',
+      'Old Lyon (UNESCO), traboules, Paul Bocuse',
+    ],
+    toneFr: 'gastronomique, soyeux, historique',
+  },
+
+  // ── Aix-en-Provence ──────────────────────────────────────────────────────
+  {
+    slug: 'aix-en-provence',
+    nameFr: 'Aix-en-Provence',
+    nameEn: 'Aix-en-Provence',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['aix-en-provence'],
+    keywordsFr: [
+      "Aix-en-Provence — ville de Cézanne, capitale historique de la Provence",
+      "Adresses : Villa Gallici, Hôtel Renoir, Le Pigonnet, La Bastide de Tourtour, Château de la Gaude",
+      'Cours Mirabeau, atelier Cézanne, fondation Vasarely, hôtels particuliers XVIIIᵉ',
+      "Festival d'Art Lyrique (juillet), marché provençal",
+      'Montagne Sainte-Victoire (peinte 87 fois par Cézanne)',
+      "Vignobles Coteaux d'Aix, Cassis, Bandol à proximité",
+      'Aéroport Marseille-Provence (30 min), TGV Aix (3h Paris)',
+    ],
+    keywordsEn: [
+      'Aix-en-Provence — Cézanne\'s city, historic Provençal capital',
+      'Villa Gallici, Le Pigonnet, Château de la Gaude',
+      'Cours Mirabeau, Cézanne studio, Festival d\'Art Lyrique',
+    ],
+    toneFr: 'cézannien, provençal, raffiné',
+  },
+
+  // ── Arles ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'arles',
+    nameFr: 'Arles',
+    nameEn: 'Arles',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['arles', 'le paradou', 'paradou'],
+    keywordsFr: [
+      "Arles — ville romaine UNESCO, ville de Van Gogh (200 toiles)",
+      "Adresses : L'Hôtel Particulier, Le Cloître, Hôtel Jules César MGallery, Le Mas de Peint",
+      'Arènes romaines, théâtre antique, Cryptoportiques, Alyscamps',
+      'Rencontres de la Photographie (juillet), LUMA Arles (Frank Gehry, 2021)',
+      'Camargue : manades, flamants roses, Parc Naturel Régional',
+      'Vignobles : Costières de Nîmes, Côtes du Rhône méridionales',
+      'TGV Avignon ou Aix (15-25 min), aéroport Marseille (1h)',
+    ],
+    keywordsEn: [
+      'Arles — Roman UNESCO city, Van Gogh\'s city',
+      'L\'Hôtel Particulier, Hôtel Jules César MGallery',
+      'Roman amphitheatre, Rencontres de la Photographie, LUMA Arles',
+    ],
+    toneFr: 'romain, artistique, camarguais',
+  },
+
+  // ── Dinard ────────────────────────────────────────────────────────────────
+  {
+    slug: 'dinard',
+    nameFr: 'Dinard',
+    nameEn: 'Dinard',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['dinard'],
+    keywordsFr: [
+      "Dinard — station Belle Époque, élue 'Nice du Nord' (XIXᵉ)",
+      "Adresses : Grand Hôtel Barrière de Dinard, Hôtel Castelbrac (ex-Musée de la Mer)",
+      'Villas Belle Époque (407 répertoriées), Pointe du Moulinet',
+      'Festival du Film Britannique (octobre), Coupes Internationales de Pétanque',
+      'Plages : Écluse, Saint-Énogat, Prieuré',
+      'Saint-Malo (15 min en navette maritime), Cap Fréhel, Cancale',
+      'Aéroport Dinard-Pleurtuit-Saint-Malo, TGV Saint-Malo (2h15 Paris)',
+    ],
+    keywordsEn: [
+      'Dinard — Belle Époque resort, "Nice of the North"',
+      'Grand Hôtel Barrière de Dinard, Hôtel Castelbrac',
+      'Belle Époque villas, Pointe du Moulinet, Saint-Malo',
+    ],
+    toneFr: 'belle époque, balnéaire, britannique',
+  },
+
+  // ── La Baule ──────────────────────────────────────────────────────────────
+  {
+    slug: 'la-baule',
+    nameFr: 'La Baule',
+    nameEn: 'La Baule',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['la baule', 'la-baule', 'la baule-escoublac'],
+    keywordsFr: [
+      "La Baule — plus belle baie d'Europe selon le Club des Plus Belles Baies du Monde",
+      "Adresses : Hôtel Barrière Le Royal La Baule, Hôtel Barrière L'Hermitage, Castel Marie-Louise",
+      'Plage de sable fin (9 km), villas Belle Époque, casino',
+      'Golf international de La Baule, hippodrome, thalasso',
+      'Parc Naturel Régional de Brière (zone humide), Guérande (sel)',
+      'Saint-Nazaire (chantiers Atlantique), Nantes (45 min)',
+      'TGV Paris (3h), aéroport Nantes-Atlantique (1h)',
+    ],
+    keywordsEn: [
+      'La Baule — Europe\'s finest bay (Club des Plus Belles Baies)',
+      'Hôtel Barrière Le Royal, Hôtel Barrière L\'Hermitage, Castel Marie-Louise',
+      'Belle Époque villas, golf, thalasso, Briere wetlands',
+    ],
+    toneFr: 'atlantique, balnéaire, élégant',
+  },
+
+  // ── Saint-Rémy-de-Provence ───────────────────────────────────────────────
+  {
+    slug: 'saint-remy-de-provence',
+    nameFr: 'Saint-Rémy-de-Provence',
+    nameEn: 'Saint-Rémy-de-Provence',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['saint-rémy-de-provence', 'saint-remy-de-provence', 'maussane'],
+    keywordsFr: [
+      "Saint-Rémy — village d'Alpilles, lieu d'asile de Van Gogh (1889-1890)",
+      "Adresses : Hôtel de Tourrel, Le Vallon de Valrugues, Château des Alpilles, Hôtel L'Image",
+      'Saint-Paul-de-Mausole (cloître où séjourna Van Gogh)',
+      'Glanum (cité gallo-romaine), Mausolée et Arc municipal',
+      "Marché du mercredi (l'un des plus beaux de Provence), oliviers AOP",
+      'Les Baux-de-Provence (Carrières de Lumières), Mausanne, Maussane',
+      'TGV Avignon (25 min), aéroport Marseille-Provence (1h)',
+    ],
+    keywordsEn: [
+      'Saint-Rémy — Alpilles village, Van Gogh asylum (1889-1890)',
+      'Hôtel de Tourrel, Le Vallon de Valrugues, Château des Alpilles',
+      'Saint-Paul-de-Mausole, Glanum Roman city, Les Baux-de-Provence',
+    ],
+    toneFr: 'alpilles, provençal, art de vivre',
+  },
+
+  // ── Bourgogne ────────────────────────────────────────────────────────────
+  {
+    slug: 'bourgogne',
+    nameFr: 'Bourgogne',
+    nameEn: 'Burgundy',
+    scope: 'region',
+    countryCode: 'FR',
+    hotelCityKeys: ['beaune', 'dijon', 'gevrey-chambertin', 'chassagne-montrachet', 'puligny-montrachet', 'levernois', 'gilly-lès-cîteaux'],
+    keywordsFr: [
+      'Bourgogne — Climats du vignoble UNESCO (2015), Grands Crus mondialement uniques',
+      'Adresses : Hostellerie Cèdre & Spa Beaune, Hôtel le Cep, Les Sources de Cheverny, Domaine de Rymska, Levernois, Hôtel Como Le Montrachet',
+      'Côte de Nuits (Romanée-Conti, Chambertin, Vougeot), Côte de Beaune (Montrachet, Corton)',
+      "Hospices de Beaune (1443), Cité Internationale de la Gastronomie et du Vin (Dijon)",
+      "Gastronomie : Bernard Loiseau ***, William Frachot (Hostellerie du Chapeau Rouge)",
+      "Vendanges (septembre), Vente aux enchères des Hospices (3ᵉ dimanche novembre)",
+      'TGV Dijon (1h35 Paris), aéroport Lyon (1h45)',
+    ],
+    keywordsEn: [
+      'Burgundy — UNESCO Climats vineyard, unique Grands Crus',
+      'Hostellerie Cèdre & Spa Beaune, Hôtel le Cep, Domaine de Rymska',
+      'Côte de Nuits, Côte de Beaune, Hospices de Beaune, Bernard Loiseau',
+    ],
+    toneFr: 'viticole, climats, gastronomique',
+  },
+
+  // ── Bretagne ─────────────────────────────────────────────────────────────
+  {
+    slug: 'bretagne',
+    nameFr: 'Bretagne',
+    nameEn: 'Brittany',
+    scope: 'region',
+    countryCode: 'FR',
+    hotelCityKeys: ['saint-malo', 'dinard', 'rennes', 'quiberon', 'arzon', 'perros-guirec', 'kervignac'],
+    keywordsFr: [
+      'Bretagne — région maritime, 2 700 km de côtes, identité celtique',
+      'Adresses : Sofitel Quiberon Thalassa Sea & Spa, Le Grand Hôtel des Thermes Saint-Malo, Hôtel Spa L\'Agapa Perros-Guirec, Hôtel le Domaine de Locguénole & Spa',
+      'Côte de Granit Rose (Perros-Guirec, Ploumanac\'h), Cap Fréhel, Pointe du Raz',
+      'Mont-Saint-Michel (Manche/Bretagne frontière), Saint-Malo (cité corsaire)',
+      'Gastronomie : huîtres de Cancale, crêpes, beurre Bordier, cidre',
+      'Festival Interceltique de Lorient (août), Tour de Bretagne',
+      'TGV Rennes (1h30 Paris), aéroport Rennes / Brest / Nantes',
+    ],
+    keywordsEn: [
+      'Brittany — maritime region, 2,700 km coastline, Celtic identity',
+      'Sofitel Quiberon Thalassa, Le Grand Hôtel des Thermes Saint-Malo, L\'Agapa Perros-Guirec',
+      'Côte de Granit Rose, Cap Fréhel, Mont-Saint-Michel, Saint-Malo',
+    ],
+    toneFr: 'maritime, celtique, authentique',
+  },
+
+  // ── Normandie ────────────────────────────────────────────────────────────
+  {
+    slug: 'normandie',
+    nameFr: 'Normandie',
+    nameEn: 'Normandy',
+    scope: 'region',
+    countryCode: 'FR',
+    hotelCityKeys: ['deauville', 'trouville', 'honfleur', 'cabourg', 'bayeux'],
+    keywordsFr: [
+      'Normandie — région impressionniste, plages du Débarquement, falaises',
+      'Adresses : Hôtel Barrière Le Normandy Deauville, Hôtel Barrière Le Royal, Domaine de Primard',
+      'Côte Fleurie (Deauville, Trouville, Honfleur, Cabourg), Côte d\'Albâtre (Étretat)',
+      'Plages du Débarquement (Omaha, Utah, Juno, Gold, Sword), Cimetière américain',
+      'Mont-Saint-Michel (UNESCO), abbaye, baie',
+      'Gastronomie : camembert, calvados, cidre, fruits de mer, agneau de pré-salé',
+      'Festival du Cinéma Américain Deauville, Impressionnisme route',
+    ],
+    keywordsEn: [
+      'Normandy — Impressionist region, D-Day beaches, cliffs',
+      'Hôtel Barrière Le Normandy Deauville, Domaine de Primard',
+      'Côte Fleurie, Côte d\'Albâtre, D-Day beaches, Mont-Saint-Michel',
+    ],
+    toneFr: 'impressionniste, mémoriel, balnéaire',
+  },
+
+  // ── Châteaux de la Loire ─────────────────────────────────────────────────
+  {
+    slug: 'chateaux-de-la-loire',
+    nameFr: 'Châteaux de la Loire',
+    nameEn: 'Loire Valley Châteaux',
+    scope: 'region',
+    countryCode: 'FR',
+    hotelCityKeys: ['amboise', 'blois', 'chenonceaux', 'montbazon', 'noizay', 'onzain', 'cheverny', 'tours', 'reugny'],
+    keywordsFr: [
+      'Vallée de la Loire — Patrimoine mondial UNESCO (2000), 280 km de Sully à Chalonnes',
+      'Adresses : Hôtel Fleur de Loire (Christophe Hay), Domaine des Hauts de Loire, Château d\'Artigny, Auberge du Bon Laboureur, Les Sources de Cheverny, Château Louise de la Vallière',
+      'Châteaux royaux : Chambord, Chenonceau, Amboise, Blois, Cheverny, Villandry, Azay-le-Rideau',
+      'Vignobles : Vouvray, Chinon, Bourgueil, Sancerre, Sauvignon de Touraine',
+      "Gastronomie : Christophe Hay (Fleur de Loire **), Bon Laboureur",
+      "Loire à vélo (900 km), jardins de Villandry, Forteresse royale de Loches",
+      'TGV Tours-Saint-Pierre-des-Corps (1h Paris), aéroport Tours',
+    ],
+    keywordsEn: [
+      'Loire Valley — UNESCO World Heritage (2000), 280 km of châteaux',
+      'Hôtel Fleur de Loire, Domaine des Hauts de Loire, Château d\'Artigny',
+      'Chambord, Chenonceau, Amboise, Blois, Cheverny, Villandry',
+    ],
+    toneFr: 'royal, fluvial, jardins',
+  },
+
+  // ── Vaucluse / Luberon ───────────────────────────────────────────────────
+  {
+    slug: 'luberon',
+    nameFr: 'Luberon',
+    nameEn: 'Luberon',
+    scope: 'cluster',
+    countryCode: 'FR',
+    hotelCityKeys: ['gordes', 'ménerbes', 'menerbes', 'bonnieux', 'lourmarin', 'isle-sur-la-sorgue'],
+    keywordsFr: [
+      'Luberon — Parc Naturel Régional, plus beaux villages de France',
+      'Adresses : Airelles Gordes La Bastide, La Coquillade Village, Capelongue Beaumier Bonnieux, Le Phébus & Spa',
+      'Villages perchés : Gordes, Ménerbes, Bonnieux, Roussillon (ocres), Lacoste',
+      "Abbaye de Sénanque (cisterciens, lavandes), Fontaine-de-Vaucluse",
+      'Marchés provençaux : Isle-sur-la-Sorgue (antiquaires), Apt (samedi)',
+      "Vignobles : Côtes du Luberon AOC, Ventoux",
+      'TGV Avignon (40 min), aéroport Marseille-Provence (1h15)',
+    ],
+    keywordsEn: [
+      'Luberon — Natural Regional Park, most beautiful villages of France',
+      'Airelles Gordes La Bastide, La Coquillade, Capelongue Bonnieux',
+      'Gordes, Ménerbes, Bonnieux, Roussillon, Sénanque Abbey',
+    ],
+    toneFr: 'provençal, lavandes, perché',
+  },
+
+  // ── Alsace ───────────────────────────────────────────────────────────────
+  {
+    slug: 'alsace',
+    nameFr: 'Alsace',
+    nameEn: 'Alsace',
+    scope: 'region',
+    countryCode: 'FR',
+    hotelCityKeys: ['strasbourg', 'colmar', 'kaysersberg', 'illhaeusern', 'barr', 'ostwald', 'colroy-la-roche'],
+    keywordsFr: [
+      "Alsace — région bilingue, route des vins (170 km, 67 villages viticoles)",
+      "Adresses : Hôtel le Chambard (Olivier Nasti **), Auberge de l'Ill (Haeberlin ***), Hôtel des Berges, Maison des Têtes, Château de l'Île Strasbourg",
+      'Strasbourg (UNESCO, Parlement européen), Colmar (Petite Venise, Schongauer)',
+      'Route des Vins : Riesling, Gewürztraminer, Pinot Gris, Crémant',
+      "Gastronomie : Auberge de l'Ill ***, Olivier Nasti **, choucroute, tarte flambée, Munster",
+      'Marchés de Noël (Strasbourg, Colmar, Kaysersberg, Riquewihr)',
+      'TGV Strasbourg (1h45 Paris), aéroport Strasbourg / Bâle-Mulhouse',
+    ],
+    keywordsEn: [
+      'Alsace — bilingual region, Wine Route (170 km, 67 wine villages)',
+      'Hôtel le Chambard (Olivier Nasti), Auberge de l\'Ill (Haeberlin)',
+      'Strasbourg, Colmar, Riesling, Christmas markets',
+    ],
+    toneFr: 'alsacien, viticole, mitteleuropa',
+  },
+
+  // ── Méribel ──────────────────────────────────────────────────────────────
+  {
+    slug: 'meribel',
+    nameFr: 'Méribel',
+    nameEn: 'Méribel',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['méribel', 'meribel', 'les allues'],
+    keywordsFr: [
+      'Méribel — station alpine du domaine des 3 Vallées (600 km de pistes)',
+      'Adresses : Le Coucou Méribel (Maja Hoffmann), Le Kaïla, La Chaudanne, Allodis',
+      "Architecture chalets traditionnels (Peter Lindsay, 1936 — fondateur britannique)",
+      'Domaine skiable : Trois Vallées (Courchevel, Méribel, Val Thorens, Brides-les-Bains)',
+      "Gastronomie : Le Cèpe Méribel, La Table du Coucou",
+      "Saison hiver : décembre - avril, été : juin - août (rando, VTT)",
+      'Aéroport Genève (2h30), Lyon (2h), Chambéry (1h45)',
+    ],
+    keywordsEn: [
+      'Méribel — Alpine resort, Trois Vallées domain (600 km of slopes)',
+      'Le Coucou Méribel (Maja Hoffmann), Le Kaïla, La Chaudanne',
+      'British heritage (Peter Lindsay, 1936), Trois Vallées',
+    ],
+    toneFr: 'alpin, chalets, britannique',
+  },
+
+  // ── Annecy ───────────────────────────────────────────────────────────────
+  {
+    slug: 'annecy',
+    nameFr: 'Annecy',
+    nameEn: 'Annecy',
+    scope: 'city',
+    countryCode: 'FR',
+    hotelCityKeys: ['annecy', 'talloires', 'veyrier-du-lac'],
+    keywordsFr: [
+      "Annecy — 'Venise des Alpes', lac le plus pur d'Europe (LCSQA)",
+      "Adresses : Hôtel Black Bass, La Maison Bleue (Veyrier-du-Lac), Hôtel de l'Abbaye (Talloires), Hôtel Beauregard",
+      "Vieille ville, Palais de l'Isle (XIIᵉ), Pont des Amours",
+      'Lac (27 km de tour à vélo), plages de Saint-Jorioz, Doussard',
+      "Gastronomie : Yoann Conte ** (Veyrier-du-Lac), Le Clos des Sens *** (Annecy-le-Vieux)",
+      'Fête du Lac (premier samedi août), Festival International du Film d\'Animation (juin)',
+      "Aéroport Genève (45 min), Lyon (1h45), Chambéry (50 min)",
+    ],
+    keywordsEn: [
+      'Annecy — "Venice of the Alps", purest lake in Europe',
+      'Hôtel Black Bass, La Maison Bleue (Veyrier-du-Lac)',
+      'Old town, Palais de l\'Isle, Yoann Conte, Le Clos des Sens',
+    ],
+    toneFr: 'lacustre, alpin, romantique',
+  },
 ];
 
 export function findDestinationBySlug(slug: string): DestinationGuideSeed | null {

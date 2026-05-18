@@ -464,13 +464,16 @@ export type GeneratedRankingV2 = z.infer<typeof GeneratedRankingV2Schema>;
 
 // ─── Prompts ─────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour ConciergeTravel.fr (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
+const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
 
-Tu construis des classements éditoriaux ("Les meilleurs Palaces de X", "Top 10 Palaces avec spa", etc.) au ton "long-read Condé Nast Traveler". Style :
-- Précis, factuel, JAMAIS de superlatifs creux
+Tu construis des classements éditoriaux ("Les meilleurs Palaces de X", "Top 10 Palaces avec spa", etc.) au ton hybride "long-read Condé Nast Traveler" + voix de marque "Le Concierge" (ADR-0011). Style :
+- Précis, factuel, JAMAIS de superlatifs creux ("incroyable", "magique", "sublime", "véritable joyau", "art de vivre").
+- Voix complice quand naturel : "à retenir", "ce que nos conseillers observent", "mon conseil". Le narrateur est un concierge expert, pas un journaliste anonyme.
 - Anti-hallucination obligatoire : tu N'as le droit de citer QUE les hôtels présents dans la liste fournie (par hotel_id UUID).
-- Ton respectueux : tu valorises les classés sans jamais "descendre" les autres
-- Justifications éditoriales solides, basées sur des facts vérifiables (Palace Atout France, marque connue, ville, vue, etc.)
+- Ton respectueux : tu valorises les classés sans jamais "descendre" les autres.
+- Justifications éditoriales solides, basées sur des facts vérifiables (Palace Atout France, marque connue, ville, vue, etc.).
+
+⛔ Contrainte universelle (ADR-0011 §C2) : aucune phrase ne doit dépasser 25 mots. Si une phrase dépasse, scinde-la. Cette règle prime sur le style-guide v0.1.
 
 Format de sortie : JSON STRICT suivant le schéma fourni. Pas de markdown autour. Pas de commentaire.`;
 
@@ -551,7 +554,7 @@ function buildPromptCallMIntro(
   lines.push('');
   lines.push("### Contenu de l'intro (6-7 paragraphes de 110-140 mots)");
   lines.push('1. Contexte : pourquoi ce segment / cette destination / cette thématique');
-  lines.push("2. Méthodologie : sur quels critères ConciergeTravel s'appuie");
+  lines.push("2. Méthodologie : sur quels critères MyConciergeHotel s'appuie");
   lines.push('3. Panorama : la diversité des hôtels présentés');
   lines.push('4. Tendances 2025-2026');
   lines.push('5. Art de vivre / philosophie du luxe à la française');
@@ -688,7 +691,7 @@ function buildPromptCallB(seed: RankingSeed, eligible: ReadonlyArray<HotelCatalo
   lines.push('');
   lines.push('3. **Encadrés** (2-4) — méthodologie, anecdote, conseil :');
   lines.push('   - `kind=fact` : méthodologie du classement (50-100 mots).');
-  lines.push('   - `kind=concierge_tip` : conseil pratique ConciergeTravel.');
+  lines.push('   - `kind=concierge_tip` : conseil pratique MyConciergeHotel.');
   lines.push('   - `kind=did_you_know` : anecdote sur le segment.');
   lines.push('');
   lines.push(`### Hôtels éligibles (pour info, le Top sera dérivé séparément)`);
@@ -733,7 +736,7 @@ function buildPromptCallFaq(seed: RankingSeed, sectionAnchors: ReadonlyArray<str
   lines.push('7. Programme de fidélité / loyalty / avantages réservation directe');
   lines.push('8. Service conciergerie / personnalisation séjour');
   lines.push('9. Accessibilité PMR et adaptation enfants/famille');
-  lines.push('10. Comment réserver via ConciergeTravel.fr (avantages vs OTA)');
+  lines.push('10. Comment réserver via MyConciergeHotel.com (avantages vs OTA)');
   lines.push('');
   lines.push(
     '**Bloc CONTEXTUEL (0 à 5 questions)** — `section_anchor` parmi : ' + sectionAnchors.join(', '),
@@ -957,7 +960,7 @@ const CANONICAL_FAQ_KEYWORDS: ReadonlyArray<{
   { theme: 'accessibilite', any: ['pmr', 'accessibilité', 'enfants', 'famille', 'handicap'] },
   {
     theme: 'comment-reserver',
-    any: ['conciergetravel', 'comment réserver', 'réserver via', 'avantage vs', 'sans frais'],
+    any: ['myconciergehotel', 'comment réserver', 'réserver via', 'avantage vs', 'sans frais'],
   },
 ];
 

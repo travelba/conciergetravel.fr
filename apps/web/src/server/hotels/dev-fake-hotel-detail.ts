@@ -11,7 +11,7 @@ import type {
  * Dev/E2E-only synthetic hotel-detail fixture for `/[locale]/hotel/[slug]`.
  * Same activation contract as `dev-fake-hotel.ts`:
  *
- *  - Reads `CCT_E2E_FAKE_HOTEL_ID` (the canonical UUID exposed to the
+ *  - Reads `MCH_E2E_FAKE_HOTEL_ID` (the canonical UUID exposed to the
  *    tests via `e2e/fixtures/env.ts`).
  *  - Both the FR slug (`hotel-de-test-e2e`) and the EN slug
  *    (`hotel-de-test-e2e-en`) resolve to the same synthetic detail.
@@ -28,7 +28,7 @@ export const FAKE_HOTEL_DETAIL_SLUG_FR = 'hotel-de-test-e2e';
 export const FAKE_HOTEL_DETAIL_SLUG_EN = 'hotel-de-test-e2e-en';
 
 function configuredFakeId(): string | undefined {
-  const raw = process.env['CCT_E2E_FAKE_HOTEL_ID'];
+  const raw = process.env['MCH_E2E_FAKE_HOTEL_ID'];
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 }
 
@@ -140,6 +140,21 @@ function buildRow(locale: SupportedLocale): HotelDetailRow {
     email_reservations: null,
     commons_category: null,
     external_sameas: null,
+    // Voix Concierge (ADR-0011) — synthetic advice so the E2E spec can
+    // assert the <ConciergeAdvice> block renders. Stays within the
+    // 50-110 word envelope enforced by the Zod schema upstream.
+    concierge_advice: {
+      fr: {
+        title: 'Demandez la chambre 305 si vous arrivez en train',
+        body: "Mon conseil : à la réservation, demandez la chambre 305. Elle ouvre sur la cour intérieure côté ouest, donc le soleil de fin d'après-midi entre jusqu'à dix-huit heures. Le lit fait face à la fenêtre, pas au couloir, et le bureau Louis-Philippe d'origine reste en place. Précisez « arrivée Gare de Lyon » au check-in : le concierge prévient la voiturière, votre valise monte en chambre avant même que vous ayez signé.",
+        tip_for: 'room',
+      },
+      en: {
+        title: 'Ask for room 305 if you arrive by train',
+        body: "My tip: when you book, ask specifically for room 305. It opens onto the inner courtyard on the west side, so the late afternoon sun reaches it until six. The bed faces the window, not the corridor, and the original Louis-Philippe writing desk is still in place. Mention 'arriving Gare de Lyon' at check-in: the concierge alerts the valet, your luggage goes up before you've signed.",
+        tip_for: 'room',
+      },
+    },
     is_published: true,
     updated_at: '2026-05-01T10:00:00.000Z',
     // Inventory counts surface in JSON-LD Hotel.numberOfRooms and the

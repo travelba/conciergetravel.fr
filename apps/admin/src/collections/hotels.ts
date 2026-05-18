@@ -44,6 +44,70 @@ function hasRole(user: unknown, roles: readonly string[]): boolean {
   return typeof role === 'string' && roles.includes(role);
 }
 
+const CONCIERGE_TIP_FOR = ['room', 'dining', 'timing', 'access', 'service', 'wellness'] as const;
+
+type ConciergeTipFor = (typeof CONCIERGE_TIP_FOR)[number];
+
+interface ConciergeAdviceLocale {
+  readonly title?: unknown;
+  readonly body?: unknown;
+  readonly tip_for?: unknown;
+}
+
+interface ConciergeAdvicePayload {
+  readonly fr?: ConciergeAdviceLocale;
+  readonly en?: ConciergeAdviceLocale;
+}
+
+function countWords(s: string): number {
+  const trimmed = s.trim();
+  if (trimmed.length === 0) return 0;
+  return trimmed.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0).length;
+}
+
+function isConciergeTipFor(v: unknown): v is ConciergeTipFor {
+  return typeof v === 'string' && (CONCIERGE_TIP_FOR as readonly string[]).includes(v);
+}
+
+function validateLocaleAdvice(loc: unknown, label: string): true | string {
+  if (loc === undefined || loc === null) return `${label} is required`;
+  if (typeof loc !== 'object') return `${label} must be an object`;
+  const a = loc as ConciergeAdviceLocale;
+  if (typeof a.title !== 'string' || a.title.trim().length === 0) {
+    return `${label}.title is required`;
+  }
+  if (typeof a.body !== 'string' || a.body.trim().length === 0) {
+    return `${label}.body is required`;
+  }
+  const n = countWords(a.body);
+  if (n < 50 || n > 110) {
+    return `${label}.body must be 50-110 words (got ${String(n)})`;
+  }
+  if (!isConciergeTipFor(a.tip_for)) {
+    return `${label}.tip_for must be one of ${CONCIERGE_TIP_FOR.join(', ')}`;
+  }
+  return true;
+}
+
+/**
+ * Optional on the way in (we backfill via humanizer-pass — see ADR-0011
+ * Phase 3), but **rejected if partially filled**: any incoming payload
+ * must satisfy the 60-90 words contract on `fr` (`en` is optional and
+ * follows the same contract when present).
+ */
+function validateConciergeAdvice(value: unknown): true | string {
+  if (value === null || value === undefined) return true;
+  if (typeof value !== 'object') return 'concierge_advice must be an object';
+  const v = value as ConciergeAdvicePayload;
+  const fr = validateLocaleAdvice(v.fr, 'concierge_advice.fr');
+  if (fr !== true) return fr;
+  if (v.en !== undefined && v.en !== null) {
+    const en = validateLocaleAdvice(v.en, 'concierge_advice.en');
+    if (en !== true) return en;
+  }
+  return true;
+}
+
 export const Hotels: CollectionConfig = {
   slug: 'hotels',
   // Owns `cms.hotels` — NEVER public.hotels (canonical SQL-migrated table).
@@ -388,6 +452,15 @@ export const Hotels: CollectionConfig = {
           },
         },
         {
+          name: 'concierge_advice',
+          type: 'json',
+          admin: {
+            description:
+              'Voice-of-the-Concierge advice block (CDC §2 + ADR-0011). Shape: { fr: {title, body, tip_for}, en: {title, body, tip_for} }. body MUST be 50-110 words FR/EN (envelope relaxed from initial 60-90 after Phase 3 audit). tip_for ∈ {room, dining, timing, access, service, wellness}. Validation enforced by validateConciergeAdvice hook below.',
+          },
+          validate: validateConciergeAdvice,
+        },
+        {
           name: 'long_description_sections',
           type: 'json',
           admin: {
@@ -563,6 +636,42 @@ export const Hotels: CollectionConfig = {
     },
   ],
   hooks: {
+    /**
+     * Voix Concierge publication blocker (ADR-0011 / Phase 7) — refuse
+     * to publish a hotel that doesn't ship at least a FR `concierge_advice`
+     * with a body inside the 50-110 word envelope.
+     *
+     * Runs before validate so the editor sees the error inline before
+     * Payload tries to persist. We only block when the row is *becoming*
+     * `is_published = true`, never when it's already published (so a
+     * fix-by-batch script can still pass through).
+     */
+    beforeValidate: [
+      ({ data, originalDoc }) => {
+        const next = (data ?? {}) as Record<string, unknown>;
+        const becomingPublished =
+          next['is_published'] === true && (originalDoc as { is_published?: boolean } | null | undefined)?.is_published !== true;
+        if (!becomingPublished) return data;
+        const advice = next['concierge_advice'];
+        if (advice === null || advice === undefined) {
+          throw new Error(
+            'Publication bloquée (ADR-0011) : `concierge_advice` est requis avant publication. Renseigne FR.body (50-110 mots) au minimum.',
+          );
+        }
+        if (typeof advice !== 'object') {
+          throw new Error('Publication bloquée (ADR-0011) : `concierge_advice` doit être un objet.');
+        }
+        const adv = advice as { fr?: { body?: unknown } };
+        const body = typeof adv.fr?.body === 'string' ? adv.fr.body.trim() : '';
+        const words = body.split(/\s+/u).filter(Boolean).length;
+        if (words < 50 || words > 110) {
+          throw new Error(
+            `Publication bloquée (ADR-0011) : concierge_advice.fr.body fait ${words} mots, attendu 50-110.`,
+          );
+        }
+        return data;
+      },
+    ],
     afterChange: [
       ({ doc, operation }) => {
         // Phase 8.1 TODO: sync `cms.hotels` row into `public.hotels`

@@ -1,0 +1,110 @@
+name: Sync hotel events
+
+# Weekly refresh of the `hotels.upcoming_events` JSONB column from
+# DATAtourisme. Why weekly:
+#   - Regional ODTs update their catalogue at most twice a week.
+#   - The page surface stays correct within a 7-day window (already
+#     past events are filtered out at render time by
+#     `readUpcomingEvents`).
+#   - Daily would burn ~$0.30 / week of OpenAI for the LLM
+#     descriptions with no fresh signal in return.
+#
+# Cost
+# ----
+# DATAtourisme: free.
+# OpenAI: ~$0.04 per run (106 hotels × ~3 events × gpt-4o-mini).
+# Wall clock: ~3 min on the GitHub-hosted runner.
+
+on:
+  schedule:
+    # Every Monday at 04:17 UTC — early enough to land before the
+    # next ISR revalidation cycle (revalidate = 3600 s), late enough
+    # not to clash with the OpenAI European maintenance window.
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Single hotel slug (debug, leave empty for full batch)'
+        required: false
+        type: string
+      bucket:
+        description: 'Bucket to refresh'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - palaces
+          - stars5
+      dry_run:
+        description: 'Skip the DB write (preview only)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  # Mutex on the global `events-sync` resource — refusing to overlap
+  # avoids hammering DATAtourisme and the OpenAI rate limits when a
+  # manual run lands while the cron is in flight.
+  group: sync-hotel-events
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 20.19.4
+  COREPACK_ENABLE_STRICT: '0'
+  COREPACK_ENABLE_SIGNATURES: '0'
+  SKIP_ENV_VALIDATION: 'true'
+
+jobs:
+  sync:
+    name: Sync upcoming events
+    runs-on: ubuntu-latest
+    # Hard timeout — the batch should finish in < 5 min. Anything
+    # over 15 min is a bug or a DT outage; fail loudly so we notice.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Upgrade corepack + activate pnpm
+        run: |
+          npm install -g corepack@latest
+          corepack enable
+          corepack prepare pnpm@10.33.2 --activate
+          pnpm --version
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run events sync
+        env:
+          # All three secrets are required — fail loudly if any
+          # is missing rather than silently writing an empty array.
+          DATATOURISME_API_KEY: ${{ secrets.DATATOURISME_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          args=""
+          if [[ -n "${{ inputs.slug }}" ]]; then
+            args="$args --slug=${{ inputs.slug }}"
+          else
+            args="$args --bucket=${{ inputs.bucket || 'all' }}"
+          fi
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            args="$args --dry-run"
+          fi
+          # Concurrency 3 stays well below DATAtourisme's soft rate
+          # cap (we never observed a 429 with 3 in-flight requests).
+          args="$args --concurrency=3"
+          echo "Running events sync with: $args"
+          pnpm --filter @mch/editorial-pilot exec tsx src/events/sync-hotel-events.ts $args
+
+      - name: Upload runlog
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: events-runlog-${{ github.run_id }}
+          path: scripts/editorial-pilot/out/events-runlog-*.jsonl
+          retention-days: 30
+          if-no-files-found: warn

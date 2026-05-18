@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import { buildSitemapXml, type SitemapEntry } from '@cct/seo';
+import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
 export const revalidate = 3600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');

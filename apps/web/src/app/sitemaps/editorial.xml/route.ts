@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { buildSitemapXml } from '@cct/seo';
+import { buildSitemapXml } from '@mch/seo';
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;

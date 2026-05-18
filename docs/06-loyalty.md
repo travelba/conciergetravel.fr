@@ -1,4 +1,4 @@
-# Programme de fidélité — ConciergeTravel.fr
+# Programme de fidélité — MyConciergeHotel.com
 
 > Document rempli en Phase 7. Couvre :
 >

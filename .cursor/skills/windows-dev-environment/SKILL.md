@@ -1,9 +1,9 @@
 ---
 name: windows-dev-environment
-description: Windows + PowerShell development gotchas for ConciergeTravel.fr — quoting CLI arguments with commas, missing Unix tools, Supabase SSL self-signed handshake, pnpm filters, path separators. Use whenever running shell commands, writing CLI scripts, or troubleshooting environment errors on Windows.
+description: Windows + PowerShell development gotchas for MyConciergeHotel.com — quoting CLI arguments with commas, missing Unix tools, Supabase SSL self-signed handshake, pnpm filters, path separators. Use whenever running shell commands, writing CLI scripts, or troubleshooting environment errors on Windows.
 ---
 
-# Windows dev environment — ConciergeTravel.fr
+# Windows dev environment — MyConciergeHotel.com
 
 The repo's primary maintainer runs Windows 10/11 + PowerShell. The codebase is otherwise UNIX-style, but the shell layer has Windows-specific quirks that bite every fresh agent session. This skill is the cheat-sheet to avoid 2-3 wasted iterations per task.
 
@@ -20,7 +20,7 @@ Invoke when:
 
 ```powershell
 # WRONG — PowerShell expands a,b,c as separate tokens
-pnpm --filter @cct/editorial-pilot exec tsx run.ts --slug=alpes,biarritz,bordeaux
+pnpm --filter @mch/editorial-pilot exec tsx run.ts --slug=alpes,biarritz,bordeaux
 
 # Becomes (under the hood):
 #   tsx run.ts --slug=alpes biarritz bordeaux
@@ -30,7 +30,7 @@ pnpm --filter @cct/editorial-pilot exec tsx run.ts --slug=alpes,biarritz,bordeau
 **Always quote when an argument contains commas, spaces, or `=`:**
 
 ```powershell
-pnpm --filter @cct/editorial-pilot exec tsx run.ts "--slug=alpes,biarritz,bordeaux"
+pnpm --filter @mch/editorial-pilot exec tsx run.ts "--slug=alpes,biarritz,bordeaux"
 ```
 
 The double-quotes are passed through to the child process unchanged.
@@ -94,7 +94,7 @@ The filter argument can match by either package name or directory path. Names wo
 
 ```powershell
 # ✅ preferred — package name
-pnpm --filter @cct/editorial-pilot exec tsx src/run.ts
+pnpm --filter @mch/editorial-pilot exec tsx src/run.ts
 
 # ⚠️ works but path needs forward slashes
 pnpm --filter ./scripts/editorial-pilot exec tsx src/run.ts
@@ -114,6 +114,27 @@ When running long pipelines (e.g. v2 guide regen takes 10-15 min), use the Shell
 await shell({ command: '…', block_until_ms: 0 });
 await awaitShell({ task_id, pattern: 'Done — \\d+ OK / \\d+ failed', block_until_ms: 600000 });
 ```
+
+### 6a — NEVER kill node processes by date range or by name on Windows
+
+**Bug pattern that wasted 30 min on 2026-05-18:**
+
+```powershell
+# WRONG — kills Cursor IDE's tsserver + typingsInstaller + every other node tool.
+Get-Process -Name node | Where-Object { $_.StartTime -gt (Get-Date).AddMinutes(-15) } | Stop-Process -Force
+```
+
+Cursor IDE runs its own long-lived node helpers (`tsserver.js`, `typingsInstaller.js`, language servers). Killing "all node procs started in the last X minutes" stops them too — TypeScript intelligence stays broken until you restart the IDE.
+
+**Correct pattern — target by command line:**
+
+```powershell
+Get-WmiObject Win32_Process -Filter "Name='node.exe'" `
+  | Where-Object { $_.CommandLine -like "*run-guides-v2*" -or $_.CommandLine -like "*generate-guide-v2*" } `
+  | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+```
+
+Best of all: track the parent PID printed by the Shell tool when you back-ground a job (e.g. `PID: 26896`), and `Stop-Process -Id 26896` plus its direct children only.
 
 ## Rule 7 — `dotenv` loads `.env.local` before `.env`
 
@@ -156,7 +177,7 @@ After modifying `apps/web/.env.local`, **purge the bundle cache** because `NEXT_
 ```powershell
 Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
 Remove-Item -Recurse -Force apps/web/.next
-$env:SKIP_ENV_VALIDATION="true"; pnpm --filter @cct/web exec next dev --port 3000
+$env:SKIP_ENV_VALIDATION="true"; pnpm --filter @mch/web exec next dev --port 3000
 ```
 
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle

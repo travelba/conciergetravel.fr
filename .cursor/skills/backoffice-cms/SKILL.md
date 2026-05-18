@@ -1,9 +1,9 @@
 ---
 name: backoffice-cms
-description: Payload CMS 3 back-office engineering for ConciergeTravel.fr — collections, RBAC, hooks, ISR revalidation, Cloudinary, custom endpoints, reporting. Use for any change in `apps/admin/` or to back-office workflows.
+description: Payload CMS 3 back-office engineering for MyConciergeHotel.com — collections, RBAC, hooks, ISR revalidation, Cloudinary, custom endpoints, reporting. Use for any change in `apps/admin/` or to back-office workflows.
 ---
 
-# Back-office (Payload CMS 3) — ConciergeTravel.fr
+# Back-office (Payload CMS 3) — MyConciergeHotel.com
 
 The cahier des charges (CDC v3.0 §11.1, §11.2) requires CRUD on hotels, rooms, editorial pages, FAQs, SEO, bookings, email requests, loyalty, reporting, and **publication without redeploy**. The chosen stack is **Payload CMS 3** (decided ADR 0003).
 

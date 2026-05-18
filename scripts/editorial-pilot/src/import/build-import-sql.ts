@@ -11,7 +11,7 @@
  * Next.js reader (`apps/web/src/server/hotels/get-hotel-by-slug.ts`).
  *
  * Run with:
- *   pnpm --filter @cct/editorial-pilot exec tsx src/import/build-import-sql.ts
+ *   pnpm --filter @mch/editorial-pilot exec tsx src/import/build-import-sql.ts
  *
  * Then either pipe the file to `psql` or hand it to the Supabase
  * `apply_migration` MCP tool.
@@ -43,16 +43,129 @@ const BATCH_SIZE = 5;
  * INSEE department prefix → French region + department label.
  * Restricted to the prefixes used by the 30-palace dataset.
  */
+// French department prefix → official region name + department label.
+// Full coverage of metropolitan France (01-95) + main DROM-COM (97x).
+// Required so the hotel detail page region-grouping (CDC §2 #15 footer
+// "similar hotels in the region") works for every postal code.
 const DEPT_TO_REGION: Record<string, { region: string; department: string }> = {
-  '06': { region: "Provence-Alpes-Côte d'Azur", department: 'Alpes-Maritimes' },
-  '13': { region: "Provence-Alpes-Côte d'Azur", department: 'Bouches-du-Rhône' },
-  '33': { region: 'Nouvelle-Aquitaine', department: 'Gironde' },
-  '40': { region: 'Nouvelle-Aquitaine', department: 'Landes' },
+  // Auvergne-Rhône-Alpes
+  '01': { region: 'Auvergne-Rhône-Alpes', department: 'Ain' },
+  '03': { region: 'Auvergne-Rhône-Alpes', department: 'Allier' },
+  '07': { region: 'Auvergne-Rhône-Alpes', department: 'Ardèche' },
+  '15': { region: 'Auvergne-Rhône-Alpes', department: 'Cantal' },
+  '26': { region: 'Auvergne-Rhône-Alpes', department: 'Drôme' },
+  '38': { region: 'Auvergne-Rhône-Alpes', department: 'Isère' },
+  '42': { region: 'Auvergne-Rhône-Alpes', department: 'Loire' },
+  '43': { region: 'Auvergne-Rhône-Alpes', department: 'Haute-Loire' },
+  '63': { region: 'Auvergne-Rhône-Alpes', department: 'Puy-de-Dôme' },
+  '69': { region: 'Auvergne-Rhône-Alpes', department: 'Rhône' },
   '73': { region: 'Auvergne-Rhône-Alpes', department: 'Savoie' },
   '74': { region: 'Auvergne-Rhône-Alpes', department: 'Haute-Savoie' },
+  // Bourgogne-Franche-Comté
+  '21': { region: 'Bourgogne-Franche-Comté', department: "Côte-d'Or" },
+  '25': { region: 'Bourgogne-Franche-Comté', department: 'Doubs' },
+  '39': { region: 'Bourgogne-Franche-Comté', department: 'Jura' },
+  '58': { region: 'Bourgogne-Franche-Comté', department: 'Nièvre' },
+  '70': { region: 'Bourgogne-Franche-Comté', department: 'Haute-Saône' },
+  '71': { region: 'Bourgogne-Franche-Comté', department: 'Saône-et-Loire' },
+  '89': { region: 'Bourgogne-Franche-Comté', department: 'Yonne' },
+  '90': { region: 'Bourgogne-Franche-Comté', department: 'Territoire de Belfort' },
+  // Bretagne
+  '22': { region: 'Bretagne', department: "Côtes-d'Armor" },
+  '29': { region: 'Bretagne', department: 'Finistère' },
+  '35': { region: 'Bretagne', department: 'Ille-et-Vilaine' },
+  '56': { region: 'Bretagne', department: 'Morbihan' },
+  // Centre-Val de Loire
+  '18': { region: 'Centre-Val de Loire', department: 'Cher' },
+  '28': { region: 'Centre-Val de Loire', department: 'Eure-et-Loir' },
+  '36': { region: 'Centre-Val de Loire', department: 'Indre' },
+  '37': { region: 'Centre-Val de Loire', department: 'Indre-et-Loire' },
+  '41': { region: 'Centre-Val de Loire', department: 'Loir-et-Cher' },
+  '45': { region: 'Centre-Val de Loire', department: 'Loiret' },
+  // Corse
+  '20': { region: 'Corse', department: 'Corse' },
+  '2A': { region: 'Corse', department: 'Corse-du-Sud' },
+  '2B': { region: 'Corse', department: 'Haute-Corse' },
+  // Grand Est
+  '08': { region: 'Grand Est', department: 'Ardennes' },
+  '10': { region: 'Grand Est', department: 'Aube' },
+  '51': { region: 'Grand Est', department: 'Marne' },
+  '52': { region: 'Grand Est', department: 'Haute-Marne' },
+  '54': { region: 'Grand Est', department: 'Meurthe-et-Moselle' },
+  '55': { region: 'Grand Est', department: 'Meuse' },
+  '57': { region: 'Grand Est', department: 'Moselle' },
+  '67': { region: 'Grand Est', department: 'Bas-Rhin' },
+  '68': { region: 'Grand Est', department: 'Haut-Rhin' },
+  '88': { region: 'Grand Est', department: 'Vosges' },
+  // Hauts-de-France
+  '02': { region: 'Hauts-de-France', department: 'Aisne' },
+  '59': { region: 'Hauts-de-France', department: 'Nord' },
+  '60': { region: 'Hauts-de-France', department: 'Oise' },
+  '62': { region: 'Hauts-de-France', department: 'Pas-de-Calais' },
+  '80': { region: 'Hauts-de-France', department: 'Somme' },
+  // Île-de-France
   '75': { region: 'Île-de-France', department: 'Paris' },
+  '77': { region: 'Île-de-France', department: 'Seine-et-Marne' },
+  '78': { region: 'Île-de-France', department: 'Yvelines' },
+  '91': { region: 'Île-de-France', department: 'Essonne' },
+  '92': { region: 'Île-de-France', department: 'Hauts-de-Seine' },
+  '93': { region: 'Île-de-France', department: 'Seine-Saint-Denis' },
+  '94': { region: 'Île-de-France', department: 'Val-de-Marne' },
+  '95': { region: 'Île-de-France', department: "Val-d'Oise" },
+  // Normandie
+  '14': { region: 'Normandie', department: 'Calvados' },
+  '27': { region: 'Normandie', department: 'Eure' },
+  '50': { region: 'Normandie', department: 'Manche' },
+  '61': { region: 'Normandie', department: 'Orne' },
+  '76': { region: 'Normandie', department: 'Seine-Maritime' },
+  // Nouvelle-Aquitaine
+  '16': { region: 'Nouvelle-Aquitaine', department: 'Charente' },
+  '17': { region: 'Nouvelle-Aquitaine', department: 'Charente-Maritime' },
+  '19': { region: 'Nouvelle-Aquitaine', department: 'Corrèze' },
+  '23': { region: 'Nouvelle-Aquitaine', department: 'Creuse' },
+  '24': { region: 'Nouvelle-Aquitaine', department: 'Dordogne' },
+  '33': { region: 'Nouvelle-Aquitaine', department: 'Gironde' },
+  '40': { region: 'Nouvelle-Aquitaine', department: 'Landes' },
+  '47': { region: 'Nouvelle-Aquitaine', department: 'Lot-et-Garonne' },
+  '64': { region: 'Nouvelle-Aquitaine', department: 'Pyrénées-Atlantiques' },
+  '79': { region: 'Nouvelle-Aquitaine', department: 'Deux-Sèvres' },
+  '86': { region: 'Nouvelle-Aquitaine', department: 'Vienne' },
+  '87': { region: 'Nouvelle-Aquitaine', department: 'Haute-Vienne' },
+  // Occitanie
+  '09': { region: 'Occitanie', department: 'Ariège' },
+  '11': { region: 'Occitanie', department: 'Aude' },
+  '12': { region: 'Occitanie', department: 'Aveyron' },
+  '30': { region: 'Occitanie', department: 'Gard' },
+  '31': { region: 'Occitanie', department: 'Haute-Garonne' },
+  '32': { region: 'Occitanie', department: 'Gers' },
+  '34': { region: 'Occitanie', department: 'Hérault' },
+  '46': { region: 'Occitanie', department: 'Lot' },
+  '48': { region: 'Occitanie', department: 'Lozère' },
+  '65': { region: 'Occitanie', department: 'Hautes-Pyrénées' },
+  '66': { region: 'Occitanie', department: 'Pyrénées-Orientales' },
+  '81': { region: 'Occitanie', department: 'Tarn' },
+  '82': { region: 'Occitanie', department: 'Tarn-et-Garonne' },
+  // Pays de la Loire
+  '44': { region: 'Pays de la Loire', department: 'Loire-Atlantique' },
+  '49': { region: 'Pays de la Loire', department: 'Maine-et-Loire' },
+  '53': { region: 'Pays de la Loire', department: 'Mayenne' },
+  '72': { region: 'Pays de la Loire', department: 'Sarthe' },
+  '85': { region: 'Pays de la Loire', department: 'Vendée' },
+  // Provence-Alpes-Côte d'Azur
+  '04': { region: "Provence-Alpes-Côte d'Azur", department: 'Alpes-de-Haute-Provence' },
+  '05': { region: "Provence-Alpes-Côte d'Azur", department: 'Hautes-Alpes' },
+  '06': { region: "Provence-Alpes-Côte d'Azur", department: 'Alpes-Maritimes' },
+  '13': { region: "Provence-Alpes-Côte d'Azur", department: 'Bouches-du-Rhône' },
   '83': { region: "Provence-Alpes-Côte d'Azur", department: 'Var' },
   '84': { region: "Provence-Alpes-Côte d'Azur", department: 'Vaucluse' },
+  // DROM-COM
+  '971': { region: 'Guadeloupe', department: 'Guadeloupe' },
+  '972': { region: 'Martinique', department: 'Martinique' },
+  '973': { region: 'Guyane', department: 'Guyane' },
+  '974': { region: 'La Réunion', department: 'La Réunion' },
+  '976': { region: 'Mayotte', department: 'Mayotte' },
+  '977': { region: 'Saint-Barthélemy', department: 'Saint-Barthélemy' },
+  '978': { region: 'Saint-Martin', department: 'Saint-Martin' },
   '97': { region: 'Saint-Barthélemy', department: 'Saint-Barthélemy' },
 };
 
@@ -93,7 +206,21 @@ function parseAddress(raw: string, fallbackCity: string): ParsedAddress {
     if (cleaned.length > 0) cityFromAddress = cleaned;
   }
 
-  const deptPrefix = postalCode?.slice(0, 2) ?? null;
+  // 97xxx → DROM-COM use a 3-digit prefix. 200/201xx (Corse-du-Sud) and
+  // 202/206xx (Haute-Corse) need to remap to the official 2A / 2B codes
+  // since the brief stores the numeric prefix.
+  let deptPrefix: string | null = null;
+  if (postalCode !== null) {
+    if (postalCode.startsWith('97')) {
+      deptPrefix = postalCode.slice(0, 3);
+      if (!DEPT_TO_REGION[deptPrefix]) deptPrefix = '97';
+    } else if (postalCode.startsWith('20')) {
+      const n = Number(postalCode);
+      deptPrefix = n >= 20000 && n < 20200 ? '2A' : '2B';
+    } else {
+      deptPrefix = postalCode.slice(0, 2);
+    }
+  }
   const lookup = deptPrefix !== null ? DEPT_TO_REGION[deptPrefix] : undefined;
   const region = lookup?.region ?? 'France';
   const department = lookup?.department ?? null;
@@ -676,10 +803,10 @@ function buildFaqContent(brief: Brief): FaqItemJson[] {
     });
   }
 
-  // 17. How to book — surfaces the ConciergeTravel booking model
+  // 17. How to book — surfaces the MyConciergeHotel booking model
   //     (the front-office is `display_only` for these palace fiches).
   out.push({
-    question_fr: `Comment réserver à ${hotel} via ConciergeTravel ?`,
+    question_fr: `Comment réserver à ${hotel} via MyConciergeHotel ?`,
     answer_fr: `${hotel} fait partie de notre sélection éditoriale. Pour une demande sur mesure (dates, type de chambre, transferts, expériences), contactez notre conciergerie via le formulaire de la fiche : nous revenons sous 24 h avec une proposition détaillée.`,
     category: 'agency',
   });
@@ -965,13 +1092,13 @@ function buildRow(brief: Brief, md: string): HotelRow {
   const parsedAddr = parseAddress(brief.address, brief.city);
   const description = split.lead;
 
-  const metaTitleFr = `${brief.name} — Palace ${brief.city} | ConciergeTravel`;
-  const metaTitleEn = `${brief.name} — Luxury Palace in ${brief.city} | ConciergeTravel`;
+  const metaTitleFr = `${brief.name} — Palace ${brief.city} | MyConciergeHotel`;
+  const metaTitleEn = `${brief.name} — Luxury Palace in ${brief.city} | MyConciergeHotel`;
   const metaDescFr =
     description !== null
       ? clampString(description, 155)
-      : `Découvrez ${brief.name}, palace 5★ ${brief.city}. Sélection éditoriale ConciergeTravel.`;
-  const metaDescEn = `Discover ${brief.name}, 5-star palace in ${brief.city}. ConciergeTravel editorial selection.`;
+      : `Découvrez ${brief.name}, palace 5★ ${brief.city}. Sélection éditoriale MyConciergeHotel.`;
+  const metaDescEn = `Discover ${brief.name}, 5-star palace in ${brief.city}. MyConciergeHotel editorial selection.`;
 
   const totalKeys =
     numberish(brief.capacity['total_keys']) ?? numberish(brief.capacity['rooms_count']);
@@ -1050,10 +1177,33 @@ function buildUpsertSql(row: HotelRow): string {
 
   const colNames = columns.map(([c]) => c).join(', ');
   const colValues = columns.map(([, v]) => v).join(', ');
-  // Exclude `slug` from the UPDATE set (it's the conflict key).
+  // EN columns are filled by the i18n batch (translate-hotels-en.ts), not
+  // by this script. Use COALESCE on text EN fields so that re-running the
+  // upsert never wipes existing translations.
+  //
+  // JSONB collections that carry per-item _en keys (faq_content, sections,
+  // signature_experiences, awards) keep the EN keys when the upsert holds
+  // the same number of items — we merge per-index. The merge function is
+  // declared once at the top of the SQL file as `_cct_merge_en_array`.
+  const EN_TEXT_COLS = new Set(['description_en', 'meta_title_en', 'meta_desc_en']);
+  const EN_JSONB_COLS = new Set([
+    'faq_content',
+    'long_description_sections',
+    'signature_experiences',
+    'awards',
+  ]);
+
   const setClause = columns
     .filter(([c]) => c !== 'slug')
-    .map(([c]) => `${c} = EXCLUDED.${c}`)
+    .map(([c]) => {
+      if (EN_TEXT_COLS.has(c)) {
+        return `${c} = COALESCE(EXCLUDED.${c}, public.hotels.${c})`;
+      }
+      if (EN_JSONB_COLS.has(c)) {
+        return `${c} = public._cct_merge_en_array(public.hotels.${c}, EXCLUDED.${c})`;
+      }
+      return `${c} = EXCLUDED.${c}`;
+    })
     .concat(["updated_at = timezone('utc', now())"])
     .join(',\n    ');
 
@@ -1118,6 +1268,57 @@ async function main(): Promise<void> {
     }
   }
 
+  const mergeFn = `
+-- Merge helper: preserves _en keys (added by the i18n batch) when re-running
+-- the FR-only upsert. For each index in the new array, keeps the new _fr/_url
+-- keys and re-injects the matching _en keys from the existing array.
+-- Also preserves any TRAILING items present in the existing array but absent
+-- from the incoming one (e.g. FAQ entries added post-import by the
+-- extend-faq-to-10 batch) — so re-pushing the briefs never shrinks the
+-- editorial surface.
+CREATE OR REPLACE FUNCTION public._cct_merge_en_array(
+  existing jsonb,
+  incoming jsonb
+) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $merge$
+DECLARE
+  result jsonb := '[]'::jsonb;
+  i integer;
+  new_item jsonb;
+  old_item jsonb;
+  key text;
+  v jsonb;
+  existing_len integer;
+  incoming_len integer;
+BEGIN
+  IF incoming IS NULL THEN RETURN existing; END IF;
+  IF jsonb_typeof(incoming) <> 'array' THEN RETURN incoming; END IF;
+  IF existing IS NULL OR jsonb_typeof(existing) <> 'array' THEN RETURN incoming; END IF;
+  existing_len := jsonb_array_length(existing);
+  incoming_len := jsonb_array_length(incoming);
+  -- Step 1: copy each incoming item, re-injecting matching _en keys from
+  -- the existing item at the same index.
+  FOR i IN 0 .. incoming_len - 1 LOOP
+    new_item := incoming -> i;
+    old_item := CASE WHEN existing_len > i THEN existing -> i ELSE NULL END;
+    IF old_item IS NOT NULL AND jsonb_typeof(old_item) = 'object' AND jsonb_typeof(new_item) = 'object' THEN
+      FOR key, v IN SELECT k, val FROM jsonb_each(old_item) AS o(k, val) LOOP
+        IF key LIKE '%_en' AND NOT (new_item ? key) THEN
+          new_item := jsonb_set(new_item, ARRAY[key], v);
+        END IF;
+      END LOOP;
+    END IF;
+    result := result || jsonb_build_array(new_item);
+  END LOOP;
+  -- Step 2: keep trailing extra items from existing (post-import additions).
+  IF existing_len > incoming_len THEN
+    FOR i IN incoming_len .. existing_len - 1 LOOP
+      result := result || jsonb_build_array(existing -> i);
+    END LOOP;
+  END IF;
+  RETURN result;
+END;
+$merge$;
+`;
   const header = [
     '-- ===========================================================',
     '-- Auto-generated by scripts/editorial-pilot/src/import/build-import-sql.ts',
@@ -1127,6 +1328,7 @@ async function main(): Promise<void> {
     '-- ===========================================================',
     '',
     'BEGIN;',
+    mergeFn,
   ].join('\n');
 
   const footer = '\nCOMMIT;\n';

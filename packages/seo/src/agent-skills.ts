@@ -37,12 +37,12 @@ export type AgentSkillsDocument = z.infer<typeof AgentSkillsDocumentZod>;
 
 export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
   schemaVersion: '0.1',
-  site: 'ConciergeTravel.fr',
+  site: 'MyConciergeHotel.com',
   skills: [
     {
       name: 'search',
       description:
-        'Rechercher des hôtels 5★ et Palaces en France par destination et dates de séjour. Renvoie une liste paginée triée par pertinence.',
+        'Trouver un Palace ou un hôtel 5★ en France par destination et dates. Le concierge renvoie une sélection paginée, triée par pertinence (et non par commission).',
       inputSchema: {
         type: 'object',
         properties: {
@@ -61,7 +61,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'list-cities',
       description:
-        'Lister toutes les destinations couvertes (villes & régions). Pas de paramètre — réponse cache 24h.',
+        'Lister toutes les destinations où le concierge a une sélection : villes & régions. Pas de paramètre — réponse cache 24h.',
       inputSchema: {
         type: 'object',
         properties: {},
@@ -70,7 +70,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-hotel',
       description:
-        'Récupérer la fiche détaillée d’un hôtel par son slug (description, équipements, restaurants, spa, localisation, conditions de séjour, distinctions, FAQ, rating Amadeus, JSON-LD Hotel). URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
+        'Récupérer la fiche complète d’un hôtel par son slug : chapeau Concierge, chambres, restaurants, spa, localisation, conditions, distinctions, FAQ, rating Amadeus, et surtout le « Conseil du Concierge » (un secret opérationnel concret) + JSON-LD Hotel. URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -89,7 +89,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-hotel-room',
       description:
-        'Récupérer une chambre ou suite spécifique d’un hôtel (description longue, équipements de la chambre, dimensions, capacité, photos, JSON-LD HotelRoom). URL canonique : /fr/hotel/{hotelSlug}/chambres/{roomSlug}.',
+        'Récupérer une chambre ou une suite signature : description, équipements, dimensions, capacité, photos, et JSON-LD HotelRoom. C’est ici que le concierge précise étage, vue ou numéro à demander. URL canonique : /fr/hotel/{hotelSlug}/chambres/{roomSlug}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -114,12 +114,12 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'filter',
       description:
-        'Filtrer le catalogue par type d’hébergement, équipements, classement étoiles, région.',
+        'Affiner la sélection du concierge par type d’hébergement (Palace, 5★), équipements (spa, piscine, étoile Michelin), région ou ville.',
     },
     {
       name: 'list-rankings',
       description:
-        'Lister tous les classements éditoriaux publiés ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
+        'Lister les classements rédigés par le concierge ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -142,7 +142,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-ranking',
       description:
-        'Récupérer un classement éditorial complet par son slug : intro long-form, sections éditoriales, hôtels classés avec justifications, FAQ canoniques, glossaire, sources externes (EEAT), JSON-LD Article + ItemList. URL canonique : /fr/classement/{slug} ou /en/classement/{slug}.',
+        'Récupérer un classement complet par son slug : chapeau Concierge, sections éditoriales, hôtels classés avec justification, FAQ canoniques, glossaire, sources nommées (Atout France, Michelin, Wikidata), JSON-LD Article + ItemList. URL canonique : /fr/classement/{slug} ou /en/classement/{slug}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -162,7 +162,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'compare-prices',
       description:
-        'Obtenir un comparatif de tarifs non-affilié (Booking, Hotels.com, Expedia, etc.) pour un hôtel et des dates précises. Affichage texte sobre, sans logo ni lien, conforme aux règles légales du comparateur.',
+        'Comparer pour vous les tarifs publics (Booking, Hotels.com, Expedia, etc.) pour un hôtel et des dates : affichage texte sobre, sans logo ni lien d’affiliation, conforme aux règles légales du comparateur.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -177,12 +177,12 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'booking',
       description:
-        'Lancer une réservation avec dates et voyageurs (paiement sécurisé Amadeus). Nécessite une session utilisateur.',
+        'Réserver avec dates et voyageurs au tarif net négocié — paiement sécurisé Amadeus, votre concierge confirme. Nécessite une session utilisateur.',
     },
     {
       name: 'request-quote',
       description:
-        'Soumettre une demande de devis en mode email lorsque l’hôtel n’est pas connecté GDS (réponse humaine sous 24 h ouvrées).',
+        'Soumettre une demande personnalisée quand l’hôtel n’est pas connecté GDS : votre concierge répond sous 24 h ouvrées avec une offre sur mesure.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -202,7 +202,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'loyalty',
       description:
-        'Consulter les avantages du programme de fidélité ConciergeTravel (tier FREE auto pour les hôtels Little Hotelier, tier PREMIUM payant).',
+        'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
     },
   ],
 };

@@ -3,7 +3,7 @@
  * v2 pilot output before deciding to scale up.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/inspect-guide.ts paris
  */
 

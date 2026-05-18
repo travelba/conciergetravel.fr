@@ -1,4 +1,4 @@
-# SEO / GEO / AEO — ConciergeTravel.fr
+# SEO / GEO / AEO — MyConciergeHotel.com
 
 > Document rempli en Phases 5 (templates) + 9 (technique). Couvre :
 >

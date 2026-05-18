@@ -4,7 +4,7 @@
 **Hôtel testé** : The Peninsula Paris — `slug=peninsula-paris`, ID Supabase `a237d595-1b07-477e-b908-a60e95e3d148`  
 **Mode** : `display_only` (vitrine pure — `bookable = false`)  
 **URL inspectée** : `http://localhost:3000/hotel/peninsula-paris` (200, 147 KB HTML)  
-**Pré-requis** : seed exécuté via `pnpm --filter @cct/db seed:peninsula`. Rollback : `pnpm --filter @cct/db teardown:peninsula`.
+**Pré-requis** : seed exécuté via `pnpm --filter @mch/db seed:peninsula`. Rollback : `pnpm --filter @mch/db teardown:peninsula`.
 
 ## Sommaire
 
@@ -87,7 +87,7 @@ Score sur **5** par bloc. Notes :
 - **`<JsonLdScript>` accepte désormais `nonce` en prop explicite** (au lieu de lire `headers()` en interne). Chaque page lit le nonce une seule fois en tête (`(await headers()).get('x-nonce')`) et le forward à toutes les balises. La dépendance request-bound devient visible depuis le fichier de la page, plus enterrée dans un leaf RSC — c'est ce que la PR #56 désignait comme « bon chemin long terme ».
 - **Les 3 pages encore ISR + `<JsonLdScript>`** (`hotel/[slug]/chambres/[roomSlug]`, `destination`, `destination/[citySlug]`) sont passées en `force-dynamic`. Elles avaient le même bug CSP latent que la home avant PR #57 (`nonce=""` figé dans le HTML caché par ISR → `strict-dynamic` bloquant les `HotelRoom` / `ItemList` / `BreadcrumbList` / `FAQPage` JSON-LD chez le client). Réactivation ISR = à terme migration vers des hashs CSP calculés au build (out of scope).
 - **Nouveau filet E2E paramétrisé** : `api-routes.spec.ts` itère sur 4 routes (`/fr`, `/fr/destination`, `/fr/hotel/{fake}`, `/fr/hotel/{fake}/chambres/{room}`), inspecte le HTML SSR brut et croise le nonce du `Content-Security-Policy` avec celui de chaque `<script type="application/ld+json">`. Si une route ré-active ISR sans repenser la CSP, le test casse immédiatement. Total chromium : **92 passés / 0 échec / 3 skipped** (gain +3 sur PR #57).
-- **Seam fake `dev-fake-room-detail.ts`** : la fiche chambre est désormais testable sans seeder `hotel_rooms` dans Supabase. Active sur `CCT_E2E_FAKE_HOTEL_ID` (même contrat que `dev-fake-hotel-detail.ts`), expose `chambre-deluxe-roi` + `suite-junior-tuileries` sur le faux hôtel.
+- **Seam fake `dev-fake-room-detail.ts`** : la fiche chambre est désormais testable sans seeder `hotel_rooms` dans Supabase. Active sur `MCH_E2E_FAKE_HOTEL_ID` (même contrat que `dev-fake-hotel-detail.ts`), expose `chambre-deluxe-roi` + `suite-junior-tuileries` sur le faux hôtel.
 
 Suivi non bloquant : seeder une ville fake (`paris`) pour étendre le filet CSP nonce à `/destination/[citySlug]` — structurellement identique à `/destination`, donc à low priority.
 
@@ -214,7 +214,7 @@ explicite par catégorie (extérieur/lobby/chambre/...).
 
 **Observé**
 
-- Bloc `<section data-aeo>` rendu avec H2 "Comment réserver The Peninsula Paris via ConciergeTravel ?" et answer de 50-80 mots.
+- Bloc `<section data-aeo>` rendu avec H2 "Comment réserver The Peninsula Paris via MyConciergeHotel ?" et answer de 50-80 mots.
 - Inclus dans FAQPage JSON-LD (position 0).
 - Cible explicite : Perplexity / SearchGPT / Gemini.
 
@@ -448,12 +448,12 @@ Rolls-Royce Phantom, Art in Residence).
 **Observé**
 
 - L'AEO answer mentionne déjà "agence IATA partenaire", "PCI-DSS 3-D Secure", "comparatif non affilié", "fidélité dès la 1ère nuit" ✓
-- Aucune section "Pourquoi réserver via ConciergeTravel ?" rendue.
+- Aucune section "Pourquoi réserver via MyConciergeHotel ?" rendue.
 
 **Manquant (CDC §2.13)**
 
 - Section dédiée avec 4 pillars : IATA / Prix net GDS / Paiement sécurisé / Programme fidélité.
-- Bloc "À propos de ConciergeTravel" (1 paragraphe) avec lien vers `/qui-sommes-nous`.
+- Bloc "À propos de MyConciergeHotel" (1 paragraphe) avec lien vers `/qui-sommes-nous`.
 - Trust badges (IATA #, Atout France IM, Forbes if relevant) — pas du tout présent en DB ni UI.
 
 **Action Phase 10** : composant partagé `<AgencyTrustBlock />` rendu en bas de fiche.
@@ -619,7 +619,7 @@ Hors §2, mais bloquants pour livrer un preview observable et une prod fiable.
 | Root layout `apps/web`             | `<html>`/`<body>` dans `[locale]/layout.tsx` → `/404` prerender échoue en build prod | Vérifié : Next.js 15.1.6 + next-intl 3.x build clean sans modification (régression antérieure résolue). Job CI `Build` réactivé.                   | P2   | ✓ PR #44 |
 | Root layout `apps/admin`           | `page.tsx` racine sans root layout → build prod échouait                             | Redirect `/` → `/admin` déplacé en `middleware.ts`, `page.tsx` racine supprimé, Payload `(payload)/layout.tsx` reste seul propriétaire du document | P2   | ✓ PR #44 |
 | Vercel env vars production         | tout en `SKIP_ENV_VALIDATION=true` par défaut                                        | Câbler Supabase, Cloudinary, Upstash, Algolia, Brevo, Sentry, Makcorps (3 scopes : Production, Preview, Development)                               | P2   | ouvert   |
-| DNS `www.conciergetravel.fr`       | non rattaché                                                                         | Une fois deploy stable, mapper le domaine Vercel — runbook §3                                                                                      | P3   | ouvert   |
+| DNS `www.myconciergehotel.com`       | non rattaché                                                                         | Une fois deploy stable, mapper le domaine Vercel — runbook §3                                                                                      | P3   | ouvert   |
 
 ---
 
@@ -667,7 +667,7 @@ Patch à appliquer dans `seed-dev.ts` :
 
 ## 7. Inventaire Cloudinary du test
 
-Cloud `dvbjwh5wy` — folder `cct/test/peninsula-paris/` — tags `cct:test:peninsula`, `cct:test-data-not-prod`, `cct:source:wikimedia-commons` (CC licence).
+Cloud `dvbjwh5wy` — folder `cct/test/peninsula-paris/` — tags `mch:test:peninsula`, `mch:test-data-not-prod`, `mch:source:wikimedia-commons` (CC licence).
 
 | Public ID                   | Catégorie  | Dim       |
 | --------------------------- | ---------- | --------- |
@@ -702,9 +702,9 @@ Cloud `dvbjwh5wy` — folder `cct/test/peninsula-paris/` — tags `cct:test:peni
 Une commande, retour à zéro instantané :
 
 ```bash
-pnpm --filter @cct/db teardown:peninsula
+pnpm --filter @mch/db teardown:peninsula
 ```
 
 - Supprime la ligne `hotels` correspondante.
 - `hotel_rooms` cascade automatiquement via la FK `ON DELETE CASCADE`.
-- Les 12 assets Cloudinary **ne sont pas** supprimés (intentionnel — réutilisables pour Phase 10). Pour les wipe : utiliser la console Cloudinary avec le tag `cct:test:peninsula` (cloud `dvbjwh5wy`).
+- Les 12 assets Cloudinary **ne sont pas** supprimés (intentionnel — réutilisables pour Phase 10). Pour les wipe : utiliser la console Cloudinary avec le tag `mch:test:peninsula` (cloud `dvbjwh5wy`).

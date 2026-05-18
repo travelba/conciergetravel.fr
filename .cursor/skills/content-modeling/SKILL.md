@@ -1,9 +1,9 @@
 ---
 name: content-modeling
-description: Editorial content modeling for ConciergeTravel.fr (Payload collections, fields, relations, validation, draft/publish, multilingual content). Use when adding or modifying any Payload collection or content shape.
+description: Editorial content modeling for MyConciergeHotel.com (Payload collections, fields, relations, validation, draft/publish, multilingual content). Use when adding or modifying any Payload collection or content shape.
 ---
 
-# Content modeling — ConciergeTravel.fr
+# Content modeling — MyConciergeHotel.com
 
 The editorial layer is **first-class product surface**. Content must be reusable across hubs, fiches, and AI surfaces (cf. CDC §5.1, §6, §15). Modeled in **Payload CMS 3** (collections + globals) backed by Postgres on Supabase.
 
@@ -179,6 +179,91 @@ Invoke when:
 - Storing inline image URLs not from Cloudinary.
 - Storing POI distances without units or without `walk_min` when the POI is < 2 km.
 
+## Idempotent multilingual upserts — preserve `_en` keys across pushes
+
+Whenever an FR-only batch (briefs → SQL → upsert) coexists with an
+independent EN translation batch (`translate-hotels-en.ts`), the upsert
+**must never wipe** the EN columns. This trap cost us a whole i18n
+re-run in May 2026 because the seed upsert overwrote `description_en`,
+`faq_content[*].answer_en`, `long_description_sections[*].body_en`, …
+with `NULL` (the briefs only carry FR).
+
+### The two-tier protection
+
+**Text EN columns** (`description_en`, `meta_title_en`, `meta_desc_en`):
+use `COALESCE(EXCLUDED.x, hotels.x)` so passing `NULL` is a no-op:
+
+```sql
+description_en = COALESCE(EXCLUDED.description_en, public.hotels.description_en),
+```
+
+**JSONB arrays of mixed-locale objects** (`faq_content`,
+`long_description_sections`, `signature_experiences`, `awards`):
+declare a Postgres helper that merges per-item:
+
+```sql
+CREATE OR REPLACE FUNCTION public._cct_merge_en_array(
+  existing jsonb, incoming jsonb
+) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $merge$
+DECLARE
+  result jsonb := '[]'::jsonb;
+  i integer; new_item jsonb; old_item jsonb;
+  key text; v jsonb;
+  existing_len integer; incoming_len integer;
+BEGIN
+  IF incoming IS NULL THEN RETURN existing; END IF;
+  IF jsonb_typeof(incoming) <> 'array' THEN RETURN incoming; END IF;
+  IF existing IS NULL OR jsonb_typeof(existing) <> 'array' THEN RETURN incoming; END IF;
+  existing_len := jsonb_array_length(existing);
+  incoming_len := jsonb_array_length(incoming);
+  -- 1. copy incoming items, re-inject existing _en keys at same index
+  FOR i IN 0 .. incoming_len - 1 LOOP
+    new_item := incoming -> i;
+    old_item := CASE WHEN existing_len > i THEN existing -> i ELSE NULL END;
+    IF old_item IS NOT NULL AND jsonb_typeof(old_item) = 'object'
+       AND jsonb_typeof(new_item) = 'object' THEN
+      FOR key, v IN SELECT k, val FROM jsonb_each(old_item) AS o(k, val) LOOP
+        IF key LIKE '%_en' AND NOT (new_item ? key) THEN
+          new_item := jsonb_set(new_item, ARRAY[key], v);
+        END IF;
+      END LOOP;
+    END IF;
+    result := result || jsonb_build_array(new_item);
+  END LOOP;
+  -- 2. keep extra trailing items from existing (post-import additions
+  --    such as FAQ extensions from extend-faq-to-10.ts).
+  IF existing_len > incoming_len THEN
+    FOR i IN incoming_len .. existing_len - 1 LOOP
+      result := result || jsonb_build_array(existing -> i);
+    END LOOP;
+  END IF;
+  RETURN result;
+END;
+$merge$;
+```
+
+Use in the upsert:
+
+```sql
+faq_content = public._cct_merge_en_array(public.hotels.faq_content, EXCLUDED.faq_content),
+long_description_sections = public._cct_merge_en_array(
+  public.hotels.long_description_sections, EXCLUDED.long_description_sections),
+```
+
+Reference implementation: `scripts/editorial-pilot/src/import/build-import-sql.ts`
+(`EN_TEXT_COLS` + `EN_JSONB_COLS` sets, `_cct_merge_en_array` helper).
+
+### Anti-patterns
+
+- `faq_content = EXCLUDED.faq_content` when the upsert source is FR-only.
+  Wipes every `_en` key in the array.
+- A post-import enrich (FAQ extender, signature_experiences enricher)
+  that lengthens an array but no merge function to preserve the extras
+  on the next re-push.
+- COALESCE-ing a JSONB array as a whole (`COALESCE(EXCLUDED.x, …)`):
+  the upsert always carries a non-null value, so COALESCE never kicks
+  in — you still lose `_en` per-index. Per-element merge is required.
+
 ## Catalog stub fiches (combinatorial matrix only)
 
 Some product surfaces — e.g. the editorial **rankings combinatorial
@@ -196,20 +281,45 @@ hidden from Google.
 **The two locks** (must always be paired):
 
 1. **`generateMetadata` returns `robots: { index: false, follow: true }`**
-   when both `hero_image IS NULL` and `long_description_sections` is
-   empty (or not an array). `follow` lets Google traverse the deep links
-   the rankings emit toward the (indexable) parent ranking page.
-   See `apps/web/src/app/[locale]/hotel/[slug]/page.tsx`.
+   when the indexability predicate fails. `follow` lets Google traverse
+   the deep links the rankings emit toward the (indexable) parent
+   ranking page. See `apps/web/src/app/[locale]/hotel/[slug]/page.tsx`.
 2. **The public sub-sitemap omits the stubs** — never just relax the
    `is_published` filter. Use a dedicated query
    (`listIndexableHotelSlugs()` in `get-hotel-by-slug.ts`) that mirrors
-   the same `(hero_image IS NOT NULL OR long_description_sections IS NOT NULL)`
-   predicate. Otherwise Google wastes crawl budget on pages it will
-   refuse to index.
+   **exactly** the same predicate. Otherwise Google wastes crawl
+   budget on pages it will refuse to index.
 
-**Reverse direction**: as soon as the editor adds a hero image **or**
-the first long-form section, both locks lift on the next ISR
-revalidation — no manual flag flip required.
+**Indexability predicate (May 2026, photo-ingest sprint)**:
+
+```
+hero_image IS NOT NULL
+ AND (jsonb_array_length(gallery_images) >= 5
+      OR jsonb_array_length(long_description_sections) > 0)
+```
+
+Rationale for the **AND** + the **5-photo threshold**:
+
+- A hero image alone is not enough — Google Hotels rich results show
+  a thumbnail strip and "no extra photos" looks broken in the SERP.
+- Five gallery photos + hero is the minimum that fills the SERP
+  thumbnail row credibly without forcing a long-form editorial body.
+- The editorial-only branch (`sections > 0`) keeps the lift fast for
+  hotels where the editor wrote 800-word sections before the photo
+  orchestrator finished — rare, but supported.
+
+The `page.tsx` predicate (`isIndexable`) and the
+`listIndexableHotelSlugs()` SQL filter **MUST** stay in lockstep. If
+they ever diverge, Google sees a sitemap that advertises URLs the
+page marks `noindex` — a contradictory signal that downgrades the
+site's overall quality score. Add a comment in both files pointing
+at the other.
+
+**Reverse direction**: as soon as the photo orchestrator
+(`scripts/editorial-pilot/src/photos/sync-hotel-photos.ts`) hydrates
+hero + 5 gallery photos, the page becomes indexable on the next
+render — the hotel detail route is `force-dynamic`, so there's no
+cache to invalidate.
 
 **Bulk-import gotcha** (Atout France CSV pipeline):
 
@@ -233,3 +343,5 @@ revalidation — no manual flag flip required.
   pipeline (editorial guides, rankings, hotel fiches, AEO blocks).
 - **`typescript-strict-zod-interop`** — when a Zod schema for a content
   field will be consumed by a React component (front-end rendering).
+- **`concierge-voice-pipeline`** — `concierge_advice` field shape (Payload
+  collection + validation + Zod schema + publication blocker hook).

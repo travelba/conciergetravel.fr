@@ -3,7 +3,7 @@
  * Requires SUPABASE_DB_URL (prefer direct Postgres — port 5432 — for DDL, not pooled PgBouncer).
  *
  * Usage (from repo root):
- *   pnpm --filter @cct/db migrate
+ *   pnpm --filter @mch/db migrate
  */
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';

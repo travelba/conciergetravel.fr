@@ -1,9 +1,9 @@
 ---
 name: domain-driven-design
-description: Apply DDD bounded contexts and pure domain modeling for ConciergeTravel.fr. Use when adding business logic (booking rules, loyalty tiers, pricing comparison, editorial slugs, hotel publication state) or creating new entities, value objects, or domain services.
+description: Apply DDD bounded contexts and pure domain modeling for MyConciergeHotel.com. Use when adding business logic (booking rules, loyalty tiers, pricing comparison, editorial slugs, hotel publication state) or creating new entities, value objects, or domain services.
 ---
 
-# Domain-driven design — ConciergeTravel.fr
+# Domain-driven design — MyConciergeHotel.com
 
 The codebase is organized by **bounded contexts** in `packages/domain/`. Domain code is **pure TypeScript** — zero framework dependencies, zero I/O. All side effects (Supabase, Amadeus, Brevo, Algolia, Redis) live in `packages/integrations/`.
 

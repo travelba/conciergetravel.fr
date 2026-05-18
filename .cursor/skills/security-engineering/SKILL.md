@@ -1,9 +1,9 @@
 ---
 name: security-engineering
-description: Security engineering rules for ConciergeTravel.fr (RLS, secrets, CSP, CSRF, rate limiting, PII, GDPR, audit logging). Use whenever you handle user input, secrets, headers, third-party calls, or sensitive data.
+description: Security engineering rules for MyConciergeHotel.com (RLS, secrets, CSP, CSRF, rate limiting, PII, GDPR, audit logging). Use whenever you handle user input, secrets, headers, third-party calls, or sensitive data.
 ---
 
-# Security engineering — ConciergeTravel.fr
+# Security engineering — MyConciergeHotel.com
 
 Cahier des charges §11 sets contractual requirements: payment delegated to Amadeus, RLS enforced, role-based access, server-side input validation, env-only secrets, journaled sensitive calls, abuse protection.
 

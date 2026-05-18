@@ -18,7 +18,7 @@ La piscine emblématique, creusée dans la roche et alimentée en eau de mer, co
 
 L’Hôtel du Cap-Eden-Roc se savoure comme un rituel. Les 118 hébergements, dont 27 suites et 3 villas, traduisent un mariage entre confort contemporain et héritage. Parmi les choix notables : la suite Eden-Roc avec sa terrasse panoramique sur la mer, la Villa Soleil privatisable avec piscine ou encore la Bastide du Cap, ancienne résidence familiale.
 
-Accueillir la mer depuis une chaise longue ou plonger dans la piscine creusée dans la roche figure parmi les incontournables. « L’arrivée par l’allée centrale, les pins, les cigales : c’est ici que l’on mesure la singularité d’Eden-Roc. Tout commence par l’approche, jamais par une simple façade » — Marc, conseiller senior Côte d’Azur ConciergeTravel.fr.
+Accueillir la mer depuis une chaise longue ou plonger dans la piscine creusée dans la roche figure parmi les incontournables. « L’arrivée par l’allée centrale, les pins, les cigales : c’est ici que l’on mesure la singularité d’Eden-Roc. Tout commence par l’approche, jamais par une simple façade » — Marc, conseiller senior Côte d’Azur MyConciergeHotel.com.
 
 Idéal pour un séjour de cinq à sept nuits, particulièrement en juin ou septembre, le lieu se prête à des célébrations marquantes. Attention néanmoins : fermé de mi-octobre à mi-avril, l’hôtel n’est pas adapté pour des étapes courtes ou hors saison.
 

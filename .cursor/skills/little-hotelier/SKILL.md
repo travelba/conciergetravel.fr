@@ -1,9 +1,9 @@
 ---
 name: little-hotelier
-description: Little Hotelier API integration for ConciergeTravel.fr — properties, availability, rates, reservations. Used for hotels in the Little catalog (eligible to loyalty tier FREE benefits). Invoke for any code touching Little Hotelier endpoints or its data mapping.
+description: Little Hotelier API integration for MyConciergeHotel.com — properties, availability, rates, reservations. Used for hotels in the Little catalog (eligible to loyalty tier FREE benefits). Invoke for any code touching Little Hotelier endpoints or its data mapping.
 ---
 
-# Little Hotelier API — ConciergeTravel.fr
+# Little Hotelier API — MyConciergeHotel.com
 
 Little Hotelier is the **secondary booking channel** for hotels in the Little catalog. These hotels are eligible to the **tier FREE loyalty benefits** (breakfast, late check-out, hotel credit per CDC §8.1).
 

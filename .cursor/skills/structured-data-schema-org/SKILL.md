@@ -1,9 +1,9 @@
 ---
 name: structured-data-schema-org
-description: Schema.org JSON-LD builders for ConciergeTravel.fr (Hotel, LodgingBusiness, Offer, FAQPage, ItemList, Article, HowTo, BreadcrumbList, ProfilePage, AggregateRating, TravelAgency). Use whenever you add or modify a JSON-LD payload.
+description: Schema.org JSON-LD builders for MyConciergeHotel.com (Hotel, LodgingBusiness, Offer, FAQPage, ItemList, Article, HowTo, BreadcrumbList, ProfilePage, AggregateRating, TravelAgency). Use whenever you add or modify a JSON-LD payload.
 ---
 
-# Structured data (Schema.org) — ConciergeTravel.fr
+# Structured data (Schema.org) — MyConciergeHotel.com
 
 Each page type carries one or more JSON-LD blocks per CDC v3.0 §6.4 and the Excel "Schema JSON-LD" sheet. Builders live in `packages/seo/jsonld/`.
 

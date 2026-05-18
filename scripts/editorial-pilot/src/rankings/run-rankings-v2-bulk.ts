@@ -14,7 +14,7 @@
  *     JSON per attempt) for observability.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings-v2-bulk.ts \
  *     [--concurrency=3] \
  *     [--limit=50] \

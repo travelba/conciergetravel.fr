@@ -9,8 +9,8 @@ import './globals.css';
 import { payloadAdminImportMap } from './payload-import-map';
 
 export const metadata: Metadata = {
-  title: 'ConciergeTravel — Back-office',
-  description: 'Administration ConciergeTravel.fr',
+  title: 'MyConciergeHotel — Back-office',
+  description: 'Administration MyConciergeHotel.com',
 };
 
 const adminConfigPromise = Promise.resolve(config);

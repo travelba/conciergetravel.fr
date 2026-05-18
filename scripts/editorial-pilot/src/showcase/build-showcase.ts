@@ -65,8 +65,8 @@ interface Brief {
   }>;
 }
 
-const SITE_ORIGIN = 'https://conciergetravel.fr';
-const SITE_NAME = 'ConciergeTravel.fr';
+const SITE_ORIGIN = 'https://myconciergehotel.com';
+const SITE_NAME = 'MyConciergeHotel.com';
 
 async function main(): Promise<void> {
   const slug = process.argv[2];
@@ -321,7 +321,7 @@ function buildFaqs(b: Brief): readonly Faq[] {
   if (service['check_in_time'] || service['check_out_time']) {
     out.push({
       question: `Quels sont les horaires de check-in et check-out à ${b.name} ?`,
-      answer: `Le check-in s'effectue à partir de ${service['check_in_time'] ?? '15h00'} et le check-out jusqu'à ${service['check_out_time'] ?? '12h00'}. Pour des arrivées ou départs en dehors de ces horaires, contactez la conciergerie via votre conseiller ConciergeTravel.fr.`,
+      answer: `Le check-in s'effectue à partir de ${service['check_in_time'] ?? '15h00'} et le check-out jusqu'à ${service['check_out_time'] ?? '12h00'}. Pour des arrivées ou départs en dehors de ces horaires, contactez la conciergerie via votre conseiller MyConciergeHotel.com.`,
     });
   }
 
@@ -399,7 +399,7 @@ function buildMetadata(b: Brief): Record<string, unknown> {
   const michelinCount = b.dining.filter((o) => o.michelin_stars && o.michelin_stars > 0).length;
 
   const title = `${b.name} — Hôtel Palace 5★ à ${b.city} | ${SITE_NAME}`;
-  const description = `${b.name}, Palace Atout France 5 étoiles à ${b.city}. ${totalKeys ? `${totalKeys} chambres, ` : ''}${michelinCount > 0 ? `${michelinCount} restaurant${michelinCount > 1 ? 's' : ''} étoilé${michelinCount > 1 ? 's' : ''}, ` : ''}spa & conciergerie. Réservation et conseils IATA par ConciergeTravel.fr.`;
+  const description = `${b.name}, Palace Atout France 5 étoiles à ${b.city}. ${totalKeys ? `${totalKeys} chambres, ` : ''}${michelinCount > 0 ? `${michelinCount} restaurant${michelinCount > 1 ? 's' : ''} étoilé${michelinCount > 1 ? 's' : ''}, ` : ''}spa & conciergerie. Réservation et conseils IATA par MyConciergeHotel.com.`;
 
   return {
     title,
@@ -502,7 +502,7 @@ function buildLlmsFullEntry(b: Brief): string {
   }
 
   lines.push('');
-  lines.push(`Source : ${url} — ConciergeTravel.fr, agence IATA partenaire.`);
+  lines.push(`Source : ${url} — MyConciergeHotel.com, agence IATA partenaire.`);
   lines.push('');
   return lines.join('\n');
 }
@@ -513,7 +513,7 @@ function buildAgentSkillsEntry(b: Brief): Record<string, unknown> {
   return {
     '@context': 'https://agent-skills.org/v1',
     skill: 'hotel-information',
-    domain: 'conciergetravel.fr',
+    domain: 'myconciergehotel.com',
     hotel: {
       name: b.name,
       url: `${SITE_ORIGIN}/fr/hotels/${b.slug}`,

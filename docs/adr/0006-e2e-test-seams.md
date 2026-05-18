@@ -8,9 +8,9 @@
 
 Pour permettre à la suite Playwright de couvrir le **tunnel paid Amadeus** (offer-lock → invite → recap → payment), le tunnel **email-mode** complet et les **fiches hôtel** dans un environnement CI **sans Supabase, Redis, Algolia, Amadeus ni Brevo réels**, on introduit quatre seams cumulables, activables uniquement via variables d'environnement explicites :
 
-1. **`apps/web/src/lib/redis-memory.ts`** — store Upstash-Redis in-process (Map + TTL absolu), implémentant strictement le sous-ensemble consommé : `get / set (ex, nx) / del / incr / expire`. Substitué dans `lib/redis.ts` dès que `CCT_E2E_FAKE_HOTEL_ID` est posé.
-2. **`getFakeHotelHead(id)`** (`server/booking/dev-fake-hotel.ts`) — hôtel `booking_mode = 'email'` synthétique, ciblé par UUID configuré dans `CCT_E2E_FAKE_HOTEL_ID`.
-3. **`getFakePaidHotelHead(id)`** (même fichier) — variante `booking_mode = 'amadeus'`, ciblée par `CCT_E2E_FAKE_PAID_HOTEL_ID`. Branchée dans `lock-offer.ts::fetchHotelSnapshot` avant l'appel Supabase.
+1. **`apps/web/src/lib/redis-memory.ts`** — store Upstash-Redis in-process (Map + TTL absolu), implémentant strictement le sous-ensemble consommé : `get / set (ex, nx) / del / incr / expire`. Substitué dans `lib/redis.ts` dès que `MCH_E2E_FAKE_HOTEL_ID` est posé.
+2. **`getFakeHotelHead(id)`** (`server/booking/dev-fake-hotel.ts`) — hôtel `booking_mode = 'email'` synthétique, ciblé par UUID configuré dans `MCH_E2E_FAKE_HOTEL_ID`.
+3. **`getFakePaidHotelHead(id)`** (même fichier) — variante `booking_mode = 'amadeus'`, ciblée par `MCH_E2E_FAKE_PAID_HOTEL_ID`. Branchée dans `lock-offer.ts::fetchHotelSnapshot` avant l'appel Supabase.
 4. **`createFakeOfferForDev` + `isFakeOffersEnabled`** (`server/booking/dev-fake-offer.ts`) — offre Amadeus synthétique (€250/nuit, EUR, 10 min TTL, cancellation verbatim). Activé en `production` uniquement si le seam paid est configuré.
 
 Tous les seams sont **inactifs en l'absence** de leurs variables d'environnement respectives — il n'y a aucun mode "automatique" qui pourrait fuir en production.
@@ -54,7 +54,7 @@ Les contraintes du projet :
 
 ### Garde-fous
 
-- Toutes les variables d'environnement seam (`CCT_E2E_*`) sont préfixées de manière reconnaissable et **uniquement positionnées par `playwright.config.ts`**. Aucun fichier `.env*` ne les contient.
+- Toutes les variables d'environnement seam (`MCH_E2E_*`) sont préfixées de manière reconnaissable et **uniquement positionnées par `playwright.config.ts`**. Aucun fichier `.env*` ne les contient.
 - Les seams logiques (paid hotel, fake offer) ne se déclenchent que quand l'UUID demandé correspond exactement à la valeur configurée — un appel avec un UUID arbitraire retombe sur le chemin Supabase normal.
 - Le stub Redis utilise un `Proxy` qui jette une erreur claire pour toute méthode non implémentée, garantissant qu'un changement de surface côté `@upstash/redis` se manifeste tout de suite plutôt que par un comportement silencieux divergent.
 
@@ -62,5 +62,5 @@ Les contraintes du projet :
 
 - `pnpm -r typecheck` : 0 erreur sur les 4 nouveaux modules et leurs callers.
 - `pnpm -r test` : 114 unit tests Vitest verts, aucune régression.
-- `pnpm --filter @cct/web test:e2e` : 128 tests Playwright (125 passed + 3 skipped intentionnels) sur Chromium desktop + Pixel 5 mobile, build Next.js production.
+- `pnpm --filter @mch/web test:e2e` : 128 tests Playwright (125 passed + 3 skipped intentionnels) sur Chromium desktop + Pixel 5 mobile, build Next.js production.
 - Job CI `e2e` ajouté à `.github/workflows/ci.yml` avec cache `~/.cache/ms-playwright` keyé sur la version Playwright pour ramener le run à ~3 min sur cache hit.

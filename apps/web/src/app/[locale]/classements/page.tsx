@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { RankingsFacets } from '@/components/rankings/rankings-facets';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -19,7 +19,7 @@ import {
 // detail page revalidation cadence.
 export const revalidate = 3600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -35,7 +35,7 @@ const T = {
     title: 'Nos classements de Palaces et hôtels 5★',
     subtitle: (n: number) =>
       `${n} classements éditoriaux rédigés par notre équipe : les plus beaux Palaces de France, par destination, par thématique, ou par distinction.`,
-    metaTitle: 'Classements de Palaces — ConciergeTravel',
+    metaTitle: 'Classements de Palaces — MyConciergeHotel',
     metaDesc:
       "Découvrez nos classements éditoriaux : meilleurs Palaces de France, plus beaux Palaces de Paris, Côte d'Azur, Alpes, spa, gastronomie, romantisme.",
     entriesCount: (n: number) => (n === 1 ? '1 hôtel' : `${n} hôtels`),
@@ -57,7 +57,7 @@ const T = {
     title: 'Our Palace and 5★ hotel rankings',
     subtitle: (n: number) =>
       `${n} editorial rankings written by our team — the most beautiful Palaces of France, by destination, theme or distinction.`,
-    metaTitle: 'Palace Rankings — ConciergeTravel',
+    metaTitle: 'Palace Rankings — MyConciergeHotel',
     metaDesc:
       'Discover our editorial rankings: the finest Palaces of France, the most beautiful Palaces of Paris, Riviera, Alps, spa, gastronomy, romance.',
     entriesCount: (n: number) => (n === 1 ? '1 hotel' : `${n} hotels`),

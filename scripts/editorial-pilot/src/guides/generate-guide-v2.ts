@@ -93,6 +93,20 @@ const SECTION_TYPE_ALIASES: Readonly<Record<string, string>> = {
   summary: 'conclusion',
 };
 
+// EN strings are intentionally lenient — the dedicated I18N pipeline
+// (translate-hotels-en.ts pattern) re-translates EVERY guide FR → EN
+// downstream, so we accept empty or short LLM output here rather than
+// blocking the whole pipeline.
+// Anti-pattern this replaces: `z.string().min(N).optional().default('')`
+// does NOT bypass `.min(N)` — Zod still validates the default. Use this
+// helper instead for any `_en` field that will be re-translated later.
+const EnString = (maxLen: number) =>
+  z.preprocess((v) => {
+    if (v === null || v === undefined) return '';
+    if (typeof v !== 'string') return v;
+    return v;
+  }, z.string().max(maxLen).default(''));
+
 const SectionSchema = z.object({
   key: z
     .string()
@@ -126,7 +140,7 @@ const SectionSchema = z.object({
       .default('art_de_vivre'),
   ),
   title_fr: z.string().min(4).max(180),
-  title_en: z.string().min(4).max(180).optional().default(''),
+  title_en: EnString(180),
   body_fr: z.string().min(200),
   body_en: z.string().optional().default(''),
 });
@@ -172,8 +186,22 @@ const TABLE_KIND_ALIASES: Readonly<Record<string, string>> = {
 const TableHeaderSchema = z.object({
   key: z.string().min(1).max(40),
   label_fr: z.string().min(1).max(80),
-  label_en: z.string().min(1).max(80).optional().default(''),
-  align: z.enum(['left', 'right', 'center']).optional(),
+  label_en: EnString(80),
+  // LLM occasionally emits `null`, booleans, numbers, or non-enum strings
+  // instead of omitting — coerce anything non-conforming to undefined so the
+  // optional enum just falls through.
+  align: z.preprocess(
+    (v) => {
+      if (typeof v !== 'string') return undefined;
+      const t = v.trim().toLowerCase();
+      if (t === 'left' || t === 'right' || t === 'center') return t;
+      if (t === 'l' || t === 'start') return 'left';
+      if (t === 'r' || t === 'end') return 'right';
+      if (t === 'c' || t === 'middle') return 'center';
+      return undefined;
+    },
+    z.enum(['left', 'right', 'center']).optional(),
+  ),
 });
 
 const TableCellSchema = z.union([
@@ -217,7 +245,7 @@ const TableSchema = z.object({
       .default('generic'),
   ),
   title_fr: z.string().min(4).max(140),
-  title_en: z.string().min(4).max(140).optional().default(''),
+  title_en: EnString(140),
   note_fr: z.string().max(400).optional().default(''),
   note_en: z.string().max(400).optional().default(''),
   headers: z.array(TableHeaderSchema).min(2).max(8),
@@ -231,7 +259,7 @@ const TableSchema = z.object({
 
 const GlossaryEntrySchema = z.object({
   term_fr: z.string().min(2).max(80),
-  term_en: z.string().min(2).max(80).optional().default(''),
+  term_en: EnString(80),
   definition_fr: z.string().min(40).max(600),
   definition_en: z.string().max(600).optional().default(''),
 });
@@ -265,7 +293,7 @@ const CalloutSchema = z.object({
     z.enum(['did_you_know', 'concierge_tip', 'warning', 'pro_tip', 'fact']).default('did_you_know'),
   ),
   title_fr: z.string().min(2).max(120),
-  title_en: z.string().min(2).max(120).optional().default(''),
+  title_en: EnString(120),
   body_fr: z.string().min(30).max(700),
   body_en: z.string().max(700).optional().default(''),
 });
@@ -464,7 +492,8 @@ const HIGHLIGHT_TYPE_SET = new Set<string>([
 
 const HighlightSchema = z.object({
   name_fr: z.string().min(2).max(180),
-  name_en: z.string().min(2).max(180).optional().default(''),
+  // EN can be empty — the I18N pipeline will fill it. We just clamp len.
+  name_en: EnString(180),
   type: z.preprocess(
     (v) => {
       if (typeof v !== 'string') return v;
@@ -493,7 +522,18 @@ const HighlightSchema = z.object({
   ),
   description_fr: z.string().min(30).max(700),
   description_en: z.string().max(700).optional().default(''),
-  url: z.string().url().optional().nullable(),
+  // LLM frequently emits '' or 'TBD' for unknown URLs — coerce to undefined
+  // before applying the URL validator so we don't blow up the whole guide.
+  url: z.preprocess(
+    (v) => {
+      if (typeof v !== 'string') return v;
+      const t = v.trim();
+      if (t.length === 0) return undefined;
+      if (!/^https?:\/\//iu.test(t)) return undefined;
+      return t;
+    },
+    z.string().url().optional().nullable(),
+  ),
 });
 
 // ─── Top-level v2 schemas (per call) ─────────────────────────────────
@@ -533,17 +573,17 @@ const SectionPlanItemSchema = z.object({
       .default('art_de_vivre'),
   ),
   title_fr: z.string().min(4).max(180),
-  title_en: z.string().min(4).max(180).optional().default(''),
+  title_en: EnString(180),
   brief_fr: z.string().min(30).max(500),
 });
 
 export const CallMSchema = z.object({
   summary_fr: z.string().min(60).max(260),
-  summary_en: z.string().min(40).max(260).optional().default(''),
+  summary_en: EnString(260),
   meta_title_fr: z.string().min(15).max(90),
-  meta_title_en: z.string().min(15).max(90).optional().default(''),
+  meta_title_en: EnString(90),
   meta_desc_fr: z.string().min(50).max(220),
-  meta_desc_en: z.string().min(40).max(240).optional().default(''),
+  meta_desc_en: EnString(240),
   section_plan: z.array(SectionPlanItemSchema).min(8).max(14),
   practical_info: PracticalInfoSchema,
   highlights: z.array(HighlightSchema).min(7).max(16),
@@ -558,11 +598,11 @@ export const CallSSchema = z.object({
 // Kept for backwards compatibility with anyone who imports CallASchema.
 export const CallASchema = z.object({
   summary_fr: z.string().min(60).max(260),
-  summary_en: z.string().min(40).max(260).optional().default(''),
+  summary_en: EnString(260),
   meta_title_fr: z.string().min(15).max(90),
-  meta_title_en: z.string().min(15).max(90).optional().default(''),
+  meta_title_en: EnString(90),
   meta_desc_fr: z.string().min(50).max(220),
-  meta_desc_en: z.string().min(40).max(240).optional().default(''),
+  meta_desc_en: EnString(240),
   sections: z.array(SectionSchema).min(6).max(14),
   practical_info: PracticalInfoSchema,
   highlights: z.array(HighlightSchema).min(5).max(16),
@@ -584,8 +624,11 @@ export const CallFaqSchema = z.object({
   faq: z.array(FaqSchema).min(20).max(60),
 });
 
+// min 4 (not 6) — smaller destinations (Dinard, Saint-Rémy) often lack
+// 6 distinct allowlisted sources. Allowlist post-validation can still
+// shrink the array, and we need to survive that.
 export const CallSourcesSchema = z.object({
-  external_sources: z.array(ExternalSourceSchema).min(6).max(20),
+  external_sources: z.array(ExternalSourceSchema).min(4).max(20),
 });
 
 /**
@@ -601,9 +644,11 @@ export type GeneratedGuideV2 = z.infer<typeof GeneratedGuideV2Schema>;
 
 // ─── Prompts ─────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT_BASE = `Tu es rédacteur éditorial senior pour ConciergeTravel.fr (conciergerie agréée IATA, Palaces et hôtels 5 étoiles en France). Style "long-read Condé Nast Traveler" : précis, factuel, érudit, intemporel — JAMAIS de superlatifs creux ("incroyable", "magique", "à couper le souffle", "féerique").
+const SYSTEM_PROMPT_BASE = `Tu es rédacteur éditorial senior pour MyConciergeHotel.com (conciergerie agréée IATA, Palaces et hôtels 5 étoiles en France). Style hybride "long-read Condé Nast Traveler" + voix de marque "Le Concierge" (ADR-0011) : précis, factuel, érudit, intemporel, complice quand le sujet s'y prête — JAMAIS de superlatifs creux ("incroyable", "magique", "à couper le souffle", "féerique", "sublime", "véritable joyau").
 
-Voix : 3e personne neutre, anglais britannique (en-GB) pour les _en, français soutenu (mais accessible) pour les _fr.
+Voix : registre soutenu mais accessible. Le narrateur n'est pas un journaliste anonyme, c'est un concierge expert qui partage ses observations. Le tutoiement reste exclu, mais l'usage du "nous" et de tournures complices ("on retient", "à retenir", "mon conseil") est encouragé là où c'est naturel. Anglais britannique (en-GB) pour les _en, français soutenu pour les _fr.
+
+⛔ Contrainte universelle (ADR-0011 §C2) : aucune phrase ne doit dépasser 25 mots. Si une phrase dépasse, scinde-la. Cette règle prime sur les ratios "phrases longues" du style-guide v0.1 (désactivés).
 
 Anti-hallucination CRITIQUE :
 - Tu DOIS t'appuyer EXCLUSIVEMENT sur les "keywords" fournis + tes connaissances Wikipédia-niveau.
@@ -774,6 +819,9 @@ function buildPromptCallB(dest: DestinationGuideSeed, sectionsSummary: string): 
     '   - `headers` : 3-6 colonnes, chacune { key (kebab-case), label_fr, label_en, align? }.',
   );
   lines.push(
+    '   - `align` (optionnel) : STRING dans {"left","right","center"} uniquement. JAMAIS un booléen, jamais un nombre, jamais null. Si tu hésites, OMETS le champ entièrement.',
+  );
+  lines.push(
     '   - `rows` : 3-12 lignes par tableau, chaque ligne = objet avec UNE valeur par header.key. Valeur = string OU { text, href } pour lien.',
   );
   lines.push(
@@ -798,7 +846,7 @@ function buildPromptCallB(dest: DestinationGuideSeed, sectionsSummary: string): 
     '   - `did_you_know` : anecdote historique ou fait insolite (ex: "Saviez-vous que Hemingway séjournait au Ritz dans la suite n°…").',
   );
   lines.push(
-    '   - `concierge_tip` : conseil pratique ConciergeTravel (ex: "Notre conseil : réserver 3-6 mois avant pour la haute saison").',
+    '   - `concierge_tip` : conseil pratique MyConciergeHotel (ex: "Notre conseil : réserver 3-6 mois avant pour la haute saison").',
   );
   lines.push('   - `pro_tip` : astuce voyageurs experts.');
   lines.push(
@@ -910,10 +958,53 @@ async function callLlm<S extends z.ZodTypeAny>(
   schema: S,
   label: string,
 ): Promise<z.infer<S>> {
+  // 1st attempt — standard temperature.
+  const attempt1 = await callLlmOnce(client, systemPrompt, userPrompt, schema, label, 0.55);
+  if (attempt1.ok) return attempt1.data;
+
+  // 2nd attempt — surface the schema issues to the model and ask for a
+  // strict re-emit at a lower temperature. This rescues the typical LLM
+  // drift cases (booleans where enums are expected, missing en fields, …)
+  // without giving up the whole guide.
+  const issuesText = attempt1.issues
+    .slice(0, 25)
+    .map((i) => `- ${i.path.join('.')}: ${i.message}`)
+    .join('\n');
+  const retryPrompt = [
+    userPrompt,
+    '',
+    '---',
+    'TENTATIVE PRÉCÉDENTE INVALIDE — corrige STRICTEMENT ces erreurs Zod :',
+    issuesText,
+    '',
+    "Règles de récupération :",
+    '- `align` est un string ∈ {"left","right","center"} OU absent. Jamais un booléen, jamais un nombre.',
+    '- Les champs `_en` (label_en, title_en, summary_en…) acceptent une chaîne vide "" ou la traduction.',
+    '- Les champs `url` doivent être absents ou une vraie URL https://.',
+    '- Aucun champ enum ne peut être null — omets-le ou utilise une valeur valide.',
+    '- Retourne UNIQUEMENT le JSON corrigé, rien d\'autre.',
+  ].join('\n');
+  const attempt2 = await callLlmOnce(client, systemPrompt, retryPrompt, schema, label, 0.2);
+  if (attempt2.ok) return attempt2.data;
+
+  const issues = attempt2.issues
+    .map((i) => `- ${i.path.join('.')}: ${i.message}`)
+    .join('\n');
+  throw new Error(`[${label}] schema-fail after retry:\n${issues}`);
+}
+
+async function callLlmOnce<S extends z.ZodTypeAny>(
+  client: LlmClient,
+  systemPrompt: string,
+  userPrompt: string,
+  schema: S,
+  label: string,
+  temperature: number,
+): Promise<{ ok: true; data: z.infer<S> } | { ok: false; issues: z.ZodIssue[] }> {
   const result = await client.call({
     systemPrompt,
     userPrompt,
-    temperature: 0.55,
+    temperature,
     maxOutputTokens: 16000,
     responseFormat: 'json',
   });
@@ -927,12 +1018,9 @@ async function callLlm<S extends z.ZodTypeAny>(
   }
   const validation = schema.safeParse(parsed);
   if (!validation.success) {
-    const issues = validation.error.issues
-      .map((i) => `- ${i.path.join('.')}: ${i.message}`)
-      .join('\n');
-    throw new Error(`[${label}] schema-fail:\n${issues}`);
+    return { ok: false, issues: validation.error.issues as z.ZodIssue[] };
   }
-  return validation.data as z.infer<S>;
+  return { ok: true, data: validation.data as z.infer<S> };
 }
 
 function sectionsAsSummary(sections: ReadonlyArray<z.infer<typeof SectionSchema>>): string {

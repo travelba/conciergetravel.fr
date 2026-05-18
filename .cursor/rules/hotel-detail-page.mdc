@@ -16,6 +16,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 | Sous-pages chambres `/hotel/[slug]/chambres/[room-slug]` indexables | [ADR-0009](../../docs/adr/0009-hotel-room-subpages-indexable.md) |
 | ISR `revalidate = 3600` via auth client island | [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) |
 | Locales V1 = `fr` + `en` (V2 = +es/de/it, V3 = +ar/zh/ja) | [seo-technical](../skills/seo-technical/SKILL.md) |
+| Voix éditoriale « Le Concierge » + bloc obligatoire `<ConciergeAdvice>` en bas de fiche (60-90 mots FR/EN) | [ADR-0011](../../docs/adr/0011-concierge-voice.md) + [`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) |
 
 ## The 15 mandatory blocks
 
@@ -36,6 +37,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 | 13 | Réassurance & autorité (labels Clef Verte / Michelin Key / LEED, presse, garanties, partenaires) | Payload `awards` (`verified: true` uniquement) | `<TrustSignals>` | `Hotel.award[]` |
 | 14 | Bloc pro / groupes / événements (devis séminaire/mariage, capacités salles, formulaire MICE) | Payload `mice_events` | `<MiceBlock>` | (formulaire — pas de Schema dédié) |
 | 15 | Footer fiche (NAP identique GBP, réseaux sociaux vérifiés, mentions légales, hôtels similaires maillage interne) | `SiteSettings` + Supabase similar hotels | `<HotelFooter>` | `Organization` (rappel) |
+| 16 | **Le Conseil du Concierge** (bloc canonique 50-110 mots FR/EN, voix Concierge, secret opérationnel concret — rendu en bas de fiche juste avant la FAQ) | `hotels.concierge_advice` (jsonb, migration 0032) | `<ConciergeAdvice>` ([`apps/web/src/components/hotel/concierge-advice.tsx`](../../apps/web/src/components/hotel/concierge-advice.tsx)) | Pas de Schema.org dédié (le bloc est rendu en HTML sémantique `<aside role="note">` indexé naturellement) |
 
 ## Hard rules (PR doit refuser si manquant)
 
@@ -49,6 +51,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 8. **Room sub-page canonical** : pointe vers la fiche parent → refus (annulerait l'indexabilité de la sous-page).
 9. **Vidéos auto-play** : interdit (WCAG 2.2 AA).
 10. **Bloc 12 (guide local)** : doit être un **lien vers** la page guide (`/destination/[city]/guide`), pas une duplication du contenu.
+11. **Bloc 16 (Conseil du Concierge)** : obligatoire sur tout hôtel publié, `body` 50-110 mots FR/EN (envelope empirique post-Phase 3), `tip_for` ∈ {room, dining, timing, access, service, wellness}, commence par « Mon conseil : » (FR) ou « My tip: » (EN). Validation Payload bloque le publish — voir ADR-0011.
 
 ## Composition graphe (target)
 

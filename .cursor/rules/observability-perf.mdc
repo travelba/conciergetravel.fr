@@ -1,10 +1,10 @@
 ---
-description: Observability and performance rules for ConciergeTravel.fr (Sentry, logs, Web Vitals, caching, bundle size).
+description: Observability and performance rules for MyConciergeHotel.com (Sentry, logs, Web Vitals, caching, bundle size).
 globs: "{apps,packages}/**/*.{ts,tsx}"
 alwaysApply: true
 ---
 
-# Observability + performance — ConciergeTravel.fr
+# Observability + performance — MyConciergeHotel.com
 
 ## Sentry
 
@@ -16,7 +16,7 @@ alwaysApply: true
 
 ## Structured logs
 
-- Use `pino` (`@cct/observability/logger`) — never `console.log` in production code paths.
+- Use `pino` (`@mch/observability/logger`) — never `console.log` in production code paths.
 - Fields: `req_id`, `route`, `user_id_hash`, `vendor`, `latency_ms`, `status`. **Never** raw email, phone, name.
 - Log levels: `debug` (dev only), `info` (user-facing actions), `warn` (recoverable), `error` (Sentry-captured).
 
@@ -30,7 +30,7 @@ alwaysApply: true
 
 - No `lodash`, no `moment`. Use the native equivalent or a focused alternative.
 - Tree-shake aggressively. If a dep ships CJS only, document the trade-off in the PR.
-- `next-bundle-analyzer` runs on demand (`pnpm --filter @cct/web analyze`) — keep first-load JS < 180 KB gzipped on the marketing routes.
+- `next-bundle-analyzer` runs on demand (`pnpm --filter @mch/web analyze`) — keep first-load JS < 180 KB gzipped on the marketing routes.
 
 ## Caching layers (top-down)
 

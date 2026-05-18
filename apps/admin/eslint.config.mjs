@@ -1,4 +1,4 @@
-import next from '@cct/config/eslint/next';
+import next from '@mch/config/eslint/next';
 
 const config = [
   ...next,

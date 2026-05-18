@@ -1,4 +1,4 @@
-import type { HttpError } from '@cct/integrations/http';
+import type { HttpError } from '@mch/integrations/http';
 
 export type BrevoError =
   | { readonly kind: 'http'; readonly error: HttpError }

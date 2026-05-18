@@ -52,7 +52,7 @@ async function fetchHotelHead(
   hotelId: string,
 ): Promise<{ id: string; name: string; city: string; region: string } | null> {
   // E2E / dev seam — short-circuit before touching Supabase. Activated
-  // exclusively via the `CCT_E2E_FAKE_HOTEL_ID` env var so it cannot
+  // exclusively via the `MCH_E2E_FAKE_HOTEL_ID` env var so it cannot
   // accidentally serve fake data in production.
   const fake = getFakeHotelHead(hotelId);
   if (fake !== null) return fake;

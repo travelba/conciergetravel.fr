@@ -30,22 +30,22 @@
     "jsx": "preserve",
 
     "paths": {
-      "@cct/db": ["./packages/db/src/index.ts"],
-      "@cct/db/*": ["./packages/db/src/*"],
-      "@cct/domain": ["./packages/domain/src/index.ts"],
-      "@cct/domain/*": ["./packages/domain/src/*"],
-      "@cct/integrations": ["./packages/integrations/src/index.ts"],
-      "@cct/integrations/*": ["./packages/integrations/src/*"],
-      "@cct/ui": ["./packages/ui/src/index.ts"],
-      "@cct/ui/*": ["./packages/ui/src/*"],
-      "@cct/seo": ["./packages/seo/src/index.ts"],
-      "@cct/seo/*": ["./packages/seo/src/*"],
-      "@cct/emails": ["./packages/emails/src/index.ts"],
-      "@cct/emails/*": ["./packages/emails/src/*"],
-      "@cct/observability": ["./packages/observability/src/index.ts"],
-      "@cct/observability/*": ["./packages/observability/src/*"],
-      "@cct/config": ["./packages/config/src/index.ts"],
-      "@cct/config/*": ["./packages/config/src/*"]
+      "@mch/db": ["./packages/db/src/index.ts"],
+      "@mch/db/*": ["./packages/db/src/*"],
+      "@mch/domain": ["./packages/domain/src/index.ts"],
+      "@mch/domain/*": ["./packages/domain/src/*"],
+      "@mch/integrations": ["./packages/integrations/src/index.ts"],
+      "@mch/integrations/*": ["./packages/integrations/src/*"],
+      "@mch/ui": ["./packages/ui/src/index.ts"],
+      "@mch/ui/*": ["./packages/ui/src/*"],
+      "@mch/seo": ["./packages/seo/src/index.ts"],
+      "@mch/seo/*": ["./packages/seo/src/*"],
+      "@mch/emails": ["./packages/emails/src/index.ts"],
+      "@mch/emails/*": ["./packages/emails/src/*"],
+      "@mch/observability": ["./packages/observability/src/index.ts"],
+      "@mch/observability/*": ["./packages/observability/src/*"],
+      "@mch/config": ["./packages/config/src/index.ts"],
+      "@mch/config/*": ["./packages/config/src/*"]
     }
   },
   "exclude": ["node_modules", ".next", "dist", "build", "coverage", ".turbo"]

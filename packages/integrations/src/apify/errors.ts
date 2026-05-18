@@ -1,4 +1,4 @@
-import type { HttpError } from '@cct/integrations/http';
+import type { HttpError } from '@mch/integrations/http';
 
 export type ApifyError =
   | { readonly kind: 'http'; readonly error: HttpError }

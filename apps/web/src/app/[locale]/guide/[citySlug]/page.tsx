@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { EditorialCallout } from '@/components/editorial/editorial-callout';
 import { EditorialGlossary } from '@/components/editorial/editorial-glossary';
@@ -25,7 +25,7 @@ import { getHotelsForDestination } from '@/server/guides/get-guide-hotels';
 // changes on editorial publish).
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -92,9 +92,9 @@ export async function generateMetadata({
   const locale = raw;
   const title =
     locale === 'fr'
-      ? (guide.meta_title_fr ?? `Guide ${guide.name_fr} — Palaces & art de vivre | ConciergeTravel`)
+      ? (guide.meta_title_fr ?? `Guide ${guide.name_fr} — Palaces & art de vivre | MyConciergeHotel`)
       : (guide.meta_title_en ??
-        `${guide.name_en ?? guide.name_fr} guide — Palaces & art de vivre | ConciergeTravel`);
+        `${guide.name_en ?? guide.name_fr} guide — Palaces & art de vivre | MyConciergeHotel`);
   const description =
     locale === 'fr'
       ? (guide.meta_desc_fr ?? guide.summary_fr)
@@ -184,11 +184,11 @@ export default async function GuidePage({
       datePublished: guide.reviewed_at ?? new Date().toISOString().slice(0, 10),
       dateModified: guide.updated_at ?? guide.reviewed_at ?? new Date().toISOString().slice(0, 10),
       author: {
-        name: guide.author_name ?? 'ConciergeTravel Éditorial',
+        name: guide.author_name ?? 'MyConciergeHotel Éditorial',
         ...(guide.author_url !== null ? { url: `${origin}${guide.author_url}` } : {}),
       },
       publisher: {
-        name: 'ConciergeTravel',
+        name: 'MyConciergeHotel',
         logoUrl: `${origin}/logo.png`,
       },
       inLanguage: locale === 'fr' ? 'fr-FR' : 'en',

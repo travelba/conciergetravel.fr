@@ -57,7 +57,7 @@ export default [
           patterns: [
             {
               group: ['../../../*'],
-              message: 'Use workspace path aliases (@cct/*) instead of deep relative imports.',
+              message: 'Use workspace path aliases (@mch/*) instead of deep relative imports.',
             },
           ],
         },

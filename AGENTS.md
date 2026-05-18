@@ -1,11 +1,11 @@
-# AGENTS.md — ConciergeTravel.fr
+# AGENTS.md — MyConciergeHotel.com
 
 > Hi 👋. This file is for **AI coding agents** (Cursor, Claude, Codex CLI, …) that land in this repo.
 > Read it once at the start of a session, then jump to the relevant skills/rules for the task.
 
 ## 1. What this project is
 
-ConciergeTravel.fr is an **IATA-accredited online travel agency** for 5-star hotels and Palaces in France.
+MyConciergeHotel.com is an **IATA-accredited online travel agency** for 5-star hotels and Palaces in France.
 The product is split into:
 
 - **`apps/web`** — the public Next.js 15 site (booking, search, editorial, account).
@@ -35,8 +35,10 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 | Task                                          | Start here                                                                              |
 | --------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Add a business rule                           | `packages/domain/` + `.cursor/rules/architecture-layers.mdc`                            |
+| **Editorial voice / brand tone / FR-EN copy** | [`EDITORIAL_VOICE.md`](EDITORIAL_VOICE.md) (root) + [`docs/editorial/style-guide.md`](docs/editorial/style-guide.md) |
 | New vendor integration                        | `.cursor/skills/api-integration/SKILL.md` + `.cursor/rules/integrations-api.mdc`        |
 | **LLM pipeline (editorial, AEO, content)**    | `.cursor/skills/llm-output-robustness/SKILL.md`                                         |
+| **Voix du Concierge** (ADR-0011, pass 8, `<ConciergeAdvice>`, shortener phrases > 25 mots) | `.cursor/skills/concierge-voice-pipeline/SKILL.md`                                |
 | **LLM extraction from web content (Tavily)**  | `.cursor/skills/content-enrichment-pipeline/SKILL.md` + `llm-output-robustness` §rule-9 |
 | **Multi-source factual enrichment**           | `.cursor/skills/content-enrichment-pipeline/SKILL.md`                                   |
 | **Zod schema → React props**                  | `.cursor/skills/typescript-strict-zod-interop/SKILL.md`                                 |

@@ -1,4 +1,4 @@
--- ConciergeTravel.fr — Phase 2 initial schema (CDC §4 + skills supabase-postgres-rls / auth-role-management)
+-- MyConciergeHotel.com — Phase 2 initial schema (CDC §4 + skills supabase-postgres-rls / auth-role-management)
 --
 -- JSONB shapes validated in app layer via Zod; never trust client JSON without parse.
 --

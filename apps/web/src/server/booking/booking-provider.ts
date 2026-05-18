@@ -1,7 +1,7 @@
 import 'server-only';
 
-import type { Guest, Offer } from '@cct/domain/booking';
-import { ok, type Result } from '@cct/domain/shared';
+import type { Guest, Offer } from '@mch/domain/booking';
+import { ok, type Result } from '@mch/domain/shared';
 
 /**
  * Booking-provider port — wraps the upstream reservation API (Amadeus

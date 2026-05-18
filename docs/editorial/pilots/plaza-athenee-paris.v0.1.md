@@ -18,7 +18,7 @@ La rénovation de 2014, pilotée par Bruno Moinard, introduit des matériaux cla
 
 Avec ses 208 clés, le Plaza Athénée propose 154 chambres et 54 suites, mêlant codes classiques et confort technologique avant-gardiste. Parmi les joyaux de l’établissement, la Suite Royale s’étend sur 450 m² et domine Paris avec une vue spectaculaire sur la Tour Eiffel. La Suite Eiffel, avec ses 88 m² et une terrasse privée, capture la lumière du Trocadéro entre 17 h et 19 h en hiver — un détail rare que l'hôtel ne communique pas toujours.
 
-> « Proposer une vue Tour Eiffel depuis la majorité des suites est une prouesse, mais la lumière dorée de fin de journée sur les chambres côté nord ajoute une magie bien particulière. » — Léa, conseillère senior Paris ConciergeTravel.fr
+> « Proposer une vue Tour Eiffel depuis la majorité des suites est une prouesse, mais la lumière dorée de fin de journée sur les chambres côté nord ajoute une magie bien particulière. » — Léa, conseillère senior Paris MyConciergeHotel.com
 
 Idéal pour des séjours de 3 à 4 nuits, l’hôtel s’adresse essentiellement à ceux mêlant rendez-vous prestigieux sur Montaigne et moments de villégiature. Cependant, l’entrée discrète, au format urbain classique, pourrait déconcerter les amateurs d’arrivées spectaculaires.
 

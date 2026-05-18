@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Cookie name + schema mirror `@cct/domain/consent` (CONSENT_COOKIE_NAME,
+ * Cookie name + schema mirror `@mch/domain/consent` (CONSENT_COOKIE_NAME,
  * parseConsentCookie). Re-declared here so Playwright doesn't pull the
  * workspace path aliases.
  */
-export const CONSENT_COOKIE_NAME = 'cct.consent.v1';
+export const CONSENT_COOKIE_NAME = 'mch.consent.v1';
 export const CONSENT_VERSION = 1;
 
 export type ConsentDecision = {

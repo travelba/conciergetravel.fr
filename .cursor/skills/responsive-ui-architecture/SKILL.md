@@ -1,9 +1,9 @@
 ---
 name: responsive-ui-architecture
-description: Mobile-first responsive UI architecture for ConciergeTravel.fr (Tailwind + shadcn/ui + design tokens). Use when designing layouts, building shared components, defining breakpoints, or any UI change that must remain restylable later without refactor.
+description: Mobile-first responsive UI architecture for MyConciergeHotel.com (Tailwind + shadcn/ui + design tokens). Use when designing layouts, building shared components, defining breakpoints, or any UI change that must remain restylable later without refactor.
 ---
 
-# Responsive UI architecture — ConciergeTravel.fr
+# Responsive UI architecture — MyConciergeHotel.com
 
 The cahier des charges asks for a **mobile-first, sober, restylable** UI base — no strong artistic direction yet. The design will be reworked later (CDC v3.0 §10), so the system must be **token-driven** so a single CSS file change repaints the product.
 

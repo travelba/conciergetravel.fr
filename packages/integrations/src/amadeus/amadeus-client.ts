@@ -1,6 +1,6 @@
-import { loadSharedEnv, type SharedEnv } from '@cct/config/env';
-import type { CancellationPolicy, Offer } from '@cct/domain/booking';
-import { err, ok, type Result } from '@cct/domain/shared';
+import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
+import type { CancellationPolicy, Offer } from '@mch/domain/booking';
+import { err, ok, type Result } from '@mch/domain/shared';
 
 import { retryingJsonRequest } from '../http/index.js';
 import { getRedis } from '../redis/index.js';

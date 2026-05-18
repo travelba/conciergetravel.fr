@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { acceptAll, customize, rejectAll, type ConsentState } from '@cct/domain/consent';
+import { acceptAll, customize, rejectAll, type ConsentState } from '@mch/domain/consent';
 
 import { onConsentReopen, readConsentClient, writeConsentClient } from '@/lib/consent/client';
 
@@ -19,7 +19,7 @@ type ViewState = 'closed' | 'summary' | 'customize';
  *  - User can drill into `customize` view to toggle categories.
  *  - Any explicit choice (Accept all / Reject all / Save) writes the
  *    cookie and closes the banner.
- *  - The footer "Manage cookies" link fires `cct:consent-reopen` →
+ *  - The footer "Manage cookies" link fires `mch:consent-reopen` →
  *    re-opens in `summary` view.
  *
  * Accessibility:

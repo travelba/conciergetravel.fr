@@ -9,11 +9,11 @@
  * is currently null OR empty array. Use `--force` to overwrite.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-hotel-content.ts --slug=plaza-athenee-paris
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-hotel-content.ts --all
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-hotel-content.ts --all --force
  */
 
@@ -145,7 +145,7 @@ async function persistEnrichment(hotelId: string, out: EnrichmentOutput): Promis
 
 // ─── LLM prompts ─────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour ConciergeTravel.fr.
+const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com.
 
 Tu écris des sections éditoriales longues et substantielles pour des fiches Palaces/5★ en France. Style "long-read Condé Nast Traveler", précis, factuel, intemporel — JAMAIS de superlatifs creux.
 
@@ -196,7 +196,7 @@ function buildUserPrompt(h: HotelInput): string {
     '1. `long_description_sections` (6-8 sections) — chaque section : { anchor, title_fr, title_en, body_fr, body_en }.',
   );
   lines.push(
-    '   Sections recommandées : "histoire" (Histoire & héritage), "lieu" (L\'établissement), "chambres" (Chambres et suites), "gastronomie" (La table), "spa" (Spa & bien-être), "services" (Conciergerie & services), "art-de-vivre" (L\'art de vivre [ville]), "reserver" (Réserver via ConciergeTravel).',
+    '   Sections recommandées : "histoire" (Histoire & héritage), "lieu" (L\'établissement), "chambres" (Chambres et suites), "gastronomie" (La table), "spa" (Spa & bien-être), "services" (Conciergerie & services), "art-de-vivre" (L\'art de vivre [ville]), "reserver" (Réserver via MyConciergeHotel).',
   );
   lines.push('   `body_fr` ≥ 350 mots par section. Anchor en kebab-case ASCII.');
   lines.push('');

@@ -1,11 +1,11 @@
 ---
 name: product-architecture
-description: High-level product architecture decisions for ConciergeTravel.fr. Use whenever you introduce a new bounded context, change a layer boundary, add a top-level package, or alter the rendering strategy (SSG/ISR/SSR) of a route.
+description: High-level product architecture decisions for MyConciergeHotel.com. Use whenever you introduce a new bounded context, change a layer boundary, add a top-level package, or alter the rendering strategy (SSG/ISR/SSR) of a route.
 ---
 
-# Product architecture — ConciergeTravel.fr
+# Product architecture — MyConciergeHotel.com
 
-ConciergeTravel.fr is structured in **four functional layers** (cahier des charges v3.0 §5):
+MyConciergeHotel.com is structured in **four functional layers** (cahier des charges v3.0 §5):
 
 1. **Editorial layer** (SEO/GEO) — pillar, regional/city hubs, hotel pages, classements, thematic, comparatives, guides, E-E-A-T.
 2. **Booking layer** — search, real-time results, offer detail, guest collection, native cancellation policy display, Amadeus Payment, confirmation, post-booking.

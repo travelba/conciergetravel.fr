@@ -30,5 +30,5 @@ L'option custom aurait exigé un effort de développement initial très importan
 
 - Schéma Postgres reste source de vérité ; Payload reflète les colonnes existantes via collections.
 - Authentification Payload distincte de Supabase Auth en MVP. Phase 2 : possibilité de fédération.
-- `apps/admin` est déployé séparément sur Vercel, sur un sous-domaine `admin.conciergetravel.fr`.
+- `apps/admin` est déployé séparément sur Vercel, sur un sous-domaine `admin.myconciergehotel.com`.
 - `revalidateTag` côté `apps/web` appelé via endpoint signé HMAC depuis les hooks Payload.

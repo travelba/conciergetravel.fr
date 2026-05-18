@@ -1,9 +1,9 @@
 import 'server-only';
 
-import { EmailRequestGuest, EmailRequestOps, renderEmailHtml, renderEmailText } from '@cct/emails';
-import { generateBookingRef, parseGuest, type Guest } from '@cct/domain/booking';
-import { err, ok, type Result } from '@cct/domain/shared';
-import { sendBrevoTransactionalEmail } from '@cct/integrations/brevo';
+import { EmailRequestGuest, EmailRequestOps, renderEmailHtml, renderEmailText } from '@mch/emails';
+import { generateBookingRef, parseGuest, type Guest } from '@mch/domain/booking';
+import { err, ok, type Result } from '@mch/domain/shared';
+import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
 import { z } from 'zod';
 
 import { env } from '@/lib/env';

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import { buildSitemapIndexXml } from '@cct/seo';
+import { buildSitemapIndexXml } from '@mch/seo';
 
 import { env } from '@/lib/env';
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 /**
  * Sitemap index (skill: seo-technical). Sub-sitemaps are emitted by

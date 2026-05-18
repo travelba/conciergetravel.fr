@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { createSupabaseAdminClient, type SupabaseAdminClient } from '@cct/db';
+import { createSupabaseAdminClient, type SupabaseAdminClient } from '@mch/db';
 
 import { env } from '@/lib/env';
 

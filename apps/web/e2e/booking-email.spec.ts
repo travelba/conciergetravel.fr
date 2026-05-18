@@ -15,7 +15,7 @@ import { E2E_FAKE_HOTEL_ID } from './fixtures/env';
  *      * No `hotelId` → "missing params" page.
  *      * Unknown hotelId (Supabase returns null / unreachable) →
  *        "unbookable" page.
- *      * Known hotelId (resolved via the `CCT_E2E_FAKE_HOTEL_ID` dev
+ *      * Known hotelId (resolved via the `MCH_E2E_FAKE_HOTEL_ID` dev
  *        seam) → full guest-details form with hotel head, stay
  *        summary and required fields.
  *      * Error query params (`?error=validation` and

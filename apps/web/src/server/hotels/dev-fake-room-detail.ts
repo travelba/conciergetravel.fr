@@ -14,7 +14,7 @@ import type { SupportedLocale } from '@/server/hotels/get-hotel-by-slug';
  * `/[locale]/hotel/[slug]/chambres/[roomSlug]`. Same activation contract
  * as `dev-fake-hotel-detail.ts`:
  *
- *  - Reads `CCT_E2E_FAKE_HOTEL_ID` (the canonical UUID exposed to the
+ *  - Reads `MCH_E2E_FAKE_HOTEL_ID` (the canonical UUID exposed to the
  *    tests via `e2e/fixtures/env.ts`).
  *  - Only fires when the hotel slug matches one of the fake hotel slugs
  *    AND the room slug matches one of the two fake rooms declared by

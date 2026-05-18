@@ -1,10 +1,10 @@
 ---
-description: Security rules for ConciergeTravel.fr — CSP, nonces, secrets, PII, GDPR, auth.
+description: Security rules for MyConciergeHotel.com — CSP, nonces, secrets, PII, GDPR, auth.
 globs: "{apps,packages}/**/*.{ts,tsx,sql}"
 alwaysApply: true
 ---
 
-# Security — ConciergeTravel.fr
+# Security — MyConciergeHotel.com
 
 ## Content Security Policy
 
@@ -16,7 +16,7 @@ alwaysApply: true
 
 ## Secrets & env
 
-- Secrets are read **only** via `@cct/config/env` (server) and `@cct/config/env-web` (client-safe, `NEXT_PUBLIC_*` only).
+- Secrets are read **only** via `@mch/config/env` (server) and `@mch/config/env-web` (client-safe, `NEXT_PUBLIC_*` only).
 - Both are validated with Zod / `@t3-oss/env-nextjs`. A missing or malformed env in production must fail loud at startup.
 - Never `console.log` an env value. Never write a secret into a comment.
 
@@ -28,7 +28,7 @@ alwaysApply: true
 ## Rate limiting
 
 - Every public-facing endpoint or action goes through `@upstash/ratelimit` keyed by `req.ip + scope`.
-- Tests bypass rate limits via `CCT_DISABLE_RATE_LIMITS=1`. Never bypass via `NODE_ENV` checks.
+- Tests bypass rate limits via `MCH_DISABLE_RATE_LIMITS=1`. Never bypass via `NODE_ENV` checks.
 
 ## PII & logging
 

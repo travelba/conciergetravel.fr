@@ -4,7 +4,7 @@
  * legacy v1 shape. Used to scope the scale-up phase.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/audit-v2-status.ts
  */
 

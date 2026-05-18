@@ -34,7 +34,7 @@ export interface NormalizedComparison {
   readonly competitors: readonly CompetitorPrice[];
   /**
    * Value (EUR cents) of the loyalty / direct-booking benefits embedded
-   * in the ConciergeTravel offer (e.g. early check-in, room upgrade,
+   * in the MyConciergeHotel offer (e.g. early check-in, room upgrade,
    * welcome amenities). Used by the `equal_with_benefits` scenario.
    *
    * `0` when no benefit applies (typical for non-Little-catalog hotels).
@@ -51,7 +51,7 @@ export interface NormalizedComparison {
 }
 
 /**
- * Outcome of comparing the ConciergeTravel price (`priceConciergeMinor`)
+ * Outcome of comparing the MyConciergeHotel price (`priceConciergeMinor`)
  * to the cheapest competitor, **after** factoring in the FREE-catalog
  * benefits when applicable (CDC §9 + addendum v3.2).
  */

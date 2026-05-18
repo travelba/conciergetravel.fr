@@ -1,4 +1,4 @@
-# Checklist SEO — ConciergeTravel.fr
+# Checklist SEO — MyConciergeHotel.com
 
 Mirror du CDC v3.0 §12.1 + complément Excel "Plan d'action".
 

@@ -5,7 +5,7 @@ import { env } from '@/lib/env';
 export const dynamic = 'force-static';
 export const revalidate = 86400;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 /**
  * robots.txt — generated dynamically so the SEO team can override allow/disallow
@@ -30,7 +30,7 @@ export function GET() {
   //   - `anthropic-ai`        — legacy Anthropic crawler (kept for back-compat)
   //   - `Applebot-Extended`   — Apple AI training opt-out
   const lines: string[] = [
-    '# ConciergeTravel.fr — robots.txt',
+    '# MyConciergeHotel.com — robots.txt',
     '# Authorize Google + OpenAI + Perplexity + Anthropic + Apple LLM crawlers (cf. CDC §6.5)',
     '',
     'User-agent: *',

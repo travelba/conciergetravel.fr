@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 
-import { CONSENT_COOKIE_NAME, parseConsentCookie, type ConsentState } from '@cct/domain/consent';
+import { CONSENT_COOKIE_NAME, parseConsentCookie, type ConsentState } from '@mch/domain/consent';
 
 /**
  * Server-side read of the consent cookie. Returns `null` when the user

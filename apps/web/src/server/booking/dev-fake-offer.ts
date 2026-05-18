@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Offer } from '@cct/domain/booking';
+import type { Offer } from '@mch/domain/booking';
 
 /**
  * Dev/preview-only synthetic offer builder. Used by the lock route when
@@ -35,12 +35,12 @@ function nightCount(checkIn: string, checkOut: string): number {
  * Fake offers are normally gated on `NODE_ENV !== 'production'`, but
  * the Playwright webserver runs Next.js in `production` mode after
  * `next build` to exercise the real bundle. The opt-in
- * `CCT_E2E_FAKE_PAID_HOTEL_ID` env var (only set by the test harness)
+ * `MCH_E2E_FAKE_PAID_HOTEL_ID` env var (only set by the test harness)
  * re-enables the seam in that single context — never in real prod.
  */
 export function isFakeOffersEnabled(): boolean {
   if (process.env['NODE_ENV'] !== 'production') return true;
-  const paidId = process.env['CCT_E2E_FAKE_PAID_HOTEL_ID'];
+  const paidId = process.env['MCH_E2E_FAKE_PAID_HOTEL_ID'];
   return typeof paidId === 'string' && paidId.length > 0;
 }
 

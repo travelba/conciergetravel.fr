@@ -8,12 +8,14 @@ export * from './aggregate-rating';
 export * from './article';
 export * from './breadcrumb';
 export * from './collection-page';
+export * from './event';
 export * from './faq';
 export * from './hotel';
 export * from './hotel-room';
 export * from './howto';
 export * from './item-list';
 export * from './offer';
+export * from './place-amenity';
 export * from './travel-agency';
 
 /**

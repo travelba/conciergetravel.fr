@@ -41,7 +41,7 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.string().url(),
-    NEXT_PUBLIC_SITE_NAME: z.string().default('ConciergeTravel'),
+    NEXT_PUBLIC_SITE_NAME: z.string().default('MyConciergeHotel'),
     NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['fr', 'en']).default('fr'),
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),

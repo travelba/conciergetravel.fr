@@ -1,5 +1,5 @@
 /**
- * @cct/seo — JSON-LD builders, metadata helpers, llms.txt + sitemaps + agent-skills
+ * @mch/seo — JSON-LD builders, metadata helpers, llms.txt + sitemaps + agent-skills
  * (skills: seo-technical, geo-llm-optimization, structured-data-schema-org).
  */
 export * from './aeo';

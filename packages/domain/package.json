@@ -1,5 +1,5 @@
 {
-  "name": "@cct/domain",
+  "name": "@mch/domain",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -24,7 +24,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@cct/config": "workspace:*",
+    "@mch/config": "workspace:*",
     "@types/node": "^22.10.0",
     "typescript": "catalog:",
     "vitest": "catalog:"

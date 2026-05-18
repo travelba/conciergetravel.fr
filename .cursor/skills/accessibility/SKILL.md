@@ -1,9 +1,9 @@
 ---
 name: accessibility
-description: WCAG 2.2 AA accessibility rules for ConciergeTravel.fr. Use whenever you build forms, navigation, modals, booking steps, dialogs, or any interactive UI; or when adding images, videos, color combinations.
+description: WCAG 2.2 AA accessibility rules for MyConciergeHotel.com. Use whenever you build forms, navigation, modals, booking steps, dialogs, or any interactive UI; or when adding images, videos, color combinations.
 ---
 
-# Accessibility — ConciergeTravel.fr
+# Accessibility — MyConciergeHotel.com
 
 Accessibility is part of the maintainability and reach quality bar (CDC §10). Target: **WCAG 2.2 AA**. The booking tunnel must be usable on mobile with assistive tech.
 

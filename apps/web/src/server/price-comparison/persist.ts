@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { NormalizedComparison } from '@cct/domain/price-comparison';
+import type { NormalizedComparison } from '@mch/domain/price-comparison';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 

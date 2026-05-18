@@ -11,7 +11,7 @@
 import { z } from 'zod';
 
 const USER_AGENT =
-  'ConciergeTravelEditorialPilot/0.1 (https://conciergetravel.fr; reservations@conciergetravel.fr)';
+  'MyConciergeHotelEditorialPilot/0.1 (https://myconciergehotel.com; reservations@myconciergehotel.com)';
 
 export interface WpSummary {
   readonly title: string;
