@@ -1186,3 +1186,93 @@ export function lintReport(text: string): LinterReport {
     clean: counts.blocker === 0 && counts.high === 0,
   };
 }
+
+// ---------------------------------------------------------------------------
+// WS5 phase 2 — Concierge-voice linter for *short texts* (POI / event /
+// FAQ Q&A items). Re-uses the lexical banned-terms set + the ≤25 words
+// sentence-length rule already battle-tested on the long-form editorial
+// pipeline, but skips the markdown-specific checks (lead length,
+// participe présent en attaque) that don't apply to a one-liner.
+//
+// Use this from the humanizer scripts to validate each LLM-generated
+// item *after* Zod parsing — Zod handles the shape, the linter handles
+// the editorial contract.
+// ---------------------------------------------------------------------------
+
+export function lintConciergeText(text: string): readonly Violation[] {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return [];
+  const violations: Violation[] = [...lintSentenceLength(trimmed)];
+
+  // Lexical pass — same banned-terms set as `lintMarkdown`, but we
+  // iterate manually here so a single line can be scanned without the
+  // markdown-aware paragraph splitter.
+  const lines = trimmed.split(/\r?\n/);
+  for (const term of ALL_TERMS) {
+    const totalOccurrences = countOccurrencesGlobal(trimmed, term.pattern);
+    const maxAllowed = term.maxOccurrences ?? 0;
+    if (term.maxOccurrences !== undefined && totalOccurrences <= maxAllowed) continue;
+    const startCountingFrom = term.maxOccurrences !== undefined ? maxAllowed : 0;
+
+    let occurrenceIndex = 0;
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+      const line = lines[lineIdx]!;
+      const lineFlags = term.pattern.flags.includes('g')
+        ? term.pattern.flags
+        : `${term.pattern.flags}g`;
+      const lineRegex = new RegExp(term.pattern.source, lineFlags);
+      let m: RegExpExecArray | null;
+      while ((m = lineRegex.exec(line)) !== null) {
+        occurrenceIndex++;
+        if (occurrenceIndex <= startCountingFrom) continue;
+        const context = line.toLowerCase();
+        const isException =
+          term.contextExceptions?.some((re) => {
+            const idx = m!.index;
+            const window = context.slice(Math.max(0, idx - 60), Math.min(context.length, idx + 60));
+            return re.test(window);
+          }) ?? false;
+        if (isException) continue;
+        violations.push({
+          category: term.category,
+          severity: term.severity,
+          term: term.term,
+          matchedText: m[0],
+          line: lineIdx + 1,
+          column: m.index,
+          snippet: extractSnippet(line, m.index, m[0].length),
+          suggestion: term.suggestion,
+        });
+        if (m[0].length === 0) lineRegex.lastIndex++;
+      }
+    }
+  }
+
+  return violations.sort((a, b) => a.line - b.line || a.column - b.column);
+}
+
+/**
+ * Compact summary used by the humanizer scripts to decide whether to
+ * accept an LLM output. We accept everything except `blocker` — `high`
+ * occurrences are logged but don't block, matching the long-form
+ * pipeline behaviour where a Pass 6 fixer cleans them later. For short
+ * Concierge items there is no Pass 6, so the humanizer surfaces the
+ * counts in its runlog and a follow-up `--invalid` re-run can rewrite
+ * the affected entries.
+ */
+export interface ConciergeLintSummary {
+  readonly clean: boolean;
+  readonly blocker: number;
+  readonly high: number;
+  readonly violations: readonly Violation[];
+}
+
+export function lintConciergeSummary(text: string): ConciergeLintSummary {
+  const violations = lintConciergeText(text);
+  return {
+    violations,
+    blocker: violations.filter((v) => v.severity === 'blocker').length,
+    high: violations.filter((v) => v.severity === 'high').length,
+    clean: violations.every((v) => v.severity !== 'blocker'),
+  };
+}

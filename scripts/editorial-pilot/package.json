@@ -29,6 +29,9 @@
     "events:sync:dry": "tsx src/events/sync-hotel-events.ts --dry-run --no-llm",
     "events:sync:bristol": "tsx src/events/sync-hotel-events.ts --slug=le-bristol-paris",
     "lint:files": "tsx src/lint-files.ts",
+    "concierge:humanize:pois": "tsx src/concierge/run-humanizer-pois.ts",
+    "concierge:humanize:pois:dry": "tsx src/concierge/run-humanizer-pois.ts --dry-run",
+    "concierge:audit:pois": "node ./audit-concierge-pois.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

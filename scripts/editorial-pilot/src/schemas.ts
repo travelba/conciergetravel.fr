@@ -95,6 +95,43 @@ export const ConciergePass8OutputSchema = z.object({
 
 export type ConciergePass8Output = z.infer<typeof ConciergePass8OutputSchema>;
 
+// ---------------------------------------------------------------------------
+// WS5 phase 2 — Concierge humanizer for POIs (`hotels.points_of_interest`).
+// One short, factual, voice-of-the-Concierge sentence per POI. The shape
+// is intentionally tiny so the LLM can return a batch of ~10 in a single
+// call without burning tokens on schema overhead.
+//
+// Hard rules enforced *after* parsing (style-guide §4-5):
+//   - sentence length ≤ 25 words
+//   - no banned phrases (`magnifique`, `incontournable`, `niché`, …)
+// Both checks live in `linter.ts → lintConciergeText()` because they are
+// already battle-tested on `concierge_advice`.
+//
+// `osm_id` is the matching key: the humanizer reads it back from the
+// hotel row to rewrite the description in-place without touching the
+// other POI fields (coords, walk distance, schema_type, …).
+//
+// `bucket_tip` is OPTIONAL: the LLM is asked to emit it on exactly one
+// POI per bucket (the most representative). The persistence step keeps
+// only the first non-empty tip per bucket (the reader already collapses
+// duplicates), so the LLM does not need to be perfect about uniqueness.
+// ---------------------------------------------------------------------------
+
+const POI_DESC_MIN = 20;
+const POI_DESC_MAX = 260;
+
+export const ConciergePoiDescriptionSchema = z.object({
+  osm_id: z.string().min(1).max(80),
+  description_fr: z.string().min(POI_DESC_MIN).max(POI_DESC_MAX),
+  bucket_tip_fr: z.string().min(POI_DESC_MIN).max(POI_DESC_MAX).optional(),
+});
+export type ConciergePoiDescription = z.infer<typeof ConciergePoiDescriptionSchema>;
+
+export const ConciergePoiBatchSchema = z.object({
+  pois: z.array(ConciergePoiDescriptionSchema).min(1).max(20),
+});
+export type ConciergePoiBatch = z.infer<typeof ConciergePoiBatchSchema>;
+
 export const BriefSchema = z.object({
   slug: z.string().min(3),
   name: z.string().min(3),
