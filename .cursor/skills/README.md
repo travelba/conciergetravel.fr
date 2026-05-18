@@ -55,6 +55,8 @@ Use this when you don't know where to start.
 | Sentry, structured logs, Web Vitals, alerts, dashboards                                       | [`observability-monitoring`](observability-monitoring/SKILL.md)                  |
 | Unit (Vitest) + integration (MSW) + E2E (Playwright) + axe + Lighthouse                       | [`test-strategy`](test-strategy/SKILL.md)                                        |
 | GitHub Actions, Vercel previews, Supabase migrations, release flow                            | [`cicd-release-management`](cicd-release-management/SKILL.md)                    |
+| **Vercel env vars scoped per environment** (Production / Preview / Development trap)          | [`cicd-release-management` §Rule 9](cicd-release-management/SKILL.md)            |
+| **Next.js App Router `_folder` private convention** (route silently 404s)                     | [`nextjs-app-router` §Private folders](nextjs-app-router/SKILL.md)               |
 | **PowerShell / Windows dev commands, Supabase SSL strip**                                     | [`windows-dev-environment`](windows-dev-environment/SKILL.md) ⭐ NEW             |
 | README, ADRs, runbooks, integration docs                                                      | [`technical-documentation`](technical-documentation/SKILL.md)                    |
 | Layer boundaries, rendering strategy, new bounded context                                     | [`product-architecture`](product-architecture/SKILL.md)                          |

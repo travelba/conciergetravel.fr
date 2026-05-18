@@ -242,11 +242,40 @@ export default async function HotelPage({ params: { locale, region, city, hotel 
 }
 ```
 
+## Private folders — `_foldername` is **not** a route
+
+Next.js App Router treats any folder prefixed with `_` as **private** —
+files inside are excluded from routing entirely, even if they export a
+valid `page.tsx` / `route.ts`. This is documented but easy to forget
+mid-debugging.
+
+Concrete bite (18 May 2026, lost ~20 min during a Vercel preview
+investigation): a diagnostic route at
+`apps/web/src/app/api/_diag/supabase/route.ts` returned a 404 page
+from every URL we tried. Vercel build logs showed nothing about the
+file. The fix was a single rename — `_diag` → `diag` — and the route
+appeared at `/api/diag/supabase` on the next deploy.
+
+Use cases — when to keep / avoid the underscore prefix:
+
+- **Keep `_`** for collocated helpers (`_components/`, `_lib/`,
+  `_types.ts`) that should live next to their consumers but never be
+  routed. This is the intended use of private folders.
+- **Avoid `_`** for any folder that hosts a `page.tsx`, `route.ts`,
+  `layout.tsx`, or `loading.tsx`. Use a different naming convention
+  if you want to mark the route as internal (e.g. `/api/diag/`,
+  `/admin/`, or route groups with `(group)`).
+- **Token-gate** internal routes (diagnostic, admin tooling) via a
+  hard-coded UUID or a dedicated env secret — don't rely on obscurity.
+
 ## References
 
-- Next.js 15 App Router docs.
+- Next.js 15 App Router docs — [Private folders](https://nextjs.org/docs/app/building-your-application/routing/colocation#private-folders).
 - CDC v3.0 §2.2 (rendering), §6 (SEO/GEO), §9 (mobile-first).
 - `seo-technical`, `redis-caching`, `responsive-ui-architecture` skills.
 - **`structured-data-schema-org`** — CSP nonce contract details for JSON-LD.
 - **`security-engineering`** — full CSP3 policy + middleware.
 - **`editorial-long-read-rendering`** — two-column layout, TOC sidebar pattern.
+- **`cicd-release-management` Rule 9** — Vercel env vars scoped per
+  environment (Production / Preview / Development); the cross-link for the
+  diagnostic-endpoint pattern that triggered this skill update.

@@ -258,6 +258,45 @@ Symptom: route handler exists, build log shows it as static prerendered
 the matcher when you add a new top-level folder that should bypass i18n
 routing (e.g. `/api/health`, `/sitemaps/`, `/.well-known/`).
 
+### Rule 9 — Vercel env vars are **scoped per environment**; preview ≠ production
+
+Each env var in the Vercel dashboard has three independent toggles:
+**Production**, **Preview**, **Development**. A value set only to
+"Production" is **undefined** in every Preview deployment — including
+the preview of a long-lived release branch. The build does not fail
+because `SKIP_ENV_VALIDATION=true` is the CI default (see Rule 7) and
+`@t3-oss/env-nextjs` skips the Zod gate at build time.
+
+At runtime the symptom is silent: any server module that calls a
+vendor (Supabase, Algolia, Amadeus) and wraps the call in a defensive
+`try/catch → return []` returns an empty result. **The page renders 200
+with zero data** — no Sentry, no log, no clue.
+
+How this surfaced (18 May 2026, lost > 1h): the `release/myconciergehotel-2026-05`
+preview displayed "0 destinations available" while production
+(`wonderplace-travel-travelba.vercel.app/destination`) listed 73.
+Same Supabase project, same code paths. A one-shot diagnostic endpoint
+that read `process.env` directly (bypassing `env-web` to avoid early
+throws) revealed every Supabase variable as `present: false, length: 0`.
+
+Mitigations:
+
+1. **Set release-critical env vars to all three scopes** (Production +
+   Preview + Development) at provisioning time. The dashboard's
+   "Copy from another environment" button does it in one click.
+2. **Surface failures in production** — `apps/web/src/server/destinations/cities.ts`
+   was reverted from `if (NODE_ENV !== 'production') console.warn` to
+   an unconditional `console.error` so the next env regression shows up
+   in Vercel runtime logs within seconds.
+3. **Never gate logging on `NODE_ENV` for vendor errors** — the very
+   environment where you most need the signal (production / preview) is
+   exactly where the gate silences you.
+4. **For a one-shot diag**: do not use `_diag/` as the folder name — see
+   `nextjs-app-router` Rule on App Router private folders. Use `diag/`
+   (no leading underscore) and read `process.env` directly with
+   defensive `describe(value)` helpers so a missing var reports as
+   `{ present: false }` instead of crashing the route.
+
 ## References
 
 - CDC v3.0 §13 (phasage), §15 (livrables).
