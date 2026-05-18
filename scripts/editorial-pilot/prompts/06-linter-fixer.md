@@ -29,7 +29,7 @@ Pour chaque violation listée dans le rapport :
 - L'**ordre des sections H2**
 - Le **lead 80-120 mots** (mais corrigé si une violation est dedans)
 - La **phrase au passé simple** dans Histoire
-- Le **verbatim conseiller IATA** attribué nommément (sauf si la violation est dedans, auquel cas on patch UNIQUEMENT la phrase concernée du verbatim, sans casser l'attribution `— {Prénom}, {rôle} ConciergeTravel.fr`)
+- Le **verbatim conseiller IATA** attribué nommément (sauf si la violation est dedans, auquel cas on patch UNIQUEMENT la phrase concernée du verbatim, sans casser l'attribution `— {Prénom}, {rôle} MyConciergeHotel.com`)
 - La **recommandation experte mesurée avec nuance honnête**
 - La **référence culturelle vérifiable**
 - **Tous les chiffres précis** (m², dates, distances, capacités)

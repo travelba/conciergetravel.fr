@@ -2,7 +2,7 @@
 --
 -- Phase 10.29 (gap analysis Peninsula §6 — JSON-LD enrichment).
 --
--- The `Hotel` JSON-LD builder (`@cct/seo`) already accepts a
+-- The `Hotel` JSON-LD builder (`@mch/seo`) already accepts a
 -- `telephone` input; the only thing missing was a column to source
 -- the value from. We add `phone_e164` as a nullable text column with
 -- a CHECK constraint enforcing the E.164 format (international

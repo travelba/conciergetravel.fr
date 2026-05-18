@@ -1,9 +1,9 @@
 ---
 name: supabase-postgres-rls
-description: Supabase PostgreSQL schema, migrations, and Row-Level Security policies for ConciergeTravel.fr. Use when adding/altering tables, indexes, RLS policies, generated columns, JSONB fields, or any database concern.
+description: Supabase PostgreSQL schema, migrations, and Row-Level Security policies for MyConciergeHotel.com. Use when adding/altering tables, indexes, RLS policies, generated columns, JSONB fields, or any database concern.
 ---
 
-# Supabase PostgreSQL + RLS — ConciergeTravel.fr
+# Supabase PostgreSQL + RLS — MyConciergeHotel.com
 
 The cahier des charges mandates **Supabase PostgreSQL with RLS native** (CDC §2). Every table that holds business data must have RLS enabled with explicit policies. We never disable RLS.
 
@@ -97,6 +97,27 @@ Invoke when:
 - Files numbered `NNNN_description.sql`. Idempotent if possible. Drizzle schema kept in sync.
 - Each migration is reviewable as plain SQL. We commit raw SQL, not ORM-generated.
 - New columns are nullable or have defaults to keep deploy zero-downtime.
+- **Before picking a number, `Glob 'packages/db/migrations/NNNN_*'`**. Two
+  files at the same number is a real foot-gun: the MCP `apply_migration`
+  is read-only (we run the SQL through `pg` directly), and the
+  `_cct_sql_migrations` ledger is keyed by `filename` — two files
+  numbered 0029 end up with two unrelated entries and the rename costs
+  three round-trips. Reference incident: 2026-05-17, `0029_hotel_upcoming_events.sql`
+  → had to be renamed to `0031_*` because `0029_editorial_rankings_axes.sql`
+  AND `0030_editorial_rankings_factual_summary.sql` already existed.
+- **The Supabase MCP is read-only for write-DDL** in this project. To
+  apply a migration, run it through `pg` with the SSL escape hatch:
+
+  ```ts
+  const conn = (process.env.SUPABASE_DB_POOLER_URL ?? '').replace(/[?&]sslmode=[^&]*/giu, '');
+  const c = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false } });
+  await c.connect();
+  await c.query(await readFile('packages/db/migrations/NNNN_*.sql', 'utf8'));
+  await c.end();
+  ```
+
+  See `scripts/editorial-pilot/src/import/push-import.ts` for the canonical
+  helper.
 
 ### Indexes
 

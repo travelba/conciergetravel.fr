@@ -1,5 +1,5 @@
 {
-  "name": "@cct/db",
+  "name": "@mch/db",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -24,8 +24,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@cct/config": "workspace:*",
-    "@cct/integrations": "workspace:*",
+    "@mch/config": "workspace:*",
+    "@mch/integrations": "workspace:*",
     "@types/node": "^22.10.0",
     "drizzle-kit": "^0.30.2",
     "tsx": "^4.19.2",

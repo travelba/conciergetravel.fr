@@ -21,7 +21,7 @@ export const logger: Logger = pino({
   level: process.env['LOG_LEVEL'] ?? (process.env['NODE_ENV'] === 'production' ? 'info' : 'debug'),
   redact: { paths: REDACT_PATHS, censor: '[redacted]' },
   base: {
-    app: 'cct',
+    app: 'mch',
     env: process.env['SENTRY_ENV'] ?? process.env['NODE_ENV'] ?? 'dev',
   },
   timestamp: pino.stdTimeFunctions.isoTime,

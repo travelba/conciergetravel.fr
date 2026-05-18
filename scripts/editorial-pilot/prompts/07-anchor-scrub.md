@@ -129,7 +129,7 @@ Exemples :
 
 **Entrée** :
 
-> « Léa, conseillère senior pour ConciergeTravel.fr, souligne : "Le Plaza Athénée est avant tout une question d'expérience parisienne." »
+> « Léa, conseillère senior pour MyConciergeHotel.com, souligne : "Le Plaza Athénée est avant tout une question d'expérience parisienne." »
 
 **Action** : `iata_insider.key_observation` du brief commence par `AUTO_DRAFT`. → **REMOVE** la citation entièrement (pas de soften, le verbatim est intégralement inventé).
 

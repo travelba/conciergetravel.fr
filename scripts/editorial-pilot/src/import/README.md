@@ -33,7 +33,7 @@ regenerates the SQL deterministically from the briefs, and re-running
 | `priority`                  | `'P0'` (palace = top priority)                  |
 | `is_published`              | `TRUE`                                          |
 | `description_fr`            | first paragraph of editorial markdown           |
-| `meta_title_fr/en`          | `<name> — Palace <city> \| ConciergeTravel`     |
+| `meta_title_fr/en`          | `<name> — Palace <city> \| MyConciergeHotel`    |
 | `meta_desc_fr`              | first 155 chars of description                  |
 | `number_of_rooms`           | `brief.capacity.total_keys` / `rooms_count`     |
 | `highlights` (jsonb)        | palace flag + capacity + Michelin + spa partner |
@@ -52,13 +52,13 @@ All JSONB shapes strictly follow the Zod schemas enforced by
 
 ```pwsh
 # 1. Build the SQL files (always idempotent)
-pnpm --filter @cct/editorial-pilot exec tsx src/import/build-import-sql.ts
+pnpm --filter @mch/editorial-pilot exec tsx src/import/build-import-sql.ts
 
 # 2. Push to Supabase (three options, choose one)
 
 # Option A — pg client (preferred, fully automated)
 $env:DATABASE_URL = "postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres"
-pnpm --filter @cct/editorial-pilot exec tsx src/import/push-import.ts
+pnpm --filter @mch/editorial-pilot exec tsx src/import/push-import.ts
 
 # Option B — psql (if installed)
 psql "$env:DATABASE_URL" -f scripts/editorial-pilot/out/seed-palaces.sql

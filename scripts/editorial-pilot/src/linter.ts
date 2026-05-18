@@ -25,7 +25,8 @@ export type ViolationCategory =
   | 'pattern_conclusion_paresseuse'
   | 'pattern_fausse_question'
   | 'pattern_participe_present_attaque'
-  | 'lead_length';
+  | 'lead_length'
+  | 'sentence_length';
 
 export type ViolationSeverity = 'blocker' | 'high' | 'medium' | 'low';
 
@@ -1042,6 +1043,52 @@ function lintLeadLength(text: string, minWords = 80, maxWords = 120): Violation[
   ];
 }
 
+/**
+ * Voix Concierge — ADR-0011 §C2.
+ *
+ * Strict rule: aucune phrase prose ne dépasse 25 mots. Tolerance 0 — toute
+ * phrase au-delà est `medium` (pas bloquant : on laisse Pass 5/6 corriger
+ * mais on signale). Les titres (`#`, `##`, …), listes (`- `, `* `, `1. `),
+ * et blocs code sont ignorés.
+ */
+function lintSentenceLength(text: string, maxWords = 25): Violation[] {
+  const lines = text.split(/\r?\n/);
+  const out: Violation[] = [];
+  let inCodeBlock = false;
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i] ?? '';
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+    if (trimmed.length === 0) continue;
+    if (/^#{1,6}\s/.test(trimmed)) continue;
+    if (/^([-*+]\s|\d+\.\s|>\s)/.test(trimmed)) continue;
+    if (/^\|/.test(trimmed)) continue;
+    const sentences = trimmed.split(/(?<=[.!?…])\s+/u);
+    for (const s of sentences) {
+      const clean = s.replace(/^[\s>]+/, '').trim();
+      if (clean.length === 0) continue;
+      const words = countWords(clean);
+      if (words > maxWords) {
+        out.push({
+          category: 'sentence_length',
+          severity: 'medium',
+          term: 'Phrase > 25 mots (voix Concierge)',
+          matchedText: `${words} mots`,
+          line: i + 1,
+          column: 0,
+          snippet: clean.slice(0, 140) + (clean.length > 140 ? '…' : ''),
+          suggestion: `Phrase ${words} mots > 25 max (ADR-0011 §C2). Couper en 2-3 phrases courtes, voix active.`,
+        });
+      }
+    }
+  }
+  return out;
+}
+
 function extractSnippet(line: string, col: number, matchLength: number): string {
   const start = Math.max(0, col - 25);
   const end = Math.min(line.length, col + matchLength + 25);
@@ -1059,7 +1106,11 @@ function countOccurrencesGlobal(text: string, pattern: RegExp): number {
 
 export function lintMarkdown(text: string): Violation[] {
   const lines = text.split(/\r?\n/);
-  const violations: Violation[] = [...lintParticipePresentAttack(text), ...lintLeadLength(text)];
+  const violations: Violation[] = [
+    ...lintParticipePresentAttack(text),
+    ...lintLeadLength(text),
+    ...lintSentenceLength(text),
+  ];
 
   for (const term of ALL_TERMS) {
     const totalOccurrences = countOccurrencesGlobal(text, term.pattern);

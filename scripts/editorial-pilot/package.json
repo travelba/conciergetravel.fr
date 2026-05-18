@@ -1,5 +1,5 @@
 {
-  "name": "@cct/editorial-pilot",
+  "name": "@mch/editorial-pilot",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,11 +17,24 @@
     "rankings:bulk:dry": "tsx src/rankings/run-rankings-v2-bulk.ts --dry-run",
     "rankings:bulk:manual": "tsx src/rankings/run-rankings-v2-bulk.ts --source=manual --concurrency=2",
     "rankings:matrix:inspect": "tsx src/rankings/inspect-matrix.ts",
+    "photos:sync": "tsx src/photos/sync-hotel-photos.ts",
+    "photos:sync:dry": "tsx src/photos/sync-hotel-photos.ts --dry-run",
+    "photos:sync:bristol": "tsx src/photos/sync-hotel-photos.ts --slug=le-bristol-paris",
+    "pois:sync": "tsx src/pois/sync-hotel-pois.ts",
+    "pois:sync:dry": "tsx src/pois/sync-hotel-pois.ts --dry-run --no-llm",
+    "pois:sync:bristol": "tsx src/pois/sync-hotel-pois.ts --slug=le-bristol-paris",
+    "geocode:hotels": "tsx src/geocode/sync-hotel-geocoding.ts",
+    "geocode:hotels:dry": "tsx src/geocode/sync-hotel-geocoding.ts --dry-run",
+    "events:sync": "tsx src/events/sync-hotel-events.ts",
+    "events:sync:dry": "tsx src/events/sync-hotel-events.ts --dry-run --no-llm",
+    "events:sync:bristol": "tsx src/events/sync-hotel-events.ts --slug=le-bristol-paris",
     "lint:files": "tsx src/lint-files.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@mch/domain": "workspace:*",
+    "@mch/integrations": "workspace:*",
     "dotenv": "^16.4.7",
     "openai": "^4.78.0",
     "zod": "^3.24.1"

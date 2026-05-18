@@ -55,6 +55,46 @@ const ExternalSourceFactSchema = z.object({
   confidence: z.enum(['high', 'medium-high', 'medium', 'medium-low', 'low']).optional(),
 });
 
+/**
+ * « Le Conseil du Concierge » — bloc 60-90 mots qui se rend en bas de
+ * fiche hôtel. Voix Concierge (expert complice), contient un secret
+ * opérationnel concret (chambre, timing, accès, table, service, spa).
+ * Voir `docs/adr/0011-concierge-voice.md` et `EDITORIAL_VOICE.md` §4
+ * bloc 8.
+ *
+ * Côté brief on tolère un texte source plus libre — la passe 8
+ * (humanizer Concierge) le reformate au format exact 60-90 mots avant
+ * upsert.
+ */
+const ConciergeTipForSchema = z.enum(['room', 'dining', 'timing', 'access', 'service', 'wellness']);
+
+export const ConciergeAdviceLocaleSchema = z.object({
+  title: z.string().min(1).max(120),
+  body: z.string().min(40),
+  tip_for: ConciergeTipForSchema,
+});
+
+export const ConciergeAdviceBriefSchema = z.object({
+  fr: ConciergeAdviceLocaleSchema,
+  en: ConciergeAdviceLocaleSchema.optional(),
+});
+
+export type ConciergeAdviceBrief = z.infer<typeof ConciergeAdviceBriefSchema>;
+
+/**
+ * Pass 8 humanizer output — contract enforced post-LLM, with sentence
+ * length checked separately by `linterPhraseLength` (see linter.ts).
+ */
+export const ConciergePass8OutputSchema = z.object({
+  lead_concierge: z
+    .string()
+    .min(400, { message: 'lead_concierge too short (must reach ≈ 180-220 words)' })
+    .max(2000, { message: 'lead_concierge too long (must stay ≈ 180-220 words)' }),
+  concierge_advice: ConciergeAdviceBriefSchema.required({ fr: true, en: true }),
+});
+
+export type ConciergePass8Output = z.infer<typeof ConciergePass8OutputSchema>;
+
 export const BriefSchema = z.object({
   slug: z.string().min(3),
   name: z.string().min(3),
@@ -91,14 +131,31 @@ export const BriefSchema = z.object({
   service: z.record(z.unknown()),
   signature_features: z.array(z.string()).min(1),
   nearby_pois: z.array(PoiSchema).min(1),
-  iata_insider: z.object({
-    advisor_name: z.string(),
-    advisor_role: z.string(),
-    key_observation: z.string(),
-    best_for: z.string(),
-    honest_caveat: z.string(),
-    alternative_recommendation: z.string().optional(),
-  }),
+  /**
+   * Legacy "IATA insider" payload (kept for backward compatibility on
+   * existing briefs). New briefs target `concierge_advice` below — see
+   * `docs/adr/0011-concierge-voice.md`. Both fields can coexist on a
+   * single brief during the migration window; pipelines should prefer
+   * `concierge_advice` when present.
+   */
+  iata_insider: z
+    .object({
+      advisor_name: z.string(),
+      advisor_role: z.string(),
+      key_observation: z.string(),
+      best_for: z.string(),
+      honest_caveat: z.string(),
+      alternative_recommendation: z.string().optional(),
+    })
+    .optional(),
+  /**
+   * « Le Conseil du Concierge » — bloc canonique exposé en bas de
+   * fiche hôtel (cf. ADR-0011 et EDITORIAL_VOICE.md §4 bloc 8).
+   * Le `body` est contraint 60-90 mots en aval (Payload + DB Zod
+   * reader). Côté brief, on accepte un texte plus libre que le LLM
+   * passe 8 (humanizer Concierge) reformatera ensuite.
+   */
+  concierge_advice: ConciergeAdviceBriefSchema.optional(),
   pricing_indication: z.record(z.unknown()).optional(),
   operational: z.record(z.unknown()).optional(),
   sources: z.array(SourceSchema).min(2),

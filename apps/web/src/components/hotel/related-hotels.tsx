@@ -16,7 +16,7 @@ interface RelatedHotelsProps {
 const T = {
   fr: {
     sameCityTitle: (city: string) => `Autres palaces à ${city}`,
-    sameCitySub: 'Découvrez la sélection ConciergeTravel dans la même ville.',
+    sameCitySub: 'Découvrez la sélection MyConciergeHotel dans la même ville.',
     sameBrandTitle: (brand: string) => `Toutes les adresses ${brand}`,
     sameBrandSub: 'La collection complète de la marque dans notre catalogue.',
     sameRegionTitle: (region: string) => `Explorer la région ${region}`,
@@ -27,7 +27,7 @@ const T = {
   },
   en: {
     sameCityTitle: (city: string) => `Other Palaces in ${city}`,
-    sameCitySub: 'Discover the ConciergeTravel selection in the same city.',
+    sameCitySub: 'Discover the MyConciergeHotel selection in the same city.',
     sameBrandTitle: (brand: string) => `All ${brand} addresses`,
     sameBrandSub: 'The complete brand collection in our catalog.',
     sameRegionTitle: (region: string) => `Explore the ${region} region`,

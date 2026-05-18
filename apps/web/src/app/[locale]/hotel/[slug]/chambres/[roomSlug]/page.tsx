@@ -1,10 +1,10 @@
-import { HotelImage, buildCloudinarySrc } from '@cct/ui';
+import { HotelImage, buildCloudinarySrc } from '@mch/ui';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
@@ -40,7 +40,7 @@ import {
  */
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -180,7 +180,7 @@ export async function generateMetadata({
       title,
       description: desc,
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
-      siteName: 'ConciergeTravel',
+      siteName: 'MyConciergeHotel',
       url: absoluteUrl,
       ...(ogImages !== undefined ? { images: ogImages } : {}),
     },

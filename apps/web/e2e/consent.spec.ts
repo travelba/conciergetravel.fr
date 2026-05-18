@@ -8,7 +8,7 @@ import { CONSENT_COOKIE_NAME } from './fixtures/consent';
  * Verifies:
  *  - The banner auto-opens on first visit (no decision cookie).
  *  - Each primary action (Accept all / Reject all / Customize → Save)
- *    persists a properly shaped cookie under `cct.consent.v1`.
+ *    persists a properly shaped cookie under `mch.consent.v1`.
  *  - The footer "Gérer les cookies" link re-opens the banner after a
  *    decision has been made.
  */

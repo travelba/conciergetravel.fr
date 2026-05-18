@@ -1,10 +1,10 @@
 ---
-description: Vendor API integration patterns for ConciergeTravel.fr (HTTP client, Zod, retries, Redis cache, idempotency, error mapping).
+description: Vendor API integration patterns for MyConciergeHotel.com (HTTP client, Zod, retries, Redis cache, idempotency, error mapping).
 globs: "packages/integrations/**/*.{ts,tsx}"
 alwaysApply: true
 ---
 
-# API integrations — ConciergeTravel.fr
+# API integrations — MyConciergeHotel.com
 
 Every vendor adapter under `packages/integrations/<vendor>/` follows the same pattern. Deviation requires an ADR.
 
@@ -36,14 +36,14 @@ packages/integrations/<vendor>/
 
 - OAuth tokens cached in Redis with a margin of safety (`expires_in - 60s`).
 - Stampede protection: wrap the token refresh in a Redis mutex (single inflight refresh per process cluster).
-- API keys read from `@cct/config/env`. Never embed in code, never log.
+- API keys read from `@mch/config/env`. Never embed in code, never log.
 
 ## Caching
 
 - Reads are cached in Redis when:
   - The endpoint is idempotent
   - The TTL doesn't violate the vendor's freshness contract (hotel ARI = 5 min, hotel sentiments = 24 h, etc.)
-- Keys follow `cct:<vendor>:<scope>:<key>`. Versioned via a `cct:v<n>:` prefix when the schema changes.
+- Keys follow `mch:<vendor>:<scope>:<key>`. Versioned via a `mch:v<n>:` prefix when the schema changes.
 
 ## Idempotency
 

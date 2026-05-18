@@ -6,7 +6,7 @@ import 'server-only';
  * the `/reservation/start` UI without seeded Supabase data.
  *
  * Activation:
- *  - Set `CCT_E2E_FAKE_HOTEL_ID` (a UUID v4 string) in the runtime env.
+ *  - Set `MCH_E2E_FAKE_HOTEL_ID` (a UUID v4 string) in the runtime env.
  *  - The seam ONLY fires when the requested hotelId matches that value.
  *  - We additionally refuse activation if `NODE_ENV === 'production'`
  *    *and* the env var is unset — the env var must be explicitly
@@ -31,12 +31,12 @@ const FAKE_HOTEL_TEMPLATE: Omit<FakeHotelHead, 'id'> = {
 };
 
 function configuredFakeId(): string | undefined {
-  const raw = process.env['CCT_E2E_FAKE_HOTEL_ID'];
+  const raw = process.env['MCH_E2E_FAKE_HOTEL_ID'];
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 }
 
 function configuredFakePaidId(): string | undefined {
-  const raw = process.env['CCT_E2E_FAKE_PAID_HOTEL_ID'];
+  const raw = process.env['MCH_E2E_FAKE_PAID_HOTEL_ID'];
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 }
 
@@ -58,7 +58,7 @@ const FAKE_PAID_HOTEL_TEMPLATE: Omit<FakeHotelHead, 'id'> = {
 
 /**
  * Paid-tunnel counterpart to {@link getFakeHotelHead}. Returned only
- * when the requested UUID matches `CCT_E2E_FAKE_PAID_HOTEL_ID`,
+ * when the requested UUID matches `MCH_E2E_FAKE_PAID_HOTEL_ID`,
  * mimicking a published `booking_mode = 'amadeus'` hotel for the
  * `lockOffer` → invite → recap → payment Playwright scenario. Like
  * the email-mode seam, the env var must be explicitly set to enable

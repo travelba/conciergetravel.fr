@@ -2,6 +2,13 @@ import type { Hotel } from 'schema-dts';
 
 import { aggregateRatingJsonLd, type AggregateRatingInput } from './aggregate-rating';
 import { offerJsonLd, type OfferInput } from './offer';
+import {
+  buildOpeningHoursSpecification,
+  normalisePriceRange,
+  osmToSchemaClass,
+  osmToSchemaUrl,
+  type OpeningHoursSpecificationNode,
+} from './place-amenity';
 
 /**
  * Hotel JSON-LD node — `schema-dts`' `Hotel` is overly conservative
@@ -142,11 +149,33 @@ type ContainedPlaceNode = ContainedRoomNode | MeetingRoomNode;
  * a structural type (not a discriminated union) because the set of
  * `@type` strings is open-ended and depends on the editorial taxonomy.
  */
+/**
+ * `Place` subtype emitted under `nearbyAttractions`. We keep it as a
+ * structural type (not a discriminated union) because the set of
+ * `@type` strings is open-ended and depends on the editorial taxonomy.
+ *
+ * Optional enrichment fields (WS5 extensions):
+ *   - `description` — short LLM-generated 1-2 sentence narrative.
+ *   - `openingHoursSpecification` — parsed from the raw OSM `opening_hours`
+ *     tag; cleanly indexed by Google's hotel + local-business test.
+ *   - `priceRange` — `'€'..'€€€€'` or `'À partir de N €'` etc.
+ *   - `additionalType` — Schema.org URL form, used to disambiguate
+ *     narrow shop subtypes (`https://schema.org/Pharmacy` etc.) when
+ *     the `@type` is the broader `Store` for compatibility.
+ *   - `address` — for utility shops, a postal address strengthens the
+ *     `LocalBusiness` shape that Google's Pharmacy/Bakery rich result
+ *     expects.
+ */
 type NearbyAttractionNode = {
   '@type': string;
   name: string;
   geo?: { '@type': 'GeoCoordinates'; latitude: number; longitude: number };
   sameAs?: string;
+  description?: string;
+  openingHoursSpecification?: readonly OpeningHoursSpecificationNode[];
+  priceRange?: string;
+  additionalType?: string;
+  address?: { '@type': 'PostalAddress'; streetAddress?: string; addressLocality?: string };
 };
 
 export interface HotelAddressInput {
@@ -408,38 +437,70 @@ export interface NearbyAttractionInput {
   readonly longitude?: number;
   /** Optional canonical URL of the attraction (Wikidata, Wikipedia, official site). */
   readonly sameAs?: string;
+  /**
+   * LLM-generated short narrative (1-2 sentences, EEAT-safe). Surfaces
+   * as `description` on the `Place` node — Google + Bing index it for
+   * AI-overview snippets.
+   */
+  readonly description?: string;
+  /**
+   * Raw OSM `opening_hours` tag. Parsed into
+   * `openingHoursSpecification[]` by {@link buildOpeningHoursSpecification}.
+   * Unparseable strings are dropped silently — better than emitting a
+   * malformed node.
+   */
+  readonly openingHours?: string;
+  /**
+   * Free-form `priceRange` (e.g. `'€€'`, `'À partir de 12 €'`). Capped
+   * at 32 chars by {@link normalisePriceRange}.
+   */
+  readonly priceRange?: string;
+  /**
+   * Pre-resolved Schema.org URL (e.g. `'https://schema.org/Pharmacy'`).
+   * When provided, takes precedence over the `type` → class table
+   * lookup. The sync script persists it into `points_of_interest[].schema_type`
+   * so re-emits stay deterministic.
+   */
+  readonly schemaTypeUrl?: string;
+  /**
+   * Optional postal address — adds local-business credibility for
+   * utility shops (Pharmacy, BakeryShop, ConvenienceStore). Skipped
+   * for cultural / nature POIs where the address adds noise.
+   */
+  readonly address?: { readonly streetAddress?: string; readonly addressLocality?: string };
 }
 
 /**
- * POI editorial type → Schema.org Place subtype. We picked the
- * narrowest subtype that still validates as `Place`. Wide categories
- * (`station`, `area`) fall back to `TouristAttraction` which is the
- * Google-recommended default for "things tourists go to see".
+ * POI editorial type → Schema.org Place subtype.
+ *
+ * Delegates to {@link osmToSchemaClass} in `place-amenity.ts` — that
+ * module owns the canonical taxonomy and is shared with the editorial
+ * sync script so a tag mapped here stays consistent end-to-end.
  */
-const POI_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
-  monument: 'LandmarksOrHistoricalBuildings',
-  landmark: 'LandmarksOrHistoricalBuildings',
-  museum: 'Museum',
-  art_gallery: 'Museum',
-  park: 'Park',
-  garden: 'Park',
-  shopping: 'ShoppingCenter',
-  store: 'ShoppingCenter',
-  restaurant: 'Restaurant',
-  cafe: 'Restaurant',
-  church: 'PlaceOfWorship',
-  cathedral: 'PlaceOfWorship',
-  synagogue: 'PlaceOfWorship',
-  mosque: 'PlaceOfWorship',
-  theater: 'PerformingArtsTheater',
-  theatre: 'PerformingArtsTheater',
-  zoo: 'Zoo',
-  beach: 'Beach',
-};
-
 function poiSchemaType(rawType: string): string {
-  const key = rawType.toLowerCase().trim();
-  return POI_TYPE_TO_SCHEMA[key] ?? 'TouristAttraction';
+  return osmToSchemaClass(rawType);
+}
+
+/**
+ * Derives the Schema.org URL form (`https://schema.org/Pharmacy`) for
+ * `additionalType`. We prefer the input's `schemaTypeUrl` when the
+ * editor explicitly pinned it (e.g. for narrow subtypes that change
+ * how Google's local-business panel renders) and fall back to the
+ * type-based lookup otherwise.
+ *
+ * `additionalType` is only emitted when it adds information beyond
+ * the bare `@type` (i.e. the narrow URL differs from the broad class
+ * already in `@type`) — emitting `additionalType: 'https://schema.org/Museum'`
+ * next to `@type: 'Museum'` is pure noise that hurts JSON-LD size
+ * without giving Google extra signal.
+ */
+function additionalTypeFor(input: NearbyAttractionInput, atTypeClass: string): string | undefined {
+  if (input.schemaTypeUrl !== undefined && input.schemaTypeUrl.length > 0) {
+    const explicit = input.schemaTypeUrl;
+    return explicit.endsWith(`/${atTypeClass}`) ? undefined : explicit;
+  }
+  const inferred = osmToSchemaUrl(input.type);
+  return inferred.endsWith(`/${atTypeClass}`) ? undefined : inferred;
 }
 
 const PALACE_AWARD = 'Distinction Palace — Atout France';
@@ -550,25 +611,63 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
     out.tourBookingPage = input.tourBookingPage;
   }
   if (input.nearbyAttractions !== undefined && input.nearbyAttractions.length > 0) {
-    // Cap at 10 to keep the JSON-LD envelope tight. Google ignores
-    // anything past the first dozen anyway and oversized graphs hurt
-    // crawl-budget. The visible `<HotelLocation>` component renders
-    // up to 8 POIs already, so 10 here keeps a small buffer for the
-    // "+2 not visible but indexable" pattern.
-    out.nearbyAttractions = input.nearbyAttractions.slice(0, 10).map((poi) => ({
-      '@type': poiSchemaType(poi.type),
-      name: poi.name,
-      ...(poi.latitude !== undefined && poi.longitude !== undefined
-        ? {
-            geo: {
-              '@type': 'GeoCoordinates',
-              latitude: poi.latitude,
-              longitude: poi.longitude,
-            },
-          }
-        : {}),
-      ...(poi.sameAs !== undefined && poi.sameAs.length > 0 ? { sameAs: poi.sameAs } : {}),
-    }));
+    // Cap at 24 to cover the three editorial buckets (visit / do / shop,
+    // typically 6-8 entries each — see CDC §2 bloc 10 + the front-end
+    // `<HotelLocation>` 3-section layout). Google ignores anything past
+    // ~12 in its rich-result test but the wider set still surfaces in
+    // LLM ingestion pipelines (Bing, Perplexity, Anthropic crawlers).
+    out.nearbyAttractions = input.nearbyAttractions.slice(0, 24).map((poi) => {
+      const atTypeClass = poiSchemaType(poi.type);
+      const node: NearbyAttractionNode = {
+        '@type': atTypeClass,
+        name: poi.name,
+      };
+      if (poi.latitude !== undefined && poi.longitude !== undefined) {
+        node.geo = {
+          '@type': 'GeoCoordinates',
+          latitude: poi.latitude,
+          longitude: poi.longitude,
+        };
+      }
+      if (poi.sameAs !== undefined && poi.sameAs.length > 0) {
+        node.sameAs = poi.sameAs;
+      }
+      if (poi.description !== undefined) {
+        const trimmed = poi.description.trim();
+        if (trimmed.length > 0) {
+          // Cap at 280 chars — same envelope as the DB schema so a
+          // single-source-of-truth narrative renders identically in
+          // the page body and the JSON-LD.
+          node.description = trimmed.length > 280 ? `${trimmed.slice(0, 277)}…` : trimmed;
+        }
+      }
+      if (poi.openingHours !== undefined) {
+        const spec = buildOpeningHoursSpecification(poi.openingHours);
+        if (spec.length > 0) {
+          node.openingHoursSpecification = spec;
+        }
+      }
+      const price = normalisePriceRange(poi.priceRange);
+      if (price !== null) {
+        node.priceRange = price;
+      }
+      const additional = additionalTypeFor(poi, atTypeClass);
+      if (additional !== undefined) {
+        node.additionalType = additional;
+      }
+      if (poi.address !== undefined) {
+        const street = poi.address.streetAddress?.trim();
+        const locality = poi.address.addressLocality?.trim();
+        if ((street && street.length > 0) || (locality && locality.length > 0)) {
+          node.address = {
+            '@type': 'PostalAddress',
+            ...(street && street.length > 0 ? { streetAddress: street } : {}),
+            ...(locality && locality.length > 0 ? { addressLocality: locality } : {}),
+          };
+        }
+      }
+      return node;
+    });
   }
   // `containsPlace` aggregates two distinct sub-types: editorial
   // `HotelRoom` sub-pages and `MeetingRoom` MICE spaces. Schema.org

@@ -11,12 +11,12 @@ const T = {
   fr: {
     title: 'Cet hôtel apparaît dans nos classements',
     subtitle:
-      'Sélections éditoriales ConciergeTravel — chaque entrée renvoie au classement complet.',
+      'Sélections éditoriales MyConciergeHotel — chaque entrée renvoie au classement complet.',
     rankLabel: (n: number) => `N°${n}`,
   },
   en: {
     title: 'This hotel features in our rankings',
-    subtitle: 'ConciergeTravel editorial selections — each entry links to the full ranking.',
+    subtitle: 'MyConciergeHotel editorial selections — each entry links to the full ranking.',
     rankLabel: (n: number) => `#${n}`,
   },
 } as const;

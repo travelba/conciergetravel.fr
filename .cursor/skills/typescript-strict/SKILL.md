@@ -1,9 +1,9 @@
 ---
 name: typescript-strict
-description: TypeScript strict-mode rules for ConciergeTravel.fr. Use when configuring tsconfig, declaring types, parsing vendor responses, defining IDs/slugs, or whenever you would be tempted to use `any`, `as`, or non-null assertions.
+description: TypeScript strict-mode rules for MyConciergeHotel.com. Use when configuring tsconfig, declaring types, parsing vendor responses, defining IDs/slugs, or whenever you would be tempted to use `any`, `as`, or non-null assertions.
 ---
 
-# TypeScript strict — ConciergeTravel.fr
+# TypeScript strict — MyConciergeHotel.com
 
 The cahier des charges mandates **TypeScript strict** because Amadeus, Little Hotelier and Makcorps responses must be typed end-to-end (CDC v3.0 §2). Type safety is contractual.
 

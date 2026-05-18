@@ -21,7 +21,7 @@ test.describe('public API + well-known', () => {
     expect(res.headers()['cache-control']).toMatch(/no-store/);
     const body = await res.json();
     expect(body.ok).toBe(true);
-    expect(body.service).toBe('cct-web');
+    expect(body.service).toBe('mch-web');
     expect(typeof body.time).toBe('string');
     // ISO-8601-ish: at least starts with YYYY-MM-DD.
     expect(body.time).toMatch(/^\d{4}-\d{2}-\d{2}/);
@@ -64,7 +64,7 @@ test.describe('public API + well-known', () => {
     const body = await res.text();
 
     // Header + about copy.
-    expect(body).toMatch(/ConciergeTravel\.fr/);
+    expect(body).toMatch(/MyConciergeHotel\.fr/);
     expect(body).toMatch(/Agence IATA/i);
 
     // Strategic pages section — references real, in-tree routes only.
@@ -91,7 +91,7 @@ test.describe('public API + well-known', () => {
 
     const body = await res.json();
     expect(body.schemaVersion).toBe('0.1');
-    expect(body.site).toBe('ConciergeTravel.fr');
+    expect(body.site).toBe('MyConciergeHotel.com');
     expect(Array.isArray(body.skills)).toBe(true);
     expect(body.skills.length).toBeGreaterThanOrEqual(8);
 

@@ -6,7 +6,7 @@ import {
   hotelsIndexName,
   type AlgoliaHotelRecord,
   type SearchLocale,
-} from '@cct/integrations/algolia-hotel-catalog';
+} from '@mch/integrations/algolia-hotel-catalog';
 
 import { env } from '@/lib/env';
 

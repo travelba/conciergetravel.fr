@@ -1,4 +1,4 @@
-import { err, ok, type Result } from '@cct/domain/shared';
+import { err, ok, type Result } from '@mch/domain/shared';
 import { z } from 'zod';
 
 import { retryingJsonRequest, type RequestBody } from '../http/index.js';

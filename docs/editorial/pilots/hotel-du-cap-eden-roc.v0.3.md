@@ -18,7 +18,7 @@ La piscine, véritable signature de l’hôtel, est un chef-d’œuvre audacieux
 
 Avec seulement 118 clés — dont 88 chambres, 27 suites et 3 villas — l’Hôtel du Cap-Eden-Roc illustre la rareté. La suite Eden-Roc, avec sa terrasse panoramique ouverte sur la mer, et la Villa Soleil, équipée de six chambres et d’une piscine privée, témoignent de l’exclusivité des lieux. Quant à la Bastide du Cap, elle prolonge l’héritage familial dans un cadre plus intime.
 
-> « L’arrivée se mérite : à pied, le long de l’allée centrale, entre pins et cigales en été — une mise en scène naturelle qui impose respect et ravissement. » — Marc, conseiller senior Côte d’Azur ConciergeTravel.fr
+> « L’arrivée se mérite : à pied, le long de l’allée centrale, entre pins et cigales en été — une mise en scène naturelle qui impose respect et ravissement. » — Marc, conseiller senior Côte d’Azur MyConciergeHotel.com
 
 Idéal pour des séjours prolongés en quête de moments suspendus, ce palace révèle toute sa magie dans ses rituels empreints de sérénité. Cependant, avec une ouverture limitée d’avril à octobre, il s’adresse avant tout aux épicuriens saisonniers. Pour des séjours hivernaux, optez plutôt pour le Cap-Estel à Èze ou le Cheval Blanc Saint-Tropez.
 

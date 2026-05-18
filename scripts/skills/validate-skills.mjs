@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Validate the agent-skills catalogue for ConciergeTravel.fr.
+ * Validate the agent-skills catalogue for MyConciergeHotel.com.
  *
  * Checks every `.cursor/skills/<name>/SKILL.md` for:
  *  - Valid YAML frontmatter (`name`, `description`).

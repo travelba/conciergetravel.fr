@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   const llm = buildLlmClient(env, provider);
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('  ConciergeTravel.fr — Sprint 1B editorial pilot');
+  console.log('  MyConciergeHotel.com — Sprint 1B editorial pilot');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`  Provider:      ${llm.provider}`);
   console.log(`  Model:         ${llm.model}`);

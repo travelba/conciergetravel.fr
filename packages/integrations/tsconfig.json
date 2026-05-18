@@ -1,5 +1,5 @@
 {
-  "extends": "@cct/config/tsconfig/library.json",
+  "extends": "@mch/config/tsconfig/library.json",
   "compilerOptions": {
     "outDir": "./dist",
     "noEmit": true

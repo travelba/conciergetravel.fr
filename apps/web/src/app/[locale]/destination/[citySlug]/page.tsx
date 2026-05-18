@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
@@ -24,7 +24,7 @@ import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sen
  */
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -101,7 +101,7 @@ export async function generateMetadata({
       title,
       description,
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
-      siteName: 'ConciergeTravel',
+      siteName: 'MyConciergeHotel',
     },
   };
 }

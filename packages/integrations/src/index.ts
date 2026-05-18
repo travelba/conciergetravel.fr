@@ -1,5 +1,5 @@
 /**
- * @cct/integrations — public surface.
+ * @mch/integrations — public surface.
  * Each vendor has its own sub-export; do not import from each other across vendors.
  */
 export * as Http from './http';

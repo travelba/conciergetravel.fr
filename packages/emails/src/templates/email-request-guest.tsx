@@ -48,24 +48,24 @@ const footer = { fontSize: 12, color: colors.muted, marginTop: 24 };
 
 const copy = {
   fr: {
-    preview: 'Votre demande de réservation a bien été reçue.',
+    preview: 'Votre demande est entre les mains de votre concierge.',
     title: 'Demande reçue',
     hello: (n: string) => `Bonjour ${n},`,
     body: (h: string, ci: string, co: string) =>
-      `Merci pour votre demande concernant ${h}. Nous avons bien reçu votre demande pour le ${ci} → ${co}.`,
-    sla: 'Notre conciergerie vous contactera sous un jour ouvré avec une proposition tarifaire pour cet hôtel hors-réseau.',
+      `Merci pour votre demande concernant ${h} pour le ${ci} → ${co}. Votre concierge prend le dossier.`,
+    sla: 'Cet hôtel est hors GDS : votre concierge revient vers vous sous un jour ouvré avec disponibilité et tarif net négocié.',
     refLabel: 'Référence :',
-    sign: '— ConciergeTravel',
+    sign: '— Votre Concierge MyConciergeHotel',
   },
   en: {
-    preview: 'We received your booking enquiry.',
+    preview: "Your request is in your concierge's hands.",
     title: 'Enquiry received',
     hello: (n: string) => `Hello ${n},`,
     body: (h: string, ci: string, co: string) =>
-      `Thank you for reaching out about ${h}. We have received your enquiry for ${ci} → ${co}.`,
-    sla: 'Our concierge team will contact you within one business day with availability and pricing for this off-network property.',
+      `Thank you for reaching out about ${h} for ${ci} → ${co}. Your concierge is on it.`,
+    sla: 'This hotel sits outside the GDS network: your concierge will come back within one business day with availability and a negotiated net rate.',
     refLabel: 'Reference:',
-    sign: '— ConciergeTravel',
+    sign: '— Your MyConciergeHotel Concierge',
   },
 } as const;
 

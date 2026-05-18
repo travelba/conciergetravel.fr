@@ -1,4 +1,4 @@
--- ConciergeTravel.fr — Phase 6 wave A
+-- MyConciergeHotel.com — Phase 6 wave A
 --
 -- Adds a public-facing `request_ref` (CT-YYYYMMDD-XXXXX) to
 -- `booking_requests_email` so the email-mode tunnel can surface a stable

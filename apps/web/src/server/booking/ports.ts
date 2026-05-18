@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { realClock, type Clock, type RandomSource } from '@cct/domain/shared';
+import { realClock, type Clock, type RandomSource } from '@mch/domain/shared';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 

@@ -3,7 +3,7 @@ import 'server-only';
 import {
   amadeusSentimentToAggregateRating,
   type AmadeusAggregateRating,
-} from '@cct/integrations/amadeus';
+} from '@mch/integrations/amadeus';
 
 import { env } from '@/lib/env';
 import { getAmadeusClient } from '@/lib/amadeus';

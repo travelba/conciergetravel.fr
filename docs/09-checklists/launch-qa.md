@@ -1,4 +1,4 @@
-# Checklist QA pré-lancement — ConciergeTravel.fr
+# Checklist QA pré-lancement — MyConciergeHotel.com
 
 Mirror du CDC v3.0 §12.2.
 

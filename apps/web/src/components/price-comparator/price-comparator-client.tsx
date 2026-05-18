@@ -8,7 +8,7 @@ import {
   type CompetitorPrice,
   type CompetitorProvider,
   type NormalizedComparison,
-} from '@cct/domain/price-comparison';
+} from '@mch/domain/price-comparison';
 
 import type { Locale } from '@/i18n/routing';
 

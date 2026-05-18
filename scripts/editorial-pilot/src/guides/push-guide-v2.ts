@@ -161,7 +161,7 @@ export async function pushGuideV2(
         guide.meta_desc_fr,
         guide.meta_desc_en,
         todayIso,
-        'ConciergeTravel Éditorial',
+        'MyConciergeHotel Éditorial',
         '/equipe/editorial',
         options.publish,
         JSON.stringify(guide.tables),

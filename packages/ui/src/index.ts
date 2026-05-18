@@ -1,5 +1,5 @@
 /**
- * @cct/ui — design system primitives.
+ * @mch/ui — design system primitives.
  * Token-driven so the entire visual identity is restylable by overriding
  * `tokens.css` (cf. responsive-ui-architecture skill).
  */

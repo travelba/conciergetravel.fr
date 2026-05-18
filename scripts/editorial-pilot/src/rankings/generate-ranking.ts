@@ -51,7 +51,7 @@ export const GeneratedRankingSchema = z.object({
 });
 export type GeneratedRanking = z.infer<typeof GeneratedRankingSchema>;
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour ConciergeTravel.fr (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
+const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
 
 Tu construis des classements éditoriaux ("Les meilleurs Palaces de X", "Top 10 Palaces avec spa", etc.) au ton "long-read Condé Nast Traveler". Style :
 - Précis, factuel, JAMAIS de superlatifs creux

@@ -4,11 +4,11 @@
  * editorial sections) and persists them.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings-v2.ts --slug=meilleurs-palaces-france
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings-v2.ts --slug=meilleurs-palaces-france,meilleurs-palaces-paris
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings-v2.ts --all
  */
 

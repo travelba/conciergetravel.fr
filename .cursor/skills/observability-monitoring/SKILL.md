@@ -1,9 +1,9 @@
 ---
 name: observability-monitoring
-description: Observability stack for ConciergeTravel.fr (Sentry, structured logs with pino, Vercel Analytics, Web Vitals, alerts, dashboards). Use whenever you add error handling, logs, custom metrics, or alert configuration.
+description: Observability stack for MyConciergeHotel.com (Sentry, structured logs with pino, Vercel Analytics, Web Vitals, alerts, dashboards). Use whenever you add error handling, logs, custom metrics, or alert configuration.
 ---
 
-# Observability and monitoring — ConciergeTravel.fr
+# Observability and monitoring — MyConciergeHotel.com
 
 Per CDC v3.0 §2, monitoring is **Sentry** with **Datadog optional in Phase 2**. The MVP uses Sentry for errors + tracing, pino for structured logs, Vercel Analytics + Web Vitals for runtime, and basic alerts.
 

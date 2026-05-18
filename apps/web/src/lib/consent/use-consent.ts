@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import type { ConsentState } from '@cct/domain/consent';
+import type { ConsentState } from '@mch/domain/consent';
 
 import { onConsentChanged, readConsentClient } from './client';
 
@@ -27,7 +27,7 @@ function toView(state: ConsentState | null): ConsentView {
 }
 
 /**
- * Reactive consent state — subscribes to `cct:consent-changed` and
+ * Reactive consent state — subscribes to `mch:consent-changed` and
  * re-renders dependent islands when the user updates their choices.
  *
  * Critical guarantees (skill: security-engineering §GDPR):

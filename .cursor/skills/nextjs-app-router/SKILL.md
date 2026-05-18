@@ -1,9 +1,9 @@
 ---
 name: nextjs-app-router
-description: Next.js 15 App Router patterns and conventions for ConciergeTravel.fr. Use whenever you create or modify routes, layouts, server actions, route handlers, metadata, fetch caching, revalidation tags, or middleware.
+description: Next.js 15 App Router patterns and conventions for MyConciergeHotel.com. Use whenever you create or modify routes, layouts, server actions, route handlers, metadata, fetch caching, revalidation tags, or middleware.
 ---
 
-# Next.js 15 App Router — ConciergeTravel.fr
+# Next.js 15 App Router — MyConciergeHotel.com
 
 We use **Next.js 15 App Router** with **React 19 Server Components by default**. Every change must respect the contractual rendering matrix (cf. `product-architecture` skill).
 
@@ -65,6 +65,9 @@ for editorial routes whose underlying data only changes on publish.
 
 - `next-intl` middleware mounted in `middleware.ts`. Default locale `fr` without prefix; `en` prefixed.
 - All page params include `[locale]`. Read locale via `unstable_setRequestLocale(locale)` at top of each page/layout.
+- **Namespace strings are not type-safe.** A typo like `getTranslations({ namespace: 'hotel' })` (instead of `'hotelPage'`) doesn't fail the build — it silently throws `MISSING_MESSAGE: hotel (fr)` at render time, gets swallowed by the error boundary, and the page degrades visually with no compile signal. Treat any `MISSING_MESSAGE` in the prod log as P1.
+  - **Discovery rule**: before merging a PR that touches a new server component using `getTranslations`, do `rg "namespace:\s*['\"]<name>['\"]"` and verify `<name>` exists at the top level of `apps/web/src/i18n/messages/fr.json` AND `en.json`. The top-level keys in V1 are `common, navigation, homepage, searchPage, header, consent, footer, legal, priceComparator, destinationPage, hotelPage, roomPage, errors, account, reservationStart, reservationConfirmation, reservationInvite, reservationRecap, reservationPayment` — anything outside that list is a bug.
+  - **Smoke contract**: every E2E that renders an editorial/hotel page must `grep`/`expect-not` `MISSING_MESSAGE` in `console.error`. Otherwise i18n drift accumulates silently across releases.
 
 ### Streaming, suspense, parallel routes
 
@@ -137,6 +140,58 @@ code never re-uses the array in a position that triggers the
 `readonly` inference issue. When it does (typically `Array.reduce<T>`
 or property access on an inferred element), fall back to try/catch.
 
+### Function props NEVER cross the RSC → Client boundary (Next 15.3+)
+
+A Server Component cannot pass a function (closure, arrow, method) as a
+prop to a Client Component. Next 15.3 throws at request time:
+
+```
+Error: Functions cannot be passed directly to Client Components unless
+you explicitly expose it by marking it with "use server".
+{ ..., lightboxCounter: function lightboxCounter }
+```
+
+The typical trap is wrapping `next-intl`'s `getTranslations` in a closure:
+
+```tsx
+// ❌ Bad — Server Component, closure prop
+<HotelGalleryLightbox
+  translations={{
+    lightboxCounter: (current, total) => t('gallery.lightboxCounter', { current, total }),
+  }}
+/>
+```
+
+Two fixes that DO cross the boundary safely:
+
+```tsx
+// ✅ Good — pass the raw ICU template, interpolate in the client
+<HotelGalleryLightbox
+  translations={{
+    lightboxCounterTemplate: t.raw('gallery.lightboxCounter') as string,
+  }}
+/>;
+
+// Inside the 'use client' component:
+const label = props.translations.lightboxCounterTemplate
+  .replace('{current}', String(current))
+  .replace('{total}', String(total));
+```
+
+```tsx
+// ✅ Good — use `useTranslations` directly in the client component
+'use client';
+import { useTranslations } from 'next-intl';
+function Lightbox() {
+  const t = useTranslations('hotelPage');
+  return <p>{t('gallery.lightboxCounter', { current, total })}</p>;
+}
+```
+
+Reference fix: `apps/web/src/components/hotel/hotel-gallery-lightbox.tsx`
+(`lightboxCounterTemplate` prop) — was caught when smoke-testing
+`/fr/hotel/le-bristol-paris` after a Next 15.1 → 15.3 upgrade.
+
 ### Middleware matcher must list every top-level folder you want to bypass
 
 `next-intl`'s middleware matcher uses a negative-lookahead alternation
@@ -161,9 +216,9 @@ prerendered (`○ /sitemaps/rankings.xml`), but production returns 404.
 // apps/web/src/app/[locale]/(marketing)/hotels/france/[region]/[city]/[hotel]/page.tsx
 import { unstable_setRequestLocale } from 'next-intl/server';
 import { getHotelBySlug } from '@/lib/data/hotels';
-import { JsonLd } from '@cct/seo/jsonld';
-import { hotelJsonLd, breadcrumbJsonLd } from '@cct/seo/jsonld/builders';
-import { AeoBlock } from '@cct/ui/seo/AeoBlock';
+import { JsonLd } from '@mch/seo/jsonld';
+import { hotelJsonLd, breadcrumbJsonLd } from '@mch/seo/jsonld/builders';
+import { AeoBlock } from '@mch/ui/seo/AeoBlock';
 
 export const revalidate = 21600; // 6h ISR per CDC §2.2
 
@@ -187,11 +242,40 @@ export default async function HotelPage({ params: { locale, region, city, hotel 
 }
 ```
 
+## Private folders — `_foldername` is **not** a route
+
+Next.js App Router treats any folder prefixed with `_` as **private** —
+files inside are excluded from routing entirely, even if they export a
+valid `page.tsx` / `route.ts`. This is documented but easy to forget
+mid-debugging.
+
+Concrete bite (18 May 2026, lost ~20 min during a Vercel preview
+investigation): a diagnostic route at
+`apps/web/src/app/api/_diag/supabase/route.ts` returned a 404 page
+from every URL we tried. Vercel build logs showed nothing about the
+file. The fix was a single rename — `_diag` → `diag` — and the route
+appeared at `/api/diag/supabase` on the next deploy.
+
+Use cases — when to keep / avoid the underscore prefix:
+
+- **Keep `_`** for collocated helpers (`_components/`, `_lib/`,
+  `_types.ts`) that should live next to their consumers but never be
+  routed. This is the intended use of private folders.
+- **Avoid `_`** for any folder that hosts a `page.tsx`, `route.ts`,
+  `layout.tsx`, or `loading.tsx`. Use a different naming convention
+  if you want to mark the route as internal (e.g. `/api/diag/`,
+  `/admin/`, or route groups with `(group)`).
+- **Token-gate** internal routes (diagnostic, admin tooling) via a
+  hard-coded UUID or a dedicated env secret — don't rely on obscurity.
+
 ## References
 
-- Next.js 15 App Router docs.
+- Next.js 15 App Router docs — [Private folders](https://nextjs.org/docs/app/building-your-application/routing/colocation#private-folders).
 - CDC v3.0 §2.2 (rendering), §6 (SEO/GEO), §9 (mobile-first).
 - `seo-technical`, `redis-caching`, `responsive-ui-architecture` skills.
 - **`structured-data-schema-org`** — CSP nonce contract details for JSON-LD.
 - **`security-engineering`** — full CSP3 policy + middleware.
 - **`editorial-long-read-rendering`** — two-column layout, TOC sidebar pattern.
+- **`cicd-release-management` Rule 9** — Vercel env vars scoped per
+  environment (Production / Preview / Development); the cross-link for the
+  diagnostic-endpoint pattern that triggered this skill update.

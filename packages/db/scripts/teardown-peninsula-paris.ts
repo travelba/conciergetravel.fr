@@ -4,7 +4,7 @@
  * Deletes the `hotels` row matching `slug = 'peninsula-paris'`. The FK
  * cascade on `hotel_rooms.hotel_id` removes the associated room rows
  * automatically. Cloudinary assets are NOT deleted by this script (use
- * `cloudinary-asset-mgmt` tooling with the tag `cct:test:peninsula` if you
+ * `cloudinary-asset-mgmt` tooling with the tag `mch:test:peninsula` if you
  * need to wipe them).
  *
  * Idempotent: if no row matches the slug, exits with code 0.
@@ -12,7 +12,7 @@
  * Refuses to run on prod unless `SEED_ALLOW_PROD=true`.
  *
  * Usage (from repo root):
- *   pnpm --filter @cct/db teardown:peninsula
+ *   pnpm --filter @mch/db teardown:peninsula
  */
 import postgres from 'postgres';
 import { z } from 'zod';
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
       );
     }
     console.info('[teardown:peninsula] Cloudinary assets NOT deleted — use the tag');
-    console.info('[teardown:peninsula]   tags="cct:test:peninsula"  (cloud dvbjwh5wy)');
+    console.info('[teardown:peninsula]   tags="mch:test:peninsula"  (cloud dvbjwh5wy)');
   } catch (error) {
     console.error('[teardown:peninsula] failed:', error);
     process.exitCode = 1;

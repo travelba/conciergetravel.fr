@@ -1,5 +1,5 @@
-import { loadSharedEnv, type SharedEnv } from '@cct/config/env';
-import { err, type Result } from '@cct/domain/shared';
+import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
+import { err, type Result } from '@mch/domain/shared';
 
 import type { AlgoliaIndexingError } from './errors.js';
 import { AlgoliaHotelRecordSchema, HotelSourceRowSchema, type HotelSourceRow } from './types.js';

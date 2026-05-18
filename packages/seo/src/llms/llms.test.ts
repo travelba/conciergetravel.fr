@@ -5,7 +5,7 @@ import { buildLlmsFullTxt, buildLlmsTxt } from './index';
 describe('buildLlmsTxt', () => {
   it('emits sections with URL + description bullets', () => {
     const out = buildLlmsTxt({
-      siteName: 'ConciergeTravel.fr',
+      siteName: 'MyConciergeHotel.com',
       tagline: 'Hôtels 5★ France',
       originUrl: 'https://example.com',
       about: 'Description.',
@@ -17,7 +17,7 @@ describe('buildLlmsTxt', () => {
         },
       ],
     });
-    expect(out).toContain('# ConciergeTravel.fr — Hôtels 5★ France');
+    expect(out).toContain('# MyConciergeHotel.com — Hôtels 5★ France');
     expect(out).toContain('## Pages stratégiques');
     expect(out).toContain('- https://example.com/x — Page X');
     expect(out).toContain('Dernière mise à jour : 2026-05-11');

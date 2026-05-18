@@ -1,4 +1,4 @@
-# Conception et phasage — ConciergeTravel.fr
+# Conception et phasage — MyConciergeHotel.com
 
 > Point d’entrée pour **reprendre la conception** : lier le cahier des charges (CDC), les livrables documentaires sous `docs/`, les contextes métier et les décisions d’architecture (ADR).
 

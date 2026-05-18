@@ -1,9 +1,9 @@
 ---
 name: search-engineering
-description: Algolia-based internal search engineering for ConciergeTravel.fr (autocomplete destinations, hotel catalog facets, indexing pipeline, relevance tuning, synonyms). Use for any code touching Algolia indices, search UI, or search-related domain logic.
+description: Algolia-based internal search engineering for MyConciergeHotel.com (autocomplete destinations, hotel catalog facets, indexing pipeline, relevance tuning, synonyms). Use for any code touching Algolia indices, search UI, or search-related domain logic.
 ---
 
-# Search engineering — ConciergeTravel.fr
+# Search engineering — MyConciergeHotel.com
 
 We use **Algolia** for instant typo-tolerant search on destinations and hotels (CDC §2). Indices are kept in sync from Payload via `afterChange` hooks. Search powers autocomplete on the homepage and the catalog facet pages, while real-time prices come from Amadeus.
 

@@ -79,11 +79,11 @@ From the monorepo root :
 
 ```bash
 # Generate both pilot fiches
-pnpm --filter @cct/editorial-pilot run run:all
+pnpm --filter @mch/editorial-pilot run run:all
 
 # Or one at a time
-pnpm --filter @cct/editorial-pilot run run:plaza
-pnpm --filter @cct/editorial-pilot run run:cap-eden-roc
+pnpm --filter @mch/editorial-pilot run run:plaza
+pnpm --filter @mch/editorial-pilot run run:cap-eden-roc
 ```
 
 Or from this folder :

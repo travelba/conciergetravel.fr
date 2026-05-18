@@ -65,6 +65,11 @@ async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
   // throw; the destination pages tolerate an empty catalog so we coerce all
   // failure modes to `[]` here rather than scattering try/catch at every
   // call site.
+  //
+  // Failures are surfaced via `console.error` in every environment (including
+  // production) — silent empty arrays previously hid Vercel preview env
+  // misconfigurations for hours. PII never reaches this code path; the
+  // logged error contains nothing user-related.
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
@@ -72,17 +77,42 @@ async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
       .select(HOTELS_FOR_GROUPING_COLUMNS)
       .eq('is_published', true)
       .limit(2000);
-    if (error || !Array.isArray(data)) return [];
+    if (error) {
+      console.error('[destinations.cities] Supabase returned error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      return [];
+    }
+    if (!Array.isArray(data)) {
+      console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
+      return [];
+    }
     const out: HotelGroupRow[] = [];
+    let parseFailures = 0;
     for (const raw of data) {
       const parsed = HotelGroupRowSchema.safeParse(raw);
-      if (parsed.success) out.push(parsed.data);
+      if (parsed.success) {
+        out.push(parsed.data);
+      } else {
+        parseFailures += 1;
+      }
+    }
+    if (parseFailures > 0) {
+      console.error('[destinations.cities] Schema validation failures:', {
+        totalRows: data.length,
+        parsed: out.length,
+        failures: parseFailures,
+      });
     }
     return out;
   } catch (e) {
-    if (process.env['NODE_ENV'] !== 'production') {
-      console.warn('[destinations.cities] fetchAllPublished failed:', e);
-    }
+    console.error(
+      '[destinations.cities] fetchAllPublished threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
     return [];
   }
 }

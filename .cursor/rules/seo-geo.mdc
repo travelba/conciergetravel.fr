@@ -1,10 +1,10 @@
 ---
-description: SEO + GEO + AEO conventions for ConciergeTravel.fr (metadata, JSON-LD, robots.txt, llms.txt, agent-skills, AEO blocks).
+description: SEO + GEO + AEO conventions for MyConciergeHotel.com (metadata, JSON-LD, robots.txt, llms.txt, agent-skills, AEO blocks).
 globs: "{packages/seo,apps/web/src/app}/**/*.{ts,tsx}"
 alwaysApply: true
 ---
 
-# SEO / GEO / AEO — ConciergeTravel.fr
+# SEO / GEO / AEO — MyConciergeHotel.com
 
 ## Décisions structurantes (référencer dans les PR)
 
@@ -27,7 +27,7 @@ alwaysApply: true
 
 ## JSON-LD
 
-- All builders live in `@cct/seo/jsonld/*` and return plain objects validated by Zod.
+- All builders live in `@mch/seo/jsonld/*` and return plain objects validated by Zod.
 - Compose with `JsonLd.withSchemaOrgContext(...)` to ensure `@context: "https://schema.org"`.
 - Emit via `JsonLdScript` from `@/components/seo/json-ld` so the CSP nonce is applied. Never inline `<script>` directly.
 - Forbidden: fabricated ratings. `aggregateRating` requires real `reviewCount > 0` from Amadeus or Google Places.
@@ -53,7 +53,7 @@ alwaysApply: true
 ## AEO blocks + FAQ (CDC §2.11, §6 — levier GEO majeur)
 
 - AEO = Answer Engine Optimization: short, quotable answer (40–80 words) paired with `FAQPage` JSON-LD.
-- Validated by `buildAeoBlock` from `@cct/seo`. Ship one block per pillar page (homepage, hotel detail, destination hub).
+- Validated by `buildAeoBlock` from `@mch/seo`. Ship one block per pillar page (homepage, hotel detail, destination hub).
 - Include a freshness signal in the answer text (e.g. `Mise à jour <date>`) so LLMs surface recency.
 - The visible section uses `data-aeo`, `aria-labelledby`, and renders inside a sober container — no extra styling competing with the body.
 - **FAQ block on hotel detail: 10–15 Q&A obligatoires** (CDC §2.11). The 10 questions canoniques (parking, petit-déj, Wi-Fi, animaux, distance aéroport, piscine, check-in anticipé, transferts, annulation, taxes) must always be present, even with generic answers.

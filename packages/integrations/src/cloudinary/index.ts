@@ -1,0 +1,22 @@
+/**
+ * Cloudinary integration (skill: api-integration).
+ *
+ * Consumed by `scripts/photos/sync-hotel-photos.ts` to push the
+ * results of WS1 (Wikimedia Commons) + WS2 (Google Places) into the
+ * `cct/hotels/{slug}/` folder.
+ */
+export const CLOUDINARY_INTEGRATION_VERSION = '0.0.1' as const;
+
+export type { CloudinaryError } from './errors.js';
+export {
+  type CloudinaryClientConfig,
+  configureCloudinary,
+  toGalleryRow,
+  uploadFromUrl,
+} from './client.js';
+export {
+  CloudinaryUploadResultSchema,
+  type CloudinaryUploadInput,
+  type CloudinaryUploadResult,
+  type GalleryImageRow,
+} from './types.js';

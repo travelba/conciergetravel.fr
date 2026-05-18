@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
-import { buildLlmsTxt, type LlmsTxtSectionItem } from '@cct/seo';
+import { buildLlmsTxt, type LlmsTxtSectionItem } from '@mch/seo';
 
 import { env } from '@/lib/env';
+import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { listPublishedHotelSummaries } from '@/server/hotels/get-hotel-by-slug';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
@@ -10,7 +11,7 @@ import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 // to a day so this route never serves a slow miss.
 export const revalidate = 3600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 /**
  * /llms.txt — concise index for LLMs (skill: geo-llm-optimization).
@@ -33,16 +34,17 @@ export async function GET(): Promise<NextResponse> {
   // (skill: nextjs-app-router — generateStaticParams / route handlers
   // must degrade gracefully). The route still ships a valid llms.txt
   // skeleton without dynamic catalogue when the DB is unreachable.
-  const [hotels, rankings] = await Promise.all([
+  const [hotels, rankings, guides] = await Promise.all([
     listPublishedHotelSummaries(50).catch(() => []),
     listPublishedRankings().catch(() => []),
+    listPublishedGuides().catch(() => []),
   ]);
 
   const catalogItems: LlmsTxtSectionItem[] = hotels.map((h) => {
     const distinction = h.isPalace ? 'Palace' : `${h.stars} étoiles`;
     return {
       url: `${origin}/fr/hotel/${h.slugFr}`,
-      description: `${h.nameFr} (${h.city}) — ${distinction}. Fiche complète : photos, chambres, restaurants, FAQ, distinctions.`,
+      description: `${h.nameFr} (${h.city}) — ${distinction}. Fiche complète + Conseil du Concierge (chambre, table ou timing à retenir).`,
     };
   });
 
@@ -53,16 +55,29 @@ export async function GET(): Promise<NextResponse> {
     description:
       r.factualSummaryFr !== null && r.factualSummaryFr.length > 0
         ? r.factualSummaryFr
-        : `${r.titleFr} — classement éditorial ConciergeTravel (${r.entryCount} hôtel${r.entryCount === 1 ? '' : 's'}).`,
+        : `${r.titleFr} — classement éditorial MyConciergeHotel (${r.entryCount} hôtel${r.entryCount === 1 ? '' : 's'}).`,
+  }));
+
+  // Destination guides (long-read 3500+ words, GEO-optimised).
+  // Highest-value pages for AI Overviews and Perplexity citations
+  // because they answer broad "où séjourner à X" queries with
+  // structured tables + glossary + sources.
+  const guideItems: LlmsTxtSectionItem[] = guides.map((g) => ({
+    url: `${origin}/fr/guide/${g.slug}`,
+    description:
+      g.summaryFr.length > 0
+        ? g.summaryFr
+        : `${g.nameFr} — guide éditorial long-format (palaces, gastronomie, art de vivre, infos pratiques).`,
   }));
 
   const body = buildLlmsTxt({
-    siteName: 'ConciergeTravel.fr',
-    tagline: 'Agence IATA Hôtels 5★ & Palaces France',
+    siteName: 'MyConciergeHotel.com',
+    tagline: 'Votre concierge des Palaces et hôtels 5★ en France — agence IATA',
     originUrl: origin,
     about:
-      "ConciergeTravel.fr est l'agence de voyage IATA spécialisée dans les hôtels 5 étoiles et Palaces en France. " +
-      'Tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.',
+      'MyConciergeHotel.com est le concierge en ligne des Palaces et hôtels 5 étoiles en France. ' +
+      'Chaque fiche est rédigée par nos conseillers et se termine par un « Conseil du Concierge » : un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent. ' +
+      'Côté réservation : agence IATA, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.',
     lastUpdatedDate: new Date().toISOString(),
     sections: [
       {
@@ -71,7 +86,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/fr`,
             description:
-              'Page d’accueil — agence IATA, sélection d’hôtels 5★ et Palaces en France.',
+              'Page d’accueil — le concierge des Palaces et hôtels 5★ en France (agence IATA).',
           },
           {
             url: `${origin}/fr/destination`,
@@ -81,7 +96,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/fr/recherche`,
             description:
-              'Recherche temps réel par ville et dates (tarifs nets GDS, paiement Amadeus).',
+              'Recherche temps réel par ville et dates — votre concierge propose les meilleures options (tarifs nets GDS, paiement Amadeus).',
           },
         ],
       },
@@ -104,6 +119,21 @@ export async function GET(): Promise<NextResponse> {
                     'Hub de tous les classements (filtres par type, lieu, thématique, occasion).',
                 },
                 ...rankingItems,
+              ],
+            },
+          ]
+        : []),
+      ...(guideItems.length > 0
+        ? [
+            {
+              title: `Guides de destinations (${guideItems.length} long-reads ≥ 3 500 mots)`,
+              items: [
+                {
+                  url: `${origin}/fr/guides`,
+                  description:
+                    'Hub de tous les guides destination — Paris, Côte d’Azur, Provence, Alpes, Bourgogne, etc.',
+                },
+                ...guideItems,
               ],
             },
           ]

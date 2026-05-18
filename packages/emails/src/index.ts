@@ -1,5 +1,5 @@
 /**
- * @cct/emails — Brevo transactional email templates (React Email).
+ * @mch/emails — Brevo transactional email templates (React Email).
  * Each template lives in `src/templates/<slug>.tsx` and is rendered to HTML
  * by `packages/integrations/brevo` before sending (skill: email-workflow-automation).
  */

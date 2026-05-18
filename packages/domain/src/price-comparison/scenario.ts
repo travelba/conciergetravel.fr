@@ -3,7 +3,7 @@ import type { ComparisonScenario, NormalizedComparison } from './types';
 export interface ScenarioInput {
   readonly normalized: NormalizedComparison;
   /**
-   * ConciergeTravel price (TTC, EUR minor units) — the **fresh** Amadeus
+   * MyConciergeHotel price (TTC, EUR minor units) — the **fresh** Amadeus
    * or Little Hotelier price. Per skill, this value is never cached
    * because pre-payment offer pricing must always be live.
    *

@@ -26,7 +26,7 @@
  *
  * Usage
  * -----
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/import/import-atout-france-5stars.ts \
  *     [--max=70] [--per-city=2] [--dry-run]
  */
@@ -386,7 +386,7 @@ function prepareRows(
         const d = buildDescription(name, city, region);
         return { descriptionFr: d.fr, descriptionEn: d.en };
       })(),
-      metaTitleFr: `${name} — Hôtel 5 étoiles ${city} | ConciergeTravel`,
+      metaTitleFr: `${name} — Hôtel 5 étoiles ${city} | MyConciergeHotel`,
       metaDescFr:
         `${name}, hôtel 5 étoiles à ${city}. Classement Atout France. Toutes les informations pratiques, photos et contact.`.slice(
           0,

@@ -6,8 +6,8 @@ import {
   normalizeComparison,
   type NormalizedComparison,
   type RawCompetitorEntry,
-} from '@cct/domain/price-comparison';
-import { Apify, Makcorps } from '@cct/integrations';
+} from '@mch/domain/price-comparison';
+import { Apify, Makcorps } from '@mch/integrations';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { redis } from '@/lib/redis';

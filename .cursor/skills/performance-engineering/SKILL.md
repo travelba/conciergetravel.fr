@@ -1,9 +1,9 @@
 ---
 name: performance-engineering
-description: Performance engineering rules for ConciergeTravel.fr (Core Web Vitals, image optimization, fonts, code splitting, edge runtime). Use when you ship UI, add dependencies, or change build/runtime configuration.
+description: Performance engineering rules for MyConciergeHotel.com (Core Web Vitals, image optimization, fonts, code splitting, edge runtime). Use when you ship UI, add dependencies, or change build/runtime configuration.
 ---
 
-# Performance engineering — ConciergeTravel.fr
+# Performance engineering — MyConciergeHotel.com
 
 The cahier des charges sets **contractual Core Web Vitals targets** (CDC v3.0 §9.2):
 

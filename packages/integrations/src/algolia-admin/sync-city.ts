@@ -1,4 +1,4 @@
-import { err, type Result } from '@cct/domain/shared';
+import { err, type Result } from '@mch/domain/shared';
 
 import type { AlgoliaIndexingError } from './errors.js';
 import { buildCityAlgoliaRecord } from './map-city-record.js';

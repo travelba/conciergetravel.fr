@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
@@ -16,7 +16,7 @@ import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 // destination directory. Catalog stays edge-cached at the CDN layer.
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -38,7 +38,7 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 adresse' : `${n} adresses`),
     seeFiche: 'Voir la fiche',
-    metaTitle: 'Hôtels 5★ et Palaces en France — Sélection ConciergeTravel',
+    metaTitle: 'Hôtels 5★ et Palaces en France — Sélection MyConciergeHotel',
     metaDesc:
       "Découvrez notre sélection éditoriale d'hôtels 5 étoiles et Palaces en France : Paris, Côte d'Azur, Alpes, Provence, Aquitaine. Réservation IATA, tarifs nets GDS.",
   },
@@ -53,7 +53,7 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 address' : `${n} addresses`),
     seeFiche: 'View the page',
-    metaTitle: '5★ Hotels and Palaces in France — ConciergeTravel Selection',
+    metaTitle: '5★ Hotels and Palaces in France — MyConciergeHotel Selection',
     metaDesc:
       'Discover our editorial selection of 5-star hotels and Palaces in France: Paris, French Riviera, Alps, Provence, Aquitaine. IATA booking, GDS net rates.',
   },

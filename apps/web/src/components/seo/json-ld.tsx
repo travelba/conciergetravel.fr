@@ -6,7 +6,7 @@ import type { ReactElement } from 'react';
  *
  * # CSP contract
  *
- * Inline scripts on ConciergeTravel.fr live under a strict CSP3 policy:
+ * Inline scripts on MyConciergeHotel.com live under a strict CSP3 policy:
  *
  *     script-src 'self' 'nonce-{nonce}' 'strict-dynamic'
  *

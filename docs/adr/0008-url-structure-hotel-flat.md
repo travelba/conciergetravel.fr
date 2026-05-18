@@ -56,7 +56,7 @@ Une migration `/hotel/[slug]` → `/hotels/[pays]/[ville]/[slug]` impliquerait :
 ### Négatives
 
 - **Divergence assumée vs CDC** : doit être tracée explicitement dans `seo-technical/SKILL.md` (fait) et `hotel-detail-page.mdc` (fait).
-- Si un jour ConciergeTravel s'ouvre à plusieurs pays, on devra envisager `/hotel/<country>/<slug>` ou un sous-domaine pays (`fr.conciergetravel.fr`) — pas un blocker court terme (V1 = France seulement).
+- Si un jour MyConciergeHotel s'ouvre à plusieurs pays, on devra envisager `/hotel/<country>/<slug>` ou un sous-domaine pays (`fr.myconciergehotel.com`) — pas un blocker court terme (V1 = France seulement).
 
 ## Plan de rollback
 

@@ -1,9 +1,9 @@
 ---
 name: editorial-long-read-rendering
-description: Rendering pattern for ≥ 3500-word editorial pages on ConciergeTravel.fr (guides destinations, classements de palaces, articles éditoriaux longs). Sticky TOC with scroll-spy, auto-linked entity bodies, interleaved callouts, comparison tables, glossary, EEAT sources footer, two-level FAQ. Use when designing or modifying any long-read page or its supporting Server Components.
+description: Rendering pattern for ≥ 3500-word editorial pages on MyConciergeHotel.com (guides destinations, classements de palaces, articles éditoriaux longs). Sticky TOC with scroll-spy, auto-linked entity bodies, interleaved callouts, comparison tables, glossary, EEAT sources footer, two-level FAQ. Use when designing or modifying any long-read page or its supporting Server Components.
 ---
 
-# Editorial long-read rendering — ConciergeTravel.fr
+# Editorial long-read rendering — MyConciergeHotel.com
 
 Long-form editorial (destination guides ≥ 3 500 mots, classements ≥ 3 500 mots, articles thématiques) follows a single composable rendering architecture. Every component plays a specific role for **SEO** (structure HTML), **GEO** (LLM ingestion), **AEO** (Answer Engine Optimization) and **EEAT** (sources & expertise). This skill is the blueprint.
 
@@ -249,6 +249,7 @@ re-run the generator (see [`llm-output-robustness`](../llm-output-robustness/SKI
 - `structured-data-schema-org` — JSON-LD + CSP nonce contract.
 - `seo-technical`, `geo-llm-optimization` — SEO/GEO surface design.
 - `content-modeling` — Payload collections that source the editorial.
+- `concierge-voice-pipeline` — ADR-0011 constraints applied to long-read prompts (sentence ≤ 25 mots, `concierge_tip` callouts injected automatically).
 - Reference impls: `apps/web/src/app/[locale]/guide/[citySlug]/page.tsx`,
   `apps/web/src/app/[locale]/classement/[slug]/page.tsx`,
   `apps/web/src/components/editorial/*.tsx`.

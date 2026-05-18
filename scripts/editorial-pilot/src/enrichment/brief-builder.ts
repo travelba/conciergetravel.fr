@@ -58,7 +58,11 @@ export function hotelCoreFromDt(dt: DtHotel): HotelCore {
     name: dt.name,
     city: dt.location.city,
     region: dt.location.region || null,
-    country: dt.location.country || 'FR',
+    // DATAtourisme is a French dataset — every record is in France. The
+    // upstream `country` field is a localised LABEL ("France", "France
+    // métropolitaine"), not an ISO 3166 alpha-2 code. BriefSchema
+    // requires a strict 2-char code, so we normalise here.
+    country: normaliseCountryToIso2(dt.location.country),
     streetAddress: dt.location.streetAddress,
     postalCode: dt.location.postalCode,
     latitude: dt.location.latitude,
@@ -71,6 +75,21 @@ export function hotelCoreFromDt(dt: DtHotel): HotelCore {
     sourceUri: dt.uri || `https://api.datatourisme.fr/v1/catalog/${dt.uuid}`,
     sourceLabel: `DATAtourisme catalog — ${dt.uri || dt.uuid}`,
   };
+}
+
+/**
+ * Maps a localised country label or alpha-3 code to the canonical
+ * ISO 3166-1 alpha-2 code BriefSchema requires (`.length(2)`).
+ * DATAtourisme is France-only so we default to `FR`.
+ */
+function normaliseCountryToIso2(raw: string | null | undefined): string {
+  if (typeof raw !== 'string') return 'FR';
+  const trimmed = raw.trim();
+  if (trimmed.length === 2) return trimmed.toUpperCase();
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('fr')) return 'FR';
+  if (lower.includes('france')) return 'FR';
+  return 'FR';
 }
 
 export interface EnrichmentSources {
@@ -117,12 +136,28 @@ function mapPoiCategoryToBrief(category: DtPoi['category']): string {
       return 'park_garden';
     case 'building':
       return 'remarkable_building';
+    case 'castle':
+      return 'castle';
+    case 'memorial':
+      return 'memorial';
     case 'religious':
       return 'religious_site';
     case 'theater':
       return 'theater';
+    case 'beach':
+      return 'beach';
+    case 'trail':
+      return 'trail';
+    case 'viewpoint':
+      return 'viewpoint';
+    case 'winery':
+      return 'winery';
+    case 'sports':
+      return 'sports_leisure';
     case 'restaurant':
       return 'gourmet_restaurant';
+    case 'store':
+      return 'store';
     case 'other':
       return 'other';
   }
@@ -155,7 +190,7 @@ export function buildBriefFromSources(
   } = sources;
   const slug = opts.slug ?? slugify(hotel.name);
   const advisorName = opts.advisorName ?? 'Léa';
-  const advisorRole = opts.advisorRole ?? 'conseillère senior ConciergeTravel.fr';
+  const advisorRole = opts.advisorRole ?? 'conseillère senior MyConciergeHotel.com';
   const today = todayIso();
 
   const keyDates = buildKeyDates(wikidata, hotel);
@@ -224,7 +259,7 @@ export function buildBriefFromSources(
     iata_insider: {
       advisor_name: advisorName,
       advisor_role: advisorRole,
-      key_observation: `${AUTO_DRAFT} — observation insider à rédiger par conseiller ConciergeTravel (visite, retour client, ou Tavily insider sources)`,
+      key_observation: `${AUTO_DRAFT} — observation insider à rédiger par conseiller MyConciergeHotel (visite, retour client, ou Tavily insider sources)`,
       best_for: `${AUTO_DRAFT} — profil voyageur cible à définir`,
       honest_caveat: `${AUTO_DRAFT} — caveat honnête à rédiger`,
     },
@@ -689,7 +724,7 @@ function buildVerificationList(v: VerificationListInput): string[] {
   } else {
     list.push("Services : recouper langues parlées et statut Clefs d'Or avec la fiche officielle");
   }
-  list.push('Observation IATA insider authentique — à rédiger par conseiller ConciergeTravel');
+  list.push('Observation IATA insider authentique — à rédiger par conseiller MyConciergeHotel');
   list.push('Recoupement GPS DATAtourisme avec Google Maps');
   if (v.wikidataInceptionYear !== null) {
     list.push(

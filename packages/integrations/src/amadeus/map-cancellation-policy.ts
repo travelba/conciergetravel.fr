@@ -1,5 +1,5 @@
-import { normaliseCancellationPolicy, type CancellationPolicy } from '@cct/domain/booking';
-import { err, ok, type Result } from '@cct/domain/shared';
+import { normaliseCancellationPolicy, type CancellationPolicy } from '@mch/domain/booking';
+import { err, ok, type Result } from '@mch/domain/shared';
 
 import type { AmadeusError } from './errors.js';
 import type { AmadeusOffer } from './types.js';

@@ -18,7 +18,7 @@ Au sommet de l'édifice, une piscine en bois d'acajou, évoquant le pont d'un ya
 
 Le Bristol Paris compte environ 190 chambres, avec une répartition entre chambres classiques et suites qui nécessite confirmation finale. Parmi elles, la Suite Impériale, avec ses 320 m², sa vue sur le jardin intérieur et son mobilier Empire, illustre un luxe raffiné. La Suite Penthouse, perchée au 6ᵉ étage, séduit par sa terrasse de 100 m² offrant une vue panoramique sur les toits parisiens.
 
-> « Pour un séjour combinant rendez-vous officiels et cadre raffiné, Le Bristol est idéal. Sa proximité avec le Palais de l'Élysée et son équipe de conciergerie habituée aux codes protocolaires en font un choix de prédilection. » — Léa, conseillère senior Paris ConciergeTravel.fr
+> « Pour un séjour combinant rendez-vous officiels et cadre raffiné, Le Bristol est idéal. Sa proximité avec le Palais de l'Élysée et son équipe de conciergerie habituée aux codes protocolaires en font un choix de prédilection. » — Léa, conseillère senior Paris MyConciergeHotel.com
 
 Cet hôtel s'adresse aussi aux familles, grâce à son jardin intérieur, véritable espace de respiration — rare dans Paris intra-muros. Un détail pratique souvent sous-estimé.
 

@@ -7,7 +7,7 @@
  *
  * Output: `out/hotels-catalog.json` (one row per hotel).
  *
- * Run: `pnpm --filter @cct/editorial-pilot exec tsx src/guides/list-hotels-for-rankings.ts`
+ * Run: `pnpm --filter @mch/editorial-pilot exec tsx src/guides/list-hotels-for-rankings.ts`
  */
 
 import fs from 'node:fs/promises';

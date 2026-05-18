@@ -1,10 +1,10 @@
 ---
-description: DDD bounded contexts and layering rules for ConciergeTravel.fr. The 4 layers and what's allowed/forbidden in each.
+description: DDD bounded contexts and layering rules for MyConciergeHotel.com. The 4 layers and what's allowed/forbidden in each.
 globs: "{packages,apps}/**/*.{ts,tsx}"
 alwaysApply: true
 ---
 
-# Architecture layers — ConciergeTravel.fr
+# Architecture layers — MyConciergeHotel.com
 
 The repo is a four-layer monorepo. **Each layer has a strict allow-list of what it may import.**
 A pull request that breaks layering must be rejected.
@@ -26,22 +26,22 @@ Vendor adapters. **Mandatory pattern:**
 - Typed config via `packages/config`
 - HTTP client with retries + circuit breaker (`packages/integrations/_http`)
 - Zod schemas for **every** vendor response — never `as` cast
-- Redis caching (`packages/integrations/_redis`) keyed by `cct:<vendor>:<scope>:<key>`
+- Redis caching (`packages/integrations/_redis`) keyed by `mch:<vendor>:<scope>:<key>`
 - Typed error union, mapped to domain errors at the boundary
 
 **Forbidden:** importing `next/*` or `react`. Apps consume integrations, never the reverse.
 
 ## Layer 3 — `packages/seo/`, `packages/emails/`, `packages/ui/`, `packages/db/`
 
-Pure cross-cutting helpers. May depend on `@cct/domain` and small external libs (`zod`, `clsx`, …).
+Pure cross-cutting helpers. May depend on `@mch/domain` and small external libs (`zod`, `clsx`, …).
 Each export must have a `.test.ts` covering at least one happy path and one failure path.
 
 ## Layer 4 — Apps (`apps/web`, `apps/admin`)
 
 Apps **compose** the lower layers. Apps:
-- Read env via `@cct/config/env-web` (web) or `env` (server-only).
+- Read env via `@mch/config/env-web` (web) or `env` (server-only).
 - Map domain errors to user-facing responses (server actions, route handlers).
-- Never re-implement business logic. If you're tempted to inline a rule, lift it to `@cct/domain`.
+- Never re-implement business logic. If you're tempted to inline a rule, lift it to `@mch/domain`.
 
 ## Cheat-sheet
 

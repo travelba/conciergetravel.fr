@@ -1,0 +1,37 @@
+---
+description: Editorial voice for MyConciergeHotel.com (Concierge persona, sentence rules, fiche skeleton, multilingual adaptation). Pointer that loads EDITORIAL_VOICE.md in agent context.
+alwaysApply: true
+---
+
+# Editorial voice — pointer
+
+The brand voice, persona, and writing rules live in
+[`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) at the repo root.
+
+**Always read it before:**
+- Authoring or editing any user-facing copy (hotel fiches, guides, rankings, FAQ, AEO blocks, emails, meta tags, llms.txt).
+- Writing or modifying any LLM prompt that produces French/English/Spanish/German/Italian copy (pipelines in `scripts/editorial-pilot/src/**`).
+- Designing a new content block, callout, or editorial section component.
+
+The deeper production grammar (banned lexicon, syntactic patterns, gate QA
+metrics) lives in [`docs/editorial/style-guide.md`](../../docs/editorial/style-guide.md).
+The two documents are **complementary** — see
+[`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) §6 Compatibility for the
+three open conflicts to arbitrate before the brief fully supersedes the
+legacy style guide.
+
+## Hard rules surfaced here (do not re-derive)
+
+- **Concierge voice** — expert complice, jamais commercial, toujours précis. Not a journalist, not a salesperson — an insider sharing operational secrets.
+- **Always TTC, always euros** in any price mention.
+- **Sentence length ≤ 25 words** (see §6 conflict C2 against the journalistic-density rule in `style-guide.md` §9).
+- **`## ⭐ Le Conseil du Concierge`** block at the end of every hotel fiche — 60-90 words, opens with a concrete operational secret (a room number, a timing, an access route).
+- **Banned superlatives**: `incroyable`, `magnifique`, `exceptionnel` (except Atout France classification), `magique`, `sublime`, plus the 75+ patterns in `style-guide.md` §4-5.
+- **Cultural references**: Atout France (with year), Michelin (with star count), Relais & Châteaux, Leading Hotels of the World, Forbes Travel Guide — never vague mentions.
+- **Multilingual**: same Concierge voice, culturally adapted (never machine-translated literally). Numbers, addresses, distances must match the FR canonical version verbatim.
+
+## Where the voice gets enforced in code
+
+- **LLM prompts**: `scripts/editorial-pilot/src/**/prompts/*.md` (the `01-draft-factuel.md`, `03-humanisation-magazine.md`, `05-correctrice-post-fact-check.md`, etc.). New brief rules must be folded into these prompts to take effect on the next regenerate.
+- **Component skeleton**: the 9-section fiche skeleton (`EDITORIAL_VOICE.md` §4) must map cleanly onto the 15-block CDC §2 contract in [`.cursor/rules/hotel-detail-page.mdc`](hotel-detail-page.mdc). The editorial sections are blocks 4 (description longue) + 11 (FAQ).
+- **Gate QA** (post-LLM validator): metrics in `style-guide.md` §9. New brief rules become hard fails only after C1/C2/C3 are arbitrated.

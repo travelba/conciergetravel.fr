@@ -1,9 +1,9 @@
 ---
 name: technical-documentation
-description: Documentation standards for ConciergeTravel.fr (README, architecture, integrations, deployment, ADRs, runbooks, checklists). Use whenever you create or update any document under `docs/` or top-level READMEs.
+description: Documentation standards for MyConciergeHotel.com (README, architecture, integrations, deployment, ADRs, runbooks, checklists). Use whenever you create or update any document under `docs/` or top-level READMEs.
 ---
 
-# Technical documentation — ConciergeTravel.fr
+# Technical documentation — MyConciergeHotel.com
 
 The cahier des charges (CDC v3.0 §15) requires a complete documentation package: main README, architecture doc, env variables list, integrations docs, deployment plan, back-office runbook, SEO/GEO checklist, QA pre-launch checklist.
 

@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
@@ -14,7 +14,7 @@ import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -29,13 +29,13 @@ const T = {
     eyebrow: 'Groupe hôtelier',
     titleSuffix: 'en France',
     subtitle: (brand: string, n: number) =>
-      `Les ${n} adresses ${brand} de notre catalogue éditorial — sélection IATA ConciergeTravel.`,
+      `Les ${n} adresses ${brand} de notre catalogue éditorial — sélection IATA MyConciergeHotel.`,
     palace: 'Palace',
     stars: '★',
     seeFiche: 'Voir la fiche',
     breadcrumbHome: 'Accueil',
     breadcrumbHotels: 'Hôtels',
-    metaTitle: (brand: string) => `${brand} en France — Hôtels & Palaces | ConciergeTravel`,
+    metaTitle: (brand: string) => `${brand} en France — Hôtels & Palaces | MyConciergeHotel`,
     metaDesc: (brand: string, n: number) =>
       `Découvrez les ${n} adresses ${brand} de notre sélection éditoriale : Palaces, hôtels 5 étoiles. Réservation IATA, tarifs nets GDS.`,
   },
@@ -43,13 +43,13 @@ const T = {
     eyebrow: 'Hotel group',
     titleSuffix: 'in France',
     subtitle: (brand: string, n: number) =>
-      `The ${n} ${brand} addresses from our editorial catalog — ConciergeTravel IATA selection.`,
+      `The ${n} ${brand} addresses from our editorial catalog — MyConciergeHotel IATA selection.`,
     palace: 'Palace',
     stars: '★',
     seeFiche: 'View the page',
     breadcrumbHome: 'Home',
     breadcrumbHotels: 'Hotels',
-    metaTitle: (brand: string) => `${brand} in France — Hotels & Palaces | ConciergeTravel`,
+    metaTitle: (brand: string) => `${brand} in France — Hotels & Palaces | MyConciergeHotel`,
     metaDesc: (brand: string, n: number) =>
       `Discover the ${n} ${brand} addresses from our editorial selection: Palaces, 5-star hotels. IATA booking, GDS net rates.`,
   },

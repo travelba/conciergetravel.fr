@@ -1,5 +1,5 @@
 /**
- * @cct/db — public surface.
+ * @mch/db — public surface.
  * Schema (Drizzle types) + supabase admin client factory.
  * Migrations live under ./migrations/*.sql, executed via scripts/migrate.ts.
  */

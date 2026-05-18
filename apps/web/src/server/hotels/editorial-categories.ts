@@ -116,16 +116,16 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     labelEn: 'Parisian Palaces',
     h1Fr: 'Les Palaces parisiens',
     h1En: 'The Parisian Palaces',
-    metaTitleFr: 'Palaces parisiens — Sélection ConciergeTravel',
-    metaTitleEn: 'Parisian Palaces — ConciergeTravel selection',
+    metaTitleFr: 'Palaces parisiens — Sélection MyConciergeHotel',
+    metaTitleEn: 'Parisian Palaces — MyConciergeHotel selection',
     metaDescFr:
-      'Découvrez la sélection ConciergeTravel des Palaces parisiens distingués par Atout France : Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
+      'Découvrez la sélection MyConciergeHotel des Palaces parisiens distingués par Atout France : Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
     metaDescEn:
-      'Discover the ConciergeTravel selection of Parisian Palaces distinguished by Atout France: Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
+      'Discover the MyConciergeHotel selection of Parisian Palaces distinguished by Atout France: Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
     subtitleFr: (n) =>
-      `${n} adresses parisiennes distinguées par la mention Palace d'Atout France — la conciergerie ConciergeTravel vous accompagne pour réserver l'expérience à 360°.`,
+      `${n} adresses parisiennes distinguées par la mention Palace d'Atout France — la conciergerie MyConciergeHotel vous accompagne pour réserver l'expérience à 360°.`,
     subtitleEn: (n) =>
-      `${n} Parisian addresses awarded the Palace distinction by Atout France — ConciergeTravel concierges assist you with a 360° booking experience.`,
+      `${n} Parisian addresses awarded the Palace distinction by Atout France — MyConciergeHotel concierges assist you with a 360° booking experience.`,
     match: (h) => h.isPalace && PARIS_DEPTS.has(lower(h.city)),
   },
   {
@@ -134,12 +134,12 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     labelEn: 'Mountain Palaces',
     h1Fr: 'Les Palaces de montagne',
     h1En: 'Mountain Palaces',
-    metaTitleFr: 'Palaces à la montagne (Alpes) — ConciergeTravel',
-    metaTitleEn: 'Mountain Palaces (French Alps) — ConciergeTravel',
+    metaTitleFr: 'Palaces à la montagne (Alpes) — MyConciergeHotel',
+    metaTitleEn: 'Mountain Palaces (French Alps) — MyConciergeHotel',
     metaDescFr:
-      "Sélection ConciergeTravel des Palaces des Alpes : Courchevel, Megève, Val d'Isère, Chamonix — Cheval Blanc Courchevel, Les Airelles, Le Strato, Four Seasons Megève…",
+      "Sélection MyConciergeHotel des Palaces des Alpes : Courchevel, Megève, Val d'Isère, Chamonix — Cheval Blanc Courchevel, Les Airelles, Le Strato, Four Seasons Megève…",
     metaDescEn:
-      "ConciergeTravel selection of French Alps Palaces: Courchevel, Megève, Val d'Isère, Chamonix — Cheval Blanc, Les Airelles, Le Strato, Four Seasons Megève…",
+      "MyConciergeHotel selection of French Alps Palaces: Courchevel, Megève, Val d'Isère, Chamonix — Cheval Blanc, Les Airelles, Le Strato, Four Seasons Megève…",
     subtitleFr: (n) =>
       `${n} Palaces des Alpes françaises — séjours ski-in / ski-out, spas après-ski et tables Michelin au cœur des massifs.`,
     subtitleEn: (n) =>
@@ -153,12 +153,12 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     labelEn: 'Seafront Palaces',
     h1Fr: 'Les Palaces en bord de mer',
     h1En: 'Seafront Palaces',
-    metaTitleFr: "Palaces de la Côte d'Azur & bord de mer — ConciergeTravel",
-    metaTitleEn: 'French Riviera & seafront Palaces — ConciergeTravel',
+    metaTitleFr: "Palaces de la Côte d'Azur & bord de mer — MyConciergeHotel",
+    metaTitleEn: 'French Riviera & seafront Palaces — MyConciergeHotel',
     metaDescFr:
-      "Sélection ConciergeTravel des Palaces côte de mer : Côte d'Azur, Atlantique, Corse — Eden-Roc, Grand-Hôtel du Cap-Ferrat, La Réserve Ramatuelle, Hôtel du Palais Biarritz…",
+      "Sélection MyConciergeHotel des Palaces côte de mer : Côte d'Azur, Atlantique, Corse — Eden-Roc, Grand-Hôtel du Cap-Ferrat, La Réserve Ramatuelle, Hôtel du Palais Biarritz…",
     metaDescEn:
-      'ConciergeTravel selection of seafront Palaces: French Riviera, Atlantic coast, Corsica — Eden-Roc, Grand-Hôtel du Cap-Ferrat, La Réserve Ramatuelle, Hôtel du Palais Biarritz…',
+      'MyConciergeHotel selection of seafront Palaces: French Riviera, Atlantic coast, Corsica — Eden-Roc, Grand-Hôtel du Cap-Ferrat, La Réserve Ramatuelle, Hôtel du Palais Biarritz…',
     subtitleFr: (n) =>
       `${n} Palaces les pieds dans l'eau — adresses iconiques de la Côte d'Azur, du Bassin d'Arcachon, du Pays basque et de Corse.`,
     subtitleEn: (n) =>
@@ -172,12 +172,12 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     labelEn: 'Vineyard Palaces',
     h1Fr: 'Les Palaces des vignobles',
     h1En: 'Vineyard Palaces',
-    metaTitleFr: 'Palaces des vignobles français — ConciergeTravel',
-    metaTitleEn: 'Palaces in French vineyards — ConciergeTravel',
+    metaTitleFr: 'Palaces des vignobles français — MyConciergeHotel',
+    metaTitleEn: 'Palaces in French vineyards — MyConciergeHotel',
     metaDescFr:
-      'Sélection ConciergeTravel des Palaces des grandes régions viticoles : Bordeaux, Champagne, Bourgogne — Les Sources de Caudalie, Château Léoube, Domaine des Crayères…',
+      'Sélection MyConciergeHotel des Palaces des grandes régions viticoles : Bordeaux, Champagne, Bourgogne — Les Sources de Caudalie, Château Léoube, Domaine des Crayères…',
     metaDescEn:
-      'ConciergeTravel selection of Palaces in the great wine regions: Bordeaux, Champagne, Burgundy — Les Sources de Caudalie, Château Léoube, Domaine des Crayères…',
+      'MyConciergeHotel selection of Palaces in the great wine regions: Bordeaux, Champagne, Burgundy — Les Sources de Caudalie, Château Léoube, Domaine des Crayères…',
     subtitleFr: (n) =>
       `${n} Palaces ancrés dans les terroirs viticoles français — œnotourisme, gastronomie et art de vivre.`,
     subtitleEn: (n) =>
@@ -190,12 +190,12 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     labelEn: 'All Palaces in France',
     h1Fr: 'Les Palaces distingués par Atout France',
     h1En: 'Palaces distinguished by Atout France',
-    metaTitleFr: 'Tous les Palaces de France (mention Atout France) — ConciergeTravel',
-    metaTitleEn: 'All French Palaces (Atout France distinction) — ConciergeTravel',
+    metaTitleFr: 'Tous les Palaces de France (mention Atout France) — MyConciergeHotel',
+    metaTitleEn: 'All French Palaces (Atout France distinction) — MyConciergeHotel',
     metaDescFr:
-      "La sélection complète ConciergeTravel des Palaces français distingués par la mention officielle Atout France — Paris, Côte d'Azur, Alpes, Provence, Aquitaine.",
+      "La sélection complète MyConciergeHotel des Palaces français distingués par la mention officielle Atout France — Paris, Côte d'Azur, Alpes, Provence, Aquitaine.",
     metaDescEn:
-      "ConciergeTravel's complete selection of French Palaces awarded the official Atout France distinction — Paris, French Riviera, Alps, Provence, Aquitaine.",
+      "MyConciergeHotel's complete selection of French Palaces awarded the official Atout France distinction — Paris, French Riviera, Alps, Provence, Aquitaine.",
     subtitleFr: (n) =>
       `${n} adresses régulées par la mention Palace d'Atout France — la plus haute distinction hôtelière française, accordée à seulement ~30 propriétés dans tout le pays.`,
     subtitleEn: (n) =>

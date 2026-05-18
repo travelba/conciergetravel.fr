@@ -40,7 +40,7 @@ export async function buildLegalMetadata(args: {
       title,
       description,
       locale: args.locale === 'fr' ? 'fr_FR' : 'en_US',
-      siteName: 'ConciergeTravel',
+      siteName: 'MyConciergeHotel',
     },
   };
 }

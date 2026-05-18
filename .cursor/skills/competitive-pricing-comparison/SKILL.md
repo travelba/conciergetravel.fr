@@ -1,11 +1,11 @@
 ---
 name: competitive-pricing-comparison
-description: Non-affiliated price comparator for ConciergeTravel.fr (Makcorps primary, Apify fallback). Strict legal/UX rules — no affiliate links, no logos, text only, sober display. Use for any code touching the comparator widget, normalization, persistence, or scenario logic.
+description: Non-affiliated price comparator for MyConciergeHotel.com (Makcorps primary, Apify fallback). Strict legal/UX rules — no affiliate links, no logos, text only, sober display. Use for any code touching the comparator widget, normalization, persistence, or scenario logic.
 ---
 
-# Competitive pricing comparator — ConciergeTravel.fr
+# Competitive pricing comparator — MyConciergeHotel.com
 
-Per CDC addendum v3.2, ConciergeTravel.fr displays Booking.com, Expedia, Hotels.com and the official site prices **for information only**, **without affiliate links**, **without competitor logos**. The goal is to reassure users on price competitiveness, not redirect them.
+Per CDC addendum v3.2, MyConciergeHotel.com displays Booking.com, Expedia, Hotels.com and the official site prices **for information only**, **without affiliate links**, **without competitor logos**. The goal is to reassure users on price competitiveness, not redirect them.
 
 ## Triggers
 

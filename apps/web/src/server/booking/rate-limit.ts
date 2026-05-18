@@ -48,7 +48,7 @@ const verdictFromLimit = (limited: { success: boolean; reset: number }): RateLim
  * is active we short-circuit to "always allow" so the booking-email
  * spec exercises the route without spurious 500s.
  */
-const isE2EBypass = (): boolean => typeof process.env['CCT_E2E_FAKE_HOTEL_ID'] === 'string';
+const isE2EBypass = (): boolean => typeof process.env['MCH_E2E_FAKE_HOTEL_ID'] === 'string';
 
 const E2E_ALLOW: RateLimitVerdict = { ok: true, retryAfterSec: 0 };
 
