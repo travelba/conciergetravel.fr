@@ -1,9 +1,9 @@
 ---
 name: llm-output-robustness
-description: Engineering rules for robust LLM-generated JSON in ConciergeTravel.fr — multi-call single-concern pipelines, Zod schema design for LLM drift, allowlist post-validation, retry strategy, concurrency. Use when designing or modifying any LLM pipeline that produces structured output (editorial guides, rankings, hotel fiches, AEO blocks).
+description: Engineering rules for robust LLM-generated JSON in MyConciergeHotel.com — multi-call single-concern pipelines, Zod schema design for LLM drift, allowlist post-validation, retry strategy, concurrency. Use when designing or modifying any LLM pipeline that produces structured output (editorial guides, rankings, hotel fiches, AEO blocks).
 ---
 
-# LLM output robustness — ConciergeTravel.fr
+# LLM output robustness — MyConciergeHotel.com
 
 The editorial pipelines (`scripts/editorial-pilot/src/guides/*-v2.ts`, `scripts/editorial-pilot/src/rankings/*-v2.ts`) generate ≥ 3 500-word JSON payloads from GPT-4o. Naive single-prompt designs fail in production with truncation, enum drift, and hallucinated entities. This skill encodes the patterns that get the pipelines from 30 % success rate to ≥ 95 %.
 
@@ -97,14 +97,53 @@ rows: z.array(...).min(1).max(20),  // tolerate single-row tables
 
 A hard `min(6)` on a "produce exactly 6 tables" prompt fails ~10 % of the time. `min(4)` makes the entire pipeline 10× more reliable. Adjust the **prompt** to ask for the high end, the **schema** to accept the low end.
 
-### 3c. Optional English fields default to empty string
+### 3c. Optional English fields — use the `EnString` helper, NEVER `.min(N).optional().default('')`
+
+**CRITICAL Zod gotcha:** `z.string().min(N).optional().default('')` does **not** bypass `.min(N)`. The `.default('')` produces an empty string, which is then validated against `.min(N)` and rejected. The whole schema fails on _every_ guide where the LLM omits the EN field. This caused a 2026-05-18 regression where 8 of 16 destination guides failed Call M with errors like `summary_en: String must contain at least 40 character(s)`.
+
+**Reusable helper — put it at the top of the schema file:**
 
 ```ts
-title_en: z.string().optional().default(''),
-meta_desc_en: z.string().optional().default(''),
+// EN strings are intentionally lenient — the dedicated I18N pipeline
+// (translate-hotels-en.ts pattern) re-translates EVERY guide FR → EN
+// downstream, so we accept empty or short LLM output here.
+const EnString = (maxLen: number) =>
+  z.preprocess((v) => {
+    if (v === null || v === undefined) return '';
+    if (typeof v !== 'string') return v;
+    return v;
+  }, z.string().max(maxLen).default(''));
+
+const SectionSchema = z.object({
+  title_fr: z.string().min(4).max(180),
+  title_en: EnString(180),  // ← accepts '', null, undefined, missing
+  body_fr: z.string().min(350),
+  body_en: EnString(8000),
+});
 ```
 
-The LLM often skips `_en` variants when the prompt focuses on FR. `.default('')` keeps the pipeline running; the front-end falls back to the FR variant when EN is empty.
+The front-end falls back to the FR variant when EN is empty. The dedicated I18N pipeline backfills the EN content in a separate pass with full validation.
+
+**Reference:** [`scripts/editorial-pilot/src/guides/generate-guide-v2.ts`](mdc:scripts/editorial-pilot/src/guides/generate-guide-v2.ts) (search for `EnString`).
+
+### 3c-bis. URLs from LLM — preprocess empty / non-URL to undefined
+
+LLMs emit `""` or `"TBD"` for missing URLs. `z.string().url().optional()` rejects empty strings (they're "present but invalid"). Preprocess:
+
+```ts
+url: z.preprocess(
+  (v) => {
+    if (typeof v !== 'string') return v;
+    const t = v.trim();
+    if (t.length === 0) return undefined;
+    if (!/^https?:\/\//iu.test(t)) return undefined;
+    return t;
+  },
+  z.string().url().optional().nullable(),
+),
+```
+
+Real regression (2026-05-18): without this, `HighlightSchema.url` failed 50 % of guides because LLM emitted `url: ""` for highlights that don't have a canonical Wikipedia page.
 
 ### 3d. `nullish()` for soft optional anchors
 
@@ -253,7 +292,9 @@ async function runWithConcurrency<T, R>(
 
 Default cap: **4** for OpenAI tier 1 (avoids 429 rate limits at ~10 k TPM gpt-4o).
 
-## Rule 8 — `callLlm` with typed generic + JSON mode
+## Rule 8 — `callLlm` with typed generic + JSON mode + auto-retry
+
+The basic shape:
 
 ```ts
 async function callLlm<S extends z.ZodTypeAny>(
@@ -263,32 +304,72 @@ async function callLlm<S extends z.ZodTypeAny>(
   schema: S,
   tag: string,
 ): Promise<z.infer<S>> {
-  const resp = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: system },
-      { role: 'user', content: user },
-    ],
-    response_format: { type: 'json_object' },
-    temperature: 0.4,
-  });
-  const raw = resp.choices[0]?.message.content ?? '';
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error(`[${tag}] invalid JSON: ${raw.slice(0, 200)}…`);
-  }
-  const result = schema.safeParse(parsed);
-  if (!result.success) {
-    const msg = result.error.errors.map((e) => `- ${e.path.join('.')}: ${e.message}`).join('\n');
-    throw new Error(`[${tag}] schema-fail:\n${msg}`);
-  }
-  return result.data;
+  // ... single attempt with safeParse → throw on schema-fail
 }
 ```
 
 The `<S extends z.ZodTypeAny>` generic gives perfect type inference at call sites. The `tag` prefix in errors makes log triage trivial (`[v2 paris call-B] schema-fail: tables.1.rows: …`).
+
+### Rule 8a — Single-shot retry with schema-error feedback
+
+In long pipelines (16-call guide generator, 7-pass editorial pipeline)
+a single LLM hiccup throws away the whole sibling work. **Add one
+in-loop retry that surfaces the Zod issues as feedback** before giving
+up. This rescued ≥ 80 % of our v6 guide failures (`align: boolean`,
+missing optional `_en` fields, null where enum expected) without
+manual intervention:
+
+```ts
+async function callLlm<S extends z.ZodTypeAny>(
+  client: LlmClient, sys: string, user: string, schema: S, tag: string,
+): Promise<z.infer<S>> {
+  const a1 = await callLlmOnce(client, sys, user, schema, tag, 0.55);
+  if (a1.ok) return a1.data;
+
+  const issuesText = a1.issues
+    .slice(0, 25)
+    .map((i) => `- ${i.path.join('.')}: ${i.message}`)
+    .join('\n');
+  const retryPrompt = [
+    user, '',
+    '---',
+    'TENTATIVE PRÉCÉDENTE INVALIDE — corrige STRICTEMENT ces erreurs Zod :',
+    issuesText, '',
+    'Règles de récupération :',
+    '- `align` ∈ {"left","right","center"} ou absent. Jamais booléen/nombre.',
+    '- Champs `_en` acceptent "" ou la traduction.',
+    '- Champs `url` doivent être absents ou https://… valides.',
+    '- Aucun champ enum ne peut être null — omets-le.',
+    '- Retourne UNIQUEMENT le JSON corrigé.',
+  ].join('\n');
+  // 2nd attempt at lower temperature (more obedient).
+  const a2 = await callLlmOnce(client, sys, retryPrompt, schema, tag, 0.2);
+  if (a2.ok) return a2.data;
+
+  const issues = a2.issues.map((i) => `- ${i.path.join('.')}: ${i.message}`).join('\n');
+  throw new Error(`[${tag}] schema-fail after retry:\n${issues}`);
+}
+```
+
+Two crucial subtleties:
+
+- The retry prompt **echoes the original user prompt verbatim** before
+  appending the issue list. The LLM otherwise loses all context and
+  generates a stub.
+- The retry temperature drops to `0.2`. A "be obedient" hint via
+  temperature is more effective than another paragraph of rules.
+
+Reference implementation:
+`scripts/editorial-pilot/src/guides/generate-guide-v2.ts`
+(`callLlm` + `callLlmOnce`). Use it any time you have a multi-call
+pipeline where one schema-fail wastes meaningful budget.
+
+### Rule 8b — Don't retry on non-JSON output
+
+If `JSON.parse` fails on the model output, retrying rarely helps —
+the model is in a different failure mode (truncation, refusal, prose
+preamble). Surface the first 300 chars in the error and fail fast.
+Retries are reserved for `safeParse` failures only.
 
 ## Rule 9 — Extraction is a different job (temperature 0, gpt-4o-mini)
 
@@ -387,4 +468,5 @@ The rule prevents the worst pathology: a pipeline silently producing
 - `geo-llm-optimization` skill (allowlist EEAT signals).
 - **`content-enrichment-pipeline`** — the multi-source brief that feeds generation.
 - **`editorial-long-read-rendering`** — how the generated JSON renders.
+- **`concierge-voice-pipeline`** — pass 8 (Concierge voice), bloc ConciergeAdvice, shortener phrases > 25 mots, contraintes ADR-0011.
 - Reference impls: `scripts/editorial-pilot/src/guides/generate-guide-v2.ts`, `…/rankings/generate-ranking-v2.ts`, `…/enrichment/llm-extract.ts`.

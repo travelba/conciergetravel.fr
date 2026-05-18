@@ -3,7 +3,7 @@
   "framework": "nextjs",
   "regions": ["cdg1"],
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@cct/web",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@mch/web",
   "outputDirectory": ".next",
-  "ignoreCommand": "cd ../.. && npx turbo-ignore @cct/web"
+  "ignoreCommand": "cd ../.. && npx turbo-ignore @mch/web"
 }

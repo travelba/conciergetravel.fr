@@ -18,7 +18,7 @@ Le domaine s’étend sur neuf hectares de végétation méditerranéenne, bien 
 
 Avec 118 hébergements répartis entre chambres, suites et villas, chaque recoin de l’Hôtel du Cap-Eden-Roc porte la signature d’un soin méticuleux. La suite Eden-Roc, avec sa terrasse panoramique, ou la Villa Soleil, privatisable avec ses six chambres et piscine, illustre un luxe confidentiel que peu d’établissements peuvent se targuer d’égaler.
 
-> « L’arrivée par l’allée de pins, surtout en été, n’a pas d’équivalent. C’est un palace qui se mérite par l’expérience, pas par la démonstration », résume Marc, conseiller senior Côte d’Azur ConciergeTravel.fr.
+> « L’arrivée par l’allée de pins, surtout en été, n’a pas d’équivalent. C’est un palace qui se mérite par l’expérience, pas par la démonstration », résume Marc, conseiller senior Côte d’Azur MyConciergeHotel.com.
 
 Recommandé pour des séjours prolongés, l’hôtel s’apprécie pleinement dans la durée. Toutefois, il est à noter que l’établissement ferme ses portes de mi-octobre à mi-avril — une saisonnalité qui saura frustrer les amateurs de séjours hivernaux.
 

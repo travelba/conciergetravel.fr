@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { createAmadeusClient, type AmadeusClient } from '@cct/integrations/amadeus';
+import { createAmadeusClient, type AmadeusClient } from '@mch/integrations/amadeus';
 
 import { env } from '@/lib/env';
 import { redis } from '@/lib/redis';

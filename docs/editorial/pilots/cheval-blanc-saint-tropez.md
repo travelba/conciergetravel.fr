@@ -16,7 +16,7 @@ Un ponton privé, rare atout dans la région, invite les voyageurs à découvrir
 
 Avec une capacité totale située entre 30 et 33 clés selon les rénovations, dont la plupart offrent une vue sur la Méditerranée, le Cheval Blanc St-Tropez favorise une intimité que peu d’autres palaces peuvent égaler. La Suite Cheval Blanc impressionne par son mobilier signé Liaigre et sa salle de bain en marbre de Carrare. La Villa La Pinède, avec ses trois chambres et sa piscine privée, reflète l’histoire et l’élégance du lieu.
 
-> « Le Cheval Blanc St-Tropez défie les conventions des palaces traditionnels : ici, on privilégie une ambiance de résidence privée, avec le luxe ultime d'une table triplement étoilée en bord de plage accessible en peignoir. » — Marc, conseiller senior Côte d’Azur ConciergeTravel.fr
+> « Le Cheval Blanc St-Tropez défie les conventions des palaces traditionnels : ici, on privilégie une ambiance de résidence privée, avec le luxe ultime d'une table triplement étoilée en bord de plage accessible en peignoir. » — Marc, conseiller senior Côte d’Azur MyConciergeHotel.com
 
 Idéal pour les couples ou les groupes réduits cherchant raffinement et sérénité, cette résidence est néanmoins soumise à quelques contraintes : sa saisonnalité stricte et sa localisation, nécessitant des déplacements fréquents pour explorer pleinement Saint-Tropez.
 

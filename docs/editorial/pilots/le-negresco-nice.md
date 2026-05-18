@@ -18,7 +18,7 @@ Symbole intemporel de la Belle Époque, la silhouette du Negresco est immédiate
 
 Avec environ 124 clés, dont 29 suites, le Negresco combine histoire et singularité. Chaque hébergement raconte une page de l'art et de l'histoire de France. La Suite Belle Époque, par exemple, offre un mobilier Napoléon III et une vue sur la Méditerranée, tandis que la Suite Catherine de Médicis célèbre l’héritage Renaissance.
 
-Mais ce qui distingue le Negresco, c'est son atmosphère de "maison-musée". Comme le souligne Sophie, conseillère senior Côte d’Azur pour ConciergeTravel.fr : « Le Negresco n'est pas un palace standard — c'est une immersion dans l'histoire, bordée par la Méditerranée. C'est un lieu où chaque détail, chaque pièce d'art raconte un fragment de la Riviera d'antan. »
+Mais ce qui distingue le Negresco, c'est son atmosphère de "maison-musée". Comme le souligne Sophie, conseillère senior Côte d’Azur pour MyConciergeHotel.com : « Le Negresco n'est pas un palace standard — c'est une immersion dans l'histoire, bordée par la Méditerranée. C'est un lieu où chaque détail, chaque pièce d'art raconte un fragment de la Riviera d'antan. »
 
 Idéal pour les amateurs de patrimoine et les voyageurs en quête d'authenticité culturelle. Seul bémol notable : certaines chambres standards affichent des dimensions plus modestes que les standards des nouveaux palaces, et l'absence de distinction "Palace" par Atout France peut surprendre.
 

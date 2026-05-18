@@ -1,6 +1,14 @@
-# Style guide éditorial — ConciergeTravel.fr
+# Style guide éditorial — MyConciergeHotel.com
 
-> Source de vérité unique pour la voix éditoriale du site. Tous les prompts du pipeline IA dérivent de ce document. Toute évolution est versionnée (Git) et impacte rétroactivement les fiches lors du prochain run d'amélioration.
+> Source de vérité unique pour la **grammaire de production** du site (lexique
+> interdit, signatures stylistiques, patterns syntaxiques, métriques de gate
+> QA). Tous les prompts du pipeline IA dérivent de ce document.
+>
+> Pour le **brief de marque** synthétique (personnage « Le Concierge »,
+> identité, règles courtes, structure 9-sections), voir
+> [`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) à la racine — les deux
+> fichiers se complètent, voir §6 Compatibility du brief pour les 3 conflits
+> à arbitrer (FAQ count, longueur de phrase, posture journalistique).
 
 **Version** : 0.1 (Sprint 1B — pilote)
 **Statut** : Draft, à valider sur 2 fiches pilotes (Plaza Athénée Paris + Hôtel du Cap-Eden-Roc)
@@ -19,7 +27,7 @@ Triple registre **fusionné** dans chaque fiche, jamais séquentiel :
 | **Journalisme rigoureux** | Le Monde Style, Les Échos Weekend, Air France Magazine                    | Faits sourcés, données précises, citations attribuées, regard analytique tiers |
 | **Autorité IATA insider** | Différenciation unique du projet                                          | Voix conseiller IATA, preuve d'expérience, recommandation experte mesurée      |
 
-Notre standard de qualité : un voyageur premium doit pouvoir lire une fiche ConciergeTravel.fr et un article Condé Nast Traveler du même hôtel **sans deviner lequel est éditorial pro et lequel est généré**.
+Notre standard de qualité : un voyageur premium doit pouvoir lire une fiche MyConciergeHotel.com et un article Condé Nast Traveler du même hôtel **sans deviner lequel est éditorial pro et lequel est généré**.
 
 ---
 
@@ -309,10 +317,12 @@ Chaque fiche doit comporter **minimum** les éléments suivants. Sans eux, gate 
 
 ### Lisibilité
 
-- Score Flesch-Kincaid (français équivalent) : **50-65** (lectorat éduqué)
-- Longueur moyenne de phrase : 15-22 mots
-- Ratio phrases <12 mots : **≥ 30%** (rythme magazine)
-- Ratio phrases >25 mots : **≥ 15%** (densité journalistique)
+- Score Flesch-Kincaid (français équivalent) : **55-70** (lectorat éduqué, voix Concierge plus accessible que la version pré-Concierge)
+- Longueur moyenne de phrase : 12-18 mots
+- Ratio phrases <12 mots : **≥ 40%** (rythme Concierge)
+- Ratio phrases >25 mots : **0%** (hard rule, voir [ADR-0011](../adr/0011-concierge-voice.md) §C2)
+
+> **Changement Sprint Concierge (ADR-0011, 18 mai 2026)** : la métrique « ≥ 15 % phrases longues » qui prévalait dans la version 0.1 de ce style-guide a été **désactivée** au profit de la voix Concierge. La rigueur factuelle (§6.2) reste obligatoire — c'est la longueur de phrase qui change, pas la densité de chiffres et de sources.
 
 ### Densité factuelle
 

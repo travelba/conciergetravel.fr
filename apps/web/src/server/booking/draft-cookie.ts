@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 
-const COOKIE_NAME = 'cct.bk_draft';
+const COOKIE_NAME = 'mch.bk_draft';
 const MAX_AGE_FALLBACK_SEC = 30 * 60;
 const MIN_AGE_SEC = 30;
 const MAX_AGE_CAP_SEC = 60 * 60;

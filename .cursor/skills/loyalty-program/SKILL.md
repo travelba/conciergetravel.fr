@@ -1,9 +1,9 @@
 ---
 name: loyalty-program
-description: Loyalty program logic for ConciergeTravel.fr — tier FREE (auto, Little catalog) and tier PREMIUM (paid). Use for any code touching tier rules, benefits calculation, eligibility display in tunnel/fiches, or back-office membership management.
+description: Loyalty program logic for MyConciergeHotel.com — tier FREE (auto, Little catalog) and tier PREMIUM (paid). Use for any code touching tier rules, benefits calculation, eligibility display in tunnel/fiches, or back-office membership management.
 ---
 
-# Loyalty program — ConciergeTravel.fr
+# Loyalty program — MyConciergeHotel.com
 
 The cahier des charges defines two tiers (CDC v3.0 §8). The logic is encapsulated in `packages/domain/loyalty/`.
 
@@ -18,7 +18,7 @@ Invoke when:
 
 ## Tiers
 
-### FREE — "ConciergeTravel Essentiel"
+### FREE — "MyConciergeHotel Essentiel"
 
 - **Eligibility**: automatic on first confirmed booking.
 - **Hotels eligible**: only `is_little_catalog = true`.
@@ -29,7 +29,7 @@ Invoke when:
   - Hotel credit (amount per hotel, defined in Little catalog).
 - **Activation**: automatic; mentioned in confirmation email.
 
-### PREMIUM — "ConciergeTravel Prestige"
+### PREMIUM — "MyConciergeHotel Prestige"
 
 - **Eligibility**: paid annual subscription (price TBD; UI ready, billing in Phase 2 — explicitly deferred).
 - **Hotels eligible**: all hotels in the catalog.

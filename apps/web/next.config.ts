@@ -5,8 +5,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
-// Bundle analyzer is opt-in (`ANALYZE=true pnpm --filter @cct/web build` or
-// `pnpm --filter @cct/web analyze`). Skill: performance-engineering.
+// Bundle analyzer is opt-in (`ANALYZE=true pnpm --filter @mch/web build` or
+// `pnpm --filter @mch/web analyze`). Skill: performance-engineering.
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env['ANALYZE'] === 'true',
   openAnalyzer: false,
@@ -17,15 +17,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     typedRoutes: true,
-    optimizePackageImports: ['lucide-react', '@cct/ui'],
+    optimizePackageImports: ['lucide-react', '@mch/ui'],
   },
   transpilePackages: [
-    '@cct/ui',
-    '@cct/seo',
-    '@cct/domain',
-    '@cct/emails',
-    '@cct/db',
-    '@cct/integrations',
+    '@mch/ui',
+    '@mch/seo',
+    '@mch/domain',
+    '@mch/emails',
+    '@mch/db',
+    '@mch/integrations',
   ],
   // Allow NodeNext-style `.js` import specifiers in TS sources from
   // workspace packages (e.g. `export * from './client.js'`). Webpack
@@ -141,7 +141,7 @@ const shouldWrapSentry = !isDev && sentryAuthToken !== undefined && sentryAuthTo
 export default shouldWrapSentry
   ? withSentryConfig(baseConfig, {
       org: 'travelba',
-      project: 'cct-web',
+      project: 'mch-web',
       authToken: sentryAuthToken,
       silent: process.env['CI'] !== 'true',
       widenClientFileUpload: true,

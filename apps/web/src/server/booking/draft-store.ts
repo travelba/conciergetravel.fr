@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { BookingDraft } from '@cct/domain/booking';
+import type { BookingDraft } from '@mch/domain/booking';
 
 import { redis } from '@/lib/redis';
 

@@ -1,6 +1,6 @@
-# Environment variables — ConciergeTravel.fr
+# Environment variables — MyConciergeHotel.com
 
-Toute variable d'environnement utilisée par le projet est listée ici. Le fichier `.env.example` est la source synchronisée pour le scaffolding local. La validation runtime est assurée par `@cct/config/env` (t3-env + Zod) qui fait échouer le boot si une variable obligatoire est manquante ou invalide.
+Toute variable d'environnement utilisée par le projet est listée ici. Le fichier `.env.example` est la source synchronisée pour le scaffolding local. La validation runtime est assurée par `@mch/config/env` (t3-env + Zod) qui fait échouer le boot si une variable obligatoire est manquante ou invalide.
 
 > Convention : préfixe `NEXT_PUBLIC_` = exposé au client. Tout le reste est server-only.
 
@@ -8,8 +8,8 @@ Toute variable d'environnement utilisée par le projet est listée ici. Le fichi
 
 | Variable                     | Type         | Scope           | Description                                                         |
 | ---------------------------- | ------------ | --------------- | ------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`       | URL          | client + server | URL canonique (sans slash final). Ex. `https://conciergetravel.fr`. |
-| `NEXT_PUBLIC_SITE_NAME`      | string       | client + server | "ConciergeTravel".                                                  |
+| `NEXT_PUBLIC_SITE_URL`       | URL          | client + server | URL canonique (sans slash final). Ex. `https://myconciergehotel.com`. |
+| `NEXT_PUBLIC_SITE_NAME`      | string       | client + server | "MyConciergeHotel".                                                  |
 | `NEXT_PUBLIC_DEFAULT_LOCALE` | `fr` \| `en` | client + server | Locale par défaut. `fr` en MVP.                                     |
 
 ## Supabase

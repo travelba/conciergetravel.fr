@@ -1,8 +1,8 @@
-# ConciergeTravel.fr
+# MyConciergeHotel.com
 
 > OTA luxe — réservation et éditorial premium pour les hôtels 5 étoiles et Palaces en France.
 
-ConciergeTravel.fr combine une couche éditoriale référence (modèle Tablet Hotels), un moteur de réservation temps réel connecté à Amadeus GDS et Little Hotelier, un programme de fidélité différenciant, et un comparateur de prix non-affilié. Le projet est cadré par le cahier des charges v3.0 (mai 2026) et respecte strictement la stack imposée.
+MyConciergeHotel.com combine une couche éditoriale référence (modèle Tablet Hotels), un moteur de réservation temps réel connecté à Amadeus GDS et Little Hotelier, un programme de fidélité différenciant, et un comparateur de prix non-affilié. Le projet est cadré par le cahier des charges v3.0 (mai 2026) et respecte strictement la stack imposée.
 
 ## Stack
 
@@ -57,7 +57,7 @@ cp .env.example .env.local
 # Remplir les valeurs — voir docs/10-environment-variables.md
 
 # 3. Base de données (Supabase local OU projet cloud)
-pnpm --filter @cct/db migrate
+pnpm --filter @mch/db migrate
 
 # 4. Développement
 pnpm dev               # web + admin en parallèle

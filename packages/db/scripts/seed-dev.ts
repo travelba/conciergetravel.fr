@@ -1,5 +1,5 @@
 /**
- * Dev/preview-only seed for ConciergeTravel.fr.
+ * Dev/preview-only seed for MyConciergeHotel.com.
  *
  * Inserts three palace hotels (idempotent — `ON CONFLICT (slug)`), publishes
  * them in `booking_mode = 'amadeus'`, and — if the Algolia admin credentials
@@ -9,7 +9,7 @@
  * Refuses to run when `NODE_ENV === 'production'` or `SEED_ALLOW_PROD !== 'true'`.
  *
  * Usage (from repo root):
- *   pnpm --filter @cct/db seed:dev
+ *   pnpm --filter @mch/db seed:dev
  */
 import postgres from 'postgres';
 import { z } from 'zod';
@@ -202,7 +202,7 @@ async function maybeIndexAlgolia(
   algoliaEnv: AlgoliaEnv,
   rows: ReadonlyArray<{ id: string; seed: HotelSeed }>,
 ): Promise<void> {
-  const algoliaAdmin = await import('@cct/integrations/algolia-admin');
+  const algoliaAdmin = await import('@mch/integrations/algolia-admin');
   const svc = algoliaAdmin.createAlgoliaIndexingService({
     appId: algoliaEnv.appId,
     apiKey: algoliaEnv.apiKey,

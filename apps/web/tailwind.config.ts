@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import preset from '@cct/config/tailwind';
+import preset from '@mch/config/tailwind';
 
 const config: Config = {
   presets: [preset],

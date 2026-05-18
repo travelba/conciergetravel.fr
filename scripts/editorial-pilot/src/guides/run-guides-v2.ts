@@ -4,13 +4,13 @@
  * persists them to `editorial_guides` (v2 columns from migration 0027).
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides-v2.ts --slug=paris
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides-v2.ts --slug=paris,courchevel,cote-d-azur
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides-v2.ts --all
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides-v2.ts --all --draft
  *
  * The v1 entrypoint (run-guides.ts) is preserved for rollback.

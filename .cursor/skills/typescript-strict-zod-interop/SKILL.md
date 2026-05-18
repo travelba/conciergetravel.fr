@@ -1,9 +1,9 @@
 ---
 name: typescript-strict-zod-interop
-description: Type-level interop between Zod schemas, React component props, and `exactOptionalPropertyTypes: true` for ConciergeTravel.fr. Use whenever defining a Zod schema that will flow into React props, designing optional fields on shared types, or fixing `Type 'undefined' is not assignable to type X` compile errors caused by strict TS settings.
+description: Type-level interop between Zod schemas, React component props, and `exactOptionalPropertyTypes: true` for MyConciergeHotel.com. Use whenever defining a Zod schema that will flow into React props, designing optional fields on shared types, or fixing `Type 'undefined' is not assignable to type X` compile errors caused by strict TS settings.
 ---
 
-# TypeScript strict × Zod interop — ConciergeTravel.fr
+# TypeScript strict × Zod interop — MyConciergeHotel.com
 
 The repo runs with `strict: true` **and** `exactOptionalPropertyTypes: true` (see `packages/config/typescript/tsconfig.base.json`). That latter flag is non-negotiable per CDC §2, but it creates a class of compile errors at the Zod ↔ React boundary that the standard `typescript-strict` skill does not cover. This skill is the playbook.
 

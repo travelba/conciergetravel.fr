@@ -24,7 +24,7 @@
  * per page, ~25 pages = ~50 credits).
  *
  * Run:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/yonder/scrape-yonder-tops-index.ts
  */
 

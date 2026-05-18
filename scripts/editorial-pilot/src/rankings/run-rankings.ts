@@ -3,9 +3,9 @@
  * persists them to `editorial_rankings` + `editorial_ranking_entries`.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings.ts --slug=meilleurs-palaces-france
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/rankings/run-rankings.ts --all
  *
  * Prereq: `out/hotels-catalog.json` must exist (run list-hotels-for-rankings.ts).

@@ -1,4 +1,4 @@
-# Booking flow — ConciergeTravel.fr
+# Booking flow — MyConciergeHotel.com
 
 > Document rempli en Phase 6. Couvre :
 >

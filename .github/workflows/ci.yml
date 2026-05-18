@@ -125,7 +125,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "ci-placeholder-anon-key"
       SUPABASE_SERVICE_ROLE_KEY: "ci-placeholder-service-role-key"
-      NEXT_PUBLIC_SITE_URL: "https://ci.conciergetravel.fr"
+      NEXT_PUBLIC_SITE_URL: "https://ci.myconciergehotel.com"
       NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "ci-placeholder"
       NEXT_PUBLIC_ALGOLIA_APP_ID: "CIPLACEHOLDER"
       NEXT_PUBLIC_ALGOLIA_SEARCH_KEY: "ci-placeholder-search-key"
@@ -147,4 +147,4 @@ jobs:
 
   # E2E (Playwright) still runs locally only — it needs a live
   # database + Cloudinary cloud, which we don't wire up in CI yet.
-  # Run with `pnpm --filter @cct/web test:e2e`.
+  # Run with `pnpm --filter @mch/web test:e2e`.

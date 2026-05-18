@@ -1,11 +1,11 @@
 ---
 name: payment-orchestration
-description: Payment orchestration via Amadeus Payments for ConciergeTravel.fr (PCI scope-out, hosted iframe, 3DS2, Apple/Google Pay, idempotency). Use for any payment-related code, webhook, or UI touching the payment iframe.
+description: Payment orchestration via Amadeus Payments for MyConciergeHotel.com (PCI scope-out, hosted iframe, 3DS2, Apple/Google Pay, idempotency). Use for any payment-related code, webhook, or UI touching the payment iframe.
 ---
 
-# Payment orchestration — ConciergeTravel.fr
+# Payment orchestration — MyConciergeHotel.com
 
-Payment is **fully delegated to Amadeus Payments** (CDC §5.3, §7.3, §11). ConciergeTravel.fr is **out of PCI DSS scope**: no card data ever transits or is stored on our servers.
+Payment is **fully delegated to Amadeus Payments** (CDC §5.3, §7.3, §11). MyConciergeHotel.com is **out of PCI DSS scope**: no card data ever transits or is stored on our servers.
 
 ## Triggers
 

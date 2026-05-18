@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 
-import { beginPayment, moveToRecap } from '@cct/domain/booking';
+import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { getDraftId } from '@/server/booking/draft-cookie';

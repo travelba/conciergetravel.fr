@@ -56,7 +56,10 @@ export async function HotelGallery({
         previousImage: t('gallery.previousImage'),
         nextImage: t('gallery.nextImage'),
         closeLightbox: t('gallery.closeLightbox'),
-        lightboxCounter: (current, total) => t('gallery.lightboxCounter', { current, total }),
+        // Pass the raw ICU template — interpolated client-side because a
+        // closure cannot cross the RSC boundary (Next 15.3 throws
+        // "Functions cannot be passed directly to Client Components").
+        lightboxCounterTemplate: t.raw('gallery.lightboxCounter') as string,
       }}
     />
   );

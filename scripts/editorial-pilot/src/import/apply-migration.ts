@@ -2,7 +2,7 @@
  * Generic SQL migration applier.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/import/apply-migration.ts <path-to-migration.sql>
  *
  * Resolves the connection string in this order (mirrors push-import.ts):

@@ -1,9 +1,9 @@
 ---
-description: Conventional Commits for ConciergeTravel.fr — scopes, types, examples
+description: Conventional Commits for MyConciergeHotel.com — scopes, types, examples
 alwaysApply: false
 ---
 
-# Commit conventions — ConciergeTravel.fr
+# Commit conventions — MyConciergeHotel.com
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/) with project-specific scopes.
 

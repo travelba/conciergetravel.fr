@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
@@ -13,7 +13,7 @@ import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -29,7 +29,7 @@ const T = {
     title: 'Nos guides voyage luxe en France',
     subtitle: (n: number) =>
       `${n} guides éditoriaux rédigés par notre équipe : Palaces, art de vivre, gastronomie, saisons idéales et accès — pour Paris, la Côte d'Azur, les Alpes, Bordeaux, Champagne, Provence, Corse et plus encore.`,
-    metaTitle: 'Guides voyage luxe en France — ConciergeTravel',
+    metaTitle: 'Guides voyage luxe en France — MyConciergeHotel',
     metaDesc:
       "Découvrez nos guides éditoriaux des plus belles destinations françaises : Paris, Côte d'Azur, Alpes, Bordeaux, Champagne, Provence, Corse. Palaces, art de vivre, conseils saisonniers.",
     scope: {
@@ -44,7 +44,7 @@ const T = {
     title: 'Our luxury travel guides — France',
     subtitle: (n: number) =>
       `${n} editorial guides written by our team — Palaces, art of living, gastronomy, seasons and access — for Paris, the French Riviera, the Alps, Bordeaux, Champagne, Provence, Corsica and more.`,
-    metaTitle: 'Luxury Travel Guides — France | ConciergeTravel',
+    metaTitle: 'Luxury Travel Guides — France | MyConciergeHotel',
     metaDesc:
       'Discover our editorial guides to the finest French destinations: Paris, French Riviera, Alps, Bordeaux, Champagne, Provence, Corsica. Palaces, art of living, seasonal advice.',
     scope: {

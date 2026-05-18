@@ -35,7 +35,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');

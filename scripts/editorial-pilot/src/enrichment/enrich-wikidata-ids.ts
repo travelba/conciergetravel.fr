@@ -27,7 +27,7 @@
  *     non-HTTPS values are dropped.
  *
  * Run:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/enrichment/enrich-wikidata-ids.ts
  *
  * Idempotent: re-running is safe — UPDATE only sets columns currently NULL.

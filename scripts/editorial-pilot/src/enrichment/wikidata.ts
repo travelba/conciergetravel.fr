@@ -20,7 +20,7 @@
 import { z } from 'zod';
 
 const USER_AGENT =
-  'ConciergeTravelEditorialPilot/0.1 (https://conciergetravel.fr; reservations@conciergetravel.fr)';
+  'MyConciergeHotelEditorialPilot/0.1 (https://myconciergehotel.com; reservations@myconciergehotel.com)';
 const WIKIDATA_SEARCH_BASE = 'https://www.wikidata.org/w/api.php';
 const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 

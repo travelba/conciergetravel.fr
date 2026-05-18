@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { buildLlmsFullTxt } from '@cct/seo';
+import { buildLlmsFullTxt } from '@mch/seo';
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;
@@ -13,11 +13,11 @@ export const revalidate = 3600;
 export function GET(request: Request): NextResponse {
   const origin = new URL(request.url).origin;
   const body = buildLlmsFullTxt({
-    siteName: 'ConciergeTravel.fr',
+    siteName: 'MyConciergeHotel.com',
     tagline: 'Agence IATA Hôtels 5★ & Palaces France',
     originUrl: origin,
     about:
-      "ConciergeTravel.fr est l'agence de voyage IATA spécialisée dans les hôtels 5 étoiles et Palaces en France. " +
+      "MyConciergeHotel.com est l'agence de voyage IATA spécialisée dans les hôtels 5 étoiles et Palaces en France. " +
       'Tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.',
     lastUpdatedDate: new Date().toISOString(),
     pages: [
@@ -25,7 +25,7 @@ export function GET(request: Request): NextResponse {
         url: `${origin}/agence/`,
         title: "L'agence",
         summary:
-          'ConciergeTravel.fr est une agence française accréditée IATA et membre ASPST. ' +
+          'MyConciergeHotel.com est une agence française accréditée IATA et membre ASPST. ' +
           'Garantie financière APST. Conseillers francophones, paiement sécurisé Amadeus.',
         keyFacts: [
           'Accréditation IATA',
@@ -38,7 +38,7 @@ export function GET(request: Request): NextResponse {
         url: `${origin}/programme-fidelite/`,
         title: 'Programme de fidélité',
         summary:
-          'Programme de fidélité ConciergeTravel avec deux tiers : Essentiel (gratuit, dès la première nuit, ' +
+          'Programme de fidélité MyConciergeHotel avec deux tiers : Essentiel (gratuit, dès la première nuit, ' +
           'avantages variables selon hôtel partenaire) et Prestige (payant, avantages renforcés).',
         keyFacts: [
           'Tier Essentiel automatique',

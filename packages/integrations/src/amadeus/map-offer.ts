@@ -1,5 +1,5 @@
-import type { CancellationPolicy, Offer } from '@cct/domain/booking';
-import { err, ok, type Result } from '@cct/domain/shared';
+import type { CancellationPolicy, Offer } from '@mch/domain/booking';
+import { err, ok, type Result } from '@mch/domain/shared';
 
 import type { AmadeusError } from './errors.js';
 import { amadeusPoliciesToCancellation } from './map-cancellation-policy.js';

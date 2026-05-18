@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { EditorialCallout } from '@/components/editorial/editorial-callout';
 import { EditorialGlossary } from '@/components/editorial/editorial-glossary';
@@ -47,7 +47,7 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
   }
 }
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
@@ -100,8 +100,8 @@ export async function generateMetadata({
   const locale = raw;
   const title =
     locale === 'fr'
-      ? (ranking.meta_title_fr ?? `${ranking.title_fr} | ConciergeTravel`)
-      : (ranking.meta_title_en ?? `${ranking.title_en ?? ranking.title_fr} | ConciergeTravel`);
+      ? (ranking.meta_title_fr ?? `${ranking.title_fr} | MyConciergeHotel`)
+      : (ranking.meta_title_en ?? `${ranking.title_en ?? ranking.title_fr} | MyConciergeHotel`);
   const description =
     locale === 'fr'
       ? (ranking.meta_desc_fr ?? ranking.intro_fr.slice(0, 160))
@@ -202,10 +202,10 @@ export default async function RankingPage({
       dateModified:
         ranking.updated_at ?? ranking.reviewed_at ?? new Date().toISOString().slice(0, 10),
       author: {
-        name: ranking.author_name ?? 'ConciergeTravel Éditorial',
+        name: ranking.author_name ?? 'MyConciergeHotel Éditorial',
         ...(ranking.author_url !== null ? { url: `${origin}${ranking.author_url}` } : {}),
       },
-      publisher: { name: 'ConciergeTravel', logoUrl: `${origin}/logo.png` },
+      publisher: { name: 'MyConciergeHotel', logoUrl: `${origin}/logo.png` },
       inLanguage: locale === 'fr' ? 'fr-FR' : 'en',
     }),
   );

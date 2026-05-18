@@ -13,9 +13,9 @@ import { E2E_FAKE_PAID_HOTEL_ID } from './fixtures/env';
  * surfaces a visitor actually sees.
  *
  * Seams activated by the Playwright webserver:
- *   - `CCT_E2E_FAKE_PAID_HOTEL_ID` → synthetic `booking_mode = 'amadeus'`
+ *   - `MCH_E2E_FAKE_PAID_HOTEL_ID` → synthetic `booking_mode = 'amadeus'`
  *     hotel snapshot served by {@link getFakePaidHotelHead}.
- *   - `CCT_E2E_FAKE_HOTEL_ID`     → switches the Upstash Redis client
+ *   - `MCH_E2E_FAKE_HOTEL_ID`     → switches the Upstash Redis client
  *     to an in-memory store (`apps/web/src/lib/redis-memory.ts`) for
  *     deterministic draft storage in CI.
  *   - `fake=1` form field         → bypasses Amadeus `priceOffer` and
@@ -112,7 +112,7 @@ test.describe('paid tunnel — expired states (no cookie)', () => {
     await context.clearCookies();
     await context.addCookies([
       {
-        name: 'cct.bk_draft',
+        name: 'mch.bk_draft',
         value: 'unknown-draft-id-deadbeef',
         domain: '127.0.0.1',
         path: '/',

@@ -1,9 +1,9 @@
 ---
 name: redis-caching
-description: Upstash Redis caching strategy for ConciergeTravel.fr — Amadeus ARI 3-level cache, price comparator cache, idempotency keys, rate limiting. Use when introducing or changing any cache, TTL, key naming, or invalidation behavior.
+description: Upstash Redis caching strategy for MyConciergeHotel.com — Amadeus ARI 3-level cache, price comparator cache, idempotency keys, rate limiting. Use when introducing or changing any cache, TTL, key naming, or invalidation behavior.
 ---
 
-# Redis caching — ConciergeTravel.fr
+# Redis caching — MyConciergeHotel.com
 
 Cache is **Upstash Redis (HTTP)** — works on edge runtime and standard Node. The cahier des charges specifies a **3-level Amadeus ARI cache** and a 15 min cache for the price comparator (CDC §7.2 + addendum v3.2).
 

@@ -1,5 +1,5 @@
 {
-  "name": "@cct/admin",
+  "name": "@mch/admin",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,12 +12,12 @@
     "generate:types": "payload generate:types"
   },
   "dependencies": {
-    "@cct/config": "workspace:*",
-    "@cct/db": "workspace:*",
-    "@cct/domain": "workspace:*",
-    "@cct/integrations": "workspace:*",
-    "@cct/observability": "workspace:*",
-    "@cct/seo": "workspace:*",
+    "@mch/config": "workspace:*",
+    "@mch/db": "workspace:*",
+    "@mch/domain": "workspace:*",
+    "@mch/integrations": "workspace:*",
+    "@mch/observability": "workspace:*",
+    "@mch/seo": "workspace:*",
     "@payloadcms/db-postgres": "^3.20.0",
     "@payloadcms/next": "^3.20.0",
     "@payloadcms/richtext-lexical": "^3.20.0",

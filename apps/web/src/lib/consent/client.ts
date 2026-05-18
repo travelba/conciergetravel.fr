@@ -6,19 +6,19 @@ import {
   parseConsentCookie,
   serializeConsentCookie,
   type ConsentState,
-} from '@cct/domain/consent';
+} from '@mch/domain/consent';
 
 /**
  * Client-side cookie I/O for the consent banner. Server reads use
  * `next/headers` directly via `getConsentFromCookies`.
  *
- * Why a custom dispatch event ("cct:consent-changed"):
+ * Why a custom dispatch event ("mch:consent-changed"):
  *   the banner, the "Reopen preferences" link in the footer, and any
  *   analytics gating code may all live in different islands. A custom
  *   event keeps them in sync without a global store.
  */
 
-const COOKIE_EVENT = 'cct:consent-changed' as const;
+const COOKIE_EVENT = 'mch:consent-changed' as const;
 
 function readDocumentCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
@@ -73,10 +73,10 @@ export function onConsentChanged(handler: (state: ConsentState) => void): () => 
 /**
  * Open the consent banner programmatically — used by the footer
  * "Manage cookies" link and the dedicated `/cookies` page. Fires a
- * `cct:consent-reopen` event; the banner listens and re-mounts the
+ * `mch:consent-reopen` event; the banner listens and re-mounts the
  * full dialog.
  */
-const REOPEN_EVENT = 'cct:consent-reopen' as const;
+const REOPEN_EVENT = 'mch:consent-reopen' as const;
 
 export function openConsentBanner(): void {
   if (typeof window === 'undefined') return;

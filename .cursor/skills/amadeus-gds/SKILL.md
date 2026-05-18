@@ -1,9 +1,9 @@
 ---
 name: amadeus-gds
-description: Amadeus GDS Self-Service Hotels integration (search, offers, booking, status, cancellation) for ConciergeTravel.fr. Use for any code touching Amadeus endpoints, OAuth, offer locks, booking creation, or PNR handling.
+description: Amadeus GDS Self-Service Hotels integration (search, offers, booking, status, cancellation) for MyConciergeHotel.com. Use for any code touching Amadeus endpoints, OAuth, offer locks, booking creation, or PNR handling.
 ---
 
-# Amadeus GDS — ConciergeTravel.fr
+# Amadeus GDS — MyConciergeHotel.com
 
 Amadeus is the **primary booking channel** for in-network hotels (CDC §5.1). The cahier des charges enumerates the exact endpoints to consume.
 

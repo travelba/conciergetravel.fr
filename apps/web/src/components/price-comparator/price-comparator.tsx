@@ -13,7 +13,7 @@ export interface PriceComparatorProps {
   readonly checkOut: string | null;
   readonly adults: number;
   /**
-   * Live ConciergeTravel price (EUR cents, TTC). When `null` the widget
+   * Live MyConciergeHotel price (EUR cents, TTC). When `null` the widget
    * still renders the competitor list but skips the scenario verdict
    * (CDC v3.2 §"informational" tone).
    */

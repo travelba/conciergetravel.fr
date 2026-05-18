@@ -1,10 +1,10 @@
 ---
-description: Code conventions for ConciergeTravel.fr (TypeScript strict, naming, layering, imports, comments)
+description: Code conventions for MyConciergeHotel.com (TypeScript strict, naming, layering, imports, comments)
 globs: "**/*.{ts,tsx}"
 alwaysApply: true
 ---
 
-# Code conventions — ConciergeTravel.fr
+# Code conventions — MyConciergeHotel.com
 
 ## Layering
 - Pure domain logic lives in `packages/domain/`. No `next/`, `@supabase/*`, `fetch`, `Date.now()` allowed there.
@@ -23,7 +23,7 @@ alwaysApply: true
 - Test files alongside source: `<name>.test.ts(x)`.
 
 ## Imports
-- Use path aliases (`@cct/domain`, `@cct/integrations`, `@cct/seo`, …) instead of deep relative paths.
+- Use path aliases (`@mch/domain`, `@mch/integrations`, `@mch/seo`, …) instead of deep relative paths.
 - Group: built-ins → external → workspace → relative. Prettier organises automatically; do not fight it.
 - Never import server-only secrets in client components. ESLint enforces.
 
@@ -49,6 +49,6 @@ alwaysApply: true
 - New user journey impacting booking, search, account, or comparator → Playwright E2E case.
 
 ## Security
-- Read secrets only from validated env via `@cct/config/env`.
+- Read secrets only from validated env via `@mch/config/env`.
 - No `dangerouslySetInnerHTML` outside of trusted JSON-LD scripts.
 - Do not log PII (email, phone, full address).

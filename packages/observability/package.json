@@ -1,5 +1,5 @@
 {
-  "name": "@cct/observability",
+  "name": "@mch/observability",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "pino": "catalog:"
   },
   "devDependencies": {
-    "@cct/config": "workspace:*",
+    "@mch/config": "workspace:*",
     "@types/node": "^22.10.0",
     "typescript": "catalog:"
   }

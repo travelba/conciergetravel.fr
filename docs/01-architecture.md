@@ -1,8 +1,8 @@
-# Architecture — ConciergeTravel.fr
+# Architecture — MyConciergeHotel.com
 
 ## Vue d'ensemble
 
-ConciergeTravel.fr est organisé en **quatre couches fonctionnelles** (cf. CDC §5) et **deux applications** Next.js partageant une base de packages.
+MyConciergeHotel.com est organisé en **quatre couches fonctionnelles** (cf. CDC §5) et **deux applications** Next.js partageant une base de packages.
 
 ```mermaid
 flowchart TB

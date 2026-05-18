@@ -1,6 +1,6 @@
-# Skills catalogue — ConciergeTravel.fr
+# Skills catalogue — MyConciergeHotel.com
 
-> 34 agent skills covering every vertical. Each skill is a `SKILL.md` file
+> 35 agent skills covering every vertical. Each skill is a `SKILL.md` file
 > with YAML frontmatter (`name`, `description`) that Cursor reads at session
 > start; the body is loaded into context only when the agent decides the
 > skill is relevant to the current task.
@@ -27,6 +27,7 @@ Use this when you don't know where to start.
 | Hotel detail page, room sub-pages, editorial fiches                                           | [`content-modeling`](content-modeling/SKILL.md)                                  |
 | Long-read editorial guides / rankings — **LLM pipeline**                                      | [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐                     |
 | Long-read editorial guides / rankings — **rendering** (TOC, auto-link, callouts)              | [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐ NEW |
+| **Voix du Concierge** (pass 8, concierge_advice, shortener phrases > 25 mots)                 | [`concierge-voice-pipeline`](concierge-voice-pipeline/SKILL.md) ⭐ NEW           |
 | **Factual enrichment** (DATAtourisme + Wikidata + Wikipedia + Tavily)                         | [`content-enrichment-pipeline`](content-enrichment-pipeline/SKILL.md) ⭐ NEW     |
 | Amadeus Hotels API (search, offers, booking, PNR)                                             | [`amadeus-gds`](amadeus-gds/SKILL.md)                                            |
 | Little Hotelier API (loyalty FREE tier eligibility)                                           | [`little-hotelier`](little-hotelier/SKILL.md)                                    |
@@ -69,6 +70,7 @@ Use this when you don't know where to start.
 - [`api-integration`](api-integration/SKILL.md) — vendor / LLM HTTP client pattern.
 - [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐ — multi-call pipelines, schema drift tolerance, extraction patterns, pilot→scale workflow.
 - [`content-enrichment-pipeline`](content-enrichment-pipeline/SKILL.md) ⭐ — multi-source factual enrichment (DATAtourisme + Wikidata + Wikipedia + Tavily).
+- [`concierge-voice-pipeline`](concierge-voice-pipeline/SKILL.md) ⭐ — pass 8 voix Concierge, bloc ConciergeAdvice, shortener legacy, contraintes ADR-0011.
 
 ### Vendor integrations
 
@@ -151,7 +153,7 @@ description: >-
   <user mention of X / Y / Z>.
 ---
 
-# Skill name — ConciergeTravel.fr
+# Skill name — MyConciergeHotel.com
 
 [One paragraph: what problem this solves, why it exists.]
 
@@ -214,5 +216,6 @@ This batch capitalised the editorial v2 launch:
 | `exactOptionalPropertyTypes` ↔ Zod ↔ React props interop                  | `typescript-strict-zod-interop`                                                          |
 | PowerShell quoting, Supabase SSL strip, Unix commands                     | `windows-dev-environment`                                                                |
 | DATAtourisme + Wikidata + Wikipedia + Tavily cascade                      | `content-enrichment-pipeline` ⭐                                                         |
+| DATAtourisme **events** (gotchas: `takesPlaceAt` nested, silent 0 on subtype filters, swapped dates) | `content-enrichment-pipeline` §Rule 11                                                   |
 | TOC sidebar + EnrichedText auto-link + callouts + sources footer          | `editorial-long-read-rendering` ⭐                                                       |
 | **CSP nonce ↔ `JsonLdScript` ↔ `force-dynamic` contract** (PR #56 / #57)  | `structured-data-schema-org`, `nextjs-app-router`, `security-engineering` (all extended) |

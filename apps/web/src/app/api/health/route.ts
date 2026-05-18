@@ -11,7 +11,7 @@ export function GET() {
   return NextResponse.json(
     {
       ok: true,
-      service: 'cct-web',
+      service: 'mch-web',
       time: new Date().toISOString(),
     },
     { headers: { 'Cache-Control': 'no-store' } },

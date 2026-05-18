@@ -1,5 +1,5 @@
 /**
- * HotelImage — `next/image` wrapper specialised for ConciergeTravel hotel media.
+ * HotelImage — `next/image` wrapper specialised for MyConciergeHotel hotel media.
  *
  * Skill: performance-engineering, responsive-ui-architecture.
  *
@@ -11,13 +11,13 @@
  *     - LCP candidates pass `priority` to opt in to high-fetch-priority.
  *     - All other instances are `loading="lazy"` and `decoding="async"`.
  * - The `cloudName` is **passed in by the consumer**, not read from `env`,
- *   so `@cct/ui` stays env-free and the build doesn't need Cloudinary
+ *   so `@mch/ui` stays env-free and the build doesn't need Cloudinary
  *   credentials to render Storybook / tests.
  *
  * Usage:
  *   ```tsx
  *   <HotelImage
- *     cloudName="conciergetravel"
+ *     cloudName="myconciergehotel"
  *     publicId="hotels/ritz-paris/hero"
  *     alt="Façade de l'hôtel Ritz Paris"
  *     width={1600}
@@ -72,10 +72,10 @@ const DEFAULT_SIZES: Record<HotelImageVariant, string> = {
  *
  * @example
  *   buildCloudinarySrc({
- *     cloudName: 'conciergetravel',
+ *     cloudName: 'myconciergehotel',
  *     publicId: 'hotels/ritz-paris/hero',
  *   })
- *   // → https://res.cloudinary.com/conciergetravel/image/upload/f_auto,q_auto,c_fill,g_auto/hotels/ritz-paris/hero
+ *   // → https://res.cloudinary.com/myconciergehotel/image/upload/f_auto,q_auto,c_fill,g_auto/hotels/ritz-paris/hero
  */
 export function buildCloudinarySrc(input: {
   readonly cloudName: string;

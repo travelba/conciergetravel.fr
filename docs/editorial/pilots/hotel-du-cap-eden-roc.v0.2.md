@@ -18,7 +18,7 @@ Au cœur du domaine, la piscine emblématique, sculptée dans la roche, s'impose
 
 Avec une capacité totale de 118 clés, comprenant 88 chambres, 27 suites et trois villas, l'Hôtel du Cap-Eden-Roc offre une diversité d'hébergements qui répondent à des exigences variées. Parmi les plus remarquables, la suite Eden-Roc séduit par sa terrasse offrant une vue exceptionnelle sur la mer, tandis que la Villa Soleil, entièrement privatisable, garantit une exclusivité totale avec ses six chambres et sa piscine privée. Enfin, la Bastide du Cap, ancienne demeure familiale, allie charme historique et indépendance moderne.
 
-> « L'arrivée à pied par l'allée centrale de pinède — 400 mètres entre le portail et la villa principale, avec les cigales en juillet — c'est là que l'on comprend ce qui distingue Eden-Roc d'à peu près tout le reste : un palace qui se mérite par l'approche, jamais par la façade. » — Marc, conseiller senior Côte d'Azur ConciergeTravel.fr
+> « L'arrivée à pied par l'allée centrale de pinède — 400 mètres entre le portail et la villa principale, avec les cigales en juillet — c'est là que l'on comprend ce qui distingue Eden-Roc d'à peu près tout le reste : un palace qui se mérite par l'approche, jamais par la façade. » — Marc, conseiller senior Côte d'Azur MyConciergeHotel.com
 
 Idéal pour les séjours prolongés hors festival, l'établissement dévoile pleinement son essence sur plusieurs jours, à travers des rituels qui enveloppent chaque moment. Toutefois, la fermeture saisonnière (mi-octobre à mi-avril) et son rythme volontairement lent peuvent ne pas convenir aux voyageurs d'affaires ou aux séjours courts de passage.
 

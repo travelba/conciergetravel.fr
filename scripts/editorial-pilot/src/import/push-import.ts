@@ -11,7 +11,7 @@
  *   3. `SUPABASE_DB_URL`             — legacy direct host (IPv6)
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx src/import/push-import.ts
+ *   pnpm --filter @mch/editorial-pilot exec tsx src/import/push-import.ts
  *
  * Idempotent: every upsert statement uses `ON CONFLICT (slug) DO UPDATE`
  * so the script can be re-run safely after any brief regeneration.
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
   } catch {
     console.error(
       "Error: the 'pg' package is not installed. Run:\n" +
-        '  pnpm --filter @cct/editorial-pilot add -D pg @types/pg',
+        '  pnpm --filter @mch/editorial-pilot add -D pg @types/pg',
     );
     process.exit(1);
   }

@@ -1,6 +1,6 @@
 {
   "common": {
-    "siteName": "ConciergeTravel",
+    "siteName": "MyConciergeHotel",
     "tagline": "5-star hotels and Palaces in France — editorial selection and premium booking",
     "search": "Search",
     "book": "Book",
@@ -18,23 +18,23 @@
     "agency": "The agency"
   },
   "homepage": {
-    "title": "The concierge for France's finest hotels",
-    "subtitle": "IATA-accredited agency and ASPST member. GDS net rates, secure Amadeus payment, loyalty perks from the first night.",
-    "comingSoon": "ConciergeTravel.fr — bootstrapping",
+    "title": "Your concierge for France's Palaces and 5-star hotels",
+    "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
+    "comingSoon": "MyConciergeHotel.com — your concierge is curating the selection.",
     "trust": {
       "iata": "IATA-accredited agency",
       "aspst": "ASPST member",
       "amadeus": "Secure Amadeus payment"
     },
     "aeo": {
-      "question": "Why book a 5-star hotel or Palace through ConciergeTravel?",
-      "answer": "ConciergeTravel is an IATA-accredited travel agency specialised in 5-star hotels and Palaces in France. Every stay is priced at the Amadeus GDS net rate, paid through Amadeus Payments (PCI-DSS-certified, 3-D Secure), with a non-affiliated price comparator on every hotel page and ConciergeTravel loyalty benefits applied from the first night. No agency markup is added to the published rate."
+      "question": "Why book a Palace or 5-star hotel through MyConciergeHotel?",
+      "answer": "MyConciergeHotel is the online concierge for France's Palaces and 5-star hotels. Every page is written by our advisors and closes with a concrete operational tip — the right room, the right table, the right hour. On the booking side: IATA-accredited agency, Amadeus GDS net rates, PCI-DSS payment, a non-affiliated price comparator on every hotel page, and loyalty benefits from the first night. No agency markup."
     }
   },
   "searchPage": {
     "meta": {
       "title": "Search for a hotel",
-      "description": "Browse ConciergeTravel’s editorial selection with instant search."
+      "description": "Browse MyConciergeHotel’s editorial selection with instant search."
     },
     "title": "Search for a hotel",
     "subtitle": "Enter a name, city, or keyword to explore the selection.",
@@ -65,7 +65,7 @@
     }
   },
   "header": {
-    "brand": "ConciergeTravel",
+    "brand": "MyConciergeHotel",
     "skipToContent": "Skip to main content",
     "primaryNav": {
       "label": "Primary navigation",
@@ -121,9 +121,9 @@
     }
   },
   "footer": {
-    "company": "ConciergeTravel",
-    "rights": "© {year} ConciergeTravel. All rights reserved.",
-    "tagline": "Curated 5-star and Palace hotels in France — booking made simple.",
+    "company": "MyConciergeHotel",
+    "rights": "© {year} MyConciergeHotel. All rights reserved.",
+    "tagline": "Your concierge for France's Palaces and 5★ hotels — editorial selection, operational tips, net-rate booking via our IATA-accredited desk.",
     "headings": {
       "explore": "Explore",
       "info": "Information",
@@ -146,15 +146,15 @@
     "lastUpdated": "Last updated: {date}",
     "noticePage": {
       "title": "Legal notice",
-      "metaDescription": "ConciergeTravel legal notice — publisher, hosting, intellectual property, travel agency licences.",
+      "metaDescription": "MyConciergeHotel legal notice — publisher, hosting, intellectual property, travel agency licences.",
       "sections": {
         "editor": {
           "title": "Publisher",
-          "body": "The conciergetravel.fr website is published by ConciergeTravel, a French SAS with share capital of €10,000, registered with the Paris Trade Register under number RCS XXX XXX XXX, whose registered office is in Paris, France. EU VAT number: FR XX XXXXXXXXX. Publication director: ConciergeTravel management."
+          "body": "The myconciergehotel.com website is published by MyConciergeHotel, a French SAS with share capital of €10,000, registered with the Paris Trade Register under number RCS XXX XXX XXX, whose registered office is in Paris, France. EU VAT number: FR XX XXXXXXXXX. Publication director: MyConciergeHotel management."
         },
         "contact": {
           "title": "Contact",
-          "body": "Email: contact@conciergetravel.fr. Phone: +33 1 XX XX XX XX. Any enquiry about the site, content or bookings may be sent to this address."
+          "body": "Email: contact@myconciergehotel.com. Phone: +33 1 XX XX XX XX. Any enquiry about the site, content or bookings may be sent to this address."
         },
         "hosting": {
           "title": "Hosting",
@@ -162,7 +162,7 @@
         },
         "license": {
           "title": "Travel agency licence",
-          "body": "ConciergeTravel operates as a travel agent registered with Atout France under number IM XXXXXXXXX. Financial guarantee: Groupama Assurance-Crédit, 8-10 rue d'Astorg, 75008 Paris. Professional civil liability: HISCOX Europe Underwriting Ltd, 19 rue Louis Le Grand, 75002 Paris."
+          "body": "MyConciergeHotel operates as a travel agent registered with Atout France under number IM XXXXXXXXX. Financial guarantee: Groupama Assurance-Crédit, 8-10 rue d'Astorg, 75008 Paris. Professional civil liability: HISCOX Europe Underwriting Ltd, 19 rue Louis Le Grand, 75002 Paris."
         },
         "ip": {
           "title": "Intellectual property",
@@ -172,15 +172,15 @@
     },
     "privacyPage": {
       "title": "Privacy policy",
-      "metaDescription": "ConciergeTravel privacy policy — personal data, purposes, retention, GDPR rights, DPO contact.",
+      "metaDescription": "MyConciergeHotel privacy policy — personal data, purposes, retention, GDPR rights, DPO contact.",
       "sections": {
         "intro": {
           "title": "Preamble",
-          "body": "ConciergeTravel takes the protection of personal data seriously. This policy describes the data processing carried out as part of the use of the site and the booking services. It complies with EU Regulation 2016/679 (GDPR) and French data protection law."
+          "body": "MyConciergeHotel takes the protection of personal data seriously. This policy describes the data processing carried out as part of the use of the site and the booking services. It complies with EU Regulation 2016/679 (GDPR) and French data protection law."
         },
         "controller": {
           "title": "Data controller",
-          "body": "ConciergeTravel SAS, located in Paris, France. Data Protection Officer (DPO): dpo@conciergetravel.fr."
+          "body": "MyConciergeHotel SAS, located in Paris, France. Data Protection Officer (DPO): dpo@myconciergehotel.com."
         },
         "purposes": {
           "title": "Purposes and legal bases",
@@ -204,7 +204,7 @@
         },
         "recipients": {
           "title": "Recipients",
-          "body": "Your data is accessible to ConciergeTravel operational teams and to our strictly necessary sub-processors: Supabase (database hosting), Vercel (application hosting), Amadeus (booking and payment), Brevo (email), Algolia (search), Upstash (cache). No data is sold or rented to third parties for commercial purposes."
+          "body": "Your data is accessible to MyConciergeHotel operational teams and to our strictly necessary sub-processors: Supabase (database hosting), Vercel (application hosting), Amadeus (booking and payment), Brevo (email), Algolia (search), Upstash (cache). No data is sold or rented to third parties for commercial purposes."
         },
         "transfers": {
           "title": "International transfers",
@@ -212,7 +212,7 @@
         },
         "rights": {
           "title": "Your rights",
-          "body": "Under the GDPR you have the right to access, rectify, erase, restrict, object, port and to define post-mortem instructions. To exercise your rights: dpo@conciergetravel.fr. You may also lodge a complaint with the CNIL (www.cnil.fr)."
+          "body": "Under the GDPR you have the right to access, rectify, erase, restrict, object, port and to define post-mortem instructions. To exercise your rights: dpo@myconciergehotel.com. You may also lodge a complaint with the CNIL (www.cnil.fr)."
         },
         "cookies": {
           "title": "Cookies",
@@ -222,11 +222,11 @@
     },
     "termsPage": {
       "title": "Terms of sale",
-      "metaDescription": "ConciergeTravel terms of sale — hotel reservation, payment, cancellation, jurisdiction.",
+      "metaDescription": "MyConciergeHotel terms of sale — hotel reservation, payment, cancellation, jurisdiction.",
       "sections": {
         "scope": {
           "title": "Scope",
-          "body": "These Terms of Sale govern bookings made by any customer (\"the Customer\") via conciergetravel.fr with ConciergeTravel (\"the Agency\"). Any booking implies full and unreserved acceptance of these Terms."
+          "body": "These Terms of Sale govern bookings made by any customer (\"the Customer\") via myconciergehotel.com with MyConciergeHotel (\"the Agency\"). Any booking implies full and unreserved acceptance of these Terms."
         },
         "reservation": {
           "title": "Booking process",
@@ -238,7 +238,7 @@
         },
         "cancellation": {
           "title": "Cancellation and changes",
-          "body": "Cancellation and modification conditions are those displayed at booking time and specific to each offer. Article L221-28 12° of the French Consumer Code explicitly excludes accommodation services from the right of withdrawal. Cancellation requests must be sent by email to reservations@conciergetravel.fr."
+          "body": "Cancellation and modification conditions are those displayed at booking time and specific to each offer. Article L221-28 12° of the French Consumer Code explicitly excludes accommodation services from the right of withdrawal. Cancellation requests must be sent by email to reservations@myconciergehotel.com."
         },
         "liability": {
           "title": "Liability",
@@ -256,11 +256,11 @@
     },
     "cookiesPage": {
       "title": "Cookie policy",
-      "metaDescription": "ConciergeTravel cookie policy — categories, purposes, retention, preference management.",
+      "metaDescription": "MyConciergeHotel cookie policy — categories, purposes, retention, preference management.",
       "sections": {
         "intro": {
           "title": "What is a cookie?",
-          "body": "A cookie is a small file placed on your device when you visit a site. It stores useful information (preferences, authentication, audience measurement). The conciergetravel.fr site uses only cookies strictly necessary for its operation, plus anonymised audience-measurement cookies that we place only with your consent."
+          "body": "A cookie is a small file placed on your device when you visit a site. It stores useful information (preferences, authentication, audience measurement). The myconciergehotel.com site uses only cookies strictly necessary for its operation, plus anonymised audience-measurement cookies that we place only with your consent."
         },
         "categories": {
           "title": "Categories used",
@@ -274,15 +274,15 @@
         },
         "contact": {
           "title": "Contact",
-          "body": "For any question about this policy: dpo@conciergetravel.fr."
+          "body": "For any question about this policy: dpo@myconciergehotel.com."
         }
       },
       "manageButton": "Manage my cookies"
     }
   },
   "priceComparator": {
-    "title": "Price comparison",
-    "subtitle": "Prices observed on other platforms for this stay, for information only.",
+    "title": "The Concierge's price check",
+    "subtitle": "Rates observed on other platforms for this stay — for information only, no affiliate links.",
     "loading": "Loading prices…",
     "providerLabel": {
       "booking_com": "Booking.com",
@@ -306,7 +306,7 @@
   "destinationPage": {
     "meta": {
       "title": "5★ hotels & Palaces in {city}",
-      "description": "ConciergeTravel's curated selection of 5★ hotels and Palaces in {city} ({region}). Net GDS rates, secure payment, loyalty rewards from the first night."
+      "description": "MyConciergeHotel's curated selection of 5★ hotels and Palaces in {city} ({region}). Net GDS rates, secure payment, loyalty rewards from the first night."
     },
     "breadcrumb": {
       "home": "Home",
@@ -318,8 +318,8 @@
     "empty": "No published hotel for this destination yet.",
     "aeo": {
       "question": "How many 5★ hotels and Palaces do you offer in {city}?",
-      "answerSingular": "ConciergeTravel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
-      "answerPlural": "ConciergeTravel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
+      "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
+      "answerPlural": "MyConciergeHotel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
     },
     "card": {
       "palace": "Palace",
@@ -338,7 +338,7 @@
   "hotelPage": {
     "meta": {
       "titleFallback": "{name} — {city}",
-      "descriptionFallback": "{name}, 5★ hotel in {city}. Book direct with ConciergeTravel, IATA agency specialised in French palaces and 5★ hotels."
+      "descriptionFallback": "{name}, 5★ hotel in {city}: full page + Concierge's Tip. Net-rate booking via MyConciergeHotel, IATA agency specialised in France's Palaces and 5★ hotels."
     },
     "breadcrumb": {
       "home": "Home",
@@ -406,6 +406,10 @@
       "listAria": "Editorial pull-quotes for this property",
       "ratingAria": "Score {value} out of {max}"
     },
+    "conciergeAdvice": {
+      "eyebrow": "The Concierge's tip",
+      "defaultTitle": "What I would tell you before booking"
+    },
     "amenityCategories": {
       "wellness": "Wellness",
       "dining": "Dining",
@@ -428,7 +432,7 @@
       "categoryAgency": "About the property"
     },
     "displayOnly": {
-      "headline": "ConciergeTravel concierge booking",
+      "headline": "MyConciergeHotel concierge booking",
       "explainer": "{name} is not available for online booking. Share your dates and our concierge will email a tailored proposal.",
       "sla": "Reply within 24 business hours.",
       "checkIn": "Check-in",
@@ -465,8 +469,8 @@
       "updatedAtAria": "Information last updated on {date}"
     },
     "reassurance": {
-      "title": "Why book with ConciergeTravel?",
-      "listAria": "ConciergeTravel guarantees and commitments",
+      "title": "Why book with MyConciergeHotel?",
+      "listAria": "MyConciergeHotel guarantees and commitments",
       "iataLabel": "IATA-accredited agency",
       "iataDetail": "GDS net rates negotiated directly, no intermediary, no markup.",
       "apstLabel": "APST financial guarantee",
@@ -568,9 +572,9 @@
       "indicativePriceRange": "{from} – {to} / night"
     },
     "aeo": {
-      "question": "How do I book {name} through ConciergeTravel?",
-      "answer": "ConciergeTravel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, ConciergeTravel loyalty benefits applied from the first night. Updated {date}.",
-      "answerNoStay": "ConciergeTravel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and ConciergeTravel loyalty benefits applied from the first night. Updated {date}."
+      "question": "How do I book {name} through MyConciergeHotel?",
+      "answer": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
+      "answerNoStay": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}."
     },
     "noFaq": "No questions yet for this property.",
     "noAmenities": "Detailed services coming soon.",
@@ -613,6 +617,56 @@
         "train": "Train",
         "taxi": "Taxi",
         "airport_shuttle": "Airport shuttle"
+      },
+      "intro": "Less than {walkMinutes} minutes on foot from the heart of the neighbourhood: museums, Michelin tables, and the everyday shops you actually need.",
+      "buckets": {
+        "visit": {
+          "title": "Things to see",
+          "lead": "Heritage, museums and cultural landmarks within walking distance.",
+          "empty": "No cultural site recorded within walking distance yet."
+        },
+        "do": {
+          "title": "Things to do",
+          "lead": "Restaurants, wineries, experiences and activities that shape the stay.",
+          "empty": "No activity recorded within walking distance yet."
+        },
+        "shop": {
+          "title": "Useful services & shops",
+          "lead": "Pharmacy, bakery, ATM, newsagent — the everyday utilities a traveller appreciates.",
+          "empty": "No essential shop recorded within walking distance yet."
+        }
+      },
+      "pricing": {
+        "free": "Free",
+        "paid": "From {amount} {currency}",
+        "paidNoAmount": "Paid admission",
+        "donation": "Donation",
+        "mixed": "Free · paid exhibitions"
+      },
+      "openHoursToday": "Today {hours}",
+      "openHoursTodayClosed": "Closed today",
+      "openHoursTodayAllDay": "Open 24/7",
+      "openHoursUnknown": "See opening hours",
+      "nearestTransitBadge": "{mode} {line, select, _ {{name}} other {{line} · {name}}} · {distance}",
+      "category": "Category",
+      "schemaTypeAria": "Schema.org type: {type}"
+    },
+    "events": {
+      "title": "Upcoming events nearby",
+      "lead": "Concerts, exhibitions and festivals close to {hotelName} during your stay in {city} — refreshed weekly from DATAtourisme.",
+      "officialSource": "View official source",
+      "category": {
+        "concert": "Concert",
+        "expo": "Exhibition",
+        "festival": "Festival",
+        "sport": "Sport",
+        "theater": "Performance",
+        "other": "Event"
+      },
+      "pricing": {
+        "free": "Free",
+        "paid": "From {amount} €",
+        "paidNoAmount": "Paid entry"
       }
     },
     "policies": {
@@ -677,9 +731,9 @@
   },
   "roomPage": {
     "meta": {
-      "titleFallback": "{roomName} — {hotelName} | ConciergeTravel",
+      "titleFallback": "{roomName} — {hotelName} | MyConciergeHotel",
       "signatureSuffix": "{base} · Signature suite",
-      "descriptionFallback": "{roomName} at {hotelName}, {city}. Details, amenities and photos. Book direct with ConciergeTravel, IATA agency."
+      "descriptionFallback": "{roomName} at {hotelName}, {city}. Details, amenities and photos. Book direct with MyConciergeHotel, IATA agency."
     },
     "breadcrumb": {
       "label": "Breadcrumb",
@@ -711,13 +765,13 @@
   "account": {
     "meta": {
       "dashboardTitle": "My account",
-      "dashboardDescription": "Find your ConciergeTravel bookings and requests in one place.",
+      "dashboardDescription": "Find your MyConciergeHotel bookings and requests in one place.",
       "signInTitle": "Sign in",
       "signUpTitle": "Create an account",
       "forgotTitle": "Forgot password",
       "resetTitle": "New password",
       "favoritesTitle": "My favorites",
-      "favoritesDescription": "Hotels you've saved on ConciergeTravel."
+      "favoritesDescription": "Hotels you've saved on MyConciergeHotel."
     },
     "shared": {
       "email": "Email address",
@@ -929,7 +983,7 @@
       "verbatimNote": "Text provided by the hotelier — it applies as written."
     },
     "continueToPayment": "Continue to payment",
-    "paymentDisclaimer": "You will be redirected to the secure Amadeus payment module. No card data is stored by ConciergeTravel."
+    "paymentDisclaimer": "You will be redirected to the secure Amadeus payment module. No card data is stored by MyConciergeHotel."
   },
   "reservationPayment": {
     "meta": {
@@ -959,7 +1013,7 @@
       "database": "We could not record the booking. Our team has been notified.",
       "unknown": "Something went wrong during payment. Please try again."
     },
-    "pciNote": "ConciergeTravel never receives or stores card data. Payment is processed directly by Amadeus Payments (PCI DSS Level 1)."
+    "pciNote": "MyConciergeHotel never receives or stores card data. Payment is processed directly by Amadeus Payments (PCI DSS Level 1)."
   },
   "reservationConfirmation": {
     "meta": {

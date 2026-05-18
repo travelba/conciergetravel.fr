@@ -1,5 +1,5 @@
 {
-  "name": "@cct/seo",
+  "name": "@mch/seo",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -24,8 +24,8 @@
     "next": "catalog:"
   },
   "devDependencies": {
-    "@cct/config": "workspace:*",
-    "@cct/domain": "workspace:*",
+    "@mch/config": "workspace:*",
+    "@mch/domain": "workspace:*",
     "@types/node": "^22.10.0",
     "next": "catalog:",
     "typescript": "catalog:",

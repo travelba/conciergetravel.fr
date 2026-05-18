@@ -230,7 +230,7 @@ export async function getRoomBySlug(
 ): Promise<HotelRoomDetail | null> {
   if (!isValidSlug(hotelSlug) || !isValidSlug(roomSlug)) return null;
 
-  // Dev/E2E seam — short-circuits when `CCT_E2E_FAKE_HOTEL_ID` is set and
+  // Dev/E2E seam — short-circuits when `MCH_E2E_FAKE_HOTEL_ID` is set and
   // the slug pair maps to a fixture. Keeps the room sub-page testable
   // without seeding `hotel_rooms` in Supabase.
   const fake = getFakeRoomBySlug(hotelSlug, roomSlug, locale);

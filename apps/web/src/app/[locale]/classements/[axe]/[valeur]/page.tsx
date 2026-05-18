@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
@@ -14,7 +14,7 @@ import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
 export const revalidate = 3600;
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
@@ -34,7 +34,7 @@ const T = {
     home: 'Accueil',
     rankings: 'Classements',
     eyebrow: 'Sous-hub',
-    metaTitleTpl: (axe: string, label: string) => `Classements ${axe} ${label} — ConciergeTravel`,
+    metaTitleTpl: (axe: string, label: string) => `Classements ${axe} ${label} — MyConciergeHotel`,
     metaDescTpl: (label: string, n: number) =>
       `${n} classements éditoriaux Palaces et 5 étoiles autour de ${label}.`,
     backLabel: '← Tous les classements',
@@ -46,7 +46,7 @@ const T = {
     home: 'Home',
     rankings: 'Rankings',
     eyebrow: 'Sub-hub',
-    metaTitleTpl: (axe: string, label: string) => `${axe} rankings — ${label} — ConciergeTravel`,
+    metaTitleTpl: (axe: string, label: string) => `${axe} rankings — ${label} — MyConciergeHotel`,
     metaDescTpl: (label: string, n: number) =>
       `${n} editorial Palace and 5-star rankings around ${label}.`,
     backLabel: '← All rankings',

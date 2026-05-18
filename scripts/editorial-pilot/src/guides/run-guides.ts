@@ -3,11 +3,11 @@
  * pipeline and persists them to `editorial_guides`.
  *
  * Usage:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides.ts --slug=paris
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides.ts --all
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides.ts --all --draft     # generate without publishing
  *
  * Idempotent. Re-runs overwrite the row.

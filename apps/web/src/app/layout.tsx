@@ -2,15 +2,15 @@ import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://conciergetravel.fr'),
+  metadataBase: new URL(process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://myconciergehotel.com'),
   title: {
-    default: 'ConciergeTravel — Hôtels 5★ et Palaces en France',
-    template: '%s · ConciergeTravel',
+    default: 'MyConciergeHotel — Votre concierge des Palaces et hôtels 5★ en France',
+    template: '%s · MyConciergeHotel',
   },
   description:
-    "Sélection éditoriale et réservation premium d'hôtels 5 étoiles et Palaces en France. Agence IATA, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.",
-  applicationName: 'ConciergeTravel',
-  authors: [{ name: 'ConciergeTravel' }],
+    "Le concierge des Palaces et hôtels 5 étoiles en France : sélection éditoriale, conseils opérationnels par fiche, tarifs nets via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
+  applicationName: 'MyConciergeHotel',
+  authors: [{ name: 'MyConciergeHotel' }],
   formatDetection: { email: false, address: false, telephone: false },
 };
 

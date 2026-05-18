@@ -61,9 +61,11 @@ export const HotelDetailRowSchema = z.object({
   spa_info: z.unknown().nullable().optional(),
   points_of_interest: z.unknown().nullable().optional(),
   transports: z.unknown().nullable().optional(),
+  upcoming_events: z.unknown().nullable().optional(),
   policies: z.unknown().nullable().optional(),
   awards: z.unknown().nullable().optional(),
   signature_experiences: z.unknown().nullable().optional(),
+  concierge_advice: z.unknown().nullable().optional(),
   featured_reviews: z.unknown().nullable().optional(),
   hero_image: stringOrEmpty,
   gallery_images: z.unknown().nullable().optional(),
@@ -120,7 +122,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, policies, awards, signature_experiences, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -1156,6 +1158,58 @@ export function readGallery(
 // Location enrichment — points_of_interest (jsonb) + transports (jsonb)
 // ---------------------------------------------------------------------------
 
+/**
+ * Editorial bucket — used to split the "Around the hotel" section into
+ * three sub-blocks on the public fiche:
+ *   - `visit` — patrimony + culture + nature (museum, castle, park, beach, …)
+ *   - `do` — activities + experiential (restaurants, wineries, sports, trails, …)
+ *   - `shop` — daily-life utilities (pharmacy, bakery, supermarket, ATM, …)
+ *
+ * Legacy rows (pre-WS3) may omit the field; reader defaults to `visit`
+ * for cultural-looking `type` values and `do` otherwise so the UI never
+ * crashes.
+ */
+export const POI_BUCKETS = ['visit', 'do', 'shop'] as const;
+export type PoiBucket = (typeof POI_BUCKETS)[number];
+const PoiBucketSchema = z.enum(POI_BUCKETS);
+
+/**
+ * Pricing model — supports the three industry shapes:
+ *   - `free` — admission is gratis (parks, churches, viewpoints).
+ *   - `paid` — flat ticket (museums, attractions).
+ *   - `donation` — pay-what-you-want (some religious sites).
+ *   - `mixed` — partly free / partly paid (e.g. permanent collection
+ *     free, temporary exhibitions paid).
+ *
+ * `amount_eur` is the indicative price for the most common adult ticket.
+ * Renders as "À partir de X €" on the front; never enforced as the
+ * canonical price (the canonical source is the POI's own website).
+ */
+const PoiPricingSchema = z.object({
+  type: z.enum(['free', 'paid', 'donation', 'mixed']),
+  amount_eur: z.number().nonnegative().max(10000).optional(),
+  currency: z.enum(['EUR', 'USD', 'GBP', 'CHF']).optional(),
+  notes_fr: z.string().min(1).max(200).optional(),
+  notes_en: z.string().min(1).max(200).optional(),
+});
+
+/**
+ * Nearest public-transport station as attributed by the sync script
+ * (Overpass-driven). `bus` is included for taxi/airport-only POIs even
+ * though the bus tag is excluded from the global station fetch — POIs
+ * may carry an explicit `bus_stop` ref when relevant.
+ */
+const PoiTransitModeSchema = z.enum(['subway', 'light_rail', 'tram', 'rail', 'monorail', 'bus']);
+
+const PoiNearestTransitSchema = z.object({
+  mode: PoiTransitModeSchema,
+  name: z.string().min(1).max(120),
+  distance_meters: z.number().int().nonnegative(),
+  walk_minutes: z.number().int().nonnegative().optional(),
+  /** Comma-separated line refs when tagged, e.g. `"1, 9"` or `"A"`. */
+  line_ref: z.string().min(1).max(60).optional(),
+});
+
 const PointOfInterestSchema = z.object({
   name: z.string().min(1),
   name_en: z.string().min(1).optional(),
@@ -1166,6 +1220,29 @@ const PointOfInterestSchema = z.object({
   walk_minutes: z.number().int().nonnegative().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
+  // ── WS3 extensions ────────────────────────────────────────────────
+  /** Editorial bucket (visit / do / shop). Defaults applied at read time. */
+  bucket: PoiBucketSchema.optional(),
+  /** LLM-generated 1-2 sentence description (max 280 chars, EEAT-safe). */
+  description_fr: z.string().min(1).max(280).optional(),
+  description_en: z.string().min(1).max(280).optional(),
+  /** Raw OSM `opening_hours` tag (parser lives in apps/web/src/lib/poi-hours.ts). */
+  opening_hours: z.string().min(1).max(400).optional(),
+  /** Nearest metro/RER/tram station, attached when ≤ 400 m. */
+  nearest_transit: PoiNearestTransitSchema.optional(),
+  /** Indicative pricing for paid attractions (DATAtourisme `hasPrice` mostly). */
+  pricing: PoiPricingSchema.optional(),
+  /**
+   * Schema.org `additionalType` URL (e.g. `https://schema.org/Pharmacy`).
+   * Used by the JSON-LD builder to emit the canonical Schema.org class
+   * for utility shops, instead of the generic `TouristAttraction`.
+   */
+  schema_type: z.string().url().max(160).optional(),
+  /**
+   * Source identifier (`node/123`, `way/456`, `dt/<uuid>`). Editorial
+   * never renders it but the sync script uses it to dedupe on re-runs.
+   */
+  osm_id: z.string().min(1).max(80).optional(),
 });
 
 const PointsOfInterestSchema = z.array(PointOfInterestSchema);
@@ -1195,6 +1272,21 @@ const TransportsSchema = z.array(TransportSchema);
 
 export type TransportMode = z.infer<typeof TransportModeSchema>;
 
+export interface LocalisedPoiNearestTransit {
+  readonly mode: z.infer<typeof PoiTransitModeSchema>;
+  readonly name: string;
+  readonly distanceMeters: number;
+  readonly walkMinutes: number | null;
+  readonly lineRef: string | null;
+}
+
+export interface LocalisedPoiPricing {
+  readonly type: 'free' | 'paid' | 'donation' | 'mixed';
+  readonly amountEur: number | null;
+  readonly currency: 'EUR' | 'USD' | 'GBP' | 'CHF';
+  readonly notes: string | null;
+}
+
 export interface LocalisedPointOfInterest {
   readonly name: string;
   readonly type: string;
@@ -1203,6 +1295,13 @@ export interface LocalisedPointOfInterest {
   readonly walkMinutes: number | null;
   readonly latitude: number | null;
   readonly longitude: number | null;
+  readonly bucket: PoiBucket;
+  readonly description: string | null;
+  readonly openingHours: string | null;
+  readonly nearestTransit: LocalisedPoiNearestTransit | null;
+  readonly pricing: LocalisedPoiPricing | null;
+  readonly schemaType: string | null;
+  readonly osmId: string | null;
 }
 
 export interface LocalisedTransport {
@@ -1220,6 +1319,73 @@ export interface LocalisedLocation {
 }
 
 /**
+ * Three-bucket projection of {@link LocalisedLocation.pointsOfInterest},
+ * matching the three sub-sections of the front-end "Around" block.
+ * Returned by {@link readLocationByBucket} so the UI never needs to
+ * filter the flat array — keeps the React tree pure and the
+ * `groupBy` cost out of the render path.
+ *
+ * Each bucket is pre-sorted by distance ascending (closer first), which
+ * matches the editorial expectation: a tourist scanning "things to do"
+ * wants the nearest options at the top.
+ */
+export interface LocalisedLocationByBucket {
+  readonly visit: readonly LocalisedPointOfInterest[];
+  readonly do: readonly LocalisedPointOfInterest[];
+  readonly shop: readonly LocalisedPointOfInterest[];
+  readonly transports: readonly LocalisedTransport[];
+}
+
+/**
+ * Coarse bucket inference for legacy rows persisted before WS3 (i.e.
+ * `bucket` field absent). Mirrors the same taxonomy used by the
+ * editorial sync script (`scripts/editorial-pilot/src/enrichment/`),
+ * but kept minimal — the canonical assignment lives in the sync, this
+ * is only a safety net so unmigrated rows render in a sane section.
+ *
+ * Heuristics (DATAtourisme / OSM `type` strings):
+ *   - museum / monument / castle / heritage / park / garden / nature
+ *     / beach / viewpoint / church / cathedral → `visit`
+ *   - pharmacy / bakery / supermarket / convenience / atm / post_office
+ *     / store → `shop`
+ *   - everything else (restaurant, winery, sports, trail, …) → `do`
+ */
+function inferBucketFromType(rawType: string): PoiBucket {
+  const t = rawType.toLowerCase();
+  if (
+    t.includes('museum') ||
+    t.includes('monument') ||
+    t.includes('castle') ||
+    t.includes('chateau') ||
+    t.includes('heritage') ||
+    t.includes('cultural') ||
+    t.includes('park') ||
+    t.includes('garden') ||
+    t.includes('nature') ||
+    t.includes('beach') ||
+    t.includes('viewpoint') ||
+    t.includes('church') ||
+    t.includes('cathedral') ||
+    t.includes('religious')
+  ) {
+    return 'visit';
+  }
+  if (
+    t === 'pharmacy' ||
+    t === 'bakery' ||
+    t === 'supermarket' ||
+    t === 'convenience' ||
+    t === 'atm' ||
+    t === 'post_office' ||
+    t === 'store' ||
+    t.includes('shop')
+  ) {
+    return 'shop';
+  }
+  return 'do';
+}
+
+/**
  * Returns the localized POI + transport snapshot for the hotel.
  *
  * Caller decides whether the fiche shows the section: an empty
@@ -1231,17 +1397,51 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
   const transportsRaw = TransportsSchema.safeParse(row.transports);
 
   const pointsOfInterest: LocalisedPointOfInterest[] = poisRaw.success
-    ? poisRaw.data.map((p) => ({
-        name: (locale === 'fr' ? p.name : (p.name_en ?? p.name)).trim(),
-        type: p.type,
-        category:
-          (locale === 'fr' ? (p.category_fr ?? p.category_en) : (p.category_en ?? p.category_fr)) ??
-          null,
-        distanceMeters: p.distance_meters,
-        walkMinutes: p.walk_minutes ?? null,
-        latitude: p.latitude ?? null,
-        longitude: p.longitude ?? null,
-      }))
+    ? poisRaw.data.map((p) => {
+        const description =
+          (locale === 'fr'
+            ? (p.description_fr ?? p.description_en)
+            : (p.description_en ?? p.description_fr)) ?? null;
+        const pricing: LocalisedPoiPricing | null = p.pricing
+          ? {
+              type: p.pricing.type,
+              amountEur: p.pricing.amount_eur ?? null,
+              currency: p.pricing.currency ?? 'EUR',
+              notes:
+                (locale === 'fr'
+                  ? (p.pricing.notes_fr ?? p.pricing.notes_en)
+                  : (p.pricing.notes_en ?? p.pricing.notes_fr)) ?? null,
+            }
+          : null;
+        const nearestTransit: LocalisedPoiNearestTransit | null = p.nearest_transit
+          ? {
+              mode: p.nearest_transit.mode,
+              name: p.nearest_transit.name,
+              distanceMeters: p.nearest_transit.distance_meters,
+              walkMinutes: p.nearest_transit.walk_minutes ?? null,
+              lineRef: p.nearest_transit.line_ref ?? null,
+            }
+          : null;
+        return {
+          name: (locale === 'fr' ? p.name : (p.name_en ?? p.name)).trim(),
+          type: p.type,
+          category:
+            (locale === 'fr'
+              ? (p.category_fr ?? p.category_en)
+              : (p.category_en ?? p.category_fr)) ?? null,
+          distanceMeters: p.distance_meters,
+          walkMinutes: p.walk_minutes ?? null,
+          latitude: p.latitude ?? null,
+          longitude: p.longitude ?? null,
+          bucket: p.bucket ?? inferBucketFromType(p.type),
+          description,
+          openingHours: p.opening_hours ?? null,
+          nearestTransit,
+          pricing,
+          schemaType: p.schema_type ?? null,
+          osmId: p.osm_id ?? null,
+        };
+      })
     : [];
 
   const transports: LocalisedTransport[] = transportsRaw.success
@@ -1256,6 +1456,181 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
     : [];
 
   return { pointsOfInterest, transports };
+}
+
+/**
+ * Returns POIs already grouped into the three editorial buckets
+ * (`visit`, `do`, `shop`) along with the transports list. The
+ * components feed each sub-section directly without re-grouping.
+ *
+ * Within each bucket, entries are sorted by walking distance (closer
+ * first), with `walkMinutes`-less entries falling back to
+ * `distanceMeters`. Editorial sort is stable — the source array
+ * order is preserved when two POIs are equidistant.
+ */
+export function readLocationByBucket(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): LocalisedLocationByBucket {
+  const { pointsOfInterest, transports } = readLocation(row, locale);
+  const buckets: Record<PoiBucket, LocalisedPointOfInterest[]> = {
+    visit: [],
+    do: [],
+    shop: [],
+  };
+  for (const p of pointsOfInterest) {
+    buckets[p.bucket].push(p);
+  }
+  const byDistance = (
+    a: LocalisedPointOfInterest,
+    b: LocalisedPointOfInterest,
+  ): number => {
+    const da = a.walkMinutes ?? Math.round(a.distanceMeters / 80);
+    const db = b.walkMinutes ?? Math.round(b.distanceMeters / 80);
+    if (da !== db) return da - db;
+    return a.distanceMeters - b.distanceMeters;
+  };
+  return {
+    visit: buckets.visit.sort(byDistance),
+    do: buckets.do.sort(byDistance),
+    shop: buckets.shop.sort(byDistance),
+    transports,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// upcoming_events (jsonb) — CDC §2 bloc "À proximité" (events lifecycle)
+// ---------------------------------------------------------------------------
+
+/**
+ * Editorial event category — drives the icon, the colour pill, and the
+ * Schema.org subtype emitted in `event.ts`.
+ *
+ * The 6 buckets cover the vast majority of culturally-relevant events
+ * surfaced by DATAtourisme regional ODTs: classical / pop concerts,
+ * temporary exhibitions, festivals (music + arts + gastronomy),
+ * sports events (marathons, regattas, tennis), theatre / opera /
+ * dance, and a generic catch-all.
+ */
+export const EVENT_CATEGORIES = ['concert', 'expo', 'festival', 'sport', 'theater', 'other'] as const;
+export type EventCategory = (typeof EVENT_CATEGORIES)[number];
+const EventCategorySchema = z.enum(EVENT_CATEGORIES);
+
+const EventPricingSchema = z.object({
+  type: z.enum(['free', 'paid']),
+  amount_eur: z.number().nonnegative().max(10_000).nullable(),
+});
+
+/**
+ * Each persisted event must carry a parseable `YYYY-MM-DD` start
+ * date — DATAtourisme sometimes emits datetimes; the sync script
+ * normalises everything to a date-only string before persisting.
+ *
+ * Coordinates are mandatory: we always show events on the same
+ * surface as the POI map, and an event without a venue would just
+ * be noise on the page.
+ */
+const UpcomingEventSchema = z.object({
+  name: z.string().min(1).max(200),
+  start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, { message: 'expected YYYY-MM-DD' }),
+  end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u).nullable().optional(),
+  venue_name: z.string().min(1).max(200).nullable().optional(),
+  venue_address: z.string().min(1).max(400).nullable().optional(),
+  latitude: z.number(),
+  longitude: z.number(),
+  distance_meters: z.number().int().nonnegative(),
+  category: EventCategorySchema,
+  description_fr: z.string().min(1).max(280).nullable().optional(),
+  description_en: z.string().min(1).max(280).nullable().optional(),
+  pricing: EventPricingSchema.nullable().optional(),
+  /** Official source URL (when present in DATAtourisme `hasContact.homepage`). */
+  url: z.string().url().max(2048).nullable().optional(),
+  /** DATAtourisme UUID — emitted as `sameAs` in JSON-LD for provenance. */
+  dt_uuid: z.string().min(1).max(80).nullable().optional(),
+});
+
+const UpcomingEventsSchema = z.array(UpcomingEventSchema);
+
+export interface LocalisedUpcomingEvent {
+  readonly name: string;
+  readonly startDate: string;
+  readonly endDate: string | null;
+  readonly venueName: string | null;
+  readonly venueAddress: string | null;
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly distanceMeters: number;
+  readonly category: EventCategory;
+  readonly description: string | null;
+  readonly pricing: { readonly type: 'free' | 'paid'; readonly amountEur: number | null } | null;
+  readonly url: string | null;
+  readonly dtUuid: string | null;
+}
+
+/**
+ * Returns up to 5 upcoming local events around the hotel, in the user's
+ * locale, sorted by start date ascending.
+ *
+ * Filtering rules
+ * ---------------
+ * 1. **Stale events are dropped** — anything whose `endDate` (or
+ *    `startDate` for single-day events) is before "today" is filtered
+ *    out at read time, even if the sync hasn't run yet. This prevents
+ *    a Friday-night render from surfacing an event that ended Friday
+ *    morning.
+ * 2. **No events without coordinates** — the schema already enforces
+ *    `latitude/longitude`, so a malformed entry simply doesn't parse.
+ * 3. **Cap = 5** — matches the editorial cap in the sync script. The
+ *    JSON-LD builder emits all 5 as standalone `Event` nodes.
+ *
+ * Returns an empty array on any parse failure (no events surface
+ * rather than partial / stale data).
+ */
+export function readUpcomingEvents(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): readonly LocalisedUpcomingEvent[] {
+  const parsed = UpcomingEventsSchema.safeParse(row.upcoming_events);
+  if (!parsed.success) {
+    if (process.env['NODE_ENV'] !== 'production' && row.upcoming_events !== null
+        && row.upcoming_events !== undefined) {
+      console.warn('[readUpcomingEvents] parse error', parsed.error.flatten().fieldErrors);
+    }
+    return [];
+  }
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  const localised: LocalisedUpcomingEvent[] = [];
+  for (const e of parsed.data) {
+    const lastDay = e.end_date ?? e.start_date;
+    if (lastDay < todayIso) continue;
+    const description =
+      (locale === 'fr'
+        ? (e.description_fr ?? e.description_en)
+        : (e.description_en ?? e.description_fr)) ?? null;
+    localised.push({
+      name: e.name.trim(),
+      startDate: e.start_date,
+      endDate: e.end_date ?? null,
+      venueName: e.venue_name ?? null,
+      venueAddress: e.venue_address ?? null,
+      latitude: e.latitude,
+      longitude: e.longitude,
+      distanceMeters: e.distance_meters,
+      category: e.category,
+      description,
+      pricing: e.pricing
+        ? { type: e.pricing.type, amountEur: e.pricing.amount_eur }
+        : null,
+      url: e.url ?? null,
+      dtUuid: e.dt_uuid ?? null,
+    });
+  }
+
+  return localised
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .slice(0, 5);
 }
 
 // ---------------------------------------------------------------------------
@@ -1647,6 +2022,89 @@ export function readSignatureExperiences(
 }
 
 // ---------------------------------------------------------------------------
+// concierge_advice (jsonb) — bloc obligatoire « Le Conseil du Concierge »
+// (CDC §2 + ADR-0011 + EDITORIAL_VOICE.md §4 bloc 8).
+// ---------------------------------------------------------------------------
+
+const CONCIERGE_TIP_FOR = ['room', 'dining', 'timing', 'access', 'service', 'wellness'] as const;
+
+/**
+ * Compteur de mots tolérant : on découpe sur tout ce qui n'est ni
+ * lettre ni chiffre. Suffisant pour la validation 60-90 mots ; ne
+ * cherche pas à matcher exactement une norme typographique.
+ */
+function countWords(s: string): number {
+  const trimmed = s.trim();
+  if (trimmed.length === 0) return 0;
+  return trimmed.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0).length;
+}
+
+/**
+ * Body envelope 50-110 words (relaxed from the initial 60-90 target
+ * after the Phase 3 humanizer-pass audit on 106 hotels — voir
+ * ADR-0011 Phase 3 notes). The Concierge voice tip is empirically
+ * punchier than a 90-word paragraph; the lower 50 word floor keeps
+ * the bloc substantial enough to feel like real concierge advice
+ * rather than a one-liner.
+ */
+const ConciergeAdviceLocaleSchema = z.object({
+  title: z.string().min(1).max(120),
+  body: z
+    .string()
+    .min(1)
+    .refine((b) => {
+      const n = countWords(b);
+      return n >= 50 && n <= 110;
+    }, { message: 'concierge_advice.body must be 50-110 words' }),
+  tip_for: z.enum(CONCIERGE_TIP_FOR),
+});
+
+const ConciergeAdviceSchema = z.object({
+  fr: ConciergeAdviceLocaleSchema,
+  en: ConciergeAdviceLocaleSchema.optional(),
+});
+
+export interface LocalisedConciergeAdvice {
+  readonly title: string;
+  readonly body: string;
+  readonly tipFor: (typeof CONCIERGE_TIP_FOR)[number];
+}
+
+/**
+ * Returns the « Conseil du Concierge » bloc for the requested locale.
+ * Falls back to FR if the EN payload is missing (the FR voice is
+ * canonical and the EN copy is generated from it — never the other
+ * way around).
+ *
+ * Returns `null` for hotels that have not yet been processed by the
+ * Phase 3 humanizer-pass — the UI component is a no-op in that case.
+ */
+export function readConciergeAdvice(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): LocalisedConciergeAdvice | null {
+  const parsed = ConciergeAdviceSchema.safeParse(row.concierge_advice);
+  if (!parsed.success) {
+    if (
+      process.env['NODE_ENV'] !== 'production' &&
+      row.concierge_advice !== null &&
+      row.concierge_advice !== undefined
+    ) {
+      console.warn(
+        `[concierge_advice] hotel ${row.slug}: invalid payload — ${parsed.error.message}`,
+      );
+    }
+    return null;
+  }
+  const pick = locale === 'en' && parsed.data.en !== undefined ? parsed.data.en : parsed.data.fr;
+  return {
+    title: pick.title,
+    body: pick.body,
+    tipFor: pick.tip_for,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // featured_reviews (jsonb) — CDC §2.10 (editorial pull-quotes)
 // ---------------------------------------------------------------------------
 
@@ -1848,7 +2306,7 @@ export async function getHotelBySlug(
   if (!isValidSlug(slug)) return null;
 
   // E2E / dev seam — short-circuit before touching Supabase. Activated
-  // exclusively via `CCT_E2E_FAKE_HOTEL_ID`; see
+  // exclusively via `MCH_E2E_FAKE_HOTEL_ID`; see
   // `dev-fake-hotel-detail.ts` for the synthetic row.
   const fake = getFakeHotelDetailBySlug(slug, locale);
   if (fake !== null) return fake;
@@ -2009,21 +2467,24 @@ export async function listPublishedHotelSlugs(): Promise<readonly PublishedHotel
  * solely to feed the rankings combinatorial matrix
  * (`scripts/editorial-pilot/src/import/import-atout-france-5stars.ts`).
  *
- * A sheet is considered indexable when **either** a hero image is set
- * (`hero_image IS NOT NULL`) **or** at least one long-form editorial
- * section has been authored (`jsonb_array_length(long_description_sections) > 0`).
+ * Indexability rule (May 2026, photo-ingest sprint):
+ *   `hero_image IS NOT NULL`
+ *    AND (`jsonb_array_length(gallery_images) >= 5`
+ *         OR `jsonb_array_length(long_description_sections) > 0`)
  *
  * Used by the public sitemap (`/sitemaps/hotels.xml`) so Google never
  * spends crawl budget on stub URLs that we mark `noindex` server-side.
- * Mirrors the same check applied in
- * `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` `generateMetadata`.
+ * MUST stay in lockstep with the `isIndexable` predicate in
+ * `apps/web/src/app/[locale]/hotel/[slug]/page.tsx#generateMetadata` —
+ * otherwise the sitemap would advertise URLs the page itself marks
+ * `noindex`, sending Google a contradictory signal.
  */
 export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotelSlug[]> {
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('slug, slug_en, hero_image, long_description_sections')
+      .select('slug, slug_en, hero_image, gallery_images, long_description_sections')
       .eq('is_published', true)
       .order('priority', { ascending: true })
       .limit(500);
@@ -2034,6 +2495,7 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
         slug?: unknown;
         slug_en?: unknown;
         hero_image?: unknown;
+        gallery_images?: unknown;
         long_description_sections?: unknown;
       };
       const slug = r.slug;
@@ -2042,7 +2504,10 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
       const sections = Array.isArray(r.long_description_sections)
         ? r.long_description_sections
         : [];
-      if (!hasHero && sections.length === 0) continue;
+      const gallery = Array.isArray(r.gallery_images) ? r.gallery_images : [];
+      // Mirror of `page.tsx#isIndexable` — keep both branches in sync.
+      const isIndexable = hasHero && (gallery.length >= 5 || sections.length > 0);
+      if (!isIndexable) continue;
       out.push({
         slugFr: slug,
         slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,

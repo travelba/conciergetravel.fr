@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
-import { HotelImage } from '@cct/ui';
+import { HotelImage } from '@mch/ui';
 
 import { FavoriteRemoveButton } from '@/components/account/favorite-remove-button';
 import { Link } from '@/i18n/navigation';

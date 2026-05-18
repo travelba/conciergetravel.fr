@@ -21,7 +21,7 @@ export interface RateLimitVerdict {
   readonly retryAfterSec: number;
 }
 
-const isE2EBypass = (): boolean => typeof process.env['CCT_E2E_FAKE_HOTEL_ID'] === 'string';
+const isE2EBypass = (): boolean => typeof process.env['MCH_E2E_FAKE_HOTEL_ID'] === 'string';
 
 export async function gateByIp(ip: string): Promise<RateLimitVerdict> {
   if (isE2EBypass()) return { ok: true, retryAfterSec: 0 };

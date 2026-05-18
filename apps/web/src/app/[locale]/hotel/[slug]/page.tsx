@@ -3,10 +3,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@cct/seo';
+import { JsonLd } from '@mch/seo';
 
-import { buildCloudinarySrc } from '@cct/ui';
+import { buildCloudinarySrc } from '@mch/ui';
 
+import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { DisplayOnlyBookingCard } from '@/components/hotel/display-only-booking-card';
 import { HotelAmenities } from '@/components/hotel/hotel-amenities';
 import { HotelAwards } from '@/components/hotel/hotel-awards';
@@ -17,6 +18,7 @@ import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews'
 import { HotelFavoriteButton } from '@/components/hotel/hotel-favorite-button';
 import { HotelShareButton } from '@/components/hotel/hotel-share-button';
 import { HotelGallery } from '@/components/hotel/hotel-gallery';
+import HotelEvents from '@/components/hotel/hotel-events';
 import { HotelLocation } from '@/components/hotel/hotel-location';
 import { HotelMiceEvents } from '@/components/hotel/hotel-mice-events';
 import { HotelPolicies } from '@/components/hotel/hotel-policies';
@@ -59,9 +61,11 @@ import {
   readInventoryCounts,
   readLocation,
   readMiceInfo,
+  readUpcomingEvents,
   readPhoneE164,
   readPolicies,
   readPostalCode,
+  readConciergeAdvice,
   readRestaurants,
   readSignatureExperiences,
   readSpa,
@@ -103,7 +107,7 @@ import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
  */
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://conciergetravel.fr';
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function siteOrigin(): string {
@@ -273,21 +277,41 @@ export async function generateMetadata({
         ]
       : undefined;
 
-  // EEAT guard: a sheet that has neither a real hero image nor any
-  // long-form editorial section is a "stub" (catalog placeholder for
-  // the rankings matrix — see `scripts/editorial-pilot/src/import/
-  // import-atout-france-5stars.ts`). We let the page render so deep
-  // links from rankings work, but mark it `noindex, follow` so Google
-  // doesn't index thin pages and downgrade the site's overall quality
-  // signal. As soon as the editorial team enriches the fiche (hero +
-  // ≥1 long-description section), the page becomes indexable on the
-  // next ISR revalidation.
-  // `long_description_sections` is typed as `unknown` in the row schema
-  // (it's a JSONB blob with its own runtime parser further down). Narrow
-  // it locally so the TS strict mode is satisfied without an `as` cast.
+  // EEAT guard (Phase photo-ingest, May 2026): a "stub" sheet — i.e.
+  // one that does NOT meet the minimum indexability bar — renders
+  // server-side so deep links from rankings still work, but emits
+  // `noindex, follow` so Google doesn't index thin pages and downgrade
+  // the site's overall quality signal.
+  //
+  // A sheet is indexable when it has **a hero image** AND
+  // (**≥ 5 gallery photos** OR **≥ 1 long-form editorial section**).
+  //
+  // Rationale:
+  //   - Hero alone is necessary (no visual = nothing to crawl/share).
+  //   - Hero + 5 gallery shots = a credible mini-fiche, sufficient
+  //     EEAT for Google Hotels even without a long editorial body.
+  //   - Hero + 1 long section = a credible editorial fiche even if
+  //     the orchestrator only managed to pull a few photos (rare —
+  //     editor manually wrote sections without uploading more shots).
+  //
+  // As soon as the photo orchestrator hydrates the fiche
+  // (`scripts/photos/sync-hotel-photos.ts`), the page becomes
+  // indexable on the next request — `dynamic = 'force-dynamic'` so
+  // there is no cache to invalidate.
+  //
+  // `long_description_sections` and `gallery_images` are typed as
+  // `unknown` in the row schema (jsonb blobs with their own runtime
+  // parsers further down). Narrow them locally so TS strict is
+  // satisfied without an `as` cast. Keep this predicate in lockstep
+  // with `listIndexableHotelSlugs()` in
+  // `apps/web/src/server/hotels/get-hotel-by-slug.ts` — they MUST
+  // agree, otherwise the sitemap would list a noindex'd URL.
   const sectionsRaw = row.long_description_sections;
   const hasSections = Array.isArray(sectionsRaw) && sectionsRaw.length > 0;
-  const isStub = heroPublicId === null && !hasSections;
+  const galleryRaw = row.gallery_images;
+  const galleryCount = Array.isArray(galleryRaw) ? galleryRaw.length : 0;
+  const isIndexable = heroPublicId !== null && (galleryCount >= 5 || hasSections);
+  const isStub = !isIndexable;
 
   return {
     title,
@@ -306,7 +330,7 @@ export async function generateMetadata({
       title,
       description: desc,
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
-      siteName: 'ConciergeTravel',
+      siteName: 'MyConciergeHotel',
       url: absoluteUrl,
       ...(ogImages !== undefined ? { images: ogImages } : {}),
     },
@@ -380,6 +404,7 @@ async function renderHotelPage(
   const historyDates = readHotelHistoryDates(row);
   const storySections = readHotelStory(row, locale);
   const signatureExperiences = readSignatureExperiences(row, locale);
+  const conciergeAdvice = readConciergeAdvice(row, locale);
   const featuredReviews = readFeaturedReviews(row, locale);
   const faqs = readFaq(row, locale);
   const faqGroups = readFaqByCategory(row, locale);
@@ -387,6 +412,7 @@ async function renderHotelPage(
   const galleryImages = readGallery(row, locale, name);
   const virtualTour = readVirtualTour(row);
   const miceInfo = readMiceInfo(row, locale);
+  const upcomingEvents = readUpcomingEvents(row, locale);
   const externalIds = readExternalIds(row);
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const heroDescriptor =
@@ -719,6 +745,38 @@ async function renderHotelPage(
     }),
   );
 
+  // Event[] JSON-LD — one standalone node per upcoming event (CDC §2 "À
+  // proximité"). Google's "Events" rich result requires top-level Event
+  // nodes; nesting them in an ItemList drops the eligibility. We cap at
+  // 5 per the reader (`readUpcomingEvents`).
+  const eventJsonLdList = upcomingEvents.map((e) =>
+    JsonLd.withSchemaOrgContext(
+      JsonLd.eventJsonLd({
+        name: e.name,
+        category: e.category,
+        startDate: e.startDate,
+        ...(e.endDate !== null ? { endDate: e.endDate } : {}),
+        venueName: e.venueName,
+        venueAddress: e.venueAddress,
+        latitude: e.latitude,
+        longitude: e.longitude,
+        ...(e.description !== null ? { description: e.description } : {}),
+        ...(e.url !== null ? { officialUrl: e.url } : {}),
+        ...(e.dtUuid !== null
+          ? { sameAs: `https://data.datatourisme.fr/poi/${e.dtUuid}` }
+          : {}),
+        ...(e.pricing !== null
+          ? {
+              pricing: {
+                type: e.pricing.type,
+                amountEur: e.pricing.amountEur,
+              },
+            }
+          : {}),
+      }),
+    ),
+  );
+
   // Maillage interne (Phase 12.4 / skill seo-technical §Maillage).
   // Fetched right before render so the bundle is a Server Component
   // tree leaf — cached implicitly by the route's ISR layer (1 h).
@@ -743,6 +801,13 @@ async function renderHotelPage(
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
       <JsonLdScript data={bookingHowToJsonLd} nonce={nonce} />
       <JsonLdScript data={cancellationHowToJsonLd} nonce={nonce} />
+      {eventJsonLdList.map((data, i) => (
+        <JsonLdScript
+          key={`event-${i}`}
+          data={data as unknown as Record<string, unknown>}
+          nonce={nonce}
+        />
+      ))}
 
       <nav aria-label={t('breadcrumb.hotels')} className="text-muted mb-6 text-xs">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -1125,6 +1190,13 @@ async function renderHotelPage(
         location={location}
       />
 
+      <HotelEvents
+        locale={locale}
+        hotelName={name}
+        city={row.city}
+        events={upcomingEvents}
+      />
+
       <HotelMiceEvents locale={locale} hotelName={name} mice={miceInfo} />
 
       <section aria-labelledby="rooms-title" className="mb-12">
@@ -1207,6 +1279,8 @@ async function renderHotelPage(
       </section>
 
       {hasAnyPolicy(policies) ? <HotelPolicies locale={locale} policies={policies} /> : null}
+
+      <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
 
       {faqGroups.length > 0 ? (
         <HotelFaq locale={locale} groups={faqGroups} />

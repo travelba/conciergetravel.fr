@@ -42,7 +42,7 @@ const T = {
   fr: {
     bookName: (hotel: string) => `Comment réserver une chambre à ${hotel}`,
     bookDescription: (hotel: string) =>
-      `Réservation pas à pas d'une chambre à ${hotel} via la conciergerie ConciergeTravel — tarifs négociés IATA, accompagnement humain.`,
+      `Réservation pas à pas d'une chambre à ${hotel} via la conciergerie MyConciergeHotel — tarifs négociés IATA, accompagnement humain.`,
     bookSteps: (hotel: string): readonly { name: string; text: string }[] => [
       {
         name: 'Choisir les dates',
@@ -71,15 +71,15 @@ const T = {
     ],
     cancelName: (hotel: string) => `Comment annuler ma réservation à ${hotel}`,
     cancelDescription: (hotel: string) =>
-      `Procédure pour annuler ou modifier une réservation à ${hotel} effectuée via ConciergeTravel.`,
+      `Procédure pour annuler ou modifier une réservation à ${hotel} effectuée via MyConciergeHotel.`,
     cancelSteps: (): readonly { name: string; text: string }[] => [
       {
         name: "Vérifier la politique d'annulation",
         text: "Consultez votre voucher de réservation : la date limite d'annulation gratuite et le montant des pénalités y figurent. Chaque tarif a sa propre politique.",
       },
       {
-        name: 'Contacter la conciergerie ConciergeTravel',
-        text: 'Envoyez un e-mail à reservations@conciergetravel.fr en précisant votre numéro de réservation (PNR) et le motif. Réponse sous 4 h ouvrées.',
+        name: 'Contacter la conciergerie MyConciergeHotel',
+        text: 'Envoyez un e-mail à reservations@myconciergehotel.com en précisant votre numéro de réservation (PNR) et le motif. Réponse sous 4 h ouvrées.',
       },
       {
         name: "Recevoir la confirmation d'annulation",
@@ -93,7 +93,7 @@ const T = {
   en: {
     bookName: (hotel: string) => `How to book a room at ${hotel}`,
     bookDescription: (hotel: string) =>
-      `Step-by-step booking of a room at ${hotel} via the ConciergeTravel concierge desk — IATA-negotiated rates, human assistance.`,
+      `Step-by-step booking of a room at ${hotel} via the MyConciergeHotel concierge desk — IATA-negotiated rates, human assistance.`,
     bookSteps: (hotel: string): readonly { name: string; text: string }[] => [
       {
         name: 'Choose your dates',
@@ -122,15 +122,15 @@ const T = {
     ],
     cancelName: (hotel: string) => `How to cancel my reservation at ${hotel}`,
     cancelDescription: (hotel: string) =>
-      `Procedure to cancel or modify a reservation at ${hotel} made via ConciergeTravel.`,
+      `Procedure to cancel or modify a reservation at ${hotel} made via MyConciergeHotel.`,
     cancelSteps: (): readonly { name: string; text: string }[] => [
       {
         name: 'Check the cancellation policy',
         text: 'Review your booking voucher: the free-cancellation deadline and any penalty amounts are listed there. Each rate has its own policy.',
       },
       {
-        name: 'Contact the ConciergeTravel concierge desk',
-        text: 'E-mail reservations@conciergetravel.fr with your booking reference (PNR) and the reason. Reply within 4 business hours.',
+        name: 'Contact the MyConciergeHotel concierge desk',
+        text: 'E-mail reservations@myconciergehotel.com with your booking reference (PNR) and the reason. Reply within 4 business hours.',
       },
       {
         name: 'Receive the cancellation confirmation',

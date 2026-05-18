@@ -16,7 +16,7 @@ La façade Belle Époque du Plaza Athénée, caractérisée par ses marquises Ar
 
 Avec 208 clés réparties entre chambres et suites, le Plaza Athénée offre une expérience d’hébergement variée où chaque détail est pensé pour séduire. La Suite Royale, étendue sur 450 m², propose un rare privilège : une vue dégagée sur la Tour Eiffel, typique des étages supérieurs. Plus intime, la Suite Eiffel (88 m²) séduit par sa terrasse privée.
 
-> « Ce palace offre des perspectives lumineuses uniques : l’orientation des suites Eiffel permet d’apprécier la lumière du Trocadéro en hiver, un détail que l’hôtel mentionne rarement. » — Léa, conseillère senior Paris ConciergeTravel.fr
+> « Ce palace offre des perspectives lumineuses uniques : l’orientation des suites Eiffel permet d’apprécier la lumière du Trocadéro en hiver, un détail que l’hôtel mentionne rarement. » — Léa, conseillère senior Paris MyConciergeHotel.com
 
 Idéal pour les adeptes de la mode et les voyageurs participant à la Fashion Week ou souhaitant explorer l’avenue Montaigne, le Plaza Athénée conjugue art de vivre et emplacement stratégique. On notera toutefois que l’arrivée manque un peu de théâtre — la magie commence une fois la cour franchie.
 

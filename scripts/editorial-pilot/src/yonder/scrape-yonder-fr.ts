@@ -21,7 +21,7 @@
  *
  * Re-run safely: cached pages are reused; pass `--no-cache` to force-refresh.
  *
- * Run:  pnpm --filter @cct/editorial-pilot exec tsx src/yonder/scrape-yonder-fr.ts
+ * Run:  pnpm --filter @mch/editorial-pilot exec tsx src/yonder/scrape-yonder-fr.ts
  */
 
 import { readdir, readFile, writeFile, mkdir, stat } from 'node:fs/promises';

@@ -18,7 +18,7 @@ const requiredUrl = z.string().url();
 const SharedEnvSchema = z.object({
   // Public site
   NEXT_PUBLIC_SITE_URL: requiredUrl,
-  NEXT_PUBLIC_SITE_NAME: z.string().default('ConciergeTravel'),
+  NEXT_PUBLIC_SITE_NAME: z.string().default('MyConciergeHotel'),
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['fr', 'en']).default('fr'),
 
   // Supabase
@@ -61,7 +61,7 @@ const SharedEnvSchema = z.object({
   // Brevo
   BREVO_API_KEY: z.string().min(1),
   BREVO_SENDER_EMAIL: z.string().email(),
-  BREVO_SENDER_NAME: z.string().default('ConciergeTravel'),
+  BREVO_SENDER_NAME: z.string().default('MyConciergeHotel'),
   BREVO_INTERNAL_OPS_EMAIL: z.string().email(),
 
   // Sentry

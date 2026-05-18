@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/cursor-ai/mcp-config-schema/main/schema.json",
   "_comment": [
-    "Project-local MCP server pinning for ConciergeTravel.fr.",
+    "Project-local MCP server pinning for MyConciergeHotel.com.",
     "Servers listed here are the ones every contributor (human or agent) should",
     "have available. User-level config still applies on top — these entries",
     "merely document the project's expected toolkit.",

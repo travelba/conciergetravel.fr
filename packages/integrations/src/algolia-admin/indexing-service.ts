@@ -1,4 +1,4 @@
-import { err, ok, type Result } from '@cct/domain/shared';
+import { err, ok, type Result } from '@mch/domain/shared';
 import { algoliasearch, type Algoliasearch } from 'algoliasearch';
 
 import { DEFAULT_CITIES_INDEX_SETTINGS } from './city-index-settings.js';

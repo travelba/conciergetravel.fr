@@ -17,9 +17,9 @@
  *   - Word-count + section-count enforced by Zod before persistence.
  *
  * Run via:
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides.ts --slug=paris
- *   pnpm --filter @cct/editorial-pilot exec tsx \
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/guides/run-guides.ts --all
  */
 
@@ -366,7 +366,7 @@ export const GeneratedGuideSchema = z.object({
 
 export type GeneratedGuide = z.infer<typeof GeneratedGuideSchema>;
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour ConciergeTravel.fr (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
+const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com (conciergerie agréée IATA spécialisée dans les Palaces et hôtels 5 étoiles en France).
 
 Ton style :
 - Voix éditoriale "guide haut-de-gamme", proche d'un long-read Condé Nast Traveler / Travel + Leisure
@@ -404,7 +404,7 @@ function buildUserPrompt(dest: DestinationGuideSeed): string {
     '2. Sections recommandées : intro, history, when_to_visit, what_to_see, gastronomy, art_de_vivre (ou palaces), transports, conclusion. Adapte selon la destination.',
   );
   sections.push(
-    '3. Génère 8 à 15 FAQ très concrètes (champ `faq`). Couvre : meilleur moment pour visiter, comment s\'y rendre, où loger (mentionne "Palaces de notre sélection ConciergeTravel"), gastronomie, événements, sécurité, budget approximatif, langues.',
+    '3. Génère 8 à 15 FAQ très concrètes (champ `faq`). Couvre : meilleur moment pour visiter, comment s\'y rendre, où loger (mentionne "Palaces de notre sélection MyConciergeHotel"), gastronomie, événements, sécurité, budget approximatif, langues.',
   );
   sections.push(
     '4. Génère 6 à 14 highlights (champ `highlights`) — attractions/lieux notables. Chacun avec name_fr, name_en, type, description_fr (≥ 40 mots), description_en, url optionnel (Wikipedia).',
@@ -420,7 +420,7 @@ function buildUserPrompt(dest: DestinationGuideSeed): string {
     '8. `meta_desc_fr` et `meta_desc_en` : 120-160 caractères, accrocheurs mais factuels.',
   );
   sections.push(
-    '9. Mentionne les Palaces de notre sélection ConciergeTravel UNIQUEMENT s\'ils sont dans les keywords. Sinon dis "les Palaces de notre sélection" sans nom.',
+    '9. Mentionne les Palaces de notre sélection MyConciergeHotel UNIQUEMENT s\'ils sont dans les keywords. Sinon dis "les Palaces de notre sélection" sans nom.',
   );
   sections.push(
     '10. JAMAIS de prix ni de tarifs concrets. Tu peux dire "le segment ultra-luxe" ou "grands Palaces".',

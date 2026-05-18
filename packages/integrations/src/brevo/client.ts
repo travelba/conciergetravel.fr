@@ -1,6 +1,6 @@
-import { loadSharedEnv, type SharedEnv } from '@cct/config/env';
-import { err, ok, type Result } from '@cct/domain/shared';
-import { retryingJsonRequest } from '@cct/integrations/http';
+import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
+import { err, ok, type Result } from '@mch/domain/shared';
+import { retryingJsonRequest } from '@mch/integrations/http';
 
 import type { BrevoError } from './errors.js';
 import {

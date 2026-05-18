@@ -1,4 +1,4 @@
-import { HotelImage } from '@cct/ui';
+import { HotelImage } from '@mch/ui';
 import { getTranslations } from 'next-intl/server';
 
 import type { LocalisedSignatureExperience } from '@/server/hotels/get-hotel-by-slug';

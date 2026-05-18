@@ -1,5 +1,5 @@
 {
-  "name": "@cct/emails",
+  "name": "@mch/emails",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -19,7 +19,7 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@cct/config": "workspace:*",
+    "@mch/config": "workspace:*",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "react-email": "^3.0.4",

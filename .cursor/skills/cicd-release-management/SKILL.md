@@ -1,9 +1,9 @@
 ---
 name: cicd-release-management
-description: CI/CD and release management for ConciergeTravel.fr — GitHub Actions, Vercel previews, Supabase migrations, Sentry releases, environment promotion. Use whenever you add or modify CI workflows, release processes, or environment handling.
+description: CI/CD and release management for MyConciergeHotel.com — GitHub Actions, Vercel previews, Supabase migrations, Sentry releases, environment promotion. Use whenever you add or modify CI workflows, release processes, or environment handling.
 ---
 
-# CI/CD and release management — ConciergeTravel.fr
+# CI/CD and release management — MyConciergeHotel.com
 
 The pipeline must support **fast iteration**, **safe migrations**, and **one-click rollback**. We use GitHub Actions + Vercel + Supabase CI.
 
@@ -22,8 +22,8 @@ Invoke when:
 | ------------ | ---------------------- | ---------------------------------- |
 | `dev`        | local + Supabase local | `localhost:3000`, `localhost:3001` |
 | `preview`    | every PR               | `<pr>.cct-preview.vercel.app`      |
-| `staging`    | `develop` branch       | `staging.conciergetravel.fr`       |
-| `production` | `main` branch          | `conciergetravel.fr`               |
+| `staging`    | `develop` branch       | `staging.myconciergehotel.com`       |
+| `production` | `main` branch          | `myconciergehotel.com`               |
 
 Database environments map to **separate Supabase projects** for `staging` and `production`. Preview deployments use the staging DB unless an `e2e/` tag triggers an ephemeral schema (Phase 2 enhancement).
 
@@ -224,7 +224,7 @@ build:
     NEXT_PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co'
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'ci-placeholder-anon-key'
     SUPABASE_SERVICE_ROLE_KEY: 'ci-placeholder-service-role-key'
-    NEXT_PUBLIC_SITE_URL: 'https://ci.conciergetravel.fr'
+    NEXT_PUBLIC_SITE_URL: 'https://ci.myconciergehotel.com'
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: 'ci-placeholder'
     NEXT_PUBLIC_ALGOLIA_APP_ID: 'CIPLACEHOLDER'
     NEXT_PUBLIC_ALGOLIA_SEARCH_KEY: 'ci-placeholder-search-key'

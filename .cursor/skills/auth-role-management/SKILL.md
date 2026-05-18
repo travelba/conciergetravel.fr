@@ -1,9 +1,9 @@
 ---
 name: auth-role-management
-description: Supabase Auth + RBAC integration for ConciergeTravel.fr (customer / editor / operator / admin / seo). Use when implementing auth flows, middleware, server actions requiring auth, role checks, or RLS policy claims.
+description: Supabase Auth + RBAC integration for MyConciergeHotel.com (customer / editor / operator / admin / seo). Use when implementing auth flows, middleware, server actions requiring auth, role checks, or RLS policy claims.
 ---
 
-# Auth and role management — ConciergeTravel.fr
+# Auth and role management — MyConciergeHotel.com
 
 Authentication is **Supabase Auth** (CDC §2). The app uses `@supabase/ssr` for Next.js 15 App Router cookie-based sessions. Role-based access is layered: **app-level guards** + **RLS policies** referencing JWT custom claims.
 
@@ -88,7 +88,7 @@ Roles are stored in `auth.users.app_metadata.role` (server-set only — clients 
 'use server';
 import { z } from 'zod';
 import { requireUser } from '@/lib/auth/require-user';
-import { cancelBooking } from '@cct/integrations/amadeus';
+import { cancelBooking } from '@mch/integrations/amadeus';
 
 const Input = z.object({ bookingRef: z.string() });
 

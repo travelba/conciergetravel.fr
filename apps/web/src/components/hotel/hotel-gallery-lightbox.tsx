@@ -1,6 +1,6 @@
 'use client';
 
-import { HotelImage } from '@cct/ui';
+import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 export interface GalleryLightboxImage {
@@ -17,7 +17,13 @@ interface HotelGalleryLightboxProps {
     readonly thumbnailsLabel: string;
     readonly openLightbox: string;
     readonly lightboxLabel: string;
-    readonly lightboxCounter: (current: number, total: number) => string;
+    /**
+     * Template containing `{current}` and `{total}` placeholders (the raw
+     * ICU message), interpolated client-side. We pass the template instead
+     * of a closure so the prop stays serialisable across the RSC boundary
+     * — Next 15 rejects function props from a Server Component.
+     */
+    readonly lightboxCounterTemplate: string;
     readonly previousImage: string;
     readonly nextImage: string;
     readonly closeLightbox: string;
@@ -254,7 +260,9 @@ export function HotelGalleryLightbox({
                 ←
               </button>
               <p aria-live="polite" className="text-white/80">
-                {translations.lightboxCounter(currentIndex + 1, total)}
+                {translations.lightboxCounterTemplate
+                  .replace('{current}', String(currentIndex + 1))
+                  .replace('{total}', String(total))}
               </p>
               <div className="flex items-center gap-2">
                 <button

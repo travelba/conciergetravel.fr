@@ -1,4 +1,4 @@
-# Modèle de données — ConciergeTravel.fr
+# Modèle de données — MyConciergeHotel.com
 
 Référence vivante CDC v3.0 §4, addendum v3.2 §B (Makcorps), skill `supabase-postgres-rls`.  
 **DDL versionné :** [`packages/db/migrations/0001_init_core_schema.sql`](../packages/db/migrations/0001_init_core_schema.sql).
@@ -33,7 +33,7 @@ erDiagram
 | `redirects`              | 301/302 Payload → middleware Next (anti‑cannibalisation).                                     |
 | `audit_logs`             | Traçabilité opérateur (INSERT via service_role / jobs).                                       |
 
-Système : table interne **`_cct_sql_migrations`** (journal d’applications SQL), créée par `pnpm --filter @cct/db migrate`.
+Système : table interne **`_cct_sql_migrations`** (journal d’applications SQL), créée par `pnpm --filter @mch/db migrate`.
 
 ## RBAC — `auth.jwt() ->> 'role'`
 
@@ -74,7 +74,7 @@ Documentés avant persistance depuis `packages/domain` + intégrations :
 ```bash
 # Depuis https://console.supabase.com → Settings → Database (URI direct port 5432 de préférence)
 export SUPABASE_DB_URL='postgresql://postgres:...@db.<ref>.supabase.co:5432/postgres'
-pnpm --filter @cct/db migrate
+pnpm --filter @mch/db migrate
 ```
 
 Rollback : fichier SQL inverse numéroté suivant convention `NNNN_rollback_xyz.sql`, rarement automatique ; PITR Supabase pour incident majeur.

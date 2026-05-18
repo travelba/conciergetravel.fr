@@ -1,9 +1,9 @@
 ---
 name: geo-llm-optimization
-description: GEO / AEO optimization for ConciergeTravel.fr (llms.txt, llms-full.txt, AEO blocks, agent-skills.json, Link Header WebMCP, FAQ extraction, freshness signals). Use for any work touching LLM ingestion, AI Overviews, or LLM-actionable surfaces.
+description: GEO / AEO optimization for MyConciergeHotel.com (llms.txt, llms-full.txt, AEO blocks, agent-skills.json, Link Header WebMCP, FAQ extraction, freshness signals). Use for any work touching LLM ingestion, AI Overviews, or LLM-actionable surfaces.
 ---
 
-# GEO / LLM optimization — ConciergeTravel.fr
+# GEO / LLM optimization — MyConciergeHotel.com
 
 Beyond Google SEO, the site must rank inside **AI Overviews, ChatGPT, Perplexity, Claude** answers (CDC §6.5 + Excel sheet "GEO & Agentique"). The architecture exposes machine-readable surfaces designed for extraction.
 
@@ -32,7 +32,7 @@ Invoke when:
 
 ### `llms.txt` (root)
 
-- Title `# ConciergeTravel.fr — Agence IATA Hôtels 5★ & Palaces France`.
+- Title `# MyConciergeHotel.com — Agence IATA Hôtels 5★ & Palaces France`.
 - One-line description.
 - "## Pages stratégiques" with 5–10 curated links + 40–60 word descriptions each.
 - "## À propos" with IATA / ASPST credentials, value proposition, freshness.
@@ -47,7 +47,7 @@ Invoke when:
 ### AEO block (40–80 words) — CDC §6.5
 
 - Component `<AeoBlock>` placed at the top of every editorial page and hotel detail.
-- Content authored in Payload field `aeo_block_fr` / `aeo_block_en`. Lint validates 40–80 words (was 40–60 in V1, widened to align with `buildAeoBlock` from `@cct/seo`).
+- Content authored in Payload field `aeo_block_fr` / `aeo_block_en`. Lint validates 40–80 words (was 40–60 in V1, widened to align with `buildAeoBlock` from `@mch/seo`).
 - Format: direct answer to the page's primary question, names entities, includes the freshness phrase ("mise à jour [mois année]").
 
 ### IA-ready factual summary (CDC §2.3)
@@ -117,7 +117,7 @@ Invoke when:
 
 - Author byline + bio on every editorial page (Payload `authors`).
 - Methodology page describing selection criteria.
-- Proprietary data: where applicable, badge "Sélection ConciergeTravel" + internal scoring.
+- Proprietary data: where applicable, badge "Sélection MyConciergeHotel" + internal scoring.
 
 ### TravelAgency JSON-LD on home + `/agence/`
 

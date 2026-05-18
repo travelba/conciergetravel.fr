@@ -45,7 +45,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
-      siteName: 'ConciergeTravel',
+      siteName: 'MyConciergeHotel',
     },
     twitter: { card: 'summary_large_image' },
   };

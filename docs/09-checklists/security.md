@@ -1,4 +1,4 @@
-# Checklist sécurité — ConciergeTravel.fr
+# Checklist sécurité — MyConciergeHotel.com
 
 Mirror du CDC v3.0 §11. Skill : `security-engineering`.
 

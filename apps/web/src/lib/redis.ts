@@ -7,7 +7,7 @@ import { createInMemoryRedis } from './redis-memory';
 let cached: Redis | undefined;
 
 /**
- * E2E seam — when `CCT_E2E_FAKE_HOTEL_ID` is set (Playwright webserver
+ * E2E seam — when `MCH_E2E_FAKE_HOTEL_ID` is set (Playwright webserver
  * + CI smoke) we substitute a process-local in-memory store for
  * Upstash. Same shape (`get`, `set`, `del`, `incr`, `expire` with
  * `ex` / `nx`) so all callers keep working unchanged. Never enabled in
@@ -19,7 +19,7 @@ let cached: Redis | undefined;
  * the booking-paid spec without any infra to spin up.
  */
 function isE2ESeamEnabled(): boolean {
-  return typeof process.env['CCT_E2E_FAKE_HOTEL_ID'] === 'string';
+  return typeof process.env['MCH_E2E_FAKE_HOTEL_ID'] === 'string';
 }
 
 export const redis = (() => {

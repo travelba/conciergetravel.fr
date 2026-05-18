@@ -1,9 +1,9 @@
 ---
 name: booking-engine
-description: End-to-end booking engine flow for ConciergeTravel.fr (search → results → offer → guest → recap → payment → confirmation → post-booking). Use for any code spanning the tunnel, state transitions, e-mails, or fallback email mode.
+description: End-to-end booking engine flow for MyConciergeHotel.com (search → results → offer → guest → recap → payment → confirmation → post-booking). Use for any code spanning the tunnel, state transitions, e-mails, or fallback email mode.
 ---
 
-# Booking engine — ConciergeTravel.fr
+# Booking engine — MyConciergeHotel.com
 
 The booking flow is the **transactional core** (CDC v3.0 §7). It must work flawlessly on mobile within max 3 screens, with native cancellation policy display, real-time prices, and Amadeus-hosted payment.
 
@@ -69,7 +69,7 @@ flowchart LR
 - Hotels with `booking_mode = 'email'` show CTA "Demande de réservation" — no payment iframe.
 - Form fields: dates, room preference, party composition, message.
 - Server action persists into `booking_requests_email`, sends:
-  - Internal email to `reservations@conciergetravel.fr` (Brevo template `booking-request-internal`).
+  - Internal email to `reservations@myconciergehotel.com` (Brevo template `booking-request-internal`).
   - Acknowledgement email to guest with 4h response SLA.
 - Surfaced in Payload back-office for operator follow-up.
 

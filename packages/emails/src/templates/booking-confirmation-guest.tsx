@@ -90,30 +90,30 @@ const footer = { fontSize: 12, color: colors.muted, marginTop: 24 };
 
 const copy = {
   fr: {
-    preview: (ref: string) => `Votre réservation est confirmée — ${ref}`,
-    title: 'Votre réservation est confirmée',
-    subtitle: 'Tous les détails de votre séjour ci-dessous.',
+    preview: (ref: string) => `Votre séjour est confirmé — ${ref}`,
+    title: 'Votre séjour est confirmé',
+    subtitle: 'Votre concierge récapitule tout ci-dessous.',
     hello: (n: string) => `Bonjour ${n},`,
     intro: (h: string, loc: string) =>
-      `Votre séjour à ${h} (${loc}) est confirmé. Voici les détails :`,
+      `C'est fait : votre séjour à ${h} (${loc}) est confirmé. Voici les détails :`,
     stayLabel: 'Séjour',
     refLabel: 'Référence de réservation',
     totalLabel: 'Total réglé',
     policyLabel: "Politique d'annulation",
-    sign: "À très bientôt,\n— L'équipe ConciergeTravel",
+    sign: "À très bientôt,\n— Votre Concierge MyConciergeHotel",
   },
   en: {
-    preview: (ref: string) => `Your booking is confirmed — ${ref}`,
-    title: 'Your booking is confirmed',
-    subtitle: 'All your stay details below.',
+    preview: (ref: string) => `Your stay is confirmed — ${ref}`,
+    title: 'Your stay is confirmed',
+    subtitle: 'Your concierge has the full recap below.',
     hello: (n: string) => `Hello ${n},`,
     intro: (h: string, loc: string) =>
-      `Your stay at ${h} (${loc}) is confirmed. Here are the details:`,
+      `Done: your stay at ${h} (${loc}) is confirmed. Here are the details:`,
     stayLabel: 'Stay',
     refLabel: 'Booking reference',
     totalLabel: 'Total charged',
     policyLabel: 'Cancellation policy',
-    sign: 'See you soon,\n— The ConciergeTravel team',
+    sign: 'See you soon,\n— Your MyConciergeHotel Concierge',
   },
 } as const;
 

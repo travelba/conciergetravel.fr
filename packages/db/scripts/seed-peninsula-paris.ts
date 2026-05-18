@@ -13,8 +13,8 @@
  *   - https://en.wikipedia.org/wiki/The_Peninsula_Paris
  *
  * Photos (12) uploaded separately on Cloudinary cloud `dvbjwh5wy` under the
- * folder `cct/test/peninsula-paris/`, tagged `cct:test:peninsula`,
- * `cct:test-data-not-prod`, `cct:source:wikimedia-commons`. They are sourced
+ * folder `cct/test/peninsula-paris/`, tagged `mch:test:peninsula`,
+ * `mch:test-data-not-prod`, `mch:source:wikimedia-commons`. They are sourced
  * from Wikimedia Commons (CC licence). The `hotels` table has no image
  * column at the moment, so we stash room-level photos in `hotel_rooms.images`
  * and document the hotel-level gallery as a known gap (see
@@ -27,12 +27,12 @@
  *     wipe & reinsert inside a single transaction).
  *
  * Rollback (one command):
- *   pnpm --filter @cct/db teardown:peninsula
+ *   pnpm --filter @mch/db teardown:peninsula
  *
  * Refuses to run on prod unless `SEED_ALLOW_PROD=true`.
  *
  * Usage (from repo root):
- *   pnpm --filter @cct/db seed:peninsula
+ *   pnpm --filter @mch/db seed:peninsula
  */
 import postgres from 'postgres';
 import { z } from 'zod';
@@ -191,10 +191,10 @@ const FAQ: readonly LocalisedFaq[] = [
     category: 'before',
     question_fr: "Quel est le prix moyen d'une nuit au Peninsula Paris ?",
     answer_fr:
-      'Les chambres Deluxe démarrent autour de 1 600 € la nuit, les chambres Premier autour de 2 200 €, et la Suite Tour Eiffel autour de 8 000 €. Le tarif définitif dépend de la saison, de la durée du séjour et des options incluses (petit-déjeuner, transfert). ConciergeTravel transmet un devis personnalisé sous 24 h après votre demande.',
+      'Les chambres Deluxe démarrent autour de 1 600 € la nuit, les chambres Premier autour de 2 200 €, et la Suite Tour Eiffel autour de 8 000 €. Le tarif définitif dépend de la saison, de la durée du séjour et des options incluses (petit-déjeuner, transfert). MyConciergeHotel transmet un devis personnalisé sous 24 h après votre demande.',
     question_en: 'What is the average price for a night at The Peninsula Paris?',
     answer_en:
-      'Deluxe rooms start around €1,600 per night, Premier rooms around €2,200, and the Eiffel Tower Suite around €8,000. The final rate depends on season, length of stay and included options (breakfast, transfer). ConciergeTravel sends a personalised quote within 24 hours of your request.',
+      'Deluxe rooms start around €1,600 per night, Premier rooms around €2,200, and the Eiffel Tower Suite around €8,000. The final rate depends on season, length of stay and included options (breakfast, transfer). MyConciergeHotel sends a personalised quote within 24 hours of your request.',
   },
   {
     category: 'before',
@@ -254,10 +254,10 @@ const FAQ: readonly LocalisedFaq[] = [
     category: 'after',
     question_fr: 'Comment annuler ou modifier ma réservation ?',
     answer_fr:
-      "Toute demande d'annulation ou de modification doit être adressée par e-mail à reservations@conciergetravel.fr. L'annulation est gratuite jusqu'à 24 h avant l'arrivée ; une retenue d'une nuit s'applique au-delà, ainsi qu'en cas de non-présentation (no-show).",
+      "Toute demande d'annulation ou de modification doit être adressée par e-mail à reservations@myconciergehotel.com. L'annulation est gratuite jusqu'à 24 h avant l'arrivée ; une retenue d'une nuit s'applique au-delà, ainsi qu'en cas de non-présentation (no-show).",
     question_en: 'How can I cancel or modify my reservation?',
     answer_en:
-      'Any cancellation or modification request should be sent by email to reservations@conciergetravel.fr. Cancellation is free of charge up to 24 hours before arrival; one night will be charged thereafter, as well as in case of no-show.',
+      'Any cancellation or modification request should be sent by email to reservations@myconciergehotel.com. Cancellation is free of charge up to 24 hours before arrival; one night will be charged thereafter, as well as in case of no-show.',
   },
   {
     category: 'agency',
@@ -1176,8 +1176,8 @@ const HOTEL_RECORD = {
     "Surnommée la « petite Versailles », cette Grande Dame parisienne occupe un bâtiment historique de 1908 — l'ancien hôtel Majestic — entièrement restauré pendant quatre ans avant sa réouverture en 2014. Distinguée Palace par Atout France en 2016, The Peninsula Paris abrite 200 chambres et suites (dont 87 suites) parmi les plus spacieuses de Paris, à 5 minutes à pied de l'Arc de Triomphe et des Champs-Élysées.\n\nL'établissement réunit sept lieux de restauration, dont L'Oiseau Blanc, restaurant gastronomique 2 étoiles Michelin perché sur le toit, et LiLi, table cantonaise gastronomique. Le Spa Peninsula (1 800 m², 6 salles de soins) est le plus grand des palaces parisiens. Détails signature : service Rolls-Royce Phantom EWB et Mini Cooper Clubman, programme « Peninsula Time » offrant un check-in dès 6h et un check-out jusqu'à 22h sans frais.",
   description_en:
     'Often called the "little Versailles", this Parisian Grande Dame occupies a heritage 1908 building — the former Hôtel Majestic — fully restored over four years before reopening in 2014. Granted the Palace distinction by Atout France in 2016, The Peninsula Paris houses 200 of the most spacious rooms and suites in Paris (including 87 suites), a 5-minute walk from the Arc de Triomphe and the Champs-Élysées.\n\nThe hotel brings together seven dining venues, including L\'Oiseau Blanc, a 2 Michelin star rooftop restaurant, and LiLi, fine Cantonese cuisine. The Peninsula Spa (1,800 m², 6 treatment rooms) is the largest among Parisian palaces. Signature touches: house Rolls-Royce Phantom EWB and Mini Cooper Clubman, and the "Peninsula Time" programme offering complimentary check-in from 6 am and check-out until 10 pm.',
-  meta_title_fr: 'The Peninsula Paris — Palace 5 étoiles, 19 av. Kléber, 16e | ConciergeTravel',
-  meta_title_en: 'The Peninsula Paris — 5-Star Palace, 19 Av. Kléber, 16th | ConciergeTravel',
+  meta_title_fr: 'The Peninsula Paris — Palace 5 étoiles, 19 av. Kléber, 16e | MyConciergeHotel',
+  meta_title_en: 'The Peninsula Paris — 5-Star Palace, 19 Av. Kléber, 16th | MyConciergeHotel',
   meta_desc_fr:
     'Palace parisien 5★ avenue Kléber : 200 chambres et suites, restaurant 2★ Michelin (L’Oiseau Blanc), Spa 1 800 m², à 5 min de l’Arc de Triomphe.',
   meta_desc_en:
@@ -1418,7 +1418,7 @@ function readAlgoliaEnv(): AlgoliaEnv | null {
 }
 
 async function maybeIndexAlgolia(env: AlgoliaEnv, hotelId: string): Promise<void> {
-  const algoliaAdmin = await import('@cct/integrations/algolia-admin');
+  const algoliaAdmin = await import('@mch/integrations/algolia-admin');
   const svc = algoliaAdmin.createAlgoliaIndexingService({
     appId: env.appId,
     apiKey: env.apiKey,
@@ -1489,7 +1489,7 @@ async function main(): Promise<void> {
     console.info(`[seed:peninsula] done. Hotel ID: ${hotelId}`);
     console.info('');
     console.info(`Inspect: ${HOTEL_PHOTOS.length} hotel photos staged on Cloudinary.`);
-    console.info(`Rollback: pnpm --filter @cct/db teardown:peninsula`);
+    console.info(`Rollback: pnpm --filter @mch/db teardown:peninsula`);
   } catch (error) {
     console.error('[seed:peninsula] failed:', error);
     process.exitCode = 1;

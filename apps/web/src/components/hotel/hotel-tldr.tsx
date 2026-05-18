@@ -18,23 +18,23 @@ interface HotelTldrProps {
 
 const T = {
   fr: {
-    eyebrow: 'Réponse rapide',
+    eyebrow: 'L\'essentiel du Concierge',
     palaceLine: 'distingué Palace par Atout France',
     fiveStarLine: '5 étoiles',
     inCity: (city: string, region: string) => ` à ${city} (${region})`,
     inventory: (rooms: number, suites: number) =>
       suites > 0 ? `${rooms} chambres dont ${suites} suites` : `${rooms} chambres`,
     openedSince: (year: number) => `Ouvert depuis ${year}`,
-    bookingAmadeus: 'Réservation immédiate au tarif négocié via notre conciergerie agréée IATA.',
+    bookingAmadeus: 'Réservation en ligne au tarif net négocié — notre agence IATA gère le séjour.',
     bookingLittle: 'Réservation directe au tarif officiel, sans commission cachée.',
-    bookingEmail: 'Réservation sur demande personnalisée par notre conciergerie.',
-    bookingDisplay: 'Fiche éditoriale — réservation par contact direct avec l’hôtel.',
+    bookingEmail: 'Réservation sur demande — votre concierge vous répond sous 24 h.',
+    bookingDisplay: 'Fiche éditoriale — la réservation se fait en contact direct avec l’hôtel.',
     architecte: (names: readonly string[]) =>
       names.length === 1 ? `Conçu par ${names[0]}.` : `Conçu par ${names.slice(0, 2).join(' & ')}.`,
     updatedAt: (date: string) => `Mis à jour le ${date}.`,
   },
   en: {
-    eyebrow: 'Quick answer',
+    eyebrow: 'The Concierge\'s essentials',
     palaceLine: 'distinguished as a Palace by Atout France',
     fiveStarLine: '5-star',
     inCity: (city: string, region: string) => ` in ${city} (${region})`,
@@ -42,10 +42,10 @@ const T = {
       suites > 0 ? `${rooms} rooms including ${suites} suites` : `${rooms} rooms`,
     openedSince: (year: number) => `Open since ${year}`,
     bookingAmadeus:
-      'Instant booking at the negotiated rate via our IATA-accredited concierge desk.',
+      'Online booking at the negotiated net rate — your stay is handled by our IATA-accredited team.',
     bookingLittle: 'Direct booking at the official rate, no hidden commission.',
-    bookingEmail: 'Bespoke request handled by our concierge desk.',
-    bookingDisplay: 'Editorial page — booking via direct contact with the hotel.',
+    bookingEmail: 'Bespoke request — your concierge replies within 24 hours.',
+    bookingDisplay: 'Editorial page — booking is handled directly with the hotel.',
     architecte: (names: readonly string[]) =>
       names.length === 1
         ? `Designed by ${names[0]}.`

@@ -1,9 +1,9 @@
 ---
 name: email-workflow-automation
-description: Brevo transactional emails and lifecycle automations for ConciergeTravel.fr (booking confirmation, J-3 reminder, post-stay, loyalty welcome, password reset, internal email-mode requests). Use for any email-related code or content.
+description: Brevo transactional emails and lifecycle automations for MyConciergeHotel.com (booking confirmation, J-3 reminder, post-stay, loyalty welcome, password reset, internal email-mode requests). Use for any email-related code or content.
 ---
 
-# Email workflow automation — ConciergeTravel.fr
+# Email workflow automation — MyConciergeHotel.com
 
 All transactional and lifecycle emails are sent through **Brevo** (CDC §2). Templates live in `packages/emails/` as React Email components, rendered to MJML/HTML and pushed to Brevo for sending.
 
@@ -77,7 +77,7 @@ Invoke when:
 
 ### Internal emails
 
-- Always sent from `reservations@conciergetravel.fr` for booking ops.
+- Always sent from `reservations@myconciergehotel.com` for booking ops.
 - Include a deep link to the back-office record (`/admin/collections/booking-requests-email/<id>`).
 
 ## Anti-patterns to refuse
