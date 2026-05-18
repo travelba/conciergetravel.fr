@@ -132,6 +132,42 @@ export const ConciergePoiBatchSchema = z.object({
 });
 export type ConciergePoiBatch = z.infer<typeof ConciergePoiBatchSchema>;
 
+// ---------------------------------------------------------------------------
+// Concierge-voice EVENT description schema (Phase 3)
+//
+// One short Concierge-voice paragraph per upcoming event (2-3 sentences,
+// total 30-50 words). The hotel.upcoming_events jsonb cap stays at 280
+// characters per the production reader schema, so we keep within that.
+//
+// Hard rules enforced *after* parsing (style-guide §4-5, identical to
+// POI):
+//   - sentence length ≤ 25 words
+//   - no banned phrases
+// Both checks live in `linter.ts → lintConciergeText()`.
+//
+// `dt_uuid` is the matching key when present (DATAtourisme UUID),
+// `name + start_date` is the fallback (the reader already collapses
+// duplicates by the same pair).
+//
+// The recommended format for the LLM (enforced by prompt, not schema):
+//   "<Type d'événement> ouvert <au public|réservé sur invitation>,
+//    du <X> au <Y>. <Conseil pratique actionnable du Concierge>."
+// ---------------------------------------------------------------------------
+
+const EVENT_DESC_MIN = 30;
+const EVENT_DESC_MAX = 280;
+
+export const ConciergeEventDescriptionSchema = z.object({
+  match_key: z.string().min(1).max(120),
+  description_fr: z.string().min(EVENT_DESC_MIN).max(EVENT_DESC_MAX),
+});
+export type ConciergeEventDescription = z.infer<typeof ConciergeEventDescriptionSchema>;
+
+export const ConciergeEventBatchSchema = z.object({
+  events: z.array(ConciergeEventDescriptionSchema).min(1).max(10),
+});
+export type ConciergeEventBatch = z.infer<typeof ConciergeEventBatchSchema>;
+
 export const BriefSchema = z.object({
   slug: z.string().min(3),
   name: z.string().min(3),

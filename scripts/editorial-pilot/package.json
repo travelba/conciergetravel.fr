@@ -32,6 +32,9 @@
     "concierge:humanize:pois": "tsx src/concierge/run-humanizer-pois.ts",
     "concierge:humanize:pois:dry": "tsx src/concierge/run-humanizer-pois.ts --dry-run",
     "concierge:audit:pois": "node ./audit-concierge-pois.mjs",
+    "concierge:humanize:events": "tsx src/concierge/run-humanizer-events.ts",
+    "concierge:humanize:events:dry": "tsx src/concierge/run-humanizer-events.ts --dry-run",
+    "concierge:audit:events": "node ./audit-concierge-events.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
