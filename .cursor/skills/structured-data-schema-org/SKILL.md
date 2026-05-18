@@ -103,6 +103,24 @@ explaining the PR #56/#57 regressions). See also
 - Hotel itself = `Place` via the `geo` field on `Hotel`.
 - POIs from the `pois` collection rendered as separate `Place` entries, linked via `nearbyAttraction` on the parent `Hotel`. Each carries `geo`, `distanceToHotel` (custom property if standard one missing — `QuantitativeValue` with `unitCode: 'KMT'`).
 
+#### `nearbyAttractions` enriched payload (WS5 phase 1)
+
+The `Hotel` JSON-LD's `nearbyAttraction[]` started as a thin list (name + url). Since the May 2026 Concierge restructuration it forwards the full POI metadata so search engines can render rich POI panels and AI overviews can quote them directly:
+
+- `name`, `url` (canonical hotel URL fragment when no external URL available).
+- `description` — Concierge-voice 1-2 sentence summary (≤ 25 words/sentence), comes straight from `points_of_interest[].description_fr/_en` (humanizer Phase 2 output).
+- `@type` — defaults to `Place`, escalates to a more specific subtype (`TouristAttraction`, `Museum`, `Park`, `Restaurant`, `Store`) when the POI carries a `schema_type` hint. The builder accepts `schemaTypeUrl` (full `https://schema.org/...` URL) directly to avoid string lookup.
+- `geo.GeoCoordinates` when `lat/lng` is present (always for DATAtourisme + Google Places POIs).
+- `openingHours` when the POI source publishes them (DATAtourisme `placeOpeningHoursSpecification`, Google `regularOpeningHours.weekdayDescriptions`).
+
+Cap **24 entries** (was 10) — the cap exists to keep the JSON-LD body under Google's 100 KB sweet spot while still surfacing all 22 POIs the editorial pipeline curates (8 visit + 6 do + 8 shop). The cap is enforced in `packages/seo/src/jsonld/hotel.ts` and asserted in `hotel.test.ts`.
+
+#### `ItemList` for the visit bucket (WS5 phase 1)
+
+In addition to `Hotel.nearbyAttraction[]`, the hotel detail page emits a dedicated `ItemList` JSON-LD whose `itemListElement[]` wraps the **visit** bucket POIs (max 8). Each list item carries a nested `Place` (or `TouristAttraction`) node with the same enriched payload as above. This is the **SEO-rentable** bucket — visit POIs are what users + LLMs search for ("musées près de [hôtel]", "que voir autour de [hôtel]"). Builder: `packages/seo/src/jsonld/item-list.ts#poiItemListJsonLd`.
+
+The `do` and `shop` buckets do not get their own `ItemList` to avoid noise; they remain in `Hotel.nearbyAttraction[]` only.
+
 ### AggregateRating (mandatory `bestRating: '5'`)
 
 - For hotel detail: from Google Reviews (`google_rating`, `google_reviews_count`) or Amadeus sentiments.

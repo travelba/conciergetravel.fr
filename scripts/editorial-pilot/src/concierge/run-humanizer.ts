@@ -96,6 +96,39 @@ function parseArgs(argv: readonly string[]): CliArgs {
 const ADVICE_MIN_WORDS = 50;
 const ADVICE_MAX_WORDS = 110;
 
+// Subset of `linter.ts` BANNED_BLOCKERS — kept local so the humanizer
+// doesn't have to import the full lint module (which would pull in
+// the markdown-specific helpers it doesn't need).
+const VOICE_BANNED_REGEXES: readonly RegExp[] = [
+  /\bniché[se]?\s+(?:au\s+cœur|entre)\b/iu,
+  /^(\s*)découvrez\b/imu,
+  /^(\s*)bienvenue\s+dans\b/imu,
+  /^(\s*)plongez\s+dans\b/imu,
+  /\bvues?\s+imprenables?\b/giu,
+  /\bvues?\s+spectaculaires?\b/giu,
+  /\bexpériences?\s+inoubliables?\b/giu,
+  /\bcocons?\b/giu,
+  /\bjoyaux?\b/giu,
+  /\bécrins?\b/giu,
+  /\bart\s+de\s+(?:recevoir|vivre)\b/giu,
+];
+
+function voiceViolates(body: string, maxWordsPerSentence = 25): boolean {
+  for (const re of VOICE_BANNED_REGEXES) {
+    if (new RegExp(re.source, re.flags).test(body)) return true;
+  }
+  const sentences = body
+    .replace(/\.\.\./g, '.')
+    .split(/(?<=[.!?…])\s+/u)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  for (const s of sentences) {
+    const words = s.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+    if (words > maxWordsPerSentence) return true;
+  }
+  return false;
+}
+
 function countWordsLocal(s: unknown): number {
   if (typeof s !== 'string') return 0;
   const t = s.trim();
@@ -156,11 +189,20 @@ async function listSlugs(client: import('pg').Client, args: CliArgs): Promise<re
           en?: { body?: unknown };
         } | null;
         if (adv === null || adv === undefined) return true;
-        const frWords = countWordsLocal(adv.fr?.body);
-        const enWords = countWordsLocal(adv.en?.body);
+        const frBody = typeof adv.fr?.body === 'string' ? adv.fr.body : '';
+        const enBody = typeof adv.en?.body === 'string' ? adv.en.body : '';
+        const frWords = countWordsLocal(frBody);
+        const enWords = countWordsLocal(enBody);
         const frBad = frWords < ADVICE_MIN_WORDS || frWords > ADVICE_MAX_WORDS;
         const enBad = enWords < ADVICE_MIN_WORDS || enWords > ADVICE_MAX_WORDS;
-        return frBad || enBad;
+        // Phase 5: --invalid also targets advice that violates the
+        // strict Concierge voice contract (sentences ≤ 25 words,
+        // no banned phrases). The pre-Phase 4 humanizer didn't
+        // enforce these as blockers, so legacy hotels can be in
+        // envelope yet contain 30-word paragraphs.
+        const frVoiceBad = frBody.length > 0 && voiceViolates(frBody);
+        const enVoiceBad = enBody.length > 0 && voiceViolates(enBody);
+        return frBad || enBad || frVoiceBad || enVoiceBad;
       })
       .map((row) => row.slug);
   }

@@ -21,45 +21,48 @@
 
 Use this when you don't know where to start.
 
-| Problem / Feature                                                                             | Skill                                                                            |
-| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Booking tunnel (search → offer → payment → confirmation)                                      | [`booking-engine`](booking-engine/SKILL.md)                                      |
-| Hotel detail page, room sub-pages, editorial fiches                                           | [`content-modeling`](content-modeling/SKILL.md)                                  |
-| Long-read editorial guides / rankings — **LLM pipeline**                                      | [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐                     |
-| Long-read editorial guides / rankings — **rendering** (TOC, auto-link, callouts)              | [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐ NEW |
-| **Voix du Concierge** (pass 8, concierge_advice, shortener phrases > 25 mots)                 | [`concierge-voice-pipeline`](concierge-voice-pipeline/SKILL.md) ⭐ NEW           |
-| **Factual enrichment** (DATAtourisme + Wikidata + Wikipedia + Tavily)                         | [`content-enrichment-pipeline`](content-enrichment-pipeline/SKILL.md) ⭐ NEW     |
-| Amadeus Hotels API (search, offers, booking, PNR)                                             | [`amadeus-gds`](amadeus-gds/SKILL.md)                                            |
-| Little Hotelier API (loyalty FREE tier eligibility)                                           | [`little-hotelier`](little-hotelier/SKILL.md)                                    |
-| Price comparator widget (Makcorps + Apify, no affiliate links)                                | [`competitive-pricing-comparison`](competitive-pricing-comparison/SKILL.md)      |
-| Algolia search (autocomplete, facets, indexing)                                               | [`search-engineering`](search-engineering/SKILL.md)                              |
-| **Any vendor / LLM integration** (HTTP, Zod, retries, errors)                                 | [`api-integration`](api-integration/SKILL.md)                                    |
-| Amadeus Payments iframe, 3DS2, Apple/Google Pay                                               | [`payment-orchestration`](payment-orchestration/SKILL.md)                        |
-| Brevo transactional emails + lifecycle automations                                            | [`email-workflow-automation`](email-workflow-automation/SKILL.md)                |
-| Loyalty FREE / PREMIUM tier rules                                                             | [`loyalty-program`](loyalty-program/SKILL.md)                                    |
-| Supabase Auth (customer / editor / operator / admin / seo)                                    | [`auth-role-management`](auth-role-management/SKILL.md)                          |
-| Payload CMS 3 collections, hooks, ISR revalidation                                            | [`backoffice-cms`](backoffice-cms/SKILL.md)                                      |
-| Next.js 15 App Router (routes, metadata, caching, middleware) + **force-dynamic for JSON-LD** | [`nextjs-app-router`](nextjs-app-router/SKILL.md) ✏️                             |
-| **Zod schemas ↔ React props** under `exactOptionalPropertyTypes`                              | [`typescript-strict-zod-interop`](typescript-strict-zod-interop/SKILL.md) ⭐ NEW |
-| TypeScript strict baseline (no `any`, no `as`, no `!`)                                        | [`typescript-strict`](typescript-strict/SKILL.md)                                |
-| Pure domain logic, branded types, bounded contexts                                            | [`domain-driven-design`](domain-driven-design/SKILL.md)                          |
-| Supabase Postgres schema, migrations, RLS                                                     | [`supabase-postgres-rls`](supabase-postgres-rls/SKILL.md)                        |
-| Upstash Redis (ARI cache, comparator cache, rate limit, idempotency)                          | [`redis-caching`](redis-caching/SKILL.md)                                        |
-| RLS, secrets, **CSP nonce + JSON-LD wrapper**, GDPR, rate limiting                            | [`security-engineering`](security-engineering/SKILL.md) ✏️                       |
-| WCAG 2.2 AA — forms, modals, dialogs, color contrasts                                         | [`accessibility`](accessibility/SKILL.md)                                        |
-| Mobile-first responsive UI (Tailwind + shadcn + tokens)                                       | [`responsive-ui-architecture`](responsive-ui-architecture/SKILL.md)              |
-| Metadata, hreflang, sitemaps, robots, anti-cannibalisation                                    | [`seo-technical`](seo-technical/SKILL.md)                                        |
-| llms.txt, AEO blocks, JSON-LD agent-skills, FAQ extraction                                    | [`geo-llm-optimization`](geo-llm-optimization/SKILL.md)                          |
-| JSON-LD builders (Hotel, Article, FAQ, ItemList, BreadcrumbList) + **CSP nonce contract**     | [`structured-data-schema-org`](structured-data-schema-org/SKILL.md) ✏️           |
-| Core Web Vitals, image / font optim, code splitting, edge runtime                             | [`performance-engineering`](performance-engineering/SKILL.md)                    |
-| Sentry, structured logs, Web Vitals, alerts, dashboards                                       | [`observability-monitoring`](observability-monitoring/SKILL.md)                  |
-| Unit (Vitest) + integration (MSW) + E2E (Playwright) + axe + Lighthouse                       | [`test-strategy`](test-strategy/SKILL.md)                                        |
-| GitHub Actions, Vercel previews, Supabase migrations, release flow                            | [`cicd-release-management`](cicd-release-management/SKILL.md)                    |
-| **Vercel env vars scoped per environment** (Production / Preview / Development trap)          | [`cicd-release-management` §Rule 9](cicd-release-management/SKILL.md)            |
-| **Next.js App Router `_folder` private convention** (route silently 404s)                     | [`nextjs-app-router` §Private folders](nextjs-app-router/SKILL.md)               |
-| **PowerShell / Windows dev commands, Supabase SSL strip**                                     | [`windows-dev-environment`](windows-dev-environment/SKILL.md) ⭐ NEW             |
-| README, ADRs, runbooks, integration docs                                                      | [`technical-documentation`](technical-documentation/SKILL.md)                    |
-| Layer boundaries, rendering strategy, new bounded context                                     | [`product-architecture`](product-architecture/SKILL.md)                          |
+| Problem / Feature                                                                                                 | Skill                                                                            |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Booking tunnel (search → offer → payment → confirmation)                                                          | [`booking-engine`](booking-engine/SKILL.md)                                      |
+| Hotel detail page, room sub-pages, editorial fiches                                                               | [`content-modeling`](content-modeling/SKILL.md)                                  |
+| Long-read editorial guides / rankings — **LLM pipeline**                                                          | [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐                     |
+| Long-read editorial guides / rankings — **rendering** (TOC, auto-link, callouts)                                  | [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐ NEW |
+| **Voix du Concierge** (pass 8, concierge_advice, shortener phrases > 25 mots)                                     | [`concierge-voice-pipeline`](concierge-voice-pipeline/SKILL.md) ⭐ NEW           |
+| **Humanizer POI / events / FAQ** (batch, retry harness, clampFeatured, audits cross-blocks)                       | [`concierge-voice-pipeline` §Rule 6](concierge-voice-pipeline/SKILL.md) ✏️       |
+| **`nearbyAttraction` enrichi + `ItemList` POI visit** (description, schema_type, geo, openingHours)               | [`structured-data-schema-org` §Place](structured-data-schema-org/SKILL.md) ✏️    |
+| **FAQ Top 5 visible + FAQPage 10-15** (ADR-0011 C1, `<TopConciergeFaq>` Server Component, pas de doublon JSON-LD) | [`geo-llm-optimization` §FAQ extraction](geo-llm-optimization/SKILL.md) ✏️       |
+| **Factual enrichment** (DATAtourisme + Wikidata + Wikipedia + Tavily)                                             | [`content-enrichment-pipeline`](content-enrichment-pipeline/SKILL.md) ⭐ NEW     |
+| Amadeus Hotels API (search, offers, booking, PNR)                                                                 | [`amadeus-gds`](amadeus-gds/SKILL.md)                                            |
+| Little Hotelier API (loyalty FREE tier eligibility)                                                               | [`little-hotelier`](little-hotelier/SKILL.md)                                    |
+| Price comparator widget (Makcorps + Apify, no affiliate links)                                                    | [`competitive-pricing-comparison`](competitive-pricing-comparison/SKILL.md)      |
+| Algolia search (autocomplete, facets, indexing)                                                                   | [`search-engineering`](search-engineering/SKILL.md)                              |
+| **Any vendor / LLM integration** (HTTP, Zod, retries, errors)                                                     | [`api-integration`](api-integration/SKILL.md)                                    |
+| Amadeus Payments iframe, 3DS2, Apple/Google Pay                                                                   | [`payment-orchestration`](payment-orchestration/SKILL.md)                        |
+| Brevo transactional emails + lifecycle automations                                                                | [`email-workflow-automation`](email-workflow-automation/SKILL.md)                |
+| Loyalty FREE / PREMIUM tier rules                                                                                 | [`loyalty-program`](loyalty-program/SKILL.md)                                    |
+| Supabase Auth (customer / editor / operator / admin / seo)                                                        | [`auth-role-management`](auth-role-management/SKILL.md)                          |
+| Payload CMS 3 collections, hooks, ISR revalidation                                                                | [`backoffice-cms`](backoffice-cms/SKILL.md)                                      |
+| Next.js 15 App Router (routes, metadata, caching, middleware) + **force-dynamic for JSON-LD**                     | [`nextjs-app-router`](nextjs-app-router/SKILL.md) ✏️                             |
+| **Zod schemas ↔ React props** under `exactOptionalPropertyTypes`                                                  | [`typescript-strict-zod-interop`](typescript-strict-zod-interop/SKILL.md) ⭐ NEW |
+| TypeScript strict baseline (no `any`, no `as`, no `!`)                                                            | [`typescript-strict`](typescript-strict/SKILL.md)                                |
+| Pure domain logic, branded types, bounded contexts                                                                | [`domain-driven-design`](domain-driven-design/SKILL.md)                          |
+| Supabase Postgres schema, migrations, RLS                                                                         | [`supabase-postgres-rls`](supabase-postgres-rls/SKILL.md)                        |
+| Upstash Redis (ARI cache, comparator cache, rate limit, idempotency)                                              | [`redis-caching`](redis-caching/SKILL.md)                                        |
+| RLS, secrets, **CSP nonce + JSON-LD wrapper**, GDPR, rate limiting                                                | [`security-engineering`](security-engineering/SKILL.md) ✏️                       |
+| WCAG 2.2 AA — forms, modals, dialogs, color contrasts                                                             | [`accessibility`](accessibility/SKILL.md)                                        |
+| Mobile-first responsive UI (Tailwind + shadcn + tokens)                                                           | [`responsive-ui-architecture`](responsive-ui-architecture/SKILL.md)              |
+| Metadata, hreflang, sitemaps, robots, anti-cannibalisation                                                        | [`seo-technical`](seo-technical/SKILL.md)                                        |
+| llms.txt, AEO blocks, JSON-LD agent-skills, FAQ extraction                                                        | [`geo-llm-optimization`](geo-llm-optimization/SKILL.md)                          |
+| JSON-LD builders (Hotel, Article, FAQ, ItemList, BreadcrumbList) + **CSP nonce contract**                         | [`structured-data-schema-org`](structured-data-schema-org/SKILL.md) ✏️           |
+| Core Web Vitals, image / font optim, code splitting, edge runtime                                                 | [`performance-engineering`](performance-engineering/SKILL.md)                    |
+| Sentry, structured logs, Web Vitals, alerts, dashboards                                                           | [`observability-monitoring`](observability-monitoring/SKILL.md)                  |
+| Unit (Vitest) + integration (MSW) + E2E (Playwright) + axe + Lighthouse                                           | [`test-strategy`](test-strategy/SKILL.md)                                        |
+| GitHub Actions, Vercel previews, Supabase migrations, release flow                                                | [`cicd-release-management`](cicd-release-management/SKILL.md)                    |
+| **Vercel env vars scoped per environment** (Production / Preview / Development trap)                              | [`cicd-release-management` §Rule 9](cicd-release-management/SKILL.md)            |
+| **Next.js App Router `_folder` private convention** (route silently 404s)                                         | [`nextjs-app-router` §Private folders](nextjs-app-router/SKILL.md)               |
+| **PowerShell / Windows dev commands, Supabase SSL strip**                                                         | [`windows-dev-environment`](windows-dev-environment/SKILL.md) ⭐ NEW             |
+| README, ADRs, runbooks, integration docs                                                                          | [`technical-documentation`](technical-documentation/SKILL.md)                    |
+| Layer boundaries, rendering strategy, new bounded context                                                         | [`product-architecture`](product-architecture/SKILL.md)                          |
 
 ## 3. Categories
 

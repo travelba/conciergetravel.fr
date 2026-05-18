@@ -143,7 +143,66 @@ Trois scripts à connaître pour mesurer l'avancement de la voix Concierge :
 - **[`scripts/editorial-pilot/check-sentence-length.mjs`](../../scripts/editorial-pilot/check-sentence-length.mjs)** — % de phrases > 25 mots par guide / ranking, top 10 worst.
 - **[`scripts/editorial-pilot/audit-concierge.mjs`](../../scripts/editorial-pilot/audit-concierge.mjs)** — audit fin des body lengths + flags « Mon conseil/My tip » prefixes + sentences > 25 mots dans les advice eux-mêmes.
 
-## Rule 6 — Payload publication blocker
+## Rule 6 — Family of short-text humanizers (POI / events / FAQ)
+
+Phases 2-4 du sprint « Restructuration Concierge — POI, Services, FAQ, Événements » ont ajouté trois humanizers parallèles à `run-humanizer.ts` (le humanizer historique pour `concierge_advice`). Tous suivent la même mécanique pour réécrire les contenus **factuels courts** en voix Concierge sans toucher aux passes 1-7.
+
+| Script                                                                                           | Cible                                                       | Batch   | Cap                         | Données touchées           |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | ------- | --------------------------- | -------------------------- |
+| [`run-humanizer.ts`](../../scripts/editorial-pilot/src/concierge/run-humanizer.ts)               | `hotels.concierge_advice` (advice 50-110 mots, FR+EN)       | 1/call  | 1/hôtel                     | `concierge_advice` JSONB   |
+| [`run-humanizer-pois.ts`](../../scripts/editorial-pilot/src/concierge/run-humanizer-pois.ts)     | `points_of_interest[].description_fr` + `bucket_tip_fr`     | 10/call | 8 visit / 6 do / 8 shop     | `points_of_interest` JSONB |
+| [`run-humanizer-events.ts`](../../scripts/editorial-pilot/src/concierge/run-humanizer-events.ts) | `upcoming_events[].description_fr` (30-50 mots)             | 5/call  | 5/hôtel                     | `upcoming_events` JSONB    |
+| [`run-humanizer-faq.ts`](../../scripts/editorial-pilot/src/concierge/run-humanizer-faq.ts)       | `faq_content[].answer_fr` + `featured` + `concierge_tip_fr` | 4/call  | 5 featured + ≤ 2 tips/hôtel | `faq_content` JSONB        |
+
+### Convention de batching par sortie LLM
+
+- **Batch size = nombre d'items qu'un seul `gpt-4o-mini` génère proprement dans le budget JSON 3500 tokens output.** Empirique : 1 advice (200 mots), 10 POI descriptions (1 phrase chacune), 5 events (40 mots chacun), 4 FAQ (50-80 mots chacune).
+- Au-delà, on observe des troncatures JSON ou des réponses incomplètes (items manquants dans le retour). Le harness ne fait pas de continuation — un item omis = un retry.
+- **Concurrency 5** est le plafond Supabase pooler + OpenAI rate limit pour un run sur les 106 hôtels (Tier 1 OpenAI = 500 RPM, ≈ 8 RPS, marge confortable).
+
+### Retry harness (rule clé — Phase 4)
+
+`run-humanizer-faq.ts` introduit un harness de retry par batch (à généraliser aux autres humanizers quand ils touchent à des règles dures comme ≤ 25 mots) :
+
+1. Premier appel : `temperature = 0.6`.
+2. Validation Zod + `lintConciergeSummary` par item. Les items rejetés (blocker) sont mémorisés (`match_key`).
+3. Retry 1 (`temperature = 0.85`) **uniquement sur les match_keys rejetés**, avec un `REMINDER` injecté dans le user prompt qui rappelle :
+   - Tentative N/3.
+   - Les phrases précédentes étaient > 25 mots ou contenaient un mot banni.
+   - Cible : 2-4 phrases courtes ≤ 25 mots, présent, voix active.
+   - Total mots-cible.
+   - Liste des `match_keys` à corriger (max 8 pour rester sous la limite tokens).
+4. Retry 2 (`temperature = 0.95`), mêmes règles.
+5. Au bout de 3 tentatives, les items restants comptent en `rejected` (legacy answer préservé en DB).
+
+Empirique : 12-14 hôtels qui échouaient avec un seul call passent à zéro échec avec le harness 3-tentatives. Coût marginal : +25 % tokens sur les batchs en faute (les batchs propres sortent au 1er essai).
+
+### `--invalid` vs `--all` — préserver la curation
+
+Quand un humanizer accepte un flag `--invalid` (rerun uniquement sur les items qui échouent le linter), le merge **ne doit pas écraser** les champs curés (`featured`, `concierge_tip_fr`, etc.) des items qu'il n'a pas réécrits. `run-humanizer-faq.ts#mergeRewrites(original, rewrites, isPartialRewrite)` capitalise ce pattern :
+
+- Mode `isPartialRewrite = true` (`--invalid` ou `--missing`) :
+  - Préserve les `featured: true` existants sur les items non réécrits.
+  - Backfill featured uniquement à partir des items réécrits, jusqu'à 5.
+  - Préserve les `concierge_tip_fr` existants.
+- Mode `isPartialRewrite = false` (`--all`, `--slug`) :
+  - Le LLM voit le hôtel complet → curation `featured` exclusive sur ses réponses (cap 5).
+  - Drop des `concierge_tip_fr` legacy non confirmés par le LLM.
+
+Sans ce switch, un `--invalid` qui réécrit 3 items sur 13 perd les 5 featured existants et n'en remarque que 0-3 dans le run partiel.
+
+### Audit scripts associés
+
+| Script                                                                                   | Mesure                                                                                 |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [`audit-concierge-pois.mjs`](../../scripts/editorial-pilot/audit-concierge-pois.mjs)     | Couverture FR + Concierge tips par bucket, sentence-length, banned phrases             |
+| [`audit-concierge-events.mjs`](../../scripts/editorial-pilot/audit-concierge-events.mjs) | Couverture FR + breakdown par catégorie d'événement                                    |
+| [`audit-concierge-faq.mjs`](../../scripts/editorial-pilot/audit-concierge-faq.mjs)       | Couverture FR + count featured (target = 5) + tips + sentence-length + banned phrases  |
+| [`audit-concierge-fiche.mjs`](../../scripts/editorial-pilot/audit-concierge-fiche.mjs)   | **Cross-blocks** — score % par hôtel sur advice + POI + events + FAQ ; échec si < 95 % |
+
+⚠️ **Word counter en lockstep avec le linter.** Les audits ont d'abord utilisé `split(/[^\p{L}\p{N}]+/u)` (cf. Rule 8 anti-pattern), ce qui sur-comptait les hyphens et apostrophes : « L'Auberge », « Saint-Tropez », « Centre-Val » étaient comptés 2 mots au lieu d'un. `linter.ts#countWords` splite sur `/\s+/` puis filtre `[\p{L}\p{N}]`. Les audits doivent partager cette implémentation — sinon le diagnostic dérive du gatekeeper et on signale des phrases « trop longues » qui passent en réalité le humanizer.
+
+## Rule 7 — Payload publication blocker
 
 [`apps/admin/src/collections/hotels.ts`](../../apps/admin/src/collections/hotels.ts) embarque un hook `beforeValidate` qui refuse de **basculer** `is_published` en `true` si `concierge_advice` est manquant ou hors envelope :
 
@@ -156,7 +215,7 @@ throw new Error('Publication bloquée (ADR-0011) : …');
 
 Ne se déclenche que lors de la **transition** vers publié — un hôtel déjà publié peut continuer à être édité par batch sans déclencher le blocage. Permet aux scripts de cleanup (humanizer-only, shortener) de tourner sans entrave.
 
-## Rule 7 — Tests E2E + linter intégré CI
+## Rule 8 — Tests E2E + linter intégré CI
 
 - [`apps/web/e2e/concierge-voice.spec.ts`](../../apps/web/e2e/concierge-voice.spec.ts) — 4 specs :
   1. FR — bloc visible, eyebrow + titre + corps (anchors stables sur substrings « Mon conseil », « 305 »).

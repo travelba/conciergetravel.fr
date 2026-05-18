@@ -80,6 +80,21 @@ Invoke when:
 - **Réponses factuelles courtes : 50–100 mots** — denser than the AEO block (40–80), optimised for LLM citation extraction.
 - Rendered both as HTML (`<details open>` for the first Q to keep DOM text visible) and JSON-LD `FAQPage`.
 
+#### ADR-0011 C1 — Top 5 Réponses du Concierge (visible) + FAQPage 10–15 (JSON-LD)
+
+The CDC pushed two conflicting requirements: a "visible top 5" for human readability and a "10-15 entries" floor for AEO citation breadth. ADR-0011 reconciles them with a two-block layout:
+
+- `<TopConciergeFaq>` (`apps/web/src/components/hotel/top-concierge-faq.tsx`) — Server Component rendered **before** `<HotelFaq>`. Reads `faq_content[].featured === true` and caps to 5 items, with an optional `concierge_tip_fr` per item ("Mon conseil : …"). Self-elides if fewer than 5 items are flagged featured (avoids broken UI on incomplete hotels).
+- `<HotelFaq>` (10–15 Q&A, first item `<details open>` for LLM crawler visibility) — kept as the canonical FAQ. **Emits the JSON-LD `FAQPage` over all 10-15 entries.** The Top 5 component deliberately does **not** emit its own `FAQPage` to avoid duplicate structured data; the 5 featured entries are a strict subset of the 10–15 already in JSON-LD.
+- Curation: the LLM humanizer (`run-humanizer-faq.ts`, prompt `11-concierge-faq.md`) marks exactly 5 items as `featured: true` per hotel, prioritising actionable + frequently asked questions (parking, breakfast, check-in, transfers, pets). A `clampFeatured` post-step guarantees the exact-5 invariant even when the LLM picks fewer.
+- Tip coverage cap: ≤ 2 `concierge_tip_fr` per hotel, drop overflow silently.
+
+Hard rules:
+
+- The visible Top 5 must always be a **subset** of the entries in the JSON-LD FAQPage. Never surface a featured FAQ that isn't also in the canonical 10-15 list.
+- Never emit two `FAQPage` blocks for the same hotel (Google Rich Results merges them inconsistently — the structured `<HotelFaq>` JSON-LD is the source of truth).
+- E2E coverage in `apps/web/e2e/hotel-concierge-blocks.spec.ts` asserts (a) 5 visible questions without interaction, (b) tips render, (c) exactly one `FAQPage` JSON-LD block in `<head>`.
+
 ### Freshness (CDC §6 — visible dated updates)
 
 - Visible "Dernière mise à jour : [Mois Année]" badge near H1 on every editorial page **and on every hotel detail page** (component `<LastUpdatedBadge />`).
