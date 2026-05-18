@@ -60,14 +60,57 @@ function buildRow(locale: SupportedLocale): HotelDetailRow {
       {
         question_fr: 'Quel est l’horaire du check-in ?',
         question_en: 'What is the check-in time?',
-        answer_fr: 'À partir de 15h00.',
-        answer_en: 'From 3:00 PM.',
+        answer_fr:
+          'Le check-in commence à 15h00, parfois plus tôt sur demande. Mes clients arrivés du Sud du pays profitent souvent du salon de l’étage pour patienter.',
+        answer_en: 'From 3:00 PM, sometimes earlier on request.',
+        category: 'before',
+        featured: true,
+        concierge_tip_fr: 'Si vous arrivez avant 11h, je peux vous garder vos bagages.',
+        concierge_tip_en: 'If you land before 11am, I can keep your bags safe.',
       },
       {
         question_fr: 'Le petit-déjeuner est-il inclus ?',
         question_en: 'Is breakfast included?',
-        answer_fr: 'Oui, dans tous les tarifs.',
+        answer_fr:
+          'Oui, dans tous les tarifs. Service en chambre ou au restaurant entre 7h00 et 10h30 en semaine.',
         answer_en: 'Yes, included in every rate.',
+        category: 'before',
+        featured: true,
+      },
+      {
+        question_fr: 'Les animaux sont-ils acceptés ?',
+        question_en: 'Are pets allowed?',
+        answer_fr:
+          'Oui, les chiens jusqu’à 10 kg sont accueillis sans supplément. Panier et gamelle fournis.',
+        answer_en: 'Yes, dogs under 10kg are welcome at no extra cost.',
+        category: 'before',
+        featured: true,
+      },
+      {
+        question_fr: 'Quelle est la distance avec l’aéroport ?',
+        question_en: 'How far from the airport?',
+        answer_fr:
+          'Comptez 45 minutes en taxi depuis Roissy-CDG, hors heures de pointe. Le service voiturier peut organiser votre transfert.',
+        answer_en: 'About 45 minutes by taxi from Roissy-CDG.',
+        category: 'before',
+        featured: true,
+        concierge_tip_fr:
+          'Je vous réserve une voiture avec chauffeur, c’est plus serein qu’un Uber.',
+      },
+      {
+        question_fr: 'Quels sont les horaires du spa ?',
+        question_en: 'What are the spa hours?',
+        answer_fr: 'Le spa est ouvert tous les jours de 10h00 à 21h00. Sauna et hammam inclus.',
+        answer_en: 'The spa is open daily 10am-9pm.',
+        category: 'during',
+        featured: true,
+      },
+      {
+        question_fr: 'La piscine est-elle chauffée ?',
+        question_en: 'Is the pool heated?',
+        answer_fr: 'Oui, la piscine extérieure est chauffée à 27 °C toute l’année.',
+        answer_en: 'Yes, the outdoor pool is heated year-round at 27°C.',
+        category: 'during',
       },
     ],
     meta_title_fr: null,

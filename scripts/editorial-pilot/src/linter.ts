@@ -724,8 +724,17 @@ const G_LIMITED: readonly BannedTerm[] = [
     category: 'G_adjectif_creux_limite',
     severity: 'medium',
     suggestion:
-      'Conserver UNIQUEMENT si attribué à une institution établie ("le prestigieux Guide Michelin").',
-    contextExceptions: [/prestigieux?\s+guide\s+michelin|prestigieuse?\s+étoile/iu],
+      'Conserver UNIQUEMENT si attribué à une institution établie ("le prestigieux Guide Michelin", "label Palace prestigieux décerné par Atout France").',
+    contextExceptions: [
+      /prestigieux?\s+guide\s+michelin|prestigieuse?\s+étoile/iu,
+      // Atout France / Palace distinction — the institutional context
+      // justifies the qualifier (it's a formal label, not marketing
+      // fluff). Allow the term when "Atout France" appears in the
+      // surrounding window.
+      /atout\s+france/iu,
+      // Relais & Châteaux is an official association, same rationale.
+      /relais\s+(?:&|et)\s+châteaux/iu,
+    ],
   },
   {
     term: 'mythique',
@@ -1202,7 +1211,16 @@ export function lintReport(text: string): LinterReport {
 export function lintConciergeText(text: string): readonly Violation[] {
   const trimmed = text.trim();
   if (trimmed.length === 0) return [];
-  const violations: Violation[] = [...lintSentenceLength(trimmed)];
+  // Upgrade sentence-length violations to `blocker` for Concierge
+  // short-text. The default `medium` severity is calibrated for
+  // long-form editorial markdown where a 26-word sentence is often
+  // acceptable; for POI / event / FAQ rewrites the ≤ 25 mots rule
+  // is hard (CDC §6, ADR-0011 §C2) — the LLM has no excuse to
+  // overshoot on a single-paragraph answer.
+  const violations: Violation[] = lintSentenceLength(trimmed).map(
+    (v): Violation =>
+      v.category === 'sentence_length' ? { ...v, severity: 'blocker' as const } : v,
+  );
 
   // Lexical pass — same banned-terms set as `lintMarkdown`, but we
   // iterate manually here so a single line can be scanned without the

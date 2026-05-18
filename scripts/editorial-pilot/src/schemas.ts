@@ -168,6 +168,54 @@ export const ConciergeEventBatchSchema = z.object({
 });
 export type ConciergeEventBatch = z.infer<typeof ConciergeEventBatchSchema>;
 
+// ---------------------------------------------------------------------------
+// Concierge-voice FAQ answer schema (Phase 4 — ADR-0011 C1)
+//
+// For every FAQ item on a hotel, the humanizer rewrites the answer
+// in Concierge voice, marks the 5 best Q&A as `featured: true`, and
+// MAY emit an optional `concierge_tip_fr` ("Mon conseil : …") on
+// 1–2 items per hotel.
+//
+// Hard rules enforced *after* parsing (style-guide §4-5):
+//   - 50–110 mots per answer
+//   - ≤ 25 mots / phrase
+//   - no banned phrases
+//
+// Featured curation rules (enforced in the prompt + verified by the
+// orchestrator):
+//   - exactly 5 featured per hotel
+//   - prefer actionable / frequently-asked questions: parking,
+//     petit-déj, check-in anticipé, transferts, animaux, taxes
+//     locales, accessibilité, restaurants, distance aéroport.
+//
+// `match_key` keys the rewrite back to the source item — it is the
+// original `question_fr` (or `question_en` fallback) sent in the
+// input batch.
+// ---------------------------------------------------------------------------
+
+// Soft bounds — the orchestrator enforces the actual 15..110 word
+// envelope. 60 chars is roughly 10 words: anything below that is
+// almost certainly truncated LLM output.
+const FAQ_ANSWER_MIN = 60;
+const FAQ_ANSWER_MAX = 900;
+
+export const ConciergeFaqAnswerSchema = z.object({
+  match_key: z.string().min(1).max(300),
+  answer_fr: z.string().min(FAQ_ANSWER_MIN).max(FAQ_ANSWER_MAX),
+  // LLMs frequently omit `featured` when the value is `false` instead
+  // of writing `featured: false`. We default to `false` so the schema
+  // does not reject an otherwise-valid batch — the orchestrator
+  // re-curates featured items in `clampFeatured` regardless.
+  featured: z.boolean().optional().default(false),
+  concierge_tip_fr: z.string().min(20).max(220).optional(),
+});
+export type ConciergeFaqAnswer = z.infer<typeof ConciergeFaqAnswerSchema>;
+
+export const ConciergeFaqBatchSchema = z.object({
+  faqs: z.array(ConciergeFaqAnswerSchema).min(1).max(20),
+});
+export type ConciergeFaqBatch = z.infer<typeof ConciergeFaqBatchSchema>;
+
 export const BriefSchema = z.object({
   slug: z.string().min(3),
   name: z.string().min(3),

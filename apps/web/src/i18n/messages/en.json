@@ -431,6 +431,11 @@
       "categoryAfter": "After your stay",
       "categoryAgency": "About the property"
     },
+    "topConciergeFaq": {
+      "title": "The Concierge's 5 top answers about this hotel",
+      "lead": "The questions my guests ask me most. Direct answers, no fluff.",
+      "tipPrefix": "My tip"
+    },
     "displayOnly": {
       "headline": "MyConciergeHotel concierge booking",
       "explainer": "{name} is not available for online booking. Share your dates and our concierge will email a tailored proposal.",

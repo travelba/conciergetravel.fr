@@ -13,6 +13,7 @@ import { HotelAmenities } from '@/components/hotel/hotel-amenities';
 import { HotelAwards } from '@/components/hotel/hotel-awards';
 import { HotelFactSheet } from '@/components/hotel/hotel-fact-sheet';
 import { HotelFaq } from '@/components/hotel/hotel-faq';
+import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
 import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews';
 import { HotelFavoriteButton } from '@/components/hotel/hotel-favorite-button';
@@ -52,6 +53,7 @@ import {
   hasAnyPolicy,
   readFaq,
   readFaqByCategory,
+  readTopConciergeFaq,
   readFeaturedReviews,
   readGallery,
   readHeroImage,
@@ -408,6 +410,7 @@ async function renderHotelPage(
   const featuredReviews = readFeaturedReviews(row, locale);
   const faqs = readFaq(row, locale);
   const faqGroups = readFaqByCategory(row, locale);
+  const topConciergeFaq = readTopConciergeFaq(row, locale);
   const heroPublicId = readHeroImage(row);
   const galleryImages = readGallery(row, locale, name);
   const virtualTour = readVirtualTour(row);
@@ -1328,6 +1331,8 @@ async function renderHotelPage(
       {hasAnyPolicy(policies) ? <HotelPolicies locale={locale} policies={policies} /> : null}
 
       <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
+
+      <TopConciergeFaq locale={locale} items={topConciergeFaq} />
 
       {faqGroups.length > 0 ? (
         <HotelFaq locale={locale} groups={faqGroups} />

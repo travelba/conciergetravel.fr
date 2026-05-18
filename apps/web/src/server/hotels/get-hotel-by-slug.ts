@@ -775,6 +775,21 @@ export const FaqItemSchema = z.object({
   answer_fr: z.string().min(1).optional(),
   answer_en: z.string().min(1).optional(),
   category: FaqCategorySchema.optional(),
+  // ---------------------------------------------------------------------
+  // Concierge-voice extension (WS5 phase 4, jsonb compatible — all fields
+  // OPTIONAL so legacy rows still parse).
+  //
+  //   - `featured: true` lifts the Q&A into the "Top 5 réponses du Concierge"
+  //     visible block (component `<TopConciergeFaq>`). The humanizer caps
+  //     featured items at 5 per hotel; the reader (`readTopConciergeFaq`)
+  //     also trims to 5 defensively.
+  //   - `concierge_tip_fr / _en` is an OPTIONAL one-liner ("Mon conseil :
+  //     …") that the UI surfaces under the answer. Only set on the 1-2
+  //     answers that genuinely lend themselves to a contextual tip.
+  // ---------------------------------------------------------------------
+  featured: z.boolean().optional(),
+  concierge_tip_fr: z.string().min(1).optional(),
+  concierge_tip_en: z.string().min(1).optional(),
 });
 export type FaqItem = z.infer<typeof FaqItemSchema>;
 
@@ -784,6 +799,10 @@ export interface LocalisedFaq {
   readonly question: string;
   readonly answer: string;
   readonly category: FaqCategory;
+  /** Lifted into the Top Concierge block when true (WS5 phase 4). */
+  readonly featured: boolean;
+  /** Optional Concierge tip surfaced under the answer ("Mon conseil : …"). */
+  readonly conciergeTip: string | null;
 }
 
 export interface LocalisedFaqGroup {
@@ -955,11 +974,43 @@ export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly 
         : (item.question_en ?? item.question_fr);
     const a =
       locale === 'fr' ? (item.answer_fr ?? item.answer_en) : (item.answer_en ?? item.answer_fr);
-    if (q !== undefined && a !== undefined) {
-      out.push({ question: q, answer: a, category: item.category ?? 'before' });
-    }
+    if (q === undefined || a === undefined) continue;
+    const tipRaw =
+      locale === 'fr'
+        ? (item.concierge_tip_fr ?? item.concierge_tip_en)
+        : (item.concierge_tip_en ?? item.concierge_tip_fr);
+    const tip = typeof tipRaw === 'string' && tipRaw.trim().length > 0 ? tipRaw.trim() : null;
+    out.push({
+      question: q,
+      answer: a,
+      category: item.category ?? 'before',
+      featured: item.featured === true,
+      conciergeTip: tip,
+    });
   }
   return out;
+}
+
+/**
+ * Returns up to 5 FAQ items marked `featured: true` — the "Top 5
+ * réponses du Concierge" visible block (ADR-0011 C1, WS5 phase 4).
+ *
+ * Order is the source array order (Payload / humanizer-controlled);
+ * the cap of 5 is defensive in case the humanizer ever marks more
+ * than 5 (the LLM is instructed to mark exactly 5, but production
+ * data should never crash a page).
+ *
+ * Returns `[]` when no item is featured — the caller should not
+ * render the block in that case (component already self-elides on
+ * `length < 5`, falling back to the standard `<HotelFaq>`).
+ */
+export function readTopConciergeFaq(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): readonly LocalisedFaq[] {
+  const all = readFaq(row, locale);
+  const featured = all.filter((f) => f.featured);
+  return featured.slice(0, 5);
 }
 
 /**

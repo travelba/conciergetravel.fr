@@ -431,6 +431,11 @@
       "categoryAfter": "Après votre séjour",
       "categoryAgency": "À propos de l'établissement"
     },
+    "topConciergeFaq": {
+      "title": "Les 5 réponses du Concierge sur cet hôtel",
+      "lead": "Les questions que mes clients me posent le plus souvent. Réponses directes, sans détour.",
+      "tipPrefix": "Mon conseil"
+    },
     "displayOnly": {
       "headline": "Réservation par concierge MyConciergeHotel",
       "explainer": "{name} n'est pas disponible à la réservation en ligne. Indiquez vos dates, nous vous transmettons une proposition personnalisée par e-mail.",

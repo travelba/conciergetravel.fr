@@ -35,6 +35,9 @@
     "concierge:humanize:events": "tsx src/concierge/run-humanizer-events.ts",
     "concierge:humanize:events:dry": "tsx src/concierge/run-humanizer-events.ts --dry-run",
     "concierge:audit:events": "node ./audit-concierge-events.mjs",
+    "concierge:humanize:faq": "tsx src/concierge/run-humanizer-faq.ts",
+    "concierge:humanize:faq:dry": "tsx src/concierge/run-humanizer-faq.ts --dry-run",
+    "concierge:audit:faq": "node ./audit-concierge-faq.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -146,4 +146,53 @@ test.describe('Concierge blocks — fiche hôtel (WS5 phase 1)', () => {
     // Schema.org class derived from the OSM `type` via osmToSchemaClass.
     expect(louvre?.['@type']).toBe('Museum');
   });
+
+  // -------------------------------------------------------------------
+  // WS5 phase 4 — "Top 5 réponses du Concierge" block (ADR-0011 C1).
+  // The synthetic hotel ships exactly 5 FAQ items marked
+  // `featured: true` so this block renders with its 5-item cap and
+  // the optional `concierge_tip_fr` surfaces under the answers.
+  // -------------------------------------------------------------------
+
+  test('FR — Top Concierge FAQ surfaces the 5 featured items above the standard FAQ', async ({
+    page,
+  }) => {
+    await page.goto(FR_PATH);
+
+    const block = page.locator('#faq-top-concierge');
+    await expect(block).toBeVisible();
+    await expect(block.getByRole('heading', { level: 2 })).toHaveText(/5 réponses du Concierge/i);
+    await expect(block.locator('[data-top-concierge-item]')).toHaveCount(5);
+
+    // Questions are visible without interaction (no <details>) — that's
+    // the whole AEO point of the Top 5 block.
+    const allQuestions = await block.locator('h3').allTextContents();
+    expect(allQuestions.length).toBe(5);
+    for (const q of allQuestions) {
+      expect(q.trim().length).toBeGreaterThan(0);
+    }
+
+    // At least one Concierge tip surfaces inside the block. The
+    // synthetic hotel sets two tips (`check-in` + `airport`); we
+    // assert ≥1 so adding tips later doesn't break the spec.
+    const tips = block.locator('[data-concierge-tip="faq"]');
+    expect(await tips.count()).toBeGreaterThanOrEqual(1);
+    await expect(tips.first()).toContainText(/Mon conseil\s*:/i);
+  });
+
+  test('FR — Top Concierge block does NOT duplicate FAQPage JSON-LD entities', async ({ page }) => {
+    await page.goto(FR_PATH);
+
+    const payloads = await readJsonLd(page);
+    const faqPages = payloads.filter(
+      (p): p is Record<string, unknown> =>
+        p !== null &&
+        typeof p === 'object' &&
+        (p as Record<string, unknown>)['@type'] === 'FAQPage',
+    );
+    // Exactly ONE FAQPage payload — the Top 5 block is purely UI and
+    // must not emit its own structured-data signal (otherwise Google
+    // would flag duplicate Question entities).
+    expect(faqPages.length).toBe(1);
+  });
 });
