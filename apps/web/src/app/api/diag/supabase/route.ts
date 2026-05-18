@@ -11,6 +11,10 @@ export const dynamic = 'force-dynamic';
  * destinations despite the production Supabase containing data. Token-gated
  * by `REVALIDATE_SECRET` (already required env) so it isn't world-readable.
  *
+ * NOTE: Next.js App Router treats folders prefixed with `_` as private and
+ * does NOT expose them. Hence `app/api/diag/supabase/route.ts` (no leading
+ * underscore on `diag`).
+ *
  * MUST be removed once the destinations issue is resolved.
  * Tracked via TODO `diag-cleanup` in the active session.
  */
