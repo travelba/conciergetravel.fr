@@ -399,7 +399,7 @@ async function processGuide(
     chunksProcessed: processed,
     chunksShortened: shortenedCount,
     tokens: { input: totalIn, output: totalOut },
-    reason: failures > 0 ? `${failures} chunk(s) failed validation` : undefined,
+    ...(failures > 0 ? { reason: `${failures} chunk(s) failed validation` } : {}),
   };
 }
 
@@ -460,7 +460,7 @@ async function processRanking(
     chunksProcessed: processed,
     chunksShortened: shortenedCount,
     tokens: { input: totalIn, output: totalOut },
-    reason: failures > 0 ? `${failures} chunk(s) failed validation` : undefined,
+    ...(failures > 0 ? { reason: `${failures} chunk(s) failed validation` } : {}),
   };
 }
 
