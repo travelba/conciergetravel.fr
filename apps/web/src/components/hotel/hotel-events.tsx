@@ -1,10 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { formatDistanceMeters } from '@/lib/format-distance';
-import type {
-  EventCategory,
-  LocalisedUpcomingEvent,
-} from '@/server/hotels/get-hotel-by-slug';
+import type { EventCategory, LocalisedUpcomingEvent } from '@/server/hotels/get-hotel-by-slug';
 
 /**
  * Local alias for the next-intl translator instance. See
@@ -108,16 +105,12 @@ function EventCard({
           <span className="text-muted text-xs tabular-nums">{dateLabel}</span>
         </div>
         <p className="text-muted text-xs">
-          {event.venueName !== null && event.venueName.length > 0
-            ? `${event.venueName} · `
-            : ''}
+          {event.venueName !== null && event.venueName.length > 0 ? `${event.venueName} · ` : ''}
           {distance}
           {pricingLabel !== null ? ` · ${pricingLabel}` : ''}
         </p>
         {event.description !== null ? (
-          <p className="text-fg/90 mt-1 max-w-prose text-sm leading-relaxed">
-            {event.description}
-          </p>
+          <p className="text-fg/90 mt-1 max-w-prose text-sm leading-relaxed">{event.description}</p>
         ) : null}
         {event.url !== null ? (
           <p className="mt-1 text-xs">
@@ -164,11 +157,7 @@ function CategoryBadge({
  * Always emits the year for the end date so the badge is unambiguous
  * even when the run spans into next year.
  */
-function formatEventDates(
-  startIso: string,
-  endIso: string | null,
-  locale: 'fr' | 'en',
-): string {
+function formatEventDates(startIso: string, endIso: string | null, locale: 'fr' | 'en'): string {
   const start = new Date(`${startIso}T00:00:00Z`);
   const fmtFull = new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',

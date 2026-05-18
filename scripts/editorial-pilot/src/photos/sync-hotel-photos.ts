@@ -55,11 +55,7 @@ import {
 } from '@mch/integrations/google-places';
 
 import { loadPhotoEnv, requirePhotoEnv } from './env-photos.js';
-import {
-  selectHotels,
-  updateHotelPhotos,
-  type SupabaseRestConfig,
-} from './supabase-rest.js';
+import { selectHotels, updateHotelPhotos, type SupabaseRestConfig } from './supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -234,7 +230,10 @@ interface HotelOutcome {
 
 function altFromCommons(photo: NormalisedCommonsPhoto, hotelName: string, city: string): string {
   if (photo.description !== undefined) {
-    return photo.description.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
+    return photo.description
+      .replace(/<[^>]+>/gu, ' ')
+      .replace(/\s+/gu, ' ')
+      .trim();
   }
   // Build from title: "File:Hôtel Le Bristol Paris (2).jpg" → "Hôtel Le Bristol Paris (2)"
   const cleaned = photo.title
@@ -301,10 +300,7 @@ interface MergedPhoto {
   readonly tags: readonly string[];
 }
 
-function mergeCommons(
-  hotel: HotelRow,
-  photo: NormalisedCommonsPhoto,
-): MergedPhoto {
+function mergeCommons(hotel: HotelRow, photo: NormalisedCommonsPhoto): MergedPhoto {
   return {
     source: 'commons',
     downloadUrl: photo.downloadUrl,
@@ -316,10 +312,7 @@ function mergeCommons(
   };
 }
 
-function mergePlaces(
-  hotel: HotelRow,
-  photo: NormalisedPlacesPhoto,
-): MergedPhoto {
+function mergePlaces(hotel: HotelRow, photo: NormalisedPlacesPhoto): MergedPhoto {
   const attribution = photo.attribution ?? 'Google Places';
   return {
     source: 'places',
@@ -430,9 +423,7 @@ async function processHotel(
     hero_image: hero,
     gallery_images: galleryWithoutHero,
   });
-  console.log(
-    `  DB updated: hero=${hero}, gallery=${galleryWithoutHero.length} item(s)`,
-  );
+  console.log(`  DB updated: hero=${hero}, gallery=${galleryWithoutHero.length} item(s)`);
 
   return {
     slug: hotel.slug,

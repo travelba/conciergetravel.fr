@@ -64,12 +64,7 @@ const EARTH_RADIUS_M = 6_371_000;
  * Great-circle distance in metres (haversine). Accurate to ~0.5 % for
  * urban distances — good enough for "nearest pharmacy" UX.
  */
-export function haversineMeters(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
+export function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const toRad = (deg: number): number => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -176,7 +171,9 @@ function buildAmenitiesQuery(
   radiusMeters: number,
   tags: readonly UtilityAmenityTag[],
 ): string {
-  const filters = tags.map((t) => `  nwr(around:${radiusMeters},${lat},${lon})["amenity"="${t}"];`).join('\n');
+  const filters = tags
+    .map((t) => `  nwr(around:${radiusMeters},${lat},${lon})["amenity"="${t}"];`)
+    .join('\n');
   return `[out:json][timeout:${cfg.queryTimeoutSec}];
 (
 ${filters}
@@ -215,9 +212,7 @@ function normaliseAmenityElements(
     const houseNumber = tags['addr:housenumber'];
     const street = tags['addr:street'];
     const streetAddress =
-      street !== undefined && houseNumber !== undefined
-        ? `${houseNumber} ${street}`
-        : street;
+      street !== undefined && houseNumber !== undefined ? `${houseNumber} ${street}` : street;
 
     const candidate = {
       osmType: el.type,
@@ -230,7 +225,9 @@ function normaliseAmenityElements(
       ...(streetAddress !== undefined ? { streetAddress } : {}),
       ...(tags['opening_hours'] !== undefined ? { openingHours: tags['opening_hours'] } : {}),
       ...(tags['phone'] !== undefined ? { phone: tags['phone'] } : {}),
-      ...(tags['website'] !== undefined && isHttpUrl(tags['website']) ? { website: tags['website'] } : {}),
+      ...(tags['website'] !== undefined && isHttpUrl(tags['website'])
+        ? { website: tags['website'] }
+        : {}),
       ...(tags['brand'] !== undefined ? { brand: tags['brand'] } : {}),
     };
 

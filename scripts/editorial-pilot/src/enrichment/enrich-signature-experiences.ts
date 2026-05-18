@@ -178,7 +178,7 @@ function buildPrompt(h: HotelRow): string {
     "- Anglais britannique (en-GB) **OBLIGATOIRE** sur title_en + description_en + badge_en (si présent). Pas d'oubli.",
   );
   lines.push(
-    "- title_en = traduction directe du title_fr ; description_en = traduction directe (60-180 mots), pas un résumé.",
+    '- title_en = traduction directe du title_fr ; description_en = traduction directe (60-180 mots), pas un résumé.',
   );
   lines.push(
     '- Adapter les signatures à la SAISON et au LIEU (montagne en hiver, mer en été, urbain à Paris…)',

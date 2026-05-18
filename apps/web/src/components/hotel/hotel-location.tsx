@@ -9,10 +9,7 @@ import { deriveWalkMinutes, formatDistanceMeters } from '@/lib/format-distance';
  * polymorphic signature, we just forward it.
  */
 type Translator = Awaited<ReturnType<typeof getTranslations>>;
-import {
-  formatOpeningHoursToday,
-  parseOpeningHoursForToday,
-} from '@/lib/poi-hours';
+import { formatOpeningHoursToday, parseOpeningHoursForToday } from '@/lib/poi-hours';
 import type {
   LocalisedLocation,
   LocalisedPointOfInterest,
@@ -56,7 +53,9 @@ const TRANSPORT_MODE_ORDER: readonly TransportMode[] = [
  */
 const BUCKET_ORDER: readonly PoiBucket[] = ['visit', 'do', 'shop'];
 
-function sortByWalk(pois: readonly LocalisedPointOfInterest[]): readonly LocalisedPointOfInterest[] {
+function sortByWalk(
+  pois: readonly LocalisedPointOfInterest[],
+): readonly LocalisedPointOfInterest[] {
   return [...pois].sort((a, b) => {
     const da = deriveWalkMinutes(a.walkMinutes, a.distanceMeters) ?? Number.MAX_SAFE_INTEGER;
     const db = deriveWalkMinutes(b.walkMinutes, b.distanceMeters) ?? Number.MAX_SAFE_INTEGER;
@@ -105,7 +104,8 @@ function medianWalk(pois: readonly LocalisedPointOfInterest[]): number {
     .sort((a, b) => a - b);
   if (xs.length === 0) return 5;
   const mid = Math.floor(xs.length / 2);
-  const value = xs.length % 2 === 1 ? xs[mid] : Math.round(((xs[mid - 1] ?? 0) + (xs[mid] ?? 0)) / 2);
+  const value =
+    xs.length % 2 === 1 ? xs[mid] : Math.round(((xs[mid - 1] ?? 0) + (xs[mid] ?? 0)) / 2);
   return value ?? 5;
 }
 
@@ -220,10 +220,7 @@ export async function HotelLocation({
 
       {hasTransports ? (
         <div className="mt-8" aria-labelledby="location-transports-title">
-          <h3
-            id="location-transports-title"
-            className="text-fg mb-2 font-medium"
-          >
+          <h3 id="location-transports-title" className="text-fg mb-2 font-medium">
             {t('location.transportsTitle')}
           </h3>
           <ul className="divide-border flex flex-col divide-y">
@@ -389,7 +386,9 @@ function PoiCard({
           {poi.nearestTransit !== null ? (
             <li className="border-border text-fg/80 rounded-full border px-2 py-0.5">
               {t('location.nearestTransitBadge', {
-                mode: t(`location.transportMode.${poi.nearestTransit.mode === 'subway' ? 'metro' : poi.nearestTransit.mode === 'light_rail' ? 'rer' : poi.nearestTransit.mode === 'rail' ? 'train' : poi.nearestTransit.mode === 'monorail' ? 'train' : poi.nearestTransit.mode}`),
+                mode: t(
+                  `location.transportMode.${poi.nearestTransit.mode === 'subway' ? 'metro' : poi.nearestTransit.mode === 'light_rail' ? 'rer' : poi.nearestTransit.mode === 'rail' ? 'train' : poi.nearestTransit.mode === 'monorail' ? 'train' : poi.nearestTransit.mode}`,
+                ),
                 line: poi.nearestTransit.lineRef ?? '_',
                 name: poi.nearestTransit.name,
                 distance: formatDistanceMeters(poi.nearestTransit.distanceMeters, locale),

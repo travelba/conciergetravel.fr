@@ -170,7 +170,10 @@ function validateShortened(
   }
   for (const s of splitSentences(shortened)) {
     if (wordCount(s) > TOLERANCE_WORDS) {
-      return { ok: false, reason: `sentence still > ${TOLERANCE_WORDS} words: "${s.slice(0, 80)}…"` };
+      return {
+        ok: false,
+        reason: `sentence still > ${TOLERANCE_WORDS} words: "${s.slice(0, 80)}…"`,
+      };
     }
   }
   const origNumbers = extractNumbers(original);
@@ -253,8 +256,7 @@ async function listSlugs(client: PgClientLike, args: CliArgs): Promise<readonly 
   if (args.slug !== null) return [args.slug];
   if (args.slugs.length > 0) return args.slugs;
   const table = args.table === 'guides' ? 'editorial_guides' : 'editorial_rankings';
-  const cols =
-    args.table === 'guides' ? 'slug, summary_fr, sections' : 'slug, intro_fr, outro_fr';
+  const cols = args.table === 'guides' ? 'slug, summary_fr, sections' : 'slug, intro_fr, outro_fr';
   const r = await client.query<Record<string, unknown>>(
     `select ${cols} from public.${table} where is_published = true order by slug`,
   );
@@ -312,9 +314,20 @@ interface ShortenResult {
 }
 
 async function shortenChunk(
-  llm: { call: (opts: { systemPrompt: string; userPrompt: string; temperature?: number; maxOutputTokens?: number; responseFormat?: 'text' | 'json' }) => Promise<{ content: string; usage: { inputTokens: number; outputTokens: number } }> },
+  llm: {
+    call: (opts: {
+      systemPrompt: string;
+      userPrompt: string;
+      temperature?: number;
+      maxOutputTokens?: number;
+      responseFormat?: 'text' | 'json';
+    }) => Promise<{ content: string; usage: { inputTokens: number; outputTokens: number } }>;
+  },
   text: string,
-): Promise<{ ok: true; shortened: string; tokens: { input: number; output: number } } | { ok: false; reason: string }> {
+): Promise<
+  | { ok: true; shortened: string; tokens: { input: number; output: number } }
+  | { ok: false; reason: string }
+> {
   const result = await llm.call({
     systemPrompt: SHORTEN_PROMPT,
     userPrompt: text,

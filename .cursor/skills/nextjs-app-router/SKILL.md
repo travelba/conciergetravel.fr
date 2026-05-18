@@ -157,8 +157,7 @@ The typical trap is wrapping `next-intl`'s `getTranslations` in a closure:
 // ❌ Bad — Server Component, closure prop
 <HotelGalleryLightbox
   translations={{
-    lightboxCounter: (current, total) =>
-      t('gallery.lightboxCounter', { current, total }),
+    lightboxCounter: (current, total) => t('gallery.lightboxCounter', { current, total }),
   }}
 />
 ```
@@ -171,7 +170,7 @@ Two fixes that DO cross the boundary safely:
   translations={{
     lightboxCounterTemplate: t.raw('gallery.lightboxCounter') as string,
   }}
-/>
+/>;
 
 // Inside the 'use client' component:
 const label = props.translations.lightboxCounterTemplate

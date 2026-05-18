@@ -19,11 +19,11 @@ Invoquer dès que :
 
 ## Décisions structurantes (ADR-0011)
 
-| # | Conflit | Décision | Référence |
-|---|---|---|---|
-| **C1** | FAQ visible 5 vs JSON-LD 10-15 | **JSON-LD garde 10-15** ; le bloc visible devient **Top 5 du Concierge**, sous-ensemble exact des 5 du JSON-LD | [ADR-0011](../../docs/adr/0011-concierge-voice.md) |
-| **C2** | Phrases ≤ 25 mots vs ≥ 15 % phrases longues (style-guide §9) | **≤ 25 mots strict**, métrique long-sentence désactivée | [ADR-0011](../../docs/adr/0011-concierge-voice.md), [style-guide §9](../../docs/editorial/style-guide.md) |
-| **C3** | Pas un journaliste vs rigueur journalistique | **Posture Concierge complice + rigueur factuelle de fact-checker** (chiffres précis, sources Atout France/Michelin/Wikidata nommées) | [ADR-0011](../../docs/adr/0011-concierge-voice.md) |
+| #      | Conflit                                                      | Décision                                                                                                                             | Référence                                                                                                 |
+| ------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| **C1** | FAQ visible 5 vs JSON-LD 10-15                               | **JSON-LD garde 10-15** ; le bloc visible devient **Top 5 du Concierge**, sous-ensemble exact des 5 du JSON-LD                       | [ADR-0011](../../docs/adr/0011-concierge-voice.md)                                                        |
+| **C2** | Phrases ≤ 25 mots vs ≥ 15 % phrases longues (style-guide §9) | **≤ 25 mots strict**, métrique long-sentence désactivée                                                                              | [ADR-0011](../../docs/adr/0011-concierge-voice.md), [style-guide §9](../../docs/editorial/style-guide.md) |
+| **C3** | Pas un journaliste vs rigueur journalistique                 | **Posture Concierge complice + rigueur factuelle de fact-checker** (chiffres précis, sources Atout France/Michelin/Wikidata nommées) | [ADR-0011](../../docs/adr/0011-concierge-voice.md)                                                        |
 
 ## Architecture du pipeline (Phase 1 → Phase 8)
 
@@ -91,6 +91,7 @@ pnpm --filter @mch/editorial-pilot exec tsx src/concierge/run-humanizer.ts --slu
 Ce script **ne rejoue pas** les passes 1-7 : il reconstruit un brief synthétique depuis Supabase (`description_fr`, `long_description_sections`, `signature_experiences`, `restaurant_info`, `spa_info`, `amenities`) et appelle Pass 8 uniquement. Output validé par `ConciergePass8OutputSchema` puis upserté.
 
 Pattern type :
+
 - Concurrence 4 = sweet spot OpenAI rate limit + Supabase pooler.
 - Mode `--dry-run` pour preview JSON sans écriture.
 - `--no-en` pour économiser le call EN quand on régénère uniquement FR.
@@ -111,6 +112,7 @@ pnpm --filter @mch/editorial-pilot exec tsx src/concierge/run-shorten-sections.t
 ```
 
 Mécanique de sûreté :
+
 1. Identifie les chunks (`summary_fr`, `sections[].body_fr`, `intro_fr`, `outro_fr`) qui contiennent au moins une phrase > 25 mots.
 2. Envoie chaque chunk concerné à gpt-4o-mini avec un prompt « réécris chaque phrase > 25 mots en 1-3 phrases courtes ≤ 25 mots, conserve chiffres / noms propres / sens ».
 3. **Validation post-LLM** côté script :
@@ -146,8 +148,7 @@ Trois scripts à connaître pour mesurer l'avancement de la voix Concierge :
 [`apps/admin/src/collections/hotels.ts`](../../apps/admin/src/collections/hotels.ts) embarque un hook `beforeValidate` qui refuse de **basculer** `is_published` en `true` si `concierge_advice` est manquant ou hors envelope :
 
 ```ts
-const becomingPublished =
-  next['is_published'] === true && originalDoc?.is_published !== true;
+const becomingPublished = next['is_published'] === true && originalDoc?.is_published !== true;
 if (!becomingPublished) return data;
 // … check concierge_advice.fr.body 50-110 mots …
 throw new Error('Publication bloquée (ADR-0011) : …');

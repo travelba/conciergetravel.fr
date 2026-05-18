@@ -1481,10 +1481,7 @@ export function readLocationByBucket(
   for (const p of pointsOfInterest) {
     buckets[p.bucket].push(p);
   }
-  const byDistance = (
-    a: LocalisedPointOfInterest,
-    b: LocalisedPointOfInterest,
-  ): number => {
+  const byDistance = (a: LocalisedPointOfInterest, b: LocalisedPointOfInterest): number => {
     const da = a.walkMinutes ?? Math.round(a.distanceMeters / 80);
     const db = b.walkMinutes ?? Math.round(b.distanceMeters / 80);
     if (da !== db) return da - db;
@@ -1512,7 +1509,14 @@ export function readLocationByBucket(
  * sports events (marathons, regattas, tennis), theatre / opera /
  * dance, and a generic catch-all.
  */
-export const EVENT_CATEGORIES = ['concert', 'expo', 'festival', 'sport', 'theater', 'other'] as const;
+export const EVENT_CATEGORIES = [
+  'concert',
+  'expo',
+  'festival',
+  'sport',
+  'theater',
+  'other',
+] as const;
 export type EventCategory = (typeof EVENT_CATEGORIES)[number];
 const EventCategorySchema = z.enum(EVENT_CATEGORIES);
 
@@ -1533,7 +1537,11 @@ const EventPricingSchema = z.object({
 const UpcomingEventSchema = z.object({
   name: z.string().min(1).max(200),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, { message: 'expected YYYY-MM-DD' }),
-  end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u).nullable().optional(),
+  end_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/u)
+    .nullable()
+    .optional(),
   venue_name: z.string().min(1).max(200).nullable().optional(),
   venue_address: z.string().min(1).max(400).nullable().optional(),
   latitude: z.number(),
@@ -1592,8 +1600,11 @@ export function readUpcomingEvents(
 ): readonly LocalisedUpcomingEvent[] {
   const parsed = UpcomingEventsSchema.safeParse(row.upcoming_events);
   if (!parsed.success) {
-    if (process.env['NODE_ENV'] !== 'production' && row.upcoming_events !== null
-        && row.upcoming_events !== undefined) {
+    if (
+      process.env['NODE_ENV'] !== 'production' &&
+      row.upcoming_events !== null &&
+      row.upcoming_events !== undefined
+    ) {
       console.warn('[readUpcomingEvents] parse error', parsed.error.flatten().fieldErrors);
     }
     return [];
@@ -1620,17 +1631,13 @@ export function readUpcomingEvents(
       distanceMeters: e.distance_meters,
       category: e.category,
       description,
-      pricing: e.pricing
-        ? { type: e.pricing.type, amountEur: e.pricing.amount_eur }
-        : null,
+      pricing: e.pricing ? { type: e.pricing.type, amountEur: e.pricing.amount_eur } : null,
       url: e.url ?? null,
       dtUuid: e.dt_uuid ?? null,
     });
   }
 
-  return localised
-    .sort((a, b) => a.startDate.localeCompare(b.startDate))
-    .slice(0, 5);
+  return localised.sort((a, b) => a.startDate.localeCompare(b.startDate)).slice(0, 5);
 }
 
 // ---------------------------------------------------------------------------
@@ -2052,10 +2059,13 @@ const ConciergeAdviceLocaleSchema = z.object({
   body: z
     .string()
     .min(1)
-    .refine((b) => {
-      const n = countWords(b);
-      return n >= 50 && n <= 110;
-    }, { message: 'concierge_advice.body must be 50-110 words' }),
+    .refine(
+      (b) => {
+        const n = countWords(b);
+        return n >= 50 && n <= 110;
+      },
+      { message: 'concierge_advice.body must be 50-110 words' },
+    ),
   tip_for: z.enum(CONCIERGE_TIP_FOR),
 });
 

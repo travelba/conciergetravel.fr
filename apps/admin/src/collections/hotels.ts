@@ -650,7 +650,8 @@ export const Hotels: CollectionConfig = {
       ({ data, originalDoc }) => {
         const next = (data ?? {}) as Record<string, unknown>;
         const becomingPublished =
-          next['is_published'] === true && (originalDoc as { is_published?: boolean } | null | undefined)?.is_published !== true;
+          next['is_published'] === true &&
+          (originalDoc as { is_published?: boolean } | null | undefined)?.is_published !== true;
         if (!becomingPublished) return data;
         const advice = next['concierge_advice'];
         if (advice === null || advice === undefined) {
@@ -659,7 +660,9 @@ export const Hotels: CollectionConfig = {
           );
         }
         if (typeof advice !== 'object') {
-          throw new Error('Publication bloquée (ADR-0011) : `concierge_advice` doit être un objet.');
+          throw new Error(
+            'Publication bloquée (ADR-0011) : `concierge_advice` doit être un objet.',
+          );
         }
         const adv = advice as { fr?: { body?: unknown } };
         const body = typeof adv.fr?.body === 'string' ? adv.fr.body.trim() : '';

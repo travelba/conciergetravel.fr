@@ -28,10 +28,7 @@ import { z } from 'zod';
 
 const RUNLOG_DIR = resolve(process.cwd(), 'out');
 mkdirSync(RUNLOG_DIR, { recursive: true });
-const RUNLOG = resolve(
-  RUNLOG_DIR,
-  `i18n-en-runlog-${new Date().toISOString().slice(0, 10)}.jsonl`,
-);
+const RUNLOG = resolve(RUNLOG_DIR, `i18n-en-runlog-${new Date().toISOString().slice(0, 10)}.jsonl`);
 
 // ─── env loader (Rule 7 — windows-dev-environment) ────────────────
 function loadEnv(): Record<string, string> {
@@ -44,7 +41,7 @@ function loadEnv(): Record<string, string> {
     if (!m) continue;
     let v = (m[2] ?? '').trim();
     const q = v.match(/^"([^"]*)"/) ?? v.match(/^'([^']*)'/);
-    v = q ? (q[1] ?? '') : v.split(/\s+#/)[0]?.trim() ?? '';
+    v = q ? (q[1] ?? '') : (v.split(/\s+#/)[0]?.trim() ?? '');
     env[m[1] ?? ''] = v;
   }
   return env;
@@ -286,7 +283,11 @@ Règles d'écho :
 - Pour les arrays : MÊME LONGUEUR que l'entrée FR, MÊME ORDRE, indices implicites.`;
 }
 
-async function translateOne(client: OpenAI, model: string, h: HotelRow): Promise<TranslationOutput> {
+async function translateOne(
+  client: OpenAI,
+  model: string,
+  h: HotelRow,
+): Promise<TranslationOutput> {
   const prompt = buildUserPrompt(h);
   const resp = await client.chat.completions.create({
     model,
@@ -306,9 +307,7 @@ async function translateOne(client: OpenAI, model: string, h: HotelRow): Promise
   }
   const safe = TranslationOutputSchema.safeParse(parsed);
   if (!safe.success) {
-    const issues = safe.error.issues
-      .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
-      .join('\n');
+    const issues = safe.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
     throw new Error(`schema validation failed:\n${issues}`);
   }
   return safe.data;
@@ -320,7 +319,10 @@ async function translateOne(client: OpenAI, model: string, h: HotelRow): Promise
 // LLM output keeps the FR-only field untouched.
 const isMeaningful = (s: string, min: number): boolean => s.trim().length >= min;
 
-function mergeEnIntoFaq(faq: FaqItem[], en: { question_en: string; answer_en: string }[]): FaqItem[] {
+function mergeEnIntoFaq(
+  faq: FaqItem[],
+  en: { question_en: string; answer_en: string }[],
+): FaqItem[] {
   return faq.map((f, i) => {
     const t = en[i];
     if (!t) return f;
@@ -387,10 +389,7 @@ async function persistTranslation(h: HotelRow, t: TranslationOutput): Promise<vo
         )
       : null;
     const signaturesMerged = h.signature_experiences
-      ? mergeEnIntoSignatures(
-          h.signature_experiences,
-          t.signatures_en as { summary_en: string }[],
-        )
+      ? mergeEnIntoSignatures(h.signature_experiences, t.signatures_en as { summary_en: string }[])
       : null;
     const awardsMerged = h.awards
       ? mergeEnIntoAwards(h.awards, t.awards_en as { name_en: string }[])

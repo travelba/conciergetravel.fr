@@ -22,8 +22,8 @@ Invoke when:
 | ------------ | ---------------------- | ---------------------------------- |
 | `dev`        | local + Supabase local | `localhost:3000`, `localhost:3001` |
 | `preview`    | every PR               | `<pr>.cct-preview.vercel.app`      |
-| `staging`    | `develop` branch       | `staging.myconciergehotel.com`       |
-| `production` | `main` branch          | `myconciergehotel.com`               |
+| `staging`    | `develop` branch       | `staging.myconciergehotel.com`     |
+| `production` | `main` branch          | `myconciergehotel.com`             |
 
 Database environments map to **separate Supabase projects** for `staging` and `production`. Preview deployments use the staging DB unless an `e2e/` tag triggers an ephemeral schema (Phase 2 enhancement).
 

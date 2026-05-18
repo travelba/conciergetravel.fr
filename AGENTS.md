@@ -32,29 +32,29 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 
 ## 3. Where to look first
 
-| Task                                          | Start here                                                                              |
-| --------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Add a business rule                           | `packages/domain/` + `.cursor/rules/architecture-layers.mdc`                            |
-| **Editorial voice / brand tone / FR-EN copy** | [`EDITORIAL_VOICE.md`](EDITORIAL_VOICE.md) (root) + [`docs/editorial/style-guide.md`](docs/editorial/style-guide.md) |
-| New vendor integration                        | `.cursor/skills/api-integration/SKILL.md` + `.cursor/rules/integrations-api.mdc`        |
-| **LLM pipeline (editorial, AEO, content)**    | `.cursor/skills/llm-output-robustness/SKILL.md`                                         |
-| **Voix du Concierge** (ADR-0011, pass 8, `<ConciergeAdvice>`, shortener phrases > 25 mots) | `.cursor/skills/concierge-voice-pipeline/SKILL.md`                                |
-| **LLM extraction from web content (Tavily)**  | `.cursor/skills/content-enrichment-pipeline/SKILL.md` + `llm-output-robustness` §rule-9 |
-| **Multi-source factual enrichment**           | `.cursor/skills/content-enrichment-pipeline/SKILL.md`                                   |
-| **Zod schema → React props**                  | `.cursor/skills/typescript-strict-zod-interop/SKILL.md`                                 |
-| **PowerShell / Windows dev commands**         | `.cursor/skills/windows-dev-environment/SKILL.md`                                       |
-| New public route                              | `apps/web/src/app/[locale]/` + `.cursor/rules/nextjs-app-router.mdc`                    |
-| **JSON-LD page → must be `force-dynamic`**    | `.cursor/skills/structured-data-schema-org/SKILL.md` §CSP-nonce-contract                |
-| **Hotel detail page** (15 blocks)             | `.cursor/rules/hotel-detail-page.mdc` (CDC §2 checklist + ADR-0007/0008/0009)           |
-| Room sub-page `/hotel/[slug]/chambres/[room]` | `.cursor/rules/hotel-detail-page.mdc` + ADR-0009                                        |
-| **Editorial guide / ranking page**            | `.cursor/skills/editorial-long-read-rendering/SKILL.md` + `llm-output-robustness`       |
-| **TOC sidebar / EnrichedText / auto-link**    | `.cursor/skills/editorial-long-read-rendering/SKILL.md`                                 |
-| New Supabase table / RLS policy               | `packages/db/migrations/` + `.cursor/rules/supabase-rls.mdc`                            |
-| JSON-LD / robots / llms.txt                   | `packages/seo/` + `.cursor/rules/seo-geo.mdc`                                           |
-| Payload collection / back-office hook         | `apps/admin/` + `.cursor/skills/backoffice-cms/SKILL.md`                                |
-| E2E for a new journey                         | `apps/web/e2e/` + `.cursor/rules/e2e-testing.mdc`                                       |
-| Security / CSP / auth                         | `.cursor/rules/security-csp.mdc`                                                        |
-| Perf, Sentry, logs                            | `.cursor/rules/observability-perf.mdc`                                                  |
+| Task                                                                                       | Start here                                                                                                           |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Add a business rule                                                                        | `packages/domain/` + `.cursor/rules/architecture-layers.mdc`                                                         |
+| **Editorial voice / brand tone / FR-EN copy**                                              | [`EDITORIAL_VOICE.md`](EDITORIAL_VOICE.md) (root) + [`docs/editorial/style-guide.md`](docs/editorial/style-guide.md) |
+| New vendor integration                                                                     | `.cursor/skills/api-integration/SKILL.md` + `.cursor/rules/integrations-api.mdc`                                     |
+| **LLM pipeline (editorial, AEO, content)**                                                 | `.cursor/skills/llm-output-robustness/SKILL.md`                                                                      |
+| **Voix du Concierge** (ADR-0011, pass 8, `<ConciergeAdvice>`, shortener phrases > 25 mots) | `.cursor/skills/concierge-voice-pipeline/SKILL.md`                                                                   |
+| **LLM extraction from web content (Tavily)**                                               | `.cursor/skills/content-enrichment-pipeline/SKILL.md` + `llm-output-robustness` §rule-9                              |
+| **Multi-source factual enrichment**                                                        | `.cursor/skills/content-enrichment-pipeline/SKILL.md`                                                                |
+| **Zod schema → React props**                                                               | `.cursor/skills/typescript-strict-zod-interop/SKILL.md`                                                              |
+| **PowerShell / Windows dev commands**                                                      | `.cursor/skills/windows-dev-environment/SKILL.md`                                                                    |
+| New public route                                                                           | `apps/web/src/app/[locale]/` + `.cursor/rules/nextjs-app-router.mdc`                                                 |
+| **JSON-LD page → must be `force-dynamic`**                                                 | `.cursor/skills/structured-data-schema-org/SKILL.md` §CSP-nonce-contract                                             |
+| **Hotel detail page** (15 blocks)                                                          | `.cursor/rules/hotel-detail-page.mdc` (CDC §2 checklist + ADR-0007/0008/0009)                                        |
+| Room sub-page `/hotel/[slug]/chambres/[room]`                                              | `.cursor/rules/hotel-detail-page.mdc` + ADR-0009                                                                     |
+| **Editorial guide / ranking page**                                                         | `.cursor/skills/editorial-long-read-rendering/SKILL.md` + `llm-output-robustness`                                    |
+| **TOC sidebar / EnrichedText / auto-link**                                                 | `.cursor/skills/editorial-long-read-rendering/SKILL.md`                                                              |
+| New Supabase table / RLS policy                                                            | `packages/db/migrations/` + `.cursor/rules/supabase-rls.mdc`                                                         |
+| JSON-LD / robots / llms.txt                                                                | `packages/seo/` + `.cursor/rules/seo-geo.mdc`                                                                        |
+| Payload collection / back-office hook                                                      | `apps/admin/` + `.cursor/skills/backoffice-cms/SKILL.md`                                                             |
+| E2E for a new journey                                                                      | `apps/web/e2e/` + `.cursor/rules/e2e-testing.mdc`                                                                    |
+| Security / CSP / auth                                                                      | `.cursor/rules/security-csp.mdc`                                                                                     |
+| Perf, Sentry, logs                                                                         | `.cursor/rules/observability-perf.mdc`                                                                               |
 
 ### Structural decisions already taken (don't relitigate without an ADR)
 

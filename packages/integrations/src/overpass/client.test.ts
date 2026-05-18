@@ -29,7 +29,7 @@ const AMENITY_NODES = [
     tags: {
       amenity: 'pharmacy',
       name: 'Pharmacie du Faubourg',
-      'opening_hours': 'Mo-Sa 09:00-19:30',
+      opening_hours: 'Mo-Sa 09:00-19:30',
       phone: '+33 1 42 65 12 34',
       website: 'https://pharmacie-faubourg.fr',
     },
@@ -55,7 +55,7 @@ const AMENITY_NODES = [
       name: 'Monoprix Faubourg Saint-Honoré',
       'addr:housenumber': '109',
       'addr:street': 'Rue du Faubourg Saint-Honoré',
-      'opening_hours': 'Mo-Sa 08:30-21:00; Su 09:00-13:00',
+      opening_hours: 'Mo-Sa 08:30-21:00; Su 09:00-13:00',
     },
   },
   // Missing name → should be dropped.

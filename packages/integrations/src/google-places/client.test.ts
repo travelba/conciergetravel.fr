@@ -2,11 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import {
-  defaultPlacesConfig,
-  fetchPlacePhotos,
-  searchPlaceByNameAndCity,
-} from './client.js';
+import { defaultPlacesConfig, fetchPlacePhotos, searchPlaceByNameAndCity } from './client.js';
 
 const cfg = { ...defaultPlacesConfig('TEST-KEY'), apiBase: 'https://places.test/v1' };
 

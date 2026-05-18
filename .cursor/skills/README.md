@@ -206,16 +206,16 @@ links to `typescript-strict-zod-interop`, etc.
 
 This batch capitalised the editorial v2 launch:
 
-| Pattern paid for                                                          | Capture                                                                                  |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| LLM truncation on multi-faceted prompts → multi-call architecture         | `llm-output-robustness`                                                                  |
-| LLM extraction vs generation (temperature 0, gpt-4o-mini, evidence_quote) | `llm-output-robustness` rule 9                                                           |
-| `AUTO_DRAFT` sentinels for missing facts                                  | `llm-output-robustness` rule 10                                                          |
-| Pilot → validate → scale workflow                                         | `llm-output-robustness` rule 11                                                          |
-| Word-count gates as warnings, not blockers                                | `llm-output-robustness` rule 12                                                          |
-| `exactOptionalPropertyTypes` ↔ Zod ↔ React props interop                  | `typescript-strict-zod-interop`                                                          |
-| PowerShell quoting, Supabase SSL strip, Unix commands                     | `windows-dev-environment`                                                                |
-| DATAtourisme + Wikidata + Wikipedia + Tavily cascade                      | `content-enrichment-pipeline` ⭐                                                         |
+| Pattern paid for                                                                                     | Capture                                                                                  |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| LLM truncation on multi-faceted prompts → multi-call architecture                                    | `llm-output-robustness`                                                                  |
+| LLM extraction vs generation (temperature 0, gpt-4o-mini, evidence_quote)                            | `llm-output-robustness` rule 9                                                           |
+| `AUTO_DRAFT` sentinels for missing facts                                                             | `llm-output-robustness` rule 10                                                          |
+| Pilot → validate → scale workflow                                                                    | `llm-output-robustness` rule 11                                                          |
+| Word-count gates as warnings, not blockers                                                           | `llm-output-robustness` rule 12                                                          |
+| `exactOptionalPropertyTypes` ↔ Zod ↔ React props interop                                             | `typescript-strict-zod-interop`                                                          |
+| PowerShell quoting, Supabase SSL strip, Unix commands                                                | `windows-dev-environment`                                                                |
+| DATAtourisme + Wikidata + Wikipedia + Tavily cascade                                                 | `content-enrichment-pipeline` ⭐                                                         |
 | DATAtourisme **events** (gotchas: `takesPlaceAt` nested, silent 0 on subtype filters, swapped dates) | `content-enrichment-pipeline` §Rule 11                                                   |
-| TOC sidebar + EnrichedText auto-link + callouts + sources footer          | `editorial-long-read-rendering` ⭐                                                       |
-| **CSP nonce ↔ `JsonLdScript` ↔ `force-dynamic` contract** (PR #56 / #57)  | `structured-data-schema-org`, `nextjs-app-router`, `security-engineering` (all extended) |
+| TOC sidebar + EnrichedText auto-link + callouts + sources footer                                     | `editorial-long-read-rendering` ⭐                                                       |
+| **CSP nonce ↔ `JsonLdScript` ↔ `force-dynamic` contract** (PR #56 / #57)                             | `structured-data-schema-org`, `nextjs-app-router`, `security-engineering` (all extended) |

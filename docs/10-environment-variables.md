@@ -6,11 +6,11 @@ Toute variable d'environnement utilisée par le projet est listée ici. Le fichi
 
 ## Public site
 
-| Variable                     | Type         | Scope           | Description                                                         |
-| ---------------------------- | ------------ | --------------- | ------------------------------------------------------------------- |
+| Variable                     | Type         | Scope           | Description                                                           |
+| ---------------------------- | ------------ | --------------- | --------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`       | URL          | client + server | URL canonique (sans slash final). Ex. `https://myconciergehotel.com`. |
-| `NEXT_PUBLIC_SITE_NAME`      | string       | client + server | "MyConciergeHotel".                                                  |
-| `NEXT_PUBLIC_DEFAULT_LOCALE` | `fr` \| `en` | client + server | Locale par défaut. `fr` en MVP.                                     |
+| `NEXT_PUBLIC_SITE_NAME`      | string       | client + server | "MyConciergeHotel".                                                   |
+| `NEXT_PUBLIC_DEFAULT_LOCALE` | `fr` \| `en` | client + server | Locale par défaut. `fr` en MVP.                                       |
 
 ## Supabase
 

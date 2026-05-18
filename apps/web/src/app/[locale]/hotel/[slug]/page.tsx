@@ -762,9 +762,7 @@ async function renderHotelPage(
         longitude: e.longitude,
         ...(e.description !== null ? { description: e.description } : {}),
         ...(e.url !== null ? { officialUrl: e.url } : {}),
-        ...(e.dtUuid !== null
-          ? { sameAs: `https://data.datatourisme.fr/poi/${e.dtUuid}` }
-          : {}),
+        ...(e.dtUuid !== null ? { sameAs: `https://data.datatourisme.fr/poi/${e.dtUuid}` } : {}),
         ...(e.pricing !== null
           ? {
               pricing: {
@@ -1190,12 +1188,7 @@ async function renderHotelPage(
         location={location}
       />
 
-      <HotelEvents
-        locale={locale}
-        hotelName={name}
-        city={row.city}
-        events={upcomingEvents}
-      />
+      <HotelEvents locale={locale} hotelName={name} city={row.city} events={upcomingEvents} />
 
       <HotelMiceEvents locale={locale} hotelName={name} mice={miceInfo} />
 

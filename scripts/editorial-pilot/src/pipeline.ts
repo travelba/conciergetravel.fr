@@ -133,16 +133,17 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
   console.log(`\n━━━ ${slug} ━━━`);
 
   const brief = await loadBrief(slug);
-  const [prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt7, prompt8] = await Promise.all([
-    loadPrompt('01-draft-factuel.md'),
-    loadPrompt('02-variation-syntaxique.md'),
-    loadPrompt('03-humanisation-magazine.md'),
-    loadPrompt('04-fact-check.md'),
-    loadPrompt('05-correctrice-post-fact-check.md'),
-    loadPrompt('06-linter-fixer.md'),
-    loadPrompt('07-anchor-scrub.md'),
-    loadPrompt('08-concierge-voice.md'),
-  ]);
+  const [prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt7, prompt8] =
+    await Promise.all([
+      loadPrompt('01-draft-factuel.md'),
+      loadPrompt('02-variation-syntaxique.md'),
+      loadPrompt('03-humanisation-magazine.md'),
+      loadPrompt('04-fact-check.md'),
+      loadPrompt('05-correctrice-post-fact-check.md'),
+      loadPrompt('06-linter-fixer.md'),
+      loadPrompt('07-anchor-scrub.md'),
+      loadPrompt('08-concierge-voice.md'),
+    ]);
 
   // Pass 7 anchor-scrub can be disabled via env flag for A/B comparisons.
   const anchorScrubEnabled = process.env['EDITORIAL_PILOT_ANCHOR_SCRUB'] !== 'false';
@@ -473,11 +474,13 @@ function countWords(s: string): number {
 export async function listAvailableBriefs(): Promise<string[]> {
   const { readdir } = await import('node:fs/promises');
   const entries = await readdir(BRIEFS_DIR);
-  return entries
-    .filter((f) => f.endsWith('.json'))
-    // Skip internal metadata files like _palaces-discovered.json that share
-    // the same folder but are not actual hotel briefs.
-    .filter((f) => !f.startsWith('_'))
-    .map((f) => f.replace(/\.json$/, ''))
-    .sort();
+  return (
+    entries
+      .filter((f) => f.endsWith('.json'))
+      // Skip internal metadata files like _palaces-discovered.json that share
+      // the same folder but are not actual hotel briefs.
+      .filter((f) => !f.startsWith('_'))
+      .map((f) => f.replace(/\.json$/, ''))
+      .sort()
+  );
 }

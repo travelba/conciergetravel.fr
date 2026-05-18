@@ -112,7 +112,7 @@ packages/integrations/<vendor>/
 - **Category prefix normalisation**: Wikidata persists categories WITHOUT
   the `Category:` prefix; MediaWiki `cmtitle` requires it. Helper:
   ```ts
-  buildCmTitle('Le Bristol Paris') // → 'Category:Le_Bristol_Paris'
+  buildCmTitle('Le Bristol Paris'); // → 'Category:Le_Bristol_Paris'
   ```
 - **Filter by MIME**: a "Hôtel X" category can contain a sound clip of
   the jingle (`audio/ogg`), architectural plans (`image/svg+xml`), or
@@ -126,7 +126,10 @@ packages/integrations/<vendor>/
 - **Attribution often contains HTML** (`<a href="...">User:Foo</a>`).
   Strip it before pushing to Cloudinary `context.alt`:
   ```ts
-  attribution.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim()
+  attribution
+    .replace(/<[^>]+>/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
   ```
 - **Pagination via `continue.cmcontinue`**: walk it until `maxN`
   collected OR exhausted. Don't trust a single 50-item page.
@@ -156,8 +159,8 @@ packages/integrations/<vendor>/
   the hotel name (drop tokens like "hotel"/"hôtel" — they appear
   everywhere). The skill ships `looksLikeMatch` in `google-places/client.ts`.
 - **Attribution**: Google ToS requires displaying `authorAttributions[0].displayName`
-  + linking to `authorAttributions[0].uri`. We forward both into the
-  Cloudinary `context.alt` + `tags`.
+  - linking to `authorAttributions[0].uri`. We forward both into the
+    Cloudinary `context.alt` + `tags`.
 
 ### Cloudinary Node SDK
 
@@ -195,7 +198,7 @@ packages/integrations/<vendor>/
   Resumability + audit trail for free; `jq` or Excel can chart it.
 - **Optional vendor keys**: model env loaders so dry-runs work with
   zero vendor secrets configured. `requirePhotoEnv({ needsCloudinary,
-  needsGooglePlaces })` enforces the right subset only when the
+needsGooglePlaces })` enforces the right subset only when the
   orchestrator actually intends to call that vendor.
 - **MergedPhoto common shape**: when two tiers produce different
   payloads (Commons normalises around `pageId/license`, Places around

@@ -93,7 +93,11 @@ function mapSdkError(e: unknown, input: CloudinaryUploadInput): CloudinaryError 
   if (e instanceof Error) {
     raw = e.message;
   } else if (typeof e === 'object' && e !== null) {
-    const obj = e as { message?: unknown; http_code?: unknown; error?: { message?: unknown; http_code?: unknown } };
+    const obj = e as {
+      message?: unknown;
+      http_code?: unknown;
+      error?: { message?: unknown; http_code?: unknown };
+    };
     const nested = obj.error;
     const msg =
       typeof nested?.message === 'string'
@@ -102,7 +106,12 @@ function mapSdkError(e: unknown, input: CloudinaryUploadInput): CloudinaryError 
           ? obj.message
           : null;
     if (msg !== null) raw = msg;
-    const code = typeof nested?.http_code === 'number' ? nested.http_code : typeof obj.http_code === 'number' ? obj.http_code : undefined;
+    const code =
+      typeof nested?.http_code === 'number'
+        ? nested.http_code
+        : typeof obj.http_code === 'number'
+          ? obj.http_code
+          : undefined;
     if (code !== undefined) httpCode = code;
   } else if (typeof e === 'string') {
     raw = e;
@@ -193,11 +202,16 @@ export async function uploadFromUrl(
   const altFr = stripHtml(input.altFr).slice(0, 200);
   const altEn = input.altEn !== undefined ? stripHtml(input.altEn).slice(0, 200) : undefined;
 
-  const tags = [tagify(input.hotelSlug), tagify(input.source), ...(input.extraTags ?? []).map(tagify)].filter(
-    (t) => t.length > 0,
-  );
+  const tags = [
+    tagify(input.hotelSlug),
+    tagify(input.source),
+    ...(input.extraTags ?? []).map(tagify),
+  ].filter((t) => t.length > 0);
 
-  const contextParts: string[] = [`alt=${altFr.replace(/[|=]/gu, ' ')}`, `alt_fr=${altFr.replace(/[|=]/gu, ' ')}`];
+  const contextParts: string[] = [
+    `alt=${altFr.replace(/[|=]/gu, ' ')}`,
+    `alt_fr=${altFr.replace(/[|=]/gu, ' ')}`,
+  ];
   if (altEn !== undefined && altEn.length > 0) {
     contextParts.push(`alt_en=${altEn.replace(/[|=]/gu, ' ')}`);
   }
@@ -260,13 +274,20 @@ export async function uploadFromUrl(
 export function toGalleryRow(
   result: CloudinaryUploadResult,
   input: CloudinaryUploadInput,
-): { readonly public_id: string; readonly alt_fr?: string; readonly alt_en?: string; readonly category?: string } {
+): {
+  readonly public_id: string;
+  readonly alt_fr?: string;
+  readonly alt_en?: string;
+  readonly category?: string;
+} {
   const altFr = stripHtml(input.altFr).slice(0, 200);
   const altEn = input.altEn !== undefined ? stripHtml(input.altEn).slice(0, 200) : undefined;
   return {
     public_id: result.public_id,
     ...(altFr.length > 0 ? { alt_fr: altFr } : {}),
     ...(altEn !== undefined && altEn.length > 0 ? { alt_en: altEn } : {}),
-    ...(input.category !== undefined && input.category.length > 0 ? { category: input.category } : {}),
+    ...(input.category !== undefined && input.category.length > 0
+      ? { category: input.category }
+      : {}),
   };
 }

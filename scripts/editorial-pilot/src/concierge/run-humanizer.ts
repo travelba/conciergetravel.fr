@@ -69,7 +69,10 @@ function parseArgs(argv: readonly string[]): CliArgs {
       slug = argv[i + 1] ?? null;
       i += 1;
     } else if (a === '--slugs') {
-      slugs = (argv[i + 1] ?? '').split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+      slugs = (argv[i + 1] ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
       i += 1;
     } else if (a === '--all') {
       all = true;
@@ -148,7 +151,10 @@ async function listSlugs(client: import('pg').Client, args: CliArgs): Promise<re
     );
     return r.rows
       .filter((row) => {
-        const adv = row.concierge_advice as { fr?: { body?: unknown }; en?: { body?: unknown } } | null;
+        const adv = row.concierge_advice as {
+          fr?: { body?: unknown };
+          en?: { body?: unknown };
+        } | null;
         if (adv === null || adv === undefined) return true;
         const frWords = countWordsLocal(adv.fr?.body);
         const enWords = countWordsLocal(adv.en?.body);
@@ -159,7 +165,7 @@ async function listSlugs(client: import('pg').Client, args: CliArgs): Promise<re
       .map((row) => row.slug);
   }
   const where = args.missing
-    ? "is_published = true and concierge_advice is null"
+    ? 'is_published = true and concierge_advice is null'
     : 'is_published = true';
   const r = await client.query<{ slug: string }>(
     `select slug from public.hotels where ${where} order by slug`,
@@ -167,10 +173,7 @@ async function listSlugs(client: import('pg').Client, args: CliArgs): Promise<re
   return r.rows.map((row) => row.slug);
 }
 
-async function fetchHotel(
-  client: import('pg').Client,
-  slug: string,
-): Promise<HotelRow | null> {
+async function fetchHotel(client: import('pg').Client, slug: string): Promise<HotelRow | null> {
   const r = await client.query<HotelRow>(
     `select id, slug, name, name_en, city, stars, is_palace, description_fr,
             opened_at::text as opened_at, long_description_sections,
@@ -319,14 +322,11 @@ async function runWithConcurrency(
         runOne(client, slug, prompt, args)
           .then((r) => {
             out.push(r);
-            const tag =
-              r.status === 'ok' ? 'OK' : r.status === 'skipped' ? 'SKIP' : 'FAIL';
+            const tag = r.status === 'ok' ? 'OK' : r.status === 'skipped' ? 'SKIP' : 'FAIL';
             const tokens = r.tokens ? ` ${r.tokens.input}→${r.tokens.output}t` : '';
             console.log(`[${idx}/${total}] ${tag} ${slug}${tokens} — ${r.reason ?? ''}`);
             if (r.status === 'ok' && r.advice !== undefined) {
-              console.log(
-                `         FR body: ${r.advice.concierge_advice.fr.body.slice(0, 80)}...`,
-              );
+              console.log(`         FR body: ${r.advice.concierge_advice.fr.body.slice(0, 80)}...`);
             }
             if (r.status === 'failed') {
               console.warn(`[${idx}/${total}] FAIL ${slug} — ${r.reason}`);
@@ -352,14 +352,18 @@ async function runWithConcurrency(
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   if (!args.slug && args.slugs.length === 0 && !args.all && !args.missing && !args.invalid) {
-    console.error('Usage: --slug <s> | --slugs <a,b,c> | --all | --missing | --invalid  [--concurrency N] [--dry-run] [--no-en]');
+    console.error(
+      'Usage: --slug <s> | --slugs <a,b,c> | --all | --missing | --invalid  [--concurrency N] [--dry-run] [--no-en]',
+    );
     process.exit(1);
   }
   const prompt = await fs.readFile(PROMPT_PATH, 'utf-8');
   const client = await connectPg();
   try {
     const slugs = await listSlugs(client, args);
-    console.log(`[concierge-humanizer] targets: ${slugs.length} hotel(s), concurrency=${args.concurrency}, dryRun=${args.dryRun}`);
+    console.log(
+      `[concierge-humanizer] targets: ${slugs.length} hotel(s), concurrency=${args.concurrency}, dryRun=${args.dryRun}`,
+    );
     if (slugs.length === 0) {
       console.log('Nothing to do.');
       return;

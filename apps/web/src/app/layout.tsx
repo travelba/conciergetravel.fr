@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: '%s · MyConciergeHotel',
   },
   description:
-    "Le concierge des Palaces et hôtels 5 étoiles en France : sélection éditoriale, conseils opérationnels par fiche, tarifs nets via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
+    'Le concierge des Palaces et hôtels 5 étoiles en France : sélection éditoriale, conseils opérationnels par fiche, tarifs nets via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.',
   applicationName: 'MyConciergeHotel',
   authors: [{ name: 'MyConciergeHotel' }],
   formatDetection: { email: false, address: false, telephone: false },

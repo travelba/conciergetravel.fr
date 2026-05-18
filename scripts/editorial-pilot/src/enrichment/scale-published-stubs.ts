@@ -31,10 +31,7 @@ import pg from 'pg';
 const BRIEFS_DIR = resolve(process.cwd(), 'briefs-auto');
 const RUNLOG_DIR = resolve(process.cwd(), 'out');
 mkdirSync(RUNLOG_DIR, { recursive: true });
-const RUNLOG = resolve(
-  RUNLOG_DIR,
-  `briefs-runlog-${new Date().toISOString().slice(0, 10)}.jsonl`,
-);
+const RUNLOG = resolve(RUNLOG_DIR, `briefs-runlog-${new Date().toISOString().slice(0, 10)}.jsonl`);
 
 interface Hotel {
   readonly slug: string;
@@ -90,7 +87,7 @@ function loadEnv(): Record<string, string> {
     if (!m) continue;
     let v = (m[2] ?? '').trim();
     const q = v.match(/^"([^"]*)"/) ?? v.match(/^'([^']*)'/);
-    v = q ? (q[1] ?? '') : v.split(/\s+#/)[0]?.trim() ?? '';
+    v = q ? (q[1] ?? '') : (v.split(/\s+#/)[0]?.trim() ?? '');
     env[m[1] ?? ''] = v;
   }
   return env;
@@ -137,19 +134,14 @@ async function listStubs(): Promise<readonly Hotel[]> {
   return rows as readonly Hotel[];
 }
 
-function runBuildBrief(hotel: Hotel): Promise<{ ok: boolean; error?: string; mode: 'dt' | 'manual' }> {
+function runBuildBrief(
+  hotel: Hotel,
+): Promise<{ ok: boolean; error?: string; mode: 'dt' | 'manual' }> {
   return new Promise((res) => {
     const dept = inseeFromPostal(hotel.postal_code);
     const isWin = process.platform === 'win32';
     const safeQuery = isWin ? `"${hotel.name.replace(/"/g, '\\"')}"` : hotel.name;
-    const args = [
-      'exec',
-      'tsx',
-      'src/enrichment/build-brief.ts',
-      hotel.slug,
-      '--query',
-      safeQuery,
-    ];
+    const args = ['exec', 'tsx', 'src/enrichment/build-brief.ts', hotel.slug, '--query', safeQuery];
     if (dept) args.push('--dept', dept);
     if (hotel.is_palace) args.push('--force-palace');
     const child = spawn('pnpm', args, {
@@ -159,11 +151,7 @@ function runBuildBrief(hotel: Hotel): Promise<{ ok: boolean; error?: string; mod
     });
     child.on('error', (e) => res({ ok: false, error: e.message, mode: 'dt' }));
     child.on('exit', (code) =>
-      res(
-        code === 0
-          ? { ok: true, mode: 'dt' }
-          : { ok: false, error: `exit ${code}`, mode: 'dt' },
-      ),
+      res(code === 0 ? { ok: true, mode: 'dt' } : { ok: false, error: `exit ${code}`, mode: 'dt' }),
     );
   });
 }
@@ -231,7 +219,9 @@ async function main(): Promise<void> {
   if (args.skipExisting) {
     const before = queue.length;
     queue = queue.filter((h) => !existsSync(resolve(BRIEFS_DIR, `${h.slug}.json`)));
-    console.log(`[scale-stubs] ${before - queue.length} already have briefs, ${queue.length} remain`);
+    console.log(
+      `[scale-stubs] ${before - queue.length} already have briefs, ${queue.length} remain`,
+    );
   }
   if (queue.length > args.limit) {
     queue = queue.slice(0, args.limit);
@@ -296,7 +286,9 @@ async function main(): Promise<void> {
   if (okSlugs.length > 0) {
     console.log(`\nNext: run the 5-pass LLM pipeline on the new briefs:`);
     console.log(`  $env:EDITORIAL_PILOT_BRIEFS_DIR="briefs-auto"`);
-    console.log(`  pnpm exec tsx src/run.ts ${okSlugs.slice(0, 5).join(' ')}${okSlugs.length > 5 ? ' ... (' + okSlugs.length + ' total)' : ''}`);
+    console.log(
+      `  pnpm exec tsx src/run.ts ${okSlugs.slice(0, 5).join(' ')}${okSlugs.length > 5 ? ' ... (' + okSlugs.length + ' total)' : ''}`,
+    );
   }
 }
 

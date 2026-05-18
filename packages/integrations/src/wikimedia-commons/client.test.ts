@@ -2,11 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import {
-  buildCmTitle,
-  defaultCommonsConfig,
-  fetchCategoryPhotos,
-} from './client.js';
+import { buildCmTitle, defaultCommonsConfig, fetchCategoryPhotos } from './client.js';
 
 const TEST_API = 'https://example-commons.test/w/api.php';
 const cfg = {

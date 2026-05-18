@@ -233,13 +233,15 @@ export function buildOpeningHoursSpecification(
   for (const day of WEEKDAY_ORDER) dayIntervals.set(day, []);
 
   // Split on `;` for rules, `,` for parallel intervals inside one rule.
-  const rules = trimmed.split(';').map((r) => r.trim()).filter((r) => r.length > 0);
+  const rules = trimmed
+    .split(';')
+    .map((r) => r.trim())
+    .filter((r) => r.length > 0);
 
   for (const rule of rules) {
     // Strip out explicit closures (drop the affected days).
-    const closedMatch = /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(?:off|closed)$/iu.exec(
-      rule,
-    );
+    const closedMatch =
+      /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(?:off|closed)$/iu.exec(rule);
     if (closedMatch !== null) {
       const start = closedMatch[1] as WeekdayToken;
       const end = (closedMatch[2] as WeekdayToken | undefined) ?? null;
@@ -250,8 +252,7 @@ export function buildOpeningHoursSpecification(
     }
 
     // Split parallel intervals — `Mo-Fr 09:00-12:00, 14:00-19:00`.
-    const dayRangeMatch =
-      /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(.+)$/u.exec(rule);
+    const dayRangeMatch = /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(.+)$/u.exec(rule);
     if (dayRangeMatch === null) continue;
     const start = dayRangeMatch[1] as WeekdayToken;
     const end = (dayRangeMatch[2] as WeekdayToken | undefined) ?? null;

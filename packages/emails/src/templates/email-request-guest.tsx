@@ -58,7 +58,7 @@ const copy = {
     sign: '— Votre Concierge MyConciergeHotel',
   },
   en: {
-    preview: 'Your request is in your concierge\'s hands.',
+    preview: "Your request is in your concierge's hands.",
     title: 'Enquiry received',
     hello: (n: string) => `Hello ${n},`,
     body: (h: string, ci: string, co: string) =>

@@ -100,7 +100,7 @@ const copy = {
     refLabel: 'Référence de réservation',
     totalLabel: 'Total réglé',
     policyLabel: "Politique d'annulation",
-    sign: "À très bientôt,\n— Votre Concierge MyConciergeHotel",
+    sign: 'À très bientôt,\n— Votre Concierge MyConciergeHotel',
   },
   en: {
     preview: (ref: string) => `Your stay is confirmed — ${ref}`,

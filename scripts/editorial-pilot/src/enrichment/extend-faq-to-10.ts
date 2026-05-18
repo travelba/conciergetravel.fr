@@ -34,7 +34,7 @@ function loadEnv(): Record<string, string> {
     if (!m) continue;
     let v = (m[2] ?? '').trim();
     const q = v.match(/^"([^"]*)"/) ?? v.match(/^'([^']*)'/);
-    v = q ? (q[1] ?? '') : v.split(/\s+#/)[0]?.trim() ?? '';
+    v = q ? (q[1] ?? '') : (v.split(/\s+#/)[0]?.trim() ?? '');
     env[m[1] ?? ''] = v;
   }
   return env;
@@ -137,11 +137,7 @@ async function listHotelsNeedingExtension(): Promise<HotelRow[]> {
 
 type FaqGenItems = z.infer<typeof FaqGenSchema>['items'];
 
-async function extendOne(
-  openai: OpenAI,
-  model: string,
-  hotel: HotelRow,
-): Promise<FaqGenItems> {
+async function extendOne(openai: OpenAI, model: string, hotel: HotelRow): Promise<FaqGenItems> {
   const currentCount = (hotel.faq_content ?? []).length;
   const missing = Math.max(0, 10 - currentCount + 1); // overshoot by 1
   if (missing === 0) return [];

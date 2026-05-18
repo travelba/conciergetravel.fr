@@ -75,8 +75,8 @@ export async function GET(): Promise<NextResponse> {
     tagline: 'Votre concierge des Palaces et hôtels 5★ en France — agence IATA',
     originUrl: origin,
     about:
-      "MyConciergeHotel.com est le concierge en ligne des Palaces et hôtels 5 étoiles en France. " +
-      "Chaque fiche est rédigée par nos conseillers et se termine par un « Conseil du Concierge » : un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent. " +
+      'MyConciergeHotel.com est le concierge en ligne des Palaces et hôtels 5 étoiles en France. ' +
+      'Chaque fiche est rédigée par nos conseillers et se termine par un « Conseil du Concierge » : un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent. ' +
       'Côté réservation : agence IATA, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.',
     lastUpdatedDate: new Date().toISOString(),
     sections: [

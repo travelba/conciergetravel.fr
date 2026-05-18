@@ -33,9 +33,7 @@ test.describe('Voix Concierge — fiche hôtel', () => {
     const section = page.locator('#concierge-advice');
     await expect(section).toBeVisible();
     await expect(section.getByText(/le conseil du concierge/i)).toBeVisible();
-    await expect(
-      section.getByRole('heading', { level: 2, name: /chambre 305/i }),
-    ).toBeVisible();
+    await expect(section.getByRole('heading', { level: 2, name: /chambre 305/i })).toBeVisible();
     await expect(section).toContainText(/Mon conseil/iu);
     await expect(section).toContainText(/305/);
   });
@@ -47,9 +45,7 @@ test.describe('Voix Concierge — fiche hôtel', () => {
     const section = page.locator('#concierge-advice');
     await expect(section).toBeVisible();
     await expect(section.getByText(/concierge'?s tip/i)).toBeVisible();
-    await expect(
-      section.getByRole('heading', { level: 2, name: /room 305/i }),
-    ).toBeVisible();
+    await expect(section.getByRole('heading', { level: 2, name: /room 305/i })).toBeVisible();
     await expect(section).toContainText(/My tip/iu);
   });
 

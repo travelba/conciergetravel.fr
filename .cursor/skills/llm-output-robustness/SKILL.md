@@ -116,7 +116,7 @@ const EnString = (maxLen: number) =>
 
 const SectionSchema = z.object({
   title_fr: z.string().min(4).max(180),
-  title_en: EnString(180),  // ← accepts '', null, undefined, missing
+  title_en: EnString(180), // ← accepts '', null, undefined, missing
   body_fr: z.string().min(350),
   body_en: EnString(8000),
 });
@@ -321,7 +321,11 @@ manual intervention:
 
 ```ts
 async function callLlm<S extends z.ZodTypeAny>(
-  client: LlmClient, sys: string, user: string, schema: S, tag: string,
+  client: LlmClient,
+  sys: string,
+  user: string,
+  schema: S,
+  tag: string,
 ): Promise<z.infer<S>> {
   const a1 = await callLlmOnce(client, sys, user, schema, tag, 0.55);
   if (a1.ok) return a1.data;
@@ -331,10 +335,12 @@ async function callLlm<S extends z.ZodTypeAny>(
     .map((i) => `- ${i.path.join('.')}: ${i.message}`)
     .join('\n');
   const retryPrompt = [
-    user, '',
+    user,
+    '',
     '---',
     'TENTATIVE PRÉCÉDENTE INVALIDE — corrige STRICTEMENT ces erreurs Zod :',
-    issuesText, '',
+    issuesText,
+    '',
     'Règles de récupération :',
     '- `align` ∈ {"left","right","center"} ou absent. Jamais booléen/nombre.',
     '- Champs `_en` acceptent "" ou la traduction.',

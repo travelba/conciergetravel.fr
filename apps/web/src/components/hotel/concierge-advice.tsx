@@ -42,7 +42,7 @@ export async function ConciergeAdvice({
       className="mb-12 scroll-mt-24"
     >
       <aside
-        className="border-l-4 border-l-amber-600/70 bg-amber-50/50 px-6 py-5 dark:border-l-amber-500/70 dark:bg-amber-950/20 sm:rounded-r-lg"
+        className="border-l-4 border-l-amber-600/70 bg-amber-50/50 px-6 py-5 sm:rounded-r-lg dark:border-l-amber-500/70 dark:bg-amber-950/20"
         role="note"
         aria-label={eyebrow}
       >
@@ -52,10 +52,7 @@ export async function ConciergeAdvice({
           </span>
           {eyebrow}
         </p>
-        <h2
-          id="concierge-advice-title"
-          className="text-fg mb-2 font-serif text-xl leading-tight"
-        >
+        <h2 id="concierge-advice-title" className="text-fg mb-2 font-serif text-xl leading-tight">
           {title}
         </h2>
         <p className="text-fg/90 text-[15px] leading-relaxed">{advice.body}</p>

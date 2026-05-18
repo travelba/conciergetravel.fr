@@ -92,7 +92,8 @@ export async function generateMetadata({
   const locale = raw;
   const title =
     locale === 'fr'
-      ? (guide.meta_title_fr ?? `Guide ${guide.name_fr} — Palaces & art de vivre | MyConciergeHotel`)
+      ? (guide.meta_title_fr ??
+        `Guide ${guide.name_fr} — Palaces & art de vivre | MyConciergeHotel`)
       : (guide.meta_title_en ??
         `${guide.name_en ?? guide.name_fr} guide — Palaces & art de vivre | MyConciergeHotel`);
   const description =

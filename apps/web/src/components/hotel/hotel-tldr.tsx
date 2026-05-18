@@ -18,7 +18,7 @@ interface HotelTldrProps {
 
 const T = {
   fr: {
-    eyebrow: 'L\'essentiel du Concierge',
+    eyebrow: "L'essentiel du Concierge",
     palaceLine: 'distingué Palace par Atout France',
     fiveStarLine: '5 étoiles',
     inCity: (city: string, region: string) => ` à ${city} (${region})`,
@@ -34,7 +34,7 @@ const T = {
     updatedAt: (date: string) => `Mis à jour le ${date}.`,
   },
   en: {
-    eyebrow: 'The Concierge\'s essentials',
+    eyebrow: "The Concierge's essentials",
     palaceLine: 'distinguished as a Palace by Atout France',
     fiveStarLine: '5-star',
     inCity: (city: string, region: string) => ` in ${city} (${region})`,

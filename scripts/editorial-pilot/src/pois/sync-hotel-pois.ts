@@ -44,7 +44,11 @@ import {
   fetchTransitStationsAround,
 } from '@mch/integrations/overpass';
 
-import { fetchPOIsAround, DEFAULT_RADII_URBAN, DEFAULT_RADII_RURAL } from '../enrichment/datatourisme.js';
+import {
+  fetchPOIsAround,
+  DEFAULT_RADII_URBAN,
+  DEFAULT_RADII_RURAL,
+} from '../enrichment/datatourisme.js';
 import { loadPhotoEnv } from '../photos/env-photos.js';
 import { selectHotels, type SupabaseRestConfig } from '../photos/supabase-rest.js';
 
@@ -196,7 +200,11 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
       limit: 1,
     });
   }
-  const filters: string[] = ['is_published=eq.true', 'latitude=not.is.null', 'longitude=not.is.null'];
+  const filters: string[] = [
+    'is_published=eq.true',
+    'latitude=not.is.null',
+    'longitude=not.is.null',
+  ];
   if (args.bucket === 'palaces') {
     filters.push('is_palace=eq.true');
   } else if (args.bucket === 'stars5') {

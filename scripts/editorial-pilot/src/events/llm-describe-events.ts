@@ -170,7 +170,9 @@ export async function describeEventsBatch(
         results[item.i] = await describeOne(client, item.input);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        console.warn(`  [llm-describe-events] failed for "${item.input.name}": ${msg.slice(0, 200)}`);
+        console.warn(
+          `  [llm-describe-events] failed for "${item.input.name}": ${msg.slice(0, 200)}`,
+        );
         results[item.i] = null;
       }
     }

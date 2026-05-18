@@ -66,14 +66,7 @@ const ExternalSourceFactSchema = z.object({
  * (humanizer Concierge) le reformate au format exact 60-90 mots avant
  * upsert.
  */
-const ConciergeTipForSchema = z.enum([
-  'room',
-  'dining',
-  'timing',
-  'access',
-  'service',
-  'wellness',
-]);
+const ConciergeTipForSchema = z.enum(['room', 'dining', 'timing', 'access', 'service', 'wellness']);
 
 export const ConciergeAdviceLocaleSchema = z.object({
   title: z.string().min(1).max(120),

@@ -33,7 +33,7 @@ regenerates the SQL deterministically from the briefs, and re-running
 | `priority`                  | `'P0'` (palace = top priority)                  |
 | `is_published`              | `TRUE`                                          |
 | `description_fr`            | first paragraph of editorial markdown           |
-| `meta_title_fr/en`          | `<name> — Palace <city> \| MyConciergeHotel`     |
+| `meta_title_fr/en`          | `<name> — Palace <city> \| MyConciergeHotel`    |
 | `meta_desc_fr`              | first 155 chars of description                  |
 | `number_of_rooms`           | `brief.capacity.total_keys` / `rooms_count`     |
 | `highlights` (jsonb)        | palace flag + capacity + Michelin + spa partner |

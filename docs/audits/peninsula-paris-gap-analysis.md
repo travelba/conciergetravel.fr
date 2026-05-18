@@ -619,7 +619,7 @@ Hors §2, mais bloquants pour livrer un preview observable et une prod fiable.
 | Root layout `apps/web`             | `<html>`/`<body>` dans `[locale]/layout.tsx` → `/404` prerender échoue en build prod | Vérifié : Next.js 15.1.6 + next-intl 3.x build clean sans modification (régression antérieure résolue). Job CI `Build` réactivé.                   | P2   | ✓ PR #44 |
 | Root layout `apps/admin`           | `page.tsx` racine sans root layout → build prod échouait                             | Redirect `/` → `/admin` déplacé en `middleware.ts`, `page.tsx` racine supprimé, Payload `(payload)/layout.tsx` reste seul propriétaire du document | P2   | ✓ PR #44 |
 | Vercel env vars production         | tout en `SKIP_ENV_VALIDATION=true` par défaut                                        | Câbler Supabase, Cloudinary, Upstash, Algolia, Brevo, Sentry, Makcorps (3 scopes : Production, Preview, Development)                               | P2   | ouvert   |
-| DNS `www.myconciergehotel.com`       | non rattaché                                                                         | Une fois deploy stable, mapper le domaine Vercel — runbook §3                                                                                      | P3   | ouvert   |
+| DNS `www.myconciergehotel.com`     | non rattaché                                                                         | Une fois deploy stable, mapper le domaine Vercel — runbook §3                                                                                      | P3   | ouvert   |
 
 ---
 

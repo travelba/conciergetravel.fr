@@ -167,8 +167,7 @@ export async function geocodeHotelQuery(
     method: 'POST',
     headers: {
       'X-Goog-Api-Key': cfg.apiKey,
-      'X-Goog-FieldMask':
-        'places.id,places.displayName,places.formattedAddress,places.location',
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
       Accept: 'application/json',
     },
     body: {
@@ -208,8 +207,7 @@ export async function geocodeHotelQuery(
     place: p,
     matched: looksLikeMatch(hotelName, p.displayName?.text ?? ''),
   }));
-  const winner =
-    ranked.find((r) => r.matched)?.place ?? parsed.data.places[0];
+  const winner = ranked.find((r) => r.matched)?.place ?? parsed.data.places[0];
   if (winner === undefined || winner.location === undefined) {
     return err({ kind: 'no_match', query });
   }

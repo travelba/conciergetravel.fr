@@ -524,16 +524,13 @@ const HighlightSchema = z.object({
   description_en: z.string().max(700).optional().default(''),
   // LLM frequently emits '' or 'TBD' for unknown URLs — coerce to undefined
   // before applying the URL validator so we don't blow up the whole guide.
-  url: z.preprocess(
-    (v) => {
-      if (typeof v !== 'string') return v;
-      const t = v.trim();
-      if (t.length === 0) return undefined;
-      if (!/^https?:\/\//iu.test(t)) return undefined;
-      return t;
-    },
-    z.string().url().optional().nullable(),
-  ),
+  url: z.preprocess((v) => {
+    if (typeof v !== 'string') return v;
+    const t = v.trim();
+    if (t.length === 0) return undefined;
+    if (!/^https?:\/\//iu.test(t)) return undefined;
+    return t;
+  }, z.string().url().optional().nullable()),
 });
 
 // ─── Top-level v2 schemas (per call) ─────────────────────────────────
@@ -977,19 +974,17 @@ async function callLlm<S extends z.ZodTypeAny>(
     'TENTATIVE PRÉCÉDENTE INVALIDE — corrige STRICTEMENT ces erreurs Zod :',
     issuesText,
     '',
-    "Règles de récupération :",
+    'Règles de récupération :',
     '- `align` est un string ∈ {"left","right","center"} OU absent. Jamais un booléen, jamais un nombre.',
     '- Les champs `_en` (label_en, title_en, summary_en…) acceptent une chaîne vide "" ou la traduction.',
     '- Les champs `url` doivent être absents ou une vraie URL https://.',
     '- Aucun champ enum ne peut être null — omets-le ou utilise une valeur valide.',
-    '- Retourne UNIQUEMENT le JSON corrigé, rien d\'autre.',
+    "- Retourne UNIQUEMENT le JSON corrigé, rien d'autre.",
   ].join('\n');
   const attempt2 = await callLlmOnce(client, systemPrompt, retryPrompt, schema, label, 0.2);
   if (attempt2.ok) return attempt2.data;
 
-  const issues = attempt2.issues
-    .map((i) => `- ${i.path.join('.')}: ${i.message}`)
-    .join('\n');
+  const issues = attempt2.issues.map((i) => `- ${i.path.join('.')}: ${i.message}`).join('\n');
   throw new Error(`[${label}] schema-fail after retry:\n${issues}`);
 }
 

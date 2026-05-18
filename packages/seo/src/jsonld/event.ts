@@ -30,7 +30,14 @@
  *   - `sameAs` to the DATAtourisme URI for provenance
  */
 
-import type { Event, ExhibitionEvent, Festival, MusicEvent, SportsEvent, TheaterEvent } from 'schema-dts';
+import type {
+  Event,
+  ExhibitionEvent,
+  Festival,
+  MusicEvent,
+  SportsEvent,
+  TheaterEvent,
+} from 'schema-dts';
 
 export type EventCategory = 'concert' | 'expo' | 'festival' | 'sport' | 'theater' | 'other';
 

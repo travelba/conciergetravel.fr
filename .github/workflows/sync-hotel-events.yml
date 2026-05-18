@@ -20,24 +20,24 @@ on:
     # Every Monday at 04:17 UTC — early enough to land before the
     # next ISR revalidation cycle (revalidate = 3600 s), late enough
     # not to clash with the OpenAI European maintenance window.
-    - cron: '17 4 * * 1'
+    - cron: "17 4 * * 1"
   workflow_dispatch:
     inputs:
       slug:
-        description: 'Single hotel slug (debug, leave empty for full batch)'
+        description: "Single hotel slug (debug, leave empty for full batch)"
         required: false
         type: string
       bucket:
-        description: 'Bucket to refresh'
+        description: "Bucket to refresh"
         required: false
-        default: 'all'
+        default: "all"
         type: choice
         options:
           - all
           - palaces
           - stars5
       dry_run:
-        description: 'Skip the DB write (preview only)'
+        description: "Skip the DB write (preview only)"
         required: false
         default: false
         type: boolean
@@ -51,9 +51,9 @@ concurrency:
 
 env:
   NODE_VERSION: 20.19.4
-  COREPACK_ENABLE_STRICT: '0'
-  COREPACK_ENABLE_SIGNATURES: '0'
-  SKIP_ENV_VALIDATION: 'true'
+  COREPACK_ENABLE_STRICT: "0"
+  COREPACK_ENABLE_SIGNATURES: "0"
+  SKIP_ENV_VALIDATION: "true"
 
 jobs:
   sync:
@@ -74,7 +74,6 @@ jobs:
           corepack prepare pnpm@10.33.2 --activate
           pnpm --version
       - run: pnpm install --frozen-lockfile
-
       - name: Run events sync
         env:
           # All three secrets are required — fail loudly if any

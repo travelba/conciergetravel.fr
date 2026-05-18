@@ -209,11 +209,11 @@ booking, reviews, image fallback, JSON-LD `sameAs[]`, …
 The "À proximité" block on a hotel page has **three editorial buckets**
 (`visit` / `do` / `shop`) with very different source profiles:
 
-| Bucket | Source                          | Why                                                  |
-|--------|--------------------------------|------------------------------------------------------|
-| visit  | DATAtourisme                    | Strong on patrimony, museums, religious sites       |
-| do     | DATAtourisme                    | Strong on leisure, gastronomy, wineries, beaches    |
-| shop   | OpenStreetMap (Overpass)        | DT barely covers daily-life (pharmacy, bakery, ATM) |
+| Bucket | Source                   | Why                                                 |
+| ------ | ------------------------ | --------------------------------------------------- |
+| visit  | DATAtourisme             | Strong on patrimony, museums, religious sites       |
+| do     | DATAtourisme             | Strong on leisure, gastronomy, wineries, beaches    |
+| shop   | OpenStreetMap (Overpass) | DT barely covers daily-life (pharmacy, bakery, ATM) |
 
 Reference orchestrator: `scripts/editorial-pilot/src/pois/sync-hotel-pois.ts`.
 
@@ -262,7 +262,7 @@ city = one line in the set.
   `--concurrency=2` max for batch jobs.
 - QL body MUST be `application/x-www-form-urlencoded` (`data=<QL>`),
   NOT JSON. `retryingJsonRequest` supports this via `body: { kind:
-  'form', pairs: { data: query } }`.
+'form', pairs: { data: query } }`.
 - A timeout returns **HTTP 200** with a tiny HTML payload "runtime
   error: Query timed out". We map this to `query_timeout` so rural
   hotels degrade gracefully (no `shop` POIs is OK).

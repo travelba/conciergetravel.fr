@@ -726,13 +726,7 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
  *   theater → TheaterEvent
  *   other   → Event (generic)
  */
-export type DtEventCategory =
-  | 'concert'
-  | 'expo'
-  | 'festival'
-  | 'sport'
-  | 'theater'
-  | 'other';
+export type DtEventCategory = 'concert' | 'expo' | 'festival' | 'sport' | 'theater' | 'other';
 
 export interface DtEventPricing {
   readonly type: 'free' | 'paid';
@@ -843,9 +837,7 @@ type EventObject = z.infer<typeof EventObjectSchema>;
 
 function classifyEvent(types: readonly string[]): DtEventCategory {
   if (
-    types.some((t) =>
-      /Concert|Music(Event|Show|Performance)?|Recital|Opera|OperaShow/u.test(t),
-    )
+    types.some((t) => /Concert|Music(Event|Show|Performance)?|Recital|Opera|OperaShow/u.test(t))
   ) {
     return 'concert';
   }
@@ -949,15 +941,14 @@ function normalizeEvent(
   const street = firstString(addr?.streetAddress);
   const city = addr?.addressLocality ?? localized(addr?.hasAddressCity?.label);
   const venueAddress =
-    street !== null && city !== null
-      ? `${street}, ${city}`
-      : (street ?? city ?? null);
+    street !== null && city !== null ? `${street}, ${city}` : (street ?? city ?? null);
 
   const types = o.type ?? [];
   const category = classifyEvent(types);
 
-  const description = localized(o.hasDescription?.[0]?.shortDescription)
-    ?? localized(o.hasDescription?.[0]?.description);
+  const description =
+    localized(o.hasDescription?.[0]?.shortDescription) ??
+    localized(o.hasDescription?.[0]?.description);
 
   const contact = o.hasContact?.[0];
   const officialUrl = firstString(contact?.homepage);
@@ -968,9 +959,7 @@ function normalizeEvent(
   const minPrice = priceSpec?.minPrice?.[0];
   if (typeof minPrice === 'number') {
     pricing =
-      minPrice === 0
-        ? { type: 'free', amountEur: null }
-        : { type: 'paid', amountEur: minPrice };
+      minPrice === 0 ? { type: 'free', amountEur: null } : { type: 'paid', amountEur: minPrice };
   }
 
   return {
@@ -1055,12 +1044,8 @@ export async function fetchEventsAround(
   const limit = options.limit ?? 5;
 
   const todayIso = new Date().toISOString().slice(0, 10);
-  const horizonIso = new Date(Date.now() + horizon * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
-  const lookaheadIso = new Date(Date.now() + lookahead * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
+  const horizonIso = new Date(Date.now() + horizon * 86_400_000).toISOString().slice(0, 10);
+  const lookaheadIso = new Date(Date.now() + lookahead * 86_400_000).toISOString().slice(0, 10);
 
   // No server-side date filter — `takesPlaceAt.*.startDate` is nested
   // and DT's filter DSL doesn't traverse into arrays of objects
@@ -1101,7 +1086,5 @@ export async function fetchEventsAround(
     return lastDay >= lookaheadIso && e.startDate <= horizonIso;
   });
 
-  return inWindow
-    .sort((a, b) => a.startDate.localeCompare(b.startDate))
-    .slice(0, limit);
+  return inWindow.sort((a, b) => a.startDate.localeCompare(b.startDate)).slice(0, limit);
 }

@@ -242,9 +242,7 @@ interface PersistedEvent {
   readonly category: DtEvent['category'];
   readonly description_fr: string | null;
   readonly description_en: string | null;
-  readonly pricing:
-    | { readonly type: 'free' | 'paid'; readonly amount_eur: number | null }
-    | null;
+  readonly pricing: { readonly type: 'free' | 'paid'; readonly amount_eur: number | null } | null;
   readonly url: string | null;
   readonly dt_uuid: string;
 }
@@ -395,9 +393,7 @@ async function processHotel(
       category: e.category,
       description_fr: d?.descriptionFr ?? null,
       description_en: d?.descriptionEn ?? null,
-      pricing: e.pricing
-        ? { type: e.pricing.type, amount_eur: e.pricing.amountEur }
-        : null,
+      pricing: e.pricing ? { type: e.pricing.type, amount_eur: e.pricing.amountEur } : null,
       url: e.officialUrl,
       dt_uuid: e.uuid,
     };

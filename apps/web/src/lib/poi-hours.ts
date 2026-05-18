@@ -103,14 +103,16 @@ export function parseOpeningHoursForToday(raw: string, referenceDay?: WeekdayTok
   // spec; we iterate forward and keep the most recent match so an
   // override like `Mo-Sa 09:00-19:00; Su closed` reports correctly
   // when today is Sunday.
-  const rules = trimmed.split(';').map((r) => r.trim()).filter((r) => r.length > 0);
+  const rules = trimmed
+    .split(';')
+    .map((r) => r.trim())
+    .filter((r) => r.length > 0);
   let lastKnown: PoiHours = { kind: 'unknown' };
 
   for (const rule of rules) {
     // Explicit closure shorthand.
-    const closedMatch = /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(?:off|closed)$/iu.exec(
-      rule,
-    );
+    const closedMatch =
+      /^(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(Mo|Tu|We|Th|Fr|Sa|Su))?\s+(?:off|closed)$/iu.exec(rule);
     if (closedMatch !== null) {
       const start = closedMatch[1] as WeekdayToken;
       const end = (closedMatch[2] as WeekdayToken | undefined) ?? null;
@@ -157,10 +159,7 @@ export function parseOpeningHoursForToday(raw: string, referenceDay?: WeekdayTok
  * Returns `null` when the hours are `unknown` so the UI can pick
  * its own fallback ("Voir les horaires", a link, etc.).
  */
-export function formatOpeningHoursToday(
-  hours: PoiHours,
-  locale: 'fr' | 'en',
-): string | null {
+export function formatOpeningHoursToday(hours: PoiHours, locale: 'fr' | 'en'): string | null {
   if (hours.kind === 'unknown') return null;
   if (hours.kind === '24_7') return locale === 'fr' ? 'Ouvert 24h/24' : 'Open 24/7';
   if (hours.kind === 'closed') return locale === 'fr' ? 'Fermé aujourd’hui' : 'Closed today';

@@ -67,12 +67,7 @@ async function fetchCategoryPage(
   cfg: CommonsClientConfig,
   category: string,
   cursor: string | undefined,
-): Promise<
-  Result<
-    { titles: string[]; nextCursor: string | undefined },
-    CommonsError
-  >
-> {
+): Promise<Result<{ titles: string[]; nextCursor: string | undefined }, CommonsError>> {
   const url = new URL(cfg.apiBase);
   url.searchParams.set('action', 'query');
   url.searchParams.set('list', 'categorymembers');
@@ -133,10 +128,7 @@ async function fetchImageInfo(
   url.searchParams.set('action', 'query');
   url.searchParams.set('titles', titles.slice(0, 50).join('|'));
   url.searchParams.set('prop', 'imageinfo');
-  url.searchParams.set(
-    'iiprop',
-    ['url', 'size', 'mime', 'extmetadata'].join('|'),
-  );
+  url.searchParams.set('iiprop', ['url', 'size', 'mime', 'extmetadata'].join('|'));
   url.searchParams.set('iiurlwidth', String(cfg.thumbWidth));
   url.searchParams.set('format', 'json');
   url.searchParams.set('formatversion', '2');

@@ -5,10 +5,7 @@
  *   pnpm tsx scripts/photos/smoke-commons.ts "Hôtel Le Bristol Paris"
  *   pnpm tsx scripts/photos/smoke-commons.ts "Plaza Athénée" 5
  */
-import {
-  defaultCommonsConfig,
-  fetchCategoryPhotos,
-} from '@mch/integrations/wikimedia-commons';
+import { defaultCommonsConfig, fetchCategoryPhotos } from '@mch/integrations/wikimedia-commons';
 
 async function main(): Promise<void> {
   const category = process.argv[2] ?? 'Hôtel Le Bristol Paris';
