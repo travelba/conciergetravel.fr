@@ -155,6 +155,66 @@ function buildRow(locale: SupportedLocale): HotelDetailRow {
         tip_for: 'room',
       },
     },
+    // Three POIs covering the three editorial buckets (visit / do /
+    // shop) so the E2E spec can verify the bucket sections render with
+    // the Concierge-voice copy + tip fallback (WS5 phase 1). No
+    // `bucket_tip_fr` is set on purpose — the spec exercises the i18n
+    // fallback path. The humanizer-populated path is covered later by
+    // the audit script (WS5 phase 2).
+    points_of_interest: [
+      {
+        name: 'Musée du Louvre',
+        type: 'museum',
+        category_fr: 'Musée',
+        distance_meters: 350,
+        walk_minutes: 5,
+        latitude: 48.8606,
+        longitude: 2.3376,
+        bucket: 'visit',
+        description_fr: 'Le musée le plus visité au monde, à cinq minutes à pied.',
+        schema_type: 'https://schema.org/Museum',
+        osm_id: 'node/test-louvre',
+      },
+      {
+        name: 'Comptoir de la Gastronomie',
+        type: 'restaurant',
+        category_fr: 'Restaurant',
+        distance_meters: 220,
+        walk_minutes: 3,
+        latitude: 48.8628,
+        longitude: 2.3457,
+        bucket: 'do',
+        osm_id: 'node/test-resto',
+      },
+      {
+        name: 'Pharmacie du Marché Saint-Honoré',
+        type: 'pharmacy',
+        category_fr: 'Pharmacie',
+        distance_meters: 180,
+        walk_minutes: 3,
+        latitude: 48.8669,
+        longitude: 2.3343,
+        bucket: 'shop',
+        schema_type: 'https://schema.org/Pharmacy',
+        osm_id: 'node/test-pharmacy',
+      },
+    ],
+    // One upcoming event so the events block exercises the Concierge
+    // tip fallback + the standalone `Event` JSON-LD node.
+    upcoming_events: [
+      {
+        name: 'Nuit Blanche Paris',
+        start_date: '2099-10-04',
+        end_date: '2099-10-05',
+        venue_name: 'Île de la Cité',
+        venue_address: 'Île de la Cité, 75001 Paris',
+        latitude: 48.854,
+        longitude: 2.347,
+        distance_meters: 700,
+        category: 'festival',
+        description_fr: 'Parcours artistique nocturne dans Paris, ouvert au public.',
+      },
+    ],
     is_published: true,
     updated_at: '2026-05-01T10:00:00.000Z',
     // Inventory counts surface in JSON-LD Hotel.numberOfRooms and the

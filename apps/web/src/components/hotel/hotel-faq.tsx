@@ -53,7 +53,7 @@ export async function HotelFaq({
       </h2>
 
       <div className="flex flex-col gap-8">
-        {groups.map((group) => {
+        {groups.map((group, groupIndex) => {
           const meta = categoryMeta[group.category];
           return (
             <section key={group.category} aria-labelledby={meta.anchor}>
@@ -64,22 +64,30 @@ export async function HotelFaq({
                 {meta.label}
               </h3>
               <ul className="divide-border flex flex-col divide-y">
-                {group.items.map((item, i) => (
-                  <li key={i} className="py-4">
-                    <details className="group">
-                      <summary className="text-fg cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">
-                        <span
-                          className="mr-2 inline-block transition-transform group-open:rotate-90"
-                          aria-hidden
-                        >
-                          ›
-                        </span>
-                        {item.question}
-                      </summary>
-                      <p className="text-muted mt-2 text-sm">{item.answer}</p>
-                    </details>
-                  </li>
-                ))}
+                {group.items.map((item, i) => {
+                  // GEO rule (skill: geo-llm-optimization §AEO): the
+                  // first Q&A of the first group renders as `<details open>`
+                  // so the answer text is in the DOM at load. Several
+                  // LLM crawlers (Anthropic, Perplexity) skip closed
+                  // `<details>` bodies, which silently breaks AEO.
+                  const isFirstOpen = groupIndex === 0 && i === 0;
+                  return (
+                    <li key={i} className="py-4">
+                      <details className="group" {...(isFirstOpen ? { open: true } : {})}>
+                        <summary className="text-fg cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">
+                          <span
+                            className="mr-2 inline-block transition-transform group-open:rotate-90"
+                            aria-hidden
+                          >
+                            ›
+                          </span>
+                          {item.question}
+                        </summary>
+                        <p className="text-muted mt-2 text-sm">{item.answer}</p>
+                      </details>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );

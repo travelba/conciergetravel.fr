@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { itemListJsonLd } from './item-list';
+import { itemListJsonLd, poiItemListJsonLd } from './item-list';
 
 describe('itemListJsonLd', () => {
   it('numbers entries from 1 and preserves URLs', () => {
@@ -70,5 +70,87 @@ describe('itemListJsonLd', () => {
     });
     expect(node.itemListElement?.[0]).not.toHaveProperty('item');
     expect(node.itemListElement?.[1]).toHaveProperty('item');
+  });
+});
+
+describe('poiItemListJsonLd', () => {
+  it('builds an ItemList of nested Place nodes with description + geo', () => {
+    const node = poiItemListJsonLd({
+      name: "Ce qu'on visite dans le quartier",
+      items: [
+        {
+          name: 'Tour Eiffel',
+          schemaType: 'TouristAttraction',
+          latitude: 48.8584,
+          longitude: 2.2945,
+          description: 'Le monument iconique de Paris, à dix minutes à pied.',
+        },
+        {
+          name: 'Musée du Louvre',
+          schemaType: 'Museum',
+          latitude: 48.8606,
+          longitude: 2.3376,
+        },
+      ],
+    });
+    expect(node.numberOfItems).toBe(2);
+    expect(node.name).toBe("Ce qu'on visite dans le quartier");
+    const items = node.itemListElement;
+    expect(items).toHaveLength(2);
+    const first = (items?.[0] as { item: Record<string, unknown> }).item;
+    expect(first).toMatchObject({
+      '@type': 'TouristAttraction',
+      name: 'Tour Eiffel',
+      description: 'Le monument iconique de Paris, à dix minutes à pied.',
+      geo: { '@type': 'GeoCoordinates', latitude: 48.8584, longitude: 2.2945 },
+    });
+    const second = (items?.[1] as { item: Record<string, unknown> }).item;
+    expect(second).toMatchObject({ '@type': 'Museum', name: 'Musée du Louvre' });
+    expect(second).not.toHaveProperty('description');
+  });
+
+  it('caps at 8 entries to keep the JSON-LD envelope small', () => {
+    const node = poiItemListJsonLd({
+      name: 'Long list',
+      items: Array.from({ length: 20 }, (_, i) => ({
+        name: `POI ${i}`,
+        schemaType: 'TouristAttraction',
+      })),
+    });
+    expect(node.numberOfItems).toBe(8);
+    expect(node.itemListElement).toHaveLength(8);
+  });
+
+  it('emits additionalType when schemaTypeUrl differs from schemaType', () => {
+    const node = poiItemListJsonLd({
+      name: 'Shops',
+      items: [
+        {
+          name: 'Pharmacie Saint-Honoré',
+          schemaType: 'Store',
+          schemaTypeUrl: 'https://schema.org/Pharmacy',
+        },
+      ],
+    });
+    const item = (node.itemListElement?.[0] as { item: Record<string, unknown> }).item;
+    expect(item).toMatchObject({
+      '@type': 'Store',
+      additionalType: 'https://schema.org/Pharmacy',
+    });
+  });
+
+  it('omits additionalType when schemaTypeUrl matches the @type', () => {
+    const node = poiItemListJsonLd({
+      name: 'Museums',
+      items: [
+        {
+          name: 'Louvre',
+          schemaType: 'Museum',
+          schemaTypeUrl: 'https://schema.org/Museum',
+        },
+      ],
+    });
+    const item = (node.itemListElement?.[0] as { item: Record<string, unknown> }).item;
+    expect(item).not.toHaveProperty('additionalType');
   });
 });

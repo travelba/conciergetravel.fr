@@ -12,6 +12,7 @@ type Translator = Awaited<ReturnType<typeof getTranslations>>;
 import { formatOpeningHoursToday, parseOpeningHoursForToday } from '@/lib/poi-hours';
 import type {
   LocalisedLocation,
+  LocalisedPoiBucketTips,
   LocalisedPointOfInterest,
   LocalisedTransport,
   PoiBucket,
@@ -213,6 +214,7 @@ export async function HotelLocation({
               bucket={bucket}
               locale={locale}
               pois={buckets[bucket]}
+              bucketTips={location.bucketTips}
               t={t}
             />
           ))
@@ -269,14 +271,17 @@ function PoiBucketSection({
   bucket,
   locale,
   pois,
+  bucketTips,
   t,
 }: {
   readonly bucket: PoiBucket;
   readonly locale: 'fr' | 'en';
   readonly pois: readonly LocalisedPointOfInterest[];
+  readonly bucketTips: LocalisedPoiBucketTips;
   readonly t: Translator;
 }): React.ReactElement {
   const titleId = `location-bucket-${bucket}-title`;
+  const conciergeTip = bucketTips[bucket] ?? t(`location.buckets.${bucket}.tipFallback`);
   return (
     <div className="mt-8" aria-labelledby={titleId}>
       <h3 id={titleId} className="text-fg font-medium">
@@ -284,6 +289,12 @@ function PoiBucketSection({
       </h3>
       <p className="text-muted mt-1 max-w-prose text-sm leading-relaxed">
         {t(`location.buckets.${bucket}.lead`)}
+      </p>
+      <p
+        data-concierge-tip={`bucket-${bucket}`}
+        className="border-accent/30 bg-accent/5 text-fg/90 mt-3 max-w-prose rounded-md border-l-2 px-3 py-2 text-sm italic leading-snug"
+      >
+        {conciergeTip}
       </p>
       <ul className="divide-border mt-3 flex flex-col divide-y">
         {pois.map((poi) => (

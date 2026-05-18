@@ -574,11 +574,16 @@ async function renderHotelPage(
           })),
         }
       : {}),
-    // Nearby attractions (Phase 10.16 / CDC §2.7+§2.15). The builder
-    // caps at 10 entries; we forward the top points of interest as
-    // already sorted by `readLocation()` (distance asc). Coordinates
-    // are forwarded when available so Google can render the map
-    // ribbon in the rich result.
+    // Nearby attractions (Phase 10.16 / CDC §2.7+§2.15 / WS5 phase 1
+    // enrichment). The builder caps at 24 entries (3 buckets × ~8); we
+    // forward the top points of interest as already sorted by
+    // `readLocation()` (distance asc). Coordinates, the LLM-generated
+    // 1-2 sentence description, the explicit `schema_type` URL and the
+    // raw OSM `opening_hours` tag are all forwarded — every optional
+    // field tightens the JSON-LD signal Google + LLM pipelines weigh
+    // for "things to do near <hotel>" answers. The builder already
+    // tolerates missing values, so legacy POIs without enrichment
+    // still emit a clean bare `Place` node.
     ...(location.pointsOfInterest.length > 0
       ? {
           nearbyAttractions: location.pointsOfInterest.map((p) => ({
@@ -586,6 +591,15 @@ async function renderHotelPage(
             type: p.type,
             ...(p.latitude !== null && p.longitude !== null
               ? { latitude: p.latitude, longitude: p.longitude }
+              : {}),
+            ...(p.description !== null && p.description.length > 0
+              ? { description: p.description }
+              : {}),
+            ...(p.schemaType !== null && p.schemaType.length > 0
+              ? { schemaTypeUrl: p.schemaType }
+              : {}),
+            ...(p.openingHours !== null && p.openingHours.length > 0
+              ? { openingHours: p.openingHours }
               : {}),
           })),
         }
@@ -775,6 +789,40 @@ async function renderHotelPage(
     ),
   );
 
+  // POI `visit` bucket → ItemList JSON-LD (WS5 phase 1). The `visit`
+  // bucket is the most SEO-rentable surface ("Top X things to visit
+  // near <hotel>") and the one AI Overviews + Bing copilots tend to
+  // cite verbatim. We emit the list **in addition to** the existing
+  // `nearbyAttractions` payload on the `Hotel` node — both signals
+  // complement each other (rich-result vs LLM ingestion). Capped at 8
+  // entries by the builder; emits nothing when the bucket is empty.
+  const visitPois = location.pointsOfInterest.filter((p) => p.bucket === 'visit');
+  const visitItemListJsonLd =
+    visitPois.length > 0
+      ? JsonLd.withSchemaOrgContext(
+          JsonLd.poiItemListJsonLd({
+            name: t('location.buckets.visit.title'),
+            description: t('location.buckets.visit.lead'),
+            items: visitPois.map((p) => ({
+              name: p.name,
+              schemaType: JsonLd.osmToSchemaClass(p.type),
+              ...(p.latitude !== null && p.longitude !== null
+                ? { latitude: p.latitude, longitude: p.longitude }
+                : {}),
+              ...(p.description !== null && p.description.length > 0
+                ? { description: p.description }
+                : {}),
+              ...(p.openingHours !== null && p.openingHours.length > 0
+                ? { openingHours: p.openingHours }
+                : {}),
+              ...(p.schemaType !== null && p.schemaType.length > 0
+                ? { schemaTypeUrl: p.schemaType }
+                : {}),
+            })),
+          }),
+        )
+      : null;
+
   // Maillage interne (Phase 12.4 / skill seo-technical §Maillage).
   // Fetched right before render so the bundle is a Server Component
   // tree leaf — cached implicitly by the route's ISR layer (1 h).
@@ -806,6 +854,12 @@ async function renderHotelPage(
           nonce={nonce}
         />
       ))}
+      {visitItemListJsonLd !== null ? (
+        <JsonLdScript
+          data={visitItemListJsonLd as unknown as Record<string, unknown>}
+          nonce={nonce}
+        />
+      ) : null}
 
       <nav aria-label={t('breadcrumb.hotels')} className="text-muted mb-6 text-xs">
         <ol className="flex flex-wrap items-center gap-1.5">

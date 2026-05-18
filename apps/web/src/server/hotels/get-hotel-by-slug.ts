@@ -1226,6 +1226,17 @@ const PointOfInterestSchema = z.object({
   /** LLM-generated 1-2 sentence description (max 280 chars, EEAT-safe). */
   description_fr: z.string().min(1).max(280).optional(),
   description_en: z.string().min(1).max(280).optional(),
+  /**
+   * Concierge-voice tip for the *bucket* this POI sits in (one short
+   * sentence, ≤ 25 words, style guide §4-5). Written by the humanizer
+   * to the first POI of each bucket only — the reader collects the
+   * first non-empty match per bucket. Falls back to the i18n
+   * `location.buckets.<bucket>.tipFallback` when no humanized tip is
+   * available yet. WS5 phase 1 — schema slot only; phase 2 ships the
+   * humanizer that populates the field.
+   */
+  bucket_tip_fr: z.string().min(1).max(280).optional(),
+  bucket_tip_en: z.string().min(1).max(280).optional(),
   /** Raw OSM `opening_hours` tag (parser lives in apps/web/src/lib/poi-hours.ts). */
   opening_hours: z.string().min(1).max(400).optional(),
   /** Nearest metro/RER/tram station, attached when ≤ 400 m. */
@@ -1313,9 +1324,19 @@ export interface LocalisedTransport {
   readonly notes: string | null;
 }
 
+/**
+ * Concierge-voice tip surfaced at the top of each POI bucket section
+ * (visit / do / shop). Sourced from the first `bucket_tip_fr/_en`
+ * found in the bucket; `null` when the humanizer has not populated
+ * the slot yet, in which case the UI displays the i18n
+ * `location.buckets.<bucket>.tipFallback` template.
+ */
+export type LocalisedPoiBucketTips = Readonly<Record<PoiBucket, string | null>>;
+
 export interface LocalisedLocation {
   readonly pointsOfInterest: readonly LocalisedPointOfInterest[];
   readonly transports: readonly LocalisedTransport[];
+  readonly bucketTips: LocalisedPoiBucketTips;
 }
 
 /**
@@ -1455,7 +1476,33 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
       }))
     : [];
 
-  return { pointsOfInterest, transports };
+  // Bucket tips — the Concierge-voice humanizer (WS5 phase 2) stores
+  // a single short sentence on the *first* POI of each bucket via the
+  // `bucket_tip_fr/_en` slot. The reader collects the first non-empty
+  // match per bucket so the UI never has to re-scan the array. When
+  // no humanized tip is present (legacy rows or pre-humanizer hotels),
+  // the value stays `null` and the front-end falls back to the i18n
+  // `location.buckets.<bucket>.tipFallback` template.
+  const bucketTips: Record<PoiBucket, string | null> = {
+    visit: null,
+    do: null,
+    shop: null,
+  };
+  if (poisRaw.success) {
+    for (const p of poisRaw.data) {
+      const bucket: PoiBucket = p.bucket ?? inferBucketFromType(p.type);
+      if (bucketTips[bucket] !== null) continue;
+      const tip =
+        (locale === 'fr'
+          ? (p.bucket_tip_fr ?? p.bucket_tip_en)
+          : (p.bucket_tip_en ?? p.bucket_tip_fr)) ?? null;
+      if (tip !== null && tip.trim().length > 0) {
+        bucketTips[bucket] = tip.trim();
+      }
+    }
+  }
+
+  return { pointsOfInterest, transports, bucketTips };
 }
 
 /**

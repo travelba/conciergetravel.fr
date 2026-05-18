@@ -38,6 +38,12 @@ export default async function HotelEvents({
   if (events.length === 0) return null;
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
 
+  // Concierge-voice tip at section level. WS5 phase 1 ships the
+  // i18n fallback; phase 3 (`run-humanizer-events.ts`) writes a
+  // contextual sentence (e.g. cite a specific upcoming festival) on
+  // the hotel row that the reader will surface when present.
+  const conciergeTip = t('events.tipFallback');
+
   return (
     <section
       id="evenements"
@@ -50,6 +56,12 @@ export default async function HotelEvents({
         </h2>
         <p className="text-muted max-w-prose text-sm leading-relaxed">
           {t('events.lead', { hotelName, city })}
+        </p>
+        <p
+          data-concierge-tip="events"
+          className="border-accent/30 bg-bg text-fg/90 mt-2 max-w-prose rounded-md border-l-2 px-3 py-2 text-sm italic leading-snug"
+        >
+          {conciergeTip}
         </p>
       </header>
 

@@ -621,18 +621,21 @@
       "intro": "Less than {walkMinutes} minutes on foot from the heart of the neighbourhood: museums, Michelin tables, and the everyday shops you actually need.",
       "buckets": {
         "visit": {
-          "title": "Things to see",
-          "lead": "Heritage, museums and cultural landmarks within walking distance.",
+          "title": "What we visit in the neighbourhood",
+          "lead": "Three places I send my guests to on their first day.",
+          "tipFallback": "My tip: start early — you save 30 minutes at the door.",
           "empty": "No cultural site recorded within walking distance yet."
         },
         "do": {
-          "title": "Things to do",
-          "lead": "Restaurants, wineries, experiences and activities that shape the stay.",
+          "title": "What we do nearby",
+          "lead": "What I book for them when they have a free half-day.",
+          "tipFallback": "My tip: book the day before — the best tables close fast.",
           "empty": "No activity recorded within walking distance yet."
         },
         "shop": {
-          "title": "Useful services & shops",
-          "lead": "Pharmacy, bakery, ATM, newsagent — the everyday utilities a traveller appreciates.",
+          "title": "The practical side of the area",
+          "lead": "Pharmacy, taxi, dry cleaner — the address you’ll probably need.",
+          "tipFallback": "My tip: the front desk keeps these addresses on hand.",
           "empty": "No essential shop recorded within walking distance yet."
         }
       },
@@ -652,8 +655,9 @@
       "schemaTypeAria": "Schema.org type: {type}"
     },
     "events": {
-      "title": "Upcoming events nearby",
-      "lead": "Concerts, exhibitions and festivals close to {hotelName} during your stay in {city} — refreshed weekly from DATAtourisme.",
+      "title": "What’s happening during your stay",
+      "lead": "The dates I slip into my guests’ programme in {city} — concerts, exhibitions, festivals a few steps from {hotelName}.",
+      "tipFallback": "My tip: book concert tickets seven days ahead.",
       "officialSource": "View official source",
       "category": {
         "concert": "Concert",

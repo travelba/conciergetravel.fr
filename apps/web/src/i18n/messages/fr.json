@@ -621,18 +621,21 @@
       "intro": "À {walkMinutes} minutes à pied du centre, le quartier rassemble musées, terrasses étoilées et commerces utiles — voici la sélection à connaître avant d’arriver.",
       "buckets": {
         "visit": {
-          "title": "À visiter",
-          "lead": "Patrimoine, musées et lieux culturels emblématiques accessibles à pied.",
+          "title": "Ce qu’on visite dans le quartier",
+          "lead": "Trois choses que je recommande à mes clients pour leur première journée.",
+          "tipFallback": "Mon conseil : commencez tôt — vous gagnez 30 minutes de file.",
           "empty": "Aucun lieu culturel référencé à proximité immédiate."
         },
         "do": {
-          "title": "À faire",
-          "lead": "Tables, vignobles, expériences et activités du quartier — pour rythmer le séjour.",
+          "title": "Ce qu’on y fait",
+          "lead": "Ce que je réserve pour eux quand ils ont une demi-journée libre.",
+          "tipFallback": "Mon conseil : réservez la veille — les meilleures tables ferment vite.",
           "empty": "Aucune activité référencée à proximité immédiate."
         },
         "shop": {
-          "title": "Services & commerces utiles",
-          "lead": "Pharmacie, boulangerie, presse, distributeur — tout ce qui simplifie le quotidien d’un voyageur.",
+          "title": "Le pratique du quartier",
+          "lead": "Pharmacie, taxi, pressing — l’adresse que vous chercherez sans doute.",
+          "tipFallback": "Mon conseil : la réception garde ces adresses sous la main.",
           "empty": "Aucun commerce utile référencé à proximité immédiate."
         }
       },
@@ -652,8 +655,9 @@
       "schemaTypeAria": "Type Schema.org : {type}"
     },
     "events": {
-      "title": "Évènements à venir",
-      "lead": "Concerts, expositions et festivals à proximité du {hotelName} pendant votre séjour à {city} — sélection rafraîchie chaque semaine depuis DATAtourisme.",
+      "title": "Ce qui se passe pendant votre séjour",
+      "lead": "Les rendez-vous que je glisse dans les programmes de mes clients à {city} — concerts, expos, festivals à deux pas du {hotelName}.",
+      "tipFallback": "Mon conseil : réservez 7 jours avant pour les billets concert.",
       "officialSource": "Voir la source officielle",
       "category": {
         "concert": "Concert",

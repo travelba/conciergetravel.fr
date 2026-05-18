@@ -297,8 +297,8 @@ describe('hotelJsonLd', () => {
     }
   });
 
-  it('caps nearbyAttractions to 10 entries', () => {
-    const pois = Array.from({ length: 14 }, (_, i) => ({
+  it('caps nearbyAttractions to 24 entries (3 buckets × ~8 — see CDC §2 bloc 10)', () => {
+    const pois = Array.from({ length: 30 }, (_, i) => ({
       name: `POI ${i + 1}`,
       type: 'monument',
     }));
@@ -308,7 +308,7 @@ describe('hotelJsonLd', () => {
       nearbyAttractions: pois,
     });
     if (Array.isArray(node.nearbyAttractions)) {
-      expect(node.nearbyAttractions).toHaveLength(10);
+      expect(node.nearbyAttractions).toHaveLength(24);
     }
   });
 
