@@ -9,6 +9,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
@@ -17,9 +18,6 @@ export const revalidate = 3600;
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const ALLOWED_AXES = new Set(['type', 'lieu', 'theme', 'occasion'] as const);
@@ -151,27 +149,25 @@ export async function generateMetadata({
   if (!isAxe(axe)) return {};
   const resolved = await resolveAxeValue(axe, valeur);
   if (resolved === null) return { robots: { index: false, follow: false } };
-  const t = T[raw];
-  const axeLabel = AXE_LABEL[axe][raw];
+  const locale = raw;
+  const t = T[locale];
+  const axeLabel = AXE_LABEL[axe][locale];
   const title = t.metaTitleTpl(axeLabel, resolved.label);
   const description = t.metaDescTpl(resolved.label, resolved.matches.length);
   const path = `/classements/${axe}/${valeur}`;
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, path);
   return {
     title,
     description,
     alternates: {
-      canonical: raw === 'fr' ? path : `/en${path}`,
-      languages: {
-        'fr-FR': path,
-        en: `/en${path}`,
-        'x-default': path,
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title,
       description,
       type: 'website',
-      locale: raw === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -190,7 +186,7 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   const path = `/classements/${axe}/${valeur}`;
-  const canonical = `${origin}${withLocalePrefix(locale, path)}`;
+  const canonical = `${origin}${withLocalePath(locale, path)}`;
   const axeLabel = AXE_LABEL[axe][locale];
   const heading =
     locale === 'fr'
@@ -205,8 +201,8 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePrefix(locale, '/')}` },
-      { name: t.rankings, url: `${origin}${withLocalePrefix(locale, '/classements')}` },
+      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t.rankings, url: `${origin}${withLocalePath(locale, '/classements')}` },
       { name: resolved.label, url: canonical },
     ]),
   );
@@ -220,11 +216,12 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
       itemList: {
         name: heading,
         items: resolved.matches.map((r) => ({
+          // Title selection stays locale-aware (data layer) — see ADR-0012.
           name: locale === 'fr' ? r.titleFr : (r.titleEn ?? r.titleFr),
-          url: `${origin}${withLocalePrefix(locale, `/classement/${r.slug}`)}`,
+          url: `${origin}${withLocalePath(locale, `/classement/${r.slug}`)}`,
         })),
       },
-      inLanguage: locale === 'fr' ? 'fr-FR' : 'en',
+      inLanguage: hreflangKey(locale),
     }),
   );
 

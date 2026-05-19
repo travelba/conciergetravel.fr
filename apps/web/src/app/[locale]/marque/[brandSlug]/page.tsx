@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
@@ -18,10 +19,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -71,24 +68,22 @@ export async function generateMetadata({
 
   const hotels = await listPublishedHotelsForIndex();
   const count = hotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug).length;
-  const t = T[raw];
+  const locale = raw;
+  const t = T[locale];
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/marque/${brand.slug}`);
 
   return {
     title: t.metaTitle(brand.label),
     description: t.metaDesc(brand.label, count),
     alternates: {
-      canonical: raw === 'fr' ? `/marque/${brand.slug}` : `/en/marque/${brand.slug}`,
-      languages: {
-        'fr-FR': `/marque/${brand.slug}`,
-        en: `/en/marque/${brand.slug}`,
-        'x-default': `/marque/${brand.slug}`,
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t.metaTitle(brand.label),
       description: t.metaDesc(brand.label, count),
       type: 'website',
-      locale: raw === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -117,11 +112,11 @@ export default async function BrandPage({
   // ── BreadcrumbList JSON-LD ───────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.breadcrumbHome, url: `${origin}${withLocalePrefix(locale, '/')}` },
-      { name: t.breadcrumbHotels, url: `${origin}${withLocalePrefix(locale, '/hotels')}` },
+      { name: t.breadcrumbHome, url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t.breadcrumbHotels, url: `${origin}${withLocalePath(locale, '/hotels')}` },
       {
         name: brand.label,
-        url: `${origin}${withLocalePrefix(locale, `/marque/${brand.slug}`)}`,
+        url: `${origin}${withLocalePath(locale, `/marque/${brand.slug}`)}`,
       },
     ]),
   );
@@ -132,7 +127,7 @@ export default async function BrandPage({
       name: `${brand.label} ${t.titleSuffix}`,
       items: hotels.map((h) => ({
         name: h.nameFr,
-        url: `${origin}${withLocalePrefix(locale, `/hotel/${h.slugFr}`)}`,
+        url: `${origin}${withLocalePath(locale, `/hotel/${h.slugFr}`)}`,
         hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
       })),
     }),
@@ -176,8 +171,9 @@ export default async function BrandPage({
 
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {hotels.map((h) => {
+          // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
           const slug = locale === 'en' && h.slugEn !== null ? h.slugEn : h.slugFr;
-          const href = locale === 'en' ? `/en/hotel/${slug}` : `/hotel/${slug}`;
+          const href = withLocalePath(locale, `/hotel/${slug}`);
           const name = locale === 'en' && h.nameEn !== null ? h.nameEn : h.nameFr;
           const descSource =
             locale === 'en' && h.descriptionEn !== null ? h.descriptionEn : h.descriptionFr;
