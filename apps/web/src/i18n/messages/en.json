@@ -588,7 +588,9 @@
     "aeo": {
       "question": "How do I book {name} through MyConciergeHotel?",
       "answer": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
-      "answerNoStay": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}."
+      "answerNoStay": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
+      "answerNoRegion": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city}. Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
+      "answerNoStayNoRegion": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city}. Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}."
     },
     "noFaq": "No questions yet for this property.",
     "noAmenities": "Detailed services coming soon.",
@@ -1069,7 +1071,9 @@
   "hotelTldr": {
     "eyebrow": "The Concierge's essentials",
     "firstSentencePalace": "{name} is a hotel distinguished as a Palace by Atout France in {city} ({region}).",
+    "firstSentencePalaceNoRegion": "{name} is a hotel distinguished as a Palace by Atout France in {city}.",
     "firstSentenceFiveStar": "{name} is a 5-star hotel in {city} ({region}).",
+    "firstSentenceFiveStarNoRegion": "{name} is a 5-star hotel in {city}.",
     "inventoryRoomsOnly": "{rooms, plural, one {# room} other {# rooms}}",
     "inventoryWithSuites": "{rooms, plural, one {# room} other {# rooms}} including {suites, plural, one {# suite} other {# suites}}",
     "openedSince": "Open since {year}",

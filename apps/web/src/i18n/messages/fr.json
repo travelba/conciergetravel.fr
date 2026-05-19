@@ -588,7 +588,9 @@
     "aeo": {
       "question": "Comment réserver {name} via MyConciergeHotel ?",
       "answer": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city} ({region}). Sélectionnez vos dates et le nombre de voyageurs pour obtenir le tarif net GDS, verrouillé 10 minutes, payable en ligne via Amadeus Payments (PCI-DSS, 3-D Secure). Aucun supplément agence, comparatif de prix transparent, programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
-      "answerNoStay": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city} ({region}). Notre tarif est le tarif net GDS Amadeus, sans supplément agence, avec verrouillage 10 minutes, paiement sécurisé Amadeus Payments (PCI-DSS, 3-D Secure), comparatif de prix non affilié et programme de fidélité applicable dès la première nuit. Mise à jour {date}."
+      "answerNoStay": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city} ({region}). Notre tarif est le tarif net GDS Amadeus, sans supplément agence, avec verrouillage 10 minutes, paiement sécurisé Amadeus Payments (PCI-DSS, 3-D Secure), comparatif de prix non affilié et programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
+      "answerNoRegion": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city}. Sélectionnez vos dates et le nombre de voyageurs pour obtenir le tarif net GDS, verrouillé 10 minutes, payable en ligne via Amadeus Payments (PCI-DSS, 3-D Secure). Aucun supplément agence, comparatif de prix transparent, programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
+      "answerNoStayNoRegion": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city}. Notre tarif est le tarif net GDS Amadeus, sans supplément agence, avec verrouillage 10 minutes, paiement sécurisé Amadeus Payments (PCI-DSS, 3-D Secure), comparatif de prix non affilié et programme de fidélité applicable dès la première nuit. Mise à jour {date}."
     },
     "noFaq": "Aucune question pour cet établissement pour le moment.",
     "noAmenities": "Détail des services à venir.",
@@ -1069,7 +1071,9 @@
   "hotelTldr": {
     "eyebrow": "L'essentiel du Concierge",
     "firstSentencePalace": "{name} est un hôtel distingué Palace par Atout France à {city} ({region}).",
+    "firstSentencePalaceNoRegion": "{name} est un hôtel distingué Palace par Atout France à {city}.",
     "firstSentenceFiveStar": "{name} est un hôtel 5 étoiles à {city} ({region}).",
+    "firstSentenceFiveStarNoRegion": "{name} est un hôtel 5 étoiles à {city}.",
     "inventoryRoomsOnly": "{rooms, plural, one {# chambre} other {# chambres}}",
     "inventoryWithSuites": "{rooms, plural, one {# chambre} other {# chambres}} dont {suites, plural, one {# suite} other {# suites}}",
     "openedSince": "Ouvert depuis {year}",

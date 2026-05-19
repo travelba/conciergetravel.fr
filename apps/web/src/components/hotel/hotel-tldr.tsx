@@ -87,8 +87,21 @@ export async function HotelTldr({
   // templates (FR/EN differ on whether the word "hôtel" is repeated
   // before the status fragment). Encoding the two shapes as separate
   // ICU templates is cleaner than splicing fragments at runtime.
-  const firstSentenceKey = isPalace ? 'firstSentencePalace' : 'firstSentenceFiveStar';
-  const firstSentence = t(firstSentenceKey, { name, city, region });
+  // International hotels (migration 0033) carry an empty `region` —
+  // we swap to the dedicated `*NoRegion` template so the parenthesised
+  // region fragment doesn't render as "({city} ())" — verified against
+  // the live production deployment on the-beverly-hills-hotel.
+  const hasRegion = region.trim().length > 0;
+  const firstSentenceKey = isPalace
+    ? hasRegion
+      ? 'firstSentencePalace'
+      : 'firstSentencePalaceNoRegion'
+    : hasRegion
+      ? 'firstSentenceFiveStar'
+      : 'firstSentenceFiveStarNoRegion';
+  const firstSentence = hasRegion
+    ? t(firstSentenceKey, { name, city, region })
+    : t(firstSentenceKey, { name, city });
 
   // Inventory line (only when known — never bluff).
   let inventoryLine: string | null = null;
