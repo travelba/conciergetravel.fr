@@ -90,17 +90,24 @@ Cinq nouvelles tables planifiées : `hotel_translations`, `hotel_room_translatio
 1. **Phase 0 — ADR-0012** : ✅ acté 2026-05-19. Option B retenue (table normalisée).
 2. **Phase 1 — Refactor type-safe (1-2 jours, sans contenu)** :
    - ✅ **Sous-étape 1a faite** (commit `5fc60c4`) : `apps/web/src/i18n/runtime.ts` créé avec `localePathPrefix`, `withLocalePath`, `intlLocaleTag`, `ogLocale`, `hreflangKey`, `buildHreflangAlternates`. Pattern : maps `Record<KnownLocale, …>` exhaustives sur les 8 locales planifiées (FR/EN/DE/ES/IT/AR/ZH/JA), garde `__LOCALE_IS_KNOWN` qui force `routing.locales ⊆ KnownLocale` à la compilation. Couverture test : `apps/web/src/i18n/runtime.test.ts` (13 tests vitest).
-   - 🟡 **Sous-étape 1b en cours** (18 / ~50 fichiers — 5 commits) : codemod des hotspots URL prefix / OG / Intl / hreflang. Cinq paquets livrés à ce jour, ~70+ ternaires supprimés et 10 fonctions locales `withLocalePrefix` collapsées vers le helper centralisé :
-     1. **Paquet 1** (`381bedd`) — fiche détaillée + recherche : `recherche/page.tsx`, `hotel/[slug]/page.tsx`, `chambres/[roomSlug]/page.tsx`, `[locale]/layout.tsx`.
-     2. **Paquet 2** (`ee7472e`) — 4 hubs/landings : `destination/[citySlug]`, `hotels`, `guides`, `classements` (+ widening de `inLanguage` en `string` dans `packages/seo/src/jsonld/{article,collection-page,hotel}.ts`, 89 tests SEO passent).
-     3. **Paquet 3** (`b9a8002`) — 3 hubs secondaires : `marque/[brandSlug]`, `categorie/[categorySlug]`, `classements/[axe]/[valeur]`.
-     4. **Paquet 9** (`4819ee0`) — formatters : `lib/format-indicative-price.ts`. `lib/format-distance.ts` et `lib/poi-hours.ts` reclassifiés Phase 1c (UI strings, pas Intl tags).
-     5. **Paquet 7** (`7196bd0`) — espace compte (6 fichiers) : `compte/page.tsx`, `connexion`, `inscription`, `nouveau-mot-de-passe`, `favoris`, `deconnexion/route.ts`.
+   - ✅ **Sous-étape 1b complète** (~43 / ~50 fichiers — 12 commits cumulés sur 2 sessions). Plus aucun ternaire de prefix/OG/Intl/hreflang ne reste dans le code applicatif. Le reliquat (~85 occurrences `locale === 'fr' / 'en'`) est entièrement de nature 1c (picks de colonne data ou copy maps UI). Les 12 paquets livrés :
+     1. **Paquet 1** (`381bedd`) — fiche détaillée + recherche.
+     2. **Paquet 2** (`ee7472e`) — 4 hubs/landings + widening `inLanguage` en `string` dans `packages/seo/src/jsonld/{article,collection-page,hotel}.ts` (89 tests SEO passent).
+     3. **Paquet 3** (`b9a8002`) — 3 hubs secondaires.
+     4. **Paquet 4** (`5c6eb77`, sous-agent) — `guide/[citySlug]/page.tsx` (9 ternaires Phase 1b ; 32 picks data + UI annotés Phase 1c).
+     5. **Paquet 5** (`9631937`, sous-agent) — `classement/[slug]/page.tsx` (10 Phase 1b ; 25 annotés Phase 1c).
+     6. **Paquet 6** (`2f0b3e5`) — tunnel `reservation/*` (6 fichiers, signatures `Locale` au lieu de `string`).
+     7. **Paquet 7** (`7196bd0`) — espace compte (6 fichiers).
+     8. **Paquet 8a** (`fe1576a`, sous-agent) — `components/hotel/*` (6 fichiers).
+     9. **Paquet 8b** (`b6c4cd6`) — `components/editorial/{enriched-text,editorial-table}.tsx`.
+     10. **Paquet 9** (`4819ee0`) — `lib/format-indicative-price.ts`. `format-distance.ts` + `poi-hours.ts` reclassifiés 1c.
+     11. **Paquet 10** (`bc7468c`) — sub-sitemaps `app/sitemaps/{hotels,rooms,guides,rankings,hubs}.xml/route.ts` + helper centralisé `apps/web/src/lib/sitemap-alternates.ts` (`buildSitemapAlternates` itère `routing.locales` → V2-ready sans modifier les routes sitemap).
+     12. **Paquet 11** (`f9af676`) — catch-all : homepage, destination directory, legal (2 fichiers), auth callback, `server/auth/actions.ts`, `server/booking/confirm-payment.ts`, `last-updated-badge`, `price-comparator-client`.
 
-     Reste à traiter par ordre de priorité (~32 fichiers) : paquet 4 (`guide/[citySlug]` 37 ternaires), paquet 5 (`classement/[slug]` 30), paquet 6 (`reservation/*` 12), paquet 8 (`components/hotel/*` + `components/editorial/*` ~20). Plan détaillé + checklist par fichier : [`docs/runbooks/i18n-v2-rollout.md`](../../../docs/runbooks/i18n-v2-rollout.md) §Prochains paquets recommandés.
+     Plan détaillé + commits par paquet : [`docs/runbooks/i18n-v2-rollout.md`](../../../docs/runbooks/i18n-v2-rollout.md) §Déjà traités.
 
-   - ⏳ **Sous-étape 1c à faire (après 1b complet)** : élargir `SupportedLocale` en y ajoutant DE/ES/IT + insérer des `assertNever` exhaustifs dans chaque `pickXxx` pour que TS force la résolution des cas manquants. Cette étape doit suivre 1b — sinon le widening seul produit des fallbacks FR silencieux.
-   - **Bénéfice immédiat de 1a (déjà acquis)** : les helpers sont disponibles et testés. Toute nouvelle PR peut les utiliser sans attendre le codemod complet — le code legacy continue de marcher à l'identique en parallèle.
+   - ⏳ **Sous-étape 1c à faire** : élargir `SupportedLocale` en y ajoutant DE/ES/IT + insérer des `assertNever` exhaustifs dans chaque `pickXxx`, et migrer les copy maps `{ fr: '...', en: '...' }` vers les messages `next-intl`. Cette étape adresse le reliquat ~85 ternaires data-layer + UI listés dans le runbook. Sans elle, le widening seul produirait des fallbacks FR silencieux.
+   - **Bénéfice acquis** : 1a + 1b livrés. Toute nouvelle PR utilise les helpers naturellement — aucun nouveau ternaire de prefix/OG/Intl/hreflang n'est introduit (le pattern est mort dans le code applicatif).
 
 3. **Phase 2 — `routing.pathnames`** : ajouter le mapping de la rule `seo-geo.mdc`, refactorer tous les `<Link href="/recherche">`.
 4. **Phase 3 — Schéma DB + Payload** : appliquer les 3 migrations de l'ADR-0012 (`0034_create_translations_tables.sql`, `0035_backfill_translations_from_legacy_columns.sql`, `0036_drop_legacy_localized_columns.sql` — DROP seulement après 2 semaines d'observation), exposer les champs DE/ES/IT dans Payload, adapter les readers.
