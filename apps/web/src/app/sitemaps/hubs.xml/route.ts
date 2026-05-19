@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
@@ -31,7 +31,7 @@ export async function GET(): Promise<NextResponse> {
     const cities = await listPublishedCities();
 
     const directoryHrefForLocale = (l: Locale): string =>
-      `${origin}${withLocalePath(l, '/destination')}`;
+      `${origin}${getPathname({ locale: l, href: '/destination' })}`;
     entries.push({
       loc: directoryHrefForLocale('fr'),
       changefreq: 'weekly',
@@ -41,7 +41,10 @@ export async function GET(): Promise<NextResponse> {
 
     for (const c of cities) {
       const hrefForLocale = (l: Locale): string =>
-        `${origin}${withLocalePath(l, `/destination/${c.slug}`)}`;
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
+        })}`;
       entries.push({
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',

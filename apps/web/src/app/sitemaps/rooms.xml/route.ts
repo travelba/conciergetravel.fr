@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedRoomSlugs } from '@/server/hotels/get-room-by-slug';
@@ -37,7 +37,13 @@ export async function GET(): Promise<NextResponse> {
       const hotelSlugForLocale = (l: Locale): string =>
         l === 'en' ? (r.hotelSlugEn ?? r.hotelSlugFr) : r.hotelSlugFr;
       const hrefForLocale = (l: Locale): string =>
-        `${origin}${withLocalePath(l, `/hotel/${hotelSlugForLocale(l)}/chambres/${r.roomSlug}`)}`;
+        `${origin}${getPathname({
+          locale: l,
+          href: {
+            pathname: '/hotel/[slug]/chambres/[roomSlug]',
+            params: { slug: hotelSlugForLocale(l), roomSlug: r.roomSlug },
+          },
+        })}`;
       entries.push({
         loc: hrefForLocale('fr'),
         changefreq: 'monthly',

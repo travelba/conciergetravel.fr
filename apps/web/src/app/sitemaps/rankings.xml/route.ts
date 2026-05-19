@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
@@ -40,7 +40,10 @@ export async function GET(): Promise<NextResponse> {
     // Detail pages — one entry per ranking.
     for (const r of rankings) {
       const hrefForLocale = (l: Locale): string =>
-        `${origin}${withLocalePath(l, `/classement/${r.slug}`)}`;
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/classement/[slug]', params: { slug: r.slug } },
+        })}`;
       const lastmod = r.updatedAt ?? undefined;
       entries.push({
         loc: hrefForLocale('fr'),
@@ -52,7 +55,8 @@ export async function GET(): Promise<NextResponse> {
     }
 
     // Hub.
-    const hubHrefForLocale = (l: Locale): string => `${origin}${withLocalePath(l, '/classements')}`;
+    const hubHrefForLocale = (l: Locale): string =>
+      `${origin}${getPathname({ locale: l, href: '/classements' })}`;
     entries.push({
       loc: hubHrefForLocale('fr'),
       changefreq: 'daily',
@@ -66,8 +70,11 @@ export async function GET(): Promise<NextResponse> {
       const key = `${axe}/${valeur}`;
       if (seenSubhubs.has(key)) return;
       seenSubhubs.add(key);
-      const path = `/classements/${axe}/${valeur}`;
-      const subhubHrefForLocale = (l: Locale): string => `${origin}${withLocalePath(l, path)}`;
+      const subhubHrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/classements/[axe]/[valeur]', params: { axe, valeur } },
+        })}`;
       entries.push({
         loc: subhubHrefForLocale('fr'),
         changefreq: 'weekly',

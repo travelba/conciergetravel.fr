@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listIndexableHotelSlugs } from '@/server/hotels/get-hotel-by-slug';
@@ -34,7 +34,10 @@ export async function GET(): Promise<NextResponse> {
       // `slugEn`/`slugFr` into a per-locale map keyed on routing.locales).
       const slugForLocale = (l: Locale): string => (l === 'en' ? (s.slugEn ?? s.slugFr) : s.slugFr);
       const hrefForLocale = (l: Locale): string =>
-        `${origin}${withLocalePath(l, `/hotel/${slugForLocale(l)}`)}`;
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/hotel/[slug]', params: { slug: slugForLocale(l) } },
+        })}`;
       entries.push({
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',
