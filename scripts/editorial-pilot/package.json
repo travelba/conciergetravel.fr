@@ -49,6 +49,8 @@
     "global:diff": "node ./global-sources/diff-all-sources.mjs",
     "global:scaffold": "tsx src/global-sources/scaffold-international.ts",
     "global:scaffold:gr": "tsx src/global-sources/scaffold-guides-rankings-intl.ts",
+    "seed:tier1": "tsx src/global-sources/seed-tier1-content.ts",
+    "seed:tier1:dry": "tsx src/global-sources/seed-tier1-content.ts --dry-run --limit=5",
     "enrich:wikidata": "tsx src/enrichment/enrich-wikidata-ids.ts",
     "typecheck": "tsc --noEmit"
   },
