@@ -4,21 +4,21 @@
 > Skill de référence : [`seo-technical`](../../.cursor/skills/seo-technical/SKILL.md)
 > §V2 multilingual rollout.
 
-## État au 2026-05-19
+## État au 2026-05-19 (fin de session)
 
-| Phase                                          | Statut                          | Livrable                                          |
-| ---------------------------------------------- | ------------------------------- | ------------------------------------------------- |
-| 0 — ADR-0012 schéma DB multilingue             | ✅ accepted                     | `docs/adr/0012-multilingual-db-schema.md`         |
-| 1a — `runtime.ts` helpers centralisés          | ✅ livré (commit `5fc60c4`)     | `apps/web/src/i18n/runtime.ts` + 13 tests vitest  |
-| 1b — Codemod hotspots                          | 🟡 4 / ~50 fichiers (`381bedd`) | 21 ternaires de prefix/OG/Intl supprimés          |
-| 1c — Élargir `SupportedLocale` + `assertNever` | ⏳ à faire (après 1b complet)   | `get-hotel-by-slug.ts` + readers serveur          |
-| 2 — `routing.pathnames`                        | ⏳ à faire                      | `routing.ts` + refactor `<Link>`                  |
-| 3 — Migrations DB + Payload                    | ⏳ à faire                      | `0034`, `0035`, `0036` + dual-table mirror étendu |
-| 4 — Activation V2 (DE en premier)              | ⏳ à faire                      | `messages/de.json` + contenu rédacteur natif      |
+| Phase                                          | Statut                           | Livrable                                                                             |
+| ---------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------ |
+| 0 — ADR-0012 schéma DB multilingue             | ✅ accepted                      | `docs/adr/0012-multilingual-db-schema.md`                                            |
+| 1a — `runtime.ts` helpers centralisés          | ✅ livré (commit `5fc60c4`)      | `apps/web/src/i18n/runtime.ts` + 13 tests vitest                                     |
+| 1b — Codemod hotspots                          | 🟡 18 / ~50 fichiers (5 commits) | 70+ ternaires de prefix/OG/Intl supprimés, 10 duplicats `withLocalePrefix` collapsés |
+| 1c — Élargir `SupportedLocale` + `assertNever` | ⏳ à faire (après 1b complet)    | `get-hotel-by-slug.ts` + readers serveur                                             |
+| 2 — `routing.pathnames`                        | ⏳ à faire                       | `routing.ts` + refactor `<Link>`                                                     |
+| 3 — Migrations DB + Payload                    | ⏳ à faire                       | `0034`, `0035`, `0036` + dual-table mirror étendu                                    |
+| 4 — Activation V2 (DE en premier)              | ⏳ à faire                       | `messages/de.json` + contenu rédacteur natif                                         |
 
-### Re-survey du 2026-05-19 (après commit `381bedd`)
+### Re-survey du 2026-05-19 (fin de session, 5 commits)
 
-Le tableau d'hotspots initial était un échantillon. Survey exhaustif réalisé après Phase 1b partielle : **plus de 50 fichiers** contiennent au moins un ternaire `locale === 'fr' / 'en'` dans `apps/web/src/`. Les gros offenders (à traiter en priorité dans les prochains paquets) :
+Le tableau d'hotspots initial était un échantillon. Survey exhaustif réalisé : **plus de 50 fichiers** contiennent au moins un ternaire `locale === 'fr' / 'en'` dans `apps/web/src/`. Les gros offenders (à traiter en priorité dans les prochains paquets) :
 
 | Fichier                                            | Ternaires restants | Notes                                                                                                      |
 | -------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -47,14 +47,44 @@ Objectif : remplacer toutes les occurrences de `locale === 'fr'` / `locale === '
 
 **Périmètre exclu de 1b** : les ternaires qui sélectionnent une **colonne** FR vs EN (`name_fr` vs `name_en`, `slug` vs `slug_en`, etc.) — ces ternaires restent jusqu'à Phase 1c (qui élargit `SupportedLocale`) puis Phase 3 (qui collapse les colonnes en tables de translations).
 
-**Statut au 2026-05-19** : 4 / ~50 fichiers traités. Voir la section "Re-survey" ci-dessus pour la liste à attaquer en priorité.
+**Statut au 2026-05-19 (fin de session)** : **18 / ~50 fichiers traités**. Voir la section "Re-survey" ci-dessus pour la liste à attaquer en priorité.
 
-### Déjà traités (commit `381bedd`)
+### Déjà traités
+
+**Paquet 1 — fiche détaillée hôtel + recherche (commit `381bedd`)**
 
 - ✅ `app/[locale]/recherche/page.tsx` (2 ternaires)
 - ✅ `app/[locale]/hotel/[slug]/chambres/[roomSlug]/page.tsx` (5 ternaires + local `withLocalePrefix` supprimé)
 - ✅ `app/[locale]/hotel/[slug]/page.tsx` (7 ternaires de prefix/OG/Intl + local `withLocalePrefix` supprimé ; les 5 ternaires data-layer restants annotés pour Phase 1c)
 - ✅ `app/[locale]/layout.tsx` (2 ternaires : hreflang home + og:locale)
+
+**Paquet 2 — 4 routes de hub/landing (commit `ee7472e`)**
+
+- ✅ `app/[locale]/destination/[citySlug]/page.tsx` (4 URL + 1 Intl + local `withLocalePrefix` supprimé)
+- ✅ `app/[locale]/hotels/page.tsx` (2 URL + local `withLocalePrefix` supprimé)
+- ✅ `app/[locale]/guides/page.tsx` (3 URL + local `withLocalePrefix` supprimé)
+- ✅ `app/[locale]/classements/page.tsx` (4 URL + 1 hreflangKey + local `withLocalePrefix` supprimé)
+- ✅ `packages/seo/src/jsonld/{article,collection-page,hotel}.ts` — schéma `inLanguage` élargi à `string` (V2-ready, 89 tests SEO passent)
+
+**Paquet 3 — 3 hubs secondaires (commit `b9a8002`)**
+
+- ✅ `app/[locale]/marque/[brandSlug]/page.tsx` (4 URL + local `withLocalePrefix` supprimé)
+- ✅ `app/[locale]/categorie/[categorySlug]/page.tsx` (5 URL + local `withLocalePrefix` supprimé)
+- ✅ `app/[locale]/classements/[axe]/[valeur]/page.tsx` (4 URL + 1 hreflangKey + local `withLocalePrefix` supprimé)
+
+**Paquet 9 — formatters Intl (commit `4819ee0`)**
+
+- ✅ `lib/format-indicative-price.ts` (2 Intl ternaires → `intlLocaleTag`)
+- ⏸️ `lib/format-distance.ts` et `lib/poi-hours.ts` **reclassifiés Phase 1c** — leurs ternaires sélectionnent du texte visible (`"sur place"` / `"on site"`), pas des Intl tags. Migration vers `next-intl` messages.
+
+**Paquet 7 — espace compte (commit `7196bd0`)**
+
+- ✅ `app/[locale]/compte/page.tsx` (3 URL + 2 Intl ternaires)
+- ✅ `app/[locale]/compte/connexion/page.tsx` (1 URL ternaire)
+- ✅ `app/[locale]/compte/inscription/page.tsx` (1 URL ternaire)
+- ✅ `app/[locale]/compte/nouveau-mot-de-passe/page.tsx` (1 URL ternaire)
+- ✅ `app/[locale]/compte/favoris/page.tsx` (2 URL ternaires)
+- ✅ `app/[locale]/compte/deconnexion/route.ts` (1 URL ternaire)
 
 ### Helpers disponibles dans `apps/web/src/i18n/runtime.ts`
 
@@ -67,21 +97,19 @@ Objectif : remplacer toutes les occurrences de `locale === 'fr'` / `locale === '
 | `hreflangKey(locale)`                | clé brute `'fr-FR'` / `'en'` dans `alternates.languages`       | idem                    |
 | `buildHreflangAlternates(buildHref)` | `{ 'fr-FR': '...', 'en': '...', 'x-default': '...' }` littéral | idem                    |
 
-### Prochains paquets recommandés
+### Prochains paquets recommandés (restants)
 
-À traiter par paquets de 4-6 fichiers, dans cet ordre (priorisé par impact SEO et lisibilité du diff) :
+Reprendre dans cet ordre — priorisé par impact SEO et risque :
 
-| Paquet | Fichiers                                                                                                  | Pourquoi                                                                                                  |
-| ------ | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 2      | `destination/[citySlug]/page.tsx`, `hotels/page.tsx`, `guides/page.tsx`, `classements/page.tsx`           | 4 routes de hub/landing, même pattern, faible volume                                                      |
-| 3      | `marque/[brandSlug]/page.tsx`, `categorie/[categorySlug]/page.tsx`, `classements/[axe]/[valeur]/page.tsx` | hubs secondaires                                                                                          |
-| 4      | `guide/[citySlug]/page.tsx` SEUL (37 ternaires)                                                           | gros morceau, mérite son propre commit pour la revue                                                      |
-| 5      | `classement/[slug]/page.tsx` SEUL (30 ternaires)                                                          | idem                                                                                                      |
-| 6      | `reservation/*` (5 fichiers)                                                                              | tunnel booking — vigilance sur lockAction + email locale                                                  |
-| 7      | `compte/*` (5 fichiers)                                                                                   | espace compte — vigilance redirects après auth                                                            |
-| 8      | `components/hotel/*` + `components/editorial/*`                                                           | composants — beaucoup de copy maps en dur qui doivent migrer vers `next-intl` messages plutôt que helpers |
-| 9      | `lib/format-distance.ts`, `lib/poi-hours.ts`, `lib/format-indicative-price.ts`                            | formatters Intl → utiliser `intlLocaleTag`                                                                |
-| 10     | Sub-sitemaps `sitemap-*.xml/route.ts` (à survey)                                                          | hreflang en dur — boucle `routing.locales` + `buildHreflangAlternates`                                    |
+| Paquet | Fichiers                                                 | Pourquoi                                                                                                              |
+| ------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 4      | `guide/[citySlug]/page.tsx` SEUL (37 ternaires)          | gros morceau éditorial — mérite son propre commit pour la revue. Mix prefix + UI copy maps (UI copy → tracker en 1c). |
+| 5      | `classement/[slug]/page.tsx` SEUL (30 ternaires)         | éditorial ranking long-read, même pattern que guide.                                                                  |
+| 6      | `reservation/*` (5 fichiers, ~12 ternaires)              | tunnel booking — **vigilance sur lockAction + email locale** (impact revenu direct, tester E2E avant merge).          |
+| 8a     | `components/hotel/*` (5 fichiers, ~8 ternaires)          | composants fiche (TLDr, favorite, related) — beaucoup de copy maps `{ fr: '...', en: '...' }` → next-intl messages.   |
+| 8b     | `components/editorial/*` (6 fichiers, ~12 ternaires)     | composants long-read (TOC, callouts, glossary) — idem.                                                                |
+| 9-bis  | `lib/format-distance.ts`, `lib/poi-hours.ts` (5 cumulés) | UI strings — migration vers `next-intl` messages plutôt que helpers runtime.                                          |
+| 10     | Sub-sitemaps `sitemap-*.xml/route.ts` (à survey)         | hreflang en dur — boucle `routing.locales` + `buildHreflangAlternates`.                                               |
 
 ### Hors périmètre Phase 1b (reportés explicitement)
 
