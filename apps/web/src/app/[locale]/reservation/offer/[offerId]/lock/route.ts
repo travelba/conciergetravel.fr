@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { setDraftCookie } from '@/server/booking/draft-cookie';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import { lockOffer, type LockOfferInput } from '@/server/booking/lock-offer';
@@ -13,7 +13,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function inviteUrl(req: NextRequest, locale: Locale): URL {
-  return new URL(withLocalePath(locale, '/reservation/invite'), req.nextUrl.origin);
+  return new URL(getPathname({ locale, href: '/reservation/invite' }), req.nextUrl.origin);
 }
 
 function backOnError(
@@ -22,7 +22,7 @@ function backOnError(
   hotelId: string | undefined,
   errorKind: string,
 ): URL {
-  const url = new URL(withLocalePath(locale, '/recherche'), req.nextUrl.origin);
+  const url = new URL(getPathname({ locale, href: '/recherche' }), req.nextUrl.origin);
   if (hotelId !== undefined) url.searchParams.set('hotelId', hotelId);
   url.searchParams.set('error', errorKind);
   return url;

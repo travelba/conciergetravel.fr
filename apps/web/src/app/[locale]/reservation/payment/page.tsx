@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, redirect as nextRedirect } from 'next/navigation';
 
+import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
+import { intlLocaleTag } from '@/i18n/runtime';
 import { confirmPaymentAndCreateBooking } from '@/server/booking/confirm-payment';
 import { clearDraftCookie, getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft } from '@/server/booking/draft-store';
@@ -34,35 +35,35 @@ const fmtPrice = (locale: Locale, amountMinor: number): string =>
     minimumFractionDigits: 2,
   }).format(amountMinor / 100);
 
-function confirmationPath(locale: Locale, ref: string): string {
-  return withLocalePath(locale, `/reservation/confirmation/${encodeURIComponent(ref)}`);
-}
-
-function paymentPath(locale: Locale, errorKind?: string): string {
-  const base = withLocalePath(locale, '/reservation/payment');
-  return errorKind !== undefined ? `${base}?error=${encodeURIComponent(errorKind)}` : base;
-}
-
 async function confirmStubAction(): Promise<void> {
   'use server';
 
   const draftId = await getDraftId();
   if (draftId === undefined) {
-    redirect('/');
+    nextRedirect('/');
   }
 
   const persisted = await loadDraft(draftId);
   if (persisted === null) {
-    redirect('/');
+    nextRedirect('/');
   }
 
   const result = await confirmPaymentAndCreateBooking(draftId);
   if (!result.ok) {
-    redirect(paymentPath(persisted.locale, result.error.kind));
+    redirect({
+      href: { pathname: '/reservation/payment', query: { error: result.error.kind } },
+      locale: persisted.locale,
+    });
   }
 
   await clearDraftCookie();
-  redirect(confirmationPath(persisted.locale, result.value.bookingRef));
+  redirect({
+    href: {
+      pathname: '/reservation/confirmation/[ref]',
+      params: { ref: result.value.bookingRef },
+    },
+    locale: persisted.locale,
+  });
 }
 
 interface PaymentSearchParams {

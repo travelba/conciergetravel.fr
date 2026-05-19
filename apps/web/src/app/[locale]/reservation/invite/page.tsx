@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, redirect as nextRedirect } from 'next/navigation';
 
 import { attachGuest, parseGuest } from '@mch/domain/booking';
 
+import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
 
@@ -35,17 +35,16 @@ function pickString(v: unknown): string | undefined {
   return typeof v === 'string' && v.length > 0 ? v : undefined;
 }
 
-function recapPath(locale: Locale): string {
-  return withLocalePath(locale, '/reservation/recap');
-}
-
-// Aligned with `recap/page.tsx#expiredPath`: both locales point at the
-// canonical search page with the expired flag. Phase 1c-α — fixes the
-// pre-existing FR-branch typo (`/reservation/recherche` 404) and the
-// hard-coded EN prefix that bypassed `withLocalePath` (would break for
-// V2 locales de/es/it).
-function expiredPath(locale: Locale): string {
-  return withLocalePath(locale, '/recherche?expired=1');
+// Aligned with `recap/page.tsx#redirectExpired`: both locales point at
+// the canonical search page with the expired flag. Phase 1c-α fixed the
+// pre-existing FR-branch typo (`/reservation/recherche` 404); Phase 2
+// routes the redirect through next-intl typed pathnames so EN goes to
+// `/en/search?expired=1` (not the legacy `/en/recherche?expired=1`).
+function redirectExpired(locale: Locale): never {
+  redirect({
+    href: { pathname: '/recherche', query: { expired: '1' } },
+    locale,
+  });
 }
 
 async function submitAction(formData: FormData): Promise<void> {
@@ -53,12 +52,12 @@ async function submitAction(formData: FormData): Promise<void> {
 
   const draftId = await getDraftId();
   if (draftId === undefined) {
-    redirect('/');
+    nextRedirect('/');
   }
 
   const persisted = await loadDraft(draftId);
   if (persisted === null) {
-    redirect(expiredPath('fr'));
+    redirectExpired('fr');
   }
 
   const guestParsed = parseGuest({
@@ -71,14 +70,18 @@ async function submitAction(formData: FormData): Promise<void> {
   const locale: Locale = persisted.locale;
 
   if (!guestParsed.ok) {
-    const base = withLocalePath(locale, '/reservation/invite');
-    redirect(`${base}?error=validation`);
+    redirect({
+      href: { pathname: '/reservation/invite', query: { error: 'validation' } },
+      locale,
+    });
   }
 
   const next = attachGuest(persisted.draft, guestParsed.value);
   if (!next.ok) {
-    const base = withLocalePath(locale, '/reservation/invite');
-    redirect(`${base}?error=invalid_state`);
+    redirect({
+      href: { pathname: '/reservation/invite', query: { error: 'invalid_state' } },
+      locale,
+    });
   }
 
   await saveDraft({
@@ -87,7 +90,7 @@ async function submitAction(formData: FormData): Promise<void> {
     locale,
   });
 
-  redirect(recapPath(locale));
+  redirect({ href: '/reservation/recap', locale });
 }
 
 export default async function ReservationInvitePage({

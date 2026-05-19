@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
+import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getFakeHotelHead } from '@/server/booking/dev-fake-hotel';
 import { submitEmailBookingRequest } from '@/server/booking/email-request';
@@ -96,8 +96,11 @@ async function fetchHotelHead(
   }
 }
 
-function confirmationPath(locale: Locale, ref: string): string {
-  return withLocalePath(locale, `/reservation/confirmation/${encodeURIComponent(ref)}`);
+function redirectToConfirmation(locale: Locale, ref: string): never {
+  redirect({
+    href: { pathname: '/reservation/confirmation/[ref]', params: { ref } },
+    locale,
+  });
 }
 
 function readClientIp(forwardedFor: string | null): string | undefined {
@@ -142,28 +145,30 @@ async function submitAction(formData: FormData): Promise<void> {
 
   const result = await submitEmailBookingRequest(payload);
   if (result.ok) {
-    redirect(confirmationPath(locale, result.value.requestRef));
+    redirectToConfirmation(locale, result.value.requestRef);
   }
   // Duplicate-within-window: route the user to the existing confirmation
   // instead of surfacing a scary error — same outcome from their POV.
   if (result.error.kind === 'duplicate') {
-    redirect(confirmationPath(locale, result.error.requestRef));
+    redirectToConfirmation(locale, result.error.requestRef);
   }
 
-  const params = new URLSearchParams({
+  const query: Record<string, string> = {
     hotelId: payload.hotelId,
     checkIn: payload.checkIn,
     checkOut: payload.checkOut,
     adults: String(payload.adults),
     children: String(payload.children),
     error: result.error.kind,
-  });
+  };
   if (result.error.kind === 'rate_limited') {
-    params.set('retryAfter', String(result.error.retryAfterSec));
-    params.set('scope', result.error.scope);
+    query['retryAfter'] = String(result.error.retryAfterSec);
+    query['scope'] = result.error.scope;
   }
-  const base = withLocalePath(locale, '/reservation/start');
-  redirect(`${base}?${params.toString()}`);
+  redirect({
+    href: { pathname: '/reservation/start', query },
+    locale,
+  });
 }
 
 export default async function ReservationStartPage({

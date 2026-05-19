@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
-import { withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 
 interface DisplayOnlyBookingCardProps {
@@ -52,7 +52,10 @@ export async function DisplayOnlyBookingCard({
   childrenCount,
 }: DisplayOnlyBookingCardProps): Promise<React.ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage.displayOnly' });
-  const action = withLocalePath(locale, '/reservation/start');
+  // getPathname accepts any string locale at runtime; V2 locales fall back
+  // to the FR slug until added to `routing.locales`, matching the rest of
+  // the V2-staging pattern in `apps/web/src/i18n/`.
+  const action = getPathname({ locale, href: '/reservation/start' });
 
   return (
     <div className="mt-5 flex flex-col gap-5">
