@@ -10,6 +10,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import {
@@ -55,18 +56,14 @@ function truncate(text: string, max: number): string {
 
 function pickHotelName(detail: HotelRoomDetail, locale: Locale): string {
   const row = detail.hotel.row;
-  if (locale === 'en') {
-    return row.name_en !== null && row.name_en.length > 0 ? row.name_en : row.name;
-  }
-  return row.name;
+  const enName = row.name_en !== null && row.name_en.length > 0 ? row.name_en : row.name;
+  return pickByLocale(locale, row.name, enName);
 }
 
 function pickHotelSlug(detail: HotelRoomDetail, locale: Locale): string {
   const row = detail.hotel.row;
-  if (locale === 'en') {
-    return row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
-  }
-  return row.slug;
+  const enSlug = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
+  return pickByLocale(locale, row.slug, enSlug);
 }
 
 export async function generateStaticParams(): Promise<

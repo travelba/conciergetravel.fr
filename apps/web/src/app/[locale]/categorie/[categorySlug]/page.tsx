@@ -9,6 +9,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
   EDITORIAL_CATEGORIES,
@@ -60,8 +61,10 @@ export async function generateMetadata({
 
   const locale = raw;
   // Title / description selection stays locale-aware (data layer) — see ADR-0012.
-  const title = locale === 'fr' ? cat.metaTitleFr : cat.metaTitleEn;
-  const description = locale === 'fr' ? cat.metaDescFr : cat.metaDescEn;
+  // V2 locales fall back to FR until the editorial-categories module gains
+  // DE/ES/IT copy (Phase 1c-β: migrate the whole module to next-intl messages).
+  const title = pickByLocale(locale, cat.metaTitleFr, cat.metaTitleEn);
+  const description = pickByLocale(locale, cat.metaDescFr, cat.metaDescEn);
   const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/categorie/${cat.slug}`);
 
   return {
@@ -101,16 +104,19 @@ export default async function CategoryPage({
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  const h1 = locale === 'fr' ? category.h1Fr : category.h1En;
-  const subtitle =
-    locale === 'fr' ? category.subtitleFr(hotels.length) : category.subtitleEn(hotels.length);
+  const h1 = pickByLocale(locale, category.h1Fr, category.h1En);
+  const subtitle = pickByLocale(
+    locale,
+    category.subtitleFr(hotels.length),
+    category.subtitleEn(hotels.length),
+  );
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t.breadcrumbHome, url: `${origin}${withLocalePath(locale, '/')}` },
       { name: t.breadcrumbHotels, url: `${origin}${withLocalePath(locale, '/hotels')}` },
       {
-        name: locale === 'fr' ? category.labelFr : category.labelEn,
+        name: pickByLocale(locale, category.labelFr, category.labelEn),
         url: `${origin}${withLocalePath(locale, `/categorie/${category.slug}`)}`,
       },
     ]),
@@ -147,7 +153,7 @@ export default async function CategoryPage({
           </li>
           <li aria-hidden>›</li>
           <li className="text-fg" aria-current="page">
-            {locale === 'fr' ? category.labelFr : category.labelEn}
+            {pickByLocale(locale, category.labelFr, category.labelEn)}
           </li>
         </ol>
       </nav>
@@ -161,11 +167,11 @@ export default async function CategoryPage({
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {hotels.map((h) => {
           // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
-          const slug = locale === 'en' && h.slugEn !== null ? h.slugEn : h.slugFr;
+          // V2 locales fall back to FR until migration 0034.
+          const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
           const href = withLocalePath(locale, `/hotel/${slug}`);
-          const name = locale === 'en' && h.nameEn !== null ? h.nameEn : h.nameFr;
-          const descSource =
-            locale === 'en' && h.descriptionEn !== null ? h.descriptionEn : h.descriptionFr;
+          const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
+          const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
           const desc =
             descSource !== null && descSource.length > 200
               ? `${descSource.slice(0, 197).trimEnd()}…`

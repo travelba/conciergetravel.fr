@@ -21,6 +21,7 @@ import {
   ogLocale,
   withLocalePath,
 } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getCityKeysForGuide } from '@/server/guides/destination-mappings';
@@ -94,16 +95,18 @@ export async function generateMetadata({
   if (guide === null) return {};
   const locale = raw;
   // Title/description selection stays locale-aware (data layer) — see ADR-0012.
-  const title =
-    locale === 'fr'
-      ? (guide.meta_title_fr ??
-        `Guide ${guide.name_fr} — Palaces & art de vivre | MyConciergeHotel`)
-      : (guide.meta_title_en ??
-        `${guide.name_en ?? guide.name_fr} guide — Palaces & art de vivre | MyConciergeHotel`);
-  const description =
-    locale === 'fr'
-      ? (guide.meta_desc_fr ?? guide.summary_fr)
-      : (guide.meta_desc_en ?? guide.summary_en ?? guide.summary_fr);
+  // V2 locales fall back to the FR title/description until migration 0034.
+  const title = pickByLocale(
+    locale,
+    guide.meta_title_fr ?? `Guide ${guide.name_fr} — Palaces & art de vivre | MyConciergeHotel`,
+    guide.meta_title_en ??
+      `${guide.name_en ?? guide.name_fr} guide — Palaces & art de vivre | MyConciergeHotel`,
+  );
+  const description = pickByLocale(
+    locale,
+    guide.meta_desc_fr ?? guide.summary_fr,
+    guide.meta_desc_en ?? guide.summary_en ?? guide.summary_fr,
+  );
   // The guide slug is shared across locales (no `slug_en` on guides), so
   // the canonical path only varies by URL prefix — buildHreflangAlternates
   // handles the full languages map.
@@ -167,7 +170,8 @@ export default async function GuidePage({
   ]);
 
   // Slug/name/desc selection stays locale-aware (data layer) — see ADR-0012.
-  const guideName = locale === 'fr' ? guide.name_fr : (guide.name_en ?? guide.name_fr);
+  // V2 locales fall back to the FR guide name until migration 0034.
+  const guideName = pickByLocale(locale, guide.name_fr, guide.name_en ?? guide.name_fr);
 
   // ── JSON-LD: BreadcrumbList ──────────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
@@ -181,12 +185,13 @@ export default async function GuidePage({
   // ── JSON-LD: Article (long-read editorial) ───────────────────────────────
   const articleJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.articleJsonLd({
-      headline:
-        locale === 'fr'
-          ? (guide.meta_title_fr ?? `Guide ${guide.name_fr}`)
-          : (guide.meta_title_en ?? `${guide.name_en ?? guide.name_fr} guide`),
+      headline: pickByLocale(
+        locale,
+        guide.meta_title_fr ?? `Guide ${guide.name_fr}`,
+        guide.meta_title_en ?? `${guide.name_en ?? guide.name_fr} guide`,
+      ),
       url: canonical,
-      description: locale === 'fr' ? guide.summary_fr : (guide.summary_en ?? guide.summary_fr),
+      description: pickByLocale(locale, guide.summary_fr, guide.summary_en ?? guide.summary_fr),
       datePublished: guide.reviewed_at ?? new Date().toISOString().slice(0, 10),
       dateModified: guide.updated_at ?? guide.reviewed_at ?? new Date().toISOString().slice(0, 10),
       author: {
@@ -203,8 +208,8 @@ export default async function GuidePage({
 
   // ── JSON-LD: FAQPage (when the LLM produced bilingual FAQ pairs) ─────────
   const faqItems = guide.faq.filter((f) => {
-    const q = locale === 'fr' ? f.question_fr : f.question_en;
-    const a = locale === 'fr' ? f.answer_fr : f.answer_en;
+    const q = pickByLocale(locale, f.question_fr, f.question_en);
+    const a = pickByLocale(locale, f.answer_fr, f.answer_en);
     return q.length > 0 && a.length > 0;
   });
   const faqJsonLd =
@@ -212,8 +217,8 @@ export default async function GuidePage({
       ? JsonLd.withSchemaOrgContext(
           JsonLd.faqPageJsonLd(
             faqItems.map((f) => ({
-              question: locale === 'fr' ? f.question_fr : f.question_en,
-              answer: locale === 'fr' ? f.answer_fr : f.answer_en,
+              question: pickByLocale(locale, f.question_fr, f.question_en),
+              answer: pickByLocale(locale, f.answer_fr, f.answer_en),
             })),
           ),
         )
@@ -224,20 +229,24 @@ export default async function GuidePage({
     palaces.length > 0
       ? JsonLd.withSchemaOrgContext(
           JsonLd.itemListJsonLd({
-            name:
-              locale === 'fr'
-                ? `Palaces et hôtels 5★ — ${guide.name_fr}`
-                : `Palaces and 5★ hotels — ${guide.name_en ?? guide.name_fr}`,
-            items: palaces.map((h) => ({
-              name: locale === 'fr' ? h.name : (h.name_en ?? h.name),
-              url: `${origin}${withLocalePath(locale, `/hotel/${locale === 'en' && h.slug_en !== null ? h.slug_en : h.slug}`)}`,
-              hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
-            })),
+            name: pickByLocale(
+              locale,
+              `Palaces et hôtels 5★ — ${guide.name_fr}`,
+              `Palaces and 5★ hotels — ${guide.name_en ?? guide.name_fr}`,
+            ),
+            items: palaces.map((h) => {
+              const slug = pickByLocale(locale, h.slug, h.slug_en ?? h.slug);
+              return {
+                name: pickByLocale(locale, h.name, h.name_en ?? h.name),
+                url: `${origin}${withLocalePath(locale, `/hotel/${slug}`)}`,
+                hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
+              };
+            }),
           }),
         )
       : null;
 
-  const summary = locale === 'fr' ? guide.summary_fr : (guide.summary_en ?? guide.summary_fr);
+  const summary = pickByLocale(locale, guide.summary_fr, guide.summary_en ?? guide.summary_fr);
   const reviewedDate = formatRevisedDate(guide.reviewed_at, locale);
 
   // Build a Map<string,string> for the EnrichedText component.
@@ -295,8 +304,8 @@ export default async function GuidePage({
           {/* Hero */}
           <header className="mb-10">
             <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
-              {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
-              {locale === 'fr' ? 'Guide voyage luxe' : 'Luxury travel guide'}
+              {/* TODO i18n Phase 1c-β: migrate hardcoded UI labels to next-intl messages. */}
+              {pickByLocale(locale, 'Guide voyage luxe', 'Luxury travel guide')}
             </p>
             <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{guideName}</h1>
             <p className="text-muted mt-4 text-base md:text-lg">{summary}</p>
@@ -311,9 +320,16 @@ export default async function GuidePage({
             {guide.sections.map((section, idx) => {
               const anchor =
                 (section.key ?? '').length > 0 ? (section.key as string) : `section-${idx}`;
-              const title =
-                locale === 'fr' ? section.title_fr : section.title_en || section.title_fr;
-              const body = locale === 'fr' ? section.body_fr : section.body_en || section.body_fr;
+              const title = pickByLocale(
+                locale,
+                section.title_fr,
+                section.title_en || section.title_fr,
+              );
+              const body = pickByLocale(
+                locale,
+                section.body_fr,
+                section.body_en || section.body_fr,
+              );
               const localFaq = contextualFaqByAnchor.get(anchor) ?? [];
               // One inline callout per section in rotation, until exhausted.
               const callout = inlineCallouts[idx] ?? null;
@@ -325,13 +341,16 @@ export default async function GuidePage({
                   {localFaq.length > 0 ? (
                     <div className="mt-6 space-y-2">
                       <p className="text-fg/70 text-xs font-medium uppercase tracking-wide">
-                        {locale === 'fr'
-                          ? 'Questions sur cette section'
-                          : 'Questions about this section'}
+                        {/* TODO i18n Phase 1c-β: migrate to next-intl. */}
+                        {pickByLocale(
+                          locale,
+                          'Questions sur cette section',
+                          'Questions about this section',
+                        )}
                       </p>
                       {localFaq.map((f, i) => {
-                        const q = locale === 'fr' ? f.question_fr : f.question_en;
-                        const a = locale === 'fr' ? f.answer_fr : f.answer_en;
+                        const q = pickByLocale(locale, f.question_fr, f.question_en);
+                        const a = pickByLocale(locale, f.answer_fr, f.answer_en);
                         return (
                           <details
                             key={`s-faq-${anchor}-${i}`}
@@ -355,7 +374,8 @@ export default async function GuidePage({
           {guide.tables.length > 0 ? (
             <section id="tableaux" className="mt-14 scroll-mt-24">
               <h2 className="text-fg mb-2 font-serif text-2xl md:text-3xl">
-                {locale === 'fr' ? 'Tableaux comparatifs' : 'Comparison tables'}
+                {/* TODO i18n Phase 1c-β: migrate to next-intl. */}
+                {pickByLocale(locale, 'Tableaux comparatifs', 'Comparison tables')}
               </h2>
               {guide.tables.map((tab) => (
                 <EditorialTable key={tab.key} table={tab} locale={locale} />
@@ -381,9 +401,12 @@ export default async function GuidePage({
               <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.highlightsTitle}</h2>
               <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {guide.highlights.map((h, i) => {
-                  const name = locale === 'fr' ? h.name_fr : h.name_en || h.name_fr;
-                  const desc =
-                    locale === 'fr' ? h.description_fr : h.description_en || h.description_fr;
+                  const name = pickByLocale(locale, h.name_fr, h.name_en || h.name_fr);
+                  const desc = pickByLocale(
+                    locale,
+                    h.description_fr,
+                    h.description_en || h.description_fr,
+                  );
                   return (
                     <li
                       key={`${h.type}-${i}`}
@@ -399,7 +422,8 @@ export default async function GuidePage({
                           rel="noopener noreferrer"
                           className="text-fg/70 mt-2 inline-block text-xs underline hover:no-underline"
                         >
-                          {locale === 'fr' ? 'En savoir plus →' : 'Read more →'}
+                          {/* TODO i18n Phase 1c-β: migrate to next-intl. */}
+                          {pickByLocale(locale, 'En savoir plus →', 'Read more →')}
                         </a>
                       ) : null}
                     </li>
@@ -417,9 +441,11 @@ export default async function GuidePage({
                 <div>
                   <dt className="text-muted text-xs uppercase tracking-wide">{t.bestTimeLabel}</dt>
                   <dd className="text-fg/90 mt-1 text-sm">
-                    {locale === 'fr'
-                      ? guide.practical_info.best_time_fr
-                      : guide.practical_info.best_time_en || guide.practical_info.best_time_fr}
+                    {pickByLocale(
+                      locale,
+                      guide.practical_info.best_time_fr,
+                      guide.practical_info.best_time_en || guide.practical_info.best_time_fr,
+                    )}
                   </dd>
                 </div>
                 <div>
@@ -429,9 +455,11 @@ export default async function GuidePage({
                 <div>
                   <dt className="text-muted text-xs uppercase tracking-wide">{t.languagesLabel}</dt>
                   <dd className="text-fg/90 mt-1 text-sm">
-                    {locale === 'fr'
-                      ? guide.practical_info.languages_fr
-                      : guide.practical_info.languages_en}
+                    {pickByLocale(
+                      locale,
+                      guide.practical_info.languages_fr,
+                      guide.practical_info.languages_en,
+                    )}
                   </dd>
                 </div>
                 {guide.practical_info.airports.length > 0 ? (
@@ -449,7 +477,7 @@ export default async function GuidePage({
                             ) : null}
                             {' — '}
                             <span>
-                              {locale === 'fr' ? a.distance_fr : a.distance_en || a.distance_fr}
+                              {pickByLocale(locale, a.distance_fr, a.distance_en || a.distance_fr)}
                             </span>
                           </li>
                         ))}
@@ -468,7 +496,9 @@ export default async function GuidePage({
                           <li key={`${s.name}-${i}`}>
                             <span className="font-medium">{s.name}</span>
                             {' — '}
-                            <span>{locale === 'fr' ? s.notes_fr : s.notes_en || s.notes_fr}</span>
+                            <span>
+                              {pickByLocale(locale, s.notes_fr, s.notes_en || s.notes_fr)}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -485,8 +515,8 @@ export default async function GuidePage({
               <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.faqTitle}</h2>
               <div className="space-y-3">
                 {globalFaq.map((f, i) => {
-                  const q = locale === 'fr' ? f.question_fr : f.question_en;
-                  const a = locale === 'fr' ? f.answer_fr : f.answer_en;
+                  const q = pickByLocale(locale, f.question_fr, f.question_en);
+                  const a = pickByLocale(locale, f.answer_fr, f.answer_en);
                   return (
                     <details
                       key={`g-faq-${i}`}
@@ -510,9 +540,10 @@ export default async function GuidePage({
               <p className="text-muted mb-6 text-sm">{t.relatedSubtitle(palaces.length)}</p>
               <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {palaces.map((h) => {
-                  const slug = locale === 'en' && h.slug_en !== null ? h.slug_en : h.slug;
-                  const name = locale === 'fr' ? h.name : (h.name_en ?? h.name);
-                  const desc = locale === 'fr' ? h.description_fr : h.description_en;
+                  // V2 locales fall back to FR slug/name/description.
+                  const slug = pickByLocale(locale, h.slug, h.slug_en ?? h.slug);
+                  const name = pickByLocale(locale, h.name, h.name_en ?? h.name);
+                  const desc = pickLocalizedText(locale, h.description_fr, h.description_en);
                   return (
                     <li
                       key={h.slug}

@@ -2,8 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { type SupportedLocale } from '@/i18n/supported-locale';
-import { assertNever } from '@/lib/assert-never';
+import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export type { SupportedLocale };
@@ -186,22 +185,11 @@ export interface DestinationDetail {
 }
 
 function pickName(row: HotelGroupRow, locale: SupportedLocale): string {
-  switch (locale) {
-    case 'fr':
-      return row.name;
-    case 'en': {
-      const en = row.name_en;
-      return en !== null && en.length > 0 ? en : row.name;
-    }
-    case 'de':
-    case 'es':
-    case 'it':
-      // No `name_<locale>` column yet — fall back to FR until migration
-      // 0034 (cf. ADR-0012, runbook Phase 3). Documented silent fallback.
-      return row.name;
-    default:
-      return assertNever(locale);
-  }
+  // The FR-side column is the unprefixed `name` (not `name_fr`), so we
+  // can't use `pickLocalizedText` directly — `pickByLocale` lets us
+  // express "FR/DE/ES/IT take the FR column, EN takes name_en with FR
+  // fallback".
+  return pickByLocale(locale, row.name, row.name_en ?? row.name);
 }
 
 function pickSlugEn(row: HotelGroupRow): string {
@@ -210,29 +198,7 @@ function pickSlugEn(row: HotelGroupRow): string {
 }
 
 function pickDescription(row: HotelGroupRow, locale: SupportedLocale): string {
-  let primary: string | null;
-  let fallback: string | null;
-  switch (locale) {
-    case 'fr':
-      primary = row.description_fr;
-      fallback = row.description_en;
-      break;
-    case 'en':
-      primary = row.description_en;
-      fallback = row.description_fr;
-      break;
-    case 'de':
-    case 'es':
-    case 'it':
-      // No `description_<locale>` column yet — fall back to FR until
-      // migration 0034 (cf. ADR-0012, runbook Phase 3).
-      primary = row.description_fr;
-      fallback = row.description_en;
-      break;
-    default:
-      return assertNever(locale);
-  }
-  const raw = (primary ?? fallback ?? '').trim();
+  const raw = (pickLocalizedText(locale, row.description_fr, row.description_en) ?? '').trim();
   if (raw.length === 0) return '';
   const max = 180;
   if (raw.length <= max) return raw;

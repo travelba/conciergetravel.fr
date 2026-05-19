@@ -2,7 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { assertNever } from '@/lib/assert-never';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getFakeRoomBySlug } from '@/server/hotels/dev-fake-room-detail';
@@ -12,44 +12,6 @@ import {
   type HotelDetail,
   type SupportedLocale,
 } from '@/server/hotels/get-hotel-by-slug';
-
-/**
- * Local mirror of `get-hotel-by-slug.ts#pickLocalizedText` — V2 locales
- * (DE/ES/IT) fall back to the FR column until migration 0034 lands.
- * Re-implemented here rather than imported to avoid polluting the
- * hotel-detail module's public API.
- */
-function pickLocalizedText(
-  locale: SupportedLocale,
-  fr: string | null | undefined,
-  en: string | null | undefined,
-): string | null {
-  switch (locale) {
-    case 'fr':
-    case 'de':
-    case 'es':
-    case 'it':
-      return fr ?? en ?? null;
-    case 'en':
-      return en ?? fr ?? null;
-    default:
-      return assertNever(locale);
-  }
-}
-
-function pickByLocale<T>(locale: SupportedLocale, frBranch: T, enBranch: T): T {
-  switch (locale) {
-    case 'fr':
-    case 'de':
-    case 'es':
-    case 'it':
-      return frBranch;
-    case 'en':
-      return enBranch;
-    default:
-      return assertNever(locale);
-  }
-}
 
 /**
  * Detailed room row consumed by `/hotel/[slug]/chambres/[roomSlug]` —

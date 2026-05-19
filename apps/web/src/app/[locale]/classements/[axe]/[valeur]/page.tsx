@@ -10,6 +10,7 @@ import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
@@ -188,10 +189,13 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
   const path = `/classements/${axe}/${valeur}`;
   const canonical = `${origin}${withLocalePath(locale, path)}`;
   const axeLabel = AXE_LABEL[axe][locale];
-  const heading =
-    locale === 'fr'
-      ? `Classements ${axeLabel} : ${resolved.label}`
-      : `${axeLabel.replace(/^by /u, '')} rankings: ${resolved.label}`;
+  // TODO i18n Phase 1c-β: migrate heading templates to next-intl. V2
+  // locales fall back to the FR phrasing for now.
+  const heading = pickByLocale(
+    locale,
+    `Classements ${axeLabel} : ${resolved.label}`,
+    `${axeLabel.replace(/^by /u, '')} rankings: ${resolved.label}`,
+  );
 
   const latestUpdate = resolved.matches.reduce<string | null>((acc, r) => {
     if (r.updatedAt === null) return acc;
@@ -217,7 +221,8 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
         name: heading,
         items: resolved.matches.map((r) => ({
           // Title selection stays locale-aware (data layer) — see ADR-0012.
-          name: locale === 'fr' ? r.titleFr : (r.titleEn ?? r.titleFr),
+          // V2 locales fall back to FR until migration 0034.
+          name: pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr),
           url: `${origin}${withLocalePath(locale, `/classement/${r.slug}`)}`,
         })),
       },
@@ -247,11 +252,8 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {resolved.matches.map((r) => {
-            const title = locale === 'fr' ? r.titleFr : (r.titleEn ?? r.titleFr);
-            const summary =
-              locale === 'fr'
-                ? (r.factualSummaryFr ?? null)
-                : (r.factualSummaryEn ?? r.factualSummaryFr ?? null);
+            const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
+            const summary = pickLocalizedText(locale, r.factualSummaryFr, r.factualSummaryEn);
             return (
               <li
                 key={r.slug}

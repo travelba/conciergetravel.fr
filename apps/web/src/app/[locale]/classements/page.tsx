@@ -10,6 +10,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
   listPublishedRankings,
@@ -246,11 +247,8 @@ export default async function RankingsIndexPage({
 
   const cards = rankings.map((r) => ({
     slug: r.slug,
-    title: locale === 'fr' ? r.titleFr : (r.titleEn ?? r.titleFr),
-    subtitle:
-      locale === 'fr'
-        ? (r.factualSummaryFr ?? null)
-        : (r.factualSummaryEn ?? r.factualSummaryFr ?? null),
+    title: pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr),
+    subtitle: pickLocalizedText(locale, r.factualSummaryFr, r.factualSummaryEn),
     entryCount: r.entryCount,
     // Pre-rendered to avoid passing a function across the RSC ↔ Client
     // Component boundary (Next.js refuses).
@@ -292,13 +290,14 @@ export default async function RankingsIndexPage({
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       {
-        // TODO i18n: migrate hardcoded breadcrumb labels to next-intl messages
-        // (tracked separately from Phase 1b URL-prefix codemod).
-        name: locale === 'fr' ? 'Accueil' : 'Home',
+        // TODO i18n Phase 1c-β: migrate hardcoded breadcrumb labels to
+        // next-intl messages. The `pickByLocale` keeps DE/ES/IT aligned
+        // with the FR data fallback policy until those messages exist.
+        name: pickByLocale(locale, 'Accueil', 'Home'),
         url: `${origin}${withLocalePath(locale, '/')}`,
       },
       {
-        name: locale === 'fr' ? 'Classements' : 'Rankings',
+        name: pickByLocale(locale, 'Classements', 'Rankings'),
         url: `${origin}${withLocalePath(locale, '/classements')}`,
       },
     ]),

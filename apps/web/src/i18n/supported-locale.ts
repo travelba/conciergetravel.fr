@@ -1,3 +1,5 @@
+import { assertNever } from '@/lib/assert-never';
+
 /**
  * `SupportedLocale` — canonical type for the **data layer**.
  *
@@ -39,4 +41,61 @@ export type V1Locale = 'fr' | 'en';
  */
 export function isV1Locale(locale: SupportedLocale): locale is V1Locale {
   return locale === 'fr' || locale === 'en';
+}
+
+/**
+ * Picks a localized text field with the V2 fallback policy.
+ *
+ * - FR → `fr ?? en ?? null`
+ * - EN → `en ?? fr ?? null`
+ * - DE / ES / IT → `fr ?? en ?? null` (FR fallback during the migration
+ *   window — `*_translations` rows for these locales do not exist
+ *   yet, cf. [ADR-0012](../../../../docs/adr/0012-multilingual-db-schema.md)
+ *   §Phase 3).
+ *
+ * Centralising the policy in one place keeps the V2 → Phase 3 transition
+ * surgical: the day translations land, only this function (+ the schema
+ * + a couple of column reads) need to change. Every reader downstream
+ * stays untouched.
+ *
+ * Returns `null` if both inputs are nullish. Pair with `?? defaultValue`
+ * at the call site when the caller needs a guaranteed string.
+ */
+export function pickLocalizedText(
+  locale: SupportedLocale,
+  fr: string | null | undefined,
+  en: string | null | undefined,
+): string | null {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return fr ?? en ?? null;
+    case 'en':
+      return en ?? fr ?? null;
+    default:
+      return assertNever(locale);
+  }
+}
+
+/**
+ * Picks one of two branches based on locale, with the same V2 fallback
+ * policy as `pickLocalizedText`. Use for non-text branches —
+ * candidate-key arrays, single-column picks without a fallback chain,
+ * SQL column names, or anywhere the FR/EN branches are not simple
+ * `string | null` cells.
+ */
+export function pickByLocale<T>(locale: SupportedLocale, frBranch: T, enBranch: T): T {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return frBranch;
+    case 'en':
+      return enBranch;
+    default:
+      return assertNever(locale);
+  }
 }

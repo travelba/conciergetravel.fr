@@ -9,6 +9,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
@@ -172,11 +173,11 @@ export default async function BrandPage({
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {hotels.map((h) => {
           // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
-          const slug = locale === 'en' && h.slugEn !== null ? h.slugEn : h.slugFr;
+          // V2 locales fall back to FR until migration 0034.
+          const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
           const href = withLocalePath(locale, `/hotel/${slug}`);
-          const name = locale === 'en' && h.nameEn !== null ? h.nameEn : h.nameFr;
-          const descSource =
-            locale === 'en' && h.descriptionEn !== null ? h.descriptionEn : h.descriptionFr;
+          const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
+          const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
           const desc =
             descSource !== null && descSource.length > 200
               ? `${descSource.slice(0, 197).trimEnd()}…`

@@ -39,13 +39,13 @@ function recapPath(locale: Locale): string {
   return withLocalePath(locale, '/reservation/recap');
 }
 
-// FIXME pre-existing bug: the FR branch points at `/reservation/recherche`
-// which does not exist (404). The EN branch points at `/recherche?expired=1`
-// (correct). Left as-is to keep this codemod byte-for-byte; fix in a
-// dedicated PR (the right URL is almost certainly `/recherche?expired=1`
-// for both locales — same as `recap/page.tsx#expiredPath`).
+// Aligned with `recap/page.tsx#expiredPath`: both locales point at the
+// canonical search page with the expired flag. Phase 1c-α — fixes the
+// pre-existing FR-branch typo (`/reservation/recherche` 404) and the
+// hard-coded EN prefix that bypassed `withLocalePath` (would break for
+// V2 locales de/es/it).
 function expiredPath(locale: Locale): string {
-  return locale === 'fr' ? '/reservation/recherche?expired=1' : `/${locale}/recherche?expired=1`;
+  return withLocalePath(locale, '/recherche?expired=1');
 }
 
 async function submitAction(formData: FormData): Promise<void> {

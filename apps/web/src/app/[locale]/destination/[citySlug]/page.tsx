@@ -9,6 +9,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sentiments-batch';
@@ -136,8 +137,9 @@ export default async function DestinationHubPage({
         // shape so we don't dilute the structured-data signal.
         const stars = narrowStars(h.stars);
         // Slug selection stays locale-aware (data-layer concern) until
-        // ADR-0012 Phase 3 — see docs/runbooks/i18n-v2-rollout.md.
-        const hotelSlugForLocale = locale === 'en' ? h.slugEn : h.slug;
+        // ADR-0012 Phase 3 — see docs/runbooks/i18n-v2-rollout.md. V2
+        // locales fall back to the FR slug until migration 0034.
+        const hotelSlugForLocale = pickByLocale(locale, h.slug, h.slugEn);
         return {
           name: h.name,
           url: `${origin}${withLocalePath(locale, `/hotel/${hotelSlugForLocale}`)}`,
@@ -240,7 +242,7 @@ export default async function DestinationHubPage({
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {destination.hotels.map((hotel) => {
-            const slugForLocale = locale === 'en' ? hotel.slugEn : hotel.slug;
+            const slugForLocale = pickByLocale(locale, hotel.slug, hotel.slugEn);
             const rating =
               hotel.amadeusHotelId !== null
                 ? (ratingsByAmadeusId.get(hotel.amadeusHotelId) ?? null)

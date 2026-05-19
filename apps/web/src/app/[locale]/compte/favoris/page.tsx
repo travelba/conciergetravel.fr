@@ -7,6 +7,7 @@ import { FavoriteRemoveButton } from '@/components/account/favorite-remove-butto
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getOptionalUser } from '@/server/auth/session';
 import { listUserFavorites, type FavoriteListItem } from '@/server/account/list-favorites';
@@ -29,20 +30,18 @@ export async function generateMetadata({
 }
 
 function pickHotelName(hotel: FavoriteListItem['hotels'], locale: Locale): string {
-  if (locale === 'en' && hotel.name_en !== null && hotel.name_en !== '') return hotel.name_en;
-  return hotel.name;
+  const enName = hotel.name_en !== null && hotel.name_en !== '' ? hotel.name_en : hotel.name;
+  return pickByLocale(locale, hotel.name, enName);
 }
 
 function hotelHref(hotel: FavoriteListItem['hotels'], locale: Locale): string {
-  const slug =
-    locale === 'en' && hotel.slug_en !== null && hotel.slug_en !== '' ? hotel.slug_en : hotel.slug;
+  const enSlug = hotel.slug_en !== null && hotel.slug_en !== '' ? hotel.slug_en : hotel.slug;
+  const slug = pickByLocale(locale, hotel.slug, enSlug);
   return `/hotel/${slug}`;
 }
 
 function pickDescription(hotel: FavoriteListItem['hotels'], locale: Locale): string | null {
-  const primary = locale === 'fr' ? hotel.description_fr : hotel.description_en;
-  const fallback = locale === 'fr' ? hotel.description_en : hotel.description_fr;
-  return primary ?? fallback;
+  return pickLocalizedText(locale, hotel.description_fr, hotel.description_en);
 }
 
 function truncate(text: string, max: number): string {

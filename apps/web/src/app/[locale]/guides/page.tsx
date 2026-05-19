@@ -9,6 +9,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 
@@ -116,13 +117,14 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       {
-        // TODO i18n: migrate hardcoded breadcrumb labels to next-intl messages
-        // (tracked separately from Phase 1b URL-prefix codemod).
-        name: locale === 'fr' ? 'Accueil' : 'Home',
+        // TODO i18n Phase 1c-β: migrate hardcoded breadcrumb labels to
+        // next-intl messages. The `pickByLocale` keeps DE/ES/IT aligned
+        // with the FR data fallback policy until those messages exist.
+        name: pickByLocale(locale, 'Accueil', 'Home'),
         url: `${origin}${withLocalePath(locale, '/')}`,
       },
       {
-        name: locale === 'fr' ? 'Guides' : 'Guides',
+        name: 'Guides',
         url: `${origin}${withLocalePath(locale, '/guides')}`,
       },
     ]),
@@ -147,8 +149,8 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
             <h2 className="text-fg mb-4 font-serif text-xl md:text-2xl">{t.scope[scope]}</h2>
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((g) => {
-                const name = locale === 'fr' ? g.nameFr : (g.nameEn ?? g.nameFr);
-                const summary = locale === 'fr' ? g.summaryFr : (g.summaryEn ?? g.summaryFr);
+                const name = pickByLocale(locale, g.nameFr, g.nameEn ?? g.nameFr);
+                const summary = pickByLocale(locale, g.summaryFr, g.summaryEn ?? g.summaryFr);
                 return (
                   <li
                     key={g.slug}
@@ -161,7 +163,8 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
                       <h3 className="text-fg font-medium">{name}</h3>
                       <p className="text-muted mt-2 line-clamp-3 text-sm">{summary}</p>
                       <p className="text-fg/70 mt-3 text-xs underline">
-                        {locale === 'fr' ? 'Lire le guide →' : 'Read the guide →'}
+                        {/* TODO i18n Phase 1c-β: migrate to next-intl messages. */}
+                        {pickByLocale(locale, 'Lire le guide →', 'Read the guide →')}
                       </p>
                     </Link>
                   </li>

@@ -2,8 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { type SupportedLocale } from '@/i18n/supported-locale';
-import { assertNever } from '@/lib/assert-never';
+import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
@@ -17,59 +16,6 @@ import {
 import { getFakeHotelDetailBySlug } from '@/server/hotels/dev-fake-hotel-detail';
 
 export type { SupportedLocale };
-
-/**
- * Picks a localized text field with the V2 fallback policy.
- *
- * - FR → `fr ?? en ?? null`
- * - EN → `en ?? fr ?? null`
- * - DE / ES / IT → `fr ?? en ?? null` (FR fallback during the migration
- *   window — `hotel_translations` rows for these locales do not exist
- *   yet, cf. [ADR-0012](../../../../docs/adr/0012-multilingual-db-schema.md)
- *   §Phase 3).
- *
- * Centralising the policy in one place keeps the V2 → Phase 3 transition
- * surgical: the day translations land, only this function (+ the schema
- * + a couple of column reads) need to change. Every reader downstream
- * stays untouched.
- */
-function pickLocalizedText(
-  locale: SupportedLocale,
-  fr: string | null | undefined,
-  en: string | null | undefined,
-): string | null {
-  switch (locale) {
-    case 'fr':
-    case 'de':
-    case 'es':
-    case 'it':
-      return fr ?? en ?? null;
-    case 'en':
-      return en ?? fr ?? null;
-    default:
-      return assertNever(locale);
-  }
-}
-
-/**
- * Picks one of two branches based on locale, with the same V2 fallback
- * policy as `pickLocalizedText`. Use for non-text branches —
- * candidate-key arrays, single-column picks without a fallback chain,
- * SQL column names, etc.
- */
-function pickByLocale<T>(locale: SupportedLocale, frBranch: T, enBranch: T): T {
-  switch (locale) {
-    case 'fr':
-    case 'de':
-    case 'es':
-    case 'it':
-      return frBranch;
-    case 'en':
-      return enBranch;
-    default:
-      return assertNever(locale);
-  }
-}
 
 const BookingModeSchema = z.enum(['amadeus', 'little', 'email', 'display_only']);
 const PrioritySchema = z.enum(['P0', 'P1', 'P2']);

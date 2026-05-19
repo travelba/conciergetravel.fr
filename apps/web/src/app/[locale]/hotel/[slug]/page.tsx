@@ -36,6 +36,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
@@ -118,17 +119,12 @@ function siteOrigin(): string {
 }
 
 function pickName(row: HotelDetailRow, locale: SupportedLocale): string {
-  if (locale === 'en') {
-    const en = row.name_en ?? null;
-    return en !== null && en.length > 0 ? en : row.name;
-  }
-  return row.name;
+  const enName = row.name_en !== null && row.name_en.length > 0 ? row.name_en : row.name;
+  return pickByLocale(locale, row.name, enName);
 }
 
 function pickDescription(row: HotelDetailRow, locale: SupportedLocale): string | null {
-  const primary = locale === 'fr' ? row.description_fr : row.description_en;
-  const fallback = locale === 'fr' ? row.description_en : row.description_fr;
-  return primary ?? fallback;
+  return pickLocalizedText(locale, row.description_fr, row.description_en);
 }
 
 function truncate(text: string, max: number): string {
@@ -220,8 +216,10 @@ export async function generateMetadata({
   const { row } = detail;
   const name = pickName(row, locale);
   const description = pickDescription(row, locale);
-  const titleOverride = locale === 'fr' ? row.meta_title_fr : row.meta_title_en;
-  const descOverride = locale === 'fr' ? row.meta_desc_fr : row.meta_desc_en;
+  // V2 locales fall back to FR meta until migration 0034 adds the new
+  // `meta_title_<locale>` / `meta_desc_<locale>` columns.
+  const titleOverride = pickLocalizedText(locale, row.meta_title_fr, row.meta_title_en);
+  const descOverride = pickLocalizedText(locale, row.meta_desc_fr, row.meta_desc_en);
 
   const title =
     titleOverride !== null && titleOverride !== ''
@@ -431,7 +429,8 @@ async function renderHotelPage(
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
   const origin = siteOrigin();
   // Slug selection still locale-aware (data layer) — see ADR-0012.
-  const slugForLocale = locale === 'en' ? slugEn : slugFr;
+  // V2 locales reuse the FR slug until `hotels.slug_<locale>` columns exist.
+  const slugForLocale = pickByLocale(locale, slugFr, slugEn);
   const localePath = withLocalePath(locale, `/hotel/${slugForLocale}`);
   const canonicalUrl = `${origin}${localePath}`;
 
