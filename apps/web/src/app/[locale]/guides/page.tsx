@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
@@ -63,7 +63,7 @@ export async function generateMetadata({
   if (!isRoutingLocale(raw)) return {};
   const locale = raw;
   const t = T[locale];
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/guides');
+  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/guides' });
   return {
     title: t.metaTitle,
     description: t.metaDesc,
@@ -109,7 +109,10 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
       name: t.title,
       items: guides.map((g) => ({
         name: g.nameFr,
-        url: `${origin}${withLocalePath(locale, `/guide/${g.slug}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/guide/[citySlug]', params: { citySlug: g.slug } },
+        })}`,
       })),
     }),
   );
@@ -121,11 +124,11 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
         // next-intl messages. The `pickByLocale` keeps DE/ES/IT aligned
         // with the FR data fallback policy until those messages exist.
         name: pickByLocale(locale, 'Accueil', 'Home'),
-        url: `${origin}${withLocalePath(locale, '/')}`,
+        url: `${origin}${getPathname({ locale, href: '/' })}`,
       },
       {
         name: 'Guides',
-        url: `${origin}${withLocalePath(locale, '/guides')}`,
+        url: `${origin}${getPathname({ locale, href: '/guides' })}`,
       },
     ]),
   );

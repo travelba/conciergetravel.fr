@@ -9,7 +9,8 @@ import { RankingsFacets } from '@/components/rankings/rankings-facets';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, hreflangKey, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
@@ -206,7 +207,8 @@ export async function generateMetadata({
   if (!isRoutingLocale(raw)) return {};
   const locale = raw;
   const t = T[locale];
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/classements');
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({ locale: l, href: '/classements' });
   return {
     title: t.metaTitle,
     description: t.metaDesc,
@@ -273,14 +275,17 @@ export default async function RankingsIndexPage({
   const collectionJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.collectionPageJsonLd({
       name: t.title,
-      url: `${origin}${withLocalePath(locale, '/classements')}`,
+      url: `${origin}${getPathname({ locale, href: '/classements' })}`,
       description: t.metaDesc,
       ...(latestUpdate !== null ? { dateModified: latestUpdate } : {}),
       itemList: {
         name: t.title,
         items: cards.map((c) => ({
           name: c.title,
-          url: `${origin}${withLocalePath(locale, `/classement/${c.slug}`)}`,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/classement/[slug]', params: { slug: c.slug } },
+          })}`,
         })),
       },
       inLanguage: hreflangKey(locale),
@@ -294,11 +299,11 @@ export default async function RankingsIndexPage({
         // next-intl messages. The `pickByLocale` keeps DE/ES/IT aligned
         // with the FR data fallback policy until those messages exist.
         name: pickByLocale(locale, 'Accueil', 'Home'),
-        url: `${origin}${withLocalePath(locale, '/')}`,
+        url: `${origin}${getPathname({ locale, href: '/' })}`,
       },
       {
         name: pickByLocale(locale, 'Classements', 'Rankings'),
-        url: `${origin}${withLocalePath(locale, '/classements')}`,
+        url: `${origin}${getPathname({ locale, href: '/classements' })}`,
       },
     ]),
   );

@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
@@ -100,7 +100,7 @@ export async function generateMetadata({
 
   const title = hasForeign ? t.metaTitleWorld : t.metaTitleFrance;
   const description = hasForeign ? t.metaDescWorld : t.metaDescFrance;
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/hotels');
+  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/hotels' });
   return {
     title,
     description,
@@ -201,7 +201,10 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
         const slug = pickByLocale(locale, h.slug, h.slug_en ?? h.slug);
         return {
           name: pickByLocale(locale, h.name, h.name_en ?? h.name),
-          url: `${origin}${withLocalePath(locale, `/hotel/${slug}`)}`,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/hotel/[slug]', params: { slug } },
+          })}`,
           ...(isValidStarRating(stars) ? { hotel: { starRating: stars } } : {}),
         };
       }),

@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
 
@@ -25,7 +25,7 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
-const canonicalFor = (l: Locale): string => withLocalePath(l, '/destination');
+const canonicalFor = (l: Locale): string => getPathname({ locale: l, href: '/destination' });
 
 export async function generateMetadata({
   params,
@@ -65,7 +65,10 @@ export default async function DestinationDirectoryPage({
       name: t('directory.title'),
       items: cities.map((c) => ({
         name: c.name,
-        url: `${origin}${withLocalePath(locale, `/destination/${c.slug}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
+        })}`,
       })),
     }),
   );
