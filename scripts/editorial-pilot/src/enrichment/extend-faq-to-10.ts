@@ -72,7 +72,7 @@ const FaqGenSchema = z.object({
       }),
     )
     .min(1)
-    .max(10),
+    .max(15),
 });
 
 const SYSTEM_PROMPT = `Tu es éditrice expérimentée pour MyConciergeHotel.com, agence IATA de palaces.
@@ -105,13 +105,33 @@ function buildUserPrompt(hotel: HotelRow, missingCount: number): string {
   ].join('\n');
 }
 
-async function listHotelsNeedingExtension(): Promise<HotelRow[]> {
+async function listHotelsNeedingExtension(opts: {
+  includeDrafts: boolean;
+  slugsFilter?: string[];
+}): Promise<HotelRow[]> {
   const env = loadEnv();
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   const conn = (env.SUPABASE_DB_POOLER_URL ?? '').replace(/\?sslmode=require/, '');
   const cli = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false } });
   await cli.connect();
   try {
+    // Build the where clause. Drafts need to have long_description_sections
+    // populated (i.e. they've been through the 8-pass pipeline) so we don't
+    // waste tokens generating FAQ for stub rows.
+    const wherePublished = opts.includeDrafts
+      ? `(is_published = true or (is_published = false and long_description_sections is not null))`
+      : `is_published = true`;
+    const slugClause =
+      opts.slugsFilter && opts.slugsFilter.length > 0 ? `and slug = ANY($1::text[])` : '';
+    const sql = `
+      select slug, name, city, region, address, description_fr,
+             faq_content, policies, number_of_rooms
+      from hotels
+      where ${wherePublished}
+        and coalesce(jsonb_array_length(faq_content), 0) < 10
+        ${slugClause}
+      order by slug`;
+    const params = opts.slugsFilter && opts.slugsFilter.length > 0 ? [opts.slugsFilter] : [];
     const { rows } = await cli.query<{
       slug: string;
       name: string;
@@ -122,13 +142,7 @@ async function listHotelsNeedingExtension(): Promise<HotelRow[]> {
       faq_content: FaqItem[] | null;
       policies: Record<string, unknown> | null;
       number_of_rooms: number | null;
-    }>(`
-      select slug, name, city, region, address, description_fr,
-             faq_content, policies, number_of_rooms
-      from hotels
-      where is_published = true
-        and coalesce(jsonb_array_length(faq_content), 0) < 10
-      order by slug`);
+    }>(sql, params);
     return rows;
   } finally {
     await cli.end();
@@ -137,9 +151,16 @@ async function listHotelsNeedingExtension(): Promise<HotelRow[]> {
 
 type FaqGenItems = z.infer<typeof FaqGenSchema>['items'];
 
-async function extendOne(openai: OpenAI, model: string, hotel: HotelRow): Promise<FaqGenItems> {
+async function extendOne(
+  openai: OpenAI,
+  model: string,
+  hotel: HotelRow,
+  targetCount = 12,
+): Promise<FaqGenItems> {
   const currentCount = (hotel.faq_content ?? []).length;
-  const missing = Math.max(0, 10 - currentCount + 1); // overshoot by 1
+  // Target the mid-range of CDC §2.11 (10-15) so drafts with 0 FAQs come
+  // out at 12, not pinned to the 10 floor.
+  const missing = Math.max(0, targetCount - currentCount);
   if (missing === 0) return [];
 
   const response = await openai.chat.completions.create({
@@ -199,37 +220,95 @@ function logEntry(o: object): void {
   appendFileSync(RUNLOG, JSON.stringify({ t: new Date().toISOString(), ...o }) + '\n');
 }
 
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const opts = {
+    includeDrafts: false,
+    slugs: undefined as string[] | undefined,
+    target: 12,
+    concurrency: 1,
+  };
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--include-drafts') opts.includeDrafts = true;
+    else if (a === '--slugs' && args[i + 1]) {
+      opts.slugs = args[i + 1]!.split(',').filter(Boolean);
+      i += 1;
+    } else if (a?.startsWith('--target=')) {
+      opts.target = parseInt(a.slice('--target='.length), 10);
+    } else if (a?.startsWith('--concurrency=')) {
+      opts.concurrency = parseInt(a.slice('--concurrency='.length), 10);
+    }
+  }
+  return opts;
+}
+
+async function processOne(
+  openai: OpenAI,
+  h: HotelRow,
+  i: number,
+  total: number,
+  target: number,
+): Promise<{ slug: string; ok: boolean; ms: number; added?: number; error?: string }> {
+  const before = (h.faq_content ?? []).length;
+  const start = Date.now();
+  process.stdout.write(`[${i + 1}/${total}] ${h.slug} (${before}) ... `);
+  try {
+    const items = await extendOne(openai, 'gpt-4o-mini', h, target);
+    await persistFaqExtension(h, items);
+    const ms = Date.now() - start;
+    console.log(`✓ +${items.length} in ${(ms / 1000).toFixed(1)}s`);
+    return { slug: h.slug, ok: true, ms, added: items.length };
+  } catch (e) {
+    const ms = Date.now() - start;
+    const err = (e as Error).message;
+    console.log(`✗ ${err}`);
+    return { slug: h.slug, ok: false, ms, error: err };
+  }
+}
+
 async function main(): Promise<void> {
   const env = loadEnv();
   const apiKey = env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY missing');
   const openai = new OpenAI({ apiKey });
 
-  const hotels = await listHotelsNeedingExtension();
-  console.log(`[faq-extend] ${hotels.length} hotels with FAQ < 10`);
+  const opts = parseArgs();
+  const hotels = await listHotelsNeedingExtension({
+    includeDrafts: opts.includeDrafts,
+    ...(opts.slugs ? { slugsFilter: opts.slugs } : {}),
+  });
+  console.log(
+    `[faq-extend] ${hotels.length} hotels with FAQ < 10 (includeDrafts=${opts.includeDrafts}, target=${opts.target}, concurrency=${opts.concurrency})`,
+  );
 
   let ok = 0;
   let fail = 0;
-  for (let i = 0; i < hotels.length; i++) {
-    const h = hotels[i]!;
-    const before = (h.faq_content ?? []).length;
-    const start = Date.now();
-    process.stdout.write(`[${i + 1}/${hotels.length}] ${h.slug} (${before}) ... `);
-    try {
-      const items = await extendOne(openai, 'gpt-4o-mini', h);
-      await persistFaqExtension(h, items);
-      const ms = Date.now() - start;
-      console.log(`✓ +${items.length} in ${(ms / 1000).toFixed(1)}s`);
-      ok += 1;
-      logEntry({ slug: h.slug, ok: true, ms, added: items.length });
-    } catch (e) {
-      const ms = Date.now() - start;
-      const err = (e as Error).message;
-      console.log(`✗ ${err}`);
-      fail += 1;
-      logEntry({ slug: h.slug, ok: false, ms, error: err });
+
+  if (opts.concurrency <= 1) {
+    for (let i = 0; i < hotels.length; i += 1) {
+      const r = await processOne(openai, hotels[i]!, i, hotels.length, opts.target);
+      if (r.ok) ok += 1;
+      else fail += 1;
+      logEntry(r);
     }
+  } else {
+    // Simple pool: dispatch `concurrency` jobs at a time.
+    let cursor = 0;
+    async function worker() {
+      while (cursor < hotels.length) {
+        const i = cursor;
+        cursor += 1;
+        const r = await processOne(openai, hotels[i]!, i, hotels.length, opts.target);
+        if (r.ok) ok += 1;
+        else fail += 1;
+        logEntry(r);
+      }
+    }
+    const workers = Array.from({ length: opts.concurrency }, () => worker());
+    await Promise.all(workers);
   }
+
   console.log(`\n━━━ Summary: ${ok}/${hotels.length} extended, ${fail} failed`);
 }
 

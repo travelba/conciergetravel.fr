@@ -23,12 +23,15 @@
  */
 
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Client } from 'pg';
 import { config as loadDotenv } from 'dotenv';
 
 loadDotenv({ path: resolve(process.cwd(), '../../.env.local') });
+
+const localRequire = createRequire(import.meta.url);
 
 interface DraftRow {
   readonly slug: string;
@@ -187,14 +190,21 @@ async function listDrafts(args: CliArgs): Promise<readonly DraftRow[]> {
   }
 }
 
-// Windows + spawn(shell:true) routes args through cmd.exe, which interprets
-// `&`, `|`, `<`, `>`, `^` as command separators *even inside double quotes*.
-// Hotels named "Hôtel & Spa" silently truncate to "Hôtel" → "Missing --city".
-// We caret-escape these chars so cmd preserves the original token.
-function escapeWinArg(arg: string): string {
-  if (process.platform !== 'win32') return arg;
-  return arg.replace(/([&|<>^])/gu, '^$1');
+// Bypass the pnpm wrapper entirely on Windows: pnpm.ps1 + cmd.exe mangle
+// args containing `&`, `|`, `<`, `>` even when caret-escaped (PowerShell
+// re-interprets before they reach cmd's caret-aware parser). We invoke node
+// + tsx directly with shell:false so args travel as a real argv array and
+// no shell touches them.
+//
+// tsx ships a `bin` entry but its CLI is `dist/cli.mjs`, which isn't in the
+// package's exports map. Resolve the package's main entrypoint first, then
+// walk to `dist/cli.mjs` from the resolved package directory.
+function resolveTsxCli(): string {
+  const pkgPath = localRequire.resolve('tsx/package.json');
+  return resolve(pkgPath, '..', 'dist', 'cli.mjs');
 }
+
+const TSX_BIN = resolveTsxCli();
 
 function runBuildBriefManual(
   row: DraftRow,
@@ -203,28 +213,27 @@ function runBuildBriefManual(
 ): Promise<{ ok: boolean; reason?: string }> {
   return new Promise((resolveP) => {
     const args = [
-      'exec',
-      'tsx',
+      TSX_BIN,
       'src/enrichment/build-brief-manual.ts',
       row.slug,
       '--name',
-      escapeWinArg(row.name),
+      row.name,
       '--city',
-      escapeWinArg(row.city),
+      row.city,
       '--postal',
       parsed.postal,
       '--address',
-      escapeWinArg(parsed.street),
+      parsed.street,
       '--lat',
       String(row.latitude),
       '--lng',
       String(row.longitude),
     ];
-    if (row.official_url) args.push('--website', escapeWinArg(row.official_url));
+    if (row.official_url) args.push('--website', row.official_url);
     if (row.wikidata_id) args.push('--qid', row.wikidata_id);
     if (row.wikipedia_url_fr) {
       const m = row.wikipedia_url_fr.match(/\/wiki\/(.+)$/u);
-      if (m?.[1]) args.push('--wp', escapeWinArg(decodeURIComponent(m[1]).replace(/_/g, ' ')));
+      if (m?.[1]) args.push('--wp', decodeURIComponent(m[1]).replace(/_/g, ' '));
     }
     if (skipTavily) args.push('--no-tavily');
 
@@ -233,9 +242,9 @@ function runBuildBriefManual(
       EDITORIAL_PILOT_BRIEFS_DIR: 'briefs-auto',
       NODE_TLS_REJECT_UNAUTHORIZED: '0',
     };
-    const child = spawn('pnpm', args, {
+    const child = spawn('node', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
-      shell: process.platform === 'win32',
+      shell: false,
       env,
     });
     let stdout = '';

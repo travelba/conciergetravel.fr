@@ -1,34 +1,40 @@
-# Villa
+# Villa Gallici
 
-À Aix-en-Provence, la Villa incarne l’art de vivre provençal dans un cadre de Palace, classé par Atout France. Son étoile Michelin, décernée à La Table de Pierre Reboul, reflète un engagement inébranlable pour l’excellence culinaire. Les créations du chef, telles que les olives en trompe-l’œil ou la fleur de courgette farcie à la langoustine, jouent sur les sens.
+À Aix-en-Provence, la Villa Gallici offre un havre de quiétude et de gastronomie. Ce Palace, certifié par Atout France, se distingue par ses jardins méditerranéens et par « La Table de Pierre Reboul », son restaurant étoilé. Le chef Pierre Reboul y réinvente les saveurs provençales avec une créativité reconnue par le Guide Michelin. Ici, chaque plat raconte une histoire, des olives en trompe-l'œil à une fleur de courgette farcie à la langoustine.
 
-Située à quelques pas des trésors historiques de la ville, la Villa offre un accès privilégié à des lieux emblématiques comme la Fontaine Bellegarde, à seulement 458 mètres. Ce point d’eau discret, niché sur une petite esplanade, est une halte apaisante lors de vos explorations urbaines. Laissez-vous également séduire par l’Hôtel Estienne de Saint-Jean, chef-d’œuvre architectural à 555 mètres, ou plongez dans l’histoire locale à la Bibliothèque diocésaine Charles de Provenchères.
-
-La Villa est plus qu’une adresse : c’est un point de départ idéal pour redécouvrir la richesse culturelle et gastronomique d’Aix-en-Provence. Chaque détail, des saveurs à l’atmosphère, reflète une Provence authentique et raffinée.
+À quelques pas, découvrez les trésors d'Aix : la Fontaine Bellegarde, les hôtels particuliers ou encore la Bibliothèque diocésaine Charles de Provenchères. La Villa Gallici devient ainsi le point de départ idéal pour explorer l'âme culturelle et architecturale de la ville. Luxe discret et authenticité se conjuguent pour une expérience qui séduit les amateurs de raffinement et de découvertes culinaires.
 
 ## Histoire & héritage
 
-L’histoire documentée de la Villa reste limitée pour l’instant. Cependant, son nom évoque des origines latines, comme l'indique Wikipedia : une villa désignait un domaine foncier regroupant habitations et bâtiments agricoles. À l’époque romaine, ces propriétés se divisaient entre villae rurales et urbaines. (Source : Wikipedia FR, consulté le 19 mai 2026).
+L'historique de la Villa Gallici reste encore enveloppé de mystère. Aucun récit documenté ne précise sa date de création ou les événements marquants qui auraient jalonné son histoire.
+
+## Architecture & design
+
+Les informations disponibles ne permettent pas de définir le style architectural ou les restaurations éventuelles de la Villa Gallici.
+
+## Hébergement
+
+Le mystère entoure également la capacité d'accueil et les spécificités des chambres ou suites de cet hôtel Palace.
 
 ## Restauration
 
-### La Table de Pierre Reboul
+Le restaurant de la Villa Gallici, « La Table de Pierre Reboul », mérite le détour pour ses créations audacieuses. Sous l'influence du chef Pierre Reboul, récompensé d'une étoile Michelin, la gastronomie prend une tournure artistique. Parmi ses plats emblématiques, on trouve des olives en trompe-l'œil qui libèrent une explosion de saveurs en bouche. Une trilogie inventive autour de la crevette méditerranéenne et une fleur de courgette enveloppant une délicate langoustine complètent cette expérience culinaire. Selon le Guide Michelin, ces créations allient finesse et créativité.
 
-Avec une étoile au Guide Michelin, ce restaurant représente l’audace culinaire en revisitant des saveurs méditerranéennes avec créativité. Les olives en trompe-l’œil — qui explosent en bouche — ouvrent le bal des surprises. Suivent la trilogie autour de la crevette méditerranéenne et une étonnante fleur de courgette, farcie de langoustine. Chaque plat témoigne de la vision originale du chef, où le visuel et le goût s’entrelacent. (Source : Guide Michelin, consulté le 19 mai 2026).
+## Bien-être & spa
 
-### Le Feuillée - Le Couvent des Minimes
-
-Louis Gachet, chef étoilé, propose ici une cuisine d'une modernité audacieuse. Ses créations sont portées par des sauces savoureuses, qui équilibrent finesse et force gustative. Selon le Guide Michelin, l'expérience chez Gachet s’apparente à une leçon subtile de textures et de saveurs réinventées. Ce restaurant témoigne de la richesse gastronomique de la Provence. (Source : Guide Michelin, consulté le 19 mai 2026).
+Aucune information spécifique n'est disponible concernant les installations de bien-être à la Villa Gallici.
 
 ## À deux pas
 
-La Villa bénéficie d’une situation centrale à Aix-en-Provence, entourée de sites historiques. À seulement 458 mètres, la Fontaine Bellegarde, située sur une esplanade discrète, offre une pause rafraîchissante lors de balades urbaines. La Bibliothèque diocésaine Charles de Provenchères, à 494 mètres, séduit par ses 60 000 ouvrages accessibles à tous. Pour une touche d’histoire, la Fontaine d'Espéluque, à environ 538 mètres, rappelle les sources médiévales alimentant la ville. Enfin, l’Hôtel Estienne de Saint-Jean, un édifice monumental situé à 555 mètres, impressionne par son architecture imposante.
+La localisation de la Villa Gallici place ses hôtes à proximité de nombreux lieux d'intérêt aixois. À environ 458 mètres, la Fontaine Bellegarde est mentionnée comme un point notable. La Bibliothèque diocésaine Charles de Provenchères, située à environ 494 mètres, renferme un fonds riche de 60 000 documents accessible à tous. Plus loin, à environ 538 mètres, la Fontaine d'Espéluque est une curiosité historique.
+
+Des bâtiments historiques tels que l'Hôtel Estienne de Saint-Jean (555 m) ou l'Hôtel d'Arbaud (742 m) illustrent l'architecture remarquable d'Aix-en-Provence. En matière de gastronomie, Le Divan d'Antioche (662 m) propose des spécialités turques et libanaises. Pour un repas inspiré des classiques du brunch moderne, Brunch'Aila (759 m) est une option appréciée.
 
 ## En pratique
 
-- **Adresse** : 18, 13100 Aix-en-Provence, FR
-- **Classement** : 5 étoiles, distingué Palace par Atout France
+- **Adresse** : 18 Av. de la Violette, 13100 Aix-en-Provence, FR
+- **Classement** : Référencé Palace par Atout France
 
 ## Notre verdict
 
-La Villa promet une immersion dans l’élégance provençale et l’histoire d’Aix-en-Provence. Son statut de Palace et son étoile Michelin soulignent la qualité de l’expérience offerte. Un complément d'informations sur l’hébergement, le bien-être et les services permettrait d’affiner cette impression. Une destination idéale pour les amateurs de gastronomie et de patrimoine.
+La Villa Gallici séduit par son cadre paisible et son restaurant étoilé, reconnu pour sa créativité culinaire. Certains aspects pratiques et historiques restent encore à dévoiler. Cependant, cet établissement offre un potentiel de découvertes pour les amateurs de luxe discret et d'expériences gastronomiques.

@@ -406,6 +406,38 @@ détail JSON pour pilotage. Le critère NEEDS_REGEN englobe :
 
 À relancer après chaque batch push pour suivre la dérive qualitative.
 
+## Rule 11 — Le FR a un échec symétrique (bullet implicite à 47-49 mots)
+
+Audit complémentaire (19 mai 2026, batch 3 + retry session soir) : après
+correction de Rule 10 (EN), **14 fiches** sont tombées en NEEDS_REGEN sur
+`advice_fr < 50w`. Médiane 48w.
+
+Cause racine : **bullet implicite à 3 mini-recommandations**. Le LLM compresse
+le conseil en 3 phrases de 15 mots chacune (« Réservez X, demandez Y, évitez
+Z »), sortant à 47-49 mots — sous le floor par 1-3 mots.
+
+C'est l'image-miroir de Rule 10 : EN trop dense vs FR trop télégraphique.
+
+**Fix appliqué côté prompt Pass 8** (section « Spécificité FR — anti-bullet-list-implicite ») :
+
+- Le LLM doit développer 1 secret opérationnel + 1 justification de ce
+  secret (« pourquoi ») + 1 précision saisonnière OU 1 alternative concrète.
+- Pattern obligatoire : `Mon conseil : <secret> — <raison opérationnelle de
+l'effet>. <Précision saisonnière ou alternative>.`
+- Si premier jet < 50w, **étoffer** la justification, ne pas raccourcir le EN
+  pour rééquilibrer.
+
+**Anti-fix** : ❌ Re-run pipeline complet quand seul concierge_advice fail
+(coût ~$1 vs $0.05 du `run-humanizer.ts`).
+❌ Acceptation tacite des 47-49w en relâchant la Zod à `min(45)` — anéantit
+le contrat ADR-0011 et autorise la dérive bullet implicite.
+
+**Convergence empirique observée** : avec les deux patches (Rule 10 + Rule 11)
+appliqués + 1 retry humanizer, le corpus de 84 drafts passe à **77 PASS /
+7 NEEDS_REGEN (92 %)**. Les 7 résiduels sont long_sentences (4×) +
+banned_terms (2×) + thin brief (1×) — pas advice-driven. Voir
+[`docs/editorial/audit-phaseC-session-2026-05-19.md`](../../docs/editorial/audit-phaseC-session-2026-05-19.md).
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.

@@ -81,6 +81,19 @@ L'anglais est structurellement plus dense que le français : un message identiqu
 
 - **Compte les mots du EN body en l'écrivant**. Si tu arrives à 50, tu n'as pas suivi la méthode : ajoute la précision saisonnière ou l'alternative.
 
+### Spécificité FR — anti-bullet-list-implicite (cause racine identifiée audit 19 mai 2026, batch 3)
+
+14 % des `body` FR sont rejetés à 45-49 mots. Le modèle tend à compresser le conseil en une liste implicite (« Réservez X, demandez Y, évitez Z ») sans étoffer chaque secret. Résultat : trois mini-recommandations à 15 mots, et tu sors à 47 mots.
+
+**Méthode obligatoire pour atteindre 60+ mots en FR** :
+
+- **Cible la médiane 70 mots dès le brouillon.** Si ton premier jet est à 48, **n'enlève pas du EN pour rééquilibrer** — étoffe le FR.
+- **Pattern obligatoire** : 1 secret opérationnel **développé** (avec une raison qui en explique l'effet) + 1 précision saisonnière OU 1 alternative concrète.
+  - ❌ Bullet implicite (47 mots) : « Mon conseil : réservez la chambre 305 côté jardin. Demandez le room service du chef Martin pour le petit-déjeuner. Évitez août, l'établissement est complet trois mois à l'avance. »
+  - ✅ Étoffé (65 mots) : « Mon conseil : réservez la chambre 305 côté jardin — c'est la seule au 3ᵉ étage qui ouvre sur le micocoulier centenaire. Demandez le petit-déjeuner servi en chambre par l'équipe du chef Martin : la viennoiserie sort du four à 7 h 30. Évitez août, l'établissement affiche complet trois mois à l'avance ; la première semaine de septembre reste calme et lumineuse. »
+- **Le "pourquoi" du secret est obligatoire.** Si tu dis « réservez 305 côté jardin », ajoute pourquoi (la seule au 3ᵉ étage qui ouvre sur le micocoulier). Cette justification opérationnelle ajoute 8-12 mots et te place dans l'envelope.
+- **Compte tes mots avant de finaliser**. Si tu es à 48, identifie quel secret manque de justification → ajoute-la. Tu ne dois pas couper, tu dois étoffer.
+
 ### Choix du `tip_for` (enum strict)
 
 - `room` — conseil porte sur une chambre/suite spécifique
@@ -122,7 +135,7 @@ Pas de commentaire. Pas de « Voici la version… ». Pas de markdown fences aut
 
 1. ☐ `lead_concierge` fait 180-220 mots
 2. ☐ Toutes les phrases (lead + 2× body) sont ≤ 25 mots — vérifie en comptant chaque phrase
-3. ☐ `concierge_advice.fr.body` fait 60-90 mots (envelope acceptée 50-110, vise 70)
+3. ☐ `concierge_advice.fr.body` fait 60-90 mots (envelope acceptée 50-110, vise 70) — **étoffé par 1 justification opérationnelle + 1 précision saisonnière/alternative**, pas une liste implicite de 3 mini-recommandations
 4. ☐ `concierge_advice.en.body` fait 60-90 mots (envelope acceptée 50-110, vise 70) — **construit indépendamment du FR avec un 2e détail opérationnel**, pas traduit littéralement
 5. ☐ `concierge_advice.fr.body` ouvre par « Mon conseil : »
 6. ☐ `concierge_advice.en.body` ouvre par « My tip: »

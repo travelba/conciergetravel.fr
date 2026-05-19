@@ -31,15 +31,26 @@
  *     src/concierge/run-shorten-sections.ts --table guides --worst 5
  *   pnpm --filter @mch/editorial-pilot exec tsx \
  *     src/concierge/run-shorten-sections.ts --table rankings --all --concurrency 4
+ *   pnpm --filter @mch/editorial-pilot exec tsx \
+ *     src/concierge/run-shorten-sections.ts --table hotels --slugs slug1,slug2
  *
  * Flags :
- *   --table guides|rankings   (requis)
+ *   --table guides|rankings|hotels  (requis)
  *   --slug <s>                cible un seul item
  *   --slugs s1,s2,s3          cible plusieurs items
  *   --worst N                 prend les N items avec le pire ratio long-sentence
  *   --all                     tous les items publiés
  *   --concurrency N           parallélisme (défaut: 2)
  *   --dry-run                 n'écrit pas en base
+ *
+ * Pour `hotels` :
+ *   - On lit `long_description_sections` (JSONB array de
+ *     `{ key?, type?, title_fr, title_en, body_fr, body_en }`).
+ *   - On shorten uniquement `body_fr` (audit ne flag que le FR ;
+ *     `body_en` est généré par translate-hotels-en.ts une fois le FR figé).
+ *   - On scope la sélection automatique sur les drafts (is_published = false)
+ *     pour ne pas re-toucher les fiches Yonder déjà publiées.
+ *   - Le `--worst` agrège le ratio long-sentence sur l'ensemble des bodies FR.
  */
 
 import path from 'node:path';
@@ -60,7 +71,7 @@ const MAX_WORDS = 25;
 const TOLERANCE_WORDS = 30;
 const DELTA_PCT = 0.15;
 
-type Table = 'guides' | 'rankings';
+type Table = 'guides' | 'rankings' | 'hotels';
 
 interface CliArgs {
   readonly table: Table;
@@ -84,7 +95,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     const a = argv[i];
     if (a === '--table') {
       const v = argv[i + 1];
-      if (v === 'guides' || v === 'rankings') table = v;
+      if (v === 'guides' || v === 'rankings' || v === 'hotels') table = v;
       i += 1;
     } else if (a === '--slug') {
       slug = argv[i + 1] ?? null;
@@ -110,7 +121,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     }
   }
   if (table === null) {
-    throw new Error('Missing --table guides|rankings');
+    throw new Error('Missing --table guides|rankings|hotels');
   }
   return { table, slug, slugs, worst, all, concurrency, dryRun };
 }
@@ -236,6 +247,20 @@ interface RankingRow {
   readonly outro_fr: string | null;
 }
 
+interface HotelSection {
+  readonly key?: string;
+  readonly type?: string;
+  readonly title_fr?: string;
+  readonly title_en?: string;
+  readonly body_fr?: string;
+  readonly body_en?: string;
+}
+
+interface HotelRow {
+  readonly slug: string;
+  readonly long_description_sections: HotelSection[] | null;
+}
+
 async function fetchGuide(client: PgClientLike, slug: string): Promise<GuideRow | null> {
   const r = await client.query<GuideRow>(
     `select slug, summary_fr, sections from public.editorial_guides where slug = $1 limit 1`,
@@ -252,13 +277,38 @@ async function fetchRanking(client: PgClientLike, slug: string): Promise<Ranking
   return r.rows[0] ?? null;
 }
 
+async function fetchHotel(client: PgClientLike, slug: string): Promise<HotelRow | null> {
+  const r = await client.query<HotelRow>(
+    `select slug, long_description_sections from public.hotels where slug = $1 limit 1`,
+    [slug],
+  );
+  return r.rows[0] ?? null;
+}
+
 async function listSlugs(client: PgClientLike, args: CliArgs): Promise<readonly string[]> {
   if (args.slug !== null) return [args.slug];
   if (args.slugs.length > 0) return args.slugs;
-  const table = args.table === 'guides' ? 'editorial_guides' : 'editorial_rankings';
-  const cols = args.table === 'guides' ? 'slug, summary_fr, sections' : 'slug, intro_fr, outro_fr';
+  const tableMap: Record<Table, { name: string; cols: string; whereClause: string }> = {
+    guides: {
+      name: 'editorial_guides',
+      cols: 'slug, summary_fr, sections',
+      whereClause: 'is_published = true',
+    },
+    rankings: {
+      name: 'editorial_rankings',
+      cols: 'slug, intro_fr, outro_fr',
+      whereClause: 'is_published = true',
+    },
+    hotels: {
+      name: 'hotels',
+      cols: 'slug, long_description_sections',
+      // Scope to drafts only — published Yonder fiches stay untouched.
+      whereClause: 'is_published = false and long_description_sections is not null',
+    },
+  };
+  const meta = tableMap[args.table];
   const r = await client.query<Record<string, unknown>>(
-    `select ${cols} from public.${table} where is_published = true order by slug`,
+    `select ${meta.cols} from public.${meta.name} where ${meta.whereClause} order by slug`,
   );
   const ranked = r.rows.map((row) => {
     const text = collectText(args.table, row);
@@ -282,6 +332,18 @@ function collectText(table: Table, row: Record<string, unknown>): string {
     const summary = row['summary_fr'];
     if (typeof summary === 'string') parts.push(summary);
     const sections = row['sections'];
+    if (Array.isArray(sections)) {
+      for (const s of sections) {
+        if (s && typeof (s as { body_fr?: unknown }).body_fr === 'string') {
+          parts.push((s as { body_fr: string }).body_fr);
+        }
+      }
+    }
+    return parts.join('\n\n');
+  }
+  if (table === 'hotels') {
+    const parts: string[] = [];
+    const sections = row['long_description_sections'];
     if (Array.isArray(sections)) {
       for (const s of sections) {
         if (s && typeof (s as { body_fr?: unknown }).body_fr === 'string') {
@@ -477,6 +539,66 @@ async function processRanking(
   };
 }
 
+async function processHotel(
+  client: PgClientLike,
+  llm: Parameters<typeof shortenChunk>[0],
+  slug: string,
+  args: CliArgs,
+): Promise<ShortenResult> {
+  const row = await fetchHotel(client, slug);
+  if (row === null) return base('failed', slug, 'hotel not found');
+
+  const sections = Array.isArray(row.long_description_sections)
+    ? [...row.long_description_sections]
+    : [];
+  const updatedSections: HotelSection[] = [];
+  let totalIn = 0;
+  let totalOut = 0;
+  let processed = 0;
+  let shortenedCount = 0;
+  let failures = 0;
+
+  for (const s of sections) {
+    if (
+      s &&
+      typeof s === 'object' &&
+      typeof s.body_fr === 'string' &&
+      hasLongSentences(s.body_fr)
+    ) {
+      processed += 1;
+      const out = await shortenChunk(llm, s.body_fr);
+      if (out.ok) {
+        shortenedCount += 1;
+        totalIn += out.tokens.input;
+        totalOut += out.tokens.output;
+        updatedSections.push({ ...s, body_fr: out.shortened });
+        continue;
+      } else {
+        failures += 1;
+      }
+    }
+    updatedSections.push(s);
+  }
+
+  if (processed === 0) return base('skipped', slug, 'no long sentences');
+
+  if (!args.dryRun && shortenedCount > 0) {
+    await client.query(
+      `update public.hotels set long_description_sections = $1, updated_at = now() where slug = $2`,
+      [JSON.stringify(updatedSections), slug],
+    );
+  }
+
+  return {
+    slug,
+    status: failures === 0 ? 'ok' : 'partial',
+    chunksProcessed: processed,
+    chunksShortened: shortenedCount,
+    tokens: { input: totalIn, output: totalOut },
+    ...(failures > 0 ? { reason: `${failures} chunk(s) failed validation` } : {}),
+  };
+}
+
 function base(status: ShortenResult['status'], slug: string, reason?: string): ShortenResult {
   return {
     slug,
@@ -528,10 +650,10 @@ async function main(): Promise<void> {
   const t0 = Date.now();
   const results = await runWithConcurrency(slugs, args.concurrency, async (slug) => {
     try {
-      const r =
-        args.table === 'guides'
-          ? await processGuide(client, llm, slug, args)
-          : await processRanking(client, llm, slug, args);
+      let r: ShortenResult;
+      if (args.table === 'guides') r = await processGuide(client, llm, slug, args);
+      else if (args.table === 'rankings') r = await processRanking(client, llm, slug, args);
+      else r = await processHotel(client, llm, slug, args);
       const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
       const tok = `${r.tokens.input}+${r.tokens.output}t`;
       console.log(
