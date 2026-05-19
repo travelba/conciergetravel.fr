@@ -52,6 +52,12 @@ export interface LlmExtractOptions<Schema extends z.ZodTypeAny> {
   readonly schema: Schema;
   /** Override the default extraction model. */
   readonly model?: string;
+  /**
+   * Override the default `max_tokens` budget (default 2000, ≈ 4 KB of output).
+   * Bump to 8000+ when extracting long lists (e.g. 100 hotels = ~12 K tokens of
+   * JSON). Going past max_tokens silently truncates the JSON → JSON.parse fails.
+   */
+  readonly maxOutputTokens?: number;
 }
 
 export interface LlmExtractResult<T> {
@@ -96,7 +102,7 @@ export async function llmExtract<Schema extends z.ZodTypeAny>(
   const response = await client.chat.completions.create({
     model,
     temperature: 0,
-    max_tokens: 2000,
+    max_tokens: opts.maxOutputTokens ?? 2000,
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: systemPrompt },
@@ -106,6 +112,13 @@ export async function llmExtract<Schema extends z.ZodTypeAny>(
 
   const choice = response.choices[0];
   if (!choice || !choice.message.content) {
+    return null;
+  }
+  if (choice.finish_reason === 'length') {
+    console.warn(
+      `[llm-extract] OUTPUT TRUNCATED (finish_reason=length) for context="${opts.context}". ` +
+        `Bump maxOutputTokens above ${opts.maxOutputTokens ?? 2000}.`,
+    );
     return null;
   }
 

@@ -438,6 +438,174 @@ Reference: `scripts/editorial-pilot/src/guides/{run-guides-v2,audit-v2-status,in
 Always run the runner with **continue-on-failure** (Rule 6) so a partial
 scale run still leaves successfully-generated content in place.
 
+## Rule 12-bis — Detect `finish_reason === 'length'` (silent truncation)
+
+OpenAI returns `finish_reason: 'length'` when the model hit `max_tokens`
+before completing the JSON. Without an explicit check, the truncated
+JSON reaches `JSON.parse` → "Unexpected end of JSON input" → null
+returned by `llmExtract` → silent data loss.
+
+**Always add the check inside the extraction helper:**
+
+```ts
+const choice = response.choices[0];
+if (!choice || !choice.message.content) return null;
+
+if (choice.finish_reason === 'length') {
+  console.warn(
+    `[llm-extract] OUTPUT TRUNCATED (finish_reason=length) for context="${opts.context}". ` +
+      `Bump maxOutputTokens above ${opts.maxOutputTokens ?? 2000}.`,
+  );
+  return null; // surface as a clear warning, never as a parse error
+}
+
+let json: unknown;
+try {
+  json = JSON.parse(choice.message.content);
+} catch {
+  console.warn(`[llm-extract] JSON parse failed for context="${opts.context}"`);
+  return null;
+}
+```
+
+**Sizing rule of thumb** (gpt-4o-mini, JSON-only output):
+
+- 1 hotel entry with name+city+country+rank ≈ 60 chars JSON ≈ 18 tokens.
+- 100 hotels list ≈ 1 800 tokens, but add 30 % overhead for braces +
+  quotes + repeated field names → ≈ 2 400 tokens minimum.
+- Default `max_tokens: 2000` is **too small** for any list extraction
+  ≥ 50 items. Bump to 8 000 for "extract every hotel on this page"
+  scenarios, 16 000 for "the entire 100-best ranking".
+
+**Real regression (2026-05-19)**: T+L Top-100 hotels page returned only
+10 entries because `max_tokens: 2000` truncated the JSON. Adding the
+`finish_reason` check + raising to `maxOutputTokens: 16000` recovered
+98 entries on the next run. CN Gold List and W50 (138 entries) followed
+the same pattern.
+
+**Reference**: `scripts/editorial-pilot/src/enrichment/llm-extract.ts`
+(`maxOutputTokens` option, `finish_reason` check).
+
+## Rule 12-ter — Anchor-trim huge web pages before LLM extraction
+
+Editorial sites (Travel + Leisure, Condé Nast, NYT) prepend 25-40 k
+chars of navigation, cookie banners, search forms, and "trending"
+sidebars before the actual content. A 90 k-char Tavily extract therefore
+contains < 60 k chars of useful body — the LLM either spends tokens on
+junk or misses the list entirely.
+
+**Pattern: define source-specific anchor strings + slice from the first
+matching anchor:**
+
+```ts
+interface SourceConfig {
+  readonly urls: readonly string[];
+  /** First-occurrence anchors used to skip the prelude. */
+  readonly anchors?: readonly string[];
+}
+
+// At extraction time:
+let start = 0;
+if (source.anchors) {
+  for (const a of source.anchors) {
+    const idx = content.indexOf(a);
+    if (idx >= 0) {
+      start = Math.max(0, idx - 200);
+      break;
+    }
+  }
+}
+const trimmed = content.slice(start, start + 90_000);
+```
+
+Pick anchors that are **specific to the data section** (the first hotel
+name, a numbered "1. " marker, or a section heading). Always keep a 200-
+char lead so the LLM sees a bit of context before the list starts.
+
+**Real regression (2026-05-19)**: T+L `worlds-best-awards-2025-top-100`
+had "andBeyond Bateleur Camp" at offset 34 430. Without anchor-trim,
+the default `slice(0, 36000)` left only 1 500 chars of actual list →
+LLM saw 10 hotels, not 100.
+
+## Rule 12-quater — Tavily can't render JS-only pages: keep editorial fallbacks
+
+Some flagship sources (e.g. `theworlds50besthotels.com`) ship a
+client-side-only rendering. Even `extract_depth: 'advanced'` returns
+nothing but the navigation skeleton. Don't burn credits retrying.
+
+**Pattern: declare 1-2 known-good third-party article URLs as
+fallbacks for each award/list source:**
+
+```ts
+{
+  key: 'w50',
+  urls: [
+    // Canonical (works as of 2026-05)
+    'https://www.theworlds50best.com/hotels/list/1-50',
+    'https://www.theworlds50best.com/hotels/list/51-100',
+    // Editorial fallbacks — same data, plain HTML
+    'https://thedotmagazine.com/the-worlds-50-best-hotels-2025-announced-...',
+    'https://theluxurytravelexpert.com/the-worlds-50-best-hotels-list/',
+    'https://robbreport.com/travel/hotels/lists/50-best-hotels-1236896449/',
+  ],
+}
+```
+
+The dedupe pass (Rule 4: post-validation) merges overlapping mentions
+into one entity per key. Net win: zero data loss when the canonical site
+breaks, no manual intervention needed.
+
+## Rule 12-quinquies — `gpt-4o-mini` invents enum values: relax + map
+
+`gpt-4o-mini` constantly hallucinates "obviously correct" enum values
+that aren't in the schema:
+
+- `luxury_tier`: invents `ritz_carlton`, `kempinski`, `hilton`,
+  `design_hotels`, `como`, `six_senses`, `waldorf_astoria`, `hyatt`,
+  `bulgari`, `edition`, `one_only`, `oneandonly`, `anantara`, `raffles`,
+  `peninsula`, `dorchester`.
+- `section.type`: invents `overview`, `food`, `cuisine`, `when_to_go`.
+- `country_code`: invents 3-letter ISO codes (`USA`, `GBR`) when the
+  schema asks for alpha-2.
+
+**Pattern: schema relaxes to `z.string()`, post-validation maps to
+allowlist (Rule 4 generalised):**
+
+```ts
+const LUXURY_TIER_VALUES = ['aman', 'belmond', 'four_seasons' /* … */] as const;
+
+const HotelMention = z.object({
+  name: z.string().min(2),
+  luxury_tier: z.string().nullable(), // ← relaxed
+});
+
+const TIER_SET = new Set<string>(LUXURY_TIER_VALUES);
+
+function normaliseLuxuryTier(raw: string | null): (typeof LUXURY_TIER_VALUES)[number] | null {
+  if (!raw) return null;
+  const lc = raw.toLowerCase().trim();
+  if (TIER_SET.has(lc)) return lc as (typeof LUXURY_TIER_VALUES)[number];
+  const map: Record<string, (typeof LUXURY_TIER_VALUES)[number]> = {
+    ritz_carlton: 'ritz_carlton_reserve',
+    hyatt: 'park_hyatt',
+    waldorf_astoria: 'lhw_member',
+    six_senses: 'lhw_member',
+    como: 'lhw_member',
+    /* … */
+  };
+  return map[lc] ?? null; // lose the tier signal, never the hotel
+}
+```
+
+**Real regression (2026-05-19)**: `extract-yonder-intl.ts` initially
+used `z.enum(LUXURY_TIER_VALUES)` and rejected ~15 % of pages with
+`Invalid enum value... received 'ritz_carlton'`. Relaxing to `z.string()`
+
+- post-mapping recovered 74 additional hotels (382 → 456).
+
+**Reference**: `scripts/editorial-pilot/src/yonder/extract-yonder-intl.ts`
+(`HotelMention`, `LUXURY_TIER_SET`, `normaliseLuxuryTier`).
+
 ## Rule 12 — Word-count gates as warnings, not blockers
 
 The generation pipeline computes word counts and warns under thresholds
@@ -466,6 +634,10 @@ The rule prevents the worst pathology: a pipeline silently producing
 - ❌ Generation pipeline that retries on schema-fail without changing input → wastes credits, hits same drift.
 - ❌ Empty string `''` instead of `'AUTO_DRAFT'` for missing facts → invisible in DB, no fact-check signal.
 - ❌ Scaling on 100 items before piloting on 3 → 100× the cost of any mistake.
+- ❌ Calling `JSON.parse(choice.message.content)` without first checking `choice.finish_reason === 'length'` → silent truncation reported as a parse error, no fix until someone reads the raw output.
+- ❌ Default `max_tokens: 2000` on any list-extraction call → catastrophic truncation at ≥ 50 items (gpt-4o-mini outputs ~25 tokens per JSON entry).
+- ❌ Tavily-extract on a JS-rendered single-page-app without a known third-party article fallback → silent zero-hotel runs.
+- ❌ Hard `z.enum(LUXURY_TIER_VALUES)` directly on LLM output (or any open-ended brand/category enum) → 10-15 % data loss per run from invented values.
 
 ## References
 

@@ -318,3 +318,141 @@ goulot d'étranglement au moment du publish (gate ≥ 30 photos).
    hotelMatch immédiat.
 
 Réponse souhaitée : option(s) à lancer (1/2/3/4 combinables).
+
+---
+
+## 10. Suite — 19 mai 2026 (réponse user : "fait le 1, le 3 et le 4")
+
+### Décision 3 — `rankings:bulk` (11 regen sur les 30 candidates)
+
+- 11 rankings sous le seuil ≥ 3 500 mots ont été relancés.
+- **6 / 11 passent ≥ 3 500 mots** après regen. Les 5 autres restent capés
+  par l'inventaire d'hôtels publiés (3-9 entries seulement, le LLM ne
+  pouvant pas inventer du contenu factuel pour des hôtels absents du
+  catalogue).
+- Log : `scripts/editorial-pilot/runs/rankings-bulk-regen-*.log`.
+
+### Décision 4 — `guides:bulk` (10 nouveaux guides Phase F)
+
+- 10 drafts générés (`pays-basque`, `sologne`, `sud-ouest`, `hauts-de-france`,
+  `occitanie`, `pays-de-la-loire`, `lac-leman`, `vexin`, `ile-de-france-region`,
+  `auvergne-rhone-alpes`).
+- **Audit qualité** (`audit-guides-drafts.mjs`) : FR ≥ 3 500 mots ✓, EN
+  ~4-5 % du FR (stub voulu, voir Rule 2 bis du skill
+  `concierge-voice-pipeline`), FAQ 10-15 Q&A ✓, banned terms = 0.
+- **Shortener obligatoire** (lesson capturée) : 40 phrases > 25 mots
+  avant shortener → 8.8 phrases / guide en moyenne après (2.7× baseline
+  des 30 guides déjà publiés).
+- **Publish ratchet** : les 10 drafts sont passés `is_published = true`
+  via `publish-guide-drafts.mjs` (40 guides publiés au total).
+
+### Phase C — 17 fiches Yonder Tier 1 (bonus exécuté avant le réveil)
+
+| Métrique                                     | Résultat                                             |
+| -------------------------------------------- | ---------------------------------------------------- |
+| Slugs visés initialement                     | 30 (top citations Yonder + 5★ publiés)               |
+| Trouvés en base                              | 16 / 30 (14 slugs étaient spéculatifs)               |
+| Drafts éligibles (avec prérequis)            | 41 / 167                                             |
+| Doublons retirés (vs publiés + intra-drafts) | 24                                                   |
+| **Drafts pipelinés (clean unique set)**      | **17**                                               |
+| Briefs construits (`build-yonder-briefs.ts`) | 17 / 17 ✓                                            |
+| Fiches 8-passes générées (gpt-4o-2024-11-20) | **17 / 17 ✓**                                        |
+| Wall-time                                    | 22 min 31 s (cible 2 h 15 — pipeline parallélisable) |
+| Coût LLM réel                                | ~$18 (estimé $21)                                    |
+| Linter final                                 | 17 / 17 CLEAN (blocker 0, high 0)                    |
+| Pass 8 Concierge voice appliqué              | 17 / 17 ✓ (advice FR 41-69 mots, EN 41-57)           |
+
+**Slugs livrés** (`docs/editorial/pilots/*.md`) :
+
+`bvlgari-hotel-paris`, `hotel-molitor-paris-mgallery`, `castel-marie-louise`,
+`hotel-crillon-le-brave`, `domaine-les-crayeres`, `burgundy`,
+`hotel-hermitage-monte-carlo`, `bus-palladium`, `hotel-cap-estel`,
+`hotel-de-sers`, `hotel-metropole-monte-carlo`, `hotel-martinez`,
+`hotel-sax-paris`, `hotel-barriere-le-majestic`, `hotel-barriere-le-normandy`,
+`abbaye-des-vaux-de-cernay`, `hotel-montalembert`.
+
+### Gaps connus avant push Supabase (pas un bug pipeline, à arbitrer)
+
+1. **Adresses tronquées** sur drafts Yonder (champ `address` importé sans
+   nom de rue → pipeline propage honnêtement `"30, 75008 Paris"`).
+   Capture : skill `content-enrichment-pipeline` Rule 3 bis.
+2. **`history` low-confidence** sur les hôtels sans `wikidata_id` (boutiques
+   récents) — déclenche du contenu "à confirmer" honnête mais publish-blocker.
+3. **Photos** : aucune disponible (blocage Cloudinary Décision 1).
+   Pas bloquant pour la fiche markdown, bloquant pour le publish (gate ≥ 30
+   photos côté Payload).
+
+### Décisions qui T'ATTENDENT au prochain réveil
+
+1. **Cloudinary** : toujours en attente (option A/B/C/D — recommandation
+   reste D).
+2. **Push Supabase des 17 fiches** : on écrit dans `hotels.long_description_fr/_en`,
+   `hotels.factual_summary_fr/_en`, `hotels.faq` ? (Aujourd'hui les fiches
+   sont en markdown disque uniquement.) Nécessite un script
+   `push-pilot-fiches.ts` (~30 min de dev) + arbitrage des 3 gaps ci-dessus.
+3. **Phase C batch 2** : 24 drafts éligibles restants après dédup
+   (sud-est + sud-ouest + Paris non couverts), ~$18 et 25 min.
+4. **`translate-guides-en.ts`** (gap connu Rule 2 bis) : prioriser pour
+   sortir le SEO EN sur les 40 guides ?
+
+Capitalisations capturées cette nuit :
+
+- `concierge-voice-pipeline` Rule 2 bis (translate-guides-en gap) + Rule 3 bis (shortener pre-publish).
+- `content-enrichment-pipeline` Rule 3 bis (Yonder addresses truncated).
+
+---
+
+## 11. Session 19 mai 2026 — après-midi (user : "push supabase et phase C, on laisse cloudinary de cote")
+
+### Push Supabase des 22 fiches pilote
+
+Nouveau script [`push-pilot-fiches.mjs`](../../scripts/editorial-pilot/push-pilot-fiches.mjs) :
+
+- Parse `output/<slug>/08-concierge-voice.md` (markdown final post-pass-8).
+- Dérive `long_description_sections` (JSONB array) avec anchors stables
+  (`presentation`, `histoire`, `architecture`, `experience`, `restauration`,
+  `bien-etre`, `a-deux-pas`, `service`).
+- Push aussi `concierge_advice` depuis `08-concierge-advice.json`.
+- Skip le bloc `## En pratique` (donnée déjà structurée en colonnes).
+- Respecte le ratchet `is_published` — jamais touché.
+- Validation pré-push : `concierge_advice.fr.body` ∈ [40-130 mots] sinon warning.
+
+Résultat : **22 fiches pushées** (17 Phase C batch 1 + 5 pilotes pré-existants en `output/` : `cheval-blanc-saint-tropez`, `hotel-du-cap-eden-roc`, `le-bristol-paris`, `le-negresco-nice`, `plaza-athenee-paris`).
+
+### Phase C batch 2 — 15 fiches Yonder (17 candidats, 2 schema failures)
+
+Nouveau script [`list-batch2-candidates.mjs`](../../scripts/editorial-pilot/list-batch2-candidates.mjs) qui cross-check les Wikidata Q-id contre les drafts batch 1 (catche les variantes Yonder ratées au premier dédup, ex. `sax-paris` ↔ `hotel-sax-paris`).
+
+| Métrique                                                | Valeur                                               |
+| ------------------------------------------------------- | ---------------------------------------------------- |
+| Top-tier candidates (wd + lat/lng + url)                | 41                                                   |
+| Skipped batch 1                                         | 17                                                   |
+| Skipped Q-id dupes (vs batch 1 + publiés + intra-batch) | 7                                                    |
+| **Net candidates batch 2**                              | **17**                                               |
+| Briefs build (cached + new)                             | 15 (8 new + 7 cached batch 1 leftovers)              |
+| Briefs FAILED (`BriefSchema`)                           | 2 (`la-reserve-de-beaulieu`, `le-maybourne-riviera`) |
+| Pipeline 8-passes                                       | **15 / 15 ✓**                                        |
+| Wall-time pipeline                                      | 20 min 11 s                                          |
+| Coût LLM réel                                           | ~$16                                                 |
+| Linter final                                            | 15 / 15 CLEAN (blocker 0, high 0)                    |
+| Pass 8 Concierge voice                                  | 15 / 15 ✓ (advice FR 43-67 mots, EN 41-52)           |
+| Push Supabase                                           | **15 / 15 ✓**                                        |
+
+**Slugs livrés batch 2 :** `four-seasons-georges-v`, `hotel-de-crillon`, `hotel-royal`, `saint-james-paris`, `fouquet-s-paris`, `grand-hotel-du-palais-royal`, `hotel-raphael`, `hotel-vernet`, `intercontinental-paris-le-grand`, `jiva-hill-resort`, `maison-souquet`, `monte-carlo-beach`, `sofitel-paris-le-faubourg`, `soho-house-paris`, `villa-belrose`.
+
+État DB après cette session : **138 hôtels avec sections + advice** (106 publiés inchangés + 32 drafts).
+
+### Capitalisation supplémentaire
+
+- `concierge-voice-pipeline` **Rule 9** ajoutée : le 8-pass pipeline n'écrit PAS en base. Deux scripts complémentaires : `push-pipeline-advice.mjs` (advice seul) et `push-pilot-fiches.mjs` (fiche complète). Anti-pattern fréquent : laisser le markdown sur disque et oublier le push → fiche prod vide.
+
+### Reste à faire
+
+| Item                                                             | Statut                                                     | Estimation                            |
+| ---------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------- |
+| Cloudinary                                                       | en attente arbitrage user                                  | option D recommandée                  |
+| `la-reserve-de-beaulieu` + `le-maybourne-riviera` brief failures | NEEDS_FIX                                                  | investigate `BriefSchema` upstream    |
+| Phase C batch 3                                                  | drafts restants top-tier ≈ 30 (sud-ouest + IdF hors Paris) | ~$30, 40 min                          |
+| Audit éditorial des 32 drafts pushés                             | NEEDS_USER_REVIEW                                          | qualité variable selon enrichissement |
+| Adresses Yonder tronquées (Rule 3 bis content-enrichment)        | NEEDS_FIX upstream                                         | publish-blocker tant que pas résolu   |
+| `translate-guides-en.ts` (Rule 2 bis concierge-voice)            | NEEDS_DEV                                                  | gap systémique EN sur 40 guides       |

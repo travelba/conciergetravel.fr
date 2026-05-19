@@ -89,3 +89,9 @@ scripts/editorial-pilot/briefs-auto/
 scripts/editorial-pilot/data/
 docs/editorial/pilots-auto/
 docs/editorial/showcase/
+
+# Editorial pilot — pipeline data dumps (raw fetches, dedupe outputs, scaffold SQL); reproducible from scripts
+scripts/editorial-pilot/yonder/
+scripts/editorial-pilot/global-sources/
+scripts/editorial-pilot/runs/
+scripts/editorial-pilot/*.mjs

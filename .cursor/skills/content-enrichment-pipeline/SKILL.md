@@ -82,6 +82,40 @@ If DATAtourisme returns no match, fall back to a **manual entry** path
 (`--no-datatourisme` CLI flag) with explicit source labels:
 `"Manual entry — Atout France Palace registry"`.
 
+### Rule 3 bis — Yonder-imported drafts often have truncated addresses
+
+The Phase E Yonder import populated `public.hotels.address` from a free-text
+field in the legacy site; for many entries the street name is missing and
+only the street number survives (e.g. `"30"` instead of
+`"30 avenue George V"`). When you build briefs for Yonder drafts via
+`scripts/editorial-pilot/src/phaseC/build-yonder-briefs.ts`, the parsed
+address propagates verbatim into the brief and into pass-1 prose — the
+generated fiche then renders `"Adresse : 30, 75008 Paris"`, which is a
+visible publication blocker.
+
+Diagnosis:
+
+```ts
+// scripts/editorial-pilot/inspect-drafts.mjs (one-off)
+select slug, address from public.hotels
+ where source = 'yonder' and address ~ '^\d+,'  -- starts with digits + comma
+```
+
+Mitigation before push (do **not** invent street names):
+
+1. Cross-check against DATAtourisme via Wikidata `P6375` (street address) or
+   `P669` + `P670` (street + number) when the hotel has a `wikidata_id`.
+2. For palaces without Wikidata, scrape the official site `Contact` page via
+   Tavily Extract and pin the address with a "manual review" sentinel.
+3. Block publish (`is_published = false`) until the address is editorially
+   validated. The brief builder must surface this as a
+   `verification_required_before_publication` entry, not silently emit a
+   truncated address.
+
+The generation LLM is told to keep `"En pratique"` faithful to the brief, so
+fixing the brief is the only durable fix — touching the markdown by hand
+diverges from the source of truth and will be overwritten on the next regen.
+
 ## Rule 4 — Wikidata: SPARQL is the API, not REST
 
 Wikidata's REST has rate limits and incomplete property coverage. Always

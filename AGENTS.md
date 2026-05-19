@@ -59,12 +59,13 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 
 ### Structural decisions already taken (don't relitigate without an ADR)
 
-| Decision                                                               | Reference                                                  |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Hotel URL = `/hotel/<slug>` (flat slug, against CDC §3.3)              | [ADR-0008](docs/adr/0008-url-structure-hotel-flat.md)      |
-| Room sub-pages `/hotel/<slug>/chambres/<room-slug>` indexable          | [ADR-0009](docs/adr/0009-hotel-room-subpages-indexable.md) |
-| ISR via auth client island (hotel + destination = `revalidate = 3600`) | [ADR-0007](docs/adr/0007-isr-via-auth-client-island.md)    |
-| Locales V1 = `fr` + `en` ; V2 = +es/de/it ; V3 = +ar/zh/ja             | `.cursor/skills/seo-technical/SKILL.md`                    |
+| Decision                                                                                                  | Reference                                                                                                   |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Hotel URL = `/hotel/<slug>` (flat slug, against CDC §3.3)                                                 | [ADR-0008](docs/adr/0008-url-structure-hotel-flat.md)                                                       |
+| Room sub-pages `/hotel/<slug>/chambres/<room-slug>` indexable                                             | [ADR-0009](docs/adr/0009-hotel-room-subpages-indexable.md)                                                  |
+| ISR via auth client island (hotel + destination = `revalidate = 3600`)                                    | [ADR-0007](docs/adr/0007-isr-via-auth-client-island.md)                                                     |
+| Locales V1 = `fr` + `en` ; V2 = +es/de/it ; V3 = +ar/zh/ja                                                | `.cursor/skills/seo-technical/SKILL.md`                                                                     |
+| International hotels (`country_code != 'FR'`, `region` nullable, `luxury_tier` CHECK on 19 awards/brands) | `packages/db/migrations/0033_hotels_country_support.sql` + `docs/editorial/yonder-intl-expansion-wakeup.md` |
 
 ## 4. Hard rules (non-negotiable)
 

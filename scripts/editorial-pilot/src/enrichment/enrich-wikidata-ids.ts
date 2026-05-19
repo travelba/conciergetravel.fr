@@ -211,13 +211,34 @@ async function main(): Promise<void> {
   await client.connect();
 
   try {
-    const { rows } = await client.query<HotelRow>(
-      `SELECT slug, name, city, wikidata_id, latitude::text, longitude::text
+    // `MCH_INCLUDE_DRAFTS=1` allows running the enrichment on draft hotels
+    // (e.g. the 132 Yonder-derived rows scaffolded in May 2026 that are
+    // `is_published=false` until editorial review).
+    const includeDrafts = process.env['MCH_INCLUDE_DRAFTS'] === '1';
+    const onlySlugRaw = process.env['MCH_ONLY_SLUGS'] ?? '';
+    const onlySlugs = onlySlugRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    const filters: string[] = [];
+    const params: unknown[] = [];
+    if (!includeDrafts) {
+      filters.push('is_published = TRUE');
+    }
+    if (onlySlugs.length > 0) {
+      params.push(onlySlugs);
+      filters.push(`slug = ANY($${params.length}::text[])`);
+    }
+    const whereSql = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+    const query = `SELECT slug, name, city, wikidata_id, latitude::text, longitude::text
        FROM public.hotels
-       WHERE is_published = TRUE
-       ORDER BY name;`,
+       ${whereSql}
+       ORDER BY name;`;
+    const { rows } = await client.query<HotelRow>(query, params);
+    console.log(
+      `Enriching ${rows.length} hotels via Wikidata (drafts=${includeDrafts}, slug-filter=${onlySlugs.length})…\n`,
     );
-    console.log(`Enriching ${rows.length} hotels via Wikidata…\n`);
 
     let ok = 0;
     let skipped = 0;
