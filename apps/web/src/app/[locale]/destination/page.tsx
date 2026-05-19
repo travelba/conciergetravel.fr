@@ -11,6 +11,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
+import { listInternationalDestinations } from '@/server/destinations/list-destination-countries';
 
 // The page emits a `JsonLdScript` carrying the per-request CSP nonce
 // (skill: security-engineering §CSP). Reading `headers()` for that nonce
@@ -56,20 +57,42 @@ export default async function DestinationDirectoryPage({
   setRequestLocale(locale);
 
   const t = await getTranslations('destinationPage');
-  const cities = await listPublishedCities();
+  const [cities, countries] = await Promise.all([
+    listPublishedCities(),
+    listInternationalDestinations(locale),
+  ]);
+  // We only surface countries that already have a published country
+  // guide — sending traffic to a deep-link without an editorial landing
+  // page would dilute the directory's curated promise. The remaining
+  // countries are reachable from `/hotels` (the full catalog).
+  const guidedCountries = countries.filter((c) => c.guideSlug !== null);
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  const totalDestinations = cities.length + guidedCountries.length;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
       name: t('directory.title'),
-      items: cities.map((c) => ({
-        name: c.name,
-        url: `${origin}${getPathname({
-          locale,
-          href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
-        })}`,
-      })),
+      items: [
+        ...cities.map((c) => ({
+          name: c.name,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
+          })}`,
+        })),
+        ...guidedCountries.map((c) => ({
+          name: c.name,
+          url: `${origin}${getPathname({
+            locale,
+            // `guideSlug` is non-null in this branch — the filter above
+            // narrows the type for humans, but TS can't see through
+            // `Array.prototype.filter`, hence the assertion-free fallback.
+            href: { pathname: '/guide/[citySlug]', params: { citySlug: c.guideSlug ?? '' } },
+          })}`,
+        })),
+      ],
     }),
   );
 
@@ -82,30 +105,100 @@ export default async function DestinationDirectoryPage({
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">
           {t('directory.title')}
         </h1>
-        <p className="text-muted mt-3">{t('directory.subtitle', { count: cities.length })}</p>
+        <p className="text-muted mt-3">{t('directory.subtitle', { count: totalDestinations })}</p>
       </header>
 
-      {cities.length === 0 ? (
+      {totalDestinations === 0 ? (
         <p className="text-muted text-sm">{t('empty')}</p>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {cities.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={{ pathname: '/destination/[citySlug]', params: { citySlug: c.slug } }}
-                className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
-              >
-                <span>
-                  <span className="text-fg font-serif text-lg">{c.name}</span>
-                  <span className="text-muted ml-2 text-xs">{c.region}</span>
-                </span>
-                <span className="text-muted text-xs">
-                  {t('directory.count', { count: c.count })}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-12">
+          {cities.length > 0 && (
+            <section aria-labelledby="destination-france-heading">
+              <header className="mb-4 flex items-baseline justify-between gap-4">
+                <h2
+                  id="destination-france-heading"
+                  className="text-fg font-serif text-2xl sm:text-3xl"
+                >
+                  {t('directory.franceSection.title')}
+                </h2>
+                <p className="text-muted text-xs">
+                  {t('directory.franceSection.subtitle', { count: cities.length })}
+                </p>
+              </header>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {cities.map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      href={{
+                        pathname: '/destination/[citySlug]',
+                        params: { citySlug: c.slug },
+                      }}
+                      className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
+                    >
+                      <span>
+                        <span className="text-fg font-serif text-lg">{c.name}</span>
+                        <span className="text-muted ml-2 text-xs">{c.region}</span>
+                      </span>
+                      <span className="text-muted text-xs">
+                        {t('directory.count', { count: c.count })}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {guidedCountries.length > 0 && (
+            <section aria-labelledby="destination-world-heading">
+              <header className="mb-4 flex items-baseline justify-between gap-4">
+                <h2
+                  id="destination-world-heading"
+                  className="text-fg font-serif text-2xl sm:text-3xl"
+                >
+                  {t('directory.worldSection.title')}
+                </h2>
+                <p className="text-muted text-xs">
+                  {t('directory.worldSection.subtitle', { count: guidedCountries.length })}
+                </p>
+              </header>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {guidedCountries.map((c) => (
+                  <li key={c.code}>
+                    <Link
+                      href={{
+                        pathname: '/guide/[citySlug]',
+                        params: { citySlug: c.guideSlug ?? '' },
+                      }}
+                      className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
+                    >
+                      <span>
+                        <span className="text-fg font-serif text-lg">{c.name}</span>
+                        <span className="text-muted ml-2 text-xs uppercase tracking-wide">
+                          {c.code}
+                        </span>
+                      </span>
+                      <span className="text-muted text-xs">
+                        {t('directory.worldSection.hotelsCount', { count: c.hotelCount })}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-muted mt-4 text-xs">
+                {t('directory.worldSection.fullCatalogHint', {
+                  count: countries.length - guidedCountries.length,
+                })}{' '}
+                <Link
+                  href="/hotels"
+                  className="text-fg hover:text-fg/80 underline decoration-dotted"
+                >
+                  {t('directory.worldSection.fullCatalogLink')}
+                </Link>
+              </p>
+            </section>
+          )}
+        </div>
       )}
     </main>
   );

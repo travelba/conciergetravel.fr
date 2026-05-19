@@ -347,7 +347,18 @@
     "directory": {
       "title": "All destinations",
       "subtitle": "{count, plural, one {# destination available} other {# destinations available}}.",
-      "count": "{count, plural, one {# hotel} other {# hotels}}"
+      "count": "{count, plural, one {# hotel} other {# hotels}}",
+      "franceSection": {
+        "title": "France — by city",
+        "subtitle": "{count, plural, one {# French city} other {# French cities}}."
+      },
+      "worldSection": {
+        "title": "World — by country",
+        "subtitle": "{count, plural, one {# international country with a guide} other {# international countries with guides}}.",
+        "hotelsCount": "{count, plural, one {# hotel} other {# hotels}}",
+        "fullCatalogHint": "{count, plural, =0 {Our catalog also covers other countries —} one {One more country is represented in our catalog —} other {# more countries are represented in our catalog —}}",
+        "fullCatalogLink": "see every hotel."
+      }
     }
   },
   "hotelPage": {

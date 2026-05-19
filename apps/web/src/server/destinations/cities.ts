@@ -142,16 +142,19 @@ export interface CitySummary {
 }
 
 /**
- * Aggregates the published catalog into city groups. One row per distinct
- * `city` value (case-sensitive — the catalog is editor-curated so casing is
- * stable). Region is taken from the **first** hotel found, since a city
- * never spans regions in the French administrative division we use.
+ * Aggregates the published catalog into French city groups. One row per
+ * distinct `city` value (case-sensitive — the catalog is editor-curated
+ * so casing is stable). Region is taken from the **first** hotel found,
+ * since a city never spans regions in the French administrative
+ * division we use.
  *
- * **Scope** — France-only by design. International rows (country_code ≠
- * 'FR') don't carry a French administrative region and are surfaced via
- * `groupByCountry` on the `/hotels` page instead. Filtering here keeps the
- * `/destination/[city]` hub strictly domestic until the international guide
- * pipeline lands.
+ * **Scope** — French cities only. International countries are surfaced
+ * separately by `listInternationalDestinations` in
+ * `list-destination-countries.ts`, which the `/destination` hub renders
+ * alongside this output as a second "Monde — par pays" section. The
+ * `/destination/[citySlug]` detail page also stays France-only (foreign
+ * destinations route through `/guide/[countrySlug]` instead, since
+ * country guides are far richer than a ville-style hub).
  */
 export async function listPublishedCities(): Promise<readonly CitySummary[]> {
   const all = await fetchAllPublished();

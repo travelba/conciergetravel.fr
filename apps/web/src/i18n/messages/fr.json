@@ -347,7 +347,18 @@
     "directory": {
       "title": "Toutes nos destinations",
       "subtitle": "{count, plural, one {# destination disponible} other {# destinations disponibles}}.",
-      "count": "{count, plural, one {# hôtel} other {# hôtels}}"
+      "count": "{count, plural, one {# hôtel} other {# hôtels}}",
+      "franceSection": {
+        "title": "France — par ville",
+        "subtitle": "{count, plural, one {# ville française} other {# villes françaises}}."
+      },
+      "worldSection": {
+        "title": "Monde — par pays",
+        "subtitle": "{count, plural, one {# pays international avec guide} other {# pays internationaux avec guide}}.",
+        "hotelsCount": "{count, plural, one {# hôtel} other {# hôtels}}",
+        "fullCatalogHint": "{count, plural, =0 {Notre catalogue couvre aussi d'autres pays —} one {Un autre pays est représenté à notre catalogue —} other {# autres pays sont représentés à notre catalogue —}}",
+        "fullCatalogLink": "voir tous les hôtels."
+      }
     }
   },
   "hotelPage": {
