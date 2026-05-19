@@ -1,0 +1,207 @@
+---
+description: Règles pour les pages itinéraire de MyConciergeHotel.com — SEO, GEO, AEO, maillage interne, JSON-LD HowTo + ItemList. Lire avant tout travail sur le segment /itineraire ou /itinerary.
+globs: "apps/web/src/app/**/itineraire*/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Règles — Pages Itinéraire
+
+Spec complète → `docs/cdc-itineraires.md`  
+Pipeline contenu → `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`  
+Règles SEO/GEO transversales → `.cursor/rules/seo-geo.mdc`  
+Voix éditoriale → `.cursor/rules/editorial-voice.mdc` + `EDITORIAL_VOICE.md`
+
+---
+
+## 1. URL & Routing i18n
+
+- Route FR : `/[locale]/itineraire/[slug]` — slug depuis `itineraries.slug_fr`
+- Route EN : `/[locale]/itinerary/[slug]` — slug depuis `itineraries.slug_en`
+- Hub FR : `/[locale]/itineraires` | Hub EN : `/[locale]/itineraries`
+- Définir dans `lib/i18n/routing.ts` > `pathnames` (même pattern que `/recherche` → `/search`) :
+
+```ts
+'/itineraires': { fr: '/itineraires', en: '/itineraries' },
+'/itineraire/[slug]': { fr: '/itineraire/[slug]', en: '/itinerary/[slug]' },
+```
+
+- **Jamais** rediriger `/itinerary/` vers `/itineraire/` — chemins séparés par locale.
+
+---
+
+## 2. `generateMetadata` (obligatoire)
+
+```ts
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  const itinerary = await getItineraryBySlug(slug, locale);
+  if (!itinerary) return { robots: { index: false, follow: false } };
+
+  const canonical = `/${locale}/${
+    locale === 'fr' ? 'itineraire' : 'itinerary'
+  }/${slug}`;
+
+  return {
+    title:       locale === 'fr' ? itinerary.meta_title_fr : itinerary.meta_title_en,
+    description: locale === 'fr' ? itinerary.meta_desc_fr  : itinerary.meta_desc_en,
+    alternates: {
+      canonical,
+      languages: {
+        'fr-FR':    `/fr/itineraire/${itinerary.slug_fr}`,
+        'en':       `/en/itinerary/${itinerary.slug_en ?? itinerary.slug_fr}`,
+        'x-default': `/fr/itineraire/${itinerary.slug_fr}`,
+      },
+    },
+    openGraph: {
+      images: itinerary.hero_cloudinary_id
+        ? [{ url: cloudinaryUrl(itinerary.hero_cloudinary_id, 1200, 630) }]
+        : [],
+    },
+  };
+}
+```
+
+---
+
+## 3. JSON-LD (5 schemas obligatoires)
+
+Émettre via `<JsonLdScript>` — **jamais** de `<script>` inline (violation CSP, cf. `security-engineering`).
+
+### 3.1 HowTo — `packages/seo/src/jsonld/howto.ts`
+
+```ts
+buildHowTo({
+  name:      locale === 'fr' ? itinerary.title_fr : itinerary.title_en,
+  totalTime: `P${itinerary.duration_min_days}D`,
+  steps: itinerary.sections.map((s) => ({
+    name:  locale === 'fr' ? s.title_fr : s.title_en,
+    text:  locale === 'fr' ? s.body_fr  : s.body_en,
+    url:   s.hotel_id ? `/hotel/${hotelSlugMap[s.hotel_id]}` : undefined,
+    image: s.hero_cloudinary_id,
+  })),
+});
+```
+
+### 3.2 ItemList — `packages/seo/src/jsonld/item-list.ts`
+
+Items = hôtels recommandés dans l'ordre `hotel_ids[]`.  
+`item['@type'] = 'Hotel'` ; `item.url = '/hotel/[slug]'`.
+
+### 3.3 FAQPage — `packages/seo/src/jsonld/faq.ts`
+
+Toutes les Q&A de `faq_content` (≥ 8). Premier item rendu `<details open>` dans le DOM.
+
+### 3.4 BreadcrumbList
+
+Accueil → Itinéraires → [Titre de l'itinéraire]
+
+### 3.5 Article
+
+`datePublished` = `created_at` ; `dateModified` = `last_updated` ; `author.name` = auteur.  
+**Interdit** : `AggregateRating` fabriquée. Uniquement si `google_rating` réel ≥ 10 reviews.
+
+---
+
+## 4. AEO Block (obligatoire)
+
+```tsx
+import { buildAeoBlock } from '@mch/seo';
+
+// Valider AVANT le render — throw si invalide (fail fast)
+const aeoResult = buildAeoBlock({
+  question:  locale === 'fr' ? itinerary.aeo_question_fr : itinerary.aeo_question_en,
+  answer:    locale === 'fr' ? itinerary.aeo_answer_fr   : itinerary.aeo_answer_en,
+  sourceUrl: canonicalUrl,
+  updatedAt: itinerary.last_updated,
+});
+if (!aeoResult.ok) {
+  throw new Error(`AEO validation failed: ${JSON.stringify(aeoResult.error)}`);
+}
+```
+
+```tsx
+<section data-aeo aria-labelledby="aeo-heading">
+  <h2 id="aeo-heading" className="sr-only">{aeoResult.value.question}</h2>
+  <p>{aeoResult.value.answer}</p>
+  <LastUpdatedBadge date={aeoResult.value.updatedAt} />
+</section>
+```
+
+---
+
+## 5. Maillage Interne (CRITIQUE pour le SEO)
+
+### 5.1 Liens sortants obligatoires
+
+| Cible | Minimum | Composant | Anchor text |
+|-------|---------|-----------|-------------|
+| `/hotel/[slug]` | 1 par étape | `<ItineraryHotelCard>` | Nom exact de l'hôtel |
+| `/classement/[slug]` | ≥ 2 | `<RelatedRankings>` | Titre du classement |
+| `/guide/[slug]` | ≥ 1 | `<RelatedGuides>` | "Notre guide [Destination]" |
+| `/itineraire/[slug]` | ≥ 2 | `<RelatedItineraries>` | Titre de l'itinéraire |
+| `/itineraires` | 1 | BreadcrumbList | "Tous nos itinéraires" |
+
+### 5.2 Liens entrants à déclencher post-publish
+
+- Guides pays (`/guide/[slug]`) → ajouter bloc "Nos itinéraires pour [Pays]"
+- Fiches hôtels → widget "Cet hôtel dans nos itinéraires" si `hotel_id` ∈ `itineraries.hotel_ids`
+- Navigation principale → lien "Itinéraires" (CSS-only dropdown, même pattern commit `ab79771`)
+
+### 5.3 Anti-cannibalisation
+
+- **Ne jamais coller `description_fr` d'un hôtel** — lien vers la fiche, contextualisation unique ≥ 50 mots
+- `/itineraire/` est distinct de `/guide/` et `/classement/` — pas de doublon de contenu
+- Un hôtel peut apparaître dans plusieurs itinéraires : chaque contexte doit être unique
+
+---
+
+## 6. ISR & Cache
+
+```ts
+export const revalidate = 3600;  // fiche unitaire
+// Hub /itineraires : revalidate = 86400
+
+// unstable_cache — RETOURNER Record<string, …> PAS Map/Set
+// → cf. hotfix commit 4d02187 "fix(web): unbreak /en/destination"
+// Map JSON-sérialise en {} et casse chaque cache hit après le premier in-memory miss
+const data = await unstable_cache(
+  async () => fetchItinerary(slug),  // doit retourner un POJO
+  [`itinerary-${slug}-${locale}`],
+  { tags: [`itinerary-${slug}`, 'itineraries-hub', `itinerary-${country}`], revalidate: 3600 },
+)();
+```
+
+---
+
+## 7. Freshness Signal
+
+```tsx
+<LastUpdatedBadge date={itinerary.last_updated} />
+```
+
+Triple sync obligatoire : visible UI ↔ `sitemap.xml <lastmod>` ↔ JSON-LD `Article.dateModified`.
+
+---
+
+## 8. Checklist PR — 15 points
+
+- [ ] `generateMetadata` présent avec canonical + hreflang FR/EN/x-default
+- [ ] HowTo JSON-LD présent et valide
+- [ ] ItemList JSON-LD présent (hôtels ordonnés)
+- [ ] FAQPage JSON-LD présent (≥ 8 Q&A)
+- [ ] BreadcrumbList JSON-LD présent
+- [ ] Article JSON-LD présent avec `dateModified`
+- [ ] AEO block validé `buildAeoBlock` (40-80 mots)
+- [ ] ≥ 1 lien `/hotel/[slug]` par étape
+- [ ] ≥ 2 liens `/classement/[slug]`
+- [ ] ≥ 1 lien `/guide/[slug]`
+- [ ] ≥ 2 liens `/itineraire/[slug]` similaires
+- [ ] `revalidate = 3600` configuré
+- [ ] `unstable_cache` retourne Record pas Map
+- [ ] `<LastUpdatedBadge />` visible près du H1
+- [ ] Pages non publiées : `robots: { index: false, follow: false }`
+- [ ] 0 texte hôtel dupliqué verbatim depuis les fiches
