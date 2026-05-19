@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { intlLocaleTag } from '@/i18n/runtime';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +55,7 @@ type ConfirmationView =
     };
 
 const fmtPrice = (locale: Locale, amount: number, currency: string): string =>
-  new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,

@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
 
@@ -27,15 +28,15 @@ export async function generateMetadata({
 }
 
 function paymentPath(locale: Locale): string {
-  return locale === 'fr' ? '/reservation/payment' : `/${locale}/reservation/payment`;
+  return withLocalePath(locale, '/reservation/payment');
 }
 
 function expiredPath(locale: Locale): string {
-  return locale === 'fr' ? '/recherche?expired=1' : `/${locale}/recherche?expired=1`;
+  return withLocalePath(locale, '/recherche?expired=1');
 }
 
 const fmtPrice = (locale: Locale, amountMinor: number): string =>
-  new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,

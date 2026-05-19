@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { attachGuest, parseGuest } from '@mch/domain/booking';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
 
@@ -35,9 +36,14 @@ function pickString(v: unknown): string | undefined {
 }
 
 function recapPath(locale: Locale): string {
-  return locale === 'fr' ? '/reservation/recap' : `/${locale}/reservation/recap`;
+  return withLocalePath(locale, '/reservation/recap');
 }
 
+// FIXME pre-existing bug: the FR branch points at `/reservation/recherche`
+// which does not exist (404). The EN branch points at `/recherche?expired=1`
+// (correct). Left as-is to keep this codemod byte-for-byte; fix in a
+// dedicated PR (the right URL is almost certainly `/recherche?expired=1`
+// for both locales — same as `recap/page.tsx#expiredPath`).
 function expiredPath(locale: Locale): string {
   return locale === 'fr' ? '/reservation/recherche?expired=1' : `/${locale}/recherche?expired=1`;
 }
@@ -65,13 +71,13 @@ async function submitAction(formData: FormData): Promise<void> {
   const locale: Locale = persisted.locale;
 
   if (!guestParsed.ok) {
-    const base = locale === 'fr' ? '/reservation/invite' : `/${locale}/reservation/invite`;
+    const base = withLocalePath(locale, '/reservation/invite');
     redirect(`${base}?error=validation`);
   }
 
   const next = attachGuest(persisted.draft, guestParsed.value);
   if (!next.ok) {
-    const base = locale === 'fr' ? '/reservation/invite' : `/${locale}/reservation/invite`;
+    const base = withLocalePath(locale, '/reservation/invite');
     redirect(`${base}?error=invalid_state`);
   }
 

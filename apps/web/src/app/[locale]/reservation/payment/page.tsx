@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
 import { confirmPaymentAndCreateBooking } from '@/server/booking/confirm-payment';
 import { clearDraftCookie, getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft } from '@/server/booking/draft-store';
@@ -27,20 +28,18 @@ export async function generateMetadata({
 }
 
 const fmtPrice = (locale: Locale, amountMinor: number): string =>
-  new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,
   }).format(amountMinor / 100);
 
 function confirmationPath(locale: Locale, ref: string): string {
-  return locale === 'fr'
-    ? `/reservation/confirmation/${encodeURIComponent(ref)}`
-    : `/${locale}/reservation/confirmation/${encodeURIComponent(ref)}`;
+  return withLocalePath(locale, `/reservation/confirmation/${encodeURIComponent(ref)}`);
 }
 
 function paymentPath(locale: Locale, errorKind?: string): string {
-  const base = locale === 'fr' ? '/reservation/payment' : `/${locale}/reservation/payment`;
+  const base = withLocalePath(locale, '/reservation/payment');
   return errorKind !== undefined ? `${base}?error=${encodeURIComponent(errorKind)}` : base;
 }
 

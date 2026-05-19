@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getFakeHotelHead } from '@/server/booking/dev-fake-hotel';
 import { submitEmailBookingRequest } from '@/server/booking/email-request';
@@ -96,9 +97,7 @@ async function fetchHotelHead(
 }
 
 function confirmationPath(locale: Locale, ref: string): string {
-  return locale === 'fr'
-    ? `/reservation/confirmation/${encodeURIComponent(ref)}`
-    : `/${locale}/reservation/confirmation/${encodeURIComponent(ref)}`;
+  return withLocalePath(locale, `/reservation/confirmation/${encodeURIComponent(ref)}`);
 }
 
 function readClientIp(forwardedFor: string | null): string | undefined {
@@ -163,7 +162,7 @@ async function submitAction(formData: FormData): Promise<void> {
     params.set('retryAfter', String(result.error.retryAfterSec));
     params.set('scope', result.error.scope);
   }
-  const base = locale === 'fr' ? '/reservation/start' : `/${locale}/reservation/start`;
+  const base = withLocalePath(locale, '/reservation/start');
   redirect(`${base}?${params.toString()}`);
 }
 
