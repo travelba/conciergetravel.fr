@@ -390,7 +390,12 @@ export interface HotelJsonLdInput {
 export interface SubjectOfInput {
   readonly url: string;
   readonly name?: string;
-  readonly inLanguage?: 'fr' | 'en';
+  /**
+   * BCP-47 language tag (e.g. `fr-FR`, `en`, `de`). Widened to `string`
+   * for V2 locales — Schema.org accepts any valid BCP-47 tag. See
+   * `apps/web/src/i18n/runtime.ts#hreflangKey`.
+   */
+  readonly inLanguage?: string;
   readonly type?: 'Article' | 'CreativeWork' | 'WebPage';
 }
 

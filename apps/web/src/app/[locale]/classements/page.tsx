@@ -9,6 +9,7 @@ import { RankingsFacets } from '@/components/rankings/rankings-facets';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import {
   listPublishedRankings,
@@ -23,10 +24,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -206,23 +203,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) return {};
-  const t = T[raw];
+  const locale = raw;
+  const t = T[locale];
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/classements');
   return {
     title: t.metaTitle,
     description: t.metaDesc,
     alternates: {
-      canonical: raw === 'fr' ? '/classements' : '/en/classements',
-      languages: {
-        'fr-FR': '/classements',
-        en: '/en/classements',
-        'x-default': '/classements',
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t.metaTitle,
       description: t.metaDesc,
       type: 'website',
-      locale: raw === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -280,29 +275,31 @@ export default async function RankingsIndexPage({
   const collectionJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.collectionPageJsonLd({
       name: t.title,
-      url: `${origin}${withLocalePrefix(locale, '/classements')}`,
+      url: `${origin}${withLocalePath(locale, '/classements')}`,
       description: t.metaDesc,
       ...(latestUpdate !== null ? { dateModified: latestUpdate } : {}),
       itemList: {
         name: t.title,
         items: cards.map((c) => ({
           name: c.title,
-          url: `${origin}${withLocalePrefix(locale, `/classement/${c.slug}`)}`,
+          url: `${origin}${withLocalePath(locale, `/classement/${c.slug}`)}`,
         })),
       },
-      inLanguage: locale === 'fr' ? 'fr-FR' : 'en',
+      inLanguage: hreflangKey(locale),
     }),
   );
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       {
+        // TODO i18n: migrate hardcoded breadcrumb labels to next-intl messages
+        // (tracked separately from Phase 1b URL-prefix codemod).
         name: locale === 'fr' ? 'Accueil' : 'Home',
-        url: `${origin}${withLocalePrefix(locale, '/')}`,
+        url: `${origin}${withLocalePath(locale, '/')}`,
       },
       {
         name: locale === 'fr' ? 'Classements' : 'Rankings',
-        url: `${origin}${withLocalePrefix(locale, '/classements')}`,
+        url: `${origin}${withLocalePath(locale, '/classements')}`,
       },
     ]),
   );

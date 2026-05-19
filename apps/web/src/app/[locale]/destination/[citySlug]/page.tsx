@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sentiments-batch';
@@ -28,10 +29,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 /**
@@ -83,24 +80,22 @@ export async function generateMetadata({
 
   const title = t('meta.title', { city: destination.name });
   const description = t('meta.description', { city: destination.name, region: destination.region });
-  const canonical = locale === 'fr' ? `/destination/${citySlug}` : `/en/destination/${citySlug}`;
+  // citySlug is locale-invariant (no localized variant in destination data).
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/destination/${citySlug}`);
+  const canonical = buildCanonicalPath(locale);
 
   return {
     title,
     description,
     alternates: {
       canonical,
-      languages: {
-        'fr-FR': `/destination/${citySlug}`,
-        en: `/en/destination/${citySlug}`,
-        'x-default': `/destination/${citySlug}`,
-      },
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       type: 'website',
       title,
       description,
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
     },
   };
@@ -128,7 +123,7 @@ export default async function DestinationHubPage({
     getAmadeusAggregateRatingsBatch(destination.hotels.map((h) => h.amadeusHotelId)),
   ]);
   const origin = siteOrigin();
-  const pageUrl = `${origin}${withLocalePrefix(locale, `/destination/${citySlug}`)}`;
+  const pageUrl = `${origin}${withLocalePath(locale, `/destination/${citySlug}`)}`;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
@@ -140,9 +135,12 @@ export default async function DestinationHubPage({
         // publishable rating; otherwise keep the lean navigational
         // shape so we don't dilute the structured-data signal.
         const stars = narrowStars(h.stars);
+        // Slug selection stays locale-aware (data-layer concern) until
+        // ADR-0012 Phase 3 — see docs/runbooks/i18n-v2-rollout.md.
+        const hotelSlugForLocale = locale === 'en' ? h.slugEn : h.slug;
         return {
           name: h.name,
-          url: `${origin}${withLocalePrefix(locale, `/hotel/${locale === 'en' ? h.slugEn : h.slug}`)}`,
+          url: `${origin}${withLocalePath(locale, `/hotel/${hotelSlugForLocale}`)}`,
           ...(rating !== null
             ? {
                 hotel: {
@@ -163,17 +161,17 @@ export default async function DestinationHubPage({
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePrefix(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePrefix(locale, '/recherche')}`,
+        url: `${origin}${withLocalePath(locale, '/recherche')}`,
       },
       { name: destination.name, url: pageUrl },
     ]),
   );
 
   // AEO block — short, visible, quotable answer paired with FAQPage JSON-LD.
-  const today = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', {
+  const today = new Intl.DateTimeFormat(intlLocaleTag(locale), {
     dateStyle: 'long',
   }).format(new Date());
   const count = destination.hotels.length;

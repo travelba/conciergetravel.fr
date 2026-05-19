@@ -18,7 +18,14 @@ export interface ArticleJsonLdInput {
   readonly dateModified?: string;
   readonly author: ArticleAuthorInput;
   readonly publisher?: { readonly name: string; readonly logoUrl?: string };
-  readonly inLanguage?: 'fr-FR' | 'en';
+  /**
+   * BCP-47 language tag (e.g. `fr-FR`, `en`, `de`, `es-ES`). Kept as a
+   * widened `string` so V2 locales (DE/ES/IT) work without a schema
+   * bump — Schema.org `inLanguage` accepts any BCP-47 tag. See
+   * `apps/web/src/i18n/runtime.ts#hreflangKey` for the canonical tag
+   * per app locale.
+   */
+  readonly inLanguage?: string;
 }
 
 /**

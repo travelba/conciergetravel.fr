@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
@@ -20,10 +21,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -66,23 +63,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) return {};
-  const t = T[raw];
+  const locale = raw;
+  const t = T[locale];
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/hotels');
   return {
     title: t.metaTitle,
     description: t.metaDesc,
     alternates: {
-      canonical: raw === 'fr' ? '/hotels' : '/en/hotels',
-      languages: {
-        'fr-FR': '/hotels',
-        en: '/en/hotels',
-        'x-default': '/hotels',
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t.metaTitle,
       description: t.metaDesc,
       type: 'website',
-      locale: raw === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -126,7 +121,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
       name: t.title,
       items: hotels.map((h) => ({
         name: h.nameFr,
-        url: `${origin}${withLocalePrefix(locale, `/hotel/${h.slugFr}`)}`,
+        url: `${origin}${withLocalePath(locale, `/hotel/${h.slugFr}`)}`,
         hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
       })),
     }),
@@ -207,8 +202,9 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
 
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((h) => {
+              // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
               const slug = locale === 'en' && h.slugEn !== null ? h.slugEn : h.slugFr;
-              const href = locale === 'en' ? `/en/hotel/${slug}` : `/hotel/${slug}`;
+              const href = withLocalePath(locale, `/hotel/${slug}`);
               const name = locale === 'en' && h.nameEn !== null ? h.nameEn : h.nameFr;
               const descSource =
                 locale === 'en' && h.descriptionEn !== null ? h.descriptionEn : h.descriptionFr;

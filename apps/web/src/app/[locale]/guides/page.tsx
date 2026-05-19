@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 
@@ -17,10 +18,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -63,23 +60,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) return {};
-  const t = T[raw];
+  const locale = raw;
+  const t = T[locale];
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, '/guides');
   return {
     title: t.metaTitle,
     description: t.metaDesc,
     alternates: {
-      canonical: raw === 'fr' ? '/guides' : '/en/guides',
-      languages: {
-        'fr-FR': '/guides',
-        en: '/en/guides',
-        'x-default': '/guides',
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t.metaTitle,
       description: t.metaDesc,
       type: 'website',
-      locale: raw === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -113,7 +108,7 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
       name: t.title,
       items: guides.map((g) => ({
         name: g.nameFr,
-        url: `${origin}${withLocalePrefix(locale, `/guide/${g.slug}`)}`,
+        url: `${origin}${withLocalePath(locale, `/guide/${g.slug}`)}`,
       })),
     }),
   );
@@ -121,12 +116,14 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       {
+        // TODO i18n: migrate hardcoded breadcrumb labels to next-intl messages
+        // (tracked separately from Phase 1b URL-prefix codemod).
         name: locale === 'fr' ? 'Accueil' : 'Home',
-        url: `${origin}${withLocalePrefix(locale, '/')}`,
+        url: `${origin}${withLocalePath(locale, '/')}`,
       },
       {
         name: locale === 'fr' ? 'Guides' : 'Guides',
-        url: `${origin}${withLocalePrefix(locale, '/guides')}`,
+        url: `${origin}${withLocalePath(locale, '/guides')}`,
       },
     ]),
   );
