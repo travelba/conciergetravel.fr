@@ -294,6 +294,68 @@ Ne se déclenche que lors de la **transition** vers publié — un hôtel déjà
   4. Position relative : `#concierge-advice` est au-dessus de la FAQ.
 - Le synthetic hotel ([`apps/web/src/server/hotels/dev-fake-hotel-detail.ts`](../../apps/web/src/server/hotels/dev-fake-hotel-detail.ts)) ship un `concierge_advice` FR + EN dans l'envelope 50-110 mots, gated par `MCH_E2E_FAKE_HOTEL_ID`.
 
+## Rule 9 — Le 8-pass pipeline n'écrit PAS en base, il faut pousser explicitement
+
+Le naming `summary.json.pass_8_advice_persisted: true` est trompeur : il
+signifie uniquement « Pass 8 a été validé et écrit sur disque dans
+`output/<slug>/08-concierge-advice.json` ». **Aucune écriture Supabase**
+n'a lieu pendant la pipeline.
+
+Pour pousser le contenu généré vers la base, deux scripts complémentaires
+existent côté `scripts/editorial-pilot/` :
+
+1. [`push-pipeline-advice.mjs`](../../scripts/editorial-pilot/push-pipeline-advice.mjs) — push **uniquement** `concierge_advice` (JSONB). Utile pour relancer le pass 8 seul sur un hôtel déjà publié.
+2. [`push-pilot-fiches.mjs`](../../scripts/editorial-pilot/push-pilot-fiches.mjs) — push **complet** : parse `08-concierge-voice.md`, dérive `long_description_sections` (un array d'objets `{anchor, title_fr, title_en, body_fr, body_en}`) et écrit en même temps `concierge_advice`. Skip explicite du bloc `## En pratique` (donnée structurée déjà en colonnes dédiées).
+
+**Contrats à respecter dans tout nouveau pusher :**
+
+```ts
+// Ratchet `is_published` : ne JAMAIS flipper true → false.
+// Update ciblé sur les seules colonnes éditoriales, pas les colonnes ARI/booking.
+update public.hotels
+   set long_description_sections = $2::jsonb,
+       concierge_advice = $3::jsonb,
+       updated_at = now()
+ where slug = $1
+```
+
+Parsing markdown :
+
+- Strip le `# <H1>` (titre hôtel) — il vit dans la colonne `name`.
+- Lead paragraphes (avant le premier `##`) → section synthétique
+  `{anchor:'presentation', title_fr:'Présentation', ...}`.
+- Chaque `## Title` → un objet de la liste. Mapping des titres canoniques
+  vers anchors stables (`Histoire & héritage` → `histoire`, etc.) dans le
+  script. Les anchors stables sont **contractuels** côté frontend (TOC,
+  scroll-spy, JSON-LD `Article.hasPart`).
+- `## En pratique` skippé (info répliquée dans les colonnes `address`,
+  `capacity`, `restaurant_info`, `policies`).
+
+Vérification post-push (canonique) :
+
+```sql
+select slug,
+       jsonb_array_length(long_description_sections) as sections,
+       length(concierge_advice::text) as advice_len,
+       concierge_advice->'fr'->>'tip_for' as tip_for,
+       is_published
+  from public.hotels
+ where slug = $1;
+```
+
+Une fiche publiée saine après push :
+
+- `sections >= 8` (présentation + 7 thématiques attendues)
+- `advice_len` entre 700 et 1500 b
+- `tip_for` ∈ `{room, dining, timing, access, service, wellness}`
+- `is_published` inchangé (le push ne flippe rien)
+
+**Anti-pattern fréquent** : laisser le 8-pass écrire le markdown sur
+disque, valider visuellement la fiche `docs/editorial/pilots/<slug>.md`,
+oublier le push. La fiche prod reste vide. Mettre **systématiquement** un
+appel `push-pilot-fiches.mjs --slugs <list>` ou `--all` à la fin du run
+pipeline (ou en step CI).
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.
