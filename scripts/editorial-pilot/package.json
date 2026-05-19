@@ -51,6 +51,10 @@
     "global:scaffold:gr": "tsx src/global-sources/scaffold-guides-rankings-intl.ts",
     "seed:tier1": "tsx src/global-sources/seed-tier1-content.ts",
     "seed:tier1:dry": "tsx src/global-sources/seed-tier1-content.ts --dry-run --limit=5",
+    "enrich:brand": "tsx src/global-sources/enrich-brand-tier1.ts",
+    "enrich:brand:dry": "tsx src/global-sources/enrich-brand-tier1.ts --dry-run --limit=2",
+    "photos:sync:intl": "tsx src/global-sources/photos-sync-intl.ts",
+    "photos:sync:intl:dry": "tsx src/global-sources/photos-sync-intl.ts --dry-run",
     "enrich:wikidata": "tsx src/enrichment/enrich-wikidata-ids.ts",
     "typecheck": "tsc --noEmit"
   },

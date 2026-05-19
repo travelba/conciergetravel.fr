@@ -162,6 +162,84 @@ Never `fetch()` a third-party URL directly: you'll fight bot-protection,
 JavaScript rendering, and dirty HTML. Tavily abstracts all of that and
 returns clean LLM-ready markdown.
 
+### Rule 5 bis — Tavily Extract is blocked on some corporate hotel domains
+
+Discovered the hard way (`scripts/editorial-pilot/src/global-sources/enrich-brand-tier1.ts`,
+2026-05-19): Tavily Extract returns `"Failed to fetch url"` on **every**
+URL under `hyatt.com` family (`hyatt.com`, `park-hyatt-*.hyatt.com`,
+`grand.hyatt.com`, `andaz.hyatt.com`, `hyatt-centric.hyatt.com`) AND
+`starwoodhotels.com` (Westin/Marriott legacy). 11 of 16 Park Hyatt
+hotels in the brand-only Tier 1 batch failed for this exact reason.
+
+Other property-level corporate hotel domains that **do** work with
+`extract_depth: 'advanced'`:
+
+| Domain                 | Status  | Notes                                         |
+| ---------------------- | ------- | --------------------------------------------- |
+| `aman.com`             | ✅ OK   | Returns ~16 k-50 k chars, often JS-heavy      |
+| `fourseasons.com`      | ✅ OK   | Property pages work; brand root returns fluff |
+| `mandarinoriental.com` | ⚠️ OK   | Often returns thin content (anchor_facts=0)   |
+| `ritzcarlton.com`      | ✅ OK   | Property pages work well                      |
+| `rosewoodhotels.com`   | ✅ OK   | Best content density in our sample            |
+| `peninsula.com`        | ✅ OK   | Property pages work                           |
+| `bulgarihotels.com`    | ✅ OK   | Returns marketing-style content though        |
+| `hyatt.com` (any)      | ❌ FAIL | Tavily reliably 4xx / blocked                 |
+| `starwoodhotels.com`   | ❌ FAIL | Same                                          |
+
+**Mitigation** when Extract fails:
+
+1. Fall back to Tavily **Search** with a tight query
+   (`"{hotel name} {city} overview suites restaurants"`).
+2. Filter `includeDomains` to **third-party editorial sources**:
+   `tablethotels.com`, `travelandleisure.com`, `cntraveler.com`,
+   `forbes.com`, `theluxurytravelexpert.com`, `robbreport.com`,
+   `traveler.es`.
+3. Extract from the top 1-2 search results, feed those into the LLM
+   instead of the official site.
+4. Keep the **gate** (Rule 9): if `anchor_facts.length < 2`, refuse the
+   write — preserve the existing seed rather than overwrite with thin
+   prose.
+
+**Anti-pattern that already failed**: do not retry Tavily Extract on
+hyatt.com — the failure is deterministic and burns Tavily credits.
+The `tavily-client.ts` retry policy will run 3 attempts and lose ~3
+credits per blocked URL.
+
+### Rule 5 ter — Pre-flight URL gate: refuse brand-homepage-only URLs
+
+The same enrichment run discovered that 16 of the 66 brand-only hotels
+had `official_url` populated **but** the URL pointed at the brand root
+(e.g. `https://www.fourseasons.com/`, `https://www.mandarinoriental.com/`,
+`http://www.shangri-la.com/`) — not a property-specific page. Running
+Tavily Extract on a brand homepage returns marketing copy about the
+chain ("Discover unforgettable luxury…") with **zero** facts about the
+specific property.
+
+**Pattern** — classify the URL **before** spending a Tavily credit:
+
+```ts
+function classifyUrl(rawUrl: string): { kind: 'ok' | 'skip'; reason?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { kind: 'skip', reason: 'invalid_url' };
+  }
+  const path = parsed.pathname.replace(/\/+$/u, '');
+  if (path === '' || path === '/') return { kind: 'skip', reason: 'url_is_brand_homepage' };
+  if (path.replace(/^\//u, '').length < 3) return { kind: 'skip', reason: 'url_path_too_short' };
+  return { kind: 'ok' };
+}
+```
+
+Path length ≥ 3 chars below root is the cheapest reliable heuristic.
+Tested against the 66 brand hotels: caught 16 brand-root URLs, zero
+false positives among the property-specific URLs (which all had paths
+≥ 7 chars like `/prague`, `/newyorkdowntown`, `/resorts/aman-venice`).
+
+Reference: `scripts/editorial-pilot/src/global-sources/enrich-brand-tier1.ts`
+(`classifyUrl`).
+
 ## Rule 6 — Structured extraction with `gpt-4o-mini`, temperature 0
 
 Generation uses `gpt-4o` at `temperature: 0.4`. **Extraction** is a
@@ -436,6 +514,15 @@ Cron: `.github/workflows/sync-hotel-events.yml` runs every Monday
   source — wastes credits and lowers signal-to-noise.
 - ❌ Writing facts without `sourceUri` + `sourceLabel`.
 - ❌ Non-idempotent enrichment scripts (re-running corrupts data).
+- ❌ Calling Tavily Extract on `hyatt.com` / `starwoodhotels.com` —
+  the domain returns "Failed to fetch url" deterministically. Use Tavily
+  Search → 3rd-party editorial article as fallback. See Rule 5 bis.
+- ❌ Calling Tavily Extract on a brand-homepage URL
+  (`https://www.fourseasons.com/`) without a property path — returns
+  generic marketing fluff. Pre-flight gate the URL (Rule 5 ter).
+- ❌ Overwriting an existing editorial seed with thin LLM output —
+  always gate on `anchor_facts.length >= N` and refuse to write if the
+  LLM couldn't pin down N verbatim quotes (Rule 9 generalised).
 - ❌ Sending Overpass QL as JSON body — must be `data=<QL>` (form-encoded).
 - ❌ Running Overpass with `--concurrency` > 2 — public instance throttles
   hard at ~1 req/s and returns silent timeouts.
