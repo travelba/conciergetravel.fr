@@ -187,6 +187,15 @@ async function listDrafts(args: CliArgs): Promise<readonly DraftRow[]> {
   }
 }
 
+// Windows + spawn(shell:true) routes args through cmd.exe, which interprets
+// `&`, `|`, `<`, `>`, `^` as command separators *even inside double quotes*.
+// Hotels named "Hôtel & Spa" silently truncate to "Hôtel" → "Missing --city".
+// We caret-escape these chars so cmd preserves the original token.
+function escapeWinArg(arg: string): string {
+  if (process.platform !== 'win32') return arg;
+  return arg.replace(/([&|<>^])/gu, '^$1');
+}
+
 function runBuildBriefManual(
   row: DraftRow,
   parsed: ParsedAddress,
@@ -199,23 +208,23 @@ function runBuildBriefManual(
       'src/enrichment/build-brief-manual.ts',
       row.slug,
       '--name',
-      row.name,
+      escapeWinArg(row.name),
       '--city',
-      row.city,
+      escapeWinArg(row.city),
       '--postal',
       parsed.postal,
       '--address',
-      parsed.street,
+      escapeWinArg(parsed.street),
       '--lat',
       String(row.latitude),
       '--lng',
       String(row.longitude),
     ];
-    if (row.official_url) args.push('--website', row.official_url);
+    if (row.official_url) args.push('--website', escapeWinArg(row.official_url));
     if (row.wikidata_id) args.push('--qid', row.wikidata_id);
     if (row.wikipedia_url_fr) {
       const m = row.wikipedia_url_fr.match(/\/wiki\/(.+)$/u);
-      if (m?.[1]) args.push('--wp', decodeURIComponent(m[1]).replace(/_/g, ' '));
+      if (m?.[1]) args.push('--wp', escapeWinArg(decodeURIComponent(m[1]).replace(/_/g, ' ')));
     }
     if (skipTavily) args.push('--no-tavily');
 
