@@ -307,7 +307,12 @@ async function main(): Promise<void> {
       results.push({ slug: d.slug, ok: true, elapsedMs: ms });
     } else {
       console.log(`  ✗ ${d.slug} FAILED — ${r.reason}`);
-      results.push({ slug: d.slug, ok: false, reason: r.reason, elapsedMs: ms });
+      results.push({
+        slug: d.slug,
+        ok: false,
+        ...(r.reason !== undefined ? { reason: r.reason } : {}),
+        elapsedMs: ms,
+      });
     }
   }
 
