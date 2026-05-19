@@ -57,7 +57,56 @@ Conventions:
 - Each phase adds a Postgres column **per per-locale field** (`description_<xx>`, `name_<xx>`, `meta_title_<xx>`, `meta_desc_<xx>`, `slug_<xx>`), a hreflang alternate, and a sitemap segment. CDC §3.4 (8 langues) is **aspirational** and tracked as a roadmap, not a V1 requirement.
 - Translation policy: LLM-generated via the `translate-hotels-<xx>.ts` pattern (calqué sur `translate-hotels-en.ts`), with the **voix Concierge adaptée culturellement** (cf. [concierge-voice-pipeline](../concierge-voice-pipeline/SKILL.md) Pass 8 + Phase 2 prompts). Editorial team reviews a sample of ≥ 10 hotels before publishing the new locale.
 
+### V2 multilingual rollout — état réel (audit mai 2026)
+
+> **STOP — avant d'écrire un mot de contenu DE/ES/IT, lire cette section.**
+> La rule [`seo-geo.mdc`](../../rules/seo-geo.mdc) §Rollout multilingue V2 décrit l'**objectif**. Cette sous-section décrit la **réalité** du code au moment de l'audit. Les deux divergent — l'objectif suppose une infra prête, qui ne l'est pas encore.
+
+**Verdict** : le shell (routes `[locale]/`, next-intl, middleware, layout) est prêt. Le code applicatif et le schéma DB sont **verrouillés FR/EN**. Activer naïvement `'de'` dans `routing.locales` produirait des URLs `/de/...` qui rendent du contenu français avec `<html lang="de">` — cloaking SEO involontaire, signal catastrophique pour Google.
+
+**Les 8 blocages structurels** à lever avant tout travail V2 :
+
+| #   | Blocage                                                                              | Fichier / preuve                                                                                                                                                                            | Impact si ignoré                                                                          |
+| --- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 1   | Pas de `routing.pathnames` configuré (FR slugs servis tels quels en EN aujourd'hui)  | `apps/web/src/i18n/routing.ts` n'a que `locales` + `defaultLocale` ; commentaire dans `site-footer.tsx` : « Locale-specific slug mapping is deferred to a future `pathnames` migration »    | `/de/recherche` au lieu de `/de/suche` — la rule promet l'inverse                         |
+| 2   | `SupportedLocale = 'fr' \| 'en'` hardcodé                                            | `apps/web/src/server/hotels/get-hotel-by-slug.ts` L18 ; type consommé par ~30 readers `pickXxx` / `readXxx`                                                                                 | Compilation ne casse pas à l'élargissement → readers retournent du fallback FR silencieux |
+| 3   | ~32 fichiers avec ternaires `locale === 'fr'` / `locale === 'en'` (>200 occurrences) | Hotspots : `guide/[citySlug]/page.tsx` (37), `get-hotel-by-slug.ts` (32), `classement/[slug]/page.tsx` (30), `hotel/[slug]/page.tsx` (12)                                                   | Chaque ternaire est un fallback FR silencieux — aucun test type-level ne le détecte       |
+| 4   | `withLocalePrefix(locale, path)` et `alternates.languages` câblés en dur sur FR+EN   | `hotel/[slug]/page.tsx` L119-121 et L322-328, `recherche/page.tsx`, `sitemaps/hotels.xml/route.ts`                                                                                          | hreflang ment à Google, canonical incorrect                                               |
+| 5   | Schéma DB dual-locale uniquement                                                     | Migration `0001_init_core_schema.sql` : `name_en`, `description_{fr,en}`, `slug_en`, `meta_{title,desc}_{fr,en}`, `title_{fr,en}`, `content_{fr,en}`. Pas de colonnes `_de` / `_es` / `_it` | Pas d'endroit où stocker le contenu DE des rédacteurs — bloque Payload                    |
+| 6   | Pas de fichiers `messages/{de,es,it}.json`                                           | `apps/web/src/i18n/messages/` ne contient que `fr.json` et `en.json` (1056 lignes chacun)                                                                                                   | Tous les libellés UI tombent en FR fallback avec warning next-intl en dev                 |
+| 7   | Sub-sitemaps n'itèrent pas sur `routing.locales`                                     | `sitemaps/hotels.xml/route.ts` L33-41 : `alternates: [{ hreflang: 'fr-FR' }, { hreflang: 'en' }, { hreflang: 'x-default' }]` en dur                                                         | Ajouter une locale = éditer 6 sub-sitemaps à la main                                      |
+| 8   | Helpers de format locale-spécifiques hardcodés                                       | `hotel/[slug]/page.tsx` L714 : `const localeFmt = locale === 'en' ? 'en-GB' : 'fr-FR'` ; idem `og:locale` (`fr_FR` / `en_US`)                                                               | Dates et OG mal formatés dans la nouvelle locale                                          |
+
+**Décision actée — [ADR-0012](../../../docs/adr/0012-multilingual-db-schema.md)** (status: **accepted** 2026-05-19) : option **B — table normalisée `<entity>_translations`** retenue. Trois options envisagées (analyse complète dans l'ADR) :
+
+- **A.** Colonnes plates (`name_de`, `slug_de`, …) — rejetée : explose à 222 colonnes localisées en V3.
+- **B.** Table normalisée `<entity>_translations(<entity_id>, locale, …)` — **retenue** : scalable à V3 sans DDL, contraintes SQL préservées, pattern industriel reconnu (Sanity, Strapi, Shopify, Stripe).
+- **C.** JSONB localisé — rejetée : perd les contraintes SQL fortes (slug regex + unique), Payload UX inadaptée.
+
+Cinq nouvelles tables planifiées : `hotel_translations`, `hotel_room_translations`, `editorial_page_translations`, `editorial_guide_translations`, `editorial_ranking_translations`. Plan d'exécution 8 phases détaillé dans l'ADR.
+
+**Ordre de travail imposé (ne pas paralléliser)** :
+
+1. **Phase 0 — ADR-0012** : ✅ acté 2026-05-19. Option B retenue (table normalisée).
+2. **Phase 1 — Refactor type-safe (1-2 jours, sans contenu)** :
+   - ✅ **Sous-étape 1a faite** : `apps/web/src/i18n/runtime.ts` créé avec `localePathPrefix`, `withLocalePath`, `intlLocaleTag`, `ogLocale`, `hreflangKey`, `buildHreflangAlternates`. Pattern : maps `Record<KnownLocale, …>` exhaustives sur les 8 locales planifiées (FR/EN/DE/ES/IT/AR/ZH/JA), garde `__LOCALE_IS_KNOWN` qui force `routing.locales ⊆ KnownLocale` à la compilation. Couverture test : `apps/web/src/i18n/runtime.test.ts` (13 tests vitest).
+   - ⏳ **Sous-étape 1b à faire** : codemod des 32 hotspots — remplacer chaque ternaire `locale === 'fr' / 'en'` par un appel aux helpers. À faire en PR dédié, idéalement par paquets de 5 fichiers avec revue. Hotspots prioritaires : `hotel/[slug]/page.tsx` (12), `get-hotel-by-slug.ts` (32), `classement/[slug]/page.tsx` (30), `guide/[citySlug]/page.tsx` (37).
+   - ⏳ **Sous-étape 1c à faire (après 1b)** : élargir `SupportedLocale` en y ajoutant DE/ES/IT + insérer des `assertNever` exhaustifs dans chaque `pickXxx` pour que TS force la résolution des cas manquants. Cette étape doit suivre 1b — sinon le widening seul produit des fallbacks FR silencieux.
+   - **Bénéfice immédiat de 1a (déjà acquis)** : les helpers sont disponibles et testés. Toute nouvelle PR peut les utiliser sans attendre le codemod complet — le code legacy continue de marcher à l'identique en parallèle.
+3. **Phase 2 — `routing.pathnames`** : ajouter le mapping de la rule `seo-geo.mdc`, refactorer tous les `<Link href="/recherche">`.
+4. **Phase 3 — Schéma DB + Payload** : appliquer les 3 migrations de l'ADR-0012 (`0034_create_translations_tables.sql`, `0035_backfill_translations_from_legacy_columns.sql`, `0036_drop_legacy_localized_columns.sql` — DROP seulement après 2 semaines d'observation), exposer les champs DE/ES/IT dans Payload, adapter les readers.
+5. **Phase 4 — Contenu DE par rédacteur natif** : seulement maintenant la checklist 13 surfaces ci-dessous devient applicable.
+
+**À ne pas faire (anti-patterns) :**
+
+- Ajouter `'de'` à `routing.locales` "pour voir" — produit `/de/...` rendu en français avec `<html lang="de">` → cloaking SEO de fait.
+- Lancer un rédacteur freelance DE/ES/IT avant Phase 3 — le contenu produit n'a pas où être stocké ni servi correctement.
+- Faire Phase 1 + ADR-0012 + Phase 2 en parallèle — l'ADR conditionne la signature des helpers de Phase 1.
+- Traduire uniquement `messages/de.json` en pensant "ça commence quelque part" — sans Phase 1 le contenu éditorial reste FR et l'hreflang ment à Google.
+
 ### Add a new locale (V2/V3 extension) — checklist
+
+> **Ne lire cette checklist qu'une fois les phases 0-3 ci-dessus terminées.** Tant que les 8 blocages structurels ne sont pas levés, l'exécuter mène à un déploiement incohérent.
 
 Adding `de` / `it` / `es` / `ar` / `zh` / `ja` requires touching **13 surfaces in lockstep**. Partial coverage is worse than no coverage (incomplete hreflang triggers Search Console "Alternate page with proper canonical tag" warnings + diluted PageRank). Reference order matters — DB schema first so seed scripts have a target, UI last so screenshots are reviewable.
 
@@ -208,9 +257,14 @@ the room-page indexability check: ≥ 5 photos AND ≥ 200 words).
 - Fabricated urgency indicators ("X personnes consultent" without Amadeus signal).
 - `bestRating: '10'` in `AggregateRating` JSON-LD (Google renders /5 anyway).
 - Adding ES/DE/IT/AR/ZH/JA locales without going through the i18n roadmap (V1/V2/V3) — partial coverage is worse than honest scoping.
+- **Starting V2 content production (DE/ES/IT) before clearing the 8 structural blockers** documented in §"V2 multilingual rollout — état réel". The shell is ready; the application code and DB schema are not. Activating `'de'` in `routing.locales` today produces `/de/...` URLs that render French content under `<html lang="de">` — unintentional cloaking and a SEO disaster.
 
 ## References
 
 - CDC v3.0 §6, §8 (cursor brief).
 - Excel arborescence — anti-cannibalisation sheet, GEO sheet.
 - `geo-llm-optimization`, `structured-data-schema-org`, `nextjs-app-router` skills.
+- [`concierge-voice-pipeline`](../concierge-voice-pipeline/SKILL.md) — voix Concierge à préserver dans les traductions DE/ES/IT (Pass 8 + ADR-0011).
+- [`content-modeling`](../content-modeling/SKILL.md) — modélisation Payload des champs localisés (impacté par l'ADR-0012 si l'option B "table normalisée" est retenue).
+- Rule [`seo-geo.mdc`](../../rules/seo-geo.mdc) §Rollout multilingue V2 — décrit l'objectif ; cette skill décrit l'état réel.
+- [ADR-0012](../../../docs/adr/0012-multilingual-db-schema.md) — décision schéma DB multilingue (colonnes plates / table normalisée / JSONB). Status: **proposed**, recommande l'option B (table normalisée `*_translations`).

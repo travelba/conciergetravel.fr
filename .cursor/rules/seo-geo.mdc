@@ -87,3 +87,84 @@ alwaysApply: true
 - Robots allow-list (2026): `Googlebot`, `Google-Extended`, `Bingbot`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `anthropic-ai`, `Applebot`, `Applebot-Extended`.
 
 See `.cursor/skills/seo-technical/SKILL.md`, `.cursor/skills/geo-llm-optimization/SKILL.md`, `.cursor/skills/structured-data-schema-org/SKILL.md`, and `.cursor/rules/hotel-detail-page.mdc` for the 15-block checklist.
+
+## Rollout multilingue V2 — de / es / it
+
+### Statut des locales
+| Locale | Statut | Routing activé | `alternates.languages` | Rédacteur natif requis |
+|--------|--------|---------------|------------------------|------------------------|
+| `fr` | ✅ V1 live | ✅ | ✅ | ✅ |
+| `en` | ✅ V1 live | ✅ | ✅ (`x-default`) | ✅ |
+| `de` | 🔶 V2 en cours | ❌ jusqu'au go-live | ❌ jusqu'au go-live | ✅ obligatoire |
+| `es` | 🔶 V2 en cours | ❌ jusqu'au go-live | ❌ jusqu'au go-live | ✅ obligatoire |
+| `it` | 🔶 V2 en cours | ❌ jusqu'au go-live | ❌ jusqu'au go-live | ✅ obligatoire |
+
+**Règle** : une locale V2 ne s'active en routing qu'une fois que **100% des pages stratégiques** (accueil, recherche, fiche hôtel, about) ont leur contenu natif validé par un rédacteur natif. Ne jamais activer le routing sur du contenu machine-traduit brut.
+
+### Slugs d'URL — localisation obligatoire (V2)
+Les slugs doivent être localisés nativement, **pas traduits mot à mot**.
+Le mapping est défini dans `routing.pathnames` (`lib/i18n/routing.ts`) :
+
+```ts
+'/hotel/[slug]': {
+  fr: '/hotel/[slug]',       // slug FR = référence canonique
+  en: '/hotel/[slug]',       // slug EN = identique au FR (décision ADR-0008)
+  de: '/hotel/[slug]',       // slug DE = identique (flat slug — cf. ADR-0008)
+  es: '/hotel/[slug]',
+  it: '/hotel/[slug]',
+},
+'/recherche': {
+  fr: '/recherche',
+  en: '/search',
+  de: '/suche',
+  es: '/buscar',
+  it: '/cerca',
+},
+'/a-propos': {
+  fr: '/a-propos',
+  en: '/about',
+  de: '/ueber-uns',
+  es: '/sobre-nosotros',
+  it: '/chi-siamo',
+},
+```
+
+> Note : les slugs hôtels restent identiques entre langues (ADR-0008 flat slug). Seules les routes de navigation sont localisées.
+
+### Priorité de production V2
+1. 🇩🇪 **Allemand en premier** — marché touristique premium (DE + AT + CH), fort volume sur requêtes hôtels luxe
+2. 🇪🇸 Espagnol
+3. 🇮🇹 Italien
+
+### Checklist go-live par locale V2
+Avant d'activer le routing d'une locale V2 :
+- [ ] Contenu de toutes les pages stratégiques validé par un rédacteur natif
+- [ ] `messages/[locale].json` complet (aucune clé manquante — vérifier avec `next-intl` en mode strict)
+- [ ] `alternates.languages` mis à jour dans `generateMetadata` et `sitemap.ts`
+- [ ] Balises hreflang bidirectionnelles vérifiées (FR ↔ DE, EN ↔ DE, etc.)
+- [ ] Sitemap XML soumis à Google Search Console pour la locale
+- [ ] Ciblage géographique configuré dans GSC (DE → Allemagne, ES → Espagne, IT → Italie)
+- [ ] `robots.txt` : aucune exclusion de la nouvelle locale
+- [ ] Screaming Frog audit hreflang post-déploiement
+
+### Mots-clés : recherche native obligatoire
+Les mots-clés SEO des `meta.title` / `meta.description` en DE/ES/IT **ne sont pas des traductions** du FR/EN.
+Ils doivent être recherchés nativement dans Semrush avec le marché cible :
+- DE → `google.de`, marché Allemagne
+- ES → `google.es`, marché Espagne  
+- IT → `google.it`, marché Italie
+
+Marquer les traductions provisoires avec `// TODO: native-seo-review` dans les fichiers `messages/`.
+
+### Anti-cannibalisation V2
+- Canonical de chaque page pointe vers sa propre URL dans sa langue (jamais vers `/fr/`)
+- Les pages V2 non encore prêtes retournent `{ robots: { index: false, follow: false } }` — même pattern que les chambres incomplètes (cf. `nextjs-app-router.mdc`)
+- Audit mensuel Screaming Frog sur les erreurs hreflang (fréquentes lors du rollout progressif)
+
+### GEO / AEO — langues V2
+- Les blocs AEO (factual summary, FAQ `FAQPage`) doivent exister dans chaque locale activée
+- Le `## ⭐ Le Conseil du Concierge` (`concierge_advice` JSONB) doit avoir une entrée pour chaque locale active — cf. `editorial-voice.mdc`
+- Le fichier `public/llms.txt` liste les pages dans toutes les locales live
+
+### Référence ADR
+Décision de phasage V1/V2/V3 : [seo-technical/SKILL.md](../skills/seo-technical/SKILL.md) + `seo-geo.mdc` §Décisions structurantes.
