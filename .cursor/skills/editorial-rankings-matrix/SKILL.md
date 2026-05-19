@@ -196,7 +196,43 @@ for (const s of matrix.seeds) {
 À chaque vague de publication, le ratchet d'éligibilité débloque
 naturellement de nouveaux slugs sans changement de code.
 
-## Rule 6 — Ne pas hardcoder l'ordre de matchers `lieuMatches`
+## Rule 6 — `is_published` doit être un ratchet, jamais un assignment
+
+**Regression incident — 2026-05-19.** `pnpm rankings:bulk --source=yonder
+--draft` a démoté **14 rankings publiés** (`meilleurs-hotels-5-etoiles-france`,
+`meilleurs-hotels-spa-france`, `plus-beaux-5-etoiles-france`, etc.) à `is_published
+= false` en quelques secondes, parce que la clause `on conflict do update` de
+[`push-ranking-v2.ts`](../../scripts/editorial-pilot/src/rankings/push-ranking-v2.ts)
+écrasait inconditionnellement `is_published`.
+
+```sql
+-- ❌ Bad — un re-push avec --draft flip toutes les pages SEO live à draft
+on conflict (slug) do update set
+  ...
+  is_published = excluded.is_published
+
+-- ✅ Bon — ratchet : ne jamais redescendre publié → draft via le bulk pipeline
+on conflict (slug) do update set
+  ...
+  is_published = (editorial_rankings.is_published OR excluded.is_published)
+```
+
+**Pourquoi** : le bulk runner consomme un cache disque
+(`data/rankings-cache/<slug>/generated.json`). Une fois qu'un slug a été généré
+puis publié, **toute** invocation ultérieure de `rankings:bulk --draft` (par
+exemple pour scaffolder une nouvelle vague Yonder) va re-pousser ce slug avec
+`publish=false` et le faire passer en draft. Le bug s'étend à
+`push-guide-v2.ts` (même pattern).
+
+**Le bulk pipeline doit "publish forward, never unpublish silently"**.
+L'unpublishing est une opération admin explicite (Payload back-office ou SQL
+direct), pas un side-effect d'un re-push.
+
+Anti-pattern associé : tester avec `--draft` "pour être prudent" sur un corpus
+qui contient des slugs déjà publiés. **Avec le ratchet en place, `--draft` est
+sûr**. Sans le ratchet, c'est un fusil à pompe.
+
+## Rule 7 — Ne pas hardcoder l'ordre de matchers `lieuMatches`
 
 `resolveLieu(raw)` est appelé en chaîne (exact → label normalisé →
 heuristique city-key). Ajouter un alias spécifique (`cote-azur` →
@@ -208,6 +244,7 @@ classifications déjà persistées.
 
 ## Anti-patterns à refuser
 
+- **`on conflict do update set is_published = excluded.is_published`** dans n'importe quel `push-*` editorial — cf. Rule 6, incident du 2026-05-19. Le bulk pipeline ne doit jamais redescendre une page SEO en draft.
 - **Slug duplicate avec différents `axes`** entre `MANUAL_OVERRIDES` et `yonderScaffoldClassified` → bug silencieux : la première source gagne, la seconde voit son `kind`/title écrasés. Faire `inspect-scaffold-coverage.ts` après chaque ajout.
 - **`axes.lieu.slug = 'paris'` pour un slug Yonder de quartier** sans `postalCodePrefixes` → éligibilité sur-permissive, le LLM sélectionne des hôtels du mauvais arrondissement.
 - **Nouveau template dans `templates.ts`** pour matcher un slug externe → préfèrer `slugOverride`. Les templates doivent rester génératifs (axes → slug), pas réactifs (slug → axes).
