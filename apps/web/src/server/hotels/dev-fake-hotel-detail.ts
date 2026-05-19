@@ -183,6 +183,10 @@ function buildRow(_locale: SupportedLocale): HotelDetailRow {
     email_reservations: null,
     commons_category: null,
     external_sameas: null,
+    country_code: 'FR',
+    country_label_fr: 'France',
+    country_label_en: 'France',
+    luxury_tier: null,
     // Voix Concierge (ADR-0011) — synthetic advice so the E2E spec can
     // assert the <ConciergeAdvice> block renders. Stays within the
     // 50-110 word envelope enforced by the Zod schema upstream.

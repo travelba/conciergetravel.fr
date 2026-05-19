@@ -121,6 +121,17 @@ export const HotelDetailRowSchema = z.object({
   email_reservations: stringOrEmpty,
   commons_category: stringOrEmpty,
   external_sameas: z.unknown().nullable().optional(),
+  // International support (migration 0033). FR for legacy rows; ISO-3166-1
+  // alpha-2 for new intl entries. Country labels are denormalised so the UI
+  // doesn't need a separate join.
+  country_code: z
+    .string()
+    .length(2)
+    .nullish()
+    .transform((v) => v ?? 'FR'),
+  country_label_fr: stringOrEmpty,
+  country_label_en: stringOrEmpty,
+  luxury_tier: stringOrEmpty,
   is_published: z.boolean(),
   updated_at: stringOrEmpty,
 });
@@ -128,7 +139,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no

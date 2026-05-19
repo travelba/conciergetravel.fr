@@ -69,6 +69,10 @@ function rowWith(mice: unknown): HotelDetailRow {
     email_reservations: null,
     commons_category: null,
     external_sameas: null,
+    country_code: 'FR',
+    country_label_fr: null,
+    country_label_en: null,
+    luxury_tier: null,
     is_published: true,
     updated_at: null,
   };

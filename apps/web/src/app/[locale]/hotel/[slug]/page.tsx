@@ -612,8 +612,8 @@ async function renderHotelPage(
             streetAddress: row.address,
             addressLocality: row.city,
             postalCode,
-            addressCountry: 'FR',
-            addressRegion: row.region,
+            addressCountry: row.country_code,
+            ...(row.region !== '' ? { addressRegion: row.region } : {}),
           },
         }
       : {}),
