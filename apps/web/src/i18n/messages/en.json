@@ -1057,6 +1057,42 @@
     "inline": "Updated on {date}",
     "block": "Updated on {date}"
   },
+  "hotelTldr": {
+    "eyebrow": "The Concierge's essentials",
+    "firstSentencePalace": "{name} is a hotel distinguished as a Palace by Atout France in {city} ({region}).",
+    "firstSentenceFiveStar": "{name} is a 5-star hotel in {city} ({region}).",
+    "inventoryRoomsOnly": "{rooms, plural, one {# room} other {# rooms}}",
+    "inventoryWithSuites": "{rooms, plural, one {# room} other {# rooms}} including {suites, plural, one {# suite} other {# suites}}",
+    "openedSince": "Open since {year}",
+    "architectSingle": "Designed by {name}.",
+    "architectPair": "Designed by {a} & {b}.",
+    "bookingAmadeus": "Online booking at the negotiated net rate — your stay is handled by our IATA-accredited team.",
+    "bookingLittle": "Direct booking at the official rate, no hidden commission.",
+    "bookingEmail": "Bespoke request — your concierge replies within 24 hours.",
+    "bookingDisplay": "Editorial page — booking is handled directly with the hotel.",
+    "updatedAt": "Updated on {date}."
+  },
+  "hotelFeaturedInRankings": {
+    "title": "This hotel features in our rankings",
+    "subtitle": "MyConciergeHotel editorial selections — each entry links to the full ranking.",
+    "rankLabel": "#{rank}"
+  },
+  "relatedHotels": {
+    "headingSr": "Related hotels",
+    "sameCityTitle": "Other Palaces in {city}",
+    "sameCitySub": "Discover the MyConciergeHotel selection in the same city.",
+    "sameBrandTitle": "All {brand} addresses",
+    "sameBrandSub": "The complete brand collection in our catalog.",
+    "sameRegionTitle": "Explore the {region} region",
+    "sameRegionSub": "Widen your search to neighbouring destinations.",
+    "palace": "Palace",
+    "starsBadge": "{count}★",
+    "seeFiche": "View the page"
+  },
+  "rankingsFacets": {
+    "filtersLabel": "Filters",
+    "allOption": "All"
+  },
   "editorial": {
     "tocHeading": "On this page",
     "glossaryHeading": "Glossary",

@@ -1,12 +1,19 @@
+import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import Link from 'next/link';
 
 import { withLocalePath } from '@/i18n/runtime';
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import type { RelatedHotelsBundle, RelatedHotelRow } from '@/server/hotels/get-related-hotels';
 
+/** Normalises `''` → `null` so `pickLocalizedText` falls back correctly. */
+function blankToNull(s: string | null | undefined): string | null {
+  return s === undefined || s === null || s === '' ? null : s;
+}
+
 interface RelatedHotelsProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly bundle: RelatedHotelsBundle;
   /** Region of the current hotel — used in the section heading. */
   readonly currentRegion: string;
@@ -14,48 +21,21 @@ interface RelatedHotelsProps {
   readonly currentCity: string;
 }
 
-const T = {
-  fr: {
-    sameCityTitle: (city: string) => `Autres palaces à ${city}`,
-    sameCitySub: 'Découvrez la sélection MyConciergeHotel dans la même ville.',
-    sameBrandTitle: (brand: string) => `Toutes les adresses ${brand}`,
-    sameBrandSub: 'La collection complète de la marque dans notre catalogue.',
-    sameRegionTitle: (region: string) => `Explorer la région ${region}`,
-    sameRegionSub: 'Élargissez votre recherche aux destinations voisines.',
-    palace: 'Palace',
-    stars: '★',
-    seeFiche: 'Voir la fiche',
-  },
-  en: {
-    sameCityTitle: (city: string) => `Other Palaces in ${city}`,
-    sameCitySub: 'Discover the MyConciergeHotel selection in the same city.',
-    sameBrandTitle: (brand: string) => `All ${brand} addresses`,
-    sameBrandSub: 'The complete brand collection in our catalog.',
-    sameRegionTitle: (region: string) => `Explore the ${region} region`,
-    sameRegionSub: 'Widen your search to neighbouring destinations.',
-    palace: 'Palace',
-    stars: '★',
-    seeFiche: 'View the page',
-  },
-} as const;
-
-function pickLink(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
+function pickLink(row: RelatedHotelRow, locale: SupportedLocale): string {
   // Per-locale column selection stays here (data layer — ADR-0012 Phase 1c).
-  const slug =
-    locale === 'en' && row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
+  // V2 policy: FR/DE/ES/IT route via the FR slug; EN prefers slug_en when set.
+  const slug = pickLocalizedText(locale, row.slug, blankToNull(row.slug_en)) ?? row.slug;
   return withLocalePath(locale, `/hotel/${slug}`);
 }
 
-function pickName(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
-  if (locale === 'en' && row.name_en !== null && row.name_en !== '') return row.name_en;
-  return row.name;
+function pickName(row: RelatedHotelRow, locale: SupportedLocale): string {
+  return pickLocalizedText(locale, row.name, blankToNull(row.name_en)) ?? row.name;
 }
 
-function pickDescription(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
+function pickDescription(row: RelatedHotelRow, locale: SupportedLocale): string {
   const raw =
-    locale === 'en' && row.description_en !== null && row.description_en !== ''
-      ? row.description_en
-      : (row.description_fr ?? '');
+    pickLocalizedText(locale, blankToNull(row.description_fr), blankToNull(row.description_en)) ??
+    '';
   if (raw.length <= 140) return raw;
   return raw.slice(0, 137).trimEnd() + '…';
 }
@@ -86,13 +66,14 @@ function pickDescription(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
  *   - No client-side fetching — content is server-rendered and cached
  *     by the ISR layer (1 h on the hotel route).
  */
-export function RelatedHotels({
+export async function RelatedHotels({
   locale,
   bundle,
   currentRegion,
   currentCity,
-}: RelatedHotelsProps): ReactElement | null {
-  const t = T[locale];
+}: RelatedHotelsProps): Promise<ReactElement | null> {
+  const t = await getTranslations({ locale, namespace: 'relatedHotels' });
+
   const sections: {
     key: string;
     title: string;
@@ -103,24 +84,24 @@ export function RelatedHotels({
   if (bundle.sameCity.length > 0) {
     sections.push({
       key: 'same-city',
-      title: t.sameCityTitle(currentCity),
-      sub: t.sameCitySub,
+      title: t('sameCityTitle', { city: currentCity }),
+      sub: t('sameCitySub'),
       items: bundle.sameCity,
     });
   }
   if (bundle.brand !== null && bundle.sameBrand.length > 0) {
     sections.push({
       key: 'same-brand',
-      title: t.sameBrandTitle(bundle.brand.label),
-      sub: t.sameBrandSub,
+      title: t('sameBrandTitle', { brand: bundle.brand.label }),
+      sub: t('sameBrandSub'),
       items: bundle.sameBrand,
     });
   }
   if (bundle.sameRegion.length > 0) {
     sections.push({
       key: 'same-region',
-      title: t.sameRegionTitle(currentRegion),
-      sub: t.sameRegionSub,
+      title: t('sameRegionTitle', { region: currentRegion }),
+      sub: t('sameRegionSub'),
       items: bundle.sameRegion,
     });
   }
@@ -135,8 +116,7 @@ export function RelatedHotels({
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <h2 id="related-hotels-title" className="sr-only">
-          {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
-          {locale === 'en' ? 'Related hotels' : 'Hôtels reliés'}
+          {t('headingSr')}
         </h2>
 
         <div className="space-y-12">
@@ -166,7 +146,7 @@ export function RelatedHotels({
                       >
                         <div className="mb-2 flex items-center justify-between gap-2">
                           <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
-                            {row.is_palace ? t.palace : `${row.stars}${t.stars}`}
+                            {row.is_palace ? t('palace') : t('starsBadge', { count: row.stars })}
                           </span>
                           <span className="text-xs text-neutral-500">{row.city}</span>
                         </div>
@@ -177,7 +157,7 @@ export function RelatedHotels({
                           <p className="line-clamp-3 text-sm text-neutral-600">{desc}</p>
                         ) : null}
                         <span className="mt-3 inline-block text-xs font-medium text-amber-700 underline-offset-2 group-hover:underline">
-                          {t.seeFiche} →
+                          {t('seeFiche')} →
                         </span>
                       </Link>
                     </li>

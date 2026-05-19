@@ -1057,6 +1057,42 @@
     "inline": "Mise à jour le {date}",
     "block": "Mise à jour le {date}"
   },
+  "hotelTldr": {
+    "eyebrow": "L'essentiel du Concierge",
+    "firstSentencePalace": "{name} est un hôtel distingué Palace par Atout France à {city} ({region}).",
+    "firstSentenceFiveStar": "{name} est un hôtel 5 étoiles à {city} ({region}).",
+    "inventoryRoomsOnly": "{rooms, plural, one {# chambre} other {# chambres}}",
+    "inventoryWithSuites": "{rooms, plural, one {# chambre} other {# chambres}} dont {suites, plural, one {# suite} other {# suites}}",
+    "openedSince": "Ouvert depuis {year}",
+    "architectSingle": "Conçu par {name}.",
+    "architectPair": "Conçu par {a} & {b}.",
+    "bookingAmadeus": "Réservation en ligne au tarif net négocié — notre agence IATA gère le séjour.",
+    "bookingLittle": "Réservation directe au tarif officiel, sans commission cachée.",
+    "bookingEmail": "Réservation sur demande — votre concierge vous répond sous 24 h.",
+    "bookingDisplay": "Fiche éditoriale — la réservation se fait en contact direct avec l'hôtel.",
+    "updatedAt": "Mis à jour le {date}."
+  },
+  "hotelFeaturedInRankings": {
+    "title": "Cet hôtel apparaît dans nos classements",
+    "subtitle": "Sélections éditoriales MyConciergeHotel — chaque entrée renvoie au classement complet.",
+    "rankLabel": "N°{rank}"
+  },
+  "relatedHotels": {
+    "headingSr": "Hôtels reliés",
+    "sameCityTitle": "Autres palaces à {city}",
+    "sameCitySub": "Découvrez la sélection MyConciergeHotel dans la même ville.",
+    "sameBrandTitle": "Toutes les adresses {brand}",
+    "sameBrandSub": "La collection complète de la marque dans notre catalogue.",
+    "sameRegionTitle": "Explorer la région {region}",
+    "sameRegionSub": "Élargissez votre recherche aux destinations voisines.",
+    "palace": "Palace",
+    "starsBadge": "{count}★",
+    "seeFiche": "Voir la fiche"
+  },
+  "rankingsFacets": {
+    "filtersLabel": "Filtres",
+    "allOption": "Tous"
+  },
   "editorial": {
     "tocHeading": "Sur cette page",
     "glossaryHeading": "Glossaire",

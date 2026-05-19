@@ -1,9 +1,9 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import { Link } from '@/i18n/navigation';
-import type { Locale } from '@/i18n/routing';
 
 interface RankingCard {
   readonly slug: string;
@@ -40,7 +40,6 @@ interface FacetGroup {
 interface Props {
   readonly rankings: ReadonlyArray<RankingCard>;
   readonly facets: ReadonlyArray<FacetGroup>;
-  readonly locale: Locale;
   readonly seeRankingLabel: string;
   readonly searchPlaceholder: string;
   readonly emptyLabel: string;
@@ -76,7 +75,6 @@ function rankingMatchesFilter(ranking: RankingCard, filterId: FilterId, value: s
 export function RankingsFacets({
   rankings,
   facets,
-  locale,
   seeRankingLabel,
   searchPlaceholder,
   emptyLabel,
@@ -84,6 +82,7 @@ export function RankingsFacets({
   resultsLabelTpl,
   subhubsLabel,
 }: Props) {
+  const t = useTranslations('rankingsFacets');
   const [search, setSearch] = useState('');
   const [active, setActive] = useState<Record<FilterId, string | null>>({
     type: null,
@@ -141,7 +140,7 @@ export function RankingsFacets({
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
         {/* Facets sidebar */}
-        <aside aria-label={locale === 'fr' ? 'Filtres' : 'Filters'} className="space-y-6">
+        <aside aria-label={t('filtersLabel')} className="space-y-6">
           {facets.map((group) => (
             <fieldset key={group.id} className="space-y-2">
               <legend className="text-fg mb-1 text-xs font-medium uppercase tracking-wide">
@@ -158,7 +157,7 @@ export function RankingsFacets({
                         : 'text-fg/70 hover:text-fg'
                     }`}
                   >
-                    {locale === 'fr' ? 'Tous' : 'All'}
+                    {t('allOption')}
                   </button>
                 </li>
                 {group.options.map((opt) => (

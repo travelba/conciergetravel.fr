@@ -1,25 +1,14 @@
+import { getTranslations } from 'next-intl/server';
+import type { ReactElement } from 'react';
+
 import { Link } from '@/i18n/navigation';
-import type { Locale } from '@/i18n/routing';
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import type { HotelRankingMention } from '@/server/rankings/get-rankings-for-hotel';
 
 interface Props {
   readonly mentions: ReadonlyArray<HotelRankingMention>;
-  readonly locale: Locale;
+  readonly locale: SupportedLocale;
 }
-
-const T = {
-  fr: {
-    title: 'Cet hôtel apparaît dans nos classements',
-    subtitle:
-      'Sélections éditoriales MyConciergeHotel — chaque entrée renvoie au classement complet.',
-    rankLabel: (n: number) => `N°${n}`,
-  },
-  en: {
-    title: 'This hotel features in our rankings',
-    subtitle: 'MyConciergeHotel editorial selections — each entry links to the full ranking.',
-    rankLabel: (n: number) => `#${n}`,
-  },
-} as const;
 
 /**
  * Internal-link block surfaced near the bottom of the hotel detail
@@ -28,9 +17,12 @@ const T = {
  * Renders nothing when the hotel hasn't been featured in any
  * published ranking — keeps the page clean for fresh entries.
  */
-export function HotelFeaturedInRankings({ mentions, locale }: Props) {
+export async function HotelFeaturedInRankings({
+  mentions,
+  locale,
+}: Props): Promise<ReactElement | null> {
   if (mentions.length === 0) return null;
-  const t = T[locale];
+  const t = await getTranslations({ locale, namespace: 'hotelFeaturedInRankings' });
 
   return (
     <section
@@ -39,13 +31,13 @@ export function HotelFeaturedInRankings({ mentions, locale }: Props) {
       className="mb-10 mt-10 scroll-mt-24"
     >
       <h2 id="featured-in-rankings-title" className="text-fg mb-3 font-serif text-2xl">
-        {t.title}
+        {t('title')}
       </h2>
-      <p className="text-muted mb-5 text-sm">{t.subtitle}</p>
+      <p className="text-muted mb-5 text-sm">{t('subtitle')}</p>
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {mentions.map((m) => {
-          const title = locale === 'fr' ? m.titleFr : (m.titleEn ?? m.titleFr);
-          const badge = locale === 'fr' ? m.badgeFr : (m.badgeEn ?? m.badgeFr);
+          const title = pickLocalizedText(locale, m.titleFr, m.titleEn) ?? m.titleFr;
+          const badge = pickLocalizedText(locale, m.badgeFr, m.badgeEn);
           return (
             <li
               key={m.slug}
@@ -53,7 +45,7 @@ export function HotelFeaturedInRankings({ mentions, locale }: Props) {
             >
               <Link href={`/classement/${m.slug}`} className="flex items-baseline gap-3">
                 <span className="text-fg/80 font-serif text-xl font-light">
-                  {t.rankLabel(m.rank)}
+                  {t('rankLabel', { rank: m.rank })}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="text-fg block text-sm font-medium underline-offset-2 hover:underline">

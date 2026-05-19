@@ -1,9 +1,11 @@
+import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import { intlLocaleTag } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 
 interface HotelTldrProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly name: string;
   readonly city: string;
   readonly region: string;
@@ -18,45 +20,7 @@ interface HotelTldrProps {
   readonly dateModified: string | null;
 }
 
-const T = {
-  fr: {
-    eyebrow: "L'essentiel du Concierge",
-    palaceLine: 'distingué Palace par Atout France',
-    fiveStarLine: '5 étoiles',
-    inCity: (city: string, region: string) => ` à ${city} (${region})`,
-    inventory: (rooms: number, suites: number) =>
-      suites > 0 ? `${rooms} chambres dont ${suites} suites` : `${rooms} chambres`,
-    openedSince: (year: number) => `Ouvert depuis ${year}`,
-    bookingAmadeus: 'Réservation en ligne au tarif net négocié — notre agence IATA gère le séjour.',
-    bookingLittle: 'Réservation directe au tarif officiel, sans commission cachée.',
-    bookingEmail: 'Réservation sur demande — votre concierge vous répond sous 24 h.',
-    bookingDisplay: 'Fiche éditoriale — la réservation se fait en contact direct avec l’hôtel.',
-    architecte: (names: readonly string[]) =>
-      names.length === 1 ? `Conçu par ${names[0]}.` : `Conçu par ${names.slice(0, 2).join(' & ')}.`,
-    updatedAt: (date: string) => `Mis à jour le ${date}.`,
-  },
-  en: {
-    eyebrow: "The Concierge's essentials",
-    palaceLine: 'distinguished as a Palace by Atout France',
-    fiveStarLine: '5-star',
-    inCity: (city: string, region: string) => ` in ${city} (${region})`,
-    inventory: (rooms: number, suites: number) =>
-      suites > 0 ? `${rooms} rooms including ${suites} suites` : `${rooms} rooms`,
-    openedSince: (year: number) => `Open since ${year}`,
-    bookingAmadeus:
-      'Online booking at the negotiated net rate — your stay is handled by our IATA-accredited team.',
-    bookingLittle: 'Direct booking at the official rate, no hidden commission.',
-    bookingEmail: 'Bespoke request — your concierge replies within 24 hours.',
-    bookingDisplay: 'Editorial page — booking is handled directly with the hotel.',
-    architecte: (names: readonly string[]) =>
-      names.length === 1
-        ? `Designed by ${names[0]}.`
-        : `Designed by ${names.slice(0, 2).join(' & ')}.`,
-    updatedAt: (date: string) => `Updated on ${date}.`,
-  },
-} as const;
-
-function formatDateForLocale(iso: string, locale: 'fr' | 'en'): string | null {
+function formatDateForLocale(iso: string, locale: SupportedLocale): string | null {
   if (!/^\d{4}-\d{2}-\d{2}/.test(iso)) return null;
   try {
     return new Intl.DateTimeFormat(intlLocaleTag(locale), {
@@ -68,6 +32,13 @@ function formatDateForLocale(iso: string, locale: 'fr' | 'en'): string | null {
     return null;
   }
 }
+
+const BOOKING_MESSAGE_KEY = {
+  amadeus: 'bookingAmadeus',
+  little: 'bookingLittle',
+  email: 'bookingEmail',
+  display_only: 'bookingDisplay',
+} as const satisfies Record<HotelTldrProps['bookingMode'], string>;
 
 /**
  * AEO "Quick answer" / TL;DR block (skill: geo-llm-optimization §AEO).
@@ -92,8 +63,12 @@ function formatDateForLocale(iso: string, locale: 'fr' | 'en'): string | null {
  * `<h1>` heading. The visible style is a soft amber-tinted card,
  * compact (≤ 4 lines on desktop, ≤ 6 on mobile) so it never pushes
  * the hero gallery below the fold.
+ *
+ * Async server component — pulls copy via `getTranslations` so
+ * DE/ES/IT in Phase 4 just need `messages/{de,es,it}.json` rows
+ * (no code change).
  */
-export function HotelTldr({
+export async function HotelTldr({
   locale,
   name,
   city,
@@ -105,46 +80,50 @@ export function HotelTldr({
   architects,
   bookingMode,
   dateModified,
-}: HotelTldrProps): ReactElement {
-  const t = T[locale];
+}: HotelTldrProps): Promise<ReactElement> {
+  const t = await getTranslations({ locale, namespace: 'hotelTldr' });
 
-  // First sentence — status + location + name.
-  const statusFragment = isPalace ? t.palaceLine : t.fiveStarLine;
-  const firstSentence = `${name} est un hôtel ${statusFragment}${t.inCity(city, region)}.`;
-  const firstSentenceEn = `${name} is a${statusFragment === t.palaceLine ? ' hotel ' : ' '}${statusFragment}${t.inCity(city, region)}.`;
+  // First sentence — status drives one of two structurally different
+  // templates (FR/EN differ on whether the word "hôtel" is repeated
+  // before the status fragment). Encoding the two shapes as separate
+  // ICU templates is cleaner than splicing fragments at runtime.
+  const firstSentenceKey = isPalace ? 'firstSentencePalace' : 'firstSentenceFiveStar';
+  const firstSentence = t(firstSentenceKey, { name, city, region });
 
   // Inventory line (only when known — never bluff).
-  const inventoryLine =
-    totalRooms !== null && totalRooms > 0 ? t.inventory(totalRooms, suites ?? 0) : null;
+  let inventoryLine: string | null = null;
+  if (totalRooms !== null && totalRooms > 0) {
+    inventoryLine =
+      suites !== null && suites > 0
+        ? t('inventoryWithSuites', { rooms: totalRooms, suites })
+        : t('inventoryRoomsOnly', { rooms: totalRooms });
+  }
 
   // Opened/architect — facts only, no fluff.
-  const openedLine = openedYear !== null ? t.openedSince(openedYear) : null;
-  const architectLine = architects.length > 0 ? t.architecte(architects) : null;
+  const openedLine = openedYear !== null ? t('openedSince', { year: openedYear }) : null;
+  let architectLine: string | null = null;
+  if (architects.length === 1 && architects[0] !== undefined) {
+    architectLine = t('architectSingle', { name: architects[0] });
+  } else if (architects.length >= 2 && architects[0] !== undefined && architects[1] !== undefined) {
+    architectLine = t('architectPair', { a: architects[0], b: architects[1] });
+  }
 
   // Booking CTA hint.
-  const bookingLine =
-    bookingMode === 'amadeus'
-      ? t.bookingAmadeus
-      : bookingMode === 'little'
-        ? t.bookingLittle
-        : bookingMode === 'email'
-          ? t.bookingEmail
-          : t.bookingDisplay;
+  const bookingLine = t(BOOKING_MESSAGE_KEY[bookingMode]);
 
   const formattedDate = dateModified !== null ? formatDateForLocale(dateModified, locale) : null;
 
   return (
     <aside
       id="tldr"
-      aria-label={t.eyebrow}
+      aria-label={t('eyebrow')}
       className="mb-10 rounded-xl border border-amber-200 bg-amber-50/50 p-5 md:p-6"
     >
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-800">
-        {t.eyebrow}
+        {t('eyebrow')}
       </p>
       <p className="text-fg text-base leading-relaxed md:text-lg">
-        {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
-        {locale === 'fr' ? firstSentence : firstSentenceEn}
+        {firstSentence}
         {inventoryLine !== null ? ' ' + inventoryLine + '.' : ''}
       </p>
       {openedLine !== null || architectLine !== null || bookingLine.length > 0 ? (
@@ -155,7 +134,7 @@ export function HotelTldr({
         </ul>
       ) : null}
       {formattedDate !== null ? (
-        <p className="text-muted/80 mt-3 text-xs">{t.updatedAt(formattedDate)}</p>
+        <p className="text-muted/80 mt-3 text-xs">{t('updatedAt', { date: formattedDate })}</p>
       ) : null}
     </aside>
   );

@@ -318,7 +318,6 @@ export default async function RankingsIndexPage({
       <RankingsFacets
         rankings={cards}
         facets={facets}
-        locale={locale}
         seeRankingLabel={t.seeRanking}
         searchPlaceholder={t.searchPlaceholder}
         emptyLabel={t.emptyLabel}
