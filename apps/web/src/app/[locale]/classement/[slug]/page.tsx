@@ -15,6 +15,13 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import {
+  buildHreflangAlternates,
+  hreflangKey,
+  intlLocaleTag,
+  ogLocale,
+  withLocalePath,
+} from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import {
@@ -51,10 +58,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -98,6 +101,7 @@ export async function generateMetadata({
   const ranking = await getRankingBySlug(slug);
   if (ranking === null) return {};
   const locale = raw;
+  // Title/description selection stays locale-aware (data layer) — see ADR-0012.
   const title =
     locale === 'fr'
       ? (ranking.meta_title_fr ?? `${ranking.title_fr} | MyConciergeHotel`)
@@ -106,22 +110,19 @@ export async function generateMetadata({
     locale === 'fr'
       ? (ranking.meta_desc_fr ?? ranking.intro_fr.slice(0, 160))
       : (ranking.meta_desc_en ?? ranking.intro_en?.slice(0, 160) ?? ranking.intro_fr.slice(0, 160));
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/classement/${slug}`);
   return {
     title,
     description,
     alternates: {
-      canonical: locale === 'fr' ? `/classement/${slug}` : `/en/classement/${slug}`,
-      languages: {
-        'fr-FR': `/classement/${slug}`,
-        en: `/en/classement/${slug}`,
-        'x-default': `/classement/${slug}`,
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title,
       description,
       type: 'article',
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -131,7 +132,7 @@ function formatRevisedDate(iso: string | null, locale: Locale): string | null {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   try {
-    return new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    return new Intl.DateTimeFormat(intlLocaleTag(locale), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -156,7 +157,7 @@ export default async function RankingPage({
 
   const t = T[locale];
   const origin = siteOrigin();
-  const canonical = `${origin}${withLocalePrefix(locale, `/classement/${slug}`)}`;
+  const canonical = `${origin}${withLocalePath(locale, `/classement/${slug}`)}`;
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Fetch entries + internal-link map in parallel (the latter drives
@@ -167,6 +168,7 @@ export default async function RankingPage({
   ]);
   const linkMapAsMap = new Map(linkMap);
 
+  // Title/intro/outro/factual selection stays locale-aware (data layer) — see ADR-0012.
   const title = locale === 'fr' ? ranking.title_fr : (ranking.title_en ?? ranking.title_fr);
   const intro = locale === 'fr' ? ranking.intro_fr : (ranking.intro_en ?? ranking.intro_fr);
   const outro =
@@ -181,14 +183,15 @@ export default async function RankingPage({
   // ── JSON-LD: BreadcrumbList ──────────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePrefix(locale, '/')}` },
-      { name: t.rankings, url: `${origin}${withLocalePrefix(locale, '/classements')}` },
+      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t.rankings, url: `${origin}${withLocalePath(locale, '/classements')}` },
       { name: title, url: canonical },
     ]),
   );
 
   // ── JSON-LD: Article ─────────────────────────────────────────────────────
   // Description preference order: factual_summary (AEO 130-150) → meta_desc → intro slice.
+  // Meta description selection stays locale-aware (data layer) — see ADR-0012.
   const jsonLdDescription =
     factualSummary !== null && factualSummary.length > 0
       ? factualSummary
@@ -206,7 +209,7 @@ export default async function RankingPage({
         ...(ranking.author_url !== null ? { url: `${origin}${ranking.author_url}` } : {}),
       },
       publisher: { name: 'MyConciergeHotel', logoUrl: `${origin}/logo.png` },
-      inLanguage: locale === 'fr' ? 'fr-FR' : 'en',
+      inLanguage: hreflangKey(locale),
     }),
   );
 
@@ -216,8 +219,9 @@ export default async function RankingPage({
     JsonLd.itemListJsonLd({
       name: title,
       items: entries.map((e) => ({
+        // Hotel name + slug selection stays locale-aware (data layer) — see ADR-0012.
         name: locale === 'fr' ? e.hotel_name : (e.hotel_name_en ?? e.hotel_name),
-        url: `${origin}${withLocalePrefix(locale, `/hotel/${locale === 'en' && e.hotel_slug_en !== null ? e.hotel_slug_en : e.hotel_slug}`)}`,
+        url: `${origin}${withLocalePath(locale, `/hotel/${locale === 'en' && e.hotel_slug_en !== null ? e.hotel_slug_en : e.hotel_slug}`)}`,
         position: e.rank,
         hotel: { starRating: e.hotel_stars as 1 | 2 | 3 | 4 | 5 },
       })),
@@ -226,6 +230,7 @@ export default async function RankingPage({
 
   // ── JSON-LD: FAQPage ─────────────────────────────────────────────────────
   const faqItems = ranking.faq.filter((f) => {
+    // FAQ question/answer selection stays locale-aware (data layer) — see ADR-0012.
     const q = locale === 'fr' ? f.question_fr : f.question_en;
     const a = locale === 'fr' ? f.answer_fr : f.answer_en;
     return q.length > 0 && a.length > 0;
@@ -235,6 +240,7 @@ export default async function RankingPage({
       ? JsonLd.withSchemaOrgContext(
           JsonLd.faqPageJsonLd(
             faqItems.map((f) => ({
+              // FAQ question/answer selection stays locale-aware (data layer) — see ADR-0012.
               question: locale === 'fr' ? f.question_fr : f.question_en,
               answer: locale === 'fr' ? f.answer_fr : f.answer_en,
             })),
@@ -294,6 +300,7 @@ export default async function RankingPage({
           {/* Hero */}
           <header className="mb-10">
             <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
+              {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
               {locale === 'fr' ? 'Classement éditorial' : 'Editorial ranking'}
             </p>
             <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{title}</h1>
@@ -328,6 +335,7 @@ export default async function RankingPage({
             <article className="space-y-12">
               {ranking.editorial_sections.map((section, idx) => {
                 const anchor = section.key.length > 0 ? section.key : `section-${idx}`;
+                // Section title/body selection stays locale-aware (data layer) — see ADR-0012.
                 const sectionTitle =
                   locale === 'fr' ? section.title_fr : section.title_en || section.title_fr;
                 const body = locale === 'fr' ? section.body_fr : section.body_en || section.body_fr;
@@ -343,11 +351,13 @@ export default async function RankingPage({
                     {localFaq.length > 0 ? (
                       <div className="mt-6 space-y-2">
                         <p className="text-fg/70 text-xs font-medium uppercase tracking-wide">
+                          {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
                           {locale === 'fr'
                             ? 'Questions sur cette section'
                             : 'Questions about this section'}
                         </p>
                         {localFaq.map((f, i) => {
+                          // FAQ question/answer selection stays locale-aware (data layer) — see ADR-0012.
                           const q = locale === 'fr' ? f.question_fr : f.question_en;
                           const a = locale === 'fr' ? f.answer_fr : f.answer_en;
                           return (
@@ -385,6 +395,7 @@ export default async function RankingPage({
             <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.rankingHeading}</h2>
             <ol className="space-y-6">
               {entries.map((e) => {
+                // Hotel slug/name/justification/badge selection stays locale-aware (data layer) — see ADR-0012.
                 const linkSlug =
                   locale === 'en' && e.hotel_slug_en !== null ? e.hotel_slug_en : e.hotel_slug;
                 const name = locale === 'fr' ? e.hotel_name : (e.hotel_name_en ?? e.hotel_name);
@@ -464,6 +475,7 @@ export default async function RankingPage({
               <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.faqTitle}</h2>
               <div className="space-y-3">
                 {globalFaq.map((f, i) => {
+                  // FAQ question/answer selection stays locale-aware (data layer) — see ADR-0012.
                   const q = locale === 'fr' ? f.question_fr : f.question_en;
                   const a = locale === 'fr' ? f.answer_fr : f.answer_en;
                   return (
