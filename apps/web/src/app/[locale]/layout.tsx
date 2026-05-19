@@ -7,8 +7,9 @@ import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
+import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, routing } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import '@/styles/globals.css';
 
 const sans = Inter({
@@ -38,8 +39,8 @@ export async function generateMetadata({
   const locale = raw;
   return {
     alternates: {
-      canonical: withLocalePath(locale, '/'),
-      languages: buildHreflangAlternates((l) => withLocalePath(l, '/')),
+      canonical: getPathname({ locale, href: '/' }),
+      languages: buildHreflangAlternates((l) => getPathname({ locale: l, href: '/' })),
     },
     openGraph: {
       type: 'website',
