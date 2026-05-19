@@ -44,7 +44,13 @@ export const HotelDetailRowSchema = z.object({
   name_en: stringOrEmpty,
   stars: z.number().int().min(1).max(5),
   is_palace: z.boolean(),
-  region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to
+  // empty string so the detail page renders for non-FR hotels. The visible
+  // breadcrumb falls back to country labels when region is empty.
+  region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   department: stringOrEmpty,
   city: z.string(),
   district: stringOrEmpty,
@@ -2647,7 +2653,12 @@ const HotelIndexRowSchema = z.object({
   name: z.string(),
   name_en: stringOrEmpty,
   city: z.string(),
-  region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to
+  // empty string so the /hotels listing surfaces non-FR rows too.
+  region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   stars: z.number().int().min(1).max(5),
   is_palace: z.boolean(),
   priority: PrioritySchema,

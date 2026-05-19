@@ -10,7 +10,12 @@ const HotelCardSchema = z.object({
   name: z.string(),
   name_en: z.string().nullable(),
   city: z.string(),
-  region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to
+  // empty string so the guide hotel cards keep rendering.
+  region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   stars: z.number().int(),
   is_palace: z.boolean(),
   hero_image: z.string().nullable(),

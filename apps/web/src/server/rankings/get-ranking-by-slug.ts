@@ -148,7 +148,12 @@ export const RankingEntrySchema = z.object({
   hotel_stars: z.number().int(),
   hotel_is_palace: z.boolean(),
   hotel_city: z.string(),
-  hotel_region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to
+  // empty string so ranking entries with intl hotels render correctly.
+  hotel_region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   hotel_hero_image: z.string().nullable(),
   hotel_description_fr: z.string().nullable(),
   hotel_description_en: z.string().nullable(),

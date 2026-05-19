@@ -16,7 +16,12 @@ const HotelMiniSchema = z.object({
   name: z.string(),
   name_en: stringOrNull,
   city: z.string(),
-  region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to
+  // empty string so favorites listing works for non-FR hotels too.
+  region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   is_palace: z.boolean(),
   stars: z.number().int(),
   hero_image: stringOrNull,

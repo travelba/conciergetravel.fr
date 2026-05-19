@@ -56,7 +56,13 @@ const RelatedHotelRowSchema = z.object({
   name: z.string(),
   name_en: z.string().nullable(),
   city: z.string(),
-  region: z.string(),
+  // International hotels have NULL region (migration 0033). Coerce to empty
+  // string so the existing UI (which treats region as `string`) keeps
+  // working — the consumer falls back to country labels for non-FR hotels.
+  region: z
+    .string()
+    .nullable()
+    .transform((v) => v ?? ''),
   stars: z.number().int(),
   is_palace: z.boolean(),
   hero_image: z.string().nullable(),
