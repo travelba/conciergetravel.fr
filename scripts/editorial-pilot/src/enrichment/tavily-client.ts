@@ -37,6 +37,10 @@ export interface TavilySearchOptions {
   readonly country?: string;
   /** When true, include the page's full markdown content in each result. */
   readonly includeRawContent?: boolean;
+  /** When true, Tavily returns an `images` array of direct image URLs. */
+  readonly includeImages?: boolean;
+  /** When true AND `includeImages` is true, Tavily returns descriptions. */
+  readonly includeImageDescriptions?: boolean;
 }
 
 export interface TavilySearchResult {
@@ -47,9 +51,15 @@ export interface TavilySearchResult {
   readonly rawContent: string | null;
 }
 
+export interface TavilyImage {
+  readonly url: string;
+  readonly description: string | null;
+}
+
 export interface TavilySearchResponse {
   readonly query: string;
   readonly results: readonly TavilySearchResult[];
+  readonly images: readonly TavilyImage[];
   readonly responseTime: number;
 }
 
@@ -96,10 +106,24 @@ const SearchResultSchema = z
   })
   .passthrough();
 
+// Tavily emits `images` as either an array of strings (legacy / when
+// `include_image_descriptions` is false) or an array of objects
+// `{ url, description? }` (when descriptions are requested). We accept both.
+const ImageEntrySchema = z.union([
+  z.string().url(),
+  z
+    .object({
+      url: z.string().url(),
+      description: z.union([z.string(), z.null()]).optional(),
+    })
+    .passthrough(),
+]);
+
 const SearchResponseSchema = z
   .object({
     query: z.string(),
     results: z.array(SearchResultSchema),
+    images: z.array(ImageEntrySchema).optional().default([]),
     response_time: z.number().default(0),
   })
   .passthrough();
@@ -205,13 +229,33 @@ export async function tavilySearch(opts: TavilySearchOptions): Promise<TavilySea
   if (opts.country) {
     body['country'] = opts.country;
   }
+  if (opts.includeImages === true) {
+    body['include_images'] = true;
+    if (opts.includeImageDescriptions === true) {
+      body['include_image_descriptions'] = true;
+    }
+  }
 
   const raw = await tavilyRequest<unknown>('/search', body);
   const parsed = SearchResponseSchema.parse(raw);
 
+  const images: TavilyImage[] = parsed.images.map((entry) => {
+    if (typeof entry === 'string') {
+      return { url: entry, description: null };
+    }
+    return {
+      url: entry.url,
+      description:
+        typeof entry.description === 'string' && entry.description.trim().length > 0
+          ? entry.description.trim()
+          : null,
+    };
+  });
+
   return {
     query: parsed.query,
     responseTime: parsed.response_time,
+    images,
     results: parsed.results
       .slice()
       .sort((a, b) => b.score - a.score)
