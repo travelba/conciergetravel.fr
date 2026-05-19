@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/routing';
+import { intlLocaleTag } from '@/i18n/runtime';
 
 /**
  * Minor-unit currency tuple as stored in the
@@ -42,8 +43,7 @@ export function formatIndicativePriceParts(
   price: IndicativePriceMinor,
   locale: Locale,
 ): IndicativePriceParts {
-  const localeTag = locale === 'fr' ? 'fr-FR' : 'en-GB';
-  const fmt = new Intl.NumberFormat(localeTag, {
+  const fmt = new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: price.currency,
     maximumFractionDigits: 0,
@@ -102,8 +102,7 @@ export function computeHotelPriceRange(
     if (top > maxMinor) maxMinor = top;
   }
 
-  const localeTag = locale === 'fr' ? 'fr-FR' : 'en-GB';
-  const fmt = new Intl.NumberFormat(localeTag, {
+  const fmt = new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency,
     maximumFractionDigits: 0,
