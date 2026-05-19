@@ -1052,5 +1052,35 @@
       }
     },
     "emailSentTo": "A copy of this confirmation was sent to {email}."
+  },
+  "lastUpdated": {
+    "inline": "Updated on {date}",
+    "block": "Updated on {date}"
+  },
+  "editorial": {
+    "tocHeading": "On this page",
+    "glossaryHeading": "Glossary",
+    "callout": {
+      "didYouKnow": "Did you know?",
+      "conciergeTip": "Concierge tip",
+      "warning": "Important",
+      "proTip": "Pro tip",
+      "fact": "Fact"
+    },
+    "sources": {
+      "heading": "Sources & references",
+      "intro": "This editorial article is based on the following authoritative sources, listed here for transparency and reader verification.",
+      "groups": {
+        "encyclopaedias": "Encyclopaedias",
+        "official": "Official websites",
+        "atoutFrance": "Atout France & administration",
+        "government": "Government",
+        "touristOffice": "Tourist offices",
+        "unesco": "UNESCO",
+        "michelin": "MICHELIN Guide",
+        "press": "Press of reference",
+        "other": "Other references"
+      }
+    }
   }
 }

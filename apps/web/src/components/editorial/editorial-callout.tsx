@@ -1,4 +1,7 @@
+import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
+
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
  * Sidebar editorial box: "Le saviez-vous ?", "Conseil de notre
@@ -38,20 +41,17 @@ export interface EditorialCalloutData {
   readonly body_en?: string;
 }
 
-const KIND_LABEL_FR: Readonly<Record<CalloutKind, string>> = {
-  did_you_know: 'Le saviez-vous ?',
-  concierge_tip: 'Le conseil de la conciergerie',
-  warning: 'À noter',
-  pro_tip: 'Astuce experte',
-  fact: 'Le fait',
-};
-
-const KIND_LABEL_EN: Readonly<Record<CalloutKind, string>> = {
-  did_you_know: 'Did you know?',
-  concierge_tip: 'Concierge tip',
-  warning: 'Important',
-  pro_tip: 'Pro tip',
-  fact: 'Fact',
+/**
+ * Maps each kind to its `editorial.callout.*` next-intl message key.
+ * Centralised so adding a kind is a two-line change (here + message
+ * files) instead of touching the component body.
+ */
+const KIND_MESSAGE_KEY: Readonly<Record<CalloutKind, string>> = {
+  did_you_know: 'didYouKnow',
+  concierge_tip: 'conciergeTip',
+  warning: 'warning',
+  pro_tip: 'proTip',
+  fact: 'fact',
 };
 
 const KIND_TONE: Readonly<Record<CalloutKind, string>> = {
@@ -64,20 +64,16 @@ const KIND_TONE: Readonly<Record<CalloutKind, string>> = {
 
 interface Props {
   readonly callout: EditorialCalloutData;
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
-function pick(fr: string | undefined, en: string | undefined, locale: 'fr' | 'en'): string {
-  if (locale === 'en') return en !== undefined && en.length > 0 ? en : (fr ?? '');
-  return fr ?? '';
-}
-
-export function EditorialCallout({ callout, locale }: Props): ReactElement {
+export async function EditorialCallout({ callout, locale }: Props): Promise<ReactElement> {
+  const t = await getTranslations({ locale, namespace: 'editorial.callout' });
   const safeKind: CalloutKind = isKnownKind(callout.kind) ? callout.kind : 'fact';
-  const eyebrow = locale === 'en' ? KIND_LABEL_EN[safeKind] : KIND_LABEL_FR[safeKind];
+  const eyebrow = t(KIND_MESSAGE_KEY[safeKind]);
   const tone = KIND_TONE[safeKind];
-  const title = pick(callout.title_fr, callout.title_en, locale);
-  const body = pick(callout.body_fr, callout.body_en, locale);
+  const title = pickLocalizedText(locale, callout.title_fr, callout.title_en) ?? '';
+  const body = pickLocalizedText(locale, callout.body_fr, callout.body_en) ?? '';
   return (
     <aside className={`my-6 rounded-r-lg px-5 py-4 ${tone}`} role="note" aria-label={eyebrow}>
       <p className="text-fg/60 mb-1 text-xs font-medium uppercase tracking-wider">{eyebrow}</p>

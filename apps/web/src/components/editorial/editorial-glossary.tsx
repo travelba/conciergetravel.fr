@@ -1,4 +1,8 @@
+import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
+
+import { intlLocaleTag } from '@/i18n/runtime';
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
  * Domain-glossary block — renders the JSONB `glossary` column as a
@@ -17,22 +21,21 @@ export interface GlossaryEntryData {
 
 interface Props {
   readonly glossary: readonly GlossaryEntryData[];
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
-function pick(fr: string | undefined, en: string | undefined, locale: 'fr' | 'en'): string {
-  if (locale === 'en') return en !== undefined && en.length > 0 ? en : (fr ?? '');
-  return fr ?? '';
-}
-
-export function EditorialGlossary({ glossary, locale }: Props): ReactElement | null {
+export async function EditorialGlossary({ glossary, locale }: Props): Promise<ReactElement | null> {
   if (glossary.length === 0) return null;
-  const heading = locale === 'en' ? 'Glossary' : 'Glossaire';
+  const t = await getTranslations({ locale, namespace: 'editorial' });
+  const heading = t('glossaryHeading');
 
-  // Sort alphabetically for predictable, scan-friendly output.
-  const sorted = [...glossary].sort((a, b) =>
-    pick(a.term_fr, a.term_en, locale).localeCompare(pick(b.term_fr, b.term_en, locale), locale),
-  );
+  // Sort alphabetically for predictable, scan-friendly output. The
+  // BCP-47 tag drives native collation (FR → "École" before "Eau",
+  // DE/ES/IT inherit the FR fallback content per V2 policy).
+  const sortKey = (g: GlossaryEntryData): string =>
+    pickLocalizedText(locale, g.term_fr, g.term_en) ?? g.term_fr;
+  const collation = intlLocaleTag(locale);
+  const sorted = [...glossary].sort((a, b) => sortKey(a).localeCompare(sortKey(b), collation));
 
   return (
     <section id="glossaire" aria-labelledby="glossary-heading" className="my-10">
@@ -42,9 +45,11 @@ export function EditorialGlossary({ glossary, locale }: Props): ReactElement | n
       <dl className="grid gap-4 sm:grid-cols-2">
         {sorted.map((g) => (
           <div key={g.term_fr} className="border-border bg-bg/30 rounded-lg border p-4">
-            <dt className="text-fg mb-1 font-medium">{pick(g.term_fr, g.term_en, locale)}</dt>
+            <dt className="text-fg mb-1 font-medium">
+              {pickLocalizedText(locale, g.term_fr, g.term_en) ?? g.term_fr}
+            </dt>
             <dd className="text-fg/80 text-sm leading-relaxed">
-              {pick(g.definition_fr, g.definition_en, locale)}
+              {pickLocalizedText(locale, g.definition_fr, g.definition_en) ?? g.definition_fr}
             </dd>
           </div>
         ))}

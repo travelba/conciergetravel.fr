@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server';
+
 import type { Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
 
@@ -15,8 +17,17 @@ interface LastUpdatedBadgeProps {
  * Use in two flavours:
  *   - `inline` — sits under the H1, single line ("Mise à jour le …").
  *   - `block`  — small standalone card, used in editorial sidebars.
+ *
+ * Server Component — calls `getTranslations` directly. The badge is
+ * rendered on routes that already opt into per-locale rendering, so
+ * the synchronous `await` carries no extra cost beyond the existing
+ * route boundary.
  */
-export function LastUpdatedBadge({ isoDate, locale, variant = 'inline' }: LastUpdatedBadgeProps) {
+export async function LastUpdatedBadge({
+  isoDate,
+  locale,
+  variant = 'inline',
+}: LastUpdatedBadgeProps) {
   if (typeof isoDate !== 'string' || isoDate.length === 0) return null;
   const d = new Date(isoDate);
   if (Number.isNaN(d.getTime())) return null;
@@ -30,8 +41,8 @@ export function LastUpdatedBadge({ isoDate, locale, variant = 'inline' }: LastUp
   } catch {
     formatted = isoDate.slice(0, 10);
   }
-  // TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c).
-  const label = locale === 'fr' ? `Mise à jour le ${formatted}` : `Updated on ${formatted}`;
+  const t = await getTranslations({ locale, namespace: 'lastUpdated' });
+  const label = t(variant, { date: formatted });
 
   if (variant === 'block') {
     return (

@@ -1,4 +1,8 @@
+import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
+
+import { intlLocaleTag } from '@/i18n/runtime';
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
  * "Sources & références" block, rendered at the bottom of a guide
@@ -57,57 +61,50 @@ export interface ExternalSourceData {
 
 interface Props {
   readonly sources: readonly ExternalSourceData[];
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
-const TYPE_GROUP_FR: Readonly<Record<ExternalSourceType, string>> = {
-  wikipedia: 'Encyclopédies',
-  wikidata: 'Encyclopédies',
-  wikimedia_commons: 'Encyclopédies',
-  official: 'Sites officiels',
-  atout_france: 'Atout France & administration',
-  gov: 'Atout France & administration',
-  tourist_office: 'Offices du tourisme',
-  unesco: 'UNESCO',
-  michelin: 'Guide MICHELIN',
-  press: 'Presse de référence',
-  other: 'Autres références',
+/**
+ * Maps each source type to its `editorial.sources.groups.*` message
+ * key. Centralised so adding a type is a two-line change. Multiple
+ * types can intentionally collapse into the same group (e.g.
+ * `wikipedia` / `wikidata` / `wikimedia_commons` → "Encyclopédies").
+ */
+const TYPE_GROUP_KEY: Readonly<Record<ExternalSourceType, string>> = {
+  wikipedia: 'encyclopaedias',
+  wikidata: 'encyclopaedias',
+  wikimedia_commons: 'encyclopaedias',
+  official: 'official',
+  atout_france: 'atoutFrance',
+  gov: 'government',
+  tourist_office: 'touristOffice',
+  unesco: 'unesco',
+  michelin: 'michelin',
+  press: 'press',
+  other: 'other',
 };
 
-const TYPE_GROUP_EN: Readonly<Record<ExternalSourceType, string>> = {
-  wikipedia: 'Encyclopaedias',
-  wikidata: 'Encyclopaedias',
-  wikimedia_commons: 'Encyclopaedias',
-  official: 'Official websites',
-  atout_france: 'Atout France & administration',
-  gov: 'Government',
-  tourist_office: 'Tourist offices',
-  unesco: 'UNESCO',
-  michelin: 'MICHELIN Guide',
-  press: 'Press of reference',
-  other: 'Other references',
-};
-
-export function ExternalSourcesFooter({ sources, locale }: Props): ReactElement | null {
+export async function ExternalSourcesFooter({
+  sources,
+  locale,
+}: Props): Promise<ReactElement | null> {
   if (sources.length === 0) return null;
+  const t = await getTranslations({ locale, namespace: 'editorial.sources' });
 
-  const grouping = locale === 'en' ? TYPE_GROUP_EN : TYPE_GROUP_FR;
   const groups = new Map<string, ExternalSourceData[]>();
   for (const s of sources) {
-    const label = grouping[normalizeType(s.type)];
+    const label = t(`groups.${TYPE_GROUP_KEY[normalizeType(s.type)]}`);
     const arr = groups.get(label) ?? [];
     arr.push(s);
     groups.set(label, arr);
   }
 
-  // Deterministic ordering for stable output.
-  const orderedGroups = Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
-
-  const heading = locale === 'en' ? 'Sources & references' : 'Sources & références';
-  const intro =
-    locale === 'en'
-      ? 'This editorial article is based on the following authoritative sources, listed here for transparency and reader verification.'
-      : "Cet article éditorial s'appuie sur les sources d'autorité ci-dessous, listées par transparence et pour permettre la vérification.";
+  // Deterministic ordering for stable output — sort group headings
+  // by the current locale's native collation.
+  const collation = intlLocaleTag(locale);
+  const orderedGroups = Array.from(groups.entries()).sort(([a], [b]) =>
+    a.localeCompare(b, collation),
+  );
 
   return (
     <section
@@ -116,9 +113,9 @@ export function ExternalSourcesFooter({ sources, locale }: Props): ReactElement 
       className="border-border bg-bg/40 mt-12 rounded-lg border p-6"
     >
       <h2 id="sources-heading" className="text-fg mb-2 font-serif text-2xl font-light">
-        {heading}
+        {t('heading')}
       </h2>
-      <p className="text-fg/70 mb-5 text-sm">{intro}</p>
+      <p className="text-fg/70 mb-5 text-sm">{t('intro')}</p>
       <div className="space-y-5">
         {orderedGroups.map(([groupLabel, items]) => (
           <div key={groupLabel}>
@@ -127,12 +124,7 @@ export function ExternalSourcesFooter({ sources, locale }: Props): ReactElement 
             </h3>
             <ul className="space-y-1.5 text-sm">
               {items.map((s) => {
-                const label =
-                  locale === 'en'
-                    ? s.label_en !== undefined && s.label_en.length > 0
-                      ? s.label_en
-                      : s.label_fr
-                    : s.label_fr;
+                const label = pickLocalizedText(locale, s.label_fr, s.label_en) ?? s.label_fr;
                 return (
                   <li key={s.url} className="flex items-baseline gap-2">
                     <span className="text-fg/40">→</span>

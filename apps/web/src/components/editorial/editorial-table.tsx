@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactElement } from 'react';
 
 import { intlLocaleTag } from '@/i18n/runtime';
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
  * Renders a structured comparison table produced by the editorial v2
@@ -49,21 +50,18 @@ export interface EditorialTableData {
 
 interface Props {
   readonly table: EditorialTableData;
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
 function pickLocalized(
   fr: string | undefined,
   en: string | undefined,
-  locale: 'fr' | 'en',
+  locale: SupportedLocale,
 ): string {
-  if (locale === 'en') {
-    return en !== undefined && en.length > 0 ? en : (fr ?? '');
-  }
-  return fr ?? '';
+  return pickLocalizedText(locale, fr, en) ?? '';
 }
 
-function renderCell(cell: TableCell, locale: 'fr' | 'en'): ReactElement | string {
+function renderCell(cell: TableCell, locale: SupportedLocale): ReactElement | string {
   if (cell === null || cell === undefined) return '—';
   if (typeof cell === 'boolean') return cell ? '✓' : '—';
   if (typeof cell === 'number') return cell.toLocaleString(intlLocaleTag(locale));

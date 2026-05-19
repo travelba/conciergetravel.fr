@@ -1,6 +1,9 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactElement } from 'react';
+
+import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
  * Sticky table-of-contents sidebar for editorial long-reads.
@@ -24,11 +27,12 @@ export interface TocAnchor {
 
 interface Props {
   readonly anchors: readonly TocAnchor[];
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
 export function TocSidebar({ anchors, locale }: Props): ReactElement | null {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const t = useTranslations('editorial');
 
   useEffect(() => {
     if (typeof window === 'undefined' || anchors.length === 0) return;
@@ -58,7 +62,7 @@ export function TocSidebar({ anchors, locale }: Props): ReactElement | null {
 
   if (anchors.length === 0) return null;
 
-  const heading = locale === 'en' ? 'On this page' : 'Sur cette page';
+  const heading = t('tocHeading');
 
   return (
     <nav
@@ -68,8 +72,8 @@ export function TocSidebar({ anchors, locale }: Props): ReactElement | null {
       <p className="text-fg/60 mb-2 text-xs font-medium uppercase tracking-wider">{heading}</p>
       <ul className="space-y-1.5 text-sm">
         {anchors.map((a) => {
-          const label =
-            locale === 'en' ? (a.label_en.length > 0 ? a.label_en : a.label_fr) : a.label_fr;
+          // Data-layer pick — author-curated FR/EN columns.
+          const label = pickLocalizedText(locale, a.label_fr, a.label_en) ?? a.label_fr;
           const isActive = activeId === a.anchor;
           return (
             <li key={a.anchor} className={`${a.level === 3 ? 'pl-3' : ''}`}>

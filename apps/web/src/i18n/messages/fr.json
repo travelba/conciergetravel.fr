@@ -1052,5 +1052,35 @@
       "unknown": "Une erreur est survenue pendant le paiement. Veuillez réessayer."
     },
     "pciNote": "MyConciergeHotel ne reçoit ni ne stocke aucune donnée de carte bancaire. Le paiement est traité directement par Amadeus Payments (PCI DSS Level 1)."
+  },
+  "lastUpdated": {
+    "inline": "Mise à jour le {date}",
+    "block": "Mise à jour le {date}"
+  },
+  "editorial": {
+    "tocHeading": "Sur cette page",
+    "glossaryHeading": "Glossaire",
+    "callout": {
+      "didYouKnow": "Le saviez-vous ?",
+      "conciergeTip": "Le conseil de la conciergerie",
+      "warning": "À noter",
+      "proTip": "Astuce experte",
+      "fact": "Le fait"
+    },
+    "sources": {
+      "heading": "Sources & références",
+      "intro": "Cet article éditorial s'appuie sur les sources d'autorité ci-dessous, listées par transparence et pour permettre la vérification.",
+      "groups": {
+        "encyclopaedias": "Encyclopédies",
+        "official": "Sites officiels",
+        "atoutFrance": "Atout France & administration",
+        "government": "Atout France & administration",
+        "touristOffice": "Offices du tourisme",
+        "unesco": "UNESCO",
+        "michelin": "Guide MICHELIN",
+        "press": "Presse de référence",
+        "other": "Autres références"
+      }
+    }
   }
 }
