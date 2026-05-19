@@ -33,9 +33,9 @@ import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
 import { PriceComparator } from '@/components/price-comparator';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link } from '@/i18n/navigation';
+import { getPathname, Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
@@ -179,7 +179,10 @@ function formatIndicativePrice(
 
 function lockActionFor(locale: Locale, hotelId: string): string {
   const offerId = `TEST-OFFER-${hotelId}`;
-  return withLocalePath(locale, `/reservation/offer/${encodeURIComponent(offerId)}/lock`);
+  return getPathname({
+    locale,
+    href: { pathname: '/reservation/offer/[offerId]/lock', params: { offerId } },
+  });
 }
 
 export async function generateStaticParams(): Promise<Array<{ locale: string; slug: string }>> {
@@ -237,9 +240,12 @@ export async function generateMetadata({
   // Slug selection stays locale-aware (data-layer concern) until
   // ADR-0012 Phase 3 collapses dual-locale columns into a single
   // `hotel_translations` table — see docs/runbooks/i18n-v2-rollout.md.
-  // URL prefix is centralised via withLocalePath / buildHreflangAlternates.
+  // URL prefix is centralised via getPathname / buildHreflangAlternates.
   const buildCanonicalPath = (l: Locale): string =>
-    withLocalePath(l, `/hotel/${l === 'en' ? slugEn : slugFr}`);
+    getPathname({
+      locale: l,
+      href: { pathname: '/hotel/[slug]', params: { slug: l === 'en' ? slugEn : slugFr } },
+    });
   const canonical = buildCanonicalPath(locale);
   const origin = siteOrigin();
   const absoluteUrl = `${origin}${canonical}`;
@@ -431,7 +437,10 @@ async function renderHotelPage(
   // Slug selection still locale-aware (data layer) — see ADR-0012.
   // V2 locales reuse the FR slug until `hotels.slug_<locale>` columns exist.
   const slugForLocale = pickByLocale(locale, slugFr, slugEn);
-  const localePath = withLocalePath(locale, `/hotel/${slugForLocale}`);
+  const localePath = getPathname({
+    locale,
+    href: { pathname: '/hotel/[slug]', params: { slug: slugForLocale } },
+  });
   const canonicalUrl = `${origin}${localePath}`;
 
   // JSON-LD Hotel images: hero + first 5 gallery shots, served as absolute
@@ -542,7 +551,13 @@ async function renderHotelPage(
       ? {
           containedRooms: rooms.map((r) => ({
             name: r.name ?? r.room_code,
-            url: `${origin}${withLocalePath(locale, `/hotel/${slugForLocale}/chambres/${r.slug}`)}`,
+            url: `${origin}${getPathname({
+              locale,
+              href: {
+                pathname: '/hotel/[slug]/chambres/[roomSlug]',
+                params: { slug: slugForLocale, roomSlug: r.slug },
+              },
+            })}`,
           })),
         }
       : {}),
@@ -686,14 +701,17 @@ async function renderHotelPage(
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
 
   const cityHubSlug = citySlug(row.city);
-  const cityHubUrl = `${origin}${withLocalePath(locale, `/destination/${cityHubSlug}`)}`;
+  const cityHubUrl = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/destination/[citySlug]', params: { citySlug: cityHubSlug } },
+  })}`;
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePath(locale, '/recherche')}`,
+        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
       },
       { name: row.city, url: cityHubUrl },
       { name, url: canonicalUrl },
@@ -751,7 +769,10 @@ async function renderHotelPage(
   // Two recipes: "How to book at X" + "How to cancel at X". Strong
   // signal for AI voice assistants (Google Assistant, Siri, Alexa)
   // answering procedural booking queries.
-  const hotelCanonicalUrl = `${origin}${withLocalePath(locale, `/hotel/${row.slug}`)}`;
+  const hotelCanonicalUrl = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/hotel/[slug]', params: { slug: row.slug } },
+  })}`;
   const bookingHowToJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.bookingHowToJsonLd({
       hotelName: name,

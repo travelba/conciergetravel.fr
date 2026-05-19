@@ -4,7 +4,7 @@
 > Skill de référence : [`seo-technical`](../../.cursor/skills/seo-technical/SKILL.md)
 > §V2 multilingual rollout.
 
-## État au 2026-05-19 (fin de session 3)
+## État au 2026-05-19 (fin de session 4)
 
 | Phase                                            | Statut                             | Livrable                                                                              |
 | ------------------------------------------------ | ---------------------------------- | ------------------------------------------------------------------------------------- |
@@ -13,7 +13,7 @@
 | 1b — Codemod hotspots                            | ✅ ~43 / ~50 fichiers (12 commits) | 100+ ternaires de prefix/OG/Intl supprimés, 11 duplicats `withLocalePrefix` collapsés |
 | 1c-α — Élargir `SupportedLocale` + `assertNever` | ✅ livré (session 3)               | `supported-locale.ts` + `assertNever` + tous les `pickXxx` data-layer exhaustifs      |
 | 1c-β — Copy maps + email subjects → `next-intl`  | ✅ livré (session 3)               | Editorial / hotel / rankings / SEO / email subjects tous migrés vers ICU messages     |
-| 2 — `routing.pathnames`                          | ⏳ à faire                         | `routing.ts` + refactor `<Link>`                                                      |
+| 2 — `routing.pathnames`                          | ✅ livré (session 4)               | `routing.ts` + refactor de tous les `<Link>` / canonical / hreflang + 301 legacy EN   |
 | 3 — Migrations DB + Payload                      | ⏳ à faire                         | `0034`, `0035`, `0036` + dual-table mirror étendu                                     |
 | 4 — Activation V2 (DE en premier)                | ⏳ à faire                         | `messages/de.json` + contenu rédacteur natif                                          |
 
@@ -247,27 +247,56 @@ Conservé pour mémoire ; toutes les étapes ont été exécutées :
 
 **Garde-fou** (toujours valable jusqu'en Phase 4) : ne PAS ajouter `'de'` / `'es'` / `'it'` à `routing.locales`. Le widening `SupportedLocale` est interne aux couches serveur et présentation ; le routing reste FR/EN tant que le contenu DE/ES/IT n'est pas produit.
 
-## Phase 2 — `routing.pathnames` (estimé : 0.5 jour)
+## Phase 2 — `routing.pathnames` (livrée, session 4)
 
-Implémenter le mapping promis dans la rule [`seo-geo.mdc`](../../.cursor/rules/seo-geo.mdc) §Slugs d'URL :
+Mapping de la rule [`seo-geo.mdc`](../../.cursor/rules/seo-geo.mdc) §Slugs d'URL implémenté dans [`apps/web/src/i18n/routing.ts`](../../apps/web/src/i18n/routing.ts).
 
-```ts
-// apps/web/src/i18n/routing.ts
-export const routing = defineRouting({
-  locales: ['fr', 'en'],
-  defaultLocale: 'fr',
-  localePrefix: 'as-needed',
-  pathnames: {
-    '/recherche': { fr: '/recherche', en: '/search' },
-    '/a-propos': { fr: '/a-propos', en: '/about' },
-    '/compte': { fr: '/compte', en: '/account' },
-    // ... voir rule seo-geo.mdc pour la liste complète
-    '/hotel/[slug]': '/hotel/[slug]', // identique partout (ADR-0008 flat slug)
-  },
-});
+### Livrables
+
+1. ✅ **`routing.pathnames` mappé** — tous les UI / system routes (`/recherche`, `/a-propos`, `/compte/*`, `/reservation/*`, `/cgv`, `/confidentialite`, `/mentions-legales`) ont un slug localisé EN (`/search`, `/about`, `/account/*`, `/booking/*`, `/terms`, `/privacy`, `/legal-notice`) avec placeholders V2 (DE/ES/IT) commentés. Les routes éditoriales / hôtel (`/hotel/[slug]`, `/destination`, `/marque`, `/categorie`, `/classement`, …) restent identiques par locale par décision ADR-0008 (flat slug) + préservation d'equity SEO.
+
+2. ✅ **`<Link href>` migrés vers la signature typée** `{ pathname, params }` :
+   - Sitemaps : `app/sitemaps/{hotels,rooms,guides,rankings,hubs}.xml/route.ts` (commit `2bbb693`)
+   - Booking tunnel `redirect`s : `app/[locale]/reservation/**` (commit `20137ec`)
+   - Auth + favorite flows : `app/[locale]/compte/**`, `server/auth/actions.ts`, `app/[locale]/auth/callback/route.ts`, `components/hotel/hotel-favorite-button.tsx` (commit `55df405`)
+   - Root layout + home + search canonicals : `app/[locale]/{layout,page,recherche/page}.tsx` (commit `4419aea`)
+   - Listing pages : `destination`, `marque/[brandSlug]`, `categorie/[categorySlug]`, `classements`, `classements/[axe]/[valeur]`, `hotels`, `guides` (commit `84109e7`)
+   - Detail pages + editorial link map : `classement/[slug]`, `guide/[citySlug]`, `destination/[citySlug]`, `hotel/[slug]/chambres/[roomSlug]`, components/editorial maps (commit `75115dc`)
+   - **Hotel detail** `hotel/[slug]/page.tsx` (commit `5587056`) — 8 sites de `withLocalePath` migrés (l'audit `223a7bb` avait silencieusement échoué sur ce fichier ; voir §Ghost-edit ci-dessous).
+
+3. ✅ **301 legacy EN paths** (commit `e930a1c`) — middleware émet un permanent redirect pour les URL pré-Phase 2 (`/en/recherche` → `/en/search`, `/en/compte/*` → `/en/account/*`, `/en/reservation/*` → `/en/booking/*`, `/en/cgv` → `/en/terms`, `/en/confidentialite` → `/en/privacy`, `/en/a-propos` → `/en/about`, `/en/mentions-legales` → `/en/legal-notice`). Helper pur testable : `apps/web/src/i18n/legacy-en-redirects.ts` + 14 tests vitest dans `middleware.test.ts`. La query string est préservée verbatim ; le fragment ne traverse pas le serveur.
+
+### Surfaces couvertes (audit ré-exécutable)
+
+```powershell
+# Doit retourner ZÉRO résultat dans le code applicatif :
+git grep -n withLocalePath apps/web/src/app
+# Le seul usage légitime reste la définition + tests de runtime.ts.
+git grep -n withLocalePath apps/web/src/i18n
 ```
 
-Refactorer tous les `<Link href="/recherche">` pour qu'ils utilisent la signature compatible `pathnames` (objet `{ pathname, params }` au lieu de string). Voir la doc next-intl 3.x.
+Toute nouvelle URL dans l'app doit passer par :
+
+- `getPathname({ locale, href: '...' })` pour les chemins simples
+- `getPathname({ locale, href: { pathname: '/route/[param]', params: { … } } })` pour les routes paramétrées
+- `<Link href={{ pathname, params }}>` pour les liens client
+- `redirect({ pathname, params }, { locale })` pour les redirects côté serveur
+
+Quand DE/ES/IT seront ajoutés à `routing.locales` (Phase 4), les slugs EN se résoudront automatiquement vers leurs équivalents allemands / espagnols / italiens (`/de/suche`, `/es/buscar`, `/it/cerca`, …) sans toucher aux call-sites.
+
+### Ghost-edit / IDE buffer revert pattern (lesson apprise session 4)
+
+**Symptôme observé** : commit `223a7bb` (titre « refactor(i18n)!: route detail pages + editorial link map through typed pathnames ») affichait dans son message la mention d'avoir migré `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` — mais le fichier conservait 8 callers `withLocalePath`. `pnpm -w typecheck` était vert (donc rien à signaler immédiatement) mais le fichier n'avait pas reçu les `StrReplace` annoncés.
+
+**Hypothèse** : l'agent travaille sur plusieurs branches (`fix/destination-hub-intl`, `feat/intl-phase-2-polish`) dans la même session ; le buffer IDE Cursor caching s'est désynchronisé avec le disque pendant un `git checkout` interstitiel, et un `StrReplace` apparemment réussi a en réalité écrit sur une version stale du fichier qui a été restaurée au checkout suivant.
+
+**Mitigation** — règle à appliquer pour toute édition cross-branche :
+
+1. **`Read` après chaque `StrReplace`** sur la plage de lignes modifiée pour confirmer la persistance avant de passer au site suivant.
+2. **`git grep`** à la fin du paquet pour confirmer qu'aucun caller du pattern visé ne subsiste.
+3. **Faire `git status --short` avant ET après le commit** — si `git diff --stat HEAD~1` ne montre pas la file qu'on pensait modifier, le commit a ramassé le mauvais snapshot.
+
+Une variante du même symptôme observée pendant Phase 2 : pendant le commit lint-staged en cours, une force-extérieure (auto-pull main ou similaire) bascule `HEAD` sur `main` et fait échouer le `git commit` avec `fatal: cannot lock ref 'HEAD': is at X but expected Y`. Si ça arrive : `git checkout feat/intl-phase-2-polish` (les changements stagés survivent à un checkout compatible) puis `git commit -F …` à nouveau. La pré-commit hook `lint-staged` stash automatiquement le working tree pendant qu'elle tourne — donc même si on observe un état transitoire bizarre, on récupère sans perdre de travail.
 
 ## Phase 3 — Migrations DB + Payload (estimé : 2-3 jours)
 

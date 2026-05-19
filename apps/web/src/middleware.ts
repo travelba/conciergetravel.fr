@@ -1,5 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
+import { matchLegacyEnRedirect } from '@/i18n/legacy-en-redirects';
 import { routing } from '@/i18n/routing';
 import { buildCspHeader, generateNonce, NONCE_HEADER } from '@/lib/security/csp';
 import { updateSession } from '@/lib/supabase/middleware';
@@ -9,6 +10,27 @@ const intlMiddleware = createMiddleware(routing);
 const IS_DEV = process.env['NODE_ENV'] !== 'production';
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  // 0. Legacy EN URL redirects (i18n V2 — Phase 2).
+  //    Before Phase 2 the FR slugs (`/en/recherche`, `/en/compte`,
+  //    `/en/reservation/...`, `/en/cgv`, …) were served under the
+  //    `/en/` prefix. Phase 2 introduced localised slugs via the typed
+  //    `routing.pathnames` map (`/en/search`, `/en/account`,
+  //    `/en/booking/...`, `/en/terms`, …). External signals — Google
+  //    index entries, social shares, bookmarks, sitemaps already
+  //    crawled — may still hit the legacy path. Issue a permanent 301
+  //    so link equity collapses onto the canonical localised URL.
+  //
+  //    The 301 must fire BEFORE the next-intl middleware so the latter
+  //    does not transparently rewrite the legacy slug back to its
+  //    matching `/[locale]/...` route. Query string is preserved
+  //    verbatim; the fragment never reaches the server.
+  const legacyTarget = matchLegacyEnRedirect(request.nextUrl.pathname);
+  if (legacyTarget !== null) {
+    const redirectUrl = new URL(legacyTarget, request.nextUrl);
+    redirectUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(redirectUrl, 301);
+  }
+
   // 1. Per-request CSP nonce. We mutate the inbound NextRequest's Headers
   //    object so downstream `headers().get('x-nonce')` calls in RSCs see it.
   //    Next.js' bundled inline scripts also pick this up automatically and
