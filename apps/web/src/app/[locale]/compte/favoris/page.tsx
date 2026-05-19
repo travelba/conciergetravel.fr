@@ -6,6 +6,7 @@ import { HotelImage } from '@mch/ui';
 import { FavoriteRemoveButton } from '@/components/account/favorite-remove-button';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { getOptionalUser } from '@/server/auth/session';
 import { listUserFavorites, type FavoriteListItem } from '@/server/account/list-favorites';
@@ -57,10 +58,8 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
 
   const user = await getOptionalUser();
   if (user === null) {
-    const dest = locale === 'en' ? '/en/compte/favoris' : '/compte/favoris';
-    redirect(
-      `${locale === 'en' ? '/en/compte/connexion' : '/compte/connexion'}?next=${encodeURIComponent(dest)}`,
-    );
+    const dest = withLocalePath(locale, '/compte/favoris');
+    redirect(`${withLocalePath(locale, '/compte/connexion')}?next=${encodeURIComponent(dest)}`);
   }
 
   const t = await getTranslations('account');

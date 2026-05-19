@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 
 import { isRoutingLocale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { resetPasswordAction } from '@/server/auth/actions';
 import { getOptionalUser } from '@/server/auth/session';
 
@@ -51,9 +52,7 @@ export default async function NewPasswordPage({
   // `/auth/callback` handler. Without one, push back to sign-in.
   const user = await getOptionalUser();
   if (user === null) {
-    redirect(
-      (locale === 'en' ? '/en/compte/connexion' : '/compte/connexion') + '?error=session_missing',
-    );
+    redirect(`${withLocalePath(locale, '/compte/connexion')}?error=session_missing`);
   }
 
   const t = await getTranslations('account');

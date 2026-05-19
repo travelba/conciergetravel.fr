@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { signUpAction } from '@/server/auth/actions';
 import { getOptionalUser } from '@/server/auth/session';
 
@@ -51,7 +52,7 @@ export default async function InscriptionPage({
 
   const existing = await getOptionalUser();
   if (existing !== null) {
-    redirect(locale === 'en' ? '/en/compte' : '/compte');
+    redirect(withLocalePath(locale, '/compte'));
   }
 
   const t = await getTranslations('account');

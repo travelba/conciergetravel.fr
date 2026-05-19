@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { isRoutingLocale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,7 @@ export async function POST(
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
 
-  const destination = locale === 'en' ? '/en/compte/connexion' : '/compte/connexion';
+  const destination = withLocalePath(locale, '/compte/connexion');
   return NextResponse.redirect(new URL(destination, request.url), { status: 303 });
 }
 

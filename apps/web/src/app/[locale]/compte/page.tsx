@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
 import { listUserBookings, type BookingListItem } from '@/server/account/list-bookings';
 import {
   listUserEmailRequests,
@@ -49,7 +50,7 @@ function hotelHref(hotel: BookingListItem['hotels'], locale: Locale): string | n
 function fmtDate(iso: string, locale: Locale): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', {
+  return new Intl.DateTimeFormat(intlLocaleTag(locale), {
     dateStyle: 'long',
   }).format(d);
 }
@@ -57,7 +58,7 @@ function fmtDate(iso: string, locale: Locale): string {
 function fmtAmount(amount: number | null, currency: string, locale: Locale): string {
   if (amount === null) return '—';
   try {
-    return new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'fr-FR', {
+    return new Intl.NumberFormat(intlLocaleTag(locale), {
       style: 'currency',
       currency,
       maximumFractionDigits: 0,
@@ -81,10 +82,8 @@ export default async function CompteDashboardPage({
 
   const user = await getOptionalUser();
   if (user === null) {
-    redirect(
-      (locale === 'en' ? '/en/compte/connexion' : '/compte/connexion') +
-        `?next=${encodeURIComponent(locale === 'en' ? '/en/compte' : '/compte')}`,
-    );
+    const next = withLocalePath(locale, '/compte');
+    redirect(`${withLocalePath(locale, '/compte/connexion')}?next=${encodeURIComponent(next)}`);
   }
 
   const t = await getTranslations('account');
