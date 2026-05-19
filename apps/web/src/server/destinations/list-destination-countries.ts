@@ -113,7 +113,17 @@ async function fetchInternationalDestinations(): Promise<readonly CountryAggrega
   }
 }
 
-async function fetchPublishedCountryGuides(): Promise<ReadonlyMap<string, string>> {
+/**
+ * Returns a plain object `code -> guideSlug`.
+ *
+ * **Why not a `Map`?** This function is wrapped in `unstable_cache`,
+ * which JSON-serializes the return value before persisting it. `Map`
+ * (and `Set`) are not JSON-serializable, so they round-trip as `{}` —
+ * the consumer then crashes with `TypeError: x.get is not a function`
+ * on every cache hit after the first in-memory miss. Use a plain
+ * record for any cached aggregate keyed by a primitive.
+ */
+async function fetchPublishedCountryGuides(): Promise<Readonly<Record<string, string>>> {
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
@@ -121,8 +131,8 @@ async function fetchPublishedCountryGuides(): Promise<ReadonlyMap<string, string
       .select('slug, country_code')
       .eq('is_published', true)
       .eq('scope', 'country');
-    if (error !== null || !Array.isArray(data)) return new Map();
-    const out = new Map<string, string>();
+    if (error !== null || !Array.isArray(data)) return {};
+    const out: Record<string, string> = {};
     for (const raw of data) {
       const parsed = GuideCountryRowSchema.safeParse(raw);
       if (!parsed.success) continue;
@@ -130,7 +140,7 @@ async function fetchPublishedCountryGuides(): Promise<ReadonlyMap<string, string
       // guide; if duplicates ever appear the deterministic ordering of
       // the Supabase response is preserved.
       const code = parsed.data.country_code.toUpperCase();
-      if (!out.has(code)) out.set(code, parsed.data.slug);
+      if (!(code in out)) out[code] = parsed.data.slug;
     }
     return out;
   } catch (e) {
@@ -138,7 +148,7 @@ async function fetchPublishedCountryGuides(): Promise<ReadonlyMap<string, string
       '[destinations.intl-directory] fetchPublishedCountryGuides threw:',
       e instanceof Error ? `${e.name}: ${e.message}` : String(e),
     );
-    return new Map();
+    return {};
   }
 }
 
@@ -161,7 +171,7 @@ export async function listInternationalDestinations(
       code: row.code,
       name,
       hotelCount: row.hotelCount,
-      guideSlug: guideSlugs.get(row.code) ?? null,
+      guideSlug: guideSlugs[row.code] ?? null,
     };
   });
 
@@ -179,8 +189,13 @@ const cachedAggregates = unstable_cache(
   { revalidate: 3600, tags: ['intl-destinations'] },
 );
 
+// Cache key bumped to v2 in the same commit that switched the return
+// shape from `Map` to `Record`. Old v1 entries in the Vercel data cache
+// persisted a JSON-serialised empty Map (`{}`) and would crash the
+// new consumer if served. The bump guarantees a fresh fetch on the
+// first request after deploy.
 const cachedGuideSlugs = unstable_cache(
   fetchPublishedCountryGuides,
-  ['intl-destinations-guide-slugs-v1'],
+  ['intl-destinations-guide-slugs-v2'],
   { revalidate: 3600, tags: ['intl-destinations', 'editorial-guides'] },
 );
