@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 
+import { intlLocaleTag } from '@/i18n/runtime';
+
 /**
  * Renders a structured comparison table produced by the editorial v2
  * pipeline. The table data lives in the JSONB `tables` column of
@@ -64,7 +66,7 @@ function pickLocalized(
 function renderCell(cell: TableCell, locale: 'fr' | 'en'): ReactElement | string {
   if (cell === null || cell === undefined) return '—';
   if (typeof cell === 'boolean') return cell ? '✓' : '—';
-  if (typeof cell === 'number') return cell.toLocaleString(locale);
+  if (typeof cell === 'number') return cell.toLocaleString(intlLocaleTag(locale));
   if (typeof cell === 'string') return cell;
   if (typeof cell === 'object' && typeof cell.text === 'string') {
     if (typeof cell.href === 'string' && cell.href.length > 0) {

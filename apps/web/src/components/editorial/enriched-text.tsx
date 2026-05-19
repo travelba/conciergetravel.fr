@@ -1,11 +1,8 @@
 import Link from 'next/link';
 import type { ReactElement, ReactNode } from 'react';
 
-function withLocalePrefix(locale: 'fr' | 'en', path: string): string {
-  if (locale === 'fr') return path;
-  if (path === '/') return '/en';
-  return `/en${path}`;
-}
+import type { Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 
 /**
  * Auto-links named entities (Palaces, cities, brands, categories,
@@ -31,7 +28,7 @@ function withLocalePrefix(locale: 'fr' | 'en', path: string): string {
 
 interface Props {
   readonly body: string;
-  readonly locale: 'fr' | 'en';
+  readonly locale: Locale;
   readonly linkMap: ReadonlyMap<string, string>;
   /** Cap on auto-links per paragraph (default 4 — avoid over-linking). */
   readonly maxLinksPerParagraph?: number;
@@ -94,7 +91,7 @@ function findMatches(paragraph: string, linkMap: ReadonlyMap<string, string>): M
 function renderParagraph(
   paragraph: string,
   linkMap: ReadonlyMap<string, string>,
-  locale: 'fr' | 'en',
+  locale: Locale,
   maxLinks: number,
   keyBase: string,
 ): ReactNode {
@@ -105,7 +102,7 @@ function renderParagraph(
   let cursor = 0;
   matches.forEach((m, i) => {
     if (m.start > cursor) out.push(paragraph.slice(cursor, m.start));
-    const href = m.href.startsWith('/') ? withLocalePrefix(locale, m.href) : m.href;
+    const href = m.href.startsWith('/') ? withLocalePath(locale, m.href) : m.href;
     out.push(
       <Link
         key={`${keyBase}-${i}`}
