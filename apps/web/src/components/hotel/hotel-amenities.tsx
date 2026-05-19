@@ -1,10 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 
 import { AmenityCategoryIcon } from '@/components/hotel/amenity-category-icon';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedAmenityGroup } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelAmenitiesProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly groups: readonly LocalisedAmenityGroup[];
   /** Flat list (legacy `readAmenities`) used as fallback when `groups` is empty. */
   readonly flat: readonly string[];

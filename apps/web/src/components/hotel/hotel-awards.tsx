@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedAward } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelAwardsProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly awards: readonly LocalisedAward[];
 }
 

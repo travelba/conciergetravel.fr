@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
 import { withLocalePath } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 
 interface DisplayOnlyBookingCardProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelId: string;
   readonly hotelName: string;
   readonly checkIn: string;

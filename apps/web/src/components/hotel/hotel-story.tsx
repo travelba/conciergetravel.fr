@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedHotelStorySection } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelStoryProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly sections: readonly LocalisedHotelStorySection[];
   readonly heroParagraphs: readonly string[] | null;
 }

@@ -1,10 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 
 import { intlLocaleTag } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedFeaturedReview } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelFeaturedReviewsProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly reviews: readonly LocalisedFeaturedReview[];
 }
 

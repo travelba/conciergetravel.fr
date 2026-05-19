@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import { intlLocaleTag } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type {
   LocalisedMiceInfo,
   LocalisedMiceSpace,
@@ -9,7 +10,7 @@ import type {
 } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelMiceEventsProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly mice: LocalisedMiceInfo | null;
 }

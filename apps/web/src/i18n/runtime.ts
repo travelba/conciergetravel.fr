@@ -57,12 +57,18 @@ export type KnownLocale = 'fr' | 'en' | 'de' | 'es' | 'it' | 'ar' | 'zh' | 'ja';
  * source of truth, so flipping the default in `routing.ts` propagates here
  * without code changes.
  *
+ * Accepts `KnownLocale` (not just the currently-active `Locale`) so that
+ * data-layer / utility callers can pass a `SupportedLocale` (V2 scope)
+ * without a separate widening cast. The runtime answer is correct for
+ * every `KnownLocale` because `routing.defaultLocale` is itself a
+ * `KnownLocale` and `localePrefix: 'as-needed'` semantics apply uniformly.
+ *
  * @example
  *   localePathPrefix('fr')  // ''
  *   localePathPrefix('en')  // '/en'
  *   localePathPrefix('de')  // '/de'
  */
-export function localePathPrefix(locale: Locale): string {
+export function localePathPrefix(locale: KnownLocale): string {
   return locale === routing.defaultLocale ? '' : `/${locale}`;
 }
 
@@ -70,6 +76,8 @@ export function localePathPrefix(locale: Locale): string {
  * Compose a locale-aware in-app path. Replaces the 30+ hand-rolled
  * `locale === 'en' ? \`/en${path}\` : path` ternaries scattered through
  * the codebase (hotel detail, room sub-page, sitemaps, lock action, …).
+ *
+ * Accepts `KnownLocale` for the reason described on `localePathPrefix`.
  *
  * @throws when `path` does not start with `/` — defensive guard against
  *         callers that already concatenated a prefix.
@@ -79,7 +87,7 @@ export function localePathPrefix(locale: Locale): string {
  *   withLocalePath('en', '/hotel/le-bristol')  // '/en/hotel/le-bristol'
  *   withLocalePath('de', '/hotel/le-bristol')  // '/de/hotel/le-bristol'
  */
-export function withLocalePath(locale: Locale, path: string): string {
+export function withLocalePath(locale: KnownLocale, path: string): string {
   if (!path.startsWith('/')) {
     throw new Error(`withLocalePath: path must start with '/', got: ${path}`);
   }
@@ -118,7 +126,7 @@ const INTL_LOCALE_TAG: Record<KnownLocale, string> = {
   ja: 'ja-JP',
 };
 
-export function intlLocaleTag(locale: Locale): string {
+export function intlLocaleTag(locale: KnownLocale): string {
   return INTL_LOCALE_TAG[locale];
 }
 
@@ -150,7 +158,7 @@ const OG_LOCALE: Record<KnownLocale, string> = {
   ja: 'ja_JP',
 };
 
-export function ogLocale(locale: Locale): string {
+export function ogLocale(locale: KnownLocale): string {
   return OG_LOCALE[locale];
 }
 
@@ -182,7 +190,7 @@ const HREFLANG_KEY: Record<KnownLocale, string> = {
   ja: 'ja',
 };
 
-export function hreflangKey(locale: Locale): string {
+export function hreflangKey(locale: KnownLocale): string {
   return HREFLANG_KEY[locale];
 }
 

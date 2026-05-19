@@ -1,11 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedGalleryImage } from '@/server/hotels/get-hotel-by-slug';
 
 import { HotelGalleryLightbox, type GalleryLightboxImage } from './hotel-gallery-lightbox';
 
 interface HotelGalleryProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly cloudName: string;
   readonly hero: { readonly publicId: string; readonly alt: string } | null;
   readonly images: readonly LocalisedGalleryImage[];

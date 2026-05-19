@@ -1,10 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { HotelVirtualTour as VirtualTourValue } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelVirtualTourProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly tour: VirtualTourValue | null;
 }

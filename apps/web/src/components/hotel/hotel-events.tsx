@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { pickByLocale, type SupportedLocale } from '@/i18n/supported-locale';
 import { formatDistanceMeters } from '@/lib/format-distance';
 import type { EventCategory, LocalisedUpcomingEvent } from '@/server/hotels/get-hotel-by-slug';
 
@@ -10,7 +11,7 @@ import type { EventCategory, LocalisedUpcomingEvent } from '@/server/hotels/get-
 type Translator = Awaited<ReturnType<typeof getTranslations>>;
 
 interface HotelEventsProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly city: string;
   readonly events: readonly LocalisedUpcomingEvent[];
@@ -88,7 +89,7 @@ function EventCard({
   event,
   t,
 }: {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly event: LocalisedUpcomingEvent;
   readonly t: Translator;
 }): React.ReactElement {
@@ -169,12 +170,21 @@ function CategoryBadge({
  * Always emits the year for the end date so the badge is unambiguous
  * even when the run spans into next year.
  */
-function formatEventDates(startIso: string, endIso: string | null, locale: 'fr' | 'en'): string {
+function formatEventDates(
+  startIso: string,
+  endIso: string | null,
+  locale: SupportedLocale,
+): string {
   const start = new Date(`${startIso}T00:00:00Z`);
+  // Continental locales (FR/DE/ES/IT) keep the long month form; EN uses
+  // short ("Sep" rather than "September") to match newsroom convention.
+  // Phase 1c-β will move the choice into `next-intl` if a locale wants
+  // to diverge further.
+  const monthFull: Intl.DateTimeFormatOptions['month'] = pickByLocale(locale, 'long', 'short');
   const fmtFull = new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     day: 'numeric',
-    month: locale === 'fr' ? 'long' : 'short',
+    month: monthFull,
     year: 'numeric',
   });
   if (endIso === null || endIso === startIso) {
@@ -184,7 +194,7 @@ function formatEventDates(startIso: string, endIso: string | null, locale: 'fr' 
   const fmtShort = new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     day: 'numeric',
-    month: locale === 'fr' ? 'short' : 'short',
+    month: 'short',
   });
   // If the year is the same, only show the year on the end side.
   const startYear = start.getUTCFullYear();

@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition, type ReactElement } from 'react';
 
 import { withLocalePath } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface HotelFavoriteButtonProps {
   readonly hotelId: string;
   readonly hotelName: string;
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   /** Same-origin path the unauthenticated user is sent back to after signing in. */
   readonly returnPath: string;
 }

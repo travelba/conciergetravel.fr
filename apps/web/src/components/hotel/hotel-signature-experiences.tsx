@@ -1,10 +1,11 @@
 import { HotelImage } from '@mch/ui';
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedSignatureExperience } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelSignatureExperiencesProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly cloudName: string;
   readonly experiences: readonly LocalisedSignatureExperience[];
 }

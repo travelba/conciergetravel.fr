@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
+
 interface HotelFactSheetProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly address: string | null;
   readonly postalCode: string | null;

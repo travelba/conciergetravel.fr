@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { FaqCategory, LocalisedFaqGroup } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelFaqProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly groups: readonly LocalisedFaqGroup[];
 }
 

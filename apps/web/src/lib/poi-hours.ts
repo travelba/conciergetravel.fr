@@ -31,6 +31,8 @@
  * when `referenceDay` is provided — tests inject a fixed weekday.
  */
 
+import { pickByLocale, type SupportedLocale } from '@/i18n/supported-locale';
+
 export type PoiHours =
   | { readonly kind: '24_7' }
   | { readonly kind: 'open'; readonly from: string; readonly until: string }
@@ -158,15 +160,19 @@ export function parseOpeningHoursForToday(raw: string, referenceDay?: WeekdayTok
  *
  * Returns `null` when the hours are `unknown` so the UI can pick
  * its own fallback ("Voir les horaires", a link, etc.).
+ *
+ * Locale typing — `SupportedLocale` (V2 scope FR/EN/DE/ES/IT). The
+ * DE/ES/IT branches fall back to the FR formatting per the V2 policy
+ * (`pickByLocale`). Phase 1c-β will migrate the embedded literals
+ * (`'Ouvert 24h/24'`, `'Fermé aujourd’hui'`) to `next-intl` messages
+ * and switch the `H:MM` ↔ `H'h'MM` toggle to a locale-aware Intl
+ * format.
  */
-export function formatOpeningHoursToday(hours: PoiHours, locale: 'fr' | 'en'): string | null {
+export function formatOpeningHoursToday(hours: PoiHours, locale: SupportedLocale): string | null {
   if (hours.kind === 'unknown') return null;
-  if (hours.kind === '24_7') return locale === 'fr' ? 'Ouvert 24h/24' : 'Open 24/7';
-  if (hours.kind === 'closed') return locale === 'fr' ? 'Fermé aujourd’hui' : 'Closed today';
+  if (hours.kind === '24_7') return pickByLocale(locale, 'Ouvert 24h/24', 'Open 24/7');
+  if (hours.kind === 'closed') return pickByLocale(locale, 'Fermé aujourd’hui', 'Closed today');
   const { from, until } = hours;
-  if (locale === 'fr') {
-    const fmt = (t: string): string => t.replace(':', 'h');
-    return `${fmt(from)} – ${fmt(until)}`;
-  }
-  return `${from} – ${until}`;
+  const frFmt = (t: string): string => t.replace(':', 'h');
+  return pickByLocale(locale, `${frFmt(from)} – ${frFmt(until)}`, `${from} – ${until}`);
 }

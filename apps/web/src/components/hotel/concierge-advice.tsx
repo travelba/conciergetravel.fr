@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedConciergeAdvice } from '@/server/hotels/get-hotel-by-slug';
 
 interface Props {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly advice: LocalisedConciergeAdvice | null;
 }
 

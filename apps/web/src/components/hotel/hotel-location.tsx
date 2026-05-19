@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import { deriveWalkMinutes, formatDistanceMeters } from '@/lib/format-distance';
 
 /**
@@ -22,7 +23,7 @@ import type {
 import { HotelStaticMap } from './hotel-static-map';
 
 interface HotelLocationProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly city: string;
   readonly address: string | null;
@@ -275,7 +276,7 @@ function PoiBucketSection({
   t,
 }: {
   readonly bucket: PoiBucket;
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly pois: readonly LocalisedPointOfInterest[];
   readonly bucketTips: LocalisedPoiBucketTips;
   readonly t: Translator;
@@ -315,7 +316,7 @@ function PoiCard({
   poi,
   t,
 }: {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
   readonly poi: LocalisedPointOfInterest;
   readonly t: Translator;
 }): React.ReactElement {

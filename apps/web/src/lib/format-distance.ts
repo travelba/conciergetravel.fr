@@ -16,17 +16,24 @@
  * sync script did not pre-compute `walk_minutes`. Sub-1-minute walks
  * are reported as `1 min` rather than `0 min` (the rendering target
  * is "human guidance", not "stop-watch precision").
+ *
+ * Locale typing — `SupportedLocale` (V2 scope FR/EN/DE/ES/IT) so the
+ * function compiles the day Phase 4 widens `routing.locales`. The
+ * DE/ES/IT branches fall back to the FR string per the V2 policy
+ * (`pickByLocale`). Migration to `next-intl` messages tracked under
+ * Phase 1c-β — the embedded literals (`'sur place'`, `' km'`) will
+ * become localised at that point.
  */
 
-export function formatDistanceMeters(meters: number, locale: 'fr' | 'en'): string {
+import { pickByLocale, type SupportedLocale } from '@/i18n/supported-locale';
+
+export function formatDistanceMeters(meters: number, locale: SupportedLocale): string {
   if (!Number.isFinite(meters) || meters < 0) return '';
-  if (meters < 100) return locale === 'fr' ? 'sur place' : 'on site';
+  if (meters < 100) return pickByLocale(locale, 'sur place', 'on site');
   if (meters < 1000) return `${Math.round(meters)} m`;
   const km = meters / 1000;
   const formatted = km.toFixed(1);
-  // FR uses comma as decimal separator — the canonical sitewide rule
-  // (mirrored by `Intl.NumberFormat('fr-FR')` but lighter).
-  return locale === 'fr' ? `${formatted.replace('.', ',')} km` : `${formatted} km`;
+  return pickByLocale(locale, `${formatted.replace('.', ',')} km`, `${formatted} km`);
 }
 
 /**

@@ -1,9 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 
+import type { SupportedLocale } from '@/i18n/supported-locale';
+
 type ReassuranceIconKey = 'iata' | 'apst' | 'payment' | 'gdpr' | 'support';
 
 interface HotelReassuranceProps {
-  readonly locale: 'fr' | 'en';
+  readonly locale: SupportedLocale;
 }
 
 /**
