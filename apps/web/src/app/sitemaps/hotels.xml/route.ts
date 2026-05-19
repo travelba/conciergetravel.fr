@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import type { Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
+import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listIndexableHotelSlugs } from '@/server/hotels/get-hotel-by-slug';
 
 // ISR — fetches the published catalog at build, then revalidates hourly.
@@ -27,18 +30,16 @@ export async function GET(): Promise<NextResponse> {
     // Indexable only — exclude catalog stubs (noindex on the page).
     const slugs = await listIndexableHotelSlugs();
     for (const s of slugs) {
-      const enSlug = s.slugEn ?? s.slugFr;
-      const frUrl = `${origin}/hotel/${s.slugFr}`;
-      const enUrl = `${origin}/en/hotel/${enSlug}`;
+      // Per-locale slug selection (data layer — Phase 1c will widen
+      // `slugEn`/`slugFr` into a per-locale map keyed on routing.locales).
+      const slugForLocale = (l: Locale): string => (l === 'en' ? (s.slugEn ?? s.slugFr) : s.slugFr);
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${withLocalePath(l, `/hotel/${slugForLocale(l)}`)}`;
       entries.push({
-        loc: frUrl,
+        loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.8,
-        alternates: [
-          { hreflang: 'fr-FR', href: frUrl },
-          { hreflang: 'en', href: enUrl },
-          { hreflang: 'x-default', href: frUrl },
-        ],
+        alternates: buildSitemapAlternates(hrefForLocale),
       });
     }
   } catch {

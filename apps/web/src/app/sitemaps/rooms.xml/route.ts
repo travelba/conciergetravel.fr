@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import type { Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
+import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedRoomSlugs } from '@/server/hotels/get-room-by-slug';
 
 export const revalidate = 3600;
@@ -30,18 +33,16 @@ export async function GET(): Promise<NextResponse> {
   try {
     const rooms = await listPublishedRoomSlugs();
     for (const r of rooms) {
-      const enHotelSlug = r.hotelSlugEn ?? r.hotelSlugFr;
-      const frUrl = `${origin}/hotel/${r.hotelSlugFr}/chambres/${r.roomSlug}`;
-      const enUrl = `${origin}/en/hotel/${enHotelSlug}/chambres/${r.roomSlug}`;
+      // Per-locale hotel-slug selection (data layer — Phase 1c).
+      const hotelSlugForLocale = (l: Locale): string =>
+        l === 'en' ? (r.hotelSlugEn ?? r.hotelSlugFr) : r.hotelSlugFr;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${withLocalePath(l, `/hotel/${hotelSlugForLocale(l)}/chambres/${r.roomSlug}`)}`;
       entries.push({
-        loc: frUrl,
+        loc: hrefForLocale('fr'),
         changefreq: 'monthly',
         priority: 0.6,
-        alternates: [
-          { hreflang: 'fr-FR', href: frUrl },
-          { hreflang: 'en', href: enUrl },
-          { hreflang: 'x-default', href: frUrl },
-        ],
+        alternates: buildSitemapAlternates(hrefForLocale),
       });
     }
   } catch {

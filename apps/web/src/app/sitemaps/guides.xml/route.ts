@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import type { Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
+import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 
 export const revalidate = 3600;
@@ -26,17 +29,13 @@ export async function GET(): Promise<NextResponse> {
   try {
     const guides = await listPublishedGuides();
     for (const g of guides) {
-      const frUrl = `${origin}/guide/${g.slug}`;
-      const enUrl = `${origin}/en/guide/${g.slug}`;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${withLocalePath(l, `/guide/${g.slug}`)}`;
       const entry: SitemapEntry = {
-        loc: frUrl,
+        loc: hrefForLocale('fr'),
         changefreq: 'monthly',
         priority: 0.7,
-        alternates: [
-          { hreflang: 'fr-FR', href: frUrl },
-          { hreflang: 'en', href: enUrl },
-          { hreflang: 'x-default', href: frUrl },
-        ],
+        alternates: buildSitemapAlternates(hrefForLocale),
       };
       // exactOptionalPropertyTypes — only set lastmod when we actually
       // have a reviewedAt value, never as `undefined`.
@@ -46,15 +45,12 @@ export async function GET(): Promise<NextResponse> {
       entries.push(entry);
     }
     // Also include the hub.
+    const hubHrefForLocale = (l: Locale): string => `${origin}${withLocalePath(l, '/guides')}`;
     entries.unshift({
-      loc: `${origin}/guides`,
+      loc: hubHrefForLocale('fr'),
       changefreq: 'weekly',
       priority: 0.6,
-      alternates: [
-        { hreflang: 'fr-FR', href: `${origin}/guides` },
-        { hreflang: 'en', href: `${origin}/en/guides` },
-        { hreflang: 'x-default', href: `${origin}/guides` },
-      ],
+      alternates: buildSitemapAlternates(hubHrefForLocale),
     });
   } catch {
     entries = [];

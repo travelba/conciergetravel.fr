@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 
+import type { Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
+import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
 
 // ISR — fetches the destination directory at build, then revalidates hourly.
@@ -27,31 +30,23 @@ export async function GET(): Promise<NextResponse> {
   try {
     const cities = await listPublishedCities();
 
-    const directoryFr = `${origin}/destination`;
-    const directoryEn = `${origin}/en/destination`;
+    const directoryHrefForLocale = (l: Locale): string =>
+      `${origin}${withLocalePath(l, '/destination')}`;
     entries.push({
-      loc: directoryFr,
+      loc: directoryHrefForLocale('fr'),
       changefreq: 'weekly',
       priority: 0.6,
-      alternates: [
-        { hreflang: 'fr-FR', href: directoryFr },
-        { hreflang: 'en', href: directoryEn },
-        { hreflang: 'x-default', href: directoryFr },
-      ],
+      alternates: buildSitemapAlternates(directoryHrefForLocale),
     });
 
     for (const c of cities) {
-      const fr = `${origin}/destination/${c.slug}`;
-      const en = `${origin}/en/destination/${c.slug}`;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${withLocalePath(l, `/destination/${c.slug}`)}`;
       entries.push({
-        loc: fr,
+        loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.7,
-        alternates: [
-          { hreflang: 'fr-FR', href: fr },
-          { hreflang: 'en', href: en },
-          { hreflang: 'x-default', href: fr },
-        ],
+        alternates: buildSitemapAlternates(hrefForLocale),
       });
     }
   } catch {
