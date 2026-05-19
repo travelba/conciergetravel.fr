@@ -96,6 +96,34 @@ Pattern type :
 - Mode `--dry-run` pour preview JSON sans écriture.
 - `--no-en` pour économiser le call EN quand on régénère uniquement FR.
 
+### Rule 2 bis — `translate-guides-en.ts` est un gap connu
+
+Les guides éditoriaux (40 publiés au 19/05/2026) ont un **EN ratio de
+4-5 %** côté `sections[].body_en` (vs `body_fr` 2200-4500 chars). C'est
+intentionnel côté pipeline : [`generate-guide-v2.ts`](../../scripts/editorial-pilot/src/guides/generate-guide-v2.ts) ligne 762 déclare
+explicitement `body_en` optionnel, court (10-30 mots), avec un commentaire
+« the I18N pipeline will fill it » — mais **cette I18N pipeline guides
+n'existe pas encore**. Seul `translate-hotels-en.ts` existe (Rule 2).
+
+Conséquences :
+
+- Les 40 guides ont leur `alternates.languages` EN mais le contenu réel est
+  ~5 % du FR. Acceptable en V1 (40 pages FR-only équivalent), bloquant pour
+  V2 (de/es/it nécessite EN propre comme pivot).
+- À implémenter sur le pattern de `translate-hotels-en.ts` :
+- Schema Zod (`sections[]`, `faq[]`, `summary`, `meta_title`, `meta_desc`,
+  `tables[]`, `glossary[]`, `editorial_callouts[]`).
+- `mergeEn*` helpers : ne JAMAIS écrabouiller un champ FR populé par une
+  traduction vide ou très courte.
+- Coût empirique attendu : ~$0.30-0.50 par guide (vs $0.30 pour
+  `translate-hotels-en.ts` qui traite ~10 KB de FR).
+- Audit dispo : [`scripts/editorial-pilot/inspect-published-guides-en.mjs`](../../scripts/editorial-pilot/inspect-published-guides-en.mjs)
+  ratio EN / FR par guide.
+
+Anti-pattern à refuser : publier de nouveaux guides en V2 sans avoir
+construit `translate-guides-en.ts`. Capitalisation à compléter dès
+qu'on attaque le rollout multilingue.
+
 ## Rule 3 — Sentence-length shortener (vague 2bis guides + rankings)
 
 Les ~30 guides + ~100 rankings publiés avant Phase 2 ont entre 35 % et 39 % de phrases > 25 mots. Full-regen 8-pass coûterait 50-80 €. À la place, [`scripts/editorial-pilot/src/concierge/run-shorten-sections.ts`](../../scripts/editorial-pilot/src/concierge/run-shorten-sections.ts) cible **uniquement** les phrases longues :
@@ -122,6 +150,48 @@ Mécanique de sûreté :
 4. Si validation échoue → on conserve le chunk d'origine, statut `PARTIAL`. Si tous les chunks passent → `OK`. Aucun fallback silencieux.
 
 Coût empirique : ~1500 input + 1000 output tokens par guide section, ~$0.01 par guide complet en gpt-4o-mini. Bien plus cheap que full-regen.
+
+### Rule 3 bis — Shortener obligatoire sur les drafts fraîchement bulk-générés
+
+Les prompts inline `generate-guide-v2.ts` + `generate-ranking-v2.ts` portent la
+règle « toutes phrases ≤ 25 mots », mais en pratique gpt-4o-mini _ne respecte
+pas la règle à 100 %_ sur un batch. Audit empirique 19/05/2026 sur 10 guides
+fraîchement générés par `guides:bulk` Phase F (cf.
+[`scripts/editorial-pilot/runs/guides-audit-2026-05-19T10-11-55.json`](../../scripts/editorial-pilot/runs/guides-audit-2026-05-19T10-11-55.json)) :
+
+| Métrique                  | Drafts fraîches | Published bar (30 guides) |
+| ------------------------- | --------------- | ------------------------- |
+| Sentences > 25 mots (avg) | **40**          | 15                        |
+| Sentences > 25 mots (max) | **49**          | 53                        |
+
+Soit **2.7 × le bar publié** sans la passe shortener. Conclusion :
+
+- Ne **jamais publier directement** la sortie de `rankings:bulk` /
+  `guides:bulk` avant d'avoir passé `run-shorten-sections.ts --slugs <list>`
+  sur le delta. Le shortener accepte un slug même non-publié (`--slugs`
+  bypass le filtre `is_published = true` du `listSlugs`).
+- Coût marginal : ~$0.30 pour 10 guides, 2.4 min wall-clock à
+  `--concurrency 3`. Négligeable vs la régression SEO de phrases denses.
+- Audit type pre-publish : [`scripts/editorial-pilot/audit-guides-drafts.mjs`](../../scripts/editorial-pilot/audit-guides-drafts.mjs)
+  (similaire pour rankings via Rule 5).
+
+Workflow canonique pour publier un batch de drafts :
+
+```bash
+# 1. Generate bulk
+pnpm --filter @mch/editorial-pilot run guides --slug=sologne,pays-basque,...
+
+# 2. Shorten (pre-publish gate)
+pnpm --filter @mch/editorial-pilot exec tsx \
+ src/concierge/run-shorten-sections.ts --table guides \
+ --slugs sologne,pays-basque,... --concurrency 3
+
+# 3. Audit
+node scripts/editorial-pilot/audit-guides-drafts.mjs
+
+# 4. Publish (ratchet UPDATE — never downgrades)
+node scripts/editorial-pilot/publish-guide-drafts.mjs
+```
 
 ## Rule 4 — Linter sentence_length (CI cheap)
 
