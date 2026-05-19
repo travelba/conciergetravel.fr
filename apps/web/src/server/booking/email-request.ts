@@ -4,6 +4,7 @@ import { EmailRequestGuest, EmailRequestOps, renderEmailHtml, renderEmailText } 
 import { generateBookingRef, parseGuest, type Guest } from '@mch/domain/booking';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
+import { getTranslations } from 'next-intl/server';
 import { z } from 'zod';
 
 import { env } from '@/lib/env';
@@ -102,10 +103,15 @@ async function sendEmails(input: {
   const brevo = { apiKey: env.BREVO_API_KEY };
   const sender = { email: env.BREVO_SENDER_EMAIL, name: env.BREVO_SENDER_NAME };
 
-  const guestSubject =
-    input.locale === 'en'
-      ? `Your enquiry — ${input.hotelName} (${input.requestRef})`
-      : `Votre demande — ${input.hotelName} (${input.requestRef})`;
+  // Guest-facing subject is localised via `next-intl` so DE/ES/IT in Phase 4
+  // only need new entries under the `emails` namespace. The ops subject stays
+  // EN-only on purpose — it's read by the internal operations team, not the
+  // customer.
+  const tEmails = await getTranslations({ locale: input.locale, namespace: 'emails' });
+  const guestSubject = tEmails('emailRequestGuestSubject', {
+    hotelName: input.hotelName,
+    requestRef: input.requestRef,
+  });
   const opsSubject = `[CCT] Email request — ${input.hotelName} — ${input.requestRef}`;
 
   await Promise.allSettled([

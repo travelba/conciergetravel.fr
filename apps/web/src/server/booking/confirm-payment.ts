@@ -9,8 +9,10 @@ import {
 } from '@mch/domain/booking';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
+import { getTranslations } from 'next-intl/server';
 
 import { intlLocaleTag } from '@/i18n/runtime';
+import type { SupportedLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getOptionalUser } from '@/server/auth/session';
@@ -35,7 +37,7 @@ export interface ConfirmPaymentSuccess {
   readonly hotelName: string;
 }
 
-const fmtPrice = (amountMinor: number, locale: 'fr' | 'en'): string =>
+const fmtPrice = (amountMinor: number, locale: SupportedLocale): string =>
   new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
@@ -53,6 +55,10 @@ function nightCount(checkIn: string, checkOut: string): number {
 }
 
 async function sendConfirmationEmail(input: {
+  // V1-narrow: matches the email template (`BookingConfirmationGuest` accepts
+  // only `'fr' | 'en'`). Widening this signature would force a narrowing dance
+  // at the React-Email call site for zero benefit while the template hasn't
+  // grown DE/ES/IT copy yet — keep the type honest.
   readonly locale: 'fr' | 'en';
   readonly hotel: DraftHotelSnapshot;
   readonly draft: BookingDraft;
@@ -75,10 +81,13 @@ async function sendConfirmationEmail(input: {
 
   const [html, text] = await Promise.all([renderEmailHtml(element), renderEmailText(element)]);
 
-  const subject =
-    input.locale === 'en'
-      ? `Booking confirmed — ${input.hotel.name} (${input.bookingRef})`
-      : `Réservation confirmée — ${input.hotel.name} (${input.bookingRef})`;
+  // Subject is sourced from `next-intl` messages so DE/ES/IT in Phase 4
+  // just need new entries under the `emails` namespace (no code change).
+  const t = await getTranslations({ locale: input.locale, namespace: 'emails' });
+  const subject = t('bookingConfirmedSubject', {
+    hotelName: input.hotel.name,
+    bookingRef: input.bookingRef,
+  });
 
   await sendBrevoTransactionalEmail(
     { apiKey: env.BREVO_API_KEY },

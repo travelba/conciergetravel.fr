@@ -1093,6 +1093,10 @@
     "filtersLabel": "Filtres",
     "allOption": "Tous"
   },
+  "emails": {
+    "bookingConfirmedSubject": "Réservation confirmée — {hotelName} ({bookingRef})",
+    "emailRequestGuestSubject": "Votre demande — {hotelName} ({requestRef})"
+  },
   "editorial": {
     "tocHeading": "Sur cette page",
     "glossaryHeading": "Glossaire",
