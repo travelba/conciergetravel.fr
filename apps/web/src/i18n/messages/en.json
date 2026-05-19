@@ -80,7 +80,12 @@
       "label": "Primary navigation",
       "destinations": "Destinations",
       "search": "Search",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "hotelsAllAria": "View all hotels",
+      "hotelsCategoriesLabel": "Hotel categories",
+      "hotelsBrowseAll": "Browse the full catalogue",
+      "rankings": "Rankings",
+      "guides": "Guides"
     },
     "account": {
       "signIn": "Sign in",
@@ -90,7 +95,8 @@
     "menu": {
       "open": "Open menu",
       "close": "Close menu",
-      "label": "Mobile menu"
+      "label": "Mobile menu",
+      "sectionsLabel": "Site sections"
     },
     "locale": {
       "label": "Choose language",

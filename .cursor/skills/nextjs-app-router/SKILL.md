@@ -22,6 +22,14 @@ Invoke when:
 
 - No `'use client'` unless interactivity, browser API, or hooks are required.
 - Heavy editorial pages (hubs, fiches, guides) must be RSC and stream where possible.
+- **Interactive UI that only needs hover/focus disclosure (dropdowns,
+  tooltips, simple menus) stays Server-Component-only via CSS
+  `group-hover` + `group-focus-within`** — adding `'use client'` to the
+  site header would silently force every page underneath to leave ISR
+  (the auth client island pattern of ADR-0007 collapses). Pattern in
+  [`responsive-ui-architecture`](../responsive-ui-architecture/SKILL.md)
+  §CSS-only dropdowns keep the header as a Server Component. Only escape to a Client Component for typeahead, full APG
+  menubar with roving tabindex, or open-state-survives-outside-click.
 
 ### Caching directives
 

@@ -1,11 +1,13 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 
 import { Link, usePathname } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
 
 import { AuthArea } from './auth-area';
+import { HOTEL_CATEGORY_NAV_ENTRIES, pickCategoryLabel } from './nav-data';
 
 /**
  * Mobile slide-over menu (skill: accessibility §dialogs +
@@ -19,11 +21,16 @@ import { AuthArea } from './auth-area';
  *    closes it (route change handled by next-intl).
  *  - `role="dialog"` + `aria-modal="true"` because it's an *overlay*
  *    (vs. the consent banner which is non-modal).
+ *  - The "Hôtels" entry expands to the same 5 editorial categories
+ *    exposed by the desktop dropdown. We use a native `<details>` so
+ *    keyboard and assistive-tech users get the disclosure semantics
+ *    for free.
  *  - Sprint 4.1: auth area is the shared `<AuthArea variant="mobile" />`
  *    client island so the host header stays static.
  */
 export function MobileNav(): ReactElement {
   const t = useTranslations('header');
+  const locale = useLocale() as Locale;
   const [open, setOpen] = useState(false);
   const labelId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -64,6 +71,11 @@ export function MobileNav(): ReactElement {
       triggerRef.current?.focus({ preventScroll: true });
     }
   }, [open]);
+
+  const linkClass =
+    'text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2';
+  const subLinkClass =
+    'text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2';
 
   return (
     <>
@@ -120,7 +132,7 @@ export function MobileNav(): ReactElement {
             role="dialog"
             aria-modal="true"
             aria-label={t('menu.label')}
-            className="border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(20rem,85vw)] flex-col overflow-y-auto border-l p-5 shadow-xl"
+            className="border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5 shadow-xl"
           >
             <div className="mb-6 flex items-center justify-between">
               <p className="text-fg font-serif text-lg">{t('brand')}</p>
@@ -144,17 +156,65 @@ export function MobileNav(): ReactElement {
             </div>
 
             <nav aria-label={t('primaryNav.label')} className="flex flex-col gap-1 text-base">
-              <Link
-                href="/recherche"
-                className="text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
-              >
-                {t('primaryNav.search')}
-              </Link>
-              <Link
-                href="/destination"
-                className="text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
-              >
+              {/*
+                Native `<details>` gives us a disclosure widget with the
+                correct ARIA semantics for free. The "Tous les hôtels"
+                link is duplicated inside the open panel so the user
+                always has a 1-click route to `/hotels` even after they
+                expand the categories.
+              */}
+              <details className="group">
+                <summary
+                  className={`${linkClass} flex cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden`}
+                >
+                  <span>{t('primaryNav.hotels')}</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 12 12"
+                    className="h-3 w-3 opacity-60 transition group-open:rotate-180"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path d="M3 4.5l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </summary>
+                <ul
+                  className="border-muted/30 ml-3 mt-1 flex flex-col gap-0.5 border-l pl-3"
+                  aria-label={t('primaryNav.hotelsCategoriesLabel')}
+                >
+                  {HOTEL_CATEGORY_NAV_ENTRIES.map((entry) => (
+                    <li key={entry.slug}>
+                      <Link
+                        href={{
+                          pathname: '/categorie/[categorySlug]',
+                          params: { categorySlug: entry.slug },
+                        }}
+                        className={subLinkClass}
+                      >
+                        {pickCategoryLabel(entry, locale)}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link href="/hotels" className={`${subLinkClass} text-muted`}>
+                      {t('primaryNav.hotelsBrowseAll')}
+                    </Link>
+                  </li>
+                </ul>
+              </details>
+
+              <Link href="/destination" className={linkClass}>
                 {t('primaryNav.destinations')}
+              </Link>
+              <Link href="/classements" className={linkClass}>
+                {t('primaryNav.rankings')}
+              </Link>
+              <Link href="/guides" className={linkClass}>
+                {t('primaryNav.guides')}
+              </Link>
+              <Link href="/recherche" className={linkClass}>
+                {t('primaryNav.search')}
               </Link>
             </nav>
 

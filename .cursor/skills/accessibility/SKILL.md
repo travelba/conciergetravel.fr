@@ -42,6 +42,12 @@ Invoke when:
 - All interactive elements reachable via Tab in logical order.
 - Modals trap focus and restore on close.
 - Booking tunnel step navigation: Enter advances, Esc cancels current step (with confirm if data entered).
+- **Hover-only dropdowns fail WCAG 2.1.1.** Any dropdown driven by CSS
+  hover MUST also expose its panel via `:focus-within` (Tailwind
+  `group-focus-within:`). Use `invisible opacity-0` rather than `hidden`
+  so the panel stays in the DOM and focus can land inside it. Pattern
+  - reference code: [`responsive-ui-architecture`](../responsive-ui-architecture/SKILL.md)
+    §CSS-only dropdowns keep the header as a Server Component.
 
 ### Images and media
 

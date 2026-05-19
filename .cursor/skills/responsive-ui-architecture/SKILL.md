@@ -46,6 +46,75 @@ Invoke when:
 - Mobile: top header + burger → bottom-sheet menu. Footer is condensed.
 - Desktop: sticky top header with mega-menu (regions/themes/guides), full footer with trust signals (IATA/ASPST badges, secure payment Amadeus, phone, financial guarantee).
 
+### CSS-only dropdowns keep the header as a Server Component
+
+The site header (`apps/web/src/components/layout/site-header.tsx`) is a
+Server Component on purpose: pages underneath can opt into ISR because
+it never reads `cookies()` (ADR-0007 auth client island pattern). Adding
+a "use client" wrapper around a dropdown trigger silently breaks that
+contract and forces every page to fall back to `force-dynamic`.
+
+**Pattern** — wrap the trigger + panel in a `group relative` container
+and drive the panel's visibility with `group-hover` AND
+`group-focus-within`. Both keyboard and pointer users get the same
+affordance, no JS required, the host stays RSC.
+
+```tsx
+<div className="group relative">
+  <Link
+    href="/hotels"
+    aria-haspopup="menu"
+    className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2"
+  >
+    {t('primaryNav.hotels')}
+    {/* caret SVG */}
+  </Link>
+  <div
+    role="menu"
+    aria-label={t('primaryNav.hotelsCategoriesLabel')}
+    className="border-border bg-bg invisible absolute left-0 top-full z-50 mt-1 w-72 rounded-md border p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+  >
+    <ul>
+      {entries.map((e) => (
+        <li key={e.slug} role="none">
+          <Link role="menuitem" href={…}>{label}</Link>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+```
+
+Five things this pattern enforces:
+
+1. **`invisible opacity-0` + `transition`** instead of `hidden` — the
+   panel stays in the DOM so `focus-within` actually fires when a
+   keyboard user tabs into the first menu item.
+2. **`group-focus-within:` in addition to `group-hover:`** — without it,
+   Tab + Enter cannot reach the panel items on desktop; the dropdown
+   becomes mouse-only and fails WCAG 2.1.1 (Keyboard).
+3. **`aria-haspopup="menu"`** on the trigger and **`role="menu"` +
+   `role="menuitem"`** inside, with `role="none"` on the `<li>`
+   wrappers — APG menu pattern.
+4. **The trigger itself is a real link** (`/hotels`), not a `<button>`
+   that does nothing. Mouse users who don't hover-and-click on a child
+   still land on a useful page.
+5. **Mobile counterpart uses `<details>`** — never reuse the same
+   `group-hover` panel on touch, where there is no hover. `<details>`
+   gives APG disclosure semantics for free and degrades without JS.
+   See `apps/web/src/components/layout/mobile-nav.tsx`.
+
+**When to escape to a Client Component instead** — only when the menu
+needs typeahead, complex roving-tabindex (full APG menubar), or a
+controlled-open state that survives clicks outside. For a static list
+of links the CSS-only path is correct.
+
+Reference implementation: `apps/web/src/components/layout/site-header.tsx`
+
+- `apps/web/src/components/layout/nav-data.ts` (shared category source
+  between RSC header and Client mobile-nav — the data module avoids
+  `server-only` so both consumers can import it).
+
 ### Trust signals (CDC §10.2) on every page
 
 - Header: phone number visible, IATA + ASPST badges with link to official registers.
@@ -75,4 +144,8 @@ Invoke when:
 ## References
 
 - CDC v3.0 §9 (mobile-first), §10 (visual identity), §10.2 (trust signals).
-- `accessibility`, `performance-engineering`, `booking-engine` skills.
+- `accessibility` — APG menu / disclosure patterns, focus-visible rules
+  consumed by the CSS-only dropdown.
+- `nextjs-app-router` — Server Component / Client Component boundary that
+  the dropdown pattern is built to preserve (ADR-0007 auth island).
+- `performance-engineering`, `booking-engine` skills.
