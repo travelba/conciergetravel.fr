@@ -99,9 +99,23 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
       limit: 1,
     });
   }
-  const filters: string[] = ['is_published=eq.true'];
+  // `MCH_INCLUDE_DRAFTS=1` extends the working set to draft hotels (e.g.
+  // the 167 Yonder-derived rows scaffolded in May 2026 that are
+  // `is_published=false` until editorial review).
+  // `MCH_ONLY_SLUGS=slug-a,slug-b` further restricts the working set.
+  const includeDrafts = process.env['MCH_INCLUDE_DRAFTS'] === '1';
+  const onlySlugRaw = process.env['MCH_ONLY_SLUGS'] ?? '';
+  const onlySlugs = onlySlugRaw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const filters: string[] = [];
+  if (!includeDrafts) filters.push('is_published=eq.true');
   if (!args.force) {
     filters.push('latitude=is.null');
+  }
+  if (onlySlugs.length > 0) {
+    filters.push(`slug=in.(${onlySlugs.join(',')})`);
   }
   return selectHotels<HotelRow>(cfg, {
     columns: HOTEL_COLS,

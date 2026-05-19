@@ -27,6 +27,10 @@ import type { RankingSeed } from './rankings-catalog.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLASSIFIED_PATH = path.resolve(__dirname, '../../data/yonder-tops-fr-classified.json');
+const SCAFFOLD_CLASSIFIED_PATH = path.resolve(
+  __dirname,
+  '../../data/yonder-scaffold-classified.json',
+);
 
 // ─── Yonder loader ───────────────────────────────────────────────────────
 
@@ -35,6 +39,14 @@ interface ClassifiedYonderEntry {
   readonly title: string;
   readonly axes: RankingAxes;
   readonly lieuResolved: boolean;
+}
+
+interface ScaffoldClassifiedEntry {
+  readonly slug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly axes: RankingAxes;
+  readonly kind: 'best_of' | 'awarded' | 'thematic' | 'geographic';
 }
 
 async function loadYonderClassified(): Promise<ClassifiedYonderEntry[]> {
@@ -61,6 +73,36 @@ async function loadYonderClassified(): Promise<ClassifiedYonderEntry[]> {
   return out;
 }
 
+async function loadYonderScaffoldClassified(): Promise<ScaffoldClassifiedEntry[]> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(SCAFFOLD_CLASSIFIED_PATH, 'utf-8');
+  } catch {
+    return [];
+  }
+  const parsed = JSON.parse(raw) as { entries: ReadonlyArray<unknown> };
+  const out: ScaffoldClassifiedEntry[] = [];
+  const ALLOWED_KINDS = new Set(['best_of', 'awarded', 'thematic', 'geographic']);
+  for (const e of parsed.entries) {
+    if (typeof e !== 'object' || e === null) continue;
+    const obj = e as Record<string, unknown>;
+    const axesRes = RankingAxesSchema.safeParse(obj['axes']);
+    if (!axesRes.success) continue;
+    const rawKind = String(obj['kind'] ?? 'geographic');
+    const kind: ScaffoldClassifiedEntry['kind'] = ALLOWED_KINDS.has(rawKind)
+      ? (rawKind as ScaffoldClassifiedEntry['kind'])
+      : 'geographic';
+    out.push({
+      slug: String(obj['slug'] ?? ''),
+      titleFr: String(obj['titleFr'] ?? ''),
+      titleEn: String(obj['titleEn'] ?? ''),
+      axes: axesRes.data,
+      kind,
+    });
+  }
+  return out;
+}
+
 // ─── Public API ──────────────────────────────────────────────────────────
 
 export interface LoadedRankingsV2 {
@@ -81,10 +123,14 @@ export async function loadRankingsV2(
   options: { readonly skipUnderfilled?: boolean } = {},
 ): Promise<LoadedRankingsV2> {
   const catalog = await loadHotelsCatalog();
-  const yonderClassified = await loadYonderClassified();
+  const [yonderClassified, yonderScaffoldClassified] = await Promise.all([
+    loadYonderClassified(),
+    loadYonderScaffoldClassified(),
+  ]);
   const matrix = buildMatrix({
     catalog,
     yonderClassified,
+    yonderScaffoldClassified,
     skipUnderfilled: options.skipUnderfilled ?? true,
   });
   const seedsAsRankingSeeds = matrix.seeds.map(matrixSeedToRankingSeed);

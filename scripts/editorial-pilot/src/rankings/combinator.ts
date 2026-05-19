@@ -57,7 +57,17 @@ const lc = (s: string): string => s.toLowerCase();
 function lieuMatches(h: HotelCatalogRow, lieu: LieuDef): boolean {
   if (lieu.slug === 'france') return true;
   const c = lc(h.city);
-  return lieu.hotelCityKeys.some((k) => c === lc(k) || c.includes(lc(k)));
+  const cityMatch = lieu.hotelCityKeys.some((k) => c === lc(k) || c.includes(lc(k)));
+  if (!cityMatch) return false;
+  // A2 (May 19, 2026): refine eligibility for arrondissement / quartier
+  // lieus by matching on postal_code. A hotel located in "Paris" but with
+  // postal_code 75008 will match `paris-8` / `champs-elysees`, NOT `paris-2`
+  // even though the city key alone is permissive.
+  if (lieu.postalCodePrefixes !== undefined && lieu.postalCodePrefixes.length > 0) {
+    const pc = (h.postal_code ?? '').replace(/\s+/gu, '');
+    return lieu.postalCodePrefixes.some((prefix) => pc.startsWith(prefix));
+  }
+  return true;
 }
 
 /**
@@ -471,6 +481,21 @@ export interface BuildMatrixOptions {
     readonly axes: RankingAxes;
     readonly lieuResolved: boolean;
   }>;
+  /**
+   * Classified yonder *scaffold* plans (output of
+   * classify-scaffold-axes.ts). These mirror Yonder URLs we scaffolded
+   * directly into Supabase: the original Yonder slug becomes the
+   * canonical matrice slug (via `slugOverride`), so the bulk runner
+   * picks them up without remapping. See ADR-rankings-axes / A2
+   * (May 19, 2026).
+   */
+  readonly yonderScaffoldClassified?: ReadonlyArray<{
+    readonly slug: string;
+    readonly titleFr: string;
+    readonly titleEn: string;
+    readonly axes: RankingAxes;
+    readonly kind?: MatrixSeed['kind'];
+  }>;
   /** When false, emit even seeds with < MIN_ELIGIBLE candidates (for QA). */
   readonly skipUnderfilled?: boolean;
 }
@@ -487,7 +512,12 @@ export interface BuildMatrixResult {
 }
 
 export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
-  const { catalog, yonderClassified, skipUnderfilled = false } = options;
+  const {
+    catalog,
+    yonderClassified,
+    yonderScaffoldClassified = [],
+    skipUnderfilled = false,
+  } = options;
   const seedsBySlug = new Map<string, MatrixSeed>();
   let droppedUnderfilled = 0;
   let totalCandidates = 0;
@@ -509,7 +539,33 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     seedsBySlug.set(m.slug, final);
   }
 
-  // 2. Yonder mirrors — only when the lieu was resolved (otherwise
+  // 2. Yonder scaffold mirrors — these are URL-canonical Yonder slugs
+  //    we want to ship as-is (already scaffolded into Supabase). The
+  //    slug always overrides the template render, so the bulk runner
+  //    picks them up with their original URL. See A2 (May 19, 2026).
+  for (const y of yonderScaffoldClassified) {
+    totalCandidates += 1;
+    const seed = buildSeed({
+      axes: y.axes,
+      source: 'yonder',
+      catalog,
+      slugOverride: y.slug,
+      titleFrOverride: y.titleFr,
+      titleEnOverride: y.titleEn,
+      yonderSlug: y.slug,
+      yonderTitle: y.titleFr,
+    });
+    if (seed === null) continue;
+    if (seedsBySlug.has(y.slug)) continue; // manual already won
+    if (skipUnderfilled && !seed.hasEnoughCandidates) {
+      droppedUnderfilled += 1;
+      continue;
+    }
+    const final: MatrixSeed = y.kind ? { ...seed, kind: y.kind } : seed;
+    seedsBySlug.set(y.slug, final);
+  }
+
+  // 3. Yonder mirrors — only when the lieu was resolved (otherwise
   //    we cannot map to our hotels DB) and the template renders.
   for (const y of yonderClassified) {
     if (!y.lieuResolved) continue;
@@ -522,7 +578,7 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
       yonderTitle: y.title,
     });
     if (seed === null) continue;
-    if (seedsBySlug.has(seed.slug)) continue; // manual already won
+    if (seedsBySlug.has(seed.slug)) continue; // manual / scaffold already won
     if (skipUnderfilled && !seed.hasEnoughCandidates) {
       droppedUnderfilled += 1;
       continue;
@@ -530,7 +586,7 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     seedsBySlug.set(seed.slug, seed);
   }
 
-  // 3. Auto matrix — full Cartesian product (type × lieu) +
+  // 4. Auto matrix — full Cartesian product (type × lieu) +
   //    (theme × lieu) + (theme × france). We intentionally cap the
   //    explosion by NOT generating type × theme × occasion at this
   //    layer (templates handle that for yonder mirrors only).
@@ -557,7 +613,7 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     }
   }
 
-  // 4. Theme × Lieu (type=all).
+  // 5. Theme × Lieu (type=all).
   for (const lieu of LIEUX) {
     if (lieu.slug === 'monde') continue;
     for (const th of THEMES) {
@@ -580,7 +636,7 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     }
   }
 
-  // 5. Occasion × France (type=all). Few but high-volume terms.
+  // 6. Occasion × France (type=all). Few but high-volume terms.
   for (const o of OCCASIONS) {
     const axes: RankingAxes = {
       types: ['all'],

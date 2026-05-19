@@ -67,6 +67,15 @@ export interface LieuDef {
   readonly scope: LieuScope;
   /** Cities (lowercase) of the hotel catalog mapping to this lieu. */
   readonly hotelCityKeys: readonly string[];
+  /**
+   * Optional postal_code prefix(es) used for arrondissement / quartier
+   * scoping. When present, a hotel matches this lieu only when its
+   * `postal_code` starts with one of the listed prefixes AND its `city`
+   * matches `hotelCityKeys`. Used to make Paris-N rankings cite only
+   * hotels actually located in arrondissement N (cf. ADR-rankings-axes,
+   * May 19, 2026 — A2 Yonder slug alignment).
+   */
+  readonly postalCodePrefixes?: readonly string[];
 }
 
 export const LIEUX: readonly LieuDef[] = [
@@ -317,6 +326,351 @@ export const LIEUX: readonly LieuDef[] = [
     label: 'Deauville',
     scope: 'ville',
     hotelCityKeys: ['deauville'],
+  },
+
+  // ─── A2 (May 19, 2026) — additional regions, clusters, cities and
+  //     Paris arrondissements / named neighbourhoods. Introduced to
+  //     align our matrice slugs with the 58+ Yonder rankings imported
+  //     overnight, while keeping eligibility filtering precise (via
+  //     postal_code) for Paris quartier-level pages.
+
+  // Missing regions + clusters.
+  {
+    slug: 'bourgogne',
+    label: 'Bourgogne',
+    scope: 'region',
+    hotelCityKeys: [
+      'beaune',
+      'dijon',
+      'pommard',
+      'vougeot',
+      'nuits-saint-georges',
+      'meursault',
+      'chablis',
+      'gevrey-chambertin',
+      'puligny-montrachet',
+      'levernois',
+    ],
+  },
+  {
+    slug: 'centre-val-de-loire',
+    label: 'Centre-Val de Loire',
+    scope: 'region',
+    hotelCityKeys: [
+      'tours',
+      'amboise',
+      'blois',
+      'chambord',
+      'orleans',
+      'orléans',
+      'cheverny',
+      'chinon',
+      'azay-le-rideau',
+      'chenonceaux',
+    ],
+  },
+  {
+    slug: 'sud-ouest',
+    label: 'Sud-Ouest',
+    scope: 'cluster',
+    hotelCityKeys: [
+      'biarritz',
+      'bordeaux',
+      'saint-jean-de-luz',
+      'bayonne',
+      'hossegor',
+      'soorts-hossegor',
+      'martillac',
+      'saint-emilion',
+      'saint-émilion',
+      'pauillac',
+      'cognac',
+      'arcachon',
+      'cap ferret',
+      'cap-ferret',
+    ],
+  },
+  {
+    slug: 'cote-atlantique',
+    label: 'Côte Atlantique',
+    scope: 'cluster',
+    hotelCityKeys: [
+      'la baule',
+      'la baule-escoublac',
+      'la rochelle',
+      'arcachon',
+      'cap ferret',
+      'cap-ferret',
+      'sables-d-olonne',
+      'les sables-d-olonne',
+      'biarritz',
+      'hossegor',
+      'soorts-hossegor',
+    ],
+  },
+  {
+    slug: 'ile-de-france',
+    label: 'Île-de-France',
+    scope: 'region',
+    hotelCityKeys: [
+      'versailles',
+      'fontainebleau',
+      'chantilly',
+      'barbizon',
+      'bonnelles',
+      'rambouillet',
+      'gif-sur-yvette',
+      'saint-germain-en-laye',
+      'auvers-sur-oise',
+      'magny-en-vexin',
+      'la roche-guyon',
+    ],
+  },
+  {
+    slug: 'sologne',
+    label: 'Sologne',
+    scope: 'cluster',
+    hotelCityKeys: [
+      'cheverny',
+      'romorantin',
+      'romorantin-lanthenay',
+      'sully-sur-loire',
+      'la ferté-saint-aubin',
+      'chambord',
+    ],
+  },
+  {
+    slug: 'vexin',
+    label: 'Vexin',
+    scope: 'cluster',
+    hotelCityKeys: ['magny-en-vexin', 'la roche-guyon', 'giverny', 'vetheuil', 'vétheuil'],
+  },
+  {
+    slug: 'lac-leman',
+    label: 'Lac Léman',
+    scope: 'cluster',
+    hotelCityKeys: [
+      'évian',
+      'evian',
+      'évian-les-bains',
+      'evian-les-bains',
+      'thonon-les-bains',
+      'yvoire',
+    ],
+  },
+
+  // Missing cities (regional capitals + Yonder Tops anchors).
+  {
+    slug: 'colmar',
+    label: 'Colmar',
+    scope: 'ville',
+    hotelCityKeys: ['colmar'],
+  },
+  {
+    slug: 'dijon',
+    label: 'Dijon',
+    scope: 'ville',
+    hotelCityKeys: ['dijon'],
+  },
+  {
+    slug: 'lyon',
+    label: 'Lyon',
+    scope: 'ville',
+    hotelCityKeys: ['lyon'],
+  },
+  {
+    slug: 'tours',
+    label: 'Tours',
+    scope: 'ville',
+    hotelCityKeys: ['tours'],
+  },
+  {
+    slug: 'chantilly',
+    label: 'Chantilly',
+    scope: 'ville',
+    hotelCityKeys: ['chantilly'],
+  },
+  {
+    slug: 'bordeaux-ville',
+    label: 'Bordeaux ville',
+    scope: 'ville',
+    hotelCityKeys: ['bordeaux'],
+  },
+
+  // Paris arrondissements (proper filtering via postal_code prefix).
+  // Only emit those referenced by Yonder slugs; the others can be
+  // added as the catalog gains coverage.
+  {
+    slug: 'paris-1',
+    label: 'Paris 1er',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75001'],
+  },
+  {
+    slug: 'paris-2',
+    label: 'Paris 2e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75002'],
+  },
+  {
+    slug: 'paris-3',
+    label: 'Paris 3e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75003'],
+  },
+  {
+    slug: 'paris-4',
+    label: 'Paris 4e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75004'],
+  },
+  {
+    slug: 'paris-5',
+    label: 'Paris 5e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75005'],
+  },
+  {
+    slug: 'paris-6',
+    label: 'Paris 6e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75006'],
+  },
+  {
+    slug: 'paris-7',
+    label: 'Paris 7e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75007'],
+  },
+  {
+    slug: 'paris-8',
+    label: 'Paris 8e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75008'],
+  },
+  {
+    slug: 'paris-9',
+    label: 'Paris 9e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75009'],
+  },
+  {
+    slug: 'paris-11',
+    label: 'Paris 11e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75011'],
+  },
+  {
+    slug: 'paris-12',
+    label: 'Paris 12e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75012'],
+  },
+  {
+    slug: 'paris-13',
+    label: 'Paris 13e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75013'],
+  },
+  {
+    slug: 'paris-15',
+    label: 'Paris 15e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75015'],
+  },
+  {
+    slug: 'paris-16',
+    label: 'Paris 16e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75016', '75116'],
+  },
+  {
+    slug: 'paris-17',
+    label: 'Paris 17e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75017'],
+  },
+  {
+    slug: 'paris-18',
+    label: 'Paris 18e',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75018'],
+  },
+
+  // Paris named quartiers — each maps to one or two arrondissements
+  // via postal_code prefix. Slug stays as the Yonder vernacular term
+  // (Marais, Montmartre…) for SEO; eligibility is the underlying arrdt.
+  {
+    slug: 'marais',
+    label: 'Le Marais (Paris)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75003', '75004'],
+  },
+  {
+    slug: 'montmartre',
+    label: 'Montmartre (Paris 18e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75018'],
+  },
+  {
+    slug: 'champs-elysees',
+    label: 'Champs-Élysées (Paris 8e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75008'],
+  },
+  {
+    slug: 'quartier-latin',
+    label: 'Quartier Latin (Paris 5e–6e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75005', '75006'],
+  },
+  {
+    slug: 'bastille',
+    label: 'Bastille (Paris 11e–12e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75011', '75012', '75004'],
+  },
+  {
+    slug: 'bercy',
+    label: 'Bercy (Paris 12e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75012'],
+  },
+  {
+    slug: 'gare-de-lyon',
+    label: 'Gare de Lyon (Paris 12e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75012'],
+  },
+  {
+    slug: 'tour-eiffel',
+    label: 'Tour Eiffel (Paris 7e)',
+    scope: 'arrondissement',
+    hotelCityKeys: ['paris'],
+    postalCodePrefixes: ['75007', '75015', '75016'],
   },
 ];
 

@@ -200,17 +200,32 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
       limit: 1,
     });
   }
-  const filters: string[] = [
-    'is_published=eq.true',
-    'latitude=not.is.null',
-    'longitude=not.is.null',
-  ];
+  // `MCH_INCLUDE_DRAFTS=1` extends the working set to draft hotels (e.g.
+  // the 167 Yonder-derived rows scaffolded in May 2026 that are
+  // `is_published=false` until editorial review).
+  // `MCH_DRAFTS_ONLY=1` (added 2026-05-19) restricts strictly to drafts so a
+  // Phase B run on drafts cannot overwrite already-humanised POIs on
+  // published palaces.
+  // `MCH_ONLY_SLUGS=slug-a,slug-b` further restricts the working set.
+  const includeDrafts = process.env['MCH_INCLUDE_DRAFTS'] === '1';
+  const draftsOnly = process.env['MCH_DRAFTS_ONLY'] === '1';
+  const onlySlugRaw = process.env['MCH_ONLY_SLUGS'] ?? '';
+  const onlySlugs = onlySlugRaw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const filters: string[] = ['latitude=not.is.null', 'longitude=not.is.null'];
+  if (draftsOnly) filters.push('is_published=eq.false');
+  else if (!includeDrafts) filters.push('is_published=eq.true');
   if (args.bucket === 'palaces') {
     filters.push('is_palace=eq.true');
   } else if (args.bucket === 'stars5') {
     filters.push('is_palace=eq.false', 'stars=eq.5');
   } else if (args.bucket === 'enriched') {
     filters.push('long_description_sections=not.is.null');
+  }
+  if (onlySlugs.length > 0) {
+    filters.push(`slug=in.(${onlySlugs.join(',')})`);
   }
   return selectHotels<HotelRow>(cfg, {
     columns: HOTEL_COLS,

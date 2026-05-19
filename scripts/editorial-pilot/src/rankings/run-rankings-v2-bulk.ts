@@ -276,6 +276,36 @@ async function processSeed(
     console.warn(`${tag} ⚠ words=${words.total} < 3500 target`);
   }
 
+  // Dry-run safety gate: the earlier guard (around line 243) only fires
+  // when `ranking === null` (no cached output). A cached seed has a valid
+  // `ranking` and would otherwise fall through to `pushRankingV2`, which
+  // upserts to Supabase and can flip `is_published`. Cf. Agent B abort
+  // report (May 19, 2026) — dry-run pushed 98 cached rankings unwanted.
+  if (args.dryRun) {
+    console.log(
+      `${tag} (dry-run) would ${cached ? 'reuse cached' : 'push freshly-generated'} ranking (entries=${ranking.entries.length}, faq=${ranking.faq.length}, words=${words.total}) — no DB write`,
+    );
+    await appendRunLog({
+      ts: new Date().toISOString(),
+      slug: seed.slug,
+      source: seed.source,
+      templateKey: seed.templateKey,
+      status: cached ? 'cached' : 'generated',
+      eligibleCount: seed.eligibleCount,
+      targetLength: seed.targetLength,
+      durationMs: Date.now() - t0,
+      wordsTotal: words.total,
+      entriesCount: ranking.entries.length,
+      faqCount: ranking.faq.length,
+    });
+    return {
+      slug: seed.slug,
+      ok: true,
+      status: cached ? 'cached' : 'generated',
+      wordsTotal: words.total,
+    };
+  }
+
   if (!args.noPush) {
     try {
       const rs = matrixSeedToRankingSeed(seed);
