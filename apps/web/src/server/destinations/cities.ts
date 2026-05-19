@@ -44,7 +44,20 @@ const HotelGroupRowSchema = z.object({
   name_en: stringOrNull,
   city: z.string(),
   district: stringOrNull,
-  region: z.string(),
+  // `region` is nullable since migration 0033 — international hotels
+  // don't carry a French administrative region. Domestic (FR) rows
+  // continue to be populated by the back-office.
+  region: stringOrNull,
+  // ISO 3166-1 alpha-2. Defaults to `'FR'` server-side; we still
+  // enforce length here so a malformed row gets logged rather than
+  // silently bucketed into the wrong group.
+  country_code: z.string().length(2),
+  country_label_fr: stringOrNull,
+  country_label_en: stringOrNull,
+  // Free-form premium label that earned the hotel its MCH listing
+  // (CHECK-constrained in SQL — we keep this permissive here so a
+  // schema mismatch surfaces as a Sentry log, not a silent filter).
+  luxury_tier: stringOrNull,
   is_palace: z.boolean(),
   stars: z.number().int(),
   priority: z.enum(['P0', 'P1', 'P2']),
@@ -57,7 +70,7 @@ const HotelGroupRowSchema = z.object({
 export type HotelGroupRow = z.infer<typeof HotelGroupRowSchema>;
 
 const HOTELS_FOR_GROUPING_COLUMNS =
-  'id, slug, slug_en, name, name_en, city, district, region, is_palace, stars, priority, description_fr, description_en, amadeus_hotel_id';
+  'id, slug, slug_en, name, name_en, city, district, region, country_code, country_label_fr, country_label_en, luxury_tier, is_palace, stars, priority, description_fr, description_en, amadeus_hotel_id';
 
 const PRIORITY_RANK: Record<HotelGroupRow['priority'], number> = { P0: 0, P1: 1, P2: 2 };
 
@@ -77,6 +90,8 @@ async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
       .from('hotels')
       .select(HOTELS_FOR_GROUPING_COLUMNS)
       .eq('is_published', true)
+      .order('priority', { ascending: true })
+      .order('name', { ascending: true })
       .limit(2000);
     if (error) {
       console.error('[destinations.cities] Supabase returned error:', {
@@ -131,6 +146,12 @@ export interface CitySummary {
  * `city` value (case-sensitive — the catalog is editor-curated so casing is
  * stable). Region is taken from the **first** hotel found, since a city
  * never spans regions in the French administrative division we use.
+ *
+ * **Scope** — France-only by design. International rows (country_code ≠
+ * 'FR') don't carry a French administrative region and are surfaced via
+ * `groupByCountry` on the `/hotels` page instead. Filtering here keeps the
+ * `/destination/[city]` hub strictly domestic until the international guide
+ * pipeline lands.
  */
 export async function listPublishedCities(): Promise<readonly CitySummary[]> {
   const all = await fetchAllPublished();
@@ -139,6 +160,8 @@ export async function listPublishedCities(): Promise<readonly CitySummary[]> {
     { name: string; region: string; count: number; hasPalace: boolean }
   >();
   for (const h of all) {
+    if (h.country_code !== 'FR') continue;
+    if (h.region === null) continue;
     const slug = citySlug(h.city);
     if (slug.length === 0) continue;
     const existing = map.get(slug);
@@ -220,11 +243,19 @@ export async function getDestinationBySlug(
   const all = await fetchAllPublished();
   if (all.length === 0) return null;
 
-  const matching = all.filter((h) => citySlug(h.city) === slug);
+  // `/destination/[city]` is FR-only until the international guide
+  // pipeline ships. Reject foreign cities (and FR rows missing a region,
+  // which would also break the back-compat CitySummary contract).
+  const matching = all.filter(
+    (h) => h.country_code === 'FR' && h.region !== null && citySlug(h.city) === slug,
+  );
   const [first] = matching;
   if (first === undefined) return null;
 
   const cityName = first.city;
+  // `first.region` is narrowed by the filter above, but TS doesn't see
+  // through `Array.prototype.filter` — guard explicitly.
+  if (first.region === null) return null;
   const region = first.region;
 
   const sorted = [...matching].sort((a, b) => {
@@ -248,4 +279,110 @@ export async function getDestinationBySlug(
   }));
 
   return { slug, name: cityName, region, hotels };
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// International expansion (May 2026) — public catalog accessor + helpers
+// ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Public service-role accessor returning every published hotel row with
+ * the columns needed by the grouping helpers below (and the `/hotels`
+ * listing page). Equivalent to the private `fetchAllPublished` — exposed
+ * so consumers stay on a single Zod-validated read path.
+ *
+ * Ordering: priority (P0 → P2) then `name` ASC. Failure modes collapse
+ * to `[]` so the page renders an empty state rather than 500-ing on a
+ * Supabase outage.
+ */
+export async function listPublishedHotelsForGrouping(): Promise<readonly HotelGroupRow[]> {
+  return fetchAllPublished();
+}
+
+/**
+ * Splits a hotel list into domestic (France) and foreign buckets based
+ * on `country_code`. Used by the `/hotels` listing to render the
+ * "France — par région" and "Monde — par pays" sections side by side.
+ *
+ * Returned arrays preserve the input ordering, which the upstream query
+ * sorts by editorial `priority` then `name`. Callers may resort within
+ * each bucket without disturbing the partition.
+ */
+export function partitionByDomesticForeign(rows: readonly HotelGroupRow[]): {
+  readonly domestic: readonly HotelGroupRow[];
+  readonly foreign: readonly HotelGroupRow[];
+} {
+  const domestic: HotelGroupRow[] = [];
+  const foreign: HotelGroupRow[] = [];
+  for (const r of rows) {
+    if (r.country_code === 'FR') {
+      domestic.push(r);
+    } else {
+      foreign.push(r);
+    }
+  }
+  return { domestic, foreign };
+}
+
+export interface CountryGroup {
+  readonly code: string;
+  readonly label: string;
+  readonly hotels: readonly HotelGroupRow[];
+}
+
+/**
+ * Groups hotels by ISO `country_code`, returning a Map keyed by code in
+ * insertion order (first occurrence wins). The label is resolved with
+ * the locale-aware `pickByLocale` over `country_label_fr/en`, falling
+ * back to the raw ISO code when both labels are null — keeps the UI
+ * resilient if an editor forgets to fill the translation.
+ *
+ * Caller decides ordering. Typical usage on `/hotels`:
+ *
+ * ```ts
+ * const groups = [...groupByCountry(foreign, locale).values()]
+ *   .sort((a, b) => b.hotels.length - a.hotels.length);
+ * ```
+ */
+export function groupByCountry(
+  rows: readonly HotelGroupRow[],
+  locale: SupportedLocale,
+): Map<string, CountryGroup> {
+  const out = new Map<string, CountryGroup>();
+  for (const r of rows) {
+    const code = r.country_code;
+    const existing = out.get(code);
+    if (existing === undefined) {
+      const label = pickLocalizedText(locale, r.country_label_fr, r.country_label_en) ?? code;
+      out.set(code, { code, label, hotels: [r] });
+    } else {
+      out.set(code, { ...existing, hotels: [...existing.hotels, r] });
+    }
+  }
+  return out;
+}
+
+/**
+ * Like `groupByCountry` but for regions. Skips rows with a null region
+ * (international hotels). Mirrors the inline `Map<string, T[]>` loop
+ * that has lived in `/hotels` page.tsx — extracted so both the listing
+ * page and future destination hubs can share the canonical grouping.
+ */
+export interface RegionGroup {
+  readonly region: string;
+  readonly hotels: readonly HotelGroupRow[];
+}
+
+export function groupByRegion(rows: readonly HotelGroupRow[]): Map<string, RegionGroup> {
+  const out = new Map<string, RegionGroup>();
+  for (const r of rows) {
+    if (r.region === null) continue;
+    const existing = out.get(r.region);
+    if (existing === undefined) {
+      out.set(r.region, { region: r.region, hotels: [r] });
+    } else {
+      out.set(r.region, { ...existing, hotels: [...existing.hotels, r] });
+    }
+  }
+  return out;
 }
