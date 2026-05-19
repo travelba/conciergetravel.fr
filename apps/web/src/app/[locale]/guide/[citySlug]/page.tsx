@@ -14,6 +14,13 @@ import { TocSidebar } from '@/components/editorial/toc-sidebar';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import {
+  buildHreflangAlternates,
+  hreflangKey,
+  intlLocaleTag,
+  ogLocale,
+  withLocalePath,
+} from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getCityKeysForGuide } from '@/server/guides/destination-mappings';
@@ -29,10 +36,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 const T = {
@@ -90,6 +93,7 @@ export async function generateMetadata({
   const guide = await getGuideBySlug(citySlug);
   if (guide === null) return {};
   const locale = raw;
+  // Title/description selection stays locale-aware (data layer) — see ADR-0012.
   const title =
     locale === 'fr'
       ? (guide.meta_title_fr ??
@@ -100,22 +104,22 @@ export async function generateMetadata({
     locale === 'fr'
       ? (guide.meta_desc_fr ?? guide.summary_fr)
       : (guide.meta_desc_en ?? guide.summary_en ?? guide.summary_fr);
+  // The guide slug is shared across locales (no `slug_en` on guides), so
+  // the canonical path only varies by URL prefix — buildHreflangAlternates
+  // handles the full languages map.
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/guide/${citySlug}`);
   return {
     title,
     description,
     alternates: {
-      canonical: locale === 'fr' ? `/guide/${citySlug}` : `/en/guide/${citySlug}`,
-      languages: {
-        'fr-FR': `/guide/${citySlug}`,
-        en: `/en/guide/${citySlug}`,
-        'x-default': `/guide/${citySlug}`,
-      },
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title,
       description,
       type: 'article',
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
     },
   };
 }
@@ -125,7 +129,7 @@ function formatRevisedDate(iso: string | null, locale: Locale): string | null {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   try {
-    return new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    return new Intl.DateTimeFormat(intlLocaleTag(locale), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -150,7 +154,7 @@ export default async function GuidePage({
 
   const t = T[locale];
   const origin = siteOrigin();
-  const canonical = `${origin}${withLocalePrefix(locale, `/guide/${citySlug}`)}`;
+  const canonical = `${origin}${withLocalePath(locale, `/guide/${citySlug}`)}`;
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Cross-link to Palaces in our catalog matching this destination.
@@ -162,13 +166,14 @@ export default async function GuidePage({
     buildEditorialLinkMap({ excludeGuideSlug: citySlug }),
   ]);
 
+  // Slug/name/desc selection stays locale-aware (data layer) — see ADR-0012.
   const guideName = locale === 'fr' ? guide.name_fr : (guide.name_en ?? guide.name_fr);
 
   // ── JSON-LD: BreadcrumbList ──────────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePrefix(locale, '/')}` },
-      { name: t.guides, url: `${origin}${withLocalePrefix(locale, '/guides')}` },
+      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t.guides, url: `${origin}${withLocalePath(locale, '/guides')}` },
       { name: guideName, url: canonical },
     ]),
   );
@@ -192,7 +197,7 @@ export default async function GuidePage({
         name: 'MyConciergeHotel',
         logoUrl: `${origin}/logo.png`,
       },
-      inLanguage: locale === 'fr' ? 'fr-FR' : 'en',
+      inLanguage: hreflangKey(locale),
     }),
   );
 
@@ -225,7 +230,7 @@ export default async function GuidePage({
                 : `Palaces and 5★ hotels — ${guide.name_en ?? guide.name_fr}`,
             items: palaces.map((h) => ({
               name: locale === 'fr' ? h.name : (h.name_en ?? h.name),
-              url: `${origin}${withLocalePrefix(locale, `/hotel/${locale === 'en' && h.slug_en !== null ? h.slug_en : h.slug}`)}`,
+              url: `${origin}${withLocalePath(locale, `/hotel/${locale === 'en' && h.slug_en !== null ? h.slug_en : h.slug}`)}`,
               hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
             })),
           }),
@@ -290,6 +295,7 @@ export default async function GuidePage({
           {/* Hero */}
           <header className="mb-10">
             <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
+              {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
               {locale === 'fr' ? 'Guide voyage luxe' : 'Luxury travel guide'}
             </p>
             <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{guideName}</h1>
