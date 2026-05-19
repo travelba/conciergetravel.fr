@@ -356,6 +356,56 @@ oublier le push. La fiche prod reste vide. Mettre **systématiquement** un
 appel `push-pilot-fiches.mjs --slugs <list>` ou `--all` à la fin du run
 pipeline (ou en step CI).
 
+## Rule 10 — EN concierge advice est structurellement 15 % plus court que le FR
+
+Audit du 19 mai 2026 sur 32 fiches pushées en Phase C (batches 1+2) :
+
+- **11/32 PASS** (advice EN ∈ [50,110])
+- **21/32 NEEDS_REGEN** (advice EN < 50 mots, médiane 45w vs FR médiane 55w)
+
+Cause racine : **l'anglais est structurellement plus dense que le français**.
+Une traduction littérale d'un body FR de 60 mots atterrit à 50-52 mots côté EN.
+Si le FR est lui-même borderline (55-60w), le EN tombe sous 50w et fail le
+Zod `LongDescriptionSectionSchema` côté `apps/web/src/server/hotels/get-hotel-by-slug.ts`.
+
+Le contenu était substantiel et actionnable — c'est l'envelope qui est
+arbitrairement floored à 50w. ADR-0011 fixe 50-110 comme contrat marque ;
+relâcher serait une régression éditoriale.
+
+**Fix appliqué côté prompt Pass 8** :
+[`prompts/08-concierge-voice.md`](../../scripts/editorial-pilot/prompts/08-concierge-voice.md)
+contient désormais une section dédiée « Spécificité EN — anti-traduction-littérale » :
+
+- Le LLM doit construire le `body` EN **indépendamment** du FR, pas le traduire.
+- Pattern recommandé : FR = 1 secret + 1 raison ; EN = 1 secret + 1 raison
+  **+ 1 alternative ou précision saisonnière**. Cette précision supplémentaire
+  est le « coût rédactionnel » de 10-15 mots qui place EN dans l'envelope.
+- Clôtures EN bannies (signaux d'incompressible vide) : `It's the perfect time
+for`, `It offers a unique experience`, `for an unforgettable stay`,
+  `for ultimate relaxation`, `sublime sensory journey`.
+- Si EN < 50w : ajouter la précision saisonnière ou l'alternative, pas étendre
+  une généralité.
+
+**Anti-fix à éviter** :
+
+- ❌ Relâcher la Zod schema à `min(40)` — bypasse le symptôme, masque la perte
+  de substance, casse l'ADR-0011.
+- ❌ Re-run Pass 8 sans patcher le prompt — la cause racine (traduction littérale)
+  resterait active et le pattern se reproduirait sur le batch suivant.
+- ❌ Demander au LLM de « rallonger » l'EN existant en post-traitement — produit
+  des chevilles de remplissage qui dégradent la voix Concierge.
+
+**Audit script** :
+[`scripts/editorial-pilot/audit-pushed-drafts.mjs`](../../scripts/editorial-pilot/audit-pushed-drafts.mjs)
+classe les drafts en `PASS / NEEDS_REGEN / NEEDS_MANUAL_FIX` et écrit un
+détail JSON pour pilotage. Le critère NEEDS_REGEN englobe :
+
+- `advice_fr` ou `advice_en` hors [50, 110]
+- `> 5` phrases > 25 mots dans le `long_description_sections.body_fr`
+- `> 2` mots bannis (incroyable, magnifique, sublime, …)
+
+À relancer après chaque batch push pour suivre la dérive qualitative.
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.

@@ -62,6 +62,25 @@ Règles du `body` (FR comme EN) :
 - **Ancré dans le brief** : tout fait cité doit être présent dans le brief JSON (chambres, tables, accès, services). Si le brief ne fournit pas un secret opérationnel exploitable, tu reformules en conseil de timing/saison (toujours ancré dans `service.check_in_time`, `history.opening_year`, etc.).
 - **Pas de superlatif vide**, pas de promesse marketing, pas de CTA.
 
+### Spécificité EN — anti-traduction-littérale (cause racine identifiée audit 19 mai 2026)
+
+L'anglais est structurellement plus dense que le français : un message identique tient en ~15 % de mots en moins. Une traduction littérale du `body` FR atterrit systématiquement à 40-49 mots côté EN, sous l'envelope minimale.
+
+**Méthode obligatoire pour atteindre 60+ mots en EN** :
+
+- **N'écris pas le `body` EN après le FR comme une traduction.** Construis-le **indépendamment** à partir du brief, avec un second détail opérationnel concret que le FR peut omettre.
+- **Pattern recommandé** : FR = 1 secret opérationnel + 1 raison/contexte. EN = 1 secret opérationnel + 1 raison/contexte **+ 1 alternative ou précision saisonnière**. Cette précision supplémentaire est un coût rédactionnel de 10-15 mots qui te place dans l'envelope.
+
+  Exemple FR (62 mots) : « Mon conseil : réservez la suite 412 pour son balcon orienté sud. Vous y prendrez votre petit-déjeuner face au Vésuve. Demandez un café ristretto en arrivant — le room service le sert avec un cannelé que la maison réalise sur place chaque matin. Pour un dimanche calme, évitez juin et septembre. »
+
+  Exemple EN (74 mots, **pas une traduction**) : « My tip: book Suite 412 for its south-facing balcony — you’ll have breakfast watching Vesuvius. Ask for a ristretto on arrival; the room service pairs it with a house-baked cannelé. Sundays in May or October are quietest; June and September fill with cruise visitors. If 412 is taken, Suite 408 has the same orientation one floor below. »
+
+- **Clôtures EN à bannir** (elles bouchent l'envelope sans apporter d'info) :
+  - « It’s the perfect time for / It offers a unique experience / for an unforgettable stay / for ultimate relaxation / sublime sensory journey »
+  - Toute formule vague qui se substitue à un fait. Si tu écris ça, c'est que tu manques d'un 2e fait — retourne au brief.
+
+- **Compte les mots du EN body en l'écrivant**. Si tu arrives à 50, tu n'as pas suivi la méthode : ajoute la précision saisonnière ou l'alternative.
+
 ### Choix du `tip_for` (enum strict)
 
 - `room` — conseil porte sur une chambre/suite spécifique
@@ -104,7 +123,7 @@ Pas de commentaire. Pas de « Voici la version… ». Pas de markdown fences aut
 1. ☐ `lead_concierge` fait 180-220 mots
 2. ☐ Toutes les phrases (lead + 2× body) sont ≤ 25 mots — vérifie en comptant chaque phrase
 3. ☐ `concierge_advice.fr.body` fait 60-90 mots (envelope acceptée 50-110, vise 70)
-4. ☐ `concierge_advice.en.body` fait 60-90 mots (envelope acceptée 50-110, vise 70)
+4. ☐ `concierge_advice.en.body` fait 60-90 mots (envelope acceptée 50-110, vise 70) — **construit indépendamment du FR avec un 2e détail opérationnel**, pas traduit littéralement
 5. ☐ `concierge_advice.fr.body` ouvre par « Mon conseil : »
 6. ☐ `concierge_advice.en.body` ouvre par « My tip: »
 7. ☐ Aucun mot banni (« incroyable », « magnifique », « exceptionnel », « magique », « sublime », « bulle », « cocon », « écrin », « véritable joyau », « art de vivre »)
