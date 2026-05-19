@@ -9,6 +9,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import {
@@ -44,10 +45,6 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
 }
 
 function truncate(text: string, max: number): string {
@@ -125,15 +122,15 @@ export async function generateMetadata({
           city: detail.hotel.row.city,
         });
 
-  const slugFr = detail.hotel.row.slug;
-  const slugEn =
-    detail.hotel.row.slug_en !== null && detail.hotel.row.slug_en !== ''
-      ? detail.hotel.row.slug_en
-      : detail.hotel.row.slug;
-
-  const canonicalFr = `/hotel/${slugFr}/chambres/${detail.room.slug}`;
-  const canonicalEn = `/en/hotel/${slugEn}/chambres/${detail.room.slug}`;
-  const canonical = locale === 'fr' ? canonicalFr : canonicalEn;
+  // Slug selection stays locale-aware (data-layer concern) until
+  // ADR-0012 Phase 3 collapses dual-locale columns into a single
+  // `hotel_translations` table — see docs/runbooks/i18n-v2-rollout.md.
+  // URL prefix is centralised via withLocalePath / buildHreflangAlternates.
+  const buildCanonicalPath = (l: Locale): string => {
+    const hotelSlug = pickHotelSlug(detail, l);
+    return withLocalePath(l, `/hotel/${hotelSlug}/chambres/${detail.room.slug}`);
+  };
+  const canonical = buildCanonicalPath(locale);
   const absoluteUrl = `${siteOrigin()}${canonical}`;
 
   // Open Graph / Twitter Card image — mirrors the hotel page treatment
@@ -169,17 +166,13 @@ export async function generateMetadata({
     description: desc,
     alternates: {
       canonical,
-      languages: {
-        'fr-FR': canonicalFr,
-        en: canonicalEn,
-        'x-default': canonicalFr,
-      },
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       type: 'website',
       title,
       description: desc,
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
       url: absoluteUrl,
       ...(ogImages !== undefined ? { images: ogImages } : {}),
@@ -220,9 +213,9 @@ async function renderRoomPage(
   const hotelName = pickHotelName(detail, locale);
   const hotelLocaleSlug = pickHotelSlug(detail, locale);
   const hotelPath = `/hotel/${hotelLocaleSlug}`;
-  const hotelUrl = `${origin}${withLocalePrefix(locale, hotelPath)}`;
+  const hotelUrl = `${origin}${withLocalePath(locale, hotelPath)}`;
   const roomPath = `${hotelPath}/chambres/${detail.room.slug}`;
-  const roomUrl = `${origin}${withLocalePrefix(locale, roomPath)}`;
+  const roomUrl = `${origin}${withLocalePath(locale, roomPath)}`;
 
   const { room } = detail;
   const heroPublicId = room.heroImage ?? room.images[0]?.publicId ?? null;
@@ -262,10 +255,10 @@ async function renderRoomPage(
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePrefix(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePrefix(locale, '/recherche')}`,
+        url: `${origin}${withLocalePath(locale, '/recherche')}`,
       },
       { name: hotelName, url: hotelUrl },
       { name: room.name, url: roomUrl },

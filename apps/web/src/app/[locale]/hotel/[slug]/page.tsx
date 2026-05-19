@@ -35,6 +35,7 @@ import { PriceComparator } from '@/components/price-comparator';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
@@ -116,10 +117,6 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
-}
-
 function pickName(row: HotelDetailRow, locale: SupportedLocale): string {
   if (locale === 'en') {
     const en = row.name_en ?? null;
@@ -186,9 +183,7 @@ function formatIndicativePrice(
 
 function lockActionFor(locale: Locale, hotelId: string): string {
   const offerId = `TEST-OFFER-${hotelId}`;
-  return locale === 'fr'
-    ? `/reservation/offer/${encodeURIComponent(offerId)}/lock`
-    : `/${locale}/reservation/offer/${encodeURIComponent(offerId)}/lock`;
+  return withLocalePath(locale, `/reservation/offer/${encodeURIComponent(offerId)}/lock`);
 }
 
 export async function generateStaticParams(): Promise<Array<{ locale: string; slug: string }>> {
@@ -241,7 +236,13 @@ export async function generateMetadata({
 
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
-  const canonical = locale === 'fr' ? `/hotel/${slugFr}` : `/en/hotel/${slugEn}`;
+  // Slug selection stays locale-aware (data-layer concern) until
+  // ADR-0012 Phase 3 collapses dual-locale columns into a single
+  // `hotel_translations` table — see docs/runbooks/i18n-v2-rollout.md.
+  // URL prefix is centralised via withLocalePath / buildHreflangAlternates.
+  const buildCanonicalPath = (l: Locale): string =>
+    withLocalePath(l, `/hotel/${l === 'en' ? slugEn : slugFr}`);
+  const canonical = buildCanonicalPath(locale);
   const origin = siteOrigin();
   const absoluteUrl = `${origin}${canonical}`;
 
@@ -321,17 +322,13 @@ export async function generateMetadata({
     ...(isStub ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical,
-      languages: {
-        'fr-FR': `/hotel/${slugFr}`,
-        en: `/en/hotel/${slugEn}`,
-        'x-default': `/hotel/${slugFr}`,
-      },
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       type: 'website',
       title,
       description: desc,
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
       url: absoluteUrl,
       ...(ogImages !== undefined ? { images: ogImages } : {}),
@@ -433,7 +430,9 @@ async function renderHotelPage(
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
   const origin = siteOrigin();
-  const localePath = locale === 'en' ? `/en/hotel/${slugEn}` : `/hotel/${slugFr}`;
+  // Slug selection still locale-aware (data layer) — see ADR-0012.
+  const slugForLocale = locale === 'en' ? slugEn : slugFr;
+  const localePath = withLocalePath(locale, `/hotel/${slugForLocale}`);
   const canonicalUrl = `${origin}${localePath}`;
 
   // JSON-LD Hotel images: hero + first 5 gallery shots, served as absolute
@@ -542,18 +541,10 @@ async function renderHotelPage(
     // itself — see `chambres/[roomSlug]/page.tsx`.
     ...(rooms.length > 0
       ? {
-          containedRooms: rooms.map((r) => {
-            const slugForLocale =
-              locale === 'en'
-                ? row.slug_en !== null && row.slug_en !== ''
-                  ? row.slug_en
-                  : row.slug
-                : row.slug;
-            return {
-              name: r.name ?? r.room_code,
-              url: `${origin}${withLocalePrefix(locale, `/hotel/${slugForLocale}/chambres/${r.slug}`)}`,
-            };
-          }),
+          containedRooms: rooms.map((r) => ({
+            name: r.name ?? r.room_code,
+            url: `${origin}${withLocalePath(locale, `/hotel/${slugForLocale}/chambres/${r.slug}`)}`,
+          })),
         }
       : {}),
     // MICE event spaces exposed as `Hotel.containsPlace[]` with
@@ -697,21 +688,21 @@ async function renderHotelPage(
 
   const cityHubSlug = citySlug(row.city);
   const cityHubPath = `/destination/${cityHubSlug}`;
-  const cityHubUrl = `${origin}${withLocalePrefix(locale, cityHubPath)}`;
+  const cityHubUrl = `${origin}${withLocalePath(locale, cityHubPath)}`;
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePrefix(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePrefix(locale, '/recherche')}`,
+        url: `${origin}${withLocalePath(locale, '/recherche')}`,
       },
       { name: row.city, url: cityHubUrl },
       { name, url: canonicalUrl },
     ]),
   );
 
-  const localeFmt = locale === 'en' ? 'en-GB' : 'fr-FR';
+  const localeFmt = intlLocaleTag(locale);
   const lastUpdated =
     row.updated_at !== null && row.updated_at !== ''
       ? new Intl.DateTimeFormat(localeFmt, { dateStyle: 'long' }).format(new Date(row.updated_at))
@@ -746,7 +737,7 @@ async function renderHotelPage(
   // Two recipes: "How to book at X" + "How to cancel at X". Strong
   // signal for AI voice assistants (Google Assistant, Siri, Alexa)
   // answering procedural booking queries.
-  const hotelCanonicalUrl = `${origin}${withLocalePrefix(locale, `/hotel/${row.slug}`)}`;
+  const hotelCanonicalUrl = `${origin}${withLocalePath(locale, `/hotel/${row.slug}`)}`;
   const bookingHowToJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.bookingHowToJsonLd({
       hotelName: name,

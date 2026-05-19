@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, withLocalePath } from '@/i18n/runtime';
 import { searchHotelsCatalogOnServer } from '@/lib/search/hotels-catalog';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 
@@ -22,17 +23,13 @@ export async function generateMetadata({
   }
   const locale = raw;
   const t = await getTranslations({ locale, namespace: 'searchPage' });
-  const canonical = locale === 'fr' ? '/recherche' : '/en/recherche';
+  const canonical = withLocalePath(locale, '/recherche');
   return {
     title: t('meta.title'),
     description: t('meta.description'),
     alternates: {
       canonical,
-      languages: {
-        'fr-FR': '/recherche',
-        en: '/en/recherche',
-        'x-default': '/recherche',
-      },
+      languages: buildHreflangAlternates((l) => withLocalePath(l, '/recherche')),
     },
   };
 }
@@ -67,9 +64,7 @@ function pickPositiveInt(value: string | undefined, fallback: number): number {
 
 function lockActionFor(locale: Locale, hotelId: string): string {
   const offerId = `TEST-OFFER-${hotelId}`;
-  return locale === 'fr'
-    ? `/reservation/offer/${encodeURIComponent(offerId)}/lock`
-    : `/${locale}/reservation/offer/${encodeURIComponent(offerId)}/lock`;
+  return withLocalePath(locale, `/reservation/offer/${encodeURIComponent(offerId)}/lock`);
 }
 
 export default async function RecherchePage({

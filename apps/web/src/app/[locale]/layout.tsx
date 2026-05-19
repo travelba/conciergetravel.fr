@@ -8,6 +8,7 @@ import { ConsentBanner } from '@/components/consent';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { isRoutingLocale, routing } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 import '@/styles/globals.css';
 
 const sans = Inter({
@@ -32,19 +33,17 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale: raw } = await params;
+  if (!isRoutingLocale(raw)) return {};
+  const locale = raw;
   return {
     alternates: {
-      canonical: locale === 'fr' ? '/' : `/${locale}/`,
-      languages: {
-        'fr-FR': '/',
-        en: '/en/',
-        'x-default': '/',
-      },
+      canonical: withLocalePath(locale, '/'),
+      languages: buildHreflangAlternates((l) => withLocalePath(l, '/')),
     },
     openGraph: {
       type: 'website',
-      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
     },
     twitter: { card: 'summary_large_image' },
