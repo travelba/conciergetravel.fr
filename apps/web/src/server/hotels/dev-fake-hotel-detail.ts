@@ -32,7 +32,7 @@ function configuredFakeId(): string | undefined {
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 }
 
-function buildRow(locale: SupportedLocale): HotelDetailRow {
+function buildRow(_locale: SupportedLocale): HotelDetailRow {
   const id = configuredFakeId() ?? '00000000-0000-0000-0000-000000000000';
   return {
     id,
@@ -268,9 +268,6 @@ function buildRow(locale: SupportedLocale): HotelDetailRow {
     // No hero/gallery for the E2E synthetic hotel — keeps the fake
     // testable without Cloudinary credentials at build time.
     hero_image: null,
-    // `locale` reserved for future locale-conditional fields — currently
-    // unused but kept in the signature so it's obvious the row CAN vary.
-    ...(locale === 'en' ? {} : {}),
   };
 }
 

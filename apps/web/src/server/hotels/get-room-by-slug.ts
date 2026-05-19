@@ -2,6 +2,7 @@ import 'server-only';
 
 import { z } from 'zod';
 
+import { assertNever } from '@/lib/assert-never';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getFakeRoomBySlug } from '@/server/hotels/dev-fake-room-detail';
@@ -11,6 +12,44 @@ import {
   type HotelDetail,
   type SupportedLocale,
 } from '@/server/hotels/get-hotel-by-slug';
+
+/**
+ * Local mirror of `get-hotel-by-slug.ts#pickLocalizedText` — V2 locales
+ * (DE/ES/IT) fall back to the FR column until migration 0034 lands.
+ * Re-implemented here rather than imported to avoid polluting the
+ * hotel-detail module's public API.
+ */
+function pickLocalizedText(
+  locale: SupportedLocale,
+  fr: string | null | undefined,
+  en: string | null | undefined,
+): string | null {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return fr ?? en ?? null;
+    case 'en':
+      return en ?? fr ?? null;
+    default:
+      return assertNever(locale);
+  }
+}
+
+function pickByLocale<T>(locale: SupportedLocale, frBranch: T, enBranch: T): T {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return frBranch;
+    case 'en':
+      return enBranch;
+    default:
+      return assertNever(locale);
+  }
+}
 
 /**
  * Detailed room row consumed by `/hotel/[slug]/chambres/[roomSlug]` —
@@ -125,10 +164,11 @@ function readAmenityList(raw: unknown, locale: SupportedLocale): readonly string
     }
     if (entry !== null && typeof entry === 'object') {
       const e = entry as Record<string, unknown>;
-      const candidates =
-        locale === 'fr'
-          ? ['label_fr', 'name_fr', 'label', 'name']
-          : ['label_en', 'name_en', 'label', 'name'];
+      const candidates = pickByLocale<readonly string[]>(
+        locale,
+        ['label_fr', 'name_fr', 'label', 'name'],
+        ['label_en', 'name_en', 'label', 'name'],
+      );
       for (const k of candidates) {
         const v = e[k];
         if (typeof v === 'string' && v.trim().length > 0) {
@@ -150,7 +190,7 @@ function localizeImages(
   if (!parsed.success) return [];
   return parsed.data.map((img) => ({
     publicId: img.public_id,
-    alt: (locale === 'fr' ? (img.alt_fr ?? img.alt_en) : (img.alt_en ?? img.alt_fr)) ?? fallbackAlt,
+    alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackAlt,
     category: img.category ?? null,
   }));
 }
@@ -159,28 +199,21 @@ function pickName(
   row: z.infer<typeof HotelRoomDetailDbRowSchema>,
   locale: SupportedLocale,
 ): string {
-  if (locale === 'fr') {
-    return row.name_fr ?? row.name_en ?? row.room_code;
-  }
-  return row.name_en ?? row.name_fr ?? row.room_code;
+  return pickLocalizedText(locale, row.name_fr, row.name_en) ?? row.room_code;
 }
 
 function pickShortDescription(
   row: z.infer<typeof HotelRoomDetailDbRowSchema>,
   locale: SupportedLocale,
 ): string | null {
-  return locale === 'fr'
-    ? (row.description_fr ?? row.description_en)
-    : (row.description_en ?? row.description_fr);
+  return pickLocalizedText(locale, row.description_fr, row.description_en);
 }
 
 function pickLongDescription(
   row: z.infer<typeof HotelRoomDetailDbRowSchema>,
   locale: SupportedLocale,
 ): string | null {
-  return locale === 'fr'
-    ? (row.long_description_fr ?? row.long_description_en)
-    : (row.long_description_en ?? row.long_description_fr);
+  return pickLocalizedText(locale, row.long_description_fr, row.long_description_en);
 }
 
 function readIndicativePriceDetail(raw: unknown): RoomDetailIndicativePrice | null {

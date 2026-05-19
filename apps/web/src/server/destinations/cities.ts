@@ -2,9 +2,11 @@ import 'server-only';
 
 import { z } from 'zod';
 
+import { type SupportedLocale } from '@/i18n/supported-locale';
+import { assertNever } from '@/lib/assert-never';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
-export type SupportedLocale = 'fr' | 'en';
+export type { SupportedLocale };
 
 /**
  * Slugify a French city/region name into a URL-safe ASCII slug.
@@ -184,11 +186,22 @@ export interface DestinationDetail {
 }
 
 function pickName(row: HotelGroupRow, locale: SupportedLocale): string {
-  if (locale === 'en') {
-    const en = row.name_en;
-    if (en !== null && en.length > 0) return en;
+  switch (locale) {
+    case 'fr':
+      return row.name;
+    case 'en': {
+      const en = row.name_en;
+      return en !== null && en.length > 0 ? en : row.name;
+    }
+    case 'de':
+    case 'es':
+    case 'it':
+      // No `name_<locale>` column yet — fall back to FR until migration
+      // 0034 (cf. ADR-0012, runbook Phase 3). Documented silent fallback.
+      return row.name;
+    default:
+      return assertNever(locale);
   }
-  return row.name;
 }
 
 function pickSlugEn(row: HotelGroupRow): string {
@@ -197,8 +210,28 @@ function pickSlugEn(row: HotelGroupRow): string {
 }
 
 function pickDescription(row: HotelGroupRow, locale: SupportedLocale): string {
-  const primary = locale === 'fr' ? row.description_fr : row.description_en;
-  const fallback = locale === 'fr' ? row.description_en : row.description_fr;
+  let primary: string | null;
+  let fallback: string | null;
+  switch (locale) {
+    case 'fr':
+      primary = row.description_fr;
+      fallback = row.description_en;
+      break;
+    case 'en':
+      primary = row.description_en;
+      fallback = row.description_fr;
+      break;
+    case 'de':
+    case 'es':
+    case 'it':
+      // No `description_<locale>` column yet — fall back to FR until
+      // migration 0034 (cf. ADR-0012, runbook Phase 3).
+      primary = row.description_fr;
+      fallback = row.description_en;
+      break;
+    default:
+      return assertNever(locale);
+  }
   const raw = (primary ?? fallback ?? '').trim();
   if (raw.length === 0) return '';
   const max = 180;

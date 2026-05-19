@@ -2,6 +2,8 @@ import 'server-only';
 
 import { z } from 'zod';
 
+import { type SupportedLocale } from '@/i18n/supported-locale';
+import { assertNever } from '@/lib/assert-never';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
@@ -14,8 +16,60 @@ import {
 } from '@/server/hotels/amenity-taxonomy';
 import { getFakeHotelDetailBySlug } from '@/server/hotels/dev-fake-hotel-detail';
 
-/** Locale alias used for slug selection (slug_en vs slug). */
-export type SupportedLocale = 'fr' | 'en';
+export type { SupportedLocale };
+
+/**
+ * Picks a localized text field with the V2 fallback policy.
+ *
+ * - FR → `fr ?? en ?? null`
+ * - EN → `en ?? fr ?? null`
+ * - DE / ES / IT → `fr ?? en ?? null` (FR fallback during the migration
+ *   window — `hotel_translations` rows for these locales do not exist
+ *   yet, cf. [ADR-0012](../../../../docs/adr/0012-multilingual-db-schema.md)
+ *   §Phase 3).
+ *
+ * Centralising the policy in one place keeps the V2 → Phase 3 transition
+ * surgical: the day translations land, only this function (+ the schema
+ * + a couple of column reads) need to change. Every reader downstream
+ * stays untouched.
+ */
+function pickLocalizedText(
+  locale: SupportedLocale,
+  fr: string | null | undefined,
+  en: string | null | undefined,
+): string | null {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return fr ?? en ?? null;
+    case 'en':
+      return en ?? fr ?? null;
+    default:
+      return assertNever(locale);
+  }
+}
+
+/**
+ * Picks one of two branches based on locale, with the same V2 fallback
+ * policy as `pickLocalizedText`. Use for non-text branches —
+ * candidate-key arrays, single-column picks without a fallback chain,
+ * SQL column names, etc.
+ */
+function pickByLocale<T>(locale: SupportedLocale, frBranch: T, enBranch: T): T {
+  switch (locale) {
+    case 'fr':
+    case 'de':
+    case 'es':
+    case 'it':
+      return frBranch;
+    case 'en':
+      return enBranch;
+    default:
+      return assertNever(locale);
+  }
+}
 
 const BookingModeSchema = z.enum(['amadeus', 'little', 'email', 'display_only']);
 const PrioritySchema = z.enum(['P0', 'P1', 'P2']);
@@ -633,11 +687,8 @@ export function readMiceInfo(
   }
   const p = parsed.data;
 
-  const pickFr = (fr: string | undefined, en: string | undefined): string | null =>
-    (locale === 'fr' ? (fr ?? en) : (en ?? fr)) ?? null;
-
   return {
-    summary: pickFr(p.summary_fr, p.summary_en),
+    summary: pickLocalizedText(locale, p.summary_fr, p.summary_en),
     contactEmail: p.contact_email,
     brochureUrl: p.brochure_url ?? null,
     totalCapacitySeated: p.total_capacity_seated,
@@ -649,7 +700,7 @@ export function readMiceInfo(
       maxSeated: s.max_seated,
       configurations: s.configurations ?? [],
       hasNaturalLight: s.has_natural_light === true,
-      notes: pickFr(s.notes_fr, s.notes_en),
+      notes: pickLocalizedText(locale, s.notes_fr, s.notes_en),
     })),
     eventTypes: p.event_types ?? [],
   };
@@ -716,13 +767,9 @@ export function readHotelStory(
 
   const out: LocalisedHotelStorySection[] = [];
   for (const section of parsed.data) {
-    const title =
-      locale === 'fr'
-        ? (section.title_fr ?? section.title_en)
-        : (section.title_en ?? section.title_fr);
-    const body =
-      locale === 'fr' ? (section.body_fr ?? section.body_en) : (section.body_en ?? section.body_fr);
-    if (title === undefined || body === undefined) continue;
+    const title = pickLocalizedText(locale, section.title_fr, section.title_en);
+    const body = pickLocalizedText(locale, section.body_fr, section.body_en);
+    if (title === null || body === null) continue;
     const paragraphs = body
       .split(/\r?\n\r?\n+/u)
       .map((p) => p.trim())
@@ -821,10 +868,11 @@ function readStringList(raw: unknown, locale: SupportedLocale): readonly string[
     }
     if (entry !== null && typeof entry === 'object') {
       const e = entry as Record<string, unknown>;
-      const candidates =
-        locale === 'fr'
-          ? ['label_fr', 'name_fr', 'label', 'name']
-          : ['label_en', 'name_en', 'label', 'name'];
+      const candidates = pickByLocale<readonly string[]>(
+        locale,
+        ['label_fr', 'name_fr', 'label', 'name'],
+        ['label_en', 'name_en', 'label', 'name'],
+      );
       for (const k of candidates) {
         const v = e[k];
         if (typeof v === 'string' && v.trim().length > 0) {
@@ -899,10 +947,11 @@ function readAmenityEntries(
     }
     if (entry === null || typeof entry !== 'object') continue;
     const e = entry as Record<string, unknown>;
-    const labelCandidates =
-      locale === 'fr'
-        ? ['label_fr', 'name_fr', 'label', 'name']
-        : ['label_en', 'name_en', 'label', 'name'];
+    const labelCandidates = pickByLocale<readonly string[]>(
+      locale,
+      ['label_fr', 'name_fr', 'label', 'name'],
+      ['label_en', 'name_en', 'label', 'name'],
+    );
     let label: string | null = null;
     for (const k of labelCandidates) {
       const v = e[k];
@@ -942,7 +991,11 @@ export function readAmenitiesByCategory(
     buckets.set(cat, arr);
   }
 
-  const localeCmp = locale === 'fr' ? 'fr' : 'en';
+  // `localeCompare`'s `locales` argument accepts any 2-letter ISO code or
+  // BCP-47 tag. Passing `locale` directly gives DE/ES/IT proper native
+  // collation instead of forcing a French fallback when the user is on
+  // a /de/, /es/ or /it/ route.
+  const localeCmp: SupportedLocale = locale;
   const groups: LocalisedAmenityGroup[] = [];
   for (const cat of AMENITY_CATEGORIES) {
     const arr = buckets.get(cat);
@@ -968,17 +1021,10 @@ export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly 
   if (!parsed.success) return [];
   const out: LocalisedFaq[] = [];
   for (const item of parsed.data) {
-    const q =
-      locale === 'fr'
-        ? (item.question_fr ?? item.question_en)
-        : (item.question_en ?? item.question_fr);
-    const a =
-      locale === 'fr' ? (item.answer_fr ?? item.answer_en) : (item.answer_en ?? item.answer_fr);
-    if (q === undefined || a === undefined) continue;
-    const tipRaw =
-      locale === 'fr'
-        ? (item.concierge_tip_fr ?? item.concierge_tip_en)
-        : (item.concierge_tip_en ?? item.concierge_tip_fr);
+    const q = pickLocalizedText(locale, item.question_fr, item.question_en);
+    const a = pickLocalizedText(locale, item.answer_fr, item.answer_en);
+    if (q === null || a === null) continue;
+    const tipRaw = pickLocalizedText(locale, item.concierge_tip_fr, item.concierge_tip_en);
     const tip = typeof tipRaw === 'string' && tipRaw.trim().length > 0 ? tipRaw.trim() : null;
     out.push({
       question: q,
@@ -1100,7 +1146,7 @@ export function readRestaurants(
   if (!parsed.success) return null;
   const venues: LocalisedRestaurantVenue[] = parsed.data.venues.map((v) => ({
     name: v.name,
-    type: (locale === 'fr' ? (v.type_fr ?? v.type_en) : (v.type_en ?? v.type_fr)) ?? null,
+    type: pickLocalizedText(locale, v.type_fr, v.type_en),
     michelinStars: v.michelin_stars ?? null,
     chef: v.chef ?? null,
     pastryChef: v.pastry_chef ?? null,
@@ -1108,7 +1154,7 @@ export function readRestaurants(
     since: v.since ?? null,
     michelinSince: v.michelin_since ?? null,
     features: v.features ?? [],
-    hours: (locale === 'fr' ? (v.hours_fr ?? v.hours_en) : (v.hours_en ?? v.hours_fr)) ?? null,
+    hours: pickLocalizedText(locale, v.hours_fr, v.hours_en),
   }));
   return {
     count: parsed.data.count ?? null,
@@ -1139,10 +1185,11 @@ export interface LocalisedSpa {
 export function readSpa(row: HotelDetailRow, locale: SupportedLocale): LocalisedSpa | null {
   const parsed = SpaInfoSchema.safeParse(row.spa_info);
   if (!parsed.success) return null;
-  const localizedFeatures =
-    locale === 'fr'
-      ? (parsed.data.features_fr ?? parsed.data.features_en ?? [])
-      : (parsed.data.features_en ?? parsed.data.features_fr ?? []);
+  const localizedFeatures = pickByLocale(
+    locale,
+    parsed.data.features_fr ?? parsed.data.features_en ?? [],
+    parsed.data.features_en ?? parsed.data.features_fr ?? [],
+  );
   return {
     name: parsed.data.name,
     surfaceSqm: parsed.data.surface_sqm ?? null,
@@ -1199,8 +1246,7 @@ export function readGallery(
   if (!parsed.success) return [];
   return parsed.data.map((img) => ({
     publicId: img.public_id,
-    alt:
-      (locale === 'fr' ? (img.alt_fr ?? img.alt_en) : (img.alt_en ?? img.alt_fr)) ?? fallbackName,
+    alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackName,
     category: img.category ?? null,
   }));
 }
@@ -1470,19 +1516,13 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
 
   const pointsOfInterest: LocalisedPointOfInterest[] = poisRaw.success
     ? poisRaw.data.map((p) => {
-        const description =
-          (locale === 'fr'
-            ? (p.description_fr ?? p.description_en)
-            : (p.description_en ?? p.description_fr)) ?? null;
+        const description = pickLocalizedText(locale, p.description_fr, p.description_en);
         const pricing: LocalisedPoiPricing | null = p.pricing
           ? {
               type: p.pricing.type,
               amountEur: p.pricing.amount_eur ?? null,
               currency: p.pricing.currency ?? 'EUR',
-              notes:
-                (locale === 'fr'
-                  ? (p.pricing.notes_fr ?? p.pricing.notes_en)
-                  : (p.pricing.notes_en ?? p.pricing.notes_fr)) ?? null,
+              notes: pickLocalizedText(locale, p.pricing.notes_fr, p.pricing.notes_en),
             }
           : null;
         const nearestTransit: LocalisedPoiNearestTransit | null = p.nearest_transit
@@ -1495,12 +1535,9 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
             }
           : null;
         return {
-          name: (locale === 'fr' ? p.name : (p.name_en ?? p.name)).trim(),
+          name: pickByLocale(locale, p.name, p.name_en ?? p.name).trim(),
           type: p.type,
-          category:
-            (locale === 'fr'
-              ? (p.category_fr ?? p.category_en)
-              : (p.category_en ?? p.category_fr)) ?? null,
+          category: pickLocalizedText(locale, p.category_fr, p.category_en),
           distanceMeters: p.distance_meters,
           walkMinutes: p.walk_minutes ?? null,
           latitude: p.latitude ?? null,
@@ -1520,10 +1557,10 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
     ? transportsRaw.data.map((t) => ({
         mode: t.mode,
         line: t.line ?? null,
-        station: (locale === 'fr' ? t.station : (t.station_en ?? t.station)).trim(),
+        station: pickByLocale(locale, t.station, t.station_en ?? t.station).trim(),
         distanceMeters: t.distance_meters,
         walkMinutes: t.walk_minutes ?? null,
-        notes: (locale === 'fr' ? (t.notes_fr ?? t.notes_en) : (t.notes_en ?? t.notes_fr)) ?? null,
+        notes: pickLocalizedText(locale, t.notes_fr, t.notes_en),
       }))
     : [];
 
@@ -1543,10 +1580,7 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
     for (const p of poisRaw.data) {
       const bucket: PoiBucket = p.bucket ?? inferBucketFromType(p.type);
       if (bucketTips[bucket] !== null) continue;
-      const tip =
-        (locale === 'fr'
-          ? (p.bucket_tip_fr ?? p.bucket_tip_en)
-          : (p.bucket_tip_en ?? p.bucket_tip_fr)) ?? null;
+      const tip = pickLocalizedText(locale, p.bucket_tip_fr, p.bucket_tip_en);
       if (tip !== null && tip.trim().length > 0) {
         bucketTips[bucket] = tip.trim();
       }
@@ -1714,10 +1748,7 @@ export function readUpcomingEvents(
   for (const e of parsed.data) {
     const lastDay = e.end_date ?? e.start_date;
     if (lastDay < todayIso) continue;
-    const description =
-      (locale === 'fr'
-        ? (e.description_fr ?? e.description_en)
-        : (e.description_en ?? e.description_fr)) ?? null;
+    const description = pickLocalizedText(locale, e.description_fr, e.description_en);
     localised.push({
       name: e.name.trim(),
       startDate: e.start_date,
@@ -1917,9 +1948,6 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
   if (!parsed.success) return EMPTY_POLICIES;
   const p = parsed.data;
 
-  const pickFr = (fr: string | undefined, en: string | undefined): string | null =>
-    (locale === 'fr' ? (fr ?? en) : (en ?? fr)) ?? null;
-
   return {
     checkIn:
       p.check_in !== undefined ? { from: p.check_in.from, until: p.check_in.until ?? null } : null,
@@ -1927,9 +1955,17 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
     cancellation:
       p.cancellation !== undefined
         ? {
-            summary: pickFr(p.cancellation.summary_fr, p.cancellation.summary_en),
+            summary: pickLocalizedText(
+              locale,
+              p.cancellation.summary_fr,
+              p.cancellation.summary_en,
+            ),
             freeUntilHours: p.cancellation.free_until_hours ?? null,
-            penaltyAfter: pickFr(p.cancellation.penalty_after_fr, p.cancellation.penalty_after_en),
+            penaltyAfter: pickLocalizedText(
+              locale,
+              p.cancellation.penalty_after_fr,
+              p.cancellation.penalty_after_en,
+            ),
           }
         : null,
     pets:
@@ -1937,7 +1973,7 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
         ? {
             allowed: p.pets.allowed,
             feeEur: p.pets.fee_eur ?? null,
-            notes: pickFr(p.pets.notes_fr, p.pets.notes_en),
+            notes: pickLocalizedText(locale, p.pets.notes_fr, p.pets.notes_en),
           }
         : null,
     children:
@@ -1946,7 +1982,7 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
             welcome: p.children.welcome,
             freeUnderAge: p.children.free_under_age ?? null,
             extraBedFeeEur: p.children.extra_bed_fee_eur ?? null,
-            notes: pickFr(p.children.notes_fr, p.children.notes_en),
+            notes: pickLocalizedText(locale, p.children.notes_fr, p.children.notes_en),
           }
         : null,
     payment:
@@ -1954,7 +1990,7 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
         ? {
             methods: p.payment.methods,
             depositRequired: p.payment.deposit_required ?? null,
-            notes: pickFr(p.payment.notes_fr, p.payment.notes_en),
+            notes: pickLocalizedText(locale, p.payment.notes_fr, p.payment.notes_en),
           }
         : null,
     cityTax:
@@ -1963,7 +1999,7 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
             amountPerPersonPerNight: p.city_tax.amount_per_person_per_night,
             currency: p.city_tax.currency,
             freeUnderAge: p.city_tax.free_under_age ?? null,
-            notes: pickFr(p.city_tax.notes_fr, p.city_tax.notes_en),
+            notes: pickLocalizedText(locale, p.city_tax.notes_fr, p.city_tax.notes_en),
           }
         : null,
     wifi:
@@ -1971,7 +2007,7 @@ export function readPolicies(row: HotelDetailRow, locale: SupportedLocale): Loca
         ? {
             included: p.wifi.included,
             scope: p.wifi.scope ?? null,
-            notes: pickFr(p.wifi.notes_fr, p.wifi.notes_en),
+            notes: pickLocalizedText(locale, p.wifi.notes_fr, p.wifi.notes_en),
           }
         : null,
   };
@@ -2041,7 +2077,7 @@ export function readAwards(
   if (!parsed.success) return [];
 
   const localized: LocalisedAward[] = parsed.data.map((a) => ({
-    name: (locale === 'fr' ? a.name_fr : a.name_en).trim(),
+    name: pickByLocale(locale, a.name_fr, a.name_en).trim(),
     issuer: a.issuer.trim(),
     year: a.year ?? null,
     url: a.url ?? null,
@@ -2118,9 +2154,9 @@ export function readSignatureExperiences(
 
   return parsed.data.map((e) => ({
     key: e.key,
-    title: locale === 'fr' ? e.title_fr : e.title_en,
-    description: locale === 'fr' ? e.description_fr : e.description_en,
-    badge: (locale === 'fr' ? (e.badge_fr ?? e.badge_en) : (e.badge_en ?? e.badge_fr)) ?? null,
+    title: pickByLocale(locale, e.title_fr, e.title_en),
+    description: pickByLocale(locale, e.description_fr, e.description_en),
+    badge: pickLocalizedText(locale, e.badge_fr, e.badge_en),
     bookingRequired: e.booking_required,
     imagePublicId: e.image_public_id ?? null,
   }));
@@ -2204,7 +2240,11 @@ export function readConciergeAdvice(
     }
     return null;
   }
-  const pick = locale === 'en' && parsed.data.en !== undefined ? parsed.data.en : parsed.data.fr;
+  // EN reads the EN payload when present, otherwise falls back to FR
+  // (FR is canonical — EN is generated from it, never the other way
+  // around). DE/ES/IT collapse to FR for the same reason until the
+  // Phase 3 translations pipeline runs on the corpus.
+  const pick = pickByLocale(locale, parsed.data.fr, parsed.data.en ?? parsed.data.fr);
   return {
     title: pick.title,
     body: pick.body,
@@ -2292,10 +2332,10 @@ export function readFeaturedReviews(
 
   const localized: LocalisedFeaturedReview[] = [];
   for (const r of parsed.data) {
-    const quote = locale === 'fr' ? (r.quote_fr ?? r.quote_en) : (r.quote_en ?? r.quote_fr);
+    const quote = pickLocalizedText(locale, r.quote_fr, r.quote_en);
     // The schema refinement guarantees at least one quote is present;
     // narrow defensively for TypeScript without an assertion.
-    if (quote === undefined) continue;
+    if (quote === null) continue;
     localized.push({
       source: r.source,
       sourceUrl: r.source_url ?? null,
@@ -2422,8 +2462,10 @@ export async function getHotelBySlug(
   try {
     const supabase = await createSupabaseServerClient();
 
-    const primaryColumn = locale === 'en' ? 'slug_en' : 'slug';
-    const fallbackColumn = locale === 'en' ? 'slug' : 'slug_en';
+    // V2 locales (DE/ES/IT) reuse the FR slug — `hotels.slug_<locale>`
+    // columns do not exist yet (cf. ADR-0012 §Phase 3 + runbook).
+    const primaryColumn = pickByLocale(locale, 'slug', 'slug_en');
+    const fallbackColumn = pickByLocale(locale, 'slug_en', 'slug');
 
     let row = await supabase
       .from('hotels')
@@ -2481,14 +2523,8 @@ export async function getHotelBySlug(
           id: r.data.id,
           slug: r.data.slug ?? r.data.room_code,
           room_code: r.data.room_code,
-          name:
-            locale === 'fr'
-              ? (r.data.name_fr ?? r.data.name_en)
-              : (r.data.name_en ?? r.data.name_fr),
-          description:
-            locale === 'fr'
-              ? (r.data.description_fr ?? r.data.description_en)
-              : (r.data.description_en ?? r.data.description_fr),
+          name: pickLocalizedText(locale, r.data.name_fr, r.data.name_en),
+          description: pickLocalizedText(locale, r.data.description_fr, r.data.description_en),
           max_occupancy: r.data.max_occupancy,
           bed_type: r.data.bed_type,
           size_sqm: r.data.size_sqm,
