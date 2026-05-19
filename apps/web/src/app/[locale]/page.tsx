@@ -1,9 +1,12 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { isRoutingLocale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 
 // The page reads `headers()` to forward the per-request CSP nonce to its
@@ -18,6 +21,7 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  if (!isRoutingLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations('homepage');
   const tCommon = await getTranslations('common');
@@ -27,7 +31,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const agencyJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.travelAgencyJsonLd({
       name: 'MyConciergeHotel',
-      url: locale === 'fr' ? `${siteUrl}/` : `${siteUrl}/${locale}/`,
+      url: `${siteUrl}${withLocalePath(locale, '/')}`,
       description:
         'Le concierge en ligne des Palaces et hôtels 5 étoiles en France. Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.',
       iataCode: 'FR',

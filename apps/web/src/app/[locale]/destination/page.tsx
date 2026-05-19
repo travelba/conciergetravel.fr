@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, withLocalePath } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
 
@@ -24,9 +25,7 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
-function withLocalePrefix(locale: Locale, path: string): string {
-  return locale === 'en' ? `/en${path}` : path;
-}
+const canonicalFor = (l: Locale): string => withLocalePath(l, '/destination');
 
 export async function generateMetadata({
   params,
@@ -40,12 +39,8 @@ export async function generateMetadata({
     title: t('directory.title'),
     description: t('directory.subtitle', { count: 0 }),
     alternates: {
-      canonical: raw === 'fr' ? '/destination' : '/en/destination',
-      languages: {
-        'fr-FR': '/destination',
-        en: '/en/destination',
-        'x-default': '/destination',
-      },
+      canonical: canonicalFor(raw),
+      languages: buildHreflangAlternates(canonicalFor),
     },
   };
 }
@@ -70,7 +65,7 @@ export default async function DestinationDirectoryPage({
       name: t('directory.title'),
       items: cities.map((c) => ({
         name: c.name,
-        url: `${origin}${withLocalePrefix(locale, `/destination/${c.slug}`)}`,
+        url: `${origin}${withLocalePath(locale, `/destination/${c.slug}`)}`,
       })),
     }),
   );

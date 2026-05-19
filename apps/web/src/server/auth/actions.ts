@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { withLocalePath } from '@/i18n/runtime';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 /**
@@ -55,7 +56,7 @@ type AuthErrorKind =
   | 'session_missing';
 
 function accountPath(locale: AccountLocale, sub: string): string {
-  return locale === 'en' ? `/en/compte${sub}` : `/compte${sub}`;
+  return withLocalePath(locale, `/compte${sub}`);
 }
 
 function originFromHeaders(headerList: Headers): string {
@@ -155,7 +156,7 @@ export async function signUpAction(formData: FormData): Promise<void> {
 
   const headerList = await headers();
   const origin = originFromHeaders(headerList);
-  const callbackUrl = `${origin}${locale === 'en' ? '/en' : ''}/auth/callback?next=${encodeURIComponent(accountPath(locale, ''))}`;
+  const callbackUrl = `${origin}${withLocalePath(locale, '/auth/callback')}?next=${encodeURIComponent(accountPath(locale, ''))}`;
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signUp({
@@ -218,7 +219,7 @@ export async function forgotPasswordAction(formData: FormData): Promise<void> {
   const { email, locale } = parsed.data;
   const headerList = await headers();
   const origin = originFromHeaders(headerList);
-  const redirectTo = `${origin}${locale === 'en' ? '/en' : ''}/auth/callback?next=${encodeURIComponent(accountPath(locale, '/nouveau-mot-de-passe'))}`;
+  const redirectTo = `${origin}${withLocalePath(locale, '/auth/callback')}?next=${encodeURIComponent(accountPath(locale, '/nouveau-mot-de-passe'))}`;
 
   const supabase = await createSupabaseServerClient();
   // Always redirect to the "check your inbox" screen — we never reveal whether

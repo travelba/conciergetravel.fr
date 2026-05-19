@@ -11,6 +11,7 @@ import {
 } from '@mch/domain/price-comparison';
 
 import type { Locale } from '@/i18n/routing';
+import { intlLocaleTag } from '@/i18n/runtime';
 
 export interface PriceComparatorLabels {
   readonly title: string;
@@ -59,7 +60,7 @@ export interface PriceComparatorClientProps {
 }
 
 function formatEuroAmount(locale: Locale, amountMinor: number): string {
-  return new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  return new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0,

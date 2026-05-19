@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
-import { isRoutingLocale } from '@/i18n/routing';
+import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
 
 /**
  * Build the canonical + hreflang + OG metadata for a legal page.
@@ -19,27 +20,21 @@ export async function buildLegalMetadata(args: {
 }): Promise<Metadata> {
   if (!isRoutingLocale(args.locale)) return {};
   const t = await getTranslations({ locale: args.locale, namespace: args.translationsNamespace });
-  const canonicalFr = `/${args.slug}`;
-  const canonicalEn = `/en/${args.slug}`;
-  const canonical = args.locale === 'fr' ? canonicalFr : canonicalEn;
+  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/${args.slug}`);
   const title = t('title');
   const description = t('metaDescription');
   return {
     title,
     description,
     alternates: {
-      canonical,
-      languages: {
-        'fr-FR': canonicalFr,
-        en: canonicalEn,
-        'x-default': canonicalFr,
-      },
+      canonical: buildCanonicalPath(args.locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       type: 'article',
       title,
       description,
-      locale: args.locale === 'fr' ? 'fr_FR' : 'en_US',
+      locale: ogLocale(args.locale),
       siteName: 'MyConciergeHotel',
     },
   };

@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { Locale } from '@/i18n/routing';
+import { intlLocaleTag } from '@/i18n/runtime';
 
 interface LegalShellProps {
   readonly locale: Locale;
@@ -23,7 +24,7 @@ export async function LegalShell({
   children,
 }: LegalShellProps): Promise<ReactElement> {
   const t = await getTranslations('legal');
-  const formatted = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', {
+  const formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), {
     dateStyle: 'long',
   }).format(new Date(lastUpdatedIso));
 

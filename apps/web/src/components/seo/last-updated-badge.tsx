@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/routing';
+import { intlLocaleTag } from '@/i18n/runtime';
 
 interface LastUpdatedBadgeProps {
   /** ISO 8601 date or `YYYY-MM-DD`. */
@@ -21,7 +22,7 @@ export function LastUpdatedBadge({ isoDate, locale, variant = 'inline' }: LastUp
   if (Number.isNaN(d.getTime())) return null;
   let formatted: string;
   try {
-    formatted = new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -29,6 +30,7 @@ export function LastUpdatedBadge({ isoDate, locale, variant = 'inline' }: LastUp
   } catch {
     formatted = isoDate.slice(0, 10);
   }
+  // TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c).
   const label = locale === 'fr' ? `Mise à jour le ${formatted}` : `Updated on ${formatted}`;
 
   if (variant === 'block') {

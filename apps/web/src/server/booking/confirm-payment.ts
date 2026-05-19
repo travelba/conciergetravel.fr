@@ -10,6 +10,7 @@ import {
 import { err, ok, type Result } from '@mch/domain/shared';
 import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
 
+import { intlLocaleTag } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getOptionalUser } from '@/server/auth/session';
@@ -35,7 +36,7 @@ export interface ConfirmPaymentSuccess {
 }
 
 const fmtPrice = (amountMinor: number, locale: 'fr' | 'en'): string =>
-  new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,

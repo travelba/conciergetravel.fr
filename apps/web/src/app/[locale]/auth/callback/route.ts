@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { isRoutingLocale } from '@/i18n/routing';
+import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { withLocalePath } from '@/i18n/runtime';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -15,11 +16,11 @@ const OtpTypeSchema = z.enum([
   'email_change',
 ]);
 
-function accountPath(locale: 'fr' | 'en', sub: string): string {
-  return locale === 'en' ? `/en/compte${sub}` : `/compte${sub}`;
+function accountPath(locale: Locale, sub: string): string {
+  return withLocalePath(locale, `/compte${sub}`);
 }
 
-function safeNext(url: URL, locale: 'fr' | 'en', candidate: string | null): string {
+function safeNext(url: URL, locale: Locale, candidate: string | null): string {
   if (candidate === null) return accountPath(locale, '');
   if (!candidate.startsWith('/')) return accountPath(locale, '');
   if (candidate.startsWith('//')) return accountPath(locale, '');
@@ -38,7 +39,7 @@ export async function GET(
   { params }: { params: Promise<{ locale: string }> },
 ): Promise<NextResponse> {
   const { locale: raw } = await params;
-  const locale: 'fr' | 'en' = isRoutingLocale(raw) ? raw : 'fr';
+  const locale: Locale = isRoutingLocale(raw) ? raw : 'fr';
   const url = new URL(request.url);
 
   const tokenHash = url.searchParams.get('token_hash');
