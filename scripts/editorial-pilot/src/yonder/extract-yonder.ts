@@ -89,9 +89,7 @@ async function fetchRawForUrls(urls: readonly string[]): Promise<void> {
   }
 }
 
-async function parsePages(
-  urls: readonly string[],
-): Promise<
+async function parsePages(urls: readonly string[]): Promise<
   Array<{
     url: string;
     hotels: z.infer<typeof HotelMention>[];
