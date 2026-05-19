@@ -1,9 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
-import Link from 'next/link';
-
-import { withLocalePath } from '@/i18n/runtime';
+import { Link } from '@/i18n/navigation';
 import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import type { RelatedHotelsBundle, RelatedHotelRow } from '@/server/hotels/get-related-hotels';
 
@@ -21,11 +19,10 @@ interface RelatedHotelsProps {
   readonly currentCity: string;
 }
 
-function pickLink(row: RelatedHotelRow, locale: SupportedLocale): string {
+function pickSlug(row: RelatedHotelRow, locale: SupportedLocale): string {
   // Per-locale column selection stays here (data layer — ADR-0012 Phase 1c).
   // V2 policy: FR/DE/ES/IT route via the FR slug; EN prefers slug_en when set.
-  const slug = pickLocalizedText(locale, row.slug, blankToNull(row.slug_en)) ?? row.slug;
-  return withLocalePath(locale, `/hotel/${slug}`);
+  return pickLocalizedText(locale, row.slug, blankToNull(row.slug_en)) ?? row.slug;
 }
 
 function pickName(row: RelatedHotelRow, locale: SupportedLocale): string {
@@ -134,13 +131,13 @@ export async function RelatedHotels({
 
               <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {sec.items.map((row) => {
-                  const href = pickLink(row, locale);
+                  const slug = pickSlug(row, locale);
                   const name = pickName(row, locale);
                   const desc = pickDescription(row, locale);
                   return (
                     <li key={row.slug}>
                       <Link
-                        href={href}
+                        href={{ pathname: '/hotel/[slug]', params: { slug } }}
                         className="group block h-full rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                         prefetch={false}
                       >

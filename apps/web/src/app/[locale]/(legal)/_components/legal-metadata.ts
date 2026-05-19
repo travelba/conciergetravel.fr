@@ -1,17 +1,28 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+
+/**
+ * Internal pathnames for the four legal pages. These are the *internal*
+ * canonical paths (left-hand side of `routing.pathnames`); next-intl
+ * `getPathname` resolves them to the right localised slug per locale
+ * (e.g. `/cgv` → `/en/terms`, `/mentions-legales` → `/en/legal-notice`).
+ */
+type LegalPathname = '/cgv' | '/confidentialite' | '/cookies' | '/mentions-legales';
 
 /**
  * Build the canonical + hreflang + OG metadata for a legal page.
- * Same slug in both locales (`/<slug>` in FR, `/en/<slug>` in EN) —
- * mirrors the rest of the site.
+ *
+ * `args.pathname` is one of the four typed legal pathnames declared in
+ * `routing.pathnames`; `getPathname` then yields the correctly localised
+ * URL per locale (FR keeps `/cgv` etc., EN switches to `/en/terms`, …).
  */
 export async function buildLegalMetadata(args: {
   readonly locale: string;
-  readonly slug: string;
+  readonly pathname: LegalPathname;
   readonly translationsNamespace:
     | 'legal.noticePage'
     | 'legal.privacyPage'
@@ -20,7 +31,7 @@ export async function buildLegalMetadata(args: {
 }): Promise<Metadata> {
   if (!isRoutingLocale(args.locale)) return {};
   const t = await getTranslations({ locale: args.locale, namespace: args.translationsNamespace });
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/${args.slug}`);
+  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: args.pathname });
   const title = t('title');
   const description = t('metaDescription');
   return {

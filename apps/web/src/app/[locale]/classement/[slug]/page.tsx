@@ -13,15 +13,9 @@ import { ExternalSourcesFooter } from '@/components/editorial/external-sources-f
 import { TocSidebar } from '@/components/editorial/toc-sidebar';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import {
-  buildHreflangAlternates,
-  hreflangKey,
-  intlLocaleTag,
-  ogLocale,
-  withLocalePath,
-} from '@/i18n/runtime';
+import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
@@ -114,7 +108,11 @@ export async function generateMetadata({
     ranking.meta_desc_fr ?? ranking.intro_fr.slice(0, 160),
     ranking.meta_desc_en ?? ranking.intro_en?.slice(0, 160) ?? ranking.intro_fr.slice(0, 160),
   );
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/classement/${slug}`);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/classement/[slug]', params: { slug } },
+    });
   return {
     title,
     description,
@@ -161,7 +159,10 @@ export default async function RankingPage({
 
   const t = T[locale];
   const origin = siteOrigin();
-  const canonical = `${origin}${withLocalePath(locale, `/classement/${slug}`)}`;
+  const canonical = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/classement/[slug]', params: { slug } },
+  })}`;
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Fetch entries + internal-link map in parallel (the latter drives
@@ -192,8 +193,8 @@ export default async function RankingPage({
   // ── JSON-LD: BreadcrumbList ──────────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
-      { name: t.rankings, url: `${origin}${withLocalePath(locale, '/classements')}` },
+      { name: t.home, url: `${origin}${getPathname({ locale, href: '/' })}` },
+      { name: t.rankings, url: `${origin}${getPathname({ locale, href: '/classements' })}` },
       { name: title, url: canonical },
     ]),
   );
@@ -233,7 +234,10 @@ export default async function RankingPage({
         const hotelSlug = pickByLocale(locale, e.hotel_slug, e.hotel_slug_en ?? e.hotel_slug);
         return {
           name: pickByLocale(locale, e.hotel_name, e.hotel_name_en ?? e.hotel_name),
-          url: `${origin}${withLocalePath(locale, `/hotel/${hotelSlug}`)}`,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/hotel/[slug]', params: { slug: hotelSlug } },
+          })}`,
           position: e.rank,
           hotel: { starRating: e.hotel_stars as 1 | 2 | 3 | 4 | 5 },
         };

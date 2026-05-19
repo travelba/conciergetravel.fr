@@ -717,13 +717,29 @@ async function renderHotelPage(
   // it into the same FAQPage payload as the editorial FAQ so we ship a
   // single rich-results signal per page.
   const aeoQuestion = t('aeo.question', { name });
-  const aeoAnswerKey =
-    sp.checkIn !== undefined && sp.checkOut !== undefined ? 'aeo.answer' : 'aeo.answerNoStay';
-  const aeoAnswer = t(aeoAnswerKey, {
-    city: row.city,
-    region: row.region,
-    date: aeoFreshness,
-  });
+  // International hotels (migration 0033) carry an empty `region` —
+  // swap to a `*NoRegion` template so the AEO answer doesn't render
+  // "in {city} ()". The four keys (answer / answerNoStay × region /
+  // no-region) stay in sync via the i18n bundle.
+  const hasStay = sp.checkIn !== undefined && sp.checkOut !== undefined;
+  const hasRegion = row.region.trim().length > 0;
+  const aeoAnswerKey = hasStay
+    ? hasRegion
+      ? 'aeo.answer'
+      : 'aeo.answerNoRegion'
+    : hasRegion
+      ? 'aeo.answerNoStay'
+      : 'aeo.answerNoStayNoRegion';
+  const aeoAnswer = hasRegion
+    ? t(aeoAnswerKey, {
+        city: row.city,
+        region: row.region,
+        date: aeoFreshness,
+      })
+    : t(aeoAnswerKey, {
+        city: row.city,
+        date: aeoFreshness,
+      });
 
   const faqPayload: Array<{ question: string; answer: string }> = [
     { question: aeoQuestion, answer: aeoAnswer },
@@ -904,8 +920,12 @@ async function renderHotelPage(
                 <span>{row.district}</span>
               </>
             ) : null}
-            <span aria-hidden>{t('hero.districtSeparator')}</span>
-            <span>{row.region}</span>
+            {row.region !== '' ? (
+              <>
+                <span aria-hidden>{t('hero.districtSeparator')}</span>
+                <span>{row.region}</span>
+              </>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

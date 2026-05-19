@@ -1,8 +1,16 @@
-import Link from 'next/link';
-import type { ReactElement, ReactNode } from 'react';
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
 
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
+
+/**
+ * Typed href for an editorial auto-link. Mirrors the shape next-intl's
+ * `<Link>` accepts so the link map values can be passed straight through
+ * without runtime string concatenation (Phase 2 of i18n V2 — replaces the
+ * legacy `withLocalePath('/hotel/...')` string-building pattern).
+ */
+export type EditorialLink = Extract<ComponentProps<typeof Link>['href'], { pathname: string }>;
+export type EditorialLinkMap = ReadonlyMap<string, EditorialLink>;
 
 /**
  * Auto-links named entities (Palaces, cities, brands, categories,
@@ -29,7 +37,7 @@ import { withLocalePath } from '@/i18n/runtime';
 interface Props {
   readonly body: string;
   readonly locale: Locale;
-  readonly linkMap: ReadonlyMap<string, string>;
+  readonly linkMap: EditorialLinkMap;
   /** Cap on auto-links per paragraph (default 4 — avoid over-linking). */
   readonly maxLinksPerParagraph?: number;
 }
@@ -38,7 +46,7 @@ interface MatchRange {
   readonly start: number;
   readonly end: number;
   readonly text: string;
-  readonly href: string;
+  readonly href: EditorialLink;
 }
 
 function escapeRegex(s: string): string {
@@ -51,7 +59,7 @@ function escapeRegex(s: string): string {
  * from the text. Word-boundary check uses Unicode-aware delimiters
  * (handles French accents, hyphens, apostrophes).
  */
-function findMatches(paragraph: string, linkMap: ReadonlyMap<string, string>): MatchRange[] {
+function findMatches(paragraph: string, linkMap: EditorialLinkMap): MatchRange[] {
   const results: MatchRange[] = [];
   const used = new Set<string>();
 
@@ -90,8 +98,7 @@ function findMatches(paragraph: string, linkMap: ReadonlyMap<string, string>): M
 
 function renderParagraph(
   paragraph: string,
-  linkMap: ReadonlyMap<string, string>,
-  locale: Locale,
+  linkMap: EditorialLinkMap,
   maxLinks: number,
   keyBase: string,
 ): ReactNode {
@@ -102,11 +109,10 @@ function renderParagraph(
   let cursor = 0;
   matches.forEach((m, i) => {
     if (m.start > cursor) out.push(paragraph.slice(cursor, m.start));
-    const href = m.href.startsWith('/') ? withLocalePath(locale, m.href) : m.href;
     out.push(
       <Link
         key={`${keyBase}-${i}`}
-        href={href}
+        href={m.href}
         className="text-fg decoration-fg/30 hover:decoration-fg underline underline-offset-2"
       >
         {m.text}
@@ -120,10 +126,15 @@ function renderParagraph(
 
 export function EnrichedText({
   body,
-  locale,
+  locale: _locale,
   linkMap,
   maxLinksPerParagraph = 4,
 }: Props): ReactElement {
+  // `locale` stays in the prop signature for backwards compatibility with
+  // the editorial server components. The Link component itself picks up
+  // the current locale via the next-intl request context, so we no longer
+  // need to thread it down to each individual link.
+  void _locale;
   // Split on blank lines to render proper paragraphs.
   const paragraphs = body
     .split(/\n{2,}/u)
@@ -133,7 +144,7 @@ export function EnrichedText({
   return (
     <div className="text-fg/90 space-y-4 leading-relaxed">
       {paragraphs.map((p, i) => (
-        <p key={i}>{renderParagraph(p, linkMap, locale, maxLinksPerParagraph, `p${i}`)}</p>
+        <p key={i}>{renderParagraph(p, linkMap, maxLinksPerParagraph, `p${i}`)}</p>
       ))}
     </div>
   );

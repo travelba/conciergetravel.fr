@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildLegalMetadata({
     locale,
-    slug: 'cookies',
+    pathname: '/cookies',
     translationsNamespace: 'legal.cookiesPage',
   });
 }

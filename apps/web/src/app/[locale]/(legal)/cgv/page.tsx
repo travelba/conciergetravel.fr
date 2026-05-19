@@ -19,7 +19,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildLegalMetadata({
     locale,
-    slug: 'cgv',
+    pathname: '/cgv',
     translationsNamespace: 'legal.termsPage',
   });
 }

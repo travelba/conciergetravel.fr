@@ -1,5 +1,6 @@
 import 'server-only';
 
+import type { EditorialLink, EditorialLinkMap } from '@/components/editorial/enriched-text';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -14,10 +15,12 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
  *   - Static dictionary for the 5 editorial categories
  *     (`apps/web/src/server/hotels/editorial-categories.ts`).
  *
- * Result: a `Map<string, string>` ready for the `<EnrichedText />`
- * component to consume. Built once per page render (~50ms on warm
- * Supabase pool), so cheap enough to inline into the server
- * component lifecycle.
+ * Result: an `EditorialLinkMap` (i.e. `Map<displayName, typed href>`)
+ * ready for the `<EnrichedText />` component to consume. Built once per
+ * page render (~50ms on warm Supabase pool), so cheap enough to inline
+ * into the server component lifecycle. The href shape mirrors the
+ * `{ pathname, params }` literal next-intl's typed `<Link>` accepts —
+ * the locale prefix is added by next-intl at render time.
  *
  * Anti-overlinking: the component itself caps auto-links to N per
  * paragraph and de-duplicates the same entity per paragraph. This
@@ -53,9 +56,9 @@ interface BrandRow {
 export async function buildEditorialLinkMap(options: {
   readonly excludeGuideSlug?: string;
   readonly excludeRankingSlug?: string;
-}): Promise<ReadonlyMap<string, string>> {
+}): Promise<EditorialLinkMap> {
   const supabase = getSupabaseAdminClient();
-  const map = new Map<string, string>();
+  const map = new Map<string, EditorialLink>();
 
   const [hotelsRes, guidesRes, rankingsRes] = await Promise.all([
     supabase
@@ -78,12 +81,15 @@ export async function buildEditorialLinkMap(options: {
   // Hotels — link by full name AND short surname if distinctive.
   if (hotelsRes.data !== null) {
     for (const row of hotelsRes.data as unknown as HotelRow[]) {
-      const path = `/hotel/${row.slug}`;
-      if (!map.has(row.name)) map.set(row.name, path);
+      const href: EditorialLink = {
+        pathname: '/hotel/[slug]',
+        params: { slug: row.slug },
+      };
+      if (!map.has(row.name)) map.set(row.name, href);
       // Short surname: drop "Hôtel ", "Le ", "La " prefixes.
       const short = row.name.replace(/^(?:Hôtel\s+|Le\s+|La\s+|Les\s+)/iu, '');
       if (short.length >= 6 && short !== row.name && !map.has(short)) {
-        map.set(short, path);
+        map.set(short, href);
       }
     }
   }
@@ -92,15 +98,18 @@ export async function buildEditorialLinkMap(options: {
   if (guidesRes.data !== null) {
     for (const row of guidesRes.data as unknown as GuideRow[]) {
       if (options.excludeGuideSlug === row.slug) continue;
-      const path = `/guide/${row.slug}`;
-      if (!map.has(row.name_fr)) map.set(row.name_fr, path);
+      const href: EditorialLink = {
+        pathname: '/guide/[citySlug]',
+        params: { citySlug: row.slug },
+      };
+      if (!map.has(row.name_fr)) map.set(row.name_fr, href);
       if (
         row.name_en !== null &&
         row.name_en.length >= 3 &&
         row.name_en !== row.name_fr &&
         !map.has(row.name_en)
       ) {
-        map.set(row.name_en, path);
+        map.set(row.name_en, href);
       }
     }
   }
@@ -110,9 +119,12 @@ export async function buildEditorialLinkMap(options: {
   if (rankingsRes.data !== null) {
     for (const row of rankingsRes.data as unknown as RankingRow[]) {
       if (options.excludeRankingSlug === row.slug) continue;
-      const path = `/classement/${row.slug}`;
+      const href: EditorialLink = {
+        pathname: '/classement/[slug]',
+        params: { slug: row.slug },
+      };
       if (!map.has(row.title_fr) && row.title_fr.length >= 8) {
-        map.set(row.title_fr, path);
+        map.set(row.title_fr, href);
       }
       if (
         row.title_en !== null &&
@@ -120,7 +132,7 @@ export async function buildEditorialLinkMap(options: {
         row.title_en !== row.title_fr &&
         !map.has(row.title_en)
       ) {
-        map.set(row.title_en, path);
+        map.set(row.title_en, href);
       }
     }
   }
@@ -137,8 +149,11 @@ export async function buildEditorialLinkMap(options: {
     if (brandsRes.data !== null) {
       for (const row of brandsRes.data as unknown as BrandRow[]) {
         if (row.name.length < 3) continue;
-        const path = `/marque/${row.slug}`;
-        if (!map.has(row.name)) map.set(row.name, path);
+        const href: EditorialLink = {
+          pathname: '/marque/[brandSlug]',
+          params: { brandSlug: row.slug },
+        };
+        if (!map.has(row.name)) map.set(row.name, href);
       }
     }
   } catch {

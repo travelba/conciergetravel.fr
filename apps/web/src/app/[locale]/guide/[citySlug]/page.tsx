@@ -12,21 +12,16 @@ import { EnrichedText } from '@/components/editorial/enriched-text';
 import { ExternalSourcesFooter } from '@/components/editorial/external-sources-footer';
 import { TocSidebar } from '@/components/editorial/toc-sidebar';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import {
-  buildHreflangAlternates,
-  hreflangKey,
-  intlLocaleTag,
-  ogLocale,
-  withLocalePath,
-} from '@/i18n/runtime';
+import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getCityKeysForGuide } from '@/server/guides/destination-mappings';
 import { getGuideBySlug } from '@/server/guides/get-guide-by-slug';
 import { getHotelsForDestination } from '@/server/guides/get-guide-hotels';
+import { getHotelsForCountry } from '@/server/guides/get-guide-hotels-by-country';
 
 // Force-dynamic — CSP nonce + Supabase fetch. The route still benefits
 // from Vercel's edge-cache at the CDN layer (the underlying data only
@@ -110,7 +105,11 @@ export async function generateMetadata({
   // The guide slug is shared across locales (no `slug_en` on guides), so
   // the canonical path only varies by URL prefix — buildHreflangAlternates
   // handles the full languages map.
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/guide/${citySlug}`);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/guide/[citySlug]', params: { citySlug } },
+    });
   return {
     title,
     description,
@@ -157,15 +156,23 @@ export default async function GuidePage({
 
   const t = T[locale];
   const origin = siteOrigin();
-  const canonical = `${origin}${withLocalePath(locale, `/guide/${citySlug}`)}`;
+  const canonical = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/guide/[citySlug]', params: { citySlug } },
+  })}`;
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Cross-link to Palaces in our catalog matching this destination.
+  // Country guides aggregate by `country_code` (dozens-to-hundreds of
+  // hotels across many cities); every other scope joins by `city`.
   // The internal-link map is built in parallel — it drives the
   // <EnrichedText /> auto-linking inside section bodies.
-  const cityKeys = getCityKeysForGuide(citySlug);
+  const palacesPromise =
+    guide.scope === 'country'
+      ? getHotelsForCountry(guide.country_code)
+      : getHotelsForDestination(getCityKeysForGuide(citySlug));
   const [palaces, linkMap] = await Promise.all([
-    getHotelsForDestination(cityKeys),
+    palacesPromise,
     buildEditorialLinkMap({ excludeGuideSlug: citySlug }),
   ]);
 
@@ -176,8 +183,8 @@ export default async function GuidePage({
   // ── JSON-LD: BreadcrumbList ──────────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
-      { name: t.guides, url: `${origin}${withLocalePath(locale, '/guides')}` },
+      { name: t.home, url: `${origin}${getPathname({ locale, href: '/' })}` },
+      { name: t.guides, url: `${origin}${getPathname({ locale, href: '/guides' })}` },
       { name: guideName, url: canonical },
     ]),
   );
@@ -238,7 +245,10 @@ export default async function GuidePage({
               const slug = pickByLocale(locale, h.slug, h.slug_en ?? h.slug);
               return {
                 name: pickByLocale(locale, h.name, h.name_en ?? h.name),
-                url: `${origin}${withLocalePath(locale, `/hotel/${slug}`)}`,
+                url: `${origin}${getPathname({
+                  locale,
+                  href: { pathname: '/hotel/[slug]', params: { slug } },
+                })}`,
                 hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
               };
             }),
@@ -249,7 +259,9 @@ export default async function GuidePage({
   const summary = pickByLocale(locale, guide.summary_fr, guide.summary_en ?? guide.summary_fr);
   const reviewedDate = formatRevisedDate(guide.reviewed_at, locale);
 
-  // Build a Map<string,string> for the EnrichedText component.
+  // EnrichedText accepts a mutable Map<displayName, typed href>; the
+  // builder returns a ReadonlyMap so we copy it here before passing
+  // down (cheap — same backing storage layout).
   const linkMapAsMap = new Map(linkMap);
 
   // Group FAQ in two buckets — contextual (per-section) vs global.

@@ -8,7 +8,8 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
@@ -65,7 +66,11 @@ export async function generateMetadata({
   // DE/ES/IT copy (Phase 1c-β: migrate the whole module to next-intl messages).
   const title = pickByLocale(locale, cat.metaTitleFr, cat.metaTitleEn);
   const description = pickByLocale(locale, cat.metaDescFr, cat.metaDescEn);
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/categorie/${cat.slug}`);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/categorie/[categorySlug]', params: { categorySlug: cat.slug } },
+    });
 
   return {
     title,
@@ -113,11 +118,14 @@ export default async function CategoryPage({
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.breadcrumbHome, url: `${origin}${withLocalePath(locale, '/')}` },
-      { name: t.breadcrumbHotels, url: `${origin}${withLocalePath(locale, '/hotels')}` },
+      { name: t.breadcrumbHome, url: `${origin}${getPathname({ locale, href: '/' })}` },
+      { name: t.breadcrumbHotels, url: `${origin}${getPathname({ locale, href: '/hotels' })}` },
       {
         name: pickByLocale(locale, category.labelFr, category.labelEn),
-        url: `${origin}${withLocalePath(locale, `/categorie/${category.slug}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/categorie/[categorySlug]', params: { categorySlug: category.slug } },
+        })}`,
       },
     ]),
   );
@@ -127,7 +135,10 @@ export default async function CategoryPage({
       name: h1,
       items: hotels.map((h) => ({
         name: h.nameFr,
-        url: `${origin}${withLocalePath(locale, `/hotel/${h.slugFr}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/hotel/[slug]', params: { slug: h.slugFr } },
+        })}`,
         hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
       })),
     }),

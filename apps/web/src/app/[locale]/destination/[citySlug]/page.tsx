@@ -8,7 +8,8 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, intlLocaleTag, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
@@ -82,7 +83,11 @@ export async function generateMetadata({
   const title = t('meta.title', { city: destination.name });
   const description = t('meta.description', { city: destination.name, region: destination.region });
   // citySlug is locale-invariant (no localized variant in destination data).
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/destination/${citySlug}`);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/destination/[citySlug]', params: { citySlug } },
+    });
   const canonical = buildCanonicalPath(locale);
 
   return {
@@ -124,7 +129,10 @@ export default async function DestinationHubPage({
     getAmadeusAggregateRatingsBatch(destination.hotels.map((h) => h.amadeusHotelId)),
   ]);
   const origin = siteOrigin();
-  const pageUrl = `${origin}${withLocalePath(locale, `/destination/${citySlug}`)}`;
+  const pageUrl = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/destination/[citySlug]', params: { citySlug } },
+  })}`;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
@@ -142,7 +150,10 @@ export default async function DestinationHubPage({
         const hotelSlugForLocale = pickByLocale(locale, h.slug, h.slugEn);
         return {
           name: h.name,
-          url: `${origin}${withLocalePath(locale, `/hotel/${hotelSlugForLocale}`)}`,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/hotel/[slug]', params: { slug: hotelSlugForLocale } },
+          })}`,
           ...(rating !== null
             ? {
                 hotel: {
@@ -163,10 +174,10 @@ export default async function DestinationHubPage({
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePath(locale, '/recherche')}`,
+        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
       },
       { name: destination.name, url: pageUrl },
     ]),

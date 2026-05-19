@@ -8,7 +8,8 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
@@ -71,7 +72,11 @@ export async function generateMetadata({
   const count = hotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug).length;
   const locale = raw;
   const t = T[locale];
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, `/marque/${brand.slug}`);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/marque/[brandSlug]', params: { brandSlug: brand.slug } },
+    });
 
   return {
     title: t.metaTitle(brand.label),
@@ -113,11 +118,14 @@ export default async function BrandPage({
   // ── BreadcrumbList JSON-LD ───────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.breadcrumbHome, url: `${origin}${withLocalePath(locale, '/')}` },
-      { name: t.breadcrumbHotels, url: `${origin}${withLocalePath(locale, '/hotels')}` },
+      { name: t.breadcrumbHome, url: `${origin}${getPathname({ locale, href: '/' })}` },
+      { name: t.breadcrumbHotels, url: `${origin}${getPathname({ locale, href: '/hotels' })}` },
       {
         name: brand.label,
-        url: `${origin}${withLocalePath(locale, `/marque/${brand.slug}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/marque/[brandSlug]', params: { brandSlug: brand.slug } },
+        })}`,
       },
     ]),
   );
@@ -128,7 +136,10 @@ export default async function BrandPage({
       name: `${brand.label} ${t.titleSuffix}`,
       items: hotels.map((h) => ({
         name: h.nameFr,
-        url: `${origin}${withLocalePath(locale, `/hotel/${h.slugFr}`)}`,
+        url: `${origin}${getPathname({
+          locale,
+          href: { pathname: '/hotel/[slug]', params: { slug: h.slugFr } },
+        })}`,
         hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
       })),
     }),

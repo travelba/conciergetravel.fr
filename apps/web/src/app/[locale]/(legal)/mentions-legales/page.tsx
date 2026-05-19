@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildLegalMetadata({
     locale,
-    slug: 'mentions-legales',
+    pathname: '/mentions-legales',
     translationsNamespace: 'legal.noticePage',
   });
 }

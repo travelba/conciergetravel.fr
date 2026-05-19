@@ -9,7 +9,8 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, hreflangKey, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, hreflangKey, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
@@ -155,8 +156,11 @@ export async function generateMetadata({
   const axeLabel = AXE_LABEL[axe][locale];
   const title = t.metaTitleTpl(axeLabel, resolved.label);
   const description = t.metaDescTpl(resolved.label, resolved.matches.length);
-  const path = `/classements/${axe}/${valeur}`;
-  const buildCanonicalPath = (l: Locale): string => withLocalePath(l, path);
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({
+      locale: l,
+      href: { pathname: '/classements/[axe]/[valeur]', params: { axe, valeur } },
+    });
   return {
     title,
     description,
@@ -186,8 +190,10 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
   const t = T[locale];
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
-  const path = `/classements/${axe}/${valeur}`;
-  const canonical = `${origin}${withLocalePath(locale, path)}`;
+  const canonical = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/classements/[axe]/[valeur]', params: { axe, valeur } },
+  })}`;
   const axeLabel = AXE_LABEL[axe][locale];
   // TODO i18n Phase 1c-β: migrate heading templates to next-intl. V2
   // locales fall back to the FR phrasing for now.
@@ -205,8 +211,8 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.home, url: `${origin}${withLocalePath(locale, '/')}` },
-      { name: t.rankings, url: `${origin}${withLocalePath(locale, '/classements')}` },
+      { name: t.home, url: `${origin}${getPathname({ locale, href: '/' })}` },
+      { name: t.rankings, url: `${origin}${getPathname({ locale, href: '/classements' })}` },
       { name: resolved.label, url: canonical },
     ]),
   );
@@ -223,7 +229,10 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
           // Title selection stays locale-aware (data layer) — see ADR-0012.
           // V2 locales fall back to FR until migration 0034.
           name: pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr),
-          url: `${origin}${withLocalePath(locale, `/classement/${r.slug}`)}`,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/classement/[slug]', params: { slug: r.slug } },
+          })}`,
         })),
       },
       inLanguage: hreflangKey(locale),

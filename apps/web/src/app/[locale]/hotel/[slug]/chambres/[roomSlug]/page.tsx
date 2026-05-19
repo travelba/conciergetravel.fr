@@ -9,7 +9,8 @@ import { JsonLd } from '@mch/seo';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale, withLocalePath } from '@/i18n/runtime';
+import { getPathname } from '@/i18n/navigation';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
@@ -122,10 +123,16 @@ export async function generateMetadata({
   // Slug selection stays locale-aware (data-layer concern) until
   // ADR-0012 Phase 3 collapses dual-locale columns into a single
   // `hotel_translations` table — see docs/runbooks/i18n-v2-rollout.md.
-  // URL prefix is centralised via withLocalePath / buildHreflangAlternates.
+  // URL prefix is centralised via getPathname / buildHreflangAlternates.
   const buildCanonicalPath = (l: Locale): string => {
     const hotelSlug = pickHotelSlug(detail, l);
-    return withLocalePath(l, `/hotel/${hotelSlug}/chambres/${detail.room.slug}`);
+    return getPathname({
+      locale: l,
+      href: {
+        pathname: '/hotel/[slug]/chambres/[roomSlug]',
+        params: { slug: hotelSlug, roomSlug: detail.room.slug },
+      },
+    });
   };
   const canonical = buildCanonicalPath(locale);
   const absoluteUrl = `${siteOrigin()}${canonical}`;
@@ -213,8 +220,17 @@ async function renderRoomPage(
     pathname: '/hotel/[slug]',
     params: { slug: hotelLocaleSlug },
   } as const;
-  const hotelUrl = `${origin}${withLocalePath(locale, `/hotel/${hotelLocaleSlug}`)}`;
-  const roomUrl = `${origin}${withLocalePath(locale, `/hotel/${hotelLocaleSlug}/chambres/${detail.room.slug}`)}`;
+  const hotelUrl = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/hotel/[slug]', params: { slug: hotelLocaleSlug } },
+  })}`;
+  const roomUrl = `${origin}${getPathname({
+    locale,
+    href: {
+      pathname: '/hotel/[slug]/chambres/[roomSlug]',
+      params: { slug: hotelLocaleSlug, roomSlug: detail.room.slug },
+    },
+  })}`;
 
   const { room } = detail;
   const heroPublicId = room.heroImage ?? room.images[0]?.publicId ?? null;
@@ -254,10 +270,10 @@ async function renderRoomPage(
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t('breadcrumb.home'), url: `${origin}${withLocalePath(locale, '/')}` },
+      { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
       {
         name: t('breadcrumb.hotels'),
-        url: `${origin}${withLocalePath(locale, '/recherche')}`,
+        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
       },
       { name: hotelName, url: hotelUrl },
       { name: room.name, url: roomUrl },
