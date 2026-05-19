@@ -4,17 +4,18 @@
 > Skill de référence : [`seo-technical`](../../.cursor/skills/seo-technical/SKILL.md)
 > §V2 multilingual rollout.
 
-## État au 2026-05-19 (fin de session 2)
+## État au 2026-05-19 (fin de session 3)
 
-| Phase                                          | Statut                                | Livrable                                                                              |
-| ---------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------- |
-| 0 — ADR-0012 schéma DB multilingue             | ✅ accepted                           | `docs/adr/0012-multilingual-db-schema.md`                                             |
-| 1a — `runtime.ts` helpers centralisés          | ✅ livré (commit `5fc60c4`)           | `apps/web/src/i18n/runtime.ts` + 13 tests vitest                                      |
-| 1b — Codemod hotspots                          | ✅ ~43 / ~50 fichiers (12 commits)    | 100+ ternaires de prefix/OG/Intl supprimés, 11 duplicats `withLocalePrefix` collapsés |
-| 1c — Élargir `SupportedLocale` + `assertNever` | ⏳ à faire (Phase 1b suffisamment OK) | `get-hotel-by-slug.ts` + readers serveur + copy maps `next-intl`                      |
-| 2 — `routing.pathnames`                        | ⏳ à faire                            | `routing.ts` + refactor `<Link>`                                                      |
-| 3 — Migrations DB + Payload                    | ⏳ à faire                            | `0034`, `0035`, `0036` + dual-table mirror étendu                                     |
-| 4 — Activation V2 (DE en premier)              | ⏳ à faire                            | `messages/de.json` + contenu rédacteur natif                                          |
+| Phase                                            | Statut                             | Livrable                                                                              |
+| ------------------------------------------------ | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| 0 — ADR-0012 schéma DB multilingue               | ✅ accepted                        | `docs/adr/0012-multilingual-db-schema.md`                                             |
+| 1a — `runtime.ts` helpers centralisés            | ✅ livré (commit `5fc60c4`)        | `apps/web/src/i18n/runtime.ts` + 13 tests vitest                                      |
+| 1b — Codemod hotspots                            | ✅ ~43 / ~50 fichiers (12 commits) | 100+ ternaires de prefix/OG/Intl supprimés, 11 duplicats `withLocalePrefix` collapsés |
+| 1c-α — Élargir `SupportedLocale` + `assertNever` | ✅ livré (session 3)               | `supported-locale.ts` + `assertNever` + tous les `pickXxx` data-layer exhaustifs      |
+| 1c-β — Copy maps + email subjects → `next-intl`  | ✅ livré (session 3)               | Editorial / hotel / rankings / SEO / email subjects tous migrés vers ICU messages     |
+| 2 — `routing.pathnames`                          | ⏳ à faire                         | `routing.ts` + refactor `<Link>`                                                      |
+| 3 — Migrations DB + Payload                      | ⏳ à faire                         | `0034`, `0035`, `0036` + dual-table mirror étendu                                     |
+| 4 — Activation V2 (DE en premier)                | ⏳ à faire                         | `messages/de.json` + contenu rédacteur natif                                          |
 
 ### Re-survey du 2026-05-19 (fin de session 2, 12 commits cumulés)
 
@@ -171,20 +172,80 @@ Tous les paquets initialement prévus en Phase 1b sont livrés. Le reliquat de t
 - Ajouter un cas `else if (locale === 'de')` dans un ternaire existant au lieu d'utiliser le helper — c'est exactement le problème qu'on cherche à éliminer.
 - Toucher `pickXxx(row, locale)` dans cette phase — laisse à Phase 1c.
 
-## Phase 1c — Élargir `SupportedLocale` (estimé : 0.5 jour)
+## Phase 1c — Élargir `SupportedLocale` + migrer les copy maps (livré, session 3)
 
-Une fois 1b terminé (donc aucun ternaire FR/EN brut restant dans le code applicatif) :
+Phase 1c est désormais close, en deux sous-phases livrées dans la même session :
 
-1. Dans `apps/web/src/server/hotels/get-hotel-by-slug.ts`, élargir :
+### Phase 1c-α — Élargissement `SupportedLocale` (data layer)
+
+Livrables :
+
+1. ✅ `apps/web/src/lib/assert-never.ts` — helper d'exhaustivité TypeScript :
    ```ts
-   export type SupportedLocale = 'fr' | 'en' | 'de' | 'es' | 'it';
+   export function assertNever(x: never): never {
+     throw new Error('Unreachable: ' + JSON.stringify(x));
+   }
    ```
-2. Dans chaque `pickXxx(row, locale)`, remplacer le `if (locale === 'fr') return X else return Y` par un `switch (locale) { case 'fr': ...; case 'en': ...; default: assertNever(locale); }`.
-3. Helper `assertNever` à créer si absent : `function assertNever(x: never): never { throw new Error('Unreachable locale: ' + x); }`.
-4. Tant que la migration DB Phase 3 n'est pas faite, les cas DE/ES/IT renvoient `null` (les colonnes n'existent pas encore). Documenter dans le commentaire de chaque `pickXxx` que c'est l'attendu pendant la fenêtre 1c → 3.
-5. `pnpm --filter @mch/web typecheck` doit passer.
+2. ✅ `apps/web/src/i18n/supported-locale.ts` — type V2 + helpers de policy :
+   - `type SupportedLocale = 'fr' | 'en' | 'de' | 'es' | 'it'`
+   - `pickLocalizedText(locale, fr, en)` — policy V2 (FR/DE/ES/IT → `fr ?? en`, EN → `en ?? fr`)
+   - `pickByLocale(locale, frBranch, enBranch)` — variante pour branches non-textuelles (slugs, candidate keys, colonnes SQL)
+   - `isV1Locale(locale)` — narrowing helper
+3. ✅ Élargissement des helpers de présentation dans `runtime.ts` (`localePathPrefix`, `withLocalePath`, `intlLocaleTag`, `ogLocale`, `hreflangKey`) à `KnownLocale` (superset V3-ready), pour qu'un caller passant `SupportedLocale` compile.
+4. ✅ Refactorisation de **tous** les `pickXxx(row, locale)` data-layer pour utiliser le pattern `switch + assertNever`, avec FR fallback documenté pour DE/ES/IT pendant la fenêtre 1c → 3 :
+   - `server/destinations/cities.ts` (3 picks)
+   - `server/hotels/get-room-by-slug.ts` (3 picks + `readAmenityList` + `localizeImages`)
+   - `server/hotels/get-hotel-by-slug.ts` (32 picks — le plus gros)
+   - `server/hotels/dev-fake-hotel-detail.ts` (drop no-op spread)
+5. ✅ Routes `app/[locale]/**` avec ternaires data-layer migrées (`classement/[slug]/page.tsx`, etc.) — utilisent `pickLocalizedText` / `pickByLocale`.
+6. ✅ Bug pré-existant `reservation/invite/page.tsx#expiredPath` (branche FR donnait un 404) corrigé en alignant sur `recap/page.tsx#expiredPath` via `withLocalePath`.
+7. ✅ Utilitaires `lib/format-distance.ts` + `lib/poi-hours.ts` et composants `hotel-location.tsx` + `hotel-events.tsx` élargis à `SupportedLocale` (utilisent `pickByLocale` pour le séparateur décimal, l'unité, le format d'heures, le mois en lettres long vs court).
 
-**Garde-fou** : ne PAS ajouter `'de'` / `'es'` / `'it'` à `routing.locales` à cette étape. Le widening `SupportedLocale` est interne à la couche serveur — le routing reste FR/EN pour le moment.
+### Phase 1c-β — Migration des copy maps vers `next-intl`
+
+Livrables :
+
+1. ✅ **Composants éditoriaux** — copy maps `{ fr: '...', en: '...' }` remplacées par `getTranslations` (async server components) ou `useTranslations` (client) :
+   - `components/seo/last-updated-badge.tsx` (variante inline / block)
+   - `components/editorial/toc-sidebar.tsx` (client — `useTranslations`)
+   - `components/editorial/editorial-glossary.tsx` (sorting via `intlLocaleTag` natif)
+   - `components/editorial/editorial-callout.tsx` (5 `kind` mappés via `KIND_MESSAGE_KEY`)
+   - `components/editorial/editorial-table.tsx` (helper `pickLocalized` interne)
+   - `components/editorial/external-sources-footer.tsx` (8 groupes via `TYPE_GROUP_KEY`)
+2. ✅ **Composants hotel + rankings** — TL;DR, "featured in rankings", related hotels, facets :
+   - `components/hotel/hotel-tldr.tsx` — devenu async server component ; 14-key `T` copy map remplacée par messages `hotelTldr.*`. Sentence templates split en deux clés (`firstSentencePalace` / `firstSentenceFiveStar`) car FR/EN diffèrent structurellement (présence du mot "hôtel" avant le statut). ICU plural sur l'inventaire chambres/suites.
+   - `components/hotel/hotel-featured-in-rankings.tsx` — async server component, `rankLabel` en ICU `{rank}` (DE peut écrire `Nr.{rank}`).
+   - `components/hotel/related-hotels.tsx` — async server component ; 8 templates avec `{city}` / `{brand}` / `{region}` ; helper local `blankToNull` pour normaliser le legacy "empty string = absent" avant `pickLocalizedText`.
+   - `components/rankings/rankings-facets.tsx` (client) — `useTranslations` ; la prop `locale` devenue inutilisée a été retirée du composant ET du consumer `classements/page.tsx`.
+3. ✅ **Email subjects** — sujets Brevo migrés vers ICU templates :
+   - `server/booking/confirm-payment.ts` — `bookingConfirmedSubject` ; `fmtPrice` élargi à `SupportedLocale`. La signature `sendConfirmationEmail.locale` reste `'fr' | 'en'` pour matcher le template React-Email `BookingConfirmationGuest` qui n'a pas encore de copy DE/ES/IT (commentaire en code).
+   - `server/booking/email-request.ts` — `emailRequestGuestSubject` ; le sujet ops reste EN-only (lu par l'équipe interne, pas par le client — commentaire en code).
+
+### Re-survey final (post-session 3)
+
+`rg "locale === ['\"]fr['\"]|locale === ['\"]en['\"]" apps/web/src` ne renvoie plus que **9 lignes**, toutes intentionnelles :
+
+| Catégorie                                       | Fichiers                                                                         | Raison                                                                              |
+| ----------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Doc des helpers                                 | `i18n/runtime.ts`, `lib/assert-never.ts`                                         | exemples dans les JSDoc pour expliquer ce que le helper remplace                    |
+| Tests des helpers                               | `i18n/runtime.test.ts` (2 lignes)                                                | fixtures de test ciblant explicitement V1                                           |
+| Predicate intentionnel                          | `i18n/supported-locale.ts` (`isV1Locale`)                                        | narrowing officiel V1 ↔ V2                                                          |
+| Picks alternates dans `buildHreflangAlternates` | `app/[locale]/hotel/[slug]/page.tsx`, `app/sitemaps/{hotels,rooms}.xml/route.ts` | `l: Locale` à l'intérieur du callback — devient moot dès Phase 3 (`*_translations`) |
+| Sélecteur de langue UI                          | `components/layout/locale-switcher.tsx`                                          | toggle binaire intentionnel — sera ré-architecturé en Phase 2/4                     |
+
+Plus **aucun ternaire applicatif** à migrer. Phase 1c close.
+
+### Si vous reprenez Phase 1c (rappel des étapes originelles)
+
+Conservé pour mémoire ; toutes les étapes ont été exécutées :
+
+1. ✅ Type `SupportedLocale = 'fr' | 'en' | 'de' | 'es' | 'it'` défini dans `apps/web/src/i18n/supported-locale.ts`.
+2. ✅ Chaque `pickXxx(row, locale)` réécrit en `switch (locale) { case 'fr': ...; case 'en': ...; case 'de': case 'es': case 'it': /* FR fallback */; default: return assertNever(locale); }`.
+3. ✅ Helper `assertNever` créé dans `apps/web/src/lib/assert-never.ts`.
+4. ✅ FR fallback documenté dans chaque `pickXxx` jusqu'à Phase 3.
+5. ✅ `pnpm --filter @mch/web typecheck` passe ; `pnpm --filter @mch/web test` → 43/43 pass (3 suites failure pre-existantes par variables d'env manquantes en local, hors scope).
+
+**Garde-fou** (toujours valable jusqu'en Phase 4) : ne PAS ajouter `'de'` / `'es'` / `'it'` à `routing.locales`. Le widening `SupportedLocale` est interne aux couches serveur et présentation ; le routing reste FR/EN tant que le contenu DE/ES/IT n'est pas produit.
 
 ## Phase 2 — `routing.pathnames` (estimé : 0.5 jour)
 
