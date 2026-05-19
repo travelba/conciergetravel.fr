@@ -61,7 +61,7 @@ Other caches:
 - **Never cache pre-payment offer lookups** — prices must be guaranteed at the moment of payment.
 - **Never cache booking creation** — and use idempotency keys to prevent duplicates.
 - **Use SETEX (not SET + EXPIRE)** to avoid race conditions.
-- **JSON-encode** values; decode with Zod parse at read time (never trust the cache).
+- **JSON-encode** values; decode with Zod parse at read time (never trust the cache). Same constraint applies one layer up to Next.js `unstable_cache` — never store `Map`, `Set`, `Date`, or class instances. They round-trip as `{}` or strings and silently break the consumer on every cache hit. See [`nextjs-app-router`](../nextjs-app-router/SKILL.md) §`unstable_cache` return values MUST be JSON-serialisable.
 - **Cache only successful responses**. Errors / empty results may be cached for a very short TTL (e.g. 30s) under `:miss` suffix to dampen vendor outage stampedes.
 - **Stampede protection**: use `cache-wrap` helper that locks per-key (`SET NX PX 5000`) for 5s while a single fetch fills the cache.
 - **Monitoring**: log cache hit/miss to Sentry breadcrumbs and Vercel logs.

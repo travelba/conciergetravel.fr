@@ -38,6 +38,61 @@ Invoke when:
 - API route handlers calling Amadeus availabilities: respect Redis 3-level cache (cf. `redis-caching` skill).
 - Use `revalidateTag('hotel:<slug>')`, `revalidateTag('editorial:<slug>')`, `revalidateTag('hub:<region>')` from Payload `afterChange` hooks. **No raw `revalidatePath` from CMS** — tags only, scoped.
 
+### `unstable_cache` return values MUST be JSON-serialisable
+
+Next.js serialises every `unstable_cache` return value through
+`JSON.stringify` before persisting it (Vercel data cache, on-disk in
+local builds). Non-JSON-native types **silently round-trip to garbage**
+on every cache hit after the first in-memory miss:
+
+| Type returned                            | What the consumer receives on cache hit |
+| ---------------------------------------- | --------------------------------------- |
+| `Map<K, V>`                              | `{}` (plain empty object)               |
+| `Set<T>`                                 | `{}`                                    |
+| `Date`                                   | ISO string                              |
+| `URL`                                    | `{}` with `href` lost                   |
+| `BigInt`, `RegExp`, `Function`, `Symbol` | throws or `{}`                          |
+| `undefined` inside an object             | the property is dropped                 |
+| `class` instance with methods            | plain object, methods gone              |
+
+The failure is **invisible in dev** (cache miss every request) and on
+the **first request after deploy** (cache miss populates from the live
+function). It surfaces only on the second request to the same cache
+key, often hours later on a different locale or a warm lambda — a
+classic "works on my machine, 500s in prod" trap.
+
+```ts
+// ❌ Bad — works once, then crashes every subsequent request with
+//   `TypeError: x.get is not a function`
+async function fetchGuides(): Promise<ReadonlyMap<string, string>> {
+  const rows = await supabase.from('editorial_guides').select(...);
+  const out = new Map<string, string>();
+  for (const r of rows.data ?? []) out.set(r.country_code, r.slug);
+  return out;
+}
+export const cachedGuides = unstable_cache(fetchGuides, ['guides-v1'], { revalidate: 3600 });
+
+// ✅ Good — plain Record survives JSON round-trip
+async function fetchGuides(): Promise<Readonly<Record<string, string>>> {
+  const rows = await supabase.from('editorial_guides').select(...);
+  const out: Record<string, string> = {};
+  for (const r of rows.data ?? []) {
+    if (!(r.country_code in out)) out[r.country_code] = r.slug;
+  }
+  return out;
+}
+export const cachedGuides = unstable_cache(fetchGuides, ['guides-v1'], { revalidate: 3600 });
+```
+
+**Rules of thumb:**
+
+1. **Return shape = JSON tree.** `Array<T>` or `Record<string, T>` keyed by primitives, with `T` itself JSON-safe. No `Map`, no `Set`, no `Date` (use ISO strings), no class instances. Type the return as `Readonly<Record<string, T>>` so consumers can't reach for `.get()`/`.set()` by reflex.
+2. **Convert at the boundary, not inside the cache.** If a downstream call site genuinely wants a `Map`, build it from the cached `Record` in the consumer (`new Map(Object.entries(cached))`). Keep the cache payload boring.
+3. **Bump the cache key when the return shape changes.** Vercel's persistent backend serves the old shape to the new code path until the key versions diverge. `['guides-v1']` → `['guides-v2']`. A redeploy alone is **not** enough.
+4. **Trace one production cache hit when you ship a new cached function.** A successful preview build only proves the cache miss path. The cache hit path needs at minimum one log line (`console.debug` on cache hydration, or a Sentry breadcrumb) so a future agent can see "this is the hit, not the miss" when debugging.
+
+Cross-ref: see also [`redis-caching/SKILL.md`](../redis-caching/SKILL.md) §Serialization — Upstash Redis SDK has the same JSON-only constraint for the same reason.
+
 ### JSON-LD pages MUST be `force-dynamic` (CSP nonce contract)
 
 Any page emitting `<JsonLdScript>` (= every editorial, hotel, hub, home,
