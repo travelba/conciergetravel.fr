@@ -1,4 +1,7 @@
--- 0034 — Hotels gallery_images: document external photo entries.
+-- 0037 — Hotels gallery_images: document external photo entries.
+-- (Originally drafted as 0034 in `feat/intl-phase-2-polish` before the
+--  collision with 0034_publish_tier1_international.sql — renumbered
+--  during integration to keep the migration sequence monotonic.)
 --
 -- Context (May 2026)
 -- ------------------
@@ -67,8 +70,8 @@ comment on column public.hotels.gallery_images is
        Tier-1 international hotels whose photos remain on Commons / press
        index pages (license + attribution preserved in-place).
    Discrimination: presence of public_id (shape 1) vs url (shape 2).
-   See migration 0034 for the full contract.';
+   See migration 0037 for the full contract.';
 
 -- Log this migration so the orchestrator can detect schema drift.
-insert into public._cct_sql_migrations (filename) values ('0034_hotels_gallery_external_shape.sql')
+insert into public._cct_sql_migrations (filename) values ('0037_hotels_gallery_external_shape.sql')
   on conflict do nothing;

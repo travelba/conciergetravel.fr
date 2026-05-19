@@ -95,3 +95,10 @@ scripts/editorial-pilot/yonder/
 scripts/editorial-pilot/global-sources/
 scripts/editorial-pilot/runs/
 scripts/editorial-pilot/*.mjs
+
+# editorial-pilot run logs (kept local only)
+.guide-*.txt
+.guides-*.txt
+scripts/editorial-pilot/audit-pushed-drafts.json
+scripts/editorial-pilot/runs/
+
