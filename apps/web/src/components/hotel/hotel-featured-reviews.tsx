@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { intlLocaleTag } from '@/i18n/runtime';
 import type { LocalisedFeaturedReview } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelFeaturedReviewsProps {
@@ -54,7 +55,7 @@ export async function HotelFeaturedReviews({
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
   const visible = reviews.slice(0, MAX_VISIBLE);
 
-  const dateFormatter = new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+  const dateFormatter = new Intl.DateTimeFormat(intlLocaleTag(locale), {
     year: 'numeric',
     month: 'long',
   });

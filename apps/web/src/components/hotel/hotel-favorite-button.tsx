@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition, type ReactElement } from 'react';
 
+import { withLocalePath } from '@/i18n/runtime';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface HotelFavoriteButtonProps {
@@ -100,10 +101,7 @@ export function HotelFavoriteButton({
 
     if (state.kind === 'signed-out') {
       const params = new URLSearchParams({ next: returnPath });
-      const signInPath =
-        locale === 'en'
-          ? `/en/compte/connexion?${params.toString()}`
-          : `/compte/connexion?${params.toString()}`;
+      const signInPath = withLocalePath(locale, `/compte/connexion?${params.toString()}`);
       router.push(signInPath);
       return;
     }
@@ -123,11 +121,7 @@ export function HotelFavoriteButton({
             // Session expired mid-flight. Bounce to login.
             setState({ kind: 'signed-out' });
             const params = new URLSearchParams({ next: returnPath });
-            router.push(
-              locale === 'en'
-                ? `/en/compte/connexion?${params.toString()}`
-                : `/compte/connexion?${params.toString()}`,
-            );
+            router.push(withLocalePath(locale, `/compte/connexion?${params.toString()}`));
             return;
           }
 

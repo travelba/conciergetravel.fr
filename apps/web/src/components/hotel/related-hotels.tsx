@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 
 import Link from 'next/link';
 
+import { withLocalePath } from '@/i18n/runtime';
 import type { RelatedHotelsBundle, RelatedHotelRow } from '@/server/hotels/get-related-hotels';
 
 interface RelatedHotelsProps {
@@ -39,9 +40,10 @@ const T = {
 } as const;
 
 function pickLink(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
+  // Per-locale column selection stays here (data layer — ADR-0012 Phase 1c).
   const slug =
     locale === 'en' && row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
-  return locale === 'en' ? `/en/hotel/${slug}` : `/hotel/${slug}`;
+  return withLocalePath(locale, `/hotel/${slug}`);
 }
 
 function pickName(row: RelatedHotelRow, locale: 'fr' | 'en'): string {
@@ -133,6 +135,7 @@ export function RelatedHotels({
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <h2 id="related-hotels-title" className="sr-only">
+          {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
           {locale === 'en' ? 'Related hotels' : 'Hôtels reliés'}
         </h2>
 

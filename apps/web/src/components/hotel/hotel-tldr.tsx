@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react';
 
+import { intlLocaleTag } from '@/i18n/runtime';
+
 interface HotelTldrProps {
   readonly locale: 'fr' | 'en';
   readonly name: string;
@@ -57,7 +59,7 @@ const T = {
 function formatDateForLocale(iso: string, locale: 'fr' | 'en'): string | null {
   if (!/^\d{4}-\d{2}-\d{2}/.test(iso)) return null;
   try {
-    return new Intl.DateTimeFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    return new Intl.DateTimeFormat(intlLocaleTag(locale), {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -141,6 +143,7 @@ export function HotelTldr({
         {t.eyebrow}
       </p>
       <p className="text-fg text-base leading-relaxed md:text-lg">
+        {/* TODO i18n: migrate hardcoded UI labels to next-intl messages (Phase 1c). */}
         {locale === 'fr' ? firstSentence : firstSentenceEn}
         {inventoryLine !== null ? ' ' + inventoryLine + '.' : ''}
       </p>

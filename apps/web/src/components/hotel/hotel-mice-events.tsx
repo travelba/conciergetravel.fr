@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
+import { intlLocaleTag } from '@/i18n/runtime';
 import type {
   LocalisedMiceInfo,
   LocalisedMiceSpace,
@@ -55,7 +56,6 @@ export async function HotelMiceEvents({
   if (mice === null) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage.mice' });
-  const localeFmt = locale === 'fr' ? 'fr-FR' : 'en-GB';
 
   return (
     <section aria-labelledby="mice-title" className="mb-12">
@@ -81,7 +81,7 @@ export async function HotelMiceEvents({
           <div>
             <p className="text-muted text-xs uppercase tracking-[0.14em]">{t('headline.height')}</p>
             <p className="text-fg mt-1 font-serif text-2xl tabular-nums">
-              {new Intl.NumberFormat(localeFmt, { maximumFractionDigits: 1 }).format(
+              {new Intl.NumberFormat(intlLocaleTag(locale), { maximumFractionDigits: 1 }).format(
                 mice.maxRoomHeightM,
               )}
               <span className="text-muted text-sm"> m</span>

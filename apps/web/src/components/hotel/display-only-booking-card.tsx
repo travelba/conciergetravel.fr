@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
+import { withLocalePath } from '@/i18n/runtime';
+
 interface DisplayOnlyBookingCardProps {
   readonly locale: 'fr' | 'en';
   readonly hotelId: string;
@@ -49,7 +51,7 @@ export async function DisplayOnlyBookingCard({
   childrenCount,
 }: DisplayOnlyBookingCardProps): Promise<React.ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage.displayOnly' });
-  const action = locale === 'en' ? '/en/reservation/start' : '/reservation/start';
+  const action = withLocalePath(locale, '/reservation/start');
 
   return (
     <div className="mt-5 flex flex-col gap-5">
