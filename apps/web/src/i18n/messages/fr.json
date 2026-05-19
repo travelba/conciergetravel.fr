@@ -19,6 +19,7 @@
   },
   "homepage": {
     "title": "Votre concierge des Palaces et hôtels 5★ en France",
+    "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
     "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
@@ -29,6 +30,14 @@
     "aeo": {
       "question": "Pourquoi passer par MyConciergeHotel pour réserver un Palace ou un hôtel 5★ ?",
       "answer": "MyConciergeHotel est le concierge en ligne des Palaces et hôtels 5 étoiles en France. Chaque fiche est rédigée par nos conseillers et se termine par un secret opérationnel (chambre, table, horaire ou accès). Côté tarifs : agence IATA, tarifs nets GDS Amadeus, paiement sécurisé PCI-DSS, comparatif de prix non affilié pour chaque hôtel, programme de fidélité dès la première nuit. Aucun supplément ajouté par notre agence."
+    },
+    "intlComingSoon": {
+      "eyebrow": "Bientôt à l'international",
+      "title": "Le Concierge prépare son ouverture mondiale",
+      "subtitle": "La conciergerie sélectionne actuellement les Palaces et adresses 5★ les plus emblématiques d'une trentaine de pays — Asie, Amériques, Europe, Moyen-Orient. Chaque destination ouvrira avec son guide complet et ses fiches éditoriales.",
+      "listAria": "Pays bientôt disponibles sur MyConciergeHotel",
+      "countLabel": "{count, plural, one {# palace} other {# palaces}}",
+      "guideComingSoon": "Guide complet à venir"
     }
   },
   "searchPage": {

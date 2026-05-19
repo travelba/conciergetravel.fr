@@ -19,6 +19,7 @@
   },
   "homepage": {
     "title": "Your concierge for France's Palaces and 5-star hotels",
+    "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
     "comingSoon": "MyConciergeHotel.com — your concierge is curating the selection.",
     "trust": {
@@ -29,6 +30,14 @@
     "aeo": {
       "question": "Why book a Palace or 5-star hotel through MyConciergeHotel?",
       "answer": "MyConciergeHotel is the online concierge for France's Palaces and 5-star hotels. Every page is written by our advisors and closes with a concrete operational tip — the right room, the right table, the right hour. On the booking side: IATA-accredited agency, Amadeus GDS net rates, PCI-DSS payment, a non-affiliated price comparator on every hotel page, and loyalty benefits from the first night. No agency markup."
+    },
+    "intlComingSoon": {
+      "eyebrow": "Going international soon",
+      "title": "The Concierge is preparing its global opening",
+      "subtitle": "We're curating the most iconic Palaces and 5-star addresses across some thirty countries — Asia, the Americas, Europe and the Middle East. Each destination will open with its complete guide and editorial hotel pages.",
+      "listAria": "Countries joining MyConciergeHotel soon",
+      "countLabel": "{count, plural, one {# palace} other {# palaces}}",
+      "guideComingSoon": "Full guide coming soon"
     }
   },
   "searchPage": {

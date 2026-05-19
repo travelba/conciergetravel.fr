@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { InternationalComingSoon } from '@/components/destinations/international-coming-soon';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { isRoutingLocale } from '@/i18n/routing';
 import { withLocalePath } from '@/i18n/runtime';
@@ -55,6 +56,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {tCommon('siteName')} — France
       </p>
       <h1 className="text-fg font-serif text-4xl sm:text-5xl md:text-6xl">{t('title')}</h1>
+      {/*
+        Secondary signal for the international expansion (Phase 7).
+        Stays sober — the brand DNA is France-first, so this sits as a
+        subtle eyebrow under the H1 rather than competing with the
+        subtitle below.
+      */}
+      <p className="text-fg/70 -mt-2 font-serif text-base italic sm:text-lg">{t('intlBadge')}</p>
       <p className="text-muted max-w-prose text-lg sm:text-xl">{t('subtitle')}</p>
 
       <div className="text-muted mt-6 flex flex-wrap items-center gap-3 text-xs">
@@ -77,6 +85,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </h2>
         <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
       </section>
+
+      <InternationalComingSoon locale={locale} />
 
       <p className="text-muted mt-12 text-sm">{t('comingSoon')}</p>
     </main>
