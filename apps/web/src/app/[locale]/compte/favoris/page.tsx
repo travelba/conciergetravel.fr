@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { HotelImage } from '@mch/ui';
 
 import { FavoriteRemoveButton } from '@/components/account/favorite-remove-button';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname, redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getOptionalUser } from '@/server/auth/session';
@@ -34,10 +33,9 @@ function pickHotelName(hotel: FavoriteListItem['hotels'], locale: Locale): strin
   return pickByLocale(locale, hotel.name, enName);
 }
 
-function hotelHref(hotel: FavoriteListItem['hotels'], locale: Locale): string {
+function hotelSlugForLocale(hotel: FavoriteListItem['hotels'], locale: Locale): string {
   const enSlug = hotel.slug_en !== null && hotel.slug_en !== '' ? hotel.slug_en : hotel.slug;
-  const slug = pickByLocale(locale, hotel.slug, enSlug);
-  return `/hotel/${slug}`;
+  return pickByLocale(locale, hotel.slug, enSlug);
 }
 
 function pickDescription(hotel: FavoriteListItem['hotels'], locale: Locale): string | null {
@@ -57,8 +55,14 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
 
   const user = await getOptionalUser();
   if (user === null) {
-    const dest = withLocalePath(locale, '/compte/favoris');
-    redirect(`${withLocalePath(locale, '/compte/connexion')}?next=${encodeURIComponent(dest)}`);
+    // `next` carries the localised destination URL so the sign-in form can
+    // return the user to /compte/favoris (FR) or /en/account/favorites (EN)
+    // after a successful sign-in.
+    const next = getPathname({ locale, href: '/compte/favoris' });
+    redirect({
+      href: { pathname: '/compte/connexion', query: { next } },
+      locale,
+    });
   }
 
   const t = await getTranslations('account');
@@ -131,7 +135,7 @@ function FavoriteCard({
   t: T;
 }) {
   const name = pickHotelName(fav.hotels, locale);
-  const href = hotelHref(fav.hotels, locale);
+  const slug = hotelSlugForLocale(fav.hotels, locale);
   const description = pickDescription(fav.hotels, locale);
   const heroPublicId = fav.hotels.hero_image;
 
@@ -139,7 +143,10 @@ function FavoriteCard({
     <li>
       <article className="border-border bg-bg group relative h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
         <FavoriteRemoveButton hotelId={fav.hotel_id} hotelName={name} />
-        <Link href={href} className="block focus-visible:outline-none">
+        <Link
+          href={{ pathname: '/hotel/[slug]', params: { slug } }}
+          className="block focus-visible:outline-none"
+        >
           {heroPublicId !== null ? (
             <div className="relative aspect-[4/3] w-full overflow-hidden">
               <HotelImage

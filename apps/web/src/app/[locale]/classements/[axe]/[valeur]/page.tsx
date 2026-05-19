@@ -259,7 +259,10 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
                 key={r.slug}
                 className="border-border bg-bg/60 rounded-lg border p-5 transition hover:shadow-md"
               >
-                <Link href={`/classement/${r.slug}`} className="block">
+                <Link
+                  href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
+                  className="block"
+                >
                   <p className="text-muted mb-1 text-xs uppercase tracking-wide">
                     {t.entriesCount(r.entryCount)}
                     {r.axes.lieu !== undefined ? ` · ${r.axes.lieu.label}` : ''}

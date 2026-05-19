@@ -442,7 +442,10 @@ export default async function RankingPage({
                         {t.rankLabel(e.rank)}
                       </span>
                       <h3 className="text-fg font-medium md:text-lg">
-                        <Link href={`/hotel/${linkSlug}`} className="hover:underline">
+                        <Link
+                          href={{ pathname: '/hotel/[slug]', params: { slug: linkSlug } }}
+                          className="hover:underline"
+                        >
                           {name}
                         </Link>
                       </h3>
@@ -467,7 +470,7 @@ export default async function RankingPage({
                       maxLinksPerParagraph={2}
                     />
                     <Link
-                      href={`/hotel/${linkSlug}`}
+                      href={{ pathname: '/hotel/[slug]', params: { slug: linkSlug } }}
                       className="text-fg/70 mt-3 inline-block text-xs underline hover:no-underline"
                     >
                       {t.seePage} →

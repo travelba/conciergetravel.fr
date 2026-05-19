@@ -549,7 +549,10 @@ export default async function GuidePage({
                       key={h.slug}
                       className="border-border bg-bg/60 rounded-lg border p-4 transition hover:shadow-md"
                     >
-                      <Link href={`/hotel/${slug}`} className="block">
+                      <Link
+                        href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                        className="block"
+                      >
                         <p className="text-muted mb-1 text-xs uppercase tracking-wide">
                           {h.is_palace ? t.palace : `${h.stars} ${t.stars}`}
                           {' · '}

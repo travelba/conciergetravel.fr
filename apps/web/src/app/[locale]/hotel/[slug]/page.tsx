@@ -686,8 +686,7 @@ async function renderHotelPage(
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
 
   const cityHubSlug = citySlug(row.city);
-  const cityHubPath = `/destination/${cityHubSlug}`;
-  const cityHubUrl = `${origin}${withLocalePath(locale, cityHubPath)}`;
+  const cityHubUrl = `${origin}${withLocalePath(locale, `/destination/${cityHubSlug}`)}`;
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
@@ -869,7 +868,13 @@ async function renderHotelPage(
           </li>
           <li aria-hidden>›</li>
           <li>
-            <Link href={cityHubPath} className="hover:underline">
+            <Link
+              href={{
+                pathname: '/destination/[citySlug]',
+                params: { citySlug: cityHubSlug },
+              }}
+              className="hover:underline"
+            >
               {row.city}
             </Link>
           </li>
@@ -1246,14 +1251,17 @@ async function renderHotelPage(
         {rooms.length > 0 ? (
           <ul className="flex flex-col gap-4">
             {rooms.map((room) => {
-              const roomPath = `/hotel/${slugFr}/chambres/${room.slug}`;
+              const roomHref = {
+                pathname: '/hotel/[slug]/chambres/[roomSlug]',
+                params: { slug: slugFr, roomSlug: room.slug },
+              } as const;
               const priceLabel = formatIndicativePrice(room.indicativePrice, locale, t);
               return (
                 <li key={room.id}>
                   <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
                     <header className="flex flex-wrap items-baseline justify-between gap-2">
                       <h3 className="text-fg flex items-center gap-2 font-serif text-lg">
-                        <Link href={roomPath} className="hover:underline">
+                        <Link href={roomHref} className="hover:underline">
                           {room.name ?? room.room_code}
                         </Link>
                         {room.isSignature ? (
@@ -1295,7 +1303,7 @@ async function renderHotelPage(
                     <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
                       <p className="text-sm">
                         <Link
-                          href={roomPath}
+                          href={roomHref}
                           className="text-fg hover:text-fg/80 inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
                         >
                           {t('rooms.viewDetail')}

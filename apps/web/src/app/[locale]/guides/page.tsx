@@ -156,7 +156,10 @@ export default async function GuidesIndexPage({ params }: { params: Promise<{ lo
                     key={g.slug}
                     className="border-border bg-bg/60 rounded-lg border p-5 transition hover:shadow-md"
                   >
-                    <Link href={`/guide/${g.slug}`} className="block">
+                    <Link
+                      href={{ pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }}
+                      className="block"
+                    >
                       <p className="text-muted mb-1 text-xs uppercase tracking-wide">
                         {t.scope[g.scope]}
                       </p>

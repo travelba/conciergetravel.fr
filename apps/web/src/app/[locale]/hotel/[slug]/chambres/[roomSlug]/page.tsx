@@ -209,10 +209,12 @@ async function renderRoomPage(
   const origin = siteOrigin();
   const hotelName = pickHotelName(detail, locale);
   const hotelLocaleSlug = pickHotelSlug(detail, locale);
-  const hotelPath = `/hotel/${hotelLocaleSlug}`;
-  const hotelUrl = `${origin}${withLocalePath(locale, hotelPath)}`;
-  const roomPath = `${hotelPath}/chambres/${detail.room.slug}`;
-  const roomUrl = `${origin}${withLocalePath(locale, roomPath)}`;
+  const hotelHref = {
+    pathname: '/hotel/[slug]',
+    params: { slug: hotelLocaleSlug },
+  } as const;
+  const hotelUrl = `${origin}${withLocalePath(locale, `/hotel/${hotelLocaleSlug}`)}`;
+  const roomUrl = `${origin}${withLocalePath(locale, `/hotel/${hotelLocaleSlug}/chambres/${detail.room.slug}`)}`;
 
   const { room } = detail;
   const heroPublicId = room.heroImage ?? room.images[0]?.publicId ?? null;
@@ -284,7 +286,7 @@ async function renderRoomPage(
           </li>
           <li aria-hidden>›</li>
           <li>
-            <Link href={hotelPath} className="hover:underline">
+            <Link href={hotelHref} className="hover:underline">
               {hotelName}
             </Link>
           </li>
@@ -443,7 +445,7 @@ async function renderRoomPage(
       <aside className="border-border bg-bg flex flex-wrap items-baseline justify-between gap-4 rounded-lg border p-5">
         <p className="text-muted text-sm">{t('returnHint', { hotelName })}</p>
         <Link
-          href={hotelPath}
+          href={hotelHref}
           className="border-border bg-bg text-fg hover:bg-muted/10 inline-flex rounded-md border px-4 py-2 text-sm font-medium"
         >
           {t('returnCta', { hotelName })}

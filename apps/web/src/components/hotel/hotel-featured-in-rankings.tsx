@@ -43,7 +43,10 @@ export async function HotelFeaturedInRankings({
               key={m.slug}
               className="border-border bg-bg/60 rounded-lg border p-4 transition hover:shadow-md"
             >
-              <Link href={`/classement/${m.slug}`} className="flex items-baseline gap-3">
+              <Link
+                href={{ pathname: '/classement/[slug]', params: { slug: m.slug } }}
+                className="flex items-baseline gap-3"
+              >
                 <span className="text-fg/80 font-serif text-xl font-light">
                   {t('rankLabel', { rank: m.rank })}
                 </span>

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname, redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
+import { intlLocaleTag } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { listUserBookings, type BookingListItem } from '@/server/account/list-bookings';
 import {
@@ -41,11 +41,10 @@ function pickHotelName(hotel: BookingListItem['hotels'], locale: Locale): string
   return pickByLocale(locale, hotel.name, enName);
 }
 
-function hotelHref(hotel: BookingListItem['hotels'], locale: Locale): string | null {
+function hotelSlugForLocale(hotel: BookingListItem['hotels'], locale: Locale): string | null {
   if (hotel === null) return null;
   const enSlug = hotel.slug_en !== null && hotel.slug_en !== '' ? hotel.slug_en : hotel.slug;
-  const slug = pickByLocale(locale, hotel.slug, enSlug);
-  return `/hotel/${slug}`;
+  return pickByLocale(locale, hotel.slug, enSlug);
 }
 
 function fmtDate(iso: string, locale: Locale): string {
@@ -83,8 +82,13 @@ export default async function CompteDashboardPage({
 
   const user = await getOptionalUser();
   if (user === null) {
-    const next = withLocalePath(locale, '/compte');
-    redirect(`${withLocalePath(locale, '/compte/connexion')}?next=${encodeURIComponent(next)}`);
+    // `next` is the localised destination URL so the sign-in flow can return
+    // the user to /compte (FR) or /en/account (EN) after a successful sign-in.
+    const next = getPathname({ locale, href: '/compte' });
+    redirect({
+      href: { pathname: '/compte/connexion', query: { next } },
+      locale,
+    });
   }
 
   const t = await getTranslations('account');
@@ -176,15 +180,18 @@ type T = Awaited<ReturnType<typeof getTranslations<'account'>>>;
 
 function BookingCard({ booking, locale, t }: { booking: BookingListItem; locale: Locale; t: T }) {
   const hotelName = pickHotelName(booking.hotels, locale);
-  const href = hotelHref(booking.hotels, locale);
+  const slug = hotelSlugForLocale(booking.hotels, locale);
   const statusKey = `dashboard.statuses.${booking.status}` as const;
   return (
     <li>
       <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
         <header className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-fg font-serif text-lg">
-            {hotelName !== null && href !== null ? (
-              <Link href={href} className="hover:underline">
+            {hotelName !== null && slug !== null ? (
+              <Link
+                href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                className="hover:underline"
+              >
                 {hotelName}
               </Link>
             ) : (
@@ -239,15 +246,18 @@ function EmailRequestCard({
   t: T;
 }) {
   const hotelName = pickHotelName(request.hotels, locale);
-  const href = hotelHref(request.hotels, locale);
+  const slug = hotelSlugForLocale(request.hotels, locale);
   const statusKey = `dashboard.requestStatuses.${request.status}` as const;
   return (
     <li>
       <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
         <header className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-fg font-serif text-lg">
-            {hotelName !== null && href !== null ? (
-              <Link href={href} className="hover:underline">
+            {hotelName !== null && slug !== null ? (
+              <Link
+                href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                className="hover:underline"
+              >
                 {hotelName}
               </Link>
             ) : (

@@ -126,7 +126,7 @@ export async function generateMetadata({
 interface RenderableHotel {
   readonly key: string;
   readonly name: string;
-  readonly href: string;
+  readonly slug: string;
   readonly city: string;
   readonly description: string | null;
   readonly stars: number;
@@ -142,7 +142,7 @@ function toRenderable(row: HotelGroupRow, locale: Locale): RenderableHotel {
   return {
     key: row.slug,
     name,
-    href: withLocalePath(locale, `/hotel/${slug}`),
+    slug,
     city: row.city,
     description,
     stars: row.stars,
@@ -260,7 +260,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
             return (
               <Link
                 key={b.slug}
-                href={`/marque/${b.slug}`}
+                href={{ pathname: '/marque/[brandSlug]', params: { brandSlug: b.slug } }}
                 className="border-border bg-bg hover:bg-muted/10 rounded-lg border px-4 py-3"
                 prefetch={false}
               >
@@ -300,7 +300,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
               return (
                 <li key={h.key}>
                   <Link
-                    href={h.href}
+                    href={{ pathname: '/hotel/[slug]', params: { slug: h.slug } }}
                     prefetch={false}
                     className="border-border bg-bg group block h-full rounded-lg border p-5 transition hover:border-amber-400 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                   >
@@ -363,7 +363,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                     return (
                       <li key={h.key}>
                         <Link
-                          href={h.href}
+                          href={{ pathname: '/hotel/[slug]', params: { slug: h.slug } }}
                           prefetch={false}
                           className="border-border bg-bg group block h-full rounded-lg border p-5 transition hover:border-amber-400 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                         >

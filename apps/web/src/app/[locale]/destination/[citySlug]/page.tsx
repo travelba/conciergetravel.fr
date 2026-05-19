@@ -252,7 +252,10 @@ export default async function DestinationHubPage({
                 <article className="border-border bg-bg flex h-full flex-col rounded-lg border p-5">
                   <header className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 className="text-fg font-serif text-xl">
-                      <Link href={`/hotel/${slugForLocale}`} className="hover:underline">
+                      <Link
+                        href={{ pathname: '/hotel/[slug]', params: { slug: slugForLocale } }}
+                        className="hover:underline"
+                      >
                         {hotel.name}
                       </Link>
                     </h2>
@@ -292,7 +295,7 @@ export default async function DestinationHubPage({
                   ) : null}
                   <p className="mt-4">
                     <Link
-                      href={`/hotel/${slugForLocale}`}
+                      href={{ pathname: '/hotel/[slug]', params: { slug: slugForLocale } }}
                       className="text-fg text-sm font-medium underline-offset-4 hover:underline"
                     >
                       {t('card.viewHotel')} →

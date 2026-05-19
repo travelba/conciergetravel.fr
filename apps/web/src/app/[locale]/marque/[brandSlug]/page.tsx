@@ -175,7 +175,6 @@ export default async function BrandPage({
           // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
           // V2 locales fall back to FR until migration 0034.
           const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
-          const href = withLocalePath(locale, `/hotel/${slug}`);
           const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
           const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
           const desc =
@@ -185,7 +184,7 @@ export default async function BrandPage({
           return (
             <li key={h.slugFr}>
               <Link
-                href={href}
+                href={{ pathname: '/hotel/[slug]', params: { slug } }}
                 prefetch={false}
                 className="border-border bg-bg group block h-full rounded-lg border p-5 transition hover:border-amber-400 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
               >

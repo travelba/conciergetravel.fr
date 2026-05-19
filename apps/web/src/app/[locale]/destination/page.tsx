@@ -89,7 +89,7 @@ export default async function DestinationDirectoryPage({
           {cities.map((c) => (
             <li key={c.slug}>
               <Link
-                href={`/destination/${c.slug}`}
+                href={{ pathname: '/destination/[citySlug]', params: { citySlug: c.slug } }}
                 className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
               >
                 <span>

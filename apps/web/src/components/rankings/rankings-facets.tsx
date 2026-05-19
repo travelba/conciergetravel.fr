@@ -179,7 +179,10 @@ export function RankingsFacets({
                       {opt.label}
                     </button>
                     <Link
-                      href={`/classements/${group.id}/${opt.value}`}
+                      href={{
+                        pathname: '/classements/[axe]/[valeur]',
+                        params: { axe: group.id, valeur: opt.value },
+                      }}
                       className="text-muted/70 text-[10px] uppercase tracking-wide hover:underline"
                       aria-label={`${subhubsLabel}: ${opt.label}`}
                     >
@@ -203,7 +206,10 @@ export function RankingsFacets({
                   key={r.slug}
                   className="border-border bg-bg/60 rounded-lg border p-5 transition hover:shadow-md"
                 >
-                  <Link href={`/classement/${r.slug}`} className="block">
+                  <Link
+                    href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
+                    className="block"
+                  >
                     <p className="text-muted mb-1 text-xs uppercase tracking-wide">
                       {r.entryCountLabel}
                       {r.lieuLabel !== null ? ` · ${r.lieuLabel}` : ''}

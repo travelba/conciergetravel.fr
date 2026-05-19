@@ -199,7 +199,10 @@ export default async function RecherchePage({
                   <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <h2 className="text-fg font-serif text-lg">
-                        <Link href={hit.url_path} className="hover:underline">
+                        <Link
+                          href={{ pathname: '/hotel/[slug]', params: { slug: hit.slug } }}
+                          className="hover:underline"
+                        >
                           {hit.name}
                         </Link>
                       </h2>
