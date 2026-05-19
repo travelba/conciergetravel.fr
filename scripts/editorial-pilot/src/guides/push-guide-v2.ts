@@ -136,7 +136,9 @@ export async function pushGuideV2(
         meta_desc_fr = excluded.meta_desc_fr,
         meta_desc_en = excluded.meta_desc_en,
         reviewed_at = excluded.reviewed_at,
-        is_published = excluded.is_published,
+        -- Ratchet: never downgrade an already-published guide back to draft on
+        -- a bulk re-push. Same rule as push-ranking-v2 (regression 2026-05-19).
+        is_published = (editorial_guides.is_published OR excluded.is_published),
         tables = excluded.tables,
         glossary = excluded.glossary,
         external_sources = excluded.external_sources,

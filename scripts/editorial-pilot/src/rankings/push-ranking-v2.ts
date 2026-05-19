@@ -144,7 +144,11 @@ export async function pushRankingV2(
         meta_desc_fr = excluded.meta_desc_fr,
         meta_desc_en = excluded.meta_desc_en,
         reviewed_at = excluded.reviewed_at,
-        is_published = excluded.is_published,
+        -- Ratchet: never downgrade an already-published ranking back to draft on
+        -- a bulk re-push. The bulk pipeline publishes new drafts forward and
+        -- never silently unpublishes live SEO pages. Unpublishing remains an
+        -- explicit admin operation. Regression incident 2026-05-19.
+        is_published = (editorial_rankings.is_published OR excluded.is_published),
         tables = excluded.tables,
         glossary = excluded.glossary,
         external_sources = excluded.external_sources,

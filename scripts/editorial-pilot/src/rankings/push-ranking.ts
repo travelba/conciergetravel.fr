@@ -65,7 +65,8 @@ export async function pushRanking(
         meta_desc_fr = excluded.meta_desc_fr,
         meta_desc_en = excluded.meta_desc_en,
         reviewed_at = excluded.reviewed_at,
-        is_published = excluded.is_published
+        -- Ratchet: cf. push-ranking-v2.ts (regression 2026-05-19).
+        is_published = (editorial_rankings.is_published OR excluded.is_published)
       returning id`,
       [
         seed.slug,

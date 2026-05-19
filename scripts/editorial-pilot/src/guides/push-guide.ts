@@ -78,7 +78,8 @@ export async function pushGuide(
         meta_desc_fr = excluded.meta_desc_fr,
         meta_desc_en = excluded.meta_desc_en,
         reviewed_at = excluded.reviewed_at,
-        is_published = excluded.is_published`,
+        -- Ratchet: cf. push-guide-v2.ts (regression 2026-05-19).
+        is_published = (editorial_guides.is_published OR excluded.is_published)`,
       [
         seed.slug,
         seed.nameFr,
