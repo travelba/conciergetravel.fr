@@ -244,6 +244,7 @@ re-run the generator (see [`llm-output-robustness`](../llm-output-robustness/SKI
 
 ## References
 
+- `editorial-rankings-matrix` — upstream producer of the `MatrixSeed[]` that becomes the long-read entity; `slugOverride`, `postalCodePrefixes`, deterministic vs LLM classifier.
 - `llm-output-robustness` — the pipeline that produces the JSONB.
 - `typescript-strict-zod-interop` — Zod ↔ React prop typing.
 - `structured-data-schema-org` — JSON-LD + CSP nonce contract.

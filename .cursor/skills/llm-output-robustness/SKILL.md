@@ -472,6 +472,7 @@ The rule prevents the worst pathology: a pipeline silently producing
 - CDC §4 (qualité éditoriale 3 500+ mots).
 - `typescript-strict-zod-interop` skill (Zod ↔ React props).
 - `geo-llm-optimization` skill (allowlist EEAT signals).
+- **`editorial-rankings-matrix`** — when to use a deterministic classifier (slugs structurés) vs an LLM classifier (titres libres), `LIEU_SLUG_ALIASES` pattern.
 - **`content-enrichment-pipeline`** — the multi-source brief that feeds generation.
 - **`editorial-long-read-rendering`** — how the generated JSON renders.
 - **`concierge-voice-pipeline`** — pass 8 (Concierge voice), bloc ConciergeAdvice, shortener phrases > 25 mots, contraintes ADR-0011.
