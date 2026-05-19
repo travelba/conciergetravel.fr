@@ -1,17 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition, type ReactElement } from 'react';
 
-import { withLocalePath } from '@/i18n/runtime';
-import type { SupportedLocale } from '@/i18n/supported-locale';
+import { useRouter } from '@/i18n/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface HotelFavoriteButtonProps {
   readonly hotelId: string;
   readonly hotelName: string;
-  readonly locale: SupportedLocale;
   /** Same-origin path the unauthenticated user is sent back to after signing in. */
   readonly returnPath: string;
 }
@@ -52,7 +49,6 @@ type ResolvedState =
 export function HotelFavoriteButton({
   hotelId,
   hotelName,
-  locale,
   returnPath,
 }: HotelFavoriteButtonProps): ReactElement {
   const t = useTranslations('hotelPage.favorites');
@@ -101,9 +97,10 @@ export function HotelFavoriteButton({
     if (state.kind === 'loading') return;
 
     if (state.kind === 'signed-out') {
-      const params = new URLSearchParams({ next: returnPath });
-      const signInPath = withLocalePath(locale, `/compte/connexion?${params.toString()}`);
-      router.push(signInPath);
+      router.push({
+        pathname: '/compte/connexion',
+        query: { next: returnPath },
+      });
       return;
     }
 
@@ -121,8 +118,10 @@ export function HotelFavoriteButton({
           if (session === null) {
             // Session expired mid-flight. Bounce to login.
             setState({ kind: 'signed-out' });
-            const params = new URLSearchParams({ next: returnPath });
-            router.push(withLocalePath(locale, `/compte/connexion?${params.toString()}`));
+            router.push({
+              pathname: '/compte/connexion',
+              query: { next: returnPath },
+            });
             return;
           }
 

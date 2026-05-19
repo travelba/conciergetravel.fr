@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, redirect as nextRedirect } from 'next/navigation';
 
 import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
+import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { intlLocaleTag, withLocalePath } from '@/i18n/runtime';
+import { intlLocaleTag } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
 
@@ -27,12 +28,20 @@ export async function generateMetadata({
   };
 }
 
-function paymentPath(locale: Locale): string {
-  return withLocalePath(locale, '/reservation/payment');
+function redirectToPayment(locale: Locale): never {
+  redirect({ href: '/reservation/payment', locale });
 }
 
-function expiredPath(locale: Locale): string {
-  return withLocalePath(locale, '/recherche?expired=1');
+/**
+ * Mirror of `invite/page.tsx#redirectExpired` — the expired-draft path
+ * sends the user back to the localised search page with the expired
+ * flag set so the UI can show the dedicated banner.
+ */
+function redirectExpired(locale: Locale): never {
+  redirect({
+    href: { pathname: '/recherche', query: { expired: '1' } },
+    locale,
+  });
 }
 
 const fmtPrice = (locale: Locale, amountMinor: number): string =>
@@ -47,29 +56,29 @@ async function continueToPaymentAction(): Promise<void> {
 
   const draftId = await getDraftId();
   if (draftId === undefined) {
-    redirect('/');
+    nextRedirect('/');
   }
 
   const persisted = await loadDraft(draftId);
   if (persisted === null) {
-    redirect(expiredPath('fr'));
+    redirectExpired('fr');
   }
 
   let draft = persisted.draft;
   if (draft.state === 'guest_collected') {
     const r = moveToRecap(draft);
     if (!r.ok) {
-      redirect(expiredPath(persisted.locale));
+      redirectExpired(persisted.locale);
     }
     draft = r.value;
   }
   if (draft.state !== 'recap') {
-    redirect(expiredPath(persisted.locale));
+    redirectExpired(persisted.locale);
   }
 
   const beg = beginPayment(draft);
   if (!beg.ok) {
-    redirect(expiredPath(persisted.locale));
+    redirectExpired(persisted.locale);
   }
 
   await saveDraft({
@@ -78,7 +87,7 @@ async function continueToPaymentAction(): Promise<void> {
     locale: persisted.locale,
   });
 
-  redirect(paymentPath(persisted.locale));
+  redirectToPayment(persisted.locale);
 }
 
 export default async function ReservationRecapPage({

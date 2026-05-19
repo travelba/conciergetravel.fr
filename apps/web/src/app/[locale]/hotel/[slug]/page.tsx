@@ -909,12 +909,7 @@ async function renderHotelPage(
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <HotelFavoriteButton
-              hotelId={row.id}
-              hotelName={name}
-              locale={locale}
-              returnPath={localePath}
-            />
+            <HotelFavoriteButton hotelId={row.id} hotelName={name} returnPath={localePath} />
             <HotelShareButton
               hotelName={name}
               shareText={description !== null ? truncate(description, 160) : null}

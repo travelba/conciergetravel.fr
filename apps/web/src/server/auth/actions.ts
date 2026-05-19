@@ -1,10 +1,10 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirect as nextRedirect } from 'next/navigation';
 import { z } from 'zod';
 
-import { withLocalePath } from '@/i18n/runtime';
+import { getPathname, redirect } from '@/i18n/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 /**
@@ -55,9 +55,17 @@ type AuthErrorKind =
   | 'upstream'
   | 'session_missing';
 
-function accountPath(locale: AccountLocale, sub: string): string {
-  return withLocalePath(locale, `/compte${sub}`);
-}
+/**
+ * The set of typed pathnames that the auth flow can redirect into. Kept as
+ * a discriminated string union so a typo (`/compte/connexionn`) becomes a
+ * compile error rather than a runtime 404 — see ADR-0012 §Phase 2.
+ */
+type AccountPath =
+  | '/compte'
+  | '/compte/connexion'
+  | '/compte/inscription'
+  | '/compte/mot-de-passe-oublie'
+  | '/compte/nouveau-mot-de-passe';
 
 function originFromHeaders(headerList: Headers): string {
   const explicitOrigin = headerList.get('origin');
@@ -73,23 +81,47 @@ function readField(form: FormData, key: string): string | undefined {
   return typeof v === 'string' ? v : undefined;
 }
 
-function buildErrorRedirect(
-  locale: AccountLocale,
-  sub: string,
-  kind: AuthErrorKind,
-  email?: string,
-): string {
-  const params = new URLSearchParams();
-  params.set('error', kind);
-  if (typeof email === 'string' && email.length > 0) params.set('email', email);
-  return `${accountPath(locale, sub)}?${params.toString()}`;
+/**
+ * Localised account URL for use in Supabase email templates. Supabase
+ * receives an absolute URL (e.g. `https://myconciergehotel.com/en/auth/callback?...`)
+ * and forwards the user there after they click the email link.
+ */
+function callbackUrlFor(origin: string, locale: AccountLocale, nextPathname: AccountPath): string {
+  const callbackPath = getPathname({ locale, href: '/auth/callback' });
+  const nextPath = getPathname({ locale, href: nextPathname });
+  const callback = new URL(callbackPath, origin);
+  callback.searchParams.set('next', nextPath);
+  return callback.toString();
 }
 
-function safeNext(locale: AccountLocale, candidate: string | undefined): string {
-  if (typeof candidate !== 'string') return accountPath(locale, '');
-  if (!candidate.startsWith('/')) return accountPath(locale, '');
-  if (candidate.startsWith('//')) return accountPath(locale, '');
-  return candidate;
+/**
+ * `redirectWithError` — central place where every fallible auth action
+ * hands control back to the form. Always returns `never` so callers can
+ * use it in expression position (`if (err) redirectWithError(...)`).
+ */
+function redirectWithError(
+  locale: AccountLocale,
+  pathname: AccountPath,
+  kind: AuthErrorKind,
+  email?: string,
+): never {
+  const query: Record<string, string> = { error: kind };
+  if (typeof email === 'string' && email.length > 0) query['email'] = email;
+  redirect({ href: { pathname, query }, locale });
+}
+
+/**
+ * `safeNextUrl` — if the form-provided `next` field is a strict, single-
+ * leading-slash path (no protocol, no `//` netloc smuggling), forward to
+ * it via `nextRedirect` (Next's raw redirect — `next` may carry a slug
+ * outside our typed pathname map). Otherwise fall back to the typed
+ * `/compte` redirect.
+ */
+function safeNextUrl(locale: AccountLocale, candidate: string | undefined): never {
+  if (typeof candidate === 'string' && candidate.startsWith('/') && !candidate.startsWith('//')) {
+    nextRedirect(candidate);
+  }
+  redirect({ href: '/compte', locale });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -106,7 +138,7 @@ export async function signInAction(formData: FormData): Promise<void> {
   if (!parsed.success) {
     const email = readField(formData, 'email');
     const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
-    redirect(buildErrorRedirect(locale, '/connexion', 'invalid_input', email));
+    redirectWithError(locale, '/compte/connexion', 'invalid_input', email);
   }
 
   const { email, password, locale, next } = parsed.data;
@@ -123,10 +155,10 @@ export async function signInAction(formData: FormData): Promise<void> {
           : error.status === 429
             ? 'rate_limited'
             : 'upstream';
-    redirect(buildErrorRedirect(locale, '/connexion', kind, email));
+    redirectWithError(locale, '/compte/connexion', kind, email);
   }
 
-  redirect(safeNext(locale, next));
+  safeNextUrl(locale, next);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -146,17 +178,17 @@ export async function signUpAction(formData: FormData): Promise<void> {
   if (!parsed.success) {
     const email = readField(formData, 'email');
     const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
-    redirect(buildErrorRedirect(locale, '/inscription', 'invalid_input', email));
+    redirectWithError(locale, '/compte/inscription', 'invalid_input', email);
   }
 
   const { email, password, confirmPassword, displayName, newsletter, locale } = parsed.data;
   if (password !== confirmPassword) {
-    redirect(buildErrorRedirect(locale, '/inscription', 'password_mismatch', email));
+    redirectWithError(locale, '/compte/inscription', 'password_mismatch', email);
   }
 
   const headerList = await headers();
   const origin = originFromHeaders(headerList);
-  const callbackUrl = `${origin}${withLocalePath(locale, '/auth/callback')}?next=${encodeURIComponent(accountPath(locale, ''))}`;
+  const callbackUrl = callbackUrlFor(origin, locale, '/compte');
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signUp({
@@ -180,12 +212,15 @@ export async function signUpAction(formData: FormData): Promise<void> {
         : error.status === 429
           ? 'rate_limited'
           : 'upstream';
-    redirect(buildErrorRedirect(locale, '/inscription', kind, email));
+    redirectWithError(locale, '/compte/inscription', kind, email);
   }
 
   // Email confirmation required: send the user to a confirmation-pending page
   // (reuses the sign-in screen with a banner).
-  redirect(`${accountPath(locale, '/connexion')}?pending=1`);
+  redirect({
+    href: { pathname: '/compte/connexion', query: { pending: '1' } },
+    locale,
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -198,7 +233,7 @@ export async function signOutAction(formData: FormData): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  redirect(accountPath(locale, '/connexion'));
+  redirect({ href: '/compte/connexion', locale });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -213,13 +248,13 @@ export async function forgotPasswordAction(formData: FormData): Promise<void> {
   if (!parsed.success) {
     const email = readField(formData, 'email');
     const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
-    redirect(buildErrorRedirect(locale, '/mot-de-passe-oublie', 'invalid_input', email));
+    redirectWithError(locale, '/compte/mot-de-passe-oublie', 'invalid_input', email);
   }
 
   const { email, locale } = parsed.data;
   const headerList = await headers();
   const origin = originFromHeaders(headerList);
-  const redirectTo = `${origin}${withLocalePath(locale, '/auth/callback')}?next=${encodeURIComponent(accountPath(locale, '/nouveau-mot-de-passe'))}`;
+  const redirectTo = callbackUrlFor(origin, locale, '/compte/nouveau-mot-de-passe');
 
   const supabase = await createSupabaseServerClient();
   // Always redirect to the "check your inbox" screen — we never reveal whether
@@ -228,7 +263,10 @@ export async function forgotPasswordAction(formData: FormData): Promise<void> {
   if (error !== null && process.env['NODE_ENV'] !== 'production') {
     console.warn('[forgotPasswordAction] reset email error', error.message);
   }
-  redirect(`${accountPath(locale, '/mot-de-passe-oublie')}?sent=1`);
+  redirect({
+    href: { pathname: '/compte/mot-de-passe-oublie', query: { sent: '1' } },
+    locale,
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -243,25 +281,28 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
   });
   if (!parsed.success) {
     const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
-    redirect(buildErrorRedirect(locale, '/nouveau-mot-de-passe', 'invalid_input'));
+    redirectWithError(locale, '/compte/nouveau-mot-de-passe', 'invalid_input');
   }
 
   const { password, confirmPassword, locale } = parsed.data;
   if (password !== confirmPassword) {
-    redirect(buildErrorRedirect(locale, '/nouveau-mot-de-passe', 'password_mismatch'));
+    redirectWithError(locale, '/compte/nouveau-mot-de-passe', 'password_mismatch');
   }
 
   const supabase = await createSupabaseServerClient();
   const { data: userRes } = await supabase.auth.getUser();
   if (!userRes.user) {
-    redirect(buildErrorRedirect(locale, '/connexion', 'session_missing'));
+    redirectWithError(locale, '/compte/connexion', 'session_missing');
   }
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error !== null) {
     const kind: AuthErrorKind = error.status === 429 ? 'rate_limited' : 'upstream';
-    redirect(buildErrorRedirect(locale, '/nouveau-mot-de-passe', kind));
+    redirectWithError(locale, '/compte/nouveau-mot-de-passe', kind);
   }
 
-  redirect(`${accountPath(locale, '')}?reset=1`);
+  redirect({
+    href: { pathname: '/compte', query: { reset: '1' } },
+    locale,
+  });
 }

@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 
+import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -16,15 +16,42 @@ const OtpTypeSchema = z.enum([
   'email_change',
 ]);
 
-function accountPath(locale: Locale, sub: string): string {
-  return withLocalePath(locale, `/compte${sub}`);
+/**
+ * Build a localised account URL via the typed pathnames map.
+ *
+ * `errorKind` is appended as `?error=<kind>` — the connexion form already
+ * displays it. Phase 2: this replaces the bespoke `withLocalePath`
+ * string concatenation so the EN flow goes to `/en/account/sign-in`
+ * (not the legacy `/en/compte/connexion`).
+ */
+function accountUrl(
+  origin: URL,
+  locale: Locale,
+  pathname: '/compte' | '/compte/connexion' | '/compte/nouveau-mot-de-passe',
+  errorKind?: string,
+): URL {
+  const path = getPathname({ locale, href: pathname });
+  const u = new URL(path, origin);
+  if (errorKind !== undefined) u.searchParams.set('error', errorKind);
+  return u;
 }
 
-function safeNext(url: URL, locale: Locale, candidate: string | null): string {
-  if (candidate === null) return accountPath(locale, '');
-  if (!candidate.startsWith('/')) return accountPath(locale, '');
-  if (candidate.startsWith('//')) return accountPath(locale, '');
-  return new URL(candidate, url).pathname + new URL(candidate, url).search;
+/**
+ * `nextRaw` is a user-controlled query parameter. We only forward it
+ * when it is a strict path (one leading `/`, no protocol, no `//`
+ * netloc smuggling) so an attacker can't open-redirect via the auth
+ * callback. Anything else falls back to `/compte`.
+ */
+function safeNextUrl(origin: URL, locale: Locale, candidate: string | null): URL {
+  if (candidate === null) return accountUrl(origin, locale, '/compte');
+  if (!candidate.startsWith('/')) return accountUrl(origin, locale, '/compte');
+  if (candidate.startsWith('//')) return accountUrl(origin, locale, '/compte');
+  // The path may already include a search string from the upstream caller;
+  // preserve both.
+  const parsed = new URL(candidate, origin);
+  const out = new URL(parsed.pathname, origin);
+  out.search = parsed.search;
+  return out;
 }
 
 /**
@@ -53,42 +80,30 @@ export async function GET(
   if (tokenHash !== null && rawType !== null) {
     const typeParsed = OtpTypeSchema.safeParse(rawType);
     if (!typeParsed.success) {
-      return NextResponse.redirect(
-        new URL(accountPath(locale, '/connexion') + '?error=upstream', url),
-        303,
-      );
+      return NextResponse.redirect(accountUrl(url, locale, '/compte/connexion', 'upstream'), 303);
     }
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
       type: typeParsed.data,
     });
     if (error !== null) {
-      return NextResponse.redirect(
-        new URL(accountPath(locale, '/connexion') + '?error=upstream', url),
-        303,
-      );
+      return NextResponse.redirect(accountUrl(url, locale, '/compte/connexion', 'upstream'), 303);
     }
     const destination =
       typeParsed.data === 'recovery'
-        ? accountPath(locale, '/nouveau-mot-de-passe')
-        : safeNext(url, locale, nextRaw);
-    return NextResponse.redirect(new URL(destination, url), 303);
+        ? accountUrl(url, locale, '/compte/nouveau-mot-de-passe')
+        : safeNextUrl(url, locale, nextRaw);
+    return NextResponse.redirect(destination, 303);
   }
 
   // Branch B: legacy/PKCE `?code=...` exchange.
   if (code !== null) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error !== null) {
-      return NextResponse.redirect(
-        new URL(accountPath(locale, '/connexion') + '?error=upstream', url),
-        303,
-      );
+      return NextResponse.redirect(accountUrl(url, locale, '/compte/connexion', 'upstream'), 303);
     }
-    return NextResponse.redirect(new URL(safeNext(url, locale, nextRaw), url), 303);
+    return NextResponse.redirect(safeNextUrl(url, locale, nextRaw), 303);
   }
 
-  return NextResponse.redirect(
-    new URL(accountPath(locale, '/connexion') + '?error=invalid_input', url),
-    303,
-  );
+  return NextResponse.redirect(accountUrl(url, locale, '/compte/connexion', 'invalid_input'), 303);
 }

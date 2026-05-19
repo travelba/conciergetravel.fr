@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
-import { Link } from '@/i18n/navigation';
+import { Link, redirect } from '@/i18n/navigation';
 import { isRoutingLocale } from '@/i18n/routing';
-import { withLocalePath } from '@/i18n/runtime';
 import { signUpAction } from '@/server/auth/actions';
 import { getOptionalUser } from '@/server/auth/session';
 
@@ -52,7 +51,7 @@ export default async function InscriptionPage({
 
   const existing = await getOptionalUser();
   if (existing !== null) {
-    redirect(withLocalePath(locale, '/compte'));
+    redirect({ href: '/compte', locale });
   }
 
   const t = await getTranslations('account');
