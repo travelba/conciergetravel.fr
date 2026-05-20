@@ -17,6 +17,7 @@ export * from './item-list';
 export * from './offer';
 export * from './place-amenity';
 export * from './travel-agency';
+export * from './video-object';
 
 /**
  * Wrap any JSON-LD object with the Schema.org context. Use this right before

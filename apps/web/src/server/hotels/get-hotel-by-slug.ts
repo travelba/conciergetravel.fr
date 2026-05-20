@@ -60,6 +60,8 @@ export const HotelDetailRowSchema = z.object({
   longitude: numberOrNull,
   description_fr: stringOrEmpty,
   description_en: stringOrEmpty,
+  factual_summary_fr: stringOrEmpty,
+  factual_summary_en: stringOrEmpty,
   highlights: z.unknown().nullable().optional(),
   amenities: z.unknown().nullable().optional(),
   faq_content: z.unknown().nullable().optional(),
@@ -107,6 +109,8 @@ export const HotelDetailRowSchema = z.object({
   last_renovated_at: stringOrEmpty,
   virtual_tour_url: stringOrEmpty,
   mice_info: z.unknown().nullable().optional(),
+  // 0044 — Hero video (B8 — CDC §2 bloc 2). Optional jsonb mirroring `VideoObjectInput`.
+  hero_video: z.unknown().nullable().optional(),
   // External identifiers & knowledge-graph anchors (migration 0025).
   // All optional — backfilled by `scripts/editorial-pilot/src/enrichment/enrich-wikidata-ids.ts`.
   wikidata_id: stringOrEmpty,
@@ -139,7 +143,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -2126,6 +2130,56 @@ export function readSignatureExperiences(
 }
 
 // ---------------------------------------------------------------------------
+// hero_video (jsonb) — CDC §2 bloc 2 (B8 / migration 0044)
+// ---------------------------------------------------------------------------
+
+const HeroVideoSchema = z
+  .object({
+    name: z.string().min(1).max(160),
+    description: z.string().min(1).max(500),
+    thumbnailUrl: z.union([z.string().url(), z.array(z.string().url()).min(1)]),
+    uploadDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/u, {
+        message: 'uploadDate must be ISO 8601 (YYYY-MM-DD or full DateTime)',
+      }),
+    contentUrl: z.string().url().optional(),
+    embedUrl: z.string().url().optional(),
+    duration: z
+      .string()
+      .regex(/^PT\d+(M\d+S|S|M)$/u, { message: 'duration must be ISO 8601 (e.g. PT45S)' })
+      .optional(),
+    width: z.number().int().positive().optional(),
+    height: z.number().int().positive().optional(),
+    caption: z.string().min(1).max(280).optional(),
+  })
+  .refine((v) => v.contentUrl !== undefined || v.embedUrl !== undefined, {
+    message: 'hero_video requires at least one of contentUrl or embedUrl',
+  });
+
+export type HotelHeroVideo = z.infer<typeof HeroVideoSchema>;
+
+/**
+ * Returns the hero video payload when present and valid, otherwise
+ * `null`. Validation is strict — any malformed legacy row is dropped
+ * silently in production (warned in dev) so the `<HotelVideo>`
+ * component and the `VideoObject` JSON-LD stay coherent.
+ *
+ * Skill: structured-data-schema-org, content-modeling.
+ */
+export function readHeroVideo(row: HotelDetailRow): HotelHeroVideo | null {
+  if (row.hero_video === null || row.hero_video === undefined) return null;
+  const parsed = HeroVideoSchema.safeParse(row.hero_video);
+  if (!parsed.success) {
+    if (process.env['NODE_ENV'] !== 'production') {
+      console.warn(`[hero_video] hotel ${row.slug}: invalid payload — ${parsed.error.message}`);
+    }
+    return null;
+  }
+  return parsed.data;
+}
+
+// ---------------------------------------------------------------------------
 // concierge_advice (jsonb) — bloc obligatoire « Le Conseil du Concierge »
 // (CDC §2 + ADR-0011 + EDITORIAL_VOICE.md §4 bloc 8).
 // ---------------------------------------------------------------------------
@@ -2186,6 +2240,54 @@ export interface LocalisedConciergeAdvice {
  * Returns `null` for hotels that have not yet been processed by the
  * Phase 3 humanizer-pass — the UI component is a no-op in that case.
  */
+// ---------------------------------------------------------------------------
+// factual_summary_fr / _en (text) — CDC §2.3 (IA-ready summary)
+// ---------------------------------------------------------------------------
+
+/**
+ * Soft length window for the CDC §2.3 "factual summary" surfaced under
+ * the H1 of every hotel detail page. Editorial pipeline targets
+ * 130-150 chars (the LLM-friendly slot — fits a citation snippet in
+ * AI Overviews + Perplexity exactly once), but legacy rows may be
+ * shorter or longer; the reader returns the value verbatim and the
+ * component is responsible for the visible warning.
+ */
+const FACTUAL_SUMMARY_MIN_CHARS = 110;
+const FACTUAL_SUMMARY_MAX_CHARS = 165;
+
+export interface HotelFactualSummary {
+  /** Verbatim text as stored — no normalisation. */
+  readonly text: string;
+  /** `true` when `text.length` ∈ [110, 165] (CDC §2.3 enveloppe empirique). */
+  readonly isWithinTarget: boolean;
+}
+
+/**
+ * Returns the factual summary for the requested locale, falling back
+ * to the FR canonical when the locale-specific column is empty. The
+ * UI component (`<FactualSummary>`) trusts the verbatim text but uses
+ * `isWithinTarget` to surface an editorial warning in non-production
+ * environments (CDC §2.3 enforcement).
+ *
+ * Returns `null` when no summary is set at all — the page falls back
+ * to the truncated `description` in that case (pre-migration 0041
+ * behaviour preserved).
+ */
+export function readFactualSummary(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): HotelFactualSummary | null {
+  const raw = pickLocalizedText(locale, row.factual_summary_fr, row.factual_summary_en);
+  if (raw === null) return null;
+  const text = raw.trim();
+  if (text.length === 0) return null;
+  return {
+    text,
+    isWithinTarget:
+      text.length >= FACTUAL_SUMMARY_MIN_CHARS && text.length <= FACTUAL_SUMMARY_MAX_CHARS,
+  };
+}
+
 export function readConciergeAdvice(
   row: HotelDetailRow,
   locale: SupportedLocale,
@@ -2514,6 +2616,13 @@ export async function getHotelBySlug(
 export interface PublishedHotelSlug {
   readonly slugFr: string;
   readonly slugEn: string | null;
+  /**
+   * ISO 8601 `updated_at` value (B9). Used as `<lastmod>` in the
+   * hotels sub-sitemap and as the `dateModified` signal for the
+   * hotel JSON-LD. `null` when the upstream row has no `updated_at`
+   * column populated (legacy seed rows pre-migration 0001).
+   */
+  readonly updatedAt: string | null;
 }
 
 /**
@@ -2543,19 +2652,22 @@ export async function listPublishedHotelSlugs(): Promise<readonly PublishedHotel
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('slug, slug_en')
+      .select('slug, slug_en, updated_at')
       .eq('is_published', true)
       .order('priority', { ascending: true })
       .limit(500);
     if (error || !Array.isArray(data)) return [];
     const out: PublishedHotelSlug[] = [];
     for (const raw of data) {
-      const slug = (raw as { slug?: unknown }).slug;
-      const slugEn = (raw as { slug_en?: unknown }).slug_en;
+      const r = raw as { slug?: unknown; slug_en?: unknown; updated_at?: unknown };
+      const slug = r.slug;
+      const slugEn = r.slug_en;
       if (typeof slug === 'string' && isValidSlug(slug)) {
         out.push({
           slugFr: slug,
           slugEn: typeof slugEn === 'string' && isValidSlug(slugEn) ? slugEn : null,
+          updatedAt:
+            typeof r.updated_at === 'string' && r.updated_at.length > 0 ? r.updated_at : null,
         });
       }
     }
@@ -2591,7 +2703,7 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('slug, slug_en, hero_image, gallery_images, long_description_sections')
+      .select('slug, slug_en, hero_image, gallery_images, long_description_sections, updated_at')
       .eq('is_published', true)
       .order('priority', { ascending: true })
       .limit(500);
@@ -2604,6 +2716,7 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
         hero_image?: unknown;
         gallery_images?: unknown;
         long_description_sections?: unknown;
+        updated_at?: unknown;
       };
       const slug = r.slug;
       if (typeof slug !== 'string' || !isValidSlug(slug)) continue;
@@ -2618,6 +2731,8 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
       out.push({
         slugFr: slug,
         slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,
+        updatedAt:
+          typeof r.updated_at === 'string' && r.updated_at.length > 0 ? r.updated_at : null,
       });
     }
     return out;

@@ -11,7 +11,15 @@ export interface GalleryLightboxImage {
 interface HotelGalleryLightboxProps {
   readonly cloudName: string;
   readonly hero: GalleryLightboxImage | null;
+  /** Visible grid tiles (≤ 11 — see `MAX_THUMBNAILS` in the RSC wrapper). */
   readonly thumbnails: readonly GalleryLightboxImage[];
+  /**
+   * C4 — full image catalogue used by the lightbox cycle. When omitted
+   * (legacy callers), the lightbox falls back to `thumbnails`. When set,
+   * the lightbox navigates the entire CDC §2 ≥ 30-photo set even though
+   * only `thumbnails.length` tiles are visible above the fold.
+   */
+  readonly lightboxImages?: readonly GalleryLightboxImage[];
   readonly overflowCount: number;
   readonly translations: {
     readonly thumbnailsLabel: string;
@@ -71,13 +79,18 @@ export function HotelGalleryLightbox({
   cloudName,
   hero,
   thumbnails,
+  lightboxImages,
   overflowCount,
   translations,
 }: HotelGalleryLightboxProps): React.ReactElement {
-  const allImages = useMemo<readonly GalleryLightboxImage[]>(
-    () => (hero !== null ? [hero, ...thumbnails] : thumbnails),
-    [hero, thumbnails],
-  );
+  // C4 — the lightbox cycles through the full set (≥ 30 when available),
+  // while the visible grid stays capped. When `lightboxImages` is set,
+  // we honour the full catalogue; otherwise we mirror the visible grid
+  // for backwards compatibility with any other caller.
+  const allImages = useMemo<readonly GalleryLightboxImage[]>(() => {
+    const base = lightboxImages ?? thumbnails;
+    return hero !== null ? [hero, ...base] : base;
+  }, [hero, lightboxImages, thumbnails]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);

@@ -80,12 +80,141 @@
       "label": "Navigation principale",
       "destinations": "Destinations",
       "search": "Rechercher",
-      "hotels": "Hôtels",
+      "hotels": "Palaces & Hôtels",
       "hotelsAllAria": "Voir tous les hôtels",
       "hotelsCategoriesLabel": "Catégories d'hôtels",
       "hotelsBrowseAll": "Tous les hôtels du catalogue",
+      "hotelsByDistinction": "Par distinction",
+      "hotelsByType": "Par type",
+      "hotelsByBrand": "Par groupe hôtelier",
+      "hotelsBrowseAllBrands": "Toutes les marques →",
       "rankings": "Classements",
-      "guides": "Guides"
+      "rankingsLabel": "Classements éditoriaux",
+      "rankingsTop": "Les plus populaires",
+      "rankingsByType": "Par type d'hôtel",
+      "rankingsByDestination": "Par destination",
+      "rankingsBrowseAll": "Voir tous les classements →",
+      "guides": "Guides",
+      "inspiration": "Inspiration",
+      "inspirationLabel": "Inspirations de voyage",
+      "inspirationByTheme": "Par thème",
+      "inspirationByOccasion": "Par occasion",
+      "inspirationBySaison": "Par saison",
+      "inspirationBrowseAll": "Voir toutes les inspirations →",
+      "destinationsLabel": "Toutes les destinations",
+      "destinationsFrance": "France",
+      "destinationsHeroes": "Régions héros",
+      "destinationsWorld": "À l'international",
+      "destinationsBrowseAll": "Toutes les destinations →",
+      "concierge": "Le Concierge",
+      "conciergeLabel": "À propos & contenus",
+      "conciergeAbout": "Notre métier",
+      "conciergeContent": "Contenus",
+      "conciergePro": "Pour les pros",
+      "conciergeAboutLink": "À propos (IATA, agence)",
+      "conciergeBooking": "Comment réserver",
+      "conciergeLoyalty": "Programme de fidélité",
+      "conciergeTip": "Le Conseil du Concierge",
+      "conciergeFaq": "FAQ générale",
+      "conciergeGuides": "Guides voyage",
+      "conciergeItineraries": "Itinéraires sur-mesure",
+      "conciergeJournal": "Journal du Concierge",
+      "conciergeHotelier": "Pour les hôteliers",
+      "conciergeMice": "MICE / Séminaires",
+      "conciergeContact": "Nous contacter",
+      "conciergePress": "Presse & partenaires"
+    },
+    "search": {
+      "label": "Rechercher un hôtel",
+      "destinationPlaceholder": "Destination (ville, région…)",
+      "checkin": "Arrivée",
+      "checkout": "Départ",
+      "submit": "Rechercher",
+      "submitAria": "Lancer la recherche"
+    },
+    "concierge": {
+      "eyebrow": "À propos",
+      "title": "Le Concierge",
+      "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
+      "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
+      "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+      "trust": {
+        "title": "Nos engagements",
+        "iataTitle": "Agence IATA / APST",
+        "iataBody": "MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous vos paiements sont protégés par la garantie financière professionnelle.",
+        "gdsTitle": "Tarifs nets GDS",
+        "gdsBody": "Nous accédons à l'inventaire Amadeus GDS pour proposer le meilleur tarif net disponible, identique au tarif officiel de l'hôtel — sans surcoût caché.",
+        "amadeusTitle": "Paiement sécurisé Amadeus",
+        "amadeusBody": "Le paiement passe par l'orchestrateur Amadeus Payments, conforme PCI-DSS niveau 1. 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs."
+      },
+      "method": {
+        "title": "Notre méthode éditoriale",
+        "step1Title": "Sélection éditoriale",
+        "step1Body": "Chaque hôtel publié est sélectionné par notre équipe selon trois critères : distinction officielle (Atout France, Michelin), expérience opérationnelle vérifiée, et singularité (chambre signature, table chef, service exceptionnel).",
+        "step2Title": "Fiche rédigée par un humain",
+        "step2Body": "Nos conseillers rédigent chaque fiche après visite ou conversation directe avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur.",
+        "step3Title": "Conseil du Concierge",
+        "step3Body": "Chaque fiche se termine par un encart « Conseil du Concierge » : 60-90 mots qui livrent un secret opérationnel concret (numéro de chambre, ligne d'accès, table cachée, timing optimal). C'est notre signature."
+      },
+      "loyalty": {
+        "title": "Programme de fidélité",
+        "body": "Notre programme de fidélité MyConciergeHotel s'ouvre dès la première nuit réservée. Avantages : upgrade quand disponible, petit-déjeuner offert sur certains palaces partenaires, crédit hôtel cumulable. Voir conditions complètes."
+      },
+      "tip": {
+        "title": "Le Conseil du Concierge — la signature",
+        "body": "C'est l'élément central de chacune de nos fiches : un secret opérationnel concret partagé par notre équipe après visite. Ni avis client, ni description marketing — un raccourci d'initié, en 60-90 mots. Découvrez nos derniers Conseils sur les fiches hôtel.",
+        "cta": "Voir une fiche avec Conseil →"
+      },
+      "pro": {
+        "title": "Pour les pros",
+        "hotelierTitle": "Pour les hôteliers",
+        "hotelierBody": "Hôtels d'exception : rejoignez notre catalogue éditorial. Nous fonctionnons en partenariat direct (pas de surcommission), avec un rédacteur dédié par fiche.",
+        "miceTitle": "MICE / Séminaires",
+        "miceBody": "Nous gérons aussi les demandes séminaire, mariage, événement privatif sur nos hôtels partenaires. Devis personnalisé sous 24 h.",
+        "pressTitle": "Presse & partenaires",
+        "pressBody": "Pour toute demande presse (presse écrite, podcast, presse en ligne), contactez presse@myconciergehotel.com."
+      },
+      "faq": {
+        "title": "Foire aux questions",
+        "items": [
+          {
+            "q": "Êtes-vous une agence de voyage ?",
+            "a": "Oui, MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous nos paiements sont sécurisés par la garantie financière professionnelle."
+          },
+          {
+            "q": "Quel est votre périmètre géographique ?",
+            "a": "En V1, nous couvrons les Palaces et hôtels 5★ en France. Nous étendons progressivement à l'Italie, la Suisse, le Maroc, les Émirats et plusieurs destinations asiatiques."
+          },
+          {
+            "q": "Combien coûte votre service ?",
+            "a": "Rien pour le client final. Nous percevons une commission de l'hôtel partenaire, identique à celle versée à Booking ou Expedia. Le tarif affiché est le tarif net GDS — pas de surcoût."
+          },
+          {
+            "q": "Comment puis-je annuler une réservation ?",
+            "a": "Selon la politique d'annulation de l'hôtel choisi. La majorité des tarifs sont « flexibles » (annulation gratuite jusqu'à 48 ou 72 h). Tous les détails dans la confirmation de réservation."
+          },
+          {
+            "q": "Qu'est-ce que le Conseil du Concierge ?",
+            "a": "Un encart en bas de chaque fiche hôtel rédigé par notre équipe : 60-90 mots qui livrent un secret opérationnel (chambre signature, table cachée, timing optimal d'accès). C'est notre différenciateur principal."
+          }
+        ]
+      }
+    },
+    "breadcrumb": {
+      "label": "Fil d'ariane",
+      "home": "Accueil",
+      "hotels": "Palaces & Hôtels",
+      "destinations": "Destinations",
+      "rankings": "Classements",
+      "guides": "Guides",
+      "inspiration": "Inspiration",
+      "concierge": "Le Concierge",
+      "brands": "Marques hôtelières",
+      "categories": "Catégories",
+      "search": "Recherche",
+      "account": "Mon compte",
+      "booking": "Réservation",
+      "legal": "Mentions légales"
     },
     "account": {
       "signIn": "Connexion",
@@ -139,22 +268,52 @@
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. Tous droits réservés.",
     "tagline": "Votre concierge des Palaces et hôtels 5★ en France — sélection éditoriale, conseils opérationnels, réservation au tarif net via notre agence IATA.",
+    "trust": {
+      "iata": "Agence IATA / APST",
+      "concierge": "Le Conseil du Concierge",
+      "loyalty": "Programme de fidélité"
+    },
     "headings": {
       "explore": "Explorer",
-      "info": "Informations",
-      "legal": "Mentions"
+      "browse": "Catalogue",
+      "services": "Services",
+      "legal": "Mentions",
+      "agentic": "Surface agentique"
     },
     "links": {
-      "destinations": "Destinations",
+      "destinations": "Toutes les destinations",
+      "hotels": "Tous les hôtels",
+      "rankings": "Tous les classements",
+      "guides": "Tous les guides",
+      "inspiration": "Inspiration",
       "search": "Recherche",
-      "guides": "Guides",
+      "topDestinations": "Top destinations",
+      "topRankings": "Top classements",
       "selection": "Sélection",
+      "palaces": "Palaces",
+      "fiveStars": "Hôtels 5★",
+      "boutique": "Boutique-hôtels",
+      "chateaux": "Châteaux-hôtels",
+      "chalets": "Chalets de luxe",
+      "villas": "Villas privées",
+      "allBrands": "Toutes les marques",
       "account": "Mon compte",
+      "loyalty": "Programme de fidélité",
+      "support": "Aide & contact",
+      "hoteliers": "Pour les hôteliers",
+      "mice": "MICE / Séminaires",
+      "press": "Presse",
+      "concierge": "À propos (Le Concierge)",
+      "newsletter": "Newsletter",
+      "newsletterCta": "S'inscrire",
       "contact": "Contact",
       "legalNotice": "Mentions légales",
       "privacy": "Politique de confidentialité",
       "terms": "Conditions générales de vente",
-      "cookies": "Politique cookies"
+      "cookies": "Politique cookies",
+      "sitemap": "Plan du site",
+      "llmsTxt": "llms.txt (LLM index)",
+      "agentSkills": "agent-skills.json (API)"
     }
   },
   "legal": {
@@ -463,15 +622,39 @@
       "tipPrefix": "Mon conseil"
     },
     "displayOnly": {
-      "headline": "Réservation par concierge MyConciergeHotel",
-      "explainer": "{name} n'est pas disponible à la réservation en ligne. Indiquez vos dates, nous vous transmettons une proposition personnalisée par e-mail.",
-      "sla": "Réponse sous 24 heures ouvrées.",
+      "headline": "Réservation via votre concierge personnel",
+      "explainer": "{name} se réserve via notre conciergerie : votre concierge dédié confirme la chambre, négocie les attentions et vous transmet la proposition par e-mail.",
+      "sla": "Réponse sous 2 heures en journée, sous 24 h le week-end.",
       "checkIn": "Arrivée",
       "checkOut": "Départ",
       "adults": "Adultes",
       "children": "Enfants",
-      "trustChip": "Agence IATA accréditée. Aucune carte demandée à cette étape, paiement uniquement après acceptation du devis.",
-      "submit": "Demander un devis"
+      "trustChip": "Agence IATA accréditée. Aucune carte n'est demandée à cette étape : vous payez uniquement après confirmation de la chambre.",
+      "submit": "Réserver via mon concierge"
+    },
+    "widget": {
+      "conciergeTitle": "Réservation via votre concierge",
+      "conciergeExplainer": "{name} se réserve par notre conciergerie : votre concierge dédié confirme la chambre et vous adresse la proposition par e-mail.",
+      "conciergeSubmit": "Réserver via mon concierge",
+      "limitedAvailability": "{count, plural, =1 {Plus qu'1 chambre disponible pour ces dates} other {Plus que # chambres disponibles pour ces dates}}",
+      "soldOutForDates": "Complet pour ces dates — contactez votre concierge pour une alternative",
+      "priceFromLabel": "À partir de",
+      "priceFromUnit": "/ nuit",
+      "onRequestLabel": "Tarif sur demande",
+      "trust": {
+        "listAria": "Garanties MyConciergeHotel",
+        "iata": "Agence IATA",
+        "securePayment": "Paiement 3-D Secure",
+        "noCard": "Aucune carte requise",
+        "cancellation": "Annulation flexible"
+      },
+      "mobileBar": {
+        "ctaSeePrices": "Voir les tarifs",
+        "ctaBook": "Réserver",
+        "ctaAriaSeePrices": "Voir les tarifs et réserver {name}",
+        "ctaAriaBook": "Réserver {name}",
+        "trustChip": "Agence IATA · paiement sécurisé"
+      }
     },
     "factSheet": {
       "title": "Fiche d'identité {name}",
@@ -764,7 +947,15 @@
       "requestEmail": "Demande de réservation"
     },
     "loyaltyHint": "Programme de fidélité dès la première nuit pour les hôtels du réseau Little.",
-    "lastUpdated": "Fiche mise à jour le {date}"
+    "lastUpdated": "Fiche mise à jour le {date}",
+    "localGuide": {
+      "eyebrow": "Que faire autour",
+      "title": "Notre guide complet de {city}",
+      "cta": "Lire le guide {name}"
+    },
+    "heroAdviceTeaser": {
+      "cta": "Le conseil de votre concierge ↓"
+    }
   },
   "roomPage": {
     "meta": {

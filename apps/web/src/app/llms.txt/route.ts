@@ -16,13 +16,17 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 /**
  * /llms.txt — concise index for LLMs (skill: geo-llm-optimization).
  *
- * Phase 10.5 wires a dynamic "Catalogue" section sourced from the published
- * `hotels` table (top-50 by priority then name). The corpus stays small —
- * one line per hotel, no description — which is the format llms.txt
- * consumers (ChatGPT Search, Perplexity, Claude) actually parse.
+ * B7 lifts the historical 50-hotel cap to the editorial-priority-ordered
+ * 500 cap of `listPublishedHotelSummaries` so the LLM corpus surfaces
+ * every published palace + 5★. We also emit one EN URL per hotel
+ * (`/en/hotel/<slug_en>`) so non-FR LLM crawlers don't have to guess
+ * the EN routing. Editorial priority (`P0 → P1 → P2`) is preserved
+ * by the upstream `order('priority', asc)` clause, then `name` for
+ * stable diffs.
  *
- * Phase 8 will pull editorial copy & long descriptions from Payload; for now
- * we ship deterministic seed copy + dynamic catalog.
+ * The corpus stays one line per URL (no description sentence) which is
+ * the format llms.txt consumers (ChatGPT Search, Perplexity, Claude)
+ * actually parse — long descriptions belong in `/llms-full.txt`.
  *
  * We read the site URL from validated env (rather than `request.url`)
  * so the initial ISR prerender — which runs at build time with a
@@ -35,18 +39,31 @@ export async function GET(): Promise<NextResponse> {
   // must degrade gracefully). The route still ships a valid llms.txt
   // skeleton without dynamic catalogue when the DB is unreachable.
   const [hotels, rankings, guides] = await Promise.all([
-    listPublishedHotelSummaries(50).catch(() => []),
+    listPublishedHotelSummaries(500).catch(() => []),
     listPublishedRankings().catch(() => []),
     listPublishedGuides().catch(() => []),
   ]);
 
-  const catalogItems: LlmsTxtSectionItem[] = hotels.map((h) => {
+  // FR + EN catalog: emit one item per locale per hotel so non-FR LLM
+  // crawlers (Anglo-American GPTBot, ClaudeBot) don't have to guess
+  // the `/en/hotel/<slug>` URL from the FR one. The FR canonical
+  // line stays first (editorial priority preserved); the EN sibling
+  // follows immediately so deduplication tools can pair them.
+  const catalogItems: LlmsTxtSectionItem[] = [];
+  for (const h of hotels) {
     const distinction = h.isPalace ? 'Palace' : `${h.stars} étoiles`;
-    return {
+    catalogItems.push({
       url: `${origin}/fr/hotel/${h.slugFr}`,
       description: `${h.nameFr} (${h.city}) — ${distinction}. Fiche complète + Conseil du Concierge (chambre, table ou timing à retenir).`,
-    };
-  });
+    });
+    const slugEn = h.slugEn ?? h.slugFr;
+    const nameEn = h.nameEn ?? h.nameFr;
+    const distinctionEn = h.isPalace ? 'Palace' : `${h.stars}-star`;
+    catalogItems.push({
+      url: `${origin}/en/hotel/${slugEn}`,
+      description: `${nameEn} (${h.city}) — ${distinctionEn}. Full editorial review + Concierge tip (room, table or timing worth knowing).`,
+    });
+  }
 
   // Editorial rankings — surface the full slate so LLM crawlers can
   // discover every classement without paginating through the hub.
@@ -89,14 +106,29 @@ export async function GET(): Promise<NextResponse> {
               'Page d’accueil — le concierge des Palaces et hôtels 5★ en France (agence IATA).',
           },
           {
+            url: `${origin}/en`,
+            description:
+              'Homepage (EN) — the concierge for Palaces and 5-star hotels in France (IATA agency).',
+          },
+          {
             url: `${origin}/fr/destination`,
             description:
               'Annuaire des destinations : Paris, Côte d’Azur, Bordelais, Alpes, Provence…',
           },
           {
+            url: `${origin}/en/destination`,
+            description:
+              'Destinations hub: Paris, French Riviera, Bordeaux region, Alps, Provence…',
+          },
+          {
             url: `${origin}/fr/recherche`,
             description:
               'Recherche temps réel par ville et dates — votre concierge propose les meilleures options (tarifs nets GDS, paiement Amadeus).',
+          },
+          {
+            url: `${origin}/en/search`,
+            description:
+              'Live search by city and dates — your concierge surfaces the best options (net GDS rates, Amadeus payment).',
           },
         ],
       },

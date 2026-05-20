@@ -46,6 +46,7 @@ const FAKE_ROOMS: Readonly<Record<string, HotelRoomDetailRow>> = {
     images: [],
     isSignature: false,
     indicativePrice: { fromMinor: 95000, toMinor: 130000, currency: 'EUR' },
+    conciergeAdviceRaw: null,
   },
   [FAKE_ROOM_SLUG_JUNIOR_SUITE]: {
     id: '33333333-3333-4333-8333-333333333333',
@@ -63,6 +64,7 @@ const FAKE_ROOMS: Readonly<Record<string, HotelRoomDetailRow>> = {
     images: [],
     isSignature: true,
     indicativePrice: { fromMinor: 220000, toMinor: null, currency: 'EUR' },
+    conciergeAdviceRaw: null,
   },
 };
 

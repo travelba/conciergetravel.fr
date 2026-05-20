@@ -80,12 +80,73 @@
       "label": "Primary navigation",
       "destinations": "Destinations",
       "search": "Search",
-      "hotels": "Hotels",
+      "hotels": "Palaces & Hotels",
       "hotelsAllAria": "View all hotels",
       "hotelsCategoriesLabel": "Hotel categories",
       "hotelsBrowseAll": "Browse the full catalogue",
+      "hotelsByDistinction": "By distinction",
+      "hotelsByType": "By type",
+      "hotelsByBrand": "By hotel group",
+      "hotelsBrowseAllBrands": "All brands →",
       "rankings": "Rankings",
-      "guides": "Guides"
+      "rankingsLabel": "Editorial rankings",
+      "rankingsTop": "Most popular",
+      "rankingsByType": "By hotel type",
+      "rankingsByDestination": "By destination",
+      "rankingsBrowseAll": "View all rankings →",
+      "guides": "Guides",
+      "inspiration": "Inspiration",
+      "inspirationLabel": "Travel inspiration",
+      "inspirationByTheme": "By theme",
+      "inspirationByOccasion": "By occasion",
+      "inspirationBySaison": "By season",
+      "inspirationBrowseAll": "View all inspirations →",
+      "destinationsLabel": "All destinations",
+      "destinationsFrance": "France",
+      "destinationsHeroes": "Hero regions",
+      "destinationsWorld": "International",
+      "destinationsBrowseAll": "All destinations →",
+      "concierge": "The Concierge",
+      "conciergeLabel": "About & content",
+      "conciergeAbout": "Who we are",
+      "conciergeContent": "Content",
+      "conciergePro": "For pros",
+      "conciergeAboutLink": "About us (IATA, agency)",
+      "conciergeBooking": "How to book",
+      "conciergeLoyalty": "Loyalty programme",
+      "conciergeTip": "The Concierge’s Tip",
+      "conciergeFaq": "General FAQ",
+      "conciergeGuides": "Travel guides",
+      "conciergeItineraries": "Tailor-made itineraries",
+      "conciergeJournal": "Concierge Journal",
+      "conciergeHotelier": "For hoteliers",
+      "conciergeMice": "MICE / Events",
+      "conciergeContact": "Contact us",
+      "conciergePress": "Press & partners"
+    },
+    "search": {
+      "label": "Search a hotel",
+      "destinationPlaceholder": "Destination (city, region…)",
+      "checkin": "Check-in",
+      "checkout": "Check-out",
+      "submit": "Search",
+      "submitAria": "Start the search"
+    },
+    "breadcrumb": {
+      "label": "Breadcrumb",
+      "home": "Home",
+      "hotels": "Palaces & Hotels",
+      "destinations": "Destinations",
+      "rankings": "Rankings",
+      "guides": "Guides",
+      "inspiration": "Inspiration",
+      "concierge": "The Concierge",
+      "brands": "Hotel brands",
+      "categories": "Categories",
+      "search": "Search",
+      "account": "My account",
+      "booking": "Booking",
+      "legal": "Legal notice"
     },
     "account": {
       "signIn": "Sign in",
@@ -139,22 +200,52 @@
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. All rights reserved.",
     "tagline": "Your concierge for France's Palaces and 5★ hotels — editorial selection, operational tips, net-rate booking via our IATA-accredited desk.",
+    "trust": {
+      "iata": "IATA / APST agency",
+      "concierge": "The Concierge’s Tip",
+      "loyalty": "Loyalty programme"
+    },
     "headings": {
       "explore": "Explore",
-      "info": "Information",
-      "legal": "Legal"
+      "browse": "Catalogue",
+      "services": "Services",
+      "legal": "Legal",
+      "agentic": "Agentic surface"
     },
     "links": {
-      "destinations": "Destinations",
+      "destinations": "All destinations",
+      "hotels": "All hotels",
+      "rankings": "All rankings",
+      "guides": "All guides",
+      "inspiration": "Inspiration",
       "search": "Search",
-      "guides": "Guides",
+      "topDestinations": "Top destinations",
+      "topRankings": "Top rankings",
       "selection": "Selection",
+      "palaces": "Palaces",
+      "fiveStars": "5-Star Hotels",
+      "boutique": "Boutique Hotels",
+      "chateaux": "Château Hotels",
+      "chalets": "Luxury Chalets",
+      "villas": "Private Villas",
+      "allBrands": "All hotel brands",
       "account": "My account",
+      "loyalty": "Loyalty programme",
+      "support": "Help & contact",
+      "hoteliers": "For hoteliers",
+      "mice": "MICE / Events",
+      "press": "Press",
+      "concierge": "About (The Concierge)",
+      "newsletter": "Newsletter",
+      "newsletterCta": "Subscribe",
       "contact": "Contact",
       "legalNotice": "Legal notice",
       "privacy": "Privacy policy",
       "terms": "Terms of sale",
-      "cookies": "Cookie policy"
+      "cookies": "Cookie policy",
+      "sitemap": "Sitemap",
+      "llmsTxt": "llms.txt (LLM index)",
+      "agentSkills": "agent-skills.json (API)"
     }
   },
   "legal": {
@@ -463,15 +554,39 @@
       "tipPrefix": "My tip"
     },
     "displayOnly": {
-      "headline": "MyConciergeHotel concierge booking",
-      "explainer": "{name} is not available for online booking. Share your dates and our concierge will email a tailored proposal.",
-      "sla": "Reply within 24 business hours.",
+      "headline": "Book through your personal concierge",
+      "explainer": "{name} is booked through our concierge desk: your dedicated concierge confirms the room, secures extra perks and emails you a tailored proposal.",
+      "sla": "Reply within 2 hours on weekdays, within 24 hours on weekends.",
       "checkIn": "Check-in",
       "checkOut": "Check-out",
       "adults": "Adults",
       "children": "Children",
-      "trustChip": "IATA-accredited agency. No card details needed at this stage — payment only after you accept the quote.",
-      "submit": "Request a quote"
+      "trustChip": "IATA-accredited agency. No card is requested at this stage — you only pay once the room is confirmed.",
+      "submit": "Book via my concierge"
+    },
+    "widget": {
+      "conciergeTitle": "Book via your concierge",
+      "conciergeExplainer": "{name} is booked through our concierge desk: your dedicated concierge confirms the room and emails you the tailored proposal.",
+      "conciergeSubmit": "Book via my concierge",
+      "limitedAvailability": "{count, plural, =1 {Only 1 room left for these dates} other {Only # rooms left for these dates}}",
+      "soldOutForDates": "Fully booked for these dates — speak to your concierge for alternatives",
+      "priceFromLabel": "From",
+      "priceFromUnit": "/ night",
+      "onRequestLabel": "Price on request",
+      "trust": {
+        "listAria": "MyConciergeHotel guarantees",
+        "iata": "IATA-accredited agency",
+        "securePayment": "3-D Secure payment",
+        "noCard": "No card required",
+        "cancellation": "Flexible cancellation"
+      },
+      "mobileBar": {
+        "ctaSeePrices": "See rates",
+        "ctaBook": "Book",
+        "ctaAriaSeePrices": "See rates and book {name}",
+        "ctaAriaBook": "Book {name}",
+        "trustChip": "IATA agency · secure payment"
+      }
     },
     "factSheet": {
       "title": "{name} factsheet",
@@ -764,7 +879,15 @@
       "requestEmail": "Booking request"
     },
     "loyaltyHint": "Loyalty rewards from the first night for Little catalog hotels.",
-    "lastUpdated": "Page updated on {date}"
+    "lastUpdated": "Page updated on {date}",
+    "localGuide": {
+      "eyebrow": "Around the hotel",
+      "title": "Our full {city} guide",
+      "cta": "Read the {name} guide"
+    },
+    "heroAdviceTeaser": {
+      "cta": "Your concierge's tip ↓"
+    }
   },
   "roomPage": {
     "meta": {

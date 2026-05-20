@@ -196,13 +196,22 @@ export interface PublishedGuideCard {
   readonly summaryEn: string | null;
   readonly heroImage: string | null;
   readonly reviewedAt: string | null;
+  /**
+   * ISO 8601 `updated_at` value (B9). Preferred over `reviewedAt` for
+   * sitemap `<lastmod>` because it tracks every editorial change
+   * (not just human review milestones). Sitemap reader picks
+   * `MAX(updatedAt, reviewedAt)`.
+   */
+  readonly updatedAt: string | null;
 }
 
 export async function listPublishedGuides(): Promise<readonly PublishedGuideCard[]> {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('editorial_guides')
-    .select('slug, name_fr, name_en, scope, summary_fr, summary_en, hero_image, reviewed_at')
+    .select(
+      'slug, name_fr, name_en, scope, summary_fr, summary_en, hero_image, reviewed_at, updated_at',
+    )
     .eq('is_published', true)
     .order('name_fr', { ascending: true });
   if (error !== null || data === null) return [];
@@ -215,6 +224,7 @@ export async function listPublishedGuides(): Promise<readonly PublishedGuideCard
     summary_en: z.string().nullable(),
     hero_image: z.string().nullable(),
     reviewed_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
   });
   const cards: PublishedGuideCard[] = [];
   for (const row of data as unknown[]) {
@@ -229,6 +239,7 @@ export async function listPublishedGuides(): Promise<readonly PublishedGuideCard
         summaryEn: parsed.data.summary_en,
         heroImage: parsed.data.hero_image,
         reviewedAt: parsed.data.reviewed_at,
+        updatedAt: parsed.data.updated_at,
       });
     }
   }
