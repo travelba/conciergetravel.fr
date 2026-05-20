@@ -4,6 +4,8 @@ import { buildLlmsTxt, type LlmsTxtSectionItem } from '@mch/seo';
 
 import { env } from '@/lib/env';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
+import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
+import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 import { listPublishedHotelSummaries } from '@/server/hotels/get-hotel-by-slug';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
@@ -79,12 +81,27 @@ export async function GET(): Promise<NextResponse> {
   // Highest-value pages for AI Overviews and Perplexity citations
   // because they answer broad "où séjourner à X" queries with
   // structured tables + glossary + sources.
+  //
+  // Post ADR-0015: `/guide/[city]` redirects to `/destination/[city]`,
+  // so we surface the destination URL (the new canonical) here.
   const guideItems: LlmsTxtSectionItem[] = guides.map((g) => ({
-    url: `${origin}/fr/guide/${g.slug}`,
+    url: `${origin}/fr/destination/${g.slug}`,
     description:
       g.summaryFr.length > 0
         ? g.summaryFr
-        : `${g.nameFr} — guide éditorial long-format (palaces, gastronomie, art de vivre, infos pratiques).`,
+        : `${g.nameFr} — guide éditorial long-format (palaces, gastronomie, art de vivre, infos pratiques) intégré à la page destination.`,
+  }));
+
+  // Editorial categories (5 palace + 7 by type — ADR-0016).
+  const categoryItems: LlmsTxtSectionItem[] = EDITORIAL_CATEGORIES.map((cat) => ({
+    url: `${origin}/fr/categorie/${cat.slug}`,
+    description: cat.metaDescFr,
+  }));
+
+  // Hotel brands surfaced by the catalogue (`KNOWN_BRANDS`).
+  const brandItems: LlmsTxtSectionItem[] = KNOWN_BRANDS.map((b) => ({
+    url: `${origin}/fr/marque/${b.slug}`,
+    description: `${b.label} — adresses du groupe ${b.label} dans notre catalogue éditorial MyConciergeHotel.`,
   }));
 
   const body = buildLlmsTxt({
@@ -161,15 +178,76 @@ export async function GET(): Promise<NextResponse> {
               title: `Guides de destinations (${guideItems.length} long-reads ≥ 3 500 mots)`,
               items: [
                 {
-                  url: `${origin}/fr/guides`,
+                  url: `${origin}/fr/destination`,
                   description:
-                    'Hub de tous les guides destination — Paris, Côte d’Azur, Provence, Alpes, Bourgogne, etc.',
+                    'Hub de toutes les destinations — chaque page destination inclut le guide long-read intégré (Palaces + art de vivre + infos pratiques). Voir ADR-0015 (fusion guide↔destination).',
                 },
                 ...guideItems,
               ],
             },
           ]
         : []),
+      // ── ADR-0014 — new GEO surfaces ──────────────────────────────────────
+      {
+        title: 'Inspiration (thèmes × occasions × saisons)',
+        items: [
+          {
+            url: `${origin}/fr/inspiration`,
+            description:
+              'Hub d’inspiration de voyage : explorer notre catalogue par thème (romantique, spa, gastronomie, design…), occasion (lune de miel, mariage, séminaire…) ou saison.',
+          },
+          {
+            url: `${origin}/en/inspiration`,
+            description:
+              'Travel inspiration hub: browse our catalogue by theme (romantic, spa, gastronomy, design…), occasion (honeymoon, wedding, seminar…) or season.',
+          },
+        ],
+      },
+      ...(categoryItems.length > 0
+        ? [
+            {
+              title: `Catégories éditoriales (${categoryItems.length} pages indexables)`,
+              items: [
+                {
+                  url: `${origin}/fr/hotels`,
+                  description:
+                    'Catalogue complet — Palaces et hôtels d’exception toutes catégories confondues.',
+                },
+                ...categoryItems,
+              ],
+            },
+          ]
+        : []),
+      ...(brandItems.length > 0
+        ? [
+            {
+              title: `Marques hôtelières représentées (${brandItems.length} groupes)`,
+              items: [
+                {
+                  url: `${origin}/fr/marques`,
+                  description:
+                    'Index des groupes hôteliers représentés dans notre catalogue (Cheval Blanc, Airelles, Four Seasons, Rosewood, etc.).',
+                },
+                ...brandItems,
+              ],
+            },
+          ]
+        : []),
+      {
+        title: 'À propos & EEAT',
+        items: [
+          {
+            url: `${origin}/fr/le-concierge`,
+            description:
+              'Le Concierge — agence IATA / APST, méthode éditoriale, Conseil du Concierge (signature propriétaire), programme de fidélité.',
+          },
+          {
+            url: `${origin}/en/le-concierge`,
+            description:
+              'The Concierge — IATA / APST agency, editorial method, the Concierge’s Tip (proprietary signature), loyalty programme.',
+          },
+        ],
+      },
       {
         title: 'Mentions légales & confiance',
         items: [
@@ -197,12 +275,12 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des actions disponibles (search, get-hotel, get-hotel-room, request-quote…).',
+              'Catalogue machine-readable des 16 actions disponibles (search, get-hotel, get-hotel-room, list-categories, list-themes, list-occasions, list-brands, get-concierge-tip, request-quote…).',
           },
           {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, éditorial, guides) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, rooms, hubs, éditorial, classements, guides) — chaque sub-sitemap inclut les alternates FR/EN.',
           },
         ],
       },

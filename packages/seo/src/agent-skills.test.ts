@@ -35,6 +35,24 @@ describe('agent-skills', () => {
     );
   });
 
+  it('exposes the post-ADR-0014 taxonomy + concierge-tip skills', () => {
+    const skillNames = DEFAULT_AGENT_SKILLS.skills.map((skill) => skill.name);
+    expect(skillNames).toEqual(
+      expect.arrayContaining([
+        'list-categories',
+        'list-themes',
+        'list-occasions',
+        'list-brands',
+        'get-concierge-tip',
+      ]),
+    );
+  });
+
+  it('skill names are unique', () => {
+    const names = DEFAULT_AGENT_SKILLS.skills.map((s) => s.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
   it('every skill that declares an inputSchema lists its required keys among its properties', () => {
     for (const skill of DEFAULT_AGENT_SKILLS.skills) {
       if (!skill.inputSchema) continue;

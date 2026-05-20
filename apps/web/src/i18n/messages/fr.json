@@ -132,6 +132,51 @@
       "submit": "Rechercher",
       "submitAria": "Lancer la recherche"
     },
+    "itineraire": {
+      "eyebrow": "Itinéraires sur-mesure",
+      "title": "Vos itinéraires de voyage",
+      "lede": "Nos itinéraires sur-mesure assemblent étapes, hôtels d'exception et timings recommandés par notre conciergerie. Première vague de publications attendue prochainement.",
+      "metaTitle": "Itinéraires de voyage sur-mesure — Palaces & Hôtels 5★ | MyConciergeHotel",
+      "metaDesc": "Itinéraires de voyage 5★ rédigés par notre conciergerie : 3 à 14 jours, étapes nommées, hôtels d'exception, gastronomie, accès. Publications à venir.",
+      "breadcrumbHome": "Accueil",
+      "comingSoon": "À venir",
+      "comingSoonBody": "Nous préparons les premiers itinéraires éditoriaux 5★ — Paris, Côte d'Azur, Italie, Maroc. Notification possible par e-mail lors de la publication.",
+      "fallbackTitle": "En attendant, explorez :",
+      "fallbackInspiration": "Toutes les inspirations (thèmes × occasions × saisons)",
+      "fallbackRankings": "Tous les classements éditoriaux",
+      "fallbackDestinations": "Tous les guides destination"
+    },
+    "inspiration": {
+      "eyebrow": "Inspiration",
+      "title": "Trouvez l'hôtel qui vous correspond",
+      "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
+      "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
+      "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
+      "breadcrumbHome": "Accueil",
+      "themes": {
+        "title": "Par thème",
+        "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+      },
+      "occasions": {
+        "title": "Par occasion",
+        "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
+      },
+      "saisons": {
+        "title": "Par saison",
+        "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+      }
+    },
+    "brands": {
+      "eyebrow": "Groupes hôteliers",
+      "title": "Toutes les marques d'hôtels",
+      "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
+      "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
+      "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
+      "breadcrumbHome": "Accueil",
+      "breadcrumbHotels": "Hôtels",
+      "viewBrand": "Voir les hôtels {brand} →",
+      "empty": "Aucun hôtel publié pour cette marque pour le moment."
+    },
     "concierge": {
       "eyebrow": "À propos",
       "title": "Le Concierge",

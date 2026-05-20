@@ -203,10 +203,15 @@ export const routing = defineRouting({
     '/guide/[citySlug]': '/guide/[citySlug]',
     '/guides': '/guides',
     '/marque/[brandSlug]': '/marque/[brandSlug]',
+    '/marques': '/marques',
     '/categorie/[categorySlug]': '/categorie/[categorySlug]',
     '/classement/[slug]': '/classement/[slug]',
     '/classements': '/classements',
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
+    '/inspiration': '/inspiration',
+    '/le-concierge': '/le-concierge',
+    '/itineraire': '/itineraire',
+    '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
 });
 

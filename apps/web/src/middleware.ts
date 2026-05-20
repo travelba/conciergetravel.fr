@@ -39,6 +39,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const csp = buildCspHeader({ nonce, isDev: IS_DEV });
   request.headers.set(NONCE_HEADER, nonce);
 
+  // 1b. Expose the current pathname to Server Components via a custom
+  //     request header. Used by `<Breadcrumb>` (ADR-0014 §2.4) to render
+  //     the visible fil d'ariane mirror of the `BreadcrumbList` JSON-LD.
+  //     Next.js does not expose `usePathname()` in Server Components, and
+  //     reading from `headers()` is the canonical workaround.
+  request.headers.set('x-pathname', request.nextUrl.pathname);
+
   // 2. i18n routing (next-intl). Locale detection + cookie + EN/FR redirects.
   const intlResponse = intlMiddleware(request);
 

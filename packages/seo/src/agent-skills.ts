@@ -220,5 +220,61 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       description:
         'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
     },
+    // ── ADR-0014 — new agentic surfaces ─────────────────────────────────
+    {
+      name: 'list-categories',
+      description:
+        'Lister les catégories éditoriales d’hôtels (Palaces de France, Palaces parisiens, Palaces de montagne, Palaces bord de mer, Palaces vignobles, et les 7 catégories par type ouvertes en V2 — 5★, 4★, boutique-hôtels, châteaux, chalets de luxe, villas, maisons d’hôtes). Chaque catégorie correspond à une page indexable `/categorie/{slug}`. Pas de paramètre.',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+    {
+      name: 'list-themes',
+      description:
+        'Lister les thèmes d’inspiration : romantique, spa & bien-être, gastronomie & Michelin, famille, vignobles, design, patrimoine, golf, ski, piscine, rooftop, kids-friendly… Chaque thème ouvre un classement éditorial `/classements/theme/{slug}`. Pas de paramètre.',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+    {
+      name: 'list-occasions',
+      description:
+        'Lister les occasions de voyage couvertes : lune de miel, week-end en amoureux, anniversaire, mariage, séminaire & MICE, escapade en famille, staycation, fêtes de fin d’année, retraite bien-être. Chaque occasion ouvre un classement éditorial `/classements/occasion/{slug}`. Pas de paramètre.',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+    {
+      name: 'list-brands',
+      description:
+        'Lister les groupes hôteliers représentés dans le catalogue : Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection, Dorchester Collection, Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Chaque marque ouvre une page indexable `/marque/{slug}`. Pas de paramètre.',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+    {
+      name: 'get-concierge-tip',
+      description:
+        'Récupérer le « Conseil du Concierge » d’un hôtel : 50-110 mots livrant un secret opérationnel concret (numéro de chambre signature, table cachée, accès, timing optimal). C’est la signature éditoriale propriétaire de MyConciergeHotel, non disponible sur les agrégateurs. URL : `/fr/hotel/{slug}#conseil-concierge`.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description: 'Slug kebab-case de l’hôtel (ex. "ritz-paris", "hotel-du-cap-eden-roc").',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['slug'],
+      },
+    },
   ],
 };
