@@ -1,185 +1,27 @@
-import type { Metadata } from 'next';
-import { setRequestLocale } from 'next-intl/server';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@mch/seo';
+import { permanentRedirect } from '@/i18n/navigation';
+import { isRoutingLocale } from '@/i18n/routing';
 
-import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link, getPathname } from '@/i18n/navigation';
-import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
-import { pickByLocale } from '@/i18n/supported-locale';
-import { env } from '@/lib/env';
-import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
-
+/**
+ * `/guides` → 308 `/destination`.
+ *
+ * ADR-0015: the `guides` standalone index is absorbed by `/destination`
+ * (catalog destination → embedded guide article). Keeping the route
+ * declaration in `routing.ts` so existing inbound links continue to
+ * land somewhere, but redirected to the canonical destination
+ * directory.
+ *
+ * @see docs/adr/0015-merge-guide-destination.md
+ */
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
-
-function siteOrigin(): string {
-  return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-}
-
-const T = {
-  fr: {
-    eyebrow: 'Guides voyage',
-    title: 'Nos guides voyage luxe en France',
-    subtitle: (n: number) =>
-      `${n} guides éditoriaux rédigés par notre équipe : Palaces, art de vivre, gastronomie, saisons idéales et accès — pour Paris, la Côte d'Azur, les Alpes, Bordeaux, Champagne, Provence, Corse et plus encore.`,
-    metaTitle: 'Guides voyage luxe en France — MyConciergeHotel',
-    metaDesc:
-      "Découvrez nos guides éditoriaux des plus belles destinations françaises : Paris, Côte d'Azur, Alpes, Bordeaux, Champagne, Provence, Corse. Palaces, art de vivre, conseils saisonniers.",
-    scope: {
-      city: 'Ville',
-      cluster: 'Région',
-      region: 'Région',
-      country: 'Pays',
-    } as const,
-  },
-  en: {
-    eyebrow: 'Travel guides',
-    title: 'Our luxury travel guides — France',
-    subtitle: (n: number) =>
-      `${n} editorial guides written by our team — Palaces, art of living, gastronomy, seasons and access — for Paris, the French Riviera, the Alps, Bordeaux, Champagne, Provence, Corsica and more.`,
-    metaTitle: 'Luxury Travel Guides — France | MyConciergeHotel',
-    metaDesc:
-      'Discover our editorial guides to the finest French destinations: Paris, French Riviera, Alps, Bordeaux, Champagne, Provence, Corsica. Palaces, art of living, seasonal advice.',
-    scope: {
-      city: 'City',
-      cluster: 'Region',
-      region: 'Region',
-      country: 'Country',
-    } as const,
-  },
-} as const;
-
-export async function generateMetadata({
+export default async function GuidesIndexRedirect({
   params,
 }: {
   params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale: raw } = await params;
-  if (!isRoutingLocale(raw)) return {};
-  const locale = raw;
-  const t = T[locale];
-  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/guides' });
-  return {
-    title: t.metaTitle,
-    description: t.metaDesc,
-    alternates: {
-      canonical: buildCanonicalPath(locale),
-      languages: buildHreflangAlternates(buildCanonicalPath),
-    },
-    openGraph: {
-      title: t.metaTitle,
-      description: t.metaDesc,
-      type: 'website',
-      locale: ogLocale(locale),
-    },
-  };
-}
-
-export default async function GuidesIndexPage({ params }: { params: Promise<{ locale: string }> }) {
+}): Promise<never> {
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) notFound();
-  const locale = raw;
-  setRequestLocale(locale);
-
-  const t = T[locale];
-  const guides = await listPublishedGuides();
-  const origin = siteOrigin();
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
-
-  // Group by scope so the index reads like an editorial menu.
-  const byScope = new Map<string, typeof guides>();
-  for (const g of guides) {
-    const list = byScope.get(g.scope) ?? [];
-    byScope.set(g.scope, [...list, g]);
-  }
-  const scopeOrder: ('country' | 'region' | 'cluster' | 'city')[] = [
-    'country',
-    'region',
-    'cluster',
-    'city',
-  ];
-
-  const itemListJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.itemListJsonLd({
-      name: t.title,
-      items: guides.map((g) => ({
-        name: g.nameFr,
-        url: `${origin}${getPathname({
-          locale,
-          href: { pathname: '/guide/[citySlug]', params: { citySlug: g.slug } },
-        })}`,
-      })),
-    }),
-  );
-
-  const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.breadcrumbJsonLd([
-      {
-        // TODO i18n Phase 1c-β: migrate hardcoded breadcrumb labels to
-        // next-intl messages. The `pickByLocale` keeps DE/ES/IT aligned
-        // with the FR data fallback policy until those messages exist.
-        name: pickByLocale(locale, 'Accueil', 'Home'),
-        url: `${origin}${getPathname({ locale, href: '/' })}`,
-      },
-      {
-        name: 'Guides',
-        url: `${origin}${getPathname({ locale, href: '/guides' })}`,
-      },
-    ]),
-  );
-
-  return (
-    <main className="container mx-auto max-w-6xl px-4 py-10 sm:py-14">
-      <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
-      <JsonLdScript data={itemListJsonLd} nonce={nonce} />
-
-      <header className="mb-10 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t.title}</h1>
-        <p className="text-muted mt-3 text-sm md:text-base">{t.subtitle(guides.length)}</p>
-      </header>
-
-      {scopeOrder.map((scope) => {
-        const list = byScope.get(scope);
-        if (list === undefined || list.length === 0) return null;
-        return (
-          <section key={scope} className="mb-12">
-            <h2 className="text-fg mb-4 font-serif text-xl md:text-2xl">{t.scope[scope]}</h2>
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.map((g) => {
-                const name = pickByLocale(locale, g.nameFr, g.nameEn ?? g.nameFr);
-                const summary = pickByLocale(locale, g.summaryFr, g.summaryEn ?? g.summaryFr);
-                return (
-                  <li
-                    key={g.slug}
-                    className="border-border bg-bg/60 rounded-lg border p-5 transition hover:shadow-md"
-                  >
-                    <Link
-                      href={{ pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }}
-                      className="block"
-                    >
-                      <p className="text-muted mb-1 text-xs uppercase tracking-wide">
-                        {t.scope[g.scope]}
-                      </p>
-                      <h3 className="text-fg font-medium">{name}</h3>
-                      <p className="text-muted mt-2 line-clamp-3 text-sm">{summary}</p>
-                      <p className="text-fg/70 mt-3 text-xs underline">
-                        {/* TODO i18n Phase 1c-β: migrate to next-intl messages. */}
-                        {pickByLocale(locale, 'Lire le guide →', 'Read the guide →')}
-                      </p>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
-    </main>
-  );
+  permanentRedirect({ href: '/destination', locale: raw });
 }
