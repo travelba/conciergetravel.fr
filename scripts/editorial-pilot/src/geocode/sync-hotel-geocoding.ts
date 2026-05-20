@@ -87,9 +87,84 @@ interface HotelRow {
   readonly latitude: number | null;
   readonly longitude: number | null;
   readonly google_place_id: string | null;
+  readonly country_code: string | null;
 }
 
-const HOTEL_COLS = 'id, slug, name, city, address, latitude, longitude, google_place_id';
+const HOTEL_COLS =
+  'id, slug, name, city, address, latitude, longitude, google_place_id, country_code';
+
+/** ISO-3166-α2 → display name used in the Google Places query.
+ *  We only list countries that appear in the catalogue; an unknown code
+ *  falls back to the alpha-2 code itself, which Google understands well. */
+const COUNTRY_NAMES: Readonly<Record<string, string>> = {
+  AE: 'United Arab Emirates',
+  AT: 'Austria',
+  AU: 'Australia',
+  BE: 'Belgium',
+  BL: 'Saint Barthélemy',
+  BR: 'Brazil',
+  CA: 'Canada',
+  CH: 'Switzerland',
+  CL: 'Chile',
+  CN: 'China',
+  CR: 'Costa Rica',
+  CW: 'Curaçao',
+  CZ: 'Czech Republic',
+  DE: 'Germany',
+  DM: 'Dominica',
+  EG: 'Egypt',
+  ES: 'Spain',
+  FR: 'France',
+  GB: 'United Kingdom',
+  GR: 'Greece',
+  HK: 'Hong Kong',
+  HR: 'Croatia',
+  HU: 'Hungary',
+  ID: 'Indonesia',
+  IN: 'India',
+  IT: 'Italy',
+  JP: 'Japan',
+  KE: 'Kenya',
+  KH: 'Cambodia',
+  LC: 'Saint Lucia',
+  LK: 'Sri Lanka',
+  MA: 'Morocco',
+  MC: 'Monaco',
+  MN: 'Mongolia',
+  MU: 'Mauritius',
+  MV: 'Maldives',
+  MX: 'Mexico',
+  MY: 'Malaysia',
+  NA: 'Namibia',
+  NI: 'Nicaragua',
+  NL: 'Netherlands',
+  NO: 'Norway',
+  NZ: 'New Zealand',
+  OM: 'Oman',
+  PA: 'Panama',
+  PE: 'Peru',
+  PH: 'Philippines',
+  PT: 'Portugal',
+  QA: 'Qatar',
+  RW: 'Rwanda',
+  SA: 'Saudi Arabia',
+  SC: 'Seychelles',
+  SE: 'Sweden',
+  SG: 'Singapore',
+  TH: 'Thailand',
+  TR: 'Turkey',
+  TZ: 'Tanzania',
+  US: 'United States',
+  VN: 'Vietnam',
+  ZA: 'South Africa',
+  ZM: 'Zambia',
+  ZW: 'Zimbabwe',
+};
+
+function countryNameFor(code: string | null): string {
+  if (!code) return 'France';
+  return COUNTRY_NAMES[code] ?? code;
+}
 
 async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<HotelRow[]> {
   if (args.slug !== null) {
@@ -220,7 +295,8 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const res = await geocodeHotelQuery(placesCfg, hotel.name, hotel.city);
+    const country = countryNameFor(hotel.country_code);
+    const res = await geocodeHotelQuery(placesCfg, hotel.name, hotel.city, { country });
     if (!res.ok) {
       console.log(`FAIL ${JSON.stringify(res.error)}`);
       failCount += 1;
