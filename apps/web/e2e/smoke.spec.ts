@@ -91,4 +91,81 @@ test.describe('smoke / public landing', () => {
       }
     }
   });
+
+  /**
+   * ADR-0014 new landings (PR #71) — `/marques`, `/inspiration`,
+   * `/itineraire`, `/le-concierge`. Each is `force-dynamic` (CSP nonce
+   * for JSON-LD) and therefore invisible to `next build`. The hotfix
+   * PR #72 showed the failure mode: a missing or nested i18n namespace
+   * leaks the raw key shape (`<word>.<word>`) into `<title>` and
+   * `<meta name="description">` and the page eventually 500s when
+   * `t.raw('faq.items').map(...)` runs on a string. We pin a smoke
+   * assertion per landing so the next regression bounces in CI rather
+   * than in production.
+   *
+   * Cross-ref: `.cursor/skills/nextjs-app-router/SKILL.md`
+   * §Internationalization — "Namespace nesting fails silently".
+   */
+  test('ADR-0014 landings return 200 + render a translated H1', async ({ page }) => {
+    const landings: ReadonlyArray<{ readonly path: string; readonly h1Hint: RegExp }> = [
+      { path: '/marques', h1Hint: /\w/ },
+      { path: '/inspiration', h1Hint: /\w/ },
+      { path: '/itineraire', h1Hint: /\w/ },
+      { path: '/le-concierge', h1Hint: /\w/ },
+    ];
+
+    for (const { path, h1Hint } of landings) {
+      const res = await page.goto(path);
+      expect(res?.status(), `${path} should return 200`).toBe(200);
+
+      const h1 = page.getByRole('heading', { level: 1 });
+      await expect(h1, `${path} should expose an <h1>`).toBeVisible();
+      await expect(h1, `${path} <h1> should not be empty`).toHaveText(h1Hint);
+    }
+  });
+
+  test('/le-concierge does not leak raw i18n namespace keys (PR #72 regression)', async ({
+    page,
+  }) => {
+    // The raw-namespace shape is `<word>.<word>` with NO whitespace
+    // around the dot — distinctive enough to never collide with a
+    // legitimate sentence-ending period (we tolerate "Tip. Body" but
+    // not "concierge.metaTitle").
+    const rawKeyPattern = /\b[a-z][a-zA-Z0-9]+\.[a-z][a-zA-Z0-9]+\b/;
+
+    const res = await page.goto('/le-concierge');
+    expect(res?.status()).toBe(200);
+
+    const title = await page.title();
+    expect(
+      title,
+      `<title> should be translated, not a raw next-intl key. Got: "${title}".`,
+    ).not.toMatch(rawKeyPattern);
+
+    const description = await page.evaluate(() => {
+      const el = document.querySelector('head meta[name="description"]');
+      return el?.getAttribute('content') ?? '';
+    });
+    expect(
+      description,
+      `<meta name="description"> should be translated. Got: "${description}".`,
+    ).not.toMatch(rawKeyPattern);
+
+    // The FAQ block iterates `t.raw('faq.items')` — if the namespace
+    // resolution silently degrades to a string, the `<details>` map
+    // throws and the section disappears entirely.
+    await expect(
+      page.getByRole('heading', { level: 2 }).filter({ hasText: /FAQ|questions/i }),
+      'FAQ heading must render — confirms t.raw("faq.items") yielded an array',
+    ).toBeVisible();
+  });
+
+  test('/en/le-concierge serves the English namespace', async ({ page }) => {
+    const res = await page.goto('/en/le-concierge');
+    expect(res?.status()).toBe(200);
+    expect(await page.locator('html').getAttribute('lang')).toBe('en');
+
+    const title = await page.title();
+    expect(title).not.toMatch(/\b[a-z][a-zA-Z0-9]+\.[a-z][a-zA-Z0-9]+\b/);
+  });
 });

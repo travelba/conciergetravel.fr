@@ -221,6 +221,70 @@ Failure mode to spot: child process exit code 1 with stderr "Missing --city"
 when the original hotel name contained `&`, `|`, `<`, or `>`. Always test the
 fix against an `&`-containing argument before declaring it solved.
 
+## Rule 9 ter — `git commit -m` mangles messages with `>`, `&`, `|`, `<`, `\n` on PowerShell
+
+PowerShell interprets `>`, `&`, `|`, `<` as redirection/pipeline operators **before** the `git` binary ever sees the arguments, and newlines inside double-quoted heredocs are flattened to a single line. The typical breakage:
+
+```powershell
+# ❌ WRONG — "Palaces & Hotels > Par type" becomes:
+#    - PowerShell pipes "Palaces" into git
+#    - git complains about "Hotels" as a pathspec
+#    - the part after ">" is interpreted as a file redirect
+git commit -m "feat(nav): refonte > Palaces & Hotels"
+# fatal: pathspec 'Hotels' did not match any file(s) known to git
+```
+
+Heredoc-style `$(cat <<'EOF' … EOF)` recommended in many guides **does not work** in PowerShell either — it's bash syntax.
+
+**The robust pattern is to write the message to a temp file and use `git commit -F`:**
+
+```powershell
+# ✅ Right — write the multi-line, special-char-rich message to a file
+@'
+feat(nav): refonte navigation v2
+
+Hard rules:
+- Palaces & Hotels > Par type
+- Pipe characters | are fine here
+- Newlines are preserved verbatim
+'@ | Set-Content -Encoding utf8 .git-msg.tmp
+
+git commit -F .git-msg.tmp
+Remove-Item .git-msg.tmp -Force
+```
+
+For one-line commit messages without special characters, plain `git commit -m "feat: short message"` is fine — only switch to the file pattern when the message contains `>`, `<`, `&`, `|`, backticks, or multiple lines.
+
+Reference incident: PR #71 navigation v2 commit (May 2026) — the commit message contained `Palaces & Hotels > Par type` in a bullet list and consistently failed for ~15 minutes before switching to `-F`.
+
+## Rule 9 quater — "Mystery commit" on local `main` recovery (Cursor agent leakage)
+
+Cursor's background agents and pre-commit hooks occasionally land a commit on the local `main` branch that the human never authored and that does not exist on `origin/main`. Typical clue: `git log` shows a commit you don't recognise, `git status` flags untracked files matching the commit's scope (often `scripts/editorial-pilot/output/**`).
+
+**Do NOT just `git reset --hard origin/main`** — that destroys the work the agent did, even if it was off-topic for the current task. The reusable recovery pattern that ships the work to a side branch without polluting the current task:
+
+```powershell
+# 1. Identify the mystery commit (anything between origin/main and HEAD)
+git fetch origin --quiet
+git log --oneline origin/main..HEAD
+
+# 2. Save the unwanted commit on a dedicated branch (no PR yet)
+git branch feat/<short-name-of-the-work> HEAD
+git push origin feat/<short-name-of-the-work>
+
+# 3. Rewind local main to origin/main WITHOUT losing the worktree
+#    (--mixed unstages but keeps files; --soft would keep them staged)
+git reset --mixed origin/main
+
+# 4. The work files now appear as untracked in your worktree.
+#    Either commit them to a feature branch you actually own, or
+#    `git clean -fd` them if they're test outputs (e.g. /output/**).
+```
+
+The critical invariant: **never `git push --force` to `origin/main`**. The mystery commit only lived locally, so a non-force rewind is safe.
+
+Reference incident: editorial-pilot `description-from-wiki` files (commit `49953e2`, May 2026) — saved on `feat/hotel-description-from-wikipedia` and rewound from local `main` before the four PR series #68–#71 was split.
+
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle
 
 `packages/config/src/env-web.ts` uses `createEnv` from `@t3-oss/env-nextjs`. The `skipValidation` flag reads `process.env.SKIP_ENV_VALIDATION`, which is **server-only** — it is not inlined into the client bundle (only `NEXT_PUBLIC_*` vars are). So:
