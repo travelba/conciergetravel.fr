@@ -1028,6 +1028,7 @@ async function renderHotelPage(
         cloudName={cloudName}
         hero={heroDescriptor}
         images={galleryImages}
+        hotelName={name}
       />
 
       <HotelVirtualTour locale={locale} hotelName={name} tour={virtualTour} />
