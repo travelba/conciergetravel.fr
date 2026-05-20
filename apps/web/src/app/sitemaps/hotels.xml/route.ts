@@ -42,6 +42,12 @@ export async function GET(): Promise<NextResponse> {
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.8,
+        // B9 — propagate `hotels.updated_at` as `<lastmod>` so Google /
+        // Bing crawl budget targets recently-updated rows first. The
+        // editorial pipeline bumps `updated_at` on any content change
+        // (description, FAQ, awards, photos) via Payload `afterChange`
+        // hooks, so this signal stays sharp.
+        ...(s.updatedAt !== null ? { lastmod: s.updatedAt } : {}),
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }

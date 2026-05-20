@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { BookingWidget } from '@/components/hotel/booking-widget';
+import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -14,11 +16,16 @@ import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
+import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
+import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
+import { readConciergeAdvice } from '@/server/hotels/get-hotel-by-slug';
 import {
   getRoomBySlug,
-  listPublishedRoomSlugs,
+  isRoomSubpageIndexable,
+  readRoomConciergeAdvice,
   type HotelRoomDetail,
 } from '@/server/hotels/get-room-by-slug';
+import { listPublishedRoomSlugs } from '@/server/hotels/get-room-by-slug';
 
 /**
  * Room sub-page — CDC §2 bloc 6 (Phase 10.1).
@@ -99,6 +106,13 @@ export async function generateMetadata({
   const detail = await getRoomBySlug(slug, roomSlug, locale);
   if (!detail) return { robots: { index: false, follow: false } };
 
+  // ADR-0009 + CDC §2 — rooms must be substantive enough to index.
+  // Thin sub-pages (< 5 photos OR < 200 words description) keep the
+  // human-readable page but ship `noindex,nofollow` so Google and the
+  // LLM crawlers don't surface them as a "soft 404" / thin content
+  // candidate. The parent hotel page remains the canonical surface.
+  const isIndexable = isRoomSubpageIndexable(detail.room);
+
   const t = await getTranslations({ locale, namespace: 'roomPage' });
   const hotelName = pickHotelName(detail, locale);
 
@@ -168,6 +182,7 @@ export async function generateMetadata({
   return {
     title,
     description: desc,
+    ...(isIndexable ? {} : { robots: { index: false, follow: false } }),
     alternates: {
       canonical,
       languages: buildHreflangAlternates(buildCanonicalPath),
@@ -207,6 +222,35 @@ export default async function RoomPage({
   return renderRoomPage(locale, detail, t);
 }
 
+function defaultRoomStay(): {
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+} {
+  // Mirror the hotel page default (today + 30 / +33). Keeps the room
+  // sub-page widget aligned with the parent hotel widget on cold visit.
+  const now = new Date();
+  const ci = new Date(now.getTime() + 30 * 86_400_000);
+  const co = new Date(now.getTime() + 33 * 86_400_000);
+  const fmt = (d: Date): string =>
+    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  return { checkIn: fmt(ci), checkOut: fmt(co), adults: 2, children: 0 };
+}
+
+function lockActionFor(locale: Locale, hotelId: string, offerId: string | null): string {
+  // Same fallback shape as the parent hotel page — when no live offer
+  // is available we ship the synthetic `TEST-OFFER-<id>` so the form
+  // still posts, and the lock route returns 400 in production (form
+  // is only rendered when bookable anyway). Keeps the room-widget
+  // semantics identical to the parent hotel widget.
+  const id = offerId ?? `TEST-OFFER-${hotelId}`;
+  return getPathname({
+    locale,
+    href: { pathname: '/reservation/offer/[offerId]/lock', params: { offerId: id } },
+  });
+}
+
 async function renderRoomPage(
   locale: Locale,
   detail: HotelRoomDetail,
@@ -233,6 +277,7 @@ async function renderRoomPage(
   })}`;
 
   const { room } = detail;
+  const hotelRow = detail.hotel.row;
   const heroPublicId = room.heroImage ?? room.images[0]?.publicId ?? null;
   const heroAlt = room.images[0]?.alt ?? room.name;
   const galleryImages = room.images.filter((img) => img.publicId !== heroPublicId);
@@ -280,12 +325,61 @@ async function renderRoomPage(
     ]),
   );
 
+  // Booking widget data (B5 — same lock funnel as the parent hotel).
+  // We pre-fetch the best Amadeus offer for a default stay window so
+  // the widget can show a "from" price + use a real `offerId` in the
+  // lock URL. Concierge modes (email / display_only) skip the fetch
+  // (no offer to surface) and use the concierge form.
+  const stay = defaultRoomStay();
+  const bookable = hotelRow.booking_mode === 'amadeus' || hotelRow.booking_mode === 'little';
+  const fakeEnabled = isFakeOffersEnabled();
+  const bestOffer = bookable
+    ? await getBestOfferForHotel({
+        hotelId: hotelRow.id,
+        amadeusHotelId: hotelRow.amadeus_hotel_id !== '' ? hotelRow.amadeus_hotel_id : null,
+        checkIn: stay.checkIn,
+        checkOut: stay.checkOut,
+        adults: stay.adults,
+        childAges: [],
+      })
+    : {
+        offerId: null,
+        priceFrom: null,
+        limitedAvailability: null,
+        availabilityState: 'unknown' as const,
+      };
+
+  // Offer JSON-LD (B3 / CDC §2.8). Emitted only when we have a live
+  // Amadeus rate — never fabricated. `priceValidUntil` defaults to
+  // today + 7 days to align with the parent hotel widget and avoid
+  // stale-offer warnings from Google Rich Results / DSA art. 25.
+  const offerJsonLd: Record<string, unknown> | null =
+    bestOffer.priceFrom !== null && bestOffer.offerId !== null
+      ? (JsonLd.withSchemaOrgContext(
+          JsonLd.offerJsonLd({
+            priceFromEUR: bestOffer.priceFrom.amount.fromMinor / 100,
+            url: roomUrl,
+            priceValidUntil: new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10),
+            availability:
+              bestOffer.limitedAvailability !== null ? 'LimitedAvailability' : 'InStock',
+          }),
+        ) as unknown as Record<string, unknown>)
+      : null;
+
+  // Concierge advice (room-level first, falls back to hotel-level so
+  // the room page never ships completely without a Voix-du-Concierge
+  // anchor — keeps the editorial contract from ADR-0011 + CDC §2).
+  const roomAdvice = readRoomConciergeAdvice(room, locale);
+  const hotelAdvice = roomAdvice === null ? readConciergeAdvice(hotelRow, locale) : null;
+  const conciergeAdvice = roomAdvice ?? hotelAdvice;
+
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={roomJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
+      {offerJsonLd !== null ? <JsonLdScript data={offerJsonLd} nonce={nonce} /> : null}
 
       <nav aria-label={t('breadcrumb.label')} className="text-muted mb-6 text-xs">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -457,6 +551,23 @@ async function renderRoomPage(
           </ul>
         </section>
       ) : null}
+
+      <BookingWidget
+        locale={locale}
+        hotelId={hotelRow.id}
+        hotelName={hotelName}
+        bookingMode={hotelRow.booking_mode}
+        defaultStay={stay}
+        lockActionUrl={bookable ? lockActionFor(locale, hotelRow.id, bestOffer.offerId) : null}
+        fakeEnabled={fakeEnabled}
+        priceFrom={bestOffer.priceFrom}
+        limitedAvailability={bestOffer.limitedAvailability}
+        availabilityState={bestOffer.availabilityState}
+        surface="room_widget"
+        roomTypeCode={room.roomCode}
+      />
+
+      <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
 
       <aside className="border-border bg-bg flex flex-wrap items-baseline justify-between gap-4 rounded-lg border p-5">
         <p className="text-muted text-sm">{t('returnHint', { hotelName })}</p>

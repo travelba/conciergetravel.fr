@@ -500,6 +500,70 @@ Cron: `.github/workflows/sync-hotel-events.yml` runs every Monday
 04:17 UTC. Manual dispatch supports `--slug`, `--bucket`,
 `--dry-run`.
 
+## Rule 12 — Audit `_fr` columns for EN residuals after every enrichment
+
+External sources (Apify scrapes, Yonder JSON dumps, Booking JSON-LD, Tavily
+extracts) frequently expose **a single English string** as the only natural
+description of a fact. When an enrichment job lacks a native FR source, it
+typically falls back to the EN value as the `_fr` fallback. The English
+string then surfaces verbatim in `/fr/...` pages, and visual review misses
+it because the surrounding UI looks French.
+
+The May 2026 FR-residuals audit found three pockets of bilingual rot that
+had survived for months:
+
+- 6 `editorial_guides.summary_fr` starting with `Guide city <name>` (template
+  prefix copied unchanged from the EN template).
+- 48 `hotels.spa_info.features_fr[0]` containing `Partenaire skincare` (a
+  single English word kept inside an otherwise-French phrase).
+- 75 `hotels.policies.pets.notes_fr` storing the full English sentence
+  (`Pets are allowed on request. Charges may apply.`) because `notes_fr =
+notes_en` after the fallback.
+- 56 `hotels.restaurant_info.venues[*].type_fr` storing English cuisine
+  labels (`Italian`, `Mediterranean`, `Modern Cuisine`…).
+- 8 `hotels.city` with European capitals under their EN spelling
+  (`Geneva`, `Athens`, `Vienna`, `Venice`).
+
+**Audit query template** (run after every enrichment cycle, or as part of a
+nightly CI job):
+
+```sql
+-- Sentence-level: same string stored in _fr and _en is the strongest signal
+select count(*) from public.hotels
+where is_published = true
+  and policies->'pets'->>'notes_fr' is not null
+  and policies->'pets'->>'notes_fr' = policies->'pets'->>'notes_en';
+
+-- Word-level: scan _fr for tokens that should never appear in French
+select count(*) from public.hotels
+where (spa_info->'features_fr')::text ilike '%skincare%'
+   or (spa_info->'features_fr')::text ilike '%pool%'
+   or (spa_info->'features_fr')::text ilike '%wellness%';
+```
+
+**Remediation pattern** (`scripts/editorial-pilot/src/i18n/translate-fr-residuals.ts`):
+
+1. **Closed-vocabulary fields** (cuisine types, amenity labels) → use a
+   deterministic FR dictionary keyed by the observed EN strings. Faster,
+   cheaper, reproducible, no LLM drift. Walk JSONB arrays via
+   `jsonb_array_elements` + `jsonb_set` on the rebuilt array.
+2. **Open-text fields** (policy notes, descriptions) → LLM-translate in the
+   Concierge voice (system prompt: factual, ≤ 25 words/sentence, no
+   commercial superlatives, preserve names/prices/weights verbatim). Use
+   `gpt-4o-mini` at temperature 0.2 with JSON mode.
+3. **Dedup by content before calling the LLM** — 75 hotels had 47 unique
+   pet-notes strings, so cache `{notes_en → notes_fr}` after the first call
+   and reuse it across all rows sharing that source string.
+4. **Output a migration file** (`packages/db/migrations/NNNN_fr_residuals_translations.sql`)
+   with one `update public.hotels set ... where slug = '...'` per affected
+   row, plus the `_cct_sql_migrations` insert at the bottom. This keeps the
+   audit trail forward-only and reproducible.
+
+The script must be idempotent: re-running on already-translated rows is a
+no-op (English keys no longer match the dict; pet `notes_fr ≠ notes_en` for
+already-fixed rows). Reference impl:
+`scripts/editorial-pilot/src/i18n/translate-fr-residuals.ts`.
+
 ## Anti-patterns
 
 - ❌ Calling `fetch()` directly on a third-party hotel website — bot
@@ -544,6 +608,17 @@ Cron: `.github/workflows/sync-hotel-events.yml` runs every Monday
 - ❌ Persisting `null` to `upcoming_events` when nothing matches —
   always write `[]` so the reader can distinguish "synced, no events"
   from "never synced".
+- ❌ Trusting "the `_fr` column is French because the column name says
+  `_fr`" — external enrichment routinely stores EN in `_fr` when there is
+  no native FR source. Always audit (Rule 12). Visual page review alone
+  does NOT catch these leaks because the surrounding chrome is French.
+- ❌ Calling an LLM for closed-vocabulary translation (cuisine types,
+  amenity tags, city names). The universe is finite, dict-driven
+  translation is deterministic and ~50× cheaper.
+- ❌ Translating pet-policy notes / cancellation policies without a
+  per-string cache. 75 hotels share ~50 unique source strings — paying
+  the LLM for the same translation 75 times wastes credits and produces
+  inconsistent FR copy across hotels.
 
 ## References
 
@@ -552,6 +627,10 @@ Cron: `.github/workflows/sync-hotel-events.yml` runs every Monday
 - `supabase-postgres-rls` — destination tables and migrations.
 - `geo-llm-optimization` — EEAT + source attribution surface in `llms.txt`.
 - Reference impls: `scripts/editorial-pilot/src/enrichment/{brief-builder,datatourisme,wikidata,wikipedia,tavily-client,llm-extract}.ts`.
+- `concierge-voice-pipeline` — voice prompt template re-used for the EN→FR
+  remediation translator (`translate-fr-residuals.ts`).
+- Migration `0040_fr_residuals_quick_wins.sql` + `0041_fr_residuals_translations.sql`
+  — canonical examples of the Rule 12 remediation pattern.
 - POI pipeline: `scripts/editorial-pilot/src/pois/{sync-hotel-pois,merge-pois,llm-describe-pois}.ts` + `packages/integrations/src/overpass/`.
 - POI JSON-LD: `packages/seo/src/jsonld/place-amenity.ts` (`osmToSchemaClass`, `buildOpeningHoursSpecification`).
 - Events pipeline: `scripts/editorial-pilot/src/events/{sync-hotel-events,llm-describe-events}.ts` + `scripts/editorial-pilot/src/enrichment/datatourisme.ts` (`fetchEventsAround`).

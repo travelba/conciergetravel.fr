@@ -10,6 +10,66 @@ describe('hotelJsonLd', () => {
     expect(node.url).toBe('https://example.com/a');
   });
 
+  describe('B8 — image input shapes', () => {
+    it('preserves bare URL strings (legacy contract)', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: ['https://example.com/hero.jpg', 'https://example.com/g1.jpg'],
+      });
+      expect(node.image).toEqual(['https://example.com/hero.jpg', 'https://example.com/g1.jpg']);
+    });
+
+    it('emits ImageObject node when caption/dimensions are provided', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [
+          {
+            url: 'https://example.com/hero.jpg',
+            caption: 'Façade XIXe siècle, Place Vendôme',
+            width: 1600,
+            height: 900,
+            representativeOfPage: true,
+          },
+        ],
+      });
+      const image = node.image as unknown as readonly Record<string, unknown>[];
+      expect(image[0]).toMatchObject({
+        '@type': 'ImageObject',
+        url: 'https://example.com/hero.jpg',
+        caption: 'Façade XIXe siècle, Place Vendôme',
+        width: 1600,
+        height: 900,
+        representativeOfPage: true,
+      });
+    });
+
+    it('falls back to bare URL when rich object has no enrichment', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [{ url: 'https://example.com/hero.jpg' }],
+      });
+      expect(node.image).toEqual(['https://example.com/hero.jpg']);
+    });
+
+    it('supports mixed string + ImageObject inputs', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [
+          { url: 'https://example.com/hero.jpg', caption: 'Hero', representativeOfPage: true },
+          'https://example.com/g1.jpg',
+        ],
+      });
+      const image = node.image as unknown as readonly (string | Record<string, unknown>)[];
+      expect(image).toHaveLength(2);
+      expect(image[0]).toMatchObject({ '@type': 'ImageObject', caption: 'Hero' });
+      expect(image[1]).toBe('https://example.com/g1.jpg');
+    });
+  });
+
   it('adds Palace award without faking starRating', () => {
     const node = hotelJsonLd({
       name: 'Le Palace',

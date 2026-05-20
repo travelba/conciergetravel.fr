@@ -151,3 +151,41 @@ export function generateNonce(): string {
 }
 
 export const NONCE_HEADER = 'x-nonce';
+
+/**
+ * ISR-tolerant CSP nonce reader (C1 / ADR-0013).
+ *
+ * The default `headers()` reader trips Next.js' `DYNAMIC_SERVER_USAGE`
+ * detection and force-flips a route to `force-dynamic`. When a page
+ * opts into ISR via `export const revalidate = N`, calling `headers()`
+ * either:
+ *   - throws at build (SSG prerender) — the nonce isn't known at build,
+ *   - or silently fails over to dynamic rendering at request time.
+ *
+ * `getCspNonceOrNull` reads the nonce inside a `try/catch`:
+ *   - in `force-dynamic` mode → returns the request nonce verbatim;
+ *   - in ISR / SSG mode → returns `null`. The caller MUST then skip
+ *     emission of nonce-gated `<script>` tags, OR use a CSP-safe
+ *     fallback (Next.js `<Script>` strategy + framework-managed nonce).
+ *
+ * For JSON-LD specifically (`type="application/ld+json"`), the script
+ * content is treated as inert data by browsers. Without a nonce the
+ * tag is still blocked by `strict-dynamic` script-src — that is why
+ * the hotel detail page intentionally keeps `force-dynamic` even after
+ * the ADR-0013 island refactor, until we either (a) drop nonce on
+ * `type=application/ld+json` via CSP exception, or (b) bake a build-
+ * time hash into the policy.
+ *
+ * Skill: security-engineering §CSP, nextjs-app-router.
+ */
+export async function getCspNonceOrNull(): Promise<string | null> {
+  try {
+    // Lazy import — keeps the helper usable from edge/middleware contexts
+    // that don't ship the full `next/headers` runtime.
+    const { headers } = await import('next/headers');
+    const h = await headers();
+    return h.get(NONCE_HEADER) ?? null;
+  } catch {
+    return null;
+  }
+}

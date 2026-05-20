@@ -192,6 +192,55 @@ export interface HotelGeoInput {
   readonly longitude: number;
 }
 
+/**
+ * Rich image input for `Hotel.image[]`. Mirrors Schema.org's
+ * `ImageObject` shape (https://schema.org/ImageObject) so we can ship:
+ *
+ *   - `caption` (mandatory for the rich-result hotel test on hero shots)
+ *   - `width` / `height` (Google honours both; LLMs use them to
+ *     reconstruct aspect ratios when rendering AI-overview cards)
+ *   - `representativeOfPage` (true for the hero shot, false for gallery
+ *     extras — keeps "hero vs gallery" semantics intact)
+ *
+ * The builder accepts either bare string URLs (legacy callers — pre-B8)
+ * or full `ImageObjectInput` entries. Mixed arrays are supported and
+ * each entry is normalised independently.
+ */
+export interface ImageObjectInput {
+  readonly url: string;
+  /**
+   * Mandatory free-text caption. Empty captions are silently rejected
+   * (rendered as a bare URL string in the JSON-LD) — Schema.org
+   * requires `caption` to be meaningful, an empty caption is worse
+   * than no `ImageObject` envelope at all.
+   */
+  readonly caption?: string;
+  readonly width?: number;
+  readonly height?: number;
+  /**
+   * `true` when this is the hero image of the page (CDC §2 bloc 2).
+   * Google's hotel rich-result documentation honours
+   * `representativeOfPage: true` and treats the matching image as the
+   * canonical SERP thumbnail.
+   */
+  readonly representativeOfPage?: boolean;
+}
+
+/**
+ * Output node for `Hotel.image[]` when emitted as a rich
+ * `ImageObject`. The builder picks this shape whenever any caption /
+ * dimension is provided; otherwise it falls back to the bare URL
+ * string accepted by the legacy contract.
+ */
+type ImageObjectNode = {
+  '@type': 'ImageObject';
+  url: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  representativeOfPage?: boolean;
+};
+
 export interface HotelJsonLdInput {
   readonly name: string;
   readonly url: string;
@@ -200,7 +249,20 @@ export interface HotelJsonLdInput {
   readonly starRating?: 1 | 2 | 3 | 4 | 5;
   /** Marker for the regulated Atout France *Palace* distinction. Surfaces an `award` field. */
   readonly isPalace?: boolean;
-  readonly images?: readonly string[];
+  /**
+   * Hotel images for `Hotel.image[]`.
+   *
+   * Accepts:
+   *   - `string[]` — bare absolute URLs (legacy contract, pre-B8).
+   *   - `ImageObjectInput[]` — rich shape with caption + dimensions +
+   *     `representativeOfPage` flag (B8 — CDC §2 bloc 2 contract).
+   *
+   * The builder normalises each entry independently; mixing is
+   * supported (e.g. hero passed as rich object + gallery as bare
+   * URLs while editorial captions roll out). Empty arrays are
+   * dropped.
+   */
+  readonly images?: readonly (string | ImageObjectInput)[];
   readonly telephone?: string;
   readonly priceRange?: string;
   readonly address?: HotelAddressInput;
@@ -554,7 +616,40 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
     out.award = awardEntries;
   }
   if (input.images !== undefined && input.images.length > 0) {
-    out.image = [...input.images];
+    // Normalise each entry: strings stay as bare URLs; rich inputs
+    // emit a full `ImageObject` node when at least one optional field
+    // (caption, dimensions, representativeOfPage) is set. Pure URL
+    // values keep the legacy compact shape so we don't bloat the
+    // envelope on legacy hotels that haven't been re-captioned yet.
+    const nodes: (string | ImageObjectNode)[] = [];
+    for (const entry of input.images) {
+      if (typeof entry === 'string') {
+        nodes.push(entry);
+        continue;
+      }
+      const caption = entry.caption?.trim();
+      const hasCaption = caption !== undefined && caption.length > 0;
+      const hasDimensions =
+        (entry.width !== undefined && entry.width > 0) ||
+        (entry.height !== undefined && entry.height > 0);
+      const hasRepFlag = entry.representativeOfPage !== undefined;
+      if (!hasCaption && !hasDimensions && !hasRepFlag) {
+        nodes.push(entry.url);
+        continue;
+      }
+      const node: ImageObjectNode = { '@type': 'ImageObject', url: entry.url };
+      if (hasCaption && caption !== undefined) node.caption = caption;
+      if (entry.width !== undefined && entry.width > 0) node.width = entry.width;
+      if (entry.height !== undefined && entry.height > 0) node.height = entry.height;
+      if (entry.representativeOfPage !== undefined) {
+        node.representativeOfPage = entry.representativeOfPage;
+      }
+      nodes.push(node);
+    }
+    // `Hotel.image` is typed as `string | string[]` in schema-dts; we
+    // safely re-open it here because the upstream HotelNode is a
+    // structural type that allows array-of-mixed once normalised.
+    out.image = nodes as unknown as readonly string[];
   }
   if (input.telephone !== undefined) {
     out.telephone = input.telephone;
@@ -786,8 +881,17 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
       out.founder = founderNodes;
     }
   }
-  // Speakable — surfaces the AEO TL;DR / FAQ blocks to voice assistants.
-  const speakableCss = input.speakableSelectors ?? ['#tldr', '#faq'];
+  // Speakable — surfaces the AEO TL;DR / FAQ / FactualSummary / ConciergeAdvice
+  // blocks to voice assistants (B10 / CDC §2.3 + ADR-0011). Order matters: the
+  // first matched selector with text content is the one Google Assistant
+  // synthesises, so we lead with the dense factual summary, then the TL;DR,
+  // then the Concierge advice (Concierge voice differentiator), then the FAQ.
+  const speakableCss = input.speakableSelectors ?? [
+    '#factual-summary',
+    '#tldr',
+    '#concierge-advice',
+    '#faq',
+  ];
   if (speakableCss.length > 0) {
     out.speakable = {
       '@type': 'SpeakableSpecification',

@@ -74,6 +74,12 @@ const T = {
 } as const;
 
 const TYPE_LABEL: Record<string, { fr: string; en: string }> = {
+  // `all` is emitted by the ranking matrice when a classement isn't tied to
+  // a single hotel "type" (e.g. "plus-beaux-hotels-france" covers Palaces +
+  // 5★ + Châteaux + Villas + Maisons d'hôtes). Without an explicit label
+  // the `labelOrFallback` helper capitalises the raw slug → "All", which
+  // leaks English into the FR facet list. See FR-residuals audit, May 2026.
+  all: { fr: 'Tous types', en: 'All types' },
   palace: { fr: 'Palaces', en: 'Palaces' },
   '5-etoiles': { fr: '5 étoiles', en: '5 stars' },
   '4-etoiles': { fr: '4 étoiles', en: '4 stars' },

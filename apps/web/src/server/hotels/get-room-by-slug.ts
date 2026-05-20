@@ -10,6 +10,7 @@ import {
   getHotelBySlug,
   isValidSlug,
   type HotelDetail,
+  type LocalisedConciergeAdvice,
   type SupportedLocale,
 } from '@/server/hotels/get-hotel-by-slug';
 
@@ -76,10 +77,12 @@ const HotelRoomDetailDbRowSchema = z.object({
   hero_image: stringOrEmpty,
   is_signature: z.boolean().nullable().optional(),
   indicative_price_minor: z.unknown().nullable().optional(),
+  // 0043 — optional room-level Concierge advice; hotel block remains canonical.
+  concierge_advice: z.unknown().nullable().optional(),
 });
 
 const ROOM_DETAIL_COLUMNS =
-  'id, slug, room_code, name_fr, name_en, description_fr, description_en, long_description_fr, long_description_en, max_occupancy, bed_type, size_sqm, amenities, images, hero_image, is_signature, indicative_price_minor';
+  'id, slug, room_code, name_fr, name_en, description_fr, description_en, long_description_fr, long_description_en, max_occupancy, bed_type, size_sqm, amenities, images, hero_image, is_signature, indicative_price_minor, concierge_advice';
 
 export interface LocalisedRoomImage {
   readonly publicId: string;
@@ -108,6 +111,13 @@ export interface HotelRoomDetailRow {
   readonly images: readonly LocalisedRoomImage[];
   readonly isSignature: boolean;
   readonly indicativePrice: RoomDetailIndicativePrice | null;
+  /**
+   * Raw `concierge_advice` jsonb (parsed by `readRoomConciergeAdvice`).
+   * Kept as `unknown` here so the room reader stays Zod-agnostic and
+   * the validation lives in the shared `ConciergeAdviceSchema` (mirror
+   * of the hotels-level shape — ADR-0011 + 0043).
+   */
+  readonly conciergeAdviceRaw: unknown;
 }
 
 export interface HotelRoomDetail {
@@ -208,7 +218,89 @@ function rowToDetail(
     images: localizeImages(raw.images, locale, name),
     isSignature: raw.is_signature === true,
     indicativePrice: readIndicativePriceDetail(raw.indicative_price_minor),
+    conciergeAdviceRaw: raw.concierge_advice ?? null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// concierge_advice (room-level — same shape as hotels, ADR-0011 + 0043)
+// ---------------------------------------------------------------------------
+
+const ROOM_CONCIERGE_TIP_FOR = [
+  'room',
+  'dining',
+  'timing',
+  'access',
+  'service',
+  'wellness',
+] as const;
+
+function countWords(s: string): number {
+  const trimmed = s.trim();
+  if (trimmed.length === 0) return 0;
+  return trimmed.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0).length;
+}
+
+const RoomConciergeAdviceLocaleSchema = z.object({
+  title: z.string().min(1).max(120),
+  body: z
+    .string()
+    .min(1)
+    .refine(
+      (b) => {
+        const n = countWords(b);
+        return n >= 50 && n <= 110;
+      },
+      { message: 'room concierge_advice.body must be 50-110 words' },
+    ),
+  tip_for: z.enum(ROOM_CONCIERGE_TIP_FOR),
+});
+
+const RoomConciergeAdviceSchema = z.object({
+  fr: RoomConciergeAdviceLocaleSchema,
+  en: RoomConciergeAdviceLocaleSchema.optional(),
+});
+
+export function readRoomConciergeAdvice(
+  room: HotelRoomDetailRow,
+  locale: SupportedLocale,
+): LocalisedConciergeAdvice | null {
+  const parsed = RoomConciergeAdviceSchema.safeParse(room.conciergeAdviceRaw);
+  if (!parsed.success) {
+    if (
+      process.env['NODE_ENV'] !== 'production' &&
+      room.conciergeAdviceRaw !== null &&
+      room.conciergeAdviceRaw !== undefined
+    ) {
+      console.warn(
+        `[room concierge_advice] room ${room.slug}: invalid payload — ${parsed.error.message}`,
+      );
+    }
+    return null;
+  }
+  const pickLocale: 'fr' | 'en' = locale === 'fr' ? 'fr' : 'en';
+  const block = pickLocale === 'en' ? (parsed.data.en ?? parsed.data.fr) : parsed.data.fr;
+  return { title: block.title, body: block.body, tipFor: block.tip_for };
+}
+
+/**
+ * Room sub-page indexability guard (CDC §2 + ADR-0009).
+ *
+ * Returns `false` when the room sub-page is too thin to safely index:
+ *   - gallery has fewer than 5 photos, OR
+ *   - the long+short description body has fewer than 200 words.
+ *
+ * Sub-pages flagged as not-indexable still render to humans, but
+ * `generateMetadata` returns `{ robots: { index: false, follow: false } }`
+ * to keep cannibalisation and thin-content penalties off the parent
+ * hotel page.
+ */
+export function isRoomSubpageIndexable(room: HotelRoomDetailRow): boolean {
+  const gallerySize = room.images.length + (room.heroImage !== null ? 1 : 0);
+  if (gallerySize < 5) return false;
+  const longWords = room.longDescription !== null ? countWords(room.longDescription) : 0;
+  const shortWords = room.shortDescription !== null ? countWords(room.shortDescription) : 0;
+  return longWords + shortWords >= 200;
 }
 
 /**
@@ -266,6 +358,11 @@ export interface PublishedRoomSlug {
   readonly hotelSlugFr: string;
   readonly hotelSlugEn: string | null;
   readonly roomSlug: string;
+  /**
+   * ISO 8601 `updated_at` value (B9). Surfaced as `<lastmod>` in the
+   * rooms sub-sitemap. Falls back to `null` for legacy rows.
+   */
+  readonly updatedAt: string | null;
 }
 
 /**
@@ -277,18 +374,18 @@ export async function listPublishedRoomSlugs(): Promise<readonly PublishedRoomSl
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotel_rooms')
-      .select('slug, hotel:hotels!inner(slug, slug_en, is_published)')
+      .select('slug, updated_at, hotel:hotels!inner(slug, slug_en, is_published, updated_at)')
       .eq('hotel.is_published', true)
       .limit(2000);
     if (error || !Array.isArray(data)) return [];
 
     const out: PublishedRoomSlug[] = [];
     for (const raw of data) {
-      const rec = raw as { slug?: unknown; hotel?: unknown };
+      const rec = raw as { slug?: unknown; updated_at?: unknown; hotel?: unknown };
       const roomSlug = rec.slug;
       const hotel = rec.hotel as
-        | { slug?: unknown; slug_en?: unknown }
-        | { slug?: unknown; slug_en?: unknown }[]
+        | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }
+        | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }[]
         | undefined;
       const hotelRow = Array.isArray(hotel) ? hotel[0] : hotel;
       if (typeof roomSlug !== 'string' || !isValidSlug(roomSlug)) continue;
@@ -296,11 +393,27 @@ export async function listPublishedRoomSlugs(): Promise<readonly PublishedRoomSl
       const hotelSlug = hotelRow.slug;
       const hotelSlugEn = hotelRow.slug_en;
       if (typeof hotelSlug !== 'string' || !isValidSlug(hotelSlug)) continue;
+      // Pick the later of room.updated_at vs hotel.updated_at — a
+      // hotel-level change (new photos, FAQ rewrite) is a legitimate
+      // freshness signal for every sub-page below it.
+      const roomUpdated =
+        typeof rec.updated_at === 'string' && rec.updated_at.length > 0 ? rec.updated_at : null;
+      const hotelUpdated =
+        typeof hotelRow.updated_at === 'string' && hotelRow.updated_at.length > 0
+          ? hotelRow.updated_at
+          : null;
+      const updatedAt =
+        roomUpdated !== null && hotelUpdated !== null
+          ? roomUpdated > hotelUpdated
+            ? roomUpdated
+            : hotelUpdated
+          : (roomUpdated ?? hotelUpdated);
       out.push({
         hotelSlugFr: hotelSlug,
         hotelSlugEn:
           typeof hotelSlugEn === 'string' && isValidSlug(hotelSlugEn) ? hotelSlugEn : null,
         roomSlug,
+        updatedAt,
       });
     }
     return out;

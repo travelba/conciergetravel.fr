@@ -20,10 +20,23 @@ export const AgentSkillInputSchemaZod = z.object({
   required: z.array(z.string()).optional(),
 });
 
+export const AgentSkillEndpointZod = z.object({
+  method: z.enum(['GET', 'POST']),
+  /** Path relative to site origin, e.g. `/api/agent/search`. */
+  path: z.string().regex(/^\//u, 'endpoint path must start with /'),
+});
+
 export const AgentSkillZod = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   inputSchema: AgentSkillInputSchemaZod.optional(),
+  /**
+   * Optional HTTP endpoint that exposes this skill as an executable
+   * action. When present, LLM agents (ChatGPT Actions, Claude Tools,
+   * Perplexity, MCP) can call the endpoint directly instead of
+   * deep-linking the user to the human UI. See ADR-0017.
+   */
+  endpoint: AgentSkillEndpointZod.optional(),
 });
 
 export const AgentSkillsDocumentZod = z.object({
@@ -57,6 +70,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['destination'],
       },
+      endpoint: { method: 'POST', path: '/api/agent/search' },
     },
     {
       name: 'list-cities',
@@ -85,6 +99,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/hotel/{slug}' },
     },
     {
       name: 'get-hotel-room',
@@ -198,6 +213,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['hotelSlug', 'checkin', 'checkout', 'email'],
       },
+      endpoint: { method: 'POST', path: '/api/agent/quote' },
     },
     {
       name: 'loyalty',

@@ -54,6 +54,11 @@ function buildRow(_locale: SupportedLocale): HotelDetailRow {
       'Un hôtel fictif servant aux tests end-to-end. La description française décrit un établissement parisien intimiste idéal pour valider la fiche hôtel.\n\nDeuxième paragraphe pour exercer le rendu multi-paragraphe.',
     description_en:
       'A synthetic hotel used for end-to-end testing. This English description verifies locale fallback in the public detail page.',
+    factual_summary_fr:
+      'Hôtel-test Palace 5 étoiles situé Tuileries Paris, à 5 min du Louvre, avec spa privé, conciergerie 24/7 et restaurant gastronomique étoilé.',
+    factual_summary_en:
+      'Synthetic 5-star Palace test hotel in Tuileries Paris, 5 minutes from the Louvre, with private spa, 24/7 concierge and Michelin-starred restaurant.',
+    hero_video: null,
     highlights: ['Vue sur les Tuileries', 'Spa privé', 'Conciergerie 24/7'],
     amenities: ['Wi-Fi gratuit', 'Petit-déjeuner inclus', 'Animaux acceptés'],
     faq_content: [

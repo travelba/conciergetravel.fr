@@ -3,21 +3,24 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { JsonLd } from '@mch/seo';
+import { JsonLd, buildAeoBlock } from '@mch/seo';
 
 import { buildCloudinarySrc } from '@mch/ui';
 
+import { BookingWidget } from '@/components/hotel/booking-widget';
+import { BookingWidgetMobileBar } from '@/components/hotel/booking-widget-mobile-bar';
+import { BookingWidgetUrlHydrator } from '@/components/hotel/booking-widget-url-hydrator';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
-import { DisplayOnlyBookingCard } from '@/components/hotel/display-only-booking-card';
+import { HotelHero } from '@/components/hotel/hotel-hero';
 import { HotelAmenities } from '@/components/hotel/hotel-amenities';
+import { LocalGuideTeaser } from '@/components/hotel/local-guide-teaser';
+import { TrackPageView } from '@/lib/analytics/hooks';
 import { HotelAwards } from '@/components/hotel/hotel-awards';
 import { HotelFactSheet } from '@/components/hotel/hotel-fact-sheet';
 import { HotelFaq } from '@/components/hotel/hotel-faq';
 import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
 import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews';
-import { HotelFavoriteButton } from '@/components/hotel/hotel-favorite-button';
-import { HotelShareButton } from '@/components/hotel/hotel-share-button';
 import { HotelGallery } from '@/components/hotel/hotel-gallery';
 import HotelEvents from '@/components/hotel/hotel-events';
 import { HotelLocation } from '@/components/hotel/hotel-location';
@@ -41,10 +44,12 @@ import { env } from '@/lib/env';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import { citySlug } from '@/server/destinations/cities';
+import { getGuideTeaserForCity } from '@/server/guides/get-guide-teaser';
 import {
   getAmadeusHotelSentiment,
   type AmadeusHotelSentiment,
 } from '@/server/hotels/get-amadeus-sentiment';
+import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
 import {
   getHotelBySlug,
   listPublishedHotelSlugs,
@@ -59,6 +64,7 @@ import {
   readFeaturedReviews,
   readGallery,
   readHeroImage,
+  readHeroVideo,
   readHighlights,
   readHotelHistoryDates,
   readHotelStory,
@@ -70,6 +76,7 @@ import {
   readPolicies,
   readPostalCode,
   readConciergeAdvice,
+  readFactualSummary,
   readRestaurants,
   readSignatureExperiences,
   readSpa,
@@ -177,11 +184,19 @@ function formatIndicativePrice(
     : t('rooms.indicativePriceFrom', { from: parts.from });
 }
 
-function lockActionFor(locale: Locale, hotelId: string): string {
-  const offerId = `TEST-OFFER-${hotelId}`;
+/**
+ * Build the lock-route URL for the chosen offer. When `offerId` is
+ * null (no live Amadeus offer available, hotel not bookable, etc.)
+ * we fall back to the `TEST-OFFER-<hotelId>` synthetic id — the lock
+ * route only honours it when `isFakeOffersEnabled()` returns true,
+ * so in production this fallback simply yields a 400 on submit
+ * (form should not be rendered in that case anyway).
+ */
+function lockActionFor(locale: Locale, hotelId: string, offerId: string | null): string {
+  const id = offerId ?? `TEST-OFFER-${hotelId}`;
   return getPathname({
     locale,
-    href: { pathname: '/reservation/offer/[offerId]/lock', params: { offerId } },
+    href: { pathname: '/reservation/offer/[offerId]/lock', params: { offerId: id } },
   });
 }
 
@@ -408,6 +423,7 @@ async function renderHotelPage(
   const storySections = readHotelStory(row, locale);
   const signatureExperiences = readSignatureExperiences(row, locale);
   const conciergeAdvice = readConciergeAdvice(row, locale);
+  const factualSummary = readFactualSummary(row, locale);
   const featuredReviews = readFeaturedReviews(row, locale);
   const faqs = readFaq(row, locale);
   const faqGroups = readFaqByCategory(row, locale);
@@ -415,6 +431,7 @@ async function renderHotelPage(
   const heroPublicId = readHeroImage(row);
   const galleryImages = readGallery(row, locale, name);
   const virtualTour = readVirtualTour(row);
+  const heroVideo = readHeroVideo(row);
   const miceInfo = readMiceInfo(row, locale);
   const upcomingEvents = readUpcomingEvents(row, locale);
   const externalIds = readExternalIds(row);
@@ -443,14 +460,37 @@ async function renderHotelPage(
   });
   const canonicalUrl = `${origin}${localePath}`;
 
-  // JSON-LD Hotel images: hero + first 5 gallery shots, served as absolute
-  // Cloudinary URLs (Google's rich result test rejects relative paths).
-  const jsonLdImages: string[] = [];
+  // JSON-LD Hotel images (B8 / CDC §2 bloc 2): hero + first 5 gallery
+  // shots emitted as rich `ImageObject` nodes when we have captions.
+  // The builder accepts a mixed array (strings + ImageObject), so we
+  // ship `representativeOfPage: true` on the hero (Google honours it as
+  // the canonical SERP thumbnail) and fall back to bare URLs when the
+  // gallery row has no editorial alt text yet.
+  const jsonLdImages: (string | JsonLd.ImageObjectInput)[] = [];
   if (heroPublicId !== null) {
-    jsonLdImages.push(buildCloudinarySrc({ cloudName, publicId: heroPublicId }));
+    jsonLdImages.push({
+      url: buildCloudinarySrc({
+        cloudName,
+        publicId: heroPublicId,
+        transforms: 'f_auto,q_auto,w_1600,h_900,c_fill,g_auto',
+      }),
+      caption: galleryImages[0]?.alt ?? name,
+      width: 1600,
+      height: 900,
+      representativeOfPage: true,
+    });
   }
   for (const img of galleryImages.slice(0, 5)) {
-    jsonLdImages.push(buildCloudinarySrc({ cloudName, publicId: img.publicId }));
+    const url = buildCloudinarySrc({
+      cloudName,
+      publicId: img.publicId,
+      transforms: 'f_auto,q_auto,w_1230,h_820,c_fill,g_auto',
+    });
+    if (img.alt !== undefined && img.alt.length > 0) {
+      jsonLdImages.push({ url, caption: img.alt, width: 1230, height: 820 });
+    } else {
+      jsonLdImages.push(url);
+    }
   }
 
   // Award strings for JSON-LD: prefer "Name — Issuer, Year" to give Google /
@@ -748,7 +788,7 @@ async function renderHotelPage(
     : hasRegion
       ? 'aeo.answerNoStay'
       : 'aeo.answerNoStayNoRegion';
-  const aeoAnswer = hasRegion
+  const aeoAnswerRaw = hasRegion
     ? t(aeoAnswerKey, {
         city: row.city,
         region: row.region,
@@ -758,6 +798,27 @@ async function renderHotelPage(
         city: row.city,
         date: aeoFreshness,
       });
+
+  // B4 — validate the answer against the AEO 40-80 word envelope at
+  // render time. We never block the page: an out-of-envelope answer
+  // surfaces a dev-only console warning + a `data-aeo-warning` flag
+  // on the section so QA scripts can pick it up post-deploy. The CI
+  // lint suite (Vitest unit `apps/web/src/i18n/messages/*.test.ts`)
+  // catches regressions at PR time.
+  const aeoBlockResult = buildAeoBlock({
+    question: aeoQuestion,
+    answer: aeoAnswerRaw,
+    updatedAt: aeoFreshness,
+  });
+  const aeoAnswer = aeoBlockResult.ok ? aeoBlockResult.value.answer : aeoAnswerRaw;
+  if (!aeoBlockResult.ok && process.env['NODE_ENV'] !== 'production') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[aeo] hotel ${row.slug} / ${locale}: AEO answer rejected — ${JSON.stringify(
+        aeoBlockResult.error,
+      )}`,
+    );
+  }
 
   const faqPayload: Array<{ question: string; answer: string }> = [
     { question: aeoQuestion, answer: aeoAnswer },
@@ -852,12 +913,17 @@ async function renderHotelPage(
         )
       : null;
 
-  // Maillage interne (Phase 12.4 / skill seo-technical §Maillage).
-  // Fetched right before render so the bundle is a Server Component
-  // tree leaf — cached implicitly by the route's ISR layer (1 h).
-  // We parallel-fetch the editorial rankings that feature this hotel
-  // (plan rankings-parity-yonder WS2.5 v4 — bloc "Cet hôtel apparaît dans…").
-  const [relatedHotels, featuredInRankings] = await Promise.all([
+  // Maillage interne + Decision Layer fetches (Phase 12.4 / skill seo-technical
+  // §Maillage). Parallel-fetch:
+  //   1. related hotels (existing — internal linking)
+  //   2. rankings featuring this hotel (existing — "Cet hôtel apparaît dans…")
+  //   3. best Amadeus offer for the current stay window (A3/A4 — used by
+  //      BookingWidget for `from` price + real offerId in the lock URL).
+  //      Returns EMPTY when the hotel isn't bookable / no offer / Amadeus
+  //      unreachable — never throws.
+  //   4. local guide teaser for the city (B2). Returns null when no guide
+  //      is published — bloc 12 of CDC §2.
+  const [relatedHotels, featuredInRankings, bestOffer, guideTeaser] = await Promise.all([
     getRelatedHotels({
       currentSlug: row.slug,
       city: row.city,
@@ -865,9 +931,74 @@ async function renderHotelPage(
       name,
     }),
     getRankingsForHotel(row.id, { limit: 6 }),
+    bookable
+      ? getBestOfferForHotel({
+          hotelId: row.id,
+          amadeusHotelId: row.amadeus_hotel_id !== '' ? row.amadeus_hotel_id : null,
+          checkIn,
+          checkOut,
+          adults,
+          childAges: [],
+        })
+      : Promise.resolve({
+          offerId: null,
+          priceFrom: null,
+          limitedAvailability: null,
+          availabilityState: 'unknown' as const,
+        }),
+    getGuideTeaserForCity(cityHubSlug, locale),
   ]);
 
+  // Offer JSON-LD (B3 / CDC §2.8). Emitted only when we have a live
+  // Amadeus rate — never fabricated. `priceValidUntil` is required by
+  // Google Hotels rich-results and DSA art. 25 (no stale offers).
+  // Default cap = today + 7 days (cache lives 5 minutes, so the offer
+  // will revalidate well before the date Google sees as the expiry).
+  const offerJsonLd: Record<string, unknown> | null =
+    bestOffer.priceFrom !== null && bestOffer.offerId !== null
+      ? (JsonLd.withSchemaOrgContext(
+          JsonLd.offerJsonLd({
+            priceFromEUR: bestOffer.priceFrom.amount.fromMinor / 100,
+            url: canonicalUrl,
+            priceValidUntil: new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10),
+            availability:
+              bestOffer.limitedAvailability !== null ? 'LimitedAvailability' : 'InStock',
+          }),
+        ) as unknown as Record<string, unknown>)
+      : null;
+
+  // VideoObject JSON-LD (B8 / CDC §2 bloc 2). Emitted only when the
+  // editorial team has published a hero video — the builder returns
+  // `null` on missing required fields (name/description/upload date/
+  // contentUrl|embedUrl) so a half-typed Payload entry never ships a
+  // malformed envelope.
+  const videoObjectNode = heroVideo !== null ? JsonLd.videoObjectJsonLd(heroVideo) : null;
+  const videoObjectJsonLd: Record<string, unknown> | null =
+    videoObjectNode !== null
+      ? (JsonLd.withSchemaOrgContext(videoObjectNode) as unknown as Record<string, unknown>)
+      : null;
+
   const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  // Mobile bar labels (A1 / mobile bottom bar). We pre-compute the
+  // strings on the server so the client island stays serialisable.
+  const mobileBarT = await getTranslations({
+    locale,
+    namespace: 'hotelPage.widget.mobileBar',
+  });
+  const mobileBarCta = bookable ? mobileBarT('ctaSeePrices') : mobileBarT('ctaBook');
+  const mobileBarAria = bookable
+    ? mobileBarT('ctaAriaSeePrices', { name })
+    : mobileBarT('ctaAriaBook', { name });
+  const mobileBarTrust = mobileBarT('trustChip');
+  const mobileBarPriceLabel =
+    bestOffer.priceFrom !== null
+      ? `${(bestOffer.priceFrom.amount.fromMinor / 100).toLocaleString(localeFmt, {
+          style: 'currency',
+          currency: bestOffer.priceFrom.amount.currency,
+          maximumFractionDigits: 0,
+        })}`
+      : '';
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
@@ -876,6 +1007,8 @@ async function renderHotelPage(
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
       <JsonLdScript data={bookingHowToJsonLd} nonce={nonce} />
       <JsonLdScript data={cancellationHowToJsonLd} nonce={nonce} />
+      {offerJsonLd !== null ? <JsonLdScript data={offerJsonLd} nonce={nonce} /> : null}
+      {videoObjectJsonLd !== null ? <JsonLdScript data={videoObjectJsonLd} nonce={nonce} /> : null}
       {eventJsonLdList.map((data, i) => (
         <JsonLdScript
           key={`event-${i}`}
@@ -922,92 +1055,41 @@ async function renderHotelPage(
         </ol>
       </nav>
 
-      <header className="mb-10">
-        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-          <div className="text-muted flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em]">
-            {row.is_palace ? (
-              <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-amber-900">
-                {t('hero.palace')}
-              </span>
-            ) : (
-              <span className="border-border bg-bg rounded-md border px-2 py-1">
-                {t('hero.stars', { count: row.stars })}
-              </span>
-            )}
-            <span>{row.city}</span>
-            {row.district !== null && row.district !== '' ? (
-              <>
-                <span aria-hidden>{t('hero.districtSeparator')}</span>
-                <span>{row.district}</span>
-              </>
-            ) : null}
-            {row.region !== '' ? (
-              <>
-                <span aria-hidden>{t('hero.districtSeparator')}</span>
-                <span>{row.region}</span>
-              </>
-            ) : null}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <HotelFavoriteButton hotelId={row.id} hotelName={name} returnPath={localePath} />
-            <HotelShareButton
-              hotelName={name}
-              shareText={description !== null ? truncate(description, 160) : null}
-              canonicalUrl={canonicalUrl}
-            />
-          </div>
-        </div>
-
-        <h1 className="text-fg mt-3 font-serif text-3xl sm:text-4xl md:text-5xl">{name}</h1>
-
-        {amadeusRating !== null ? (
-          <p
-            className="text-fg mt-3 inline-flex items-center gap-2 text-sm"
-            data-testid="hotel-aggregate-rating"
-          >
-            <span
-              className="border-border bg-bg inline-flex items-center gap-1 rounded-md border px-2 py-1 font-medium"
-              aria-label={t('rating.scoreAria', {
-                value: amadeusRating.ratingValue.toFixed(1),
-                best: amadeusRating.bestRating,
-              })}
-            >
-              <span aria-hidden>★</span>
-              <span>
-                {t('rating.scoreOf', {
-                  value: amadeusRating.ratingValue.toFixed(1),
-                  best: amadeusRating.bestRating,
-                })}
-              </span>
-            </span>
-            <span className="text-muted">
-              {t('rating.reviewCount', { count: amadeusRating.reviewCount })}
-            </span>
-          </p>
-        ) : null}
-
-        {description !== null && description.length > 0 ? (
-          <p className="text-muted mt-4 max-w-prose text-lg sm:text-xl">
-            {truncate(description, 280)}
-          </p>
-        ) : null}
-
-        {row.latitude !== null &&
-        row.longitude !== null &&
-        location.pointsOfInterest.length === 0 ? (
-          <p className="mt-3 text-sm">
-            <a
-              href={`https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}&zoom=15`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted hover:text-fg underline"
-            >
-              {t('hero.viewMap')}
-            </a>
-          </p>
-        ) : null}
-      </header>
+      <HotelHero
+        locale={locale}
+        hotelId={row.id}
+        name={name}
+        city={row.city}
+        district={row.district !== '' ? row.district : null}
+        region={row.region}
+        isPalace={row.is_palace}
+        stars={row.stars as 1 | 2 | 3 | 4 | 5}
+        canonicalUrl={canonicalUrl}
+        localePath={localePath}
+        description={description}
+        factualSummary={factualSummary}
+        fallbackSummary={
+          description !== null && description.length > 0 ? truncate(description, 280) : null
+        }
+        amadeusRating={
+          amadeusRating !== null
+            ? {
+                ratingValue: amadeusRating.ratingValue,
+                reviewCount: amadeusRating.reviewCount,
+                bestRating: amadeusRating.bestRating,
+              }
+            : null
+        }
+        hasConciergeAdvice={conciergeAdvice !== null}
+        hasMapLink={
+          row.latitude !== null && row.longitude !== null && location.pointsOfInterest.length === 0
+        }
+        mapLink={
+          row.latitude !== null && row.longitude !== null
+            ? `https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}&zoom=15`
+            : null
+        }
+      />
 
       <HotelTldr
         locale={locale}
@@ -1056,7 +1138,10 @@ async function renderHotelPage(
       />
 
       <section
+        id="aeo"
         data-aeo
+        {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
+        data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
         aria-labelledby="hotel-aeo-title"
         className="border-border bg-bg mb-10 rounded-lg border p-5"
       >
@@ -1066,99 +1151,27 @@ async function renderHotelPage(
         <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
       </section>
 
-      <section
-        id="booking"
-        aria-labelledby="booking-title"
-        className="border-border bg-bg mb-12 rounded-lg border p-5 sm:p-6"
-      >
-        <h2 id="booking-title" className="text-fg font-serif text-xl sm:text-2xl">
-          {bookable ? t('sections.booking') : t('sections.concierge')}
-        </h2>
-        {bookable ? <p className="text-muted mt-2 text-sm">{t('booking.intro')}</p> : null}
-
-        {bookable ? (
-          <form
-            method="post"
-            action={lockActionFor(locale, row.id)}
-            className="mt-5 flex flex-col gap-4"
-          >
-            <input type="hidden" name="hotelId" value={row.id} />
-            {fakeEnabled ? <input type="hidden" name="fake" value="1" /> : null}
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="text-fg font-medium">{t('booking.checkIn')}</span>
-                <input
-                  type="date"
-                  name="checkIn"
-                  defaultValue={checkIn}
-                  required
-                  className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="text-fg font-medium">{t('booking.checkOut')}</span>
-                <input
-                  type="date"
-                  name="checkOut"
-                  defaultValue={checkOut}
-                  required
-                  className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="text-fg font-medium">{t('booking.adults')}</span>
-                <input
-                  type="number"
-                  name="adults"
-                  min={1}
-                  max={9}
-                  defaultValue={adults}
-                  required
-                  className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="text-fg font-medium">{t('booking.children')}</span>
-                <input
-                  type="number"
-                  name="children"
-                  min={0}
-                  max={9}
-                  defaultValue={children}
-                  className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                />
-              </label>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="submit"
-                className={
-                  fakeEnabled
-                    ? 'rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600'
-                    : 'bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
-                }
-              >
-                {fakeEnabled ? t('booking.submitTest') : t('booking.submit')}
-              </button>
-              {fakeEnabled ? (
-                <span className="text-muted text-xs">{t('booking.submitTestHint')}</span>
-              ) : null}
-            </div>
-          </form>
-        ) : (
-          <DisplayOnlyBookingCard
-            locale={locale}
-            hotelId={row.id}
-            hotelName={name}
-            checkIn={checkIn}
-            checkOut={checkOut}
-            adults={adults}
-            childrenCount={children}
-          />
-        )}
-      </section>
+      <BookingWidget
+        locale={locale}
+        hotelId={row.id}
+        hotelName={name}
+        bookingMode={row.booking_mode}
+        defaultStay={{ checkIn, checkOut, adults, children }}
+        lockActionUrl={bookable ? lockActionFor(locale, row.id, bestOffer.offerId) : null}
+        fakeEnabled={fakeEnabled}
+        priceFrom={bestOffer.priceFrom}
+        limitedAvailability={bestOffer.limitedAvailability}
+        availabilityState={bestOffer.availabilityState}
+        surface="inline_section"
+      />
+      {/*
+        C1 / ADR-0013 — URL hydrator client island.
+        Re-fills the dates/occupants inputs from `?checkIn=…` on the
+        client after hydration so deep-links from /recherche or e-mails
+        still land with the right stay window pre-selected even when
+        the page is served from the ISR cache.
+      */}
+      <BookingWidgetUrlHydrator />
 
       {/*
         Price comparator (skill: competitive-pricing-comparison).
@@ -1380,6 +1393,8 @@ async function renderHotelPage(
         </section>
       )}
 
+      <LocalGuideTeaser locale={locale} cityLabel={row.city} guide={guideTeaser} />
+
       <HotelReassurance locale={locale} />
 
       <HotelFeaturedInRankings mentions={featuredInRankings} locale={locale} />
@@ -1389,6 +1404,28 @@ async function renderHotelPage(
         bundle={relatedHotels}
         currentRegion={row.region}
         currentCity={row.city}
+      />
+
+      <BookingWidgetMobileBar
+        hotelId={row.id}
+        bookingMode={row.booking_mode}
+        priceFromLabel={bestOffer.priceFrom !== null ? mobileBarPriceLabel : null}
+        ctaLabel={mobileBarCta}
+        ctaAriaLabel={mobileBarAria}
+        trustLabel={mobileBarTrust}
+      />
+
+      <TrackPageView
+        event={{
+          name: 'view_hotel',
+          hotelId: row.id,
+          slug: row.slug,
+          locale: locale === 'fr' || locale === 'en' ? locale : 'fr',
+          bookingMode: row.booking_mode,
+          isPalace: row.is_palace,
+          stars: row.stars as 1 | 2 | 3 | 4 | 5,
+          hasPriceFrom: bestOffer.priceFrom !== null,
+        }}
       />
 
       <footer className="text-muted mt-10 flex flex-col gap-2 text-xs">

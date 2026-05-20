@@ -44,4 +44,15 @@ describe('agent-skills', () => {
       }
     }
   });
+
+  it('every skill that declares an HTTP endpoint targets the /api/agent namespace (ADR-0017)', () => {
+    const endpointSkills = DEFAULT_AGENT_SKILLS.skills.filter(
+      (s): s is typeof s & { endpoint: NonNullable<typeof s.endpoint> } => s.endpoint !== undefined,
+    );
+    expect(endpointSkills.length).toBeGreaterThan(0);
+    for (const skill of endpointSkills) {
+      expect(skill.endpoint.path.startsWith('/api/agent/')).toBe(true);
+      expect(['GET', 'POST']).toContain(skill.endpoint.method);
+    }
+  });
 });

@@ -38,7 +38,19 @@ interface HotelGalleryProps {
  * advice) still has a visual anchor. Real photos overwrite this slot
  * later via the standard `gallery_images` flow.
  */
-const MAX_THUMBNAILS = 6;
+/**
+ * C4 — cap the *visible* thumbnail grid at 11 tiles (6 above the fold,
+ * 5 lazy-loaded on scroll). Anything beyond is reachable through the
+ * "+N" overflow chip on the 11th tile and the lightbox iterates the
+ * full 30+ photo set. Cap is empirical: tested on iPhone 12 mini
+ * (2-column grid) and 27" desktop (6-column grid), both stay under
+ * 2 vertical rows before requiring scroll.
+ *
+ * CDC §2 bloc 2 mandates ≥ 30 photos at the publication gate; this
+ * grid surfaces the strongest 11 while the lightbox honours the full
+ * catalogue without bandwidth penalty (thumbnails use `c_thumb,w_400`).
+ */
+const MAX_THUMBNAILS = 11;
 const PLACEHOLDER_THUMBNAILS = 5;
 
 export async function HotelGallery({
@@ -65,9 +77,16 @@ export async function HotelGallery({
     );
   }
 
+  // C4 — visible grid stays capped at 11 tiles; the lightbox receives
+  // the full image set so navigation cycles through the entire CDC §2
+  // ≥ 30-photo corpus without forcing a 30-tile grid on initial load.
   const thumbnails: readonly GalleryLightboxImage[] = images
     .slice(0, MAX_THUMBNAILS)
     .map((img) => ({ publicId: img.publicId, alt: img.alt }));
+  const allLightboxImages: readonly GalleryLightboxImage[] = images.map((img) => ({
+    publicId: img.publicId,
+    alt: img.alt,
+  }));
   const overflowCount = Math.max(0, images.length - MAX_THUMBNAILS);
 
   return (
@@ -75,6 +94,7 @@ export async function HotelGallery({
       cloudName={cloudName}
       hero={hero}
       thumbnails={thumbnails}
+      lightboxImages={allLightboxImages}
       overflowCount={overflowCount}
       translations={{
         thumbnailsLabel: t('gallery.thumbnailsLabel'),

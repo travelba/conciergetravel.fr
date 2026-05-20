@@ -40,10 +40,18 @@ export async function GET(): Promise<NextResponse> {
         priority: 0.7,
         alternates: buildSitemapAlternates(hrefForLocale),
       };
-      // exactOptionalPropertyTypes — only set lastmod when we actually
-      // have a reviewedAt value, never as `undefined`.
-      if (g.reviewedAt !== null && g.reviewedAt !== undefined) {
-        (entry as { lastmod?: string }).lastmod = g.reviewedAt;
+      // B9 — prefer the later of `updated_at` (every edit) vs
+      // `reviewed_at` (editorial milestone). Picking `MAX` keeps the
+      // freshness signal sharp without losing the milestone marker
+      // when an unrelated content patch lands.
+      const lastmod =
+        g.updatedAt !== null && g.reviewedAt !== null
+          ? g.updatedAt > g.reviewedAt
+            ? g.updatedAt
+            : g.reviewedAt
+          : (g.updatedAt ?? g.reviewedAt);
+      if (lastmod !== null) {
+        (entry as { lastmod?: string }).lastmod = lastmod;
       }
       entries.push(entry);
     }

@@ -48,6 +48,10 @@ export async function GET(): Promise<NextResponse> {
         loc: hrefForLocale('fr'),
         changefreq: 'monthly',
         priority: 0.6,
+        // B9 — propagate `(room.updated_at | hotel.updated_at)` MAX as
+        // `<lastmod>`. The reader picks the later of the two so a
+        // hotel-level FAQ rewrite still re-crawls the room sub-pages.
+        ...(r.updatedAt !== null ? { lastmod: r.updatedAt } : {}),
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }
