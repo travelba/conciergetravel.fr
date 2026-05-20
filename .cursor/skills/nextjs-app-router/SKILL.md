@@ -129,8 +129,19 @@ for editorial routes whose underlying data only changes on publish.
 - `next-intl` middleware mounted in `middleware.ts`. Default locale `fr` without prefix; `en` prefixed.
 - All page params include `[locale]`. Read locale via `unstable_setRequestLocale(locale)` at top of each page/layout.
 - **Namespace strings are not type-safe.** A typo like `getTranslations({ namespace: 'hotel' })` (instead of `'hotelPage'`) doesn't fail the build — it silently throws `MISSING_MESSAGE: hotel (fr)` at render time, gets swallowed by the error boundary, and the page degrades visually with no compile signal. Treat any `MISSING_MESSAGE` in the prod log as P1.
-  - **Discovery rule**: before merging a PR that touches a new server component using `getTranslations`, do `rg "namespace:\s*['\"]<name>['\"]"` and verify `<name>` exists at the top level of `apps/web/src/i18n/messages/fr.json` AND `en.json`. The top-level keys in V1 are `common, navigation, homepage, searchPage, header, consent, footer, legal, priceComparator, destinationPage, hotelPage, roomPage, errors, account, reservationStart, reservationConfirmation, reservationInvite, reservationRecap, reservationPayment` — anything outside that list is a bug.
+  - **Discovery rule**: before merging a PR that touches a new server component using `getTranslations`, do `rg "namespace:\s*['\"]<name>['\"]"` and verify `<name>` exists at the **top level** of `apps/web/src/i18n/messages/fr.json` AND `en.json`. The top-level keys in V1 are `common, navigation, homepage, searchPage, header, concierge, consent, footer, legal, priceComparator, destinationPage, hotelPage, roomPage, errors, account, reservationStart, reservationConfirmation, reservationInvite, reservationRecap, reservationPayment` — anything outside that list is a bug.
   - **Smoke contract**: every E2E that renders an editorial/hotel page must `grep`/`expect-not` `MISSING_MESSAGE` in `console.error`. Otherwise i18n drift accumulates silently across releases.
+
+- **Namespace nesting fails silently** — a namespace object accidentally placed **inside** another top-level namespace (e.g. `header.concierge: { ... }` instead of `concierge: { ... }`) is the same failure mode as a typo: `getTranslations({ namespace: 'concierge' })` returns raw keys (`concierge.metaTitle`), and any downstream `t.raw('faq.items').map(...)` crashes at render with a server 500. Production paid this on **PR #71 → hotfix PR #72** (`/le-concierge` 500 ~20 min after the deploy because `concierge` was nested under `header` in both `fr.json` and `en.json`).
+  - **Why CI didn't catch it**: namespace resolution is runtime-only; `next build` never rendered the page because `/le-concierge` is `force-dynamic`; no E2E hit the route; Prettier and ESLint are JSON-shape agnostic.
+  - **Visible symptom on the rendered HTML**: `<title>concierge.metaTitle …</title>`, `<meta name="description" content="concierge.metaDesc">`. If you ever see a raw key shape (`<word>.<word>` with a dot, no whitespace) inside a `<title>` or `<meta>` in prod, the namespace lookup failed silently — go check the JSON structure first.
+  - **Discovery rule (extended)**: when adding a new `getTranslations({ namespace: 'X' })`, the `rg` check above must verify `X` is **directly** under the JSON root (`{ "X": { ... } }` at the file's top level), not nested. The exact node command we used to debug PR #72 — keep it in your toolbelt:
+
+    ```powershell
+    node -e "const j=require('./apps/web/src/i18n/messages/fr.json'); console.log('top-level:', !!j.X); console.log('nested under header?', !!j.header?.X);"
+    ```
+
+  - **Test contract going forward**: any new page exporting `force-dynamic` (i.e. invisible to `next build`) MUST be added to `apps/web/e2e/smoke.spec.ts` "new landings" group with an assertion that the rendered `<title>` does **not** match `/<word>\.<word>/` (raw-namespace shape). See [`apps/web/e2e/smoke.spec.ts`](../../../apps/web/e2e/smoke.spec.ts) §`/le-concierge does not leak raw namespace keys`.
 
 ### Streaming, suspense, parallel routes
 
