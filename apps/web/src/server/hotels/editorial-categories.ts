@@ -108,6 +108,19 @@ function lower(s: string): string {
  * Editorial categories — order matters for the `/categorie` directory
  * (lands them in this order). Each predicate is total over the index
  * card type so the matcher never throws.
+ *
+ * ## Layout
+ *
+ * 1. 5 categories Palace-only (kept from the launch — they remain the
+ *    editorial pillar of the brand).
+ * 2. 7 new categories by hotel TYPE (ADR-0016) — open the brand to
+ *    non-Palace hotels of exception (5★, 4★, boutique, château,
+ *    chalet, villa, maison d'hôtes).
+ *
+ * Type predicates are heuristic-based on the published name (the
+ * `PublishedHotelIndexCard` does not yet carry tags). The heuristics
+ * are transitional — when Payload exposes per-hotel `type` tags, the
+ * predicates collapse to `h.tags.includes('...')`.
  */
 export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
   {
@@ -201,6 +214,151 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     subtitleEn: (n) =>
       `${n} addresses awarded the Palace distinction by Atout France — the highest French hotel distinction, granted to only ~30 properties nationwide.`,
     match: (h) => h.isPalace,
+  },
+
+  // ─── ADR-0016 — Non-Palace categories (by hotel TYPE) ───────────────────
+  // Heuristic-based predicates over the published name + city + stars.
+  // Will collapse to `h.tags.includes(...)` once Payload exposes tags.
+
+  {
+    slug: 'hotels-5-etoiles',
+    labelFr: 'Hôtels 5 étoiles',
+    labelEn: '5-Star Hotels',
+    h1Fr: 'Les hôtels 5 étoiles d’exception',
+    h1En: 'Exceptional 5-Star Hotels',
+    metaTitleFr: 'Hôtels 5 étoiles en France — Sélection MyConciergeHotel',
+    metaTitleEn: '5-Star Hotels in France — MyConciergeHotel selection',
+    metaDescFr:
+      'Sélection éditoriale des hôtels 5 étoiles en France — adresses 5★ non-Palace mais hautement recommandées par notre conciergerie : Côte d’Azur, Paris, Provence, Alpes, Bordelais.',
+    metaDescEn:
+      "MyConciergeHotel's selection of 5-star hotels in France — non-Palace 5★ addresses highly recommended by our concierge desk: French Riviera, Paris, Provence, Alps, Bordeaux.",
+    subtitleFr: (n) =>
+      `${n} hôtels 5 étoiles français sélectionnés au-delà des Palaces — adresses raffinées, services attentifs, tables de qualité.`,
+    subtitleEn: (n) =>
+      `${n} French 5-star hotels selected beyond the Palaces — refined addresses, attentive service, fine dining.`,
+    match: (h) => h.stars === 5 && !h.isPalace,
+  },
+
+  {
+    slug: 'hotels-4-etoiles',
+    labelFr: 'Hôtels 4 étoiles',
+    labelEn: '4-Star Hotels',
+    h1Fr: 'Les meilleurs hôtels 4 étoiles',
+    h1En: 'The Best 4-Star Hotels',
+    metaTitleFr: 'Hôtels 4 étoiles premium en France — MyConciergeHotel',
+    metaTitleEn: 'Premium 4-Star Hotels in France — MyConciergeHotel',
+    metaDescFr:
+      'Sélection MyConciergeHotel des hôtels 4 étoiles premium en France — adresses élégantes en ville comme au vert, idéales pour un séjour soigné sans tarif Palace.',
+    metaDescEn:
+      'MyConciergeHotel selection of premium 4-star hotels in France — elegant addresses in cities and the countryside, ideal for a refined stay without Palace pricing.',
+    subtitleFr: (n) =>
+      `${n} hôtels 4 étoiles soigneusement choisis par notre conciergerie — rapport prestige/prix optimisé, charme français.`,
+    subtitleEn: (n) =>
+      `${n} carefully selected 4-star hotels — best value-prestige ratio, French charm.`,
+    match: (h) => h.stars === 4,
+  },
+
+  {
+    slug: 'boutique-hotels',
+    labelFr: 'Boutique-hôtels',
+    labelEn: 'Boutique Hotels',
+    h1Fr: 'Boutique-hôtels d’exception en France',
+    h1En: 'Exceptional Boutique Hotels in France',
+    metaTitleFr: 'Boutique-hôtels en France — Sélection MyConciergeHotel',
+    metaTitleEn: 'Boutique Hotels in France — MyConciergeHotel selection',
+    metaDescFr:
+      'Sélection MyConciergeHotel des boutique-hôtels français — adresses confidentielles, identité forte, à taille humaine. Paris, Côte d’Azur, Provence, Alpes.',
+    metaDescEn:
+      'MyConciergeHotel selection of French boutique hotels — confidential addresses, strong identity, human scale. Paris, French Riviera, Provence, Alps.',
+    subtitleFr: (n) =>
+      `${n} boutique-hôtels français — moins de 50 chambres, une signature, un secret bien gardé du Concierge.`,
+    subtitleEn: (n) =>
+      `${n} French boutique hotels — fewer than 50 rooms, a strong signature, a well-kept Concierge secret.`,
+    match: (h) =>
+      !h.isPalace &&
+      (/\bboutique\b/iu.test(h.nameFr) || (h.nameEn !== null && /\bboutique\b/iu.test(h.nameEn))),
+  },
+
+  {
+    slug: 'chateaux-hotels',
+    labelFr: 'Châteaux-hôtels',
+    labelEn: 'Château Hotels',
+    h1Fr: 'Châteaux-hôtels en France',
+    h1En: 'Château Hotels in France',
+    metaTitleFr: 'Châteaux-hôtels en France — MyConciergeHotel',
+    metaTitleEn: 'Château Hotels in France — MyConciergeHotel',
+    metaDescFr:
+      'Sélection MyConciergeHotel des châteaux-hôtels français — séjours dans les demeures historiques de la Loire, du Bordelais, de Bourgogne et au-delà.',
+    metaDescEn:
+      'MyConciergeHotel selection of French château hotels — historic estates in the Loire Valley, Bordeaux, Burgundy and beyond.',
+    subtitleFr: (n) =>
+      `${n} châteaux français devenus hôtels d’exception — dormir dans l’histoire, dîner sous des plafonds peints.`,
+    subtitleEn: (n) =>
+      `${n} French châteaux turned hotels of exception — sleep within history, dine under painted ceilings.`,
+    match: (h) =>
+      /ch[âa]teau/iu.test(h.nameFr) || (h.nameEn !== null && /ch[âa]teau/iu.test(h.nameEn)),
+  },
+
+  {
+    slug: 'chalets-luxe',
+    labelFr: 'Chalets de luxe',
+    labelEn: 'Luxury Chalets',
+    h1Fr: 'Chalets de luxe dans les Alpes',
+    h1En: 'Luxury Chalets in the French Alps',
+    metaTitleFr: 'Chalets de luxe — Alpes françaises | MyConciergeHotel',
+    metaTitleEn: 'Luxury Chalets — French Alps | MyConciergeHotel',
+    metaDescFr:
+      'Sélection MyConciergeHotel des chalets de luxe dans les Alpes : Courchevel, Megève, Val d’Isère, Chamonix. Ski-in/ski-out, services Palace, expérience montagne.',
+    metaDescEn:
+      'MyConciergeHotel selection of luxury chalets in the French Alps: Courchevel, Megève, Val d’Isère, Chamonix. Ski-in/ski-out, Palace-level service, mountain experience.',
+    subtitleFr: (n) =>
+      `${n} chalets d’altitude — ski-in/ski-out, sauna privé, après-ski signé par les meilleurs chefs alpins.`,
+    subtitleEn: (n) =>
+      `${n} alpine chalets — ski-in/ski-out, private sauna, après-ski signed by the finest alpine chefs.`,
+    match: (h) =>
+      /\bchalet\b/iu.test(h.nameFr) || (h.nameEn !== null && /\bchalet\b/iu.test(h.nameEn)),
+  },
+
+  {
+    slug: 'villas',
+    labelFr: 'Villas privées',
+    labelEn: 'Private Villas',
+    h1Fr: 'Villas privées d’exception',
+    h1En: 'Exceptional Private Villas',
+    metaTitleFr: 'Villas privées en France — MyConciergeHotel',
+    metaTitleEn: 'Private Villas in France — MyConciergeHotel',
+    metaDescFr:
+      'Sélection MyConciergeHotel des villas privées avec services hôteliers : Côte d’Azur, Provence, Corse, Pays basque. Concierge dédié, piscine, intimité.',
+    metaDescEn:
+      'MyConciergeHotel selection of private villas with hotel-grade services: French Riviera, Provence, Corsica, Basque Country. Dedicated concierge, pool, intimacy.',
+    subtitleFr: (n) =>
+      `${n} villas privées sélectionnées — intimité d’une maison, services d’un Palace.`,
+    subtitleEn: (n) =>
+      `${n} selected private villas — the privacy of a home, the services of a Palace.`,
+    match: (h) =>
+      /\bvilla\b/iu.test(h.nameFr) || (h.nameEn !== null && /\bvilla\b/iu.test(h.nameEn)),
+  },
+
+  {
+    slug: 'maisons-hotes',
+    labelFr: "Maisons d'hôtes",
+    labelEn: 'Guesthouses',
+    h1Fr: 'Maisons d’hôtes d’exception en France',
+    h1En: 'Exceptional Guesthouses in France',
+    metaTitleFr: 'Maisons d’hôtes d’exception en France — MyConciergeHotel',
+    metaTitleEn: 'Exceptional Guesthouses in France — MyConciergeHotel',
+    metaDescFr:
+      'Sélection MyConciergeHotel des maisons d’hôtes haut de gamme en France — adresses confidentielles, table d’hôte, accueil personnalisé par les propriétaires.',
+    metaDescEn:
+      'MyConciergeHotel selection of upscale French guesthouses — confidential addresses, table d’hôte, personalized welcome by the owners.',
+    subtitleFr: (n) =>
+      `${n} maisons d’hôtes premium — la rencontre des propriétaires, une table commune, une adresse rare.`,
+    subtitleEn: (n) =>
+      `${n} premium guesthouses — meet the owners, share the table, discover a rare address.`,
+    match: (h) =>
+      !h.isPalace &&
+      (/\bmaison\s+d['’]?h[oô]tes?\b|\bdomaine\b/iu.test(h.nameFr) ||
+        (h.nameEn !== null && /\bguesthouse\b|\bdomain\b/iu.test(h.nameEn))),
   },
 ];
 
