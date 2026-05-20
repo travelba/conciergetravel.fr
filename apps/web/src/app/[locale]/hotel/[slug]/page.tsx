@@ -812,7 +812,6 @@ async function renderHotelPage(
   });
   const aeoAnswer = aeoBlockResult.ok ? aeoBlockResult.value.answer : aeoAnswerRaw;
   if (!aeoBlockResult.ok && process.env['NODE_ENV'] !== 'production') {
-    // eslint-disable-next-line no-console
     console.warn(
       `[aeo] hotel ${row.slug} / ${locale}: AEO answer rejected — ${JSON.stringify(
         aeoBlockResult.error,
