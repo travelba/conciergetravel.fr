@@ -177,74 +177,6 @@
       "viewBrand": "Voir les hôtels {brand} →",
       "empty": "Aucun hôtel publié pour cette marque pour le moment."
     },
-    "concierge": {
-      "eyebrow": "À propos",
-      "title": "Le Concierge",
-      "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
-      "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
-      "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
-      "trust": {
-        "title": "Nos engagements",
-        "iataTitle": "Agence IATA / APST",
-        "iataBody": "MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous vos paiements sont protégés par la garantie financière professionnelle.",
-        "gdsTitle": "Tarifs nets GDS",
-        "gdsBody": "Nous accédons à l'inventaire Amadeus GDS pour proposer le meilleur tarif net disponible, identique au tarif officiel de l'hôtel — sans surcoût caché.",
-        "amadeusTitle": "Paiement sécurisé Amadeus",
-        "amadeusBody": "Le paiement passe par l'orchestrateur Amadeus Payments, conforme PCI-DSS niveau 1. 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs."
-      },
-      "method": {
-        "title": "Notre méthode éditoriale",
-        "step1Title": "Sélection éditoriale",
-        "step1Body": "Chaque hôtel publié est sélectionné par notre équipe selon trois critères : distinction officielle (Atout France, Michelin), expérience opérationnelle vérifiée, et singularité (chambre signature, table chef, service exceptionnel).",
-        "step2Title": "Fiche rédigée par un humain",
-        "step2Body": "Nos conseillers rédigent chaque fiche après visite ou conversation directe avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur.",
-        "step3Title": "Conseil du Concierge",
-        "step3Body": "Chaque fiche se termine par un encart « Conseil du Concierge » : 60-90 mots qui livrent un secret opérationnel concret (numéro de chambre, ligne d'accès, table cachée, timing optimal). C'est notre signature."
-      },
-      "loyalty": {
-        "title": "Programme de fidélité",
-        "body": "Notre programme de fidélité MyConciergeHotel s'ouvre dès la première nuit réservée. Avantages : upgrade quand disponible, petit-déjeuner offert sur certains palaces partenaires, crédit hôtel cumulable. Voir conditions complètes."
-      },
-      "tip": {
-        "title": "Le Conseil du Concierge — la signature",
-        "body": "C'est l'élément central de chacune de nos fiches : un secret opérationnel concret partagé par notre équipe après visite. Ni avis client, ni description marketing — un raccourci d'initié, en 60-90 mots. Découvrez nos derniers Conseils sur les fiches hôtel.",
-        "cta": "Voir une fiche avec Conseil →"
-      },
-      "pro": {
-        "title": "Pour les pros",
-        "hotelierTitle": "Pour les hôteliers",
-        "hotelierBody": "Hôtels d'exception : rejoignez notre catalogue éditorial. Nous fonctionnons en partenariat direct (pas de surcommission), avec un rédacteur dédié par fiche.",
-        "miceTitle": "MICE / Séminaires",
-        "miceBody": "Nous gérons aussi les demandes séminaire, mariage, événement privatif sur nos hôtels partenaires. Devis personnalisé sous 24 h.",
-        "pressTitle": "Presse & partenaires",
-        "pressBody": "Pour toute demande presse (presse écrite, podcast, presse en ligne), contactez presse@myconciergehotel.com."
-      },
-      "faq": {
-        "title": "Foire aux questions",
-        "items": [
-          {
-            "q": "Êtes-vous une agence de voyage ?",
-            "a": "Oui, MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous nos paiements sont sécurisés par la garantie financière professionnelle."
-          },
-          {
-            "q": "Quel est votre périmètre géographique ?",
-            "a": "En V1, nous couvrons les Palaces et hôtels 5★ en France. Nous étendons progressivement à l'Italie, la Suisse, le Maroc, les Émirats et plusieurs destinations asiatiques."
-          },
-          {
-            "q": "Combien coûte votre service ?",
-            "a": "Rien pour le client final. Nous percevons une commission de l'hôtel partenaire, identique à celle versée à Booking ou Expedia. Le tarif affiché est le tarif net GDS — pas de surcoût."
-          },
-          {
-            "q": "Comment puis-je annuler une réservation ?",
-            "a": "Selon la politique d'annulation de l'hôtel choisi. La majorité des tarifs sont « flexibles » (annulation gratuite jusqu'à 48 ou 72 h). Tous les détails dans la confirmation de réservation."
-          },
-          {
-            "q": "Qu'est-ce que le Conseil du Concierge ?",
-            "a": "Un encart en bas de chaque fiche hôtel rédigé par notre équipe : 60-90 mots qui livrent un secret opérationnel (chambre signature, table cachée, timing optimal d'accès). C'est notre différenciateur principal."
-          }
-        ]
-      }
-    },
     "breadcrumb": {
       "label": "Fil d'ariane",
       "home": "Accueil",
@@ -276,6 +208,74 @@
       "label": "Choisir la langue",
       "switchTo": "English",
       "current": "Français"
+    }
+  },
+  "concierge": {
+    "eyebrow": "À propos",
+    "title": "Le Concierge",
+    "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
+    "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
+    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "trust": {
+      "title": "Nos engagements",
+      "iataTitle": "Agence IATA / APST",
+      "iataBody": "MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous vos paiements sont protégés par la garantie financière professionnelle.",
+      "gdsTitle": "Tarifs nets GDS",
+      "gdsBody": "Nous accédons à l'inventaire Amadeus GDS pour proposer le meilleur tarif net disponible, identique au tarif officiel de l'hôtel — sans surcoût caché.",
+      "amadeusTitle": "Paiement sécurisé Amadeus",
+      "amadeusBody": "Le paiement passe par l'orchestrateur Amadeus Payments, conforme PCI-DSS niveau 1. 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs."
+    },
+    "method": {
+      "title": "Notre méthode éditoriale",
+      "step1Title": "Sélection éditoriale",
+      "step1Body": "Chaque hôtel publié est sélectionné par notre équipe selon trois critères : distinction officielle (Atout France, Michelin), expérience opérationnelle vérifiée, et singularité (chambre signature, table chef, service exceptionnel).",
+      "step2Title": "Fiche rédigée par un humain",
+      "step2Body": "Nos conseillers rédigent chaque fiche après visite ou conversation directe avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur.",
+      "step3Title": "Conseil du Concierge",
+      "step3Body": "Chaque fiche se termine par un encart « Conseil du Concierge » : 60-90 mots qui livrent un secret opérationnel concret (numéro de chambre, ligne d'accès, table cachée, timing optimal). C'est notre signature."
+    },
+    "loyalty": {
+      "title": "Programme de fidélité",
+      "body": "Notre programme de fidélité MyConciergeHotel s'ouvre dès la première nuit réservée. Avantages : upgrade quand disponible, petit-déjeuner offert sur certains palaces partenaires, crédit hôtel cumulable. Voir conditions complètes."
+    },
+    "tip": {
+      "title": "Le Conseil du Concierge — la signature",
+      "body": "C'est l'élément central de chacune de nos fiches : un secret opérationnel concret partagé par notre équipe après visite. Ni avis client, ni description marketing — un raccourci d'initié, en 60-90 mots. Découvrez nos derniers Conseils sur les fiches hôtel.",
+      "cta": "Voir une fiche avec Conseil →"
+    },
+    "pro": {
+      "title": "Pour les pros",
+      "hotelierTitle": "Pour les hôteliers",
+      "hotelierBody": "Hôtels d'exception : rejoignez notre catalogue éditorial. Nous fonctionnons en partenariat direct (pas de surcommission), avec un rédacteur dédié par fiche.",
+      "miceTitle": "MICE / Séminaires",
+      "miceBody": "Nous gérons aussi les demandes séminaire, mariage, événement privatif sur nos hôtels partenaires. Devis personnalisé sous 24 h.",
+      "pressTitle": "Presse & partenaires",
+      "pressBody": "Pour toute demande presse (presse écrite, podcast, presse en ligne), contactez presse@myconciergehotel.com."
+    },
+    "faq": {
+      "title": "Foire aux questions",
+      "items": [
+        {
+          "q": "Êtes-vous une agence de voyage ?",
+          "a": "Oui, MyConciergeHotel est une agence de voyage accréditée IATA, garante APST. Tous nos paiements sont sécurisés par la garantie financière professionnelle."
+        },
+        {
+          "q": "Quel est votre périmètre géographique ?",
+          "a": "En V1, nous couvrons les Palaces et hôtels 5★ en France. Nous étendons progressivement à l'Italie, la Suisse, le Maroc, les Émirats et plusieurs destinations asiatiques."
+        },
+        {
+          "q": "Combien coûte votre service ?",
+          "a": "Rien pour le client final. Nous percevons une commission de l'hôtel partenaire, identique à celle versée à Booking ou Expedia. Le tarif affiché est le tarif net GDS — pas de surcoût."
+        },
+        {
+          "q": "Comment puis-je annuler une réservation ?",
+          "a": "Selon la politique d'annulation de l'hôtel choisi. La majorité des tarifs sont « flexibles » (annulation gratuite jusqu'à 48 ou 72 h). Tous les détails dans la confirmation de réservation."
+        },
+        {
+          "q": "Qu'est-ce que le Conseil du Concierge ?",
+          "a": "Un encart en bas de chaque fiche hôtel rédigé par notre équipe : 60-90 mots qui livrent un secret opérationnel (chambre signature, table cachée, timing optimal d'accès). C'est notre différenciateur principal."
+        }
+      ]
     }
   },
   "consent": {
