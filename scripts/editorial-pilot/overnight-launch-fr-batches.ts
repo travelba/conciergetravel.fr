@@ -55,10 +55,21 @@ const briefSet = new Set(
   briefs.filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, '')),
 );
 
-// Excluded: hotels already produced earlier in the night (the 7 with hand-crafted briefs +
-// any slug whose final.md exists in scripts/editorial-pilot/output/<slug>/final.md).
-const outputs = await readdir(resolve(REPO, 'scripts/editorial-pilot/output')).catch(() => []);
-const alreadyProduced = new Set<string>(outputs);
+// Excluded: hotels already produced earlier in the night. We require the
+// terminal `final.md` artefact to consider a hotel produced — a partial
+// directory left over by a crashed/killed pipeline run must NOT be treated
+// as completed (otherwise a relaunch silently skips the in-flight hotels).
+const outputDirs = await readdir(resolve(REPO, 'scripts/editorial-pilot/output')).catch(() => []);
+const { stat } = await import('node:fs/promises');
+const alreadyProduced = new Set<string>();
+for (const slug of outputDirs) {
+  try {
+    await stat(resolve(REPO, 'scripts/editorial-pilot/output', slug, 'final.md'));
+    alreadyProduced.add(slug);
+  } catch {
+    // No final.md → partial run, will be retried.
+  }
+}
 
 const ready = queue.filter((s) => briefSet.has(s) && !alreadyProduced.has(s));
 const stillNoBrief = queue.filter((s) => !briefSet.has(s));

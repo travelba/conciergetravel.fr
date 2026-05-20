@@ -524,6 +524,60 @@ qui est le plus exigeant en sortie structurée). Vérifier :
 3. Le ton respecte le brief (post-validate sur 1 hôtel, mesurer mots advice).
 4. Le coût/token est compatible avec le quota.
 
+## Rule 13 — Toujours fixer un timeout sur le client OpenAI (sinon hang silencieux 30 min)
+
+**Pattern observé (overnight 20 mai 2026, batches FR résiduels)** : trois
+batches du 8-pass pipeline lancés en parallèle se sont **tous figés sur
+pass-2** pendant 32 minutes sans aucune sortie ni erreur. Logs identiques :
+
+```
+✓ pass-1 done in 26966ms — 4101 in / 1917 out
+↳ pass-2 (variation syntaxique) — calling openai/gpt-5.4...
+[silence pendant 30+ minutes, aucun retour ni timeout]
+```
+
+**Cause** : le SDK `openai@4.x` instancié sans option = **timeout par défaut
+de 600 000 ms (10 min) × 3 tentatives = 30 min de hang silencieux** quand
+un socket idle se perd (perte de connexion réseau, server-side close non
+notifié, infra OpenAI qui ne renvoie pas le RST). Lancer plusieurs batches
+en parallèle augmente la probabilité qu'un seul de ces sockets reste
+collé. Sur Windows + `NODE_TLS_REJECT_UNAUTHORIZED=0` + agent keep-alive
+par défaut, le risque est encore plus élevé.
+
+**Fix appliqué dans `scripts/editorial-pilot/src/llm.ts`** :
+
+```ts
+this.client = new OpenAI({
+  apiKey,
+  timeout: 120_000, // un pass éditorial finit en ~30s, 120s ceiling
+  maxRetries: 2, // 2 retries × 120s = 6 min max wallclock
+});
+```
+
+**Heuristique de calibrage** : prendre le p99 mesuré + 4×. Pass 1 mesuré à
+27s ⇒ ceiling à 120s. Pass 4 (fact-check `gpt-5.4`, 6000 maxTokens) mesuré
+à 50s ⇒ même ceiling tient. Pour un modèle reasoning (`o3` audit), passer
+explicitement `timeout: 240_000` au call site car ces modèles peuvent
+prendre 90s+ sur les briefs verbeux.
+
+**Anti-pattern** : ❌ « Le SDK gère déjà les retries, pas besoin d'y
+toucher ». Faux : la valeur par défaut **timeout=600_000 ms** est calibrée
+pour des prompts entreprise très longs (RAG sur 100k tokens), pas pour un
+pipeline 30s/pass. La conséquence : un batch qui devrait finir en 5 min
+peut bloquer 30 min sur une seule requête morte, multiplié par chaque
+hôtel × chaque pass.
+
+**Symptôme à reconnaître** : log freeze à `calling openai/...` pendant
+
+> 3 minutes sans CPU sur le process node (visible via
+> `Get-Process -Name node | Select Id,CPU,WorkingSet`). Si CPU = 0 et le
+> log est gelé, le socket est mort — kill et relance.
+
+**À faire pour tout nouveau script LLM** : importer
+`buildLlmClient(env, 'openai')` plutôt que `new OpenAI(...)` direct, pour
+hériter du timeout configuré une seule fois dans `llm.ts`. Ne jamais
+instancier `new OpenAI({ apiKey })` sans options.
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.

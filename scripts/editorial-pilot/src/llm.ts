@@ -45,7 +45,14 @@ class OpenAiClient implements LlmClient {
   private readonly client: OpenAI;
 
   constructor(apiKey: string, model: string) {
-    this.client = new OpenAI({ apiKey });
+    // SDK defaults silently hang for ~30 min on broken sockets (10-min request
+    // timeout × 3 attempts). Editorial passes finish in 30s so a 120s ceiling
+    // surfaces stuck requests fast and lets the pipeline retry the next pass.
+    this.client = new OpenAI({
+      apiKey,
+      timeout: 120_000,
+      maxRetries: 2,
+    });
     this.model = model;
   }
 
