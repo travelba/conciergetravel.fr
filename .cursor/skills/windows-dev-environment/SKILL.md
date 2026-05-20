@@ -180,6 +180,47 @@ Remove-Item -Recurse -Force apps/web/.next
 $env:SKIP_ENV_VALIDATION="true"; pnpm --filter @mch/web exec next dev --port 3000
 ```
 
+## Rule 9 bis — `spawn` + `shell:true` on Windows mangles `&|<>` even when quoted
+
+PowerShell + pnpm.ps1 + cmd.exe form a **three-layer wrapper** that fights any
+attempt at caret-escaping shell metachars. A hotel named `"Le Roch Hotel & Spa"`
+in argv silently truncates to `"Le Roch Hotel"` when spawned via
+`spawn('pnpm', args, { shell: true })` — and the subsequent `--city Paris`
+gets misinterpreted, so build-brief-manual fails with "Missing --city".
+
+The caret-escape pattern (`arg.replace(/([&|<>])/gu, '^$1')`) does NOT work
+in practice because PowerShell strips the carets before cmd sees them.
+
+**The robust fix is to bypass the wrapper entirely**: invoke `node` + `tsx`
+directly with `shell: false`, so the args flow as a native argv array and
+no shell touches them.
+
+```ts
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+
+const localRequire = createRequire(import.meta.url);
+
+// tsx ships a `bin` entry but `dist/cli.mjs` isn't in exports — resolve via
+// the package.json then walk to the cli.
+const tsxBin = resolve(localRequire.resolve('tsx/package.json'), '..', 'dist', 'cli.mjs');
+
+spawn('node', [tsxBin, 'src/some-script.ts', '--name', 'Hôtel & Spa'], {
+  shell: false, // ← critical: no PowerShell/cmd interpretation
+  stdio: ['ignore', 'pipe', 'pipe'],
+  env: process.env,
+});
+```
+
+The reference repair lives in
+[`scripts/editorial-pilot/src/phaseC/build-yonder-briefs.ts`](../../../scripts/editorial-pilot/src/phaseC/build-yonder-briefs.ts)
+(commit on `feat/editorial-corpus-quality-convergence`, May 2026).
+
+Failure mode to spot: child process exit code 1 with stderr "Missing --city"
+when the original hotel name contained `&`, `|`, `<`, or `>`. Always test the
+fix against an `&`-containing argument before declaring it solved.
+
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle
 
 `packages/config/src/env-web.ts` uses `createEnv` from `@t3-oss/env-nextjs`. The `skipValidation` flag reads `process.env.SKIP_ENV_VALIDATION`, which is **server-only** — it is not inlined into the client bundle (only `NEXT_PUBLIC_*` vars are). So:

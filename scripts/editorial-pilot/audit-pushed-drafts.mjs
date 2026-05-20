@@ -76,13 +76,21 @@ function countWords(s) {
 
 function countLongSentences(s) {
   if (!s) return 0;
-  // Split into sentences on `.`, `!`, `?` followed by space or end
-  const sentences = s
-    .replace(/\s+/gu, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-ZÀ-ÿ])/u)
-    .map((x) => x.trim())
-    .filter((x) => x.length > 5);
-  return sentences.filter((sent) => countWords(sent) > 25).length;
+  // First split on markdown bullet lines (`\n- ` or `\n* `): each bullet item
+  // is its own semantic unit. Without this, a 5-line bullet block would be
+  // counted as a single 100-word "sentence" — a false positive.
+  const bulletChunks = s.split(/\n\s*[-*]\s+/u);
+  let count = 0;
+  for (const chunk of bulletChunks) {
+    // Then split into sentences on `.`, `!`, `?` followed by space or end
+    const sentences = chunk
+      .replace(/\s+/gu, ' ')
+      .split(/(?<=[.!?])\s+(?=[A-ZÀ-ÿ])/u)
+      .map((x) => x.trim())
+      .filter((x) => x.length > 5);
+    count += sentences.filter((sent) => countWords(sent) > 25).length;
+  }
+  return count;
 }
 
 function countBannedTerms(s) {

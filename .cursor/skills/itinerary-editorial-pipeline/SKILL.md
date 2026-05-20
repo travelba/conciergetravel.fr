@@ -40,7 +40,9 @@ Se référer à `.cursor/rules/editorial-voice.mdc` + `EDITORIAL_VOICE.md`. Rés
 ## Rule 2 — Pipeline en 6 passes
 
 ### Passe 1 — Brief destination
+
 Requêtes Supabase avant génération :
+
 ```sql
 -- Hôtels disponibles pour la destination
 select id, slug, name, city, region, booking_mode, priority
@@ -76,7 +78,7 @@ meta_desc_fr  → 140-160 chars, inclure destination + durée + 1 USP
 - **Question** : "Quel est le meilleur itinéraire pour [destination] en [N] jours ?"
 - **Réponse** : 40-80 mots validés par `buildAeoBlock`
 - Format : affirmation directe → 2-3 étapes clés → 1 hôtel nommé → signal fraîcheur
-- Exemple (58 mots) : *"Pour 14 jours au Japon, votre Concierge recommande Tokyo (4 nuits, Aman Tokyo, quartier Otemachi) puis Kyoto (4 nuits, Park Hyatt Kyoto, colline Higashiyama) avant Hakone (2 nuits, vue Fuji). Incontournables : Asakusa, Arashiyama en tuk-tuk, kaiseki au Kikunoi. Période idéale : avril (cerisiers) ou novembre (momiji). Mis à jour mai 2026."*
+- Exemple (58 mots) : _"Pour 14 jours au Japon, votre Concierge recommande Tokyo (4 nuits, Aman Tokyo, quartier Otemachi) puis Kyoto (4 nuits, Park Hyatt Kyoto, colline Higashiyama) avant Hakone (2 nuits, vue Fuji). Incontournables : Asakusa, Arashiyama en tuk-tuk, kaiseki au Kikunoi. Période idéale : avril (cerisiers) ou novembre (momiji). Mis à jour mai 2026."_
 
 ### Passe 4 — AEO Block EN
 
@@ -104,6 +106,7 @@ meta_desc_fr  → 140-160 chars, inclure destination + durée + 1 USP
 ```
 
 Contraintes :
+
 - `body_fr` ≥ 150 mots, `body_en` ≥ 150 mots
 - ≥ 1 POI réel nommé par step
 - Si `hotel_id` présent : nommer l'hôtel + 1 USP concrète dans le body
@@ -112,6 +115,7 @@ Contraintes :
 ### Passe 6 — FAQ (8-15 Q&A)
 
 Couvrir obligatoirement :
+
 1. "Quelle est la meilleure période pour visiter [destination] ?"
 2. "Combien de jours faut-il pour [destination] ?"
 3. "Quel hôtel 5★ choisir pour un itinéraire [destination] ?"
@@ -152,6 +156,7 @@ Itinéraire [slug]
 ```
 
 Vérifier après chaque seed :
+
 ```ts
 assert(itinerary.related_ranking_ids.length >= 2, 'Min 2 classements liés');
 assert(itinerary.related_guide_slugs.length >= 1, 'Min 1 guide lié');
@@ -162,29 +167,29 @@ assert(itinerary.related_itinerary_slugs.length >= 2, 'Min 2 itinéraires simila
 
 ## Rule 5 — Longue traîne FAQ à couvrir
 
-| Catégorie | Patterns à couvrir |
-|-----------|--------------------|
-| Durée | "[N] jours [destination] suffisant", "combien de temps [destination]" |
+| Catégorie   | Patterns à couvrir                                                                |
+| ----------- | --------------------------------------------------------------------------------- |
+| Durée       | "[N] jours [destination] suffisant", "combien de temps [destination]"             |
 | Hébergement | "meilleur hôtel luxe [destination] itinéraire", "palace [destination] bien situé" |
-| Style | "[destination] lune de miel", "[destination] en famille", "[destination] solo" |
-| Saison | "[destination] [mois] météo", "éviter [destination] en [période]" |
-| Budget | "itinéraire [destination] luxe budget", "prix séjour [destination] 5 étoiles" |
-| Logistique | "se déplacer [destination]", "transports [destination]" |
+| Style       | "[destination] lune de miel", "[destination] en famille", "[destination] solo"    |
+| Saison      | "[destination] [mois] météo", "éviter [destination] en [période]"                 |
+| Budget      | "itinéraire [destination] luxe budget", "prix séjour [destination] 5 étoiles"     |
+| Logistique  | "se déplacer [destination]", "transports [destination]"                           |
 
 ---
 
 ## Anti-patterns
 
-| Erreur | Impact | Fix |
-|--------|--------|-----|
-| Traduire littéralement FR → EN sur AEO | EN < 40 mots → rejeté `buildAeoBlock` | Ajouter 1 détail opérationnel unique EN (rule 10 `concierge-voice-pipeline`) |
-| Coller `description_fr` de la fiche hôtel | Contenu dupliqué → pénalité SEO | Contextualiser uniquement, ≥ 50 mots originaux |
-| `hotel_ids[]` avec hôtels `display_only` | 0 CTA réservation = 0 conversion | Filtrer `booking_mode != 'display_only'` |
-| AEO > 80 mots | Rejeté par `buildAeoBlock` → build crash | Compter avant de shipper |
-| `unstable_cache` retournant un `Map` | 500 sur cache hit (cf. hotfix 4d02187) | Retourner `Record<string, …>` uniquement |
-| Sections sans POI nommé | Contenu vague → non cité par LLM | ≥ 1 POI nommé par step |
-| 0 lien entrant depuis guides/classements | Island de maillage → SEO faible | Déclencher mise à jour guides post-publish |
-| AEO answer sans signal de fraîcheur | LLM ne cite pas la date → perd en crédibilité | Inclure "Mis à jour [mois année]" |
+| Erreur                                    | Impact                                        | Fix                                                                          |
+| ----------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
+| Traduire littéralement FR → EN sur AEO    | EN < 40 mots → rejeté `buildAeoBlock`         | Ajouter 1 détail opérationnel unique EN (rule 10 `concierge-voice-pipeline`) |
+| Coller `description_fr` de la fiche hôtel | Contenu dupliqué → pénalité SEO               | Contextualiser uniquement, ≥ 50 mots originaux                               |
+| `hotel_ids[]` avec hôtels `display_only`  | 0 CTA réservation = 0 conversion              | Filtrer `booking_mode != 'display_only'`                                     |
+| AEO > 80 mots                             | Rejeté par `buildAeoBlock` → build crash      | Compter avant de shipper                                                     |
+| `unstable_cache` retournant un `Map`      | 500 sur cache hit (cf. hotfix 4d02187)        | Retourner `Record<string, …>` uniquement                                     |
+| Sections sans POI nommé                   | Contenu vague → non cité par LLM              | ≥ 1 POI nommé par step                                                       |
+| 0 lien entrant depuis guides/classements  | Island de maillage → SEO faible               | Déclencher mise à jour guides post-publish                                   |
+| AEO answer sans signal de fraîcheur       | LLM ne cite pas la date → perd en crédibilité | Inclure "Mis à jour [mois année]"                                            |
 
 ---
 

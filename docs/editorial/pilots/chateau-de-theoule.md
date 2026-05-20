@@ -1,36 +1,55 @@
-# Château
+# Château de Théoule
 
-Le Château de Théoule incarne l’harmonie entre la Côte d’Azur et l’excellence hôtelière. Classé Palace par Atout France, cet établissement se distingue par sa proximité avec la Méditerranée et ses plages accessibles en quelques pas. Les amateurs de gastronomie y trouvent leur bonheur : deux restaurants étoilés Michelin, Mareluna sous la direction du chef napolitain Francesco Fezza, et L’Or Bleu, proposent des saveurs innovantes, entre terre et mer. À moins de 300 mètres, d’autres adresses culinaires et balnéaires complètent cette expérience. Ici, on ne fait pas que séjourner, on savoure chaque instant.
+Le Château de Théoule n’est pas qu’un hôtel, c’est une destination. Niché sur la Côte d’Azur, il allie le prestige d’un palace classé par Atout France à la quiétude d’un bord de mer enchanteur. Ses deux restaurants Michelin, dirigés par Francesco Fezza et Alain Montigny (Meilleur Ouvrier de France 2004), sont des étapes incontournables pour les épicuriens. Imaginez savourer une langoustine rôtie ou des tortellinis de lapin face à la Méditerranée.
 
-Avec des origines encore voilées de mystère, ce château invite à la découverte. Sa localisation privilégie aussi l’exploration : Cannes est à moins de 15 kilomètres, tandis que Théoule-sur-Mer offre un cadre apaisant, loin de l’agitation. Que vous soyez en quête de sérénité ou d’aventures gastronomiques, le Château de Théoule s’impose comme une adresse incontournable. Les couchers de soleil sur la baie, depuis les terrasses voisines, ajoutent une touche inoubliable à ce séjour d’exception.
+Ce lieu discret, à quelques minutes de Cannes, incarne le charme d’un sud préservé. Les amateurs de gastronomie ne seront pas déçus, et les visiteurs en quête de tranquillité trouveront ici un refuge unique. Avec des points d’intérêt comme La Plage Blanche, à seulement 57 mètres, ou le paisible Port la Galère, chaque instant peut être une découverte. Même si certaines informations sur les infrastructures restent floues, la réputation du Château de Théoule repose sur son exigence de qualité et son cadre naturel exceptionnel.
 
 ## Histoire & héritage
 
-Les origines précises du Château de Théoule restent encore à documenter. Selon Wikipedia, le terme "château" désigne une résidence seigneuriale de prestige, ce qui laisse deviner un passé riche en distinction. Une recherche approfondie permettrait d'éclairer davantage l’héritage de ce lieu.
+Le Château de Théoule est mentionné dans des sources comme Wikipédia, mais peu d'informations précises sur son histoire ou ses origines sont disponibles. Aujourd'hui, il s'inscrit dans le paysage de l'hôtellerie de luxe sur la Côte d'Azur.
 
 ## Architecture & design
 
-Aucune description détaillée de l'architecture du Château n’a encore été consignée formellement. Une documentation plus complète serait nécessaire pour mieux comprendre l'intégration de cet édifice dans son environnement naturel méditerranéen.
+Les détails sur l'architecture du château, ses architectes ou ses rénovations ne sont pas documentés. Cependant, son emplacement en bord de mer en fait un repère visuel marquant, en harmonie avec la sérénité de Théoule-sur-Mer.
+
+## L'expérience à demeure
+
+Les données sur la capacité de l'hôtel ne sont pas renseignées. Toutefois, son classement 5 étoiles et son statut de Palace garantissent un service de haut niveau, dans un cadre naturel préservé.
 
 ## Restauration
 
-Le Château accueille deux destinations gastronomiques récompensées par une étoile Michelin, chacune offrant une exploration culinaire unique.
+Le Château de Théoule abrite deux restaurants étoilés par le Guide Michelin, chacun dirigé par des chefs renommés.
 
-- **Mareluna** : Le chef Francesco Fezza propose une cuisine méditerranéenne rehaussée d'influences asiatiques. Les trois menus de dégustation évoqués par le Guide Michelin mêlent avec virtuosité terre et mer : ris de veau et langoustine, tortellini de lapin et oursin, ou encore une option végétarienne ingénieuse. (Source : Guide Michelin).
+- **Mareluna** : Francesco Fezza, chef napolitain, propose trois menus dégustation créatifs, avec des plats tels que ris de veau et langoustines ou tortellinis de lapin à l’oursin. Une option végétarienne inventive complète l'offre.
+- **L'Or Bleu** : Sous la direction d'Alain Montigny, Meilleur Ouvrier de France 2004, ce restaurant propose une cuisine contemporaine, avec des créations comme la langoustine rôtie accompagnée de betterave et de framboise.
 
-- **L'Or Bleu** : Ce restaurant moderne propose des combinaisons délicates, comme la langoustine rôtie accompagnée de tartare de betterave et d'un condiment à la framboise. Une adresse qui traduit le savoir-faire culinaire contemporain. (Source : Guide Michelin).
+## Bien-être & spa
+
+Les informations sur les installations de bien-être ne sont pas disponibles. Une vérification auprès de l'hôtel serait nécessaire pour confirmer la présence d'un spa ou d'autres équipements de détente.
 
 ## À deux pas
 
-La localisation du Château de Théoule le place à proximité immédiate d'adresses gastronomiques et balnéaires :
+Le Château de Théoule bénéficie d'une localisation idéale, à proximité de plusieurs points d'intérêt :
 
-- À environ 57 mètres, **La Plage Blanche** offre des moments de détente avec une vue sur l’horizon maritime.
-- Le **Club Port la Galère**, à environ 294 mètres, s'étend sur 23 hectares et promet une immersion dans un parc méditerranéen sécurisé.
-- **Chez Philippe**, à environ 138 mètres, se niche sur une plage de sable blanc entourée de palmiers, une véritable carte postale méditerranéenne.
+- **Restaurant La Plage Blanche** : À environ 57 mètres, ce lieu propose des repas en bord de mer.
+- **Port la Galère** : Situé à environ 294 mètres, ce complexe exclusif est niché dans un parc sécurisé de 23 hectares.
+- **Restaurant Les Voiles de Théoule** : À environ 187 mètres, ce restaurant offre une terrasse avec vue sur la mer et des plats de saison.
+- **Restaurant Les Roches Roses** : À environ 191 mètres, il propose des menus accessibles à partir de 18,80 €.
+- **Restaurant Le Bistrot M - Tiara Miramar Beach Resort** : À environ 210 mètres, ce bistrot associe cuisine raffinée et cadre chic face à la Méditerranée.
 
-Enfin, situé à environ 210 mètres, le **Bistrot M** du Tiara Miramar Beach Resort invite à savourer une cuisine bistronomique face à la Méditerranée. Chaque adresse alentour enrichit le séjour d’une palette d’expériences locales.
+## Service & équipe
+
+Le Château de Théoule, en tant que Palace 5 étoiles, est attendu à un niveau de service élevé. Cependant, des détails spécifiques, comme la présence d'une conciergerie ou d'autres services, ne sont pas confirmés dans les sources disponibles.
 
 ## En pratique
 
-- **Adresse** : 55, 06590 Théoule-Sur-Mer, FR
-- **Classement** : Palace Atout France
+- **Adresse** : 55 Av. de Lérins, 06590 Théoule-Sur-Mer, FR
+- **Classement** : Reconnu Palace par Atout France
+- **Capacité totale** : [Non renseignée]
+- **Saisonnalité** : [Non renseignée]
+- **Fourchette tarifaire indicative** : [Non renseignée]
+- **Sources principales utilisées** : Wikipedia, Guide Michelin, Atout France
+
+## Notre verdict
+
+Le Château de Théoule se distingue par son cadre naturel et ses restaurants étoilés, en faisant une destination idéale pour les amateurs de gastronomie et de détente. Cependant, des informations supplémentaires sur ses services et infrastructures permettraient de mieux évaluer son offre globale.

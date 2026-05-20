@@ -549,12 +549,33 @@ function buildSources(
     seen.add(tavilySource);
     sources.push({ type: 'official', url: tavilySource, consulted_at: today });
   }
-  // schema requires min(2) sources, ensured by datatourisme + (official|wikidata|wikipedia)
-  if (sources.length < 2) {
+  // BriefSchema requires min(2) sources. The happy path always produces ≥ 2
+  // (datatourisme + one of official/wikidata/wikipedia). For obscure hotels
+  // with no public knowledge graph (no QID, no Wikipedia article, no
+  // `official_url` so Tavily has no extraction target), we emit auto_pending
+  // placeholders pointing the editor to manual research surfaces. The
+  // downstream pipeline (Pass 4 fact-check) flags these briefs as
+  // low-confidence — that's the intended behaviour for the FR residual queue
+  // (see docs/runbooks/overnight-2026-05-19.md).
+  const placeholders: ReadonlyArray<{ url: string; citation: string }> = [
+    {
+      url: 'https://fr.wikipedia.org/wiki/Special:Search',
+      citation: `${AUTO_DRAFT} — Wikipedia search to attach an article URL`,
+    },
+    {
+      url: 'https://www.google.com/search',
+      citation: `${AUTO_DRAFT} — find press, magazine or homepage URL`,
+    },
+  ];
+  let placeholderIdx = 0;
+  while (sources.length < 2 && placeholderIdx < placeholders.length) {
+    const p = placeholders[placeholderIdx];
+    placeholderIdx += 1;
+    if (p === undefined) break;
     sources.push({
       type: 'auto_pending',
-      url: 'https://fr.wikipedia.org/wiki/Special:Search',
-      citation: `${AUTO_DRAFT} — to be replaced with Wikipedia article URL after enrichment`,
+      url: p.url,
+      citation: p.citation,
       consulted_at: today,
     });
   }

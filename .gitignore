@@ -102,3 +102,11 @@ scripts/editorial-pilot/*.mjs
 scripts/editorial-pilot/audit-pushed-drafts.json
 scripts/editorial-pilot/runs/
 
+# Overnight pipeline runtime artifacts (logs + queue files) — repo root
+/runs/
+
+# Editorial pilot — overnight audit dumps + test outputs (reproducible)
+scripts/editorial-pilot/audit-buckets.json
+scripts/editorial-pilot/audit-guides-en-gaps.json
+scripts/editorial-pilot/output-test-*/
+

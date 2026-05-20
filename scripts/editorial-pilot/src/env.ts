@@ -37,8 +37,22 @@ const EnvSchema = z
     OPENAI_API_KEY: optionalApiKey,
     ANTHROPIC_API_KEY: optionalApiKey,
     EDITORIAL_PILOT_PROVIDER: optionalProvider,
-    EDITORIAL_PILOT_OPENAI_MODEL: z.string().min(3).default('gpt-4o-2024-11-20'),
-    EDITORIAL_PILOT_ANTHROPIC_MODEL: z.string().min(3).default('claude-sonnet-4-5-20250929'),
+    EDITORIAL_PILOT_OPENAI_MODEL: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
+      z.string().min(2).default('gpt-5.4'),
+    ),
+    EDITORIAL_PILOT_OPENAI_MODEL_MECHANICAL: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
+      z.string().min(2).default('gpt-5.4-mini'),
+    ),
+    EDITORIAL_PILOT_OPENAI_MODEL_AUDIT: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
+      z.string().min(2).default('o3'),
+    ),
+    EDITORIAL_PILOT_ANTHROPIC_MODEL: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
+      z.string().min(2).default('claude-sonnet-4-5-20250929'),
+    ),
     DATATOURISME_API_KEY: optionalUuid,
     DATATOURISME_API_BASE: z.string().url().default('https://api.datatourisme.fr/v1'),
     TAVILY_API_KEY: z.preprocess(

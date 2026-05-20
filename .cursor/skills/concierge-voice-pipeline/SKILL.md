@@ -406,6 +406,178 @@ détail JSON pour pilotage. Le critère NEEDS_REGEN englobe :
 
 À relancer après chaque batch push pour suivre la dérive qualitative.
 
+## Rule 11 — Le FR a un échec symétrique (bullet implicite à 47-49 mots)
+
+Audit complémentaire (19 mai 2026, batch 3 + retry session soir) : après
+correction de Rule 10 (EN), **14 fiches** sont tombées en NEEDS_REGEN sur
+`advice_fr < 50w`. Médiane 48w.
+
+Cause racine : **bullet implicite à 3 mini-recommandations**. Le LLM compresse
+le conseil en 3 phrases de 15 mots chacune (« Réservez X, demandez Y, évitez
+Z »), sortant à 47-49 mots — sous le floor par 1-3 mots.
+
+C'est l'image-miroir de Rule 10 : EN trop dense vs FR trop télégraphique.
+
+**Fix appliqué côté prompt Pass 8** (section « Spécificité FR — anti-bullet-list-implicite ») :
+
+- Le LLM doit développer 1 secret opérationnel + 1 justification de ce
+  secret (« pourquoi ») + 1 précision saisonnière OU 1 alternative concrète.
+- Pattern obligatoire : `Mon conseil : <secret> — <raison opérationnelle de
+l'effet>. <Précision saisonnière ou alternative>.`
+- Si premier jet < 50w, **étoffer** la justification, ne pas raccourcir le EN
+  pour rééquilibrer.
+
+**Anti-fix** : ❌ Re-run pipeline complet quand seul concierge_advice fail
+(coût ~$1 vs $0.05 du `run-humanizer.ts`).
+❌ Acceptation tacite des 47-49w en relâchant la Zod à `min(45)` — anéantit
+le contrat ADR-0011 et autorise la dérive bullet implicite.
+
+**Convergence empirique observée** : avec les deux patches (Rule 10 + Rule 11)
+appliqués + 1 retry humanizer, le corpus de 84 drafts passe à **77 PASS /
+7 NEEDS_REGEN (92 %)**. Les 7 résiduels sont long_sentences (4×) +
+banned_terms (2×) + thin brief (1×) — pas advice-driven. Voir
+[`docs/editorial/audit-phaseC-session-2026-05-19.md`](../../docs/editorial/audit-phaseC-session-2026-05-19.md).
+
+## Rule 12 — GPT-5.x / O-series API migration : `max_completion_tokens` + budget reasoning
+
+**Pattern observé (overnight 19 mai 2026)** : la migration du modèle principal
+de `gpt-4o-2024-11-20` vers `gpt-5.4` casse silencieusement la pipeline
+existante avec deux symptômes :
+
+1. **HTTP 400 `Unsupported parameter: 'max_tokens'`** — les modèles GPT-5.x
+   et O-series (`o3`, `o4-mini`) n'acceptent plus `max_tokens`, il faut
+   passer `max_completion_tokens`.
+2. **Pass 4 fact-check tronqué silencieusement** — GPT-5.4 est ~30 % plus
+   verbeux que GPT-4o sur les rapports JSON (~4000 out tokens vs ~2500). À
+   `maxTokens: 4000`, le JSON sort coupé au milieu d'un tableau, le `JSON.parse()`
+   crashe la pipeline avec `SyntaxError: Expected ',' or ']'`.
+
+**Fix appliqué dans `scripts/editorial-pilot/src/llm.ts`** :
+
+```ts
+function isNewParameterModel(model: string): boolean {
+  return /^(gpt-5|o3$|o4-mini)/.test(model);
+}
+function isReasoningModel(model: string): boolean {
+  return /^(o3$|o4-mini)/.test(model);
+}
+
+const useNewParams = isNewParameterModel(this.model);
+const reasoning = isReasoningModel(this.model);
+const baseTokens = opts.maxOutputTokens ?? 4000;
+// O-series consume up to 50% of the budget on internal reasoning.
+const tokens = reasoning ? Math.max(baseTokens, 6000) : baseTokens;
+
+if (useNewParams) {
+  params['max_completion_tokens'] = tokens;
+  if (!reasoning) params['temperature'] = opts.temperature ?? 0.7;
+  // O-series ignore `temperature` — never set it.
+} else {
+  params['max_tokens'] = tokens;
+  params['temperature'] = opts.temperature ?? 0.7;
+}
+```
+
+**Fix appliqué dans `scripts/editorial-pilot/src/pipeline.ts`** Pass 4 :
+
+- `maxTokens` passé de 4000 → **6000** (marge confortable même pour briefs
+  riches).
+- Parsing JSON défensif : si `extractJson()` échoue, on log un warning,
+  on assigne `final_recommendation = 'NEEDS_PASS_2BIS'` et on continue
+  la pipeline (pas de crash). Le hôtel sortira flaggé pour review manuelle
+  plutôt que de bloquer toute la batch.
+
+```ts
+let rawFactCheck: unknown = null;
+let factCheckParseError: string | null = null;
+try {
+  rawFactCheck = extractJson(factCheck.content);
+} catch (e) {
+  factCheckParseError = (e as Error).message;
+  console.warn(`  ⚠ Pass 4 JSON parse failed: ${factCheckParseError.slice(0, 200)}`);
+}
+const factCheckParsed =
+  rawFactCheck === null
+    ? { success: false as const }
+    : FactCheckReportSchema.safeParse(rawFactCheck);
+const final_recommendation = factCheckParsed.success
+  ? factCheckParsed.data.final_recommendation
+  : 'NEEDS_PASS_2BIS';
+```
+
+**Anti-pattern** : ❌ « Les Pro models GPT-5.5 Pro / O3-Pro sont meilleurs,
+basculons-y ». Ces modèles utilisent l'API **Responses** (pas Chat Completions)
+qui n'est pas dans le SDK pinné `openai@4.x`. Probing direct (script
+`scripts/editorial-pilot/probe-models.ts`) a confirmé `400 Bad Request — not
+a chat model` sur ces deux variantes en mai 2026. Tant que l'on n'a pas
+upgradé le SDK et migré les call sites, \*\*rester sur `gpt-5.4` (creative)
+
+- `gpt-5.4-mini` (mécanique) + `o3` (audit hallucinations)\*\*.
+
+**Probing systématique avant tout switch de modèle** : ne jamais déployer
+un nouveau modèle dans le pipeline sans avoir d'abord lancé
+`probe-models.ts` sur quelques prompts représentatifs (incluant Pass 4
+qui est le plus exigeant en sortie structurée). Vérifier :
+
+1. La requête passe (pas de 400/404).
+2. La réponse est parseable (pas de coupure JSON à `max_completion_tokens`).
+3. Le ton respecte le brief (post-validate sur 1 hôtel, mesurer mots advice).
+4. Le coût/token est compatible avec le quota.
+
+## Rule 13 — Toujours fixer un timeout sur le client OpenAI (sinon hang silencieux 30 min)
+
+**Pattern observé (overnight 20 mai 2026, batches FR résiduels)** : trois
+batches du 8-pass pipeline lancés en parallèle se sont **tous figés sur
+pass-2** pendant 32 minutes sans aucune sortie ni erreur. Logs identiques :
+
+```
+✓ pass-1 done in 26966ms — 4101 in / 1917 out
+↳ pass-2 (variation syntaxique) — calling openai/gpt-5.4...
+[silence pendant 30+ minutes, aucun retour ni timeout]
+```
+
+**Cause** : le SDK `openai@4.x` instancié sans option = **timeout par défaut
+de 600 000 ms (10 min) × 3 tentatives = 30 min de hang silencieux** quand
+un socket idle se perd (perte de connexion réseau, server-side close non
+notifié, infra OpenAI qui ne renvoie pas le RST). Lancer plusieurs batches
+en parallèle augmente la probabilité qu'un seul de ces sockets reste
+collé. Sur Windows + `NODE_TLS_REJECT_UNAUTHORIZED=0` + agent keep-alive
+par défaut, le risque est encore plus élevé.
+
+**Fix appliqué dans `scripts/editorial-pilot/src/llm.ts`** :
+
+```ts
+this.client = new OpenAI({
+  apiKey,
+  timeout: 120_000, // un pass éditorial finit en ~30s, 120s ceiling
+  maxRetries: 2, // 2 retries × 120s = 6 min max wallclock
+});
+```
+
+**Heuristique de calibrage** : prendre le p99 mesuré + 4×. Pass 1 mesuré à
+27s ⇒ ceiling à 120s. Pass 4 (fact-check `gpt-5.4`, 6000 maxTokens) mesuré
+à 50s ⇒ même ceiling tient. Pour un modèle reasoning (`o3` audit), passer
+explicitement `timeout: 240_000` au call site car ces modèles peuvent
+prendre 90s+ sur les briefs verbeux.
+
+**Anti-pattern** : ❌ « Le SDK gère déjà les retries, pas besoin d'y
+toucher ». Faux : la valeur par défaut **timeout=600_000 ms** est calibrée
+pour des prompts entreprise très longs (RAG sur 100k tokens), pas pour un
+pipeline 30s/pass. La conséquence : un batch qui devrait finir en 5 min
+peut bloquer 30 min sur une seule requête morte, multiplié par chaque
+hôtel × chaque pass.
+
+**Symptôme à reconnaître** : log freeze à `calling openai/...` pendant
+
+> 3 minutes sans CPU sur le process node (visible via
+> `Get-Process -Name node | Select Id,CPU,WorkingSet`). Si CPU = 0 et le
+> log est gelé, le socket est mort — kill et relance.
+
+**À faire pour tout nouveau script LLM** : importer
+`buildLlmClient(env, 'openai')` plutôt que `new OpenAI(...)` direct, pour
+hériter du timeout configuré une seule fois dans `llm.ts`. Ne jamais
+instancier `new OpenAI({ apiKey })` sans options.
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.

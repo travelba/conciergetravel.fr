@@ -1,4 +1,5 @@
 # Cahier des Charges — Feature Itinéraires SEO/GEO
+
 ## MyConciergeTravel · MyConciergeHotel.com
 
 > **Statut** : Spécification v1.0 — à implémenter via Cursor  
@@ -11,6 +12,7 @@
 ### 1.1 Opportunité SEO
 
 Les requêtes itinéraires représentent une part massive du contenu voyage recherché :
+
 - `itinéraire japon 2 semaines` : volume très élevé, concurrence éditoriale forte mais OTA absentes
 - `meilleurs hôtels itinéraire toscane` : longue traîne à forte intention transactionnelle
 - Les LLM génèrent systématiquement des suggestions d'hébergement dans leurs réponses itinéraires → vecteur GEO majeur
@@ -22,6 +24,7 @@ Contrairement aux blogs voyages généralistes, MyConciergeHotel.com positionne 
 ### 1.3 Intégration dans l'architecture existante
 
 La feature itinéraire s'appuie sur les fondations déjà en place :
+
 - Tables `hotels`, `editorial_guides`, `editorial_rankings` → réutilisées par référence
 - Package `@mch/seo` : `buildAeoBlock`, `buildLlmsTxt`, `DEFAULT_AGENT_SKILLS`, JSON-LD `HowTo` + `ItemList` déjà buildés
 - Routes Next.js `[locale]` bilingue FR/EN déjà opérationnelles
@@ -186,10 +189,10 @@ apps/web/src/app/[locale]/
 
 ### 3.2 URL canoniques
 
-| Locale | Hub | Fiche |
-|--------|-----|-------|
-| FR | `/fr/itineraires` | `/fr/itineraire/[slug_fr]` |
-| EN | `/en/itineraries` | `/en/itinerary/[slug_en]` |
+| Locale | Hub               | Fiche                      |
+| ------ | ----------------- | -------------------------- |
+| FR     | `/fr/itineraires` | `/fr/itineraire/[slug_fr]` |
+| EN     | `/en/itineraries` | `/en/itinerary/[slug_en]`  |
 
 **i18n routing** — ajouter dans `lib/i18n/routing.ts` > `pathnames` :
 
@@ -207,7 +210,7 @@ apps/web/src/app/[locale]/
 ### 3.3 ISR & cache tags
 
 ```ts
-export const revalidate = 3600;  // fiche
+export const revalidate = 3600; // fiche
 // hub : revalidate = 86400
 // Cache tags : `itinerary-${slug}`, `itineraries-hub`, `itinerary-${country}`
 // IMPORTANT : unstable_cache retourne Record<…> pas Map/Set → cf. hotfix 4d02187
@@ -286,20 +289,22 @@ Hero (image + titre + badges : durée / thème / saison)
 
 ### 5.5 Maillage Interne (CRITIQUE)
 
-| Lien sortant | Minimum | Composant | Anchor text |
-|---|---|---|---|
-| `/hotel/[slug]` | 1 par étape | `<ItineraryHotelCard>` | Nom exact de l'hôtel |
-| `/classement/[slug]` | ≥ 2 | `<RelatedRankings>` | Titre du classement |
-| `/guide/[slug]` | ≥ 1 | `<RelatedGuides>` | "Notre guide [Destination]" |
-| `/itineraire/[slug]` | ≥ 2 | `<RelatedItineraries>` | Titre de l'itinéraire |
-| `/itineraires` (hub) | 1 | BreadcrumbList | "Tous nos itinéraires" |
+| Lien sortant         | Minimum     | Composant              | Anchor text                 |
+| -------------------- | ----------- | ---------------------- | --------------------------- |
+| `/hotel/[slug]`      | 1 par étape | `<ItineraryHotelCard>` | Nom exact de l'hôtel        |
+| `/classement/[slug]` | ≥ 2         | `<RelatedRankings>`    | Titre du classement         |
+| `/guide/[slug]`      | ≥ 1         | `<RelatedGuides>`      | "Notre guide [Destination]" |
+| `/itineraire/[slug]` | ≥ 2         | `<RelatedItineraries>` | Titre de l'itinéraire       |
+| `/itineraires` (hub) | 1           | BreadcrumbList         | "Tous nos itinéraires"      |
 
 **Liens entrants à déclencher post-publish :**
+
 - Guides pays → ajouter bloc "Nos itinéraires pour [Pays]"
 - Fiches hôtels → widget "Cet hôtel dans nos itinéraires"
 - Nav principale → lien "Itinéraires" (CSS-only dropdown, même pattern commit `ab79771`)
 
 **Anti-cannibalisation :**
+
 - Ne jamais coller `description_fr` d'un hôtel — lien uniquement
 - Chaque contextualisation d'un hôtel dans une étape : ≥ 50 mots originaux
 - `/itineraire/` distinct de `/guide/` et `/classement/` — pas de doublon de contenu
@@ -367,6 +372,7 @@ Fichier : `packages/seo/src/agent-skills.ts` > `DEFAULT_AGENT_SKILLS.skills`
 ### 6.3 `llms-full.txt` — Entrée par itinéraire P0
 
 Chaque itinéraire P0 génère une entrée `LlmsFullTxtPage` :
+
 - `title` : titre complet FR
 - `url` : URL canonique `/fr/itineraire/[slug]`
 - `summary` : `intro_fr` tronquée à 200 mots
@@ -379,48 +385,48 @@ Chaque itinéraire P0 génère une entrée `LlmsFullTxtPage` :
 
 ### France
 
-| slug_fr | slug_en | Jours | Style | Hôtels cibles |
-|---------|---------|-------|-------|---------------|
-| `paris-luxe-3-jours` | `paris-luxury-3-days` | 3 | luxe | Ritz, Plaza Athénée, Crillon |
-| `cote-d-azur-luxe-7-jours` | `french-riviera-luxury-7-days` | 7 | luxe | Cap Eden Roc, Grand-Hôtel Cap Ferrat, Chèvre d'Or |
-| `provence-culture-gastronomie-10-jours` | `provence-culture-food-10-days` | 10 | gastronomie | Villa Gallici, Oustau Baumanière, Crillon le Brave |
-| `alsace-couple-week-end` | `alsace-romantic-weekend` | 3 | couple | Château de l'Île, Auberge de l'Ill |
-| `bordeaux-vignobles-gastronomie-5-jours` | `bordeaux-wine-food-5-days` | 5 | gastronomie | Château Lafaurie-Peyraguey, Les Sources de Caudalie |
-| `normandie-culture-week-end` | `normandy-culture-weekend` | 2 | culture | Château La Chenevière, Le Normandy Barrière |
-| `paris-famille-5-jours` | `paris-family-5-days` | 5 | famille | Hôtels families 5★ Paris |
-| `megeve-ski-luxe-5-jours` | `megeve-luxury-ski-5-days` | 5 | luxe | Les Fermes de Marie, Chalet du Mont d'Arbois |
-| `saint-tropez-ete-5-jours` | `saint-tropez-summer-5-days` | 5 | luxe | Lily of the Valley, Château de la Messardière |
-| `reims-champagne-week-end` | `reims-champagne-weekend` | 2 | gastronomie | Les Crayères |
-| `lyon-gastronomie-3-jours` | `lyon-food-3-days` | 3 | gastronomie | Villa Maia, Intercontinental Lyon |
-| `biarritz-pays-basque-5-jours` | `biarritz-basque-5-days` | 5 | culture | Hôtel du Palais |
-| `paris-lune-de-miel` | `paris-honeymoon` | 4 | couple | Le Bristol, Ritz, Four Seasons George V |
-| `val-d-isere-ski-luxe` | `val-d-isere-luxury-ski` | 5 | luxe | Les Barmes de l'Ours |
-| `bretagne-bien-etre-7-jours` | `brittany-wellness-7-days` | 7 | bien-etre | Thalasso côte bretonne |
+| slug_fr                                  | slug_en                         | Jours | Style       | Hôtels cibles                                       |
+| ---------------------------------------- | ------------------------------- | ----- | ----------- | --------------------------------------------------- |
+| `paris-luxe-3-jours`                     | `paris-luxury-3-days`           | 3     | luxe        | Ritz, Plaza Athénée, Crillon                        |
+| `cote-d-azur-luxe-7-jours`               | `french-riviera-luxury-7-days`  | 7     | luxe        | Cap Eden Roc, Grand-Hôtel Cap Ferrat, Chèvre d'Or   |
+| `provence-culture-gastronomie-10-jours`  | `provence-culture-food-10-days` | 10    | gastronomie | Villa Gallici, Oustau Baumanière, Crillon le Brave  |
+| `alsace-couple-week-end`                 | `alsace-romantic-weekend`       | 3     | couple      | Château de l'Île, Auberge de l'Ill                  |
+| `bordeaux-vignobles-gastronomie-5-jours` | `bordeaux-wine-food-5-days`     | 5     | gastronomie | Château Lafaurie-Peyraguey, Les Sources de Caudalie |
+| `normandie-culture-week-end`             | `normandy-culture-weekend`      | 2     | culture     | Château La Chenevière, Le Normandy Barrière         |
+| `paris-famille-5-jours`                  | `paris-family-5-days`           | 5     | famille     | Hôtels families 5★ Paris                            |
+| `megeve-ski-luxe-5-jours`                | `megeve-luxury-ski-5-days`      | 5     | luxe        | Les Fermes de Marie, Chalet du Mont d'Arbois        |
+| `saint-tropez-ete-5-jours`               | `saint-tropez-summer-5-days`    | 5     | luxe        | Lily of the Valley, Château de la Messardière       |
+| `reims-champagne-week-end`               | `reims-champagne-weekend`       | 2     | gastronomie | Les Crayères                                        |
+| `lyon-gastronomie-3-jours`               | `lyon-food-3-days`              | 3     | gastronomie | Villa Maia, Intercontinental Lyon                   |
+| `biarritz-pays-basque-5-jours`           | `biarritz-basque-5-days`        | 5     | culture     | Hôtel du Palais                                     |
+| `paris-lune-de-miel`                     | `paris-honeymoon`               | 4     | couple      | Le Bristol, Ritz, Four Seasons George V             |
+| `val-d-isere-ski-luxe`                   | `val-d-isere-luxury-ski`        | 5     | luxe        | Les Barmes de l'Ours                                |
+| `bretagne-bien-etre-7-jours`             | `brittany-wellness-7-days`      | 7     | bien-etre   | Thalasso côte bretonne                              |
 
 ### International
 
-| slug_fr | slug_en | Jours | Style | Hôtels cibles |
-|---------|---------|-------|-------|---------------|
-| `japon-culture-2-semaines` | `japan-culture-2-weeks` | 14 | culture | Aman Tokyo, Park Hyatt Kyoto |
-| `japon-luxe-7-jours` | `japan-luxury-7-days` | 7 | luxe | Tokyo + Kyoto 5★ |
-| `bali-lune-de-miel-10-jours` | `bali-honeymoon-10-days` | 10 | couple | COMO Uma Ubud, Four Seasons Jimbaran |
-| `maldives-luxe-7-jours` | `maldives-luxury-7-days` | 7 | couple | One&Only Reethi Rah, Soneva Fushi |
-| `toscane-gastronomie-7-jours` | `tuscany-food-wine-7-days` | 7 | gastronomie | Borgo San Felice, Rosewood Castiglion del Bosco |
-| `maroc-culture-10-jours` | `morocco-culture-10-days` | 10 | culture | La Mamounia, Royal Mansour |
-| `italie-culture-2-semaines` | `italy-culture-2-weeks` | 14 | culture | Rome + Florence + Venise 5★ |
-| `grece-iles-couple-10-jours` | `greek-islands-couple-10-days` | 10 | couple | Mystique Santorini, Canaves Oia |
-| `safari-kenya-afrique-du-sud` | `kenya-south-africa-safari` | 12 | aventure | Singita Grumeti, Royal Malewane |
-| `new-york-luxe-5-jours` | `new-york-luxury-5-days` | 5 | luxe | The Mark, Aman New York |
-| `dubai-luxe-week-end` | `dubai-luxury-weekend` | 3 | luxe | Burj Al Arab, Atlantis The Royal |
-| `sri-lanka-aventure-2-semaines` | `sri-lanka-adventure-2-weeks` | 14 | aventure | Heritance Kandalama, Cape Weligama |
-| `perou-machu-picchu-10-jours` | `peru-machu-picchu-10-days` | 10 | aventure | Inkaterra Machu Picchu, Palacio del Inka |
-| `vietnam-culture-10-jours` | `vietnam-culture-10-days` | 10 | culture | Metropole Hanoi, Four Seasons Nam Hai |
-| `patagonie-aventure-10-jours` | `patagonia-adventure-10-days` | 10 | aventure | Awasi Patagonia, Explora Patagonia |
-| `inde-rajasthan-culture-10-jours` | `india-rajasthan-culture-10-days` | 10 | culture | Oberoi Udaivilas, SUJÁN Sher Bagh |
-| `indonesie-luxe-couple-10-jours` | `indonesia-luxury-couple-10-days` | 10 | couple | Amankila, Four Seasons Bali |
-| `tanzanie-safari-zanzibar` | `tanzania-safari-zanzibar` | 10 | aventure | Singita Faru Faru, &Beyond Mnemba |
-| `thailande-bien-etre-10-jours` | `thailand-wellness-10-days` | 10 | bien-etre | Kamalaya Koh Samui, Amanpuri |
-| `islande-aventure-7-jours` | `iceland-adventure-7-days` | 7 | aventure | Ion Adventure Hotel, The Retreat Blue Lagoon |
+| slug_fr                           | slug_en                           | Jours | Style       | Hôtels cibles                                   |
+| --------------------------------- | --------------------------------- | ----- | ----------- | ----------------------------------------------- |
+| `japon-culture-2-semaines`        | `japan-culture-2-weeks`           | 14    | culture     | Aman Tokyo, Park Hyatt Kyoto                    |
+| `japon-luxe-7-jours`              | `japan-luxury-7-days`             | 7     | luxe        | Tokyo + Kyoto 5★                                |
+| `bali-lune-de-miel-10-jours`      | `bali-honeymoon-10-days`          | 10    | couple      | COMO Uma Ubud, Four Seasons Jimbaran            |
+| `maldives-luxe-7-jours`           | `maldives-luxury-7-days`          | 7     | couple      | One&Only Reethi Rah, Soneva Fushi               |
+| `toscane-gastronomie-7-jours`     | `tuscany-food-wine-7-days`        | 7     | gastronomie | Borgo San Felice, Rosewood Castiglion del Bosco |
+| `maroc-culture-10-jours`          | `morocco-culture-10-days`         | 10    | culture     | La Mamounia, Royal Mansour                      |
+| `italie-culture-2-semaines`       | `italy-culture-2-weeks`           | 14    | culture     | Rome + Florence + Venise 5★                     |
+| `grece-iles-couple-10-jours`      | `greek-islands-couple-10-days`    | 10    | couple      | Mystique Santorini, Canaves Oia                 |
+| `safari-kenya-afrique-du-sud`     | `kenya-south-africa-safari`       | 12    | aventure    | Singita Grumeti, Royal Malewane                 |
+| `new-york-luxe-5-jours`           | `new-york-luxury-5-days`          | 5     | luxe        | The Mark, Aman New York                         |
+| `dubai-luxe-week-end`             | `dubai-luxury-weekend`            | 3     | luxe        | Burj Al Arab, Atlantis The Royal                |
+| `sri-lanka-aventure-2-semaines`   | `sri-lanka-adventure-2-weeks`     | 14    | aventure    | Heritance Kandalama, Cape Weligama              |
+| `perou-machu-picchu-10-jours`     | `peru-machu-picchu-10-days`       | 10    | aventure    | Inkaterra Machu Picchu, Palacio del Inka        |
+| `vietnam-culture-10-jours`        | `vietnam-culture-10-days`         | 10    | culture     | Metropole Hanoi, Four Seasons Nam Hai           |
+| `patagonie-aventure-10-jours`     | `patagonia-adventure-10-days`     | 10    | aventure    | Awasi Patagonia, Explora Patagonia              |
+| `inde-rajasthan-culture-10-jours` | `india-rajasthan-culture-10-days` | 10    | culture     | Oberoi Udaivilas, SUJÁN Sher Bagh               |
+| `indonesie-luxe-couple-10-jours`  | `indonesia-luxury-couple-10-days` | 10    | couple      | Amankila, Four Seasons Bali                     |
+| `tanzanie-safari-zanzibar`        | `tanzania-safari-zanzibar`        | 10    | aventure    | Singita Faru Faru, &Beyond Mnemba               |
+| `thailande-bien-etre-10-jours`    | `thailand-wellness-10-days`       | 10    | bien-etre   | Kamalaya Koh Samui, Amanpuri                    |
+| `islande-aventure-7-jours`        | `iceland-adventure-7-days`        | 7     | aventure    | Ion Adventure Hotel, The Retreat Blue Lagoon    |
 
 ---
 
@@ -428,20 +434,21 @@ Chaque itinéraire P0 génère une entrée `LlmsFullTxtPage` :
 
 Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversationnelles :
 
-| Catégorie | Patterns à couvrir |
-|-----------|-------------------|
-| Durée | "combien de jours pour [destination]", "[destination] en [N] jours suffisant" |
+| Catégorie   | Patterns à couvrir                                                                      |
+| ----------- | --------------------------------------------------------------------------------------- |
+| Durée       | "combien de jours pour [destination]", "[destination] en [N] jours suffisant"           |
 | Hébergement | "meilleur hôtel 5★ pour un itinéraire [destination]", "palace [destination] bien situé" |
-| Style | "[destination] lune de miel", "[destination] en famille", "[destination] solo" |
-| Saison | "meilleure période [destination]", "éviter [destination] en [mois]" |
-| Budget | "budget itinéraire luxe [destination]", "prix séjour [destination] 5 étoiles" |
-| Logistique | "comment se déplacer [destination]", "transports [destination]" |
+| Style       | "[destination] lune de miel", "[destination] en famille", "[destination] solo"          |
+| Saison      | "meilleure période [destination]", "éviter [destination] en [mois]"                     |
+| Budget      | "budget itinéraire luxe [destination]", "prix séjour [destination] 5 étoiles"           |
+| Logistique  | "comment se déplacer [destination]", "transports [destination]"                         |
 
 ---
 
 ## 9. Plan de Travail — 4 Sprints Cursor
 
 ### Sprint 1 — DB & API
+
 1. `packages/db/migrations/0038_itineraries.sql` (schéma §2.1)
 2. Type Zod `ItinerarySchema` dans `packages/db/src/types/itinerary.ts`
 3. `getItineraryBySlug(slug, locale)` avec `unstable_cache` → retourner `Record` pas `Map`
@@ -451,6 +458,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 7. Tests Vitest : query + validation AEO
 
 ### Sprint 2 — Routes & UI
+
 1. `apps/web/src/app/[locale]/itineraires/page.tsx` (hub)
 2. `apps/web/src/app/[locale]/itineraire/[slug]/page.tsx` (fiche)
 3. Composants : `<ItinerarySteps>`, `<ItineraryHotelCard>`, `<RelatedItineraries>`, `<ItineraryAeoBlock>`
@@ -458,6 +466,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 5. Routing i18n dans `lib/i18n/routing.ts`
 
 ### Sprint 3 — Maillage & GEO
+
 1. Sitemap : ajouter query `itineraries` dans `apps/web/src/app/sitemap.xml/route.ts`
 2. `llms.txt` + `llms-full.txt` : ajouter section itinéraires
 3. Guides pays → ajouter bloc "Nos itinéraires pour [Pays]"
@@ -465,6 +474,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 5. Navigation principale → lien "Itinéraires" (CSS-only dropdown, pattern commit `ab79771`)
 
 ### Sprint 4 — Contenu P0
+
 1. Seed SQL 10 itinéraires P0 France
 2. Seed SQL 10 itinéraires P0 International
 3. Pipeline GPT-4o (réutiliser `concierge-voice-pipeline` + `llm-output-robustness`)
@@ -475,6 +485,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 ## 10. Definition of Done
 
 ### SEO
+
 - [ ] Lighthouse SEO ≥ 95 sur 3 fiches
 - [ ] Google Rich Results Test : HowTo + FAQPage valides
 - [ ] `alternates.canonical` + hreflang corrects (Screaming Frog)
@@ -482,12 +493,14 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 - [ ] 0 contenu dupliqué avec guides/classements
 
 ### GEO
+
 - [ ] `agent-skills.json` expose `get-itinerary` + `list-itineraries`
 - [ ] `llms.txt` liste les URLs itinéraires P0
 - [ ] `llms-full.txt` inclut keyFacts de chaque itinéraire P0
 - [ ] AEO block validé `buildAeoBlock` sur 100% des fiches publiées
 
 ### Maillage
+
 - [ ] ≥ 1 lien hôtel par étape
 - [ ] ≥ 2 liens classements par fiche
 - [ ] ≥ 1 lien guide destination par fiche
@@ -495,6 +508,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 - [ ] Hub `/itineraires` accessible depuis nav principale
 
 ### Performance
+
 - [ ] LCP < 2.5s mobile (Vercel Speed Insights)
 - [ ] `revalidate = 3600` configuré
 - [ ] Images hero via Next.js Image + Cloudinary
