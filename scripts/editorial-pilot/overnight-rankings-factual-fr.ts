@@ -37,7 +37,11 @@ const conn = (
 ).replace(/[?&]sslmode=[^&]*/giu, '');
 const client = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false } });
 
-const openai = new OpenAI({ apiKey: process.env['OPENAI_API_KEY']! });
+const openai = new OpenAI({
+  apiKey: process.env['OPENAI_API_KEY']!,
+  timeout: 120_000,
+  maxRetries: 2,
+});
 const MODEL = process.env['EDITORIAL_PILOT_OPENAI_MODEL'] ?? 'gpt-5.4';
 
 const SYSTEM = `Tu es éditrice senior pour MyConciergeHotel.com, agence IATA premium.

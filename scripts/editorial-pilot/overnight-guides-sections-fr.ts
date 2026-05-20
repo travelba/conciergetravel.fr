@@ -64,7 +64,11 @@ const DB_URL = RAW_DB_URL.replace(/[?&]sslmode=[^&]*/giu, '');
 
 const MODEL = process.env['EDITORIAL_PILOT_OPENAI_MODEL'] ?? 'gpt-5.4';
 
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+  timeout: 120_000,
+  maxRetries: 2,
+});
 const db = new pg.Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
 
 // ─────────────────────────── CLI parsing ───────────────────────────

@@ -29,7 +29,7 @@ function requireOpenai(): OpenAI {
       '[llm-extract] OPENAI_API_KEY missing — required for Tavily-driven structured extraction.',
     );
   }
-  return new OpenAI({ apiKey: OPENAI_KEY });
+  return new OpenAI({ apiKey: OPENAI_KEY, timeout: 120_000, maxRetries: 2 });
 }
 
 const ANTI_HALLUCINATION_RULES = `STRICT EXTRACTION RULES — NO HALLUCINATION:
