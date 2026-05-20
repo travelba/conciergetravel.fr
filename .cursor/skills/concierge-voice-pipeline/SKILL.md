@@ -438,6 +438,92 @@ appliqués + 1 retry humanizer, le corpus de 84 drafts passe à **77 PASS /
 banned_terms (2×) + thin brief (1×) — pas advice-driven. Voir
 [`docs/editorial/audit-phaseC-session-2026-05-19.md`](../../docs/editorial/audit-phaseC-session-2026-05-19.md).
 
+## Rule 12 — GPT-5.x / O-series API migration : `max_completion_tokens` + budget reasoning
+
+**Pattern observé (overnight 19 mai 2026)** : la migration du modèle principal
+de `gpt-4o-2024-11-20` vers `gpt-5.4` casse silencieusement la pipeline
+existante avec deux symptômes :
+
+1. **HTTP 400 `Unsupported parameter: 'max_tokens'`** — les modèles GPT-5.x
+   et O-series (`o3`, `o4-mini`) n'acceptent plus `max_tokens`, il faut
+   passer `max_completion_tokens`.
+2. **Pass 4 fact-check tronqué silencieusement** — GPT-5.4 est ~30 % plus
+   verbeux que GPT-4o sur les rapports JSON (~4000 out tokens vs ~2500). À
+   `maxTokens: 4000`, le JSON sort coupé au milieu d'un tableau, le `JSON.parse()`
+   crashe la pipeline avec `SyntaxError: Expected ',' or ']'`.
+
+**Fix appliqué dans `scripts/editorial-pilot/src/llm.ts`** :
+
+```ts
+function isNewParameterModel(model: string): boolean {
+  return /^(gpt-5|o3$|o4-mini)/.test(model);
+}
+function isReasoningModel(model: string): boolean {
+  return /^(o3$|o4-mini)/.test(model);
+}
+
+const useNewParams = isNewParameterModel(this.model);
+const reasoning = isReasoningModel(this.model);
+const baseTokens = opts.maxOutputTokens ?? 4000;
+// O-series consume up to 50% of the budget on internal reasoning.
+const tokens = reasoning ? Math.max(baseTokens, 6000) : baseTokens;
+
+if (useNewParams) {
+  params['max_completion_tokens'] = tokens;
+  if (!reasoning) params['temperature'] = opts.temperature ?? 0.7;
+  // O-series ignore `temperature` — never set it.
+} else {
+  params['max_tokens'] = tokens;
+  params['temperature'] = opts.temperature ?? 0.7;
+}
+```
+
+**Fix appliqué dans `scripts/editorial-pilot/src/pipeline.ts`** Pass 4 :
+
+- `maxTokens` passé de 4000 → **6000** (marge confortable même pour briefs
+  riches).
+- Parsing JSON défensif : si `extractJson()` échoue, on log un warning,
+  on assigne `final_recommendation = 'NEEDS_PASS_2BIS'` et on continue
+  la pipeline (pas de crash). Le hôtel sortira flaggé pour review manuelle
+  plutôt que de bloquer toute la batch.
+
+```ts
+let rawFactCheck: unknown = null;
+let factCheckParseError: string | null = null;
+try {
+  rawFactCheck = extractJson(factCheck.content);
+} catch (e) {
+  factCheckParseError = (e as Error).message;
+  console.warn(`  ⚠ Pass 4 JSON parse failed: ${factCheckParseError.slice(0, 200)}`);
+}
+const factCheckParsed =
+  rawFactCheck === null
+    ? { success: false as const }
+    : FactCheckReportSchema.safeParse(rawFactCheck);
+const final_recommendation = factCheckParsed.success
+  ? factCheckParsed.data.final_recommendation
+  : 'NEEDS_PASS_2BIS';
+```
+
+**Anti-pattern** : ❌ « Les Pro models GPT-5.5 Pro / O3-Pro sont meilleurs,
+basculons-y ». Ces modèles utilisent l'API **Responses** (pas Chat Completions)
+qui n'est pas dans le SDK pinné `openai@4.x`. Probing direct (script
+`scripts/editorial-pilot/probe-models.ts`) a confirmé `400 Bad Request — not
+a chat model` sur ces deux variantes en mai 2026. Tant que l'on n'a pas
+upgradé le SDK et migré les call sites, \*\*rester sur `gpt-5.4` (creative)
+
+- `gpt-5.4-mini` (mécanique) + `o3` (audit hallucinations)\*\*.
+
+**Probing systématique avant tout switch de modèle** : ne jamais déployer
+un nouveau modèle dans le pipeline sans avoir d'abord lancé
+`probe-models.ts` sur quelques prompts représentatifs (incluant Pass 4
+qui est le plus exigeant en sortie structurée). Vérifier :
+
+1. La requête passe (pas de 400/404).
+2. La réponse est parseable (pas de coupure JSON à `max_completion_tokens`).
+3. Le ton respecte le brief (post-validate sur 1 hôtel, mesurer mots advice).
+4. Le coût/token est compatible avec le quota.
+
 ## Anti-patterns à refuser en revue
 
 - Bloc `<ConciergeAdvice>` rendu en client component (`'use client'`) — Server Component obligatoire, pas de bundle JS additionnel.

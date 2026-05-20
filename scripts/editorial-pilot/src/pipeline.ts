@@ -193,12 +193,37 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
     'fact-check',
     prompt4,
     `=== BRIEF JSON ===\n${JSON.stringify(brief, null, 2)}\n\n=== TEXTE PASS 3 ===\n${humanisationMd}`,
-    { temperature: 0.1, maxTokens: 4000, jsonMode: llm.provider === 'openai' },
+    // gpt-5.4 (May 2026) is significantly more verbose than gpt-4o-2024-11-20
+    // on the structured fact-check report — easily emits 4-5k output tokens
+    // when the brief has > 50 facts. Bump the cap to 6000 so JSON doesn't
+    // truncate mid-array and crash the pipeline.
+    { temperature: 0.1, maxTokens: 6000, jsonMode: llm.provider === 'openai' },
   );
-  const rawFactCheck = extractJson(factCheck.content);
-  const factCheckParsed = FactCheckReportSchema.safeParse(rawFactCheck);
-  if (!factCheckParsed.success) {
-    const issues = factCheckParsed.error.issues
+  // Pass 4 fact-check JSON parsing can fail with new LLMs (occasional truncation,
+  // trailing commas, smart-quote drift). Fall back to a "needs review" report
+  // rather than crashing the whole hotel — the pipeline will continue and the
+  // morning audit will surface it.
+  let rawFactCheck: unknown = null;
+  let factCheckParseError: string | null = null;
+  try {
+    rawFactCheck = extractJson(factCheck.content);
+  } catch (e) {
+    factCheckParseError = (e as Error).message.slice(0, 250);
+    console.warn(
+      `[fact-check:${slug}] JSON parse failed — continuing with fallback NEEDS_PASS_2BIS verdict: ${factCheckParseError}`,
+    );
+  }
+  const factCheckParsed =
+    rawFactCheck === null
+      ? { success: false as const }
+      : FactCheckReportSchema.safeParse(rawFactCheck);
+  if (rawFactCheck !== null && !factCheckParsed.success) {
+    const issues = (
+      factCheckParsed as {
+        success: false;
+        error: { issues: { path: string[]; message: string }[] };
+      }
+    ).error.issues
       .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     console.warn(
@@ -219,8 +244,10 @@ export async function runPipelineForHotel(slug: string, llm: LlmClient): Promise
           cultural_to_verify: 0,
         },
         findings: [],
-        final_recommendation: 'MANUAL_REVIEW_REQUIRED',
-        blockers_for_publication: ['Fact-check report schema validation failed — see raw report'],
+        final_recommendation: factCheckParseError ? 'NEEDS_PASS_2BIS' : 'MANUAL_REVIEW_REQUIRED',
+        blockers_for_publication: factCheckParseError
+          ? [`Pass 4 JSON parse failed: ${factCheckParseError}`]
+          : ['Fact-check report schema validation failed — see raw report'],
       } as FactCheckReport);
   await writeFile(
     resolve(outputDir, '04-fact-check.json'),
