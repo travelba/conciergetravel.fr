@@ -47,6 +47,10 @@ export interface HotelRow {
   readonly factual_summary_fr: string | null;
   readonly factual_summary_en: string | null;
   readonly concierge_advice: unknown;
+  readonly wikidata_id: string | null;
+  readonly wikipedia_url_fr: string | null;
+  readonly wikipedia_url_en: string | null;
+  readonly official_url: string | null;
 }
 
 const HOTEL_SELECT_COLUMNS = [
@@ -73,6 +77,10 @@ const HOTEL_SELECT_COLUMNS = [
   'factual_summary_fr',
   'factual_summary_en',
   'concierge_advice',
+  'wikidata_id',
+  'wikipedia_url_fr',
+  'wikipedia_url_en',
+  'official_url',
 ].join(',');
 
 export interface ListHotelsOptions {
@@ -206,6 +214,89 @@ export async function updateHotelConciergeAdvice(
   payload: ConciergeAdvicePayload,
 ): Promise<void> {
   await patchHotel(cfg, hotelId, { concierge_advice: payload });
+}
+
+export interface DescriptionUpdate {
+  readonly description_fr: string;
+  readonly description_en: string;
+}
+
+export async function updateHotelDescription(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  payload: DescriptionUpdate,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
+}
+
+/**
+ * SELECT helper for the enrichment runner — explicitly targets the
+ * "no description" gap (494 rows as of 2026-05-20) and lets the caller
+ * filter further by source availability (wikidata_id, wikipedia_url_*,
+ * official_url).
+ */
+export interface ListMissingDescriptionOptions {
+  readonly limit?: number;
+  readonly slug?: string;
+  readonly slugs?: readonly string[];
+  /** Only return hotels with a non-null wikidata_id (highest source confidence). */
+  readonly requireWikidata?: boolean;
+  /** Only return hotels with at least one of wikipedia_url_fr / _en / wikidata_id / official_url. */
+  readonly requireAnyExternalSource?: boolean;
+}
+
+export async function listHotelsMissingDescription(
+  cfg: SupabaseRestConfig,
+  opts: ListMissingDescriptionOptions = {},
+): Promise<HotelRow[]> {
+  const params = new URLSearchParams();
+  params.set('select', HOTEL_SELECT_COLUMNS);
+  params.set('order', 'updated_at.desc');
+
+  const filterParts: string[] = ['description_fr=is.null'];
+
+  if (opts.requireWikidata === true) {
+    filterParts.push('wikidata_id=not.is.null');
+  }
+  if (opts.requireAnyExternalSource === true && opts.requireWikidata !== true) {
+    // PostgREST OR group across the 4 candidate source columns
+    filterParts.push(
+      'or=(wikidata_id.not.is.null,wikipedia_url_fr.not.is.null,wikipedia_url_en.not.is.null,official_url.not.is.null)',
+    );
+  }
+
+  if (opts.slug !== undefined) {
+    filterParts.push(`slug=eq.${encodeURIComponent(opts.slug)}`);
+  } else if (opts.slugs !== undefined && opts.slugs.length > 0) {
+    const list = opts.slugs.map((s) => encodeURIComponent(s)).join(',');
+    filterParts.push(`slug=in.(${list})`);
+  }
+
+  if (opts.limit !== undefined) {
+    params.set('limit', String(opts.limit));
+  }
+
+  const qs = `${params.toString()}${filterParts.length > 0 ? `&${filterParts.join('&')}` : ''}`;
+  const url = `${cfg.url}/rest/v1/hotels?${qs}`;
+
+  const res = await fetch(url, {
+    headers: {
+      apikey: cfg.serviceRoleKey,
+      Authorization: `Bearer ${cfg.serviceRoleKey}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(
+      `[supabase-hotels] SELECT failed (${res.status}): ${body.slice(0, 300)}`,
+    );
+  }
+  const json: unknown = await res.json();
+  if (!Array.isArray(json)) {
+    throw new Error('[supabase-hotels] SELECT did not return an array');
+  }
+  return json as HotelRow[];
 }
 
 async function patchHotel(
