@@ -90,6 +90,11 @@ export interface ListHotelsOptions {
    * summaries on a re-run.
    */
   readonly onlyMissingFactualSummary?: boolean;
+  /**
+   * Only include hotels where `concierge_advice` is currently null.
+   * Default false — concierge_advice CLI flips it true.
+   */
+  readonly onlyMissingConciergeAdvice?: boolean;
   /** Restrict to a single hotel by slug — handy for one-shot debugging. */
   readonly slug?: string;
   /** Restrict to an explicit list of slugs (comma-separated in CLI). */
@@ -100,6 +105,20 @@ export async function listHotelsForFactualSummary(
   cfg: SupabaseRestConfig,
   opts: ListHotelsOptions = {},
 ): Promise<HotelRow[]> {
+  return listHotels(cfg, {
+    ...opts,
+    onlyMissingFactualSummary: opts.onlyMissingFactualSummary !== false,
+  });
+}
+
+export async function listHotelsForConciergeAdvice(
+  cfg: SupabaseRestConfig,
+  opts: Omit<ListHotelsOptions, 'onlyMissingConciergeAdvice'> = {},
+): Promise<HotelRow[]> {
+  return listHotels(cfg, { ...opts, onlyMissingConciergeAdvice: true });
+}
+
+async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Promise<HotelRow[]> {
   const params = new URLSearchParams();
   params.set('select', HOTEL_SELECT_COLUMNS);
   params.set('order', 'updated_at.desc');
@@ -107,12 +126,15 @@ export async function listHotelsForFactualSummary(
   const filterParts: string[] = [];
 
   if (opts.requireDescription !== false) {
-    // description_fr IS NOT NULL — PostgREST: not.is.null
     filterParts.push('description_fr=not.is.null');
   }
 
-  if (opts.onlyMissingFactualSummary !== false) {
+  if (opts.onlyMissingFactualSummary === true) {
     filterParts.push('factual_summary_fr=is.null');
+  }
+
+  if (opts.onlyMissingConciergeAdvice === true) {
+    filterParts.push('concierge_advice=is.null');
   }
 
   if (opts.slug !== undefined) {
@@ -159,6 +181,38 @@ export async function updateHotelFactualSummary(
   hotelId: string,
   payload: FactualSummaryUpdate,
 ): Promise<void> {
+  await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
+}
+
+/**
+ * Concierge advice payload — matches the `ConciergeAdviceBriefSchema`
+ * jsonb shape (see `apps/web/src/server/hotels/get-hotel-by-slug.ts`
+ * + migration 0032).
+ */
+export interface ConciergeAdviceLocalePayload {
+  readonly title: string;
+  readonly body: string;
+  readonly tip_for: 'room' | 'dining' | 'timing' | 'access' | 'service' | 'wellness';
+}
+
+export interface ConciergeAdvicePayload {
+  readonly fr: ConciergeAdviceLocalePayload;
+  readonly en: ConciergeAdviceLocalePayload;
+}
+
+export async function updateHotelConciergeAdvice(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  payload: ConciergeAdvicePayload,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { concierge_advice: payload });
+}
+
+async function patchHotel(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  body: Record<string, unknown>,
+): Promise<void> {
   const url = `${cfg.url}/rest/v1/hotels?id=eq.${encodeURIComponent(hotelId)}`;
   const res = await fetch(url, {
     method: 'PATCH',
@@ -168,11 +222,13 @@ export async function updateHotelFactualSummary(
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`[supabase-hotels] PATCH failed (${res.status}): ${body.slice(0, 300)}`);
+    const responseBody = await res.text();
+    throw new Error(
+      `[supabase-hotels] PATCH failed (${res.status}): ${responseBody.slice(0, 300)}`,
+    );
   }
 }
 

@@ -240,11 +240,16 @@ for (const row of rankingsRes.rows) {
 }
 
 // ───────────────────────── 3. GUIDES ─────────────────────────
+// Migration 0039 added `summary_long_fr` (text, ≥ 1500 chars) and
+// `editorial_sections` (jsonb, ≥ 6 sections). The legacy `summary_fr`
+// and `sections` columns are kept for backwards compatibility but the
+// long-form pipeline writes to the new ones.
 const guidesRes = await cli.query(`
   select slug, name_fr, name_en, scope, country_code,
-         summary_fr, summary_en,
+         summary_fr, summary_en, summary_long_fr,
          meta_title_fr, meta_desc_fr,
-         case when jsonb_typeof(sections) = 'array' then jsonb_array_length(sections) else 0 end as section_count,
+         case when jsonb_typeof(sections) = 'array' then jsonb_array_length(sections) else 0 end as legacy_section_count,
+         case when jsonb_typeof(editorial_sections) = 'array' then jsonb_array_length(editorial_sections) else 0 end as section_count,
          case when jsonb_typeof(faq) = 'array' then jsonb_array_length(faq) else 0 end as faq_count,
          is_published
     from public.editorial_guides
@@ -260,11 +265,18 @@ const guideBuckets = {
 };
 
 for (const row of guidesRes.rows) {
-  const summaryWords = countWords(row.summary_fr);
-  const totalLongSent = countLongSentences(row.summary_fr);
-  const summaryOk = summaryWords >= 200;
+  // Pipeline post-0039 writes long-form content to `summary_long_fr` /
+  // `editorial_sections`. We check the new fields first and fall back to
+  // legacy `summary_fr` / `sections` for guides that haven't been
+  // re-rendered yet.
+  const summaryLong = row.summary_long_fr ?? '';
+  const summaryLongChars = summaryLong.length;
+  const summaryShort = row.summary_fr ?? '';
+  const summaryWords = countWords(summaryLong || summaryShort);
+  const totalLongSent = countLongSentences(summaryLong || summaryShort);
+  const summaryOk = summaryLongChars >= 1500 || summaryWords >= 200;
   const faqOk = row.faq_count >= 5;
-  const hasSections = row.section_count >= 3;
+  const hasSections = row.section_count >= 6 || row.legacy_section_count >= 3;
 
   let bucket;
   if (!summaryOk && !hasSections) bucket = 'needs_full_content';
