@@ -177,74 +177,6 @@
       "viewBrand": "View {brand} hotels →",
       "empty": "No hotel published under this brand yet."
     },
-    "concierge": {
-      "eyebrow": "About",
-      "title": "The Concierge",
-      "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks France's Palaces and exceptional hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
-      "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
-      "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency dedicated to Palaces and exceptional hotels in France. Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
-      "trust": {
-        "title": "Our commitments",
-        "iataTitle": "IATA / APST agency",
-        "iataBody": "MyConciergeHotel is an IATA-accredited travel agency, guaranteed by APST. Every payment is protected by the professional financial guarantee.",
-        "gdsTitle": "GDS net rates",
-        "gdsBody": "We access the Amadeus GDS inventory to offer the best available net rate, identical to the hotel's official rate — no hidden mark-ups.",
-        "amadeusTitle": "Amadeus secure payment",
-        "amadeusBody": "Payment runs through Amadeus Payments orchestration, compliant with PCI-DSS Level 1. 3D-Secure 2 is mandatory. Your card details never transit our servers."
-      },
-      "method": {
-        "title": "Our editorial method",
-        "step1Title": "Editorial selection",
-        "step1Body": "Every published hotel is curated by our team on three criteria: official distinction (Atout France, Michelin), verified operational experience, and uniqueness (signature room, chef-led table, exceptional service).",
-        "step2Title": "Human-written page",
-        "step2Body": "Our advisors write each page after visiting or speaking directly with management. No copy comes from the hotel's commercial sheet or an aggregator.",
-        "step3Title": "The Concierge's Tip",
-        "step3Body": "Every page ends with a Concierge's Tip block: 60-90 words sharing a concrete operational secret (room number, access line, hidden table, ideal timing). It is our signature."
-      },
-      "loyalty": {
-        "title": "Loyalty programme",
-        "body": "Our MyConciergeHotel loyalty programme starts from your very first booked night. Benefits: upgrade when available, complimentary breakfast at selected Palace partners, cumulative hotel credit. See full terms."
-      },
-      "tip": {
-        "title": "The Concierge's Tip — our signature",
-        "body": "This is the centrepiece of every page: a concrete operational secret shared by our team after visiting. Neither a customer review nor a marketing description — an insider shortcut, in 60-90 words. Discover our latest tips on the hotel pages.",
-        "cta": "View a page with a Tip →"
-      },
-      "pro": {
-        "title": "For pros",
-        "hotelierTitle": "For hoteliers",
-        "hotelierBody": "Exceptional hotels: join our editorial catalogue. We work in direct partnership (no extra commission), with a dedicated writer per page.",
-        "miceTitle": "MICE / Events",
-        "miceBody": "We also handle seminar, wedding and private event enquiries on our partner hotels. Custom quote within 24 h.",
-        "pressTitle": "Press & partners",
-        "pressBody": "For all press enquiries (print, podcast, online), contact press@myconciergehotel.com."
-      },
-      "faq": {
-        "title": "Frequently asked questions",
-        "items": [
-          {
-            "q": "Are you a travel agency?",
-            "a": "Yes, MyConciergeHotel is an IATA-accredited travel agency, guaranteed by APST. Every payment is protected by the professional financial guarantee."
-          },
-          {
-            "q": "What is your geographical scope?",
-            "a": "V1 covers Palaces and 5★ hotels in France. We are progressively extending to Italy, Switzerland, Morocco, the UAE and several Asian destinations."
-          },
-          {
-            "q": "How much does your service cost?",
-            "a": "Nothing for the end customer. We earn a commission from the partner hotel, identical to the one paid to Booking or Expedia. The price you see is the GDS net rate — no mark-up."
-          },
-          {
-            "q": "How do I cancel a booking?",
-            "a": "Depending on the cancellation policy of the chosen hotel. Most rates are 'flexible' (free cancellation up to 48 or 72 h). Full details in your booking confirmation."
-          },
-          {
-            "q": "What is the Concierge's Tip?",
-            "a": "A box at the bottom of every hotel page, written by our team: 60-90 words sharing an operational secret (signature room, hidden table, optimal access timing). It is our main differentiator."
-          }
-        ]
-      }
-    },
     "breadcrumb": {
       "label": "Breadcrumb",
       "home": "Home",
@@ -276,6 +208,74 @@
       "label": "Choose language",
       "switchTo": "Français",
       "current": "English"
+    }
+  },
+  "concierge": {
+    "eyebrow": "About",
+    "title": "The Concierge",
+    "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks France's Palaces and exceptional hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
+    "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
+    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency dedicated to Palaces and exceptional hotels in France. Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
+    "trust": {
+      "title": "Our commitments",
+      "iataTitle": "IATA / APST agency",
+      "iataBody": "MyConciergeHotel is an IATA-accredited travel agency, guaranteed by APST. Every payment is protected by the professional financial guarantee.",
+      "gdsTitle": "GDS net rates",
+      "gdsBody": "We access the Amadeus GDS inventory to offer the best available net rate, identical to the hotel's official rate — no hidden mark-ups.",
+      "amadeusTitle": "Amadeus secure payment",
+      "amadeusBody": "Payment runs through Amadeus Payments orchestration, compliant with PCI-DSS Level 1. 3D-Secure 2 is mandatory. Your card details never transit our servers."
+    },
+    "method": {
+      "title": "Our editorial method",
+      "step1Title": "Editorial selection",
+      "step1Body": "Every published hotel is curated by our team on three criteria: official distinction (Atout France, Michelin), verified operational experience, and uniqueness (signature room, chef-led table, exceptional service).",
+      "step2Title": "Human-written page",
+      "step2Body": "Our advisors write each page after visiting or speaking directly with management. No copy comes from the hotel's commercial sheet or an aggregator.",
+      "step3Title": "The Concierge's Tip",
+      "step3Body": "Every page ends with a Concierge's Tip block: 60-90 words sharing a concrete operational secret (room number, access line, hidden table, ideal timing). It is our signature."
+    },
+    "loyalty": {
+      "title": "Loyalty programme",
+      "body": "Our MyConciergeHotel loyalty programme starts from your very first booked night. Benefits: upgrade when available, complimentary breakfast at selected Palace partners, cumulative hotel credit. See full terms."
+    },
+    "tip": {
+      "title": "The Concierge's Tip — our signature",
+      "body": "This is the centrepiece of every page: a concrete operational secret shared by our team after visiting. Neither a customer review nor a marketing description — an insider shortcut, in 60-90 words. Discover our latest tips on the hotel pages.",
+      "cta": "View a page with a Tip →"
+    },
+    "pro": {
+      "title": "For pros",
+      "hotelierTitle": "For hoteliers",
+      "hotelierBody": "Exceptional hotels: join our editorial catalogue. We work in direct partnership (no extra commission), with a dedicated writer per page.",
+      "miceTitle": "MICE / Events",
+      "miceBody": "We also handle seminar, wedding and private event enquiries on our partner hotels. Custom quote within 24 h.",
+      "pressTitle": "Press & partners",
+      "pressBody": "For all press enquiries (print, podcast, online), contact press@myconciergehotel.com."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "Are you a travel agency?",
+          "a": "Yes, MyConciergeHotel is an IATA-accredited travel agency, guaranteed by APST. Every payment is protected by the professional financial guarantee."
+        },
+        {
+          "q": "What is your geographical scope?",
+          "a": "V1 covers Palaces and 5★ hotels in France. We are progressively extending to Italy, Switzerland, Morocco, the UAE and several Asian destinations."
+        },
+        {
+          "q": "How much does your service cost?",
+          "a": "Nothing for the end customer. We earn a commission from the partner hotel, identical to the one paid to Booking or Expedia. The price you see is the GDS net rate — no mark-up."
+        },
+        {
+          "q": "How do I cancel a booking?",
+          "a": "Depending on the cancellation policy of the chosen hotel. Most rates are 'flexible' (free cancellation up to 48 or 72 h). Full details in your booking confirmation."
+        },
+        {
+          "q": "What is the Concierge's Tip?",
+          "a": "A box at the bottom of every hotel page, written by our team: 60-90 words sharing an operational secret (signature room, hidden table, optimal access timing). It is our main differentiator."
+        }
+      ]
     }
   },
   "consent": {
