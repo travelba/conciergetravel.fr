@@ -39,6 +39,27 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }),
   );
 
+  // WebSite + SearchAction (Google sitelinks search box).
+  // Only emitted from the home page — Google requires the `WebSite` node
+  // at the site root, not on every page (ADR-0014 §2.2 + seo-geo.mdc).
+  const searchUrl = `${siteUrl}${getPathname({ locale, href: '/recherche' })}`;
+  const websiteSearchJsonLd = JsonLd.withSchemaOrgContext({
+    '@type': 'WebSite',
+    '@id': `${siteUrl}#website`,
+    name: 'MyConciergeHotel',
+    url: `${siteUrl}${getPathname({ locale, href: '/' })}`,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${searchUrl}?destination={search_term_string}`,
+      },
+      // `query-input` is required by Google for sitelinks search box.
+      // The literal string contract is fragile but mandated by schema.org.
+      'query-input': 'required name=search_term_string',
+    },
+  });
+
   // AEO block (skill: geo-llm-optimization). Short, quotable answer paired
   // with a FAQPage JSON-LD payload so AI Overviews / ChatGPT Search can
   // surface the value-prop verbatim without paraphrasing.
@@ -51,6 +72,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <main className="max-w-editorial container mx-auto flex min-h-[60vh] flex-col items-start justify-center gap-6 px-4 py-16 sm:py-24">
       <JsonLdScript data={agencyJsonLd} nonce={nonce} />
+      <JsonLdScript data={websiteSearchJsonLd} nonce={nonce} />
       <JsonLdScript data={homeFaqJsonLd} nonce={nonce} />
       <p className="text-muted text-xs uppercase tracking-[0.18em]">
         {tCommon('siteName')} — France

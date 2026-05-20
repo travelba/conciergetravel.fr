@@ -7,6 +7,8 @@ import type { Locale } from '@/i18n/routing';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
+import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
+import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 
 // ISR — fetches the destination directory at build, then revalidates hourly.
 export const revalidate = 3600;
@@ -49,6 +51,58 @@ export async function GET(): Promise<NextResponse> {
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.7,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // ── Static hub pages (ADR-0014) ──────────────────────────────────────
+    // Each entry is locale-aware via `buildSitemapAlternates`.
+    const staticHubs: {
+      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      priority: number;
+    }[] = [
+      { href: '/inspiration', priority: 0.7 },
+      { href: '/marques', priority: 0.6 },
+      { href: '/le-concierge', priority: 0.6 },
+      { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
+    ];
+    for (const hub of staticHubs) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({ locale: l, href: hub.href })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'monthly',
+        priority: hub.priority,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // ── Editorial categories (5 palace + 7 non-palace — ADR-0016) ────────
+    for (const cat of EDITORIAL_CATEGORIES) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/categorie/[categorySlug]', params: { categorySlug: cat.slug } },
+        })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.6,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // ── Brand pages (one per `KNOWN_BRANDS` family) ──────────────────────
+    for (const brand of KNOWN_BRANDS) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/marque/[brandSlug]', params: { brandSlug: brand.slug } },
+        })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.5,
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }

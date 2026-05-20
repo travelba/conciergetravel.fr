@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
+import { Breadcrumb } from '@/components/layout/breadcrumb';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { getPathname } from '@/i18n/navigation';
@@ -69,6 +70,11 @@ export default async function LocaleLayout({
       <body className="flex min-h-dvh flex-col">
         <NextIntlClientProvider messages={messages}>
           <SiteHeader />
+          {/*
+            Visible fil d'ariane (ADR-0014 §2.4) — mirror of the per-page
+            `BreadcrumbList` JSON-LD. Returns `null` on the home page.
+          */}
+          <Breadcrumb />
           {/*
             `#main` is the skip-link target. Mark it as `role="main"` /
             `<main>`-equivalent landmark via the `id` and `tabIndex={-1}`
