@@ -345,6 +345,7 @@ async function runWithConcurrency<T, R>(
 interface LlmCallParams {
   readonly userPrompt: string;
   readonly maxTokens: number;
+  readonly temperature?: number;
 }
 
 async function callOpenAi(params: LlmCallParams): Promise<{
@@ -355,6 +356,7 @@ async function callOpenAi(params: LlmCallParams): Promise<{
 }> {
   const useNewParams = /^(gpt-5|o3$|o3-(?!pro)|o4-mini)/u.test(MODEL);
   const isReasoning = /^(o3$|o3-(?!pro)|o4-mini)/u.test(MODEL);
+  const temperature = params.temperature ?? 0.55;
 
   const base: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = {
     model: MODEL,
@@ -370,8 +372,8 @@ async function callOpenAi(params: LlmCallParams): Promise<{
   const composed: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = useNewParams
     ? isReasoning
       ? { ...base, max_completion_tokens: Math.max(params.maxTokens, 6000) }
-      : { ...base, max_completion_tokens: params.maxTokens, temperature: 0.55 }
-    : { ...base, max_tokens: params.maxTokens, temperature: 0.55 };
+      : { ...base, max_completion_tokens: params.maxTokens, temperature }
+    : { ...base, max_tokens: params.maxTokens, temperature };
 
   const resp = await openai.chat.completions.create(composed);
   const choice = resp.choices[0];
@@ -421,7 +423,7 @@ function buildSummaryUserPrompt(row: GuideRow): string {
     `- Carte de visite existante (meta) : ${row.summary_fr}`,
     '',
     'CAHIER DES CHARGES `summary_long_fr`',
-    '- Cible : 2500-5500 caractères (espaces inclus), soit ~ 400-700 mots.',
+    '- VISE 3500-5000 caractères (espaces inclus), soit ~ 550-700 mots. Le PLANCHER STRICT est 2500 caractères ; viser plus haut pour passer le contrôle qualité.',
     '- Une seule prose dense, magazine, sans titres, sans bullet points, sans markdown.',
     '- 4 à 7 paragraphes séparés par UNE ligne vide (`\\n\\n`).',
     '- Pose la scène : géographie, héritage, ce qui fait la signature du lieu, ce que le voyageur premium vient y chercher.',
@@ -480,19 +482,21 @@ function buildSectionsUserPrompt(row: GuideRow, summaryLong: string): string {
     "8. `hors-des-sentiers-battus` — context (ou concierge-tip) — secrets opérationnels d'initié",
     '9. `a-eviter`                — practical     — pièges touristiques, arnaques, quartiers à zapper, dates à fuir',
     '',
-    'RÈGLES DE PRODUCTION',
-    '- 6 sections minimum pour une destination plus petite, 7-8 pour une ville, 9 pour un pays/région large.',
-    '- Chaque body_fr : 400 à 700 mots (≈ 1800-4500 caractères), prose dense, 4-7 paragraphes séparés par UNE ligne vide.',
-    '- Toutes les phrases ≤ 25 mots STRICT. Hard rule. Compte avant de rendre.',
-    "- `anchor` : kebab-case, doit matcher le slug du catalogue (`pourquoi-y-aller`, `quand-y-aller`, etc.). Pas d'accents.",
-    '- `title_fr` : 4-9 mots français lisibles (ex. « Quand partir à Paris », « Que voir absolument à Florence », « Bouger en Toscane sans louer de voiture »).',
+    'RÈGLES DE PRODUCTION (lis tout avant de commencer)',
+    '- Nombre de sections : 6 pour une petite destination, 7-8 pour une ville, 8-9 pour un pays/région/cluster.',
+    "- Chaque body_fr : ENTRE 420 ET 650 MOTS — soit 2 100-3 600 caractères français (chars ≈ mots × 5,5). EN DESSOUS DE 420 MOTS C'EST UN ÉCHEC. Compte tes mots à la fin de chaque section.",
+    '- Structure interne de chaque body_fr : 4 à 6 paragraphes séparés par UNE ligne vide (`\\n\\n`). Pas de bullets, pas de titres H3 internes, pas de markdown.',
+    '- Toutes les phrases ≤ 25 mots STRICT (hard rule, compte avant de rendre).',
+    '- BUDGET DE LONGUEUR : pour 9 sections vise 460-520 mots par section ; pour 7-8 sections vise 530-620 mots ; pour 6 sections vise 600-650 mots.',
+    '- `anchor` : kebab-case ASCII STRICT, sans accents. Slugs du catalogue (`pourquoi-y-aller`, `quand-y-aller`, `que-faire`, `comment-circuler`, `ou-manger`, `ou-loger`, `ce-quil-faut-savoir`, `hors-des-sentiers-battus`, `a-eviter`). Anchors uniques entre sections.',
+    '- `title_fr` : 4-9 mots français (ex. « Quand partir à Paris », « Que voir absolument à Florence », « Bouger en Toscane sans voiture »).',
     "- `position` : 1-based monotonic (1, 2, 3 …) dans l'ordre de lecture.",
-    '- `kind` : un des enums du catalogue. Optionnel mais recommandé pour le rendu UI.',
-    '- Chaque section doit citer AU MOINS 2 noms propres (lieu, institution, festival, chef, monument).',
-    '- La section `ou-manger` cite OBLIGATOIREMENT une distinction Michelin avec étoiles + millésime si pertinent ; `ou-loger` cite Atout France (ou équivalent local) si pertinent.',
-    '- AUCUN superlatif vide. AUCUN lexique banni. AUCUNE ouverture banni. Cf. system prompt.',
+    '- `kind` : un des enums du catalogue. Recommandé pour le rendu UI.',
+    '- Chaque section cite AU MOINS 2 noms propres concrets (lieu, institution, festival, chef, monument).',
+    '- `ou-manger` cite OBLIGATOIREMENT le Guide Michelin avec étoiles + millésime quand pertinent ; `ou-loger` cite Atout France (ou équivalent local : Forbes Travel Guide, Japan Ryokan Association…) si pertinent.',
+    '- AUCUN superlatif vide. AUCUN lexique banni. AUCUNE ouverture interdite (voir system prompt).',
     "- Pour `a-eviter` : sois concret (« la file d'attente Tour Eiffel en juillet à 14 h », « les taxis non-officiels gare de Rome Termini »).",
-    '- Pour `hors-des-sentiers-battus` : 1ʳᵉ personne (« Mon conseil : … ») autorisée.',
+    '- Pour `hors-des-sentiers-battus` : 1ʳᵉ personne autorisée (« Mon conseil : … »).',
     '',
     "FORMAT DE SORTIE — JSON STRICT, RIEN D'AUTRE",
     '{',
@@ -520,58 +524,223 @@ interface RunOutcome {
   readonly error: string | null;
 }
 
-async function generateSummaryLong(
+interface CallStats {
+  readonly input: number;
+  readonly output: number;
+  readonly finishReason: string | null;
+}
+
+interface SummaryAttempt {
+  readonly summary: string | null;
+  readonly violations: ReadonlyArray<string>;
+  readonly stats: CallStats;
+}
+
+async function attemptSummaryLong(
   row: GuideRow,
   prevViolations: ReadonlyArray<string>,
-): Promise<{ summary: string; tokens: { input: number; output: number }; finish: string | null }> {
+  maxTokens: number,
+  temperature: number,
+): Promise<SummaryAttempt> {
   const reminder =
     prevViolations.length > 0
       ? [
           '',
           '=== TENTATIVE PRÉCÉDENTE INVALIDE ===',
-          'Corrige strictement les violations suivantes :',
-          ...prevViolations.slice(0, 8).map((v) => `- ${v}`),
+          'Corrige STRICTEMENT les violations suivantes (chacune cassait la sortie) :',
+          ...prevViolations.slice(0, 10).map((v) => `- ${v}`),
+          '',
           'Reproduis intégralement la sortie JSON, conforme cette fois.',
+          'IMPORTANT : conserve la même longueur ou allonge légèrement, ne RACCOURCIS PAS pour éviter les violations.',
         ].join('\n')
       : '';
   const userPrompt = buildSummaryUserPrompt(row) + reminder;
-  const resp = await callOpenAi({ userPrompt, maxTokens: 4000 });
-  const parsed = SummarySchema.parse(safeParseJson(resp.raw));
-  return {
-    summary: parsed.summary_long_fr.trim(),
-    tokens: { input: resp.inputTokens, output: resp.outputTokens },
-    finish: resp.finishReason,
+  const resp = await callOpenAi({ userPrompt, maxTokens, temperature });
+  const stats: CallStats = {
+    input: resp.inputTokens,
+    output: resp.outputTokens,
+    finishReason: resp.finishReason,
   };
+
+  // 1. Parse JSON (defensively).
+  let json: unknown;
+  try {
+    json = safeParseJson(resp.raw);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return {
+      summary: null,
+      violations: [
+        `[summary_long_fr] sortie non-JSON (finish=${resp.finishReason ?? '?'}, ${msg.slice(0, 120)}). Réponds STRICTEMENT par un objet JSON.`,
+      ],
+      stats,
+    };
+  }
+
+  // 2. Zod (lenient capture).
+  const parsed = SummarySchema.safeParse(json);
+  if (!parsed.success) {
+    const issues = parsed.error.issues.slice(0, 5).map((i) => {
+      const path = i.path.join('.');
+      if (i.code === 'too_small') {
+        const got =
+          typeof json === 'object' && json !== null && path in (json as Record<string, unknown>)
+            ? String((json as Record<string, unknown>)[path]).length
+            : '?';
+        return `[summary_long_fr] champ "${path}" trop court : ${got} caractères, minimum 2500. Ajoute 1-2 paragraphes (saisons, scène d'arrivée, signature culturelle) pour atteindre 3500-5000 caractères.`;
+      }
+      if (i.code === 'too_big') {
+        return `[summary_long_fr] champ "${path}" trop long : dépasse 5500 caractères. Resserre les paragraphes les plus généralistes.`;
+      }
+      return `[summary_long_fr] ${path}: ${i.message}`;
+    });
+    return { summary: null, violations: issues, stats };
+  }
+
+  const summary = parsed.data.summary_long_fr.trim();
+  const voice = checkVoice(summary);
+  if (!voice.ok) {
+    return { summary: null, violations: describeIssues('summary_long_fr', voice), stats };
+  }
+  return { summary, violations: [], stats };
 }
 
-async function generateSections(
+interface SectionsAttempt {
+  readonly sections: ReadonlyArray<Section> | null;
+  readonly violations: ReadonlyArray<string>;
+  readonly stats: CallStats;
+}
+
+async function attemptSections(
   row: GuideRow,
   summaryLong: string,
   prevViolations: ReadonlyArray<string>,
-): Promise<{
-  sections: ReadonlyArray<Section>;
-  tokens: { input: number; output: number };
-  finish: string | null;
-}> {
+  maxTokens: number,
+  temperature: number,
+): Promise<SectionsAttempt> {
   const reminder =
     prevViolations.length > 0
       ? [
           '',
           '=== TENTATIVE PRÉCÉDENTE INVALIDE ===',
-          'Corrige strictement les violations suivantes :',
-          ...prevViolations.slice(0, 10).map((v) => `- ${v}`),
+          'Corrige STRICTEMENT les violations suivantes (chacune cassait la sortie) :',
+          ...prevViolations.slice(0, 14).map((v) => `- ${v}`),
+          '',
           'Reproduis intégralement la sortie JSON, conforme cette fois.',
+          'IMPORTANT : si un body_fr était trop court, ALLONGE-le (450-600 mots cible, JAMAIS sous 400). Ne raccourcis aucune section.',
         ].join('\n')
       : '';
   const userPrompt = buildSectionsUserPrompt(row, summaryLong) + reminder;
-  // 8000 par défaut (cf. spec). On force >= 8000 même si l'override env est plus court.
-  const resp = await callOpenAi({ userPrompt, maxTokens: 8000 });
-  const parsed = SectionsSchema.parse(safeParseJson(resp.raw));
-  return {
-    sections: parsed.sections,
-    tokens: { input: resp.inputTokens, output: resp.outputTokens },
-    finish: resp.finishReason,
+  const resp = await callOpenAi({ userPrompt, maxTokens, temperature });
+  const stats: CallStats = {
+    input: resp.inputTokens,
+    output: resp.outputTokens,
+    finishReason: resp.finishReason,
   };
+
+  if (resp.finishReason === 'length') {
+    return {
+      sections: null,
+      violations: [
+        '[sections] sortie tronquée (finish_reason=length). Réduis le nombre de sections à 7 et resserre les bodies à 400-500 mots stricts.',
+      ],
+      stats,
+    };
+  }
+
+  // Parse JSON.
+  let json: unknown;
+  try {
+    json = safeParseJson(resp.raw);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return {
+      sections: null,
+      violations: [
+        `[sections] sortie non-JSON (finish=${resp.finishReason ?? '?'}, ${msg.slice(0, 120)}). Réponds STRICTEMENT par {"sections":[…]} et rien d'autre.`,
+      ],
+      stats,
+    };
+  }
+
+  // Zod (capture per-section issues).
+  const parsed = SectionsSchema.safeParse(json);
+  if (!parsed.success) {
+    const issues: string[] = [];
+    const rawSections =
+      typeof json === 'object' &&
+      json !== null &&
+      Array.isArray((json as { sections?: unknown }).sections)
+        ? ((json as { sections: ReadonlyArray<unknown> }).sections as ReadonlyArray<unknown>)
+        : [];
+    for (const issue of parsed.error.issues.slice(0, 12)) {
+      const path = issue.path;
+      const top = path[0];
+      const idx = typeof path[1] === 'number' ? path[1] : -1;
+      const field = path[2] === undefined ? path.join('.') : String(path[2]);
+      const raw =
+        top === 'sections' && idx >= 0 && idx < rawSections.length
+          ? (rawSections[idx] as Record<string, unknown>)
+          : null;
+      const anchorLabel =
+        raw !== null && typeof raw['anchor'] === 'string'
+          ? `(anchor=${String(raw['anchor'])})`
+          : `(index ${idx})`;
+      if (issue.code === 'too_small' && field === 'body_fr') {
+        const got =
+          raw !== null && typeof raw['body_fr'] === 'string' ? raw['body_fr'].length : '?';
+        issues.push(
+          `[section ${anchorLabel}] body_fr trop court : ${got} caractères, minimum 1800 (≈ 400 mots). Ajoute 1-2 paragraphes concrets (noms de quartiers, monuments, festivals datés).`,
+        );
+      } else if (issue.code === 'too_big' && field === 'body_fr') {
+        issues.push(
+          `[section ${anchorLabel}] body_fr trop long : > 4500 caractères. Resserre sans descendre sous 1900.`,
+        );
+      } else if (issue.code === 'too_small' && field === 'title_fr') {
+        issues.push(
+          `[section ${anchorLabel}] title_fr trop court (min 8 chars). Réécris-le en 4-9 mots français.`,
+        );
+      } else if (issue.code === 'invalid_string' && field === 'anchor') {
+        issues.push(
+          `[section ${anchorLabel}] anchor invalide. Utilise STRICTEMENT du kebab-case ASCII sans accents (ex: "pourquoi-y-aller", "ou-manger").`,
+        );
+      } else if (issue.code === 'invalid_enum_value' && field === 'kind') {
+        issues.push(
+          `[section ${anchorLabel}] kind invalide. Valeurs autorisées : overview, when-to-visit, what-to-see, how-to-get-around, where-to-eat, where-to-stay, practical, concierge-tip, context. OU omets le champ.`,
+        );
+      } else if (issue.code === 'too_small' && path[0] === 'sections' && path.length === 1) {
+        issues.push(`[sections] tableau trop court : minimum 6 sections requis.`);
+      } else if (issue.code === 'too_big' && path[0] === 'sections' && path.length === 1) {
+        issues.push(`[sections] tableau trop long : maximum 9 sections.`);
+      } else {
+        issues.push(`[${path.join('.')}] ${issue.message}`);
+      }
+    }
+    return { sections: null, violations: issues, stats };
+  }
+
+  // Voice + uniqueness pass.
+  const out = parsed.data.sections;
+  const allViolations: string[] = [];
+  const seen = new Set<string>();
+  for (const sec of out) {
+    if (seen.has(sec.anchor)) {
+      allViolations.push(
+        `[section "${sec.anchor}"] anchor dupliqué — chaque anchor doit être unique.`,
+      );
+    }
+    seen.add(sec.anchor);
+    const c = checkVoice(sec.body_fr);
+    for (const issue of describeIssues(`section "${sec.anchor}"`, c)) allViolations.push(issue);
+    const titleCheck = checkVoice(sec.title_fr);
+    for (const issue of describeIssues(`section "${sec.anchor}" title`, titleCheck))
+      allViolations.push(issue);
+  }
+  if (allViolations.length > 0) {
+    return { sections: null, violations: allViolations, stats };
+  }
+  const sorted = [...out].sort((a, b) => a.position - b.position);
+  return { sections: sorted, violations: [], stats };
 }
 
 function describeIssues(label: string, check: VoiceCheck): ReadonlyArray<string> {
@@ -593,72 +762,68 @@ async function processGuide(row: GuideRow): Promise<RunOutcome> {
   let totalOutputTokens = 0;
 
   try {
-    // ─── Call 1 : summary_long_fr (avec retry tone-driven) ───
+    // ─── Call 1 : summary_long_fr ───
     let summary: string | null = null;
     let summaryViolations: ReadonlyArray<string> = [];
+    let summaryTokens = 4000;
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const { summary: out, tokens } = await generateSummaryLong(row, summaryViolations);
-      totalInputTokens += tokens.input;
-      totalOutputTokens += tokens.output;
-      const check = checkVoice(out);
-      if (check.ok) {
-        summary = out;
+      const temperature = attempt === 0 ? 0.55 : attempt === 1 ? 0.4 : 0.3;
+      const out = await attemptSummaryLong(row, summaryViolations, summaryTokens, temperature);
+      totalInputTokens += out.stats.input;
+      totalOutputTokens += out.stats.output;
+      if (out.stats.finishReason === 'length') {
+        summaryTokens = Math.min(summaryTokens + 1500, 7000);
+      }
+      if (out.summary !== null) {
+        summary = out.summary;
         break;
       }
-      summaryViolations = describeIssues('summary_long_fr', check);
+      summaryViolations = out.violations;
       retries += 1;
       if (attempt === 2) {
         throw new Error(
-          `summary_long_fr voice check failed after 3 attempts. Issues: ${summaryViolations
-            .slice(0, 3)
-            .join(' | ')}`,
+          `summary_long_fr failed after 3 attempts. Last issues: ${summaryViolations
+            .slice(0, 2)
+            .join(' | ')
+            .slice(0, 350)}`,
         );
       }
     }
     if (summary === null) {
-      // Defensive — unreachable thanks to the throw above, but the type system asks.
       throw new Error('summary_long_fr unset after retries');
     }
 
     // ─── Call 2 : editorial_sections ───
     let sections: ReadonlyArray<Section> | null = null;
     let sectionViolations: ReadonlyArray<string> = [];
+    // Budget initial spec'é à 8000 ; on monte sur truncation ou rejet.
+    let sectionTokens = 8000;
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const { sections: out, tokens } = await generateSections(row, summary, sectionViolations);
-      totalInputTokens += tokens.input;
-      totalOutputTokens += tokens.output;
-      // Vérification voix sur chaque body_fr + chaque title_fr.
-      const allViolations: string[] = [];
-      const anchorsSeen = new Set<string>();
-      for (const sec of out) {
-        if (anchorsSeen.has(sec.anchor)) {
-          allViolations.push(
-            `[section] anchor dupliqué « ${sec.anchor} ». Chaque anchor doit être unique.`,
-          );
-        }
-        anchorsSeen.add(sec.anchor);
-        const c = checkVoice(sec.body_fr);
-        for (const issue of describeIssues(`section "${sec.anchor}"`, c)) {
-          allViolations.push(issue);
-        }
-        const titleCheck = checkVoice(sec.title_fr);
-        for (const issue of describeIssues(`section "${sec.anchor}" title`, titleCheck)) {
-          allViolations.push(issue);
-        }
+      const temperature = attempt === 0 ? 0.55 : attempt === 1 ? 0.4 : 0.3;
+      const out = await attemptSections(
+        row,
+        summary,
+        sectionViolations,
+        sectionTokens,
+        temperature,
+      );
+      totalInputTokens += out.stats.input;
+      totalOutputTokens += out.stats.output;
+      if (out.stats.finishReason === 'length') {
+        sectionTokens = Math.min(sectionTokens + 2500, 14000);
       }
-      if (allViolations.length === 0) {
-        // Vérifie monotonie positions
-        const sorted = [...out].sort((a, b) => a.position - b.position);
-        sections = sorted;
+      if (out.sections !== null) {
+        sections = out.sections;
         break;
       }
-      sectionViolations = allViolations;
+      sectionViolations = out.violations;
       retries += 1;
       if (attempt === 2) {
         throw new Error(
-          `editorial_sections voice check failed after 3 attempts. Issues: ${sectionViolations
+          `editorial_sections failed after 3 attempts. Last issues: ${sectionViolations
             .slice(0, 3)
-            .join(' | ')}`,
+            .join(' | ')
+            .slice(0, 500)}`,
         );
       }
     }

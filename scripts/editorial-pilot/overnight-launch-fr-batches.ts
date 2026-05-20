@@ -11,9 +11,18 @@
  */
 
 import { readFile, readdir, mkdir } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+const localRequire = createRequire(import.meta.url);
+
+function resolveTsxCli(): string {
+  const pkgPath = localRequire.resolve('tsx/package.json');
+  return resolve(pkgPath, '..', 'dist', 'cli.mjs');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -100,7 +109,8 @@ batches.forEach((slugs, i) => {
     EDITORIAL_PILOT_BRIEFS_DIR: 'briefs-auto',
   };
   // Spawn directly via tsx — bypass pnpm wrapper to avoid PowerShell quoting drama.
-  const tsxBin = resolve(REPO, 'node_modules/tsx/dist/cli.mjs');
+  // Use the resolved tsx package path (pnpm-hoisted under node_modules/.pnpm).
+  const tsxBin = resolveTsxCli();
   const child = spawn('node', [tsxBin, 'src/run.ts', ...slugs], {
     cwd: resolve(REPO, 'scripts/editorial-pilot'),
     env,
@@ -108,9 +118,7 @@ batches.forEach((slugs, i) => {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   child.unref();
-  // Pipe stdout/stderr into log
-  const fs = require('node:fs');
-  const stream = fs.createWriteStream(logPath, { flags: 'a' });
+  const stream = createWriteStream(logPath, { flags: 'a' });
   stream.write(
     `\n=== ${new Date().toISOString()} — ${label} ${i + 1} (${slugs.length} hotels) ===\n`,
   );
