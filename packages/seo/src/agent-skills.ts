@@ -220,6 +220,32 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       description:
         'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
     },
+    {
+      name: 'newsletter',
+      description:
+        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale Palaces et hôtels 5★, conseils du Concierge, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail du destinataire.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale préférée — "fr" (par défaut) ou "en".',
+          },
+          consent: {
+            type: 'boolean',
+            description:
+              'Doit être strictement true — consentement explicite RGPD requis. Toute autre valeur est rejetée.',
+          },
+        },
+        required: ['email', 'consent'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/newsletter' },
+    },
     // ── ADR-0014 — new agentic surfaces ─────────────────────────────────
     {
       name: 'list-categories',
