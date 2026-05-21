@@ -1,0 +1,42 @@
+﻿[
+  {
+    "displayName": "A — Booking-Premium",
+    "assetName": "assets/13148644164807618628",
+    "key": "A",
+    "rawTextHead": "{\"projectId\":\"4942013958735480664\",\"sessionId\":\"16271987339012941964\",\"outputComponents\":[{\"design\":{\"screens\":[{\"screenshot\":{\"name\":\"projects/4942013958735480664/files/59cdc15bfd4b47bd8503c03b604d1f",
+    "screenId": "31b9445a94d0404db06ee6d4ed3021a2",
+    "status": "OK",
+    "screenName": "projects/4942013958735480664/screens/31b9445a94d0404db06ee6d4ed3021a2",
+    "elapsedSec": 84.7
+  },
+  {
+    "displayName": "B — Modern Palace",
+    "assetName": "assets/369789185547564837",
+    "key": "B",
+    "rawTextHead": "{\"projectId\":\"4942013958735480664\",\"sessionId\":\"16271987339012942520\",\"outputComponents\":[{\"design\":{\"screens\":[{\"screenshot\":{\"name\":\"projects/4942013958735480664/files/c711e29c858f44ef8e4ce6c6a6660a",
+    "screenId": "ecfde5c9d3a349869ebdd3c41e167e2a",
+    "status": "OK",
+    "screenName": "projects/4942013958735480664/screens/ecfde5c9d3a349869ebdd3c41e167e2a",
+    "elapsedSec": 76.9
+  },
+  {
+    "displayName": "C — Aman-Calm",
+    "assetName": "assets/13342108590524391707",
+    "key": "C",
+    "screenId": "2d9763ef668f4e428329e7ae806676a5",
+    "status": "OK",
+    "screenName": "projects/4942013958735480664/screens/2d9763ef668f4e428329e7ae806676a5",
+    "elapsedSec": 97.3,
+    "note": "v2 — re-generated with explicit screen-layout prefix because v1 returned only a hero image"
+  },
+  {
+    "displayName": "D — Rosewood-Soulful",
+    "assetName": "assets/13342108590524392478",
+    "key": "D",
+    "rawTextHead": "{\"projectId\":\"4942013958735480664\",\"sessionId\":\"16796894066476885858\",\"outputComponents\":[{\"design\":{\"screens\":[{\"screenshot\":{\"name\":\"projects/4942013958735480664/files/da7e1700eb7e4e048b5108651f4f25",
+    "screenId": "f18215cf13164b298e542997502bb39b",
+    "status": "OK",
+    "screenName": "projects/4942013958735480664/screens/f18215cf13164b298e542997502bb39b",
+    "elapsedSec": 116.6
+  }
+]

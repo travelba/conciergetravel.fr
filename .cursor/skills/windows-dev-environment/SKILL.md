@@ -301,6 +301,91 @@ When validation fails in the browser, the React Dev Overlay surfaces a red error
 
 Reference: `packages/config/src/env-web.ts`.
 
+## Rule 11 — `Get-Content -Raw` + `ConvertTo-Json` + `Out-File -Encoding utf8` — the three-way PowerShell trap when calling HTTP MCP servers
+
+This compound bug wasted ~25 minutes on 2026-05-21 while pushing Stitch generation prompts. Three independent PowerShell quirks combine to silently corrupt MCP request payloads:
+
+**Trap 1 — `Get-Content -Raw` returns a decorated `PSObject`, not a `[string]`.**
+
+```powershell
+# ❌ Looks fine, but $prompt is a PSObject with .Length, .ReadCount, .PSCredential, .DisplayRoot…
+$prompt = Get-Content "prompt.txt" -Raw
+$payload = @{ prompt = $prompt; … } | ConvertTo-Json -Depth 6 -Compress
+# ConvertTo-Json sees the PSObject and serialises every property:
+#   {"prompt":{"value":"…","ReadCount":1,"Credential":"System.Management.Automation.PSCredential",…}}
+# The remote server rejects with "Invalid argument" or interprets prompt as an object.
+```
+
+**Trap 2 — `Out-File -Encoding utf8` adds a UTF-8 BOM on PowerShell 5.1.**
+
+The BOM is `EF BB BF` at byte offset 0. Many JSON parsers (including Stitch's) reject the file as invalid JSON because the first byte is not `{` or `[`.
+
+**Trap 3 — The PowerShell console renders UTF-8 as CP850/CP1252.**
+
+`★` (UTF-8 `E2 98 85`) displays as `?` on the console. `€` shows as `‡`. `é` shows as `\t`. **The bytes on disk are correct** — only the visual rendering is wrong. Don't "fix" the file based on what you see in the terminal.
+
+**The canonical fix — bypass PowerShell's high-level cmdlets, use .NET directly:**
+
+```powershell
+# ✅ Right
+$prompt = [System.IO.File]::ReadAllText(
+  "prompt.txt",
+  [System.Text.Encoding]::UTF8
+)  # returns a real [string], not a PSObject
+
+$payload = @{
+  jsonrpc = "2.0"
+  id      = 1
+  method  = "tools/call"
+  params  = @{ name = "generate_screen_from_text"; arguments = @{ prompt = $prompt; … } }
+} | ConvertTo-Json -Depth 6 -Compress
+
+[System.IO.File]::WriteAllText(
+  "payload.json",
+  $payload,
+  [System.Text.UTF8Encoding]::new($false)  # $false = no BOM
+)
+
+curl.exe -sS -X POST $endpoint `
+  -H "Content-Type: application/json" `
+  --data-binary "@payload.json" `
+  --max-time 360
+```
+
+**Sanity checks** when an MCP rejects with "Invalid argument":
+
+```powershell
+# 1. Verify no BOM on the JSON file:
+$bytes = [System.IO.File]::ReadAllBytes("payload.json")
+[BitConverter]::ToString($bytes[0..2])  # must be "7B-22-..." (= "{\"…"), NOT "EF-BB-BF"
+
+# 2. Verify the prompt is a flat string in the JSON:
+[System.IO.File]::ReadAllText("payload.json").Substring(0, 200)
+# look for "prompt":"…" — never "prompt":{"value":"…"}
+
+# 3. Don't trust the console — verify UTF-8 chars by raw byte:
+$src = [System.IO.File]::ReadAllBytes("prompt.txt")
+for ($i = 0; $i -lt $src.Length - 2; $i++) {
+  if ($src[$i] -eq 0xE2 -and $src[$i+1] -eq 0x98 -and $src[$i+2] -eq 0x85) {
+    "Star ★ found at offset $i"; break
+  }
+}
+```
+
+**Rule 11 bis — `??` (null-coalescing) operator is PowerShell 7+ only.**
+
+PS 5.1 (the default Windows shell) parses `$a ?? 'default'` as a syntax error. Use the explicit form everywhere:
+
+```powershell
+# ❌ PS 7+ only
+$title = $screen.title ?? '<no title>'
+
+# ✅ PS 5.1 compatible
+$title = if ($screen.title) { $screen.title } else { '<no title>' }
+```
+
+Reference incident: Stitch MCP HTTP calls on 2026-05-21 — both traps fired simultaneously, returning `Invalid argument` in <1 second on every payload until the .NET-direct read/write pattern was adopted. See `stitch-mcp-pipeline` Rule 5 for the MCP-specific manifestation.
+
 ## Anti-patterns
 
 - ❌ `pnpm … --slug=a,b,c` without quotes → PowerShell mangles the args.
@@ -311,9 +396,14 @@ Reference: `packages/config/src/env-web.ts`.
 - ❌ Editing the root `.env.local` and expecting `next dev` to see the change — it reads `apps/web/.env.local` only.
 - ❌ Restarting `next dev` after a `NEXT_PUBLIC_*` change without purging `apps/web/.next/` — those vars are inlined at compile time and the cached bundle keeps the old values.
 - ❌ Relying on `SKIP_ENV_VALIDATION=true` to bypass client-side validation — it has no effect in the browser.
+- ❌ Reading prompt files via `Get-Content -Raw` and feeding into `ConvertTo-Json` (PSObject wrapping bug — see Rule 11).
+- ❌ Writing JSON payloads with `Out-File -Encoding utf8` on PS 5.1 (UTF-8 BOM corrupts strict JSON parsers — see Rule 11).
+- ❌ Trusting PowerShell's console rendering of UTF-8 (`★`, `€`, `é` look broken but the bytes on disk are correct — see Rule 11).
+- ❌ Using `??` null-coalescing operator (PS 7+ only — Rule 11 bis).
 
 ## References
 
 - `cli-for-agents` skill (CLI design that's terminal-agnostic).
 - `llm-output-robustness` skill (referenced in editorial-pilot scripts).
+- [`stitch-mcp-pipeline`](../stitch-mcp-pipeline/SKILL.md) — MCP-specific HTTP gotchas that compound with Rule 11 traps.
 - Reference impls: `scripts/editorial-pilot/src/guides/inspect-guide.ts`, `scripts/editorial-pilot/src/guides/audit-v2-status.ts`.

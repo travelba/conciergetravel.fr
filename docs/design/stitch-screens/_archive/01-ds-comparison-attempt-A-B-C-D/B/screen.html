@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Le Bristol Paris - Modern Palace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&amp;family=Karla:wght@300;400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0A0A0A",
+                        secondary: "#D4AF8B",
+                        ivory: "#F5EFE5",
+                        body: "#E8E2D5",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        body: ["Karla", "sans-serif"],
+                        label: ["Manrope", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .text-shadow-subtle {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-primary text-body font-body antialiased">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#D4AF8B]/20 flex justify-between items-center px-12 py-6 w-full">
+<div class="text-2xl font-display font-light tracking-[0.2em] text-[#F5EFE5]">MODERN PALACE</div>
+<nav class="hidden md:flex space-x-10">
+<a class="text-[#E8E2D5] hover:text-[#D4AF8B] transition-colors duration-300 font-label text-xs tracking-widest uppercase" href="#">Destinations</a>
+<a class="text-[#E8E2D5] hover:text-[#D4AF8B] transition-colors duration-300 font-label text-xs tracking-widest uppercase" href="#">Expériences</a>
+<a class="text-[#E8E2D5] hover:text-[#D4AF8B] transition-colors duration-300 font-label text-xs tracking-widest uppercase" href="#">Offres</a>
+<a class="text-[#D4AF8B] border-b border-[#D4AF8B] pb-1 font-label text-xs tracking-widest uppercase" href="#">Le Bristol</a>
+</nav>
+<div class="flex items-center space-x-6">
+<span class="text-[#E8E2D5]/60 font-label text-[10px] tracking-widest">FR / EUR</span>
+<button class="material-symbols-outlined text-[#D4AF8B] hover:opacity-80 transition-opacity">account_circle</button>
+</div>
+</header>
+<main class="pt-0">
+<!-- Hero Section -->
+<section class="relative h-[70vh] w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugcmSp7VkDzcFtwV-fJdCwHWBuh2E1JgEm0O4eyC_4ZL_p_2WB8SYOBASamIGIKxWGrVpnhW_0gezh1BECP2QHzpMiANvPdFLOpwvyWA-8qMr5VplOxARBJm90NCmsstam567Cv-40bkfRMvixpQk0qzY0GzrUfvprp48Chn9Zls99zWnPwOtnMA2EdWSLzhFVD81bJkZyCXv6lt7nj-UHJWphuirAhLb8pTAWQ_XGoNmvWFMfWYpgugw');">
+<!-- WCAG AA Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-transparent"></div>
+</div>
+<!-- Identity Overlay -->
+<div class="absolute bottom-0 left-0 w-full px-12 pb-16 flex flex-col md:flex-row justify-between items-end">
+<div class="max-w-4xl">
+<!-- Breadcrumbs -->
+<nav class="flex items-center space-x-2 font-label text-[10px] tracking-[0.2em] text-[#D4AF8B] mb-6 uppercase">
+<span>Paris</span>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span>8ème Arrondissement</span>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span class="text-[#F5EFE5]">Le Bristol</span>
+</nav>
+<div class="flex items-center space-x-4 mb-2">
+<div class="flex space-x-0.5 text-[#D4AF8B]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label text-[10px] tracking-widest text-[#F5EFE5] uppercase border border-[#D4AF8B]/30 px-2 py-0.5">Palace</span>
+</div>
+<h1 class="text-6xl md:text-8xl font-display font-light text-[#F5EFE5] leading-tight mb-4">Le Bristol Paris</h1>
+<p class="text-xl md:text-2xl font-body text-[#E8E2D5]/80 mb-6 font-light italic">Hôtel particulier du 8e arrondissement, Faubourg Saint-Honoré</p>
+<div class="flex items-center text-[#E8E2D5]/60 font-label text-xs tracking-widest">
+<span class="material-symbols-outlined text-sm mr-2">location_on</span>
+                        112 Rue du Faubourg Saint-Honoré, 75008 Paris, France
+                    </div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-8 md:mt-0 flex flex-wrap gap-4">
+<div class="flex gap-2">
+<button class="w-12 h-12 border border-[#D4AF8B]/40 flex items-center justify-center text-[#D4AF8B] hover:bg-[#D4AF8B] hover:text-primary transition-all duration-300">
+<span class="material-symbols-outlined text-xl">favorite</span>
+</button>
+<button class="w-12 h-12 border border-[#D4AF8B]/40 flex items-center justify-center text-[#D4AF8B] hover:bg-[#D4AF8B] hover:text-primary transition-all duration-300">
+<span class="material-symbols-outlined text-xl">share</span>
+</button>
+</div>
+<button class="px-8 py-4 border border-[#D4AF8B] text-[#D4AF8B] font-label text-xs tracking-[0.2em] uppercase hover:bg-[#D4AF8B] hover:text-primary transition-all duration-500 group overflow-hidden relative">
+<span class="relative z-10">Vérifier disponibilité</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Info Strip Section -->
+<section class="bg-primary py-12 px-12 border-b border-[#D4AF8B]/10">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
+<!-- Ratings Block -->
+<div class="flex flex-col space-y-6">
+<div class="flex items-center space-x-4">
+<div class="text-4xl font-display text-[#D4AF8B]">9.6<span class="text-sm font-label opacity-40">/10</span></div>
+<div class="h-8 w-[1px] bg-[#D4AF8B]/20"></div>
+<div class="font-label text-[10px] tracking-widest text-[#F5EFE5] uppercase">Exceptionnel<br/><span class="opacity-40 text-[8px]">1,240 avis</span></div>
+</div>
+<div class="space-y-3">
+<div class="group">
+<div class="flex justify-between font-label text-[9px] tracking-widest text-[#E8E2D5]/40 uppercase mb-1">
+<span>Propreté</span>
+<span>9.8</span>
+</div>
+<div class="h-[1px] w-full bg-[#D4AF8B]/10">
+<div class="h-full bg-[#D4AF8B] w-[98%] transition-all duration-1000"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between font-label text-[9px] tracking-widest text-[#E8E2D5]/40 uppercase mb-1">
+<span>Service</span>
+<span>9.7</span>
+</div>
+<div class="h-[1px] w-full bg-[#D4AF8B]/10">
+<div class="h-full bg-[#D4AF8B] w-[97%] transition-all duration-1000"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between font-label text-[9px] tracking-widest text-[#E8E2D5]/40 uppercase mb-1">
+<span>Confort</span>
+<span>9.6</span>
+</div>
+<div class="h-[1px] w-full bg-[#D4AF8B]/10">
+<div class="h-full bg-[#D4AF8B] w-[96%] transition-all duration-1000"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Award Badges -->
+<div class="flex flex-col items-center justify-center space-y-8">
+<div class="flex items-center space-x-12 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+<div class="flex flex-col items-center text-center max-w-[80px]">
+<div class="h-10 flex items-center mb-2">
+<span class="material-symbols-outlined text-3xl text-[#D4AF8B]">workspace_premium</span>
+</div>
+<span class="font-label text-[8px] tracking-widest text-center uppercase">Atout France Palace</span>
+</div>
+<div class="flex flex-col items-center text-center max-w-[80px]">
+<div class="h-10 flex items-center mb-2">
+<span class="material-symbols-outlined text-3xl text-[#D4AF8B]">verified</span>
+</div>
+<span class="font-label text-[8px] tracking-widest text-center uppercase">Forbes 5 Étoiles</span>
+</div>
+<div class="flex flex-col items-center text-center max-w-[80px]">
+<div class="h-10 flex items-center mb-2">
+<span class="material-symbols-outlined text-3xl text-[#D4AF8B]">stars</span>
+</div>
+<span class="font-label text-[8px] tracking-widest text-center uppercase">Leading Hotels</span>
+</div>
+</div>
+</div>
+<!-- Quick Stats -->
+<div class="flex flex-col justify-center space-y-4 md:items-end">
+<div class="flex items-center space-x-3 text-[#E8E2D5]/80 font-label text-xs tracking-widest uppercase">
+<span>190 chambres &amp; suites</span>
+<span class="w-1 h-1 rounded-full bg-[#D4AF8B]"></span>
+<span>Spa Le Bristol by La Prairie</span>
+</div>
+<div class="flex items-center space-x-3 text-[#E8E2D5]/80 font-label text-xs tracking-widest uppercase">
+<span>3 Restaurants Gastronomiques</span>
+</div>
+<div class="pt-2 flex items-center text-[#D4AF8B] font-label text-[10px] tracking-[0.2em] uppercase">
+<span class="material-symbols-outlined text-sm mr-2">wifi</span> Wi-Fi offert
+                        <span class="mx-3 opacity-20">|</span>
+<span class="material-symbols-outlined text-sm mr-2">local_parking</span> Service Voiturier
+                    </div>
+</div>
+</div>
+</section>
+<!-- Sticky Section Navigation -->
+<nav class="sticky top-[80px] z-40 bg-[#0A0A0A] border-y border-[#D4AF8B]/10 overflow-x-auto no-scrollbar">
+<div class="flex justify-center items-center space-x-12 py-4 px-8 min-w-max mx-auto">
+<a class="text-[#D4AF8B] font-medium tracking-widest uppercase text-xs" href="#presentation">Présentation</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#chambres">Chambres</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#equipements">Équipements</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#localisation">Localisation</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#tarifs">Tarifs</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#avis">Avis</a>
+<a class="text-[#E8E2D5]/60 hover:text-[#D4AF8B] transition-all uppercase text-xs tracking-widest" href="#faq">FAQ</a>
+</div>
+</nav>
+<!-- Placeholder Content to enable scroll demo -->
+<div class="h-screen bg-primary px-12 py-24">
+<div class="max-w-4xl mx-auto space-y-12">
+<h2 class="text-4xl font-display text-[#F5EFE5] leading-relaxed italic">L'élégance parisienne dans toute sa splendeur.</h2>
+<p class="text-xl leading-relaxed font-light text-[#E8E2D5]/70">Depuis son ouverture en 1925, Le Bristol Paris incarne l'esprit du service à la française. Situé sur la prestigieuse rue du Faubourg Saint-Honoré, cet établissement mythique offre un sanctuaire de raffinement et de calme au cœur de l'effervescence parisienne.</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-20 bg-[#0A0A0A] border-t border-[#D4AF8B]/10">
+<div class="flex flex-col items-center space-y-8 max-w-7xl mx-auto">
+<div class="text-lg font-display tracking-tighter text-[#F5EFE5]">MODERN PALACE</div>
+<nav class="flex space-x-12 font-label text-[10px] tracking-[0.2em] uppercase">
+<a class="text-[#E8E2D5]/40 hover:text-[#E8E2D5] transition-colors" href="#">Mentions Légales</a>
+<a class="text-[#E8E2D5]/40 hover:text-[#E8E2D5] transition-colors" href="#">Confidentialité</a>
+<a class="text-[#E8E2D5]/40 hover:text-[#E8E2D5] transition-colors" href="#">Presse</a>
+<a class="text-[#E8E2D5]/40 hover:text-[#E8E2D5] transition-colors" href="#">Carrières</a>
+</nav>
+<div class="text-[#E8E2D5]/20 font-label text-[9px] tracking-[0.1em]">© 2024 MODERN PALACE. TOUS DROITS RÉSERVÉS.</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions and scroll effects
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav.sticky');
+            if (window.scrollY > 100) {
+                nav.classList.add('bg-opacity-95', 'backdrop-blur-md');
+            } else {
+                nav.classList.remove('bg-opacity-95', 'backdrop-blur-md');
+            }
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('nav.sticky a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 140,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body></html>

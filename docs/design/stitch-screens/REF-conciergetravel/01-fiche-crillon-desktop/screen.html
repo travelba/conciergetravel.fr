@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hôtel de Crillon, A Rosewood Hotel - ConciergeTravel.fr</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c4c7c7",
+                        "surface-tint": "#5f5e5e",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffdea4",
+                        "primary-fixed": "#e5e2e1",
+                        "surface-variant": "#e5e2e1",
+                        "on-secondary-fixed": "#261900",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#795f2b",
+                        "surface": "#fdf8f8",
+                        "primary-container": "#1c1b1b",
+                        "surface-bright": "#fdf8f8",
+                        "on-primary-container": "#858383",
+                        "secondary": "#745a27",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#f1edec",
+                        "tertiary-fixed": "#dce6ce",
+                        "on-secondary-fixed-variant": "#5a4312",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#f4f0ef",
+                        "primary": "#000000",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#161e0f",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "background": "#fdf8f8",
+                        "on-surface": "#1c1b1b",
+                        "inverse-primary": "#c8c6c5",
+                        "inverse-surface": "#313030",
+                        "secondary-fixed-dim": "#e4c285",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#fedb9b",
+                        "outline": "#747878",
+                        "on-background": "#1c1b1b",
+                        "on-tertiary-container": "#7d8773",
+                        "on-surface-variant": "#444748",
+                        "surface-dim": "#ddd9d8",
+                        "tertiary-container": "#161e0f",
+                        "on-primary-fixed-variant": "#474746",
+                        "surface-container-low": "#f7f3f2",
+                        "on-tertiary-fixed-variant": "#404a38",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-high": "#ebe7e6",
+                        "tertiary-fixed-dim": "#c0cab3",
+                        "on-error": "#ffffff",
+                        "tertiary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "section-gap": "120px",
+                        "unit": "4px",
+                        "margin-desktop": "80px",
+                        "gutter": "24px",
+                        "touch-target": "44px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Noto Serif"],
+                        "label-caps": ["Inter"],
+                        "display-xl": ["Noto Serif"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Noto Serif"],
+                        "body-md": ["Inter"],
+                        "interactive": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "600" }],
+                        "display-xl": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "interactive": ["14px", { "lineHeight": "1.0", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface docked full-width top-0 border-b border-outline-variant/10 flat no shadows z-50 sticky">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-7xl mx-auto">
+<div class="font-headline-lg text-headline-lg tracking-tighter text-primary dark:text-on-primary-fixed">ConciergeTravel.fr</div>
+<nav class="hidden md:flex gap-gutter items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant opacity-70 hover:opacity-100 transition-opacity duration-300" href="#">Inspirations</a>
+<a class="font-label-caps text-label-caps text-primary dark:text-on-primary-fixed border-b border-primary dark:border-on-primary-fixed pb-1 hover:opacity-100 transition-opacity duration-300 opacity-80 transition-all" href="#">Hôtels</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant opacity-70 hover:opacity-100 transition-opacity duration-300" href="#">Destinations</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant opacity-70 hover:opacity-100 transition-opacity duration-300" href="#">Le Journal</a>
+</nav>
+<div class="flex gap-4 items-center">
+<div class="hidden md:flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<button class="font-interactive text-interactive text-on-surface-variant bg-transparent border border-outline px-4 min-h-[44px] rounded hover:bg-surface-container transition-colors">Loyalty</button>
+<button class="font-interactive text-interactive bg-primary text-on-primary px-6 min-h-[44px] rounded hover:bg-primary-container hover:text-on-primary-container transition-colors">Espace Membre</button>
+</div>
+</div>
+</header>
+<main>
+<!-- 1. Immersive Gallery -->
+<section class="w-full">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-1 md:h-[716px]">
+<div class="md:col-span-2 relative h-96 md:h-full">
+<img alt="Façade of Hôtel de Crillon" class="w-full h-full object-cover" data-alt="A sweeping, majestic view of the historic neoclassical façade of a grand Parisian hotel at twilight. The warm, golden interior lighting glows invitingly against the cool, dusky blue sky. The scene is elegant, serene, and deeply luxurious, capturing the essence of sober luxury and high-end editorial travel photography. Subtle motion blur on a passing vintage car adds depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2hoSdTPOEsz7XGYM2ryjqiHuiqgxVHDn4uK0F2d48XCaWP5xtHHOritAC-4xdEsd2FPTxQMZbqT8QLklmAWDQT6lXvubWhYaWwptjLQqxH-ltz7hCngNNz5m5Sg_SxGsxwJl6pDIVfIeAupL7_2ueo5cpriGag-V7ryp1rHLEfv7DGBejMo6DIeKEGPoUDGvWXi7FX0bXq0J4Ty8fl7-O36xg07sdicgx80QSXJFhVWSLqP-FbkviYLGXcgrVqeZZeQgTxmMTeTQq"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-8 text-white">
+<p class="font-label-caps text-label-caps text-secondary-fixed mb-2 tracking-widest">PARIS, FRANCE</p>
+<h1 class="font-display-xl text-display-xl text-white">Hôtel de Crillon, A Rosewood Hotel</h1>
+</div>
+</div>
+<div class="grid grid-cols-2 grid-rows-2 md:col-span-2 gap-1 h-[512px] md:h-full">
+<img alt="Luxurious living room detail" class="w-full h-full object-cover" data-alt="Close-up shot of a meticulously designed hotel living room detail. Focus is on a plush velvet armchair in soft grey, resting next to a marble-topped side table with a minimalist brass lamp. The lighting is soft and diffused, creating a serene, inviting atmosphere indicative of high-net-worth interior design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQNgwemqebftgCKMcOkL3wDfBuskbDKDSjrWVXs-0GL49_tRsuwRSg4kWelsnbIKDikeNr62v5JW9nmsDwVolw_d1dkOTyNMKvMwkLbIWCu19D37tcSCAVGfpc4pnW2FlrMoyFWt8d0aSgK1O7C2NHrwkyGw3XbxEK2NHuDv-mlYk_ejTSD9eIA-0qGIe6YszbsWjvLvvSOGYWwWVsmWlkISfB4uu2Vw-Hk2QKwrCkZl0KMRWolgkx2_cGS6lekhEUKA8C0pNgKUZS"/>
+<img alt="Elegant bedroom suite" class="w-full h-full object-cover" data-alt="An expansive, light-filled luxury bedroom suite in a historic Parisian building. High ceilings with ornate crown molding, tall French windows draped in heavy silk, and a pristine king-sized bed with crisp white linens. The color palette is muted and sophisticated—creams, pale golds, and soft greys." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCi9uXEXYm0nBCOB3FqSMQ6iT8ip8qOmceH5-NSl2wkXFqfoLGmY5CG6PaAeSjZ7NcxBuUTb5og0KyPivtyYRFpfCNZQFexrXz-pY0rdLF7hdHM0-tswdEr_lKrukkpEgUzSRRV3XUnZtWc0_9FRkDuVySwyRAEEMlmMjltDmeavffgGgp9AAxAC9RFrYkzGWprahcBrqxExf0KjPYR8M3RMhKAcDXTxpbRZHOqK3qcYvFHXMhtDd1hkAp8dscyGcghI-mFjK5GpfLC"/>
+<img alt="Fine dining restaurant detail" class="w-full h-full object-cover" data-alt="A moody, atmospheric shot of a high-end restaurant table setting within a luxury hotel. Focus is on a perfectly polished crystal wine glass and gleaming silver cutlery against a pristine white tablecloth. In the softly blurred background, warm amber lighting highlights opulent architectural details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_9gGWsvwBXF5YV3arifCAlhjBFjjgKcPXtMkdop9Eu4MpNYM4FRpcmpqdWwilHXMl-hylTQRkJ5xfUgBTT3alpaw8v95cV3bvxnrm7EjNZ1yS2YGNSzjKKlDIs87Y34kAo0RIbo1BZ8rz0M1UFm5PSsfOmQhsjTLza0j05Y1B9rozyE6uRW5vCRK9O_a5YvvRTjfugbwinFQ23Y8Q5P9WBw4aeuLiZvxfFp1TbtEdV9D6CFCVAINAyXVRgiUoQhfDO47CF_nmmE85"/>
+<img alt="Spa and wellness area" class="w-full h-full object-cover" data-alt="A tranquil, minimalist indoor swimming pool area in a luxury spa. The pool is lined with shimmering gold tiles, reflecting the soft, ambient lighting. The atmosphere is hushed and restorative, embodying the 'sober luxury' aesthetic with clean lines and premium materials." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5qkPCELR6mjjfaX10BPR6cjbc4tVdXvSjcmj1Y9rnTvppW6ojlffwea-_I8PvMb5jC0DOWDLiACzZKz1hK6RQpUvZOnzfow6Cp7vKfuU5N2MzWKz9c2AWQE-K1AbwpGoqAjDtPDaLLtUQ9WJ-axTnr8uMPaiE_LPi_f-rQoB7im99MsU0gGx2f0e6KuiqDOJEcQqImq3i82jeSeYzg-JZ3LyzikTPNHgHDSUn_KBh1NfpDmhtss1tIlMbL-5qjAjYFqqSeObw_m2v"/>
+</div>
+</div>
+</section>
+<!-- 2. Editorial Intro -->
+<section class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-section-gap">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="md:col-span-2">
+<h2 class="font-headline-lg text-headline-lg mb-6">Le mot du Concierge</h2>
+<div class="font-body-lg text-body-lg text-on-surface-variant space-y-6 leading-relaxed">
+<p><span class="float-left text-display-xl font-display-xl leading-none mr-3 text-primary mt-1">S</span>itué sur la mythique Place de la Concorde, l'Hôtel de Crillon incarne l'élégance parisienne intemporelle. Après une rénovation magistrale, ce palace historique offre un équilibre parfait entre le faste du 18ème siècle et un confort contemporain absolu. C'est une adresse où l'histoire murmure à chaque coin de rue, mais où le service, discret et anticipatif, est résolument tourné vers le voyageur moderne exigeant.</p>
+<p>L'atmosphère y est feutrée, loin de l'ostentation. Les suites, véritables appartements parisiens, offrent des vues imprenables, tandis que la cour intérieure, véritable écrin de verdure, offre une retraite silencieuse au cœur de l'effervescence de la capitale.</p>
+</div>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-6 border-b border-outline-variant/20 pb-4">POURQUOI ON L'AIME</h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-sm mt-1">star</span>
+<span class="font-body-md text-body-md">Emplacement iconique sur la Place de la Concorde.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-sm mt-1">wine_bar</span>
+<span class="font-body-md text-body-md">Le bar Les Ambassadeurs, joyau de la vie nocturne parisienne.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-sm mt-1">spa</span>
+<span class="font-body-md text-body-md">Le spa Sense, un sanctuaire de bien-être absolu.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-sm mt-1">person_play</span>
+<span class="font-body-md text-body-md">Service de majordome dédié pour une expérience sur-mesure.</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-lowest full-width py-section-gap border-t border-outline-variant/20 flat no shadows">
+<div class="max-w-7xl mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="md:col-span-1">
+<div class="font-headline-md text-headline-md text-primary mb-4">ConciergeTravel.fr</div>
+<p class="font-body-md text-body-md text-on-surface dark:text-on-surface-variant">© 2024 ConciergeTravel.fr — L'excellence du voyage sur mesure.</p>
+</div>
+<div class="md:col-span-3 flex flex-wrap gap-x-8 gap-y-4 justify-start md:justify-end items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Mentions Légales</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Confidentialité</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">IATA &amp; APST</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Presse</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-full border-t border-outline-variant/10 shadow-sm fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface dark:bg-surface-container-highest">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-on-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-label-caps text-label-caps text-[10px]">Explorer</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-on-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span class="font-label-caps text-label-caps text-[10px]">Inspirations</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-on-primary-fixed font-bold scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1 fill">hotel</span>
+<span class="font-label-caps text-label-caps text-[10px]">Hôtels</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-on-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1">confirmation_number</span>
+<span class="font-label-caps text-label-caps text-[10px]">Réserver</span>
+</a>
+</nav>
+</body></html>

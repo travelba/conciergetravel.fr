@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Le Bristol Paris - MyConciergeHotel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#7f7669",
+                    "surface-container-low": "#f5f3f3",
+                    "on-secondary-fixed-variant": "#474746",
+                    "info": "#3F5A6B",
+                    "mist": "#C9C2B0",
+                    "inverse-primary": "#e4c18a",
+                    "on-tertiary-fixed-variant": "#474744",
+                    "tertiary": "#5b5b58",
+                    "inverse-on-surface": "#f2f0f0",
+                    "primary-container": "#8b6f3f",
+                    "on-tertiary-container": "#fcfaf6",
+                    "bronze-hover": "#A88B5C",
+                    "background": "#fbf9f8",
+                    "outline-variant": "#d1c5b6",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#737370",
+                    "success": "#3F6B4F",
+                    "surface-container-highest": "#e4e2e2",
+                    "on-background": "#1b1c1c",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#e5e2e1",
+                    "surface": "#fbf9f8",
+                    "secondary-container": "#e2dfde",
+                    "on-surface-variant": "#4d463a",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#fff9f7",
+                    "surface-bright": "#fbf9f8",
+                    "on-surface": "#1b1c1c",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#1b1c1a",
+                    "ink-soft": "#3A3A3A",
+                    "surface-container-high": "#e9e8e7",
+                    "on-primary": "#ffffff",
+                    "error": "#7A1F1F",
+                    "stone": "#E8E2D4",
+                    "surface-container": "#efeded",
+                    "on-error": "#ffffff",
+                    "warning": "#A8722A",
+                    "inverse-surface": "#303031",
+                    "secondary": "#5f5e5e",
+                    "tertiary-fixed": "#e4e2de",
+                    "primary": "#705729",
+                    "tertiary-fixed-dim": "#c8c6c3",
+                    "surface-dim": "#dbdad9",
+                    "primary-fixed": "#ffdeaa",
+                    "on-primary-fixed-variant": "#5a4317",
+                    "surface-variant": "#e4e2e2",
+                    "primary-fixed-dim": "#e4c18a",
+                    "on-primary-fixed": "#271900",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "bronze-soft": "#C9B58A",
+                    "on-secondary-container": "#636262",
+                    "surface-tint": "#745a2c",
+                    "on-secondary-fixed": "#1b1b1b",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "space-2": "8px",
+                    "space-1": "4px",
+                    "space-8": "32px",
+                    "space-16": "64px",
+                    "container-max": "1280px",
+                    "space-4": "16px",
+                    "space-24": "96px",
+                    "space-3": "12px",
+                    "reading-max": "720px",
+                    "space-6": "24px",
+                    "space-12": "48px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "title-lg": ["Inter"],
+                    "label-sm-uppercase": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["EB Garamond"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["EB Garamond"],
+                    "display-xl-mobile": ["EB Garamond"],
+                    "body-md": ["Inter"],
+                    "display-xl": ["EB Garamond"],
+                    "display-md": ["EB Garamond"],
+                    "display-lg": ["EB Garamond"]
+            },
+            "fontSize": {
+                    "title-lg": ["18px", {"lineHeight": "1.40", "letterSpacing": "0", "fontWeight": "500"}],
+                    "label-sm-uppercase": ["12px", {"lineHeight": "1.40", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.65", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.20", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "1.40", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "1.30", "letterSpacing": "-0.005em", "fontWeight": "500"}],
+                    "display-xl-mobile": ["44px", {"lineHeight": "1.05", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.60", "letterSpacing": "0", "fontWeight": "400"}],
+                    "display-xl": ["64px", {"lineHeight": "1.05", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "display-md": ["40px", {"lineHeight": "1.15", "letterSpacing": "-0.015em", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "1.10", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .focus-visible-bronze:focus-visible {
+            outline: 2px solid #705729;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Utility Bar (Based on Shared Component: TopNavBar) -->
+<nav class="bg-surface dark:bg-surface-dim border-b border-mist dark:border-outline-variant fixed top-0 w-full z-50 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-12 py-4 max-w-container-max mx-auto h-[64px]">
+<!-- Wordmark -->
+<a class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim tracking-tight focus-visible-bronze" href="#">
+                MyConcierge.Hotel
+            </a>
+<!-- Nav Links -->
+<div class="hidden md:flex space-x-space-6">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-secondary-fixed-dim hover:text-bronze-hover dark:hover:text-bronze-soft transition-all focus-visible-bronze pb-1" href="#">Hotels</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-secondary-fixed-dim hover:text-bronze-hover dark:hover:text-bronze-soft transition-all focus-visible-bronze pb-1" href="#">Experiences</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-secondary-fixed-dim hover:text-bronze-hover dark:hover:text-bronze-soft transition-all focus-visible-bronze pb-1" href="#">Concierge</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-secondary-fixed-dim hover:text-bronze-hover dark:hover:text-bronze-soft transition-all focus-visible-bronze pb-1" href="#">Reservations</a>
+</div>
+<!-- Right Utilities -->
+<div class="flex items-center space-x-space-4">
+<button class="font-label-md text-label-md text-on-background flex items-center hover:text-primary transition-colors focus-visible-bronze">
+                    FR / € <i class="ml-1 w-4 h-4" data-lucide="chevron-down"></i>
+</button>
+<button aria-label="Profil utilisateur" class="text-on-background hover:text-primary transition-colors focus-visible-bronze">
+<i class="w-5 h-5" data-lucide="user"></i>
+</button>
+<button class="font-label-md text-label-md border border-primary text-primary px-space-4 py-space-2 rounded hover:bg-mist/20 transition-colors focus-visible-bronze scale-95 active:opacity-80 transition-transform">
+                    Login
+                </button>
+<button class="font-label-md text-label-md bg-primary text-on-primary px-space-4 py-space-2 rounded hover:bg-bronze-hover transition-colors focus-visible-bronze scale-95 active:opacity-80 transition-transform">
+                    Join the Circle
+                </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-[96px]"> <!-- 64px nav + 32px padding -->
+<div class="max-w-container-max mx-auto px-12">
+<!-- Breadcrumb -->
+<nav aria-label="Breadcrumb" class="mb-space-6">
+<ol class="flex items-center space-x-2 font-label-md text-label-md text-ink-soft">
+<li><a class="hover:text-primary focus-visible-bronze" href="#">Accueil</a></li>
+<li><span class="text-mist mx-1">/</span></li>
+<li><a class="hover:text-primary focus-visible-bronze" href="#">France</a></li>
+<li><span class="text-mist mx-1">/</span></li>
+<li><a class="hover:text-primary focus-visible-bronze" href="#">Île-de-France</a></li>
+<li><span class="text-mist mx-1">/</span></li>
+<li><a class="hover:text-primary focus-visible-bronze" href="#">Paris</a></li>
+<li><span class="text-mist mx-1">/</span></li>
+<li><a class="hover:text-primary focus-visible-bronze" href="#">8ᵉ arrondissement</a></li>
+<li><span class="text-mist mx-1">/</span></li>
+<li aria-current="page" class="text-on-background">Le Bristol Paris</li>
+</ol>
+</nav>
+<!-- Hero Zone -->
+<section aria-label="Vue majestueuse de la façade du Bristol Paris illuminée" class="relative h-[520px] w-full rounded-none overflow-hidden mb-space-8" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0_H9dh0Zu4XmawHsDbFoISjOH3uBtAjMe8TzIo2q_QOVaVmE_h13uKzSVTPFCtd2DvHGMN2KThTBXx3NLP4DiUJpRi-i_nfOY5qhpzeBWmWZPux1-vS8pH45nVMUf0h1gjWemJKrk-MYolUmxbNvyp7Xu1duzoaKURDGXsSoMhkjrS4uKuNUv8uH734FZs0VFJyr8vypqYATIkdNuvOUn2q1D7Eeql3tHcKy_5IMA3vJAjsivaT3BsVXDhxjy2O78FlUgJh574_I'); background-size: cover; background-position: center;">
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/40 to-transparent"></div>
+<!-- Hero Content -->
+<div class="absolute bottom-0 left-0 w-full p-12 flex flex-col justify-end">
+<h1 class="font-display-xl text-display-xl text-on-primary mb-space-3 drop-shadow-md">
+                        Le Bristol Paris
+                    </h1>
+<!-- Meta Line -->
+<div class="flex items-center flex-wrap gap-space-4 mb-space-2 font-label-md text-label-md text-on-primary">
+<div aria-label="5 étoiles sur 5" class="flex text-primary">
+<i class="w-4 h-4 fill-current" data-lucide="star"></i>
+<i class="w-4 h-4 fill-current" data-lucide="star"></i>
+<i class="w-4 h-4 fill-current" data-lucide="star"></i>
+<i class="w-4 h-4 fill-current" data-lucide="star"></i>
+<i class="w-4 h-4 fill-current" data-lucide="star"></i>
+</div>
+<span class="px-space-2 py-0.5 border border-primary text-primary rounded-full bg-on-background/30 backdrop-blur-sm">
+                            Atout France Palace 2024
+                        </span>
+<span class="px-space-2 py-0.5 border border-primary text-primary rounded-full bg-on-background/30 backdrop-blur-sm flex items-center gap-1">
+<i class="w-3 h-3" data-lucide="award"></i> Michelin · 2 étoiles 2025
+                        </span>
+<span class="text-surface-variant flex items-center gap-1">
+                            4,8 / 5 <span class="text-secondary-fixed-dim underline decoration-mist/50 underline-offset-2 hover:text-on-primary cursor-pointer transition-colors">(842 avis)</span>
+</span>
+</div>
+<!-- Address -->
+<p class="font-body-md text-body-md text-surface-variant mb-space-6 flex items-center gap-2">
+<i class="w-4 h-4 text-primary" data-lucide="map-pin"></i>
+                        112 rue du Faubourg Saint-Honoré, 75008 Paris · 0,3 km des Champs-Élysées
+                    </p>
+<!-- Action Row -->
+<div class="flex items-center gap-space-4">
+<button class="bg-primary hover:bg-bronze-hover text-on-primary font-label-md text-label-md px-space-6 py-space-3 rounded flex items-center gap-2 transition-colors focus-visible-bronze shadow-sm">
+                            Voir les disponibilités
+                            <i class="w-4 h-4" data-lucide="arrow-right"></i>
+</button>
+<button class="border border-mist text-on-primary hover:bg-mist/20 font-label-md text-label-md px-space-4 py-space-3 rounded flex items-center gap-2 transition-colors focus-visible-bronze bg-on-background/20 backdrop-blur-sm">
+<i class="w-4 h-4" data-lucide="heart"></i>
+                            Sauvegarder
+                        </button>
+<button class="border border-mist text-on-primary hover:bg-mist/20 font-label-md text-label-md px-space-4 py-space-3 rounded flex items-center gap-2 transition-colors focus-visible-bronze bg-on-background/20 backdrop-blur-sm">
+<i class="w-4 h-4" data-lucide="share"></i>
+                            Partager
+                        </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Anchor Sub-Nav (Based on Shared Component: TopAppBar small variant context) -->
+<div class="sticky top-[64px] w-full z-40 bg-surface border-b border-mist">
+<div class="flex items-center justify-between px-12 w-full max-w-container-max mx-auto h-[60px]">
+<!-- Anchors -->
+<div class="flex space-x-space-8 h-full">
+<a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary flex items-center focus-visible-bronze transition-colors" href="#apercu">
+                        Aperçu
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#chambres">
+                        Chambres
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#equipements">
+                        Équipements
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#localisation">
+                        Localisation
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#avis">
+                        Avis
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#politiques">
+                        Politiques
+                    </a>
+<a class="font-label-md text-label-md text-secondary hover:text-primary flex items-center border-b-2 border-transparent hover:border-mist transition-colors focus-visible-bronze" href="#faq">
+                        FAQ
+                    </a>
+</div>
+<!-- Price & Sticky CTA -->
+<div class="flex items-center space-x-space-4">
+<span class="font-headline-md text-title-lg italic text-on-background">
+                        À partir de 1 250 € TTC / nuit
+                    </span>
+<button class="bg-primary hover:bg-bronze-hover text-on-primary font-label-md text-label-md px-space-4 py-space-2 rounded transition-colors focus-visible-bronze shadow-sm text-sm">
+                        Réserver
+                    </button>
+</div>
+</div>
+</div>
+<!-- Placeholder for rest of page content to allow scrolling and testing sticky behaviors -->
+<div class="h-screen bg-surface"></div>
+</main>
+<script>
+        lucide.createIcons();
+    </script>
+</body></html>

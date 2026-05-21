@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>ConciergeTravel.fr &mdash; Design System overview</title>
+<style>
+  *{box-sizing:border-box}
+  body{font:14px/1.5 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin:0; background:#FAFAF8; color:#1A1A1A}
+  header.top{padding:32px 80px; background:#1A1A1A; color:#FAFAF8; border-bottom:3px solid #C9A96E}
+  header.top h1{margin:0; font-family:'Noto Serif', Georgia, serif; font-weight:400; font-size:32px; letter-spacing:-0.01em}
+  header.top p{margin:8px 0 0; opacity:.7; font-size:14px}
+  header.top .label{display:inline-block; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; color:#C9A96E; margin-bottom:8px}
+  main{padding:48px 80px; max-width:2400px; margin:0 auto}
+  section{margin-bottom:64px}
+  section h2{font-family:'Noto Serif', Georgia, serif; font-weight:400; font-size:24px; margin:0 0 4px; letter-spacing:-0.01em}
+  section .lead{color:#444; margin:0 0 24px; font-size:15px; max-width:760px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(420px, 1fr)); gap:24px}
+  .grid--3{grid-template-columns:repeat(auto-fit, minmax(360px, 1fr))}
+  .card{background:#fff; border:1px solid #E5E2E1; border-radius:4px; overflow:hidden; display:flex; flex-direction:column; transition:border-color .2s}
+  .card:hover{border-color:#1A1A1A}
+  .card header{padding:14px 20px; border-bottom:1px solid #F1EDEC; display:flex; align-items:center; gap:12px; min-height:56px}
+  .card header h3{margin:0; font-family:'Noto Serif', Georgia, serif; font-weight:400; font-size:16px; flex:1}
+  .badge{display:inline-block; padding:2px 8px; background:#1A1A1A; color:#FAFAF8; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; border-radius:2px}
+  .badge.gold{background:#C9A96E; color:#1A1A1A}
+  .badge.sage{background:#8C9681; color:#FAFAF8}
+  .shot{display:block; background:#0A0A0A; max-height:680px; overflow:hidden}
+  .shot img{display:block; width:100%; height:auto; max-height:680px; object-fit:cover; object-position:top}
+  .meta{padding:12px 20px; border-top:1px solid #F1EDEC; font-size:12px; color:#444; display:flex; gap:16px; flex-wrap:wrap}
+  .meta strong{color:#1A1A1A; font-weight:600; font-size:11px; letter-spacing:0.05em; text-transform:uppercase}
+  .footer-row{padding:10px 20px; border-top:1px solid #F1EDEC; font-size:11px; display:flex; gap:8px; align-items:center}
+  .footer-row a{color:#1A1A1A; text-decoration:none; padding:4px 8px; border:1px solid #C4C7C7; border-radius:2px}
+  .footer-row a:hover{background:#1A1A1A; color:#FAFAF8; border-color:#1A1A1A}
+  .footer-row .id{margin-left:auto; font-family:ui-monospace, monospace; font-size:10px; color:#747878}
+  .ds-summary{background:#fff; border:1px solid #E5E2E1; border-radius:4px; padding:32px; margin:0 0 48px}
+  .ds-summary h2{margin-top:0}
+  .palette{display:flex; gap:8px; margin:16px 0}
+  .swatch{width:80px; height:60px; border-radius:4px; border:1px solid rgba(0,0,0,0.1); position:relative; overflow:hidden}
+  .swatch span{position:absolute; bottom:0; left:0; right:0; padding:4px 6px; background:rgba(0,0,0,.7); color:#fff; font-size:10px; font-family:ui-monospace, monospace}
+  .types{display:grid; grid-template-columns:200px 1fr; gap:8px 16px; font-size:13px; padding:16px 0; border-top:1px dashed #C4C7C7; margin-top:16px}
+  .types strong{font-weight:600}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="label">ConciergeTravel.fr</span>
+  <h1>Design System &mdash; Concierge Travel Visual Language</h1>
+  <p>&laquo;&nbsp;Sober Luxury&nbsp;&raquo; &middot; Charcoal &middot; Off-white &middot; Gold &middot; Noto Serif &times; Inter &middot; adopt&eacute; depuis le projet Stitch source <a href="https://stitch.withgoogle.com/projects/10099065051001187678" style="color:#C9A96E">10099065051001187678</a></p>
+</header>
+
+<main>
+
+<div class="ds-summary">
+  <h2>Tokens canoniques</h2>
+  <p class="lead">Palette + typo + spacing extraits du DS asset <code>5552533c32214a9b977d438e80eb455c</code>. Source de v&eacute;rit&eacute; locale&nbsp;: <code>docs/design/DESIGN.md</code>.</p>
+  <div class="palette">
+    <div class="swatch" style="background:#1A1A1A"><span>charcoal #1A1A1A</span></div>
+    <div class="swatch" style="background:#FAFAF8"><span style="color:#1A1A1A; background:rgba(255,255,255,.7)">off-white #FAFAF8</span></div>
+    <div class="swatch" style="background:#C9A96E"><span>gold #C9A96E</span></div>
+    <div class="swatch" style="background:#8C9681"><span>sage #8C9681</span></div>
+  </div>
+  <div class="types">
+    <strong>Headlines</strong><span>Noto Serif &middot; 400 weight, lh 1.1-1.3</span>
+    <strong>Body</strong><span>Inter &middot; 400, lh 1.6 &middot; tabular-nums for prices</span>
+    <strong>Labels</strong><span>Inter <code>label-caps</code> &middot; 12px, 600, ls 0.1em, uppercase</span>
+    <strong>Roundness</strong><span>0.25rem (4px) on UI &middot; 0px on editorial photos</span>
+    <strong>Section gap</strong><span>120px desktop &middot; 80px mobile</span>
+    <strong>Touch target</strong><span>44px minimum (WCAG 2.2 AA)</span>
+  </div>
+</div>
+
+<section>
+  <h2>Bloc 1 &mdash; HotelHeader (Le Bristol Paris)</h2>
+  <p class="lead">G&eacute;n&eacute;r&eacute; aujourd'hui avec le DS canonique. Premier bloc de la fiche h&ocirc;tel (CDC &sect;2 row 1). Inclut top nav, hero photo, identit&eacute; h&ocirc;tel avec breadcrumb &amp; classement Palace, action buttons, info strip avec note &amp; awards, sub-galerie 4-photos, &laquo;&nbsp;Le mot du Concierge&nbsp;&raquo;, booking widget &amp; POI sidebar, footer trust signals.</p>
+  <div class="grid">
+    <article class="card">
+      <header>
+        <span class="badge gold">Active</span>
+        <h3>Le Bristol Paris &mdash; HotelHeader desktop</h3>
+      </header>
+      <a href="01-hotel-header-le-bristol/screenshot.png" target="_blank" class="shot">
+        <img src="01-hotel-header-le-bristol/screenshot.png" alt="HotelHeader Le Bristol Paris">
+      </a>
+      <div class="meta">
+        <span><strong>Type</strong> DESIGN</span>
+        <span><strong>Width</strong> 2560px</span>
+        <span><strong>Height</strong> 7238px</span>
+        <span><strong>HTML</strong> 27.5 KB</span>
+      </div>
+      <div class="footer-row">
+        <a href="01-hotel-header-le-bristol/screen.html" target="_blank">screen.html</a>
+        <a href="https://stitch.withgoogle.com/projects/4942013958735480664/screens/25039c99e3514e74932edf7ecaf5308b" target="_blank">canvas Stitch</a>
+        <a href="01-hotel-header-le-bristol/prompt.md" target="_blank">prompt.md</a>
+        <span class="id">25039c99&hellip;</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2>&Eacute;crans de r&eacute;f&eacute;rence (projet Stitch source)</h2>
+  <p class="lead">Sept &eacute;crans d&eacute;j&agrave; produits dans le projet ConciergeTravel.fr. Servent de r&eacute;f&eacute;rence visuelle pour la traduction en composants TSX shadcn dans <code>apps/web/</code>.</p>
+
+  <h3 style="font-family:'Noto Serif',Georgia,serif; font-size:18px; font-weight:400; margin:24px 0 12px">Fiche h&ocirc;tel &mdash; H&ocirc;tel de Crillon</h3>
+  <div class="grid">
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>Crillon &mdash; Fiche h&ocirc;tel desktop</h3></header>
+      <a href="REF-conciergetravel/01-fiche-crillon-desktop/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/01-fiche-crillon-desktop/screenshot.png" alt="Crillon desktop">
+      </a>
+      <div class="meta">
+        <span><strong>Width</strong> 2560px</span>
+        <span><strong>Height</strong> 3730px</span>
+        <span><strong>Mosaic gallery</strong> 6 photos</span>
+      </div>
+      <div class="footer-row">
+        <a href="REF-conciergetravel/01-fiche-crillon-desktop/screen.html" target="_blank">screen.html</a>
+        <a href="https://stitch.withgoogle.com/projects/10099065051001187678/screens/06dd05bb" target="_blank">canvas Stitch</a>
+      </div>
+    </article>
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>Crillon &mdash; Fiche h&ocirc;tel mobile</h3></header>
+      <a href="REF-conciergetravel/02-fiche-crillon-mobile/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/02-fiche-crillon-mobile/screenshot.png" alt="Crillon mobile">
+      </a>
+      <div class="meta">
+        <span><strong>Width</strong> 780px</span>
+        <span><strong>Height</strong> 5580px</span>
+      </div>
+      <div class="footer-row">
+        <a href="REF-conciergetravel/02-fiche-crillon-mobile/screen.html" target="_blank">screen.html</a>
+        <a href="https://stitch.withgoogle.com/projects/10099065051001187678/screens/94be0961" target="_blank">canvas Stitch</a>
+      </div>
+    </article>
+  </div>
+
+  <h3 style="font-family:'Noto Serif',Georgia,serif; font-size:18px; font-weight:400; margin:32px 0 12px">Homepage</h3>
+  <div class="grid">
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>Homepage desktop</h3></header>
+      <a href="REF-conciergetravel/03-homepage-desktop/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/03-homepage-desktop/screenshot.png" alt="Homepage desktop">
+      </a>
+      <div class="meta">
+        <span><strong>Width</strong> 2560px</span>
+        <span><strong>Height</strong> 7498px</span>
+      </div>
+      <div class="footer-row">
+        <a href="REF-conciergetravel/03-homepage-desktop/screen.html" target="_blank">screen.html</a>
+      </div>
+    </article>
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>Homepage mobile</h3></header>
+      <a href="REF-conciergetravel/04-homepage-mobile/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/04-homepage-mobile/screenshot.png" alt="Homepage mobile">
+      </a>
+      <div class="meta">
+        <span><strong>Width</strong> 780px</span>
+        <span><strong>Height</strong> 8332px</span>
+      </div>
+      <div class="footer-row">
+        <a href="REF-conciergetravel/04-homepage-mobile/screen.html" target="_blank">screen.html</a>
+      </div>
+    </article>
+  </div>
+
+  <h3 style="font-family:'Noto Serif',Georgia,serif; font-size:18px; font-weight:400; margin:32px 0 12px">Tunnel de r&eacute;servation (mobile)</h3>
+  <div class="grid grid--3">
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>1. Informations voyageur</h3></header>
+      <a href="REF-conciergetravel/06-tunnel-voyageur-mobile/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/06-tunnel-voyageur-mobile/screenshot.png" alt="Tunnel voyageur">
+      </a>
+      <div class="meta"><span><strong>Mobile</strong> 780&times;1810</span></div>
+      <div class="footer-row"><a href="REF-conciergetravel/06-tunnel-voyageur-mobile/screen.html" target="_blank">screen.html</a></div>
+    </article>
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>2. Paiement s&eacute;curis&eacute;</h3></header>
+      <a href="REF-conciergetravel/05-tunnel-paiement-mobile/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/05-tunnel-paiement-mobile/screenshot.png" alt="Tunnel paiement">
+      </a>
+      <div class="meta"><span><strong>Mobile</strong> 780&times;2662</span></div>
+      <div class="footer-row"><a href="REF-conciergetravel/05-tunnel-paiement-mobile/screen.html" target="_blank">screen.html</a></div>
+    </article>
+    <article class="card">
+      <header><span class="badge">Ref</span><h3>3. Confirmation</h3></header>
+      <a href="REF-conciergetravel/07-tunnel-confirmation-mobile/screenshot.png" target="_blank" class="shot">
+        <img src="REF-conciergetravel/07-tunnel-confirmation-mobile/screenshot.png" alt="Tunnel confirmation">
+      </a>
+      <div class="meta"><span><strong>Mobile</strong> 780&times;3740</span></div>
+      <div class="footer-row"><a href="REF-conciergetravel/07-tunnel-confirmation-mobile/screen.html" target="_blank">screen.html</a></div>
+    </article>
+  </div>
+</section>
+
+<section style="border-top:1px solid #E5E2E1; padding-top:32px">
+  <h2>Documents li&eacute;s</h2>
+  <ul style="font-size:14px; line-height:1.8">
+    <li><a href="../DESIGN.md">docs/design/DESIGN.md</a> &mdash; sp&eacute;cification canonique du DS (palette, typo, composants, anti-patterns, mapping CDC &sect;2)</li>
+    <li><a href="../../../.cursor/rules/hotel-detail-page.mdc">.cursor/rules/hotel-detail-page.mdc</a> &mdash; les 15 blocs CDC &sect;2 + bloc 16 Conseil du Concierge (ADR-0011)</li>
+    <li><a href="../../../EDITORIAL_VOICE.md">EDITORIAL_VOICE.md</a> &mdash; voix &laquo;&nbsp;Le Concierge&nbsp;&raquo;, banned superlatives, 25-words rule</li>
+    <li><a href="_archive/README.md">_archive/README.md</a> &mdash; explorations supersed&eacute;es (4 directions A/B/C/D + Parisian Concierge)</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Le Bristol Paris | MyConciergeHotel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400;1,600&amp;family=Public+Sans:wght@300;400;500;600&amp;family=EB+Garamond:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#6B1F2F",    // Bordeaux
+                        secondary: "#B87333",  // Copper
+                        background: "#F5EFE0", // Cream
+                        body: "#2D2018",      // Warm Brown
+                        bronze: "#8B6F3F",
+                        ivory: "#FAF8F4"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        headline: ["Libre Caslon Text", "serif"],
+                        display: ["EB Garamond", "serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .text-shadow-sm {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .hero-gradient {
+            background: linear-gradient(to bottom, rgba(45, 32, 24, 0.4) 0%, rgba(45, 32, 24, 0) 40%, rgba(45, 32, 24, 0.8) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-body font-body selection:bg-primary/10 selection:text-primary">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 w-full z-50 bg-[#F5EFE0] dark:bg-[#2D2018] border-b border-[#B87333]/20 shadow-sm flex justify-between items-center px-8 py-4 w-full">
+<div class="flex items-center gap-8">
+<span class="font-headline text-2xl font-normal text-[#6B1F2F] dark:text-[#B87333] cursor-pointer active:scale-95 transition-transform">MyConciergeHotel</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-headline text-lg italic tracking-tight text-[#2D2018] dark:text-[#F5EFE0] hover:text-[#6B1F2F] transition-colors" href="#">Recherche</a>
+<a class="font-headline text-lg italic tracking-tight text-[#6B1F2F] font-semibold border-b-2 border-[#6B1F2F] pb-1" href="#">Destinations</a>
+<a class="font-headline text-lg italic tracking-tight text-[#2D2018] dark:text-[#F5EFE0] hover:text-[#6B1F2F] transition-colors" href="#">Itinéraires</a>
+<a class="font-headline text-lg italic tracking-tight text-[#2D2018] dark:text-[#F5EFE0] hover:text-[#6B1F2F] transition-colors" href="#">Service Concierge</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex items-center gap-2 text-sm font-medium text-[#2D2018] dark:text-[#F5EFE0]">
+<span>FR / €</span>
+<span class="material-symbols-outlined text-xl" data-icon="language">language</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#6B1F2F] dark:text-[#B87333] cursor-pointer hover:opacity-80 transition-opacity" data-icon="payments">payments</span>
+<span class="material-symbols-outlined text-[#6B1F2F] dark:text-[#B87333] cursor-pointer hover:opacity-80 transition-opacity" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="relative h-[75vh] w-full overflow-hidden pt-20">
+<!-- Background Image -->
+<div class="absolute inset-0 z-0">
+<img alt="Le Bristol Paris Facade" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uiq8pFi7HUAkzXt2NDeob0WaEYFQC9WOa_Z7GN-W_drR3lzaK7uoxL1opSgDNIgoB4CeSTtpcpKl_7QZ-0Y7X2__EXFSYSoOplBpqqxfHI0yw9BiUDrV3Wh2RG5ZbeQYqmXlQdiSC5sqiTRTIQE6vhVr89XmoQbImTrjVTIr5b7ov7WUmOGxu3KqL5b12Mvk9gsyR4ZQ0qrHvK6cUeviWfsc5HNkIUZfiXQf7VigHsiCYnA1gy5CQZkHX4"/>
+<div class="absolute inset-0 hero-gradient"></div>
+</div>
+<div class="relative z-10 h-full max-w-7xl mx-auto px-8 flex flex-col justify-between py-12">
+<!-- Breadcrumb -->
+<nav class="text-white/90 text-sm flex items-center gap-2 font-medium tracking-wide">
+<a class="hover:text-white transition-colors" href="#">Accueil</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-white transition-colors" href="#">France</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-white transition-colors" href="#">Paris</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span class="text-white border-b border-white/30">Le Bristol Paris</span>
+</nav>
+<!-- Hotel Identity Overlay -->
+<div class="max-w-4xl space-y-6">
+<div class="space-y-2">
+<div class="flex items-center gap-4 text-secondary mb-2">
+<div class="flex text-amber-400">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="bg-primary/20 backdrop-blur-md text-white border border-white/20 px-3 py-0.5 text-xs tracking-widest uppercase">Palace</span>
+</div>
+<h1 class="font-display text-6xl md:text-7xl text-white leading-tight">Le Bristol Paris</h1>
+<p class="font-display italic text-xl md:text-2xl text-white/90 font-light">
+                        Hôtel particulier du 8e arrondissement, Faubourg Saint-Honoré
+                    </p>
+<div class="flex items-center gap-2 text-white/80 pt-2">
+<span class="material-symbols-outlined text-lg" data-icon="location_on">location_on</span>
+<span class="text-sm font-medium tracking-wide">112 Rue du Faubourg Saint-Honoré, 75008 Paris</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-4 pt-4">
+<button class="bg-bronze hover:bg-bronze/90 text-white px-8 py-4 font-label font-semibold tracking-widest text-sm uppercase transition-all transform active:scale-95 shadow-lg">
+                        Vérifier disponibilité
+                    </button>
+<button class="border border-white/40 hover:bg-white/10 text-white px-8 py-4 font-label font-semibold tracking-widest text-sm uppercase transition-all backdrop-blur-sm">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="favorite">favorite</span>
+                            Ajouter aux favoris
+                        </span>
+</button>
+<button class="border border-white/40 hover:bg-white/10 text-white p-4 transition-all backdrop-blur-sm">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Info Strip -->
+<section class="bg-ivory border-b border-primary/10">
+<div class="max-w-7xl mx-auto px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+<!-- Rating Block -->
+<div class="flex gap-6 items-start">
+<div class="flex flex-col items-center">
+<div class="text-4xl font-headline font-bold text-primary">9,6<span class="text-xl text-primary/60">/10</span></div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-primary/70 mt-1">Exceptionnel</span>
+</div>
+<div class="flex-1 space-y-2">
+<div class="flex justify-between items-center text-[10px] uppercase tracking-tighter font-semibold text-body/60">
+<span>782 avis vérifiés</span>
+<a class="text-primary underline hover:text-primary/80" href="#">Lire les avis</a>
+</div>
+<div class="space-y-1.5">
+<div class="h-1 w-full bg-body/5 relative">
+<div class="absolute inset-0 bg-primary/60 w-[98%]"></div>
+</div>
+<div class="h-1 w-full bg-body/5 relative">
+<div class="absolute inset-0 bg-primary/60 w-[96%]"></div>
+</div>
+<div class="h-1 w-full bg-body/5 relative">
+<div class="absolute inset-0 bg-primary/60 w-[97%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex justify-center items-center gap-8 border-x border-body/10 px-8">
+<div class="opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0 flex flex-col items-center gap-2 text-center">
+<span class="material-symbols-outlined text-bronze text-3xl" data-icon="military_tech">military_tech</span>
+<span class="text-[10px] font-bold uppercase tracking-widest leading-tight">Atout France<br/>Palace</span>
+</div>
+<div class="opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0 flex flex-col items-center gap-2 text-center">
+<span class="material-symbols-outlined text-bronze text-3xl" data-icon="verified">verified</span>
+<span class="text-[10px] font-bold uppercase tracking-widest leading-tight">Forbes<br/>5 Étoiles</span>
+</div>
+<div class="opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0 flex flex-col items-center gap-2 text-center">
+<span class="material-symbols-outlined text-bronze text-3xl" data-icon="diamond">diamond</span>
+<span class="text-[10px] font-bold uppercase tracking-widest leading-tight">Leading Hotels<br/>of the World</span>
+</div>
+</div>
+<!-- Quick Stats -->
+<div class="text-body flex flex-col gap-4">
+<div class="flex items-center gap-4 group">
+<div class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="bed">bed</span>
+</div>
+<span class="text-sm font-medium">190 chambres et suites d'exception</span>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="spa">spa</span>
+</div>
+<span class="text-sm font-medium">Spa Le Bristol by La Prairie</span>
+</div>
+<div class="flex items-center gap-4 group">
+<div class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="restaurant">restaurant</span>
+</div>
+<span class="text-sm font-medium">3 restaurants (Epicure 3* Michelin)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Sticky Section Nav -->
+<nav class="sticky top-[72px] z-40 bg-[#F5EFE0]/95 backdrop-blur-sm border-y border-primary/10 py-4 shadow-sm">
+<div class="max-w-7xl mx-auto px-8 flex justify-center items-center gap-12 overflow-x-auto no-scrollbar">
+<a class="font-body text-xs font-bold uppercase tracking-widest text-primary border-b-2 border-primary pb-1" href="#presentation">Présentation</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#chambres">Chambres</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#equipements">Équipements</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#localisation">Localisation</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#tarifs">Tarifs</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#avis">Avis</a>
+<a class="font-body text-xs font-bold uppercase tracking-widest text-body/60 hover:text-primary transition-colors" href="#faq">FAQ</a>
+</div>
+</nav>
+<!-- Main Content Canvas (Placeholder for the rest of the page) -->
+<main class="max-w-7xl mx-auto px-8 py-20 space-y-32">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center" id="presentation">
+<div class="space-y-8">
+<div class="space-y-4">
+<span class="text-secondary font-bold tracking-[0.3em] uppercase text-xs">Un Héritage d'Art de Vivre</span>
+<h2 class="font-headline text-5xl leading-tight text-primary">Une icône Parisienne du luxe discret</h2>
+</div>
+<p class="font-display italic text-2xl text-body/80 leading-relaxed border-l-4 border-secondary/30 pl-8 py-2">
+                    "Le Bristol n’est pas seulement un hôtel, c’est une demeure où chaque détail raconte une histoire d’élégance française."
+                </p>
+<div class="space-y-6 text-lg font-light leading-relaxed">
+<p>Situé sur la prestigieuse rue du Faubourg Saint-Honoré, Le Bristol Paris est l'incarnation même du chic parisien depuis 1925. Premier hôtel de France à recevoir la distinction 'Palace', il reste une adresse légendaire pour les voyageurs en quête d'excellence.</p>
+<p>Ici, l'art, la gastronomie et le service sur-mesure se rencontrent pour créer une expérience sensorielle inégalée, au cœur de la capitale mondiale du style.</p>
+</div>
+<button class="flex items-center gap-3 text-primary font-bold uppercase tracking-widest text-xs border-b border-primary pb-2 hover:gap-6 transition-all duration-300">
+                    Découvrir l'histoire du Palace
+                    <span class="material-symbols-outlined" data-icon="trending_flat">trending_flat</span>
+</button>
+</div>
+<div class="relative group">
+<div class="absolute -inset-4 border border-secondary/20 translate-x-4 translate-y-4 -z-10 transition-transform group-hover:translate-x-6 group-hover:translate-y-6"></div>
+<img class="w-full aspect-[4/5] object-cover shadow-2xl" data-alt="Interior of a luxury Parisian hotel suite with ornate moldings, velvet curtains, and sunlight streaming through large windows onto a plush cream-colored carpet. The atmosphere is warm and opulent with a clear focus on the refined architectural details of the Hausmann style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxrcrUzo1Zulyhd1Q6GzVRiqorfGX2jau9LvozW3EI1Ps-GsmsP0p4FT6hoX_J10IdNXuFfSLz5fRR_kZl2Vplh9qIx2IPucUBbjOazHpBT9iOLYMHvQ5_so1KEzXAT1IRQRH6JQ04lH2b5ojBfhXdqFAAKl02zzpPwC7-jbyzFOWu98Fs5pKvPOuyQIG3SEQjXrBmf1vIJVw4kP48ADr62DMjPYipikxmZ0-LZUCTL8gSNCvfR90dsdXNMsEHEttqp8noghgLwTE"/>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component Logic) -->
+<footer class="bg-[#2D2018] dark:bg-[#1A130F] w-full py-16 px-12 border-t border-[#B87333]/30 grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+<div>
+<span class="font-headline text-3xl italic text-[#B87333] mb-6 block">MyConciergeHotel</span>
+<p class="font-body text-sm leading-relaxed text-[#F5EFE0]/70">Une plateforme de curation dédiée à l'art de voyager. Découvrez les adresses les plus exclusives du monde, sélectionnées avec passion par nos experts.</p>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-body text-xs font-bold uppercase tracking-widest text-[#F5EFE0]">Explorer</h4>
+<div class="flex flex-col gap-2">
+<a class="font-body text-sm leading-relaxed text-[#F5EFE0]/70 hover:text-[#B87333] transition-colors duration-500" href="#">À propos</a>
+<a class="font-body text-sm leading-relaxed text-[#F5EFE0]/70 hover:text-[#B87333] transition-colors duration-500" href="#">Presse</a>
+<a class="font-body text-sm leading-relaxed text-[#F5EFE0]/70 hover:text-[#B87333] transition-colors duration-500" href="#">Confidentialité</a>
+<a class="font-body text-sm leading-relaxed text-[#F5EFE0]/70 hover:text-[#B87333] transition-colors duration-500" href="#">Contact</a>
+</div>
+</div>
+<div>
+<h4 class="font-body text-xs font-bold uppercase tracking-widest text-[#F5EFE0] mb-6">Suivez-nous</h4>
+<div class="flex justify-center md:justify-start gap-6">
+<span class="material-symbols-outlined text-[#F5EFE0]/70 hover:text-[#B87333] cursor-pointer" data-icon="share">share</span>
+<span class="material-symbols-outlined text-[#F5EFE0]/70 hover:text-[#B87333] cursor-pointer" data-icon="photo_camera">photo_camera</span>
+<span class="material-symbols-outlined text-[#F5EFE0]/70 hover:text-[#B87333] cursor-pointer" data-icon="mail">mail</span>
+</div>
+<div class="mt-8 text-[10px] text-[#F5EFE0]/40 tracking-widest uppercase">
+                © 2024 MyConciergeHotel. Une expérience Bourgeoisie d'art.
+            </div>
+</div>
+</footer>
+<script>
+        // Micro-interactions for scrolling
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav.sticky');
+            if (window.scrollY > 100) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // Simple smooth scroll for section navigation
+        document.querySelectorAll('nav.sticky a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 140,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body></html>

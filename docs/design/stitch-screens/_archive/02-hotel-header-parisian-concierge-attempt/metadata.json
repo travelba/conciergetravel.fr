@@ -1,0 +1,60 @@
+{
+  "block": 1,
+  "blockName": "HotelHeader",
+  "cdcReference": ".cursor/rules/hotel-detail-page.mdc §11 row 1",
+  "projectId": "4942013958735480664",
+  "projectName": "MCH — Hotel Detail Page V1",
+  "stitchUrl": "https://stitch.withgoogle.com/projects/4942013958735480664",
+  "designSystem": {
+    "assetId": "08017b60a76f45aab3e39ff3e603fa32",
+    "displayName": "The Parisian Concierge",
+    "sourceFile": "docs/design/DESIGN.md"
+  },
+  "screens": {
+    "main": {
+      "id": "a29a9abc0c524efbb0416a2dc3c8466f",
+      "name": "projects/4942013958735480664/screens/a29a9abc0c524efbb0416a2dc3c8466f",
+      "title": "Hotel Header - Le Bristol Paris",
+      "widthHeight": "2560x3554",
+      "deviceType": "DESKTOP"
+    },
+    "heroBackground": {
+      "id": "5abbfd96dd6c4c0db58912848a087b0e",
+      "title": "Cinematographic Parisian palace facade golden hour",
+      "widthHeight": "1376x768"
+    }
+  },
+  "generations": [
+    {
+      "version": "v1",
+      "tool": "generate_screen_from_text",
+      "model": "GEMINI_3_1_PRO",
+      "agentType": "PRO_AGENT",
+      "promptLength": 6559,
+      "elapsedSeconds": 99,
+      "sessionId": "7078107568696941295",
+      "generatedAt": "2026-05-21T06:58:07Z",
+      "files": ["screen.html", "screenshot.png", "hero-bg.png"]
+    },
+    {
+      "version": "v1-edit",
+      "tool": "edit_screens",
+      "model": "GEMINI_3_1_PRO",
+      "promptLength": 1945,
+      "elapsedSeconds": 31,
+      "sessionId": "17828031118150516295",
+      "editedAt": "2026-05-21T07:01:51Z",
+      "domOperations": 7,
+      "corrections": [
+        "Top nav translated EN→FR (Recherche, Destinations, Itinéraires, Service Concierge)",
+        "Top-right CTA replaced (Join the circle → Demander disponibilité, outline bronze)",
+        "Language selector defaulted to FR/€",
+        "Hero gradient strengthened (anthracite 0.20→0.45→0.78) for WCAG AA"
+      ],
+      "note": "Stitch applied DOM patches but get_screen still returns the cached pre-edit HTML. To see the corrected state, view on the Stitch web canvas (stitchUrl above) or re-run generate_screen_from_text with corrected prompt."
+    }
+  ],
+  "knownIssues": [
+    "Stitch caches the screenshot/HTML export. After edit_screens, get_screen returns the pre-edit HTML even though the canvas reflects the patches. Re-generate via generate_screen_from_text for a fresh static export."
+  ]
+}
