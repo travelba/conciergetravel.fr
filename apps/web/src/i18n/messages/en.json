@@ -569,6 +569,51 @@
       "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
       "answerPlural": "MyConciergeHotel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
     },
+    "cityFaq": {
+      "title": "Staying in {city} — frequently asked questions",
+      "items": [
+        {
+          "q": "Which are the best neighbourhoods to stay in {city}?",
+          "a": "5★ and Palace addresses in {city} cluster in historic districts and around the main POIs. Our concierge desk guides you by programme: for cultural outings, pick the centre; for quiet, the residential outskirts; for views, the waterfronts or feet-in-the-water properties. Every hotel page states the exact district and walking/driving distances to major POIs."
+        },
+        {
+          "q": "What is the best time to visit {city}?",
+          "a": "{city} is open year-round, but some seasons concentrate events (festivals, ceremonies, sport calendar) and hotel rates peak. Our concierge desk can suggest optimal windows — generally the shoulder seasons (May-June, September) — where the experience is full without over-crowding. Hotel pages mention local high/low season."
+        },
+        {
+          "q": "How do I get to {city} from Paris or an international airport?",
+          "a": "Distances and access are detailed on every hotel page (nearest airport, TGV station, driving distance). Our concierge desk arranges transfers on request: premium taxi, chauffeured car, helicopter for Alps/Riviera destinations. The price is communicated before confirmation, no intermediary markup added."
+        },
+        {
+          "q": "Which museums, restaurants or experiences are must-see in {city}?",
+          "a": "Every hotel page includes a \"What to do around\" section with named POIs (museums, starred dining, markets, viewpoints) and their exact distance. Our concierge desk can also suggest signature experiences (private museum visit outside opening hours, table at a starred chef) tailored to your stay."
+        },
+        {
+          "q": "Do hotels in {city} accept pets?",
+          "a": "The pets-friendly policy varies by hotel — most Palaces accept dogs (often with a surcharge, sometimes with a dedicated service: bowls, baskets, dog-sitting). Every hotel page details under \"Policies\": accepted size, fees, restrictions. Our concierge desk can negotiate terms with the hotel before booking."
+        },
+        {
+          "q": "Is there free parking or valet service at your {city} hotels?",
+          "a": "5★ and Palace hotels generally offer valet service (sometimes included in the rate, sometimes charged 30-80 €/night). Free parking is rare downtown but common in rural or alpine destinations. The exact policy (free / paid / valet / vehicle height) is in the \"Policies\" section of each page."
+        },
+        {
+          "q": "Are your {city} hotels wheelchair-accessible?",
+          "a": "Most 5★ and Palace hotels in {city} have wheelchair-accessible rooms (lift, adapted bathroom, access to common spaces). Our concierge desk verifies your specific need (walk-in shower, bed height, pool/spa access) with the hotel before confirmation. Please share your constraints at request time."
+        },
+        {
+          "q": "What is the cancellation policy for {city} hotels?",
+          "a": "Each Amadeus rate states its cancellation policy (often: flexible up to 24-48h before arrival, non-refundable for early-bird rates). Our concierge desk can offer rates with free cancellation up to the eve even when the hotel's public offer is non-refundable, depending on agency negotiations."
+        },
+        {
+          "q": "Is breakfast included in {city} hotel rates?",
+          "a": "Inclusion varies: most Palaces offer a room-only rate and a room + breakfast rate. Our MyConciergeHotel loyalty programme offers breakfast for two from the first night on hotels in the Little Hotelier catalogue. The hotel's exact policy is on its page."
+        },
+        {
+          "q": "How do I book a Palace or 5★ hotel in {city} via MyConciergeHotel?",
+          "a": "Click the hotel page you want, pick your dates in the Amadeus booking engine, pay online (secure PCI-DSS card, 3D-Secure). Instant email confirmation. For hotels outside the GDS, your concierge sends you an offer within 24 business hours. No agency markup on net rates."
+        }
+      ]
+    },
     "card": {
       "palace": "Palace",
       "stars": "{count}★",
