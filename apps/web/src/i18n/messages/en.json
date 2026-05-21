@@ -278,6 +278,120 @@
       ]
     }
   },
+  "guideItalie": {
+    "metaTitle": "Italy — Luxury travel guide: Palaces, 5★ hotels and art of living | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in Italy: curated Palaces, 5★ hotels and villas — Rome, Milan, Tuscany, Amalfi Coast, Lakes, Dolomites. Itineraries, starred tables, operational tips.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Italy — The MyConciergeHotel guide to Palaces and 5★ hotels",
+    "lede": "Our concierge desk selects and books 5-star and Palace addresses in Italy from Paris: historic Rome, Amalfi Coast, Tuscan wine country, Lombard lakes, Alpine Dolomites. IATA booking, net Amadeus GDS rates, secure payment. Here is how to plan a prestige stay in Italy — region by region.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Italy luxury travel guide 6 regions: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. MyConciergeHotel selection — Palaces and 5★. Updated May 2026.",
+    "aeoQuestion": "Which Palaces and 5★ hotels are best for a luxury stay in Italy?",
+    "aeoAnswer": "MyConciergeHotel covers Italy's 6 luxury flagship regions: Rome (Hôtel de Russie, Hassler, Six Senses Rome), Amalfi Coast (Le Sirenuse in Positano, Belmond Caruso in Ravello, Borgo Santandrea), Tuscany (Castiglion del Bosco, Belmond Castello di Casole, Rosewood Castiglion), Lakes (Villa d'Este on Lake Como, Grand Hotel Tremezzo, Mandarin Oriental Lake Como), Dolomites (Forestis, Rosa Alpina) and Sicily (Verdura Resort, Belmond Grand Hotel Timeo Taormina). IATA booking via our concierge: net Amadeus rates, secure payment, loyalty programme. Last updated {date}.",
+    "regions": {
+      "title": "Six regions, six experiences",
+      "items": [
+        {
+          "name": "Rome & Latium",
+          "highlights": "Hôtel de Russie (Rocco Forte), Hassler (Spanish Steps view), Six Senses Rome (first European Six Senses, 2023), Bvlgari Hotel Roma (Marriott collection 2023), Hotel Eden (Dorchester).",
+          "bestFor": "First-time Italy, cultural stay (Vatican, Colosseum, Capitoline Museums), modern Roman gastronomy (Glass Hostaria, La Pergola 3★, Idylio).",
+          "concierge": "My tip: if you stay at the Hassler, ask for room 503 (former dressing floor of Empress Sissi, unmatched view of the Spanish Steps). Book 90 days ahead — the room doesn't appear in the booking widget and must be requested by email to the concierge."
+        },
+        {
+          "name": "Amalfi Coast",
+          "highlights": "Le Sirenuse in Positano (Relais & Châteaux), Belmond Caruso in Ravello, Borgo Santandrea (2022 opening, the architectural address), Monastero Santa Rosa Hotel, Hotel Santa Caterina (Amalfi).",
+          "bestFor": "Honeymoon, wedding anniversary, feet-in-the-water stay from late April to mid-October. Capri excursion mandatory (favour the 10am-3pm window outside summer high season).",
+          "concierge": "My tip: for Le Sirenuse, don't request the signature suite but room 38 on the top floor — private terrace over Positano with complete coastal view. Management keeps it for regulars; our concierge can pre-block 60 days ahead."
+        },
+        {
+          "name": "Tuscany",
+          "highlights": "Castiglion del Bosco (Ferragamo collection, Val d'Orcia), Belmond Castello di Casole (10th-century castle), Rosewood Castiglion del Bosco, Borgo Santo Pietro (Relais & Châteaux), Como Castello del Nero.",
+          "bestFor": "Wine tourism (Brunello di Montalcino, Chianti Classico), family stays with private pool, creative retreats. Ideal May-June and September-October — avoid August (heat + overcrowding).",
+          "concierge": "My tip: for Castiglion del Bosco, book the dinner-cooking-class with chef Matteo Temperini (every Thursday evening, 8 covers max). Our concierge can sign you up at stay booking — it's fully booked 6 weeks ahead in high season."
+        },
+        {
+          "name": "Lakes (Como, Garda, Maggiore)",
+          "highlights": "Villa d'Este (Lake Como — world institution, Leading Hotels of the World), Grand Hotel Tremezzo (Como), Mandarin Oriental Lake Como (Blevio), Lefay Resort & Spa Lago di Garda, Grand Hotel des Iles Borromées (Lake Maggiore).",
+          "bestFor": "Anniversary, honeymoon, cultural stay with boat excursion, starred gastronomy (Il Mistral 1★ in Tremezzo, Berton al Lago 1★ in Blevio).",
+          "concierge": "My tip: at Villa d'Este, ask for room 113 (former Empire salon converted to bedroom — original ceiling frescoes, view of the Italian gardens). Management keeps it for spotted VIP guests; we can requalify it as soon as the booking is confirmed."
+        },
+        {
+          "name": "Dolomites & Alpine Italy",
+          "highlights": "Forestis (Plose, Geisler view), Rosa Alpina (Adler Mountain Lodge), Adler Spa Resort Dolomiti (Ortisei), Posthotel Cavallino Bianco (San Cassiano), Hotel Castel (Tirolo).",
+          "bestFor": "Ski-in/ski-out winter (December-March), summer hiking (June-September), year-round spa & wellness. Refined Alpine cuisine (St. Hubertus 3★ at Rosa Alpina, Sumzukar 1★ at Hotel Castel).",
+          "concierge": "My tip: at Forestis, choose one of the 4 Forest Tower Suites rather than a \"classic\" suite — two-storey wooden duplex, 360° terrace facing the Geisler, bathtub at the panoramic window. Ideal check-in window: between 2pm and 3pm to enjoy the altitude afternoon tea."
+        },
+        {
+          "name": "Sicily",
+          "highlights": "Verdura Resort (Rocco Forte, Sciacca), Belmond Grand Hotel Timeo (Taormina, Etna view), Villa Athena (Agrigento, temple view), Donna Carmela Resort (Riposto), Hotel Villa Sant'Andrea (Taormina Mare).",
+          "bestFor": "Late-season stay (October-November — heat dropped, archaeological sites accessible), golf (Verdura), Sicilian gastronomy (Otto Geleng 1★, Principe Cerami at San Domenico).",
+          "concierge": "My tip: if you stay at Belmond Grand Hotel Timeo, plan your breakfast on the Etna-side terrace BEFORE 8:30am — morning light lights up the crater without the sea mist that forms mid-morning. Table 2 (west end) offers the most unobstructed angle."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in Italy",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "May-June and September-October are the ideal windows for most regions (mild temperature, moderate attendance, cultural events). July-August: intense heat (40°C in Sicily, inland Tuscany), peak crowds, hotel rates at peak. December-February: ideal for Dolomites ski + Rome culture off-season."
+        },
+        {
+          "title": "How to get there",
+          "body": "Direct flights from Paris CDG/Orly to Rome FCO, Milan MXP, Venice VCE, Naples NAP, Florence FLR, Palermo PMO. Our concierge organises airport transfers (premium taxi or chauffeured car, around €80-150 per trip per distance) — book them at stay booking."
+        },
+        {
+          "title": "Inland driving",
+          "body": "For Tuscan wine country, the Amalfi Coast and Sicily, plan a car (rental at the airport — prefer a compact category on the narrow Amalfi roads). For Rome, Milan, Venice: taxi or public transport — avoid the car in the city."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "No visa for EU / Schengen nationals. Valid ID or passport. EU driving licence accepted. No currency exchange required (euro). Tipping: 10% in fine dining is common, not automatic at the bar."
+        },
+        {
+          "title": "Language",
+          "body": "Standard Italian in writing, regional dialects orally (Tuscan, Sicilian, Neapolitan — not a tourism blocker). English is spoken in 5★ hotels, starred restaurants and main tourist sites. French is less systematic — a few basic Italian notions are appreciated."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Italian-speaking advisor available for complex requests (private museum visits outside opening hours, Capri-Positano helicopter transfers, table booking with chef Gualtiero Marchesi). Write to italie@myconciergehotel.com or use the chat on the hotel page."
+        }
+      ]
+    },
+    "faqTitle": "Italy — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Italian addresses are in your catalogue?",
+        "a": "Our editorial catalogue currently covers around thirty 5★ and Palace Italian addresses, spread over the 6 flagship regions (Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily). Our Amadeus network also lets us book any 5★ GDS-connected Italian address on simple request to our concierge."
+      },
+      {
+        "q": "Are your Italian rates more expensive than booking direct?",
+        "a": "No — we access net Amadeus GDS rates, identical to the hotel's public published rate. Our non-affiliated comparator on every page transparently shows Booking, Hotels.com, Expedia rates for the same dates."
+      },
+      {
+        "q": "Can you organise a helicopter transfer from Naples to Positano?",
+        "a": "Yes — partnership with Sea & Land Helicopters (Naples). 15-minute trip, 6 passengers + luggage. Fixed rate communicated at booking (around €1,800 round trip). Our concierge can combine with a transfer from Naples airport."
+      },
+      {
+        "q": "Which starred tables to favour for a first stay?",
+        "a": "For Rome: La Pergola (3★, Hilton Cavalieri rooftop) or Glass Hostaria (1★, Trastevere). For Amalfi Coast: La Sponda (Le Sirenuse, 1★) or Don Alfonso 1890 (3★, Sant'Agata sui Due Golfi). For Tuscany: Borgo San Felice 1★ or Albereta Relais 1★. Our concierge can book your tables alongside your stay."
+      },
+      {
+        "q": "Do you accept staggered payments for long stays?",
+        "a": "Yes — stays > €5,000: 30% deposit at booking, balance 30 days before arrival. Terms specified at quote. For stays combining several hotels in a Tuscan road-trip or Sicilian itinerary, single payment simplifies administrative management."
+      },
+      {
+        "q": "Does my loyalty programme (Marriott Bonvoy, Hyatt) work on your Italian hotels?",
+        "a": "Yes — attach your chain loyalty number at checkout (Marriott Bonvoy for Bvlgari Hotel Roma, St. Regis Florence, Westin Excelsior Florence; Hyatt for Park Hyatt Milan, Andaz Roma). Points are credited by the hotel after the stay. Our MyConciergeHotel programme stacks (perks cumulable)."
+      },
+      {
+        "q": "Can Italy be combined with another destination in the same trip?",
+        "a": "Yes — common combinations: Amalfi Coast + French Riviera (Naples → Nice flight, 1h30), Rome + Paris (TGV or flight), Tuscany + Provence (Florence → Marseille flight). Our concierge manages booking coherence (transfer timing, loyalty, consolidated payment)."
+      }
+    ]
+  },
   "consent": {
     "title": "Your cookie preferences",
     "intro": "We use cookies to make this site work (login, booking cart, security). With your consent we also measure usage anonymously to improve it. You can accept, refuse or customise at any time.",

@@ -58,12 +58,17 @@ export async function GET(): Promise<NextResponse> {
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {
-      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      href: '/inspiration' | '/marques' | '/le-concierge' | '/guide/italie' | '/itineraire';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
+      // Vague-6 — international country guides ship one by one.
+      // First template: Italy. Priority 0.7 alongside top-funnel
+      // editorial pages because the guide doubles as destination
+      // discovery + LLM citation surface.
+      { href: '/guide/italie', priority: 0.7 },
       { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
     ];
     for (const hub of staticHubs) {

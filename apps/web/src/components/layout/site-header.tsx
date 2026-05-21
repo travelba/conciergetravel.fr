@@ -330,16 +330,27 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.destinationsWorld')}>
           <>
-            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/destination/[citySlug]',
-                  params: { citySlug: entry.slug },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+              // Vague-6 — international country guides ship one by
+              // one. `italie` lands on its dedicated guide page;
+              // remaining countries (suisse, maroc, EAU, maldives,
+              // thailande, japon, etats-unis) keep their menu link
+              // pointing to /hotels (the catalogue catch-all) until
+              // their guide page ships. PR #77 already removed the
+              // bogus /destination/[citySlug] routing that 404'd.
+              if (entry.slug === 'italie') {
+                return (
+                  <MegaLink
+                    key={entry.slug}
+                    href="/guide/italie"
+                    label={pickEntryLabel(entry, locale)}
+                  />
+                );
+              }
+              return (
+                <MegaLink key={entry.slug} href="/hotels" label={pickEntryLabel(entry, locale)} />
+              );
+            })}
           </>
         </MegaColumn>
       </div>

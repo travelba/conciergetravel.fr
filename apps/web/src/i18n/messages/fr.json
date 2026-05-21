@@ -278,6 +278,120 @@
       ]
     }
   },
+  "guideItalie": {
+    "metaTitle": "Italie — Guide voyage luxe : Palaces, hôtels 5★ et art de vivre | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour luxe en Italie : sélection de Palaces, hôtels 5★ et villas — Rome, Milan, Toscane, Côte amalfitaine, Lacs, Dolomites. Itinéraires, tables étoilées, conseils opérationnels.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Italie — Le guide MyConciergeHotel des Palaces et hôtels 5★",
+    "lede": "Notre conciergerie sélectionne et réserve les adresses 5 étoiles et Palaces d'Italie depuis Paris : Rome historique, Côte amalfitaine, Toscane viticole, Lacs lombards, Dolomites alpines. Réservation IATA, tarifs nets GDS Amadeus, paiement sécurisé. Voici comment penser un séjour de prestige en Italie — région par région.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Italie 6 régions : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. Sélection MyConciergeHotel — Palaces et 5★. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et hôtels 5★ pour un séjour de luxe en Italie ?",
+    "aeoAnswer": "MyConciergeHotel couvre les 6 régions phares du luxe italien : Rome (Hôtel de Russie, Hassler, Six Senses Rome), Côte amalfitaine (Le Sirenuse à Positano, Belmond Caruso à Ravello, Borgo Santandrea), Toscane (Castiglion del Bosco, Belmond Castello di Casole, Rosewood Castiglion), Lacs (Villa d'Este sur le Lac de Côme, Grand Hotel Tremezzo, Mandarin Oriental Lake Como), Dolomites (Forestis, Rosa Alpina) et Sicile (Verdura Resort, Belmond Grand Hotel Timeo Taormina). Réservation IATA via notre conciergerie : tarifs nets Amadeus, paiement sécurisé, programme de fidélité. Mise à jour {date}.",
+    "regions": {
+      "title": "Six régions, six expériences",
+      "items": [
+        {
+          "name": "Rome & Latium",
+          "highlights": "Hôtel de Russie (Rocco Forte), Hassler (vue sur la Place d'Espagne), Six Senses Rome (premier Six Senses européen, 2023), Bvlgari Hotel Roma (collection Marriott 2023), Hotel Eden (Dorchester).",
+          "bestFor": "Premier voyage en Italie, séjour culturel (Vatican, Colisée, musées Capitole), gastronomie romaine moderne (Glass Hostaria, La Pergola 3★, Idylio).",
+          "concierge": "Mon conseil : si vous descendez à l'Hassler, demandez la chambre 503 (étage de l'ancien dressing de l'impératrice Sissi, vue inégalable sur les marches de la Trinité-des-Monts). Réservez 90 jours à l'avance — la chambre n'apparaît pas dans le widget de réservation et doit être demandée par e-mail à la conciergerie."
+        },
+        {
+          "name": "Côte amalfitaine",
+          "highlights": "Le Sirenuse à Positano (Relais & Châteaux), Belmond Caruso à Ravello, Borgo Santandrea (ouverture 2022, l'adresse architecturale), Monastero Santa Rosa Hotel, Hotel Santa Caterina (Amalfi).",
+          "bestFor": "Lune de miel, anniversaire de mariage, séjour les pieds dans l'eau de fin avril à mi-octobre. Excursion Capri obligatoire (privilégiez le créneau 10h-15h hors saison estivale).",
+          "concierge": "Mon conseil : pour Le Sirenuse, ne demandez pas la suite signature mais la chambre 38 du dernier étage — terrasse privée sur Positano avec vue côtière complète. La direction la garde pour les clients réguliers ; notre conciergerie peut la pré-bloquer à la réservation 60 jours à l'avance."
+        },
+        {
+          "name": "Toscane",
+          "highlights": "Castiglion del Bosco (collection Ferragamo, Val d'Orcia), Belmond Castello di Casole (château 10e siècle), Rosewood Castiglion del Bosco, Borgo Santo Pietro (Relais & Châteaux), Como Castello del Nero.",
+          "bestFor": "Œnotourisme (Brunello di Montalcino, Chianti Classico), séjours en famille avec piscine privée, retraites créatives. Idéal mai-juin et septembre-octobre — éviter août (chaleur + sur-fréquentation).",
+          "concierge": "Mon conseil : pour le Castiglion del Bosco, réservez le dîner-cours de cuisine avec le chef Matteo Temperini (chaque jeudi soir, 8 couverts maximum). Notre conciergerie peut vous y inscrire à la réservation séjour — c'est complet 6 semaines à l'avance en haute saison."
+        },
+        {
+          "name": "Lacs (Côme, Garde, Majeur)",
+          "highlights": "Villa d'Este (Lac de Côme — institution mondiale, Leading Hotels of the World), Grand Hotel Tremezzo (Côme), Mandarin Oriental Lake Como (Blevio), Lefay Resort & Spa Lago di Garda, Grand Hotel des Iles Borromées (Lac Majeur).",
+          "bestFor": "Anniversaire, voyage de noces, séjour culturel avec excursion bateau, gastronomie étoilée (Il Mistral 1★ à Tremezzo, Berton al Lago 1★ à Blevio).",
+          "concierge": "Mon conseil : à la Villa d'Este, demandez la chambre 113 (ancien salon Empire converti en chambre — fresques d'origine au plafond, vue sur les jardins italiens). La direction la garde pour les hôtes VIP repérés ; nous pouvons la requalifier dès la confirmation de réservation."
+        },
+        {
+          "name": "Dolomites & Italie alpine",
+          "highlights": "Forestis (Plose, vue Geisler), Rosa Alpina (Adler Mountain Lodge), Adler Spa Resort Dolomiti (Ortisei), Posthotel Cavallino Bianco (San Cassiano), Hotel Castel (Tirolo).",
+          "bestFor": "Ski-in/ski-out hiver (décembre-mars), randonnée été (juin-septembre), spa & wellness toute l'année. Cuisine alpine raffinée (St. Hubertus 3★ à Rosa Alpina, Sumzukar 1★ au Hotel Castel).",
+          "concierge": "Mon conseil : au Forestis, choisissez l'une des 4 Forest Tower Suites plutôt qu'une suite « classique » — duplex bois sur 2 étages, terrasse 360° face aux Geisler, baignoire face à la fenêtre panoramique. Plage horaire idéale pour la check-in : entre 14h et 15h pour profiter du goûter d'altitude."
+        },
+        {
+          "name": "Sicile",
+          "highlights": "Verdura Resort (Rocco Forte, Sciacca), Belmond Grand Hotel Timeo (Taormina, vue Etna), Villa Athena (Agrigente, vue temples), Donna Carmela Resort (Riposto), Hotel Villa Sant'Andrea (Taormina Mare).",
+          "bestFor": "Séjour fin de saison (octobre-novembre — chaleur retombée, sites archéologiques accessibles), golf (Verdura), gastronomie sicilienne (Otto Geleng 1★, Principe Cerami au San Domenico).",
+          "concierge": "Mon conseil : si vous séjournez au Belmond Grand Hotel Timeo, planifiez votre petit-déjeuner sur la terrasse côté Etna AVANT 8h30 — la lumière du matin éclaire le cratère sans la brume de mer qui se forme en milieu de matinée. La table 2 (extrémité ouest) offre l'angle de vue le plus dégagé."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe en Italie",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Mai-juin et septembre-octobre sont les fenêtres idéales pour la majorité des régions (température clémente, fréquentation modérée, événements culturels). Juillet-août : chaleur intense (40°C en Sicile, Toscane intérieure), affluence maximum, tarifs hôteliers au pic. Décembre-février : idéal pour les Dolomites ski + Rome culturelle hors saison."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG/Orly vers Rome FCO, Milan MXP, Venise VCE, Naples NAP, Florence FLR, Palerme PMO. Notre conciergerie organise les transferts aéroport (taxi premium ou voiture avec chauffeur, environ 80-150 €/trajet selon distance) — annoncez-les à la réservation."
+        },
+        {
+          "title": "Conduite intérieure",
+          "body": "Pour la Toscane viticole, la Côte amalfitaine et la Sicile, prévoyez une voiture (location à l'aéroport — préférer une catégorie compacte sur les routes étroites amalfitaines). Pour Rome, Milan, Venise : taxi ou transport en commun — éviter la voiture en ville."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Pas de visa pour les ressortissants UE / Schengen. Carte d'identité ou passeport valides. Permis de conduire UE accepté. Pas de change requis (euro). Pourboire : 10% restauration haut de gamme courant, non automatique en bar."
+        },
+        {
+          "title": "Langue",
+          "body": "Italien standard à l'écrit, dialectes régionaux à l'oral (toscan, sicilien, napolitain — pas un blocage pour le tourisme). L'anglais est parlé dans les hôtels 5★, restaurants étoilés et lieux touristiques principaux. Le français est moins systématique — quelques notions italiennes basiques sont appréciées."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Italianophone disponible pour les demandes complexes (visites privées de musées hors heures d'ouverture, transferts hélicoptère Capri-Positano, réservation table chef Gualtiero Marchesi). Écrire à italie@myconciergehotel.com ou utiliser le chat sur la fiche hôtel."
+        }
+      ]
+    },
+    "faqTitle": "Italie — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses italiennes sont dans votre catalogue ?",
+        "a": "Notre catalogue éditorial couvre actuellement une trentaine d'adresses 5★ et Palaces italiens, réparties sur les 6 régions phares (Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile). Notre réseau Amadeus permet par ailleurs de réserver toute adresse italienne 5★ connectée GDS sur simple demande à notre conciergerie."
+      },
+      {
+        "q": "Vos tarifs italiens sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking, Hotels.com, Expedia pour les mêmes dates."
+      },
+      {
+        "q": "Pouvez-vous organiser un transfert hélicoptère Naples → Positano ?",
+        "a": "Oui — partenariat avec Sea & Land Helicopters (Naples). Trajet 15 minutes, capacité 6 passagers + bagages. Tarif fixe communiqué à la réservation (environ 1 800 € le trajet AR). Notre conciergerie peut combiner avec un transfert depuis l'aéroport de Naples."
+      },
+      {
+        "q": "Quelles tables étoilées privilégier pour un premier séjour ?",
+        "a": "Pour Rome : La Pergola (3★, restaurant terrasse Hilton Cavalieri) ou Glass Hostaria (1★, Trastevere). Pour la Côte amalfitaine : La Sponda (Le Sirenuse, 1★) ou Don Alfonso 1890 (3★, Sant'Agata sui Due Golfi). Pour la Toscane : Borgo San Felice 1★ ou Albereta Relais 1★. Notre conciergerie peut réserver vos tables en même temps que votre séjour."
+      },
+      {
+        "q": "Acceptez-vous les paiements en plusieurs fois pour les longs séjours ?",
+        "a": "Oui — séjours > 5 000 € : acompte 30% à la réservation, solde 30 jours avant l'arrivée. Modalités précisées au moment du devis. Pour les séjours combinant plusieurs hôtels en road-trip toscan ou itinéraire Sicile, paiement unique simplifie la gestion administrative."
+      },
+      {
+        "q": "Mon programme de fidélité (Marriott Bonvoy, Hyatt) fonctionne-t-il sur vos hôtels italiens ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne au checkout (Marriott Bonvoy pour Bvlgari Hotel Roma, St. Regis Florence, Westin Excelsior Florence ; Hyatt pour Park Hyatt Milan, Andaz Roma). Les points sont crédités par l'hôtel après le séjour. Notre programme MyConciergeHotel s'ajoute (avantages cumulables)."
+      },
+      {
+        "q": "Peut-on combiner Italie + autre destination dans le même voyage ?",
+        "a": "Oui — combinaisons fréquentes : Côte amalfitaine + Côte d'Azur (vol Naples → Nice, 1h30), Rome + Paris (TGV ou vol), Toscane + Provence (vol Florence → Marseille). Notre conciergerie gère la cohérence des réservations (timing transferts, fidélité, paiement consolidé)."
+      }
+    ]
+  },
   "consent": {
     "title": "Vos préférences cookies",
     "intro": "Nous utilisons des cookies pour faire fonctionner ce site (authentification, panier, sécurité). Avec votre accord, nous mesurons aussi son audience de manière anonymisée pour l'améliorer. Vous pouvez accepter, refuser ou personnaliser à tout moment.",
