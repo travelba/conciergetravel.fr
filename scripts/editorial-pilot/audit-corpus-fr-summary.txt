@@ -1,11 +1,11 @@
-=== Audit corpus FR — 2026-05-20T14:40:53.712Z ===
+=== Audit corpus FR — 2026-05-21T04:59:16.522Z ===
 
 ── HOTELS ──────────────────────────────────────────
   Total            : 936
   ready_to_publish           : 0
-  needs_publish_gates        : 239
-  needs_concierge_voice      : 4
-  needs_pipeline             : 693
+  needs_publish_gates        : 924
+  needs_concierge_voice      : 0
+  needs_pipeline             : 12
   needs_brief                : 0
 
 ── RANKINGS ────────────────────────────────────────
@@ -18,18 +18,18 @@
 
 ── GUIDES ──────────────────────────────────────────
   Total            : 86
-  ready_to_publish           : 0
-  needs_summary_long         : 50
+  ready_to_publish           : 80
+  needs_summary_long         : 4
   needs_faq                  : 0
-  needs_full_content         : 36
+  needs_full_content         : 2
 
 ── PRIORITIES ─────────────────────────────────────
-  Hotels needing pipeline    : 693
-  Hotels needing FAQ/photos  : 239
-  Hotels needing concierge   : 4
+  Hotels needing pipeline    : 12
+  Hotels needing FAQ/photos  : 924
+  Hotels needing concierge   : 0
   Rankings needing factual   : 0
   Rankings needing intro     : 0
-  Guides needing summary     : 50
-  Guides needing content     : 36
+  Guides needing summary     : 4
+  Guides needing content     : 2
 
 Detailed JSON → C:\Users\Benjamin\Desktop\Conciergetravel.fr\scripts\editorial-pilot\audit-corpus-fr.json
