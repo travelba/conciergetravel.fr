@@ -105,6 +105,22 @@ const nextConfig: NextConfig = {
         destination: '/:locale/selection/bord-de-mer-et-plage',
         permanent: true,
       },
+      // The bare `/itineraire` was a coming-soon stub; the canonical hub
+      // is now plural `/itineraires` (parity with `/classements`,
+      // `/guides`, `/hotels`). Permanent 308s for both prefixed (`/en/`)
+      // and bare (FR canonical) variants — `localePrefix: 'as-needed'`
+      // means FR is served without prefix, so `/itineraire` and
+      // `/en/itineraire` both need their own redirect entry.
+      {
+        source: '/:locale(fr|en)/itineraire',
+        destination: '/:locale/itineraires',
+        permanent: true,
+      },
+      {
+        source: '/itineraire',
+        destination: '/itineraires',
+        permanent: true,
+      },
     ];
   },
 };

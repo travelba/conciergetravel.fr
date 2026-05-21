@@ -1,0 +1,100 @@
+{
+  "slug_fr": "train-orient-express-paris-venise",
+  "slug_en": "orient-express-paris-venice",
+  "priority": "P0",
+  "destination_country": "France / Italie",
+  "destination_region": "Île-de-France / Vénétie",
+  "destination_city": "Paris, Venise",
+  "themes": ["luxe", "train", "culture"],
+  "duration_min_days": 5,
+  "duration_max_days": 5,
+  "travel_style": "luxe",
+  "season": "printemps",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Orient Express Paris–Venise 5 jours — Cabine luxe, Ritz Paris, Cipriani Venise | MyConciergeHotel",
+  "meta_desc_fr_hint": "5 jours Paris-Venise en Orient Express : Ritz Paris (nuit avant), Venice Simplon-Orient-Express, Belmond Hotel Cipriani. Saint-Marc, Murano, Harry's Bar. Sélection Concierge.",
+  "hotel_slugs_target": ["ritz-paris", "belmond-hotel-cipriani"],
+  "hotel_fallback_note": "Fallback sur palaces 5★ Paris (nuit avant départ) et hôtels 5★ Venise présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-venise", "guide-paris"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-venise", "meilleurs-palaces-paris"],
+  "related_itinerary_slugs_target": ["paris-luxe-3-jours", "toscane-gastronomie-7-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Paris — Nuit avant départ",
+      "hotel_slug_hint": "ritz-paris",
+      "key_pois": ["Place Vendôme", "Ritz Paris Bar Hemingway", "Gare de Paris-Est (départ VSOE)"],
+      "step_angle": "Veille départ — Ritz Paris check-in, dîner L'Espadon, préparation bagages (coffret Orient Express toiletries), transfert Gare de Paris-Est 30 min en voiture privée le lendemain matin",
+      "title_fr_hint": "Jour 1 : Paris — Ritz et veille de départ Orient Express",
+      "title_en_hint": "Day 1: Paris — Ritz and Orient Express eve of departure"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "À bord — Venice Simplon-Orient-Express",
+      "hotel_slug_hint": "ritz-paris",
+      "key_pois": [
+        "Gare de Paris-Est",
+        "Traversée Suisse (Lausanne, Simplon)",
+        "Traversée Italie (Vérone, Venise)",
+        "Restaurant-car dîner 3 services"
+      ],
+      "step_angle": "Voyage VSOE — départ Paris-Est 10h10, petit-déjeuner dans la cabine, déjeuner wagon-restaurant (menu Chef), traversée Simplon Suisse coucher de soleil, dîner en tenue (robe/smoking recommandé), arrivée Santa Lucia 9h le lendemain",
+      "title_fr_hint": "Jour 2 : À bord — Paris à Venise via les Alpes et le Simplon",
+      "title_en_hint": "Day 2: On board — Paris to Venice via the Alps and Simplon"
+    },
+    {
+      "step": 3,
+      "duration_days": 2,
+      "city": "Venise — Giudecca & San Marco",
+      "hotel_slug_hint": "belmond-hotel-cipriani",
+      "key_pois": [
+        "Basilique Saint-Marc",
+        "Palazzo Ducale",
+        "Grand Canal vaporetto",
+        "Harry's Bar (Cipriani originel)"
+      ],
+      "step_angle": "Venise Cipriani — navette privée gare Santa Lucia, Place Saint-Marc avant 8h (sans touristes), Harry's Bar (10 Calle Vallaresso) déjeuner bellini originel, Palazzo Ducale visite secrète guidée (Itinéraires Secrets)",
+      "title_fr_hint": "Jours 3-4 : Venise — Cipriani, Saint-Marc et Harry's Bar",
+      "title_en_hint": "Days 3-4: Venice — Cipriani, Saint Mark's and Harry's Bar"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Murano & Burano",
+      "hotel_slug_hint": "belmond-hotel-cipriani",
+      "key_pois": [
+        "Murano verrerie Seguso",
+        "Burano maisons colorées",
+        "Lagune de Venise",
+        "Torcello (option)"
+      ],
+      "step_angle": "Lagune vénitienne — bateau privé depuis Cipriani, Murano visite atelier Seguso (soufflage verre sur commande), Burano dentelles et déjeuner Trattoria da Romano, retour Cipriani coucher de soleil",
+      "title_fr_hint": "Jour 5 : Murano & Burano — Lagune, verre soufflé et dentelles",
+      "title_en_hint": "Day 5: Murano & Burano — Lagoon, glassblowing and lace"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment voyager de Paris à Venise en Orient Express ?",
+  "aeo_answer_fr_hint": "Le Venice Simplon-Orient-Express (VSOE Belmond) part de Paris-Est vers 10h et arrive à Venise Santa Lucia le lendemain matin. Cabines Grand Suite ou Suite recommandées. Nuit avant : Ritz Paris. Nuit après : Belmond Hotel Cipriani Giudecca. Réserver 4-6 mois à l'avance (places limitées, départs printemps-automne uniquement). Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Comment réserver un billet Orient Express Paris-Venise ?",
+    "Combien coûte un voyage Orient Express Paris-Venise ?",
+    "Quelle est la différence entre les cabines Orient Express (Twin, Suite, Grand Suite) ?",
+    "Quand circule l'Orient Express Paris-Venise ?",
+    "Faut-il s'habiller pour les dîners à bord de l'Orient Express ?",
+    "Quels sont les meilleurs hôtels à Venise après l'Orient Express ?",
+    "Peut-on prolonger le voyage Orient Express vers Istanbul ?",
+    "Que voir à Venise lors d'un séjour de 3 jours ?",
+    "Quels sont les meilleurs restaurants à Venise pour un séjour luxe ?",
+    "L'Orient Express est-il adapté pour une lune de miel ou une occasion spéciale ?"
+  ],
+  "concierge_secret_hint": "Sur le VSOE, la Grand Suite n°3 (voiture n°3552) dispose d'un lit double permanent (les autres suites se transforment le soir) et d'une fenêtre double côté paysage — réserver impérativement cette suite pour les voyageurs qui veulent dormir sans transformation du compartiment. Au Belmond Hotel Cipriani, les suites Palladio (bâtiment annexe) ont une terrasse avec vue directe sur le Dôme des Salute et sont plus silencieuses que les chambres côté lagune côté hôtel principal.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Venise (autorité destination) ni le guide Paris. Angle unique = expérience combinée train de luxe + palaces Paris et Venise + AEO spécifique Orient Express. Aucun autre itinéraire du site ne couvre ce format voyage en train. Différencier de l'itinéraire Paris 3 jours (qui ne couvre pas Venise).",
+  "sources_to_cite": [
+    "Belmond Venice Simplon-Orient-Express (VSOE)",
+    "Venezia Unica — Tourisme Venise",
+    "Atout France — Italie Tourisme",
+    "UNESCO — Venise et sa lagune"
+  ]
+}
