@@ -301,6 +301,34 @@ When validation fails in the browser, the React Dev Overlay surfaces a red error
 
 Reference: `packages/config/src/env-web.ts`.
 
+## Rule 11 — Cursor Cloud PRs may auto-close when you push a manual conflict resolution
+
+When a Cursor Cloud-spawned PR (head ref `cursor/<slug>-78ae`) is conflicting with `main`, the natural fix is to check the branch out locally, merge `main`, resolve, and push back to the same head ref. **Sometimes the Cursor Cloud backend detects this as a foreign push and closes the PR + clears its head ref** (`gh pr view N --json headRefName,baseRefName` returns `null` for both, even though the remote branch still exists).
+
+Symptoms:
+
+- `.merge-pr.ps1` (or `gh pr merge N`) reports `[SKIP] closed` immediately after a successful push.
+- `gh pr reopen N` fails with `GraphQL: Could not open the pull request. (reopenPullRequest)`.
+- `git ls-remote origin <branch>` still resolves — the **branch survived**, only the PR object was torched.
+
+**Recovery pattern** (used for #92 → #103 and #95 → #104 in the May 2026 deployment wave):
+
+```powershell
+# The remote branch still exists; just re-open it as a new PR.
+gh pr create `
+  --head cursor/<original-slug>-78ae `
+  --base main `
+  --title "<original PR title>" `
+  --body "Reopens #<N> (Cursor Cloud auto-closed). <one-line summary of conflict resolution>."
+
+# Then merge the new PR (e.g. #103) with the existing flow — it inherits the
+# pushed merge commit and runs CI immediately.
+```
+
+The CI duration is the same as the original PR (the workflow is keyed off the head ref, not the PR number), so the only cost is the PR number bump and a brief comment in the new PR body pointing back to the closed predecessor for audit trail.
+
+**When this can be avoided:** if the Cursor Cloud agent owning the PR is still alive, ask it to rebase its branch itself via its own dialog rather than pushing manually. The auto-close is triggered by _unexpected_ foreign pushes, not by agent-driven updates.
+
 ## Anti-patterns
 
 - ❌ `pnpm … --slug=a,b,c` without quotes → PowerShell mangles the args.
