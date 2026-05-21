@@ -13,6 +13,7 @@ import {
   HOTEL_CATEGORY_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
+  intlNavSlugToIso,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -282,11 +283,18 @@ export function MobileNav(): ReactElement {
                   {/*
                     Vague-6 — all 8 international country guides
                     indexable. Each entry routes to its dedicated
-                    /guide/<slug> page. Inline switch keeps the typed
-                    `Href` strict (no string assembly).
+                    /guide/<slug> page (inline switch keeps the typed
+                    `Href` strict; no string assembly). aria-label
+                    appends the ISO country code for screen readers
+                    so the link is unambiguous out of context.
                   */}
                   <ul className="flex flex-col gap-0.5">
                     {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+                      const iso = intlNavSlugToIso(entry.slug);
+                      const ariaLabel =
+                        iso !== null
+                          ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
+                          : pickEntryLabel(entry, locale);
                       const href = ((): React.ComponentProps<typeof Link>['href'] => {
                         switch (entry.slug) {
                           case 'italie':
@@ -311,7 +319,7 @@ export function MobileNav(): ReactElement {
                       })();
                       return (
                         <li key={entry.slug}>
-                          <Link href={href} className={subLinkClass}>
+                          <Link href={href} aria-label={ariaLabel} className={subLinkClass}>
                             {pickEntryLabel(entry, locale)}
                           </Link>
                         </li>

@@ -105,6 +105,44 @@ export const HOTEL_TYPE_NAV_ENTRIES: readonly NavLabeledEntry[] = [
   { slug: 'maisons-hotes', labelFr: "Maisons d'hôtes", labelEn: 'Guesthouses' },
 ];
 
+/**
+ * Maps a `HOTEL_TYPE_NAV_ENTRIES` slug to the canonical axis-type value
+ * expected by `/classements/[axe]/[valeur]` (axe='type'). The two
+ * taxonomies diverged historically: the menu surfaces user-friendly
+ * plurals (`hotels-5-etoiles`, `boutique-hotels`) while the rankings
+ * matrice in `scripts/editorial-pilot/src/rankings/axes.ts` uses the
+ * singular canonical form (`5-etoiles`, `boutique-hotel`).
+ *
+ * The previous mega-menu mapped via `entry.slug.replace(/^hotels-/u, '')`
+ * which only stripped the `hotels-` prefix on `hotels-5-etoiles` and
+ * `hotels-4-etoiles`. The other 5 entries (boutique, châteaux, chalets,
+ * villas, maisons) produced `/classements/type/boutique-hotels` etc. —
+ * which `axes.ts` does not recognise → 404.
+ *
+ * Source of truth for the right-hand side is `axes.ts` `HOTEL_TYPES`:
+ * `'palace' | '5-etoiles' | '4-etoiles' | 'boutique-hotel' | 'chateau'
+ *  | 'chalet' | 'villa' | 'maison-hotes' | 'resort' | 'ecolodge'
+ *  | 'insolite' | 'all'`.
+ */
+export const NAV_HOTEL_TYPE_TO_AXIS_VALUE: Readonly<Record<string, string>> = {
+  'hotels-5-etoiles': '5-etoiles',
+  'hotels-4-etoiles': '4-etoiles',
+  'boutique-hotels': 'boutique-hotel',
+  'chateaux-hotels': 'chateau',
+  'chalets-luxe': 'chalet',
+  villas: 'villa',
+  'maisons-hotes': 'maison-hotes',
+};
+
+/**
+ * Safe accessor: returns `null` when the menu slug is unknown so the
+ * consumer can avoid rendering a broken link. A test in `nav-data`
+ * keeps this table in sync with `HOTEL_TYPE_NAV_ENTRIES`.
+ */
+export function navHotelTypeToAxisValue(navSlug: string): string | null {
+  return NAV_HOTEL_TYPE_TO_AXIS_VALUE[navSlug] ?? null;
+}
+
 // ─── 3. Hotel brands — "Palaces & Hôtels > Par groupe hôtelier" ──────────
 
 /**
@@ -309,3 +347,29 @@ export const INTL_DESTINATION_NAV_ENTRIES: readonly NavLabeledEntry[] = [
   { slug: 'japon', labelFr: 'Japon', labelEn: 'Japan' },
   { slug: 'etats-unis', labelFr: 'États-Unis', labelEn: 'United States' },
 ];
+
+/**
+ * Maps the menu's FR-friendly country slugs to ISO 3166-1 alpha-2
+ * codes used by `/hotels` country anchors (e.g. `#country-it` for
+ * Italy). The destination/[city] route is FR-only by design
+ * (`getDestinationBySlug` filters `country_code === 'FR'`) — pointing
+ * the international menu entries at `/destination/<slug>` produced
+ * silent 404s + `noindex` for every international link. Re-routing
+ * them to `/hotels#country-<iso>` lands the user on the country
+ * section of the catalogue, the closest existing surface until a
+ * dedicated `/destination-internationale/[countrySlug]` page ships.
+ */
+export const INTL_NAV_SLUG_TO_ISO: Readonly<Record<string, string>> = {
+  italie: 'it',
+  suisse: 'ch',
+  maroc: 'ma',
+  'emirats-arabes-unis': 'ae',
+  maldives: 'mv',
+  thailande: 'th',
+  japon: 'jp',
+  'etats-unis': 'us',
+};
+
+export function intlNavSlugToIso(navSlug: string): string | null {
+  return INTL_NAV_SLUG_TO_ISO[navSlug] ?? null;
+}

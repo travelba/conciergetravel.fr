@@ -14,6 +14,8 @@ import {
   HOTEL_CATEGORY_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
+  intlNavSlugToIso,
+  navHotelTypeToAxisValue,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -203,16 +205,26 @@ function MegaLink({
   href,
   label,
   muted = false,
+  ariaLabel,
 }: {
   readonly href: React.ComponentProps<typeof Link>['href'];
   readonly label: string;
   readonly muted?: boolean;
+  /**
+   * Optional explicit `aria-label`. Used by international destination
+   * entries to surface the ISO code to screen readers while keeping
+   * the visible label localised — useful when several entries share
+   * the same destination page (`/hotels`) before per-country deep
+   * links land.
+   */
+  readonly ariaLabel?: string;
 }): ReactElement {
   return (
     <li role="none">
       <Link
         role="menuitem"
         href={href}
+        aria-label={ariaLabel}
         className={`hover:bg-muted/10 focus-visible:ring-ring block rounded-md px-2.5 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 ${
           muted ? 'text-muted hover:text-fg text-xs' : 'text-fg'
         }`}
@@ -335,13 +347,19 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
               // Each menu entry routes to its dedicated guide page.
               // The typed `Href` requires a literal pathname union;
               // we map the slug explicitly to keep the typecheck strict.
+              // aria-label appends the ISO country code for screen
+              // readers so the link is unambiguous out of context.
+              const iso = intlNavSlugToIso(entry.slug);
+              const label = pickEntryLabel(entry, locale);
+              const ariaLabel = iso !== null ? `${label} — ${iso.toUpperCase()}` : label;
               switch (entry.slug) {
                 case 'italie':
                   return (
                     <MegaLink
                       key={entry.slug}
                       href="/guide/italie"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'suisse':
@@ -349,7 +367,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/suisse"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'maroc':
@@ -357,7 +376,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/maroc"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'maldives':
@@ -365,7 +385,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/maldives"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'emirats-arabes-unis':
@@ -373,7 +394,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/emirats-arabes-unis"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'thailande':
@@ -381,7 +403,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/thailande"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'japon':
@@ -389,7 +412,8 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/japon"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 case 'etats-unis':
@@ -397,16 +421,13 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                     <MegaLink
                       key={entry.slug}
                       href="/guide/etats-unis"
-                      label={pickEntryLabel(entry, locale)}
+                      label={label}
+                      ariaLabel={ariaLabel}
                     />
                   );
                 default:
                   return (
-                    <MegaLink
-                      key={entry.slug}
-                      href="/hotels"
-                      label={pickEntryLabel(entry, locale)}
-                    />
+                    <MegaLink key={entry.slug} href="/hotels" label={label} ariaLabel={ariaLabel} />
                   );
               }
             })}
@@ -518,16 +539,24 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByType')}>
           <>
-            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/classements/[axe]/[valeur]',
-                  params: { axe: 'type', valeur: entry.slug.replace(/^hotels-/u, '') },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => {
+              // Map the user-friendly menu slug to the canonical axis
+              // value declared in `axes.ts`. Drop entries that can't
+              // map (defensive; the test in `nav-data.test.ts` makes
+              // this branch unreachable in CI).
+              const axisValue = navHotelTypeToAxisValue(entry.slug);
+              if (axisValue === null) return null;
+              return (
+                <MegaLink
+                  key={entry.slug}
+                  href={{
+                    pathname: '/classements/[axe]/[valeur]',
+                    params: { axe: 'type', valeur: axisValue },
+                  }}
+                  label={pickEntryLabel(entry, locale)}
+                />
+              );
+            })}
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByDestination')}>
