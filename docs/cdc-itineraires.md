@@ -33,13 +33,20 @@ La feature itinéraire s'appuie sur les fondations déjà en place :
 
 ---
 
-## 2. Modèle de Données — Migration 0038
+## 2. Modèle de Données — Migration 0045
+
+> **Note de renumérotation** : le CDC v1.0 mentionnait `0038` mais ce
+> numéro était déjà appliqué (`0038_hotels_source_layering.sql`). Les
+> migrations sont forward-only (AGENTS.md §4.5) — la migration a donc
+> été créée sous le numéro `0045` (cf.
+> `docs/itineraires-integration-plan.md` §1.3 décision D1 et
+> `packages/db/migrations/0045_itineraries.sql`).
 
 ### 2.1 Table `itineraries`
 
 ```sql
 -- ============================================================
--- Migration 0038 — itineraries
+-- Migration 0045 — itineraries
 -- MyConciergeHotel.com — itinerary SEO/GEO acquisition feature
 -- ============================================================
 
@@ -449,7 +456,7 @@ Pour chaque itinéraire, les FAQ + AEO doivent capturer ces variantes conversati
 
 ### Sprint 1 — DB & API
 
-1. `packages/db/migrations/0038_itineraries.sql` (schéma §2.1)
+1. `packages/db/migrations/0045_itineraries.sql` (schéma §2.1 — renuméroté depuis `0038` car ce numéro était déjà appliqué)
 2. Type Zod `ItinerarySchema` dans `packages/db/src/types/itinerary.ts`
 3. `getItineraryBySlug(slug, locale)` avec `unstable_cache` → retourner `Record` pas `Map`
 4. `listPublishedItineraries(filters)` paginé
