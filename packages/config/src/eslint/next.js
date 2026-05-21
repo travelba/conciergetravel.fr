@@ -1,43 +1,32 @@
 // ESLint flat config for Next.js apps (apps/web + apps/admin).
 //
 // Inherits the workspace base config, then layers Next.js / React / a11y
-// recommendations. `next/core-web-vitals` is still distributed as a legacy
-// config, so we proxy it through `@eslint/eslintrc`'s `FlatCompat` shim — this
-// is the supported migration path for ESLint v9.
+// recommendations. `eslint-config-next` 16+ ships as a native ESLint v9
+// flat config (array of config objects), so we import it directly — using
+// `@eslint/eslintrc`'s `FlatCompat` here would re-validate already-flat
+// configs and trip on circular `plugins.react` references inside its
+// JSON-based schema validator.
 //
-// `next/typescript` is intentionally NOT included: it redefines the
-// `@typescript-eslint` plugin which is already provided by our base via
-// `typescript-eslint`'s flat exports, and the resulting "Cannot redefine
-// plugin" error is unrecoverable inside FlatCompat.
+// We strip the `next/typescript` block before consuming the array: it would
+// re-declare the `@typescript-eslint` plugin already provided by our base via
+// `typescript-eslint`'s flat exports (ESLint v9 forbids redeclaring a plugin
+// across config objects in the same chain).
 
-import { FlatCompat } from '@eslint/eslintrc';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import reactHooks from 'eslint-plugin-react-hooks';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import base from './base.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const nextConfigs = nextCoreWebVitals.filter((entry) => entry?.name !== 'next/typescript');
 
 export default [
   ...base,
-  ...compat.extends('next/core-web-vitals'),
+  ...nextConfigs,
   {
-    plugins: {
-      'jsx-a11y': jsxA11y,
-      'react-hooks': reactHooks,
-    },
-    // FlatCompat may rewrite `parser` to `espree` while loading the Next legacy
-    // config; rebind `@typescript-eslint/parser` so TS-aware rules from base
-    // (no-unused-vars, no-explicit-any, …) see the correct AST.
+    // Rebind `@typescript-eslint/parser` so TS-aware rules from base
+    // (no-unused-vars, no-explicit-any, …) see the correct AST when Next
+    // would otherwise default to its Babel-based parser.
     languageOptions: {
       parser: tseslint.parser,
       globals: {
@@ -46,8 +35,6 @@ export default [
       },
     },
     rules: {
-      ...jsxA11y.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
       'react/no-unescaped-entities': 'off',
       'jsx-a11y/anchor-is-valid': 'error',
       '@next/next/no-html-link-for-pages': 'off',
