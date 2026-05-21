@@ -15,8 +15,10 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Next 16 promoted `typedRoutes` out of `experimental` to a top-level
+  // option; the old position now warns at boot.
+  typedRoutes: true,
   experimental: {
-    typedRoutes: true,
     optimizePackageImports: ['lucide-react', '@mch/ui'],
   },
   transpilePackages: [
