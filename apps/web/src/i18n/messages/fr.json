@@ -366,6 +366,263 @@
       ]
     }
   },
+  "conciergeMethod": {
+    "metaTitle": "Notre méthode éditoriale — Comment nous sélectionnons les Palaces | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel sélectionne les Palaces et hôtels 5★ français selon une méthode transparente : distinctions Atout France, Michelin Keys, Forbes, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "EEAT — méthode éditoriale",
+    "title": "Notre méthode éditoriale",
+    "lede": "Comment une adresse rejoint notre catalogue ? Sur quels critères nos classements sont-ils établis ? Voici le détail public de la méthode appliquée par notre conciergerie — sources nommées, scoring vérifiable, indépendance totale vis-à-vis des hôtels.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment MyConciergeHotel sélectionne ses Palaces et hôtels 5 étoiles ?",
+    "aeoAnswer": "Chaque adresse de notre catalogue passe par un audit en 8 critères : distinction Atout France (Palace, 5★), Michelin Keys, étoiles Michelin de la table, rang Forbes Travel Guide, appartenance à une collection d'auteur (Relais & Châteaux, LHW), avis Amadeus vérifiés, qualité de service mesurée par audit interne, et signature éditoriale (chambre signature, vue, accès). Les sources sont nommées en bas de chaque classement. Aucun hôtel ne paie son entrée — MyConciergeHotel est une agence IATA indépendante. Mise à jour {date}.",
+    "principles": {
+      "title": "Quatre principes intransgressables",
+      "independence": {
+        "title": "Indépendance financière",
+        "body": "Notre revenu vient des commissions sur réservations (standard IATA), identiques d'un hôtel à l'autre. Aucun hôtel ne paie pour figurer ou être mis en avant. Aucun lien d'affiliation déguisé. Nos recommandations ne dépendent pas de la marge dégagée."
+      },
+      "transparency": {
+        "title": "Transparence des sources",
+        "body": "Chaque classement liste en bas de page les sources externes citées (Atout France, Michelin Guide, Forbes Travel Guide, Wikidata, presse hôtelière). Chaque score interne est explicité dans la section méthodologie de la fiche. Vous pouvez vérifier."
+      },
+      "expertise": {
+        "title": "Expertise vérifiée",
+        "body": "Chaque fiche est rédigée par un membre de notre conciergerie qui a visité l'hôtel ou échangé directement avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur. Les conseillers sont identifiés par leur nom et fonction."
+      },
+      "freshness": {
+        "title": "Mise à jour datée",
+        "body": "Chaque fiche affiche sa date de dernière revue éditoriale. Les classements sont revus trimestriellement (pilier) ou semestriellement (thématique). Les changements de classement (Atout France, Michelin) sont reflétés sous 30 jours."
+      }
+    },
+    "criteria": {
+      "title": "Les 8 critères de sélection",
+      "lede": "Aucun critère seul n'est suffisant — la sélection croise plusieurs signaux. Une adresse non distinguée par Atout France peut entrer si sa table est étoilée Michelin et qu'elle appartient à une collection d'auteur. Une adresse Palace ne rentre pas si son audit interne révèle un service dégradé.",
+      "items": [
+        {
+          "name": "Distinction Atout France",
+          "desc": "Mention Palace (≈30 adresses en France) ou classement 5 étoiles officiel. La mention Palace est la plus haute distinction française — accordée pour l'art de vivre, le service personnalisé, le rayonnement international."
+        },
+        {
+          "name": "Michelin Keys",
+          "desc": "Système de notation hôtelière du Guide Michelin (1, 2 ou 3 clés). Lancé en 2024, c'est l'équivalent hôtelier des étoiles de table. Critère pondéré +20% dans notre score depuis 2026."
+        },
+        {
+          "name": "Étoiles Michelin de la table",
+          "desc": "Une, deux ou trois étoiles décernées au restaurant gastronomique de l'hôtel. Critère majeur pour notre catégorie « Palaces gastronomie » et nos classements thématiques."
+        },
+        {
+          "name": "Rang Forbes Travel Guide",
+          "desc": "Notation 4 ou 5 étoiles Forbes (système américain prestigieux). Particulièrement utile pour les hôtels internationaux et les chaînes (Four Seasons, Ritz-Carlton, Rosewood)."
+        },
+        {
+          "name": "Collection d'auteur",
+          "desc": "Appartenance à Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels & Resorts, Virtuoso. Ces collections appliquent leurs propres critères stricts d'entrée."
+        },
+        {
+          "name": "Avis Amadeus vérifiés",
+          "desc": "Sentiment agrégé sur Amadeus (note /5 + reviewCount). Filtrage : minimum 50 avis vérifiés. Pondération inverse du volume pour éviter de pénaliser les adresses confidentielles à petite échelle."
+        },
+        {
+          "name": "Audit interne MyConciergeHotel",
+          "desc": "Notre conciergerie visite, échange avec la direction, teste les services (check-in, room service, conciergerie maison) et note sur 5 axes : accueil, chambre, table, spa/expérience, infrastructure."
+        },
+        {
+          "name": "Signature éditoriale",
+          "desc": "Une adresse doit avoir une signature reconnaissable — une chambre numérotée mythique, une vue, un savoir-faire, une histoire racontable. Sans signature, l'adresse rejoint la liste mais pas le top des classements."
+        }
+      ]
+    },
+    "process": {
+      "title": "Comment une adresse rejoint notre catalogue",
+      "step1Title": "Proposition interne",
+      "step1Body": "Notre conciergerie identifie une adresse — soit suite à un événement de marché (ouverture, rachat, Atout France), soit sur recommandation client, soit lors d'un audit de cluster (« quels Palaces manquent à notre Côte d'Azur ? »). Aucune candidature spontanée n'est acceptée.",
+      "step2Title": "Audit terrain",
+      "step2Body": "Un conseiller visite l'hôtel ou organise un entretien Visio avec la direction. Vérification des 8 critères, échange sur la disponibilité GDS Amadeus, conditions de paiement, programme de fidélité applicable, photos disponibles, droits d'usage.",
+      "step3Title": "Rédaction et publication",
+      "step3Body": "La fiche est rédigée par le conseiller (description longue 600-1000 mots), enrichie d'un Conseil du Concierge (50-110 mots, secret opérationnel concret). Validation éditoriale interne puis publication. Chaque revue trimestrielle peut faire évoluer le classement de l'adresse.",
+      "step4Title": "Revue continue",
+      "step4Body": "Tout changement matériel (perte d'Atout France, fermeture du restaurant, rachat par une chaîne, audit interne défavorable) déclenche une révision dans les 30 jours. Une adresse peut sortir du catalogue — c'est rare mais documenté."
+    },
+    "faqTitle": "Questions sur notre méthode",
+    "faq": [
+      {
+        "q": "Un hôtel peut-il payer pour figurer dans votre catalogue ?",
+        "a": "Non, jamais. MyConciergeHotel est une agence IATA accréditée — notre revenu vient des commissions sur réservations (standard IATA), pas d'un référencement publicitaire. Refuser le pay-to-play est notre engagement le plus fort vis-à-vis de nos clients."
+      },
+      {
+        "q": "Comment garantissez-vous l'indépendance de vos audits ?",
+        "a": "Nos visites d'audit ne sont pas annoncées à l'avance et nous payons systématiquement nos nuits aux tarifs publics (jamais en complimentary). Le rapport d'audit est interne, le résultat publié pondéré dans le scoring. Aucun conseiller n'a de lien commercial direct avec un hôtel audité."
+      },
+      {
+        "q": "Une mauvaise expérience client peut-elle faire baisser une fiche ?",
+        "a": "Oui. Si plusieurs réservations passées via notre conciergerie remontent des problèmes opérationnels récurrents (service dégradé, surbooking, propreté), nous déclenchons une re-visite. Si l'audit confirme, l'adresse perd des points de scoring et peut sortir des classements top. Trois cas documentés depuis le lancement."
+      },
+      {
+        "q": "Pourquoi pas d'avis client direct sur votre site ?",
+        "a": "Parce que nous ne pouvons pas garantir leur vérification à 100% (sources, biais, modération). Nous préférons agréger les sentiments Amadeus (réservation vérifiée) et publier notre propre audit, signé par un conseiller identifié. Plus exigeant, moins manipulable."
+      },
+      {
+        "q": "Comment les classements sont-ils mis à jour ?",
+        "a": "Trimestriellement pour les classements pilier (Meilleurs Palaces de France, de Paris, Côte d'Azur), semestriellement pour les classements thématiques (spa, gastronomie). Les changements officiels (Atout France, Michelin Guide, fermeture) sont reflétés sous 30 jours hors cadence."
+      },
+      {
+        "q": "Puis-je signaler une erreur ou suggérer une adresse ?",
+        "a": "Oui — toute correction factuelle (erreur d'adresse, distinction périmée, photo non à jour) est traitée sous 48h après contact via /le-concierge/contact. Les suggestions d'adresse sont étudiées au cycle de revue trimestriel suivant ; nous répondons systématiquement même si l'adresse n'est pas retenue."
+      }
+    ]
+  },
+  "conciergeReserver": {
+    "metaTitle": "Comment réserver via votre concierge — tarifs nets GDS | MyConciergeHotel",
+    "metaDesc": "Réservez votre Palace ou hôtel 5★ via MyConciergeHotel : tarifs nets GDS Amadeus, paiement sécurisé PCI-DSS, confirmation instantanée, programme de fidélité. Comment ça marche en 5 étapes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Comment réserver",
+    "title": "Réserver via votre concierge",
+    "lede": "MyConciergeHotel propose deux modes de réservation : direct par carte (instantané, hôtels connectés GDS Amadeus) ou via conciergerie (par e-mail sous 24h, hôtels confidentiels). Voici comment ça marche, étape par étape.",
+    "lastReviewed": "2026-05-10",
+    "aeoQuestion": "Comment réserver un Palace ou hôtel 5★ via MyConciergeHotel ?",
+    "aeoAnswer": "Cinq étapes : 1) chercher une adresse ou parcourir un classement éditorial ; 2) choisir vos dates et voyageurs dans le moteur de réservation Amadeus ; 3) sélectionner un tarif (chambre seule / petit-déjeuner / flexible / non-remboursable) ; 4) confirmer en ligne par carte sécurisée PCI-DSS avec 3D-Secure ; 5) recevoir la confirmation par e-mail (instantanée en mode Amadeus, sous 24h en mode conciergerie). Aucun supplément agence — tarif net GDS identique au tarif public de l'hôtel. Mise à jour {date}.",
+    "steps": {
+      "title": "Les 5 étapes",
+      "items": [
+        {
+          "title": "1. Choisir une adresse",
+          "body": "Parcourez le catalogue par destination (Paris, Côte d'Azur, Alpes), par marque (Cheval Blanc, Airelles…), par classement éditorial (Meilleurs Palaces de France) ou par inspiration (lune de miel, spa, gastronomie). Chaque fiche se conclut par un Conseil du Concierge — secret opérationnel pour un séjour réussi."
+        },
+        {
+          "title": "2. Choisir vos dates et voyageurs",
+          "body": "Le moteur de réservation intégré à chaque fiche interroge l'inventaire Amadeus en temps réel : disponibilité, tarif, conditions d'annulation. Vous saisissez check-in, check-out, adultes, enfants. Les chambres signatures (suite Tour Eiffel, chambre 432 Le Ritz…) sont mises en avant si disponibles."
+        },
+        {
+          "title": "3. Sélectionner un tarif",
+          "body": "Trois familles de tarifs : chambre seule (le plus flexible), petit-déjeuner inclus, demi-pension. Politique d'annulation explicite par tarif (flexible 24-48h / non-remboursable early-bird). Notre conciergerie peut négocier des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique ne le propose pas."
+        },
+        {
+          "title": "4. Confirmer le paiement",
+          "body": "Paiement par carte (Visa, Mastercard, Amex) via l'iframe sécurisée Amadeus Payments — conforme PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs. Pour les paiements > 5 000 €, virement bancaire possible sur demande conciergerie."
+        },
+        {
+          "title": "5. Recevoir la confirmation",
+          "body": "Confirmation e-mail instantanée en mode Amadeus (avec PNR, voucher, conditions). En mode conciergerie (hôtels confidentiels non connectés GDS), votre concierge dédié vous répond sous 24h ouvrées avec une proposition personnalisée et un lien de paiement sécurisé."
+        }
+      ]
+    },
+    "reassurance": {
+      "title": "Vos garanties",
+      "iata": "Agence accréditée IATA / membre APST. Garantie financière professionnelle obligatoire — vos paiements sont protégés en cas de défaillance.",
+      "rate": "Tarif net GDS Amadeus identique au tarif public de l'hôtel — aucun supplément ajouté par notre agence.",
+      "comparator": "Comparateur de prix non affilié sur chaque fiche : vous voyez immédiatement le delta avec Booking, Hotels.com, Expedia pour les mêmes dates.",
+      "loyalty": "Programme de fidélité MyConciergeHotel offert dès la première nuit — avantages cumulables avec les programmes de chaîne (Four Seasons Preferred, Marriott Bonvoy…)."
+    },
+    "faqTitle": "Réserver — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien de temps pour confirmer ma réservation ?",
+        "a": "En mode Amadeus (direct), la confirmation est instantanée — vous recevez l'e-mail avec PNR et voucher dans les secondes qui suivent le paiement. En mode conciergerie (hôtels hors GDS), votre concierge vous répond sous 24h ouvrées, généralement sous 4-6h aux horaires de bureau."
+      },
+      {
+        "q": "Quels modes de paiement acceptez-vous ?",
+        "a": "Carte bancaire (Visa, Mastercard, American Express) via iframe sécurisée Amadeus Payments — PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Pour les paiements supérieurs à 5 000 €, virement bancaire ou paiement échelonné sur demande. Aucun paiement par chèque ou espèces."
+      },
+      {
+        "q": "Vos tarifs sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non. Nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Aucune commission ajoutée. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking, Hotels.com, Expedia — vous voyez le delta directement."
+      },
+      {
+        "q": "Puis-je modifier ou annuler ma réservation ?",
+        "a": "Selon la politique d'annulation du tarif choisi (explicite à la réservation). Tarifs flexibles : annulation gratuite jusqu'à 24-48h avant l'arrivée. Tarifs early-bird : non-remboursables. Modifications gérées via votre compte MyConciergeHotel ou par votre concierge dédié."
+      },
+      {
+        "q": "Le check-in anticipé / late check-out sont-ils possibles ?",
+        "a": "Sur demande au moment de la réservation ou auprès de votre concierge dédié. Notre programme de fidélité offre le late check-out à 14h sur les hôtels Little Hotelier (tier Essentiel). Pour les tier Prestige, late check-out à 16h confirmé. Le check-in anticipé reste soumis à la disponibilité de la chambre."
+      },
+      {
+        "q": "Mes points de fidélité chaîne (Marriott Bonvoy, Four Seasons Preferred…) sont-ils crédités ?",
+        "a": "Oui. Votre numéro de fidélité chaîne peut être joint à la réservation au moment du checkout (champ « numéro de programme de fidélité »). Les points sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne, c'est un standard de toutes les agences."
+      }
+    ]
+  },
+  "conciergeContact": {
+    "metaTitle": "Nous contacter — Conciergerie MyConciergeHotel | Agence IATA",
+    "metaDesc": "Joindre notre conciergerie : téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. MyConciergeHotel, agence de voyage IATA / APST dédiée aux Palaces et hôtels 5★.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Joindre votre concierge",
+    "title": "Nous contacter",
+    "lede": "Notre conciergerie répond en français et en anglais, du lundi au samedi de 9h à 19h (heure de Paris). Réponse aux demandes écrites sous 24h ouvrées. Pour une réservation urgente, privilégiez le téléphone aux horaires d'ouverture.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment joindre la conciergerie MyConciergeHotel ?",
+    "aeoAnswer": "Trois canaux : téléphone +33 1 84 60 95 50 (lundi-samedi 9h-19h, heure de Paris), e-mail contact@myconciergehotel.com (réponse sous 24h ouvrées), formulaire en ligne sur cette page. Nous répondons en français et en anglais. Pour une demande de devis MICE ou un séjour groupe, voir aussi /le-concierge/mice-et-seminaires. Mise à jour {date}.",
+    "channels": {
+      "title": "Trois canaux",
+      "phone": {
+        "title": "Téléphone",
+        "body": "Pour une réservation urgente, une question rapide, ou si vous préférez la voix.",
+        "value": "+33 1 84 60 95 50",
+        "hours": "Lundi-samedi 9h-19h (Paris)"
+      },
+      "email": {
+        "title": "E-mail",
+        "body": "Pour une demande détaillée, un devis sur-mesure, une question sur le programme de fidélité.",
+        "value": "contact@myconciergehotel.com",
+        "hours": "Réponse sous 24h ouvrées"
+      },
+      "form": {
+        "title": "Formulaire",
+        "body": "Si vous préférez tout consigner par écrit. Nous vous répondons par e-mail.",
+        "value": "Voir ci-dessous"
+      }
+    },
+    "form": {
+      "title": "Envoyer un message",
+      "lede": "Décrivez votre besoin en quelques lignes. Nous vous répondons sous 24h ouvrées.",
+      "namePlaceholder": "Votre prénom et nom",
+      "emailPlaceholder": "Adresse e-mail",
+      "subjectPlaceholder": "Sujet (réservation, devis, question…)",
+      "messagePlaceholder": "Votre message…",
+      "consent": "J'accepte que mes données soient utilisées pour traiter ma demande (politique de confidentialité).",
+      "submit": "Envoyer ma demande",
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com."
+    },
+    "legal": {
+      "title": "Identité de l'éditeur",
+      "company": "MyConciergeHotel SAS",
+      "address": "Adresse : voir mentions légales",
+      "iata": "Agence IATA accréditée — n° d'immatriculation Atout France IM075 (à confirmer publication)",
+      "guarantee": "Garantie financière APST — Association Professionnelle de Solidarité du Tourisme",
+      "dpo": "Délégué à la protection des données : dpo@myconciergehotel.com",
+      "press": "Demandes presse : voir /le-concierge/presse-et-partenaires"
+    },
+    "faqTitle": "Contact — questions fréquentes",
+    "faq": [
+      {
+        "q": "Sous quel délai répondez-vous ?",
+        "a": "Sous 24 heures ouvrées pour les demandes écrites (e-mail et formulaire). Plus rapide aux horaires d'ouverture du standard (lundi-samedi 9h-19h, heure de Paris) — souvent sous 4 à 6 heures aux heures de bureau. Au téléphone, vous parlez directement à un conseiller (pas de serveur vocal interactif)."
+      },
+      {
+        "q": "Parlez-vous d'autres langues que le français ?",
+        "a": "Oui — toute l'équipe parle français et anglais couramment. Espagnol et italien possibles selon les conseillers disponibles. Les demandes en allemand, arabe ou mandarin sont traitées par e-mail avec un délai de réponse légèrement plus long (mise en relation avec le bon interlocuteur)."
+      },
+      {
+        "q": "Que faire en cas d'urgence pendant mon séjour ?",
+        "a": "Le numéro d'urgence 24/7 vous est communiqué dans votre confirmation de réservation. Il permet de joindre un conseiller en astreinte pour les sujets critiques (problème majeur dans l'hôtel, sujet de sécurité). Pour les questions non urgentes pendant le séjour, écrivez à votre concierge dédié — vous avez son nom et e-mail direct."
+      },
+      {
+        "q": "Êtes-vous une agence de voyage ou une plateforme en ligne ?",
+        "a": "Une agence de voyage. MyConciergeHotel SAS est immatriculée IATA, membre APST avec garantie financière, et soumise au Code du tourisme français. Notre activité est encadrée — contrairement à une plateforme en ligne qui ne fait qu'intermédiation. Vos paiements sont protégés en cas de défaillance par la garantie APST."
+      },
+      {
+        "q": "Comment exercer mes droits RGPD (accès, rectification, suppression) ?",
+        "a": "Écrivez à dpo@myconciergehotel.com en précisant votre demande (accès aux données, rectification, suppression, portabilité, opposition). Nous répondons sous 30 jours conformément au RGPD. Pour suppression complète de votre compte client, l'accès est aussi disponible depuis /compte (section « Confidentialité »)."
+      },
+      {
+        "q": "Acceptez-vous des candidatures spontanées d'hôtels souhaitant intégrer votre catalogue ?",
+        "a": "Non — notre catalogue éditorial est constitué sur proposition interne (voir /le-concierge/methode-editoriale). Les hôteliers souhaitant un partenariat MICE / groupes / événements doivent passer par /le-concierge/pour-les-hoteliers. Les demandes presse vont à /le-concierge/presse-et-partenaires."
+      }
+    ]
+  },
   "consent": {
     "title": "Vos préférences cookies",
     "intro": "Nous utilisons des cookies pour faire fonctionner ce site (authentification, panier, sécurité). Avec votre accord, nous mesurons aussi son audience de manière anonymisée pour l'améliorer. Vous pouvez accepter, refuser ou personnaliser à tout moment.",
