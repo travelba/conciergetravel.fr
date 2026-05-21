@@ -58,12 +58,25 @@ export async function GET(): Promise<NextResponse> {
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {
-      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      href:
+        | '/inspiration'
+        | '/marques'
+        | '/le-concierge'
+        | '/le-conseil-du-concierge'
+        | '/le-concierge/presse-et-partenaires'
+        | '/le-concierge/newsletter'
+        | '/itineraire';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
+      // Vague-5 P1 — Le Conseil du Concierge USP hub (highest priority
+      // alongside the marketing pages because it carries the unique
+      // value proposition).
+      { href: '/le-conseil-du-concierge', priority: 0.7 },
+      { href: '/le-concierge/presse-et-partenaires', priority: 0.4 },
+      { href: '/le-concierge/newsletter', priority: 0.5 },
       { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
     ];
     for (const hub of staticHubs) {

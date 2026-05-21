@@ -210,6 +210,18 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
+    '/le-conseil-du-concierge': {
+      fr: '/le-conseil-du-concierge',
+      en: '/the-concierge-tip',
+    },
+    '/le-concierge/presse-et-partenaires': {
+      fr: '/le-concierge/presse-et-partenaires',
+      en: '/le-concierge/press-and-partners',
+    },
+    '/le-concierge/newsletter': {
+      fr: '/le-concierge/newsletter',
+      en: '/le-concierge/newsletter',
+    },
     '/itineraire': '/itineraire',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
