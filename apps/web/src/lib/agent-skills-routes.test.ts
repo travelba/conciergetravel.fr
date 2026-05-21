@@ -52,13 +52,17 @@ function findRouteFile(endpointPath: string): string | null {
     .split('/')
     .map((seg) => (/^\{.+\}$/u.test(seg) ? null : seg));
 
-  function walk(currentDir: string, remaining: (string | null)[]): string | null {
-    if (remaining.length === 0) {
+  function walk(currentDir: string, remaining: readonly (string | null)[]): string | null {
+    const [head, ...tail] = remaining;
+    if (head === undefined) {
+      // Reached the end of the path — the segment must resolve to a
+      // `route.ts` file (App Router convention).
       const file = join(currentDir, 'route.ts');
       return existsSync(file) ? file : null;
     }
-    const [head, ...tail] = remaining;
     if (head === null) {
+      // Dynamic segment in the catalog (`{…}`): accept any `[…]`
+      // directory at this level.
       if (!existsSync(currentDir)) return null;
       for (const entry of readdirSync(currentDir, { withFileTypes: true })) {
         if (entry.isDirectory() && entry.name.startsWith('[') && entry.name.endsWith(']')) {
