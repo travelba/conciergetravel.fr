@@ -58,12 +58,25 @@ export async function GET(): Promise<NextResponse> {
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {
-      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      href:
+        | '/inspiration'
+        | '/marques'
+        | '/le-concierge'
+        | '/le-concierge/methode-editoriale'
+        | '/le-concierge/reserver'
+        | '/le-concierge/contact'
+        | '/itineraire';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
+      // Vague 5 — institutional pages around /le-concierge. EEAT
+      // methodology and the contact page are high-priority surfaces
+      // (Knowledge Panel signals). "Reserver" is conversion-critical.
+      { href: '/le-concierge/methode-editoriale', priority: 0.6 },
+      { href: '/le-concierge/reserver', priority: 0.6 },
+      { href: '/le-concierge/contact', priority: 0.5 },
       { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
     ];
     for (const hub of staticHubs) {
