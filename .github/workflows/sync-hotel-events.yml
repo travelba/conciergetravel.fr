@@ -63,7 +63,7 @@ jobs:
     # over 15 min is a bug or a DT outage; fail loudly so we notice.
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload runlog
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: events-runlog-${{ github.run_id }}
           path: scripts/editorial-pilot/out/events-runlog-*.jsonl

@@ -276,5 +276,62 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         required: ['slug'],
       },
     },
+    // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
+    {
+      name: 'get-itinerary',
+      description:
+        'Récupérer un itinéraire complet par son slug : étapes jour par jour, hôtels 5★ et Palaces recommandés avec liens de réservation, FAQ longue traîne, conseils Concierge saisonniers, JSON-LD HowTo + ItemList + FAQPage + Article. URL canonique : /fr/itineraire/{slug} ou /en/itineraire/{slug} (slug FR identique en EN, ADR-0008).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description:
+              'Slug kebab-case de l’itinéraire (ex. "japon-culture-2-semaines", "paris-luxe-3-jours").',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['slug'],
+      },
+    },
+    {
+      name: 'list-itineraries',
+      description:
+        'Lister les itinéraires de voyage publiés par destination (pays ISO-2), durée, thème ou style (luxe, famille, couple, solo, aventure, bien-être, gastronomie, culture, affaires). Chaque itinéraire inclut les hôtels 5★ et Palaces sélectionnés par le Concierge. URL hub : /itineraires (FR) | /itineraries (EN).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          country_code: {
+            type: 'string',
+            description:
+              'Code pays ISO 3166-1 alpha-2 (ex. "FR", "JP", "IT", "MA"). Le client peut accepter un libellé utilisateur ("japon") et le convertir en ISO-2 avant l’appel.',
+          },
+          travel_style: {
+            type: 'string',
+            description:
+              'Style éditorial : "luxe" | "famille" | "couple" | "solo" | "aventure" | "bien-etre" | "gastronomie" | "culture" | "affaires".',
+          },
+          duration_min_days: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 60,
+            description: 'Durée minimum en jours (cap = 60).',
+          },
+          duration_max_days: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 60,
+            description: 'Durée maximum en jours.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+      },
+    },
   ],
 };
