@@ -18,6 +18,8 @@
     "agency": "The agency"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
+    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
     "title": "Your concierge for France's Palaces and 5-star hotels",
     "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
@@ -555,7 +557,8 @@
     },
     "breadcrumb": {
       "home": "Home",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "5★ hotels and Palaces in {city}",

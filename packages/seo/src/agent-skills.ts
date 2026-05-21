@@ -275,6 +275,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/concierge-tip/{slug}' },
     },
     // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
     {

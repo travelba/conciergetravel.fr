@@ -18,6 +18,8 @@
     "agency": "L'agence"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge des Palaces et hôtels 5★ en France",
+    "metaDesc": "Agence IATA dédiée aux Palaces et hôtels 5★ français. Chaque fiche se conclut par un Conseil du Concierge. Tarifs nets GDS, paiement Amadeus, fidélité dès la 1re nuit.",
     "title": "Votre concierge des Palaces et hôtels 5★ en France",
     "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
     "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
@@ -555,7 +557,8 @@
     },
     "breadcrumb": {
       "home": "Accueil",
-      "hotels": "Hôtels"
+      "hotels": "Hôtels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "Hôtels 5★ et Palaces à {city}",

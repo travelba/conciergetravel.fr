@@ -172,12 +172,17 @@ export default async function DestinationHubPage({
     }),
   );
 
+  // Breadcrumb : Home > Destinations > [City]. The previous variant
+  // pointed the parent to `/recherche` (search form) which is misleading
+  // for users *and* dilutes the `/destination` directory in JSON-LD
+  // (skill `seo-technical` §Anti-cannibalisation: every breadcrumb level
+  // must point to the canonical hub for that depth, not to a sibling).
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
       {
-        name: t('breadcrumb.hotels'),
-        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
+        name: t('breadcrumb.destinations'),
+        url: `${origin}${getPathname({ locale, href: '/destination' })}`,
       },
       { name: destination.name, url: pageUrl },
     ]),
@@ -207,7 +212,7 @@ export default async function DestinationHubPage({
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
 
-      <nav aria-label={t('breadcrumb.hotels')} className="text-muted mb-6 text-xs">
+      <nav aria-label={t('breadcrumb.destinations')} className="text-muted mb-6 text-xs">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
             <Link href="/" className="hover:underline">
@@ -216,8 +221,8 @@ export default async function DestinationHubPage({
           </li>
           <li aria-hidden>›</li>
           <li>
-            <Link href="/recherche" className="hover:underline">
-              {t('breadcrumb.hotels')}
+            <Link href="/destination" className="hover:underline">
+              {t('breadcrumb.destinations')}
             </Link>
           </li>
           <li aria-hidden>›</li>
