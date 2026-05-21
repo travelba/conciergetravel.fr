@@ -14,6 +14,8 @@ import {
   HOTEL_CATEGORY_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
+  intlNavSlugToIso,
+  navHotelTypeToAxisValue,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -203,16 +205,26 @@ function MegaLink({
   href,
   label,
   muted = false,
+  ariaLabel,
 }: {
   readonly href: React.ComponentProps<typeof Link>['href'];
   readonly label: string;
   readonly muted?: boolean;
+  /**
+   * Optional explicit `aria-label`. Used by international destination
+   * entries to surface the ISO code to screen readers while keeping
+   * the visible label localised — useful when several entries share
+   * the same destination page (`/hotels`) before per-country deep
+   * links land.
+   */
+  readonly ariaLabel?: string;
 }): ReactElement {
   return (
     <li role="none">
       <Link
         role="menuitem"
         href={href}
+        aria-label={ariaLabel}
         className={`hover:bg-muted/10 focus-visible:ring-ring block rounded-md px-2.5 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 ${
           muted ? 'text-muted hover:text-fg text-xs' : 'text-fg'
         }`}
@@ -330,16 +342,42 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.destinationsWorld')}>
           <>
-            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/destination/[citySlug]',
-                  params: { citySlug: entry.slug },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {/*
+              `/destination/[citySlug]` is FR-only (server filter
+              `country_code === 'FR'`). Routing the eight international
+              menu entries there produced silent 404s + `noindex` for
+              every link. Re-route to `/hotels`, the catalogue page
+              that already exposes a "Monde — par pays" section with
+              per-country sub-headings (id="country-<iso>").
+
+              We pre-compute the ISO code (`intlNavSlugToIso`) so a
+              future PR can deep-link via `#country-<iso>` once
+              next-intl's typed Link gains hash support (currently the
+              `Href` shape rejects strings with a fragment). Until
+              then, every intl entry lands on `/hotels` and the user
+              scrolls into the World section.
+
+              Dedicated `/destination-internationale/[countrySlug]`
+              pages are tracked in the v3 plan (Vague 3 — refonte
+              destination ADR-0015).
+            */}
+            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+              // Defensive: an unmapped slug still degrades to the
+              // catalogue root rather than 404-ing.
+              const iso = intlNavSlugToIso(entry.slug);
+              const ariaLabel =
+                iso !== null
+                  ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
+                  : pickEntryLabel(entry, locale);
+              return (
+                <MegaLink
+                  key={entry.slug}
+                  href="/hotels"
+                  label={pickEntryLabel(entry, locale)}
+                  ariaLabel={ariaLabel}
+                />
+              );
+            })}
           </>
         </MegaColumn>
       </div>
@@ -448,16 +486,24 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByType')}>
           <>
-            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/classements/[axe]/[valeur]',
-                  params: { axe: 'type', valeur: entry.slug.replace(/^hotels-/u, '') },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => {
+              // Map the user-friendly menu slug to the canonical axis
+              // value declared in `axes.ts`. Drop entries that can't
+              // map (defensive; the test in `nav-data.test.ts` makes
+              // this branch unreachable in CI).
+              const axisValue = navHotelTypeToAxisValue(entry.slug);
+              if (axisValue === null) return null;
+              return (
+                <MegaLink
+                  key={entry.slug}
+                  href={{
+                    pathname: '/classements/[axe]/[valeur]',
+                    params: { axe: 'type', valeur: axisValue },
+                  }}
+                  label={pickEntryLabel(entry, locale)}
+                />
+              );
+            })}
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByDestination')}>

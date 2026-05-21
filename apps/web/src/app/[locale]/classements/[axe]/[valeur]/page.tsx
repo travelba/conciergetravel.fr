@@ -22,8 +22,13 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
-const ALLOWED_AXES = new Set(['type', 'lieu', 'theme', 'occasion'] as const);
-type Axe = 'type' | 'lieu' | 'theme' | 'occasion';
+// `saison` was declared in `axes.ts` (Saison = ete/hiver/printemps/automne/
+// toute-annee) and surfaced by `SAISON_NAV_ENTRIES` + the `/inspiration`
+// hub, but was missing from `ALLOWED_AXES` here — every menu link
+// `/classements/saison/<value>` 404'd as a result. Adding `'saison'`
+// closes the loop with the menu and the matrice.
+const ALLOWED_AXES = new Set(['type', 'lieu', 'theme', 'occasion', 'saison'] as const);
+type Axe = 'type' | 'lieu' | 'theme' | 'occasion' | 'saison';
 
 function isAxe(s: string): s is Axe {
   return (ALLOWED_AXES as Set<string>).has(s);
@@ -61,6 +66,7 @@ const AXE_LABEL: Record<Axe, { fr: string; en: string }> = {
   lieu: { fr: 'par destination', en: 'by destination' },
   theme: { fr: 'par thématique', en: 'by theme' },
   occasion: { fr: 'par occasion', en: 'by occasion' },
+  saison: { fr: 'par saison', en: 'by season' },
 };
 
 function rankingMatches(
@@ -77,6 +83,11 @@ function rankingMatches(
       return rk.axes.themes.includes(value);
     case 'occasion':
       return rk.axes.occasions.includes(value);
+    case 'saison':
+      // `saison` is single-valued on the row (string?), unlike themes
+      // / occasions / types which are arrays. Mirror the column shape
+      // declared in `editorial_rankings.axes.saison` (migration 0029).
+      return rk.axes.saison === value;
     default:
       return false;
   }
@@ -106,6 +117,9 @@ export async function generateStaticParams(): Promise<
       for (const th of r.axes.themes) push('theme', th);
       for (const o of r.axes.occasions) push('occasion', o);
       if (r.axes.lieu !== undefined) push('lieu', r.axes.lieu.slug);
+      if (r.axes.saison !== undefined && r.axes.saison.length > 0) {
+        push('saison', r.axes.saison);
+      }
     }
     return out;
   } catch {
