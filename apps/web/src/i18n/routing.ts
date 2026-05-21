@@ -210,7 +210,15 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
-    '/itineraire': '/itineraire',
+    // Hub (pluriel) — pattern aligné sur /hotels, /classements, /guides,
+    // /marques. Le singulier `/itineraire` historique est 308-redirigé
+    // vers `/itineraires` côté `next.config.ts` (cf. plan de reprise
+    // §3.2.1). Slug FR identique en EN par convention éditoriale
+    // (ADR-0008 — pas de localisation des conteneurs éditoriaux).
+    '/itineraires': '/itineraires',
+    // Détail unitaire — toujours stub `notFound()` jusqu'au Sprint 2 UI.
+    // Conserver la déclaration permet à l'agent skill `get-itinerary`
+    // d'exposer un pattern d'URL stable, et au pathname d'être typé.
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
 });

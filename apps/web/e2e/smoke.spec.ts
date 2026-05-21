@@ -94,7 +94,7 @@ test.describe('smoke / public landing', () => {
 
   /**
    * ADR-0014 new landings (PR #71) — `/marques`, `/inspiration`,
-   * `/itineraire`, `/le-concierge`. Each is `force-dynamic` (CSP nonce
+   * `/itineraires`, `/le-concierge`. Each is `force-dynamic` (CSP nonce
    * for JSON-LD) and therefore invisible to `next build`. The hotfix
    * PR #72 showed the failure mode: a missing or nested i18n namespace
    * leaks the raw key shape (`<word>.<word>`) into `<title>` and
@@ -110,7 +110,7 @@ test.describe('smoke / public landing', () => {
     const landings: ReadonlyArray<{ readonly path: string; readonly h1Hint: RegExp }> = [
       { path: '/marques', h1Hint: /\w/ },
       { path: '/inspiration', h1Hint: /\w/ },
-      { path: '/itineraire', h1Hint: /\w/ },
+      { path: '/itineraires', h1Hint: /\w/ },
       { path: '/le-concierge', h1Hint: /\w/ },
     ];
 

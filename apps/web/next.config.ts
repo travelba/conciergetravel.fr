@@ -87,9 +87,12 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    // Anti-cannibalisation 301 redirects (cf. CDC arborescence + ADR seo).
-    // Final list managed via Payload `Redirects` collection in Phase 8.
+    // Permanent redirects (HTTP 308 — `permanent: true` in Next.js 15
+    // App Router preserves the request method, which 301 historically
+    // did not). Final list managed via Payload `Redirects` collection
+    // in Phase 8.
     return [
+      // Anti-cannibalisation (cf. CDC arborescence + ADR seo).
       {
         source: '/:locale(fr|en)/selection/lune-de-miel',
         destination: '/:locale/selection/romantiques-et-lune-de-miel',
@@ -103,6 +106,36 @@ const nextConfig: NextConfig = {
       {
         source: '/:locale(fr|en)/selection/plage-privee',
         destination: '/:locale/selection/bord-de-mer-et-plage',
+        permanent: true,
+      },
+      // ── /itineraire → /itineraires (plan de reprise §3.2.1) ──────────
+      // Le hub a été renommé du singulier au pluriel pour s'aligner sur
+      // `/hotels`, `/classements`, `/guides`, `/marques`. Fenêtre
+      // d'exposition du singulier < 1 jour (le pathname n'était
+      // exposé que via la nav du commit 827393d), donc l'impact SEO
+      // attendu est nul — la 308 est cependant impérative pour ne pas
+      // 404 sur les éventuels liens externes / bookmarks / GSC.
+      //
+      // Trois sources couvrent les trois formes possibles à cause de
+      // `localePrefix: 'as-needed'` sur next-intl :
+      //   - `/itineraire`     → FR canonical (pas de préfixe)
+      //   - `/fr/itineraire`  → préfixe FR explicite (redirigé par
+      //                          le middleware vers la forme sans
+      //                          préfixe — on collapse en un seul hop)
+      //   - `/en/itineraire`  → préfixe EN
+      {
+        source: '/itineraire',
+        destination: '/itineraires',
+        permanent: true,
+      },
+      {
+        source: '/fr/itineraire',
+        destination: '/itineraires',
+        permanent: true,
+      },
+      {
+        source: '/en/itineraire',
+        destination: '/en/itineraires',
         permanent: true,
       },
     ];

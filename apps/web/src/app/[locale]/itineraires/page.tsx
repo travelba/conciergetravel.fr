@@ -12,24 +12,35 @@ import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 
 /**
- * `/itineraire` — hub of bespoke editorial itineraries.
+ * `/itineraires` — hub of bespoke editorial itineraries.
  *
- * Status: route is **anticipated** by the
- * `itinerary-editorial-pipeline` skill but the `itineraries` table is
- * not yet provisioned. This page renders a polished "coming soon"
- * surface that:
- * - Is indexable (`200` response, `CollectionPage` JSON-LD).
- * - Carries hreflang alternates (FR / EN) so the route stays
- *   addressable from the LLM agent surface (`get-itinerary` skill).
- * - Provides graceful fallbacks to the live equivalents
- *   (`/inspiration`, `/classements`, `/destination`) so users
- *   arriving from external links land on something useful.
+ * URL convention: hub *pluriel*, aligné sur `/hotels`, `/classements`,
+ * `/guides`, `/marques` (plan de reprise §1.1 + §3.2.1). Le singulier
+ * historique `/itineraire` est 308-redirigé vers ce hub via
+ * `next.config.ts` pour préserver l'éventuel SEO (fenêtre d'exposition
+ * < 1 jour, donc risque nul, mais propreté SEO impérative).
  *
- * Once the `itineraries` table ships, this page evolves into a true
- * listing (the pipeline's `list-itineraries` skill exposes the
- * upstream data).
+ * i18n namespace: `itineraires` au niveau JSON root (et non
+ * `header.itineraire`, qui produisait silencieusement des clés brutes
+ * en titre + meta — pattern hotfix #72, capitalisé dans la skill
+ * `nextjs-app-router` §"Namespace nesting fails silently").
+ *
+ * Status: route **anticipée** par la skill `itinerary-editorial-pipeline`.
+ * La table `public.itineraries` existe désormais (migration 0045 + 0046)
+ * et les server queries sont en place (`apps/web/src/server/itineraries/`)
+ * mais le rendu listing reste à câbler dans Sprint 2 PR 2. Cette page
+ * rend pour l'instant une surface "coming soon" qui :
+ * - Est indexable (`200` + `CollectionPage` JSON-LD).
+ * - Porte les alternates hreflang FR/EN pour rester adressable depuis
+ *   les agent skills `get-itinerary` / `list-itineraries`.
+ * - Fournit des fallbacks vers les surfaces vivantes
+ *   (`/inspiration`, `/classements`, `/destination`).
+ *
+ * Une fois Sprint 2 mergé, ce composant bascule en vrai listing
+ * (`listPublishedItineraries({ limit: 100 })`).
  *
  * @see .cursor/skills/itinerary-editorial-pipeline/SKILL.md
+ * @see docs/plan-itineraires-reprise.md §1.1, §3.2.1
  * @see docs/adr/0014-menu-architecture-v2.md
  */
 export const dynamic = 'force-dynamic';
@@ -48,8 +59,9 @@ export async function generateMetadata({
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) return {};
   const locale = raw;
-  const t = await getTranslations({ locale, namespace: 'itineraire' });
-  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/itineraire' });
+  const t = await getTranslations({ locale, namespace: 'itineraires' });
+  const buildCanonicalPath = (l: Locale): string =>
+    getPathname({ locale: l, href: '/itineraires' });
 
   return {
     title: t('metaTitle'),
@@ -71,7 +83,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ItineraireHubPage({
+export default async function ItinerairesHubPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -80,11 +92,11 @@ export default async function ItineraireHubPage({
   if (!isRoutingLocale(raw)) notFound();
   const locale = raw;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'itineraire' });
+  const t = await getTranslations({ locale, namespace: 'itineraires' });
 
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
-  const url = `${origin}${getPathname({ locale, href: '/itineraire' })}`;
+  const url = `${origin}${getPathname({ locale, href: '/itineraires' })}`;
 
   const collectionPageJsonLd = JsonLd.withSchemaOrgContext({
     '@type': 'CollectionPage',

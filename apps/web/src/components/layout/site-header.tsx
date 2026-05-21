@@ -509,7 +509,7 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         <MegaColumn heading={t('primaryNav.conciergeContent')}>
           <>
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeTip')} />
-            <MegaLink href="/itineraire" label={t('primaryNav.conciergeItineraries')} />
+            <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeJournal')} />
           </>
