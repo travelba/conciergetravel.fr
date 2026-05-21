@@ -258,6 +258,27 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       },
     },
     {
+      name: 'get-country-guide',
+      description:
+        'Récupérer le guide pays MyConciergeHotel pour une destination internationale (Italie, Suisse, Maroc, Maldives, Émirats arabes unis, Japon, Thaïlande, États-Unis). Renvoie : factual summary, AEO Q&A, 5-6 régions avec adresses nommées + Conseil du Concierge opérationnel par région, infos pratiques (visa, monnaie, langues), 7 Q&A canoniques. URL canonique HTML : /fr/guide/{slug} ou /en/guide/{slug-en}.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description:
+              "Slug du pays en français — l'un de : italie, suisse, maroc, maldives, emirats-arabes-unis, japon, thailande, etats-unis.",
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale de la réponse — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['slug'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/country-guide/{slug}' },
+    },
+    {
       name: 'get-concierge-tip',
       description:
         'Récupérer le « Conseil du Concierge » d’un hôtel : 50-110 mots livrant un secret opérationnel concret (numéro de chambre signature, table cachée, accès, timing optimal). C’est la signature éditoriale propriétaire de MyConciergeHotel, non disponible sur les agrégateurs. URL : `/fr/hotel/{slug}#conseil-concierge`.',

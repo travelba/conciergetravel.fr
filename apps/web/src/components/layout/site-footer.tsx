@@ -252,17 +252,20 @@ export async function SiteFooter(): Promise<ReactElement> {
                 </Link>
               </li>
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link href="/le-concierge/pour-les-hoteliers" className="text-fg hover:underline">
                   {t('links.hoteliers')}
                 </Link>
               </li>
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link href="/le-concierge/mice-et-seminaires" className="text-fg hover:underline">
                   {t('links.mice')}
                 </Link>
               </li>
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link
+                  href="/le-concierge/presse-et-partenaires"
+                  className="text-fg hover:underline"
+                >
                   {t('links.press')}
                 </Link>
               </li>
