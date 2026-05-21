@@ -278,6 +278,330 @@
       ]
     }
   },
+  "conciergeLoyalty": {
+    "metaTitle": "Programme de fidélité MyConciergeHotel — Avantages dès la 1re nuit",
+    "metaDesc": "Notre programme de fidélité : tier Essentiel automatique (Little Hotelier — petit-déj offert, late check-out, crédit hôtel) et tier Prestige (abonnement — surclassement, transfert aéroport). Conditions complètes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Programme de fidélité",
+    "title": "Le programme de fidélité MyConciergeHotel",
+    "lede": "Dès votre première nuit, MyConciergeHotel vous offre des avantages cumulables avec les programmes de chaîne. Deux tiers : Essentiel (gratuit, automatique sur le catalogue Little Hotelier) et Prestige (abonnement, avantages renforcés sur l'ensemble du catalogue Palaces et 5★).",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Quels avantages offre le programme de fidélité MyConciergeHotel ?",
+    "aeoAnswer": "Deux tiers : Essentiel (gratuit, automatique dès la 1re nuit sur les hôtels du catalogue Little Hotelier) — petit-déjeuner offert pour 2, late check-out 14h, crédit hôtel selon partenaire. Prestige (sur abonnement) — surclassement chambre quand disponible, transfert aéroport, petit-déjeuner garanti, late check-out 16h confirmé. Les avantages se cumulent avec les programmes des chaînes (Four Seasons Preferred, Marriott Bonvoy…). Mise à jour {date}.",
+    "tiers": {
+      "title": "Deux tiers, deux promesses",
+      "essentiel": {
+        "name": "Essentiel",
+        "tagline": "Automatique, gratuit",
+        "lede": "Dès votre première réservation sur un hôtel du catalogue Little Hotelier — pas de carte, pas de minimum, pas de seuil de nuitées.",
+        "benefits": [
+          {
+            "title": "Petit-déjeuner offert pour 2",
+            "body": "Selon disponibilité et politique de l'hôtel partenaire. Confirmé à la réservation par votre concierge si l'hôtel le propose en avantage fidélité."
+          },
+          {
+            "title": "Late check-out à 14h",
+            "body": "Selon disponibilité (occupation de la chambre suivante). Demandé à la réservation puis confirmé la veille du départ par l'hôtel."
+          },
+          {
+            "title": "Crédit hôtel",
+            "body": "Montant variable selon hôtel partenaire (15-30 €/séjour en standard). Utilisable au bar, restaurant ou spa. Non remboursable, non transférable."
+          }
+        ]
+      },
+      "prestige": {
+        "name": "Prestige",
+        "tagline": "Sur abonnement",
+        "lede": "Avantages renforcés sur l'ensemble du catalogue (pas seulement Little Hotelier). Tarif et conditions d'abonnement à publier à l'ouverture du programme.",
+        "benefits": [
+          {
+            "title": "Surclassement chambre",
+            "body": "Quand disponible à l'arrivée. Confirmé sur place selon occupation. Ne se demande pas — l'hôtel applique automatiquement pour les membres Prestige."
+          },
+          {
+            "title": "Transfert aéroport",
+            "body": "Aller ou retour depuis l'aéroport le plus proche, dans la limite de 50 km. Au-delà, supplément kilométrique au prix d'achat."
+          },
+          {
+            "title": "Petit-déjeuner offert pour 2 (garanti)",
+            "body": "Indépendant de la politique de l'hôtel — le supplément est pris en charge par votre concierge si l'hôtel ne le propose pas en avantage natif."
+          },
+          {
+            "title": "Late check-out à 16h (confirmé)",
+            "body": "Confirmé à la réservation. Si l'hôtel ne peut tenir l'engagement, votre concierge négocie une compensation (nuit supplémentaire à tarif préférentiel, surclassement)."
+          }
+        ]
+      }
+    },
+    "compatibility": {
+      "title": "Cumul avec les programmes des chaînes",
+      "lede": "Notre programme s'ajoute à celui de l'hôtel — il ne le remplace jamais. Vous gagnez vos points chaîne ET nos avantages.",
+      "items": [
+        "Joignez votre numéro de fidélité chaîne (Four Seasons Preferred, Marriott Bonvoy pour Ritz-Carlton, Accor ALL pour Sofitel/Raffles, IHG One Rewards) au moment du checkout.",
+        "Les points chaîne sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne, c'est un standard de toutes les agences IATA.",
+        "Nos avantages MyConciergeHotel sont indépendants — petit-déjeuner, late check-out, crédit hôtel sont confirmés en plus des bénéfices fidélité de la chaîne.",
+        "Pour les chaînes très sélectives sur l'attribution de points en agence (Hyatt World of Hyatt notamment), notre conciergerie privilégie la transparence : nous indiquons à la réservation si les points sont ou non attribués."
+      ]
+    },
+    "eligibility": {
+      "title": "Qui est éligible ?",
+      "essentiel": "Toute personne ayant créé un compte client MyConciergeHotel et réservant un hôtel du catalogue Little Hotelier. Aucun seuil d'âge, pas de zone géographique, gratuit à vie.",
+      "prestige": "Sur abonnement annuel. Conditions d'inscription, tarif et avantages détaillés à publier au lancement du programme. Le tier Essentiel reste actif si vous arrêtez Prestige."
+    },
+    "faqTitle": "Fidélité — questions fréquentes",
+    "faq": [
+      {
+        "q": "Comment activer mon tier Essentiel ?",
+        "a": "Aucune activation manuelle nécessaire — créez votre compte sur /compte/inscription et le tier Essentiel est automatique. À votre première réservation sur un hôtel Little Hotelier, les avantages sont confirmés par e-mail par votre concierge."
+      },
+      {
+        "q": "Quels hôtels font partie du catalogue Little Hotelier ?",
+        "a": "Une centaine d'établissements 5★ et Palace en France et à l'international, connectés à notre canal Little Hotelier. Chaque fiche hôtel affiche un badge \"Tier Essentiel\" si l'établissement est éligible. La liste évolue trimestriellement — voir l'index des marques sur /marques pour le détail."
+      },
+      {
+        "q": "Quand le tier Prestige sera-t-il disponible ?",
+        "a": "Le tier Prestige est en phase de préparation (ADR-0005). Les conditions exactes — tarif annuel, mode d'inscription, périmètre des avantages — seront publiées au lancement. Inscrivez-vous à notre newsletter sur /le-concierge pour être notifié en priorité."
+      },
+      {
+        "q": "Les avantages sont-ils garantis ou \"selon disponibilité\" ?",
+        "a": "Tier Essentiel : petit-déjeuner et late check-out sont soumis à la politique de l'hôtel partenaire et à la disponibilité (chambre suivante occupée). Tier Prestige : petit-déjeuner et late check-out 16h sont garantis contractuellement — si l'hôtel ne peut tenir, votre concierge négocie une compensation."
+      },
+      {
+        "q": "Puis-je cumuler avec mes points Marriott Bonvoy ou Four Seasons Preferred ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne à la réservation. Les points sont crédités par l'hôtel après le séjour. Nos avantages MyConciergeHotel (petit-déjeuner, late check-out, crédit) sont indépendants et s'ajoutent."
+      },
+      {
+        "q": "Que se passe-t-il si je modifie ou annule ma réservation ?",
+        "a": "L'éligibilité aux avantages suit la réservation. Si vous annulez gratuitement (tarif flexible avant la limite d'annulation), les avantages ne s'appliquent évidemment pas. Si vous modifiez les dates (nouvelle nuitée), les avantages se reportent. En cas d'annulation tardive avec frais, les avantages ne sont pas remboursés."
+      },
+      {
+        "q": "Mon crédit hôtel inutilisé est-il remboursé ?",
+        "a": "Non — le crédit hôtel (tier Essentiel) est utilisable sur place pendant votre séjour, au bar, restaurant ou spa. Non utilisé, il n'est ni reporté sur un séjour suivant ni remboursé. La direction de l'hôtel et notre conciergerie travaillent à le porter à votre connaissance dès l'arrivée."
+      }
+    ],
+    "cta": {
+      "title": "Profitez des avantages dès votre prochaine réservation",
+      "createAccount": "Créer mon compte gratuitement",
+      "browseCatalog": "Voir le catalogue Little Hotelier",
+      "newsletter": "Être notifié du lancement Prestige"
+    }
+  },
+  "conciergeFaq": {
+    "metaTitle": "FAQ — Toutes vos questions sur MyConciergeHotel | Réservation, fidélité, garanties",
+    "metaDesc": "Foire aux questions complète : agence IATA, réservation Amadeus, tarifs nets GDS, programme de fidélité, paiement sécurisé, modifications, annulation, contact. Réponses claires sur les 35 questions les plus fréquentes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "FAQ générale",
+    "title": "Foire aux questions",
+    "lede": "Les 35 questions les plus fréquemment posées à notre conciergerie, regroupées en 6 thèmes : à propos de l'agence, réservation, tarifs et paiement, fidélité, modifications et annulation, vie de votre compte client. Cliquez pour déplier la réponse.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Où trouver la réponse à votre question chez MyConciergeHotel ?",
+    "aeoAnswer": "Cette page rassemble 35 réponses aux questions les plus fréquemment posées à notre conciergerie, sur 6 thèmes : qui nous sommes (agence IATA / APST), comment réserver (Amadeus, conciergerie), nos tarifs (nets GDS, comparateur), notre programme de fidélité (Essentiel / Prestige), modifier ou annuler, et la vie de votre compte. Si votre question n'y figure pas, écrivez-nous via /le-concierge/contact — réponse sous 24h ouvrées. Mise à jour {date}.",
+    "themes": {
+      "agency": {
+        "title": "À propos de l'agence",
+        "lede": "Qui sommes-nous, sur quels critères sélectionnons-nous, comment fonctionne la conciergerie."
+      },
+      "booking": {
+        "title": "Réserver",
+        "lede": "Comment trouver un hôtel, choisir un tarif, confirmer une réservation."
+      },
+      "pricing": {
+        "title": "Tarifs et paiement",
+        "lede": "Tarifs nets GDS, méthodes de paiement, comparateur, paiement échelonné."
+      },
+      "loyalty": {
+        "title": "Programme de fidélité",
+        "lede": "Tier Essentiel, tier Prestige, cumul avec les programmes de chaîne."
+      },
+      "modify": {
+        "title": "Modifier, annuler, rembourser",
+        "lede": "Politique d'annulation, modification de dates, remboursement, recours."
+      },
+      "account": {
+        "title": "Mon compte client",
+        "lede": "Création, gestion, RGPD, favoris, historique de réservations."
+      }
+    },
+    "items": [
+      {
+        "theme": "agency",
+        "q": "MyConciergeHotel est-il une agence de voyage ou une plateforme en ligne ?",
+        "a": "Une agence de voyage. MyConciergeHotel SAS est immatriculée IATA, membre APST avec garantie financière professionnelle, et soumise au Code du tourisme français. Notre activité est encadrée — contrairement à une plateforme qui ne fait qu'intermédiation. Vos paiements sont protégés en cas de défaillance par la garantie APST."
+      },
+      {
+        "theme": "agency",
+        "q": "Qu'est-ce que l'accréditation IATA et la garantie APST ?",
+        "a": "IATA est l'association mondiale des compagnies aériennes — l'accréditation IATA permet à une agence d'émettre des billets et de réserver via les GDS (Amadeus, Sabre, Travelport) aux tarifs nets négociés. APST est l'Association Professionnelle de Solidarité du Tourisme, qui garantit financièrement les paiements clients en cas de défaillance de l'agence."
+      },
+      {
+        "theme": "agency",
+        "q": "Sur quels critères sélectionnez-vous les hôtels ?",
+        "a": "Sélection éditoriale indépendante sur 8 critères croisés : Atout France (Palace, 5★), Michelin Keys, étoiles Michelin de la table, Forbes Travel Guide, appartenance à une collection d'auteur (Relais & Châteaux, LHW), avis Amadeus vérifiés, audit interne MyConciergeHotel, et signature éditoriale. Voir /le-concierge/methode-editoriale pour le détail."
+      },
+      {
+        "theme": "agency",
+        "q": "Les hôtels paient-ils pour figurer dans votre catalogue ?",
+        "a": "Non, jamais. Notre revenu vient des commissions sur réservations (standard IATA), identiques d'un hôtel à l'autre. Refuser le pay-to-play est notre engagement le plus fort."
+      },
+      {
+        "theme": "agency",
+        "q": "Qu'est-ce que le Conseil du Concierge ?",
+        "a": "Une signature éditoriale propriétaire : chaque fiche hôtel se conclut par 60-110 mots livrant un secret opérationnel concret (numéro de chambre signature, table cachée, accès, timing optimal). Une information qu'aucun guide généraliste ni agrégateur ne publie. Notre USP."
+      },
+      {
+        "theme": "agency",
+        "q": "Couvrez-vous des destinations hors France ?",
+        "a": "Oui — 8 pays sont publiés avec guide éditorial (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis). Notre réseau Amadeus couvre 950 000 hôtels dans le monde — au-delà du catalogue éditorial, tout hôtel listé peut être réservé sur demande conciergerie."
+      },
+      {
+        "theme": "booking",
+        "q": "Comment réserver un hôtel via MyConciergeHotel ?",
+        "a": "Voir le guide complet sur /le-concierge/reserver. En résumé : cherchez l'hôtel → choisissez vos dates → sélectionnez un tarif → payez par carte sécurisée → confirmation instantanée (mode Amadeus) ou sous 24h (mode conciergerie pour hôtels hors GDS)."
+      },
+      {
+        "theme": "booking",
+        "q": "Combien de temps pour confirmer ma réservation ?",
+        "a": "Mode Amadeus : instantanée (PNR + voucher e-mail dans les secondes). Mode conciergerie : sous 24h ouvrées, généralement 4-6h aux heures de bureau."
+      },
+      {
+        "theme": "booking",
+        "q": "Puis-je réserver pour quelqu'un d'autre ?",
+        "a": "Oui — au moment du checkout, vous indiquez le nom du voyageur réel (différent du payeur). L'hôtel reçoit le nom du voyageur pour le check-in. Le payeur reçoit la facture et la confirmation."
+      },
+      {
+        "theme": "booking",
+        "q": "Quels documents pour le check-in à l'hôtel ?",
+        "a": "Pièce d'identité valide (carte d'identité, passeport) au nom du voyageur. La carte ayant servi au paiement n'est pas systématiquement demandée mais peut l'être par certains hôtels — votre confirmation l'indique."
+      },
+      {
+        "theme": "booking",
+        "q": "Mes enfants doivent-ils être déclarés à la réservation ?",
+        "a": "Oui — saisissez le nombre d'adultes ET d'enfants au moment du checkout. Les politiques varient selon les hôtels (lit d'appoint, chambre familiale, supplément âge). Une chambre déclarée 2 adultes ne peut accueillir un enfant non déclaré sans accord de l'hôtel."
+      },
+      {
+        "theme": "pricing",
+        "q": "Vos tarifs sont-ils plus chers que sur le site de l'hôtel ?",
+        "a": "Non. Nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Aucune commission ajoutée. Notre comparateur non affilié affiche en transparence les tarifs Booking, Hotels.com, Expedia — vous voyez le delta directement."
+      },
+      {
+        "theme": "pricing",
+        "q": "Quels modes de paiement acceptez-vous ?",
+        "a": "Carte bancaire (Visa, Mastercard, American Express) via iframe sécurisée Amadeus Payments — PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Pour les paiements > 5 000 €, virement bancaire sur demande conciergerie. Pas de paiement par chèque ou espèces."
+      },
+      {
+        "theme": "pricing",
+        "q": "Le paiement échelonné est-il possible ?",
+        "a": "Sur demande pour les séjours > 5 000 € : acompte 30% à la réservation, solde 30 jours avant l'arrivée. Pour des montants inférieurs, le paiement en 3 ou 4 fois sans frais via Apple Pay / Google Pay est disponible chez certains hôteliers — l'option apparaît au checkout si éligible."
+      },
+      {
+        "theme": "pricing",
+        "q": "À quoi sert votre comparateur de prix ?",
+        "a": "À vous garantir la transparence. Sur chaque fiche hôtel, nous affichons les tarifs publics (TTC EUR) de Booking, Hotels.com, Expedia pour les dates que vous avez sélectionnées — texte sobre, sans lien d'affiliation, sans logo. Vous voyez immédiatement le delta avec notre tarif net GDS."
+      },
+      {
+        "theme": "pricing",
+        "q": "La taxe de séjour est-elle incluse dans le tarif ?",
+        "a": "Non. La taxe de séjour est due à l'hôtel à votre arrivée, conformément au Code général des impôts français (varie 0,20-5 € par personne par nuit selon la ville et la catégorie). Le tarif affiché sur notre site est TTC mais hors taxe de séjour — l'hôtel l'ajoute à la facture finale."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Comment fonctionne le programme de fidélité ?",
+        "a": "Voir /le-concierge/fidelite pour le détail complet. En résumé : tier Essentiel (gratuit, automatique sur Little Hotelier — petit-déjeuner, late check-out, crédit) et tier Prestige (sur abonnement — surclassement, transfert aéroport, late check-out 16h confirmé). Cumulable avec les programmes des chaînes."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Mes points Marriott Bonvoy ou Four Seasons Preferred sont-ils crédités ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne au checkout. Les points sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne (standard agences)."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Le tier Essentiel a-t-il un coût ?",
+        "a": "Non, gratuit à vie. Aucun seuil de nuitées, pas de carte d'adhésion. Activé automatiquement à la création de votre compte client + première réservation sur un hôtel Little Hotelier."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Quand le tier Prestige sera-t-il lancé ?",
+        "a": "En préparation (ADR-0005). Tarif annuel, mode d'inscription et périmètre exacts à publier au lancement. Inscrivez-vous à la newsletter sur /le-concierge pour être notifié."
+      },
+      {
+        "theme": "modify",
+        "q": "Comment annuler ma réservation ?",
+        "a": "Selon la politique d'annulation du tarif choisi (explicite à la réservation et dans votre confirmation). Tarifs flexibles : annulation gratuite jusqu'à 24-48h avant l'arrivée. Tarifs early-bird : non-remboursables. Annulation gérée depuis votre compte MyConciergeHotel ou par votre concierge dédié."
+      },
+      {
+        "theme": "modify",
+        "q": "Puis-je modifier les dates de mon séjour ?",
+        "a": "Selon les conditions du tarif. Si flexible, modification gratuite (sous réserve de disponibilité au nouveau tarif). Si non-remboursable, modification gratuite parfois possible avec changement de dates équivalentes — sinon annulation + nouvelle réservation."
+      },
+      {
+        "theme": "modify",
+        "q": "Que faire en cas de problème pendant mon séjour ?",
+        "a": "Le numéro d'urgence 24/7 vous est communiqué dans votre confirmation. Pour les problèmes critiques (sécurité, surbooking, panne majeure), un conseiller en astreinte vous répond. Pour les sujets non urgents (préférence chambre, demande supplémentaire), écrivez à votre concierge dédié à l'e-mail indiqué dans votre confirmation."
+      },
+      {
+        "theme": "modify",
+        "q": "Comment obtenir un remboursement en cas de problème majeur à l'hôtel ?",
+        "a": "Documentez les faits (photos, e-mail à la direction de l'hôtel pendant le séjour) et écrivez à votre concierge sous 30 jours après le départ. Notre conciergerie négocie avec l'hôtel un geste commercial (remboursement partiel, séjour-cadeau). En cas d'échec, recours à la médiation du tourisme et de voyage (MTV) — gratuite."
+      },
+      {
+        "theme": "modify",
+        "q": "Le check-in anticipé ou late check-out sont-ils possibles ?",
+        "a": "Sur demande au moment de la réservation ou auprès de votre concierge dédié. Le late check-out à 14h est offert tier Essentiel (selon disponibilité), 16h confirmé tier Prestige. Le check-in anticipé reste soumis à la disponibilité de la chambre."
+      },
+      {
+        "theme": "modify",
+        "q": "Et si l'hôtel ne respecte pas un avantage fidélité ?",
+        "a": "Documentez (photo facture si supplément petit-déjeuner facturé alors qu'offert) et signalez-le à votre concierge sous 7 jours après le départ. Notre conciergerie obtient le remboursement direct auprès de l'hôtel ou applique un crédit MyConciergeHotel utilisable sur votre prochain séjour."
+      },
+      {
+        "theme": "account",
+        "q": "Comment créer un compte client ?",
+        "a": "Sur /compte/inscription — e-mail + mot de passe, validation par lien e-mail. Le compte est gratuit, sans engagement. Il vous permet d'activer le tier Essentiel, sauvegarder vos favoris, retrouver l'historique de vos réservations, et exercer vos droits RGPD."
+      },
+      {
+        "theme": "account",
+        "q": "Comment gérer mes favoris ?",
+        "a": "Depuis chaque fiche hôtel, cliquez sur l'icône cœur pour ajouter à vos favoris. Retrouvez la liste sur /compte/favoris. Synchronisé entre devices via votre compte connecté."
+      },
+      {
+        "theme": "account",
+        "q": "Comment exercer mes droits RGPD ?",
+        "a": "Écrivez à dpo@myconciergehotel.com en précisant votre demande (accès, rectification, suppression, portabilité, opposition). Réponse sous 30 jours conformément au RGPD. La suppression complète du compte est aussi disponible depuis /compte (section « Confidentialité »)."
+      },
+      {
+        "theme": "account",
+        "q": "J'ai oublié mon mot de passe — comment le récupérer ?",
+        "a": "Sur /compte/mot-de-passe-oublie — saisissez votre e-mail, recevez un lien sécurisé valable 24h. Cliquez sur le lien et définissez un nouveau mot de passe. Si vous ne recevez pas l'e-mail, vérifiez les spams ou contactez la conciergerie."
+      },
+      {
+        "theme": "account",
+        "q": "Puis-je supprimer mon compte sans perdre l'historique de mes réservations ?",
+        "a": "À la suppression du compte, vos données personnelles sont effacées sous 30 jours. Les preuves comptables (factures de réservation) restent archivées 10 ans conformément aux obligations légales — mais elles ne sont plus liées à votre identité (anonymisées)."
+      },
+      {
+        "theme": "account",
+        "q": "Mon compte est-il sécurisé ?",
+        "a": "Mots de passe hashés (Argon2id), 2FA via TOTP recommandée à l'activation, cookies HttpOnly + SameSite=Strict, CSRF token sur chaque action. Audit OWASP annuel. En cas d'incident, notification sous 72h conformément au RGPD."
+      },
+      {
+        "theme": "account",
+        "q": "Comment recevoir vos communications par e-mail ?",
+        "a": "Cochez les préférences sur /compte (section « Notifications ») : newsletter mensuelle, alerte ouverture, lancement Prestige, événements partenaires. Désinscription en un clic depuis chaque e-mail. Aucune cession de votre adresse à un tiers."
+      },
+      {
+        "theme": "account",
+        "q": "Comment contacter votre service client ?",
+        "a": "Trois canaux : téléphone +33 1 84 60 95 50 (lundi-samedi 9h-19h), e-mail contact@myconciergehotel.com (sous 24h ouvrées), formulaire sur /le-concierge/contact. Pour une urgence pendant le séjour, voir le numéro d'astreinte dans votre confirmation."
+      },
+      {
+        "theme": "account",
+        "q": "Ma question ne figure pas dans cette FAQ — que faire ?",
+        "a": "Contactez-nous sur /le-concierge/contact ou par e-mail à contact@myconciergehotel.com. Notre conciergerie vous répond sous 24h ouvrées. Si votre question est récurrente, nous l'ajouterons à cette FAQ — qui est mise à jour mensuellement."
+      }
+    ]
+  },
   "consent": {
     "title": "Vos préférences cookies",
     "intro": "Nous utilisons des cookies pour faire fonctionner ce site (authentification, panier, sécurité). Avec votre accord, nous mesurons aussi son audience de manière anonymisée pour l'améliorer. Vous pouvez accepter, refuser ou personnaliser à tout moment.",
