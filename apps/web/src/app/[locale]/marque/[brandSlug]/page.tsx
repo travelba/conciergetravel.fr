@@ -91,6 +91,10 @@ export async function generateMetadata({
       type: 'website',
       locale: ogLocale(locale),
     },
+    // Brand exists but no published hotel yet → keep the URL resolvable
+    // but mark `noindex, follow` to avoid soft-404s while Google still
+    // discovers categorical links. Skill `seo-technical` §Indexability.
+    ...(count === 0 ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -109,7 +113,10 @@ export default async function BrandPage({
 
   const allHotels = await listPublishedHotelsForIndex();
   const hotels = allHotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug);
-  if (hotels.length === 0) notFound();
+  // Empty state: render `noindex` (set in `generateMetadata`) instead of
+  // `notFound()`. Keeps the URL discoverable for the menu while the
+  // catalogue grows, and avoids soft-404 pollution in Search Console.
+  const isEmpty = hotels.length === 0;
 
   const t = T[locale];
   const origin = siteOrigin();
@@ -131,24 +138,28 @@ export default async function BrandPage({
   );
 
   // ── ItemList JSON-LD (the brand's catalog) ───────────────────────────
-  const itemListJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.itemListJsonLd({
-      name: `${brand.label} ${t.titleSuffix}`,
-      items: hotels.map((h) => ({
-        name: h.nameFr,
-        url: `${origin}${getPathname({
-          locale,
-          href: { pathname: '/hotel/[slug]', params: { slug: h.slugFr } },
-        })}`,
-        hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
-      })),
-    }),
-  );
+  // Skip the ItemList when empty: a zero-item Schema.ItemList dilutes
+  // the structured-data signal and can trigger Rich Results warnings.
+  const itemListJsonLd = isEmpty
+    ? null
+    : JsonLd.withSchemaOrgContext(
+        JsonLd.itemListJsonLd({
+          name: `${brand.label} ${t.titleSuffix}`,
+          items: hotels.map((h) => ({
+            name: h.nameFr,
+            url: `${origin}${getPathname({
+              locale,
+              href: { pathname: '/hotel/[slug]', params: { slug: h.slugFr } },
+            })}`,
+            hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
+          })),
+        }),
+      );
 
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10 sm:py-14">
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
-      <JsonLdScript data={itemListJsonLd} nonce={nonce} />
+      {itemListJsonLd !== null ? <JsonLdScript data={itemListJsonLd} nonce={nonce} /> : null}
 
       {/* Breadcrumb visible — additional internal-link signal */}
       <nav aria-label="breadcrumb" className="text-muted mb-6 text-xs">
@@ -177,46 +188,84 @@ export default async function BrandPage({
           {brand.label} {t.titleSuffix}
         </h1>
         <p className="text-muted mt-3 text-sm md:text-base">
-          {t.subtitle(brand.label, hotels.length)}
+          {isEmpty
+            ? pickByLocale(
+                locale,
+                `Aucune adresse ${brand.label} encore publiée dans notre catalogue. Le catalogue s'enrichit régulièrement — explorez nos autres marques ou nos sélections éditoriales en attendant.`,
+                `No ${brand.label} address published yet in our catalog. The catalog is growing — browse our other brands or editorial selections in the meantime.`,
+              )
+            : t.subtitle(brand.label, hotels.length)}
         </p>
       </header>
 
-      <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {hotels.map((h) => {
-          // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
-          // V2 locales fall back to FR until migration 0034.
-          const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
-          const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
-          const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
-          const desc =
-            descSource !== null && descSource.length > 200
-              ? `${descSource.slice(0, 197).trimEnd()}…`
-              : descSource;
-          return (
-            <li key={h.slugFr}>
-              <Link
-                href={{ pathname: '/hotel/[slug]', params: { slug } }}
-                prefetch={false}
-                className="border-border bg-bg group block h-full rounded-lg border p-5 transition hover:border-amber-400 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-              >
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
-                    {h.isPalace ? t.palace : `${h.stars}${t.stars}`}
+      {isEmpty ? (
+        <section
+          aria-labelledby="empty-state-title"
+          className="border-border bg-muted/5 rounded-lg border p-6 md:p-8"
+        >
+          <h2 id="empty-state-title" className="text-fg font-serif text-xl">
+            {pickByLocale(locale, 'Sélection en préparation', 'Selection in progress')}
+          </h2>
+          <p className="text-muted mt-3 max-w-prose text-sm md:text-base">
+            {pickByLocale(
+              locale,
+              `Notre conciergerie sélectionne actuellement les adresses ${brand.label}. En attendant la publication, consultez notre index des groupes hôteliers ou notre catalogue complet.`,
+              `Our concierge desk is selecting ${brand.label} addresses. While we publish them, browse our hotel-group index or our full catalog.`,
+            )}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/marques"
+              className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+            >
+              {pickByLocale(locale, 'Toutes les marques', 'All brands')} →
+            </Link>
+            <Link
+              href="/hotels"
+              className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {pickByLocale(locale, 'Tous les hôtels', 'All hotels')} →
+            </Link>
+          </div>
+        </section>
+      ) : (
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {hotels.map((h) => {
+            // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
+            // V2 locales fall back to FR until migration 0034.
+            const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
+            const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
+            const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
+            const desc =
+              descSource !== null && descSource.length > 200
+                ? `${descSource.slice(0, 197).trimEnd()}…`
+                : descSource;
+            return (
+              <li key={h.slugFr}>
+                <Link
+                  href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                  prefetch={false}
+                  className="border-border bg-bg group block h-full rounded-lg border p-5 transition hover:border-amber-400 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
+                      {h.isPalace ? t.palace : `${h.stars}${t.stars}`}
+                    </span>
+                    <span className="text-muted text-xs">{h.city}</span>
+                  </div>
+                  <h2 className="text-fg mb-2 font-serif text-lg group-hover:text-amber-700 md:text-xl">
+                    {name}
+                  </h2>
+                  {desc !== null ? <p className="text-muted line-clamp-4 text-sm">{desc}</p> : null}
+                  <span className="mt-3 inline-block text-xs font-medium text-amber-700 underline-offset-2 group-hover:underline">
+                    {t.seeFiche} →
                   </span>
-                  <span className="text-muted text-xs">{h.city}</span>
-                </div>
-                <h2 className="text-fg mb-2 font-serif text-lg group-hover:text-amber-700 md:text-xl">
-                  {name}
-                </h2>
-                {desc !== null ? <p className="text-muted line-clamp-4 text-sm">{desc}</p> : null}
-                <span className="mt-3 inline-block text-xs font-medium text-amber-700 underline-offset-2 group-hover:underline">
-                  {t.seeFiche} →
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </main>
   );
 }
