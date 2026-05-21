@@ -18,6 +18,8 @@
     "agency": "The agency"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
+    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
     "title": "Your concierge for France's Palaces and 5-star hotels",
     "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
@@ -132,50 +134,45 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Bespoke itineraries",
       "title": "Your travel itineraries",
       "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
       "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
       "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
       "breadcrumbHome": "Home",
+      "breadcrumbHub": "Itineraries",
       "comingSoon": "Coming soon",
       "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
       "fallbackTitle": "In the meantime, explore:",
       "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
       "fallbackRankings": "All editorial rankings",
-      "fallbackDestinations": "All destination guides"
-    },
-    "inspiration": {
-      "eyebrow": "Inspiration",
-      "title": "Find the hotel that suits you",
-      "lede": "Filter our Palaces and exceptional hotels by theme (romantic, gastronomy, spa…), occasion (honeymoon, wedding, seminar…) or season. Each axis opens a dedicated editorial ranking.",
-      "metaTitle": "Travel inspiration — Themes, occasions, seasons | MyConciergeHotel",
-      "metaDesc": "Browse our exceptional hotels by inspiration axis: 12 themes (romantic, spa, gastronomy, design…), 9 occasions (honeymoon, wedding, seminar…), 4 seasons.",
-      "breadcrumbHome": "Home",
-      "themes": {
-        "title": "By theme",
-        "lede": "The experience that suits you — from spa to Michelin gastronomy, contemporary design to heritage."
+      "fallbackDestinations": "All destination guides",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 published itinerary} other {# published itineraries}}",
+        "filtersLabel": "Refine",
+        "byCountry": "By country",
+        "byTravelStyle": "By travel style",
+        "byDuration": "By duration",
+        "durationDays": "{min, plural, =1 {1 day} other {# days}}",
+        "durationRange": "{min}–{max} days"
       },
-      "occasions": {
-        "title": "By occasion",
-        "lede": "The event that brings you — anniversary, honeymoon, wedding, seminar, getaway."
-      },
-      "saisons": {
-        "title": "By season",
-        "lede": "The time that draws you — winter in the mountains, summer by the sea, spring in the vineyards, autumn among châteaux."
+      "detail": {
+        "stepLabel": "Day {n}",
+        "stepsHeading": "The itinerary, step by step",
+        "stepsLead": "Each step combines an exceptional hotel, a tested timing and our on-site recommendations.",
+        "faqHeading": "Frequently asked questions",
+        "relatedRankingsHeading": "Editorial rankings to read",
+        "relatedGuidesHeading": "Read also",
+        "relatedItinerariesHeading": "Other itineraries you might enjoy",
+        "viewHotel": "View hotel page",
+        "bookAtHotel": "Book at {hotelName}",
+        "stayDuration": "Stay duration: {n, plural, =1 {1 day} other {# days}}",
+        "city": "City",
+        "poiHeading": "Things to see / do",
+        "allItineraries": "All our itineraries",
+        "ariaSkipToSteps": "Skip directly to the step-by-step itinerary"
       }
-    },
-    "brands": {
-      "eyebrow": "Hotel groups",
-      "title": "All hotel brands",
-      "lede": "Browse the hotel groups represented in our editorial catalogue. Each brand brings together Palaces and exceptional hotels curated by our concierge desk.",
-      "metaTitle": "All hotel brands — MyConciergeHotel",
-      "metaDesc": "Index of hotel groups in our editorial catalogue: Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection and more.",
-      "breadcrumbHome": "Home",
-      "breadcrumbHotels": "Hotels",
-      "viewBrand": "View {brand} hotels →",
-      "empty": "No hotel published under this brand yet."
     },
     "breadcrumb": {
       "label": "Breadcrumb",
@@ -210,9 +207,100 @@
       "current": "English"
     }
   },
+  "inspiration": {
+    "eyebrow": "Inspiration",
+    "title": "Find the hotel that suits you",
+    "lede": "Filter our Palaces and exceptional hotels by theme (romantic, gastronomy, spa…), occasion (honeymoon, wedding, seminar…) or season. Each axis opens a dedicated editorial ranking.",
+    "metaTitle": "Travel inspiration — Themes, occasions, seasons | MyConciergeHotel",
+    "metaDesc": "Browse our exceptional hotels by inspiration axis: 12 themes (romantic, spa, gastronomy, design…), 9 occasions (honeymoon, wedding, seminar…), 4 seasons.",
+    "breadcrumbHome": "Home",
+    "themes": {
+      "title": "By theme",
+      "lede": "The experience that suits you — from spa to Michelin gastronomy, contemporary design to heritage."
+    },
+    "occasions": {
+      "title": "By occasion",
+      "lede": "The event that brings you — anniversary, honeymoon, wedding, seminar, getaway."
+    },
+    "saisons": {
+      "title": "By season",
+      "lede": "The time that draws you — winter in the mountains, summer by the sea, spring in the vineyards, autumn among châteaux."
+    },
+    "aeoQuestion": "How do you find the right hotel for your trip on MyConciergeHotel?",
+    "aeoAnswer": "MyConciergeHotel aggregates its Palaces and 5-star hotels across three complementary axes: 12 themes (romantic, spa, gastronomy, design, vineyards, heritage, golf, ski, pool, rooftop, kids-friendly), 9 travel occasions (honeymoon, wedding, seminar, anniversary, wellness retreat) and 4 seasons. Every combination opens an editorial sub-hub with a selection curated by our concierge desk. Last updated {date}.",
+    "faqTitle": "MyConciergeHotel inspiration — frequently asked questions",
+    "faqItems": [
+      {
+        "q": "What's the difference between a theme, an occasion and a season?",
+        "a": "A theme describes the main experience sought (spa, gastronomy, design) — it characterises the hotel. An occasion describes the event motivating the trip (honeymoon, wedding, seminar) — it describes the traveller. A season describes the relevant time window (winter in the mountains, summer by the sea) — it describes the calendar. The three axes cross: a hotel can be romantic (theme), ideal for a honeymoon (occasion) and at its best in spring (season)."
+      },
+      {
+        "q": "Why 12 themes rather than 50?",
+        "a": "We cap at 12 themes to guarantee each axis has at least 5 published addresses — a theme with a single page has no value for the user or for AEO. Relevant sub-themes (Michelin 2-star, spa with private sauna) are search-engine sub-facets, not standalone hubs."
+      },
+      {
+        "q": "How is inspiration linked to the rankings?",
+        "a": "Each theme, occasion or season opens `/classements/{axis}/{value}` — a matrix sub-hub listing every editorial ranking that carries that axis. For example \"Spa & wellness\" leads to the \"Best hotel spas\", \"Palaces with hammam\", \"Wellness retreats\" rankings published on that theme."
+      },
+      {
+        "q": "A season without a destination — what does it return?",
+        "a": "A \"Winter\" ranking without a listed destination means we cover the winter experience (ski, après-ski, spa) across all zones — Alps, Pyrenees, but also French Riviera off-season. A \"Winter in Courchevel\" ranking is more specific and appears in the `/classements/lieu/courchevel` sub-hub."
+      },
+      {
+        "q": "Why not a \"budget\" axis?",
+        "a": "All our hotels are Palace or 5-star — the price segment is premium by construction. A \"budget\" axis would have no useful granularity here; we do however offer a non-affiliated price comparator on every page to compare with aggregators."
+      },
+      {
+        "q": "When are new inspirations published?",
+        "a": "The taxonomy is frozen quarterly (ranking consistency). New themes can appear if the concierge desk publishes 5+ dedicated rankings (e.g. \"luxury surf\" could open if we publish 5 seaside × surf rankings)."
+      }
+    ]
+  },
+  "brands": {
+    "eyebrow": "Hotel groups",
+    "title": "All hotel brands",
+    "lede": "Browse the hotel groups represented in our editorial catalogue. Each brand brings together Palaces and exceptional hotels curated by our concierge desk.",
+    "metaTitle": "All hotel brands — MyConciergeHotel",
+    "metaDesc": "Index of hotel groups in our editorial catalogue: Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection and more.",
+    "breadcrumbHome": "Home",
+    "breadcrumbHotels": "Hotels",
+    "viewBrand": "View {brand} hotels →",
+    "empty": "No hotel published under this brand yet.",
+    "aeoQuestion": "Which hotel groups does MyConciergeHotel represent in its catalogue?",
+    "aeoAnswer": "MyConciergeHotel covers {count} author hotel collections — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Independent addresses (Negresco, Lutetia, Crillon, Villa La Coste) are also listed without chain affiliation. Last updated {date}.",
+    "faqTitle": "Hotel brands — frequently asked questions",
+    "faqItems": [
+      {
+        "q": "Are you affiliated with or paid by these hotel groups?",
+        "a": "No. MyConciergeHotel is an independent IATA-accredited agency. No brand pays to be listed or featured. Our commission comes from bookings (IATA standard), identical from one brand to another — the selection is strictly editorial."
+      },
+      {
+        "q": "Why are some luxury brands missing (Aman, Six Senses, Belmond)?",
+        "a": "Either because the brand has no French address in our catalogue yet (Aman, Six Senses), or because GDS connectivity is not optimal (Belmond — connected in batches, ongoing enrichment). Our concierge desk can however book any address via Amadeus on request."
+      },
+      {
+        "q": "How does a brand join your editorial catalogue?",
+        "a": "We select hotel groups on three criteria: at least one French 5-star or Palace address, Amadeus GDS connectivity for direct booking, strong editorial signature (author collection, not a marketing banner). A brand doesn't apply — our concierge desk proposes."
+      },
+      {
+        "q": "What does \"collection\" vs \"chain\" mean in your catalogue?",
+        "a": "A collection (Oetker, Dorchester, Cheval Blanc) groups a few author addresses, often unique by architecture or history. A chain (Four Seasons, Mandarin Oriental) deploys a service standard at scale while maintaining a high level. Both feature in the catalogue; our editorial tends to favour collections for their signature."
+      },
+      {
+        "q": "Can I earn the brand's loyalty points by booking through you?",
+        "a": "Yes — your loyalty number (Four Seasons Preferred, Marriott Bonvoy for Ritz-Carlton…) can be attached to the booking. Points are credited by the hotel after the stay. Our MyConciergeHotel programme stacks on top of the in-house programmes without replacing them."
+      },
+      {
+        "q": "How do I know if a specific hotel belongs to one of these brands?",
+        "a": "The hotel page prominently mentions collection membership (Palace + group as a chip under the H1). If the brand is ambiguous (recent acquisition, sub-brand), we clarify the history in the \"About the property\" section."
+      }
+    ]
+  },
   "concierge": {
     "eyebrow": "About",
     "title": "The Concierge",
+    "aeoQuestion": "Why book a Palace or 5-star hotel via MyConciergeHotel rather than direct or via an aggregator?",
+    "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
     "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks France's Palaces and exceptional hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
     "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency dedicated to Palaces and exceptional hotels in France. Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
@@ -499,6 +587,781 @@
       ]
     }
   },
+  "conciergeHoteliers": {
+    "metaTitle": "Become a partner hotel — MyConciergeHotel | Palace & 5★ editorial selection",
+    "metaDesc": "Palace and 5★ hoteliers: join our editorial catalogue for IATA-grade distribution, a signed editorial audit, and a premium audience. Selection by invitation — criteria, contact.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "For hoteliers",
+    "title": "Become a MyConciergeHotel partner hotel",
+    "lede": "MyConciergeHotel is an editorial distribution channel for Palaces and 5-star hotels. We select by invitation, on audit, and sign every page. Here are the benefits for selected hoteliers and the application process.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "How do hoteliers join the MyConciergeHotel editorial catalogue?",
+    "aeoAnswer": "MyConciergeHotel selects by invitation on 8 cross-referenced criteria (Atout France, Michelin Keys, Forbes, internal audit, editorial signature — see /le-concierge/editorial-method). French Palace and 5★ hoteliers can however write to us to signal their Amadeus GDS availability and appetite for partnership. Our partnerships cell replies within 5 business days. No entry fee — IATA agency, standard booking commissions. Last updated {date}.",
+    "benefits": {
+      "title": "5 benefits for partner hotels",
+      "items": [
+        {
+          "title": "IATA agency distribution",
+          "body": "Access to the MyConciergeHotel channel for premium French and international clientele. Net Amadeus GDS rates identical to your public rate — no commission added to the traveller's invoice (standard agency commission deducted from the hotel share, IATA-compliant)."
+        },
+        {
+          "title": "Signed editorial page",
+          "body": "Field audit by a MyConciergeHotel advisor, page written by our team (600-1,000 words), Concierge's Tip (50-110 words of operational secret), high-definition photos. No copy-paste of your commercial sheet or an aggregator."
+        },
+        {
+          "title": "Qualified premium audience",
+          "body": "Post-CSP+ audience, average basket 2-5× higher than general aggregators. Traffic sources: brand SERP + AI Overviews (our catalogue is GEO-optimised — Perplexity, ChatGPT Search, Claude citations), editorial ranking network, monthly newsletter, media partnerships."
+        },
+        {
+          "title": "Buyer-side concierge in French and English",
+          "body": "Every booking goes through our concierge desk (phone + email). We manage changes, special requests (room, view, occasion), pre-stay questions. You receive a ready-to-go booking, no rebound, with consolidated traveller profile."
+        },
+        {
+          "title": "Shared loyalty programme",
+          "body": "MyConciergeHotel travellers earn your chain loyalty points (Marriott Bonvoy, Four Seasons Preferred, Accor ALL…) AND MyConciergeHotel perks (breakfast, late check-out, hotel credit — Essential tier). No cannibalisation — our programme stacks, doesn't replace."
+        }
+      ]
+    },
+    "criteria": {
+      "title": "Selection criteria",
+      "lede": "The selection is strictly editorial and independent (see /le-concierge/editorial-method for the full method). You increase your chances of being selected if:",
+      "items": [
+        "You hold an Atout France distinction (Palace or official 5-star) or Michelin Keys (1, 2 or 3 keys).",
+        "Your gastronomic restaurant holds Michelin stars (1, 2 or 3 stars).",
+        "You hold a Forbes Travel Guide rank 4 or 5 stars.",
+        "You belong to an author collection (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels, Virtuoso).",
+        "You have at least 50 verified Amadeus reviews with rating ≥ 4.2/5.",
+        "You have an editorial signature (legendary numbered room, view, craft, story to tell)."
+      ]
+    },
+    "process": {
+      "title": "How to apply",
+      "step1Title": "Expression of interest",
+      "step1Body": "Write to partenariats@myconciergehotel.com with: hotel name, Amadeus property code (if known), current distinctions (Atout France, Michelin Keys, Michelin stars, Forbes, collections), management contact. We acknowledge receipt within 48 business hours.",
+      "step2Title": "Pre-evaluation",
+      "step2Body": "Our partnerships cell verifies eligibility on file (public sources, Amadeus base). Reply within 5 business days. If favourable, we schedule a field audit within 30 days.",
+      "step3Title": "Field audit",
+      "step3Body": "A MyConciergeHotel advisor visits the hotel anonymously (pays for the night at public rates) and tests services (check-in, room service, in-house concierge, spa, dining). Signed audit on 5 axes. Debrief to management within 7 days post-visit.",
+      "step4Title": "Integration",
+      "step4Body": "If selected: signing of the standard IATA agency distribution agreement, Amadeus property setup, editorial page writing (4-6 weeks), publication. First booking typically within 60 days of agreement."
+    },
+    "noPayToPlay": {
+      "title": "No pay-to-play",
+      "body": "No entry fee, no paid \"featured\" option, no ranking boost on commission. Our revenue comes from standard IATA commissions on effective bookings (12-15% per GDS), identical from one hotel to another. Refusing pay-to-play is our strongest commitment to our customers — see /le-concierge/editorial-method."
+    },
+    "contact": {
+      "title": "Contact our partnerships cell",
+      "email": "partenariats@myconciergehotel.com",
+      "responseSLA": "Receipt acknowledgement within 48 business hours, pre-evaluation within 5 business days.",
+      "altCanal": "For press requests, see /le-concierge/presse-et-partenaires. For event/MICE requests, see /le-concierge/mice-and-events."
+    },
+    "faqTitle": "Hoteliers — frequently asked questions",
+    "faq": [
+      {
+        "q": "What does it cost to join the catalogue?",
+        "a": "No entry fee. Our revenue comes from standard IATA commissions on effective bookings (12-15% per GDS and rate). No subscription, no paid option."
+      },
+      {
+        "q": "How long between application and first booking?",
+        "a": "If accepted: 5 days for pre-evaluation, 30 days to schedule the audit, 7 days for debrief, 4-6 weeks for writing and publishing the page. First effective booking typically within 60-90 days of initial agreement."
+      },
+      {
+        "q": "What happens if we are not selected?",
+        "a": "We transparently explain why (missing criteria, catalogue context, unfavourable audit signal). You remain eligible for a new application at 12 months — useful if you obtain a new distinction (Atout France, Michelin) or strengthen operations."
+      },
+      {
+        "q": "Can we ask for catalogue withdrawal?",
+        "a": "Yes at any time. 90-day notice for in-flight bookings (traveller respect). Withdrawal is free — we editorialise an archive page if you wish (\"previously listed hotel\")."
+      },
+      {
+        "q": "Can we influence what is written on our page?",
+        "a": "You review the page before publication and flag factual errors (figures, dates, equipment). You can't request a tone change, score change or Concierge's Tip change — these elements remain editorial. That's what makes our credibility."
+      },
+      {
+        "q": "Are you compatible with our existing channel manager?",
+        "a": "Yes — all distribution goes through Amadeus GDS standard (A, B, C codes per your hotel setup). If you're on Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, connectivity is immediate — your channel manager pushes inventory to Amadeus, we pick it up."
+      }
+    ]
+  },
+  "conciergeMice": {
+    "metaTitle": "MICE & private events — Quote within 24h | MyConciergeHotel",
+    "metaDesc": "Seminars, weddings, private events at our Palaces and 5★ hotels: room capacities, formats, bespoke quotes within 24h. Dedicated MICE concierge, IATA agency, APST guarantee.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "MICE & private events",
+    "title": "MICE, seminars and private events",
+    "lede": "Our Palaces and 5-star hotels host your corporate seminars, weddings, private anniversaries, product launches, creative retreats. Our MICE cell prepares your bespoke quote within 24 business hours and coordinates details with the hotel management.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "How do I organise a seminar or private event via MyConciergeHotel?",
+    "aeoAnswer": "Three steps: 1) specify your need (event type, dates, number of participants, target city or region) via the form or by email at mice@myconciergehotel.com; 2) our MICE cell selects 3-5 eligible hotels from our Palace and 5★ catalogue, checks room and accommodation availability, prepares a comparative quote within 24 business hours; 3) after choice, your MICE concierge coordinates AV brief, catering, accommodation, transfers and timing. No additional agency fee — standard IATA commissions. Last updated {date}.",
+    "formats": {
+      "title": "5 event formats handled",
+      "items": [
+        {
+          "title": "Corporate seminar",
+          "body": "10-200 participants. Plenary halls + sub-commissions, corporate catering (working lunches, gala dinners), team-building, group transfers. Suited for executive committees, sales kick-offs, codir, leadership trainings."
+        },
+        {
+          "title": "Wedding & private ceremony",
+          "body": "30-300 guests. Secular or religious ceremony, cocktail, seated dinner (round or banquet), dance party. Room block for guests, complimentary bridal suite per hotel. External wedding planner coordination possible."
+        },
+        {
+          "title": "Private anniversary / family celebration",
+          "body": "15-100 guests. Privatisation of a gastronomic restaurant, terrace or wine cellar. Seated dinner or standing cocktail format. Ideal for milestone birthdays, baptisms, engagement parties."
+        },
+        {
+          "title": "Product launch / press evening",
+          "body": "50-400 guests. Privatisation of state rooms, press dressing rooms, ephemeral signage. AV regie, security, press transfer coordination. Post-event reporting (official photos)."
+        },
+        {
+          "title": "Creative retreat / executive off-site",
+          "body": "5-30 participants. Hotel privatised in small format, intensive (3-5 days), in-room work + outdoor workshops (cooking, tasting, nature). CEO/CTO/board profiles, creative agencies, product teams."
+        }
+      ]
+    },
+    "topVenues": {
+      "title": "Our reference MICE hotels",
+      "lede": "A selection from our catalogue based on format and capacity (the full list of eligible venues is shared with your bespoke quote):",
+      "items": [
+        "Paris: Le Bristol (15 rooms, up to 500), Plaza Athénée (10 rooms, up to 350), Ritz Paris (8 rooms, up to 250), Four Seasons George V (10 rooms, up to 350), Le Meurice (12 rooms, up to 300).",
+        "French Riviera: Hôtel du Cap-Eden-Roc (cap. 250 outdoor), Grand-Hôtel du Cap-Ferrat (cap. 200), Hôtel Martinez Cannes (cap. 800 plenary), La Réserve Ramatuelle (cap. 80 intimate).",
+        "Alps: Cheval Blanc Courchevel (privatisations 30-50), Les Airelles Gstaad (cap. 100), Four Seasons Megève (privatisations 60-120), Le K2 Palace (cap. 60).",
+        "Bordeaux region: Les Sources de Caudalie (cap. 150 vineyards), Château Smith Haut Lafitte (cap. 200 receptions).",
+        "Champagne: Domaine Les Crayères (cap. 80 ceremonies)."
+      ]
+    },
+    "form": {
+      "title": "Request a quote within 24h",
+      "lede": "Specify your need — our MICE cell returns with 3-5 priced proposals within 24 business hours.",
+      "namePlaceholder": "Your first and last name",
+      "companyPlaceholder": "Company (optional)",
+      "emailPlaceholder": "Email address",
+      "phonePlaceholder": "Phone (recommended for MICE cell)",
+      "formatPlaceholder": "Event type (seminar, wedding, press evening…)",
+      "guestsPlaceholder": "Number of participants",
+      "datesPlaceholder": "Dates or window (e.g. Sept-Oct 2026)",
+      "destinationPlaceholder": "Destination (Paris, Riviera, open…)",
+      "messagePlaceholder": "Specify your need (programme, constraints, indicative budget)…",
+      "consent": "I accept that my data is used to prepare the quote (privacy policy).",
+      "submit": "Receive my quote within 24h",
+      "wip": "Form being commissioned — in the meantime, write to us directly at mice@myconciergehotel.com with this information."
+    },
+    "contact": {
+      "title": "Contact our MICE cell",
+      "email": "mice@myconciergehotel.com",
+      "responseSLA": "Comparative quote (3-5 hotels) within 24 business hours. For urgent requests < 7 days, call the desk.",
+      "altCanal": "To become a partner hotel, see /le-concierge/for-hoteliers. For press, see /le-concierge/presse-et-partenaires."
+    },
+    "faqTitle": "MICE — frequently asked questions",
+    "faq": [
+      {
+        "q": "What's the timeframe to receive a quote?",
+        "a": "Within 24 business hours for standard requests (seminar, private event, wedding). For complex requests (full privatisation, international event, tight calendar), count 48-72 business hours. Urgent requests < 7 days: call the MICE cell directly."
+      },
+      {
+        "q": "What is your MICE commission?",
+        "a": "Standard IATA commission deducted from the hotel share (8-12% per hotel and scope). No margin added on external event services (DJ, photographer, outside caterer) — we coordinate but don't charge commission on these line items."
+      },
+      {
+        "q": "Can you organise a multi-hotel event?",
+        "a": "Yes — common for anniversaries (cocktail at Le Bristol, dinner at Plaza Athénée), DACH/Europe seminars (Paris + Riviera over 3 days), destination weddings (ceremony in Provence, after-party Côte d'Azur). Our MICE cell coordinates logistics, transfers, unified signage."
+      },
+      {
+        "q": "Do you accept staggered payments for large events?",
+        "a": "Yes — standard practice for events > €30,000. Typical schedule: 30% deposit at confirmation, 30% 60 days before event, 40% balance 7 days before. Terms specified on quote."
+      },
+      {
+        "q": "What happens in case of cancellation?",
+        "a": "Contractual cancellation policy, communicated on quote before signing. Standard: cancellation > 90 days = no fee; 60-90 days = 30% retained; 30-60 days = 50% retained; < 30 days = 100% retained. Cancellation insurance (Allianz, Mondial Assistance) available separately."
+      },
+      {
+        "q": "Can you manage AV / production / external catering coordination?",
+        "a": "Yes — we work with a short-list of AV providers (Tech Event, Lagoona, AVProject), producers (Pulse, Pollen Studio) and caterers (Potel et Chabot, Saint-Clair Le Traiteur, Lenôtre). Integrated or separate quote per your preference. Your usual providers are also welcome."
+      }
+    ]
+  },
+  "conciergeLoyalty": {
+    "metaTitle": "MyConciergeHotel loyalty programme — Perks from night one",
+    "metaDesc": "Our loyalty programme: Essential tier automatic (Little Hotelier — free breakfast, late check-out, hotel credit) and Prestige tier (subscription — upgrade, airport transfer). Full terms.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "Loyalty programme",
+    "title": "The MyConciergeHotel loyalty programme",
+    "lede": "From your first night, MyConciergeHotel offers perks that stack on top of chain programmes. Two tiers: Essential (free, automatic on the Little Hotelier catalogue) and Prestige (subscription, enhanced perks across the full Palace and 5★ catalogue).",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "What perks does the MyConciergeHotel loyalty programme offer?",
+    "aeoAnswer": "Two tiers: Essential (free, automatic from night one on Little Hotelier catalogue hotels) — breakfast for two, late check-out at 2pm, hotel credit per partner. Prestige (subscription) — room upgrade when available, airport transfer, guaranteed breakfast, confirmed late check-out at 4pm. Perks stack on top of chain programmes (Four Seasons Preferred, Marriott Bonvoy…). Last updated {date}.",
+    "tiers": {
+      "title": "Two tiers, two promises",
+      "essentiel": {
+        "name": "Essential",
+        "tagline": "Automatic, free",
+        "lede": "From your first booking on a Little Hotelier catalogue hotel — no card, no minimum, no nights threshold.",
+        "benefits": [
+          {
+            "title": "Breakfast for two",
+            "body": "Subject to availability and the partner hotel's policy. Confirmed at booking by your concierge if the hotel offers it as a loyalty perk."
+          },
+          {
+            "title": "Late check-out at 2pm",
+            "body": "Subject to availability (next room occupation). Requested at booking then confirmed the day before departure by the hotel."
+          },
+          {
+            "title": "Hotel credit",
+            "body": "Variable amount per partner hotel (€15-30/stay standard). Usable at the bar, restaurant or spa. Non-refundable, non-transferable."
+          }
+        ]
+      },
+      "prestige": {
+        "name": "Prestige",
+        "tagline": "Subscription",
+        "lede": "Enhanced perks across the full catalogue (not just Little Hotelier). Rate and subscription terms to be published at programme launch.",
+        "benefits": [
+          {
+            "title": "Room upgrade",
+            "body": "When available at arrival. Confirmed on-site based on occupancy. No need to ask — the hotel applies automatically for Prestige members."
+          },
+          {
+            "title": "Airport transfer",
+            "body": "One-way or return from the nearest airport, within 50 km. Beyond, kilometre supplement at cost."
+          },
+          {
+            "title": "Breakfast for two (guaranteed)",
+            "body": "Independent of the hotel's policy — the surcharge is covered by your concierge if the hotel doesn't offer it natively."
+          },
+          {
+            "title": "Late check-out at 4pm (confirmed)",
+            "body": "Confirmed at booking. If the hotel can't honour it, your concierge negotiates a compensation (extra night at preferential rate, upgrade)."
+          }
+        ]
+      }
+    },
+    "compatibility": {
+      "title": "Stacking with chain programmes",
+      "lede": "Our programme adds to the hotel's — it never replaces it. You earn your chain points AND our perks.",
+      "items": [
+        "Attach your chain loyalty number (Four Seasons Preferred, Marriott Bonvoy for Ritz-Carlton, Accor ALL for Sofitel/Raffles, IHG One Rewards) at checkout.",
+        "Chain points are credited by the hotel after the stay per the programme's terms — often reduced compared to a direct booking on the chain's website, this is standard for all IATA agencies.",
+        "Our MyConciergeHotel perks are independent — breakfast, late check-out, hotel credit are confirmed on top of the chain's loyalty benefits.",
+        "For chains very selective about point attribution to agencies (notably Hyatt World of Hyatt), our concierge desk prioritises transparency: we indicate at booking whether points are credited or not."
+      ]
+    },
+    "eligibility": {
+      "title": "Who is eligible?",
+      "essentiel": "Anyone with a MyConciergeHotel client account booking a Little Hotelier catalogue hotel. No age threshold, no geographic restriction, free for life.",
+      "prestige": "Annual subscription. Sign-up terms, rate and detailed perks to be published at programme launch. Essential tier remains active if you stop Prestige."
+    },
+    "faqTitle": "Loyalty — frequently asked questions",
+    "faq": [
+      {
+        "q": "How do I activate my Essential tier?",
+        "a": "No manual activation needed — create your account on /compte/inscription and Essential tier is automatic. At your first booking on a Little Hotelier hotel, perks are confirmed by email by your concierge."
+      },
+      {
+        "q": "Which hotels are in the Little Hotelier catalogue?",
+        "a": "Around 100 5★ and Palace properties in France and abroad, connected to our Little Hotelier channel. Each hotel page shows an \"Essential tier\" badge if the property is eligible. The list evolves quarterly — see the brand index on /marques for details."
+      },
+      {
+        "q": "When will the Prestige tier be available?",
+        "a": "The Prestige tier is in preparation (ADR-0005). Exact terms — annual rate, sign-up flow, perks scope — will be published at launch. Sign up to our newsletter on /le-concierge to be notified first."
+      },
+      {
+        "q": "Are perks guaranteed or \"subject to availability\"?",
+        "a": "Essential tier: breakfast and late check-out are subject to the partner hotel's policy and availability (next room occupancy). Prestige tier: breakfast and late check-out at 4pm are contractually guaranteed — if the hotel can't honour, your concierge negotiates a compensation."
+      },
+      {
+        "q": "Can I stack with my Marriott Bonvoy or Four Seasons Preferred points?",
+        "a": "Yes — attach your chain loyalty number at booking. Points are credited by the hotel after the stay. Our MyConciergeHotel perks (breakfast, late check-out, credit) are independent and stack."
+      },
+      {
+        "q": "What happens if I modify or cancel my booking?",
+        "a": "Perk eligibility follows the booking. If you cancel free of charge (flexible rate before cancellation deadline), perks obviously don't apply. If you change dates (new night), perks carry over. In case of late cancellation with fees, perks are not refunded."
+      },
+      {
+        "q": "Is my unused hotel credit refunded?",
+        "a": "No — the hotel credit (Essential tier) is usable on-site during your stay, at the bar, restaurant or spa. Unused, it is neither carried over nor refunded. The hotel front desk and our concierge work to make you aware of it on arrival."
+      }
+    ],
+    "cta": {
+      "title": "Enjoy perks from your next booking",
+      "createAccount": "Create my free account",
+      "browseCatalog": "Browse the Little Hotelier catalogue",
+      "newsletter": "Get notified at Prestige launch"
+    }
+  },
+  "conciergeFaq": {
+    "metaTitle": "FAQ — All your MyConciergeHotel questions | Booking, loyalty, guarantees",
+    "metaDesc": "Complete FAQ: IATA agency, Amadeus booking, net GDS rates, loyalty programme, secure payment, changes, cancellation, contact. Clear answers to the 35 most frequent questions.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "General FAQ",
+    "title": "Frequently asked questions",
+    "lede": "The 35 most frequently asked questions to our concierge desk, grouped in 6 themes: about the agency, booking, rates and payment, loyalty, changes and cancellation, your client account life. Click to unfold the answer.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Where can you find the answer to your MyConciergeHotel question?",
+    "aeoAnswer": "This page gathers 35 answers to the most frequently asked questions to our concierge desk, on 6 themes: who we are (IATA / APST agency), how to book (Amadeus, concierge), our rates (net GDS, comparator), our loyalty programme (Essential / Prestige), modify or cancel, and the life of your account. If your question isn't here, write to us via /le-concierge/contact — reply within 24 business hours. Last updated {date}.",
+    "themes": {
+      "agency": {
+        "title": "About the agency",
+        "lede": "Who we are, on which criteria we select, how the concierge works."
+      },
+      "booking": {
+        "title": "Booking",
+        "lede": "How to find a hotel, pick a rate, confirm a booking."
+      },
+      "pricing": {
+        "title": "Rates and payment",
+        "lede": "Net GDS rates, payment methods, comparator, instalment payment."
+      },
+      "loyalty": {
+        "title": "Loyalty programme",
+        "lede": "Essential tier, Prestige tier, stacking with chain programmes."
+      },
+      "modify": {
+        "title": "Modify, cancel, refund",
+        "lede": "Cancellation policy, date change, refund, escalation."
+      },
+      "account": {
+        "title": "My client account",
+        "lede": "Creation, management, GDPR, favourites, booking history."
+      }
+    },
+    "items": [
+      {
+        "theme": "agency",
+        "q": "Is MyConciergeHotel a travel agency or an online platform?",
+        "a": "A travel agency. MyConciergeHotel SAS is IATA-registered, APST member with professional financial guarantee, and subject to the French Tourism Code. Our business is regulated — unlike a platform doing pure intermediation. Your payments are protected in case of agency failure by the APST guarantee."
+      },
+      {
+        "theme": "agency",
+        "q": "What is IATA accreditation and APST guarantee?",
+        "a": "IATA is the global airline association — IATA accreditation lets an agency issue tickets and book via GDS (Amadeus, Sabre, Travelport) at negotiated net rates. APST is the French professional solidarity association for tourism, financially backing customer payments in case of agency failure."
+      },
+      {
+        "theme": "agency",
+        "q": "On which criteria do you select hotels?",
+        "a": "Independent editorial selection on 8 cross-referenced criteria: Atout France (Palace, 5★), Michelin Keys, dining Michelin stars, Forbes Travel Guide, author collection membership (Relais & Châteaux, LHW), verified Amadeus reviews, MyConciergeHotel internal audit, and editorial signature. See /le-concierge/editorial-method for detail."
+      },
+      {
+        "theme": "agency",
+        "q": "Do hotels pay to appear in your catalogue?",
+        "a": "No, ever. Our revenue comes from booking commissions (IATA standard), identical from one hotel to another. Refusing pay-to-play is our strongest commitment."
+      },
+      {
+        "theme": "agency",
+        "q": "What is the Concierge's Tip?",
+        "a": "A proprietary editorial signature: each hotel page ends with 60-110 words delivering a concrete operational secret (signature room number, hidden table, access, optimal timing). Information no general guide or aggregator publishes. Our USP."
+      },
+      {
+        "theme": "agency",
+        "q": "Do you cover destinations outside France?",
+        "a": "Yes — 8 countries are published with editorial guides (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Our Amadeus network covers 950,000 hotels worldwide — beyond the editorial catalogue, any listed property can be booked on concierge request."
+      },
+      {
+        "theme": "booking",
+        "q": "How do I book a hotel via MyConciergeHotel?",
+        "a": "See the full guide on /le-concierge/how-to-book. In summary: find the hotel → pick your dates → select a rate → pay by secure card → instant confirmation (Amadeus mode) or within 24h (concierge mode for non-GDS hotels)."
+      },
+      {
+        "theme": "booking",
+        "q": "How long does it take to confirm my booking?",
+        "a": "Amadeus mode: instant (PNR + voucher email within seconds). Concierge mode: within 24 business hours, usually 4-6h during office hours."
+      },
+      {
+        "theme": "booking",
+        "q": "Can I book for someone else?",
+        "a": "Yes — at checkout, you indicate the actual traveller's name (different from payer). The hotel receives the traveller's name for check-in. The payer receives the invoice and confirmation."
+      },
+      {
+        "theme": "booking",
+        "q": "What documents for hotel check-in?",
+        "a": "Valid ID (ID card, passport) in the traveller's name. The payment card is not systematically requested but some hotels may ask — your confirmation states it."
+      },
+      {
+        "theme": "booking",
+        "q": "Must my children be declared at booking?",
+        "a": "Yes — enter the number of adults AND children at checkout. Policies vary by hotel (rollaway, family room, age supplement). A room declared 2 adults cannot accept an undeclared child without the hotel's agreement."
+      },
+      {
+        "theme": "pricing",
+        "q": "Are your rates more expensive than booking direct?",
+        "a": "No. We access Amadeus GDS net rates, identical to the hotel's public published rate. No commission added. Our non-affiliated comparator transparently shows Booking, Hotels.com, Expedia rates — you see the delta directly."
+      },
+      {
+        "theme": "pricing",
+        "q": "What payment methods do you accept?",
+        "a": "Bank card (Visa, Mastercard, American Express) via secure Amadeus Payments iframe — PCI-DSS level 1, 3D-Secure 2 mandatory. For payments > €5,000, bank transfer on concierge request. No cheque or cash."
+      },
+      {
+        "theme": "pricing",
+        "q": "Is instalment payment possible?",
+        "a": "On request for stays > €5,000: 30% deposit at booking, balance 30 days before arrival. For lower amounts, 3 or 4 instalments with no fees via Apple Pay / Google Pay available at some hotels — option appears at checkout if eligible."
+      },
+      {
+        "theme": "pricing",
+        "q": "What is the purpose of your price comparator?",
+        "a": "To guarantee transparency. On every hotel page, we display public rates (incl. tax in EUR) of Booking, Hotels.com, Expedia for your selected dates — sober text, no affiliate link, no logo. You immediately see the delta with our net GDS rate."
+      },
+      {
+        "theme": "pricing",
+        "q": "Is the tourist tax included in the rate?",
+        "a": "No. The tourist tax is due to the hotel on arrival, per the French General Tax Code (varies €0.20-5 per person per night per city and category). The rate displayed on our site is incl. tax but excl. tourist tax — the hotel adds it to the final bill."
+      },
+      {
+        "theme": "loyalty",
+        "q": "How does the loyalty programme work?",
+        "a": "See /le-concierge/loyalty for full detail. In summary: Essential tier (free, automatic on Little Hotelier — breakfast, late check-out, credit) and Prestige tier (subscription — upgrade, airport transfer, confirmed late check-out at 4pm). Stacks with chain programmes."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Are my Marriott Bonvoy or Four Seasons Preferred points credited?",
+        "a": "Yes — attach your chain loyalty number at checkout. Points are credited by the hotel after the stay per the programme's terms — often reduced compared to a direct booking on the chain's website (agency standard)."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Does Essential tier have a cost?",
+        "a": "No, free for life. No nights threshold, no membership card. Automatically activated at account creation + first booking on a Little Hotelier hotel."
+      },
+      {
+        "theme": "loyalty",
+        "q": "When will the Prestige tier launch?",
+        "a": "In preparation (ADR-0005). Exact annual rate, sign-up flow and scope to be published at launch. Sign up to the newsletter on /le-concierge to be notified."
+      },
+      {
+        "theme": "modify",
+        "q": "How do I cancel my booking?",
+        "a": "Per the cancellation policy of the chosen rate (explicit at booking and in your confirmation). Flexible rates: free cancellation up to 24-48h before arrival. Early-bird rates: non-refundable. Cancellation handled from your MyConciergeHotel account or by your dedicated concierge."
+      },
+      {
+        "theme": "modify",
+        "q": "Can I change my stay dates?",
+        "a": "Per the rate's terms. If flexible, free change (subject to availability at the new rate). If non-refundable, free change sometimes possible with equivalent date swap — otherwise cancel + new booking."
+      },
+      {
+        "theme": "modify",
+        "q": "What to do in case of a problem during my stay?",
+        "a": "The 24/7 emergency number is communicated in your confirmation. For critical issues (safety, overbooking, major breakdown), an on-call advisor replies. For non-urgent topics (room preference, extra request), email your dedicated concierge at the address shown in your confirmation."
+      },
+      {
+        "theme": "modify",
+        "q": "How to get a refund in case of major hotel issue?",
+        "a": "Document the facts (photos, email to hotel management during the stay) and write to your concierge within 30 days after departure. Our concierge negotiates a commercial gesture with the hotel (partial refund, complimentary stay). In case of failure, escalation to the Tourism and Travel Mediator (MTV) — free."
+      },
+      {
+        "theme": "modify",
+        "q": "Are early check-in or late check-out possible?",
+        "a": "On request at booking or via your dedicated concierge. Late check-out at 2pm offered Essential tier (subject to availability), 4pm confirmed Prestige tier. Early check-in remains subject to room availability."
+      },
+      {
+        "theme": "modify",
+        "q": "What if the hotel doesn't honour a loyalty perk?",
+        "a": "Document (photo of invoice if breakfast charged when it was supposed to be offered) and report to your concierge within 7 days after departure. Our concierge gets the direct refund from the hotel or applies a MyConciergeHotel credit usable on your next stay."
+      },
+      {
+        "theme": "account",
+        "q": "How do I create a client account?",
+        "a": "On /compte/inscription — email + password, email-link validation. The account is free, no commitment. It lets you activate Essential tier, save favourites, retrieve booking history, and exercise your GDPR rights."
+      },
+      {
+        "theme": "account",
+        "q": "How do I manage my favourites?",
+        "a": "From each hotel page, click the heart icon to add to favourites. Find the list on /compte/favoris. Synced across devices via your connected account."
+      },
+      {
+        "theme": "account",
+        "q": "How do I exercise my GDPR rights?",
+        "a": "Write to dpo@myconciergehotel.com specifying your request (access, rectification, deletion, portability, objection). Reply within 30 days per GDPR. Complete account deletion is also available from /compte (\"Privacy\" section)."
+      },
+      {
+        "theme": "account",
+        "q": "I forgot my password — how to recover it?",
+        "a": "On /compte/mot-de-passe-oublie — enter your email, receive a secure link valid 24h. Click and set a new password. If you don't receive the email, check spam or contact the concierge."
+      },
+      {
+        "theme": "account",
+        "q": "Can I delete my account without losing my booking history?",
+        "a": "At account deletion, your personal data is erased within 30 days. Accounting proofs (booking invoices) remain archived for 10 years per legal obligations — but no longer linked to your identity (anonymised)."
+      },
+      {
+        "theme": "account",
+        "q": "Is my account secure?",
+        "a": "Hashed passwords (Argon2id), 2FA via TOTP recommended at activation, HttpOnly + SameSite=Strict cookies, CSRF token on every action. Annual OWASP audit. In case of incident, notification within 72h per GDPR."
+      },
+      {
+        "theme": "account",
+        "q": "How to receive your email communications?",
+        "a": "Tick preferences on /compte (\"Notifications\" section): monthly newsletter, opening alert, Prestige launch, partner events. Unsubscribe in one click from each email. No address sale to third parties."
+      },
+      {
+        "theme": "account",
+        "q": "How to contact your customer service?",
+        "a": "Three channels: phone +33 1 84 60 95 50 (Mon-Sat 9am-7pm), email contact@myconciergehotel.com (within 24 business hours), form on /le-concierge/contact. For an emergency during the stay, see the on-call number in your confirmation."
+      },
+      {
+        "theme": "account",
+        "q": "My question isn't in this FAQ — what to do?",
+        "a": "Contact us on /le-concierge/contact or by email at contact@myconciergehotel.com. Our concierge replies within 24 business hours. If your question is recurring, we'll add it to this FAQ — updated monthly."
+      }
+    ]
+  },
+  "conciergeMethod": {
+    "metaTitle": "Our Editorial Method — How we curate Palaces | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel curates France's Palaces and 5-star hotels with a transparent method: Atout France distinctions, Michelin Keys, Forbes, internal audit. Named sources, detailed scoring, no pay-to-play.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "EEAT — Editorial method",
+    "title": "Our editorial method",
+    "lede": "How does an address join our catalogue? On which criteria are our rankings built? Here is the public detail of the method applied by our concierge desk — named sources, verifiable scoring, total independence from hotels.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "How does MyConciergeHotel curate its Palaces and 5-star hotels?",
+    "aeoAnswer": "Every address in our catalogue goes through an 8-criteria audit: Atout France distinction (Palace, 5-star), Michelin Keys, Michelin dining stars, Forbes Travel Guide rank, author-collection membership (Relais & Châteaux, LHW), verified Amadeus reviews, service quality measured by internal audit, and editorial signature (signature room, view, access). Sources are named at the bottom of each ranking. No hotel pays for inclusion — MyConciergeHotel is an independent IATA-accredited agency. Last updated {date}.",
+    "principles": {
+      "title": "Four non-negotiable principles",
+      "independence": {
+        "title": "Financial independence",
+        "body": "Our revenue comes from booking commissions (IATA standard), identical from one hotel to another. No hotel pays to be listed or featured. No disguised affiliate links. Our recommendations don't depend on margin earned."
+      },
+      "transparency": {
+        "title": "Source transparency",
+        "body": "Every ranking lists at the bottom of the page the external sources cited (Atout France, Michelin Guide, Forbes Travel Guide, Wikidata, hotel press). Every internal score is explained in the methodology section. You can verify."
+      },
+      "expertise": {
+        "title": "Verified expertise",
+        "body": "Every page is written by a member of our concierge team who has visited the hotel or spoken directly with management. No description comes from the hotel's commercial brochure or an aggregator. Advisors are identified by name and role."
+      },
+      "freshness": {
+        "title": "Dated updates",
+        "body": "Every page displays its latest editorial review date. Rankings are reviewed quarterly (pillar) or biannually (thematic). Distinction changes (Atout France, Michelin) are reflected within 30 days."
+      }
+    },
+    "criteria": {
+      "title": "The 8 selection criteria",
+      "lede": "No criterion alone is enough — the selection cross-references several signals. A hotel without an Atout France distinction can enter if its dining is Michelin-starred and it belongs to an author collection. A Palace will not enter if its internal audit reveals degraded service.",
+      "items": [
+        {
+          "name": "Atout France distinction",
+          "desc": "Palace mention (~30 addresses in France) or official 5-star classification. The Palace mention is France's highest hotel distinction — awarded for art of living, bespoke service, international reach."
+        },
+        {
+          "name": "Michelin Keys",
+          "desc": "The Michelin Guide's hotel rating system (1, 2 or 3 keys). Launched in 2024, it's the hotel equivalent of dining stars. Weighted +20% in our score since 2026."
+        },
+        {
+          "name": "Dining Michelin stars",
+          "desc": "One, two or three stars awarded to the hotel's gastronomic restaurant. Major criterion for our \"Palaces gastronomy\" category and thematic rankings."
+        },
+        {
+          "name": "Forbes Travel Guide rank",
+          "desc": "Forbes 4 or 5-star rating (prestigious American system). Particularly useful for international hotels and chains (Four Seasons, Ritz-Carlton, Rosewood)."
+        },
+        {
+          "name": "Author collection",
+          "desc": "Membership of Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels & Resorts, Virtuoso. These collections apply their own strict entry criteria."
+        },
+        {
+          "name": "Verified Amadeus reviews",
+          "desc": "Aggregate sentiment on Amadeus (/5 + reviewCount). Filter: minimum 50 verified reviews. Inverse volume weighting to avoid penalising confidential small-scale addresses."
+        },
+        {
+          "name": "MyConciergeHotel internal audit",
+          "desc": "Our concierge team visits, talks with management, tests services (check-in, room service, in-house concierge) and rates on 5 axes: welcome, room, dining, spa/experience, infrastructure."
+        },
+        {
+          "name": "Editorial signature",
+          "desc": "An address must have a recognisable signature — a legendary numbered room, a view, a craft, a story to tell. Without a signature, the address joins the list but not the top of the rankings."
+        }
+      ]
+    },
+    "process": {
+      "title": "How an address joins our catalogue",
+      "step1Title": "Internal proposal",
+      "step1Body": "Our concierge team identifies an address — either following a market event (opening, takeover, Atout France), or on customer recommendation, or during a cluster audit (\"which Palaces are missing on our French Riviera?\"). No spontaneous candidacy accepted.",
+      "step2Title": "Field audit",
+      "step2Body": "An advisor visits the hotel or organises a video call with management. Verification of the 8 criteria, discussion of Amadeus GDS availability, payment terms, applicable loyalty programme, available photos, usage rights.",
+      "step3Title": "Writing and publication",
+      "step3Body": "The page is written by the advisor (600-1000-word long description), enriched with a Concierge's Tip (50-110 words, concrete operational secret). Internal editorial validation then publication. Each quarterly review can shift the address ranking.",
+      "step4Title": "Continuous review",
+      "step4Body": "Any material change (loss of Atout France, restaurant closure, takeover by a chain, unfavourable internal audit) triggers a review within 30 days. An address can leave the catalogue — rare but documented."
+    },
+    "faqTitle": "Questions about our method",
+    "faq": [
+      {
+        "q": "Can a hotel pay to appear in your catalogue?",
+        "a": "No, ever. MyConciergeHotel is an IATA-accredited agency — our revenue comes from booking commissions (IATA standard), not from advertising. Refusing pay-to-play is our strongest commitment to our customers."
+      },
+      {
+        "q": "How do you guarantee the independence of your audits?",
+        "a": "Our audit visits are unannounced and we systematically pay our nights at public rates (never complimentary). The audit report is internal, the result published as a weighted score. No advisor has a direct commercial relationship with an audited hotel."
+      },
+      {
+        "q": "Can a bad customer experience lower a page's score?",
+        "a": "Yes. If several past bookings through our concierge team report recurring operational issues (degraded service, overbooking, cleanliness), we trigger a re-visit. If the audit confirms, the address loses scoring points and may drop out of top rankings. Three documented cases since launch."
+      },
+      {
+        "q": "Why no direct customer reviews on your site?",
+        "a": "Because we can't guarantee their verification 100% (sources, bias, moderation). We prefer to aggregate Amadeus sentiments (verified booking) and publish our own audit, signed by an identified advisor. More demanding, less manipulable."
+      },
+      {
+        "q": "How are rankings updated?",
+        "a": "Quarterly for pillar rankings (Best Palaces of France, of Paris, French Riviera), biannually for thematic rankings (spa, gastronomy). Official changes (Atout France, Michelin Guide, closure) are reflected within 30 days outside cadence."
+      },
+      {
+        "q": "Can I report an error or suggest an address?",
+        "a": "Yes — any factual correction (wrong address, lapsed distinction, outdated photo) is handled within 48h after contact via /le-concierge/contact. Address suggestions are studied at the next quarterly review cycle; we always reply even if the address isn't retained."
+      }
+    ]
+  },
+  "conciergeReserver": {
+    "metaTitle": "How to book via your concierge — net GDS rates | MyConciergeHotel",
+    "metaDesc": "Book your Palace or 5-star hotel via MyConciergeHotel: net Amadeus GDS rates, secure PCI-DSS payment, instant confirmation, loyalty programme. How it works in 5 steps.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "How to book",
+    "title": "Booking via your concierge",
+    "lede": "MyConciergeHotel offers two booking modes: direct by card (instant, hotels connected to Amadeus GDS) or via concierge (by email within 24h, confidential hotels). Here is how it works, step by step.",
+    "lastReviewed": "2026-05-10",
+    "aeoQuestion": "How do I book a Palace or 5-star hotel via MyConciergeHotel?",
+    "aeoAnswer": "Five steps: 1) find an address or browse an editorial ranking; 2) pick your dates and guests in the Amadeus booking engine; 3) select a rate (room only / breakfast / flexible / non-refundable); 4) confirm online by secure PCI-DSS card with 3D-Secure; 5) receive the confirmation by email (instant in Amadeus mode, within 24h in concierge mode). No agency markup — net GDS rate identical to the hotel's public rate. Last updated {date}.",
+    "steps": {
+      "title": "The 5 steps",
+      "items": [
+        {
+          "title": "1. Pick an address",
+          "body": "Browse the catalogue by destination (Paris, French Riviera, Alps), by brand (Cheval Blanc, Airelles…), by editorial ranking (Best Palaces of France) or by inspiration (honeymoon, spa, gastronomy). Every page ends with a Concierge's Tip — operational secret for a successful stay."
+        },
+        {
+          "title": "2. Pick your dates and guests",
+          "body": "The booking engine on each page queries Amadeus inventory in real time: availability, rate, cancellation terms. You fill check-in, check-out, adults, children. Signature rooms (Eiffel Tower Suite, Le Ritz room 432…) are highlighted when available."
+        },
+        {
+          "title": "3. Select a rate",
+          "body": "Three rate families: room only (most flexible), breakfast included, half-board. Explicit cancellation policy per rate (flexible 24-48h / non-refundable early-bird). Our concierge team can negotiate rates with free cancellation up to the eve even when the public offer doesn't allow it."
+        },
+        {
+          "title": "4. Confirm payment",
+          "body": "Card payment (Visa, Mastercard, Amex) via the secure Amadeus Payments iframe — PCI-DSS level 1 compliant, 3D-Secure 2 mandatory. Your card details never transit through our servers. For payments > €5,000, bank transfer available on concierge request."
+        },
+        {
+          "title": "5. Receive confirmation",
+          "body": "Instant email confirmation in Amadeus mode (with PNR, voucher, terms). In concierge mode (confidential hotels not connected to the GDS), your dedicated concierge replies within 24 business hours with a personalised proposal and a secure payment link."
+        }
+      ]
+    },
+    "reassurance": {
+      "title": "Your guarantees",
+      "iata": "IATA-accredited agency / APST member. Mandatory professional financial guarantee — your payments are protected in case of agency failure.",
+      "rate": "Net Amadeus GDS rate identical to the hotel's public rate — no markup added by our agency.",
+      "comparator": "Non-affiliated price comparator on every page: you immediately see the delta with Booking, Hotels.com, Expedia for the same dates.",
+      "loyalty": "MyConciergeHotel loyalty programme from the first night — benefits stack on top of chain programmes (Four Seasons Preferred, Marriott Bonvoy…)."
+    },
+    "faqTitle": "Booking — frequently asked questions",
+    "faq": [
+      {
+        "q": "How long does it take to confirm my booking?",
+        "a": "In Amadeus mode (direct), confirmation is instant — you receive the email with PNR and voucher within seconds of payment. In concierge mode (hotels outside the GDS), your concierge replies within 24 business hours, usually within 4-6h during office hours."
+      },
+      {
+        "q": "What payment methods do you accept?",
+        "a": "Bank card (Visa, Mastercard, American Express) via the secure Amadeus Payments iframe — PCI-DSS level 1, 3D-Secure 2 mandatory. For payments above €5,000, bank transfer or instalment payment on request. No payment by cheque or cash."
+      },
+      {
+        "q": "Are your rates more expensive than booking direct?",
+        "a": "No. We access Amadeus GDS net rates, identical to the hotel's public published rate. No commission added. Our non-affiliated comparator on every page transparently shows Booking, Hotels.com, Expedia rates — you see the delta directly."
+      },
+      {
+        "q": "Can I modify or cancel my booking?",
+        "a": "According to the cancellation policy of the chosen rate (explicit at booking). Flexible rates: free cancellation up to 24-48h before arrival. Early-bird rates: non-refundable. Changes handled via your MyConciergeHotel account or by your dedicated concierge."
+      },
+      {
+        "q": "Are early check-in / late check-out possible?",
+        "a": "On request at booking or via your dedicated concierge. Our loyalty programme offers late check-out at 2pm on Little Hotelier hotels (Essential tier). For Prestige tier, late check-out at 4pm confirmed. Early check-in remains subject to room availability."
+      },
+      {
+        "q": "Are my chain loyalty points (Marriott Bonvoy, Four Seasons Preferred…) credited?",
+        "a": "Yes. Your chain loyalty number can be attached to the booking at checkout (\"loyalty programme number\" field). Points are credited by the hotel after the stay according to the programme's terms — often reduced compared to a direct booking on the chain's website, this is standard for all agencies."
+      }
+    ]
+  },
+  "conciergeContact": {
+    "metaTitle": "Contact us — MyConciergeHotel concierge desk | IATA agency",
+    "metaDesc": "Reach our concierge desk: phone, email, form. Reply within 24 business hours. MyConciergeHotel, IATA / APST travel agency for Palaces and 5-star hotels.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "Reach your concierge",
+    "title": "Contact us",
+    "lede": "Our concierge desk replies in French and English, Monday to Saturday from 9am to 7pm (Paris time). Written request reply within 24 business hours. For an urgent booking, the phone is faster during opening hours.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "How do I reach the MyConciergeHotel concierge desk?",
+    "aeoAnswer": "Three channels: phone +33 1 84 60 95 50 (Monday-Saturday 9am-7pm, Paris time), email contact@myconciergehotel.com (reply within 24 business hours), online form on this page. We reply in French and English. For a MICE quote or group stay request, see also /le-concierge/mice-et-seminaires. Last updated {date}.",
+    "channels": {
+      "title": "Three channels",
+      "phone": {
+        "title": "Phone",
+        "body": "For an urgent booking, a quick question, or if you prefer voice.",
+        "value": "+33 1 84 60 95 50",
+        "hours": "Mon-Sat 9am-7pm (Paris)"
+      },
+      "email": {
+        "title": "Email",
+        "body": "For a detailed request, a bespoke quote, a loyalty programme question.",
+        "value": "contact@myconciergehotel.com",
+        "hours": "Reply within 24 business hours"
+      },
+      "form": {
+        "title": "Form",
+        "body": "If you prefer to put everything in writing. We reply by email.",
+        "value": "See below"
+      }
+    },
+    "form": {
+      "title": "Send a message",
+      "lede": "Describe your need in a few lines. We reply within 24 business hours.",
+      "namePlaceholder": "Your first and last name",
+      "emailPlaceholder": "Email address",
+      "subjectPlaceholder": "Subject (booking, quote, question…)",
+      "messagePlaceholder": "Your message…",
+      "consent": "I accept that my data is used to process my request (privacy policy).",
+      "submit": "Send my request",
+      "wip": "Form is being commissioned — in the meantime, write to us directly at contact@myconciergehotel.com."
+    },
+    "legal": {
+      "title": "Editor identity",
+      "company": "MyConciergeHotel SAS",
+      "address": "Address: see legal notice",
+      "iata": "IATA-accredited agency — Atout France registration n° IM075 (subject to publication)",
+      "guarantee": "APST financial guarantee — Association Professionnelle de Solidarité du Tourisme",
+      "dpo": "Data protection officer: dpo@myconciergehotel.com",
+      "press": "Press requests: see /le-concierge/presse-et-partenaires"
+    },
+    "faqTitle": "Contact — frequently asked questions",
+    "faq": [
+      {
+        "q": "What is your reply time?",
+        "a": "Within 24 business hours for written requests (email and form). Faster during opening hours (Monday-Saturday 9am-7pm, Paris time) — often within 4 to 6 hours during office hours. By phone, you speak directly to an advisor (no IVR)."
+      },
+      {
+        "q": "Do you speak languages other than French?",
+        "a": "Yes — the whole team speaks French and English fluently. Spanish and Italian possible depending on advisor availability. Requests in German, Arabic or Mandarin are handled by email with a slightly longer reply time (routing to the right contact)."
+      },
+      {
+        "q": "What to do in an emergency during my stay?",
+        "a": "The 24/7 emergency number is communicated to you in your booking confirmation. It puts you through to an on-call advisor for critical issues (major hotel problem, safety issue). For non-urgent questions during the stay, write to your dedicated concierge — you have their name and direct email."
+      },
+      {
+        "q": "Are you a travel agency or an online platform?",
+        "a": "A travel agency. MyConciergeHotel SAS is IATA-registered, APST member with financial guarantee, and subject to the French Tourism Code. Our business is regulated — unlike an online platform which only does intermediation. Your payments are protected by the APST guarantee in case of agency failure."
+      },
+      {
+        "q": "How do I exercise my GDPR rights (access, rectification, deletion)?",
+        "a": "Write to dpo@myconciergehotel.com specifying your request (data access, rectification, deletion, portability, objection). We reply within 30 days per GDPR. For complete account deletion, access is also available from /compte (\"Privacy\" section)."
+      },
+      {
+        "q": "Do you accept spontaneous applications from hotels wishing to join your catalogue?",
+        "a": "No — our editorial catalogue is built on internal proposal (see /le-concierge/editorial-method). Hoteliers seeking a MICE / groups / events partnership should go via /le-concierge/pour-les-hoteliers. Press requests go to /le-concierge/presse-et-partenaires."
+      }
+    ]
+  },
   "consent": {
     "title": "Your cookie preferences",
     "intro": "We use cookies to make this site work (login, booking cart, security). With your consent we also measure usage anonymously to improve it. You can accept, refuse or customise at any time.",
@@ -750,7 +1613,8 @@
     },
     "breadcrumb": {
       "home": "Home",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "5★ hotels and Palaces in {city}",
@@ -760,6 +1624,51 @@
       "question": "How many 5★ hotels and Palaces do you offer in {city}?",
       "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
       "answerPlural": "MyConciergeHotel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
+    },
+    "cityFaq": {
+      "title": "Staying in {city} — frequently asked questions",
+      "items": [
+        {
+          "q": "Which are the best neighbourhoods to stay in {city}?",
+          "a": "5★ and Palace addresses in {city} cluster in historic districts and around the main POIs. Our concierge desk guides you by programme: for cultural outings, pick the centre; for quiet, the residential outskirts; for views, the waterfronts or feet-in-the-water properties. Every hotel page states the exact district and walking/driving distances to major POIs."
+        },
+        {
+          "q": "What is the best time to visit {city}?",
+          "a": "{city} is open year-round, but some seasons concentrate events (festivals, ceremonies, sport calendar) and hotel rates peak. Our concierge desk can suggest optimal windows — generally the shoulder seasons (May-June, September) — where the experience is full without over-crowding. Hotel pages mention local high/low season."
+        },
+        {
+          "q": "How do I get to {city} from Paris or an international airport?",
+          "a": "Distances and access are detailed on every hotel page (nearest airport, TGV station, driving distance). Our concierge desk arranges transfers on request: premium taxi, chauffeured car, helicopter for Alps/Riviera destinations. The price is communicated before confirmation, no intermediary markup added."
+        },
+        {
+          "q": "Which museums, restaurants or experiences are must-see in {city}?",
+          "a": "Every hotel page includes a \"What to do around\" section with named POIs (museums, starred dining, markets, viewpoints) and their exact distance. Our concierge desk can also suggest signature experiences (private museum visit outside opening hours, table at a starred chef) tailored to your stay."
+        },
+        {
+          "q": "Do hotels in {city} accept pets?",
+          "a": "The pets-friendly policy varies by hotel — most Palaces accept dogs (often with a surcharge, sometimes with a dedicated service: bowls, baskets, dog-sitting). Every hotel page details under \"Policies\": accepted size, fees, restrictions. Our concierge desk can negotiate terms with the hotel before booking."
+        },
+        {
+          "q": "Is there free parking or valet service at your {city} hotels?",
+          "a": "5★ and Palace hotels generally offer valet service (sometimes included in the rate, sometimes charged 30-80 €/night). Free parking is rare downtown but common in rural or alpine destinations. The exact policy (free / paid / valet / vehicle height) is in the \"Policies\" section of each page."
+        },
+        {
+          "q": "Are your {city} hotels wheelchair-accessible?",
+          "a": "Most 5★ and Palace hotels in {city} have wheelchair-accessible rooms (lift, adapted bathroom, access to common spaces). Our concierge desk verifies your specific need (walk-in shower, bed height, pool/spa access) with the hotel before confirmation. Please share your constraints at request time."
+        },
+        {
+          "q": "What is the cancellation policy for {city} hotels?",
+          "a": "Each Amadeus rate states its cancellation policy (often: flexible up to 24-48h before arrival, non-refundable for early-bird rates). Our concierge desk can offer rates with free cancellation up to the eve even when the hotel's public offer is non-refundable, depending on agency negotiations."
+        },
+        {
+          "q": "Is breakfast included in {city} hotel rates?",
+          "a": "Inclusion varies: most Palaces offer a room-only rate and a room + breakfast rate. Our MyConciergeHotel loyalty programme offers breakfast for two from the first night on hotels in the Little Hotelier catalogue. The hotel's exact policy is on its page."
+        },
+        {
+          "q": "How do I book a Palace or 5★ hotel in {city} via MyConciergeHotel?",
+          "a": "Click the hotel page you want, pick your dates in the Amadeus booking engine, pay online (secure PCI-DSS card, 3D-Secure). Instant email confirmation. For hotels outside the GDS, your concierge sends you an offer within 24 business hours. No agency markup on net rates."
+        }
+      ]
     },
     "card": {
       "palace": "Palace",
@@ -772,6 +1681,35 @@
     "directory": {
       "title": "All destinations",
       "subtitle": "{count, plural, one {# destination available} other {# destinations available}}.",
+      "aeoQuestion": "Which destinations does MyConciergeHotel cover?",
+      "aeoAnswer": "MyConciergeHotel covers {count} destinations — French cities (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) and international countries with an editorial guide (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Each destination opens a page with a curated 5★ and Palace selection, local context and operational tips from the Concierge. Last updated {date}.",
+      "faqTitle": "Our destinations — frequently asked questions",
+      "faqItems": [
+        {
+          "q": "Which French cities are covered?",
+          "a": "Our catalogue covers France's historical premium tourism hubs: Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), French Riviera (Cannes, Nice, Cap-Ferrat, Monaco), Alps (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordeaux region (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Basque Country (Biarritz), Corsica (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Do you offer international destinations?",
+          "a": "Yes — 8 countries are published with editorial guides (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA) and our Amadeus network covers 950,000 hotels worldwide on request. The international catalogue grows quarterly — see each country's guide page for the curated selection."
+        },
+        {
+          "q": "How do you choose editorial cities?",
+          "a": "We publish a destination once our concierge desk has curated at least 3 five-star or Palace addresses in the city and can sign a 2,000-word editorial guide with named POIs (museums, dining venues, access). A city without critical mass appears as a sub-page but not as a top-level destination."
+        },
+        {
+          "q": "Will a missing city be added?",
+          "a": "The publication calendar is quarterly. To suggest a destination, contact the concierge via /le-concierge — we prioritise cities where our customers already book via Amadeus mode without an editorial guide."
+        },
+        {
+          "q": "What is the difference between a destination and a guide?",
+          "a": "Per ADR-0015, both routes have merged: /destination/{city} hosts both the catalogue hub (hotel selection) and the long-read guide (POIs, art of living, practical info). /guide/{city} redirects to the destination with a 308."
+        },
+        {
+          "q": "Are the guides available in English?",
+          "a": "Yes — every published destination has its EN version (/en/destination/{slug}) with native translation by our editorial team (no raw machine translation). hreflang fr-FR / en / x-default emitted on every page."
+        }
+      ],
       "count": "{count, plural, one {# hotel} other {# hotels}}",
       "franceSection": {
         "title": "France — by city",

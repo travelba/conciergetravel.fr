@@ -5,10 +5,14 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { intlLocaleTag } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
@@ -54,6 +58,40 @@ const T = {
       "Découvrez notre sélection éditoriale d'hôtels 5 étoiles et Palaces en France : Paris, Côte d'Azur, Alpes, Provence, Aquitaine. Réservation IATA, tarifs nets GDS.",
     metaDescWorld:
       "Sélection éditoriale d'hôtels 5 étoiles et Palaces — France et premières adresses internationales : Asie, Amériques, Europe et Moyen-Orient. Réservation IATA, tarifs nets GDS.",
+    // AEO + FAQ surfaces (skill geo-llm-optimization). The AEO answer
+    // weighs 60-70 words so it sits inside the 40-80 range required by
+    // `buildAeoBlock`; freshness signal "Mise à jour" is templated
+    // with the current month so LLMs flag the page as up-to-date.
+    aeoQ: 'Quels hôtels 5★ et Palaces MyConciergeHotel propose-t-il en France ?',
+    aeoAnswer: (count: number, freshness: string) =>
+      `MyConciergeHotel sélectionne ${count} adresses 5 étoiles et Palaces en France et à l'international, regroupées par région et par marque (Cheval Blanc, Airelles, Four Seasons, Rosewood, Oetker, Dorchester). Chaque fiche est rédigée par notre conciergerie IATA et se conclut par un Conseil du Concierge — secret opérationnel concret. Réservation au tarif net GDS, paiement sécurisé Amadeus. Mise à jour ${freshness}.`,
+    faqTitle: 'Le catalogue MyConciergeHotel — questions fréquentes',
+    faq: [
+      {
+        q: 'Comment choisissez-vous les hôtels du catalogue ?',
+        a: "Notre sélection est éditoriale et indépendante : un hôtel n'achète pas son entrée. Nous croisons la distinction Atout France (Palace), les étoiles Michelin de la table, le classement Forbes Travel Guide, les Michelin Keys, l'appartenance à une collection d'auteur (Relais & Châteaux, Leading Hotels of the World) et notre propre score interne (service, emplacement, signature). Chaque entrée est revue chaque trimestre par notre conciergerie.",
+      },
+      {
+        q: 'Quels sont les principaux groupes hôteliers représentés ?',
+        a: 'Le catalogue couvre 13 collections : Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections (Courchevel) et Caudalie. Les adresses indépendantes — Negresco, Lutetia, Crillon, Villa La Coste — sont également présentes sans appartenance à une chaîne.',
+      },
+      {
+        q: 'Quelle différence entre un Palace et un hôtel 5 étoiles ?',
+        a: 'La mention « Palace » est une distinction officielle décernée par Atout France à seulement ~30 hôtels sur tout le territoire français, au-delà des 5 étoiles. Critères : service personnalisé, art de vivre, infrastructures (spa, restauration étoilée, conciergerie 24/7), rayonnement international. Tous les Palaces sont 5 étoiles, mais tous les 5 étoiles ne sont pas Palaces.',
+      },
+      {
+        q: "Vos tarifs sont-ils plus chers que sur le site de l'hôtel ?",
+        a: "Non. Nous sommes une agence IATA accréditée : nous accédons aux tarifs nets GDS d'Amadeus, identiques au tarif officiel public. Aucune commission ajoutée à votre charge. Notre comparateur de prix non affilié affiche en transparence les tarifs Booking, Hotels.com, Expedia pour les mêmes dates — vous voyez immédiatement le delta.",
+      },
+      {
+        q: 'Puis-je réserver un hôtel international (Italie, Suisse, Maroc, Maldives) ?',
+        a: 'Oui pour les pays ouverts dans notre catalogue international (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis). Notre réseau GDS Amadeus couvre 950 000 hôtels dans le monde — au-delà du catalogue éditorial, tout hôtel listé peut être réservé sur demande via notre conciergerie.',
+      },
+      {
+        q: 'Combien de temps pour confirmer ma réservation ?',
+        a: 'En mode Amadeus (paiement direct par carte), la confirmation est instantanée. En mode conciergerie (par e-mail, hôtels non connectés GDS), votre concierge dédié vous adresse une proposition sous 24 heures ouvrées, généralement sous 4-6h.',
+      },
+    ] as const,
   },
   en: {
     eyebrow: 'Editorial catalog',
@@ -78,6 +116,36 @@ const T = {
       'Discover our editorial selection of 5-star hotels and Palaces in France: Paris, French Riviera, Alps, Provence, Aquitaine. IATA booking, GDS net rates.',
     metaDescWorld:
       'Editorial selection of 5-star hotels and Palaces — France and our first international addresses across Asia, the Americas, Europe and the Middle East. IATA booking, GDS net rates.',
+    aeoQ: 'Which 5-star hotels and Palaces does MyConciergeHotel cover in France?',
+    aeoAnswer: (count: number, freshness: string) =>
+      `MyConciergeHotel curates ${count} 5-star and Palace addresses across France and internationally, grouped by region and by collection (Cheval Blanc, Airelles, Four Seasons, Rosewood, Oetker, Dorchester). Every page is written by our IATA concierge desk and ends with a Concierge's Tip — a concrete operational secret. Booking at net GDS rates, secure Amadeus payment. Last updated ${freshness}.`,
+    faqTitle: 'The MyConciergeHotel catalogue — frequently asked questions',
+    faq: [
+      {
+        q: 'How do you choose the hotels in your catalogue?',
+        a: "Our selection is editorial and independent — a hotel does not pay to be listed. We cross-reference Atout France's Palace distinction, the table's Michelin stars, the Forbes Travel Guide ranking, Michelin Keys, membership of an author collection (Relais & Châteaux, Leading Hotels of the World) and our own internal score (service, location, signature). Every entry is reviewed quarterly by our concierge team.",
+      },
+      {
+        q: 'Which hotel groups are represented?',
+        a: 'The catalogue covers 13 collections: Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections (Courchevel) and Caudalie. Independent addresses — Negresco, Lutetia, Crillon, Villa La Coste — are also featured without chain affiliation.',
+      },
+      {
+        q: 'What is the difference between a Palace and a 5-star hotel?',
+        a: 'The "Palace" mention is an official distinction awarded by Atout France to roughly 30 hotels nationwide, above and beyond the 5-star rating. Criteria: bespoke service, art of living, infrastructure (spa, Michelin dining, 24/7 concierge), international reach. Every Palace is a 5-star, but not every 5-star is a Palace.',
+      },
+      {
+        q: 'Are your rates more expensive than booking direct?',
+        a: "No. We are an IATA-accredited agency: we access Amadeus GDS net rates, identical to the hotel's public published rate. No commission is added to your bill. Our non-affiliated price comparator transparently displays Booking, Hotels.com and Expedia rates for the same dates — you immediately see the delta.",
+      },
+      {
+        q: 'Can I book an international hotel (Italy, Switzerland, Morocco, Maldives)?',
+        a: 'Yes for the countries open in our international catalogue (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Our Amadeus GDS network covers 950,000 hotels worldwide — beyond the editorial catalogue, any listed property can be booked on request via our concierge desk.',
+      },
+      {
+        q: 'How long does it take to confirm my booking?',
+        a: 'In Amadeus mode (direct card payment), confirmation is instant. In concierge mode (by email, for hotels not connected to the GDS), your dedicated concierge sends you an offer within 24 business hours, usually within 4-6h.',
+      },
+    ] as const,
   },
 } as const;
 
@@ -211,6 +279,22 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
     }),
   );
 
+  // Build the AEO answer with current month freshness signal — read by
+  // LLM crawlers as a recency cue ("Mise à jour novembre 2026" per
+  // skill `geo-llm-optimization` §AEO block). Today's date is
+  // formatted in the user's locale so an EN consumer sees the EN
+  // month name, an FR consumer the FR month.
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const aeoAnswer = t.aeoAnswer(rows.length, freshnessDate);
+  // Triple freshness sync — visible badge + AEO inline cue + (later)
+  // sitemap lastmod. Using "today" here because the catalogue list
+  // recomputes on every dynamic render — the answer is always current
+  // by construction.
+  const todayIso = new Date().toISOString();
+
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10 sm:py-14">
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
@@ -219,7 +303,10 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{title}</h1>
         <p className="text-muted mt-3 text-sm md:text-base">{subtitle}</p>
+        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
+
+      <HubAeoSection question={t.aeoQ} answer={aeoAnswer} headingId="hotels-aeo-title" />
 
       {/* Internal anchor strip — region jump-to (boosts maillage interne) */}
       {regionsOrdered.length > 0 ? (
@@ -397,6 +484,11 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
           })}
         </section>
       ) : null}
+
+      <HubFaqSection
+        heading={t.faqTitle}
+        items={t.faq.map((f) => ({ question: f.q, answer: f.a }))}
+      />
     </main>
   );
 }
