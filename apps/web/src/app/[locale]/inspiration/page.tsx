@@ -13,10 +13,13 @@ import {
   pickEntryLabel,
   type NavLabeledEntry,
 } from '@/components/layout/nav-data';
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 
 /**
@@ -106,6 +109,18 @@ export default async function InspirationHubPage({
     ]),
   );
 
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const todayIso = new Date().toISOString();
+
+  interface FaqItem {
+    readonly q: string;
+    readonly a: string;
+  }
+  const faqItems = t.raw('faqItems') as FaqItem[];
+
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10 sm:py-14">
       <JsonLdScript data={collectionPageJsonLd} nonce={nonce} />
@@ -129,7 +144,14 @@ export default async function InspirationHubPage({
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
         <p className="text-muted mt-3 text-base md:text-lg">{t('lede')}</p>
+        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
+
+      <HubAeoSection
+        question={t('aeoQuestion')}
+        answer={t('aeoAnswer', { date: freshnessDate })}
+        headingId="inspiration-aeo-title"
+      />
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
         <InspirationColumn
@@ -154,6 +176,11 @@ export default async function InspirationHubPage({
           locale={locale}
         />
       </div>
+
+      <HubFaqSection
+        heading={t('faqTitle')}
+        items={faqItems.map((it) => ({ question: it.q, answer: it.a }))}
+      />
     </main>
   );
 }

@@ -18,6 +18,8 @@
     "agency": "The agency"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
+    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
     "title": "Your concierge for France's Palaces and 5-star hotels",
     "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
@@ -132,50 +134,45 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Bespoke itineraries",
       "title": "Your travel itineraries",
       "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
       "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
       "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
       "breadcrumbHome": "Home",
+      "breadcrumbHub": "Itineraries",
       "comingSoon": "Coming soon",
       "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
       "fallbackTitle": "In the meantime, explore:",
       "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
       "fallbackRankings": "All editorial rankings",
-      "fallbackDestinations": "All destination guides"
-    },
-    "inspiration": {
-      "eyebrow": "Inspiration",
-      "title": "Find the hotel that suits you",
-      "lede": "Filter our Palaces and exceptional hotels by theme (romantic, gastronomy, spa…), occasion (honeymoon, wedding, seminar…) or season. Each axis opens a dedicated editorial ranking.",
-      "metaTitle": "Travel inspiration — Themes, occasions, seasons | MyConciergeHotel",
-      "metaDesc": "Browse our exceptional hotels by inspiration axis: 12 themes (romantic, spa, gastronomy, design…), 9 occasions (honeymoon, wedding, seminar…), 4 seasons.",
-      "breadcrumbHome": "Home",
-      "themes": {
-        "title": "By theme",
-        "lede": "The experience that suits you — from spa to Michelin gastronomy, contemporary design to heritage."
+      "fallbackDestinations": "All destination guides",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 published itinerary} other {# published itineraries}}",
+        "filtersLabel": "Refine",
+        "byCountry": "By country",
+        "byTravelStyle": "By travel style",
+        "byDuration": "By duration",
+        "durationDays": "{min, plural, =1 {1 day} other {# days}}",
+        "durationRange": "{min}–{max} days"
       },
-      "occasions": {
-        "title": "By occasion",
-        "lede": "The event that brings you — anniversary, honeymoon, wedding, seminar, getaway."
-      },
-      "saisons": {
-        "title": "By season",
-        "lede": "The time that draws you — winter in the mountains, summer by the sea, spring in the vineyards, autumn among châteaux."
+      "detail": {
+        "stepLabel": "Day {n}",
+        "stepsHeading": "The itinerary, step by step",
+        "stepsLead": "Each step combines an exceptional hotel, a tested timing and our on-site recommendations.",
+        "faqHeading": "Frequently asked questions",
+        "relatedRankingsHeading": "Editorial rankings to read",
+        "relatedGuidesHeading": "Read also",
+        "relatedItinerariesHeading": "Other itineraries you might enjoy",
+        "viewHotel": "View hotel page",
+        "bookAtHotel": "Book at {hotelName}",
+        "stayDuration": "Stay duration: {n, plural, =1 {1 day} other {# days}}",
+        "city": "City",
+        "poiHeading": "Things to see / do",
+        "allItineraries": "All our itineraries",
+        "ariaSkipToSteps": "Skip directly to the step-by-step itinerary"
       }
-    },
-    "brands": {
-      "eyebrow": "Hotel groups",
-      "title": "All hotel brands",
-      "lede": "Browse the hotel groups represented in our editorial catalogue. Each brand brings together Palaces and exceptional hotels curated by our concierge desk.",
-      "metaTitle": "All hotel brands — MyConciergeHotel",
-      "metaDesc": "Index of hotel groups in our editorial catalogue: Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection and more.",
-      "breadcrumbHome": "Home",
-      "breadcrumbHotels": "Hotels",
-      "viewBrand": "View {brand} hotels →",
-      "empty": "No hotel published under this brand yet."
     },
     "breadcrumb": {
       "label": "Breadcrumb",
@@ -210,9 +207,100 @@
       "current": "English"
     }
   },
+  "inspiration": {
+    "eyebrow": "Inspiration",
+    "title": "Find the hotel that suits you",
+    "lede": "Filter our Palaces and exceptional hotels by theme (romantic, gastronomy, spa…), occasion (honeymoon, wedding, seminar…) or season. Each axis opens a dedicated editorial ranking.",
+    "metaTitle": "Travel inspiration — Themes, occasions, seasons | MyConciergeHotel",
+    "metaDesc": "Browse our exceptional hotels by inspiration axis: 12 themes (romantic, spa, gastronomy, design…), 9 occasions (honeymoon, wedding, seminar…), 4 seasons.",
+    "breadcrumbHome": "Home",
+    "themes": {
+      "title": "By theme",
+      "lede": "The experience that suits you — from spa to Michelin gastronomy, contemporary design to heritage."
+    },
+    "occasions": {
+      "title": "By occasion",
+      "lede": "The event that brings you — anniversary, honeymoon, wedding, seminar, getaway."
+    },
+    "saisons": {
+      "title": "By season",
+      "lede": "The time that draws you — winter in the mountains, summer by the sea, spring in the vineyards, autumn among châteaux."
+    },
+    "aeoQuestion": "How do you find the right hotel for your trip on MyConciergeHotel?",
+    "aeoAnswer": "MyConciergeHotel aggregates its Palaces and 5-star hotels across three complementary axes: 12 themes (romantic, spa, gastronomy, design, vineyards, heritage, golf, ski, pool, rooftop, kids-friendly), 9 travel occasions (honeymoon, wedding, seminar, anniversary, wellness retreat) and 4 seasons. Every combination opens an editorial sub-hub with a selection curated by our concierge desk. Last updated {date}.",
+    "faqTitle": "MyConciergeHotel inspiration — frequently asked questions",
+    "faqItems": [
+      {
+        "q": "What's the difference between a theme, an occasion and a season?",
+        "a": "A theme describes the main experience sought (spa, gastronomy, design) — it characterises the hotel. An occasion describes the event motivating the trip (honeymoon, wedding, seminar) — it describes the traveller. A season describes the relevant time window (winter in the mountains, summer by the sea) — it describes the calendar. The three axes cross: a hotel can be romantic (theme), ideal for a honeymoon (occasion) and at its best in spring (season)."
+      },
+      {
+        "q": "Why 12 themes rather than 50?",
+        "a": "We cap at 12 themes to guarantee each axis has at least 5 published addresses — a theme with a single page has no value for the user or for AEO. Relevant sub-themes (Michelin 2-star, spa with private sauna) are search-engine sub-facets, not standalone hubs."
+      },
+      {
+        "q": "How is inspiration linked to the rankings?",
+        "a": "Each theme, occasion or season opens `/classements/{axis}/{value}` — a matrix sub-hub listing every editorial ranking that carries that axis. For example \"Spa & wellness\" leads to the \"Best hotel spas\", \"Palaces with hammam\", \"Wellness retreats\" rankings published on that theme."
+      },
+      {
+        "q": "A season without a destination — what does it return?",
+        "a": "A \"Winter\" ranking without a listed destination means we cover the winter experience (ski, après-ski, spa) across all zones — Alps, Pyrenees, but also French Riviera off-season. A \"Winter in Courchevel\" ranking is more specific and appears in the `/classements/lieu/courchevel` sub-hub."
+      },
+      {
+        "q": "Why not a \"budget\" axis?",
+        "a": "All our hotels are Palace or 5-star — the price segment is premium by construction. A \"budget\" axis would have no useful granularity here; we do however offer a non-affiliated price comparator on every page to compare with aggregators."
+      },
+      {
+        "q": "When are new inspirations published?",
+        "a": "The taxonomy is frozen quarterly (ranking consistency). New themes can appear if the concierge desk publishes 5+ dedicated rankings (e.g. \"luxury surf\" could open if we publish 5 seaside × surf rankings)."
+      }
+    ]
+  },
+  "brands": {
+    "eyebrow": "Hotel groups",
+    "title": "All hotel brands",
+    "lede": "Browse the hotel groups represented in our editorial catalogue. Each brand brings together Palaces and exceptional hotels curated by our concierge desk.",
+    "metaTitle": "All hotel brands — MyConciergeHotel",
+    "metaDesc": "Index of hotel groups in our editorial catalogue: Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection and more.",
+    "breadcrumbHome": "Home",
+    "breadcrumbHotels": "Hotels",
+    "viewBrand": "View {brand} hotels →",
+    "empty": "No hotel published under this brand yet.",
+    "aeoQuestion": "Which hotel groups does MyConciergeHotel represent in its catalogue?",
+    "aeoAnswer": "MyConciergeHotel covers {count} author hotel collections — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Independent addresses (Negresco, Lutetia, Crillon, Villa La Coste) are also listed without chain affiliation. Last updated {date}.",
+    "faqTitle": "Hotel brands — frequently asked questions",
+    "faqItems": [
+      {
+        "q": "Are you affiliated with or paid by these hotel groups?",
+        "a": "No. MyConciergeHotel is an independent IATA-accredited agency. No brand pays to be listed or featured. Our commission comes from bookings (IATA standard), identical from one brand to another — the selection is strictly editorial."
+      },
+      {
+        "q": "Why are some luxury brands missing (Aman, Six Senses, Belmond)?",
+        "a": "Either because the brand has no French address in our catalogue yet (Aman, Six Senses), or because GDS connectivity is not optimal (Belmond — connected in batches, ongoing enrichment). Our concierge desk can however book any address via Amadeus on request."
+      },
+      {
+        "q": "How does a brand join your editorial catalogue?",
+        "a": "We select hotel groups on three criteria: at least one French 5-star or Palace address, Amadeus GDS connectivity for direct booking, strong editorial signature (author collection, not a marketing banner). A brand doesn't apply — our concierge desk proposes."
+      },
+      {
+        "q": "What does \"collection\" vs \"chain\" mean in your catalogue?",
+        "a": "A collection (Oetker, Dorchester, Cheval Blanc) groups a few author addresses, often unique by architecture or history. A chain (Four Seasons, Mandarin Oriental) deploys a service standard at scale while maintaining a high level. Both feature in the catalogue; our editorial tends to favour collections for their signature."
+      },
+      {
+        "q": "Can I earn the brand's loyalty points by booking through you?",
+        "a": "Yes — your loyalty number (Four Seasons Preferred, Marriott Bonvoy for Ritz-Carlton…) can be attached to the booking. Points are credited by the hotel after the stay. Our MyConciergeHotel programme stacks on top of the in-house programmes without replacing them."
+      },
+      {
+        "q": "How do I know if a specific hotel belongs to one of these brands?",
+        "a": "The hotel page prominently mentions collection membership (Palace + group as a chip under the H1). If the brand is ambiguous (recent acquisition, sub-brand), we clarify the history in the \"About the property\" section."
+      }
+    ]
+  },
   "concierge": {
     "eyebrow": "About",
     "title": "The Concierge",
+    "aeoQuestion": "Why book a Palace or 5-star hotel via MyConciergeHotel rather than direct or via an aggregator?",
+    "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
     "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks France's Palaces and exceptional hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
     "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency dedicated to Palaces and exceptional hotels in France. Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
@@ -786,7 +874,8 @@
     },
     "breadcrumb": {
       "home": "Home",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "5★ hotels and Palaces in {city}",
@@ -796,6 +885,51 @@
       "question": "How many 5★ hotels and Palaces do you offer in {city}?",
       "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
       "answerPlural": "MyConciergeHotel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
+    },
+    "cityFaq": {
+      "title": "Staying in {city} — frequently asked questions",
+      "items": [
+        {
+          "q": "Which are the best neighbourhoods to stay in {city}?",
+          "a": "5★ and Palace addresses in {city} cluster in historic districts and around the main POIs. Our concierge desk guides you by programme: for cultural outings, pick the centre; for quiet, the residential outskirts; for views, the waterfronts or feet-in-the-water properties. Every hotel page states the exact district and walking/driving distances to major POIs."
+        },
+        {
+          "q": "What is the best time to visit {city}?",
+          "a": "{city} is open year-round, but some seasons concentrate events (festivals, ceremonies, sport calendar) and hotel rates peak. Our concierge desk can suggest optimal windows — generally the shoulder seasons (May-June, September) — where the experience is full without over-crowding. Hotel pages mention local high/low season."
+        },
+        {
+          "q": "How do I get to {city} from Paris or an international airport?",
+          "a": "Distances and access are detailed on every hotel page (nearest airport, TGV station, driving distance). Our concierge desk arranges transfers on request: premium taxi, chauffeured car, helicopter for Alps/Riviera destinations. The price is communicated before confirmation, no intermediary markup added."
+        },
+        {
+          "q": "Which museums, restaurants or experiences are must-see in {city}?",
+          "a": "Every hotel page includes a \"What to do around\" section with named POIs (museums, starred dining, markets, viewpoints) and their exact distance. Our concierge desk can also suggest signature experiences (private museum visit outside opening hours, table at a starred chef) tailored to your stay."
+        },
+        {
+          "q": "Do hotels in {city} accept pets?",
+          "a": "The pets-friendly policy varies by hotel — most Palaces accept dogs (often with a surcharge, sometimes with a dedicated service: bowls, baskets, dog-sitting). Every hotel page details under \"Policies\": accepted size, fees, restrictions. Our concierge desk can negotiate terms with the hotel before booking."
+        },
+        {
+          "q": "Is there free parking or valet service at your {city} hotels?",
+          "a": "5★ and Palace hotels generally offer valet service (sometimes included in the rate, sometimes charged 30-80 €/night). Free parking is rare downtown but common in rural or alpine destinations. The exact policy (free / paid / valet / vehicle height) is in the \"Policies\" section of each page."
+        },
+        {
+          "q": "Are your {city} hotels wheelchair-accessible?",
+          "a": "Most 5★ and Palace hotels in {city} have wheelchair-accessible rooms (lift, adapted bathroom, access to common spaces). Our concierge desk verifies your specific need (walk-in shower, bed height, pool/spa access) with the hotel before confirmation. Please share your constraints at request time."
+        },
+        {
+          "q": "What is the cancellation policy for {city} hotels?",
+          "a": "Each Amadeus rate states its cancellation policy (often: flexible up to 24-48h before arrival, non-refundable for early-bird rates). Our concierge desk can offer rates with free cancellation up to the eve even when the hotel's public offer is non-refundable, depending on agency negotiations."
+        },
+        {
+          "q": "Is breakfast included in {city} hotel rates?",
+          "a": "Inclusion varies: most Palaces offer a room-only rate and a room + breakfast rate. Our MyConciergeHotel loyalty programme offers breakfast for two from the first night on hotels in the Little Hotelier catalogue. The hotel's exact policy is on its page."
+        },
+        {
+          "q": "How do I book a Palace or 5★ hotel in {city} via MyConciergeHotel?",
+          "a": "Click the hotel page you want, pick your dates in the Amadeus booking engine, pay online (secure PCI-DSS card, 3D-Secure). Instant email confirmation. For hotels outside the GDS, your concierge sends you an offer within 24 business hours. No agency markup on net rates."
+        }
+      ]
     },
     "card": {
       "palace": "Palace",
@@ -808,6 +942,35 @@
     "directory": {
       "title": "All destinations",
       "subtitle": "{count, plural, one {# destination available} other {# destinations available}}.",
+      "aeoQuestion": "Which destinations does MyConciergeHotel cover?",
+      "aeoAnswer": "MyConciergeHotel covers {count} destinations — French cities (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) and international countries with an editorial guide (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Each destination opens a page with a curated 5★ and Palace selection, local context and operational tips from the Concierge. Last updated {date}.",
+      "faqTitle": "Our destinations — frequently asked questions",
+      "faqItems": [
+        {
+          "q": "Which French cities are covered?",
+          "a": "Our catalogue covers France's historical premium tourism hubs: Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), French Riviera (Cannes, Nice, Cap-Ferrat, Monaco), Alps (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordeaux region (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Basque Country (Biarritz), Corsica (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Do you offer international destinations?",
+          "a": "Yes — 8 countries are published with editorial guides (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA) and our Amadeus network covers 950,000 hotels worldwide on request. The international catalogue grows quarterly — see each country's guide page for the curated selection."
+        },
+        {
+          "q": "How do you choose editorial cities?",
+          "a": "We publish a destination once our concierge desk has curated at least 3 five-star or Palace addresses in the city and can sign a 2,000-word editorial guide with named POIs (museums, dining venues, access). A city without critical mass appears as a sub-page but not as a top-level destination."
+        },
+        {
+          "q": "Will a missing city be added?",
+          "a": "The publication calendar is quarterly. To suggest a destination, contact the concierge via /le-concierge — we prioritise cities where our customers already book via Amadeus mode without an editorial guide."
+        },
+        {
+          "q": "What is the difference between a destination and a guide?",
+          "a": "Per ADR-0015, both routes have merged: /destination/{city} hosts both the catalogue hub (hotel selection) and the long-read guide (POIs, art of living, practical info). /guide/{city} redirects to the destination with a 308."
+        },
+        {
+          "q": "Are the guides available in English?",
+          "a": "Yes — every published destination has its EN version (/en/destination/{slug}) with native translation by our editorial team (no raw machine translation). hreflang fr-FR / en / x-default emitted on every page."
+        }
+      ],
       "count": "{count, plural, one {# hotel} other {# hotels}}",
       "franceSection": {
         "title": "France — by city",

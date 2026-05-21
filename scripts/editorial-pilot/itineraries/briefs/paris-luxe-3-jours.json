@@ -1,0 +1,75 @@
+{
+  "slug_fr": "paris-luxe-3-jours",
+  "slug_en": "paris-luxury-3-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Île-de-France",
+  "destination_city": "Paris",
+  "themes": ["luxe", "culture"],
+  "duration_min_days": 3,
+  "duration_max_days": 3,
+  "travel_style": "luxe",
+  "season": "toute-saison",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Paris 3 jours luxe — Palaces, musées & gastronomie | MyConciergeHotel",
+  "meta_desc_fr_hint": "3 jours à Paris entre Ritz, Plaza Athénée et Crillon : Louvre, Faubourg Saint-Honoré, dîners étoilés. Sélection Concierge avec hôtels réservables.",
+  "hotel_slugs_target": ["ritz-paris", "plaza-athenee-paris", "hotel-de-crillon"],
+  "hotel_fallback_note": "Si les hôtels cibles ne sont pas encore dans la DB, fallback sur hôtels 5★ Paris (filtre stars=5 + city ilike 'Paris') présents dans la table hotels.",
+  "related_guide_slugs_target": ["guide-paris", "guide-ile-de-france"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-paris", "meilleurs-palaces-paris"],
+  "related_itinerary_slugs_target": ["paris-lune-de-miel", "provence-culture-gastronomie-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Paris — Rive Droite",
+      "hotel_slug_hint": "ritz-paris",
+      "key_pois": ["Place Vendôme", "Tuileries", "Louvre", "Palais Royal"],
+      "step_angle": "Triangle d'or côté place — breakfast Ritz côté jardin, galerie Colbert avant 10h, Louvre aile Denon sans file",
+      "title_fr_hint": "Jour 1 : Paris Rive Droite — Place Vendôme et grands musées",
+      "title_en_hint": "Day 1: Paris Right Bank — Place Vendôme and great museums"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Paris — Faubourg Saint-Honoré & 8e",
+      "hotel_slug_hint": "plaza-athenee-paris",
+      "key_pois": ["Avenue Montaigne", "Faubourg Saint-Honoré", "Champs-Élysées", "Grand Palais"],
+      "step_angle": "Mode et gastronomie — déjeuner Alain Ducasse au Plaza, shopping avenue Montaigne, Grand Palais expositions temporaires",
+      "title_fr_hint": "Jour 2 : Avenue Montaigne — Mode, art et gastronomie",
+      "title_en_hint": "Day 2: Avenue Montaigne — Fashion, art and gastronomy"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Paris — Rive Gauche & Tour Eiffel",
+      "hotel_slug_hint": "hotel-de-crillon",
+      "key_pois": ["Musée d'Orsay", "Tour Eiffel", "Invalides", "Saint-Germain-des-Prés"],
+      "step_angle": "Rive gauche intime — Orsay ouverture 9h30, déjeuner Café de Flore, vue Tour Eiffel depuis le Trocadéro au coucher du soleil",
+      "title_fr_hint": "Jour 3 : Rive Gauche — Orsay, Saint-Germain et Tour Eiffel",
+      "title_en_hint": "Day 3: Left Bank — Orsay, Saint-Germain and Eiffel Tower"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire pour Paris en 3 jours en séjour luxe ?",
+  "aeo_answer_fr_hint": "Jour 1 : Place Vendôme, Louvre aile Denon, dîner étoilé 1er arrondissement. Jour 2 : Avenue Montaigne, Grand Palais, déjeuner Ducasse au Plaza Athénée. Jour 3 : Musée d'Orsay, Saint-Germain, Tour Eiffel au coucher du soleil. Palaces recommandés : Ritz, Crillon, Plaza Athénée. Budget moyen : 1 500-3 000 € / nuit. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter Paris ?",
+    "Combien de jours faut-il pour visiter Paris ?",
+    "Quels sont les meilleurs palaces à Paris ?",
+    "Quel budget prévoir pour un séjour luxe à Paris 3 jours ?",
+    "Comment visiter le Louvre sans faire la queue ?",
+    "Quels restaurants étoilés réserver à Paris ?",
+    "Comment se déplacer à Paris en séjour luxe ?",
+    "Paris est-elle une destination idéale pour un week-end en couple ?",
+    "Quelles boutiques de luxe incontournables à Paris ?",
+    "Faut-il réserver les musées à l'avance à Paris ?"
+  ],
+  "concierge_secret_hint": "Au Ritz Paris, demander une chambre côté jardin Vendôme (catégorie Jardin Deluxe) — le silence est total vs les chambres Place qui captent le bruit des pavés. Au Crillon, la suite Bernstein au 4e offre une vue directe sur la Concorde sans les arbres qui masquent les suites inférieures.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Paris (autorité destination globale). Cet itinéraire = angle 3 jours luxe structuré par arrondissements + recommandations palaces + AEO. Le guide Paris reste l'autorité sur la destination au sens large.",
+  "sources_to_cite": [
+    "Atout France — Tourisme Paris",
+    "Office du Tourisme et des Congrès de Paris",
+    "Michelin Guide France",
+    "Comité Régional du Tourisme Paris Île-de-France"
+  ]
+}

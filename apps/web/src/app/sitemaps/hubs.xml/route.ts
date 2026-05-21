@@ -32,6 +32,18 @@ export async function GET(): Promise<NextResponse> {
   try {
     const cities = await listPublishedCities();
 
+    // Root home — highest-priority URL of the site. Without this entry
+    // the sitemap index never explicitly advertises `/` and `/en`, and
+    // Search Console reports "URL not in any sitemap" for the home.
+    const homeHrefForLocale = (l: Locale): string =>
+      `${origin}${getPathname({ locale: l, href: '/' })}`;
+    entries.push({
+      loc: homeHrefForLocale('fr'),
+      changefreq: 'daily',
+      priority: 1.0,
+      alternates: buildSitemapAlternates(homeHrefForLocale),
+    });
+
     const directoryHrefForLocale = (l: Locale): string =>
       `${origin}${getPathname({ locale: l, href: '/destination' })}`;
     entries.push({
@@ -65,7 +77,7 @@ export async function GET(): Promise<NextResponse> {
         | '/le-concierge/methode-editoriale'
         | '/le-concierge/reserver'
         | '/le-concierge/contact'
-        | '/itineraire';
+        | '/itineraires';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
@@ -77,7 +89,10 @@ export async function GET(): Promise<NextResponse> {
       { href: '/le-concierge/methode-editoriale', priority: 0.6 },
       { href: '/le-concierge/reserver', priority: 0.6 },
       { href: '/le-concierge/contact', priority: 0.5 },
-      { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
+      // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
+      // real listing (PR2 — Sprint 2). `last_updated` per slug ships
+      // separately in `/sitemaps/itineraries.xml` (PR3).
+      { href: '/itineraires', priority: 0.7 },
     ];
     for (const hub of staticHubs) {
       const hrefForLocale = (l: Locale): string =>
@@ -116,6 +131,32 @@ export async function GET(): Promise<NextResponse> {
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.5,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // ── Legal / institutional pages ──────────────────────────────────────
+    // Authority pages (mentions légales, CGV, RGPD, cookies). They carry
+    // EEAT signal (skill `geo-llm-optimization` §E-E-A-T) and must be
+    // indexed even though they live outside the editorial flow. Until we
+    // ship a dedicated `sitemap-institutionnel.xml`, the hub sitemap is
+    // the right home — it already groups every static index/hub page.
+    const legalHrefs: {
+      href: '/mentions-legales' | '/confidentialite' | '/cgv' | '/cookies';
+      priority: number;
+    }[] = [
+      { href: '/mentions-legales', priority: 0.4 },
+      { href: '/confidentialite', priority: 0.4 },
+      { href: '/cgv', priority: 0.4 },
+      { href: '/cookies', priority: 0.3 },
+    ];
+    for (const legal of legalHrefs) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({ locale: l, href: legal.href })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'yearly',
+        priority: legal.priority,
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }
