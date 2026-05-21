@@ -18,6 +18,8 @@
     "agency": "L'agence"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge des Palaces et hôtels 5★ en France",
+    "metaDesc": "Agence IATA dédiée aux Palaces et hôtels 5★ français. Chaque fiche se conclut par un Conseil du Concierge. Tarifs nets GDS, paiement Amadeus, fidélité dès la 1re nuit.",
     "title": "Votre concierge des Palaces et hôtels 5★ en France",
     "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
     "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
@@ -132,50 +134,45 @@
       "submit": "Rechercher",
       "submitAria": "Lancer la recherche"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Itinéraires sur-mesure",
       "title": "Vos itinéraires de voyage",
       "lede": "Nos itinéraires sur-mesure assemblent étapes, hôtels d'exception et timings recommandés par notre conciergerie. Première vague de publications attendue prochainement.",
       "metaTitle": "Itinéraires de voyage sur-mesure — Palaces & Hôtels 5★ | MyConciergeHotel",
       "metaDesc": "Itinéraires de voyage 5★ rédigés par notre conciergerie : 3 à 14 jours, étapes nommées, hôtels d'exception, gastronomie, accès. Publications à venir.",
       "breadcrumbHome": "Accueil",
+      "breadcrumbHub": "Itinéraires",
       "comingSoon": "À venir",
       "comingSoonBody": "Nous préparons les premiers itinéraires éditoriaux 5★ — Paris, Côte d'Azur, Italie, Maroc. Notification possible par e-mail lors de la publication.",
       "fallbackTitle": "En attendant, explorez :",
       "fallbackInspiration": "Toutes les inspirations (thèmes × occasions × saisons)",
       "fallbackRankings": "Tous les classements éditoriaux",
-      "fallbackDestinations": "Tous les guides destination"
-    },
-    "inspiration": {
-      "eyebrow": "Inspiration",
-      "title": "Trouvez l'hôtel qui vous correspond",
-      "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
-      "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
-      "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
-      "breadcrumbHome": "Accueil",
-      "themes": {
-        "title": "Par thème",
-        "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+      "fallbackDestinations": "Tous les guides destination",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 itinéraire publié} other {# itinéraires publiés}}",
+        "filtersLabel": "Affiner",
+        "byCountry": "Par pays",
+        "byTravelStyle": "Par style de voyage",
+        "byDuration": "Par durée",
+        "durationDays": "{min, plural, =1 {1 jour} other {# jours}}",
+        "durationRange": "{min}–{max} jours"
       },
-      "occasions": {
-        "title": "Par occasion",
-        "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
-      },
-      "saisons": {
-        "title": "Par saison",
-        "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+      "detail": {
+        "stepLabel": "Étape {n}",
+        "stepsHeading": "L'itinéraire pas à pas",
+        "stepsLead": "Chaque étape combine un hôtel d'exception, un timing testé et nos recommandations sur place.",
+        "faqHeading": "Questions fréquentes",
+        "relatedRankingsHeading": "Classements éditoriaux à consulter",
+        "relatedGuidesHeading": "À lire aussi",
+        "relatedItinerariesHeading": "Autres itinéraires qui pourraient vous plaire",
+        "viewHotel": "Voir la fiche de l'hôtel",
+        "bookAtHotel": "Réserver à {hotelName}",
+        "stayDuration": "Durée du séjour : {n, plural, =1 {1 jour} other {# jours}}",
+        "city": "Ville",
+        "poiHeading": "À voir / à faire",
+        "allItineraries": "Tous nos itinéraires",
+        "ariaSkipToSteps": "Aller directement à l'itinéraire pas à pas"
       }
-    },
-    "brands": {
-      "eyebrow": "Groupes hôteliers",
-      "title": "Toutes les marques d'hôtels",
-      "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
-      "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
-      "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
-      "breadcrumbHome": "Accueil",
-      "breadcrumbHotels": "Hôtels",
-      "viewBrand": "Voir les hôtels {brand} →",
-      "empty": "Aucun hôtel publié pour cette marque pour le moment."
     },
     "breadcrumb": {
       "label": "Fil d'ariane",
@@ -210,12 +207,103 @@
       "current": "Français"
     }
   },
+  "inspiration": {
+    "eyebrow": "Inspiration",
+    "title": "Trouvez l'hôtel qui vous correspond",
+    "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
+    "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
+    "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
+    "breadcrumbHome": "Accueil",
+    "themes": {
+      "title": "Par thème",
+      "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+    },
+    "occasions": {
+      "title": "Par occasion",
+      "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
+    },
+    "saisons": {
+      "title": "Par saison",
+      "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+    },
+    "aeoQuestion": "Comment trouver l'hôtel qui correspond à votre voyage chez MyConciergeHotel ?",
+    "aeoAnswer": "MyConciergeHotel agrège ses Palaces et hôtels 5★ sur trois axes complémentaires : 12 thèmes (romantique, spa, gastronomie, design, vignobles, patrimoine, golf, ski, piscine, rooftop, kids-friendly), 9 occasions de voyage (lune de miel, mariage, séminaire, lune de miel, anniversaire, retraite bien-être) et 4 saisons. Chaque combinaison ouvre un sous-hub éditorial avec sélection signée par notre conciergerie. Mise à jour {date}.",
+    "faqTitle": "L'inspiration MyConciergeHotel — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Quelle différence entre un thème, une occasion et une saison ?",
+        "a": "Un thème décrit l'expérience principale recherchée (spa, gastronomie, design) — il caractérise l'hôtel. Une occasion décrit l'événement qui motive le voyage (lune de miel, mariage, séminaire) — elle décrit le voyageur. Une saison décrit la fenêtre temporelle pertinente (hiver à la montagne, été en bord de mer) — elle décrit le calendrier. Les trois axes se croisent : un hôtel peut être romantique (thème), idéal pour une lune de miel (occasion) et au meilleur de sa forme au printemps (saison)."
+      },
+      {
+        "q": "Pourquoi 12 thèmes plutôt que 50 ?",
+        "a": "Nous limitons à 12 thèmes pour garantir que chaque axe a au moins 5 adresses publiées — un thème avec une seule fiche n'a pas de valeur pour l'utilisateur ni pour l'AEO. Les sous-thèmes pertinents (Michelin 2 étoiles, spa avec sauna privé) sont des sous-axes du moteur de recherche, pas des hubs autonomes."
+      },
+      {
+        "q": "Comment l'inspiration est-elle reliée aux classements ?",
+        "a": "Chaque thème, occasion ou saison ouvre la page `/classements/{axe}/{valeur}` — sous-hub matrice qui liste tous les classements éditoriaux portant cet axe. Par exemple « Spa & bien-être » mène aux classements « Meilleurs spas hôteliers », « Palaces avec hammam », « Retraites bien-être » publiés sur ce thème."
+      },
+      {
+        "q": "Une saison sans destination, ça donne quoi ?",
+        "a": "Un classement « Hiver » sans destination listée signifie qu'on couvre l'expérience hivernale (ski, après-ski, spa) sur toutes les zones — Alpes, Pyrénées, mais aussi Côte d'Azur en basse saison. Un classement « Hiver à Courchevel » est plus spécifique et apparaît dans le sous-hub `/classements/lieu/courchevel`."
+      },
+      {
+        "q": "Pourquoi pas un axe « budget » ?",
+        "a": "Tous nos hôtels sont Palace ou 5 étoiles — le segment prix est par construction premium. Un axe « budget » n'aurait pas de granularité utile chez nous ; nous avons cependant un comparateur de prix non affilié sur chaque fiche pour comparer aux agrégateurs."
+      },
+      {
+        "q": "Quand de nouvelles inspirations sont-elles publiées ?",
+        "a": "La taxonomie est gelée trimestriellement (cohérence des classements). De nouveaux thèmes peuvent apparaître si la conciergerie publie 5+ classements dédiés (ex : « surf de luxe » pourrait s'ouvrir si nous publions 5 classements bord de mer × surf)."
+      }
+    ]
+  },
+  "brands": {
+    "eyebrow": "Groupes hôteliers",
+    "title": "Toutes les marques d'hôtels",
+    "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
+    "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
+    "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbHotels": "Hôtels",
+    "viewBrand": "Voir les hôtels {brand} →",
+    "empty": "Aucun hôtel publié pour cette marque pour le moment.",
+    "aeoQuestion": "Quels groupes hôteliers représente MyConciergeHotel dans son catalogue ?",
+    "aeoAnswer": "MyConciergeHotel couvre {count} collections hôtelières d'auteur — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Les adresses indépendantes (Negresco, Lutetia, Crillon, Villa La Coste) figurent également sans appartenance à une chaîne. Mise à jour {date}.",
+    "faqTitle": "Les marques d'hôtels — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Êtes-vous affilié ou rémunéré par ces groupes hôteliers ?",
+        "a": "Non. MyConciergeHotel est une agence IATA indépendante. Aucune marque ne paie pour figurer ou être mise en avant. Notre commission vient des réservations (standard IATA), identique d'une marque à l'autre — la sélection est strictement éditoriale."
+      },
+      {
+        "q": "Pourquoi certaines marques de luxe sont absentes (Aman, Six Senses, Belmond) ?",
+        "a": "Soit parce que la marque n'a pas encore d'adresse en France dans notre catalogue (Aman, Six Senses), soit parce que la connectivité GDS n'est pas optimale (Belmond — connecté par lots, en cours d'enrichissement). Notre conciergerie peut néanmoins réserver toute adresse via Amadeus sur demande."
+      },
+      {
+        "q": "Comment une marque rejoint-elle votre catalogue éditorial ?",
+        "a": "Nous sélectionnons les groupes hôteliers en croisant trois critères : présence d'au moins une adresse française 5★ ou Palace, connectivité Amadeus GDS pour la réservation directe, signature éditoriale forte (collection d'auteur, pas simple bannière marketing). Une marque ne se candidate pas — c'est notre conciergerie qui propose."
+      },
+      {
+        "q": "Que signifie « collection » vs « chaîne » dans votre catalogue ?",
+        "a": "Une collection (Oetker, Dorchester, Cheval Blanc) regroupe quelques adresses d'auteur, souvent uniques par leur architecture ou leur histoire. Une chaîne (Four Seasons, Mandarin Oriental) déploie un standard de service à grande échelle mais maintient un haut niveau. Les deux figurent au catalogue ; notre éditorial préfère les collections pour leur signature."
+      },
+      {
+        "q": "Puis-je accumuler les points de fidélité de la marque en réservant chez vous ?",
+        "a": "Oui — votre numéro de fidélité (Four Seasons Preferred, Marriott Bonvoy pour Ritz-Carlton…) peut être joint à la réservation. Les points sont attribués par l'hôtel après le séjour. Notre programme MyConciergeHotel s'ajoute aux programmes maison sans les remplacer."
+      },
+      {
+        "q": "Comment savoir si un hôtel précis appartient à une de ces marques ?",
+        "a": "La fiche hôtel mentionne en évidence l'appartenance à une collection (Palace + groupe en chip sous le H1). Si la marque est ambiguë (rachat récent, marque-fille), nous précisons l'historique dans la section « À propos de la maison »."
+      }
+    ]
+  },
   "concierge": {
     "eyebrow": "À propos",
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
     "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
+    "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
       "title": "Nos engagements",
       "iataTitle": "Agence IATA / APST",
@@ -602,6 +690,263 @@
       }
     ]
   },
+  "conciergeMethod": {
+    "metaTitle": "Notre méthode éditoriale — Comment nous sélectionnons les Palaces | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel sélectionne les Palaces et hôtels 5★ français selon une méthode transparente : distinctions Atout France, Michelin Keys, Forbes, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "EEAT — méthode éditoriale",
+    "title": "Notre méthode éditoriale",
+    "lede": "Comment une adresse rejoint notre catalogue ? Sur quels critères nos classements sont-ils établis ? Voici le détail public de la méthode appliquée par notre conciergerie — sources nommées, scoring vérifiable, indépendance totale vis-à-vis des hôtels.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment MyConciergeHotel sélectionne ses Palaces et hôtels 5 étoiles ?",
+    "aeoAnswer": "Chaque adresse de notre catalogue passe par un audit en 8 critères : distinction Atout France (Palace, 5★), Michelin Keys, étoiles Michelin de la table, rang Forbes Travel Guide, appartenance à une collection d'auteur (Relais & Châteaux, LHW), avis Amadeus vérifiés, qualité de service mesurée par audit interne, et signature éditoriale (chambre signature, vue, accès). Les sources sont nommées en bas de chaque classement. Aucun hôtel ne paie son entrée — MyConciergeHotel est une agence IATA indépendante. Mise à jour {date}.",
+    "principles": {
+      "title": "Quatre principes intransgressables",
+      "independence": {
+        "title": "Indépendance financière",
+        "body": "Notre revenu vient des commissions sur réservations (standard IATA), identiques d'un hôtel à l'autre. Aucun hôtel ne paie pour figurer ou être mis en avant. Aucun lien d'affiliation déguisé. Nos recommandations ne dépendent pas de la marge dégagée."
+      },
+      "transparency": {
+        "title": "Transparence des sources",
+        "body": "Chaque classement liste en bas de page les sources externes citées (Atout France, Michelin Guide, Forbes Travel Guide, Wikidata, presse hôtelière). Chaque score interne est explicité dans la section méthodologie de la fiche. Vous pouvez vérifier."
+      },
+      "expertise": {
+        "title": "Expertise vérifiée",
+        "body": "Chaque fiche est rédigée par un membre de notre conciergerie qui a visité l'hôtel ou échangé directement avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur. Les conseillers sont identifiés par leur nom et fonction."
+      },
+      "freshness": {
+        "title": "Mise à jour datée",
+        "body": "Chaque fiche affiche sa date de dernière revue éditoriale. Les classements sont revus trimestriellement (pilier) ou semestriellement (thématique). Les changements de classement (Atout France, Michelin) sont reflétés sous 30 jours."
+      }
+    },
+    "criteria": {
+      "title": "Les 8 critères de sélection",
+      "lede": "Aucun critère seul n'est suffisant — la sélection croise plusieurs signaux. Une adresse non distinguée par Atout France peut entrer si sa table est étoilée Michelin et qu'elle appartient à une collection d'auteur. Une adresse Palace ne rentre pas si son audit interne révèle un service dégradé.",
+      "items": [
+        {
+          "name": "Distinction Atout France",
+          "desc": "Mention Palace (≈30 adresses en France) ou classement 5 étoiles officiel. La mention Palace est la plus haute distinction française — accordée pour l'art de vivre, le service personnalisé, le rayonnement international."
+        },
+        {
+          "name": "Michelin Keys",
+          "desc": "Système de notation hôtelière du Guide Michelin (1, 2 ou 3 clés). Lancé en 2024, c'est l'équivalent hôtelier des étoiles de table. Critère pondéré +20% dans notre score depuis 2026."
+        },
+        {
+          "name": "Étoiles Michelin de la table",
+          "desc": "Une, deux ou trois étoiles décernées au restaurant gastronomique de l'hôtel. Critère majeur pour notre catégorie « Palaces gastronomie » et nos classements thématiques."
+        },
+        {
+          "name": "Rang Forbes Travel Guide",
+          "desc": "Notation 4 ou 5 étoiles Forbes (système américain prestigieux). Particulièrement utile pour les hôtels internationaux et les chaînes (Four Seasons, Ritz-Carlton, Rosewood)."
+        },
+        {
+          "name": "Collection d'auteur",
+          "desc": "Appartenance à Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels & Resorts, Virtuoso. Ces collections appliquent leurs propres critères stricts d'entrée."
+        },
+        {
+          "name": "Avis Amadeus vérifiés",
+          "desc": "Sentiment agrégé sur Amadeus (note /5 + reviewCount). Filtrage : minimum 50 avis vérifiés. Pondération inverse du volume pour éviter de pénaliser les adresses confidentielles à petite échelle."
+        },
+        {
+          "name": "Audit interne MyConciergeHotel",
+          "desc": "Notre conciergerie visite, échange avec la direction, teste les services (check-in, room service, conciergerie maison) et note sur 5 axes : accueil, chambre, table, spa/expérience, infrastructure."
+        },
+        {
+          "name": "Signature éditoriale",
+          "desc": "Une adresse doit avoir une signature reconnaissable — une chambre numérotée mythique, une vue, un savoir-faire, une histoire racontable. Sans signature, l'adresse rejoint la liste mais pas le top des classements."
+        }
+      ]
+    },
+    "process": {
+      "title": "Comment une adresse rejoint notre catalogue",
+      "step1Title": "Proposition interne",
+      "step1Body": "Notre conciergerie identifie une adresse — soit suite à un événement de marché (ouverture, rachat, Atout France), soit sur recommandation client, soit lors d'un audit de cluster (« quels Palaces manquent à notre Côte d'Azur ? »). Aucune candidature spontanée n'est acceptée.",
+      "step2Title": "Audit terrain",
+      "step2Body": "Un conseiller visite l'hôtel ou organise un entretien Visio avec la direction. Vérification des 8 critères, échange sur la disponibilité GDS Amadeus, conditions de paiement, programme de fidélité applicable, photos disponibles, droits d'usage.",
+      "step3Title": "Rédaction et publication",
+      "step3Body": "La fiche est rédigée par le conseiller (description longue 600-1000 mots), enrichie d'un Conseil du Concierge (50-110 mots, secret opérationnel concret). Validation éditoriale interne puis publication. Chaque revue trimestrielle peut faire évoluer le classement de l'adresse.",
+      "step4Title": "Revue continue",
+      "step4Body": "Tout changement matériel (perte d'Atout France, fermeture du restaurant, rachat par une chaîne, audit interne défavorable) déclenche une révision dans les 30 jours. Une adresse peut sortir du catalogue — c'est rare mais documenté."
+    },
+    "faqTitle": "Questions sur notre méthode",
+    "faq": [
+      {
+        "q": "Un hôtel peut-il payer pour figurer dans votre catalogue ?",
+        "a": "Non, jamais. MyConciergeHotel est une agence IATA accréditée — notre revenu vient des commissions sur réservations (standard IATA), pas d'un référencement publicitaire. Refuser le pay-to-play est notre engagement le plus fort vis-à-vis de nos clients."
+      },
+      {
+        "q": "Comment garantissez-vous l'indépendance de vos audits ?",
+        "a": "Nos visites d'audit ne sont pas annoncées à l'avance et nous payons systématiquement nos nuits aux tarifs publics (jamais en complimentary). Le rapport d'audit est interne, le résultat publié pondéré dans le scoring. Aucun conseiller n'a de lien commercial direct avec un hôtel audité."
+      },
+      {
+        "q": "Une mauvaise expérience client peut-elle faire baisser une fiche ?",
+        "a": "Oui. Si plusieurs réservations passées via notre conciergerie remontent des problèmes opérationnels récurrents (service dégradé, surbooking, propreté), nous déclenchons une re-visite. Si l'audit confirme, l'adresse perd des points de scoring et peut sortir des classements top. Trois cas documentés depuis le lancement."
+      },
+      {
+        "q": "Pourquoi pas d'avis client direct sur votre site ?",
+        "a": "Parce que nous ne pouvons pas garantir leur vérification à 100% (sources, biais, modération). Nous préférons agréger les sentiments Amadeus (réservation vérifiée) et publier notre propre audit, signé par un conseiller identifié. Plus exigeant, moins manipulable."
+      },
+      {
+        "q": "Comment les classements sont-ils mis à jour ?",
+        "a": "Trimestriellement pour les classements pilier (Meilleurs Palaces de France, de Paris, Côte d'Azur), semestriellement pour les classements thématiques (spa, gastronomie). Les changements officiels (Atout France, Michelin Guide, fermeture) sont reflétés sous 30 jours hors cadence."
+      },
+      {
+        "q": "Puis-je signaler une erreur ou suggérer une adresse ?",
+        "a": "Oui — toute correction factuelle (erreur d'adresse, distinction périmée, photo non à jour) est traitée sous 48h après contact via /le-concierge/contact. Les suggestions d'adresse sont étudiées au cycle de revue trimestriel suivant ; nous répondons systématiquement même si l'adresse n'est pas retenue."
+      }
+    ]
+  },
+  "conciergeReserver": {
+    "metaTitle": "Comment réserver via votre concierge — tarifs nets GDS | MyConciergeHotel",
+    "metaDesc": "Réservez votre Palace ou hôtel 5★ via MyConciergeHotel : tarifs nets GDS Amadeus, paiement sécurisé PCI-DSS, confirmation instantanée, programme de fidélité. Comment ça marche en 5 étapes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Comment réserver",
+    "title": "Réserver via votre concierge",
+    "lede": "MyConciergeHotel propose deux modes de réservation : direct par carte (instantané, hôtels connectés GDS Amadeus) ou via conciergerie (par e-mail sous 24h, hôtels confidentiels). Voici comment ça marche, étape par étape.",
+    "lastReviewed": "2026-05-10",
+    "aeoQuestion": "Comment réserver un Palace ou hôtel 5★ via MyConciergeHotel ?",
+    "aeoAnswer": "Cinq étapes : 1) chercher une adresse ou parcourir un classement éditorial ; 2) choisir vos dates et voyageurs dans le moteur de réservation Amadeus ; 3) sélectionner un tarif (chambre seule / petit-déjeuner / flexible / non-remboursable) ; 4) confirmer en ligne par carte sécurisée PCI-DSS avec 3D-Secure ; 5) recevoir la confirmation par e-mail (instantanée en mode Amadeus, sous 24h en mode conciergerie). Aucun supplément agence — tarif net GDS identique au tarif public de l'hôtel. Mise à jour {date}.",
+    "steps": {
+      "title": "Les 5 étapes",
+      "items": [
+        {
+          "title": "1. Choisir une adresse",
+          "body": "Parcourez le catalogue par destination (Paris, Côte d'Azur, Alpes), par marque (Cheval Blanc, Airelles…), par classement éditorial (Meilleurs Palaces de France) ou par inspiration (lune de miel, spa, gastronomie). Chaque fiche se conclut par un Conseil du Concierge — secret opérationnel pour un séjour réussi."
+        },
+        {
+          "title": "2. Choisir vos dates et voyageurs",
+          "body": "Le moteur de réservation intégré à chaque fiche interroge l'inventaire Amadeus en temps réel : disponibilité, tarif, conditions d'annulation. Vous saisissez check-in, check-out, adultes, enfants. Les chambres signatures (suite Tour Eiffel, chambre 432 Le Ritz…) sont mises en avant si disponibles."
+        },
+        {
+          "title": "3. Sélectionner un tarif",
+          "body": "Trois familles de tarifs : chambre seule (le plus flexible), petit-déjeuner inclus, demi-pension. Politique d'annulation explicite par tarif (flexible 24-48h / non-remboursable early-bird). Notre conciergerie peut négocier des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique ne le propose pas."
+        },
+        {
+          "title": "4. Confirmer le paiement",
+          "body": "Paiement par carte (Visa, Mastercard, Amex) via l'iframe sécurisée Amadeus Payments — conforme PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs. Pour les paiements > 5 000 €, virement bancaire possible sur demande conciergerie."
+        },
+        {
+          "title": "5. Recevoir la confirmation",
+          "body": "Confirmation e-mail instantanée en mode Amadeus (avec PNR, voucher, conditions). En mode conciergerie (hôtels confidentiels non connectés GDS), votre concierge dédié vous répond sous 24h ouvrées avec une proposition personnalisée et un lien de paiement sécurisé."
+        }
+      ]
+    },
+    "reassurance": {
+      "title": "Vos garanties",
+      "iata": "Agence accréditée IATA / membre APST. Garantie financière professionnelle obligatoire — vos paiements sont protégés en cas de défaillance.",
+      "rate": "Tarif net GDS Amadeus identique au tarif public de l'hôtel — aucun supplément ajouté par notre agence.",
+      "comparator": "Comparateur de prix non affilié sur chaque fiche : vous voyez immédiatement le delta avec Booking, Hotels.com, Expedia pour les mêmes dates.",
+      "loyalty": "Programme de fidélité MyConciergeHotel offert dès la première nuit — avantages cumulables avec les programmes de chaîne (Four Seasons Preferred, Marriott Bonvoy…)."
+    },
+    "faqTitle": "Réserver — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien de temps pour confirmer ma réservation ?",
+        "a": "En mode Amadeus (direct), la confirmation est instantanée — vous recevez l'e-mail avec PNR et voucher dans les secondes qui suivent le paiement. En mode conciergerie (hôtels hors GDS), votre concierge vous répond sous 24h ouvrées, généralement sous 4-6h aux horaires de bureau."
+      },
+      {
+        "q": "Quels modes de paiement acceptez-vous ?",
+        "a": "Carte bancaire (Visa, Mastercard, American Express) via iframe sécurisée Amadeus Payments — PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Pour les paiements supérieurs à 5 000 €, virement bancaire ou paiement échelonné sur demande. Aucun paiement par chèque ou espèces."
+      },
+      {
+        "q": "Vos tarifs sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non. Nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Aucune commission ajoutée. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking, Hotels.com, Expedia — vous voyez le delta directement."
+      },
+      {
+        "q": "Puis-je modifier ou annuler ma réservation ?",
+        "a": "Selon la politique d'annulation du tarif choisi (explicite à la réservation). Tarifs flexibles : annulation gratuite jusqu'à 24-48h avant l'arrivée. Tarifs early-bird : non-remboursables. Modifications gérées via votre compte MyConciergeHotel ou par votre concierge dédié."
+      },
+      {
+        "q": "Le check-in anticipé / late check-out sont-ils possibles ?",
+        "a": "Sur demande au moment de la réservation ou auprès de votre concierge dédié. Notre programme de fidélité offre le late check-out à 14h sur les hôtels Little Hotelier (tier Essentiel). Pour les tier Prestige, late check-out à 16h confirmé. Le check-in anticipé reste soumis à la disponibilité de la chambre."
+      },
+      {
+        "q": "Mes points de fidélité chaîne (Marriott Bonvoy, Four Seasons Preferred…) sont-ils crédités ?",
+        "a": "Oui. Votre numéro de fidélité chaîne peut être joint à la réservation au moment du checkout (champ « numéro de programme de fidélité »). Les points sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne, c'est un standard de toutes les agences."
+      }
+    ]
+  },
+  "conciergeContact": {
+    "metaTitle": "Nous contacter — Conciergerie MyConciergeHotel | Agence IATA",
+    "metaDesc": "Joindre notre conciergerie : téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. MyConciergeHotel, agence de voyage IATA / APST dédiée aux Palaces et hôtels 5★.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Joindre votre concierge",
+    "title": "Nous contacter",
+    "lede": "Notre conciergerie répond en français et en anglais, du lundi au samedi de 9h à 19h (heure de Paris). Réponse aux demandes écrites sous 24h ouvrées. Pour une réservation urgente, privilégiez le téléphone aux horaires d'ouverture.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment joindre la conciergerie MyConciergeHotel ?",
+    "aeoAnswer": "Trois canaux : téléphone +33 1 84 60 95 50 (lundi-samedi 9h-19h, heure de Paris), e-mail contact@myconciergehotel.com (réponse sous 24h ouvrées), formulaire en ligne sur cette page. Nous répondons en français et en anglais. Pour une demande de devis MICE ou un séjour groupe, voir aussi /le-concierge/mice-et-seminaires. Mise à jour {date}.",
+    "channels": {
+      "title": "Trois canaux",
+      "phone": {
+        "title": "Téléphone",
+        "body": "Pour une réservation urgente, une question rapide, ou si vous préférez la voix.",
+        "value": "+33 1 84 60 95 50",
+        "hours": "Lundi-samedi 9h-19h (Paris)"
+      },
+      "email": {
+        "title": "E-mail",
+        "body": "Pour une demande détaillée, un devis sur-mesure, une question sur le programme de fidélité.",
+        "value": "contact@myconciergehotel.com",
+        "hours": "Réponse sous 24h ouvrées"
+      },
+      "form": {
+        "title": "Formulaire",
+        "body": "Si vous préférez tout consigner par écrit. Nous vous répondons par e-mail.",
+        "value": "Voir ci-dessous"
+      }
+    },
+    "form": {
+      "title": "Envoyer un message",
+      "lede": "Décrivez votre besoin en quelques lignes. Nous vous répondons sous 24h ouvrées.",
+      "namePlaceholder": "Votre prénom et nom",
+      "emailPlaceholder": "Adresse e-mail",
+      "subjectPlaceholder": "Sujet (réservation, devis, question…)",
+      "messagePlaceholder": "Votre message…",
+      "consent": "J'accepte que mes données soient utilisées pour traiter ma demande (politique de confidentialité).",
+      "submit": "Envoyer ma demande",
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com."
+    },
+    "legal": {
+      "title": "Identité de l'éditeur",
+      "company": "MyConciergeHotel SAS",
+      "address": "Adresse : voir mentions légales",
+      "iata": "Agence IATA accréditée — n° d'immatriculation Atout France IM075 (à confirmer publication)",
+      "guarantee": "Garantie financière APST — Association Professionnelle de Solidarité du Tourisme",
+      "dpo": "Délégué à la protection des données : dpo@myconciergehotel.com",
+      "press": "Demandes presse : voir /le-concierge/presse-et-partenaires"
+    },
+    "faqTitle": "Contact — questions fréquentes",
+    "faq": [
+      {
+        "q": "Sous quel délai répondez-vous ?",
+        "a": "Sous 24 heures ouvrées pour les demandes écrites (e-mail et formulaire). Plus rapide aux horaires d'ouverture du standard (lundi-samedi 9h-19h, heure de Paris) — souvent sous 4 à 6 heures aux heures de bureau. Au téléphone, vous parlez directement à un conseiller (pas de serveur vocal interactif)."
+      },
+      {
+        "q": "Parlez-vous d'autres langues que le français ?",
+        "a": "Oui — toute l'équipe parle français et anglais couramment. Espagnol et italien possibles selon les conseillers disponibles. Les demandes en allemand, arabe ou mandarin sont traitées par e-mail avec un délai de réponse légèrement plus long (mise en relation avec le bon interlocuteur)."
+      },
+      {
+        "q": "Que faire en cas d'urgence pendant mon séjour ?",
+        "a": "Le numéro d'urgence 24/7 vous est communiqué dans votre confirmation de réservation. Il permet de joindre un conseiller en astreinte pour les sujets critiques (problème majeur dans l'hôtel, sujet de sécurité). Pour les questions non urgentes pendant le séjour, écrivez à votre concierge dédié — vous avez son nom et e-mail direct."
+      },
+      {
+        "q": "Êtes-vous une agence de voyage ou une plateforme en ligne ?",
+        "a": "Une agence de voyage. MyConciergeHotel SAS est immatriculée IATA, membre APST avec garantie financière, et soumise au Code du tourisme français. Notre activité est encadrée — contrairement à une plateforme en ligne qui ne fait qu'intermédiation. Vos paiements sont protégés en cas de défaillance par la garantie APST."
+      },
+      {
+        "q": "Comment exercer mes droits RGPD (accès, rectification, suppression) ?",
+        "a": "Écrivez à dpo@myconciergehotel.com en précisant votre demande (accès aux données, rectification, suppression, portabilité, opposition). Nous répondons sous 30 jours conformément au RGPD. Pour suppression complète de votre compte client, l'accès est aussi disponible depuis /compte (section « Confidentialité »)."
+      },
+      {
+        "q": "Acceptez-vous des candidatures spontanées d'hôtels souhaitant intégrer votre catalogue ?",
+        "a": "Non — notre catalogue éditorial est constitué sur proposition interne (voir /le-concierge/methode-editoriale). Les hôteliers souhaitant un partenariat MICE / groupes / événements doivent passer par /le-concierge/pour-les-hoteliers. Les demandes presse vont à /le-concierge/presse-et-partenaires."
+      }
+    ]
+  },
   "consent": {
     "title": "Vos préférences cookies",
     "intro": "Nous utilisons des cookies pour faire fonctionner ce site (authentification, panier, sécurité). Avec votre accord, nous mesurons aussi son audience de manière anonymisée pour l'améliorer. Vous pouvez accepter, refuser ou personnaliser à tout moment.",
@@ -853,7 +1198,8 @@
     },
     "breadcrumb": {
       "home": "Accueil",
-      "hotels": "Hôtels"
+      "hotels": "Hôtels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "Hôtels 5★ et Palaces à {city}",
@@ -863,6 +1209,51 @@
       "question": "Combien d'hôtels 5★ et Palaces proposez-vous à {city} ?",
       "answerSingular": "MyConciergeHotel propose actuellement 1 adresse à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}.",
       "answerPlural": "MyConciergeHotel propose actuellement {count} adresses à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}."
+    },
+    "cityFaq": {
+      "title": "Séjourner à {city} — questions fréquentes",
+      "items": [
+        {
+          "q": "Quels sont les meilleurs quartiers où dormir à {city} ?",
+          "a": "Les adresses 5★ et Palace de {city} se concentrent dans les quartiers historiques et les abords des principaux POIs. Notre conciergerie vous oriente selon votre programme : pour les sorties culturelles, choisissez le centre ; pour le calme, les quartiers résidentiels en périphérie ; pour la vue, les fronts de mer ou les pieds-dans-l'eau. Chaque fiche hôtel précise le quartier exact et les distances à pied/en voiture aux POIs majeurs."
+        },
+        {
+          "q": "Quelle est la meilleure période pour visiter {city} ?",
+          "a": "{city} se visite toute l'année, mais certaines saisons concentrent les événements (festivals, cérémonies, calendrier sportif) et les tarifs hôteliers atteignent leur pic. Notre conciergerie peut vous proposer des fenêtres optimales — généralement les épaules de saison (mai-juin, septembre) — où l'expérience est complète sans la sur-fréquentation. Les fiches hôtel mentionnent la haute/basse saison locale."
+        },
+        {
+          "q": "Comment rejoindre {city} depuis Paris ou un aéroport international ?",
+          "a": "Les distances et accès sont précisés sur chaque fiche hôtel (aéroport le plus proche, gare TGV, distance en voiture). Notre conciergerie organise les transferts sur demande : taxi premium, voiture avec chauffeur, hélicoptère pour les destinations Alpes/Côte d'Azur. Le tarif est communiqué avant confirmation, sans intermédiaire ajouté."
+        },
+        {
+          "q": "Quels musées, restaurants ou expériences ne pas manquer à {city} ?",
+          "a": "Chaque fiche hôtel intègre une section « Que faire autour » avec les POIs nommés (musées, tables étoilées, marchés, points de vue) et leur distance précise. Notre conciergerie peut aussi vous suggérer des expériences signature (visite privée d'un musée hors heures d'ouverture, table d'un chef étoilé) selon votre séjour."
+        },
+        {
+          "q": "Les hôtels de {city} acceptent-ils les animaux de compagnie ?",
+          "a": "La politique pets-friendly varie selon l'hôtel — la plupart des Palaces acceptent les chiens (souvent avec supplément, parfois avec service dédié type bols, paniers, dog-sitting). Chaque fiche hôtel précise dans sa section « Politiques » : taille acceptée, frais, restrictions. Notre conciergerie peut négocier les conditions avec l'hôtel avant réservation."
+        },
+        {
+          "q": "Y a-t-il un parking gratuit ou un service voiturier dans vos hôtels à {city} ?",
+          "a": "Les hôtels 5★ et Palace proposent généralement un service voiturier (parfois inclus dans le tarif, parfois facturé en supplément 30-80 €/nuit). Le parking gratuit est rare en centre-ville mais fréquent dans les destinations rurales ou alpines. La politique exacte (gratuit / payant / valet / hauteur véhicule) figure dans la section « Politiques » de chaque fiche."
+        },
+        {
+          "q": "Vos hôtels à {city} sont-ils accessibles PMR ?",
+          "a": "La plupart des hôtels 5★ et Palace de {city} ont des chambres accessibles PMR (ascenseur, salle de bain adaptée, accès aux espaces communs). Notre conciergerie vérifie l'accessibilité spécifique de votre besoin (douche italienne, hauteur de lit, accès piscine/spa) auprès de l'hôtel avant confirmation. Précisez vos contraintes au moment de la demande."
+        },
+        {
+          "q": "Quelle est la politique d'annulation pour les hôtels de {city} ?",
+          "a": "Chaque tarif Amadeus indique sa politique d'annulation (souvent : flexible jusqu'à 24-48h avant l'arrivée, non remboursable pour les tarifs early-bird). Notre conciergerie peut proposer des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique de l'hôtel est non-remboursable, selon les négociations agence."
+        },
+        {
+          "q": "Le petit-déjeuner est-il inclus dans le tarif des hôtels {city} ?",
+          "a": "L'inclusion varie : la plupart des Palaces proposent un tarif chambre seule et un tarif chambre + petit-déjeuner. Notre programme de fidélité MyConciergeHotel offre le petit-déjeuner pour deux dès la première nuit sur les hôtels du catalogue Little Hotelier. La politique exacte de l'hôtel figure dans sa fiche."
+        },
+        {
+          "q": "Comment réserver un Palace ou hôtel 5★ à {city} via MyConciergeHotel ?",
+          "a": "Cliquez sur la fiche hôtel qui vous intéresse, choisissez vos dates dans le moteur de réservation Amadeus, payez en ligne (carte sécurisée PCI-DSS, 3D-Secure). Confirmation instantanée par e-mail. Pour les hôtels hors GDS, votre concierge vous adresse une proposition sous 24h ouvrées. Aucun supplément agence sur les tarifs nets."
+        }
+      ]
     },
     "card": {
       "palace": "Palace",
@@ -875,6 +1266,35 @@
     "directory": {
       "title": "Toutes nos destinations",
       "subtitle": "{count, plural, one {# destination disponible} other {# destinations disponibles}}.",
+      "aeoQuestion": "Quelles destinations couvre la conciergerie MyConciergeHotel ?",
+      "aeoAnswer": "MyConciergeHotel couvre {count} destinations — villes françaises (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) et pays internationaux avec guide éditorial (Italie, Suisse, Maroc, Émirats, Maldives, Thaïlande, Japon, États-Unis). Chaque destination ouvre une fiche avec sélection d'hôtels 5★ et Palaces, contexte local et conseils opérationnels du Concierge. Mise à jour {date}.",
+      "faqTitle": "Nos destinations — questions fréquentes",
+      "faqItems": [
+        {
+          "q": "Quelles villes françaises sont couvertes ?",
+          "a": "Notre catalogue couvre les pôles historiques du tourisme premium en France : Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), Côte d'Azur (Cannes, Nice, Cap-Ferrat, Monaco), Alpes (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordelais (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Pays basque (Biarritz), Corse (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Proposez-vous des destinations internationales ?",
+          "a": "Oui — 8 pays sont publiés avec guide éditorial (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis) et notre réseau Amadeus couvre 950 000 hôtels dans le monde sur demande. Le catalogue international s'enrichit chaque trimestre — voir la page guide de chaque pays pour la sélection d'auteur."
+        },
+        {
+          "q": "Comment choisissez-vous les villes éditoriales ?",
+          "a": "Nous publions une destination quand notre conciergerie a sélectionné au moins 3 adresses 5★ ou Palace dans la ville et peut signer un guide éditorial de 2000 mots avec POIs nommés (musées, tables, accès). Une ville sans masse critique apparaît en sous-page mais pas comme destination de premier niveau."
+        },
+        {
+          "q": "Une ville absente sera-t-elle ajoutée ?",
+          "a": "Le calendrier de publication est trimestriel. Pour suggérer une destination, contactez la conciergerie via /le-concierge — nous publions en priorité les villes où nos clients réservent déjà via le mode Amadeus sans guide éditorial."
+        },
+        {
+          "q": "Quelle différence entre une destination et un guide ?",
+          "a": "Depuis ADR-0015, les deux routes ont fusionné : /destination/{ville} héberge à la fois le hub catalogue (sélection d'hôtels) et le guide long-read (POIs, art de vivre, infos pratiques). /guide/{ville} redirige vers la destination en 308."
+        },
+        {
+          "q": "Les guides sont-ils disponibles en anglais ?",
+          "a": "Oui — toute destination publiée a sa version EN (/en/destination/{slug}) avec traduction native par notre équipe éditoriale (pas de traduction machine brute). hreflang fr-FR / en / x-default émis sur chaque page."
+        }
+      ],
       "count": "{count, plural, one {# hôtel} other {# hôtels}}",
       "franceSection": {
         "title": "France — par ville",

@@ -1,0 +1,74 @@
+{
+  "slug_fr": "japon-luxe-7-jours",
+  "slug_en": "japan-luxury-7-days",
+  "priority": "P0",
+  "destination_country": "Japon",
+  "destination_region": "Honshu",
+  "destination_city": "Tokyo, Kyoto, Hakone",
+  "themes": ["luxe", "culture", "gastronomie"],
+  "duration_min_days": 7,
+  "duration_max_days": 7,
+  "travel_style": "luxe",
+  "season": "printemps",
+  "target_word_count": 2200,
+  "meta_title_fr_hint": "Itinéraire Japon 7 jours luxe — Tokyo, Kyoto, Hakone | MyConciergeHotel",
+  "meta_desc_fr_hint": "7 jours au Japon entre Tokyo, Kyoto et Hakone : Palaces 5★, kaiseki étoilés, période des cerisiers. Sélection Concierge avec hôtels réservables.",
+  "hotel_slugs_target": ["aman-tokyo", "park-hyatt-kyoto", "hakone-ginyu"],
+  "hotel_fallback_note": "Si les hôtels cibles ne sont pas encore dans la DB, le pipeline doit fallback sur des hôtels 5★ du même groupe ou de la même ville présents dans la table hotels (filtre stars=5 + city ilike).",
+  "related_guide_slugs_target": ["guide-japon", "guide-tokyo", "guide-kyoto"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-tokyo", "meilleurs-hotels-kyoto"],
+  "related_itinerary_slugs_target": ["japon-culture-2-semaines"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 2,
+      "city": "Tokyo",
+      "hotel_slug_hint": "aman-tokyo",
+      "key_pois": ["Senso-ji", "Ginza", "TeamLab Borderless", "Hamarikyu"],
+      "step_angle": "Immersion mégapole — quartier Otemachi, sushi Sukiyabashi Jiro, jardin Hama-rikyu au lever du soleil",
+      "title_fr_hint": "Jours 1-2 : Tokyo — Immersion dans la mégapole",
+      "title_en_hint": "Days 1-2: Tokyo — Megacity immersion"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Hakone",
+      "hotel_slug_hint": "hakone-ginyu",
+      "key_pois": ["Mont Fuji vue", "Musée en Plein Air Hakone", "Lac Ashi", "Onsen Owakudani"],
+      "step_angle": "Ryokan et Mont Fuji — Hakone Ginyu onsen privatif, lac Ashi croisière matinale, shinkansen Odawara depuis Tokyo 35 min",
+      "title_fr_hint": "Jours 3-4 : Hakone — Ryokan, onsen et vue sur le Fuji",
+      "title_en_hint": "Days 3-4: Hakone — Ryokan, onsen and Fuji views"
+    },
+    {
+      "step": 3,
+      "duration_days": 3,
+      "city": "Kyoto",
+      "hotel_slug_hint": "park-hyatt-kyoto",
+      "key_pois": ["Fushimi Inari", "Arashiyama (bambouseraie)", "Kinkaku-ji", "Kiyomizu-dera"],
+      "step_angle": "Capitale impériale — colline Higashiyama, kaiseki au Kikunoi, geisha district Gion à 17h",
+      "title_fr_hint": "Jours 5-7 : Kyoto — Capitale impériale, temples et kaiseki",
+      "title_en_hint": "Days 5-7: Kyoto — Imperial capital, temples and kaiseki"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire pour le Japon en 7 jours en luxe ?",
+  "aeo_answer_fr_hint": "Tokyo (2 nuits Aman Tokyo, Otemachi), Hakone (2 nuits ryokan Ginyu, vue Fuji, onsen), Kyoto (3 nuits Park Hyatt, Fushimi Inari, kaiseki Kikunoi). Période idéale : fin mars-début avril (cerisiers) ou novembre (momiji). Japan Rail Pass 7 jours couvre Tokyo-Hakone-Kyoto. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter le Japon ?",
+    "Combien de jours faut-il pour découvrir le Japon ?",
+    "Quel budget prévoir pour un itinéraire luxe Japon 7 jours ?",
+    "Faut-il un Japan Rail Pass pour un itinéraire 7 jours ?",
+    "Quels sont les meilleurs hôtels 5 étoiles à Tokyo ?",
+    "Faut-il combiner Tokyo et Kyoto ou rester sur une seule ville ?",
+    "Comment se déplacer entre Tokyo, Kyoto et Hakone ?",
+    "Quels restaurants étoilés réserver à Tokyo et Kyoto ?",
+    "Le Japon est-il adapté pour une lune de miel ?",
+    "Comment réserver un ryokan de luxe à Hakone ?"
+  ],
+  "concierge_secret_hint": "Au Park Hyatt Kyoto, demander chambre 3902 ou 3905 (côté pagode Yasaka) — vue meilleure que les standards 'temple view'. Au Aman Tokyo, descendre au spa avant 7h pour avoir la piscine 30m vue Skytree pour soi seul.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Japon (qui couvre la destination globale). L'angle de cet itinéraire = 7 jours luxe + recommandations hôtel + AEO. Différencier de l'itinéraire Japon 2 semaines culture : ce brief est le format court première visite. Le guide reste l'autorité destination.",
+  "sources_to_cite": [
+    "JNTO — Japan National Tourism Organization",
+    "Atout France",
+    "Michelin Guide Japan"
+  ]
+}

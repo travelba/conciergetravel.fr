@@ -212,3 +212,90 @@ export const cancellationHowToJsonLd = (input: CancellationHowToInput): HowToNod
     step: stepNodes,
   };
 };
+
+// ---------------------------------------------------------------------------
+// Itinerary HowTo — generic builder for `/itineraire/[slug]` (CDC §6).
+// ---------------------------------------------------------------------------
+//
+// Unlike `bookingHowToJsonLd` / `cancellationHowToJsonLd`, the editorial
+// itineraries don't have hard-coded steps — every step is authored
+// per slug in `public.itineraries.sections[]`. The builder accepts the
+// already-localized step shape and stamps the Schema.org-required
+// `@type` / `position` / `inLanguage` / `totalTime` envelope around it.
+//
+// `totalTime` follows ISO-8601 duration (`PnD`) per Google's HowTo
+// rich-result spec — derived from `duration_min_days`. Optional `image`
+// per step lifts the hero Cloudinary id to a fully-qualified URL via
+// the caller (we don't import Cloudinary here to keep this package
+// presentation-agnostic).
+//
+// Skill: structured-data-schema-org §HowTo. Rule: itinerary-page.mdc §3.1.
+
+export interface ItineraryHowToStepInput {
+  readonly name: string;
+  readonly text: string;
+  /** Fully-qualified URL the step links to (typically a hotel fiche). */
+  readonly url?: string;
+  /** Fully-qualified image URL (Cloudinary delivery URL). */
+  readonly image?: string;
+}
+
+export interface ItineraryHowToInput {
+  readonly name: string;
+  readonly description?: string;
+  /**
+   * Duration in days (the itinerary's `duration_min_days`). Serialized
+   * as ISO-8601 `PnD`. Use `undefined` for open-ended itineraries.
+   */
+  readonly durationDays?: number;
+  readonly steps: ReadonlyArray<ItineraryHowToStepInput>;
+  readonly locale: 'fr' | 'en';
+}
+
+const HOWTO_STEPS_MAX = 14;
+
+/**
+ * Builds the `HowTo` JSON-LD for an editorial travel itinerary.
+ *
+ * Why a dedicated builder rather than reusing `bookingHowToJsonLd`:
+ * the booking variant ships fixed editorial copy, while itineraries
+ * carry per-slug copy authored upstream by the editorial pipeline.
+ * Both share the underlying `HowToNode` shape.
+ *
+ * Caps at {@link HOWTO_STEPS_MAX} steps — Google's HowTo rich-result
+ * documentation recommends 3–6 steps but tolerates more; the cap
+ * prevents accidentally serialising a 30-step jsonb blob.
+ */
+export const itineraryHowToJsonLd = (input: ItineraryHowToInput): HowToNode => {
+  const steps = input.steps.slice(0, HOWTO_STEPS_MAX);
+  const stepNodes: HowToStepNode[] = steps.map((s, i) => {
+    const node: HowToStepNode = {
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    };
+    if (s.url !== undefined && s.url.length > 0) node.url = s.url;
+    return node;
+  });
+
+  const out: HowToNode = {
+    '@type': 'HowTo',
+    name: input.name,
+    inLanguage: input.locale === 'fr' ? 'fr-FR' : 'en-GB',
+    step: stepNodes,
+  };
+  if (input.description !== undefined && input.description.length > 0) {
+    out.description = input.description;
+  }
+  if (input.durationDays !== undefined && input.durationDays > 0) {
+    out.totalTime = `P${input.durationDays}D`;
+  }
+  // Google honours a top-level `image` array on HowTo as the cover
+  // image. We pick the first step image when present.
+  const firstImage = steps.find((s) => s.image !== undefined && s.image.length > 0)?.image;
+  if (firstImage !== undefined) {
+    (out as HowToNode & { image?: ReadonlyArray<string> }).image = [firstImage];
+  }
+  return out;
+};

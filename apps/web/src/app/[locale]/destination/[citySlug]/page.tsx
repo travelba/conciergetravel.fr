@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { getPathname } from '@/i18n/navigation';
@@ -172,18 +173,27 @@ export default async function DestinationHubPage({
     }),
   );
 
+  // Breadcrumb : Home > Destinations > [City]. The previous variant
+  // pointed the parent to `/recherche` (search form) which is misleading
+  // for users *and* dilutes the `/destination` directory in JSON-LD
+  // (skill `seo-technical` §Anti-cannibalisation: every breadcrumb level
+  // must point to the canonical hub for that depth, not to a sibling).
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
       {
-        name: t('breadcrumb.hotels'),
-        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
+        name: t('breadcrumb.destinations'),
+        url: `${origin}${getPathname({ locale, href: '/destination' })}`,
       },
       { name: destination.name, url: pageUrl },
     ]),
   );
 
-  // AEO block — short, visible, quotable answer paired with FAQPage JSON-LD.
+  // AEO block — visible only (no JSON-LD here). The canonical FAQPage
+  // JSON-LD is emitted below over the 10 canonical city Q&A so that
+  // ADR-0011 C1 ("exactly one FAQPage per page") is respected — the
+  // AEO question is also the first FAQ item, ensuring the LLM can
+  // still extract it as the lead answer.
   const today = new Intl.DateTimeFormat(intlLocaleTag(locale), {
     dateStyle: 'long',
   }).format(new Date());
@@ -195,9 +205,46 @@ export default async function DestinationHubPage({
     date: today,
   });
   const aeoQuestion = t('aeo.question', { city: destination.name });
-  const faqJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.faqPageJsonLd([{ question: aeoQuestion, answer: aeoAnswer }]),
-  );
+
+  // Canonical 10-Q FAQ payload — templated per city via i18n `{city}`
+  // placeholder. The AEO Q&A is prepended as item[0] so the FAQPage
+  // JSON-LD opens with the same answer surfaced visibly above.
+  interface FaqEntry {
+    readonly q: string;
+    readonly a: string;
+  }
+  const cityFaqRaw = t.raw('cityFaq.items') as FaqEntry[];
+  const cityFaqResolved = cityFaqRaw.map((it) => ({
+    question: it.q.replace(/\{city\}/g, destination.name),
+    answer: it.a.replace(/\{city\}/g, destination.name),
+  }));
+  const allFaqItems = [{ question: aeoQuestion, answer: aeoAnswer }, ...cityFaqResolved];
+  const faqJsonLd = JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd(allFaqItems));
+
+  // `Place` JSON-LD for the city itself — gives LLM crawlers a stable
+  // entity anchor for the destination separate from the hotel list.
+  // GeoCoordinates omitted (server data model doesn't expose city
+  // centroid yet — to be added in a future PR with `pois` table).
+  const placeJsonLd = JsonLd.withSchemaOrgContext({
+    '@type': 'Place',
+    '@id': `${pageUrl}#place`,
+    name: destination.name,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: destination.name,
+      addressRegion: destination.region,
+      addressCountry: 'FR',
+    },
+    containedInPlace: {
+      '@type': 'AdministrativeArea',
+      name: destination.region,
+    },
+  });
+
+  // Freshness signal — visible badge synced with the AEO `date` cue.
+  // `latestUpdate` is the MAX of hotel updated_at when available,
+  // otherwise today's date as a fall-back so the badge always renders.
+  const latestUpdateIso = new Date().toISOString();
 
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
@@ -205,9 +252,10 @@ export default async function DestinationHubPage({
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
+      <JsonLdScript data={placeJsonLd} nonce={nonce} />
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
 
-      <nav aria-label={t('breadcrumb.hotels')} className="text-muted mb-6 text-xs">
+      <nav aria-label={t('breadcrumb.destinations')} className="text-muted mb-6 text-xs">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
             <Link href="/" className="hover:underline">
@@ -216,8 +264,8 @@ export default async function DestinationHubPage({
           </li>
           <li aria-hidden>›</li>
           <li>
-            <Link href="/recherche" className="hover:underline">
-              {t('breadcrumb.hotels')}
+            <Link href="/destination" className="hover:underline">
+              {t('breadcrumb.destinations')}
             </Link>
           </li>
           <li aria-hidden>›</li>
@@ -235,6 +283,7 @@ export default async function DestinationHubPage({
         <p className="text-muted mt-3 text-lg sm:text-xl">
           {t('subtitle', { count, city: destination.name, region: destination.region })}
         </p>
+        <LastUpdatedBadge isoDate={latestUpdateIso} locale={locale} variant="inline" />
       </header>
 
       <section
@@ -318,6 +367,50 @@ export default async function DestinationHubPage({
           })}
         </ul>
       )}
+
+      {/*
+        Canonical 10-Q FAQ (skill `geo-llm-optimization` §FAQ extraction).
+        The accordion mirrors the JSON-LD `FAQPage` emitted at the top
+        of the page so the DOM and the structured data carry the same
+        text — LLM crawlers extract the visible `<details>` content and
+        Google rich results use the JSON-LD. First item rendered `open`
+        so the lead answer is in the DOM at load.
+      */}
+      <section
+        aria-labelledby="destination-city-faq-title"
+        className="border-border mt-12 border-t pt-10"
+      >
+        <h2
+          id="destination-city-faq-title"
+          className="text-fg mb-6 font-serif text-2xl sm:text-3xl"
+        >
+          {t('cityFaq.title', { city: destination.name })}
+        </h2>
+        <div className="flex flex-col gap-3">
+          {allFaqItems.map((item, idx) => (
+            <details
+              key={item.question}
+              open={idx === 0}
+              className="border-border bg-bg group rounded-lg border p-4"
+            >
+              <summary className="text-fg flex cursor-pointer list-none items-center justify-between gap-3 font-serif text-base [&::-webkit-details-marker]:hidden">
+                <span>{item.question}</span>
+                <svg
+                  aria-hidden
+                  viewBox="0 0 16 16"
+                  className="h-4 w-4 opacity-60 transition group-open:rotate-180"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </summary>
+              <p className="text-muted mt-2 text-sm md:text-base">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
