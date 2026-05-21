@@ -79,6 +79,8 @@ export async function GET(): Promise<NextResponse> {
         | '/le-concierge/contact'
         | '/le-concierge/fidelite'
         | '/le-concierge/faq'
+        | '/le-concierge/pour-les-hoteliers'
+        | '/le-concierge/mice-et-seminaires'
         | '/itineraires';
       priority: number;
     }[] = [
@@ -94,6 +96,11 @@ export async function GET(): Promise<NextResponse> {
       // Vague 5 batch 2 — Loyalty is conversion-related, FAQ is AEO-premium (35 Q&A).
       { href: '/le-concierge/fidelite', priority: 0.6 },
       { href: '/le-concierge/faq', priority: 0.7 },
+      // Vague-5 P1 — B2B surfaces (hotelier partnerships + MICE events).
+      // Priority 0.5 — important for revenue but lower SERP volume than
+      // the consumer-facing institutional pages.
+      { href: '/le-concierge/pour-les-hoteliers', priority: 0.5 },
+      { href: '/le-concierge/mice-et-seminaires', priority: 0.5 },
       // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
       // real listing (PR2 — Sprint 2). `last_updated` per slug ships
       // separately in `/sitemaps/itineraries.xml` (PR3).
