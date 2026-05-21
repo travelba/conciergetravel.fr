@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -7,7 +8,8 @@ import { JsonLd } from '@mch/seo';
 import { InternationalComingSoon } from '@/components/destinations/international-coming-soon';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { getPathname } from '@/i18n/navigation';
-import { isRoutingLocale } from '@/i18n/routing';
+import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 
 // The page reads `headers()` to forward the per-request CSP nonce to its
@@ -19,6 +21,46 @@ import { env } from '@/lib/env';
 export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
+
+/**
+ * Home `generateMetadata` — canonical, hreflang, OG.
+ *
+ * Without an explicit `generateMetadata` the root layout's metadata only
+ * carries the brand title; the home page is the single most important
+ * URL of the site and must expose:
+ *   - a unique 50-60 char title and 140-160 char meta description
+ *   - `alternates.canonical` (relative — middleware normalises locale)
+ *   - `alternates.languages` (fr-FR, en, x-default) for hreflang signal
+ *   - locale-aware Open Graph (LCP-relevant og:locale)
+ *
+ * Skill: seo-technical §Metadata baseline + seo-geo.mdc §Metadata.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  if (!isRoutingLocale(raw)) return {};
+  const locale = raw;
+  const t = await getTranslations({ locale, namespace: 'homepage' });
+  const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDesc'),
+    alternates: {
+      canonical: buildCanonicalPath(locale),
+      languages: buildHreflangAlternates(buildCanonicalPath),
+    },
+    openGraph: {
+      title: t('metaTitle'),
+      description: t('metaDesc'),
+      type: 'website',
+      locale: ogLocale(locale),
+      siteName: 'MyConciergeHotel',
+    },
+  };
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

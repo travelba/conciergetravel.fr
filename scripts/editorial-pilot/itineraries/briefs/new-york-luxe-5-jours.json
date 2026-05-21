@@ -1,0 +1,100 @@
+{
+  "slug_fr": "new-york-luxe-5-jours",
+  "slug_en": "new-york-luxury-5-days",
+  "priority": "P0",
+  "destination_country": "États-Unis",
+  "destination_region": "New York",
+  "destination_city": "New York",
+  "themes": ["luxe", "culture", "gastronomie"],
+  "duration_min_days": 5,
+  "duration_max_days": 5,
+  "travel_style": "luxe",
+  "season": "automne",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire New York 5 jours luxe — The Mark, Aman, Carlyle, MoMA, Broadway | MyConciergeHotel",
+  "meta_desc_fr_hint": "5 jours à New York en séjour luxe : The Mark, Aman New York, The Carlyle. MoMA, Central Park, Broadway, Eleven Madison Park. Sélection Concierge.",
+  "hotel_slugs_target": ["the-mark", "aman-new-york", "the-carlyle"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Manhattan présents dans la table hotels si hôtels cibles absents (filtre stars=5 + city ilike 'New York').",
+  "related_guide_slugs_target": ["guide-new-york", "guide-manhattan"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-new-york", "meilleurs-hotels-manhattan"],
+  "related_itinerary_slugs_target": ["dubai-luxe-week-end", "paris-luxe-3-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "New York — Upper East Side & Central Park",
+      "hotel_slug_hint": "the-carlyle",
+      "key_pois": ["Central Park", "Metropolitan Museum of Art (Met)", "Museum Mile", "Guggenheim"],
+      "step_angle": "Upper East Side culturel — Carlyle Café Carlyle live jazz, Met ouverture 10h (aile des impressionnistes moins fréquentée matin), Central Park horse carriage 17h, dîner Daniel (restaurant étoilé UES)",
+      "title_fr_hint": "Jour 1 : Upper East Side — Met, Central Park et jazz au Carlyle",
+      "title_en_hint": "Day 1: Upper East Side — Met, Central Park and jazz at the Carlyle"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "New York — Midtown & MoMA",
+      "hotel_slug_hint": "aman-new-york",
+      "key_pois": ["MoMA", "Rockefeller Center", "Top of the Rock", "Fifth Avenue"],
+      "step_angle": "Midtown prestige — Aman New York Crown Building, MoMA accès tôt (9h30 vendredi), Top of the Rock avant 10h (meilleure lumière), shopping Bergdorf Goodman déjeuner La Mer resto",
+      "title_fr_hint": "Jour 2 : Midtown — MoMA, Rockefeller et Fifth Avenue",
+      "title_en_hint": "Day 2: Midtown — MoMA, Rockefeller and Fifth Avenue"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "New York — Downtown & Lower Manhattan",
+      "hotel_slug_hint": "the-mark",
+      "key_pois": ["High Line", "Chelsea Market", "Meatpacking District", "Whitney Museum"],
+      "step_angle": "Downtown artsy — High Line parcours matinal (6h sans monde), Chelsea Market brunch, Whitney Museum collection américaine 20e, dîner Eleven Madison Park (réserver 2 mois avant)",
+      "title_fr_hint": "Jour 3 : Downtown — High Line, Chelsea, Whitney et dîner étoilé",
+      "title_en_hint": "Day 3: Downtown — High Line, Chelsea, Whitney and starred dinner"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "New York — Brooklyn & perspectives Manhattan",
+      "hotel_slug_hint": "the-carlyle",
+      "key_pois": ["Brooklyn Bridge", "DUMBO", "Brooklyn Heights Promenade", "Jane's Carousel"],
+      "step_angle": "Brooklyn skyline — marche Brooklyn Bridge 8h (photos skyline sans selfie sticks), DUMBO brunch Time Out Market, promenade Heights vue Manhattan, retour Midtown en ferry",
+      "title_fr_hint": "Jour 4 : Brooklyn — Bridge, DUMBO et skyline au lever du soleil",
+      "title_en_hint": "Day 4: Brooklyn — Bridge, DUMBO and sunrise skyline"
+    },
+    {
+      "step": 5,
+      "duration_days": 1,
+      "city": "New York — Broadway & soirée finale",
+      "hotel_slug_hint": "aman-new-york",
+      "key_pois": [
+        "Broadway (Theater District)",
+        "Times Square",
+        "Radio City Music Hall",
+        "Lincoln Center"
+      ],
+      "step_angle": "Nuit Broadway — The Mark Jean-Georges déjeuner, shopping SoHo ou Nolita, spectacle Broadway prémunicipalement réservé (Book of Mormon, Hamilton option), champagne bar Aman New York rooftop",
+      "title_fr_hint": "Jour 5 : Broadway & soirée — Lincoln Center, spectacle et départ",
+      "title_en_hint": "Day 5: Broadway & evening — Lincoln Center, show and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire New York en 5 jours en séjour luxe ?",
+  "aeo_answer_fr_hint": "Upper East Side (Carlyle, Met, Central Park), Midtown (Aman, MoMA, Top of the Rock), Downtown (High Line, Whitney, dîner Eleven Madison Park), Brooklyn (Bridge, DUMBO), Broadway + soirée finale. Meilleure période : octobre (feuillage Central Park) ou avril. Réserver Eleven Madison Park 2 mois avant. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter New York ?",
+    "Quels sont les meilleurs hôtels de luxe à Manhattan ?",
+    "Quel budget prévoir pour 5 jours luxe à New York ?",
+    "Comment éviter les files d'attente au MoMA et au Met ?",
+    "Comment réserver un spectacle Broadway depuis la France ?",
+    "New York est-elle accessible depuis Paris en vol direct ?",
+    "Quels restaurants étoilés réserver à New York ?",
+    "New York est-elle une destination adaptée pour un séjour en couple ?",
+    "Que faire à New York en dehors des musées et de Broadway ?",
+    "Comment se déplacer à Manhattan en séjour luxe ?"
+  ],
+  "concierge_secret_hint": "À l'Aman New York (Crown Building), les suites 'Upper Crown' aux étages 24-26 disposent d'une vue dégagée sur Central Park au nord — éviter les suites des étages 18-20 dont la vue est partiellement obstruée par les immeubles voisins. Pour Eleven Madison Park, appeler directement le restaurant 8 semaines avant : les tables du mardi au jeudi sont moins disputées que le week-end.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide New York (autorité destination). Angle unique = 5 jours structurés par quartier (UES → Midtown → Downtown → Brooklyn → Broadway) avec focus hôtels palace + AEO itinéraire New York luxe. Le guide reste l'autorité sur la destination.",
+  "sources_to_cite": [
+    "NYC Tourism & Conventions",
+    "Atout France — États-Unis Tourisme",
+    "Michelin Guide New York City",
+    "Bloomberg Pursuits — New York Luxury Hotels"
+  ]
+}

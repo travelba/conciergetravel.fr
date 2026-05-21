@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { buildLlmsFullHotelPages, buildLlmsFullTxt, type LlmsFullTxtPage } from '@mch/seo';
 
+import { env } from '@/lib/env';
 import { listIndexableHotelsForLlms } from '@/server/hotels/list-indexable-for-llms';
 
 /**
@@ -10,46 +11,64 @@ import { listIndexableHotelsForLlms } from '@/server/hotels/list-indexable-for-l
  * Dynamic since B6: pulls every indexable hotel from Supabase via
  * `listIndexableHotelsForLlms` and emits one FR + one EN markdown
  * section per hotel (canonical URL, factual summary, key facts). The
- * editorial preamble (`L'agence`, `Programme de fidélité`) stays in
- * code so the corpus reads coherently even when the DB is empty.
+ * editorial preamble (`Le Concierge`, mentions légales) stays in code
+ * so the corpus reads coherently even when the DB is empty.
  *
  * Caching: `force-static` + `revalidate = 3600`. Cold start hits
  * Supabase once per hour; warm revalidations are served from the
  * Vercel data cache. The Supabase reader caps the result at 500 rows
  * (~2.5 MB max output, well under Vercel route-handler limits).
+ *
+ * **Origin read from env** (not `request.url`): under `force-static` the
+ * prerender runs at build time with `localhost` as host, which would
+ * bake the wrong origin into the deployed corpus. Same pattern as
+ * `robots.txt` and `sitemap.xml` (skill `seo-technical` §Sitemaps).
  */
 export const dynamic = 'force-static';
 export const revalidate = 3600;
 
-export async function GET(request: Request): Promise<NextResponse> {
-  const origin = new URL(request.url).origin;
+const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
+
+export async function GET(): Promise<NextResponse> {
+  const origin = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 
   // Editorial preamble — keeps the LLM corpus coherent even when
-  // Supabase is unreachable. Same shape as the legacy `pages` list.
+  // Supabase is unreachable. URLs MUST resolve 200 on the live site:
+  // previous versions referenced `/agence/` and `/programme-fidelite/`
+  // which were declared in routing.ts but never implemented, leaving
+  // LLM agents with broken citation URLs. The Concierge page is the
+  // canonical EEAT surface (ADR-0014 mega-menu 5 + le-concierge/page.tsx).
   const editorialPages: LlmsFullTxtPage[] = [
     {
-      url: `${origin}/agence/`,
-      title: "L'agence",
+      url: `${origin}/fr/le-concierge`,
+      title: "Le Concierge — l'agence",
       summary:
         'MyConciergeHotel.com est une agence française accréditée IATA et membre ASPST. ' +
-        'Garantie financière APST. Conseillers francophones, paiement sécurisé Amadeus.',
+        'Garantie financière APST. Conseillers francophones, paiement sécurisé Amadeus. ' +
+        'Chaque fiche hôtel se conclut par un « Conseil du Concierge » — secret opérationnel ' +
+        '(chambre, table, horaire, accès) que les guides généralistes omettent.',
       keyFacts: [
         'Accréditation IATA',
         'Membre ASPST',
         'Garantie financière APST',
         'Paiement sécurisé Amadeus',
+        'Conseil du Concierge sur chaque fiche (ADR-0011)',
       ],
     },
     {
-      url: `${origin}/programme-fidelite/`,
-      title: 'Programme de fidélité',
+      url: `${origin}/en/le-concierge`,
+      title: 'The Concierge — the agency',
       summary:
-        'Programme de fidélité MyConciergeHotel avec deux tiers : Essentiel (gratuit, dès la première nuit, ' +
-        'avantages variables selon hôtel partenaire) et Prestige (payant, avantages renforcés).',
+        'MyConciergeHotel.com is a French IATA-accredited travel agency and ASPST member. ' +
+        'APST financial guarantee, French and English-speaking advisors, secure Amadeus payment. ' +
+        "Every hotel page closes with a Concierge's Tip — an operational secret " +
+        '(room, table, timing, access) that mainstream guides leave out.',
       keyFacts: [
-        'Tier Essentiel automatique',
-        'Tier Prestige sur abonnement',
-        'Bénéfices : petit-déjeuner offert, late check-out, crédit hôtel selon hôtels Little Hotelier',
+        'IATA accreditation',
+        'ASPST member',
+        'APST financial guarantee',
+        'Secure Amadeus payment',
+        "Concierge's Tip on every hotel page (ADR-0011)",
       ],
     },
   ];

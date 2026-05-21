@@ -241,13 +241,17 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.account')}
                 </Link>
               </li>
+              {/* Vague-5 — dedicated institutional pages now wired in
+                  place of the previous catch-all `/le-concierge`. The
+                  3 entries still pointing to `/le-concierge` (hoteliers,
+                  mice, press) will switch when their P1/P2 pages ship. */}
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link href="/le-concierge/fidelite" className="text-fg hover:underline">
                   {t('links.loyalty')}
                 </Link>
               </li>
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link href="/le-concierge/faq" className="text-fg hover:underline">
                   {t('links.support')}
                 </Link>
               </li>
@@ -267,7 +271,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                 </Link>
               </li>
               <li>
-                <Link href="/le-concierge" className="text-fg hover:underline">
+                <Link href="/le-concierge/contact" className="text-fg hover:underline">
                   {t('links.concierge')}
                 </Link>
               </li>
