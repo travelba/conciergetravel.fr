@@ -13,6 +13,7 @@ import {
   HOTEL_CATEGORY_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
+  intlNavSlugToIso,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -279,13 +280,29 @@ export function MobileNav(): ReactElement {
                     linkClass={subLinkClass}
                   />
                   <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
-                  <MobileLinkList
-                    entries={INTL_DESTINATION_NAV_ENTRIES}
-                    locale={locale}
-                    pathname="/destination/[citySlug]"
-                    paramKey="citySlug"
-                    linkClass={subLinkClass}
-                  />
+                  {/*
+                    International destinations: each entry routes to
+                    `/hotels` (catalogue catch-all with per-country
+                    sections). See `site-header.tsx` PalacesHotelsMegaMenu
+                    for the full rationale — `/destination/[citySlug]`
+                    is FR-only and 404'd on every international slug.
+                  */}
+                  <ul className="flex flex-col gap-0.5">
+                    {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+                      const iso = intlNavSlugToIso(entry.slug);
+                      const ariaLabel =
+                        iso !== null
+                          ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
+                          : pickEntryLabel(entry, locale);
+                      return (
+                        <li key={entry.slug}>
+                          <Link href="/hotels" aria-label={ariaLabel} className={subLinkClass}>
+                            {pickEntryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                   <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
                     {t('primaryNav.destinationsBrowseAll')}
                   </Link>
