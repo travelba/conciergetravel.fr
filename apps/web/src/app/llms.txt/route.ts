@@ -187,6 +187,94 @@ export async function GET(): Promise<NextResponse> {
             },
           ]
         : []),
+      // Vague-6 — all 8 international country guides indexable.
+      // Dedicated section so LLMs identify the expanded international
+      // scope (was zero before May 2026).
+      {
+        title: 'Guides pays internationaux (8 pays — Vague 6)',
+        items: [
+          {
+            url: `${origin}/fr/guide/italie`,
+            description:
+              'Italie — Guide luxe MyConciergeHotel : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. 6 régions, Palaces nommés (Le Sirenuse, Villa d’Este, Castiglion del Bosco…), conseils opérationnels Concierge, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/italy`,
+            description:
+              'Italy — MyConciergeHotel luxury guide: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. 6 regions, named 5★ and Palace addresses, Concierge operational tips, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/suisse`,
+            description:
+              'Suisse — Guide luxe MyConciergeHotel : Gstaad, St-Moritz, Zermatt, Lac Léman, Genève, Zurich, Lucerne. 6 pôles, adresses nommées (Gstaad Palace, Badrutt’s Palace, Mont Cervin Palace, Dolder Grand), 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/switzerland`,
+            description:
+              'Switzerland — MyConciergeHotel luxury guide: Gstaad, St Moritz, Zermatt, Lake Geneva, Geneva, Zurich, Lucerne. 6 hubs, named addresses, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/maroc`,
+            description:
+              'Maroc — Guide luxe MyConciergeHotel : Marrakech (Royal Mansour, La Mamounia, Mandarin Oriental, Selman), Essaouira, Désert Erg Chebbi, Tanger/Tétouan, Fès. 5 régions, riads et Palaces nommés, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/morocco`,
+            description:
+              'Morocco — MyConciergeHotel luxury guide: Marrakech, Essaouira, Erg Chebbi Desert, Tangier/Tetouan, Fes. 5 regions, named riads and Palaces, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/maldives`,
+            description:
+              'Maldives — Guide luxe MyConciergeHotel : Soneva Jani, Soneva Fushi, Cheval Blanc Randheli, Velaa Private Island, One&Only Reethi Rah, Four Seasons. 8 resorts d’auteur. Transferts hydravion. 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/maldives`,
+            description:
+              'Maldives — MyConciergeHotel luxury guide: Soneva, Cheval Blanc Randheli, Velaa, One&Only Reethi Rah, Four Seasons, Anantara, COMO. 8 author resorts. Seaplane transfers. 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/emirats-arabes-unis`,
+            description:
+              'Émirats arabes unis — Guide luxe MyConciergeHotel : Dubaï (Burj Al Arab, Atlantis The Royal, Bvlgari Resort, One Za’abeel) et Abu Dhabi (Emirates Palace, Bvlgari Abu Dhabi). 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/uae`,
+            description:
+              'United Arab Emirates — MyConciergeHotel luxury guide: Dubai (Burj Al Arab, Atlantis The Royal, Bvlgari, One Za’abeel) and Abu Dhabi (Emirates Palace, Bvlgari). 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/japon`,
+            description:
+              'Japon — Guide luxe MyConciergeHotel : Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), ryokans Hakone et Kanazawa, Mont Fuji. 5 régions, hôtels internationaux et ryokans, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/japan`,
+            description:
+              'Japan — MyConciergeHotel luxury guide: Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), Hakone and Kanazawa ryokans, Mount Fuji. 5 regions, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/thailande`,
+            description:
+              'Thaïlande — Guide luxe MyConciergeHotel : Bangkok (Mandarin Oriental depuis 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui (Four Seasons, Six Senses), Chiang Mai (Four Seasons Tented Camp Golden Triangle), Krabi. 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/thailand`,
+            description:
+              'Thailand — MyConciergeHotel luxury guide: Bangkok (Mandarin Oriental since 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui, Chiang Mai (Four Seasons Tented Camp), Krabi. 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/etats-unis`,
+            description:
+              'États-Unis — Guide luxe MyConciergeHotel : New York (Aman, Carlyle Rosewood, Mandarin Oriental, Four Seasons), Aspen (Little Nell, St Regis, Hotel Jerome), Napa Valley (Meadowood, Auberge du Soleil), Hawaii (Four Seasons Lanai, Halekulani). 4 pôles, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/usa`,
+            description:
+              'United States — MyConciergeHotel luxury guide: New York (Aman, Carlyle, Mandarin Oriental), Aspen (Little Nell, St Regis, Hotel Jerome), Napa Valley (Meadowood, Auberge du Soleil), Hawaii (Four Seasons Lanai, Halekulani). 4 hubs, 7 Q&A.',
+          },
+        ],
+      },
       // ── ADR-0014 — new GEO surfaces ──────────────────────────────────────
       {
         title: 'Inspiration (thèmes × occasions × saisons)',
@@ -245,6 +333,56 @@ export async function GET(): Promise<NextResponse> {
             url: `${origin}/en/le-concierge`,
             description:
               'The Concierge — IATA / APST agency, editorial method, the Concierge’s Tip (proprietary signature), loyalty programme.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/methode-editoriale`,
+            description:
+              'Méthode éditoriale MyConciergeHotel — les 8 critères de sélection (Atout France, Michelin Keys, Forbes, audit interne), les 4 principes (indépendance, transparence, expertise, fraîcheur), le processus d’inclusion en 4 étapes. Page-publishingPrinciples Knowledge Panel.',
+          },
+          {
+            url: `${origin}/en/le-concierge/editorial-method`,
+            description:
+              'MyConciergeHotel editorial method — the 8 selection criteria (Atout France, Michelin Keys, Forbes, internal audit), 4 principles (independence, transparency, expertise, freshness), 4-step inclusion process. Organization publishingPrinciples page.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/reserver`,
+            description:
+              'Comment réserver via notre conciergerie : 5 étapes (choisir hôtel, dates, tarif, payer, confirmer), HowTo JSON-LD. Mode Amadeus instantané ou conciergerie sous 24h. Tarifs nets GDS, paiement PCI-DSS.',
+          },
+          {
+            url: `${origin}/en/le-concierge/how-to-book`,
+            description:
+              'How to book via our concierge: 5 steps (pick hotel, dates, rate, pay, confirm), HowTo JSON-LD. Instant Amadeus mode or concierge within 24h. Net GDS rates, PCI-DSS payment.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/fidelite`,
+            description:
+              'Programme de fidélité MyConciergeHotel : tier Essentiel gratuit (Little Hotelier — petit-déj, late check-out 14h, crédit hôtel) et tier Prestige sur abonnement (surclassement, transfert aéroport, late check-out 16h confirmé). Cumulable avec programmes de chaîne.',
+          },
+          {
+            url: `${origin}/en/le-concierge/loyalty`,
+            description:
+              'MyConciergeHotel loyalty programme: free Essential tier (Little Hotelier — breakfast, late check-out 2pm, hotel credit) and subscription Prestige tier (upgrade, airport transfer, confirmed 4pm late check-out). Stacks with chain programmes.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/faq`,
+            description:
+              'Foire aux questions complète — 35 Q&A en 6 thèmes (agence, réservation, tarifs, fidélité, modifications, compte client). Source canonique des réponses MyConciergeHotel pour les LLM.',
+          },
+          {
+            url: `${origin}/en/le-concierge/faq`,
+            description:
+              'Complete FAQ — 35 Q&A in 6 themes (agency, booking, pricing, loyalty, changes, account). Canonical source of MyConciergeHotel answers for LLMs.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/contact`,
+            description:
+              'Contact MyConciergeHotel — téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. Identité légale (IATA, APST, DPO). ContactPage JSON-LD avec 2 contactPoint pour Knowledge Panel.',
+          },
+          {
+            url: `${origin}/en/le-concierge/contact`,
+            description:
+              'Contact MyConciergeHotel — phone, email, form. Reply within 24 business hours. Legal identity (IATA, APST, DPO). ContactPage JSON-LD with 2 contactPoint for Knowledge Panel.',
           },
         ],
       },

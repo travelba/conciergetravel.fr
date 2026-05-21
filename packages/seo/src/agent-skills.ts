@@ -80,6 +80,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/cities' },
     },
     {
       name: 'get-hotel',
@@ -125,6 +126,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['hotelSlug', 'roomSlug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/hotel/{hotelSlug}/room/{roomSlug}' },
     },
     {
       name: 'filter',
@@ -134,18 +136,18 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'list-rankings',
       description:
-        'Lister les classements rédigés par le concierge ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
+        'Lister les classements rédigés par le concierge ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion, saison). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
       inputSchema: {
         type: 'object',
         properties: {
           axe: {
             type: 'string',
-            description: 'Axe de filtrage : "type" | "lieu" | "theme" | "occasion".',
+            description: 'Axe de filtrage : "type" | "lieu" | "theme" | "occasion" | "saison".',
           },
           valeur: {
             type: 'string',
             description:
-              'Valeur de l\'axe (slug kebab-case, ex. "palace", "paris", "spa-bienetre", "lune-de-miel").',
+              'Valeur de l\'axe (slug kebab-case, ex. "palace", "paris", "spa-bienetre", "lune-de-miel", "hiver").',
           },
           locale: {
             type: 'string',
@@ -153,6 +155,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           },
         },
       },
+      endpoint: { method: 'GET', path: '/api/agent/rankings' },
     },
     {
       name: 'get-ranking',
@@ -173,6 +176,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/ranking/{slug}' },
     },
     {
       name: 'compare-prices',
@@ -188,6 +192,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['hotelSlug', 'checkin', 'checkout'],
       },
+      endpoint: { method: 'POST', path: '/api/agent/compare-prices' },
     },
     {
       name: 'booking',
@@ -219,6 +224,96 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       name: 'loyalty',
       description:
         'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
+      endpoint: { method: 'GET', path: '/api/agent/loyalty' },
+    },
+    {
+      name: 'contact',
+      description:
+        'Envoyer un message à la conciergerie MyConciergeHotel : question sur une réservation, demande d’information, signalement. Réponse sous 24h ouvrées. La réponse est envoyée par e-mail à l’adresse fournie. Inclut un protection honeypot anti-spam et un rate-limit par IP. URL canonique HTML : /fr/le-concierge/contact (ou /en/le-concierge/contact).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: 'Prénom et nom de la personne qui contacte la conciergerie.',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail à laquelle la conciergerie répondra.',
+          },
+          subject: {
+            type: 'string',
+            description: 'Sujet du message (réservation, devis, information, signalement…).',
+          },
+          message: {
+            type: 'string',
+            description: 'Contenu du message (minimum 10 caractères).',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale de la réponse souhaitée — "fr" (par défaut) ou "en".',
+          },
+          phone: {
+            type: 'string',
+            description: 'Numéro de téléphone optionnel pour un rappel.',
+          },
+        },
+        required: ['name', 'email', 'subject', 'message'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/contact' },
+    },
+    {
+      name: 'newsletter',
+      description:
+        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale Palaces et hôtels 5★, conseils du Concierge, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail du destinataire.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale préférée — "fr" (par défaut) ou "en".',
+          },
+          consent: {
+            type: 'boolean',
+            description:
+              'Doit être strictement true — consentement explicite RGPD requis. Toute autre valeur est rejetée.',
+          },
+        },
+        required: ['email', 'consent'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/newsletter' },
+    },
+    {
+      name: 'newsletter',
+      description:
+        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale Palaces et hôtels 5★, conseils du Concierge, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail du destinataire.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale préférée — "fr" (par défaut) ou "en".',
+          },
+          consent: {
+            type: 'boolean',
+            description:
+              'Doit être strictement true — consentement explicite RGPD requis. Toute autre valeur est rejetée.',
+          },
+        },
+        required: ['email', 'consent'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/newsletter' },
     },
     // ── ADR-0014 — new agentic surfaces ─────────────────────────────────
     {
@@ -229,6 +324,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/categories' },
     },
     {
       name: 'list-themes',
@@ -238,6 +334,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/themes' },
     },
     {
       name: 'list-occasions',
@@ -247,6 +344,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/occasions' },
     },
     {
       name: 'list-brands',
@@ -256,6 +354,49 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/brands' },
+    },
+    {
+      name: 'get-country-guide',
+      description:
+        'Récupérer le guide pays MyConciergeHotel pour une destination internationale (Italie, Suisse, Maroc, Maldives, Émirats arabes unis, Japon, Thaïlande, États-Unis). Renvoie : factual summary, AEO Q&A, 5-6 régions avec adresses nommées + Conseil du Concierge opérationnel par région, infos pratiques (visa, monnaie, langues), 7 Q&A canoniques. URL canonique HTML : /fr/guide/{slug} ou /en/guide/{slug-en}.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description:
+              "Slug du pays en français — l'un de : italie, suisse, maroc, maldives, emirats-arabes-unis, japon, thailande, etats-unis.",
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale de la réponse — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['slug'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/country-guide/{slug}' },
+    },
+    {
+      name: 'get-country-guide',
+      description:
+        'Récupérer le guide pays MyConciergeHotel pour une destination internationale (Italie, Suisse, Maroc, Maldives, Émirats arabes unis, Japon, Thaïlande, États-Unis). Renvoie : factual summary, AEO Q&A, 5-6 régions avec adresses nommées + Conseil du Concierge opérationnel par région, infos pratiques (visa, monnaie, langues), 7 Q&A canoniques. URL canonique HTML : /fr/guide/{slug} ou /en/guide/{slug-en}.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description:
+              "Slug du pays en français — l'un de : italie, suisse, maroc, maldives, emirats-arabes-unis, japon, thailande, etats-unis.",
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale de la réponse — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['slug'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/country-guide/{slug}' },
     },
     {
       name: 'get-concierge-tip',
@@ -275,6 +416,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/concierge-tip/{slug}' },
     },
     // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
     {
@@ -296,6 +438,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/itinerary/{slug}' },
     },
     {
       name: 'list-itineraries',
@@ -332,6 +475,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           },
         },
       },
+      endpoint: { method: 'GET', path: '/api/agent/itineraries' },
     },
   ],
 };

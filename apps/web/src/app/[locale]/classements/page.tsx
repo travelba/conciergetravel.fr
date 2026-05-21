@@ -6,11 +6,13 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { RankingsFacets } from '@/components/rankings/rankings-facets';
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { getPathname } from '@/i18n/navigation';
-import { buildHreflangAlternates, hreflangKey, ogLocale } from '@/i18n/runtime';
+import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
@@ -50,6 +52,36 @@ const T = {
     facetTheme: 'Thématique',
     facetOccasion: 'Occasion',
     subhubsLabel: 'Voir le sous-hub',
+    aeoQ: 'Comment fonctionnent les classements MyConciergeHotel ?',
+    aeoAnswer: (n: number, freshness: string) =>
+      `MyConciergeHotel publie ${n} classements éditoriaux de Palaces et hôtels 5★, croisés sur quatre axes (type, destination, thématique, occasion) et un calendrier saisonnier. Chaque classement est rédigé par notre conciergerie : méthode transparente, sources nommées (Atout France, Michelin Keys, Forbes Travel Guide), aucun pay-to-play. Lecture moyenne 5-8 min, mise à jour ${freshness}.`,
+    faqTitle: 'Nos classements — questions fréquentes',
+    faq: [
+      {
+        q: 'Sur quels critères classez-vous les hôtels ?',
+        a: "Notre score interne combine la distinction Atout France (Palace, 5★), les Michelin Keys, les étoiles Michelin de la table, le rang Forbes Travel Guide, l'appartenance à une collection d'auteur (Relais & Châteaux, LHW), l'avis Amadeus (sentiments agrégés), et un coefficient éditorial de notre conciergerie (service, signature, emplacement). Toutes les sources sont nommées en bas de chaque classement.",
+      },
+      {
+        q: 'Les hôtels paient-ils pour apparaître dans un classement ?',
+        a: 'Non. MyConciergeHotel est une agence IATA, pas une plateforme publicitaire. Aucun hôtel ne paie son entrée dans nos classements. Notre revenu vient des commissions sur les réservations, identiques à toutes les agences IATA, et non du référencement.',
+      },
+      {
+        q: 'À quelle fréquence les classements sont-ils mis à jour ?',
+        a: "Trimestriellement pour les classements pilier (meilleurs Palaces de France, de Paris, de la Côte d'Azur) et semestriellement pour les classements thématiques (spa, gastronomie, famille). La date de dernière revue éditoriale est affichée sous le titre de chaque classement.",
+      },
+      {
+        q: 'Puis-je filtrer les classements par destination, thème ou occasion ?',
+        a: "Oui — les facettes au-dessus de la liste permettent de croiser un type (Palace, 5★, château), une destination (Paris, Côte d'Azur, Alpes), une thématique (spa, gastronomie, design) et une occasion (lune de miel, mariage, séminaire). Les sous-hubs `/classements/{axe}/{valeur}` agrègent les classements pour un même axe.",
+      },
+      {
+        q: "Pourquoi un classement n'apparaît pas sur la liste ?",
+        a: "Soit le classement n'est pas encore publié (l'éditorial est en cours de rédaction), soit il a été archivé suite à une refonte (anti-cannibalisation). Les redirections 301 conservent toujours le lien.",
+      },
+      {
+        q: "Comment réserver un hôtel d'un classement ?",
+        a: 'Chaque entrée de classement renvoie vers la fiche hôtel complète, qui intègre le moteur de réservation (tarifs nets GDS Amadeus, paiement sécurisé, programme de fidélité). Aucun supplément ajouté.',
+      },
+    ] as const,
   },
   en: {
     eyebrow: 'Editorial rankings',
@@ -70,6 +102,36 @@ const T = {
     facetTheme: 'Theme',
     facetOccasion: 'Occasion',
     subhubsLabel: 'View sub-hub',
+    aeoQ: 'How do the MyConciergeHotel rankings work?',
+    aeoAnswer: (n: number, freshness: string) =>
+      `MyConciergeHotel publishes ${n} editorial rankings of Palaces and 5-star hotels, faceted across four axes (type, destination, theme, occasion) and a seasonal calendar. Every ranking is authored by our concierge desk: transparent methodology, named sources (Atout France, Michelin Keys, Forbes Travel Guide), no pay-to-play. 5-8 min read on average, last updated ${freshness}.`,
+    faqTitle: 'Our rankings — frequently asked questions',
+    faq: [
+      {
+        q: 'On what criteria do you rank hotels?',
+        a: "Our internal score combines the Atout France distinction (Palace, 5-star), Michelin Keys, the dining venue's Michelin stars, the Forbes Travel Guide rank, membership of an author collection (Relais & Châteaux, LHW), the aggregated Amadeus sentiment rating, and an editorial coefficient set by our concierge team (service, signature, location). Every source is named at the bottom of each ranking.",
+      },
+      {
+        q: 'Do hotels pay to appear in a ranking?',
+        a: 'No. MyConciergeHotel is an IATA-accredited travel agency, not an advertising platform. No hotel pays for inclusion. Our revenue comes from commissions on bookings, identical to any IATA agency, never from listing fees.',
+      },
+      {
+        q: 'How often are rankings updated?',
+        a: 'Quarterly for pillar rankings (best Palaces of France, of Paris, of the French Riviera) and biannually for thematic rankings (spa, gastronomy, family). The latest editorial review date is displayed below the title of each ranking.',
+      },
+      {
+        q: 'Can I filter rankings by destination, theme or occasion?',
+        a: 'Yes — the facets above the list let you cross-filter by type (Palace, 5-star, château), destination (Paris, French Riviera, Alps), theme (spa, gastronomy, design) and occasion (honeymoon, wedding, seminar). Sub-hubs `/classements/{axis}/{value}` aggregate the rankings for the same axis.',
+      },
+      {
+        q: "Why doesn't a ranking show up in the list?",
+        a: "Either the ranking isn't published yet (the editorial draft is in progress), or it's been archived following an anti-cannibalisation revamp. 301 redirects always preserve the link.",
+      },
+      {
+        q: 'How do I book a hotel from a ranking?',
+        a: 'Every ranking entry links to the full hotel page, which embeds the booking engine (Amadeus GDS net rates, secure payment, loyalty programme). No markup added.',
+      },
+    ] as const,
   },
 } as const;
 
@@ -314,6 +376,15 @@ export default async function RankingsIndexPage({
     ]),
   );
 
+  // Freshness signal embedded in the AEO answer — locale-aware month
+  // formatting matches the visible badge below the H1 (triple-sync
+  // per skill `geo-llm-optimization` §Freshness).
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(latestUpdate !== null ? new Date(latestUpdate) : new Date());
+  const aeoAnswer = t.aeoAnswer(rankings.length, freshnessDate);
+
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10 sm:py-14">
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
@@ -326,6 +397,8 @@ export default async function RankingsIndexPage({
         <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
       </header>
 
+      <HubAeoSection question={t.aeoQ} answer={aeoAnswer} headingId="classements-aeo-title" />
+
       <RankingsFacets
         rankings={cards}
         facets={facets}
@@ -335,6 +408,11 @@ export default async function RankingsIndexPage({
         clearLabel={t.clearLabel}
         resultsLabelTpl={t.resultsLabelTpl}
         subhubsLabel={t.subhubsLabel}
+      />
+
+      <HubFaqSection
+        heading={t.faqTitle}
+        items={t.faq.map((f) => ({ question: f.q, answer: f.a }))}
       />
     </main>
   );

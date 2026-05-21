@@ -4,8 +4,8 @@ import { withPayload } from '@payloadcms/next/withPayload';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  reactCompiler: false,
   experimental: {
-    reactCompiler: false,
     serverActions: { bodySizeLimit: '5mb' },
   },
   images: {
