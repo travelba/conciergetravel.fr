@@ -625,6 +625,35 @@
     "directory": {
       "title": "All destinations",
       "subtitle": "{count, plural, one {# destination available} other {# destinations available}}.",
+      "aeoQuestion": "Which destinations does MyConciergeHotel cover?",
+      "aeoAnswer": "MyConciergeHotel covers {count} destinations — French cities (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) and international countries with an editorial guide (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Each destination opens a page with a curated 5★ and Palace selection, local context and operational tips from the Concierge. Last updated {date}.",
+      "faqTitle": "Our destinations — frequently asked questions",
+      "faqItems": [
+        {
+          "q": "Which French cities are covered?",
+          "a": "Our catalogue covers France's historical premium tourism hubs: Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), French Riviera (Cannes, Nice, Cap-Ferrat, Monaco), Alps (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordeaux region (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Basque Country (Biarritz), Corsica (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Do you offer international destinations?",
+          "a": "Yes — 8 countries are published with editorial guides (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA) and our Amadeus network covers 950,000 hotels worldwide on request. The international catalogue grows quarterly — see each country's guide page for the curated selection."
+        },
+        {
+          "q": "How do you choose editorial cities?",
+          "a": "We publish a destination once our concierge desk has curated at least 3 five-star or Palace addresses in the city and can sign a 2,000-word editorial guide with named POIs (museums, dining venues, access). A city without critical mass appears as a sub-page but not as a top-level destination."
+        },
+        {
+          "q": "Will a missing city be added?",
+          "a": "The publication calendar is quarterly. To suggest a destination, contact the concierge via /le-concierge — we prioritise cities where our customers already book via Amadeus mode without an editorial guide."
+        },
+        {
+          "q": "What is the difference between a destination and a guide?",
+          "a": "Per ADR-0015, both routes have merged: /destination/{city} hosts both the catalogue hub (hotel selection) and the long-read guide (POIs, art of living, practical info). /guide/{city} redirects to the destination with a 308."
+        },
+        {
+          "q": "Are the guides available in English?",
+          "a": "Yes — every published destination has its EN version (/en/destination/{slug}) with native translation by our editorial team (no raw machine translation). hreflang fr-FR / en / x-default emitted on every page."
+        }
+      ],
       "count": "{count, plural, one {# hotel} other {# hotels}}",
       "franceSection": {
         "title": "France — by city",
