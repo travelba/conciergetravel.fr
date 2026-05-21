@@ -210,6 +210,29 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
+    // Vague 5 — institutional sub-pages (declared in PR #83 + #84,
+    // re-declared here so this PR is self-contained and the typed
+    // `Href` union resolves regardless of merge order).
+    '/le-concierge/methode-editoriale': {
+      fr: '/le-concierge/methode-editoriale',
+      en: '/le-concierge/editorial-method',
+    },
+    '/le-concierge/reserver': {
+      fr: '/le-concierge/reserver',
+      en: '/le-concierge/how-to-book',
+    },
+    '/le-concierge/contact': {
+      fr: '/le-concierge/contact',
+      en: '/le-concierge/contact',
+    },
+    '/le-concierge/fidelite': {
+      fr: '/le-concierge/fidelite',
+      en: '/le-concierge/loyalty',
+    },
+    '/le-concierge/faq': {
+      fr: '/le-concierge/faq',
+      en: '/le-concierge/faq',
+    },
     '/itineraire': '/itineraire',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
