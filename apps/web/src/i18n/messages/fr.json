@@ -540,6 +540,51 @@
       "answerSingular": "MyConciergeHotel propose actuellement 1 adresse à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}.",
       "answerPlural": "MyConciergeHotel propose actuellement {count} adresses à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}."
     },
+    "cityFaq": {
+      "title": "Séjourner à {city} — questions fréquentes",
+      "items": [
+        {
+          "q": "Quels sont les meilleurs quartiers où dormir à {city} ?",
+          "a": "Les adresses 5★ et Palace de {city} se concentrent dans les quartiers historiques et les abords des principaux POIs. Notre conciergerie vous oriente selon votre programme : pour les sorties culturelles, choisissez le centre ; pour le calme, les quartiers résidentiels en périphérie ; pour la vue, les fronts de mer ou les pieds-dans-l'eau. Chaque fiche hôtel précise le quartier exact et les distances à pied/en voiture aux POIs majeurs."
+        },
+        {
+          "q": "Quelle est la meilleure période pour visiter {city} ?",
+          "a": "{city} se visite toute l'année, mais certaines saisons concentrent les événements (festivals, cérémonies, calendrier sportif) et les tarifs hôteliers atteignent leur pic. Notre conciergerie peut vous proposer des fenêtres optimales — généralement les épaules de saison (mai-juin, septembre) — où l'expérience est complète sans la sur-fréquentation. Les fiches hôtel mentionnent la haute/basse saison locale."
+        },
+        {
+          "q": "Comment rejoindre {city} depuis Paris ou un aéroport international ?",
+          "a": "Les distances et accès sont précisés sur chaque fiche hôtel (aéroport le plus proche, gare TGV, distance en voiture). Notre conciergerie organise les transferts sur demande : taxi premium, voiture avec chauffeur, hélicoptère pour les destinations Alpes/Côte d'Azur. Le tarif est communiqué avant confirmation, sans intermédiaire ajouté."
+        },
+        {
+          "q": "Quels musées, restaurants ou expériences ne pas manquer à {city} ?",
+          "a": "Chaque fiche hôtel intègre une section « Que faire autour » avec les POIs nommés (musées, tables étoilées, marchés, points de vue) et leur distance précise. Notre conciergerie peut aussi vous suggérer des expériences signature (visite privée d'un musée hors heures d'ouverture, table d'un chef étoilé) selon votre séjour."
+        },
+        {
+          "q": "Les hôtels de {city} acceptent-ils les animaux de compagnie ?",
+          "a": "La politique pets-friendly varie selon l'hôtel — la plupart des Palaces acceptent les chiens (souvent avec supplément, parfois avec service dédié type bols, paniers, dog-sitting). Chaque fiche hôtel précise dans sa section « Politiques » : taille acceptée, frais, restrictions. Notre conciergerie peut négocier les conditions avec l'hôtel avant réservation."
+        },
+        {
+          "q": "Y a-t-il un parking gratuit ou un service voiturier dans vos hôtels à {city} ?",
+          "a": "Les hôtels 5★ et Palace proposent généralement un service voiturier (parfois inclus dans le tarif, parfois facturé en supplément 30-80 €/nuit). Le parking gratuit est rare en centre-ville mais fréquent dans les destinations rurales ou alpines. La politique exacte (gratuit / payant / valet / hauteur véhicule) figure dans la section « Politiques » de chaque fiche."
+        },
+        {
+          "q": "Vos hôtels à {city} sont-ils accessibles PMR ?",
+          "a": "La plupart des hôtels 5★ et Palace de {city} ont des chambres accessibles PMR (ascenseur, salle de bain adaptée, accès aux espaces communs). Notre conciergerie vérifie l'accessibilité spécifique de votre besoin (douche italienne, hauteur de lit, accès piscine/spa) auprès de l'hôtel avant confirmation. Précisez vos contraintes au moment de la demande."
+        },
+        {
+          "q": "Quelle est la politique d'annulation pour les hôtels de {city} ?",
+          "a": "Chaque tarif Amadeus indique sa politique d'annulation (souvent : flexible jusqu'à 24-48h avant l'arrivée, non remboursable pour les tarifs early-bird). Notre conciergerie peut proposer des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique de l'hôtel est non-remboursable, selon les négociations agence."
+        },
+        {
+          "q": "Le petit-déjeuner est-il inclus dans le tarif des hôtels {city} ?",
+          "a": "L'inclusion varie : la plupart des Palaces proposent un tarif chambre seule et un tarif chambre + petit-déjeuner. Notre programme de fidélité MyConciergeHotel offre le petit-déjeuner pour deux dès la première nuit sur les hôtels du catalogue Little Hotelier. La politique exacte de l'hôtel figure dans sa fiche."
+        },
+        {
+          "q": "Comment réserver un Palace ou hôtel 5★ à {city} via MyConciergeHotel ?",
+          "a": "Cliquez sur la fiche hôtel qui vous intéresse, choisissez vos dates dans le moteur de réservation Amadeus, payez en ligne (carte sécurisée PCI-DSS, 3D-Secure). Confirmation instantanée par e-mail. Pour les hôtels hors GDS, votre concierge vous adresse une proposition sous 24h ouvrées. Aucun supplément agence sur les tarifs nets."
+        }
+      ]
+    },
     "card": {
       "palace": "Palace",
       "stars": "{count}★",
