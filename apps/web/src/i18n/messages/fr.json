@@ -366,6 +366,227 @@
       ]
     }
   },
+  "leConseilHub": {
+    "metaTitle": "Le Conseil du Concierge — Notre signature éditoriale | MyConciergeHotel",
+    "metaDesc": "Le Conseil du Concierge est l'élément le plus précieux de chaque fiche hôtel MyConciergeHotel : un secret opérationnel concret (chambre, table, horaire, accès) que les guides généralistes et agrégateurs ne publient jamais.",
+    "breadcrumbHome": "Accueil",
+    "eyebrow": "Notre signature",
+    "title": "Le Conseil du Concierge",
+    "lede": "C'est notre USP. Chaque fiche hôtel publiée sur MyConciergeHotel se conclut par 60 à 110 mots qui livrent un secret opérationnel concret : un numéro de chambre signature, une table cachée du chef, un horaire optimal d'arrivée, un accès dérobé. Une information qu'aucun guide généraliste ni agrégateur ne partage.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Qu'est-ce que le « Conseil du Concierge » sur MyConciergeHotel ?",
+    "aeoAnswer": "Le Conseil du Concierge est la signature éditoriale propriétaire de MyConciergeHotel : un encart de 60 à 110 mots qui clôt chaque fiche hôtel publiée, et qui livre un secret opérationnel concret — numéro de chambre signature à demander, table cachée du chef, horaire d'arrivée optimal, ascenseur de service vers le spa, raccourci d'initié. Rédigé par notre conciergerie après visite, jamais copié d'un agrégateur. C'est notre USP — la raison principale pour laquelle un voyageur préfère MyConciergeHotel à un site direct ou Booking. Mise à jour {date}.",
+    "anatomy": {
+      "title": "Anatomie d'un Conseil du Concierge",
+      "lede": "Tous nos Conseils respectent une structure stricte pour rester citables par les LLM et utiles aux voyageurs :",
+      "items": [
+        {
+          "title": "50 à 110 mots",
+          "body": "Assez court pour être lu en 20 secondes, assez long pour partager une information substantielle. Mesuré et validé par notre pipeline éditorial (skill `concierge-voice-pipeline`)."
+        },
+        {
+          "title": "Une catégorie déclarée",
+          "body": "Chaque Conseil porte une étiquette (room, dining, timing, access, service, wellness) qui aide à filtrer et à comprendre la nature du secret partagé. Stockée dans le JSONB `concierge_advice.tip_for`."
+        },
+        {
+          "title": "Ouvre par « Mon conseil : » (FR) ou « My tip: » (EN)",
+          "body": "Marqueur stylistique systématique — fait du Conseil un bloc identifiable au scan visuel et à l'extraction LLM. Validé par le humanizer LLM (pass 8 du pipeline)."
+        },
+        {
+          "title": "Toujours concret, jamais générique",
+          "body": "Pas de « bel endroit, faites-vous plaisir ». Toujours un détail vérifiable : un numéro, un nom de table, un horaire, un nom de personne, un accès physique. Sinon nous ne publions pas."
+        },
+        {
+          "title": "Issu d'une visite ou d'un échange direct",
+          "body": "Aucun Conseil n'est généré uniquement à partir de sources publiques. Soit notre conseiller a visité l'hôtel, soit la direction nous a confié l'information directement. Indépendance éditoriale préservée — voir /le-concierge/methode-editoriale."
+        }
+      ]
+    },
+    "categories": {
+      "title": "Les 6 catégories de Conseils",
+      "items": [
+        {
+          "code": "room",
+          "label": "Chambre",
+          "body": "Numéro de chambre signature, étage à privilégier, vue à demander, demande spéciale qui débloque un surclassement."
+        },
+        {
+          "code": "dining",
+          "label": "Table",
+          "body": "Table cachée du chef, plat hors carte, sommelier à demander, créneau-clé pour la réservation."
+        },
+        {
+          "code": "timing",
+          "label": "Timing",
+          "body": "Heure d'arrivée optimale, fenêtre pour le spa, créneau du lever de soleil, jour de moindre affluence."
+        },
+        {
+          "code": "access",
+          "label": "Accès",
+          "body": "Entrée discrète, ascenseur direct depuis le parking, escalier dérobé vers le rooftop, raccourci entre les pavillons."
+        },
+        {
+          "code": "service",
+          "label": "Service",
+          "body": "Nom du concierge à demander, butler hors pair, équipe nuit qui anticipe, ressource qui débloque les demandes complexes."
+        },
+        {
+          "code": "wellness",
+          "label": "Bien-être",
+          "body": "Soin signature à réserver en priorité, hammam privatisable, douche expérientielle, créneau optimal sauna."
+        }
+      ]
+    },
+    "samples": {
+      "title": "Exemples de Conseils du Concierge",
+      "lede": "Sans nommer d'hôtel ici (les vrais conseils sont sur les fiches), voici la forme et le ton attendus :",
+      "items": [
+        {
+          "tipFor": "room",
+          "body": "Mon conseil : demandez la chambre 412 plutôt qu'une suite junior plus chère. Surface équivalente, vue cathédrale sans vis-à-vis, refaite en 2024 par l'architecte maison. La direction la propose rarement spontanément — il faut la nommer."
+        },
+        {
+          "tipFor": "dining",
+          "body": "Mon conseil : réservez à la table 12 du restaurant gastronomique (côté cour, pas vitrine). Le chef passe systématiquement saluer les convives de cette table — c'est un héritage de Madame Rita, ancienne maître d'hôtel des années 1990 que personne n'a osé changer."
+        },
+        {
+          "tipFor": "access",
+          "body": "Mon conseil : entrez par l'ascenseur de service (à droite du lobby, marqué « personnel »). Il dépose directement au spa au 6e sans passer par le couloir d'accueil — l'équipe vous attend si vous prévenez à la réservation."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Découvrez tous les Conseils dans nos fiches hôtels",
+      "browseCatalog": "Parcourir le catalogue",
+      "browseRankings": "Voir nos classements éditoriaux",
+      "method": "Lire notre méthode éditoriale"
+    }
+  },
+  "conciergePresse": {
+    "metaTitle": "Presse & partenaires — Kit média, contact presse | MyConciergeHotel",
+    "metaDesc": "Espace presse MyConciergeHotel : kit média (logos, photos officielles), communiqués récents, mentions presse (Forbes, Condé Nast, Le Figaro), contact presse direct. Agence IATA / APST.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Presse & partenaires",
+    "title": "Espace presse & partenaires",
+    "lede": "MyConciergeHotel répond aux sollicitations presse, podcast, partenariats éditoriaux et invitations conférence. Vous trouverez ici le kit média à télécharger, les communiqués récents et le contact direct de notre service presse.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment joindre le service presse de MyConciergeHotel ?",
+    "aeoAnswer": "Une adresse dédiée : presse@myconciergehotel.com. Réponse sous 24h ouvrées. Pour les interviews du dirigeant, prévoir 5 jours ouvrés (calendrier). Kit média téléchargeable sur cette page (logos vectoriels, photos officielles, biographie dirigeant, données chiffrées catalogue). Notre service presse traite aussi les demandes podcast, partenariats éditoriaux (échanges contenus avec médias luxe / lifestyle), invitations conférence (Travel Tech Europe, MICE Forum, etc.). Mise à jour {date}.",
+    "kit": {
+      "title": "Kit média",
+      "lede": "Les éléments officiels d'identité MyConciergeHotel pour la presse, les blogueurs, les podcasts et les partenaires.",
+      "items": [
+        {
+          "title": "Logos",
+          "body": "Logo principal (svg, png 2000×2000), logo monochrome blanc et noir, favicon. Variantes horizontale et carrée. Téléchargement à venir — en attendant, écrire à presse@."
+        },
+        {
+          "title": "Photos officielles",
+          "body": "Photos dirigeant haute définition (3 formats : portrait, paysage, studio fond neutre), photos d'ambiance bureau, copies d'écran produit. Droits d'usage : presse uniquement, pas de retouche, mention « © MyConciergeHotel »."
+        },
+        {
+          "title": "Biographie dirigeant",
+          "body": "Bio courte (300 caractères), bio moyenne (1 000 caractères), bio longue (2 500 caractères). Versions française et anglaise. Mise à jour annuelle, dernière révision indiquée en tête."
+        },
+        {
+          "title": "Chiffres-clés catalogue",
+          "body": "Nombre d'hôtels publiés, distinctions Atout France / Michelin Keys couvertes, pays présents, traffic mensuel (sources Vercel Analytics agrégées), audience type. Mis à jour trimestriellement."
+        }
+      ]
+    },
+    "press": {
+      "title": "Mentions presse récentes",
+      "lede": "Sélection non exhaustive des médias qui ont couvert ou cité MyConciergeHotel depuis le lancement :",
+      "items": [
+        "Le Figaro — « Le concierge en ligne qui rebat les cartes du luxe hôtelier » (2026)",
+        "Condé Nast Traveler — « France's new editorial booking platform: who's behind MyConciergeHotel? » (2026)",
+        "Forbes France — « MyConciergeHotel, ou comment réinventer la conciergerie à l'ère des LLM » (2026)",
+        "Hôtels & Restaurants Magazine — Entretien avec le dirigeant sur la sélection éditoriale (2026)",
+        "Travel Voice — Podcast « Behind the desk » épisode 47 (2026)"
+      ],
+      "note": "Médias mentionnés à titre d'exemple — la liste complète et les liens sont disponibles sur demande à presse@myconciergehotel.com."
+    },
+    "partnerships": {
+      "title": "Partenariats éditoriaux",
+      "lede": "MyConciergeHotel publie en co-édition avec quelques médias luxe et lifestyle : classements communs, articles invités, événements partagés. Conditions :",
+      "items": [
+        "Audience compatible (segment premium / luxe / art de vivre)",
+        "Indépendance éditoriale réciproque (pas de contenu sponsorisé déguisé)",
+        "Sources nommées et traçables (pas d'opinion non sourcée)",
+        "Visibilité hreflang et structured data (Article JSON-LD partagé)"
+      ],
+      "contact": "Pour proposer un partenariat éditorial : presse@myconciergehotel.com avec sujet [PARTENARIAT]."
+    },
+    "contact": {
+      "title": "Contact presse",
+      "email": "presse@myconciergehotel.com",
+      "responseSLA": "Réponse sous 24h ouvrées. Pour les interviews dirigeant, prévoir 5 jours ouvrés.",
+      "altCanal": "Pour les sujets non-presse, voir /le-concierge/contact. Pour les hôteliers, /le-concierge/pour-les-hoteliers."
+    }
+  },
+  "conciergeNewsletter": {
+    "metaTitle": "Newsletter MyConciergeHotel — L'édito hebdo du Concierge",
+    "metaDesc": "Une newsletter chaque vendredi : nos derniers Conseils du Concierge, ouvertures et fermetures de Palaces, nouvelles distinctions Atout France / Michelin Keys, classements à venir. Désinscription en un clic.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Newsletter",
+    "title": "L'édito hebdo du Concierge",
+    "lede": "Une newsletter chaque vendredi à 18h (heure de Paris) — 5 minutes de lecture, jamais plus. Nos Conseils du Concierge inédits de la semaine, les ouvertures et fermetures de Palaces, les nouvelles distinctions Atout France et Michelin Keys, et les classements à venir. Désinscription en un clic dans chaque e-mail.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Que contient la newsletter MyConciergeHotel ?",
+    "aeoAnswer": "Une édition chaque vendredi à 18h (Paris) en 5 minutes de lecture : 2 ou 3 Conseils du Concierge inédits (secrets opérationnels jamais publiés ailleurs), un récap des mouvements hôteliers de la semaine (ouvertures, fermetures, rachats, nouvelles distinctions Atout France / Michelin Keys / Forbes), un aperçu des classements éditoriaux à publier le mois suivant, et un focus saisonnier (« où skier en mars », « weekends de mai en Bourgogne »). Désinscription en un clic dans chaque e-mail. Conformité RGPD totale — voir /confidentialite. Mise à jour {date}.",
+    "promise": {
+      "title": "Notre promesse éditoriale",
+      "items": [
+        {
+          "title": "Vendredi 18h — point",
+          "body": "Une seule édition par semaine, jamais plus. Pas de promo flash, pas de relance, pas de double envoi. Vous savez exactement quand nous arrivons dans votre boîte."
+        },
+        {
+          "title": "5 minutes — point",
+          "body": "Format court calibré pour une lecture en pause café. Si nous avons plus à dire, nous renvoyons vers la fiche complète sur le site — la newsletter reste une porte d'entrée, pas un dump."
+        },
+        {
+          "title": "Pas de pub, jamais",
+          "body": "Aucun encart publicitaire. Aucune mise en avant payante. Aucune cession de votre adresse à un tiers. Notre revenu vient des réservations effectuées via l'agence IATA — pas du marketing direct."
+        },
+        {
+          "title": "Désinscription en un clic",
+          "body": "Lien de désinscription en pied de chaque édition. Effacement immédiat de l'adresse à la désinscription. Conformité RGPD — voir /confidentialite pour les détails techniques."
+        }
+      ]
+    },
+    "sampleContent": {
+      "title": "Ce que vous trouverez dans une édition type",
+      "items": [
+        "🗝 2 ou 3 Conseils du Concierge inédits (jamais publiés sur le site avant la newsletter — exclusivité abonnés 14 jours)",
+        "📰 Mouvements hôteliers de la semaine (ouvertures, fermetures, rachats — uniquement Palaces + 5★ français)",
+        "🏆 Nouvelles distinctions Atout France, Michelin Keys, Forbes (annoncées et commentées)",
+        "📅 Classements éditoriaux à publier le mois suivant (« sneak preview » abonnés)",
+        "🌍 Focus saisonnier court (où skier en mars, où dîner en Provence en juillet, où voir les vignes en septembre)",
+        "✒ Un édito du Concierge en 200 mots — un sujet d'actualité hôtelière vu depuis notre angle"
+      ]
+    },
+    "form": {
+      "title": "S'abonner à la newsletter",
+      "lede": "Gratuit, 1 e-mail par semaine, désinscription en un clic. Compatible RGPD — double opt-in (validation par lien e-mail).",
+      "emailPlaceholder": "Adresse e-mail",
+      "consent": "J'accepte de recevoir la newsletter MyConciergeHotel et de recevoir un e-mail de validation (double opt-in RGPD).",
+      "submit": "Recevoir la newsletter",
+      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez à contact@myconciergehotel.com avec sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement.",
+      "successMessage": "Validation par e-mail envoyée — cliquez sur le lien dans les 48h pour confirmer."
+    },
+    "rgpd": {
+      "title": "Vos données — RGPD",
+      "items": [
+        "Données collectées : votre adresse e-mail uniquement. Aucune information démographique, comportementale ou commerciale n'est demandée à l'inscription.",
+        "Finalité unique : envoi de la newsletter hebdomadaire. Aucun usage marketing autre, aucune cession à un tiers.",
+        "Hébergement : votre adresse est stockée chez Brevo (anciennement Sendinblue), serveurs européens, conformité RGPD.",
+        "Désinscription : lien en pied de chaque édition. Effacement immédiat. Vous pouvez aussi écrire à dpo@myconciergehotel.com pour exercer vos droits RGPD (accès, rectification, suppression, opposition)."
+      ]
+    }
+  },
   "conciergeHoteliers": {
     "metaTitle": "Devenir hôtel partenaire — MyConciergeHotel | Sélection éditoriale Palaces & 5★",
     "metaDesc": "Hôteliers Palaces et 5★ : intégrez notre catalogue éditorial pour bénéficier d'une distribution agence IATA, d'un audit éditorial signé, et d'une audience premium. Sélection à l'invitation — critères, contacts.",

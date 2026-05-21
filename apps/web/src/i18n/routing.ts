@@ -240,6 +240,18 @@ export const routing = defineRouting({
       fr: '/le-concierge/mice-et-seminaires',
       en: '/le-concierge/mice-and-events',
     },
+    '/le-conseil-du-concierge': {
+      fr: '/le-conseil-du-concierge',
+      en: '/the-concierge-tip',
+    },
+    '/le-concierge/presse-et-partenaires': {
+      fr: '/le-concierge/presse-et-partenaires',
+      en: '/le-concierge/press-and-partners',
+    },
+    '/le-concierge/newsletter': {
+      fr: '/le-concierge/newsletter',
+      en: '/le-concierge/newsletter',
+    },
     // Itineraries hub uses the plural FR slug `/itineraires` to keep
     // parity with `/classements`, `/guides`, `/marques`, `/hotels`.
     // Slug stays identical FR/EN per ADR-0008 (no `/itineraries` EN

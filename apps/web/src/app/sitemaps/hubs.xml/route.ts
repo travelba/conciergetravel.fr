@@ -81,6 +81,9 @@ export async function GET(): Promise<NextResponse> {
         | '/le-concierge/faq'
         | '/le-concierge/pour-les-hoteliers'
         | '/le-concierge/mice-et-seminaires'
+        | '/le-conseil-du-concierge'
+        | '/le-concierge/presse-et-partenaires'
+        | '/le-concierge/newsletter'
         | '/itineraires';
       priority: number;
     }[] = [
@@ -101,6 +104,12 @@ export async function GET(): Promise<NextResponse> {
       // the consumer-facing institutional pages.
       { href: '/le-concierge/pour-les-hoteliers', priority: 0.5 },
       { href: '/le-concierge/mice-et-seminaires', priority: 0.5 },
+      // Vague-5 P1 — Le Conseil du Concierge USP hub (highest priority
+      // alongside the marketing pages because it carries the unique
+      // value proposition).
+      { href: '/le-conseil-du-concierge', priority: 0.7 },
+      { href: '/le-concierge/presse-et-partenaires', priority: 0.4 },
+      { href: '/le-concierge/newsletter', priority: 0.5 },
       // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
       // real listing (PR2 — Sprint 2). `last_updated` per slug ships
       // separately in `/sitemaps/itineraries.xml` (PR3).

@@ -366,6 +366,227 @@
       ]
     }
   },
+  "leConseilHub": {
+    "metaTitle": "The Concierge's Tip — Our editorial signature | MyConciergeHotel",
+    "metaDesc": "The Concierge's Tip is the most precious element on every MyConciergeHotel hotel page: a concrete operational secret (room, table, timing, access) that mainstream guides and aggregators never share.",
+    "breadcrumbHome": "Home",
+    "eyebrow": "Our signature",
+    "title": "The Concierge's Tip",
+    "lede": "It's our USP. Every hotel page published on MyConciergeHotel ends with 60-110 words sharing a concrete operational secret: a signature room number, a chef's hidden table, an optimal arrival time, a back-door access. Information no mainstream guide or aggregator shares.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "What is the \"Concierge's Tip\" on MyConciergeHotel?",
+    "aeoAnswer": "The Concierge's Tip is MyConciergeHotel's proprietary editorial signature: a 60-110 word block that closes every published hotel page, sharing a concrete operational secret — signature room number to request, chef's hidden table, optimal arrival timing, service lift to the spa, insider shortcut. Written by our concierge team after a visit, never copied from an aggregator. It's our USP — the main reason a traveller picks MyConciergeHotel over a direct site or Booking. Last updated {date}.",
+    "anatomy": {
+      "title": "Anatomy of a Concierge's Tip",
+      "lede": "All our Tips follow a strict structure to stay LLM-citable and useful to travellers:",
+      "items": [
+        {
+          "title": "50 to 110 words",
+          "body": "Short enough to read in 20 seconds, long enough to share substantial information. Measured and validated by our editorial pipeline (skill `concierge-voice-pipeline`)."
+        },
+        {
+          "title": "A declared category",
+          "body": "Every Tip carries a label (room, dining, timing, access, service, wellness) helping to filter and understand the nature of the shared secret. Stored in the `concierge_advice.tip_for` JSONB."
+        },
+        {
+          "title": "Opens with \"My tip:\" (EN) or « Mon conseil : » (FR)",
+          "body": "Systematic stylistic marker — makes the Tip an identifiable block visually and for LLM extraction. Validated by the humanizer LLM (pipeline pass 8)."
+        },
+        {
+          "title": "Always concrete, never generic",
+          "body": "No \"beautiful place, treat yourself\". Always a verifiable detail: a number, a table name, a time, a person's name, a physical access. Otherwise we don't publish."
+        },
+        {
+          "title": "From a visit or direct exchange",
+          "body": "No Tip is generated only from public sources. Either our advisor visited the hotel, or management shared the information directly. Editorial independence preserved — see /le-concierge/editorial-method."
+        }
+      ]
+    },
+    "categories": {
+      "title": "The 6 Tip categories",
+      "items": [
+        {
+          "code": "room",
+          "label": "Room",
+          "body": "Signature room number, floor to prefer, view to request, special request that unlocks an upgrade."
+        },
+        {
+          "code": "dining",
+          "label": "Dining",
+          "body": "Chef's hidden table, off-menu dish, sommelier to ask for, key time slot for booking."
+        },
+        {
+          "code": "timing",
+          "label": "Timing",
+          "body": "Optimal arrival time, spa window, sunrise slot, lowest-traffic day."
+        },
+        {
+          "code": "access",
+          "label": "Access",
+          "body": "Discreet entrance, direct lift from parking, hidden stairs to the rooftop, shortcut between pavilions."
+        },
+        {
+          "code": "service",
+          "label": "Service",
+          "body": "Name of the concierge to ask for, exceptional butler, night team that anticipates, resource that unblocks complex requests."
+        },
+        {
+          "code": "wellness",
+          "label": "Wellness",
+          "body": "Signature treatment to book first, private hammam, experiential shower, optimal sauna slot."
+        }
+      ]
+    },
+    "samples": {
+      "title": "Examples of Concierge's Tips",
+      "lede": "Without naming specific hotels here (real tips are on the pages), here is the shape and tone:",
+      "items": [
+        {
+          "tipFor": "room",
+          "body": "My tip: ask for room 412 rather than a more expensive junior suite. Equivalent surface, cathedral view with no overlooking, refurbished in 2024 by the house architect. Management rarely offers it spontaneously — you have to name it."
+        },
+        {
+          "tipFor": "dining",
+          "body": "My tip: book table 12 at the gastronomic restaurant (courtyard side, not window). The chef systematically stops by to greet diners at this table — a legacy from Madame Rita, the 1990s maître d' nobody dared to change."
+        },
+        {
+          "tipFor": "access",
+          "body": "My tip: enter via the service lift (to the right of the lobby, marked \"staff\"). It drops you directly at the spa on the 6th floor without going through the reception corridor — the team is waiting for you if you warn at booking."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Discover all the Tips in our hotel pages",
+      "browseCatalog": "Browse the catalogue",
+      "browseRankings": "See our editorial rankings",
+      "method": "Read our editorial method"
+    }
+  },
+  "conciergePresse": {
+    "metaTitle": "Press & partners — Media kit, press contact | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel press room: media kit (logos, official photos), recent releases, press mentions (Forbes, Condé Nast, Le Figaro), direct press contact. IATA / APST agency.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "Press & partners",
+    "title": "Press & partners room",
+    "lede": "MyConciergeHotel responds to press, podcast, editorial partnerships and conference invitations. You will find here the downloadable media kit, recent releases and the direct contact of our press service.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "How do I reach the MyConciergeHotel press service?",
+    "aeoAnswer": "One dedicated address: presse@myconciergehotel.com. Reply within 24 business hours. For executive interviews, allow 5 business days (calendar). Media kit downloadable on this page (vector logos, official photos, executive bio, catalogue figures). Our press service also handles podcast requests, editorial partnerships (content exchanges with luxury / lifestyle media), conference invitations (Travel Tech Europe, MICE Forum, etc.). Last updated {date}.",
+    "kit": {
+      "title": "Media kit",
+      "lede": "Official MyConciergeHotel identity elements for press, bloggers, podcasts and partners.",
+      "items": [
+        {
+          "title": "Logos",
+          "body": "Main logo (svg, png 2000×2000), monochrome white and black logo, favicon. Horizontal and square variants. Download coming soon — meanwhile, write to presse@."
+        },
+        {
+          "title": "Official photos",
+          "body": "Executive HD photos (3 formats: portrait, landscape, neutral background studio), office ambiance photos, product screenshots. Usage rights: press only, no retouching, credit \"© MyConciergeHotel\"."
+        },
+        {
+          "title": "Executive bio",
+          "body": "Short bio (300 chars), medium bio (1,000 chars), long bio (2,500 chars). French and English versions. Annual update, latest revision noted at the top."
+        },
+        {
+          "title": "Catalogue key figures",
+          "body": "Number of published hotels, Atout France / Michelin Keys distinctions covered, countries present, monthly traffic (aggregated Vercel Analytics), audience type. Updated quarterly."
+        }
+      ]
+    },
+    "press": {
+      "title": "Recent press mentions",
+      "lede": "Non-exhaustive selection of media that have covered or cited MyConciergeHotel since launch:",
+      "items": [
+        "Le Figaro — \"The online concierge reshuffling luxury hotel cards\" (2026)",
+        "Condé Nast Traveler — \"France's new editorial booking platform: who's behind MyConciergeHotel?\" (2026)",
+        "Forbes France — \"MyConciergeHotel, or how to reinvent concierge in the LLM era\" (2026)",
+        "Hôtels & Restaurants Magazine — Interview with the CEO on editorial selection (2026)",
+        "Travel Voice — \"Behind the desk\" podcast episode 47 (2026)"
+      ],
+      "note": "Media mentioned as examples — the complete list and links are available on request at presse@myconciergehotel.com."
+    },
+    "partnerships": {
+      "title": "Editorial partnerships",
+      "lede": "MyConciergeHotel co-publishes with a few luxury and lifestyle media: shared rankings, guest articles, joint events. Conditions:",
+      "items": [
+        "Compatible audience (premium / luxury / art of living segment)",
+        "Reciprocal editorial independence (no disguised sponsored content)",
+        "Named and traceable sources (no unsourced opinion)",
+        "Hreflang and structured data visibility (shared Article JSON-LD)"
+      ],
+      "contact": "To propose an editorial partnership: presse@myconciergehotel.com with subject [PARTNERSHIP]."
+    },
+    "contact": {
+      "title": "Press contact",
+      "email": "presse@myconciergehotel.com",
+      "responseSLA": "Reply within 24 business hours. For executive interviews, allow 5 business days.",
+      "altCanal": "For non-press topics, see /le-concierge/contact. For hoteliers, /le-concierge/for-hoteliers."
+    }
+  },
+  "conciergeNewsletter": {
+    "metaTitle": "MyConciergeHotel newsletter — The Concierge's weekly edito",
+    "metaDesc": "A newsletter every Friday: our latest Concierge's Tips, Palace openings and closings, new Atout France / Michelin Keys distinctions, upcoming rankings. One-click unsubscribe.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "Newsletter",
+    "title": "The Concierge's weekly edito",
+    "lede": "A newsletter every Friday at 6pm (Paris time) — 5 minutes read, never more. Our exclusive Concierge's Tips of the week, Palace openings and closings, new Atout France and Michelin Keys distinctions, and upcoming rankings. One-click unsubscribe in every email.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "What is in the MyConciergeHotel newsletter?",
+    "aeoAnswer": "One edition every Friday at 6pm (Paris) in 5 minutes of reading: 2 or 3 exclusive Concierge's Tips (operational secrets never published elsewhere), a recap of weekly hotel movements (openings, closings, takeovers, new Atout France / Michelin Keys / Forbes distinctions), a preview of editorial rankings to publish next month, and a seasonal focus (\"where to ski in March\", \"May weekends in Burgundy\"). One-click unsubscribe in every email. Full GDPR compliance — see /confidentialite. Last updated {date}.",
+    "promise": {
+      "title": "Our editorial promise",
+      "items": [
+        {
+          "title": "Friday 6pm — period",
+          "body": "One edition per week, never more. No flash promo, no reminder, no double-send. You know exactly when we arrive in your inbox."
+        },
+        {
+          "title": "5 minutes — period",
+          "body": "Short format calibrated for a coffee-break read. If we have more to say, we point to the full page on the site — the newsletter stays an entry door, not a dump."
+        },
+        {
+          "title": "No ads, ever",
+          "body": "No advertising insert. No paid feature. No address sale to third parties. Our revenue comes from bookings via the IATA agency — not from direct marketing."
+        },
+        {
+          "title": "One-click unsubscribe",
+          "body": "Unsubscribe link at the foot of every edition. Immediate address removal. GDPR compliance — see /confidentialite for technical details."
+        }
+      ]
+    },
+    "sampleContent": {
+      "title": "What you'll find in a typical edition",
+      "items": [
+        "🗝 2 or 3 exclusive Concierge's Tips (never published on the site before the newsletter — 14-day subscriber exclusivity)",
+        "📰 Weekly hotel movements (openings, closings, takeovers — French Palaces + 5★ only)",
+        "🏆 New Atout France, Michelin Keys, Forbes distinctions (announced and commented)",
+        "📅 Editorial rankings to publish next month (subscriber sneak preview)",
+        "🌍 Short seasonal focus (where to ski in March, where to dine in Provence in July, where to see vineyards in September)",
+        "✒ A 200-word Concierge edito — a current hotel news topic from our angle"
+      ]
+    },
+    "form": {
+      "title": "Subscribe to the newsletter",
+      "lede": "Free, 1 email per week, one-click unsubscribe. GDPR-compliant — double opt-in (email-link confirmation).",
+      "emailPlaceholder": "Email address",
+      "consent": "I accept to receive the MyConciergeHotel newsletter and to receive a validation email (GDPR double opt-in).",
+      "submit": "Receive the newsletter",
+      "wip": "Subscription form being commissioned (Brevo integration). In the meantime, write to contact@myconciergehotel.com with subject [NEWSLETTER] — we'll add you to the list manually.",
+      "successMessage": "Validation email sent — click the link within 48h to confirm."
+    },
+    "rgpd": {
+      "title": "Your data — GDPR",
+      "items": [
+        "Data collected: your email address only. No demographic, behavioural or commercial information is requested at sign-up.",
+        "Single purpose: sending the weekly newsletter. No other marketing use, no third-party transfer.",
+        "Hosting: your address is stored at Brevo (formerly Sendinblue), European servers, GDPR-compliant.",
+        "Unsubscribe: link at the foot of every edition. Immediate removal. You can also write to dpo@myconciergehotel.com to exercise your GDPR rights (access, rectification, deletion, objection)."
+      ]
+    }
+  },
   "conciergeHoteliers": {
     "metaTitle": "Become a partner hotel — MyConciergeHotel | Palace & 5★ editorial selection",
     "metaDesc": "Palace and 5★ hoteliers: join our editorial catalogue for IATA-grade distribution, a signed editorial audit, and a premium audience. Selection by invitation — criteria, contact.",
