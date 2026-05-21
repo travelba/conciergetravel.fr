@@ -1,5 +1,6 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { DEFAULT_AGENT_SKILLS } from '@mch/seo';
 import { describe, expect, it } from 'vitest';
@@ -27,22 +28,50 @@ import { describe, expect, it } from 'vitest';
  * `endpoint` (with `filter` / `booking` allowlisted as intentionally
  * declarative).
  */
-const ROUTES_ROOT = new URL('../app/', import.meta.url).pathname;
+// Use `fileURLToPath` so the path is OS-native (Windows: `C:\…`, POSIX:
+// `/…`) — `new URL(…).pathname` returns `/C:/…` on Windows which
+// `path.join` can't compose into a usable filesystem path.
+const ROUTES_ROOT = fileURLToPath(new URL('../app/', import.meta.url));
 
 /**
- * Translate an `endpoint.path` like `/api/agent/hotel/{slug}/room/{roomSlug}`
- * into the App Router file path
- * `apps/web/src/app/api/agent/hotel/[slug]/room/[roomSlug]/route.ts`.
+ * Locate the App Router `route.ts` file matching an `endpoint.path` like
+ * `/api/agent/hotel/{hotelSlug}/room/{roomSlug}`.
+ *
+ * Static segments must match exactly. Dynamic segments (`{name}` in the
+ * catalog) accept ANY `[…]` directory on disk — the public-facing
+ * placeholder name (used by LLMs reading the agent catalog) is
+ * deliberately decoupled from Next's internal segment name. For example
+ * the catalog advertises `{hotelSlug}` for clarity while the filesystem
+ * is `[slug]` because two endpoints share the same hotel root.
+ *
+ * Returns the absolute path of the matching `route.ts`, or `null`.
  */
-function pathToRouteFile(endpointPath: string): string {
-  // Strip leading `/`, replace `{param}` segments with `[param]`, append
-  // `/route.ts`. The `api/agent/` prefix prefix maps 1:1 to the App
-  // Router segment shape — we don't need to special-case it.
+function findRouteFile(endpointPath: string): string | null {
   const segments = endpointPath
     .replace(/^\//u, '')
     .split('/')
-    .map((seg) => seg.replace(/^\{(.+)\}$/u, '[$1]'));
-  return join(ROUTES_ROOT, ...segments, 'route.ts');
+    .map((seg) => (/^\{.+\}$/u.test(seg) ? null : seg));
+
+  function walk(currentDir: string, remaining: (string | null)[]): string | null {
+    if (remaining.length === 0) {
+      const file = join(currentDir, 'route.ts');
+      return existsSync(file) ? file : null;
+    }
+    const [head, ...tail] = remaining;
+    if (head === null) {
+      if (!existsSync(currentDir)) return null;
+      for (const entry of readdirSync(currentDir, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith('[') && entry.name.endsWith(']')) {
+          const result = walk(join(currentDir, entry.name), tail);
+          if (result !== null) return result;
+        }
+      }
+      return null;
+    }
+    return walk(join(currentDir, head), tail);
+  }
+
+  return walk(ROUTES_ROOT, segments);
 }
 
 describe('agent-skills endpoint ↔ route file coverage', () => {
@@ -57,27 +86,40 @@ describe('agent-skills endpoint ↔ route file coverage', () => {
   });
 
   it('every endpoint resolves to an existing route.ts on disk', () => {
-    const missing: { skill: string; path: string; expectedFile: string }[] = [];
+    const missing: { skill: string; path: string }[] = [];
     for (const skill of endpointSkills) {
-      const file = pathToRouteFile(skill.endpoint.path);
-      if (!existsSync(file)) {
-        missing.push({ skill: skill.name, path: skill.endpoint.path, expectedFile: file });
+      if (findRouteFile(skill.endpoint.path) === null) {
+        missing.push({ skill: skill.name, path: skill.endpoint.path });
       }
     }
     expect(missing).toEqual([]);
   });
 
-  it('translates path placeholders correctly (smoke)', () => {
-    expect(pathToRouteFile('/api/agent/search').endsWith('/api/agent/search/route.ts')).toBe(true);
+  it('resolves static and dynamic placeholders to the right file (smoke)', () => {
+    // Returned paths use OS-native separators (Windows: `\`), so
+    // compose the expected suffix with `join` too instead of a
+    // hard-coded POSIX string.
+    expect(findRouteFile('/api/agent/search')).not.toBeNull();
     expect(
-      pathToRouteFile('/api/agent/concierge-tip/{slug}').endsWith(
-        '/api/agent/concierge-tip/[slug]/route.ts',
+      findRouteFile('/api/agent/search')!.endsWith(join('api', 'agent', 'search', 'route.ts')),
+    ).toBe(true);
+
+    // `{slug}` matches the on-disk `[slug]` segment.
+    expect(
+      findRouteFile('/api/agent/concierge-tip/{slug}')!.endsWith(
+        join('api', 'agent', 'concierge-tip', '[slug]', 'route.ts'),
       ),
     ).toBe(true);
+
+    // `{hotelSlug}` deliberately matches `[slug]` on disk — the public
+    // placeholder name is decoupled from the filesystem segment name.
     expect(
-      pathToRouteFile('/api/agent/hotel/{hotelSlug}/room/{roomSlug}').endsWith(
-        '/api/agent/hotel/[hotelSlug]/room/[roomSlug]/route.ts',
+      findRouteFile('/api/agent/hotel/{hotelSlug}/room/{roomSlug}')!.endsWith(
+        join('api', 'agent', 'hotel', '[slug]', 'room', '[roomSlug]', 'route.ts'),
       ),
     ).toBe(true);
+
+    // Sanity: a typo'd path must NOT match.
+    expect(findRouteFile('/api/agent/does-not-exist')).toBeNull();
   });
 });
