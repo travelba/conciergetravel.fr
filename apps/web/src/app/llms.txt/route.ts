@@ -187,6 +187,24 @@ export async function GET(): Promise<NextResponse> {
             },
           ]
         : []),
+      // Vague-6 — international country guides. First country: Italy.
+      // Surfaced as a dedicated section so LLMs can identify the
+      // expanding international scope (was zero before May 2026).
+      {
+        title: 'Guides pays internationaux (Vague 6 — en cours de publication)',
+        items: [
+          {
+            url: `${origin}/fr/guide/italie`,
+            description:
+              'Italie — Guide MyConciergeHotel pour un séjour de luxe : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. 6 régions, adresses 5★ et Palaces nommées, conseils opérationnels du Concierge par région, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/italy`,
+            description:
+              'Italy — MyConciergeHotel guide for a luxury stay: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. 6 regions, named 5★ and Palace addresses, Concierge operational tips per region, 7 Q&A.',
+          },
+        ],
+      },
       // ── ADR-0014 — new GEO surfaces ──────────────────────────────────────
       {
         title: 'Inspiration (thèmes × occasions × saisons)',

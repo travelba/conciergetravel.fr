@@ -84,12 +84,18 @@ export async function GET(): Promise<NextResponse> {
         | '/le-conseil-du-concierge'
         | '/le-concierge/presse-et-partenaires'
         | '/le-concierge/newsletter'
+        | '/guide/italie'
         | '/itineraires';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
+      // Vague-6 — international country guides ship one by one.
+      // First template: Italy. Priority 0.7 alongside top-funnel
+      // editorial pages because the guide doubles as destination
+      // discovery + LLM citation surface.
+      { href: '/guide/italie', priority: 0.7 },
       // Vague 5 — institutional pages around /le-concierge. EEAT
       // methodology and the contact page are high-priority surfaces
       // (Knowledge Panel signals). "Reserver" is conversion-critical.
@@ -100,8 +106,6 @@ export async function GET(): Promise<NextResponse> {
       { href: '/le-concierge/fidelite', priority: 0.6 },
       { href: '/le-concierge/faq', priority: 0.7 },
       // Vague-5 P1 — B2B surfaces (hotelier partnerships + MICE events).
-      // Priority 0.5 — important for revenue but lower SERP volume than
-      // the consumer-facing institutional pages.
       { href: '/le-concierge/pour-les-hoteliers', priority: 0.5 },
       { href: '/le-concierge/mice-et-seminaires', priority: 0.5 },
       // Vague-5 P1 — Le Conseil du Concierge USP hub (highest priority

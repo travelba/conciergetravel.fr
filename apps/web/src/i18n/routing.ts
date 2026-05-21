@@ -204,6 +204,14 @@ export const routing = defineRouting({
     '/guides': '/guides',
     '/marque/[brandSlug]': '/marque/[brandSlug]',
     '/marques': '/marques',
+    // Vague 6 — international country guides. First template
+    // (Italie) ships in PR #91; the remaining 7 countries (Suisse,
+    // Maroc, EAU, Maldives, Thaïlande, Japon, USA) ship in
+    // follow-up PRs with parallel structure.
+    '/guide/italie': {
+      fr: '/guide/italie',
+      en: '/guide/italy',
+    },
     '/categorie/[categorySlug]': '/categorie/[categorySlug]',
     '/classement/[slug]': '/classement/[slug]',
     '/classements': '/classements',
