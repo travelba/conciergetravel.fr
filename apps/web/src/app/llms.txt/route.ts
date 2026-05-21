@@ -334,6 +334,56 @@ export async function GET(): Promise<NextResponse> {
             description:
               'The Concierge — IATA / APST agency, editorial method, the Concierge’s Tip (proprietary signature), loyalty programme.',
           },
+          {
+            url: `${origin}/fr/le-concierge/methode-editoriale`,
+            description:
+              'Méthode éditoriale MyConciergeHotel — les 8 critères de sélection (Atout France, Michelin Keys, Forbes, audit interne), les 4 principes (indépendance, transparence, expertise, fraîcheur), le processus d’inclusion en 4 étapes. Page-publishingPrinciples Knowledge Panel.',
+          },
+          {
+            url: `${origin}/en/le-concierge/editorial-method`,
+            description:
+              'MyConciergeHotel editorial method — the 8 selection criteria (Atout France, Michelin Keys, Forbes, internal audit), 4 principles (independence, transparency, expertise, freshness), 4-step inclusion process. Organization publishingPrinciples page.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/reserver`,
+            description:
+              'Comment réserver via notre conciergerie : 5 étapes (choisir hôtel, dates, tarif, payer, confirmer), HowTo JSON-LD. Mode Amadeus instantané ou conciergerie sous 24h. Tarifs nets GDS, paiement PCI-DSS.',
+          },
+          {
+            url: `${origin}/en/le-concierge/how-to-book`,
+            description:
+              'How to book via our concierge: 5 steps (pick hotel, dates, rate, pay, confirm), HowTo JSON-LD. Instant Amadeus mode or concierge within 24h. Net GDS rates, PCI-DSS payment.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/fidelite`,
+            description:
+              'Programme de fidélité MyConciergeHotel : tier Essentiel gratuit (Little Hotelier — petit-déj, late check-out 14h, crédit hôtel) et tier Prestige sur abonnement (surclassement, transfert aéroport, late check-out 16h confirmé). Cumulable avec programmes de chaîne.',
+          },
+          {
+            url: `${origin}/en/le-concierge/loyalty`,
+            description:
+              'MyConciergeHotel loyalty programme: free Essential tier (Little Hotelier — breakfast, late check-out 2pm, hotel credit) and subscription Prestige tier (upgrade, airport transfer, confirmed 4pm late check-out). Stacks with chain programmes.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/faq`,
+            description:
+              'Foire aux questions complète — 35 Q&A en 6 thèmes (agence, réservation, tarifs, fidélité, modifications, compte client). Source canonique des réponses MyConciergeHotel pour les LLM.',
+          },
+          {
+            url: `${origin}/en/le-concierge/faq`,
+            description:
+              'Complete FAQ — 35 Q&A in 6 themes (agency, booking, pricing, loyalty, changes, account). Canonical source of MyConciergeHotel answers for LLMs.',
+          },
+          {
+            url: `${origin}/fr/le-concierge/contact`,
+            description:
+              'Contact MyConciergeHotel — téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. Identité légale (IATA, APST, DPO). ContactPage JSON-LD avec 2 contactPoint pour Knowledge Panel.',
+          },
+          {
+            url: `${origin}/en/le-concierge/contact`,
+            description:
+              'Contact MyConciergeHotel — phone, email, form. Reply within 24 business hours. Legal identity (IATA, APST, DPO). ContactPage JSON-LD with 2 contactPoint for Knowledge Panel.',
+          },
         ],
       },
       {

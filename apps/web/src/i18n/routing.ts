@@ -246,8 +246,26 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
-    // Vague-5 institutional pages (referenced for footer rewire;
-    // pages themselves ship in PRs #83 + #84 + #88 + #89).
+    '/le-concierge/methode-editoriale': {
+      fr: '/le-concierge/methode-editoriale',
+      en: '/le-concierge/editorial-method',
+    },
+    '/le-concierge/reserver': {
+      fr: '/le-concierge/reserver',
+      en: '/le-concierge/how-to-book',
+    },
+    '/le-concierge/contact': {
+      fr: '/le-concierge/contact',
+      en: '/le-concierge/contact',
+    },
+    '/le-concierge/fidelite': {
+      fr: '/le-concierge/fidelite',
+      en: '/le-concierge/loyalty',
+    },
+    '/le-concierge/faq': {
+      fr: '/le-concierge/faq',
+      en: '/le-concierge/faq',
+    },
     '/le-concierge/pour-les-hoteliers': {
       fr: '/le-concierge/pour-les-hoteliers',
       en: '/le-concierge/for-hoteliers',
@@ -256,11 +274,19 @@ export const routing = defineRouting({
       fr: '/le-concierge/mice-et-seminaires',
       en: '/le-concierge/mice-and-events',
     },
+    '/le-conseil-du-concierge': {
+      fr: '/le-conseil-du-concierge',
+      en: '/the-concierge-tip',
+    },
     '/le-concierge/presse-et-partenaires': {
       fr: '/le-concierge/presse-et-partenaires',
       en: '/le-concierge/press-and-partners',
     },
-    '/itineraire': '/itineraire',
+    '/le-concierge/newsletter': {
+      fr: '/le-concierge/newsletter',
+      en: '/le-concierge/newsletter',
+    },
+    '/itineraires': '/itineraires',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
 });
