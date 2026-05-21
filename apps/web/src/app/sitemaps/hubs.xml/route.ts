@@ -58,13 +58,16 @@ export async function GET(): Promise<NextResponse> {
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {
-      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraires';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
-      { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
+      // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
+      // real listing (PR2 — Sprint 2). `last_updated` per slug ships
+      // separately in `/sitemaps/itineraries.xml` (PR3).
+      { href: '/itineraires', priority: 0.7 },
     ];
     for (const hub of staticHubs) {
       const hrefForLocale = (l: Locale): string =>

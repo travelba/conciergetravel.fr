@@ -261,6 +261,48 @@ function cacheKeyFor(filters: ListItinerariesFilters): string[] {
 }
 
 /**
+ * Slug-only reader powering `generateStaticParams` on
+ * `/itineraire/[slug]/page.tsx`. Returns the FR slugs of every
+ * published itinerary as a flat array.
+ *
+ * Defensive `[]` on any failure (rule nextjs-app-router.mdc) so the
+ * static slate stays buildable even when Supabase is unreachable
+ * (e.g. preview deployments without env vars).
+ */
+export async function listPublishedItinerarySlugs(): Promise<readonly string[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('itineraries')
+      .select('slug_fr')
+      .eq('status', 'published');
+
+    if (error !== null || !Array.isArray(data)) {
+      if (error !== null) {
+        console.error('[itineraries.list-slugs] supabase error', {
+          message: error.message,
+          code: error.code,
+        });
+      }
+      return [];
+    }
+
+    const out: string[] = [];
+    for (const row of data) {
+      const slug = (row as { slug_fr?: unknown }).slug_fr;
+      if (typeof slug === 'string' && slug.length > 0) out.push(slug);
+    }
+    return out;
+  } catch (e) {
+    console.error(
+      '[itineraries.list-slugs] threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
+}
+
+/**
  * Public listing helper. Validates the input through Zod first
  * (defaulting `limit = 60` when missing), then hits the cached fetch.
  *
