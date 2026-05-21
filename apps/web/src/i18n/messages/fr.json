@@ -174,37 +174,6 @@
         "ariaSkipToSteps": "Aller directement à l'itinéraire pas à pas"
       }
     },
-    "inspiration": {
-      "eyebrow": "Inspiration",
-      "title": "Trouvez l'hôtel qui vous correspond",
-      "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
-      "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
-      "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
-      "breadcrumbHome": "Accueil",
-      "themes": {
-        "title": "Par thème",
-        "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
-      },
-      "occasions": {
-        "title": "Par occasion",
-        "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
-      },
-      "saisons": {
-        "title": "Par saison",
-        "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
-      }
-    },
-    "brands": {
-      "eyebrow": "Groupes hôteliers",
-      "title": "Toutes les marques d'hôtels",
-      "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
-      "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
-      "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
-      "breadcrumbHome": "Accueil",
-      "breadcrumbHotels": "Hôtels",
-      "viewBrand": "Voir les hôtels {brand} →",
-      "empty": "Aucun hôtel publié pour cette marque pour le moment."
-    },
     "breadcrumb": {
       "label": "Fil d'ariane",
       "home": "Accueil",
@@ -238,12 +207,103 @@
       "current": "Français"
     }
   },
+  "inspiration": {
+    "eyebrow": "Inspiration",
+    "title": "Trouvez l'hôtel qui vous correspond",
+    "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
+    "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
+    "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
+    "breadcrumbHome": "Accueil",
+    "themes": {
+      "title": "Par thème",
+      "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+    },
+    "occasions": {
+      "title": "Par occasion",
+      "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
+    },
+    "saisons": {
+      "title": "Par saison",
+      "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+    },
+    "aeoQuestion": "Comment trouver l'hôtel qui correspond à votre voyage chez MyConciergeHotel ?",
+    "aeoAnswer": "MyConciergeHotel agrège ses Palaces et hôtels 5★ sur trois axes complémentaires : 12 thèmes (romantique, spa, gastronomie, design, vignobles, patrimoine, golf, ski, piscine, rooftop, kids-friendly), 9 occasions de voyage (lune de miel, mariage, séminaire, lune de miel, anniversaire, retraite bien-être) et 4 saisons. Chaque combinaison ouvre un sous-hub éditorial avec sélection signée par notre conciergerie. Mise à jour {date}.",
+    "faqTitle": "L'inspiration MyConciergeHotel — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Quelle différence entre un thème, une occasion et une saison ?",
+        "a": "Un thème décrit l'expérience principale recherchée (spa, gastronomie, design) — il caractérise l'hôtel. Une occasion décrit l'événement qui motive le voyage (lune de miel, mariage, séminaire) — elle décrit le voyageur. Une saison décrit la fenêtre temporelle pertinente (hiver à la montagne, été en bord de mer) — elle décrit le calendrier. Les trois axes se croisent : un hôtel peut être romantique (thème), idéal pour une lune de miel (occasion) et au meilleur de sa forme au printemps (saison)."
+      },
+      {
+        "q": "Pourquoi 12 thèmes plutôt que 50 ?",
+        "a": "Nous limitons à 12 thèmes pour garantir que chaque axe a au moins 5 adresses publiées — un thème avec une seule fiche n'a pas de valeur pour l'utilisateur ni pour l'AEO. Les sous-thèmes pertinents (Michelin 2 étoiles, spa avec sauna privé) sont des sous-axes du moteur de recherche, pas des hubs autonomes."
+      },
+      {
+        "q": "Comment l'inspiration est-elle reliée aux classements ?",
+        "a": "Chaque thème, occasion ou saison ouvre la page `/classements/{axe}/{valeur}` — sous-hub matrice qui liste tous les classements éditoriaux portant cet axe. Par exemple « Spa & bien-être » mène aux classements « Meilleurs spas hôteliers », « Palaces avec hammam », « Retraites bien-être » publiés sur ce thème."
+      },
+      {
+        "q": "Une saison sans destination, ça donne quoi ?",
+        "a": "Un classement « Hiver » sans destination listée signifie qu'on couvre l'expérience hivernale (ski, après-ski, spa) sur toutes les zones — Alpes, Pyrénées, mais aussi Côte d'Azur en basse saison. Un classement « Hiver à Courchevel » est plus spécifique et apparaît dans le sous-hub `/classements/lieu/courchevel`."
+      },
+      {
+        "q": "Pourquoi pas un axe « budget » ?",
+        "a": "Tous nos hôtels sont Palace ou 5 étoiles — le segment prix est par construction premium. Un axe « budget » n'aurait pas de granularité utile chez nous ; nous avons cependant un comparateur de prix non affilié sur chaque fiche pour comparer aux agrégateurs."
+      },
+      {
+        "q": "Quand de nouvelles inspirations sont-elles publiées ?",
+        "a": "La taxonomie est gelée trimestriellement (cohérence des classements). De nouveaux thèmes peuvent apparaître si la conciergerie publie 5+ classements dédiés (ex : « surf de luxe » pourrait s'ouvrir si nous publions 5 classements bord de mer × surf)."
+      }
+    ]
+  },
+  "brands": {
+    "eyebrow": "Groupes hôteliers",
+    "title": "Toutes les marques d'hôtels",
+    "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
+    "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
+    "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbHotels": "Hôtels",
+    "viewBrand": "Voir les hôtels {brand} →",
+    "empty": "Aucun hôtel publié pour cette marque pour le moment.",
+    "aeoQuestion": "Quels groupes hôteliers représente MyConciergeHotel dans son catalogue ?",
+    "aeoAnswer": "MyConciergeHotel couvre {count} collections hôtelières d'auteur — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Les adresses indépendantes (Negresco, Lutetia, Crillon, Villa La Coste) figurent également sans appartenance à une chaîne. Mise à jour {date}.",
+    "faqTitle": "Les marques d'hôtels — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Êtes-vous affilié ou rémunéré par ces groupes hôteliers ?",
+        "a": "Non. MyConciergeHotel est une agence IATA indépendante. Aucune marque ne paie pour figurer ou être mise en avant. Notre commission vient des réservations (standard IATA), identique d'une marque à l'autre — la sélection est strictement éditoriale."
+      },
+      {
+        "q": "Pourquoi certaines marques de luxe sont absentes (Aman, Six Senses, Belmond) ?",
+        "a": "Soit parce que la marque n'a pas encore d'adresse en France dans notre catalogue (Aman, Six Senses), soit parce que la connectivité GDS n'est pas optimale (Belmond — connecté par lots, en cours d'enrichissement). Notre conciergerie peut néanmoins réserver toute adresse via Amadeus sur demande."
+      },
+      {
+        "q": "Comment une marque rejoint-elle votre catalogue éditorial ?",
+        "a": "Nous sélectionnons les groupes hôteliers en croisant trois critères : présence d'au moins une adresse française 5★ ou Palace, connectivité Amadeus GDS pour la réservation directe, signature éditoriale forte (collection d'auteur, pas simple bannière marketing). Une marque ne se candidate pas — c'est notre conciergerie qui propose."
+      },
+      {
+        "q": "Que signifie « collection » vs « chaîne » dans votre catalogue ?",
+        "a": "Une collection (Oetker, Dorchester, Cheval Blanc) regroupe quelques adresses d'auteur, souvent uniques par leur architecture ou leur histoire. Une chaîne (Four Seasons, Mandarin Oriental) déploie un standard de service à grande échelle mais maintient un haut niveau. Les deux figurent au catalogue ; notre éditorial préfère les collections pour leur signature."
+      },
+      {
+        "q": "Puis-je accumuler les points de fidélité de la marque en réservant chez vous ?",
+        "a": "Oui — votre numéro de fidélité (Four Seasons Preferred, Marriott Bonvoy pour Ritz-Carlton…) peut être joint à la réservation. Les points sont attribués par l'hôtel après le séjour. Notre programme MyConciergeHotel s'ajoute aux programmes maison sans les remplacer."
+      },
+      {
+        "q": "Comment savoir si un hôtel précis appartient à une de ces marques ?",
+        "a": "La fiche hôtel mentionne en évidence l'appartenance à une collection (Palace + groupe en chip sous le H1). Si la marque est ambiguë (rachat récent, marque-fille), nous précisons l'historique dans la section « À propos de la maison »."
+      }
+    ]
+  },
   "concierge": {
     "eyebrow": "À propos",
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
     "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
+    "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
       "title": "Nos engagements",
       "iataTitle": "Agence IATA / APST",

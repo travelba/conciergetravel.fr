@@ -40,19 +40,33 @@ interface HubAeoSectionProps {
    * distinct anchor. Defaults to `"aeo-title"`.
    */
   readonly headingId?: string;
+  /**
+   * When `false`, suppresses the single-Q `FAQPage` JSON-LD emission.
+   * Required by ADR-0011 C1 ("exactly one FAQPage per page") when the
+   * caller also renders a `<HubFaqSection>` (or any other inline
+   * `FAQPage` such as the `<HotelFaq>` block on `/le-concierge`).
+   * Google merges multiple FAQPage blocks inconsistently — we keep
+   * the canonical multi-Q FAQ JSON-LD as the source of truth and
+   * surface the AEO answer as visible-only DOM content. The
+   * `<section data-aeo>` is always emitted regardless.
+   */
+  readonly emitJsonLd?: boolean;
 }
 
 export async function HubAeoSection({
   question,
   answer,
   headingId = 'aeo-title',
+  emitJsonLd = true,
 }: HubAeoSectionProps): Promise<ReactElement> {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
-  const faqJsonLd = JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd([{ question, answer }]));
+  const faqJsonLd = emitJsonLd
+    ? JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd([{ question, answer }]))
+    : null;
 
   return (
     <>
-      <JsonLdScript data={faqJsonLd} nonce={nonce} />
+      {faqJsonLd !== null ? <JsonLdScript data={faqJsonLd} nonce={nonce} /> : null}
       <section
         data-aeo
         aria-labelledby={headingId}

@@ -5,10 +5,13 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
@@ -89,6 +92,21 @@ export default async function BrandsIndexPage({ params }: { params: Promise<{ lo
     count: counts.get(b.slug) ?? 0,
   })).sort((a, b) => b.count - a.count);
 
+  // Freshness signal (locale-aware month) embedded both in the visible
+  // badge and in the AEO answer string — skill `geo-llm-optimization`
+  // §Freshness triple-sync.
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const todayIso = new Date().toISOString();
+
+  interface FaqItem {
+    readonly q: string;
+    readonly a: string;
+  }
+  const faqItems = t.raw('faqItems') as FaqItem[];
+
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t('breadcrumbHome'), url: `${origin}${getPathname({ locale, href: '/' })}` },
@@ -139,7 +157,14 @@ export default async function BrandsIndexPage({ params }: { params: Promise<{ lo
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
         <p className="text-muted mt-3 text-base">{t('lede')}</p>
+        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
+
+      <HubAeoSection
+        question={t('aeoQuestion')}
+        answer={t('aeoAnswer', { count: brands.length, date: freshnessDate })}
+        headingId="brands-aeo-title"
+      />
 
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {brands.map((b) => (
@@ -165,6 +190,11 @@ export default async function BrandsIndexPage({ params }: { params: Promise<{ lo
           </li>
         ))}
       </ul>
+
+      <HubFaqSection
+        heading={t('faqTitle')}
+        items={faqItems.map((it) => ({ question: it.q, answer: it.a }))}
+      />
     </main>
   );
 }
