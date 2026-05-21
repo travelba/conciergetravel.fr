@@ -1,5 +1,6 @@
 'use client';
 
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactElement } from 'react';
 
@@ -64,17 +65,19 @@ export function AuthArea({ variant }: AuthAreaProps): ReactElement {
       const supabase = getSupabaseBrowserClient();
       void supabase.auth
         .getSession()
-        .then(({ data }) => {
+        .then(({ data }: { data: { session: Session | null } }) => {
           if (cancelled) return;
           setState(data.session !== null ? 'signed-in' : 'signed-out');
         })
         .catch(() => {
           if (!cancelled) setState('signed-out');
         });
-      const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (cancelled) return;
-        setState(session !== null ? 'signed-in' : 'signed-out');
-      });
+      const { data: sub } = supabase.auth.onAuthStateChange(
+        (_event: AuthChangeEvent, session: Session | null) => {
+          if (cancelled) return;
+          setState(session !== null ? 'signed-in' : 'signed-out');
+        },
+      );
       unsubscribe = () => sub.subscription.unsubscribe();
     } catch {
       if (!cancelled) setState('signed-out');

@@ -161,7 +161,6 @@ export default shouldWrapSentry
       authToken: sentryAuthToken,
       silent: process.env['CI'] !== 'true',
       widenClientFileUpload: true,
-      hideSourceMaps: true,
       disableLogger: true,
       tunnelRoute: '/monitoring',
       reactComponentAnnotation: { enabled: true },
