@@ -210,6 +210,15 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
+    '/le-concierge/fidelite': {
+      fr: '/le-concierge/fidelite',
+      en: '/le-concierge/loyalty',
+      // V2: /de/das-konzierge/treueprogramm etc.
+    },
+    '/le-concierge/faq': {
+      fr: '/le-concierge/faq',
+      en: '/le-concierge/faq',
+    },
     '/itineraire': '/itineraire',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
