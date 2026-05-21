@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter, Noto_Serif } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
@@ -13,17 +13,21 @@ import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import '@/styles/globals.css';
 
+// Body / UI font — DESIGN.md §3 (functional workhorse, clarity workhorse).
 const sans = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
 });
 
-const serif = Playfair_Display({
+// Editorial / headline font — DESIGN.md §3 (literary, authoritative).
+// Noto Serif replaces Playfair Display (2026-05-21) to align with the canonical
+// "Concierge Travel Visual Language" Stitch DS.
+const serif = Noto_Serif({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-serif',
-  weight: ['500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
 });
 
 export function generateStaticParams() {

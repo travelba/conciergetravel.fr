@@ -2,40 +2,102 @@
  * Design tokens — the entire visual identity is driven by these CSS custom
  * properties. Restyling the product = override this file in apps/web/src/styles.
  *
- * Palette inspired by CDC §10.1 (sober editorial luxe, neutral base + gold accent).
+ * Aligned with CDC §10.1 (visual identity — sober editorial luxe).
+ *
+ * Philosophy: "Sober Luxury" — quality whispered through white space and
+ * precise typography rather than shouted through ornamentation.
+ *
+ * Token sections:
+ *   2. Colors (brand palette + Material Design 3 named tokens)
+ *   3. Typography
+ *   4. Layout & spacing
+ *   5. Shape language (radius)
  */
 :root {
-  /* Colors */
-  --color-bg: #fafaf8;
-  --color-fg: #1a1a1a;
-  --color-muted: #6b6b6b;
-  --color-border: #e5e5e0;
-  --color-accent-gold: #c9a96e;
-  --color-accent-fg: #1a1a1a;
-  --color-sage: #8f9d83;
+  /* =========================================================================
+   * 2. Colors — brand palette
+   * ======================================================================= */
+  --color-charcoal: #1a1a1a;
+  --color-off-white: #fafaf8;
+  --color-gold: #c9a96e;
+  --color-sage: #8c9681;
+
+  /* Legacy aliases (kept for backward-compat with existing Tailwind classes) */
+  --color-bg: var(--color-off-white);
+  --color-fg: var(--color-charcoal);
+  --color-accent-gold: var(--color-gold);
+  --color-accent-fg: var(--color-charcoal);
+
+  /* Status colors (consistent with DS error token) */
   --color-success: #2f7a3d;
   --color-warning: #b07d2e;
-  --color-danger: #a83232;
+  --color-danger: #ba1a1a; /* aligned with DS `error` */
 
-  /* Typography (overridden by next/font in apps/web) */
-  --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Inter', 'DM Sans', system-ui, -apple-system, sans-serif;
+  /* =========================================================================
+   * 2b. Material Design 3 named tokens — for advanced surface/interaction work
+   * ======================================================================= */
+  --color-surface: #fdf8f8;
+  --color-surface-bright: #fdf8f8;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f7f3f2;
+  --color-surface-container: #f1edec;
+  --color-surface-container-high: #ebe7e6;
+  --color-surface-container-highest: #e5e2e1;
+  --color-surface-dim: #ddd9d8;
+  --color-surface-tint: #5f5e5e;
+  --color-surface-variant: #e5e2e1;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
+  --color-on-surface: #1c1b1b;
+  --color-on-surface-variant: #444748;
+  --color-inverse-surface: #313030;
+  --color-inverse-on-surface: #f4f0ef;
 
-  /* Spacing scale (4px base) is on Tailwind; tokens here are extras */
-  --space-section: 6rem;
-  --space-section-mobile: 3.5rem;
+  --color-outline: #747878;
+  --color-outline-variant: #c4c7c7;
 
-  /* Layout */
+  /* Legacy `muted` and `border` mapped to nearest M3 tokens */
+  --color-muted: var(--color-on-surface-variant);
+  --color-border: var(--color-outline-variant);
+
+  /* =========================================================================
+   * 3. Typography — Noto Serif × Inter
+   * Loaded by `next/font/google` in apps/web/src/app/[locale]/layout.tsx
+   * which sets the actual --font-* values on <html>.
+   * ======================================================================= */
+  --font-serif: 'Noto Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* =========================================================================
+   * 4. Layout & spacing
+   * (Tailwind exposes these via custom names — see config/tailwind/preset.ts)
+   * ======================================================================= */
+  --space-touch-target: 44px; /* WCAG 2.2 AA minimum */
+  --space-gutter: 24px; /* column gap on grids */
+  --space-margin-mobile: 20px; /* page horizontal padding mobile */
+  --space-margin-desktop: 80px; /* page horizontal padding desktop */
+  --space-section-gap: 120px; /* between editorial features */
+
+  /* Legacy section spacing (kept for backward-compat) */
+  --space-section: 6rem; /* 96px — used by editorial pages */
+  --space-section-mobile: 3.5rem; /* 56px */
+
   --max-prose: 68ch;
   --max-editorial: 74rem;
+
+  /* =========================================================================
+   * 5. Shape language — soft, slightly rounded
+   * DEFAULT = 0.25rem (4px)
+   * ======================================================================= */
+  --radius-xs: 0.125rem; /* 2px  — subtle inputs */
+  --radius-sm: 0.25rem; /* 4px  — buttons, cards */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-lg: 0.5rem; /* 8px */
+  --radius-xl: 0.75rem; /* 12px — badges, chips */
+  --radius-full: 9999px; /* circular avatars */
 }
 
 @media (prefers-color-scheme: dark) {
-  /* Dark palette deferred — the brief mandates a sober neutral base and the
-     final design will be reworked. Keeping a light theme as default. */
+  /* Dark palette deferred — the DS philosophy mandates a sober light base.
+     Dark mode would require a parallel Material Design 3 token sheet
+     (surface-dim → on-surface inverse). Tracked in a future ADR. */
 }

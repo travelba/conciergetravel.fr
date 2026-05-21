@@ -281,11 +281,12 @@ export function MobileNav(): ReactElement {
                   />
                   <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
                   {/*
-                    International destinations: each entry routes to
-                    `/hotels` (catalogue catch-all with per-country
-                    sections). See `site-header.tsx` PalacesHotelsMegaMenu
-                    for the full rationale — `/destination/[citySlug]`
-                    is FR-only and 404'd on every international slug.
+                    Vague-6 — all 8 international country guides
+                    indexable. Each entry routes to its dedicated
+                    /guide/<slug> page (inline switch keeps the typed
+                    `Href` strict; no string assembly). aria-label
+                    appends the ISO country code for screen readers
+                    so the link is unambiguous out of context.
                   */}
                   <ul className="flex flex-col gap-0.5">
                     {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
@@ -294,9 +295,31 @@ export function MobileNav(): ReactElement {
                         iso !== null
                           ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
                           : pickEntryLabel(entry, locale);
+                      const href = ((): React.ComponentProps<typeof Link>['href'] => {
+                        switch (entry.slug) {
+                          case 'italie':
+                            return '/guide/italie';
+                          case 'suisse':
+                            return '/guide/suisse';
+                          case 'maroc':
+                            return '/guide/maroc';
+                          case 'maldives':
+                            return '/guide/maldives';
+                          case 'emirats-arabes-unis':
+                            return '/guide/emirats-arabes-unis';
+                          case 'thailande':
+                            return '/guide/thailande';
+                          case 'japon':
+                            return '/guide/japon';
+                          case 'etats-unis':
+                            return '/guide/etats-unis';
+                          default:
+                            return '/hotels';
+                        }
+                      })();
                       return (
                         <li key={entry.slug}>
-                          <Link href="/hotels" aria-label={ariaLabel} className={subLinkClass}>
+                          <Link href={href} aria-label={ariaLabel} className={subLinkClass}>
                             {pickEntryLabel(entry, locale)}
                           </Link>
                         </li>
@@ -372,7 +395,9 @@ export function MobileNav(): ReactElement {
                 </div>
               </details>
 
-              {/* 5 — Le Concierge */}
+              {/* 5 — Le Concierge (Vague-5 institutional pages now
+                  reachable as dedicated routes; remaining entries
+                  still on /le-concierge until their pages ship). */}
               <details className="group">
                 <summary className={summaryClass}>
                   <span>{t('primaryNav.concierge')}</span>
@@ -382,19 +407,28 @@ export function MobileNav(): ReactElement {
                   <Link href="/le-concierge" className={subLinkClass}>
                     {t('primaryNav.conciergeAboutLink')}
                   </Link>
+                  <Link href="/le-concierge/reserver" className={subLinkClass}>
+                    {t('primaryNav.conciergeBooking')}
+                  </Link>
+                  <Link href="/le-concierge/fidelite" className={subLinkClass}>
+                    {t('primaryNav.conciergeLoyalty')}
+                  </Link>
+                  <Link href="/le-concierge/faq" className={subLinkClass}>
+                    {t('primaryNav.conciergeFaq')}
+                  </Link>
+                  <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
+                    {t('primaryNav.conciergeMethod')}
+                  </Link>
                   <Link href="/le-concierge" className={subLinkClass}>
                     {t('primaryNav.conciergeTip')}
                   </Link>
-                  <Link href="/itineraire" className={subLinkClass}>
+                  <Link href="/itineraires" className={subLinkClass}>
                     {t('primaryNav.conciergeItineraries')}
                   </Link>
                   <Link href="/guides" className={subLinkClass}>
                     {t('primaryNav.conciergeGuides')}
                   </Link>
-                  <Link href="/le-concierge" className={subLinkClass}>
-                    {t('primaryNav.conciergeLoyalty')}
-                  </Link>
-                  <Link href="/le-concierge" className={subLinkClass}>
+                  <Link href="/le-concierge/contact" className={subLinkClass}>
                     {t('primaryNav.conciergeContact')}
                   </Link>
                 </div>
