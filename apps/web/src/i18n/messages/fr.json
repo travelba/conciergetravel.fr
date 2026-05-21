@@ -278,6 +278,200 @@
       ]
     }
   },
+  "conciergeHoteliers": {
+    "metaTitle": "Devenir hôtel partenaire — MyConciergeHotel | Sélection éditoriale Palaces & 5★",
+    "metaDesc": "Hôteliers Palaces et 5★ : intégrez notre catalogue éditorial pour bénéficier d'une distribution agence IATA, d'un audit éditorial signé, et d'une audience premium. Sélection à l'invitation — critères, contacts.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Pour les hôteliers",
+    "title": "Devenir hôtel partenaire MyConciergeHotel",
+    "lede": "MyConciergeHotel est un canal de distribution éditorial pour Palaces et hôtels 5 étoiles. Nous sélectionnons à l'invitation, sur audit, et signons chaque fiche. Voici les avantages pour les hôteliers retenus et le processus de candidature.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment intégrer le catalogue éditorial MyConciergeHotel en tant qu'hôtelier ?",
+    "aeoAnswer": "MyConciergeHotel sélectionne à l'invitation, sur 8 critères croisés (Atout France, Michelin Keys, Forbes, audit interne, signature éditoriale — voir /le-concierge/methode-editoriale). Les hôteliers Palaces et 5★ français peuvent toutefois nous écrire pour signaler leur disponibilité GDS Amadeus et leur appétence à un partenariat. Réponse de notre cellule partenariats sous 5 jours ouvrés. Aucun frais d'entrée — agence IATA, commissions standard sur réservations. Mise à jour {date}.",
+    "benefits": {
+      "title": "5 avantages pour les hôtels partenaires",
+      "items": [
+        {
+          "title": "Distribution agence IATA",
+          "body": "Accès au canal MyConciergeHotel pour la clientèle premium française et internationale. Tarifs nets GDS Amadeus identiques à votre tarif public — aucune commission ajoutée à la facture du voyageur (commission agence standard prélevée sur la part hôtel, conforme IATA)."
+        },
+        {
+          "title": "Fiche rédactionnelle signée",
+          "body": "Audit terrain par un conseiller MyConciergeHotel, fiche rédigée par notre équipe (600-1 000 mots), Conseil du Concierge (50-110 mots de secret opérationnel), photos haute définition. Pas de copie-coller de votre fiche commerciale ou d'un agrégateur."
+        },
+        {
+          "title": "Audience premium qualifiée",
+          "body": "Audience post-CSP+, panier moyen 2-5× supérieur aux agrégateurs grand public. Sources de trafic : SERP marques + AI Overviews (notre catalogue est optimisé GEO — citations Perplexity, ChatGPT Search, Claude), réseau de classements éditoriaux, newsletter mensuelle, partenariats média."
+        },
+        {
+          "title": "Conciergerie acheteur en français et anglais",
+          "body": "Toute réservation passe par notre conciergerie (téléphone + e-mail). Nous gérons les modifications, demandes spéciales (chambre, vue, occasion), questions pré-séjour. Vous recevez une réservation prête, sans rebond, avec le profil voyageur consolidé."
+        },
+        {
+          "title": "Programme de fidélité partagé",
+          "body": "Les voyageurs MyConciergeHotel cumulent vos points de fidélité chaîne (Marriott Bonvoy, Four Seasons Preferred, Accor ALL…) ET les avantages MyConciergeHotel (petit-déjeuner, late check-out, crédit hôtel — Essentiel tier). Pas de cannibalisation — notre programme s'ajoute, ne remplace pas."
+        }
+      ]
+    },
+    "criteria": {
+      "title": "Les critères de sélection",
+      "lede": "La sélection est strictement éditoriale et indépendante (voir /le-concierge/methode-editoriale pour la méthode complète). Vous augmentez vos chances d'être retenu si :",
+      "items": [
+        "Vous êtes distingué par Atout France (Palace ou 5 étoiles officiel) ou par Michelin Keys (1, 2 ou 3 clés).",
+        "Votre restaurant gastronomique est étoilé Michelin (1, 2 ou 3 étoiles).",
+        "Vous êtes rang Forbes Travel Guide 4 ou 5 étoiles.",
+        "Vous appartenez à une collection d'auteur (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels, Virtuoso).",
+        "Vous avez au moins 50 avis vérifiés sur Amadeus avec note ≥ 4,2/5.",
+        "Vous disposez d'une signature éditoriale (chambre numérotée mythique, vue, savoir-faire, histoire racontable)."
+      ]
+    },
+    "process": {
+      "title": "Comment candidater",
+      "step1Title": "Manifestation d'intérêt",
+      "step1Body": "Écrivez à partenariats@myconciergehotel.com avec : nom de l'hôtel, code Amadeus property (si connu), distinctions actuelles (Atout France, Michelin Keys, Michelin stars, Forbes, collections), contact direction. Nous accusons réception sous 48h ouvrées.",
+      "step2Title": "Pré-évaluation",
+      "step2Body": "Notre cellule partenariats vérifie l'éligibilité sur dossier (sources publiques, base Amadeus). Réponse sous 5 jours ouvrés. Si dossier favorable, nous planifions un audit terrain dans les 30 jours.",
+      "step3Title": "Audit terrain",
+      "step3Body": "Un conseiller MyConciergeHotel visite l'hôtel anonymement (paye sa nuit aux tarifs publics) et teste les services (check-in, room service, conciergerie maison, spa, table). Audit signé sur 5 axes. Restitution à la direction sous 7 jours après visite.",
+      "step4Title": "Intégration",
+      "step4Body": "Si retenu : signature accord de distribution agence IATA standard, paramétrage Amadeus property, rédaction fiche éditoriale (4-6 semaines), publication. Première réservation typiquement sous 60 jours après accord."
+    },
+    "noPayToPlay": {
+      "title": "Pas de pay-to-play",
+      "body": "Aucun frais d'entrée, pas d'option « mise en avant » payante, pas de boost classement à la commission. Notre revenu vient des commissions IATA standard sur les réservations effectives (12-15% selon GDS), identiques d'un hôtel à l'autre. Refuser le pay-to-play est notre engagement le plus fort vis-à-vis de nos clients — voir /le-concierge/methode-editoriale."
+    },
+    "contact": {
+      "title": "Contacter notre cellule partenariats",
+      "email": "partenariats@myconciergehotel.com",
+      "responseSLA": "Accusé de réception sous 48h ouvrées, pré-évaluation sous 5 jours ouvrés.",
+      "altCanal": "Pour les demandes presse, voir /le-concierge/presse-et-partenaires. Pour les demandes événementiel/MICE, voir /le-concierge/mice-et-seminaires."
+    },
+    "faqTitle": "Hôteliers — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien coûte d'intégrer le catalogue ?",
+        "a": "Aucun coût d'entrée. Notre revenu vient des commissions IATA standard prélevées sur les réservations effectives (12-15% selon le GDS et le tarif). Pas d'abonnement, pas d'option payante."
+      },
+      {
+        "q": "Combien de temps entre la candidature et la première réservation ?",
+        "a": "Si dossier retenu : 5 jours pour la pré-évaluation, 30 jours pour planifier l'audit, 7 jours pour la restitution, 4-6 semaines pour la rédaction et publication de la fiche. Première réservation effective typiquement sous 60-90 jours après accord initial."
+      },
+      {
+        "q": "Que se passe-t-il si nous ne sommes pas retenus ?",
+        "a": "Nous expliquons en transparence pourquoi (critères manquants, conjoncture catalogue, signal audit défavorable). Vous restez éligible à une nouvelle candidature à 12 mois — utile si vous obtenez une nouvelle distinction (Atout France, Michelin) ou si vous renforcez l'opérationnel."
+      },
+      {
+        "q": "Pouvons-nous demander un retrait du catalogue ?",
+        "a": "Oui à tout moment. Préavis de 90 jours pour les réservations en cours (respect du voyageur). Le retrait est sans frais — nous éditorialisons une page d'archive si vous le souhaitez (« hôtel précédemment référencé »)."
+      },
+      {
+        "q": "Pouvons-nous influencer ce qui est écrit dans notre fiche ?",
+        "a": "Vous relisez la fiche avant publication et signalez les erreurs factuelles (chiffres, dates, équipements). Vous ne pouvez pas demander de changement de ton, de score ou de Conseil du Concierge — ces éléments restent éditoriaux. C'est ce qui fait notre crédibilité."
+      },
+      {
+        "q": "Êtes-vous compatibles avec notre channel manager existant ?",
+        "a": "Oui — toute distribution passe par Amadeus GDS standard (codes A, B, C selon votre paramétrage hôtel). Si vous êtes sur Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, la connectivité est immédiate — votre channel manager pousse l'inventaire vers Amadeus, nous le récupérons."
+      }
+    ]
+  },
+  "conciergeMice": {
+    "metaTitle": "MICE & événements privés — Devis sous 24h | MyConciergeHotel",
+    "metaDesc": "Séminaires, mariages, événements privés dans nos Palaces et hôtels 5★ : capacités salles, formats, devis sur-mesure sous 24h. Conciergerie dédiée MICE, agence IATA, garantie APST.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "MICE & événements privés",
+    "title": "MICE, séminaires et événements privés",
+    "lede": "Nos Palaces et hôtels 5 étoiles accueillent vos séminaires d'entreprise, mariages, anniversaires privés, lancements de produit, retraites créatives. Notre cellule MICE prépare votre devis sur-mesure sous 24h ouvrées et coordonne les détails avec la direction de l'hôtel.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment organiser un séminaire ou un événement privé via MyConciergeHotel ?",
+    "aeoAnswer": "Trois étapes : 1) précisez votre besoin (type d'événement, dates, nombre de participants, ville ou région cible) via le formulaire ou par e-mail à mice@myconciergehotel.com ; 2) notre cellule MICE sélectionne 3-5 hôtels éligibles dans notre catalogue Palaces et 5★, vérifie disponibilité salles et chambres, prépare un devis comparatif sous 24h ouvrées ; 3) après choix, votre concierge MICE coordonne brief audio-visuel, restauration, hébergement, transferts et timing. Aucun frais agence supplémentaire — commissions IATA standard. Mise à jour {date}.",
+    "formats": {
+      "title": "5 formats d'événement gérés",
+      "items": [
+        {
+          "title": "Séminaire d'entreprise",
+          "body": "10-200 participants. Salles plénières + sous-commissions, restauration corporate (déjeuners de travail, dîners de gala), team-building, transferts groupe. Adaptés pour direction générale, sales kick-off, codir, formations leadership."
+        },
+        {
+          "title": "Mariage & cérémonie privée",
+          "body": "30-300 invités. Cérémonie laïque ou religieuse, cocktail, dîner assis (rond ou banquet), soirée dansante. Block chambres pour invités, suite mariés offerte selon hôtel. Coordination wedding planner externe possible."
+        },
+        {
+          "title": "Anniversaire privé / fête de famille",
+          "body": "15-100 invités. Privatisation d'un restaurant gastronomique, terrasse ou cave à vin. Format dîner assis ou cocktail dînatoire. Idéal anniversaires marquants, baptêmes, fêtes de fiançailles."
+        },
+        {
+          "title": "Lancement produit / soirée presse",
+          "body": "50-400 invités. Privatisation de salons d'apparat, dressing rooms pour la presse, signalétique éphémère. Coordination régisseur audiovisuel, sécurité, transferts presse. Reporting post-événement (photos officielles)."
+        },
+        {
+          "title": "Retraite créative / off-site direction",
+          "body": "5-30 participants. Hôtel privatisé en petit comité, format intensif (3-5 jours), travail en salle + ateliers extérieurs (cuisine, dégustation, nature). Profils CEO/CTO/board, agences créatives, équipes produit."
+        }
+      ]
+    },
+    "topVenues": {
+      "title": "Nos hôtels MICE de référence",
+      "lede": "Une sélection parmi notre catalogue, en fonction du format et de la capacité recherchés (la liste complète des venues éligibles est partagée avec votre devis sur-mesure) :",
+      "items": [
+        "Paris : Le Bristol (15 salles, jusqu'à 500), Plaza Athénée (10 salles, jusqu'à 350), Ritz Paris (8 salles, jusqu'à 250), Four Seasons George V (10 salles, jusqu'à 350), Le Meurice (12 salles, jusqu'à 300).",
+        "Côte d'Azur : Hôtel du Cap-Eden-Roc (cap 250 en plein air), Grand-Hôtel du Cap-Ferrat (cap 200), Hôtel Martinez Cannes (cap 800 en plénière), La Réserve Ramatuelle (cap 80 intime).",
+        "Alpes : Cheval Blanc Courchevel (privatisations 30-50), Les Airelles Gstaad (cap 100), Four Seasons Megève (privatisations 60-120), Le K2 Palace (cap 60).",
+        "Bordelais : Les Sources de Caudalie (cap 150 vignobles), Château Smith Haut Lafitte (cap 200 réceptions).",
+        "Champagne : Domaine Les Crayères (cap 80 cérémonies)."
+      ]
+    },
+    "form": {
+      "title": "Demander un devis sous 24h",
+      "lede": "Précisez votre besoin — notre cellule MICE revient vers vous avec 3-5 propositions chiffrées sous 24h ouvrées.",
+      "namePlaceholder": "Votre prénom et nom",
+      "companyPlaceholder": "Société (optionnel)",
+      "emailPlaceholder": "Adresse e-mail",
+      "phonePlaceholder": "Téléphone (recommandé pour cellule MICE)",
+      "formatPlaceholder": "Type d'événement (séminaire, mariage, soirée presse…)",
+      "guestsPlaceholder": "Nombre de participants",
+      "datesPlaceholder": "Dates ou fenêtre (ex : sept-oct 2026)",
+      "destinationPlaceholder": "Destination (Paris, Côte d'Azur, libre…)",
+      "messagePlaceholder": "Précisez votre besoin (programme, contraintes, budget indicatif)…",
+      "consent": "J'accepte que mes données soient utilisées pour préparer le devis (politique de confidentialité).",
+      "submit": "Recevoir mon devis sous 24h",
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à mice@myconciergehotel.com avec ces informations."
+    },
+    "contact": {
+      "title": "Contacter notre cellule MICE",
+      "email": "mice@myconciergehotel.com",
+      "responseSLA": "Devis comparatif (3-5 hôtels) sous 24h ouvrées. Pour les demandes urgentes < 7 jours, appelez le standard.",
+      "altCanal": "Pour devenir hôtel partenaire, voir /le-concierge/pour-les-hoteliers. Pour la presse, voir /le-concierge/presse-et-partenaires."
+    },
+    "faqTitle": "MICE — questions fréquentes",
+    "faq": [
+      {
+        "q": "Quel est le délai pour recevoir un devis ?",
+        "a": "Sous 24 heures ouvrées pour les demandes standards (séminaire, événement privé, mariage). Pour les demandes complexes (privatisation totale, événement international, calendrier serré), comptez 48-72h ouvrées. Demandes urgentes < 7 jours : appelez la cellule MICE directement."
+      },
+      {
+        "q": "Quelle est votre commission sur les événements MICE ?",
+        "a": "Commission IATA standard prélevée sur la part hôtel (8-12% selon les hôtels et le périmètre). Pas de marge ajoutée sur les prestations événementielles externes (DJ, photographe, traiteur extérieur) — nous coordonnons mais ne facturons pas de commission sur ces poignées."
+      },
+      {
+        "q": "Pouvez-vous organiser un événement multi-hôtels ?",
+        "a": "Oui — fréquent pour les anniversaires (cocktail au Bristol, dîner au Plaza Athénée), les séminaires DACH/Europe (Paris + Riviera sur 3 jours), les destinations weddings (cérémonie en Provence, after Côte d'Azur). Notre cellule MICE coordonne logistique, transferts, signalétique unifiée."
+      },
+      {
+        "q": "Acceptez-vous les paiements échelonnés pour les gros événements ?",
+        "a": "Oui — pratique standard pour les événements > 30 000 €. Échéancier type : 30% acompte à la confirmation, 30% 60 jours avant l'événement, 40% solde 7 jours avant. Modalités précisées sur devis."
+      },
+      {
+        "q": "Que se passe-t-il en cas d'annulation ?",
+        "a": "Politique d'annulation contractuelle, communiquée sur devis avant signature. Standard : annulation > 90 jours = pas de frais ; 60-90 jours = 30% retenu ; 30-60 jours = 50% retenu ; < 30 jours = 100% retenu. Possibilité d'assurance annulation (Allianz, Mondial Assistance) souscrite séparément."
+      },
+      {
+        "q": "Pouvez-vous gérer la coordination AV / régie / catering externe ?",
+        "a": "Oui — nous travaillons avec une short-list de prestataires AV (Tech Event, Lagoona, AVProject), régisseurs (Pulse, Pollen Studio) et traiteurs (Potel et Chabot, Saint-Clair Le Traiteur, Lenôtre). Devis intégré ou séparé selon votre préférence. Vos prestataires habituels sont également les bienvenus."
+      }
+    ]
+  },
   "consent": {
     "title": "Vos préférences cookies",
     "intro": "Nous utilisons des cookies pour faire fonctionner ce site (authentification, panier, sécurité). Avec votre accord, nous mesurons aussi son audience de manière anonymisée pour l'améliorer. Vous pouvez accepter, refuser ou personnaliser à tout moment.",

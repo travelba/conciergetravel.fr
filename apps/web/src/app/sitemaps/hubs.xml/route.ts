@@ -58,12 +58,23 @@ export async function GET(): Promise<NextResponse> {
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {
-      href: '/inspiration' | '/marques' | '/le-concierge' | '/itineraire';
+      href:
+        | '/inspiration'
+        | '/marques'
+        | '/le-concierge'
+        | '/le-concierge/pour-les-hoteliers'
+        | '/le-concierge/mice-et-seminaires'
+        | '/itineraire';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
+      // Vague-5 P1 — B2B surfaces (hotelier partnerships + MICE events).
+      // Priority 0.5 — important for revenue but lower SERP volume than
+      // the consumer-facing institutional pages (méthode, réserver, faq).
+      { href: '/le-concierge/pour-les-hoteliers', priority: 0.5 },
+      { href: '/le-concierge/mice-et-seminaires', priority: 0.5 },
       { href: '/itineraire', priority: 0.4 }, // coming-soon hub, low priority
     ];
     for (const hub of staticHubs) {

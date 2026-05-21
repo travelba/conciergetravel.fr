@@ -278,6 +278,200 @@
       ]
     }
   },
+  "conciergeHoteliers": {
+    "metaTitle": "Become a partner hotel — MyConciergeHotel | Palace & 5★ editorial selection",
+    "metaDesc": "Palace and 5★ hoteliers: join our editorial catalogue for IATA-grade distribution, a signed editorial audit, and a premium audience. Selection by invitation — criteria, contact.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "For hoteliers",
+    "title": "Become a MyConciergeHotel partner hotel",
+    "lede": "MyConciergeHotel is an editorial distribution channel for Palaces and 5-star hotels. We select by invitation, on audit, and sign every page. Here are the benefits for selected hoteliers and the application process.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "How do hoteliers join the MyConciergeHotel editorial catalogue?",
+    "aeoAnswer": "MyConciergeHotel selects by invitation on 8 cross-referenced criteria (Atout France, Michelin Keys, Forbes, internal audit, editorial signature — see /le-concierge/editorial-method). French Palace and 5★ hoteliers can however write to us to signal their Amadeus GDS availability and appetite for partnership. Our partnerships cell replies within 5 business days. No entry fee — IATA agency, standard booking commissions. Last updated {date}.",
+    "benefits": {
+      "title": "5 benefits for partner hotels",
+      "items": [
+        {
+          "title": "IATA agency distribution",
+          "body": "Access to the MyConciergeHotel channel for premium French and international clientele. Net Amadeus GDS rates identical to your public rate — no commission added to the traveller's invoice (standard agency commission deducted from the hotel share, IATA-compliant)."
+        },
+        {
+          "title": "Signed editorial page",
+          "body": "Field audit by a MyConciergeHotel advisor, page written by our team (600-1,000 words), Concierge's Tip (50-110 words of operational secret), high-definition photos. No copy-paste of your commercial sheet or an aggregator."
+        },
+        {
+          "title": "Qualified premium audience",
+          "body": "Post-CSP+ audience, average basket 2-5× higher than general aggregators. Traffic sources: brand SERP + AI Overviews (our catalogue is GEO-optimised — Perplexity, ChatGPT Search, Claude citations), editorial ranking network, monthly newsletter, media partnerships."
+        },
+        {
+          "title": "Buyer-side concierge in French and English",
+          "body": "Every booking goes through our concierge desk (phone + email). We manage changes, special requests (room, view, occasion), pre-stay questions. You receive a ready-to-go booking, no rebound, with consolidated traveller profile."
+        },
+        {
+          "title": "Shared loyalty programme",
+          "body": "MyConciergeHotel travellers earn your chain loyalty points (Marriott Bonvoy, Four Seasons Preferred, Accor ALL…) AND MyConciergeHotel perks (breakfast, late check-out, hotel credit — Essential tier). No cannibalisation — our programme stacks, doesn't replace."
+        }
+      ]
+    },
+    "criteria": {
+      "title": "Selection criteria",
+      "lede": "The selection is strictly editorial and independent (see /le-concierge/editorial-method for the full method). You increase your chances of being selected if:",
+      "items": [
+        "You hold an Atout France distinction (Palace or official 5-star) or Michelin Keys (1, 2 or 3 keys).",
+        "Your gastronomic restaurant holds Michelin stars (1, 2 or 3 stars).",
+        "You hold a Forbes Travel Guide rank 4 or 5 stars.",
+        "You belong to an author collection (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels, Virtuoso).",
+        "You have at least 50 verified Amadeus reviews with rating ≥ 4.2/5.",
+        "You have an editorial signature (legendary numbered room, view, craft, story to tell)."
+      ]
+    },
+    "process": {
+      "title": "How to apply",
+      "step1Title": "Expression of interest",
+      "step1Body": "Write to partenariats@myconciergehotel.com with: hotel name, Amadeus property code (if known), current distinctions (Atout France, Michelin Keys, Michelin stars, Forbes, collections), management contact. We acknowledge receipt within 48 business hours.",
+      "step2Title": "Pre-evaluation",
+      "step2Body": "Our partnerships cell verifies eligibility on file (public sources, Amadeus base). Reply within 5 business days. If favourable, we schedule a field audit within 30 days.",
+      "step3Title": "Field audit",
+      "step3Body": "A MyConciergeHotel advisor visits the hotel anonymously (pays for the night at public rates) and tests services (check-in, room service, in-house concierge, spa, dining). Signed audit on 5 axes. Debrief to management within 7 days post-visit.",
+      "step4Title": "Integration",
+      "step4Body": "If selected: signing of the standard IATA agency distribution agreement, Amadeus property setup, editorial page writing (4-6 weeks), publication. First booking typically within 60 days of agreement."
+    },
+    "noPayToPlay": {
+      "title": "No pay-to-play",
+      "body": "No entry fee, no paid \"featured\" option, no ranking boost on commission. Our revenue comes from standard IATA commissions on effective bookings (12-15% per GDS), identical from one hotel to another. Refusing pay-to-play is our strongest commitment to our customers — see /le-concierge/editorial-method."
+    },
+    "contact": {
+      "title": "Contact our partnerships cell",
+      "email": "partenariats@myconciergehotel.com",
+      "responseSLA": "Receipt acknowledgement within 48 business hours, pre-evaluation within 5 business days.",
+      "altCanal": "For press requests, see /le-concierge/presse-et-partenaires. For event/MICE requests, see /le-concierge/mice-and-events."
+    },
+    "faqTitle": "Hoteliers — frequently asked questions",
+    "faq": [
+      {
+        "q": "What does it cost to join the catalogue?",
+        "a": "No entry fee. Our revenue comes from standard IATA commissions on effective bookings (12-15% per GDS and rate). No subscription, no paid option."
+      },
+      {
+        "q": "How long between application and first booking?",
+        "a": "If accepted: 5 days for pre-evaluation, 30 days to schedule the audit, 7 days for debrief, 4-6 weeks for writing and publishing the page. First effective booking typically within 60-90 days of initial agreement."
+      },
+      {
+        "q": "What happens if we are not selected?",
+        "a": "We transparently explain why (missing criteria, catalogue context, unfavourable audit signal). You remain eligible for a new application at 12 months — useful if you obtain a new distinction (Atout France, Michelin) or strengthen operations."
+      },
+      {
+        "q": "Can we ask for catalogue withdrawal?",
+        "a": "Yes at any time. 90-day notice for in-flight bookings (traveller respect). Withdrawal is free — we editorialise an archive page if you wish (\"previously listed hotel\")."
+      },
+      {
+        "q": "Can we influence what is written on our page?",
+        "a": "You review the page before publication and flag factual errors (figures, dates, equipment). You can't request a tone change, score change or Concierge's Tip change — these elements remain editorial. That's what makes our credibility."
+      },
+      {
+        "q": "Are you compatible with our existing channel manager?",
+        "a": "Yes — all distribution goes through Amadeus GDS standard (A, B, C codes per your hotel setup). If you're on Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, connectivity is immediate — your channel manager pushes inventory to Amadeus, we pick it up."
+      }
+    ]
+  },
+  "conciergeMice": {
+    "metaTitle": "MICE & private events — Quote within 24h | MyConciergeHotel",
+    "metaDesc": "Seminars, weddings, private events at our Palaces and 5★ hotels: room capacities, formats, bespoke quotes within 24h. Dedicated MICE concierge, IATA agency, APST guarantee.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "MICE & private events",
+    "title": "MICE, seminars and private events",
+    "lede": "Our Palaces and 5-star hotels host your corporate seminars, weddings, private anniversaries, product launches, creative retreats. Our MICE cell prepares your bespoke quote within 24 business hours and coordinates details with the hotel management.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "How do I organise a seminar or private event via MyConciergeHotel?",
+    "aeoAnswer": "Three steps: 1) specify your need (event type, dates, number of participants, target city or region) via the form or by email at mice@myconciergehotel.com; 2) our MICE cell selects 3-5 eligible hotels from our Palace and 5★ catalogue, checks room and accommodation availability, prepares a comparative quote within 24 business hours; 3) after choice, your MICE concierge coordinates AV brief, catering, accommodation, transfers and timing. No additional agency fee — standard IATA commissions. Last updated {date}.",
+    "formats": {
+      "title": "5 event formats handled",
+      "items": [
+        {
+          "title": "Corporate seminar",
+          "body": "10-200 participants. Plenary halls + sub-commissions, corporate catering (working lunches, gala dinners), team-building, group transfers. Suited for executive committees, sales kick-offs, codir, leadership trainings."
+        },
+        {
+          "title": "Wedding & private ceremony",
+          "body": "30-300 guests. Secular or religious ceremony, cocktail, seated dinner (round or banquet), dance party. Room block for guests, complimentary bridal suite per hotel. External wedding planner coordination possible."
+        },
+        {
+          "title": "Private anniversary / family celebration",
+          "body": "15-100 guests. Privatisation of a gastronomic restaurant, terrace or wine cellar. Seated dinner or standing cocktail format. Ideal for milestone birthdays, baptisms, engagement parties."
+        },
+        {
+          "title": "Product launch / press evening",
+          "body": "50-400 guests. Privatisation of state rooms, press dressing rooms, ephemeral signage. AV regie, security, press transfer coordination. Post-event reporting (official photos)."
+        },
+        {
+          "title": "Creative retreat / executive off-site",
+          "body": "5-30 participants. Hotel privatised in small format, intensive (3-5 days), in-room work + outdoor workshops (cooking, tasting, nature). CEO/CTO/board profiles, creative agencies, product teams."
+        }
+      ]
+    },
+    "topVenues": {
+      "title": "Our reference MICE hotels",
+      "lede": "A selection from our catalogue based on format and capacity (the full list of eligible venues is shared with your bespoke quote):",
+      "items": [
+        "Paris: Le Bristol (15 rooms, up to 500), Plaza Athénée (10 rooms, up to 350), Ritz Paris (8 rooms, up to 250), Four Seasons George V (10 rooms, up to 350), Le Meurice (12 rooms, up to 300).",
+        "French Riviera: Hôtel du Cap-Eden-Roc (cap. 250 outdoor), Grand-Hôtel du Cap-Ferrat (cap. 200), Hôtel Martinez Cannes (cap. 800 plenary), La Réserve Ramatuelle (cap. 80 intimate).",
+        "Alps: Cheval Blanc Courchevel (privatisations 30-50), Les Airelles Gstaad (cap. 100), Four Seasons Megève (privatisations 60-120), Le K2 Palace (cap. 60).",
+        "Bordeaux region: Les Sources de Caudalie (cap. 150 vineyards), Château Smith Haut Lafitte (cap. 200 receptions).",
+        "Champagne: Domaine Les Crayères (cap. 80 ceremonies)."
+      ]
+    },
+    "form": {
+      "title": "Request a quote within 24h",
+      "lede": "Specify your need — our MICE cell returns with 3-5 priced proposals within 24 business hours.",
+      "namePlaceholder": "Your first and last name",
+      "companyPlaceholder": "Company (optional)",
+      "emailPlaceholder": "Email address",
+      "phonePlaceholder": "Phone (recommended for MICE cell)",
+      "formatPlaceholder": "Event type (seminar, wedding, press evening…)",
+      "guestsPlaceholder": "Number of participants",
+      "datesPlaceholder": "Dates or window (e.g. Sept-Oct 2026)",
+      "destinationPlaceholder": "Destination (Paris, Riviera, open…)",
+      "messagePlaceholder": "Specify your need (programme, constraints, indicative budget)…",
+      "consent": "I accept that my data is used to prepare the quote (privacy policy).",
+      "submit": "Receive my quote within 24h",
+      "wip": "Form being commissioned — in the meantime, write to us directly at mice@myconciergehotel.com with this information."
+    },
+    "contact": {
+      "title": "Contact our MICE cell",
+      "email": "mice@myconciergehotel.com",
+      "responseSLA": "Comparative quote (3-5 hotels) within 24 business hours. For urgent requests < 7 days, call the desk.",
+      "altCanal": "To become a partner hotel, see /le-concierge/for-hoteliers. For press, see /le-concierge/presse-et-partenaires."
+    },
+    "faqTitle": "MICE — frequently asked questions",
+    "faq": [
+      {
+        "q": "What's the timeframe to receive a quote?",
+        "a": "Within 24 business hours for standard requests (seminar, private event, wedding). For complex requests (full privatisation, international event, tight calendar), count 48-72 business hours. Urgent requests < 7 days: call the MICE cell directly."
+      },
+      {
+        "q": "What is your MICE commission?",
+        "a": "Standard IATA commission deducted from the hotel share (8-12% per hotel and scope). No margin added on external event services (DJ, photographer, outside caterer) — we coordinate but don't charge commission on these line items."
+      },
+      {
+        "q": "Can you organise a multi-hotel event?",
+        "a": "Yes — common for anniversaries (cocktail at Le Bristol, dinner at Plaza Athénée), DACH/Europe seminars (Paris + Riviera over 3 days), destination weddings (ceremony in Provence, after-party Côte d'Azur). Our MICE cell coordinates logistics, transfers, unified signage."
+      },
+      {
+        "q": "Do you accept staggered payments for large events?",
+        "a": "Yes — standard practice for events > €30,000. Typical schedule: 30% deposit at confirmation, 30% 60 days before event, 40% balance 7 days before. Terms specified on quote."
+      },
+      {
+        "q": "What happens in case of cancellation?",
+        "a": "Contractual cancellation policy, communicated on quote before signing. Standard: cancellation > 90 days = no fee; 60-90 days = 30% retained; 30-60 days = 50% retained; < 30 days = 100% retained. Cancellation insurance (Allianz, Mondial Assistance) available separately."
+      },
+      {
+        "q": "Can you manage AV / production / external catering coordination?",
+        "a": "Yes — we work with a short-list of AV providers (Tech Event, Lagoona, AVProject), producers (Pulse, Pollen Studio) and caterers (Potel et Chabot, Saint-Clair Le Traiteur, Lenôtre). Integrated or separate quote per your preference. Your usual providers are also welcome."
+      }
+    ]
+  },
   "consent": {
     "title": "Your cookie preferences",
     "intro": "We use cookies to make this site work (login, booking cart, security). With your consent we also measure usage anonymously to improve it. You can accept, refuse or customise at any time.",
