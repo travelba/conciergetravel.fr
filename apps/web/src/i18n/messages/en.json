@@ -132,20 +132,6 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "itineraire": {
-      "eyebrow": "Bespoke itineraries",
-      "title": "Your travel itineraries",
-      "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
-      "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
-      "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
-      "breadcrumbHome": "Home",
-      "comingSoon": "Coming soon",
-      "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
-      "fallbackTitle": "In the meantime, explore:",
-      "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
-      "fallbackRankings": "All editorial rankings",
-      "fallbackDestinations": "All destination guides"
-    },
     "inspiration": {
       "eyebrow": "Inspiration",
       "title": "Find the hotel that suits you",
@@ -277,6 +263,20 @@
         }
       ]
     }
+  },
+  "itineraire": {
+    "eyebrow": "Bespoke itineraries",
+    "title": "Your travel itineraries",
+    "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
+    "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
+    "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
+    "breadcrumbHome": "Home",
+    "comingSoon": "Coming soon",
+    "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
+    "fallbackTitle": "In the meantime, explore:",
+    "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
+    "fallbackRankings": "All editorial rankings",
+    "fallbackDestinations": "All destination guides"
   },
   "consent": {
     "title": "Your cookie preferences",
