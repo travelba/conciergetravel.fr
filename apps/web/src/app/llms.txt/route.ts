@@ -187,21 +187,91 @@ export async function GET(): Promise<NextResponse> {
             },
           ]
         : []),
-      // Vague-6 — international country guides. First country: Italy.
-      // Surfaced as a dedicated section so LLMs can identify the
-      // expanding international scope (was zero before May 2026).
+      // Vague-6 — all 8 international country guides indexable.
+      // Dedicated section so LLMs identify the expanded international
+      // scope (was zero before May 2026).
       {
-        title: 'Guides pays internationaux (Vague 6 — en cours de publication)',
+        title: 'Guides pays internationaux (8 pays — Vague 6)',
         items: [
           {
             url: `${origin}/fr/guide/italie`,
             description:
-              'Italie — Guide MyConciergeHotel pour un séjour de luxe : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. 6 régions, adresses 5★ et Palaces nommées, conseils opérationnels du Concierge par région, 7 Q&A.',
+              'Italie — Guide luxe MyConciergeHotel : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. 6 régions, Palaces nommés (Le Sirenuse, Villa d’Este, Castiglion del Bosco…), conseils opérationnels Concierge, 7 Q&A.',
           },
           {
             url: `${origin}/en/guide/italy`,
             description:
-              'Italy — MyConciergeHotel guide for a luxury stay: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. 6 regions, named 5★ and Palace addresses, Concierge operational tips per region, 7 Q&A.',
+              'Italy — MyConciergeHotel luxury guide: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. 6 regions, named 5★ and Palace addresses, Concierge operational tips, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/suisse`,
+            description:
+              'Suisse — Guide luxe MyConciergeHotel : Gstaad, St-Moritz, Zermatt, Lac Léman, Genève, Zurich, Lucerne. 6 pôles, adresses nommées (Gstaad Palace, Badrutt’s Palace, Mont Cervin Palace, Dolder Grand), 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/switzerland`,
+            description:
+              'Switzerland — MyConciergeHotel luxury guide: Gstaad, St Moritz, Zermatt, Lake Geneva, Geneva, Zurich, Lucerne. 6 hubs, named addresses, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/maroc`,
+            description:
+              'Maroc — Guide luxe MyConciergeHotel : Marrakech (Royal Mansour, La Mamounia, Mandarin Oriental, Selman), Essaouira, Désert Erg Chebbi, Tanger/Tétouan, Fès. 5 régions, riads et Palaces nommés, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/morocco`,
+            description:
+              'Morocco — MyConciergeHotel luxury guide: Marrakech, Essaouira, Erg Chebbi Desert, Tangier/Tetouan, Fes. 5 regions, named riads and Palaces, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/maldives`,
+            description:
+              'Maldives — Guide luxe MyConciergeHotel : Soneva Jani, Soneva Fushi, Cheval Blanc Randheli, Velaa Private Island, One&Only Reethi Rah, Four Seasons. 8 resorts d’auteur. Transferts hydravion. 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/maldives`,
+            description:
+              'Maldives — MyConciergeHotel luxury guide: Soneva, Cheval Blanc Randheli, Velaa, One&Only Reethi Rah, Four Seasons, Anantara, COMO. 8 author resorts. Seaplane transfers. 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/emirats-arabes-unis`,
+            description:
+              'Émirats arabes unis — Guide luxe MyConciergeHotel : Dubaï (Burj Al Arab, Atlantis The Royal, Bvlgari Resort, One Za’abeel) et Abu Dhabi (Emirates Palace, Bvlgari Abu Dhabi). 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/uae`,
+            description:
+              'United Arab Emirates — MyConciergeHotel luxury guide: Dubai (Burj Al Arab, Atlantis The Royal, Bvlgari, One Za’abeel) and Abu Dhabi (Emirates Palace, Bvlgari). 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/japon`,
+            description:
+              'Japon — Guide luxe MyConciergeHotel : Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), ryokans Hakone et Kanazawa, Mont Fuji. 5 régions, hôtels internationaux et ryokans, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/japan`,
+            description:
+              'Japan — MyConciergeHotel luxury guide: Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), Hakone and Kanazawa ryokans, Mount Fuji. 5 regions, 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/thailande`,
+            description:
+              'Thaïlande — Guide luxe MyConciergeHotel : Bangkok (Mandarin Oriental depuis 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui (Four Seasons, Six Senses), Chiang Mai (Four Seasons Tented Camp Golden Triangle), Krabi. 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/thailand`,
+            description:
+              'Thailand — MyConciergeHotel luxury guide: Bangkok (Mandarin Oriental since 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui, Chiang Mai (Four Seasons Tented Camp), Krabi. 7 Q&A.',
+          },
+          {
+            url: `${origin}/fr/guide/etats-unis`,
+            description:
+              'États-Unis — Guide luxe MyConciergeHotel : New York (Aman, Carlyle Rosewood, Mandarin Oriental, Four Seasons), Aspen (Little Nell, St Regis, Hotel Jerome), Napa Valley (Meadowood, Auberge du Soleil), Hawaii (Four Seasons Lanai, Halekulani). 4 pôles, 7 Q&A.',
+          },
+          {
+            url: `${origin}/en/guide/usa`,
+            description:
+              'United States — MyConciergeHotel luxury guide: New York (Aman, Carlyle, Mandarin Oriental), Aspen (Little Nell, St Regis, Hotel Jerome), Napa Valley (Meadowood, Auberge du Soleil), Hawaii (Four Seasons Lanai, Halekulani). 4 hubs, 7 Q&A.',
           },
         ],
       },

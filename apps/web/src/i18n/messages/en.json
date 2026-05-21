@@ -278,6 +278,762 @@
       ]
     }
   },
+  "guideSuisse": {
+    "metaTitle": "Switzerland — Luxury travel guide: Palaces and 5★ hotels | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in Switzerland: Palaces and 5★ — Geneva, Zurich, Gstaad, St Moritz, Zermatt, Lucerne. Itineraries, starred tables, operational tips.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Switzerland — The MyConciergeHotel guide to Palaces and 5★ hotels",
+    "lede": "Switzerland concentrates the most accomplished Alpine art of living: Gstaad for intimate skiing, St Moritz for international reach, Zermatt for the Matterhorn, Lucerne and Lugano for the lakes, Geneva and Zurich for culture and finance. Net Amadeus GDS rates, secure payment, MyConciergeHotel loyalty programme.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Switzerland luxury travel guide 6 hubs: Alps (Gstaad, St Moritz, Zermatt), Lakes (Geneva, Lugano), cities (Geneva, Zurich). MyConciergeHotel selection. Updated May 2026.",
+    "aeoQuestion": "Which Palaces and 5★ hotels are best for a luxury stay in Switzerland?",
+    "aeoAnswer": "MyConciergeHotel covers Swiss luxury hubs: Gstaad (Gstaad Palace, Le Grand Bellevue, Park Gstaad), St Moritz (Badrutt's Palace, Kulm Hotel, Suvretta House), Zermatt (Mont Cervin Palace, The Omnia), Lake Geneva (Beau-Rivage Geneva, Le Mirador Resort & Spa, Beau-Rivage Palace Lausanne), Zurich (Dolder Grand, Baur au Lac, Park Hyatt). IATA booking via our concierge. Last updated {date}.",
+    "regions": {
+      "title": "Six hubs, six experiences",
+      "items": [
+        {
+          "name": "Gstaad",
+          "highlights": "Gstaad Palace (family institution since 1913), Le Grand Bellevue (Relais & Châteaux, village spirit), Park Gstaad (renovated 2023, Leading Hotels), The Alpina Gstaad (Leading Hotels, contemporary Alpine design), Ultima Gstaad.",
+          "bestFor": "Ski-in/ski-out from mid-December to mid-March, discreet private retreats, cultural après-ski (Menuhin Festival concerts in July-August), refined Alpine gastronomy (Sommet 1★ at Park Gstaad).",
+          "concierge": "My tip: at the Gstaad Palace, ask for room 433 rather than a suite — full Bernese view, south balcony, refurbished by the 4th-generation Scherz family in 2023. For La Fromagerie restaurant, book the 8:30-10pm slot midweek — table 8 facing the hearth is rarely allocated spontaneously."
+        },
+        {
+          "name": "St Moritz",
+          "highlights": "Badrutt's Palace Hotel (since 1896, the Engadine icon), Kulm Hotel St. Moritz (Leading Hotels), Suvretta House (Leading Hotels, neutral toward the village), Carlton Hotel St. Moritz, Grand Hotel des Bains Kempinski.",
+          "bestFor": "Corviglia + Corvatsch skiing, polo on the frozen lake (late January), White Turf, 2★ gastronomy (Da Vittorio at Carlton), Serlas street shopping.",
+          "concierge": "My tip: at Badrutt's Palace, don't stay in the main building in winter — prefer the rooms in the \"Mountain Wing\" on the Engadiner Sport side (direct Lake St. Moritz view). For Igniv restaurant (3★ Andreas Caminada), book 6 weeks ahead — lunch tasting menu is less competitive in access."
+        },
+        {
+          "name": "Zermatt",
+          "highlights": "Mont Cervin Palace (Leading Hotels, direct Matterhorn view), The Omnia (Design Hotels, Marriott), CERVO Mountain Resort, Riffelalp Resort (Europe's highest 5★, 2,222m), Schweizerhof Zermatt.",
+          "bestFor": "Year-round skiing + summer glaciers (unique in Europe), Matterhorn hiking, Alpine gastronomy by Heinz Beck (Mont Cervin), high-altitude wellness retreats (Riffelalp).",
+          "concierge": "My tip: if you stay at Mont Cervin Palace, ask for Junior room 421 (rather than a pricier suite) — east orientation with full Matterhorn view, covered balcony to watch sunrise without cold. For Riffelalp Resort, book the 7:32pm Gornergrat cogwheel train for arrival (alpenglow view of the Matterhorn)."
+        },
+        {
+          "name": "Lake Geneva & Lausanne",
+          "highlights": "Beau-Rivage Palace (Lausanne, since 1861, Leading Hotels), Hotel Royal Savoy Lausanne (Bürgenstock Group, renovated 2015), Le Mirador Resort & Spa (Mont-Pèlerin, panoramic Alps view), Lausanne Palace, Grand-Hôtel du Lac (Vevey, Relais & Châteaux).",
+          "bestFor": "Wellness cure (Le Mirador), 3★ gastronomy (Anne-Sophie Pic at Beau-Rivage), events (Tour de Romandie, Athletissima), Vaudois Riviera in May-June and September.",
+          "concierge": "My tip: at Beau-Rivage Palace, ask for suite 333 (Tissot Lounge — small private balcony, Lake Geneva view toward Évian, original 1861 parquet). For Anne-Sophie Pic, book the Thursday \"Esprit Pic\" lunch (3 courses at 195 CHF, more accessible than evening menu)."
+        },
+        {
+          "name": "Geneva & Zurich",
+          "highlights": "Geneva: Beau-Rivage Geneva (since 1865, Mont Blanc view), Hôtel d'Angleterre, Mandarin Oriental Geneva, Four Seasons Hôtel des Bergues. Zurich: Dolder Grand (the Hill, Leading Hotels), Baur au Lac (since 1844, Leading Hotels), Park Hyatt Zurich, Widder Hotel.",
+          "bestFor": "Premium business stay, urban starred gastronomy (The Restaurant 1★ at Dolder, Pavillon 1★ at Baur au Lac), shopping (Bahnhofstrasse Zurich, Rue du Rhône Geneva), direct access from Paris (TGV Lyria 3h).",
+          "concierge": "My tip: at Dolder Grand, ask for room 4063 in the \"Spa Wing\" (north-east facing, Zurich and Alps view on clear days). For Beau-Rivage Geneva, suite 622 (6th floor lake facade) offers the best Mont Blanc view — full south orientation, 65m². Refurbished by the Mayer heirs in 2024."
+        },
+        {
+          "name": "Lucerne, Lugano & Bürgenstock",
+          "highlights": "Bürgenstock Hotels & Resort (2017 reopening, Lake Lucerne view from 870m), Park Hotel Vitznau (Leading Hotels, Lake Lucerne), Mandarin Oriental Palace Luzern (2022 reopening), Splendide Royal (Lugano, Leading Hotels).",
+          "bestFor": "Quiet stay post-ski or summer (May-October), Pilatus / Rigi hiking, 2★ gastronomy (Focus at Park Hotel Vitznau), Pilatus helicopter scenic flight.",
+          "concierge": "My tip: at Bürgenstock, stay at the \"Palace Hotel\" (reopened 2017) rather than the newer \"Bürgenstock Hotel\" — historic atmosphere, Belle Époque lobby, more direct lake view. Ask for room 248 (corner suite south-west facade, private terrace full-frame)."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in Switzerland",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "Swiss Alps skiing: mid-December to mid-March (peak late December and February). Summer lakes and Vaudois Riviera: May-June and September (mild temperature, hotel rates lower). Summer Alps hiking: July-August. Cities: year-round (Geneva and Zurich)."
+        },
+        {
+          "title": "How to get there",
+          "body": "TGV Lyria Paris-Geneva (3h10) or Paris-Zurich (4h). Direct flights from Paris CDG to Geneva GVA, Zurich ZRH, Basel BSL. For Alpine destinations, helicopter transfers possible from Sion or Bern (our concierge organises)."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Swiss franc (CHF) — rate ~ €0.95 in spring 2026. Credit cards accepted everywhere. Tips never included but a 5-10% \"courtesy margin\" is appreciated in fine dining. No VAT refund for non-residents (unlike the EU)."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "Schengen area — ID card or passport. EU driving licence accepted. Motorway sticker mandatory (CHF 40/year, available at the border). Strict speed limits (40 km/h in towns, frequent controls)."
+        },
+        {
+          "title": "Languages",
+          "body": "Trilingual: French (Romandy — Geneva, Lausanne, Montreux, Sion), Swiss German (Bern, Zurich, Basel, Gstaad, Lucerne, Zermatt), Italian (Ticino — Lugano, Locarno). English spoken in all 5★ hotels and starred restaurants. French works everywhere in upmarket hotels."
+        },
+        {
+          "title": "Our concierge",
+          "body": "German and Italian speakers available for complex requests (dog-sledding outing in Les Diablerets, heli-skiing Verbier, private table booking with Anne-Sophie Pic). Write to suisse@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Switzerland — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Swiss addresses are in your catalogue?",
+        "a": "Around fifteen 5★ and Palace addresses across the 6 main hubs (Gstaad, St Moritz, Zermatt, Lake Geneva, Geneva/Zurich, Lucerne/Lugano). Our Amadeus network also lets us book any 5★ GDS-connected Swiss address on request."
+      },
+      {
+        "q": "Is skiing in Switzerland more expensive than in France?",
+        "a": "Lift passes are comparable in the Swiss Alps (Verbier, Zermatt) to those of Courchevel or Val d'Isère. Upmarket accommodation is slightly higher on average in Switzerland, but the service/price ratio is typically better (more stable teams, deeper training)."
+      },
+      {
+        "q": "Which hub to favour for a first ski in Switzerland?",
+        "a": "If you seek family intimacy: Gstaad (Gstaad Palace, Le Grand Bellevue). If you seek international reach: St Moritz (Badrutt's Palace, Kulm). If you seek pure high mountain: Zermatt (Mont Cervin Palace) with its iconic Matterhorn."
+      },
+      {
+        "q": "Are your Swiss rates more expensive than booking direct?",
+        "a": "No — we access net Amadeus GDS rates in CHF, identical to the hotel's public published rate. Our non-affiliated comparator on every page transparently shows Booking and Hotels.com rates for the same dates."
+      },
+      {
+        "q": "Do you accept payment in CHF?",
+        "a": "Yes — direct payment in CHF possible from your bank card (multi-currency account at some banks) or in EUR with conversion at the ECB daily rate. For payments > CHF 10,000, SEPA transfer available on request."
+      },
+      {
+        "q": "Does the MyConciergeHotel loyalty programme work on Swiss hotels?",
+        "a": "Yes for Little Hotelier-connected addresses (Essential tier automatic). For upmarket independents (Beau-Rivage, Baur au Lac) outside Little Hotelier, the Prestige tier (upcoming launch) will apply its perks."
+      },
+      {
+        "q": "Can Switzerland be combined with Italy (Lake Como to St Moritz)?",
+        "a": "Yes — Bernina Express train St Moritz → Tirano (Italy, 2h30, UNESCO-listed). Our concierge organises the combo St Moritz (Badrutt's Palace) + Lake Como (Villa d'Este) with coordinated transfers. Ideal window: June or September."
+      }
+    ]
+  },
+  "guideMaroc": {
+    "metaTitle": "Morocco — Luxury travel guide: Riads, Palaces and 5★ hotels | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in Morocco: Marrakech (Royal Mansour, La Mamounia), Essaouira, Ouarzazate, Tangier, Fes. Cultural itineraries, exceptional riads, operational tips.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Morocco — The MyConciergeHotel guide to Palaces and exceptional riads",
+    "lede": "Morocco concentrates some of the world's most beautiful hotel addresses — Royal Mansour in Marrakech, La Mamounia, Mandarin Oriental Marrakech, Selman Marrakech, Banyan Tree Tamouda Bay. Our concierge curates riads and Palaces by criteria: urban palace, intimate riad, seaside resort or desert retreat.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Morocco luxury travel guide 5 regions: Marrakech, Essaouira, Desert (Erg Chebbi), Tangier/Tetouan, Fes. MyConciergeHotel selection Palaces, riads, resorts. Updated May 2026.",
+    "aeoQuestion": "Which Palaces and riads are best for a luxury stay in Morocco?",
+    "aeoAnswer": "MyConciergeHotel covers 5 flagship regions: Marrakech (Royal Mansour, La Mamounia, Mandarin Oriental Marrakech, Selman, Amanjena), Essaouira (Sofitel Mogador Golf & Spa, Heure Bleue Palais Relais & Châteaux), Desert (Erg Chebbi — luxury Azalaï camps), Tangier/Tetouan (Banyan Tree Tamouda Bay, Tangerine), Fes (Riad Fès Relais & Châteaux, La Mamounia Fes). IATA booking. Last updated {date}.",
+    "regions": {
+      "title": "Five regions, five experiences",
+      "items": [
+        {
+          "name": "Marrakech",
+          "highlights": "Royal Mansour Marrakech (His Majesty Mohammed VI, 53 private riads), La Mamounia (institution since 1923, renovated by Jouin Manku 2020), Mandarin Oriental Marrakech (palmeraie, 54 villas with private pool), Selman Marrakech (Arabian horse stud), Amanjena (Palmeraie, 39 pavilions), La Maison Arabe.",
+          "bestFor": "First Morocco trip, wellness stay (Royal Mansour hammam), starred Moroccan gastronomy (Le Marocain at La Mamounia), Atlas excursion (Ourika), Medina souk shopping.",
+          "concierge": "My tip: at Royal Mansour, ask for riad 7 (the most secluded, larger interior courtyard, private hammam lounge overlooking the garden). For La Mamounia, don't stay in a Prestige room — prefer the \"Pavillon Jardin\" Koutoubia side: 60m² with full-frame private terrace, refurbished by Jouin Manku."
+        },
+        {
+          "name": "Essaouira",
+          "highlights": "Sofitel Mogador Golf & Spa, Heure Bleue Palais (Relais & Châteaux, former Hotel Métropole 1908 renovated), Madada Mogador, L'Heure Bleue Palais, Villa Maroc.",
+          "bestFor": "Less crowded seaside stay than Marrakech, wind and surf (Sidi Kaouki), fish gastronomy (Le Patio), blue and white colours of the medina, urban photography.",
+          "concierge": "My tip: at Heure Bleue Palais, ask for the \"Maroc suite\" on the 2nd floor terrace side — sea + medina alley view, private hammam. To taste local cuisine, book Caravane Café restaurant (off-hotel) at nightfall — table 5 on the covered terrace."
+        },
+        {
+          "name": "Desert (Erg Chebbi)",
+          "highlights": "Azalaï Desert Camp luxury bivouacs, Erg Chebbi Luxury Camp, Sahara Sky Camp. All offer high-comfort Berber tents (hotel-quality bedding, private bathroom, double bed, solar power) in the heart of the dunes.",
+          "bestFor": "Sunrise and sunset on the dunes, camel ride at dusk, dinner under the stars, astronomical observation (Bortle 1 zone, purest sky in North Africa), 2 nights ideal.",
+          "concierge": "My tip: arrange to arrive at camp 1h before sunset — you ride a camel up to dune 5 (highest point, 150m) and watch sunset from altitude. Next-day departure must be before 7:30am for sunrise (cool temperature, dunes still cold — magical light between 6:45 and 7am)."
+        },
+        {
+          "name": "Tangier & Tetouan",
+          "highlights": "Banyan Tree Tamouda Bay (Tetouan, Mediterranean beach, villas with private pool), Tangerine (Tangier, Strait of Gibraltar view), Hotel Es Saadi (Marrakech alternative), Villa Joséphine (Tangier, Relais & Châteaux).",
+          "bestFor": "Mediterranean beach preferred over Atlantic (warmer water), proximity to Andalusia (35 min ferry from Tarifa), Hispano-Moroccan gastronomy, international Tangier atmosphere (Bowles).",
+          "concierge": "My tip: at Banyan Tree Tamouda Bay, ask for villa 142 (row 14, central position in the complex with direct access to the main pool + 80m private beach). For the signature restaurant, choose table 6 by the reflecting pool — best photo angle at dusk."
+        },
+        {
+          "name": "Fes",
+          "highlights": "Riad Fès Relais & Châteaux (Medina heart, former 19th-century palace), La Mamounia Fes (group extension, 2024 opening), Palais Faraj, Riad Maison Bleue, Riad Salam Fes.",
+          "bestFor": "Pure cultural stay (most preserved Medina UNESCO in the Arab world, Chouara tanneries, Al Quaraouiyine university founded 859), traditional gastronomy, craftsmanship (carpets, leather, copper).",
+          "concierge": "My tip: at Riad Fès, ask for Junior suite 4 (main patio side, original cedar ceiling, private hammam). For the Chouara tanneries visit, go between 9 and 10am — light illuminates the dye basins, smell still bearable (artisans offer you a mint sprig to breathe)."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in Morocco",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "Marrakech and Desert: October-April (mild temperatures 18-25°C). Avoid July-August (40-45°C). Essaouira: April-October (Atlantic wind tempering the heat). Fes: spring (April-June) and autumn (Sept-Nov)."
+        },
+        {
+          "title": "How to get there",
+          "body": "Direct flights Paris CDG/Orly to Marrakech RAK (3h15), Casablanca CMN, Tangier TNG. Our concierge organises airport transfers (private limousine €60-150 per trip depending on distance and standing)."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Moroccan dirham (MAD), €1 ≈ 11 MAD in spring 2026. Credit cards accepted in 5★ hotels but cash appreciated in the Medina (souks, taxis, popular restaurants). No prior exchange needed — ATMs at the airport. Tips: 10% common in upmarket hotels."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "No visa for EU / Switzerland / Canada nationals for stays ≤ 90 days. Passport valid 6 months after return. French driving licence valid. Driving in Marrakech intra-Medina not recommended — prefer taxi or chauffeured car."
+        },
+        {
+          "title": "Languages",
+          "body": "Arabic (official), Berber (mountain regions), French (spoken everywhere in upmarket, administration, education), English (growing in 5★ hotels). French is comfortable for any luxury stay."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Arabic and French speakers available for complex requests (private visit Medersa Ben Youssef off-hours, dinner on Atlas terrace, Oukaïmeden winter skiing). Write to maroc@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Morocco — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Moroccan addresses are in your catalogue?",
+        "a": "About ten 5★ and Palace addresses across the 5 main regions (Marrakech, Essaouira, Desert, Tangier/Tetouan, Fes). Royal Mansour, La Mamounia and the main Relais & Châteaux of the kingdom are featured."
+      },
+      {
+        "q": "Security — is Morocco safe for a luxury stay?",
+        "a": "Yes. Morocco is one of the safest destinations in the Arab world. Tourism classified as national heritage, visible police presence in tourist areas. Our concierge stays available 24/7 during your stay for any question."
+      },
+      {
+        "q": "Can Marrakech + Desert + Essaouira be combined in one stay?",
+        "a": "Yes — classic 8-10-day itinerary: Marrakech (3 nights) → Atlas drive via Aït Ben Haddou + Ouarzazate → Merzouga Desert (2 nights) → return Marrakech → Essaouira (2-3 nights). Our concierge organises 4×4 transfers + bivouacs + return."
+      },
+      {
+        "q": "Does Ramadan affect the stay?",
+        "a": "5★ hotels and upmarket restaurants serve normally to non-Muslims during Ramadan. Medina life slows during the day and is very lively in the evening after iftar (breaking fast). Our concierge tells you the exact dates before the stay."
+      },
+      {
+        "q": "Are your Moroccan rates more expensive than booking direct?",
+        "a": "No — we access net Amadeus GDS rates in EUR or MAD, identical to the hotel's public published rate. Our comparator transparently shows Booking, Hotels.com and Expedia rates for the same dates."
+      },
+      {
+        "q": "Do my Mandarin Oriental loyalty points work on Mandarin Marrakech?",
+        "a": "Yes — attach your Fans of Mandarin Oriental number at checkout. Points credited after the stay. The MyConciergeHotel programme stacks (perks cumulable — see /le-concierge/loyalty)."
+      },
+      {
+        "q": "Do you have a recommendation for a wedding in Morocco?",
+        "a": "Royal Mansour Marrakech privatisable for weddings of 30-150 guests, complete infrastructure (separate riads for guests, private kitchen for buffets, sound system). Selman Marrakech for weddings with horse ambience. Our MICE cell prepares a bespoke quote — see /le-concierge/mice-and-events."
+      }
+    ]
+  },
+  "guideMaldives": {
+    "metaTitle": "Maldives — Luxury travel guide: Private resorts and overwater villas | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in the Maldives: Soneva (Jani, Fushi), Cheval Blanc Randheli, Four Seasons, One&Only Reethi Rah, Velaa Private Island. Atolls, seaplane transfers, honeymoon.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Maldives — The MyConciergeHotel guide to private resorts",
+    "lede": "The Maldives concentrate the most coveted archipelago for the overwater villa. Our concierge curates resorts on an author logic: Soneva for barefoot eco-luxury, Cheval Blanc Randheli for French refinement at the other end of the world, Velaa Private Island for ultimate intimacy with only 40 villas.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Maldives luxury travel guide: 8 exceptional resorts selected (Soneva, Cheval Blanc Randheli, Velaa, One&Only, Four Seasons, Anantara, COMO). MyConciergeHotel selection. Updated May 2026.",
+    "aeoQuestion": "Which resorts are best for a luxury stay in the Maldives?",
+    "aeoAnswer": "MyConciergeHotel covers 8 author resorts across the 5 main atolls: Soneva Jani and Soneva Fushi (barefoot eco-luxury), Cheval Blanc Randheli (Noonu Atoll, LVMH), Velaa Private Island (only 40 villas, Noonu Atoll), One&Only Reethi Rah (North Malé Atoll), Four Seasons Landaa Giraavaru, Anantara Kihavah Villas, COMO Maalifushi. Seaplane transfers included in the package. Last updated {date}.",
+    "regions": {
+      "title": "Eight author resorts — selection",
+      "items": [
+        {
+          "name": "Soneva Jani & Soneva Fushi",
+          "highlights": "Soneva Jani (Noonu Atoll, 27 villas including \"1-Bedroom Water Reserve\" with direct water slide), Soneva Fushi (Baa Atoll, 70 barefoot villas, slow living philosophy). Both signed Sonu Shivdasani — responsible eco-luxury, starred restaurants (Out of the Blue 2★), astronomical observatory.",
+          "bestFor": "Honeymoon, wedding anniversary, 7-10-day minimum stay. Soneva Jani more modern, Soneva Fushi more iconic (since 1995). Assumed \"No News, No Shoes\" policy.",
+          "concierge": "My tip: at Soneva Jani, ask for villa 1 (the most isolated, access to deep blue lagoon west side for sunset). The villa offers a refrigerated wine cellar privatisable on booking request (option not listed). At Soneva Fushi, choose villa 36 rather than a premium villa — south point location, 60m private beach + dolphins frequent at dawn."
+        },
+        {
+          "name": "Cheval Blanc Randheli",
+          "highlights": "Cheval Blanc Randheli (Noonu Atoll, LVMH signature on its own private island — 45 villas including 4 \"Owner Villas\" at 800m² with 12m private pool, walled garden and dedicated 24/7 staff).",
+          "bestFor": "Ultra-luxury honeymoon, special anniversary, stay with dedicated services (24/7 butler, private chef). Southeast Asia's largest Guerlain spa (1,800m²). Restaurants: Diptyque (Yannick Alléno cuisine), Le 1947 LVMH cellar.",
+          "concierge": "My tip: for Owner Villa 22, request the \"Pearl Experience\" add-on (not publicly published) — breakfast served on a private floating pontoon towed 200m offshore, dawn outing. Service confirmed on booking 30 days ahead by our concierge with the general manager."
+        },
+        {
+          "name": "Velaa Private Island",
+          "highlights": "Velaa Private Island (Noonu Atoll, only 40 villas — the most exclusive in the Maldives. Golf academy signed by José María Olazábal, luxury DeepFlight Super Falcon 3S submarine privatisable, observatory for the southern sky).",
+          "bestFor": "Very high-end families (golf, waterskiing, exceptional kids club), couples seeking extreme discretion, long stays (10-14 days).",
+          "concierge": "My tip: book the \"Romantic Pool Residence\" rather than a standard Beach Pool Villa — private beach, 12m pool, outdoor living. For golf, plan the 9-hole tour at dusk (lit course 6-8:30pm) — green fee included in the package, but the dusk slot must be blocked at booking."
+        },
+        {
+          "name": "One&Only Reethi Rah",
+          "highlights": "One&Only Reethi Rah (North Malé Atoll — 600m-long island, 130 villas of which 50% overwater and 50% beach. 12 restaurants. Marina with yachts and catamarans).",
+          "bestFor": "Families with teens (water sports, full PADI diving, surfing), active stays, mixed beach + overwater stays. More budget-accessible than Cheval Blanc or Velaa (but still 5★).",
+          "concierge": "My tip: don't request a classic overwater villa — prefer the \"Grand Beach Villa with Pool\" west side for sunset. 30m private beach, 9m pool, sundeck. For Tapasake restaurant (Japanese), book table 4 on the pontoon — shabu-shabu service at water's edge, memorable."
+        },
+        {
+          "name": "Four Seasons & Anantara",
+          "highlights": "Four Seasons Resort Maldives at Landaa Giraavaru (Baa Atoll, 102 villas in UNESCO Baa Atoll reserve), Four Seasons Resort Maldives at Kuda Huraa (close to Malé, 96 villas), Anantara Kihavah Maldives Villas (Baa Atoll, SEA 2★ underwater restaurant).",
+          "bestFor": "Families with children (Four Seasons kids club), divers (manta rays + whale sharks in Hanifaru Bay season), combined Maldives + Indonesia stays (Singapore Airlines inter-island flights).",
+          "concierge": "My tip: at Anantara Kihavah, book the \"Two-Bedroom Family Beach Pool Residence\" rather than two separate villas — savings + preserved intimacy. For underwater SEA restaurant, request table 1 (widest glass face, panoramic aquatic view on coral reef)."
+        },
+        {
+          "name": "COMO & boutiques",
+          "highlights": "COMO Maalifushi (Thaa Atoll — surfers' atoll, world-renowned waves), COMO Cocoa Island (South Malé Atoll, 33 \"dhoni\" villas inspired by traditional Maldivian boats).",
+          "bestFor": "Serious surfers (COMO Maalifushi, Veyvah Rights and Plumbabaru breaks), couples first Maldives trip (COMO Cocoa Island, more budget-accessible), wellness stays (signature COMO Shambhala).",
+          "concierge": "My tip: at COMO Cocoa Island, choose the \"Loft Villa\" 17 (rather than a Dhoni Suite) — overwater duplex, larger, direct lagoon access via private ladder. For COMO Maalifushi, plan your stay between May and October (surf season) — your concierge briefs the surf guide the day before your arrival so they know your level."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in the Maldives",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "Dry season: November to April (28-30°C, calm sea, near-guaranteed sun). Rainy season: May to October (short but intense showers, hotel rates 20-30% lower, ideal for diving — manta rays concentrated in Hanifaru Bay June-November)."
+        },
+        {
+          "title": "How to get there",
+          "body": "Flight Paris CDG → Malé MLE direct (10h, Air France, or via Doha/Dubai with Qatar/Emirates). Resort transfer by seaplane (Trans Maldivian Airways or Manta Air, 30-50 min per atoll) — included in the package. For remote atolls (Noonu, Baa), sometimes domestic flight + speedboat."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Maldivian rufiyaa (MVR) in theory, USD in practice everywhere in resorts. Credit cards accepted everywhere. Tips: 5-10% additional in upmarket restaurants, $5-10 per day for personal butler (placed in an envelope at the end of the stay)."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "30-day tourist visa issued free on arrival for EU/Switzerland/Canada nationals. Passport valid 6 months after return. No mandatory vaccine. PADI diving licence useful but Open Water introduction course offered in all resorts."
+        },
+        {
+          "title": "Daily life",
+          "body": "The Maldives are an Islamic republic — no alcohol outside resorts (but unlimited inside), no pork. Clothing: t-shirt and shorts suffice all day, no dress code in resort restaurants. Wifi included everywhere (often Starlink satellite fibre in 2026)."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Available for complex requests (privatisation of a sunset dinner on a sandbank, private seaplane transfer, dive with mantas on reservation, drone photographer for couples). Write to maldives@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Maldives — frequently asked questions",
+    "faq": [
+      {
+        "q": "How much does a Maldives stay cost on average?",
+        "a": "Count €800-1,500/night/villa for a classic 5★ (Four Seasons, One&Only), €1,500-3,500/night for ultra-luxury (Cheval Blanc Randheli, Velaa, Soneva Jani). Rates exclude seaplane transfers (€300-700 round trip per person per atoll) and taxes (16% TGST + $12/day Green Tax)."
+      },
+      {
+        "q": "Which atoll to choose for a first stay?",
+        "a": "North Malé Atoll for proximity (speedboat transfer 30-45 min, cheaper than seaplane) — One&Only Reethi Rah, Four Seasons Kuda Huraa. Baa Atoll for UNESCO reserve and manta rays — Anantara Kihavah, Four Seasons Landaa Giraavaru. Noonu Atoll for top of the top — Cheval Blanc, Velaa, Soneva Jani."
+      },
+      {
+        "q": "Overwater villa or beach villa?",
+        "a": "Overwater villa: direct lagoon access via private staircase, intimacy, romance (ideal honeymoon). Beach villa: larger surface, garden/private pool, ideal family. Our concierge can propose the \"beach + overwater combination\" (3 nights beach + 4 nights overwater) on resorts that accept (Four Seasons, COMO)."
+      },
+      {
+        "q": "Are children accepted in the Maldives?",
+        "a": "Yes in the majority of resorts. Notable: Cheval Blanc Randheli accepts children of all ages, Soneva Jani and Soneva Fushi have renowned kids clubs, Four Seasons and One&Only are family-friendly. Only a few resorts (W Maldives, Lily Beach Resort) are adults-only — specify at booking."
+      },
+      {
+        "q": "How many days minimum for a stay?",
+        "a": "7 days on site minimum (10-14 ideal). Given the long flight and jet lag (4h30 difference), a < 7-day stay is suboptimal. The Maldives are savoured in slow-living — that's the destination's very identity."
+      },
+      {
+        "q": "Are your Maldives rates more expensive than booking direct?",
+        "a": "No — net Amadeus GDS rates in USD or EUR, identical to the resort's public published rate. Our concierge can sometimes negotiate additional perks (private seaplane transfers, sandbank dinner included) per resort and stay duration."
+      },
+      {
+        "q": "Diving — which resorts to favour for an Advanced+ diver?",
+        "a": "Soneva Fushi (Baa Atoll, access to Hanifaru Bay UNESCO reserve + manta rays + whale sharks May-November), COMO Maalifushi (Thaa Atoll, less frequented sites, grey sharks, turtles), Four Seasons Landaa Giraavaru (PADI 5★ dive centre, resident marine biologists). Our concierge can brief the dive centre before arrival to plan the first spots according to your level."
+      }
+    ]
+  },
+  "guideEAU": {
+    "metaTitle": "United Arab Emirates — Luxury travel guide: Dubai & Abu Dhabi | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in the UAE: Burj Al Arab, Atlantis The Royal, Bvlgari Resort Dubai, Jumeirah, Emirates Palace Abu Dhabi. Itineraries, operational tips.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "United Arab Emirates — The MyConciergeHotel guide to Palaces",
+    "lede": "Dubai and Abu Dhabi concentrate some of the world's most spectacular urban resorts. Our concierge curates addresses on three axes: iconic addresses (Burj Al Arab, Atlantis The Royal), 2023-2025 architectural new openings (Atlantis The Royal Tower, One Za'abeel) and signature Palaces (Bvlgari Dubai, Bulgari Abu Dhabi).",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "UAE luxury travel guide: Dubai (Burj Al Arab, Atlantis The Royal, Bvlgari, One Za'abeel) and Abu Dhabi (Emirates Palace, Bvlgari, St Regis Saadiyat). Updated May 2026.",
+    "aeoQuestion": "Which Palaces and 5★ hotels are best for a luxury stay in the UAE?",
+    "aeoAnswer": "MyConciergeHotel covers Dubai (Burj Al Arab Jumeirah, Atlantis The Royal, Bvlgari Resort Dubai, One&Only Royal Mirage, Four Seasons Resort Dubai, Address Sky View, One Za'abeel) and Abu Dhabi (Emirates Palace, Bvlgari Resort Abu Dhabi, St Regis Saadiyat Island, Anantara Eastern Mangroves, Erth Abu Dhabi). IATA booking, net GDS rates. Last updated {date}.",
+    "regions": {
+      "title": "Dubai & Abu Dhabi — selection",
+      "items": [
+        {
+          "name": "Dubai iconic",
+          "highlights": "Burj Al Arab Jumeirah (the absolute icon, 202 duplex suites, 321m artificial sail), Atlantis The Royal (2023 opening, 795 rooms, 17 starred restaurants including Heart of Europe), Bvlgari Resort Dubai (private Jumeira Bay island, 101 rooms + 20 villas + 174 residences), One&Only Royal Mirage (Palm Jumeirah, 250 Oriental-style rooms).",
+          "bestFor": "First Dubai stay, luxury stopover before the Maldives (Emirates direct), shopping, international gastronomy, short stay (3-4 nights). Ideal November-April (25-30°C).",
+          "concierge": "My tip: at Burj Al Arab, don't request a \"Royal\" suite at the top — prefer the \"Deluxe One-Bedroom Suite\" on the 15th floor facing Jumeirah beach. Identical view, half the price. For Atlantis The Royal, book room 4203 (Cloud 22 lounge accessible) — Palm Jumeirah + Marina skyline view."
+        },
+        {
+          "name": "Dubai new generation",
+          "highlights": "One Za'abeel (2024 opening, \"The Link\" panoramic suspension between 2 towers), Atlantis The Royal (Mansion level reserved for resident owners + guests), Address Sky View (Downtown Dubai, direct Burj Khalifa view from infinity pool bridge), Mandarin Oriental Jumeira (2019, private beach).",
+          "bestFor": "Travellers sensitive to contemporary architecture and design, urban stays (proximity Dubai Mall and Burj Khalifa), events (late November F1).",
+          "concierge": "My tip: at One Za'abeel, request room 5611 (56th floor, simultaneous The Link and Burj Khalifa view). For Address Sky View, book the Sunday brunch slot at \"The Lobby\" restaurant — table 12 with infinity pool + Burj Khalifa view, assumed family atmosphere but refined format."
+        },
+        {
+          "name": "Abu Dhabi historic",
+          "highlights": "Emirates Palace (Mandarin Oriental since 2020, 394 rooms and suites including the 4,000m² presidential penthouse), St Regis Saadiyat Island Resort (Saadiyat, 376 rooms facing Louvre Abu Dhabi), Anantara Eastern Mangroves, Erth Abu Dhabi.",
+          "bestFor": "Cultural travellers (Louvre Abu Dhabi, Guggenheim Abu Dhabi opening 2025, Sheikh Zayed Mosque), quieter stays than Dubai, golf (Saadiyat Beach Golf Club, Yas Links).",
+          "concierge": "My tip: at Emirates Palace Mandarin Oriental, request a \"Khaleej Suite\" on the 3rd floor (marina + main dome orientation, 30m² terrace, traditional majlis). For the Louvre Abu Dhabi visit, book the 6-8pm slot (night dome illumination, milder winter temperatures, fewer tourists)."
+        },
+        {
+          "name": "Abu Dhabi new wave",
+          "highlights": "Bvlgari Resort Abu Dhabi (Jubail Island, 2024 opening — sister property of Bvlgari Dubai, 100 rooms + mangrove villas), Sea Soul Abu Dhabi (Marriott Luxury Collection member), Park Hyatt Abu Dhabi Hotel & Villas (Saadiyat).",
+          "bestFor": "Travellers seeking intimacy against spectacular Dubai, nature stays (mangroves, bird watching), proximity to beach and culture.",
+          "concierge": "My tip: at Bvlgari Resort Abu Dhabi, choose the \"Mangrove Villa\" 22 (stilt architecture in mangroves, private paddle access). For Park Hyatt Abu Dhabi, book the \"Beach House\" restaurant west-point table for sunset over the Persian Gulf."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in the UAE",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "November to April: 22-30°C, clear sky, ideal for any outdoor activity. May-October: 40-45°C, indoor-only stay (mall, spa, gastronomy) — very reduced hotel rates (up to -50%). Avoid July-August (extreme heat, Gulf humidity)."
+        },
+        {
+          "title": "How to get there",
+          "body": "Direct flights from Paris CDG to Dubai DXB (7h, Air France, Emirates, Etihad) or Abu Dhabi AUH (Etihad). Airport-hotel transfer by Rolls-Royce Phantom Emirates Chauffeur (free in Emirates First Class) or private car €80-200 per hotel."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Emirati dirham (AED), €1 ≈ 4 AED in spring 2026. More stable rate than MAD. Credit cards accepted everywhere. Tips: 10-15% common in upmarket restaurants, generous for butlers and drivers ($10-20/day)."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "Free 30-day tourist visa on arrival (EU/Switzerland/Canada nationals). Passport valid 6 months. International driving licence recommended (French accepted for short stays). Right-hand driving, excellent highways."
+        },
+        {
+          "title": "Daily life",
+          "body": "UAE are de facto secular in tourist areas (hotels serve alcohol, international gastronomy everywhere). Respectful dress code in public areas (shoulders + knees covered), free in hotels and private beaches. 5G wifi everywhere, generally free. Evening dress required in signature restaurants (shirt/jacket for men, dress for women)."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Available for complex requests (helicopter privatisation for Palm Jumeirah flight, private dinner in Liwa desert, private brunch at Burj Al Arab Sky Lounge, Marina yacht rental). Write to eau@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "UAE — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Emirati addresses are in your catalogue?",
+        "a": "About a dozen 5★ and Palace addresses split between Dubai (Burj Al Arab, Atlantis The Royal, Bvlgari Resort, One&Only Royal Mirage, Four Seasons, One Za'abeel, Address Sky View) and Abu Dhabi (Emirates Palace, Bvlgari Resort, St Regis Saadiyat, Anantara, Park Hyatt)."
+      },
+      {
+        "q": "Dubai or Abu Dhabi — which choice?",
+        "a": "Dubai for the spectacular, shopping and international gastronomy (first stay). Abu Dhabi for culture (Louvre, Guggenheim, Sheikh Zayed Mosque), quieter, quality Saadiyat beach. The 4 nights Dubai + 3 nights Abu Dhabi combination is ideal for 7 days. Transfers between the two: 1h15 car, E11 motorway."
+      },
+      {
+        "q": "Is the UAE visa paid?",
+        "a": "No — for EU/Switzerland/Canada nationals, the 30-day tourist visa is issued free on arrival at the airport (DXB or AUH). No prior procedure needed. Passport valid 6 months."
+      },
+      {
+        "q": "Do my Marriott Bonvoy points work on Marriott UAE hotels?",
+        "a": "Yes — Emirates Palace (Mandarin Oriental since 2020 but bookable via Bonvoy in transition), St Regis Saadiyat (Marriott), Westin Mina Seyahi (Marriott). Attach your Bonvoy number at checkout. Points credited after the stay."
+      },
+      {
+        "q": "Are your UAE rates more expensive than booking direct?",
+        "a": "No — net Amadeus GDS rates in EUR or AED, identical to the hotel's public published rate. Our comparator transparently shows Booking, Hotels.com and Expedia rates."
+      },
+      {
+        "q": "Can we travel as a family to the UAE?",
+        "a": "Yes — Atlantis The Royal has Aquaventure Waterpark included and a premium kids club Atlantis. Bvlgari Resort Dubai accepts children. Burj Al Arab is less family-friendly (more adult atmosphere). For very young children, prefer One&Only Royal Mirage or Four Seasons Dubai (renowned kids clubs)."
+      },
+      {
+        "q": "Are there religious constraints to respect?",
+        "a": "Very few in practice in tourist areas. Ramadan: no public food consumption during the day (but OK in hotels and hotel restaurants). Dress: respect in public places (shoulders/knees covered), free in hotels and private beaches. Alcohol: OK in licensed hotels and restaurants, not in public streets."
+      }
+    ]
+  },
+  "guideJapon": {
+    "metaTitle": "Japan — Luxury travel guide: Ryokans and 5★ hotels | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in Japan: Tokyo (Aman, Park Hyatt, Mandarin Oriental), Kyoto (Aman, Four Seasons, Ritz-Carlton), traditional Hakone and Kanazawa ryokans.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Japan — The MyConciergeHotel guide to 5★ hotels and ryokans",
+    "lede": "Our concierge curates two complementary types of accommodation in Japan: international urban hotels (Aman, Four Seasons, Mandarin Oriental, Park Hyatt in Tokyo and Kyoto) and traditional ryokans — family inns with private onsen, kaiseki, futons on tatamis. Ideal for a mixed city + tradition trip.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Japan luxury travel guide: Tokyo (5 international Palaces), Kyoto (Aman ryokans, Four Seasons), Hakone, Kanazawa, Mount Fuji. MyConciergeHotel selection. Updated May 2026.",
+    "aeoQuestion": "Which Palaces and ryokans are best for a luxury stay in Japan?",
+    "aeoAnswer": "MyConciergeHotel covers 5 regions: Tokyo (Aman Tokyo, Park Hyatt Tokyo, Mandarin Oriental, Four Seasons Marunouchi, The Peninsula), Kyoto (Aman Kyoto, Four Seasons Hotel Kyoto, Ritz-Carlton, Park Hyatt Kyoto), Hakone (Gora Kadan ryokan, Hakone Yutowa), Kanazawa (Ryokan Asadaya Yamasenro), Mount Fuji (Hoshinoya Fuji). IATA booking. Last updated {date}.",
+    "regions": {
+      "title": "Five regions, two accommodation types",
+      "items": [
+        {
+          "name": "Tokyo",
+          "highlights": "Aman Tokyo (Otemachi, the world's tallest Aman at 175m, 84 rooms and suites), Park Hyatt Tokyo (Shinjuku, legendary 'Lost in Translation'), Mandarin Oriental Tokyo (Nihonbashi, Tatsuzo restaurant 3★), Four Seasons Hotel Tokyo at Marunouchi (Imperial Palace view), The Peninsula Tokyo (Marunouchi).",
+          "bestFor": "First Japan trip, cultural stay (Imperial Palace, Asakusa, Shibuya), 3★ gastronomy (Sushi Saito, Den, Florilege), Ginza shopping, accessibility (proximity to TGV Shinkansen station).",
+          "concierge": "My tip: at Aman Tokyo, request an east-facing room (4th or 5th floor of the summit, levels 38-39) — Tokyo Bay + Skytree view, particularly spectacular at dawn. For Park Hyatt, book the 5-7pm slot at New York Bar (52nd floor) — Shinjuku sunset + skyline is one of Tokyo's most iconic views."
+        },
+        {
+          "name": "Urban Kyoto",
+          "highlights": "Aman Kyoto (Higashiyama, century-old gardens of the former Ohira house, 26 rooms), Four Seasons Hotel Kyoto (Higashiyama, 12th-century Ikeniwa garden), Ritz-Carlton Kyoto (Kamogawa, city's largest spa), Park Hyatt Kyoto (Higashiyama near Sanneizaka), Hoshinoya Kyoto (on the Oi river in Arashiyama, boat access only).",
+          "bestFor": "Pure cultural stay (Kinkakuji, Ryoanji, Fushimi Inari, Geisha Gion), starred kaiseki gastronomy (Hyotei 3★, Kichisen 3★), private tea ceremony.",
+          "concierge": "My tip: at Aman Kyoto, request villa 'Yamada' 5 (the most isolated, direct access to the central garden via interior gallery, hinoki wood bathtub). For Four Seasons Kyoto, book the 7-9am slot at the Ikeniwa garden — it's opened exclusively to you (5 people max), matcha tea served by ceremony master."
+        },
+        {
+          "name": "Hakone (onsen ryokan)",
+          "highlights": "Gora Kadan (5★ Relais & Châteaux ryokan, former imperial villa, 37 rooms with private onsen), Hakone Yutowa, Yamanouchi Yamatoya. All offer in-room private onsen + signature kappo kaiseki.",
+          "bestFor": "Discovery of traditional ryokans, Mount Fuji view on clear days, 2-3-night getaway after Tokyo (45 min Shinkansen from Tokyo + 15 min Hakone funicular).",
+          "concierge": "My tip: at Gora Kadan, request 'Asuka' room 12 (the only one with fully enclosed outdoor private onsen, personal moss garden). For kaiseki service, mention any dietary restriction at booking — Chef Yamada-san adapts the 7-9 courses accordingly (impossible once on site: preparation begins 48h ahead)."
+        },
+        {
+          "name": "Kanazawa & Hokuriku",
+          "highlights": "Ryokan Asadaya Yamasenro (Kanazawa, historic 1867 ryokan, only 8 rooms, listed garden), Ryokan Yamanoo (Wakura Onsen near Kanazawa, in Relais & Châteaux). For modern hotels: Hyatt Centric Kanazawa.",
+          "bestFor": "Cultural stay off the tourist trail (Kanazawa offers Kenrokuen — one of Japan's 3 most beautiful gardens —, castle, Higashichaya geisha districts), winter fish gastronomy (taraba crab), easy access from Tokyo (Shinkansen Hokuriku 2h30).",
+          "concierge": "My tip: at Asadaya Yamasenro, request 'Karekawa' room 3 — the oldest in the ryokan (original 1867), authentic shoji, river view. For Kenrokuen, ideal access 7am (open at 7am for residents, 8am for paying visitors — the hotel arranges a French-speaking local guide if requested at booking)."
+        },
+        {
+          "name": "Mount Fuji & Fuji-Hakone Lakes",
+          "highlights": "Hoshinoya Fuji (Hoshinoya's first luxury glamping, 40 cabin villas facing Mount Fuji and Lake Kawaguchiko), Fufu Kawaguchiko (onsen ryokan Fuji view), Lake Kawaguchiko Hotel.",
+          "bestFor": "Mount Fuji view guaranteed in winter (October-March), light hiking (Kawaguchiko lake + Sengen Shrine trail), photography (Fuji sunrise from the lookout), couples seeking nature + refinement.",
+          "concierge": "My tip: at Hoshinoya Fuji, choose the 'Premium' cabin at the west end of the resort (#10) — best Mount Fuji angle + direct access to the central campfire for sunset. The morning tea ceremony (6:45am) on the Fuji-facing terrace is a ritual not to miss — 8 people max, book at stay confirmation."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in Japan",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "Spring (March-May) for sakura (cherry blossoms, narrow window — Tokyo late March-early April, Kyoto 5 days later). Autumn (October-November) for momiji (red maples). Avoid June-July (rainy season, tsuyu) and August (humid heat). Winter: excellent for Hokkaido skiing and guaranteed Mount Fuji view."
+        },
+        {
+          "title": "How to get there",
+          "body": "Direct flights Paris CDG to Tokyo NRT/HND (12-13h, Air France, ANA, JAL). Tokyo HND is closer to the centre (30 min taxi vs 60 min from Narita). For Kyoto, Nozomi Shinkansen from Tokyo (2h15). For isolated ryokans, private car transfers organised by our concierge."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Japanese yen (JPY), €1 ≈ 165 JPY in spring 2026. Credit cards accepted in 5★ hotels and gastronomic restaurants but many small shops and traditional restaurants accept cash only. Convert €1,000-2,000 on arrival. No tipping in Japan (sometimes seen as rude)."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "No visa for EU/Switzerland/Canada nationals for stays ≤ 90 days. Valid passport. Visit Japan Web system for customs formalities (recommended, free). International driving licence mandatory if car rental (left-hand driving — not ideal for visitors)."
+        },
+        {
+          "title": "Language and culture",
+          "body": "Limited English — spoken in 5★ hotels but little in traditional restaurants and taxis. Learn 10 Japanese phrases minimum (sumimasen = excuse me, arigato gozaimasu = thank you). Etiquette: bow to greet, take off shoes at ryokan entrance (slippers provided), no phoning in transport."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Japanese and English speakers available for complex requests (private tea ceremony with certified master, private dinner with geisha in Gion, Sushi Saito booking 3 months ahead, car rental with driver Kyoto-Nara). Write to japon@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Japan — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Japanese addresses are in your catalogue?",
+        "a": "About fifteen addresses between Tokyo (5 international Palaces), Kyoto (5 Palaces + 2 ryokans), Hakone (2 ryokans), Kanazawa (2 ryokans) and Mount Fuji (2 lodges). Amadeus network also covers any 5★ GDS-connected Japanese address."
+      },
+      {
+        "q": "How many days minimum for a Japan stay?",
+        "a": "10 days on site minimum (12-14 ideal). Given the long flight (12-13h) and jet lag (8h summer difference), a < 10-day stay is suboptimal. Classic itinerary: Tokyo (5 nights) + Kyoto (4 nights) + 1-2 nights Hakone ryokan."
+      },
+      {
+        "q": "Tokyo + Kyoto: how many days in each?",
+        "a": "Tokyo: 4-5 nights for essentials (Asakusa, Shibuya, Ginza, Tsukiji, Imperial Palace) + 1 day Hakone. Kyoto: 3-4 nights for main temples (Kinkakuji, Ryoanji, Fushimi Inari, Arashiyama) + 1 day Nara. Book Shinkansen transfers via our concierge."
+      },
+      {
+        "q": "International hotel or traditional ryokan?",
+        "a": "Both. Our concierge recommends the combination: international hotel for Tokyo (comfort, international services), 1-2 nights Kyoto or Hakone ryokan for traditional experience (private onsen, kaiseki, tatami futon). Coherence with a 10-12-day trip."
+      },
+      {
+        "q": "Are your Japanese rates more expensive than booking direct?",
+        "a": "No — net Amadeus GDS rates in EUR or JPY, identical to the hotel's public published rate. Traditional ryokans may not be on Amadeus — we book them by direct email (concierge mode) with confirmation within 48h."
+      },
+      {
+        "q": "Is Japan accessible to children?",
+        "a": "Very accessible — safe, clean country, very good youth infrastructure. International hotels (Mandarin, Four Seasons, Park Hyatt) have kids clubs. Traditional ryokans accept children > 6 years in general (etiquette to respect). No Tokyo Disneyland: plan 1-2 days if young children."
+      },
+      {
+        "q": "Can Japan be combined with the Maldives or Bali?",
+        "a": "Yes — Singapore Airlines / JAL flights via Singapore allow chaining. Our concierge organises the logistical sequence. The Tokyo + Maldives combination in winter (December-February) is particularly enjoyable: ski + beach relaxation."
+      }
+    ]
+  },
+  "guideThailande": {
+    "metaTitle": "Thailand — Luxury travel guide: Resorts and 5★ hotels | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in Thailand: Bangkok (Mandarin Oriental, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui (Four Seasons), Chiang Mai (Four Seasons Tented Camp).",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "Thailand — The MyConciergeHotel guide to 5★ hotels and resorts",
+    "lede": "Thailand concentrates spectacular urban Bangkok, Phuket and Koh Samui for the beach, Chiang Mai for northern culture. Our concierge curates signature addresses (Mandarin Oriental Bangkok since 1879, Aman Phuket, Four Seasons Tented Camp Chiang Rai).",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Thailand luxury travel guide: Bangkok (Mandarin Oriental, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui, Chiang Mai. MyConciergeHotel selection. Updated May 2026.",
+    "aeoQuestion": "Which 5★ hotels are best for a luxury stay in Thailand?",
+    "aeoAnswer": "MyConciergeHotel covers 5 regions: Bangkok (Mandarin Oriental Bangkok, The Peninsula Bangkok, Four Seasons Bangkok, Capella Bangkok, Sukhothai), Phuket (Aman Phuket, Trisara, Banyan Tree Phuket, Rosewood Phuket), Koh Samui (Four Seasons Resort Koh Samui, Six Senses Samui), Chiang Mai (Four Seasons Resort Chiang Mai, Anantara Golden Triangle), Krabi (Rayavadee Krabi). IATA booking. Last updated {date}.",
+    "regions": {
+      "title": "Five regions, five experiences",
+      "items": [
+        {
+          "name": "Bangkok",
+          "highlights": "Mandarin Oriental Bangkok (since 1879, Asia's oldest 5★ address, 393 rooms), The Peninsula Bangkok (Chao Phraya, 370 rooms), Four Seasons Bangkok at Chao Phraya River (2020, latest luxury opening), Capella Bangkok (Bensley architecture), The Sukhothai Bangkok (institution).",
+          "bestFor": "First Thailand trip, 2-3★ gastronomy (Le Normandie at Mandarin Oriental, Sühring 2★), Mandarin Oriental spa, privatised Chao Phraya river cruise.",
+          "concierge": "My tip: at Mandarin Oriental Bangkok, request the 'Author's Wing' suite (former William Somerset Maugham wing, 5 historic suites with river terrace). For Le Normandie, book table 2 (window row) for dinner before 7pm — Chao Phraya sunset."
+        },
+        {
+          "name": "Phuket & Andaman islands",
+          "highlights": "Aman Phuket (Pansea Bay, 33 barefoot villas), Trisara (Naithon Beach, 39 pool villa residences), Banyan Tree Phuket (Bang Tao Bay), Rosewood Phuket (Emerald Bay).",
+          "bestFor": "Quality beach (favour Naithon, Bang Tao, Pansea — avoid touristy Patong), Similan Islands diving (boat excursion), pro-level tennis (Trisara), kids clubs (Rosewood and Banyan Tree).",
+          "concierge": "My tip: at Aman Phuket, request villa 7 (the most isolated, access to semi-isolated private beach, ideal for families seeking intimacy). For Trisara, choose pool villa 23 (row 23 — west orientation, direct Andaman sea sunset from your private 12m pool)."
+        },
+        {
+          "name": "Koh Samui & South",
+          "highlights": "Four Seasons Resort Koh Samui (Laem Yai Bay, 60 villas including 23 with private pool), Six Senses Samui (Choeng Mon Beach, 66 villas + 7 residences), Conrad Koh Samui (Hua Thanon Bay), Anantara Lawana Koh Samui Resort.",
+          "bestFor": "Couples (Six Senses Samui more intimate than Four Seasons), families (Four Seasons Resort), wellness stays (signature Six Senses Spa), accessibility (Bangkok-Samui direct flight 1h, or Koh Phangan ferry).",
+          "concierge": "My tip: at Six Senses Samui, request the 'Hideaway Pool Villa Suite' 13 — perched at the top of the hill, panoramic bay view, outdoor pine sauna. Book the 'Sleep With Six Senses' programme at booking (personalised sleep analysis, adapted infusions)."
+        },
+        {
+          "name": "Chiang Mai & North",
+          "highlights": "Four Seasons Resort Chiang Mai (Mae Rim valley, 64 villas in rice paddies), Four Seasons Tented Camp Golden Triangle (Chiang Rai, 15 tents with ethical mahout service on elephants), Anantara Golden Triangle Elephant Camp & Resort.",
+          "bestFor": "Authentic Thai culture (temples, Chiang Mai night market), ethical elephant experience (Four Seasons Tented Camp is global ethical benchmark), trekking, spicy cuisine. Ideal November-February (mild temperatures).",
+          "concierge": "My tip: at Four Seasons Tented Camp Golden Triangle, choose the 'Garden View' tent 7 rather than a pricier 'River View' — less exposed to water mosquitoes, direct elephant camp access. Book the mahout education course at stay booking (1 day, full 6 weeks ahead in high season)."
+        },
+        {
+          "name": "Krabi & Phang Nga",
+          "highlights": "Rayavadee Krabi (Phra Nang Beach, accessible only by longtail boat, 102 pavilions in tropical forest), Six Senses Krabey Island (Cambodia nearby, private island), Soneva Kiri (Koh Kood, the latter still active).",
+          "bestFor": "Couples seeking extreme isolation, spectacular beach (world-famous Phra Nang), limestone cliff climbing (Tonsai, Railay), Phang Nga Bay excursion (James Bond island).",
+          "concierge": "My tip: at Rayavadee, request the 'Hydro' pavilion 53 (the quietest, tropical forest edge, private outdoor hammam). For Phra Nang beach, get up early (7-9am) — you'll have it to yourself before tourist boats arrive around 10:30am."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in Thailand",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "November to March: dry season, 26-30°C, clear sky. April: very hot (35°C+ Bangkok). May to October: rainy season (tropical showers, hotels at reduced rate). December-February: optimal period (but Christmas/New Year rush in Phuket and Samui)."
+        },
+        {
+          "title": "How to get there",
+          "body": "Flights Paris CDG to Bangkok BKK (11h, Air France, Thai Airways). Domestic flights Bangkok-Phuket (1h, Bangkok Airways), Bangkok-Koh Samui (1h, Bangkok Airways only, monopoly), Bangkok-Chiang Mai (1h). Our concierge organises all inter-island transfers."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "Thai baht (THB), €1 ≈ 40 THB in spring 2026. Credit cards accepted everywhere in 5★ hotels and upmarket restaurants. Cash appreciated for markets and taxis. Tips: 10% in upmarket restaurants, 50-100 THB for porters and drivers."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "Electronic visa TR15 now mandatory for EU/Switzerland nationals for stays ≤ 30 days — free, requested online on Thai portal. Passport valid 6 months. International driving licence (French accepted for short stays)."
+        },
+        {
+          "title": "Language",
+          "body": "Thai (official). English well spoken in 5★ hotels and tourist areas. French rare. A few appreciated Thai words (sawasdee = hello, khob khun = thank you)."
+        },
+        {
+          "title": "Our concierge",
+          "body": "Available for complex requests (Phra Nang longtail boat privatisation, Krabi sandbank dinner, Phang Nga Bay crowd-free outing, Thai cooking class with starred Bangkok chef). Write to thailande@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Thailand — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many Thai addresses are in your catalogue?",
+        "a": "About fifteen 5★ addresses and exceptional resorts split between Bangkok (5), Phuket (4), Koh Samui (4), Chiang Mai (2) and Krabi (3). Amadeus network completes on request for recent openings (Capella Bangkok, etc.)."
+      },
+      {
+        "q": "Bangkok + beach: how many days?",
+        "a": "Bangkok: 3-4 nights (cultural stay + gastronomy). Beach: 5-7 nights Phuket OR Koh Samui (both is superfluous). Ideal total: 10-12 days in Thailand. For 7 days: 2 nights Bangkok + 5 nights beach."
+      },
+      {
+        "q": "Phuket or Koh Samui — which choice?",
+        "a": "Phuket: more accessible (direct flight from Europe in season), greater address diversity (Aman, Trisara, Banyan Tree), Similan diving excursion. Koh Samui: more intimate, quieter, ideal for couples seeking pure relaxation. Six Senses Samui is the most emblematic address."
+      },
+      {
+        "q": "Is the Thai visa paid?",
+        "a": "No — the electronic TR15 visa (stays ≤ 30 days) is free, to be requested online 7-14 days before departure. No queue on arrival for travellers who applied beforehand."
+      },
+      {
+        "q": "Are your Thai rates more expensive than booking direct?",
+        "a": "No — net Amadeus GDS rates in EUR or THB, identical to the hotel's public published rate. Our comparator transparently shows Booking and Hotels.com rates."
+      },
+      {
+        "q": "Is Four Seasons Tented Camp Golden Triangle ethical for elephants?",
+        "a": "Yes — it's the global benchmark for elephant ethics. Elephants don't carry tourists, don't perform. The 'Mahout for a Day' programme is educational (learning to recognise elephant well-being signs, river bathing). Recommended without reservation."
+      },
+      {
+        "q": "Can Thailand + Cambodia (Angkor) be combined?",
+        "a": "Yes — Bangkok → Siem Reap flights (1h, Bangkok Airways daily). Angkor deserves 3 nights minimum in Siem Reap (Templations Angkor, Park Hyatt Siem Reap). Our concierge organises the sequence with transfer coordination."
+      }
+    ]
+  },
+  "guideEtatsUnis": {
+    "metaTitle": "United States — Luxury travel guide: East Coast & West Coast Palaces | MyConciergeHotel",
+    "metaDesc": "The MyConciergeHotel guide for a luxury stay in the USA: New York (Aman, Mandarin Oriental, Carlyle), Aspen (Little Nell, St Regis), Napa (Meadowood, Auberge du Soleil), Hawaii.",
+    "breadcrumbHome": "Home",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Country guide",
+    "title": "United States — The MyConciergeHotel guide to Palaces and resorts",
+    "lede": "Our catalogue covers four American luxury hubs: urban New York, ski-in Aspen, oenological Napa Valley, Pacific Hawaii. IATA booking with net Amadeus GDS rates, secure payment in USD or EUR.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "USA luxury travel guide 4 regions: New York, Aspen, Napa Valley, Hawaii. MyConciergeHotel selection — Palaces, resorts, oenological lodges. Updated May 2026.",
+    "aeoQuestion": "Which Palaces and 5★ hotels are best for a luxury stay in the United States?",
+    "aeoAnswer": "MyConciergeHotel covers 4 regions: New York (Aman New York, Carlyle Rosewood, Mandarin Oriental, Four Seasons New York, The St Regis), Aspen (The Little Nell, St Regis Aspen, Hotel Jerome, Snowmass), Napa Valley (Meadowood, Auberge du Soleil, Carneros Inn, Stanly Ranch), Hawaii (Four Seasons Resort Lanai, Four Seasons Maui, Halekulani Waikiki). IATA booking, net rates in USD or EUR. Last updated {date}.",
+    "regions": {
+      "title": "Four hubs — selection",
+      "items": [
+        {
+          "name": "New York",
+          "highlights": "Aman New York (Crown Building 5th Avenue, 2022 opening — 83 rooms and 22 signature Cherner residences), The Carlyle, A Rosewood Hotel (76th & Madison, 188 iconic rooms), Mandarin Oriental New York (Columbus Circle, Central Park view), Four Seasons Hotel New York Downtown, The St Regis New York (5th Avenue, since 1904).",
+          "bestFor": "Cultural stay (MoMA, Metropolitan, Broadway), 2-3★ gastronomy (Le Bernardin 3★, Eleven Madison Park 3★, Per Se 3★), 5th Avenue and Soho shopping, direct air access from Paris.",
+          "concierge": "My tip: at Aman New York, request a south-facing room (40th floor, #4015) — Central Park + Empire State Building view. The 'Aman Club' lounge on the 14th floor is reserved for 5★ residents and resident owners. For Carlyle, don't stay in a standard room — prefer a 'Tower Suite' on the 30th floor: 110m², Central Park + East River view, original 1930s parquet."
+        },
+        {
+          "name": "Aspen",
+          "highlights": "The Little Nell (ski-in/ski-out direct at the foot of Aspen Mountain gondola, Relais & Châteaux, 92 rooms), The St Regis Aspen Resort (facing downtown, 179 rooms), Hotel Jerome Auberge Resorts (1889, restored mining-era institution), Viceroy Snowmass Resort.",
+          "bestFor": "Elite skiing (Aspen-Snowmass — 4 mountains, 5,547 skiable acres), altitude gastronomy (Element 47 1★ at Little Nell), cultural events (Aspen Music Festival July-August, Food & Wine Classic June), summer MTB and hiking.",
+          "concierge": "My tip: at Little Nell, request room 437 (rather than a pricier suite) — east orientation, Silver Queen gondola + Maroon Bells sunrise view. For table 26 of Element 47 restaurant, book the 7:30pm slot on Tuesday (sommelier Carlton McCoy himself officiates that day for food-wine pairing advice)."
+        },
+        {
+          "name": "Napa & Sonoma Valley",
+          "highlights": "Meadowood Napa Valley (Auberge Resorts, 250 acres, 85 cottage rooms, championship golf), Auberge du Soleil (Auberge Resorts, panoramic Napa Valley view, 1★ restaurant), The Carneros Inn (close to Calistoga), Stanly Ranch (Carneros, Auberge Resorts 2022 opening), Solage Calistoga.",
+          "bestFor": "Premium oenotourism (Opus One, Far Niente, Caymus), 3★ gastronomy (The Restaurant at Meadowood 3★ — destroyed in 2020 fire, 2025 reopening announced), Calistoga volcanic spa (muds, geysers), tennis and golf.",
+          "concierge": "My tip: at Meadowood, request 'Forest View' cottage 12 (among the trees, greater distance from the clubhouse, private terrace). For Auberge du Soleil, book the 'Cottage Pool Villa' 47 — private terrace overlooking Napa Valley, 4m pool heated year-round. Vineyard outing: book private visits to Opus One and Far Niente 8-12 weeks ahead via our concierge."
+        },
+        {
+          "name": "Hawaii",
+          "highlights": "Four Seasons Resort Lanai (Lanai Island privatised 98% by Larry Ellison, 217 rooms facing Manele Bay), Four Seasons Resort Maui at Wailea (380 rooms including 75 suites facing Pacific), Halekulani (Waikiki Beach, since 1907 — 453 rooms), Andaz Maui at Wailea Resort, Montage Kapalua Bay.",
+          "bestFor": "Honeymoon, special anniversary, combined beach + activities stay (golf, diving, surf — Kapalua Bay), contemporary Hawaiian gastronomy (Sansei, Cafe O'Lei), volcano excursion (Big Island). Ideal year-round — constant climate 25-28°C.",
+          "concierge": "My tip: at Four Seasons Resort Lanai, request the 'Ocean Front Pool Casita' 322 — private terrace with 4m pool facing Hulopoe Bay, dolphins frequent in the morning. For Halekulani Waikiki, book the 'Royal Suite' 1110 (110m², Diamond Head view, dedicated butler access) — often not listed on public booking widgets, to request via our concierge."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Practical info for a luxury stay in the USA",
+      "items": [
+        {
+          "title": "When to go",
+          "body": "New York: spring (April-June) and autumn (September-October). Avoid July-August (humid heat). Aspen: skiing mid-December to late March + July-August for culture. Napa: Sept-October (harvests), April-May (spring). Hawaii: year-round (high season December-March)."
+        },
+        {
+          "title": "How to get there",
+          "body": "Direct flights Paris CDG to New York JFK/EWR (8h, Air France, Delta, United), Los Angeles LAX (10h30). Domestic connection for Aspen (via Denver), Napa (via San Francisco), Hawaii (via Los Angeles). Our concierge organises domestic flights and transfers."
+        },
+        {
+          "title": "Currency and payment",
+          "body": "US dollar (USD), €1 ≈ $1.07 in spring 2026. Credit cards accepted everywhere. MANDATORY tipping — 18-22% restaurant, $5-10/night for housekeeping, $2-5 for porter. Our concierge can indicate the convention details on arrival."
+        },
+        {
+          "title": "Visa and formalities",
+          "body": "ESTA mandatory for EU/Switzerland nationals — electronic authorisation, $21 USD, valid 2 years, requested online 7-14 days before departure. Valid passport. International driving licence strongly recommended (French accepted for short stays). Right-hand driving, excellent interstate highways."
+        },
+        {
+          "title": "Language",
+          "body": "English. Spanish current in California and major urban centres. French rare in tourist areas but well represented in 5★ hotels (multilingual concierges)."
+        },
+        {
+          "title": "Our concierge",
+          "body": "English and French speakers available for complex requests (Aspen-Snowmass helicopter rental for direct transfer, private Opus One tasting with winemaker, Big Island Kilauea crater helicopter overflight, Le Bernardin table 3 months ahead). Write to usa@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "United States — frequently asked questions",
+    "faq": [
+      {
+        "q": "How many American addresses are in your catalogue?",
+        "a": "About twenty 5★ addresses and exceptional resorts split between New York (5), Aspen (4), Napa (5), Hawaii (5). Our Amadeus network also covers any 5★ GDS-connected American address on request."
+      },
+      {
+        "q": "How many days minimum for a USA stay?",
+        "a": "10-14 days minimum given the long flight and jet lag (6-9h difference per coast). Classic itinerary: New York 4 nights + Napa Valley 3 nights + San Francisco 2 nights. For a multi-region stay, 14-21 days ideal."
+      },
+      {
+        "q": "Tipping in the USA — how much?",
+        "a": "Strict convention: 18-22% on the restaurant bill (below = bad reputation), $5-10 per night for housekeeping, $2-5 for porter, 20% for Uber/taxi drivers. Tipping never included — the displayed price is before tax + service."
+      },
+      {
+        "q": "Aspen or Vail — which choice for skiing?",
+        "a": "Aspen for glamour (downtown atmosphere, gastronomy, cultural events), Vail for pure skiing (larger area, 5,289 acres, more beginner and intermediate slopes). The Little Nell (Aspen) is the iconic address — no equivalent at Vail (Sebastian Vail is the only 5★)."
+      },
+      {
+        "q": "Are your USA rates more expensive than booking direct?",
+        "a": "No — net Amadeus GDS rates in USD, identical to the hotel's public published rate. Beware of American 'resort fees' ($15-50/night, mandatory, not included in the Amadeus rate — always detailed on our page). Our concierge can negotiate resort fee removal on some hotels for stays > 5 nights."
+      },
+      {
+        "q": "Do my Marriott Bonvoy points work on St Regis Aspen and St Regis New York?",
+        "a": "Yes — attach your Marriott Bonvoy number at checkout. Points credited after the stay. St Regis is part of the Marriott Luxury Collection. The MyConciergeHotel programme stacks (perks cumulable)."
+      },
+      {
+        "q": "ESTA — how long before departure to request?",
+        "a": "Officially 72h before boarding, but our concierge recommends 7-14 days to anticipate any refusal or supplementary need. The request is online, $21 USD, valid 2 years for repeat stays."
+      }
+    ]
+  },
   "guideItalie": {
     "metaTitle": "Italy — Luxury travel guide: Palaces, 5★ hotels and art of living | MyConciergeHotel",
     "metaDesc": "The MyConciergeHotel guide for a luxury stay in Italy: curated Palaces, 5★ hotels and villas — Rome, Milan, Tuscany, Amalfi Coast, Lakes, Dolomites. Itineraries, starred tables, operational tips.",

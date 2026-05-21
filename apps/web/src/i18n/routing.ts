@@ -212,6 +212,34 @@ export const routing = defineRouting({
       fr: '/guide/italie',
       en: '/guide/italy',
     },
+    '/guide/suisse': {
+      fr: '/guide/suisse',
+      en: '/guide/switzerland',
+    },
+    '/guide/maroc': {
+      fr: '/guide/maroc',
+      en: '/guide/morocco',
+    },
+    '/guide/maldives': {
+      fr: '/guide/maldives',
+      en: '/guide/maldives',
+    },
+    '/guide/emirats-arabes-unis': {
+      fr: '/guide/emirats-arabes-unis',
+      en: '/guide/uae',
+    },
+    '/guide/japon': {
+      fr: '/guide/japon',
+      en: '/guide/japan',
+    },
+    '/guide/thailande': {
+      fr: '/guide/thailande',
+      en: '/guide/thailand',
+    },
+    '/guide/etats-unis': {
+      fr: '/guide/etats-unis',
+      en: '/guide/usa',
+    },
     '/categorie/[categorySlug]': '/categorie/[categorySlug]',
     '/classement/[slug]': '/classement/[slug]',
     '/classements': '/classements',

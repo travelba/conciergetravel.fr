@@ -331,25 +331,86 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         <MegaColumn heading={t('primaryNav.destinationsWorld')}>
           <>
             {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
-              // Vague-6 — international country guides ship one by
-              // one. `italie` lands on its dedicated guide page;
-              // remaining countries (suisse, maroc, EAU, maldives,
-              // thailande, japon, etats-unis) keep their menu link
-              // pointing to /hotels (the catalogue catch-all) until
-              // their guide page ships. PR #77 already removed the
-              // bogus /destination/[citySlug] routing that 404'd.
-              if (entry.slug === 'italie') {
-                return (
-                  <MegaLink
-                    key={entry.slug}
-                    href="/guide/italie"
-                    label={pickEntryLabel(entry, locale)}
-                  />
-                );
+              // Vague-6 — all 8 international country guides shipped.
+              // Each menu entry routes to its dedicated guide page.
+              // The typed `Href` requires a literal pathname union;
+              // we map the slug explicitly to keep the typecheck strict.
+              switch (entry.slug) {
+                case 'italie':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/italie"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'suisse':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/suisse"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'maroc':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/maroc"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'maldives':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/maldives"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'emirats-arabes-unis':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/emirats-arabes-unis"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'thailande':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/thailande"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'japon':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/japon"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                case 'etats-unis':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/etats-unis"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
+                default:
+                  // Defensive — any future intl slug not mapped
+                  // degrades to the catalogue root rather than 404.
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/hotels"
+                      label={pickEntryLabel(entry, locale)}
+                    />
+                  );
               }
-              return (
-                <MegaLink key={entry.slug} href="/hotels" label={pickEntryLabel(entry, locale)} />
-              );
             })}
           </>
         </MegaColumn>
