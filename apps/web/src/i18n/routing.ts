@@ -223,6 +223,15 @@ export const routing = defineRouting({
       fr: '/le-concierge/contact',
       en: '/le-concierge/contact',
     },
+    '/le-concierge/fidelite': {
+      fr: '/le-concierge/fidelite',
+      en: '/le-concierge/loyalty',
+      // V2: /de/das-konzierge/treueprogramm etc.
+    },
+    '/le-concierge/faq': {
+      fr: '/le-concierge/faq',
+      en: '/le-concierge/faq',
+    },
     // Itineraries hub uses the plural FR slug `/itineraires` to keep
     // parity with `/classements`, `/guides`, `/marques`, `/hotels`.
     // Slug stays identical FR/EN per ADR-0008 (no `/itineraries` EN

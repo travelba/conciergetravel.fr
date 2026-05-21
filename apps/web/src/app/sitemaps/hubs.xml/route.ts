@@ -77,6 +77,8 @@ export async function GET(): Promise<NextResponse> {
         | '/le-concierge/methode-editoriale'
         | '/le-concierge/reserver'
         | '/le-concierge/contact'
+        | '/le-concierge/fidelite'
+        | '/le-concierge/faq'
         | '/itineraires';
       priority: number;
     }[] = [
@@ -89,6 +91,9 @@ export async function GET(): Promise<NextResponse> {
       { href: '/le-concierge/methode-editoriale', priority: 0.6 },
       { href: '/le-concierge/reserver', priority: 0.6 },
       { href: '/le-concierge/contact', priority: 0.5 },
+      // Vague 5 batch 2 — Loyalty is conversion-related, FAQ is AEO-premium (35 Q&A).
+      { href: '/le-concierge/fidelite', priority: 0.6 },
+      { href: '/le-concierge/faq', priority: 0.7 },
       // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
       // real listing (PR2 — Sprint 2). `last_updated` per slug ships
       // separately in `/sitemaps/itineraries.xml` (PR3).
