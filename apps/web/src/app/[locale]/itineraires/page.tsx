@@ -217,20 +217,23 @@ function ItineraryCardItem({ card, locale }: { card: ItineraryCard; locale: Loca
         className="flex h-full flex-col"
       >
         {heroSrc !== null ? (
-          // Plain <img> rather than next/image: cards can be many on
-          // a hub page; relying on Cloudinary's `f_auto,q_auto` keeps
-          // the byte budget low and avoids next/image's per-instance
-          // request overhead. Eager-decoded above-the-fold cards are
-          // accepted browser-side.
-          <img
-            src={heroSrc}
-            alt={heroAlt}
-            className="aspect-[4/3] w-full object-cover"
-            loading="lazy"
-            decoding="async"
-            width={640}
-            height={480}
-          />
+          <>
+            {/* Plain <img> rather than next/image: cards can be many on
+                a hub page; relying on Cloudinary's `f_auto,q_auto` keeps
+                the byte budget low and avoids next/image's per-instance
+                request overhead. Eager-decoded above-the-fold cards are
+                accepted browser-side. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroSrc}
+              alt={heroAlt}
+              className="aspect-[4/3] w-full object-cover"
+              loading="lazy"
+              decoding="async"
+              width={640}
+              height={480}
+            />
+          </>
         ) : null}
         <div className="flex flex-1 flex-col gap-2 p-5">
           <p className="text-muted text-xs uppercase tracking-[0.16em]">
