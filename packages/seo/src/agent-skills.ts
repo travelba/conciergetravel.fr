@@ -275,6 +275,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/concierge-tip/{slug}' },
     },
   ],
 };
