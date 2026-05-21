@@ -220,6 +220,43 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       description:
         'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
     },
+    {
+      name: 'contact',
+      description:
+        'Envoyer un message à la conciergerie MyConciergeHotel : question sur une réservation, demande d’information, signalement. Réponse sous 24h ouvrées. La réponse est envoyée par e-mail à l’adresse fournie. Inclut un protection honeypot anti-spam et un rate-limit par IP. URL canonique HTML : /fr/le-concierge/contact (ou /en/le-concierge/contact).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: 'Prénom et nom de la personne qui contacte la conciergerie.',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail à laquelle la conciergerie répondra.',
+          },
+          subject: {
+            type: 'string',
+            description: 'Sujet du message (réservation, devis, information, signalement…).',
+          },
+          message: {
+            type: 'string',
+            description: 'Contenu du message (minimum 10 caractères).',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale de la réponse souhaitée — "fr" (par défaut) ou "en".',
+          },
+          phone: {
+            type: 'string',
+            description: 'Numéro de téléphone optionnel pour un rappel.',
+          },
+        },
+        required: ['name', 'email', 'subject', 'message'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/contact' },
+    },
     // ── ADR-0014 — new agentic surfaces ─────────────────────────────────
     {
       name: 'list-categories',
