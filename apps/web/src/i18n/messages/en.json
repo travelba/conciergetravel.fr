@@ -18,6 +18,8 @@
     "agency": "The agency"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
+    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
     "title": "Your concierge for France's Palaces and 5-star hotels",
     "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
@@ -132,19 +134,45 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Bespoke itineraries",
       "title": "Your travel itineraries",
       "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
       "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
       "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
       "breadcrumbHome": "Home",
+      "breadcrumbHub": "Itineraries",
       "comingSoon": "Coming soon",
       "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
       "fallbackTitle": "In the meantime, explore:",
       "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
       "fallbackRankings": "All editorial rankings",
-      "fallbackDestinations": "All destination guides"
+      "fallbackDestinations": "All destination guides",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 published itinerary} other {# published itineraries}}",
+        "filtersLabel": "Refine",
+        "byCountry": "By country",
+        "byTravelStyle": "By travel style",
+        "byDuration": "By duration",
+        "durationDays": "{min, plural, =1 {1 day} other {# days}}",
+        "durationRange": "{min}–{max} days"
+      },
+      "detail": {
+        "stepLabel": "Day {n}",
+        "stepsHeading": "The itinerary, step by step",
+        "stepsLead": "Each step combines an exceptional hotel, a tested timing and our on-site recommendations.",
+        "faqHeading": "Frequently asked questions",
+        "relatedRankingsHeading": "Editorial rankings to read",
+        "relatedGuidesHeading": "Read also",
+        "relatedItinerariesHeading": "Other itineraries you might enjoy",
+        "viewHotel": "View hotel page",
+        "bookAtHotel": "Book at {hotelName}",
+        "stayDuration": "Stay duration: {n, plural, =1 {1 day} other {# days}}",
+        "city": "City",
+        "poiHeading": "Things to see / do",
+        "allItineraries": "All our itineraries",
+        "ariaSkipToSteps": "Skip directly to the step-by-step itinerary"
+      }
     },
     "breadcrumb": {
       "label": "Breadcrumb",
@@ -589,7 +617,8 @@
     },
     "breadcrumb": {
       "home": "Home",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "5★ hotels and Palaces in {city}",
@@ -599,6 +628,51 @@
       "question": "How many 5★ hotels and Palaces do you offer in {city}?",
       "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
       "answerPlural": "MyConciergeHotel currently lists {count} properties in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}."
+    },
+    "cityFaq": {
+      "title": "Staying in {city} — frequently asked questions",
+      "items": [
+        {
+          "q": "Which are the best neighbourhoods to stay in {city}?",
+          "a": "5★ and Palace addresses in {city} cluster in historic districts and around the main POIs. Our concierge desk guides you by programme: for cultural outings, pick the centre; for quiet, the residential outskirts; for views, the waterfronts or feet-in-the-water properties. Every hotel page states the exact district and walking/driving distances to major POIs."
+        },
+        {
+          "q": "What is the best time to visit {city}?",
+          "a": "{city} is open year-round, but some seasons concentrate events (festivals, ceremonies, sport calendar) and hotel rates peak. Our concierge desk can suggest optimal windows — generally the shoulder seasons (May-June, September) — where the experience is full without over-crowding. Hotel pages mention local high/low season."
+        },
+        {
+          "q": "How do I get to {city} from Paris or an international airport?",
+          "a": "Distances and access are detailed on every hotel page (nearest airport, TGV station, driving distance). Our concierge desk arranges transfers on request: premium taxi, chauffeured car, helicopter for Alps/Riviera destinations. The price is communicated before confirmation, no intermediary markup added."
+        },
+        {
+          "q": "Which museums, restaurants or experiences are must-see in {city}?",
+          "a": "Every hotel page includes a \"What to do around\" section with named POIs (museums, starred dining, markets, viewpoints) and their exact distance. Our concierge desk can also suggest signature experiences (private museum visit outside opening hours, table at a starred chef) tailored to your stay."
+        },
+        {
+          "q": "Do hotels in {city} accept pets?",
+          "a": "The pets-friendly policy varies by hotel — most Palaces accept dogs (often with a surcharge, sometimes with a dedicated service: bowls, baskets, dog-sitting). Every hotel page details under \"Policies\": accepted size, fees, restrictions. Our concierge desk can negotiate terms with the hotel before booking."
+        },
+        {
+          "q": "Is there free parking or valet service at your {city} hotels?",
+          "a": "5★ and Palace hotels generally offer valet service (sometimes included in the rate, sometimes charged 30-80 €/night). Free parking is rare downtown but common in rural or alpine destinations. The exact policy (free / paid / valet / vehicle height) is in the \"Policies\" section of each page."
+        },
+        {
+          "q": "Are your {city} hotels wheelchair-accessible?",
+          "a": "Most 5★ and Palace hotels in {city} have wheelchair-accessible rooms (lift, adapted bathroom, access to common spaces). Our concierge desk verifies your specific need (walk-in shower, bed height, pool/spa access) with the hotel before confirmation. Please share your constraints at request time."
+        },
+        {
+          "q": "What is the cancellation policy for {city} hotels?",
+          "a": "Each Amadeus rate states its cancellation policy (often: flexible up to 24-48h before arrival, non-refundable for early-bird rates). Our concierge desk can offer rates with free cancellation up to the eve even when the hotel's public offer is non-refundable, depending on agency negotiations."
+        },
+        {
+          "q": "Is breakfast included in {city} hotel rates?",
+          "a": "Inclusion varies: most Palaces offer a room-only rate and a room + breakfast rate. Our MyConciergeHotel loyalty programme offers breakfast for two from the first night on hotels in the Little Hotelier catalogue. The hotel's exact policy is on its page."
+        },
+        {
+          "q": "How do I book a Palace or 5★ hotel in {city} via MyConciergeHotel?",
+          "a": "Click the hotel page you want, pick your dates in the Amadeus booking engine, pay online (secure PCI-DSS card, 3D-Secure). Instant email confirmation. For hotels outside the GDS, your concierge sends you an offer within 24 business hours. No agency markup on net rates."
+        }
+      ]
     },
     "card": {
       "palace": "Palace",
@@ -611,6 +685,35 @@
     "directory": {
       "title": "All destinations",
       "subtitle": "{count, plural, one {# destination available} other {# destinations available}}.",
+      "aeoQuestion": "Which destinations does MyConciergeHotel cover?",
+      "aeoAnswer": "MyConciergeHotel covers {count} destinations — French cities (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) and international countries with an editorial guide (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Each destination opens a page with a curated 5★ and Palace selection, local context and operational tips from the Concierge. Last updated {date}.",
+      "faqTitle": "Our destinations — frequently asked questions",
+      "faqItems": [
+        {
+          "q": "Which French cities are covered?",
+          "a": "Our catalogue covers France's historical premium tourism hubs: Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), French Riviera (Cannes, Nice, Cap-Ferrat, Monaco), Alps (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordeaux region (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Basque Country (Biarritz), Corsica (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Do you offer international destinations?",
+          "a": "Yes — 8 countries are published with editorial guides (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA) and our Amadeus network covers 950,000 hotels worldwide on request. The international catalogue grows quarterly — see each country's guide page for the curated selection."
+        },
+        {
+          "q": "How do you choose editorial cities?",
+          "a": "We publish a destination once our concierge desk has curated at least 3 five-star or Palace addresses in the city and can sign a 2,000-word editorial guide with named POIs (museums, dining venues, access). A city without critical mass appears as a sub-page but not as a top-level destination."
+        },
+        {
+          "q": "Will a missing city be added?",
+          "a": "The publication calendar is quarterly. To suggest a destination, contact the concierge via /le-concierge — we prioritise cities where our customers already book via Amadeus mode without an editorial guide."
+        },
+        {
+          "q": "What is the difference between a destination and a guide?",
+          "a": "Per ADR-0015, both routes have merged: /destination/{city} hosts both the catalogue hub (hotel selection) and the long-read guide (POIs, art of living, practical info). /guide/{city} redirects to the destination with a 308."
+        },
+        {
+          "q": "Are the guides available in English?",
+          "a": "Yes — every published destination has its EN version (/en/destination/{slug}) with native translation by our editorial team (no raw machine translation). hreflang fr-FR / en / x-default emitted on every page."
+        }
+      ],
       "count": "{count, plural, one {# hotel} other {# hotels}}",
       "franceSection": {
         "title": "France — by city",
