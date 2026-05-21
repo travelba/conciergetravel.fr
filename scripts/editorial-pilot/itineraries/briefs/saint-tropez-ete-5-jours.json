@@ -13,10 +13,17 @@
   "target_word_count": 2000,
   "meta_title_fr_hint": "Itinéraire Saint-Tropez été 5 jours luxe — Pampelonne, citadelle, Ramatuelle | MyConciergeHotel",
   "meta_desc_fr_hint": "5 jours à Saint-Tropez : Cheval Blanc, Lily of the Valley, Château de la Messardière. Pampelonne, citadelle, port, Ramatuelle. Sélection Concierge été luxe.",
-  "hotel_slugs_target": ["cheval-blanc-saint-tropez", "lily-of-the-valley", "chateau-de-la-messardiere"],
+  "hotel_slugs_target": [
+    "cheval-blanc-saint-tropez",
+    "lily-of-the-valley",
+    "chateau-de-la-messardiere"
+  ],
   "hotel_fallback_note": "Fallback sur hôtels 5★ Saint-Tropez et Ramatuelle présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-saint-tropez", "guide-cote-d-azur"],
-  "related_ranking_slugs_target": ["meilleurs-hotels-saint-tropez", "meilleures-plages-saint-tropez"],
+  "related_ranking_slugs_target": [
+    "meilleurs-hotels-saint-tropez",
+    "meilleures-plages-saint-tropez"
+  ],
   "related_itinerary_slugs_target": ["cote-d-azur-luxe-7-jours", "biarritz-pays-basque-5-jours"],
   "steps_outline": [
     {
@@ -44,7 +51,12 @@
       "duration_days": 1,
       "city": "Saint-Tropez — Citadelle & arrière-pays",
       "hotel_slug_hint": "chateau-de-la-messardiere",
-      "key_pois": ["Citadelle de Saint-Tropez", "Chapelle Sainte-Anne", "Grimaud", "Golfe de Saint-Tropez"],
+      "key_pois": [
+        "Citadelle de Saint-Tropez",
+        "Chapelle Sainte-Anne",
+        "Grimaud",
+        "Golfe de Saint-Tropez"
+      ],
       "step_angle": "Citadelle et arrière-pays — visite citadelle 9h (vue sur le golfe sans monde), route vignes vers Gassin, déjeuner terrasse Château de la Messardière vue mer",
       "title_fr_hint": "Jour 4 : Citadelle & arrière-pays — Vignes, chapelles et vue golfe",
       "title_en_hint": "Day 4: Citadelle & hinterland — Vineyards, chapels and gulf views"

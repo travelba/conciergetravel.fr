@@ -17,14 +17,22 @@
   "hotel_fallback_note": "Fallback sur hôtels 5★ Reims et Épernay présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-reims", "guide-champagne"],
   "related_ranking_slugs_target": ["meilleurs-hotels-reims", "meilleurs-hotels-champagne"],
-  "related_itinerary_slugs_target": ["bordeaux-vignobles-gastronomie-5-jours", "lyon-gastronomie-3-jours"],
+  "related_itinerary_slugs_target": [
+    "bordeaux-vignobles-gastronomie-5-jours",
+    "lyon-gastronomie-3-jours"
+  ],
   "steps_outline": [
     {
       "step": 1,
       "duration_days": 1,
       "city": "Reims",
       "hotel_slug_hint": "les-crayeres",
-      "key_pois": ["Cathédrale Notre-Dame de Reims", "Palais du Tau", "Caves Ruinart", "Basilique Saint-Remi"],
+      "key_pois": [
+        "Cathédrale Notre-Dame de Reims",
+        "Palais du Tau",
+        "Caves Ruinart",
+        "Basilique Saint-Remi"
+      ],
       "step_angle": "Arrivée Crayères — cathédrale en fin d'après-midi (lumière sur les vitraux Chagall), caves Ruinart visite privée sur RDV (la plus ancienne maison de champagne), dîner Philippe Mille 2 étoiles",
       "title_fr_hint": "Jour 1 : Reims — Cathédrale, caves Ruinart et table 2 étoiles",
       "title_en_hint": "Day 1: Reims — Cathedral, Ruinart cellars and 2-star dining"
@@ -34,7 +42,12 @@
       "duration_days": 1,
       "city": "Épernay & Hautvillers",
       "hotel_slug_hint": "royal-champagne",
-      "key_pois": ["Avenue de Champagne Épernay", "Dom Pérignon Hautvillers", "Caves Moët & Chandon", "Cumières village vigneron"],
+      "key_pois": [
+        "Avenue de Champagne Épernay",
+        "Dom Pérignon Hautvillers",
+        "Caves Moët & Chandon",
+        "Cumières village vigneron"
+      ],
       "step_angle": "Épernay & Hautvillers — Royal Champagne vue vignes Vallée de la Marne, Hautvillers abbaye Dom Pérignon matin (visite sur demande Moët), Avenue de Champagne visite libre Perrier-Jouët, déjeuner vigneron à Cumières",
       "title_fr_hint": "Jour 2 : Épernay & Hautvillers — Dom Pérignon, Avenue de Champagne",
       "title_en_hint": "Day 2: Épernay & Hautvillers — Dom Pérignon, Avenue de Champagne"

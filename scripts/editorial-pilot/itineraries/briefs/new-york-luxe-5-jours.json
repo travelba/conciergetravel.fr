@@ -64,7 +64,12 @@
       "duration_days": 1,
       "city": "New York — Broadway & soirée finale",
       "hotel_slug_hint": "aman-new-york",
-      "key_pois": ["Broadway (Theater District)", "Times Square", "Radio City Music Hall", "Lincoln Center"],
+      "key_pois": [
+        "Broadway (Theater District)",
+        "Times Square",
+        "Radio City Music Hall",
+        "Lincoln Center"
+      ],
       "step_angle": "Nuit Broadway — The Mark Jean-Georges déjeuner, shopping SoHo ou Nolita, spectacle Broadway prémunicipalement réservé (Book of Mormon, Hamilton option), champagne bar Aman New York rooftop",
       "title_fr_hint": "Jour 5 : Broadway & soirée — Lincoln Center, spectacle et départ",
       "title_en_hint": "Day 5: Broadway & evening — Lincoln Center, show and departure"

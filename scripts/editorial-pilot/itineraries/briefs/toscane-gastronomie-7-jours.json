@@ -13,18 +13,30 @@
   "target_word_count": 2200,
   "meta_title_fr_hint": "Itinéraire Toscane 7 jours gastronomie & vignobles — Florence, Chianti, Val d'Orcia | MyConciergeHotel",
   "meta_desc_fr_hint": "7 jours en Toscane : Borgo San Felice, Rosewood Castiglion del Bosco, Belmond Castello di Casole. Uffizi, Brunello, San Gimignano. Sélection Concierge.",
-  "hotel_slugs_target": ["borgo-san-felice", "rosewood-castiglion-del-bosco", "belmond-castello-di-casole"],
+  "hotel_slugs_target": [
+    "borgo-san-felice",
+    "rosewood-castiglion-del-bosco",
+    "belmond-castello-di-casole"
+  ],
   "hotel_fallback_note": "Fallback sur hôtels 5★ Toscane (Florence, Sienne, Chianti, Val d'Orcia) présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-toscane", "guide-florence", "guide-chianti"],
   "related_ranking_slugs_target": ["meilleurs-hotels-toscane", "meilleurs-hotels-florence"],
-  "related_itinerary_slugs_target": ["bordeaux-vignobles-gastronomie-5-jours", "provence-culture-gastronomie-10-jours"],
+  "related_itinerary_slugs_target": [
+    "bordeaux-vignobles-gastronomie-5-jours",
+    "provence-culture-gastronomie-10-jours"
+  ],
   "steps_outline": [
     {
       "step": 1,
       "duration_days": 2,
       "city": "Florence",
       "hotel_slug_hint": "borgo-san-felice",
-      "key_pois": ["Galerie des Offices (Uffizi)", "Ponte Vecchio", "Palais Pitti", "Jardins de Boboli"],
+      "key_pois": [
+        "Galerie des Offices (Uffizi)",
+        "Ponte Vecchio",
+        "Palais Pitti",
+        "Jardins de Boboli"
+      ],
       "step_angle": "Florence Renaissance — Uffizi réservation créneau 9h avant files, Ponte Vecchio lever du soleil sans touristes, déjeuner Trattoria Mario (cash uniquement), Bargello musée sculpture",
       "title_fr_hint": "Jours 1-2 : Florence — Uffizi, Renaissance et ponts de l'Arno",
       "title_en_hint": "Days 1-2: Florence — Uffizi, Renaissance and Arno bridges"
@@ -34,7 +46,12 @@
       "duration_days": 2,
       "city": "Chianti & Borgo San Felice",
       "hotel_slug_hint": "borgo-san-felice",
-      "key_pois": ["Route des Vins Chianti Classico", "Greve in Chianti", "Radda in Chianti", "Castello di Ama (art contemporain)"],
+      "key_pois": [
+        "Route des Vins Chianti Classico",
+        "Greve in Chianti",
+        "Radda in Chianti",
+        "Castello di Ama (art contemporain)"
+      ],
       "step_angle": "Chianti vignoble — Borgo San Felice hamlet privé DOCG Berardenga, vélo entre vignes matin (parcours balisé hôtel), Castello di Ama visite art et vin, déjeuner Osteria del Grifo Greve",
       "title_fr_hint": "Jours 3-4 : Chianti — Vignobles, cyclotourisme et art contemporain",
       "title_en_hint": "Days 3-4: Chianti — Vineyards, cycling and contemporary art"
@@ -44,7 +61,12 @@
       "duration_days": 2,
       "city": "Val d'Orcia & Montalcino",
       "hotel_slug_hint": "rosewood-castiglion-del-bosco",
-      "key_pois": ["Pienza (ville idéale UNESCO)", "Montalcino et Brunello", "Bagno Vignoni (source thermale)", "San Quirico d'Orcia"],
+      "key_pois": [
+        "Pienza (ville idéale UNESCO)",
+        "Montalcino et Brunello",
+        "Bagno Vignoni (source thermale)",
+        "San Quirico d'Orcia"
+      ],
       "step_angle": "Val d'Orcia UNESCO — Rosewood Castiglion del Bosco estate Brunello (cave privée), Pienza avant 9h (photographie facades), Bagno Vignoni bain thermal historique, dégustation Brunello Biondi-Santi",
       "title_fr_hint": "Jours 5-6 : Val d'Orcia — Brunello, Pienza et thermes",
       "title_en_hint": "Days 5-6: Val d'Orcia — Brunello, Pienza and thermal baths"
@@ -54,7 +76,12 @@
       "duration_days": 1,
       "city": "Sienne & San Gimignano",
       "hotel_slug_hint": "belmond-castello-di-casole",
-      "key_pois": ["Piazza del Campo Sienne", "Cathédrale Sienne (Duomo)", "San Gimignano tours médiévales", "Vernaccia di San Gimignano"],
+      "key_pois": [
+        "Piazza del Campo Sienne",
+        "Cathédrale Sienne (Duomo)",
+        "San Gimignano tours médiévales",
+        "Vernaccia di San Gimignano"
+      ],
       "step_angle": "Sienne & San Gimignano — Belmond Casole base, Piazza del Campo 8h sans groupes, Duomo Sienne bibliothèque Piccolomini, San Gimignano Vernaccia dégustation Teruzzi",
       "title_fr_hint": "Jour 7 : Sienne & San Gimignano — Piazza del Campo et tours médiévales",
       "title_en_hint": "Day 7: Siena & San Gimignano — Piazza del Campo and medieval towers"

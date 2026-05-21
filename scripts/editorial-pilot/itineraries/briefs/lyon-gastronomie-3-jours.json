@@ -17,7 +17,10 @@
   "hotel_fallback_note": "Fallback sur hôtels 5★ Lyon présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-lyon", "guide-rhone-alpes-gastronomie"],
   "related_ranking_slugs_target": ["meilleurs-hotels-lyon", "meilleurs-restaurants-lyon"],
-  "related_itinerary_slugs_target": ["bordeaux-vignobles-gastronomie-5-jours", "provence-culture-gastronomie-10-jours"],
+  "related_itinerary_slugs_target": [
+    "bordeaux-vignobles-gastronomie-5-jours",
+    "provence-culture-gastronomie-10-jours"
+  ],
   "steps_outline": [
     {
       "step": 1,
@@ -34,7 +37,12 @@
       "duration_days": 1,
       "city": "Lyon — Halles & Bocuse",
       "hotel_slug_hint": "villa-maia",
-      "key_pois": ["Halles Paul Bocuse", "Restaurant Paul Bocuse Collonges-au-Mont-d'Or", "Marché quai Saint-Antoine", "Confluence"],
+      "key_pois": [
+        "Halles Paul Bocuse",
+        "Restaurant Paul Bocuse Collonges-au-Mont-d'Or",
+        "Marché quai Saint-Antoine",
+        "Confluence"
+      ],
       "step_angle": "Halles en immersion — Halles Paul Bocuse ouverture 8h (achat produits régionaux), déjeuner marché Saint-Antoine, dîner Mère Brazier Mathieu Viannay (2 étoiles, réserver 1 mois avant)",
       "title_fr_hint": "Jour 2 : Halles & gastronomie — De Bocuse à la Mère Brazier",
       "title_en_hint": "Day 2: Halles & gastronomy — From Bocuse to La Mère Brazier"

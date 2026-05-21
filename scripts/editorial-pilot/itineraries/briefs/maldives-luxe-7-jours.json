@@ -24,7 +24,12 @@
       "duration_days": 3,
       "city": "Atoll de Noonu — Cheval Blanc Randheli",
       "hotel_slug_hint": "cheval-blanc-randheli",
-      "key_pois": ["Villa sur pilotis Randheli", "Lagoon snorkeling", "Dîner sous-marin", "Spa CHI"],
+      "key_pois": [
+        "Villa sur pilotis Randheli",
+        "Lagoon snorkeling",
+        "Dîner sous-marin",
+        "Spa CHI"
+      ],
       "step_angle": "Arrivée Randheli — hydravion depuis Malé (35 min), villa pilotis accès direct lagon, dîner sous-marin Divers Room vitrine sur le récif, manta snorkeling au lever",
       "title_fr_hint": "Jours 1-3 : Cheval Blanc Randheli — Villa sur pilotis et lagon privé",
       "title_en_hint": "Days 1-3: Cheval Blanc Randheli — Overwater villa and private lagoon"
@@ -34,7 +39,12 @@
       "duration_days": 2,
       "city": "Atoll de Baa — Soneva Fushi",
       "hotel_slug_hint": "soneva-fushi",
-      "key_pois": ["Hanifaru Bay (raies manta et baleines)", "Cinéma en plein air Cinema Paradiso", "Potager Soneva", "Soneva Soul spa"],
+      "key_pois": [
+        "Hanifaru Bay (raies manta et baleines)",
+        "Cinéma en plein air Cinema Paradiso",
+        "Potager Soneva",
+        "Soneva Soul spa"
+      ],
       "step_angle": "Soneva Fushi expériences — hydravion Malé, Hanifaru Bay UNESCO bateau Soneva (juin-novembre, réserver à l'avance), observatoire astronomique nocturne, glace artisanale So Chill",
       "title_fr_hint": "Jours 4-5 : Soneva Fushi — Hanifaru Bay, cinéma plein air et spa",
       "title_en_hint": "Days 4-5: Soneva Fushi — Hanifaru Bay, open-air cinema and spa"
@@ -44,7 +54,12 @@
       "duration_days": 2,
       "city": "Atoll de Nord Malé — One&Only Reethi Rah",
       "hotel_slug_hint": "one-and-only-reethi-rah",
-      "key_pois": ["Beach villas Reethi Rah", "Plongée récifs Nord Malé", "Restaurant REETHI", "Transfert speedboat Malé 45 min"],
+      "key_pois": [
+        "Beach villas Reethi Rah",
+        "Plongée récifs Nord Malé",
+        "Restaurant REETHI",
+        "Transfert speedboat Malé 45 min"
+      ],
       "step_angle": "Reethi Rah finale — speedboat 45 min depuis Malé, plongée récifs coralliens guide privé, dîner REETHI pieds dans le sable, vol retour depuis Malé J+7",
       "title_fr_hint": "Jours 6-7 : One&Only Reethi Rah — Récifs, plongée et fin de séjour",
       "title_en_hint": "Days 6-7: One&Only Reethi Rah — Reefs, diving and farewell"

@@ -34,7 +34,12 @@
       "duration_days": 1,
       "city": "Dubaï — Désert & excursion Al Maha",
       "hotel_slug_hint": "atlantis-the-royal",
-      "key_pois": ["Désert de Dubaï Al Maha Conservation Reserve", "Dune bashing 4x4", "Camel ride sunrise", "Atlantis The Royal piscine infinité"],
+      "key_pois": [
+        "Désert de Dubaï Al Maha Conservation Reserve",
+        "Dune bashing 4x4",
+        "Camel ride sunrise",
+        "Atlantis The Royal piscine infinité"
+      ],
       "step_angle": "Désert Al Maha — excursion 4x4 Dubaï Desert Conservation Reserve (1h de Downtown), petit-déjeuner bédouin sous tente, retour Atlantis The Royal piscine Sky Pool 21e étage, dîner Ariana's Persian Kitchen",
       "title_fr_hint": "Jour 2 : Désert & Atlantis — Dunes, 4x4 et resort ultra-luxe",
       "title_en_hint": "Day 2: Desert & Atlantis — Dunes, 4x4 and ultra-luxury resort"
@@ -44,7 +49,12 @@
       "duration_days": 1,
       "city": "Dubaï — Marina & départ",
       "hotel_slug_hint": "four-seasons-jumeirah",
-      "key_pois": ["Dubai Marina", "JBR Beach (Jumeirah Beach Residence)", "Palm Jumeirah", "Souk Madinat Jumeirah"],
+      "key_pois": [
+        "Dubai Marina",
+        "JBR Beach (Jumeirah Beach Residence)",
+        "Palm Jumeirah",
+        "Souk Madinat Jumeirah"
+      ],
       "step_angle": "Marina finale — location yacht (2h depuis Dubai Marina 750-1200 AED), vue Palm Jumeirah depuis l'eau, déjeuner Pierchic (restaurant sur ponton mer), départ DXB",
       "title_fr_hint": "Jour 3 : Dubai Marina — Yacht, Palm Jumeirah et départ",
       "title_en_hint": "Day 3: Dubai Marina — Yacht, Palm Jumeirah and departure"

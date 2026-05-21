@@ -17,14 +17,22 @@
   "hotel_fallback_note": "Fallback sur hôtels 5★ Provence (Aix-en-Provence, Avignon, Lubéron) présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-provence", "guide-luberon", "guide-avignon"],
   "related_ranking_slugs_target": ["meilleurs-hotels-provence", "meilleurs-hotels-aix-en-provence"],
-  "related_itinerary_slugs_target": ["cote-d-azur-luxe-7-jours", "bordeaux-vignobles-gastronomie-5-jours"],
+  "related_itinerary_slugs_target": [
+    "cote-d-azur-luxe-7-jours",
+    "bordeaux-vignobles-gastronomie-5-jours"
+  ],
   "steps_outline": [
     {
       "step": 1,
       "duration_days": 3,
       "city": "Aix-en-Provence",
       "hotel_slug_hint": "villa-gallici",
-      "key_pois": ["Cours Mirabeau", "Atelier Cézanne", "Cathédrale Saint-Sauveur", "Marché du Palais de Justice"],
+      "key_pois": [
+        "Cours Mirabeau",
+        "Atelier Cézanne",
+        "Cathédrale Saint-Sauveur",
+        "Marché du Palais de Justice"
+      ],
       "step_angle": "Aix baroque — Villa Gallici à 10 min du Cours Mirabeau, atelier Cézanne avant 9h, marché du mardi Place Richelme, dîner Pierre Reboul",
       "title_fr_hint": "Jours 1-3 : Aix-en-Provence — Baroque, Cézanne et marchés provençaux",
       "title_en_hint": "Days 1-3: Aix-en-Provence — Baroque, Cézanne and Provençal markets"
@@ -34,7 +42,12 @@
       "duration_days": 3,
       "city": "Les Baux-de-Provence & Alpilles",
       "hotel_slug_hint": "oustau-de-baumaniere",
-      "key_pois": ["Village des Baux-de-Provence", "Carrières de Lumières", "Pont du Gard", "Arles arènes"],
+      "key_pois": [
+        "Village des Baux-de-Provence",
+        "Carrières de Lumières",
+        "Pont du Gard",
+        "Arles arènes"
+      ],
       "step_angle": "Alpilles sauvages — Baumanière étoilé en table d'honneur, Carrières de Lumières à l'ouverture, Pont du Gard lever du soleil (parking libre avant 8h)",
       "title_fr_hint": "Jours 4-6 : Les Baux & Alpilles — Gastronomie et paysages lunaires",
       "title_en_hint": "Days 4-6: Les Baux & Alpilles — Gastronomy and lunar landscapes"
@@ -44,7 +57,12 @@
       "duration_days": 2,
       "city": "Avignon & Gard",
       "hotel_slug_hint": "villa-gallici",
-      "key_pois": ["Palais des Papes", "Pont d'Avignon", "Collection Lambert", "Villeneuve-lès-Avignon"],
+      "key_pois": [
+        "Palais des Papes",
+        "Pont d'Avignon",
+        "Collection Lambert",
+        "Villeneuve-lès-Avignon"
+      ],
       "step_angle": "Avignon pontificale — Palais des Papes visite audioguide 9h, déjeuner Christian Etienne (vue remparts), Collection Lambert musée d'art contemporain",
       "title_fr_hint": "Jours 7-8 : Avignon — Palais des Papes et art contemporain",
       "title_en_hint": "Days 7-8: Avignon — Palace of the Popes and contemporary art"
@@ -54,7 +72,12 @@
       "duration_days": 2,
       "city": "Lubéron — Gordes, Roussillon, Bonnieux",
       "hotel_slug_hint": "crillon-le-brave",
-      "key_pois": ["Roussillon ocres", "Abbaye de Sénanque", "Marché de Carpentras", "Gordes village"],
+      "key_pois": [
+        "Roussillon ocres",
+        "Abbaye de Sénanque",
+        "Marché de Carpentras",
+        "Gordes village"
+      ],
       "step_angle": "Lubéron doré — Crillon le Brave vue Mont Ventoux, Abbaye Sénanque à 8h (lavande juin-juillet), marché Carpentras vendredi matin (truffes noires en saison)",
       "title_fr_hint": "Jours 9-10 : Lubéron — Gordes, Roussillon et Ventoux",
       "title_en_hint": "Days 9-10: Lubéron — Gordes, Roussillon and Ventoux"

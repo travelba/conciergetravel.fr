@@ -17,14 +17,22 @@
   "hotel_fallback_note": "Fallback sur hôtels 5★ Bordeaux et Gironde présents dans la table hotels si hôtels cibles absents.",
   "related_guide_slugs_target": ["guide-bordeaux", "guide-saint-emilion", "guide-medoc"],
   "related_ranking_slugs_target": ["meilleurs-hotels-bordeaux", "meilleurs-hotels-saint-emilion"],
-  "related_itinerary_slugs_target": ["provence-culture-gastronomie-10-jours", "reims-champagne-week-end"],
+  "related_itinerary_slugs_target": [
+    "provence-culture-gastronomie-10-jours",
+    "reims-champagne-week-end"
+  ],
   "steps_outline": [
     {
       "step": 1,
       "duration_days": 1,
       "city": "Bordeaux",
       "hotel_slug_hint": "les-sources-de-caudalie",
-      "key_pois": ["Cité du Vin", "Place de la Bourse", "CAPC Musée d'Art Contemporain", "Marché des Capucins"],
+      "key_pois": [
+        "Cité du Vin",
+        "Place de la Bourse",
+        "CAPC Musée d'Art Contemporain",
+        "Marché des Capucins"
+      ],
       "step_angle": "Bordeaux patrimoniale — visite Cité du Vin Belvedere vue Garonne, Marché des Capucins 8h, dîner Le Pressoir d'Argent Gordon Ramsay",
       "title_fr_hint": "Jour 1 : Bordeaux — Cité du Vin, quais et gastronomie",
       "title_en_hint": "Day 1: Bordeaux — Wine city, quays and gastronomy"
@@ -34,7 +42,12 @@
       "duration_days": 2,
       "city": "Médoc — Margaux & Pauillac",
       "hotel_slug_hint": "les-sources-de-caudalie",
-      "key_pois": ["Château Margaux", "Château Pichon Baron", "Château Lynch-Bages", "Route des Châteaux D2"],
+      "key_pois": [
+        "Château Margaux",
+        "Château Pichon Baron",
+        "Château Lynch-Bages",
+        "Route des Châteaux D2"
+      ],
       "step_angle": "Route des Châteaux en voiture — Sources de Caudalie base, vinothérapie spa matin, visite privée Château Margaux sur RDV (réserver 3 semaines avant), déjeuner Café Laville",
       "title_fr_hint": "Jours 2-3 : Médoc — Margaux, Pauillac et Route des Châteaux",
       "title_en_hint": "Days 2-3: Médoc — Margaux, Pauillac and the Châteaux Route"
@@ -44,7 +57,12 @@
       "duration_days": 1,
       "city": "Saint-Émilion",
       "hotel_slug_hint": "chateau-lafaurie-peyraguey",
-      "key_pois": ["Village classé UNESCO Saint-Émilion", "Monolithe de Saint-Émilion", "Château Ausone", "Place du Marché"],
+      "key_pois": [
+        "Village classé UNESCO Saint-Émilion",
+        "Monolithe de Saint-Émilion",
+        "Château Ausone",
+        "Place du Marché"
+      ],
       "step_angle": "Saint-Émilion UNESCO — catacombes et église monolithe visite guidée 10h, dégustation Château Pavie, déjeuner Hostellerie de Plaisance terrasse village",
       "title_fr_hint": "Jour 4 : Saint-Émilion — Village UNESCO, caves et grands crus",
       "title_en_hint": "Day 4: Saint-Émilion — UNESCO village, caves and grand crus"

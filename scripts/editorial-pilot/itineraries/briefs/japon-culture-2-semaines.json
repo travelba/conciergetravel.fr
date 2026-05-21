@@ -44,7 +44,13 @@
       "duration_days": 4,
       "city": "Kyoto",
       "hotel_slug_hint": "aman-kyoto",
-      "key_pois": ["Fushimi Inari", "Arashiyama bambouseraie", "Kinkaku-ji", "Gion district", "Kiyomizu-dera"],
+      "key_pois": [
+        "Fushimi Inari",
+        "Arashiyama bambouseraie",
+        "Kinkaku-ji",
+        "Gion district",
+        "Kiyomizu-dera"
+      ],
       "step_angle": "Kyoto impériale — Aman Kyoto jardin 8 000 m², Fushimi Inari 6h (sans touristes), kaiseki Kikunoi Honten réservation 1 mois, Gion 17h-19h pour geiko",
       "title_fr_hint": "Jours 6-9 : Kyoto — Capitale impériale, temples et kaiseki",
       "title_en_hint": "Days 6-9: Kyoto — Imperial capital, temples and kaiseki"
@@ -54,7 +60,12 @@
       "duration_days": 2,
       "city": "Hiroshima & Miyajima",
       "hotel_slug_hint": "park-hyatt-kyoto",
-      "key_pois": ["Mémorial de la Paix Hiroshima", "Île Miyajima", "Torii flottant Itsukushima", "Momijidani"],
+      "key_pois": [
+        "Mémorial de la Paix Hiroshima",
+        "Île Miyajima",
+        "Torii flottant Itsukushima",
+        "Momijidani"
+      ],
       "step_angle": "Hiroshima & Miyajima — shinkansen depuis Kyoto 45 min, Mémorial de la Paix ouverture 8h30, ferry Miyajima 30 min, torii flottant marée basse, nuit à Hiroshima ou retour Kyoto",
       "title_fr_hint": "Jours 10-11 : Hiroshima & Miyajima — Mémoire et torii flottant",
       "title_en_hint": "Days 10-11: Hiroshima & Miyajima — Memory and floating torii"
@@ -64,7 +75,12 @@
       "duration_days": 2,
       "city": "Naoshima",
       "hotel_slug_hint": "aman-kyoto",
-      "key_pois": ["Musée Chichu (Tadao Ando)", "Yayoi Kusama citrouilles", "Benesse House", "Inujima"],
+      "key_pois": [
+        "Musée Chichu (Tadao Ando)",
+        "Yayoi Kusama citrouilles",
+        "Benesse House",
+        "Inujima"
+      ],
       "step_angle": "Naoshima art — ferry Uno depuis Okayama 20 min, Chichu Museum Monet Room lumière naturelle (billet J+1 obligatoire), Benesse House resort art, Kusama citrouilles plage",
       "title_fr_hint": "Jours 12-13 : Naoshima — Île de l'art contemporain",
       "title_en_hint": "Days 12-13: Naoshima — Contemporary art island"

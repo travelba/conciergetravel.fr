@@ -34,7 +34,12 @@
       "duration_days": 2,
       "city": "Fès",
       "hotel_slug_hint": "ksar-char-bagh",
-      "key_pois": ["Médina de Fès (Fès el-Bali)", "Tanneries Chouara", "Madrasa Bou Inania", "Musée Nejjarine"],
+      "key_pois": [
+        "Médina de Fès (Fès el-Bali)",
+        "Tanneries Chouara",
+        "Madrasa Bou Inania",
+        "Musée Nejjarine"
+      ],
       "step_angle": "Fès médiévale — Ksar Char-Bagh (jardin 5 ha), Fès el-Bali visite pied avec guide historien certifié, tanneries Chouara vue terrasse cuir, dîner Dar Roumana riad historique",
       "title_fr_hint": "Jours 4-5 : Fès — Médina médiévale, tanneries et madrasa",
       "title_en_hint": "Days 4-5: Fès — Medieval medina, tanneries and madrasa"
@@ -44,7 +49,12 @@
       "duration_days": 3,
       "city": "Désert Merzouga & route des Kasbahs",
       "hotel_slug_hint": "ksar-char-bagh",
-      "key_pois": ["Dunes de l'Erg Chebbi Merzouga", "Kasbah Aït Benhaddou (UNESCO)", "Gorges du Dadès", "Vallée des Roses Kelaat M'Gouna"],
+      "key_pois": [
+        "Dunes de l'Erg Chebbi Merzouga",
+        "Kasbah Aït Benhaddou (UNESCO)",
+        "Gorges du Dadès",
+        "Vallée des Roses Kelaat M'Gouna"
+      ],
       "step_angle": "Merzouga & Kasbahs — route via Midelt, bivouac dunes Erg Chebbi nuit sous tente luxe (Luxury Desert Camp), lever de soleil chameau, Kasbah Aït Benhaddou (site classé UNESCO)",
       "title_fr_hint": "Jours 6-8 : Désert Merzouga & Kasbahs — Sahara, dunes et caravanes",
       "title_en_hint": "Days 6-8: Merzouga Desert & Kasbahs — Sahara, dunes and caravans"
@@ -54,7 +64,12 @@
       "duration_days": 2,
       "city": "Essaouira",
       "hotel_slug_hint": "royal-mansour",
-      "key_pois": ["Médina Essaouira (UNESCO)", "Remparts et cannons", "Port de pêche", "Plage des Îles Purpuraires"],
+      "key_pois": [
+        "Médina Essaouira (UNESCO)",
+        "Remparts et cannons",
+        "Port de pêche",
+        "Plage des Îles Purpuraires"
+      ],
       "step_angle": "Essaouira ventée — transfert depuis Marrakech (3h voiture), médina UNESCO remparts 17h lumière dorée, port poisson frais déjeuner, retour Marrakech Royal Mansour dernier soir",
       "title_fr_hint": "Jours 9-10 : Essaouira & retour Marrakech — Médina UNESCO et fin de séjour",
       "title_en_hint": "Days 9-10: Essaouira & Marrakech — UNESCO medina and farewell"

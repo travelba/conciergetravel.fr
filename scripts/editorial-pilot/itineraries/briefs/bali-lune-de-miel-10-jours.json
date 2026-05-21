@@ -24,7 +24,12 @@
       "duration_days": 4,
       "city": "Ubud",
       "hotel_slug_hint": "como-uma-ubud",
-      "key_pois": ["Rizières Tegallalang", "Temple Tirta Empul", "Monkey Forest", "Musée Agung Rai (ARMA)"],
+      "key_pois": [
+        "Rizières Tegallalang",
+        "Temple Tirta Empul",
+        "Monkey Forest",
+        "Musée Agung Rai (ARMA)"
+      ],
       "step_angle": "Ubud spirituel — COMO Uma arrivée cours yoga privé sunset, rizières Tegallalang 7h avant touristes, cérémonie purification Tirta Empul sur demande, dîner Locavore restaurant",
       "title_fr_hint": "Jours 1-4 : Ubud — Rizières, temples et bien-être",
       "title_en_hint": "Days 1-4: Ubud — Rice terraces, temples and wellness"
@@ -34,7 +39,12 @@
       "duration_days": 3,
       "city": "Jimbaran",
       "hotel_slug_hint": "four-seasons-jimbaran",
-      "key_pois": ["Plage de Jimbaran", "Temple Tanah Lot (sunset)", "Poissonnerie Jimbaran BBQ", "Pura Luhur Uluwatu"],
+      "key_pois": [
+        "Plage de Jimbaran",
+        "Temple Tanah Lot (sunset)",
+        "Poissonnerie Jimbaran BBQ",
+        "Pura Luhur Uluwatu"
+      ],
       "step_angle": "Jimbaran & falaises Bukit — Four Seasons villa privée piscine, BBQ poissons plage Jimbaran coucher de soleil, Uluwatu temple kecak 18h (réserver tôt), Tanah Lot au lever",
       "title_fr_hint": "Jours 5-7 : Jimbaran — Plages, temples falaises et dîner sur sable",
       "title_en_hint": "Days 5-7: Jimbaran — Beaches, clifftop temples and dinner on sand"
@@ -44,7 +54,12 @@
       "duration_days": 3,
       "city": "Nusa Dua & Amankila",
       "hotel_slug_hint": "amankila",
-      "key_pois": ["Plage Amankila Candidasa", "Snorkeling Nusa Lembongan", "Temple Besakih (Mère des temples)", "Côte Est Bali"],
+      "key_pois": [
+        "Plage Amankila Candidasa",
+        "Snorkeling Nusa Lembongan",
+        "Temple Besakih (Mère des temples)",
+        "Côte Est Bali"
+      ],
       "step_angle": "Côte Est exclusive — Amankila 3 piscines en cascade face à la mer de Lombok, snorkeling manta Nusa Penida (bateau privé Amankila), Besakih visite sans agences 8h",
       "title_fr_hint": "Jours 8-10 : Côte Est — Amankila, Besakih et départ",
       "title_en_hint": "Days 8-10: East Coast — Amankila, Besakih and departure"
