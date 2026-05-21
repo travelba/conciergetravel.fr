@@ -14,6 +14,8 @@ import {
   HOTEL_CATEGORY_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
+  intlNavSlugToIso,
+  navHotelTypeToAxisValue,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -203,16 +205,26 @@ function MegaLink({
   href,
   label,
   muted = false,
+  ariaLabel,
 }: {
   readonly href: React.ComponentProps<typeof Link>['href'];
   readonly label: string;
   readonly muted?: boolean;
+  /**
+   * Optional explicit `aria-label`. Used by international destination
+   * entries to surface the ISO code to screen readers while keeping
+   * the visible label localised — useful when several entries share
+   * the same destination page (`/hotels`) before per-country deep
+   * links land.
+   */
+  readonly ariaLabel?: string;
 }): ReactElement {
   return (
     <li role="none">
       <Link
         role="menuitem"
         href={href}
+        aria-label={ariaLabel}
         className={`hover:bg-muted/10 focus-visible:ring-ring block rounded-md px-2.5 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 ${
           muted ? 'text-muted hover:text-fg text-xs' : 'text-fg'
         }`}
@@ -330,16 +342,95 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.destinationsWorld')}>
           <>
-            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/destination/[citySlug]',
-                  params: { citySlug: entry.slug },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+              // Vague-6 — all 8 international country guides shipped.
+              // Each menu entry routes to its dedicated guide page.
+              // The typed `Href` requires a literal pathname union;
+              // we map the slug explicitly to keep the typecheck strict.
+              // aria-label appends the ISO country code for screen
+              // readers so the link is unambiguous out of context.
+              const iso = intlNavSlugToIso(entry.slug);
+              const label = pickEntryLabel(entry, locale);
+              const ariaLabel = iso !== null ? `${label} — ${iso.toUpperCase()}` : label;
+              switch (entry.slug) {
+                case 'italie':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/italie"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'suisse':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/suisse"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'maroc':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/maroc"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'maldives':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/maldives"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'emirats-arabes-unis':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/emirats-arabes-unis"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'thailande':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/thailande"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'japon':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/japon"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                case 'etats-unis':
+                  return (
+                    <MegaLink
+                      key={entry.slug}
+                      href="/guide/etats-unis"
+                      label={label}
+                      ariaLabel={ariaLabel}
+                    />
+                  );
+                default:
+                  return (
+                    <MegaLink key={entry.slug} href="/hotels" label={label} ariaLabel={ariaLabel} />
+                  );
+              }
+            })}
           </>
         </MegaColumn>
       </div>
@@ -448,16 +539,24 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByType')}>
           <>
-            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => (
-              <MegaLink
-                key={entry.slug}
-                href={{
-                  pathname: '/classements/[axe]/[valeur]',
-                  params: { axe: 'type', valeur: entry.slug.replace(/^hotels-/u, '') },
-                }}
-                label={pickEntryLabel(entry, locale)}
-              />
-            ))}
+            {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => {
+              // Map the user-friendly menu slug to the canonical axis
+              // value declared in `axes.ts`. Drop entries that can't
+              // map (defensive; the test in `nav-data.test.ts` makes
+              // this branch unreachable in CI).
+              const axisValue = navHotelTypeToAxisValue(entry.slug);
+              if (axisValue === null) return null;
+              return (
+                <MegaLink
+                  key={entry.slug}
+                  href={{
+                    pathname: '/classements/[axe]/[valeur]',
+                    params: { axe: 'type', valeur: axisValue },
+                  }}
+                  label={pickEntryLabel(entry, locale)}
+                />
+              );
+            })}
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.rankingsByDestination')}>
@@ -490,6 +589,17 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 
 // ─── Mega-menu 5 — Le Concierge ──────────────────────────────────────────
 
+/**
+ * Concierge mega-menu — wired to the dedicated Vague-5 institutional
+ * pages (PRs #83 + #84) instead of all 12 entries collapsing onto
+ * `/le-concierge`. The remaining pointers (`conciergeTip`,
+ * `conciergeJournal`, `conciergeHotelier`, `conciergeMice`,
+ * `conciergePress`) keep their `/le-concierge` parent until their
+ * dedicated pages ship in Vague 5 batch 3 (P1/P2 — `/le-conseil-
+ * du-concierge`, `/le-concierge/journal`, `/le-concierge/pour-les-
+ * hoteliers`, `/le-concierge/mice-et-seminaires`, `/le-concierge/
+ * presse-et-partenaires`).
+ */
 function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
@@ -501,13 +611,20 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         <MegaColumn heading={t('primaryNav.conciergeAbout')}>
           <>
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeAboutLink')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeBooking')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeLoyalty')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeFaq')} />
+            <MegaLink href="/le-concierge/reserver" label={t('primaryNav.conciergeBooking')} />
+            <MegaLink href="/le-concierge/fidelite" label={t('primaryNav.conciergeLoyalty')} />
+            <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
+            <MegaLink
+              href="/le-concierge/methode-editoriale"
+              label={t('primaryNav.conciergeMethod')}
+            />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergeContent')}>
           <>
+            {/* `conciergeTip` still routes to `/le-concierge` (the
+                Conseil USP block is rendered there). Vague-5 P1 will
+                ship `/le-conseil-du-concierge` as a dedicated hub. */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeTip')} />
             <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
@@ -516,9 +633,11 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>
           <>
+            {/* Hotelier / MICE / press still pointing to `/le-concierge`
+                until their dedicated pages ship in Vague-5 P1/P2. */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeHotelier')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeMice')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeContact')} />
+            <MegaLink href="/le-concierge/contact" label={t('primaryNav.conciergeContact')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergePress')} />
           </>
         </MegaColumn>

@@ -26,12 +26,20 @@ export function GET() {
   //   - `ChatGPT-User`        — when ChatGPT browses live for a user query
   //   - `PerplexityBot`       — Perplexity search index
   //   - `Perplexity-User`     — Perplexity live browse
-  //   - `ClaudeBot`           — Anthropic crawler
+  //   - `ClaudeBot`           — Anthropic crawler (training + retrieval, Q4 2025+)
   //   - `anthropic-ai`        — legacy Anthropic crawler (kept for back-compat)
   //   - `Applebot-Extended`   — Apple AI training opt-out
+  //   - `MistralAI-User`      — Le Chat live browse (Mistral, Q4 2025 European LLM relevant for FR market)
+  //   - `Meta-ExternalAgent`  — Meta AI live browse (Llama-powered assistants)
+  //   - `Meta-ExternalFetcher`— Meta AI on-demand fetch for user queries
+  //   - `Bytespider`          — ByteDance / Doubao crawler (allowed by design — Doubao is the #1 LLM by usage in Asia)
+  //   - `Diffbot`             — Diffbot Knowledge Graph (cited by Bing AI and Bard for entity grounding)
+  // Explicitly listing each agent prevents accidental drift from the
+  // shared `User-agent: *` rule (which already says Allow: /, but a
+  // per-agent stanza is the contract LLM operators look for).
   const lines: string[] = [
     '# MyConciergeHotel.com — robots.txt',
-    '# Authorize Google + OpenAI + Perplexity + Anthropic + Apple LLM crawlers (cf. CDC §6.5)',
+    '# Authorize Google + OpenAI + Perplexity + Anthropic + Apple + Mistral + Meta + ByteDance + Diffbot LLM crawlers (cf. CDC §6.5)',
     '',
     'User-agent: *',
     'Allow: /',
@@ -70,6 +78,21 @@ export function GET() {
     'Allow: /',
     '',
     'User-agent: Applebot-Extended',
+    'Allow: /',
+    '',
+    'User-agent: MistralAI-User',
+    'Allow: /',
+    '',
+    'User-agent: Meta-ExternalAgent',
+    'Allow: /',
+    '',
+    'User-agent: Meta-ExternalFetcher',
+    'Allow: /',
+    '',
+    'User-agent: Bytespider',
+    'Allow: /',
+    '',
+    'User-agent: Diffbot',
     'Allow: /',
     '',
     `Sitemap: ${origin}/sitemap.xml`,
