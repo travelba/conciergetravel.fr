@@ -204,14 +204,68 @@ export const routing = defineRouting({
     '/guides': '/guides',
     '/marque/[brandSlug]': '/marque/[brandSlug]',
     '/marques': '/marques',
+    // Vague 6 — international country guides. First template
+    // (Italie) ships in PR #91; the remaining 7 countries (Suisse,
+    // Maroc, EAU, Maldives, Thaïlande, Japon, USA) ship in
+    // follow-up PRs with parallel structure.
+    '/guide/italie': {
+      fr: '/guide/italie',
+      en: '/guide/italy',
+    },
+    '/guide/suisse': {
+      fr: '/guide/suisse',
+      en: '/guide/switzerland',
+    },
+    '/guide/maroc': {
+      fr: '/guide/maroc',
+      en: '/guide/morocco',
+    },
+    '/guide/maldives': {
+      fr: '/guide/maldives',
+      en: '/guide/maldives',
+    },
+    '/guide/emirats-arabes-unis': {
+      fr: '/guide/emirats-arabes-unis',
+      en: '/guide/uae',
+    },
+    '/guide/japon': {
+      fr: '/guide/japon',
+      en: '/guide/japan',
+    },
+    '/guide/thailande': {
+      fr: '/guide/thailande',
+      en: '/guide/thailand',
+    },
+    '/guide/etats-unis': {
+      fr: '/guide/etats-unis',
+      en: '/guide/usa',
+    },
     '/categorie/[categorySlug]': '/categorie/[categorySlug]',
     '/classement/[slug]': '/classement/[slug]',
     '/classements': '/classements',
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
-    // Vague-5 institutional pages (referenced here for footer rewire;
-    // pages themselves ship in PRs #83 + #84 + #88 + #89).
+    '/le-concierge/methode-editoriale': {
+      fr: '/le-concierge/methode-editoriale',
+      en: '/le-concierge/editorial-method',
+    },
+    '/le-concierge/reserver': {
+      fr: '/le-concierge/reserver',
+      en: '/le-concierge/how-to-book',
+    },
+    '/le-concierge/contact': {
+      fr: '/le-concierge/contact',
+      en: '/le-concierge/contact',
+    },
+    '/le-concierge/fidelite': {
+      fr: '/le-concierge/fidelite',
+      en: '/le-concierge/loyalty',
+    },
+    '/le-concierge/faq': {
+      fr: '/le-concierge/faq',
+      en: '/le-concierge/faq',
+    },
     '/le-concierge/pour-les-hoteliers': {
       fr: '/le-concierge/pour-les-hoteliers',
       en: '/le-concierge/for-hoteliers',
@@ -220,11 +274,19 @@ export const routing = defineRouting({
       fr: '/le-concierge/mice-et-seminaires',
       en: '/le-concierge/mice-and-events',
     },
+    '/le-conseil-du-concierge': {
+      fr: '/le-conseil-du-concierge',
+      en: '/the-concierge-tip',
+    },
     '/le-concierge/presse-et-partenaires': {
       fr: '/le-concierge/presse-et-partenaires',
       en: '/le-concierge/press-and-partners',
     },
-    '/itineraire': '/itineraire',
+    '/le-concierge/newsletter': {
+      fr: '/le-concierge/newsletter',
+      en: '/le-concierge/newsletter',
+    },
+    '/itineraires': '/itineraires',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
 });

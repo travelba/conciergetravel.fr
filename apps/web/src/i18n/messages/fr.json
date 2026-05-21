@@ -18,6 +18,8 @@
     "agency": "L'agence"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge des Palaces et hôtels 5★ en France",
+    "metaDesc": "Agence IATA dédiée aux Palaces et hôtels 5★ français. Chaque fiche se conclut par un Conseil du Concierge. Tarifs nets GDS, paiement Amadeus, fidélité dès la 1re nuit.",
     "title": "Votre concierge des Palaces et hôtels 5★ en France",
     "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
     "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
@@ -122,7 +124,8 @@
       "conciergeHotelier": "Pour les hôteliers",
       "conciergeMice": "MICE / Séminaires",
       "conciergeContact": "Nous contacter",
-      "conciergePress": "Presse & partenaires"
+      "conciergePress": "Presse & partenaires",
+      "conciergeMethod": "Notre méthode éditoriale"
     },
     "search": {
       "label": "Rechercher un hôtel",
@@ -132,50 +135,45 @@
       "submit": "Rechercher",
       "submitAria": "Lancer la recherche"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Itinéraires sur-mesure",
       "title": "Vos itinéraires de voyage",
       "lede": "Nos itinéraires sur-mesure assemblent étapes, hôtels d'exception et timings recommandés par notre conciergerie. Première vague de publications attendue prochainement.",
       "metaTitle": "Itinéraires de voyage sur-mesure — Palaces & Hôtels 5★ | MyConciergeHotel",
       "metaDesc": "Itinéraires de voyage 5★ rédigés par notre conciergerie : 3 à 14 jours, étapes nommées, hôtels d'exception, gastronomie, accès. Publications à venir.",
       "breadcrumbHome": "Accueil",
+      "breadcrumbHub": "Itinéraires",
       "comingSoon": "À venir",
       "comingSoonBody": "Nous préparons les premiers itinéraires éditoriaux 5★ — Paris, Côte d'Azur, Italie, Maroc. Notification possible par e-mail lors de la publication.",
       "fallbackTitle": "En attendant, explorez :",
       "fallbackInspiration": "Toutes les inspirations (thèmes × occasions × saisons)",
       "fallbackRankings": "Tous les classements éditoriaux",
-      "fallbackDestinations": "Tous les guides destination"
-    },
-    "inspiration": {
-      "eyebrow": "Inspiration",
-      "title": "Trouvez l'hôtel qui vous correspond",
-      "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
-      "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
-      "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
-      "breadcrumbHome": "Accueil",
-      "themes": {
-        "title": "Par thème",
-        "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+      "fallbackDestinations": "Tous les guides destination",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 itinéraire publié} other {# itinéraires publiés}}",
+        "filtersLabel": "Affiner",
+        "byCountry": "Par pays",
+        "byTravelStyle": "Par style de voyage",
+        "byDuration": "Par durée",
+        "durationDays": "{min, plural, =1 {1 jour} other {# jours}}",
+        "durationRange": "{min}–{max} jours"
       },
-      "occasions": {
-        "title": "Par occasion",
-        "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
-      },
-      "saisons": {
-        "title": "Par saison",
-        "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+      "detail": {
+        "stepLabel": "Étape {n}",
+        "stepsHeading": "L'itinéraire pas à pas",
+        "stepsLead": "Chaque étape combine un hôtel d'exception, un timing testé et nos recommandations sur place.",
+        "faqHeading": "Questions fréquentes",
+        "relatedRankingsHeading": "Classements éditoriaux à consulter",
+        "relatedGuidesHeading": "À lire aussi",
+        "relatedItinerariesHeading": "Autres itinéraires qui pourraient vous plaire",
+        "viewHotel": "Voir la fiche de l'hôtel",
+        "bookAtHotel": "Réserver à {hotelName}",
+        "stayDuration": "Durée du séjour : {n, plural, =1 {1 jour} other {# jours}}",
+        "city": "Ville",
+        "poiHeading": "À voir / à faire",
+        "allItineraries": "Tous nos itinéraires",
+        "ariaSkipToSteps": "Aller directement à l'itinéraire pas à pas"
       }
-    },
-    "brands": {
-      "eyebrow": "Groupes hôteliers",
-      "title": "Toutes les marques d'hôtels",
-      "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
-      "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
-      "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
-      "breadcrumbHome": "Accueil",
-      "breadcrumbHotels": "Hôtels",
-      "viewBrand": "Voir les hôtels {brand} →",
-      "empty": "Aucun hôtel publié pour cette marque pour le moment."
     },
     "breadcrumb": {
       "label": "Fil d'ariane",
@@ -210,12 +208,103 @@
       "current": "Français"
     }
   },
+  "inspiration": {
+    "eyebrow": "Inspiration",
+    "title": "Trouvez l'hôtel qui vous correspond",
+    "lede": "Filtrez nos Palaces et hôtels d'exception par thème (romantique, gastronomie, spa…), occasion (lune de miel, mariage, séminaire…) ou saison. Chaque axe ouvre un classement éditorial dédié.",
+    "metaTitle": "Inspirations de voyage — Thèmes, occasions, saisons | MyConciergeHotel",
+    "metaDesc": "Explorez nos hôtels d'exception par axe d'inspiration : 12 thèmes (romantique, spa, gastronomie, design…), 9 occasions (lune de miel, mariage, séminaire…), 4 saisons.",
+    "breadcrumbHome": "Accueil",
+    "themes": {
+      "title": "Par thème",
+      "lede": "L'expérience qui vous correspond — du spa à la gastronomie étoilée, du design contemporain au patrimoine."
+    },
+    "occasions": {
+      "title": "Par occasion",
+      "lede": "L'événement qui vous amène — anniversaire, lune de miel, mariage, séminaire, escapade."
+    },
+    "saisons": {
+      "title": "Par saison",
+      "lede": "La période qui vous attire — hiver à la montagne, été en bord de mer, printemps dans les vignobles, automne entre châteaux."
+    },
+    "aeoQuestion": "Comment trouver l'hôtel qui correspond à votre voyage chez MyConciergeHotel ?",
+    "aeoAnswer": "MyConciergeHotel agrège ses Palaces et hôtels 5★ sur trois axes complémentaires : 12 thèmes (romantique, spa, gastronomie, design, vignobles, patrimoine, golf, ski, piscine, rooftop, kids-friendly), 9 occasions de voyage (lune de miel, mariage, séminaire, lune de miel, anniversaire, retraite bien-être) et 4 saisons. Chaque combinaison ouvre un sous-hub éditorial avec sélection signée par notre conciergerie. Mise à jour {date}.",
+    "faqTitle": "L'inspiration MyConciergeHotel — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Quelle différence entre un thème, une occasion et une saison ?",
+        "a": "Un thème décrit l'expérience principale recherchée (spa, gastronomie, design) — il caractérise l'hôtel. Une occasion décrit l'événement qui motive le voyage (lune de miel, mariage, séminaire) — elle décrit le voyageur. Une saison décrit la fenêtre temporelle pertinente (hiver à la montagne, été en bord de mer) — elle décrit le calendrier. Les trois axes se croisent : un hôtel peut être romantique (thème), idéal pour une lune de miel (occasion) et au meilleur de sa forme au printemps (saison)."
+      },
+      {
+        "q": "Pourquoi 12 thèmes plutôt que 50 ?",
+        "a": "Nous limitons à 12 thèmes pour garantir que chaque axe a au moins 5 adresses publiées — un thème avec une seule fiche n'a pas de valeur pour l'utilisateur ni pour l'AEO. Les sous-thèmes pertinents (Michelin 2 étoiles, spa avec sauna privé) sont des sous-axes du moteur de recherche, pas des hubs autonomes."
+      },
+      {
+        "q": "Comment l'inspiration est-elle reliée aux classements ?",
+        "a": "Chaque thème, occasion ou saison ouvre la page `/classements/{axe}/{valeur}` — sous-hub matrice qui liste tous les classements éditoriaux portant cet axe. Par exemple « Spa & bien-être » mène aux classements « Meilleurs spas hôteliers », « Palaces avec hammam », « Retraites bien-être » publiés sur ce thème."
+      },
+      {
+        "q": "Une saison sans destination, ça donne quoi ?",
+        "a": "Un classement « Hiver » sans destination listée signifie qu'on couvre l'expérience hivernale (ski, après-ski, spa) sur toutes les zones — Alpes, Pyrénées, mais aussi Côte d'Azur en basse saison. Un classement « Hiver à Courchevel » est plus spécifique et apparaît dans le sous-hub `/classements/lieu/courchevel`."
+      },
+      {
+        "q": "Pourquoi pas un axe « budget » ?",
+        "a": "Tous nos hôtels sont Palace ou 5 étoiles — le segment prix est par construction premium. Un axe « budget » n'aurait pas de granularité utile chez nous ; nous avons cependant un comparateur de prix non affilié sur chaque fiche pour comparer aux agrégateurs."
+      },
+      {
+        "q": "Quand de nouvelles inspirations sont-elles publiées ?",
+        "a": "La taxonomie est gelée trimestriellement (cohérence des classements). De nouveaux thèmes peuvent apparaître si la conciergerie publie 5+ classements dédiés (ex : « surf de luxe » pourrait s'ouvrir si nous publions 5 classements bord de mer × surf)."
+      }
+    ]
+  },
+  "brands": {
+    "eyebrow": "Groupes hôteliers",
+    "title": "Toutes les marques d'hôtels",
+    "lede": "Explorez les groupes hôteliers représentés dans notre catalogue éditorial. Chaque marque rassemble des Palaces et hôtels d'exception sélectionnés par notre conciergerie.",
+    "metaTitle": "Toutes les marques d'hôtels — MyConciergeHotel",
+    "metaDesc": "Index des groupes hôteliers de notre catalogue éditorial : Cheval Blanc, Airelles, Four Seasons, Rosewood, Raffles, Peninsula, Mandarin Oriental, Oetker Collection, Dorchester Collection et plus.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbHotels": "Hôtels",
+    "viewBrand": "Voir les hôtels {brand} →",
+    "empty": "Aucun hôtel publié pour cette marque pour le moment.",
+    "aeoQuestion": "Quels groupes hôteliers représente MyConciergeHotel dans son catalogue ?",
+    "aeoAnswer": "MyConciergeHotel couvre {count} collections hôtelières d'auteur — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Les adresses indépendantes (Negresco, Lutetia, Crillon, Villa La Coste) figurent également sans appartenance à une chaîne. Mise à jour {date}.",
+    "faqTitle": "Les marques d'hôtels — questions fréquentes",
+    "faqItems": [
+      {
+        "q": "Êtes-vous affilié ou rémunéré par ces groupes hôteliers ?",
+        "a": "Non. MyConciergeHotel est une agence IATA indépendante. Aucune marque ne paie pour figurer ou être mise en avant. Notre commission vient des réservations (standard IATA), identique d'une marque à l'autre — la sélection est strictement éditoriale."
+      },
+      {
+        "q": "Pourquoi certaines marques de luxe sont absentes (Aman, Six Senses, Belmond) ?",
+        "a": "Soit parce que la marque n'a pas encore d'adresse en France dans notre catalogue (Aman, Six Senses), soit parce que la connectivité GDS n'est pas optimale (Belmond — connecté par lots, en cours d'enrichissement). Notre conciergerie peut néanmoins réserver toute adresse via Amadeus sur demande."
+      },
+      {
+        "q": "Comment une marque rejoint-elle votre catalogue éditorial ?",
+        "a": "Nous sélectionnons les groupes hôteliers en croisant trois critères : présence d'au moins une adresse française 5★ ou Palace, connectivité Amadeus GDS pour la réservation directe, signature éditoriale forte (collection d'auteur, pas simple bannière marketing). Une marque ne se candidate pas — c'est notre conciergerie qui propose."
+      },
+      {
+        "q": "Que signifie « collection » vs « chaîne » dans votre catalogue ?",
+        "a": "Une collection (Oetker, Dorchester, Cheval Blanc) regroupe quelques adresses d'auteur, souvent uniques par leur architecture ou leur histoire. Une chaîne (Four Seasons, Mandarin Oriental) déploie un standard de service à grande échelle mais maintient un haut niveau. Les deux figurent au catalogue ; notre éditorial préfère les collections pour leur signature."
+      },
+      {
+        "q": "Puis-je accumuler les points de fidélité de la marque en réservant chez vous ?",
+        "a": "Oui — votre numéro de fidélité (Four Seasons Preferred, Marriott Bonvoy pour Ritz-Carlton…) peut être joint à la réservation. Les points sont attribués par l'hôtel après le séjour. Notre programme MyConciergeHotel s'ajoute aux programmes maison sans les remplacer."
+      },
+      {
+        "q": "Comment savoir si un hôtel précis appartient à une de ces marques ?",
+        "a": "La fiche hôtel mentionne en évidence l'appartenance à une collection (Palace + groupe en chip sous le H1). Si la marque est ambiguë (rachat récent, marque-fille), nous précisons l'historique dans la section « À propos de la maison »."
+      }
+    ]
+  },
   "concierge": {
     "eyebrow": "À propos",
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
     "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
+    "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
       "title": "Nos engagements",
       "iataTitle": "Agence IATA / APST",
@@ -277,6 +366,1872 @@
         }
       ]
     }
+  },
+  "guideSuisse": {
+    "metaTitle": "Suisse — Guide voyage luxe : Palaces et hôtels 5★ | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe en Suisse : sélection de Palaces et hôtels 5★ — Genève, Zurich, Gstaad, St-Moritz, Zermatt, Lucerne. Itinéraires, tables étoilées, conseils opérationnels.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Suisse — Le guide MyConciergeHotel des Palaces et hôtels 5★",
+    "lede": "La Suisse concentre l'art de vivre alpin le plus aboutie : Gstaad pour le ski intime, St-Moritz pour le rayonnement international, Zermatt pour le Matterhorn, Lucerne et Lugano pour les lacs, Genève et Zurich pour la culture et la finance. Tarifs nets GDS Amadeus, paiement sécurisé, programme de fidélité MyConciergeHotel.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Suisse 6 régions : Alpes (Gstaad, St-Moritz, Zermatt), Lacs (Léman, Lugano), villes (Genève, Zurich). Sélection MyConciergeHotel. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et hôtels 5★ pour un séjour de luxe en Suisse ?",
+    "aeoAnswer": "MyConciergeHotel couvre les pôles luxe suisses : Gstaad (Gstaad Palace, Le Grand Bellevue, Park Gstaad), St-Moritz (Badrutt's Palace, Kulm Hotel, Suvretta House), Zermatt (Mont Cervin Palace, The Omnia), Lac Léman (Beau-Rivage Genève, Le Mirador Resort & Spa, Beau-Rivage Palace Lausanne), Zurich (Dolder Grand, Baur au Lac, Park Hyatt). Réservation IATA via notre conciergerie. Mise à jour {date}.",
+    "regions": {
+      "title": "Six pôles, six expériences",
+      "items": [
+        {
+          "name": "Gstaad",
+          "highlights": "Gstaad Palace (institution familiale depuis 1913), Le Grand Bellevue (Relais & Châteaux, esprit village), Park Gstaad (rénové 2023, Leading Hotels), The Alpina Gstaad (Leading Hotels, design alpin contemporain), Ultima Gstaad.",
+          "bestFor": "Ski-in/ski-out de mi-décembre à mi-mars, retraites privées discrètes, après-ski culturel (concerts au Menuhin Festival en juillet-août), gastronomie alpine raffinée (Sommet 1★ au Park Gstaad).",
+          "concierge": "Mon conseil : au Gstaad Palace, demandez la chambre 433 plutôt qu'une suite — vue Bernoise complète, balcon plein sud, refaite par la 4e génération Scherz en 2023. Pour le restaurant La Fromagerie, réservez le créneau 20h30-22h en semaine — la table 8 face à l'âtre est rarement attribuée spontanément."
+        },
+        {
+          "name": "St-Moritz",
+          "highlights": "Badrutt's Palace Hotel (depuis 1896, l'icône Engadine), Kulm Hotel St. Moritz (Leading Hotels), Suvretta House (Leading Hotels, neutre vis-à-vis du village), Carlton Hotel St. Moritz (Tschuggen Hotel Group), Grand Hotel des Bains Kempinski.",
+          "bestFor": "Ski Corviglia + Corvatsch, polo sur le lac gelé (fin janvier), concours White Turf, gastronomie 2★ (Da Vittorio au Carlton), shopping rue Serlas.",
+          "concierge": "Mon conseil : au Badrutt's Palace, ne descendez pas dans le bâtiment principal en hiver — préférez les chambres de l'aile « Mountain Wing » côté Engadiner Sport (vue Lac de St-Moritz directe). Pour le restaurant Igniv (3★ Andreas Caminada), réservez 6 semaines à l'avance — option déjeuner dégustation moins compétitive en accès."
+        },
+        {
+          "name": "Zermatt",
+          "highlights": "Mont Cervin Palace (Leading Hotels, vue Matterhorn directe), The Omnia (membre Design Hotels, Marriott), CERVO Mountain Resort, Riffelalp Resort (le plus haut 5★ d'Europe, 2 222 m), Schweizerhof Zermatt.",
+          "bestFor": "Ski tout l'hiver + glaciers été (uniques en Europe), randonnée Matterhorn, gastronomie alpine de Heinz Beck (Mont Cervin), retraites bien-être altitude (Riffelalp).",
+          "concierge": "Mon conseil : si vous descendez au Mont Cervin Palace, demandez la chambre Junior 421 (et non une suite plus chère) — orientation est avec vue Cervin pleine face, balcon couvert pour observer le lever de soleil sans froid. Pour le Riffelalp Resort, réservez le train à crémaillère Gornergrat de 19h32 pour l'arrivée (vue alpenglow sur le Cervin)."
+        },
+        {
+          "name": "Lac Léman & Lausanne",
+          "highlights": "Beau-Rivage Palace (Lausanne, depuis 1861, Leading Hotels), Hotel Royal Savoy Lausanne (Bürgenstock Group, rénové 2015), Le Mirador Resort & Spa (Mont-Pèlerin, vue panoramique Alpes), Lausanne Palace, Grand-Hôtel du Lac (Vevey, Relais & Châteaux).",
+          "bestFor": "Cure de bien-être (Le Mirador), gastronomie 3★ (Anne-Sophie Pic au Beau-Rivage), événements (Tour de Romandie, Athletissima), Riviera Vaudoise en mai-juin et septembre.",
+          "concierge": "Mon conseil : au Beau-Rivage Palace, demandez la suite 333 (Salon Tissot — petit balcon privé, vue Léman vers Évian, parquet d'origine 1861). Pour Anne-Sophie Pic, réservez le déjeuner « Esprit Pic » du jeudi (3 services à 195 CHF, plus accessible que le menu du soir)."
+        },
+        {
+          "name": "Genève & Zurich",
+          "highlights": "Genève : Beau-Rivage Genève (depuis 1865, vue Mont-Blanc), Hôtel d'Angleterre, Mandarin Oriental Geneva, Four Seasons Hôtel des Bergues. Zurich : Dolder Grand (the Hill, Leading Hotels), Baur au Lac (depuis 1844, Leading Hotels), Park Hyatt Zurich, Widder Hotel.",
+          "bestFor": "Séjour affaires premium, gastronomie urbaine étoilée (The Restaurant 1★ au Dolder, Pavillon 1★ au Baur au Lac), shopping (Bahnhofstrasse Zurich, rue du Rhône Genève), accès direct depuis Paris (TGV Lyria 3h).",
+          "concierge": "Mon conseil : au Dolder Grand, demandez la chambre 4063 dans la « Spa Wing » (face nord-est, vue Zurich et Alpes par temps clair). Pour le Beau-Rivage Genève, la suite 622 (étage 6 façade lac) offre la meilleure vue Mont-Blanc — orientée plein sud, surface 65m². Refaite par les héritiers Mayer en 2024."
+        },
+        {
+          "name": "Lucerne, Lugano & Bürgenstock",
+          "highlights": "Bürgenstock Hotels & Resort (re-ouverture 2017, vue Lac des Quatre-Cantons depuis 870m), Park Hotel Vitznau (Leading Hotels, Lac des Quatre-Cantons), Mandarin Oriental Palace Luzern (re-ouverture 2022), Splendide Royal (Lugano, Leading Hotels).",
+          "bestFor": "Séjour calme post-ski ou été (mai-octobre), randonnée Pilatus / Rigi, gastronomie 2★ (Focus au Park Hotel Vitznau), vol panoramique en hélicoptère Pilatus.",
+          "concierge": "Mon conseil : au Bürgenstock, séjournez plutôt au « Palace Hotel » (réouvert 2017) qu'au « Bürgenstock Hotel » plus moderne — atmosphère historique, lobby Belle Époque, vue lac plus directe. Demandez la chambre 248 (corner suite façade sud-ouest, terrasse privée plein cadre)."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe en Suisse",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Ski Alpes suisses : mi-décembre à mi-mars (haute saison fin décembre et février). Été lacs et Riviera Vaudoise : mai-juin et septembre (température clémente, tarifs hôteliers en baisse). Été Alpes randonnée : juillet-août. Villes : toute l'année (Genève et Zurich)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "TGV Lyria Paris-Genève (3h10) ou Paris-Zurich (4h). Vols directs Paris CDG vers Genève GVA, Zurich ZRH, Bâle BSL. Pour les destinations alpines, transferts en hélicoptère possibles depuis Sion ou Berne (notre conciergerie organise)."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Franc suisse (CHF) — taux ~ 0,95 EUR au printemps 2026. CB acceptées partout. Les pourboires ne sont jamais inclus mais une « marge de courtoisie » de 5-10% est appréciée dans le haut de gamme. Pas de TVA récupérable pour les non-résidents (contrairement à l'UE)."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Espace Schengen — carte d'identité ou passeport. Permis de conduire UE accepté. Vignette autoroute obligatoire (40 CHF/an, achetable à la frontière). Limitations de vitesse strictes (40 km/h en agglomération, contrôles fréquents)."
+        },
+        {
+          "title": "Langues",
+          "body": "Trilingue : français (Romandie — Genève, Lausanne, Montreux, Sion), allemand-suisse (Berne, Zurich, Bâle, Gstaad, Lucerne, Zermatt), italien (Tessin — Lugano, Locarno). Anglais parlé dans tous les hôtels 5★ et restaurants étoilés. Le français passe partout dans les hôtels haut de gamme."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Germanophones et italophones disponibles pour les demandes complexes (sortie en chien de traîneau aux Diablerets, ski héliporté Verbier, table privatisée Anne-Sophie Pic). Écrire à suisse@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Suisse — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses suisses sont dans votre catalogue ?",
+        "a": "Une quinzaine d'adresses 5★ et Palaces sur les 6 pôles principaux (Gstaad, St-Moritz, Zermatt, Lac Léman, Genève/Zurich, Lucerne/Lugano). Notre réseau Amadeus permet de réserver toute adresse 5★ suisse connectée GDS sur demande."
+      },
+      {
+        "q": "Le ski en Suisse est-il plus cher qu'en France ?",
+        "a": "Les forfaits sont comparables en Alpes suisses (Verbier, Zermatt) à ceux de Courchevel ou Val d'Isère. L'hébergement haut de gamme est légèrement supérieur en moyenne en Suisse, mais le rapport service/prix est typiquement meilleur (équipes plus stables, formation plus poussée)."
+      },
+      {
+        "q": "Quel pôle privilégier pour un premier ski en Suisse ?",
+        "a": "Si vous cherchez l'intimité familiale : Gstaad (Gstaad Palace, Le Grand Bellevue). Si vous cherchez le rayonnement international : St-Moritz (Badrutt's Palace, Kulm). Si vous cherchez la haute montagne pure : Zermatt (Mont Cervin Palace) avec son Matterhorn iconique."
+      },
+      {
+        "q": "Vos tarifs suisses sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — nous accédons aux tarifs nets GDS Amadeus en CHF, identiques au tarif officiel public de l'hôtel. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking et Hotels.com pour les mêmes dates."
+      },
+      {
+        "q": "Acceptez-vous le paiement en CHF ?",
+        "a": "Oui — paiement direct en CHF possible depuis votre carte bancaire (ouverture compte multi-devises chez certaines banques) ou en EUR avec conversion au taux du jour BCE. Pour les paiements > 10 000 CHF, virement SEPA possible sur demande."
+      },
+      {
+        "q": "Le programme de fidélité MyConciergeHotel fonctionne-t-il sur les hôtels suisses ?",
+        "a": "Oui pour les adresses connectées Little Hotelier (tier Essentiel automatique). Pour les indépendants haut de gamme (Beau-Rivage, Baur au Lac) hors Little Hotelier, le tier Prestige (lancement à venir) appliquera ses avantages."
+      },
+      {
+        "q": "Peut-on combiner Suisse + Italie (lac de Côme à St-Moritz) ?",
+        "a": "Oui — train Bernina Express St-Moritz → Tirano (Italie, 2h30, classé UNESCO). Notre conciergerie organise le combiné St-Moritz (Badrutt's Palace) + Lac de Côme (Villa d'Este) avec transferts coordonnés. Fenêtre idéale : juin ou septembre."
+      }
+    ]
+  },
+  "guideMaroc": {
+    "metaTitle": "Maroc — Guide voyage luxe : Riads, Palaces et hôtels 5★ | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour luxe au Maroc : Marrakech (Royal Mansour, La Mamounia), Essaouira, Ouarzazate, Tanger, Fès. Itinéraires culturels, riads d'exception, conseils opérationnels.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Maroc — Le guide MyConciergeHotel des Palaces et riads d'exception",
+    "lede": "Le Maroc concentre quelques-unes des plus belles adresses hôtelières au monde — Royal Mansour à Marrakech, La Mamounia, Mandarin Oriental Marrakech, Selman Marrakech, Banyan Tree Tamouda Bay. Notre conciergerie sélectionne riads et Palaces selon vos critères : palace urbain, riad intimiste, resort balnéaire ou retraite désertique.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Maroc 5 régions : Marrakech, Essaouira, Désert (Erg Chebbi), Tanger/Tétouan, Fès. Sélection MyConciergeHotel Palaces, riads, resorts. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et riads pour un séjour de luxe au Maroc ?",
+    "aeoAnswer": "MyConciergeHotel couvre 5 régions phares : Marrakech (Royal Mansour, La Mamounia, Mandarin Oriental Marrakech, Selman, Amanjena), Essaouira (Sofitel Mogador Golf & Spa, Heure Bleue Palais Relais & Châteaux), Désert (Erg Chebbi — bivouacs de luxe Azalaï), Tanger/Tétouan (Banyan Tree Tamouda Bay, Tangerine), Fès (Riad Fès Relais & Châteaux, La Mamounia Fès). Réservation IATA. Mise à jour {date}.",
+    "regions": {
+      "title": "Cinq régions, cinq expériences",
+      "items": [
+        {
+          "name": "Marrakech",
+          "highlights": "Royal Mansour Marrakech (S.M. Mohammed VI, 53 riads privés), La Mamounia (institution depuis 1923, rénovée par Jouin Manku 2020), Mandarin Oriental Marrakech (palmeraie, 54 villas avec piscine privée), Selman Marrakech (haras de chevaux arabes), Amanjena (Palmeraie, 39 pavillons), La Maison Arabe.",
+          "bestFor": "Premier voyage au Maroc, séjour bien-être (hammam Royal Mansour), gastronomie marocaine étoilée (Le Marocain à La Mamounia), excursion Atlas (Ourika), shopping souk Médina.",
+          "concierge": "Mon conseil : au Royal Mansour, demandez le riad 7 (le plus à l'écart, plus grande cour intérieure, salon hammam privé donnant sur le jardin). Pour La Mamounia, ne descendez pas en chambre Prestige — préférez le « Pavillon Jardin » côté Koutoubia : 60m² avec terrasse privée plein cadre, refaite par Jouin Manku."
+        },
+        {
+          "name": "Essaouira",
+          "highlights": "Sofitel Mogador Golf & Spa, Heure Bleue Palais (Relais & Châteaux, ancien Hôtel Métropole 1908 rénové), Madada Mogador, L'Heure Bleue Palais, Villa Maroc.",
+          "bestFor": "Séjour balnéaire moins fréquenté que Marrakech, vent et surf (Sidi Kaouki), gastronomie poissons (Le Patio), couleurs bleues et blanches de la médina, photographie urbaine.",
+          "concierge": "Mon conseil : à l'Heure Bleue Palais, demandez la « suite Maroc » au 2e étage côté terrasse — vue mer + ruelles de la médina, hammam privé. Pour goûter à la cuisine locale, réservez le restaurant Caravane Café (hors hôtel) à la nuit tombée — table 5 sur la terrasse couverte."
+        },
+        {
+          "name": "Désert (Erg Chebbi)",
+          "highlights": "Bivouacs de luxe Azalaï Désert Camp, Erg Chebbi Luxury Camp, Sahara Sky Camp. Tous proposent tentes berbères grand confort (literie quality hôtel, salle de bain privée, lit double, électricité solaire) au cœur des dunes.",
+          "bestFor": "Lever et coucher de soleil sur les dunes, balade chameau au crépuscule, dîner sous les étoiles, observation astronomique (zone Bortle 1, ciel le plus pur d'Afrique du Nord), 2 nuits idéal.",
+          "concierge": "Mon conseil : organisez l'arrivée au camp 1h avant le coucher de soleil — vous montez à dos de chameau pour la dune 5 (point culminant, 150m) et assistez au coucher en altitude. Le départ du lendemain doit être avant 7h30 pour le lever (température fraîche, dunes encore froides — lumière magique entre 6h45 et 7h)."
+        },
+        {
+          "name": "Tanger & Tétouan",
+          "highlights": "Banyan Tree Tamouda Bay (Tétouan, plage Méditerranée, villas avec piscine privée), Tangerine (Tanger, vue détroit Gibraltar), Hotel Es Saadi (Marrakech alternative), Villa Joséphine (Tanger, Relais & Châteaux).",
+          "bestFor": "Plage Méditerranée préférée à l'Atlantique (eau plus chaude), proximité Andalousie (35 min ferry depuis Tarifa), gastronomie hispano-marocaine, ambiance Tanger international (Bowles, Paul Bowles).",
+          "concierge": "Mon conseil : au Banyan Tree Tamouda Bay, demandez la villa 142 (rangée 14, position centrale dans le complexe avec accès direct piscine principale + plage privée à 80m). Pour le restaurant signature, choisissez la table 6 en bord de bassin reflet — meilleur angle photo au crépuscule."
+        },
+        {
+          "name": "Fès",
+          "highlights": "Riad Fès Relais & Châteaux (cœur de la Médina, ancien palais 19e siècle), La Mamounia Fès (extension du groupe, ouverture 2024), Palais Faraj, Riad Maison Bleue, Riad Salam Fes.",
+          "bestFor": "Séjour culturel pur (médina UNESCO la plus préservée du monde arabe, tanneries Chouara, université Al Quaraouiyine fondée en 859), gastronomie traditionnelle, artisanat (tapis, cuir, cuivre).",
+          "concierge": "Mon conseil : au Riad Fès, demandez la suite Junior 4 (côté patio principal, plafond cèdre originel, hammam privé). Pour la visite des tanneries Chouara, allez-y entre 9h et 10h le matin — la lumière éclaire les bassins de teinture, l'odeur est encore supportable (les artisans vous offrent une brindille de menthe à respirer)."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe au Maroc",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Marrakech et Désert : octobre-avril (températures clémentes 18-25°C). Évitez juillet-août (40-45°C). Essaouira : avril-octobre (vent atlantique tempérant la chaleur). Fès : printemps (avril-juin) et automne (sept-nov)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG/Orly vers Marrakech RAK (3h15), Casablanca CMN, Tanger TNG. Notre conciergerie organise les transferts aéroport (limousine privée 60-150 €/trajet selon distance et standing)."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Dirham marocain (MAD), 1 EUR ≈ 11 MAD au printemps 2026. CB acceptées dans les hôtels 5★ mais cash apprécié dans la Médina (souks, taxis, restaurants populaires). Pas de change préalable nécessaire — distributeurs à l'aéroport. Pourboires : 10% courant dans les hôtels haut de gamme."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Pas de visa pour les ressortissants UE / Suisse / Canada pour séjours ≤ 90 jours. Passeport valide 6 mois après la date de retour. Permis de conduire français valable. La conduite à Marrakech intra-Médina est déconseillée — préférez taxi ou voiture avec chauffeur."
+        },
+        {
+          "title": "Langues",
+          "body": "Arabe (langue officielle), berbère (régions montagne), français (parlé partout dans le haut de gamme, dans l'administration, l'éducation), anglais (en croissance dans les hôtels 5★). Le français est confortable pour tout séjour de luxe."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Arabophones et francophones disponibles pour les demandes complexes (visite privée Médersa Ben Youssef hors heures, dîner en terrasse Atlas, ski Oukaïmeden hiver). Écrire à maroc@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Maroc — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses marocaines sont dans votre catalogue ?",
+        "a": "Une dizaine d'adresses 5★ et Palaces sur les 5 régions principales (Marrakech, Essaouira, Désert, Tanger/Tétouan, Fès). Royal Mansour, La Mamounia et les principaux Relais & Châteaux du royaume y figurent."
+      },
+      {
+        "q": "Sécurité — le Maroc est-il sûr pour un séjour de luxe ?",
+        "a": "Oui. Le Maroc est l'une des destinations les plus sûres du monde arabe. Tourisme classé patrimoine national, présence policière visible dans les zones touristiques. Notre conciergerie reste joignable 24/7 pendant votre séjour pour toute question."
+      },
+      {
+        "q": "Peut-on combiner Marrakech + Désert + Essaouira en un seul séjour ?",
+        "a": "Oui — itinéraire classique 8-10 jours : Marrakech (3 nuits) → trajet Atlas via Aït Ben Haddou + Ouarzazate → Désert Merzouga (2 nuits) → retour Marrakech → Essaouira (2-3 nuits). Notre conciergerie organise transferts 4×4 + bivouacs + retour."
+      },
+      {
+        "q": "Le ramadan affecte-t-il le séjour ?",
+        "a": "Les hôtels 5★ et restaurants haut de gamme servent normalement aux non-musulmans pendant le ramadan. La vie de la Médina est ralentie en journée et très animée le soir après l'iftar (rupture du jeûne). Notre conciergerie vous indique les dates précises avant le séjour."
+      },
+      {
+        "q": "Vos tarifs marocains sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — nous accédons aux tarifs nets GDS Amadeus en EUR ou MAD, identiques au tarif officiel public de l'hôtel. Notre comparateur affiche en transparence les tarifs Booking, Hotels.com et Expedia pour les mêmes dates."
+      },
+      {
+        "q": "Mes points de fidélité Mandarin Oriental fonctionnent-ils sur Mandarin Marrakech ?",
+        "a": "Oui — joignez votre numéro Fans of Mandarin Oriental au checkout. Points crédités après le séjour. Le programme MyConciergeHotel s'ajoute (avantages cumulables — voir /le-concierge/fidelite)."
+      },
+      {
+        "q": "Avez-vous une recommandation pour un mariage au Maroc ?",
+        "a": "Royal Mansour Marrakech privatisable pour les mariages de 30-150 personnes, infrastructure complète (riads séparés pour invités, cuisine privée pour buffets, sound system). Selman Marrakech pour les mariages avec ambiance chevaux. Notre cellule MICE prépare un devis sur-mesure — voir /le-concierge/mice-et-seminaires."
+      }
+    ]
+  },
+  "guideMaldives": {
+    "metaTitle": "Maldives — Guide voyage luxe : Resorts privés et villas sur pilotis | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe aux Maldives : Soneva (Jani, Fushi), Cheval Blanc Randheli, Four Seasons, One&Only Reethi Rah, Velaa Private Island. Atolls, transferts hydravion, lune de miel.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Maldives — Le guide MyConciergeHotel des resorts privés",
+    "lede": "Les Maldives concentrent l'archipel le plus convoité pour la villa sur pilotis. Notre conciergerie sélectionne les resorts dans une logique d'auteur : Soneva pour l'éco-luxe pieds nus, Cheval Blanc Randheli pour le raffinement français à l'autre bout du monde, Velaa Private Island pour l'intimité ultime à 40 villas seulement.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Maldives : 8 resorts d'exception sélectionnés (Soneva, Cheval Blanc Randheli, Velaa, One&Only, Four Seasons, Anantara, COMO). Sélection MyConciergeHotel. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs resorts pour un séjour de luxe aux Maldives ?",
+    "aeoAnswer": "MyConciergeHotel couvre 8 resorts d'auteur dans les 5 atolls principaux : Soneva Jani et Soneva Fushi (éco-luxe pieds nus), Cheval Blanc Randheli (Atoll Noonu, LVMH), Velaa Private Island (40 villas seulement, Atoll Noonu), One&Only Reethi Rah (Atoll Nord Malé), Four Seasons Landaa Giraavaru, Anantara Kihavah Villas, COMO Maalifushi. Transferts hydravion compris dans le forfait. Mise à jour {date}.",
+    "regions": {
+      "title": "Huit resorts d'auteur — sélection",
+      "items": [
+        {
+          "name": "Soneva Jani & Soneva Fushi",
+          "highlights": "Soneva Jani (Atoll Noonu, 27 villas dont des « 1-Bedroom Water Reserve » avec toboggan eau directe), Soneva Fushi (Atoll Baa, 70 villas pieds nus, philosophie « slow living »). Tous deux signés Sonu Shivdasani — éco-luxe responsable, restaurants étoilés (Out of the Blue 2★), observatoire astronomique.",
+          "bestFor": "Voyage de noces, anniversaire de mariage, séjour 7-10 jours minimum. Soneva Jani plus moderne, Soneva Fushi plus iconique (depuis 1995). Politique « No News, No Shoes » assumée.",
+          "concierge": "Mon conseil : à Soneva Jani, demandez la villa 1 (la plus isolée du resort, accès lagon profondément bleu côté ouest pour le coucher de soleil). La villa offre un coffre vinothèque réfrigéré privatisé sur demande à la réservation (option non listée). À Soneva Fushi, choisissez la villa 36 plutôt qu'une villa premium — emplacement sur la pointe sud, plage privée 60m + dauphins fréquents à l'aube."
+        },
+        {
+          "name": "Cheval Blanc Randheli",
+          "highlights": "Cheval Blanc Randheli (Atoll Noonu, signature LVMH dans son île privée — 45 villas dont 4 « Owner Villas » à 800m² avec piscine privée 12m, jardin clos et personnel dédié 24/7).",
+          "bestFor": "Lune de miel ultra-luxe, anniversaire spécial, séjour avec services dédiés (butler 24/7, chef privé). Spa Guerlain le plus grand du Sud-Est asiatique (1 800m²). Restaurants : Diptyque (Yannick Alléno cuisine), Le 1947 cave LVMH.",
+          "concierge": "Mon conseil : pour la Owner Villa 22, demandez l'ajout de la « Pearl Experience » (non publiée publiquement) — petit-déjeuner servi sur ponton flotteur privé tracté à 200m du rivage, sortie au lever du soleil. Service confirmé sur réservation 30 jours à l'avance par notre conciergerie auprès du général manager."
+        },
+        {
+          "name": "Velaa Private Island",
+          "highlights": "Velaa Private Island (Atoll Noonu, 40 villas seulement — la plus exclusive des Maldives. Académie de golf signée José María Olazábal, sous-marin de luxe DeepFlight Super Falcon 3S privatisable, observatoire pour le ciel sud).",
+          "bestFor": "Familles très haut de gamme (golf, ski nautique, kids club exceptionnel), couples cherchant l'extrême discrétion, séjours longs (10-14 jours).",
+          "concierge": "Mon conseil : réservez la « Romantic Pool Residence » plutôt qu'une Beach Pool Villa standard — plage privée, piscine 12m, salon outdoor. Pour le golf, planifiez le tour 9 trous au crépuscule (eclairage tour 18:00-20:30) — green fee inclus dans le forfait, mais le créneau crépusculaire doit être bloqué à la réservation."
+        },
+        {
+          "name": "One&Only Reethi Rah",
+          "highlights": "One&Only Reethi Rah (Atoll Nord Malé — île de 600m de long, 130 villas dont 50% sur pilotis et 50% sur plage. 12 restaurants. Marina avec yachts et catamarans).",
+          "bestFor": "Familles avec ados (sports nautiques, plongée PADI complète, surf), séjours actifs, séjours mixtes plage + pilotis. Plus accessible budgétairement que Cheval Blanc ou Velaa (mais reste 5★).",
+          "concierge": "Mon conseil : ne demandez pas une villa pilotis classique — préférez la « Grand Beach Villa with Pool » côté ouest pour le coucher de soleil. Plage privée 30m, piscine 9m, sundeck. Pour le restaurant Tapasake (japonais), réservez la table 4 sur le ponton — service shabu-shabu en bord d'eau, mémorable."
+        },
+        {
+          "name": "Four Seasons & Anantara",
+          "highlights": "Four Seasons Resort Maldives at Landaa Giraavaru (Atoll Baa, 102 villas dans réserve UNESCO Baa Atoll), Four Seasons Resort Maldives at Kuda Huraa (proche Malé, 96 villas), Anantara Kihavah Maldives Villas (Atoll Baa, restaurant sous-marin SEA 2★).",
+          "bestFor": "Familles avec enfants (kids club Four Seasons), plongeurs (raies manta + requins-baleines en saison Hanifaru Bay), séjours combinés Maldives + Indonésie (vols inter-îles Singapore Airlines).",
+          "concierge": "Mon conseil : à Anantara Kihavah, réservez la « Two-Bedroom Family Beach Pool Residence » plutôt que deux villas séparées — économie + intimité préservée. Pour le restaurant sous-marin SEA, demandez la table 1 (face vitrée la plus large, vue aquatique panoramique sur récif corail)."
+        },
+        {
+          "name": "COMO & boutiques",
+          "highlights": "COMO Maalifushi (Atoll Thaa — l'atoll des surfeurs, vagues mondialement reconnues), COMO Cocoa Island (Atoll Sud Malé, 33 villas « dhoni » inspirées des bateaux traditionnels maldivien).",
+          "bestFor": "Surfeurs sérieux (COMO Maalifushi, breaks Veyvah Rights et Plumbabaru), couples premier voyage Maldives (COMO Cocoa Island, plus accessible budgétairement), séjours bien-être (signature COMO Shambhala).",
+          "concierge": "Mon conseil : à COMO Cocoa Island, choisissez le « Loft Villa » 17 (et non un Dhoni Suite) — duplex sur pilotis, plus grand, accès direct au lagon par échelle privée. Pour COMO Maalifushi, planifiez votre séjour entre mai et octobre (saison surf) — votre concierge briefe le surf guide la veille de votre arrivée pour qu'il connaisse votre niveau."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe aux Maldives",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Saison sèche : novembre à avril (température 28-30°C, mer calme, soleil quasi-garanti). Saison des pluies : mai à octobre (averses courtes mais intenses, tarifs hôteliers en baisse 20-30%, idéal pour la plongée — raies manta concentrées à Hanifaru Bay juin-novembre)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vol Paris CDG → Malé MLE direct (10h, Air France, ou via Doha/Dubaï avec Qatar/Emirates). Transfert vers le resort en hydravion (Trans Maldivian Airways ou Manta Air, 30-50 min selon atoll) — inclus dans le forfait. Pour les atolls éloignés (Noonu, Baa), parfois vol intérieur + speedboat."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Rufiyaa maldivien (MVR) en théorie, USD en pratique partout dans les resorts. CB acceptées partout. Pourboires : 5-10% additionnels dans les restaurants haut de gamme, $5-10 par jour pour le butler personnel (mis dans une enveloppe à la fin du séjour)."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Visa touristique 30 jours délivré à l'arrivée gratuitement pour les ressortissants UE/Suisse/Canada. Passeport valide 6 mois après la date de retour. Pas de vaccin obligatoire. Permis de plongée PADI utile mais cours d'introduction Open Water proposé dans tous les resorts."
+        },
+        {
+          "title": "Vie quotidienne",
+          "body": "Les Maldives sont une république islamique — pas d'alcool en dehors des resorts (mais à volonté à l'intérieur), pas de viande de porc. Tenue : tee-shirt et short suffisent toute la journée, pas de code vestimentaire dans les restaurants des resorts. Wifi inclus partout (souvent fibre par satellite Starlink en 2026)."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Disponible pour les demandes complexes (privatisation d'un dîner sur banc de sable au coucher du soleil, transfert privé en hydravion, plongée avec mantas sur réservation, photographe drone pour les couples). Écrire à maldives@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Maldives — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien coûte un séjour aux Maldives en moyenne ?",
+        "a": "Compter 800-1 500 €/nuit/villa pour un 5★ classique (Four Seasons, One&Only), 1 500-3 500 €/nuit pour les ultra-luxe (Cheval Blanc Randheli, Velaa, Soneva Jani). Tarifs hors transferts hydravion (300-700 € AR/personne selon atoll) et hors taxes (16% TGST + 12 USD/jour Green Tax)."
+      },
+      {
+        "q": "Quel atoll choisir pour un premier séjour ?",
+        "a": "Atoll Nord Malé pour la proximité (transfert speedboat 30-45 min, moins cher qu'hydravion) — One&Only Reethi Rah, Four Seasons Kuda Huraa. Atoll Baa pour la réserve UNESCO et les raies manta — Anantara Kihavah, Four Seasons Landaa Giraavaru. Atoll Noonu pour le top du top — Cheval Blanc, Velaa, Soneva Jani."
+      },
+      {
+        "q": "Villa sur pilotis ou villa plage ?",
+        "a": "Villa pilotis : accès direct lagon par escalier privé, intimité, romantisme (idéal lune de miel). Villa plage : plus grande surface, jardin/piscine privée, idéal famille. Notre conciergerie peut proposer la « combinaison plage + pilotis » (3 nuits villa plage + 4 nuits villa pilotis) sur les resorts qui acceptent (Four Seasons, COMO)."
+      },
+      {
+        "q": "Les enfants sont-ils acceptés aux Maldives ?",
+        "a": "Oui dans la majorité des resorts. Notable : Cheval Blanc Randheli accepte les enfants de tous âges, Soneva Jani et Soneva Fushi ont des kids clubs réputés, Four Seasons et One&Only sont family-friendly. Seuls quelques resorts (W Maldives, Lily Beach Resort) sont adults-only — préciser à la réservation."
+      },
+      {
+        "q": "Combien de jours minimum pour un séjour ?",
+        "a": "7 jours sur place minimum (10-14 idéal). Compte tenu du vol long et du jet-lag (4h30 décalage), un séjour < 7 jours est sous-optimal. Les Maldives se savourent en slow-living — c'est l'identité même de la destination."
+      },
+      {
+        "q": "Vos tarifs Maldives sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — tarifs nets GDS Amadeus en USD ou EUR, identiques au tarif officiel public du resort. Notre conciergerie peut parfois négocier des avantages additionnels (transferts hydravion privés, dîner sur banc de sable inclus) selon le resort et la durée du séjour."
+      },
+      {
+        "q": "Plongée — quels resorts privilégier pour un plongeur Advanced+ ?",
+        "a": "Soneva Fushi (Atoll Baa, accès Hanifaru Bay réserve UNESCO + raies manta + requins-baleines mai-novembre), COMO Maalifushi (Atoll Thaa, sites moins fréquentés, requins gris, tortues), Four Seasons Landaa Giraavaru (centre de plongée 5★ PADI, biologistes marin résidents). Notre conciergerie peut briefer le dive center avant arrivée pour planifier les premiers spots selon votre niveau."
+      }
+    ]
+  },
+  "guideEAU": {
+    "metaTitle": "Émirats arabes unis — Guide voyage luxe : Dubaï & Abu Dhabi | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe aux Émirats arabes unis : Burj Al Arab, Atlantis The Royal, Bvlgari Resort Dubai, Jumeirah, Emirates Palace Abu Dhabi. Itinéraires, conseils opérationnels.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Émirats arabes unis — Le guide MyConciergeHotel des Palaces",
+    "lede": "Dubaï et Abu Dhabi concentrent quelques-uns des resorts urbains les plus spectaculaires au monde. Notre conciergerie sélectionne les adresses sur trois axes : adresses iconiques (Burj Al Arab, Atlantis The Royal), nouveautés architecturales 2023-2025 (Atlantis The Royal Tower, One Za'abeel) et les Palaces signature (Bvlgari Dubai, Bulgari Abu Dhabi).",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Émirats arabes unis : Dubaï (Burj Al Arab, Atlantis The Royal, Bvlgari, One Za'abeel) et Abu Dhabi (Emirates Palace, Bvlgari, St Regis Saadiyat). Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et hôtels 5★ pour un séjour de luxe aux EAU ?",
+    "aeoAnswer": "MyConciergeHotel couvre Dubaï (Burj Al Arab Jumeirah, Atlantis The Royal, Bvlgari Resort Dubai, One&Only Royal Mirage, Four Seasons Resort Dubai, Address Sky View, One Za'abeel) et Abu Dhabi (Emirates Palace, Bvlgari Resort Abu Dhabi, St Regis Saadiyat Island, Anantara Eastern Mangroves, Erth Abu Dhabi). Réservation IATA, tarifs nets GDS. Mise à jour {date}.",
+    "regions": {
+      "title": "Dubaï & Abu Dhabi — sélection",
+      "items": [
+        {
+          "name": "Dubaï iconique",
+          "highlights": "Burj Al Arab Jumeirah (l'icône absolue, 202 suites duplex, à la voile artificielle 321m), Atlantis The Royal (ouverture 2023, 795 chambres, 17 restaurants étoilés dont Heart of Europe), Bvlgari Resort Dubai (île privée Jumeira Bay, 101 chambres + 20 villas + 174 résidences), One&Only Royal Mirage (Palm Jumeirah, 250 chambres orientales).",
+          "bestFor": "Premier séjour Dubaï, escale luxe avant les Maldives (Émirates direct), shopping, gastronomie internationale, séjour court (3-4 nuits). Idéal novembre-avril (températures 25-30°C).",
+          "concierge": "Mon conseil : au Burj Al Arab, ne demandez pas une suite « Royal » au sommet — préférez la « Deluxe One-Bedroom Suite » au 15e étage face plage de Jumeirah. Vue identique, prix divisé par 2. Pour Atlantis The Royal, réservez la chambre 4203 (Cloud 22 lounge accessible) — vue Palm Jumeirah + skyline Marina."
+        },
+        {
+          "name": "Dubaï nouvelle génération",
+          "highlights": "One Za'abeel (ouverture 2024, « The Link » suspension panoramique entre 2 tours), Atlantis The Royal (Niveau « Mansion » réservé aux résidents propriétaires + invités), Address Sky View (Downtown Dubai, vue Burj Khalifa directe depuis bridge bridge piscine infinity), Mandarin Oriental Jumeira (2019, plage privée).",
+          "bestFor": "Voyageurs sensibles à l'architecture et au design contemporain, séjours urbains (proximité Dubai Mall et Burj Khalifa), événements (Formula 1 fin novembre).",
+          "concierge": "Mon conseil : au One Za'abeel, demandez la chambre 5611 (étage 56, vue The Link et Burj Khalifa simultanées). Pour Address Sky View, réservez le créneau brunch dimanche au restaurant « The Lobby » — table 12 vue piscine infinity + Burj Khalifa, ambiance familiale assumée mais format raffiné."
+        },
+        {
+          "name": "Abu Dhabi historique",
+          "highlights": "Emirates Palace (Mandarin Oriental depuis 2020, 394 chambres et suites dont le penthouse présidentiel à 4 000m²), St Regis Saadiyat Island Resort (Saadiyat, 376 chambres face Louvre Abu Dhabi), Anantara Eastern Mangroves, Erth Abu Dhabi.",
+          "bestFor": "Voyageurs culturels (Louvre Abu Dhabi, Guggenheim Abu Dhabi ouverture 2025, Mosquée Sheikh Zayed), séjours plus calmes que Dubaï, golf (Saadiyat Beach Golf Club, Yas Links).",
+          "concierge": "Mon conseil : à l'Emirates Palace Mandarin Oriental, demandez une « Khaleej Suite » au 3e étage (orientation marina + dôme principal, terrasse 30m², majlis traditionnel). Pour la visite Louvre Abu Dhabi, réservez le créneau 18h-20h (illumination nocturne du dôme, températures plus clémentes en hiver, moins de touristes)."
+        },
+        {
+          "name": "Abu Dhabi nouvelle vague",
+          "highlights": "Bvlgari Resort Abu Dhabi (Jubail Island, ouverture 2024 — sister property de Bvlgari Dubai, 100 chambres + villas mangroves), Sea Soul Abu Dhabi (membre Marriott Luxury Collection), Park Hyatt Abu Dhabi Hotel & Villas (Saadiyat).",
+          "bestFor": "Voyageurs cherchant l'intimité contre Dubaï spectaculaire, séjours nature (mangroves, observation oiseaux), proximité plage et culture.",
+          "concierge": "Mon conseil : au Bvlgari Resort Abu Dhabi, choisissez la « Mangrove Villa » 22 (architecture sur pilotis dans les mangroves, accès paddle privé). Pour Park Hyatt Abu Dhabi, réservez le restaurant « Beach House » table en pointe ouest pour le coucher de soleil sur le golfe Persique."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe aux EAU",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Novembre à avril : température 22-30°C, ciel dégagé, idéal toute activité extérieure. Mai-octobre : 40-45°C, séjour uniquement indoor (mall, spa, gastronomie) — tarifs hôteliers très réduits (jusqu'à -50%). Évitez juillet-août (chaleur extrême, humidité du Golfe)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG vers Dubaï DXB (7h, Air France, Emirates, Etihad) ou Abu Dhabi AUH (Etihad). Transfert aéroport-hôtel par Rolls-Royce Phantom Emirates Chauffeur (gratuit en First Class Emirates) ou voiture privée 80-200 € selon hôtel."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Dirham émirati (AED), 1 EUR ≈ 4 AED au printemps 2026. Cours plus stable que MAD. CB acceptées partout. Pourboires : 10-15% courant dans les restaurants haut de gamme, généreux pour les butlers et chauffeurs ($10-20/jour)."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Visa touristique gratuit à l'arrivée pour 30 jours (ressortissants UE/Suisse/Canada). Passeport valide 6 mois. Permis de conduire international recommandé (français accepté en court séjour). Conduite à droite, autoroutes excellentes."
+        },
+        {
+          "title": "Vie quotidienne",
+          "body": "EAU sont laïcs en pratique dans les zones touristiques (hôtels servent alcool, gastronomie internationale partout). Code vestimentaire respectueux dans les zones publiques (épaules + genoux couverts), libre dans les hôtels et plages privées. Wifi 5G partout, généralement gratuit. Tenue de soirée requise dans les restaurants signature (chemise/veste pour hommes, robe pour femmes)."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Disponible pour les demandes complexes (privatisation hélicoptère pour vol Palm Jumeirah, dîner privé dans le désert de Liwa, brunch privé au Burj Al Arab Sky Lounge, location yacht Marina). Écrire à eau@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "EAU — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses émiraties sont dans votre catalogue ?",
+        "a": "Une douzaine d'adresses 5★ et Palaces réparties entre Dubaï (Burj Al Arab, Atlantis The Royal, Bvlgari Resort, One&Only Royal Mirage, Four Seasons, One Za'abeel, Address Sky View) et Abu Dhabi (Emirates Palace, Bvlgari Resort, St Regis Saadiyat, Anantara, Park Hyatt)."
+      },
+      {
+        "q": "Dubaï ou Abu Dhabi — quel choix ?",
+        "a": "Dubaï pour le spectaculaire, le shopping et la gastronomie internationale (premier séjour). Abu Dhabi pour la culture (Louvre, Guggenheim, mosquée Sheikh Zayed), plus calme, plage Saadiyat de qualité. La combinaison 4 nuits Dubaï + 3 nuits Abu Dhabi est idéale pour 7 jours. Transferts entre les deux : 1h15 voiture, autoroute E11."
+      },
+      {
+        "q": "Le visa pour les EAU est-il payant ?",
+        "a": "Non — pour les ressortissants UE/Suisse/Canada, le visa touristique de 30 jours est délivré gratuitement à l'arrivée à l'aéroport (DXB ou AUH). Aucune démarche préalable nécessaire. Passeport valide 6 mois."
+      },
+      {
+        "q": "Mes points Marriott Bonvoy fonctionnent-ils sur les hôtels Marriott aux EAU ?",
+        "a": "Oui — Emirates Palace (Mandarin Oriental depuis 2020 mais bookable via Bonvoy en transition), St Regis Saadiyat (Marriott), Westin Mina Seyahi (Marriott). Joignez votre numéro Bonvoy au checkout. Points crédités après le séjour."
+      },
+      {
+        "q": "Vos tarifs EAU sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — tarifs nets GDS Amadeus en EUR ou AED, identiques au tarif officiel public de l'hôtel. Notre comparateur affiche en transparence les tarifs Booking, Hotels.com et Expedia."
+      },
+      {
+        "q": "Peut-on faire un séjour familles aux EAU ?",
+        "a": "Oui — Atlantis The Royal a un Aquaventure Waterpark inclus et un kids club Atlantis premium. Bvlgari Resort Dubai accepte les enfants. Le Burj Al Arab est moins family-friendly (atmosphère plus adulte). Pour les très jeunes enfants, préférez One&Only Royal Mirage ou Four Seasons Dubai (kids clubs réputés)."
+      },
+      {
+        "q": "Y a-t-il des contraintes religieuses à respecter ?",
+        "a": "Très peu en pratique dans les zones touristiques. Ramadan : pas de consommation publique d'aliments en journée (mais OK dans les hôtels et restaurants des hôtels). Tenue : respect dans les lieux publics (épaules/genoux couverts), libre dans les hôtels et plages privées. Alcool : OK dans les hôtels et restaurants licensed, pas en rue publique."
+      }
+    ]
+  },
+  "guideJapon": {
+    "metaTitle": "Japon — Guide voyage luxe : Ryokans et hôtels 5★ | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe au Japon : Tokyo (Aman, Park Hyatt, Mandarin Oriental), Kyoto (Aman, Four Seasons, Ritz-Carlton), ryokans traditionnels Hakone et Kanazawa.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Japon — Le guide MyConciergeHotel des hôtels 5★ et ryokans",
+    "lede": "Notre conciergerie sélectionne au Japon deux types d'hébergements complémentaires : les hôtels urbains internationaux (Aman, Four Seasons, Mandarin Oriental, Park Hyatt à Tokyo et Kyoto) et les ryokans traditionnels — auberges familiales avec onsen privé, kaiseki, futons sur tatamis. Idéal pour un voyage mixte ville + tradition.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Japon : Tokyo (5 Palaces internationaux), Kyoto (ryokans Aman, Four Seasons), Hakone, Kanazawa, Mont Fuji. Sélection MyConciergeHotel. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et ryokans pour un séjour de luxe au Japon ?",
+    "aeoAnswer": "MyConciergeHotel couvre 5 régions : Tokyo (Aman Tokyo, Park Hyatt Tokyo, Mandarin Oriental, Four Seasons Marunouchi, The Peninsula), Kyoto (Aman Kyoto, Four Seasons Hotel Kyoto, Ritz-Carlton, Park Hyatt Kyoto), Hakone (Gora Kadan ryokan, Hakone Yutowa), Kanazawa (Ryokan Asadaya Yamasenro), Mont Fuji (Hoshinoya Fuji). Réservation IATA. Mise à jour {date}.",
+    "regions": {
+      "title": "Cinq régions, deux types d'hébergement",
+      "items": [
+        {
+          "name": "Tokyo",
+          "highlights": "Aman Tokyo (Otemachi, le plus haut Aman du monde à 175m, 84 chambres et suites), Park Hyatt Tokyo (Shinjuku, mythique « Lost in Translation »), Mandarin Oriental Tokyo (Nihonbashi, Tatsuzo restaurant 3★), Four Seasons Hotel Tokyo at Marunouchi (vue Imperial Palace), The Peninsula Tokyo (Marunouchi).",
+          "bestFor": "Premier séjour Japon, séjour culturel (Imperial Palace, Asakusa, Shibuya), gastronomie 3★ (Sushi Saito, Den, Florilege), shopping Ginza, accessibilité (proximité gare TGV Shinkansen).",
+          "concierge": "Mon conseil : à l'Aman Tokyo, demandez une chambre orientation est (4e ou 5e étage du sommet, niveaux 38-39) — vue baie de Tokyo + Skytree, particulièrement spectaculaire au lever du jour. Pour le Park Hyatt, réservez le créneau 17h-19h au New York Bar (52e étage) — le coucher de soleil sur Shinjuku + skyline est l'une des vues les plus iconiques de Tokyo."
+        },
+        {
+          "name": "Kyoto urbain",
+          "highlights": "Aman Kyoto (Higashiyama, jardins centenaires de l'ancienne maison Ohira, 26 chambres), Four Seasons Hotel Kyoto (Higashiyama, jardin Ikeniwa du 12e siècle), Ritz-Carlton Kyoto (Kamogawa, plus grand spa de la ville), Park Hyatt Kyoto (Higashiyama proche Sanneizaka), Hoshinoya Kyoto (sur la rivière Oi à Arashiyama, accès uniquement par bateau).",
+          "bestFor": "Séjour culturel pur (Kinkakuji, Ryoanji, Fushimi Inari, Geisha Gion), gastronomie kaiseki étoilée (Hyotei 3★, Kichisen 3★), cérémonie du thé privée.",
+          "concierge": "Mon conseil : à l'Aman Kyoto, demandez la villa « Yamada » 5 (la plus isolée, accès direct au jardin central via galerie intérieure, baignoire de bois hinoki). Pour le Four Seasons Kyoto, réservez le créneau 7h-9h au jardin Ikeniwa — il vous est ouvert en exclusif (5 personnes max), thé matcha servi par maître de cérémonie."
+        },
+        {
+          "name": "Hakone (ryokan onsen)",
+          "highlights": "Gora Kadan (ryokan 5★ Relais & Châteaux, ancienne villa impériale, 37 chambres avec onsen privé), Hakone Yutowa, Yamanouchi Yamatoya. Tous proposent onsen privé en chambre + kaiseki kappo signature.",
+          "bestFor": "Découverte des ryokans traditionnels, vue Mont Fuji par temps clair, échappée 2-3 nuits après Tokyo (45 min en Shinkansen depuis Tokyo + 15 min funiculaire Hakone).",
+          "concierge": "Mon conseil : à Gora Kadan, demandez la chambre « Asuka » 12 (la seule avec onsen extérieur privé entièrement clos, jardin de mousse personnel). Pour le service kaiseki, mentionnez à la réservation toute restriction alimentaire — le chef Yamada-san adapte les 7-9 services en conséquence (impossible une fois sur place : la préparation commence 48h avant)."
+        },
+        {
+          "name": "Kanazawa & Hokuriku",
+          "highlights": "Ryokan Asadaya Yamasenro (Kanazawa, ryokan historique 1867, 8 chambres seulement, jardin classé), Ryokan Yamanoo (Wakura Onsen près de Kanazawa, dans Relais & Châteaux). Pour les hôtels modernes : Hyatt Centric Kanazawa.",
+          "bestFor": "Séjour culturel hors sentier touristique (Kanazawa offre Kenrokuen — 1 des 3 plus beaux jardins du Japon —, château, quartiers geishas Higashichaya), gastronomie poissons hivernale (crabe taraba), accès facile depuis Tokyo (Shinkansen Hokuriku 2h30).",
+          "concierge": "Mon conseil : à Asadaya Yamasenro, demandez la chambre « Karekawa » 3 — la plus ancienne du ryokan (originale 1867), shoji authentiques, vue sur la rivière. Pour Kenrokuen, accès idéal 7h du matin (ouvert à 7h pour les résidents, 8h pour les visiteurs payants — l'hôtel arrange un guide local francophone si demandé à la réservation)."
+        },
+        {
+          "name": "Mont Fuji & Lacs Fuji-Hakone",
+          "highlights": "Hoshinoya Fuji (le premier glamping de luxe Hoshinoya, 40 villas cabanes face Mont Fuji et Lac Kawaguchiko), Fufu Kawaguchiko (ryokan onsen vue Fuji), Lake Kawaguchiko Hotel.",
+          "bestFor": "Vue Mont Fuji garantie en hiver (octobre-mars), randonnée légère (lac Kawaguchiko + sentier Sengen Shrine), photographie (lever de soleil sur Fuji depuis le belvédère), couples cherchant nature + raffinement.",
+          "concierge": "Mon conseil : à Hoshinoya Fuji, choisissez la cabane « Premium » à l'extrémité ouest du resort (n°10) — meilleur angle Mont Fuji + accès direct au feu de camp central pour le coucher de soleil. La cérémonie du thé matin (6h45) sur la terrasse face Fuji est un rituel à ne pas manquer — limite 8 personnes, réserver dès la confirmation de séjour."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe au Japon",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Printemps (mars-mai) pour les sakuras (cerisiers, fenêtre étroite — Tokyo fin mars-début avril, Kyoto 5 jours plus tard). Automne (octobre-novembre) pour les momiji (érables rouges). Évitez juin-juillet (saison des pluies, tsuyu) et août (chaleur humide). Hiver : excellent pour le ski Hokkaido et la vue Mont Fuji garantie."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG vers Tokyo NRT/HND (12-13h, Air France, ANA, JAL). Tokyo HND est plus proche du centre (30 min taxi vs 60 min depuis Narita). Pour Kyoto, Shinkansen Nozomi depuis Tokyo (2h15). Pour les ryokans isolés, transferts privés en voiture organisés par notre conciergerie."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Yen japonais (JPY), 1 EUR ≈ 165 JPY au printemps 2026. CB acceptées dans les hôtels 5★ et restaurants gastronomiques mais beaucoup de petits commerces et restaurants traditionnels acceptent uniquement cash. Convertir 1 000-2 000 € à l'arrivée. Pas de pourboire au Japon (parfois mal vu)."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Pas de visa pour les ressortissants UE/Suisse/Canada pour séjours ≤ 90 jours. Passeport valide. Système Visit Japan Web pour les formalités douanes (recommandé, gratuit). Permis de conduire international obligatoire si location voiture (la conduite est à gauche — pas idéal pour les visiteurs)."
+        },
+        {
+          "title": "Langue et culture",
+          "body": "Anglais limité — parlé dans les hôtels 5★ mais peu en restaurants traditionnels et taxis. Apprendre 10 phrases japonaises minimum (sumimasen = excuse-moi, arigato gozaimasu = merci). Étiquette : s'incliner pour saluer, déchausser à l'entrée des ryokans (chaussons fournis), pas téléphoner dans les transports."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Japonophones et anglophones disponibles pour les demandes complexes (cérémonie du thé privée avec maître certifié, dîner privé avec geisha à Gion, réservation Sushi Saito 3 mois à l'avance, location voiture avec chauffeur Kyoto-Nara). Écrire à japon@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Japon — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses japonaises sont dans votre catalogue ?",
+        "a": "Une quinzaine d'adresses entre Tokyo (5 Palaces internationaux), Kyoto (5 Palaces + 2 ryokans), Hakone (2 ryokans), Kanazawa (2 ryokans) et Mont Fuji (2 lodges). Réseau Amadeus couvre par ailleurs toute adresse 5★ japonaise connectée GDS."
+      },
+      {
+        "q": "Combien de jours minimum pour un séjour Japon ?",
+        "a": "10 jours sur place minimum (12-14 idéal). Compte tenu du vol long (12-13h) et du jet-lag (8h décalage été), un séjour < 10 jours est sous-optimal. Itinéraire classique : Tokyo (5 nuits) + Kyoto (4 nuits) + 1-2 nuits ryokan Hakone."
+      },
+      {
+        "q": "Tokyo + Kyoto : combien de jours dans chaque ville ?",
+        "a": "Tokyo : 4-5 nuits suffisent pour les essentiels (Asakusa, Shibuya, Ginza, Tsukiji, Imperial Palace) + 1 journée Hakone. Kyoto : 3-4 nuits pour les temples principaux (Kinkakuji, Ryoanji, Fushimi Inari, Arashiyama) + 1 journée Nara. Réserver les transferts Shinkansen via notre conciergerie."
+      },
+      {
+        "q": "Hôtel international ou ryokan traditionnel ?",
+        "a": "Les deux. Notre conciergerie recommande la combinaison : hôtel international pour Tokyo (confort, services internationaux), 1-2 nuits ryokan Kyoto ou Hakone pour l'expérience traditionnelle (onsen privé, kaiseki, futon tatami). Cohérence avec un voyage de 10-12 jours."
+      },
+      {
+        "q": "Vos tarifs japonais sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — tarifs nets GDS Amadeus en EUR ou JPY, identiques au tarif officiel public de l'hôtel. Les ryokans traditionnels peuvent ne pas être sur Amadeus — nous les réservons par e-mail direct (mode conciergerie) avec confirmation sous 48h."
+      },
+      {
+        "q": "Le Japon est-il accessible aux enfants ?",
+        "a": "Très accessible — pays sûr, propre, infrastructure jeunes très bonne. Les hôtels internationaux (Mandarin, Four Seasons, Park Hyatt) ont kids clubs. Les ryokans traditionnels acceptent les enfants > 6 ans en général (étiquette à respecter). Pas de Disneyland à Tokyo Disney : prévoir 1-2 journées si jeunes enfants."
+      },
+      {
+        "q": "Peut-on combiner Japon + Maldives ou Bali ?",
+        "a": "Oui — vols Singapore Airlines / JAL via Singapour permettent d'enchaîner. Notre conciergerie organise la séquence logistique. Le combiné Tokyo + Maldives en hiver (décembre-février) est particulièrement plaisant : ski + détente plage."
+      }
+    ]
+  },
+  "guideThailande": {
+    "metaTitle": "Thaïlande — Guide voyage luxe : Resorts et hôtels 5★ | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe en Thaïlande : Bangkok (Mandarin Oriental, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui (Four Seasons), Chiang Mai (Four Seasons Tented Camp).",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Thaïlande — Le guide MyConciergeHotel des hôtels 5★ et resorts",
+    "lede": "La Thaïlande concentre Bangkok urbain spectaculaire, Phuket et Koh Samui pour la plage, Chiang Mai pour la culture nord. Notre conciergerie sélectionne les adresses signatures (Mandarin Oriental Bangkok depuis 1879, Aman Phuket, Four Seasons Tented Camp Chiang Rai).",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Thaïlande : Bangkok (Mandarin Oriental, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui, Chiang Mai. Sélection MyConciergeHotel. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs hôtels 5★ pour un séjour de luxe en Thaïlande ?",
+    "aeoAnswer": "MyConciergeHotel couvre 5 régions : Bangkok (Mandarin Oriental Bangkok, The Peninsula Bangkok, Four Seasons Bangkok, Capella Bangkok, Sukhothai), Phuket (Aman Phuket, Trisara, Banyan Tree Phuket, Rosewood Phuket), Koh Samui (Four Seasons Resort Koh Samui, Six Senses Samui), Chiang Mai (Four Seasons Resort Chiang Mai, Anantara Golden Triangle), Krabi (Rayavadee Krabi). Réservation IATA. Mise à jour {date}.",
+    "regions": {
+      "title": "Cinq régions, cinq expériences",
+      "items": [
+        {
+          "name": "Bangkok",
+          "highlights": "Mandarin Oriental Bangkok (depuis 1879, la plus ancienne adresse 5★ d'Asie, 393 chambres), The Peninsula Bangkok (Chao Phraya, 370 chambres), Four Seasons Bangkok at Chao Phraya River (2020, dernière ouverture luxe), Capella Bangkok (architecture par Bensley), The Sukhothai Bangkok (institution).",
+          "bestFor": "Premier séjour Thaïlande, gastronomie 2-3★ (Le Normandie au Mandarin Oriental, Sühring 2★), spa Mandarin Oriental, croisière fluviale Chao Phraya privatisée.",
+          "concierge": "Mon conseil : au Mandarin Oriental Bangkok, demandez la suite « Author's Wing » (ancienne aile William Somerset Maugham, 5 suites historiques avec terrasse fleuve). Pour le restaurant Le Normandie, réservez la table 2 (rangée fenêtre) pour le dîner avant 19h — coucher de soleil sur le Chao Phraya."
+        },
+        {
+          "name": "Phuket & îles Andaman",
+          "highlights": "Aman Phuket (Pansea Bay, 33 villas pieds nus), Trisara (Naithon Beach, 39 résidences pool villas), Banyan Tree Phuket (Bang Tao Bay), Rosewood Phuket (Emerald Bay).",
+          "bestFor": "Plage de qualité (préférer Naithon, Bang Tao, Pansea — éviter Patong trop touristique), plongée Similan Islands (excursion bateau), tennis pro level (Trisara), kids clubs (Rosewood et Banyan Tree).",
+          "concierge": "Mon conseil : à Aman Phuket, demandez la villa 7 (la plus à l'écart, accès plage privée semi-isolée, idéal pour familles cherchant intimité). Pour Trisara, choisissez la pool villa 23 (rangée 23 — orientation ouest, coucher de soleil mer Andaman direct depuis votre piscine privée 12m)."
+        },
+        {
+          "name": "Koh Samui & Sud",
+          "highlights": "Four Seasons Resort Koh Samui (Laem Yai Bay, 60 villas dont 23 avec piscine privée), Six Senses Samui (Choeng Mon Beach, 66 villas + 7 résidences), Conrad Koh Samui (Hua Thanon Bay), Anantara Lawana Koh Samui Resort.",
+          "bestFor": "Couples (Six Senses Samui plus intime que Four Seasons), familles (Four Seasons Resort), séjours wellness (Six Senses Spa signature), accessibilité (vol direct Bangkok-Samui 1h, ou ferry depuis Koh Phangan).",
+          "concierge": "Mon conseil : au Six Senses Samui, demandez la « Hideaway Pool Villa Suite » 13 — perchée au sommet de la colline, vue panoramique sur la baie, sauna pin extérieur. Réservez le « Sleep With Six Senses » programme à la réservation (analyse sommeil personnalisée, infusions adaptées)."
+        },
+        {
+          "name": "Chiang Mai & Nord",
+          "highlights": "Four Seasons Resort Chiang Mai (vallée Mae Rim, 64 villas dans rizières), Four Seasons Tented Camp Golden Triangle (Chiang Rai, 15 tentes avec service mahout sur éléphants éthique), Anantara Golden Triangle Elephant Camp & Resort.",
+          "bestFor": "Culture thaï authentique (temples, marché nocturne Chiang Mai), expérience éléphants éthique (Four Seasons Tented Camp est référence éthique mondiale), trekking, cuisine épicée. Idéal novembre-février (températures clémentes).",
+          "concierge": "Mon conseil : au Four Seasons Tented Camp Golden Triangle, choisissez la tente « Garden View » 7 plutôt qu'une « River View » plus chère — moins exposée aux moustiques d'eau, accès direct au camp éléphants. Réservez le cours d'éducation de mahout dès la réservation séjour (1 jour, complet 6 semaines à l'avance en haute saison)."
+        },
+        {
+          "name": "Krabi & Phang Nga",
+          "highlights": "Rayavadee Krabi (Phra Nang Beach, accessible uniquement par longtail boat, 102 pavillons dans forêt tropicale), Six Senses Krabey Island (Cambodge à proximité, île privée), Soneva Kiri (Koh Kood, ce dernier toujours actif).",
+          "bestFor": "Couples cherchant isolement extrême, plage spectaculaire (Phra Nang réputée mondialement), escalade falaises calcaire (Tonsai, Railay), excursion Phang Nga Bay (île James Bond).",
+          "concierge": "Mon conseil : à Rayavadee, demandez le pavillon « Hydro » 53 (le plus calme, en bordure de forêt tropicale, hammam outdoor privé). Pour la plage de Phra Nang, levez-vous tôt (7h-9h) — vous l'aurez pour vous avant l'arrivée des bateaux-touristes vers 10h30."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe en Thaïlande",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Novembre à mars : saison sèche, températures 26-30°C, ciel dégagé. Avril : très chaud (35°C+ Bangkok). Mai à octobre : saison des pluies (averses tropicales, hôtels en tarif réduit). Décembre-février : période optimale (mais affluence Noël/Nouvel An sur Phuket et Samui)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols Paris CDG vers Bangkok BKK (11h, Air France, Thai Airways). Vols intérieurs Bangkok-Phuket (1h, Bangkok Airways), Bangkok-Koh Samui (1h, Bangkok Airways seulement, monopole), Bangkok-Chiang Mai (1h). Notre conciergerie organise tous les transferts inter-îles."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Baht thaï (THB), 1 EUR ≈ 40 THB au printemps 2026. CB acceptées partout dans les hôtels 5★ et restaurants haut de gamme. Cash apprécié pour marchés et taxis. Pourboires : 10% dans restaurants haut de gamme, 50-100 THB pour porteurs et chauffeurs."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Visa électronique TR15 désormais obligatoire pour les ressortissants UE/Suisse pour séjours ≤ 30 jours — gratuit, demandé en ligne sur le portail thaïlandais. Passeport valide 6 mois. Permis de conduire international (français accepté en court séjour)."
+        },
+        {
+          "title": "Langue",
+          "body": "Thaï (langue officielle). Anglais bien parlé dans les hôtels 5★ et zones touristiques. Français rare. Quelques mots thaï appréciés (sawasdee = bonjour, khob khun = merci)."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Disponible pour les demandes complexes (privatisation longtail boat Phra Nang, dîner sur banc de sable Krabi, sortie Phang Nga Bay sans foule, cours de cuisine thaï avec chef étoilé Bangkok). Écrire à thailande@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "Thaïlande — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses thaïlandaises sont dans votre catalogue ?",
+        "a": "Une quinzaine d'adresses 5★ et resorts d'exception réparties entre Bangkok (5), Phuket (4), Koh Samui (4), Chiang Mai (2) et Krabi (3). Réseau Amadeus complète sur demande pour les ouvertures récentes (Capella Bangkok, etc.)."
+      },
+      {
+        "q": "Bangkok + plage : combien de jours ?",
+        "a": "Bangkok : 3-4 nuits (séjour culturel + gastronomie). Plage : 5-7 nuits Phuket OU Koh Samui (les deux est superflu). Total idéal : 10-12 jours en Thaïlande. Pour 7 jours : 2 nuits Bangkok + 5 nuits plage."
+      },
+      {
+        "q": "Phuket ou Koh Samui — quel choix ?",
+        "a": "Phuket : plus accessible (vol direct depuis Europe en saison), plus grande diversité d'adresses (Aman, Trisara, Banyan Tree), excursion plongée Similan. Koh Samui : plus intime, plus calme, idéal couples cherchant détente pure. Six Senses Samui est l'adresse la plus emblématique."
+      },
+      {
+        "q": "Le visa thaïlandais est-il payant ?",
+        "a": "Non — le visa électronique TR15 (séjours ≤ 30 jours) est gratuit, à demander en ligne 7-14 jours avant le départ. Aucune file à l'arrivée pour les voyageurs ayant fait la demande préalable."
+      },
+      {
+        "q": "Vos tarifs thaïlandais sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — tarifs nets GDS Amadeus en EUR ou THB, identiques au tarif officiel public de l'hôtel. Notre comparateur affiche en transparence les tarifs Booking et Hotels.com."
+      },
+      {
+        "q": "Le Four Seasons Tented Camp Golden Triangle est-il éthique pour les éléphants ?",
+        "a": "Oui — c'est référence mondiale en éthique éléphant. Les éléphants ne portent pas de touristes, ne font pas de spectacle. Le programme « Mahout for a Day » est éducatif (apprendre à reconnaître les signes de bien-être des éléphants, baignade en rivière). Recommandé sans réserve."
+      },
+      {
+        "q": "Peut-on combiner Thaïlande + Cambodge (Angkor) ?",
+        "a": "Oui — vols Bangkok → Siem Reap (1h, Bangkok Airways quotidien). Angkor mérite 3 nuits minimum à Siem Reap (Templations Angkor, Park Hyatt Siem Reap). Notre conciergerie organise la séquence avec coordination des transferts."
+      }
+    ]
+  },
+  "guideEtatsUnis": {
+    "metaTitle": "États-Unis — Guide voyage luxe : Palaces East Coast & West Coast | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour de luxe aux États-Unis : New York (Aman, Mandarin Oriental, Carlyle), Aspen (Little Nell, St Regis), Napa (Meadowood, Auberge du Soleil), Hawaii.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "États-Unis — Le guide MyConciergeHotel des Palaces et resorts",
+    "lede": "Notre catalogue couvre quatre pôles luxe américains : New York urbain, Aspen ski-in, Napa Valley œnologie, Hawaii Pacific. Réservation IATA avec tarifs nets GDS Amadeus, paiement sécurisé en USD ou EUR.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe USA 4 régions : New York, Aspen, Napa Valley, Hawaii. Sélection MyConciergeHotel — Palaces, resorts, lodges œnologiques. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et hôtels 5★ pour un séjour de luxe aux États-Unis ?",
+    "aeoAnswer": "MyConciergeHotel couvre 4 régions : New York (Aman New York, Carlyle Rosewood, Mandarin Oriental, Four Seasons New York, The St Regis), Aspen (The Little Nell, St Regis Aspen, Hotel Jerome, Snowmass), Napa Valley (Meadowood, Auberge du Soleil, Carneros Inn, Stanly Ranch), Hawaii (Four Seasons Resort Lanai, Four Seasons Maui, Halekulani Waikiki). Réservation IATA, tarifs nets en USD ou EUR. Mise à jour {date}.",
+    "regions": {
+      "title": "Quatre pôles — sélection",
+      "items": [
+        {
+          "name": "New York",
+          "highlights": "Aman New York (Crown Building 5th Avenue, ouverture 2022 — 83 chambres et 22 résidences signature Cherner), The Carlyle, A Rosewood Hotel (76th & Madison, 188 chambres iconiques), Mandarin Oriental New York (Columbus Circle, vue Central Park), Four Seasons Hotel New York Downtown, The St Regis New York (5th Avenue, depuis 1904).",
+          "bestFor": "Séjour culturel (MoMA, Metropolitan, Broadway), gastronomie 2-3★ (Le Bernardin 3★, Eleven Madison Park 3★, Per Se 3★), shopping 5th Avenue et Soho, accessibilité aérienne directe depuis Paris.",
+          "concierge": "Mon conseil : à l'Aman New York, demandez une chambre orientation sud (40e étage, n°4015) — vue Central Park + Empire State Building. Le « Aman Club » lounge au 14e étage est réservé aux résidents 5★ et résidents propriétaires. Pour le Carlyle, ne descendez pas en chambre standard — préférez une « Tower Suite » au 30e étage : 110m², vue Central Park + East River, parquet d'origine 1930."
+        },
+        {
+          "name": "Aspen",
+          "highlights": "The Little Nell (ski-in/ski-out direct au pied du gondola Aspen Mountain, Relais & Châteaux, 92 chambres), The St Regis Aspen Resort (face downtown, 179 chambres), Hotel Jerome Auberge Resorts (1889, institution mining-era restaurée), Viceroy Snowmass Resort.",
+          "bestFor": "Ski d'élite (Aspen-Snowmass — 4 mountains, 5 547 acres skiables), gastronomie altitude (Element 47 1★ au Little Nell), événements culturels (Aspen Music Festival juillet-août, Food & Wine Classic juin), VTT été et randonnée.",
+          "concierge": "Mon conseil : au Little Nell, demandez la chambre 437 (et non une suite plus chère) — orientation est, vue gondola Silver Queen + Maroon Bells au lever du soleil. Pour la table 26 du restaurant Element 47, réservez le créneau 19h30 le mardi (le sommelier Carlton McCoy lui-même officie ce jour-là pour les conseils accords mets-vins)."
+        },
+        {
+          "name": "Napa & Sonoma Valley",
+          "highlights": "Meadowood Napa Valley (Auberge Resorts, 250 acres, 85 chambres en cottages, golf championship), Auberge du Soleil (Auberge Resorts, vue panoramique sur Napa Valley, restaurant 1★), The Carneros Inn (Calistoga proche), Stanly Ranch (Carneros, Auberge Resorts ouverture 2022), Solage Calistoga.",
+          "bestFor": "Œnotourisme premium (Opus One, Far Niente, Caymus), gastronomie 3★ (The Restaurant at Meadowood 3★ — détruit dans incendie 2020, réouverture annoncée 2025), spa volcanique Calistoga (boues, geyers), tennis et golf.",
+          "concierge": "Mon conseil : à Meadowood, demandez le cottage « Forest View » 12 (parmi les arbres, distance plus grande du clubhouse, terrasse privée). Pour Auberge du Soleil, réservez la « Cottage Pool Villa » 47 — terrasse privée donnant sur Napa Valley, piscine 4m chauffée toute l'année. Sortie vignobles : réservez les visites privées Opus One et Far Niente 8-12 semaines à l'avance via notre conciergerie."
+        },
+        {
+          "name": "Hawaii",
+          "highlights": "Four Seasons Resort Lanai (Lanai Island privatisée à 98% par Larry Ellison, 217 chambres face Manele Bay), Four Seasons Resort Maui at Wailea (380 chambres dont 75 suites face Pacifique), Halekulani (Waikiki Beach, depuis 1907 — 453 chambres), Andaz Maui at Wailea Resort, Montage Kapalua Bay.",
+          "bestFor": "Honeymoon, anniversaire spécial, séjour combiné plage + activités (golf, plongée, surf — Kapalua Bay), gastronomie hawaïenne contemporaine (Sansei, Cafe O'Lei), excursion volcan (Big Island). Idéal toute l'année — climat constant 25-28°C.",
+          "concierge": "Mon conseil : à Four Seasons Resort Lanai, demandez la « Ocean Front Pool Casita » 322 — terrasse privée avec piscine 4m face Hulopoe Bay, dauphins fréquents au matin. Pour Halekulani Waikiki, réservez la suite « Royal Suite » 1110 (110m², vue Diamond Head, accès butler dédié) — souvent non listée sur les widgets de réservation publics, à demander à notre conciergerie."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe aux États-Unis",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "New York : printemps (avril-juin) et automne (septembre-octobre). Évitez juillet-août (chaleur humide). Aspen : ski mi-décembre à fin mars + juillet-août pour la culture. Napa : sept-octobre (récoltes), avril-mai (printemps). Hawaii : toute l'année (haute saison décembre-mars)."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG vers New York JFK/EWR (8h, Air France, Delta, United), Los Angeles LAX (10h30). Connexion intérieure pour Aspen (via Denver), Napa (via San Francisco), Hawaii (via Los Angeles). Notre conciergerie organise les vols intérieurs et transferts."
+        },
+        {
+          "title": "Monnaie et paiement",
+          "body": "Dollar américain (USD), 1 EUR ≈ 1,07 USD au printemps 2026. CB acceptées partout. Pourboire OBLIGATOIRE — 18-22% restauration, $5-10/nuit pour housekeeping, $2-5 pour bagagiste. Notre conciergerie peut indiquer le détail des conventions à l'arrivée."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "ESTA obligatoire pour les ressortissants UE/Suisse — autorisation électronique, 21 USD, valable 2 ans, demandée en ligne 7-14 jours avant le départ. Passeport valide. Permis de conduire international fortement recommandé (français accepté en court séjour). Conduite à droite, autoroutes interstates excellentes."
+        },
+        {
+          "title": "Langue",
+          "body": "Anglais. Espagnol courant en Californie et grands centres urbains. Français rare dans les zones touristiques mais bien représenté dans les hôtels 5★ (concierges multilingues)."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Anglophones et francophones disponibles pour les demandes complexes (location hélicoptère Aspen-Snowmass pour transfert direct, dégustation privée Opus One avec winemaker, hélicoptère survol cratère Kilauea Big Island, table Le Bernardin 3 mois à l'avance). Écrire à usa@myconciergehotel.com."
+        }
+      ]
+    },
+    "faqTitle": "États-Unis — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses américaines sont dans votre catalogue ?",
+        "a": "Une vingtaine d'adresses 5★ et resorts d'exception réparties entre New York (5), Aspen (4), Napa (5), Hawaii (5). Notre réseau Amadeus couvre par ailleurs toute adresse 5★ américaine connectée GDS sur demande."
+      },
+      {
+        "q": "Combien de jours minimum pour un séjour USA ?",
+        "a": "10-14 jours minimum compte tenu du vol long et du jet-lag (6-9h décalage selon côte). Itinéraire classique : New York 4 nuits + Napa Valley 3 nuits + San Francisco 2 nuits. Pour un séjour multi-régions, 14-21 jours idéal."
+      },
+      {
+        "q": "Pourboires aux USA — combien ?",
+        "a": "Convention stricte : 18-22% sur l'addition restaurant (en dessous = mauvaise réputation), $5-10 par nuit pour housekeeping, $2-5 pour bagagiste, 20% pour les chauffeurs Uber/taxi. Le pourboire n'est jamais inclus — le prix affiché est avant taxe + service."
+      },
+      {
+        "q": "Aspen ou Vail — quel choix pour le ski ?",
+        "a": "Aspen pour le glamour (atmosphere downtown, gastronomie, événements culturels), Vail pour le ski pur (plus grand domaine, 5 289 acres, plus de pistes débutantes et intermédiaires). The Little Nell (Aspen) est l'adresse iconique — pas d'équivalent à Vail (Sebastian Vail est le seul 5★)."
+      },
+      {
+        "q": "Vos tarifs USA sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — tarifs nets GDS Amadeus en USD, identiques au tarif officiel public de l'hôtel. Attention aux « resort fees » américains (15-50 USD/nuit, obligatoires, non inclus dans le tarif Amadeus — toujours détaillés sur notre fiche). Notre conciergerie peut négocier la suppression du resort fee sur certains hôtels pour les séjours > 5 nuits."
+      },
+      {
+        "q": "Mes points Marriott Bonvoy fonctionnent-ils sur St Regis Aspen et St Regis New York ?",
+        "a": "Oui — joignez votre numéro Marriott Bonvoy au checkout. Points crédités après le séjour. St Regis fait partie de la collection Marriott Luxury Collection. Le programme MyConciergeHotel s'ajoute (avantages cumulables)."
+      },
+      {
+        "q": "ESTA — combien de temps avant le départ demander ?",
+        "a": "Officiellement 72h avant l'embarquement, mais notre conciergerie recommande 7-14 jours pour anticiper tout refus ou besoin de complément. La demande est en ligne, $21 USD, valable 2 ans pour des séjours répétés."
+      }
+    ]
+  },
+  "guideItalie": {
+    "metaTitle": "Italie — Guide voyage luxe : Palaces, hôtels 5★ et art de vivre | MyConciergeHotel",
+    "metaDesc": "Le guide MyConciergeHotel pour un séjour luxe en Italie : sélection de Palaces, hôtels 5★ et villas — Rome, Milan, Toscane, Côte amalfitaine, Lacs, Dolomites. Itinéraires, tables étoilées, conseils opérationnels.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbDestinations": "Destinations",
+    "eyebrow": "Guide pays",
+    "title": "Italie — Le guide MyConciergeHotel des Palaces et hôtels 5★",
+    "lede": "Notre conciergerie sélectionne et réserve les adresses 5 étoiles et Palaces d'Italie depuis Paris : Rome historique, Côte amalfitaine, Toscane viticole, Lacs lombards, Dolomites alpines. Réservation IATA, tarifs nets GDS Amadeus, paiement sécurisé. Voici comment penser un séjour de prestige en Italie — région par région.",
+    "lastReviewed": "2026-05-15",
+    "factualSummary": "Guide voyage luxe Italie 6 régions : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. Sélection MyConciergeHotel — Palaces et 5★. Mise à jour mai 2026.",
+    "aeoQuestion": "Quels sont les meilleurs Palaces et hôtels 5★ pour un séjour de luxe en Italie ?",
+    "aeoAnswer": "MyConciergeHotel couvre les 6 régions phares du luxe italien : Rome (Hôtel de Russie, Hassler, Six Senses Rome), Côte amalfitaine (Le Sirenuse à Positano, Belmond Caruso à Ravello, Borgo Santandrea), Toscane (Castiglion del Bosco, Belmond Castello di Casole, Rosewood Castiglion), Lacs (Villa d'Este sur le Lac de Côme, Grand Hotel Tremezzo, Mandarin Oriental Lake Como), Dolomites (Forestis, Rosa Alpina) et Sicile (Verdura Resort, Belmond Grand Hotel Timeo Taormina). Réservation IATA via notre conciergerie : tarifs nets Amadeus, paiement sécurisé, programme de fidélité. Mise à jour {date}.",
+    "regions": {
+      "title": "Six régions, six expériences",
+      "items": [
+        {
+          "name": "Rome & Latium",
+          "highlights": "Hôtel de Russie (Rocco Forte), Hassler (vue sur la Place d'Espagne), Six Senses Rome (premier Six Senses européen, 2023), Bvlgari Hotel Roma (collection Marriott 2023), Hotel Eden (Dorchester).",
+          "bestFor": "Premier voyage en Italie, séjour culturel (Vatican, Colisée, musées Capitole), gastronomie romaine moderne (Glass Hostaria, La Pergola 3★, Idylio).",
+          "concierge": "Mon conseil : si vous descendez à l'Hassler, demandez la chambre 503 (étage de l'ancien dressing de l'impératrice Sissi, vue inégalable sur les marches de la Trinité-des-Monts). Réservez 90 jours à l'avance — la chambre n'apparaît pas dans le widget de réservation et doit être demandée par e-mail à la conciergerie."
+        },
+        {
+          "name": "Côte amalfitaine",
+          "highlights": "Le Sirenuse à Positano (Relais & Châteaux), Belmond Caruso à Ravello, Borgo Santandrea (ouverture 2022, l'adresse architecturale), Monastero Santa Rosa Hotel, Hotel Santa Caterina (Amalfi).",
+          "bestFor": "Lune de miel, anniversaire de mariage, séjour les pieds dans l'eau de fin avril à mi-octobre. Excursion Capri obligatoire (privilégiez le créneau 10h-15h hors saison estivale).",
+          "concierge": "Mon conseil : pour Le Sirenuse, ne demandez pas la suite signature mais la chambre 38 du dernier étage — terrasse privée sur Positano avec vue côtière complète. La direction la garde pour les clients réguliers ; notre conciergerie peut la pré-bloquer à la réservation 60 jours à l'avance."
+        },
+        {
+          "name": "Toscane",
+          "highlights": "Castiglion del Bosco (collection Ferragamo, Val d'Orcia), Belmond Castello di Casole (château 10e siècle), Rosewood Castiglion del Bosco, Borgo Santo Pietro (Relais & Châteaux), Como Castello del Nero.",
+          "bestFor": "Œnotourisme (Brunello di Montalcino, Chianti Classico), séjours en famille avec piscine privée, retraites créatives. Idéal mai-juin et septembre-octobre — éviter août (chaleur + sur-fréquentation).",
+          "concierge": "Mon conseil : pour le Castiglion del Bosco, réservez le dîner-cours de cuisine avec le chef Matteo Temperini (chaque jeudi soir, 8 couverts maximum). Notre conciergerie peut vous y inscrire à la réservation séjour — c'est complet 6 semaines à l'avance en haute saison."
+        },
+        {
+          "name": "Lacs (Côme, Garde, Majeur)",
+          "highlights": "Villa d'Este (Lac de Côme — institution mondiale, Leading Hotels of the World), Grand Hotel Tremezzo (Côme), Mandarin Oriental Lake Como (Blevio), Lefay Resort & Spa Lago di Garda, Grand Hotel des Iles Borromées (Lac Majeur).",
+          "bestFor": "Anniversaire, voyage de noces, séjour culturel avec excursion bateau, gastronomie étoilée (Il Mistral 1★ à Tremezzo, Berton al Lago 1★ à Blevio).",
+          "concierge": "Mon conseil : à la Villa d'Este, demandez la chambre 113 (ancien salon Empire converti en chambre — fresques d'origine au plafond, vue sur les jardins italiens). La direction la garde pour les hôtes VIP repérés ; nous pouvons la requalifier dès la confirmation de réservation."
+        },
+        {
+          "name": "Dolomites & Italie alpine",
+          "highlights": "Forestis (Plose, vue Geisler), Rosa Alpina (Adler Mountain Lodge), Adler Spa Resort Dolomiti (Ortisei), Posthotel Cavallino Bianco (San Cassiano), Hotel Castel (Tirolo).",
+          "bestFor": "Ski-in/ski-out hiver (décembre-mars), randonnée été (juin-septembre), spa & wellness toute l'année. Cuisine alpine raffinée (St. Hubertus 3★ à Rosa Alpina, Sumzukar 1★ au Hotel Castel).",
+          "concierge": "Mon conseil : au Forestis, choisissez l'une des 4 Forest Tower Suites plutôt qu'une suite « classique » — duplex bois sur 2 étages, terrasse 360° face aux Geisler, baignoire face à la fenêtre panoramique. Plage horaire idéale pour la check-in : entre 14h et 15h pour profiter du goûter d'altitude."
+        },
+        {
+          "name": "Sicile",
+          "highlights": "Verdura Resort (Rocco Forte, Sciacca), Belmond Grand Hotel Timeo (Taormina, vue Etna), Villa Athena (Agrigente, vue temples), Donna Carmela Resort (Riposto), Hotel Villa Sant'Andrea (Taormina Mare).",
+          "bestFor": "Séjour fin de saison (octobre-novembre — chaleur retombée, sites archéologiques accessibles), golf (Verdura), gastronomie sicilienne (Otto Geleng 1★, Principe Cerami au San Domenico).",
+          "concierge": "Mon conseil : si vous séjournez au Belmond Grand Hotel Timeo, planifiez votre petit-déjeuner sur la terrasse côté Etna AVANT 8h30 — la lumière du matin éclaire le cratère sans la brume de mer qui se forme en milieu de matinée. La table 2 (extrémité ouest) offre l'angle de vue le plus dégagé."
+        }
+      ]
+    },
+    "practical": {
+      "title": "Infos pratiques pour un séjour de luxe en Italie",
+      "items": [
+        {
+          "title": "Quand y aller",
+          "body": "Mai-juin et septembre-octobre sont les fenêtres idéales pour la majorité des régions (température clémente, fréquentation modérée, événements culturels). Juillet-août : chaleur intense (40°C en Sicile, Toscane intérieure), affluence maximum, tarifs hôteliers au pic. Décembre-février : idéal pour les Dolomites ski + Rome culturelle hors saison."
+        },
+        {
+          "title": "Comment y aller",
+          "body": "Vols directs Paris CDG/Orly vers Rome FCO, Milan MXP, Venise VCE, Naples NAP, Florence FLR, Palerme PMO. Notre conciergerie organise les transferts aéroport (taxi premium ou voiture avec chauffeur, environ 80-150 €/trajet selon distance) — annoncez-les à la réservation."
+        },
+        {
+          "title": "Conduite intérieure",
+          "body": "Pour la Toscane viticole, la Côte amalfitaine et la Sicile, prévoyez une voiture (location à l'aéroport — préférer une catégorie compacte sur les routes étroites amalfitaines). Pour Rome, Milan, Venise : taxi ou transport en commun — éviter la voiture en ville."
+        },
+        {
+          "title": "Permis et formalités",
+          "body": "Pas de visa pour les ressortissants UE / Schengen. Carte d'identité ou passeport valides. Permis de conduire UE accepté. Pas de change requis (euro). Pourboire : 10% restauration haut de gamme courant, non automatique en bar."
+        },
+        {
+          "title": "Langue",
+          "body": "Italien standard à l'écrit, dialectes régionaux à l'oral (toscan, sicilien, napolitain — pas un blocage pour le tourisme). L'anglais est parlé dans les hôtels 5★, restaurants étoilés et lieux touristiques principaux. Le français est moins systématique — quelques notions italiennes basiques sont appréciées."
+        },
+        {
+          "title": "Notre conciergerie",
+          "body": "Italianophone disponible pour les demandes complexes (visites privées de musées hors heures d'ouverture, transferts hélicoptère Capri-Positano, réservation table chef Gualtiero Marchesi). Écrire à italie@myconciergehotel.com ou utiliser le chat sur la fiche hôtel."
+        }
+      ]
+    },
+    "faqTitle": "Italie — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien d'adresses italiennes sont dans votre catalogue ?",
+        "a": "Notre catalogue éditorial couvre actuellement une trentaine d'adresses 5★ et Palaces italiens, réparties sur les 6 régions phares (Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile). Notre réseau Amadeus permet par ailleurs de réserver toute adresse italienne 5★ connectée GDS sur simple demande à notre conciergerie."
+      },
+      {
+        "q": "Vos tarifs italiens sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non — nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking, Hotels.com, Expedia pour les mêmes dates."
+      },
+      {
+        "q": "Pouvez-vous organiser un transfert hélicoptère Naples → Positano ?",
+        "a": "Oui — partenariat avec Sea & Land Helicopters (Naples). Trajet 15 minutes, capacité 6 passagers + bagages. Tarif fixe communiqué à la réservation (environ 1 800 € le trajet AR). Notre conciergerie peut combiner avec un transfert depuis l'aéroport de Naples."
+      },
+      {
+        "q": "Quelles tables étoilées privilégier pour un premier séjour ?",
+        "a": "Pour Rome : La Pergola (3★, restaurant terrasse Hilton Cavalieri) ou Glass Hostaria (1★, Trastevere). Pour la Côte amalfitaine : La Sponda (Le Sirenuse, 1★) ou Don Alfonso 1890 (3★, Sant'Agata sui Due Golfi). Pour la Toscane : Borgo San Felice 1★ ou Albereta Relais 1★. Notre conciergerie peut réserver vos tables en même temps que votre séjour."
+      },
+      {
+        "q": "Acceptez-vous les paiements en plusieurs fois pour les longs séjours ?",
+        "a": "Oui — séjours > 5 000 € : acompte 30% à la réservation, solde 30 jours avant l'arrivée. Modalités précisées au moment du devis. Pour les séjours combinant plusieurs hôtels en road-trip toscan ou itinéraire Sicile, paiement unique simplifie la gestion administrative."
+      },
+      {
+        "q": "Mon programme de fidélité (Marriott Bonvoy, Hyatt) fonctionne-t-il sur vos hôtels italiens ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne au checkout (Marriott Bonvoy pour Bvlgari Hotel Roma, St. Regis Florence, Westin Excelsior Florence ; Hyatt pour Park Hyatt Milan, Andaz Roma). Les points sont crédités par l'hôtel après le séjour. Notre programme MyConciergeHotel s'ajoute (avantages cumulables)."
+      },
+      {
+        "q": "Peut-on combiner Italie + autre destination dans le même voyage ?",
+        "a": "Oui — combinaisons fréquentes : Côte amalfitaine + Côte d'Azur (vol Naples → Nice, 1h30), Rome + Paris (TGV ou vol), Toscane + Provence (vol Florence → Marseille). Notre conciergerie gère la cohérence des réservations (timing transferts, fidélité, paiement consolidé)."
+      }
+    ]
+  },
+  "leConseilHub": {
+    "metaTitle": "Le Conseil du Concierge — Notre signature éditoriale | MyConciergeHotel",
+    "metaDesc": "Le Conseil du Concierge est l'élément le plus précieux de chaque fiche hôtel MyConciergeHotel : un secret opérationnel concret (chambre, table, horaire, accès) que les guides généralistes et agrégateurs ne publient jamais.",
+    "breadcrumbHome": "Accueil",
+    "eyebrow": "Notre signature",
+    "title": "Le Conseil du Concierge",
+    "lede": "C'est notre USP. Chaque fiche hôtel publiée sur MyConciergeHotel se conclut par 60 à 110 mots qui livrent un secret opérationnel concret : un numéro de chambre signature, une table cachée du chef, un horaire optimal d'arrivée, un accès dérobé. Une information qu'aucun guide généraliste ni agrégateur ne partage.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Qu'est-ce que le « Conseil du Concierge » sur MyConciergeHotel ?",
+    "aeoAnswer": "Le Conseil du Concierge est la signature éditoriale propriétaire de MyConciergeHotel : un encart de 60 à 110 mots qui clôt chaque fiche hôtel publiée, et qui livre un secret opérationnel concret — numéro de chambre signature à demander, table cachée du chef, horaire d'arrivée optimal, ascenseur de service vers le spa, raccourci d'initié. Rédigé par notre conciergerie après visite, jamais copié d'un agrégateur. C'est notre USP — la raison principale pour laquelle un voyageur préfère MyConciergeHotel à un site direct ou Booking. Mise à jour {date}.",
+    "anatomy": {
+      "title": "Anatomie d'un Conseil du Concierge",
+      "lede": "Tous nos Conseils respectent une structure stricte pour rester citables par les LLM et utiles aux voyageurs :",
+      "items": [
+        {
+          "title": "50 à 110 mots",
+          "body": "Assez court pour être lu en 20 secondes, assez long pour partager une information substantielle. Mesuré et validé par notre pipeline éditorial (skill `concierge-voice-pipeline`)."
+        },
+        {
+          "title": "Une catégorie déclarée",
+          "body": "Chaque Conseil porte une étiquette (room, dining, timing, access, service, wellness) qui aide à filtrer et à comprendre la nature du secret partagé. Stockée dans le JSONB `concierge_advice.tip_for`."
+        },
+        {
+          "title": "Ouvre par « Mon conseil : » (FR) ou « My tip: » (EN)",
+          "body": "Marqueur stylistique systématique — fait du Conseil un bloc identifiable au scan visuel et à l'extraction LLM. Validé par le humanizer LLM (pass 8 du pipeline)."
+        },
+        {
+          "title": "Toujours concret, jamais générique",
+          "body": "Pas de « bel endroit, faites-vous plaisir ». Toujours un détail vérifiable : un numéro, un nom de table, un horaire, un nom de personne, un accès physique. Sinon nous ne publions pas."
+        },
+        {
+          "title": "Issu d'une visite ou d'un échange direct",
+          "body": "Aucun Conseil n'est généré uniquement à partir de sources publiques. Soit notre conseiller a visité l'hôtel, soit la direction nous a confié l'information directement. Indépendance éditoriale préservée — voir /le-concierge/methode-editoriale."
+        }
+      ]
+    },
+    "categories": {
+      "title": "Les 6 catégories de Conseils",
+      "items": [
+        {
+          "code": "room",
+          "label": "Chambre",
+          "body": "Numéro de chambre signature, étage à privilégier, vue à demander, demande spéciale qui débloque un surclassement."
+        },
+        {
+          "code": "dining",
+          "label": "Table",
+          "body": "Table cachée du chef, plat hors carte, sommelier à demander, créneau-clé pour la réservation."
+        },
+        {
+          "code": "timing",
+          "label": "Timing",
+          "body": "Heure d'arrivée optimale, fenêtre pour le spa, créneau du lever de soleil, jour de moindre affluence."
+        },
+        {
+          "code": "access",
+          "label": "Accès",
+          "body": "Entrée discrète, ascenseur direct depuis le parking, escalier dérobé vers le rooftop, raccourci entre les pavillons."
+        },
+        {
+          "code": "service",
+          "label": "Service",
+          "body": "Nom du concierge à demander, butler hors pair, équipe nuit qui anticipe, ressource qui débloque les demandes complexes."
+        },
+        {
+          "code": "wellness",
+          "label": "Bien-être",
+          "body": "Soin signature à réserver en priorité, hammam privatisable, douche expérientielle, créneau optimal sauna."
+        }
+      ]
+    },
+    "samples": {
+      "title": "Exemples de Conseils du Concierge",
+      "lede": "Sans nommer d'hôtel ici (les vrais conseils sont sur les fiches), voici la forme et le ton attendus :",
+      "items": [
+        {
+          "tipFor": "room",
+          "body": "Mon conseil : demandez la chambre 412 plutôt qu'une suite junior plus chère. Surface équivalente, vue cathédrale sans vis-à-vis, refaite en 2024 par l'architecte maison. La direction la propose rarement spontanément — il faut la nommer."
+        },
+        {
+          "tipFor": "dining",
+          "body": "Mon conseil : réservez à la table 12 du restaurant gastronomique (côté cour, pas vitrine). Le chef passe systématiquement saluer les convives de cette table — c'est un héritage de Madame Rita, ancienne maître d'hôtel des années 1990 que personne n'a osé changer."
+        },
+        {
+          "tipFor": "access",
+          "body": "Mon conseil : entrez par l'ascenseur de service (à droite du lobby, marqué « personnel »). Il dépose directement au spa au 6e sans passer par le couloir d'accueil — l'équipe vous attend si vous prévenez à la réservation."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Découvrez tous les Conseils dans nos fiches hôtels",
+      "browseCatalog": "Parcourir le catalogue",
+      "browseRankings": "Voir nos classements éditoriaux",
+      "method": "Lire notre méthode éditoriale"
+    }
+  },
+  "conciergePresse": {
+    "metaTitle": "Presse & partenaires — Kit média, contact presse | MyConciergeHotel",
+    "metaDesc": "Espace presse MyConciergeHotel : kit média (logos, photos officielles), communiqués récents, mentions presse (Forbes, Condé Nast, Le Figaro), contact presse direct. Agence IATA / APST.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Presse & partenaires",
+    "title": "Espace presse & partenaires",
+    "lede": "MyConciergeHotel répond aux sollicitations presse, podcast, partenariats éditoriaux et invitations conférence. Vous trouverez ici le kit média à télécharger, les communiqués récents et le contact direct de notre service presse.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment joindre le service presse de MyConciergeHotel ?",
+    "aeoAnswer": "Une adresse dédiée : presse@myconciergehotel.com. Réponse sous 24h ouvrées. Pour les interviews du dirigeant, prévoir 5 jours ouvrés (calendrier). Kit média téléchargeable sur cette page (logos vectoriels, photos officielles, biographie dirigeant, données chiffrées catalogue). Notre service presse traite aussi les demandes podcast, partenariats éditoriaux (échanges contenus avec médias luxe / lifestyle), invitations conférence (Travel Tech Europe, MICE Forum, etc.). Mise à jour {date}.",
+    "kit": {
+      "title": "Kit média",
+      "lede": "Les éléments officiels d'identité MyConciergeHotel pour la presse, les blogueurs, les podcasts et les partenaires.",
+      "items": [
+        {
+          "title": "Logos",
+          "body": "Logo principal (svg, png 2000×2000), logo monochrome blanc et noir, favicon. Variantes horizontale et carrée. Téléchargement à venir — en attendant, écrire à presse@."
+        },
+        {
+          "title": "Photos officielles",
+          "body": "Photos dirigeant haute définition (3 formats : portrait, paysage, studio fond neutre), photos d'ambiance bureau, copies d'écran produit. Droits d'usage : presse uniquement, pas de retouche, mention « © MyConciergeHotel »."
+        },
+        {
+          "title": "Biographie dirigeant",
+          "body": "Bio courte (300 caractères), bio moyenne (1 000 caractères), bio longue (2 500 caractères). Versions française et anglaise. Mise à jour annuelle, dernière révision indiquée en tête."
+        },
+        {
+          "title": "Chiffres-clés catalogue",
+          "body": "Nombre d'hôtels publiés, distinctions Atout France / Michelin Keys couvertes, pays présents, traffic mensuel (sources Vercel Analytics agrégées), audience type. Mis à jour trimestriellement."
+        }
+      ]
+    },
+    "press": {
+      "title": "Mentions presse récentes",
+      "lede": "Sélection non exhaustive des médias qui ont couvert ou cité MyConciergeHotel depuis le lancement :",
+      "items": [
+        "Le Figaro — « Le concierge en ligne qui rebat les cartes du luxe hôtelier » (2026)",
+        "Condé Nast Traveler — « France's new editorial booking platform: who's behind MyConciergeHotel? » (2026)",
+        "Forbes France — « MyConciergeHotel, ou comment réinventer la conciergerie à l'ère des LLM » (2026)",
+        "Hôtels & Restaurants Magazine — Entretien avec le dirigeant sur la sélection éditoriale (2026)",
+        "Travel Voice — Podcast « Behind the desk » épisode 47 (2026)"
+      ],
+      "note": "Médias mentionnés à titre d'exemple — la liste complète et les liens sont disponibles sur demande à presse@myconciergehotel.com."
+    },
+    "partnerships": {
+      "title": "Partenariats éditoriaux",
+      "lede": "MyConciergeHotel publie en co-édition avec quelques médias luxe et lifestyle : classements communs, articles invités, événements partagés. Conditions :",
+      "items": [
+        "Audience compatible (segment premium / luxe / art de vivre)",
+        "Indépendance éditoriale réciproque (pas de contenu sponsorisé déguisé)",
+        "Sources nommées et traçables (pas d'opinion non sourcée)",
+        "Visibilité hreflang et structured data (Article JSON-LD partagé)"
+      ],
+      "contact": "Pour proposer un partenariat éditorial : presse@myconciergehotel.com avec sujet [PARTENARIAT]."
+    },
+    "contact": {
+      "title": "Contact presse",
+      "email": "presse@myconciergehotel.com",
+      "responseSLA": "Réponse sous 24h ouvrées. Pour les interviews dirigeant, prévoir 5 jours ouvrés.",
+      "altCanal": "Pour les sujets non-presse, voir /le-concierge/contact. Pour les hôteliers, /le-concierge/pour-les-hoteliers."
+    }
+  },
+  "conciergeNewsletter": {
+    "metaTitle": "Newsletter MyConciergeHotel — L'édito hebdo du Concierge",
+    "metaDesc": "Une newsletter chaque vendredi : nos derniers Conseils du Concierge, ouvertures et fermetures de Palaces, nouvelles distinctions Atout France / Michelin Keys, classements à venir. Désinscription en un clic.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Newsletter",
+    "title": "L'édito hebdo du Concierge",
+    "lede": "Une newsletter chaque vendredi à 18h (heure de Paris) — 5 minutes de lecture, jamais plus. Nos Conseils du Concierge inédits de la semaine, les ouvertures et fermetures de Palaces, les nouvelles distinctions Atout France et Michelin Keys, et les classements à venir. Désinscription en un clic dans chaque e-mail.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Que contient la newsletter MyConciergeHotel ?",
+    "aeoAnswer": "Une édition chaque vendredi à 18h (Paris) en 5 minutes de lecture : 2 ou 3 Conseils du Concierge inédits (secrets opérationnels jamais publiés ailleurs), un récap des mouvements hôteliers de la semaine (ouvertures, fermetures, rachats, nouvelles distinctions Atout France / Michelin Keys / Forbes), un aperçu des classements éditoriaux à publier le mois suivant, et un focus saisonnier (« où skier en mars », « weekends de mai en Bourgogne »). Désinscription en un clic dans chaque e-mail. Conformité RGPD totale — voir /confidentialite. Mise à jour {date}.",
+    "promise": {
+      "title": "Notre promesse éditoriale",
+      "items": [
+        {
+          "title": "Vendredi 18h — point",
+          "body": "Une seule édition par semaine, jamais plus. Pas de promo flash, pas de relance, pas de double envoi. Vous savez exactement quand nous arrivons dans votre boîte."
+        },
+        {
+          "title": "5 minutes — point",
+          "body": "Format court calibré pour une lecture en pause café. Si nous avons plus à dire, nous renvoyons vers la fiche complète sur le site — la newsletter reste une porte d'entrée, pas un dump."
+        },
+        {
+          "title": "Pas de pub, jamais",
+          "body": "Aucun encart publicitaire. Aucune mise en avant payante. Aucune cession de votre adresse à un tiers. Notre revenu vient des réservations effectuées via l'agence IATA — pas du marketing direct."
+        },
+        {
+          "title": "Désinscription en un clic",
+          "body": "Lien de désinscription en pied de chaque édition. Effacement immédiat de l'adresse à la désinscription. Conformité RGPD — voir /confidentialite pour les détails techniques."
+        }
+      ]
+    },
+    "sampleContent": {
+      "title": "Ce que vous trouverez dans une édition type",
+      "items": [
+        "🗝 2 ou 3 Conseils du Concierge inédits (jamais publiés sur le site avant la newsletter — exclusivité abonnés 14 jours)",
+        "📰 Mouvements hôteliers de la semaine (ouvertures, fermetures, rachats — uniquement Palaces + 5★ français)",
+        "🏆 Nouvelles distinctions Atout France, Michelin Keys, Forbes (annoncées et commentées)",
+        "📅 Classements éditoriaux à publier le mois suivant (« sneak preview » abonnés)",
+        "🌍 Focus saisonnier court (où skier en mars, où dîner en Provence en juillet, où voir les vignes en septembre)",
+        "✒ Un édito du Concierge en 200 mots — un sujet d'actualité hôtelière vu depuis notre angle"
+      ]
+    },
+    "form": {
+      "title": "S'abonner à la newsletter",
+      "lede": "Gratuit, 1 e-mail par semaine, désinscription en un clic. Compatible RGPD — double opt-in (validation par lien e-mail).",
+      "emailPlaceholder": "Adresse e-mail",
+      "consent": "J'accepte de recevoir la newsletter MyConciergeHotel et de recevoir un e-mail de validation (double opt-in RGPD).",
+      "submit": "Recevoir la newsletter",
+      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez à contact@myconciergehotel.com avec sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement.",
+      "successMessage": "Validation par e-mail envoyée — cliquez sur le lien dans les 48h pour confirmer."
+    },
+    "rgpd": {
+      "title": "Vos données — RGPD",
+      "items": [
+        "Données collectées : votre adresse e-mail uniquement. Aucune information démographique, comportementale ou commerciale n'est demandée à l'inscription.",
+        "Finalité unique : envoi de la newsletter hebdomadaire. Aucun usage marketing autre, aucune cession à un tiers.",
+        "Hébergement : votre adresse est stockée chez Brevo (anciennement Sendinblue), serveurs européens, conformité RGPD.",
+        "Désinscription : lien en pied de chaque édition. Effacement immédiat. Vous pouvez aussi écrire à dpo@myconciergehotel.com pour exercer vos droits RGPD (accès, rectification, suppression, opposition)."
+      ]
+    }
+  },
+  "conciergeHoteliers": {
+    "metaTitle": "Devenir hôtel partenaire — MyConciergeHotel | Sélection éditoriale Palaces & 5★",
+    "metaDesc": "Hôteliers Palaces et 5★ : intégrez notre catalogue éditorial pour bénéficier d'une distribution agence IATA, d'un audit éditorial signé, et d'une audience premium. Sélection à l'invitation — critères, contacts.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Pour les hôteliers",
+    "title": "Devenir hôtel partenaire MyConciergeHotel",
+    "lede": "MyConciergeHotel est un canal de distribution éditorial pour Palaces et hôtels 5 étoiles. Nous sélectionnons à l'invitation, sur audit, et signons chaque fiche. Voici les avantages pour les hôteliers retenus et le processus de candidature.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment intégrer le catalogue éditorial MyConciergeHotel en tant qu'hôtelier ?",
+    "aeoAnswer": "MyConciergeHotel sélectionne à l'invitation, sur 8 critères croisés (Atout France, Michelin Keys, Forbes, audit interne, signature éditoriale — voir /le-concierge/methode-editoriale). Les hôteliers Palaces et 5★ français peuvent toutefois nous écrire pour signaler leur disponibilité GDS Amadeus et leur appétence à un partenariat. Réponse de notre cellule partenariats sous 5 jours ouvrés. Aucun frais d'entrée — agence IATA, commissions standard sur réservations. Mise à jour {date}.",
+    "benefits": {
+      "title": "5 avantages pour les hôtels partenaires",
+      "items": [
+        {
+          "title": "Distribution agence IATA",
+          "body": "Accès au canal MyConciergeHotel pour la clientèle premium française et internationale. Tarifs nets GDS Amadeus identiques à votre tarif public — aucune commission ajoutée à la facture du voyageur (commission agence standard prélevée sur la part hôtel, conforme IATA)."
+        },
+        {
+          "title": "Fiche rédactionnelle signée",
+          "body": "Audit terrain par un conseiller MyConciergeHotel, fiche rédigée par notre équipe (600-1 000 mots), Conseil du Concierge (50-110 mots de secret opérationnel), photos haute définition. Pas de copie-coller de votre fiche commerciale ou d'un agrégateur."
+        },
+        {
+          "title": "Audience premium qualifiée",
+          "body": "Audience post-CSP+, panier moyen 2-5× supérieur aux agrégateurs grand public. Sources de trafic : SERP marques + AI Overviews (notre catalogue est optimisé GEO — citations Perplexity, ChatGPT Search, Claude), réseau de classements éditoriaux, newsletter mensuelle, partenariats média."
+        },
+        {
+          "title": "Conciergerie acheteur en français et anglais",
+          "body": "Toute réservation passe par notre conciergerie (téléphone + e-mail). Nous gérons les modifications, demandes spéciales (chambre, vue, occasion), questions pré-séjour. Vous recevez une réservation prête, sans rebond, avec le profil voyageur consolidé."
+        },
+        {
+          "title": "Programme de fidélité partagé",
+          "body": "Les voyageurs MyConciergeHotel cumulent vos points de fidélité chaîne (Marriott Bonvoy, Four Seasons Preferred, Accor ALL…) ET les avantages MyConciergeHotel (petit-déjeuner, late check-out, crédit hôtel — Essentiel tier). Pas de cannibalisation — notre programme s'ajoute, ne remplace pas."
+        }
+      ]
+    },
+    "criteria": {
+      "title": "Les critères de sélection",
+      "lede": "La sélection est strictement éditoriale et indépendante (voir /le-concierge/methode-editoriale pour la méthode complète). Vous augmentez vos chances d'être retenu si :",
+      "items": [
+        "Vous êtes distingué par Atout France (Palace ou 5 étoiles officiel) ou par Michelin Keys (1, 2 ou 3 clés).",
+        "Votre restaurant gastronomique est étoilé Michelin (1, 2 ou 3 étoiles).",
+        "Vous êtes rang Forbes Travel Guide 4 ou 5 étoiles.",
+        "Vous appartenez à une collection d'auteur (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels, Virtuoso).",
+        "Vous avez au moins 50 avis vérifiés sur Amadeus avec note ≥ 4,2/5.",
+        "Vous disposez d'une signature éditoriale (chambre numérotée mythique, vue, savoir-faire, histoire racontable)."
+      ]
+    },
+    "process": {
+      "title": "Comment candidater",
+      "step1Title": "Manifestation d'intérêt",
+      "step1Body": "Écrivez à partenariats@myconciergehotel.com avec : nom de l'hôtel, code Amadeus property (si connu), distinctions actuelles (Atout France, Michelin Keys, Michelin stars, Forbes, collections), contact direction. Nous accusons réception sous 48h ouvrées.",
+      "step2Title": "Pré-évaluation",
+      "step2Body": "Notre cellule partenariats vérifie l'éligibilité sur dossier (sources publiques, base Amadeus). Réponse sous 5 jours ouvrés. Si dossier favorable, nous planifions un audit terrain dans les 30 jours.",
+      "step3Title": "Audit terrain",
+      "step3Body": "Un conseiller MyConciergeHotel visite l'hôtel anonymement (paye sa nuit aux tarifs publics) et teste les services (check-in, room service, conciergerie maison, spa, table). Audit signé sur 5 axes. Restitution à la direction sous 7 jours après visite.",
+      "step4Title": "Intégration",
+      "step4Body": "Si retenu : signature accord de distribution agence IATA standard, paramétrage Amadeus property, rédaction fiche éditoriale (4-6 semaines), publication. Première réservation typiquement sous 60 jours après accord."
+    },
+    "noPayToPlay": {
+      "title": "Pas de pay-to-play",
+      "body": "Aucun frais d'entrée, pas d'option « mise en avant » payante, pas de boost classement à la commission. Notre revenu vient des commissions IATA standard sur les réservations effectives (12-15% selon GDS), identiques d'un hôtel à l'autre. Refuser le pay-to-play est notre engagement le plus fort vis-à-vis de nos clients — voir /le-concierge/methode-editoriale."
+    },
+    "contact": {
+      "title": "Contacter notre cellule partenariats",
+      "email": "partenariats@myconciergehotel.com",
+      "responseSLA": "Accusé de réception sous 48h ouvrées, pré-évaluation sous 5 jours ouvrés.",
+      "altCanal": "Pour les demandes presse, voir /le-concierge/presse-et-partenaires. Pour les demandes événementiel/MICE, voir /le-concierge/mice-et-seminaires."
+    },
+    "faqTitle": "Hôteliers — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien coûte d'intégrer le catalogue ?",
+        "a": "Aucun coût d'entrée. Notre revenu vient des commissions IATA standard prélevées sur les réservations effectives (12-15% selon le GDS et le tarif). Pas d'abonnement, pas d'option payante."
+      },
+      {
+        "q": "Combien de temps entre la candidature et la première réservation ?",
+        "a": "Si dossier retenu : 5 jours pour la pré-évaluation, 30 jours pour planifier l'audit, 7 jours pour la restitution, 4-6 semaines pour la rédaction et publication de la fiche. Première réservation effective typiquement sous 60-90 jours après accord initial."
+      },
+      {
+        "q": "Que se passe-t-il si nous ne sommes pas retenus ?",
+        "a": "Nous expliquons en transparence pourquoi (critères manquants, conjoncture catalogue, signal audit défavorable). Vous restez éligible à une nouvelle candidature à 12 mois — utile si vous obtenez une nouvelle distinction (Atout France, Michelin) ou si vous renforcez l'opérationnel."
+      },
+      {
+        "q": "Pouvons-nous demander un retrait du catalogue ?",
+        "a": "Oui à tout moment. Préavis de 90 jours pour les réservations en cours (respect du voyageur). Le retrait est sans frais — nous éditorialisons une page d'archive si vous le souhaitez (« hôtel précédemment référencé »)."
+      },
+      {
+        "q": "Pouvons-nous influencer ce qui est écrit dans notre fiche ?",
+        "a": "Vous relisez la fiche avant publication et signalez les erreurs factuelles (chiffres, dates, équipements). Vous ne pouvez pas demander de changement de ton, de score ou de Conseil du Concierge — ces éléments restent éditoriaux. C'est ce qui fait notre crédibilité."
+      },
+      {
+        "q": "Êtes-vous compatibles avec notre channel manager existant ?",
+        "a": "Oui — toute distribution passe par Amadeus GDS standard (codes A, B, C selon votre paramétrage hôtel). Si vous êtes sur Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, la connectivité est immédiate — votre channel manager pousse l'inventaire vers Amadeus, nous le récupérons."
+      }
+    ]
+  },
+  "conciergeMice": {
+    "metaTitle": "MICE & événements privés — Devis sous 24h | MyConciergeHotel",
+    "metaDesc": "Séminaires, mariages, événements privés dans nos Palaces et hôtels 5★ : capacités salles, formats, devis sur-mesure sous 24h. Conciergerie dédiée MICE, agence IATA, garantie APST.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "MICE & événements privés",
+    "title": "MICE, séminaires et événements privés",
+    "lede": "Nos Palaces et hôtels 5 étoiles accueillent vos séminaires d'entreprise, mariages, anniversaires privés, lancements de produit, retraites créatives. Notre cellule MICE prépare votre devis sur-mesure sous 24h ouvrées et coordonne les détails avec la direction de l'hôtel.",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Comment organiser un séminaire ou un événement privé via MyConciergeHotel ?",
+    "aeoAnswer": "Trois étapes : 1) précisez votre besoin (type d'événement, dates, nombre de participants, ville ou région cible) via le formulaire ou par e-mail à mice@myconciergehotel.com ; 2) notre cellule MICE sélectionne 3-5 hôtels éligibles dans notre catalogue Palaces et 5★, vérifie disponibilité salles et chambres, prépare un devis comparatif sous 24h ouvrées ; 3) après choix, votre concierge MICE coordonne brief audio-visuel, restauration, hébergement, transferts et timing. Aucun frais agence supplémentaire — commissions IATA standard. Mise à jour {date}.",
+    "formats": {
+      "title": "5 formats d'événement gérés",
+      "items": [
+        {
+          "title": "Séminaire d'entreprise",
+          "body": "10-200 participants. Salles plénières + sous-commissions, restauration corporate (déjeuners de travail, dîners de gala), team-building, transferts groupe. Adaptés pour direction générale, sales kick-off, codir, formations leadership."
+        },
+        {
+          "title": "Mariage & cérémonie privée",
+          "body": "30-300 invités. Cérémonie laïque ou religieuse, cocktail, dîner assis (rond ou banquet), soirée dansante. Block chambres pour invités, suite mariés offerte selon hôtel. Coordination wedding planner externe possible."
+        },
+        {
+          "title": "Anniversaire privé / fête de famille",
+          "body": "15-100 invités. Privatisation d'un restaurant gastronomique, terrasse ou cave à vin. Format dîner assis ou cocktail dînatoire. Idéal anniversaires marquants, baptêmes, fêtes de fiançailles."
+        },
+        {
+          "title": "Lancement produit / soirée presse",
+          "body": "50-400 invités. Privatisation de salons d'apparat, dressing rooms pour la presse, signalétique éphémère. Coordination régisseur audiovisuel, sécurité, transferts presse. Reporting post-événement (photos officielles)."
+        },
+        {
+          "title": "Retraite créative / off-site direction",
+          "body": "5-30 participants. Hôtel privatisé en petit comité, format intensif (3-5 jours), travail en salle + ateliers extérieurs (cuisine, dégustation, nature). Profils CEO/CTO/board, agences créatives, équipes produit."
+        }
+      ]
+    },
+    "topVenues": {
+      "title": "Nos hôtels MICE de référence",
+      "lede": "Une sélection parmi notre catalogue, en fonction du format et de la capacité recherchés (la liste complète des venues éligibles est partagée avec votre devis sur-mesure) :",
+      "items": [
+        "Paris : Le Bristol (15 salles, jusqu'à 500), Plaza Athénée (10 salles, jusqu'à 350), Ritz Paris (8 salles, jusqu'à 250), Four Seasons George V (10 salles, jusqu'à 350), Le Meurice (12 salles, jusqu'à 300).",
+        "Côte d'Azur : Hôtel du Cap-Eden-Roc (cap 250 en plein air), Grand-Hôtel du Cap-Ferrat (cap 200), Hôtel Martinez Cannes (cap 800 en plénière), La Réserve Ramatuelle (cap 80 intime).",
+        "Alpes : Cheval Blanc Courchevel (privatisations 30-50), Les Airelles Gstaad (cap 100), Four Seasons Megève (privatisations 60-120), Le K2 Palace (cap 60).",
+        "Bordelais : Les Sources de Caudalie (cap 150 vignobles), Château Smith Haut Lafitte (cap 200 réceptions).",
+        "Champagne : Domaine Les Crayères (cap 80 cérémonies)."
+      ]
+    },
+    "form": {
+      "title": "Demander un devis sous 24h",
+      "lede": "Précisez votre besoin — notre cellule MICE revient vers vous avec 3-5 propositions chiffrées sous 24h ouvrées.",
+      "namePlaceholder": "Votre prénom et nom",
+      "companyPlaceholder": "Société (optionnel)",
+      "emailPlaceholder": "Adresse e-mail",
+      "phonePlaceholder": "Téléphone (recommandé pour cellule MICE)",
+      "formatPlaceholder": "Type d'événement (séminaire, mariage, soirée presse…)",
+      "guestsPlaceholder": "Nombre de participants",
+      "datesPlaceholder": "Dates ou fenêtre (ex : sept-oct 2026)",
+      "destinationPlaceholder": "Destination (Paris, Côte d'Azur, libre…)",
+      "messagePlaceholder": "Précisez votre besoin (programme, contraintes, budget indicatif)…",
+      "consent": "J'accepte que mes données soient utilisées pour préparer le devis (politique de confidentialité).",
+      "submit": "Recevoir mon devis sous 24h",
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à mice@myconciergehotel.com avec ces informations."
+    },
+    "contact": {
+      "title": "Contacter notre cellule MICE",
+      "email": "mice@myconciergehotel.com",
+      "responseSLA": "Devis comparatif (3-5 hôtels) sous 24h ouvrées. Pour les demandes urgentes < 7 jours, appelez le standard.",
+      "altCanal": "Pour devenir hôtel partenaire, voir /le-concierge/pour-les-hoteliers. Pour la presse, voir /le-concierge/presse-et-partenaires."
+    },
+    "faqTitle": "MICE — questions fréquentes",
+    "faq": [
+      {
+        "q": "Quel est le délai pour recevoir un devis ?",
+        "a": "Sous 24 heures ouvrées pour les demandes standards (séminaire, événement privé, mariage). Pour les demandes complexes (privatisation totale, événement international, calendrier serré), comptez 48-72h ouvrées. Demandes urgentes < 7 jours : appelez la cellule MICE directement."
+      },
+      {
+        "q": "Quelle est votre commission sur les événements MICE ?",
+        "a": "Commission IATA standard prélevée sur la part hôtel (8-12% selon les hôtels et le périmètre). Pas de marge ajoutée sur les prestations événementielles externes (DJ, photographe, traiteur extérieur) — nous coordonnons mais ne facturons pas de commission sur ces poignées."
+      },
+      {
+        "q": "Pouvez-vous organiser un événement multi-hôtels ?",
+        "a": "Oui — fréquent pour les anniversaires (cocktail au Bristol, dîner au Plaza Athénée), les séminaires DACH/Europe (Paris + Riviera sur 3 jours), les destinations weddings (cérémonie en Provence, after Côte d'Azur). Notre cellule MICE coordonne logistique, transferts, signalétique unifiée."
+      },
+      {
+        "q": "Acceptez-vous les paiements échelonnés pour les gros événements ?",
+        "a": "Oui — pratique standard pour les événements > 30 000 €. Échéancier type : 30% acompte à la confirmation, 30% 60 jours avant l'événement, 40% solde 7 jours avant. Modalités précisées sur devis."
+      },
+      {
+        "q": "Que se passe-t-il en cas d'annulation ?",
+        "a": "Politique d'annulation contractuelle, communiquée sur devis avant signature. Standard : annulation > 90 jours = pas de frais ; 60-90 jours = 30% retenu ; 30-60 jours = 50% retenu ; < 30 jours = 100% retenu. Possibilité d'assurance annulation (Allianz, Mondial Assistance) souscrite séparément."
+      },
+      {
+        "q": "Pouvez-vous gérer la coordination AV / régie / catering externe ?",
+        "a": "Oui — nous travaillons avec une short-list de prestataires AV (Tech Event, Lagoona, AVProject), régisseurs (Pulse, Pollen Studio) et traiteurs (Potel et Chabot, Saint-Clair Le Traiteur, Lenôtre). Devis intégré ou séparé selon votre préférence. Vos prestataires habituels sont également les bienvenus."
+      }
+    ]
+  },
+  "conciergeLoyalty": {
+    "metaTitle": "Programme de fidélité MyConciergeHotel — Avantages dès la 1re nuit",
+    "metaDesc": "Notre programme de fidélité : tier Essentiel automatique (Little Hotelier — petit-déj offert, late check-out, crédit hôtel) et tier Prestige (abonnement — surclassement, transfert aéroport). Conditions complètes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Programme de fidélité",
+    "title": "Le programme de fidélité MyConciergeHotel",
+    "lede": "Dès votre première nuit, MyConciergeHotel vous offre des avantages cumulables avec les programmes de chaîne. Deux tiers : Essentiel (gratuit, automatique sur le catalogue Little Hotelier) et Prestige (abonnement, avantages renforcés sur l'ensemble du catalogue Palaces et 5★).",
+    "lastReviewed": "2026-05-12",
+    "aeoQuestion": "Quels avantages offre le programme de fidélité MyConciergeHotel ?",
+    "aeoAnswer": "Deux tiers : Essentiel (gratuit, automatique dès la 1re nuit sur les hôtels du catalogue Little Hotelier) — petit-déjeuner offert pour 2, late check-out 14h, crédit hôtel selon partenaire. Prestige (sur abonnement) — surclassement chambre quand disponible, transfert aéroport, petit-déjeuner garanti, late check-out 16h confirmé. Les avantages se cumulent avec les programmes des chaînes (Four Seasons Preferred, Marriott Bonvoy…). Mise à jour {date}.",
+    "tiers": {
+      "title": "Deux tiers, deux promesses",
+      "essentiel": {
+        "name": "Essentiel",
+        "tagline": "Automatique, gratuit",
+        "lede": "Dès votre première réservation sur un hôtel du catalogue Little Hotelier — pas de carte, pas de minimum, pas de seuil de nuitées.",
+        "benefits": [
+          {
+            "title": "Petit-déjeuner offert pour 2",
+            "body": "Selon disponibilité et politique de l'hôtel partenaire. Confirmé à la réservation par votre concierge si l'hôtel le propose en avantage fidélité."
+          },
+          {
+            "title": "Late check-out à 14h",
+            "body": "Selon disponibilité (occupation de la chambre suivante). Demandé à la réservation puis confirmé la veille du départ par l'hôtel."
+          },
+          {
+            "title": "Crédit hôtel",
+            "body": "Montant variable selon hôtel partenaire (15-30 €/séjour en standard). Utilisable au bar, restaurant ou spa. Non remboursable, non transférable."
+          }
+        ]
+      },
+      "prestige": {
+        "name": "Prestige",
+        "tagline": "Sur abonnement",
+        "lede": "Avantages renforcés sur l'ensemble du catalogue (pas seulement Little Hotelier). Tarif et conditions d'abonnement à publier à l'ouverture du programme.",
+        "benefits": [
+          {
+            "title": "Surclassement chambre",
+            "body": "Quand disponible à l'arrivée. Confirmé sur place selon occupation. Ne se demande pas — l'hôtel applique automatiquement pour les membres Prestige."
+          },
+          {
+            "title": "Transfert aéroport",
+            "body": "Aller ou retour depuis l'aéroport le plus proche, dans la limite de 50 km. Au-delà, supplément kilométrique au prix d'achat."
+          },
+          {
+            "title": "Petit-déjeuner offert pour 2 (garanti)",
+            "body": "Indépendant de la politique de l'hôtel — le supplément est pris en charge par votre concierge si l'hôtel ne le propose pas en avantage natif."
+          },
+          {
+            "title": "Late check-out à 16h (confirmé)",
+            "body": "Confirmé à la réservation. Si l'hôtel ne peut tenir l'engagement, votre concierge négocie une compensation (nuit supplémentaire à tarif préférentiel, surclassement)."
+          }
+        ]
+      }
+    },
+    "compatibility": {
+      "title": "Cumul avec les programmes des chaînes",
+      "lede": "Notre programme s'ajoute à celui de l'hôtel — il ne le remplace jamais. Vous gagnez vos points chaîne ET nos avantages.",
+      "items": [
+        "Joignez votre numéro de fidélité chaîne (Four Seasons Preferred, Marriott Bonvoy pour Ritz-Carlton, Accor ALL pour Sofitel/Raffles, IHG One Rewards) au moment du checkout.",
+        "Les points chaîne sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne, c'est un standard de toutes les agences IATA.",
+        "Nos avantages MyConciergeHotel sont indépendants — petit-déjeuner, late check-out, crédit hôtel sont confirmés en plus des bénéfices fidélité de la chaîne.",
+        "Pour les chaînes très sélectives sur l'attribution de points en agence (Hyatt World of Hyatt notamment), notre conciergerie privilégie la transparence : nous indiquons à la réservation si les points sont ou non attribués."
+      ]
+    },
+    "eligibility": {
+      "title": "Qui est éligible ?",
+      "essentiel": "Toute personne ayant créé un compte client MyConciergeHotel et réservant un hôtel du catalogue Little Hotelier. Aucun seuil d'âge, pas de zone géographique, gratuit à vie.",
+      "prestige": "Sur abonnement annuel. Conditions d'inscription, tarif et avantages détaillés à publier au lancement du programme. Le tier Essentiel reste actif si vous arrêtez Prestige."
+    },
+    "faqTitle": "Fidélité — questions fréquentes",
+    "faq": [
+      {
+        "q": "Comment activer mon tier Essentiel ?",
+        "a": "Aucune activation manuelle nécessaire — créez votre compte sur /compte/inscription et le tier Essentiel est automatique. À votre première réservation sur un hôtel Little Hotelier, les avantages sont confirmés par e-mail par votre concierge."
+      },
+      {
+        "q": "Quels hôtels font partie du catalogue Little Hotelier ?",
+        "a": "Une centaine d'établissements 5★ et Palace en France et à l'international, connectés à notre canal Little Hotelier. Chaque fiche hôtel affiche un badge \"Tier Essentiel\" si l'établissement est éligible. La liste évolue trimestriellement — voir l'index des marques sur /marques pour le détail."
+      },
+      {
+        "q": "Quand le tier Prestige sera-t-il disponible ?",
+        "a": "Le tier Prestige est en phase de préparation (ADR-0005). Les conditions exactes — tarif annuel, mode d'inscription, périmètre des avantages — seront publiées au lancement. Inscrivez-vous à notre newsletter sur /le-concierge pour être notifié en priorité."
+      },
+      {
+        "q": "Les avantages sont-ils garantis ou \"selon disponibilité\" ?",
+        "a": "Tier Essentiel : petit-déjeuner et late check-out sont soumis à la politique de l'hôtel partenaire et à la disponibilité (chambre suivante occupée). Tier Prestige : petit-déjeuner et late check-out 16h sont garantis contractuellement — si l'hôtel ne peut tenir, votre concierge négocie une compensation."
+      },
+      {
+        "q": "Puis-je cumuler avec mes points Marriott Bonvoy ou Four Seasons Preferred ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne à la réservation. Les points sont crédités par l'hôtel après le séjour. Nos avantages MyConciergeHotel (petit-déjeuner, late check-out, crédit) sont indépendants et s'ajoutent."
+      },
+      {
+        "q": "Que se passe-t-il si je modifie ou annule ma réservation ?",
+        "a": "L'éligibilité aux avantages suit la réservation. Si vous annulez gratuitement (tarif flexible avant la limite d'annulation), les avantages ne s'appliquent évidemment pas. Si vous modifiez les dates (nouvelle nuitée), les avantages se reportent. En cas d'annulation tardive avec frais, les avantages ne sont pas remboursés."
+      },
+      {
+        "q": "Mon crédit hôtel inutilisé est-il remboursé ?",
+        "a": "Non — le crédit hôtel (tier Essentiel) est utilisable sur place pendant votre séjour, au bar, restaurant ou spa. Non utilisé, il n'est ni reporté sur un séjour suivant ni remboursé. La direction de l'hôtel et notre conciergerie travaillent à le porter à votre connaissance dès l'arrivée."
+      }
+    ],
+    "cta": {
+      "title": "Profitez des avantages dès votre prochaine réservation",
+      "createAccount": "Créer mon compte gratuitement",
+      "browseCatalog": "Voir le catalogue Little Hotelier",
+      "newsletter": "Être notifié du lancement Prestige"
+    }
+  },
+  "conciergeFaq": {
+    "metaTitle": "FAQ — Toutes vos questions sur MyConciergeHotel | Réservation, fidélité, garanties",
+    "metaDesc": "Foire aux questions complète : agence IATA, réservation Amadeus, tarifs nets GDS, programme de fidélité, paiement sécurisé, modifications, annulation, contact. Réponses claires sur les 35 questions les plus fréquentes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "FAQ générale",
+    "title": "Foire aux questions",
+    "lede": "Les 35 questions les plus fréquemment posées à notre conciergerie, regroupées en 6 thèmes : à propos de l'agence, réservation, tarifs et paiement, fidélité, modifications et annulation, vie de votre compte client. Cliquez pour déplier la réponse.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Où trouver la réponse à votre question chez MyConciergeHotel ?",
+    "aeoAnswer": "Cette page rassemble 35 réponses aux questions les plus fréquemment posées à notre conciergerie, sur 6 thèmes : qui nous sommes (agence IATA / APST), comment réserver (Amadeus, conciergerie), nos tarifs (nets GDS, comparateur), notre programme de fidélité (Essentiel / Prestige), modifier ou annuler, et la vie de votre compte. Si votre question n'y figure pas, écrivez-nous via /le-concierge/contact — réponse sous 24h ouvrées. Mise à jour {date}.",
+    "themes": {
+      "agency": {
+        "title": "À propos de l'agence",
+        "lede": "Qui sommes-nous, sur quels critères sélectionnons-nous, comment fonctionne la conciergerie."
+      },
+      "booking": {
+        "title": "Réserver",
+        "lede": "Comment trouver un hôtel, choisir un tarif, confirmer une réservation."
+      },
+      "pricing": {
+        "title": "Tarifs et paiement",
+        "lede": "Tarifs nets GDS, méthodes de paiement, comparateur, paiement échelonné."
+      },
+      "loyalty": {
+        "title": "Programme de fidélité",
+        "lede": "Tier Essentiel, tier Prestige, cumul avec les programmes de chaîne."
+      },
+      "modify": {
+        "title": "Modifier, annuler, rembourser",
+        "lede": "Politique d'annulation, modification de dates, remboursement, recours."
+      },
+      "account": {
+        "title": "Mon compte client",
+        "lede": "Création, gestion, RGPD, favoris, historique de réservations."
+      }
+    },
+    "items": [
+      {
+        "theme": "agency",
+        "q": "MyConciergeHotel est-il une agence de voyage ou une plateforme en ligne ?",
+        "a": "Une agence de voyage. MyConciergeHotel SAS est immatriculée IATA, membre APST avec garantie financière professionnelle, et soumise au Code du tourisme français. Notre activité est encadrée — contrairement à une plateforme qui ne fait qu'intermédiation. Vos paiements sont protégés en cas de défaillance par la garantie APST."
+      },
+      {
+        "theme": "agency",
+        "q": "Qu'est-ce que l'accréditation IATA et la garantie APST ?",
+        "a": "IATA est l'association mondiale des compagnies aériennes — l'accréditation IATA permet à une agence d'émettre des billets et de réserver via les GDS (Amadeus, Sabre, Travelport) aux tarifs nets négociés. APST est l'Association Professionnelle de Solidarité du Tourisme, qui garantit financièrement les paiements clients en cas de défaillance de l'agence."
+      },
+      {
+        "theme": "agency",
+        "q": "Sur quels critères sélectionnez-vous les hôtels ?",
+        "a": "Sélection éditoriale indépendante sur 8 critères croisés : Atout France (Palace, 5★), Michelin Keys, étoiles Michelin de la table, Forbes Travel Guide, appartenance à une collection d'auteur (Relais & Châteaux, LHW), avis Amadeus vérifiés, audit interne MyConciergeHotel, et signature éditoriale. Voir /le-concierge/methode-editoriale pour le détail."
+      },
+      {
+        "theme": "agency",
+        "q": "Les hôtels paient-ils pour figurer dans votre catalogue ?",
+        "a": "Non, jamais. Notre revenu vient des commissions sur réservations (standard IATA), identiques d'un hôtel à l'autre. Refuser le pay-to-play est notre engagement le plus fort."
+      },
+      {
+        "theme": "agency",
+        "q": "Qu'est-ce que le Conseil du Concierge ?",
+        "a": "Une signature éditoriale propriétaire : chaque fiche hôtel se conclut par 60-110 mots livrant un secret opérationnel concret (numéro de chambre signature, table cachée, accès, timing optimal). Une information qu'aucun guide généraliste ni agrégateur ne publie. Notre USP."
+      },
+      {
+        "theme": "agency",
+        "q": "Couvrez-vous des destinations hors France ?",
+        "a": "Oui — 8 pays sont publiés avec guide éditorial (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis). Notre réseau Amadeus couvre 950 000 hôtels dans le monde — au-delà du catalogue éditorial, tout hôtel listé peut être réservé sur demande conciergerie."
+      },
+      {
+        "theme": "booking",
+        "q": "Comment réserver un hôtel via MyConciergeHotel ?",
+        "a": "Voir le guide complet sur /le-concierge/reserver. En résumé : cherchez l'hôtel → choisissez vos dates → sélectionnez un tarif → payez par carte sécurisée → confirmation instantanée (mode Amadeus) ou sous 24h (mode conciergerie pour hôtels hors GDS)."
+      },
+      {
+        "theme": "booking",
+        "q": "Combien de temps pour confirmer ma réservation ?",
+        "a": "Mode Amadeus : instantanée (PNR + voucher e-mail dans les secondes). Mode conciergerie : sous 24h ouvrées, généralement 4-6h aux heures de bureau."
+      },
+      {
+        "theme": "booking",
+        "q": "Puis-je réserver pour quelqu'un d'autre ?",
+        "a": "Oui — au moment du checkout, vous indiquez le nom du voyageur réel (différent du payeur). L'hôtel reçoit le nom du voyageur pour le check-in. Le payeur reçoit la facture et la confirmation."
+      },
+      {
+        "theme": "booking",
+        "q": "Quels documents pour le check-in à l'hôtel ?",
+        "a": "Pièce d'identité valide (carte d'identité, passeport) au nom du voyageur. La carte ayant servi au paiement n'est pas systématiquement demandée mais peut l'être par certains hôtels — votre confirmation l'indique."
+      },
+      {
+        "theme": "booking",
+        "q": "Mes enfants doivent-ils être déclarés à la réservation ?",
+        "a": "Oui — saisissez le nombre d'adultes ET d'enfants au moment du checkout. Les politiques varient selon les hôtels (lit d'appoint, chambre familiale, supplément âge). Une chambre déclarée 2 adultes ne peut accueillir un enfant non déclaré sans accord de l'hôtel."
+      },
+      {
+        "theme": "pricing",
+        "q": "Vos tarifs sont-ils plus chers que sur le site de l'hôtel ?",
+        "a": "Non. Nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Aucune commission ajoutée. Notre comparateur non affilié affiche en transparence les tarifs Booking, Hotels.com, Expedia — vous voyez le delta directement."
+      },
+      {
+        "theme": "pricing",
+        "q": "Quels modes de paiement acceptez-vous ?",
+        "a": "Carte bancaire (Visa, Mastercard, American Express) via iframe sécurisée Amadeus Payments — PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Pour les paiements > 5 000 €, virement bancaire sur demande conciergerie. Pas de paiement par chèque ou espèces."
+      },
+      {
+        "theme": "pricing",
+        "q": "Le paiement échelonné est-il possible ?",
+        "a": "Sur demande pour les séjours > 5 000 € : acompte 30% à la réservation, solde 30 jours avant l'arrivée. Pour des montants inférieurs, le paiement en 3 ou 4 fois sans frais via Apple Pay / Google Pay est disponible chez certains hôteliers — l'option apparaît au checkout si éligible."
+      },
+      {
+        "theme": "pricing",
+        "q": "À quoi sert votre comparateur de prix ?",
+        "a": "À vous garantir la transparence. Sur chaque fiche hôtel, nous affichons les tarifs publics (TTC EUR) de Booking, Hotels.com, Expedia pour les dates que vous avez sélectionnées — texte sobre, sans lien d'affiliation, sans logo. Vous voyez immédiatement le delta avec notre tarif net GDS."
+      },
+      {
+        "theme": "pricing",
+        "q": "La taxe de séjour est-elle incluse dans le tarif ?",
+        "a": "Non. La taxe de séjour est due à l'hôtel à votre arrivée, conformément au Code général des impôts français (varie 0,20-5 € par personne par nuit selon la ville et la catégorie). Le tarif affiché sur notre site est TTC mais hors taxe de séjour — l'hôtel l'ajoute à la facture finale."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Comment fonctionne le programme de fidélité ?",
+        "a": "Voir /le-concierge/fidelite pour le détail complet. En résumé : tier Essentiel (gratuit, automatique sur Little Hotelier — petit-déjeuner, late check-out, crédit) et tier Prestige (sur abonnement — surclassement, transfert aéroport, late check-out 16h confirmé). Cumulable avec les programmes des chaînes."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Mes points Marriott Bonvoy ou Four Seasons Preferred sont-ils crédités ?",
+        "a": "Oui — joignez votre numéro de fidélité chaîne au checkout. Les points sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne (standard agences)."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Le tier Essentiel a-t-il un coût ?",
+        "a": "Non, gratuit à vie. Aucun seuil de nuitées, pas de carte d'adhésion. Activé automatiquement à la création de votre compte client + première réservation sur un hôtel Little Hotelier."
+      },
+      {
+        "theme": "loyalty",
+        "q": "Quand le tier Prestige sera-t-il lancé ?",
+        "a": "En préparation (ADR-0005). Tarif annuel, mode d'inscription et périmètre exacts à publier au lancement. Inscrivez-vous à la newsletter sur /le-concierge pour être notifié."
+      },
+      {
+        "theme": "modify",
+        "q": "Comment annuler ma réservation ?",
+        "a": "Selon la politique d'annulation du tarif choisi (explicite à la réservation et dans votre confirmation). Tarifs flexibles : annulation gratuite jusqu'à 24-48h avant l'arrivée. Tarifs early-bird : non-remboursables. Annulation gérée depuis votre compte MyConciergeHotel ou par votre concierge dédié."
+      },
+      {
+        "theme": "modify",
+        "q": "Puis-je modifier les dates de mon séjour ?",
+        "a": "Selon les conditions du tarif. Si flexible, modification gratuite (sous réserve de disponibilité au nouveau tarif). Si non-remboursable, modification gratuite parfois possible avec changement de dates équivalentes — sinon annulation + nouvelle réservation."
+      },
+      {
+        "theme": "modify",
+        "q": "Que faire en cas de problème pendant mon séjour ?",
+        "a": "Le numéro d'urgence 24/7 vous est communiqué dans votre confirmation. Pour les problèmes critiques (sécurité, surbooking, panne majeure), un conseiller en astreinte vous répond. Pour les sujets non urgents (préférence chambre, demande supplémentaire), écrivez à votre concierge dédié à l'e-mail indiqué dans votre confirmation."
+      },
+      {
+        "theme": "modify",
+        "q": "Comment obtenir un remboursement en cas de problème majeur à l'hôtel ?",
+        "a": "Documentez les faits (photos, e-mail à la direction de l'hôtel pendant le séjour) et écrivez à votre concierge sous 30 jours après le départ. Notre conciergerie négocie avec l'hôtel un geste commercial (remboursement partiel, séjour-cadeau). En cas d'échec, recours à la médiation du tourisme et de voyage (MTV) — gratuite."
+      },
+      {
+        "theme": "modify",
+        "q": "Le check-in anticipé ou late check-out sont-ils possibles ?",
+        "a": "Sur demande au moment de la réservation ou auprès de votre concierge dédié. Le late check-out à 14h est offert tier Essentiel (selon disponibilité), 16h confirmé tier Prestige. Le check-in anticipé reste soumis à la disponibilité de la chambre."
+      },
+      {
+        "theme": "modify",
+        "q": "Et si l'hôtel ne respecte pas un avantage fidélité ?",
+        "a": "Documentez (photo facture si supplément petit-déjeuner facturé alors qu'offert) et signalez-le à votre concierge sous 7 jours après le départ. Notre conciergerie obtient le remboursement direct auprès de l'hôtel ou applique un crédit MyConciergeHotel utilisable sur votre prochain séjour."
+      },
+      {
+        "theme": "account",
+        "q": "Comment créer un compte client ?",
+        "a": "Sur /compte/inscription — e-mail + mot de passe, validation par lien e-mail. Le compte est gratuit, sans engagement. Il vous permet d'activer le tier Essentiel, sauvegarder vos favoris, retrouver l'historique de vos réservations, et exercer vos droits RGPD."
+      },
+      {
+        "theme": "account",
+        "q": "Comment gérer mes favoris ?",
+        "a": "Depuis chaque fiche hôtel, cliquez sur l'icône cœur pour ajouter à vos favoris. Retrouvez la liste sur /compte/favoris. Synchronisé entre devices via votre compte connecté."
+      },
+      {
+        "theme": "account",
+        "q": "Comment exercer mes droits RGPD ?",
+        "a": "Écrivez à dpo@myconciergehotel.com en précisant votre demande (accès, rectification, suppression, portabilité, opposition). Réponse sous 30 jours conformément au RGPD. La suppression complète du compte est aussi disponible depuis /compte (section « Confidentialité »)."
+      },
+      {
+        "theme": "account",
+        "q": "J'ai oublié mon mot de passe — comment le récupérer ?",
+        "a": "Sur /compte/mot-de-passe-oublie — saisissez votre e-mail, recevez un lien sécurisé valable 24h. Cliquez sur le lien et définissez un nouveau mot de passe. Si vous ne recevez pas l'e-mail, vérifiez les spams ou contactez la conciergerie."
+      },
+      {
+        "theme": "account",
+        "q": "Puis-je supprimer mon compte sans perdre l'historique de mes réservations ?",
+        "a": "À la suppression du compte, vos données personnelles sont effacées sous 30 jours. Les preuves comptables (factures de réservation) restent archivées 10 ans conformément aux obligations légales — mais elles ne sont plus liées à votre identité (anonymisées)."
+      },
+      {
+        "theme": "account",
+        "q": "Mon compte est-il sécurisé ?",
+        "a": "Mots de passe hashés (Argon2id), 2FA via TOTP recommandée à l'activation, cookies HttpOnly + SameSite=Strict, CSRF token sur chaque action. Audit OWASP annuel. En cas d'incident, notification sous 72h conformément au RGPD."
+      },
+      {
+        "theme": "account",
+        "q": "Comment recevoir vos communications par e-mail ?",
+        "a": "Cochez les préférences sur /compte (section « Notifications ») : newsletter mensuelle, alerte ouverture, lancement Prestige, événements partenaires. Désinscription en un clic depuis chaque e-mail. Aucune cession de votre adresse à un tiers."
+      },
+      {
+        "theme": "account",
+        "q": "Comment contacter votre service client ?",
+        "a": "Trois canaux : téléphone +33 1 84 60 95 50 (lundi-samedi 9h-19h), e-mail contact@myconciergehotel.com (sous 24h ouvrées), formulaire sur /le-concierge/contact. Pour une urgence pendant le séjour, voir le numéro d'astreinte dans votre confirmation."
+      },
+      {
+        "theme": "account",
+        "q": "Ma question ne figure pas dans cette FAQ — que faire ?",
+        "a": "Contactez-nous sur /le-concierge/contact ou par e-mail à contact@myconciergehotel.com. Notre conciergerie vous répond sous 24h ouvrées. Si votre question est récurrente, nous l'ajouterons à cette FAQ — qui est mise à jour mensuellement."
+      }
+    ]
+  },
+  "conciergeMethod": {
+    "metaTitle": "Notre méthode éditoriale — Comment nous sélectionnons les Palaces | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel sélectionne les Palaces et hôtels 5★ français selon une méthode transparente : distinctions Atout France, Michelin Keys, Forbes, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "EEAT — méthode éditoriale",
+    "title": "Notre méthode éditoriale",
+    "lede": "Comment une adresse rejoint notre catalogue ? Sur quels critères nos classements sont-ils établis ? Voici le détail public de la méthode appliquée par notre conciergerie — sources nommées, scoring vérifiable, indépendance totale vis-à-vis des hôtels.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment MyConciergeHotel sélectionne ses Palaces et hôtels 5 étoiles ?",
+    "aeoAnswer": "Chaque adresse de notre catalogue passe par un audit en 8 critères : distinction Atout France (Palace, 5★), Michelin Keys, étoiles Michelin de la table, rang Forbes Travel Guide, appartenance à une collection d'auteur (Relais & Châteaux, LHW), avis Amadeus vérifiés, qualité de service mesurée par audit interne, et signature éditoriale (chambre signature, vue, accès). Les sources sont nommées en bas de chaque classement. Aucun hôtel ne paie son entrée — MyConciergeHotel est une agence IATA indépendante. Mise à jour {date}.",
+    "principles": {
+      "title": "Quatre principes intransgressables",
+      "independence": {
+        "title": "Indépendance financière",
+        "body": "Notre revenu vient des commissions sur réservations (standard IATA), identiques d'un hôtel à l'autre. Aucun hôtel ne paie pour figurer ou être mis en avant. Aucun lien d'affiliation déguisé. Nos recommandations ne dépendent pas de la marge dégagée."
+      },
+      "transparency": {
+        "title": "Transparence des sources",
+        "body": "Chaque classement liste en bas de page les sources externes citées (Atout France, Michelin Guide, Forbes Travel Guide, Wikidata, presse hôtelière). Chaque score interne est explicité dans la section méthodologie de la fiche. Vous pouvez vérifier."
+      },
+      "expertise": {
+        "title": "Expertise vérifiée",
+        "body": "Chaque fiche est rédigée par un membre de notre conciergerie qui a visité l'hôtel ou échangé directement avec la direction. Aucune description ne vient de la fiche commerciale de l'hôtel ou d'un agrégateur. Les conseillers sont identifiés par leur nom et fonction."
+      },
+      "freshness": {
+        "title": "Mise à jour datée",
+        "body": "Chaque fiche affiche sa date de dernière revue éditoriale. Les classements sont revus trimestriellement (pilier) ou semestriellement (thématique). Les changements de classement (Atout France, Michelin) sont reflétés sous 30 jours."
+      }
+    },
+    "criteria": {
+      "title": "Les 8 critères de sélection",
+      "lede": "Aucun critère seul n'est suffisant — la sélection croise plusieurs signaux. Une adresse non distinguée par Atout France peut entrer si sa table est étoilée Michelin et qu'elle appartient à une collection d'auteur. Une adresse Palace ne rentre pas si son audit interne révèle un service dégradé.",
+      "items": [
+        {
+          "name": "Distinction Atout France",
+          "desc": "Mention Palace (≈30 adresses en France) ou classement 5 étoiles officiel. La mention Palace est la plus haute distinction française — accordée pour l'art de vivre, le service personnalisé, le rayonnement international."
+        },
+        {
+          "name": "Michelin Keys",
+          "desc": "Système de notation hôtelière du Guide Michelin (1, 2 ou 3 clés). Lancé en 2024, c'est l'équivalent hôtelier des étoiles de table. Critère pondéré +20% dans notre score depuis 2026."
+        },
+        {
+          "name": "Étoiles Michelin de la table",
+          "desc": "Une, deux ou trois étoiles décernées au restaurant gastronomique de l'hôtel. Critère majeur pour notre catégorie « Palaces gastronomie » et nos classements thématiques."
+        },
+        {
+          "name": "Rang Forbes Travel Guide",
+          "desc": "Notation 4 ou 5 étoiles Forbes (système américain prestigieux). Particulièrement utile pour les hôtels internationaux et les chaînes (Four Seasons, Ritz-Carlton, Rosewood)."
+        },
+        {
+          "name": "Collection d'auteur",
+          "desc": "Appartenance à Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels, Preferred Hotels & Resorts, Virtuoso. Ces collections appliquent leurs propres critères stricts d'entrée."
+        },
+        {
+          "name": "Avis Amadeus vérifiés",
+          "desc": "Sentiment agrégé sur Amadeus (note /5 + reviewCount). Filtrage : minimum 50 avis vérifiés. Pondération inverse du volume pour éviter de pénaliser les adresses confidentielles à petite échelle."
+        },
+        {
+          "name": "Audit interne MyConciergeHotel",
+          "desc": "Notre conciergerie visite, échange avec la direction, teste les services (check-in, room service, conciergerie maison) et note sur 5 axes : accueil, chambre, table, spa/expérience, infrastructure."
+        },
+        {
+          "name": "Signature éditoriale",
+          "desc": "Une adresse doit avoir une signature reconnaissable — une chambre numérotée mythique, une vue, un savoir-faire, une histoire racontable. Sans signature, l'adresse rejoint la liste mais pas le top des classements."
+        }
+      ]
+    },
+    "process": {
+      "title": "Comment une adresse rejoint notre catalogue",
+      "step1Title": "Proposition interne",
+      "step1Body": "Notre conciergerie identifie une adresse — soit suite à un événement de marché (ouverture, rachat, Atout France), soit sur recommandation client, soit lors d'un audit de cluster (« quels Palaces manquent à notre Côte d'Azur ? »). Aucune candidature spontanée n'est acceptée.",
+      "step2Title": "Audit terrain",
+      "step2Body": "Un conseiller visite l'hôtel ou organise un entretien Visio avec la direction. Vérification des 8 critères, échange sur la disponibilité GDS Amadeus, conditions de paiement, programme de fidélité applicable, photos disponibles, droits d'usage.",
+      "step3Title": "Rédaction et publication",
+      "step3Body": "La fiche est rédigée par le conseiller (description longue 600-1000 mots), enrichie d'un Conseil du Concierge (50-110 mots, secret opérationnel concret). Validation éditoriale interne puis publication. Chaque revue trimestrielle peut faire évoluer le classement de l'adresse.",
+      "step4Title": "Revue continue",
+      "step4Body": "Tout changement matériel (perte d'Atout France, fermeture du restaurant, rachat par une chaîne, audit interne défavorable) déclenche une révision dans les 30 jours. Une adresse peut sortir du catalogue — c'est rare mais documenté."
+    },
+    "faqTitle": "Questions sur notre méthode",
+    "faq": [
+      {
+        "q": "Un hôtel peut-il payer pour figurer dans votre catalogue ?",
+        "a": "Non, jamais. MyConciergeHotel est une agence IATA accréditée — notre revenu vient des commissions sur réservations (standard IATA), pas d'un référencement publicitaire. Refuser le pay-to-play est notre engagement le plus fort vis-à-vis de nos clients."
+      },
+      {
+        "q": "Comment garantissez-vous l'indépendance de vos audits ?",
+        "a": "Nos visites d'audit ne sont pas annoncées à l'avance et nous payons systématiquement nos nuits aux tarifs publics (jamais en complimentary). Le rapport d'audit est interne, le résultat publié pondéré dans le scoring. Aucun conseiller n'a de lien commercial direct avec un hôtel audité."
+      },
+      {
+        "q": "Une mauvaise expérience client peut-elle faire baisser une fiche ?",
+        "a": "Oui. Si plusieurs réservations passées via notre conciergerie remontent des problèmes opérationnels récurrents (service dégradé, surbooking, propreté), nous déclenchons une re-visite. Si l'audit confirme, l'adresse perd des points de scoring et peut sortir des classements top. Trois cas documentés depuis le lancement."
+      },
+      {
+        "q": "Pourquoi pas d'avis client direct sur votre site ?",
+        "a": "Parce que nous ne pouvons pas garantir leur vérification à 100% (sources, biais, modération). Nous préférons agréger les sentiments Amadeus (réservation vérifiée) et publier notre propre audit, signé par un conseiller identifié. Plus exigeant, moins manipulable."
+      },
+      {
+        "q": "Comment les classements sont-ils mis à jour ?",
+        "a": "Trimestriellement pour les classements pilier (Meilleurs Palaces de France, de Paris, Côte d'Azur), semestriellement pour les classements thématiques (spa, gastronomie). Les changements officiels (Atout France, Michelin Guide, fermeture) sont reflétés sous 30 jours hors cadence."
+      },
+      {
+        "q": "Puis-je signaler une erreur ou suggérer une adresse ?",
+        "a": "Oui — toute correction factuelle (erreur d'adresse, distinction périmée, photo non à jour) est traitée sous 48h après contact via /le-concierge/contact. Les suggestions d'adresse sont étudiées au cycle de revue trimestriel suivant ; nous répondons systématiquement même si l'adresse n'est pas retenue."
+      }
+    ]
+  },
+  "conciergeReserver": {
+    "metaTitle": "Comment réserver via votre concierge — tarifs nets GDS | MyConciergeHotel",
+    "metaDesc": "Réservez votre Palace ou hôtel 5★ via MyConciergeHotel : tarifs nets GDS Amadeus, paiement sécurisé PCI-DSS, confirmation instantanée, programme de fidélité. Comment ça marche en 5 étapes.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Comment réserver",
+    "title": "Réserver via votre concierge",
+    "lede": "MyConciergeHotel propose deux modes de réservation : direct par carte (instantané, hôtels connectés GDS Amadeus) ou via conciergerie (par e-mail sous 24h, hôtels confidentiels). Voici comment ça marche, étape par étape.",
+    "lastReviewed": "2026-05-10",
+    "aeoQuestion": "Comment réserver un Palace ou hôtel 5★ via MyConciergeHotel ?",
+    "aeoAnswer": "Cinq étapes : 1) chercher une adresse ou parcourir un classement éditorial ; 2) choisir vos dates et voyageurs dans le moteur de réservation Amadeus ; 3) sélectionner un tarif (chambre seule / petit-déjeuner / flexible / non-remboursable) ; 4) confirmer en ligne par carte sécurisée PCI-DSS avec 3D-Secure ; 5) recevoir la confirmation par e-mail (instantanée en mode Amadeus, sous 24h en mode conciergerie). Aucun supplément agence — tarif net GDS identique au tarif public de l'hôtel. Mise à jour {date}.",
+    "steps": {
+      "title": "Les 5 étapes",
+      "items": [
+        {
+          "title": "1. Choisir une adresse",
+          "body": "Parcourez le catalogue par destination (Paris, Côte d'Azur, Alpes), par marque (Cheval Blanc, Airelles…), par classement éditorial (Meilleurs Palaces de France) ou par inspiration (lune de miel, spa, gastronomie). Chaque fiche se conclut par un Conseil du Concierge — secret opérationnel pour un séjour réussi."
+        },
+        {
+          "title": "2. Choisir vos dates et voyageurs",
+          "body": "Le moteur de réservation intégré à chaque fiche interroge l'inventaire Amadeus en temps réel : disponibilité, tarif, conditions d'annulation. Vous saisissez check-in, check-out, adultes, enfants. Les chambres signatures (suite Tour Eiffel, chambre 432 Le Ritz…) sont mises en avant si disponibles."
+        },
+        {
+          "title": "3. Sélectionner un tarif",
+          "body": "Trois familles de tarifs : chambre seule (le plus flexible), petit-déjeuner inclus, demi-pension. Politique d'annulation explicite par tarif (flexible 24-48h / non-remboursable early-bird). Notre conciergerie peut négocier des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique ne le propose pas."
+        },
+        {
+          "title": "4. Confirmer le paiement",
+          "body": "Paiement par carte (Visa, Mastercard, Amex) via l'iframe sécurisée Amadeus Payments — conforme PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Vos coordonnées bancaires ne transitent jamais par nos serveurs. Pour les paiements > 5 000 €, virement bancaire possible sur demande conciergerie."
+        },
+        {
+          "title": "5. Recevoir la confirmation",
+          "body": "Confirmation e-mail instantanée en mode Amadeus (avec PNR, voucher, conditions). En mode conciergerie (hôtels confidentiels non connectés GDS), votre concierge dédié vous répond sous 24h ouvrées avec une proposition personnalisée et un lien de paiement sécurisé."
+        }
+      ]
+    },
+    "reassurance": {
+      "title": "Vos garanties",
+      "iata": "Agence accréditée IATA / membre APST. Garantie financière professionnelle obligatoire — vos paiements sont protégés en cas de défaillance.",
+      "rate": "Tarif net GDS Amadeus identique au tarif public de l'hôtel — aucun supplément ajouté par notre agence.",
+      "comparator": "Comparateur de prix non affilié sur chaque fiche : vous voyez immédiatement le delta avec Booking, Hotels.com, Expedia pour les mêmes dates.",
+      "loyalty": "Programme de fidélité MyConciergeHotel offert dès la première nuit — avantages cumulables avec les programmes de chaîne (Four Seasons Preferred, Marriott Bonvoy…)."
+    },
+    "faqTitle": "Réserver — questions fréquentes",
+    "faq": [
+      {
+        "q": "Combien de temps pour confirmer ma réservation ?",
+        "a": "En mode Amadeus (direct), la confirmation est instantanée — vous recevez l'e-mail avec PNR et voucher dans les secondes qui suivent le paiement. En mode conciergerie (hôtels hors GDS), votre concierge vous répond sous 24h ouvrées, généralement sous 4-6h aux horaires de bureau."
+      },
+      {
+        "q": "Quels modes de paiement acceptez-vous ?",
+        "a": "Carte bancaire (Visa, Mastercard, American Express) via iframe sécurisée Amadeus Payments — PCI-DSS niveau 1, 3D-Secure 2 obligatoire. Pour les paiements supérieurs à 5 000 €, virement bancaire ou paiement échelonné sur demande. Aucun paiement par chèque ou espèces."
+      },
+      {
+        "q": "Vos tarifs sont-ils plus chers qu'en réservant en direct ?",
+        "a": "Non. Nous accédons aux tarifs nets GDS Amadeus, identiques au tarif officiel public de l'hôtel. Aucune commission ajoutée. Notre comparateur non affilié sur chaque fiche affiche en transparence les tarifs Booking, Hotels.com, Expedia — vous voyez le delta directement."
+      },
+      {
+        "q": "Puis-je modifier ou annuler ma réservation ?",
+        "a": "Selon la politique d'annulation du tarif choisi (explicite à la réservation). Tarifs flexibles : annulation gratuite jusqu'à 24-48h avant l'arrivée. Tarifs early-bird : non-remboursables. Modifications gérées via votre compte MyConciergeHotel ou par votre concierge dédié."
+      },
+      {
+        "q": "Le check-in anticipé / late check-out sont-ils possibles ?",
+        "a": "Sur demande au moment de la réservation ou auprès de votre concierge dédié. Notre programme de fidélité offre le late check-out à 14h sur les hôtels Little Hotelier (tier Essentiel). Pour les tier Prestige, late check-out à 16h confirmé. Le check-in anticipé reste soumis à la disponibilité de la chambre."
+      },
+      {
+        "q": "Mes points de fidélité chaîne (Marriott Bonvoy, Four Seasons Preferred…) sont-ils crédités ?",
+        "a": "Oui. Votre numéro de fidélité chaîne peut être joint à la réservation au moment du checkout (champ « numéro de programme de fidélité »). Les points sont crédités par l'hôtel après le séjour selon les conditions du programme — souvent réduits par rapport à une réservation directe sur le site de la chaîne, c'est un standard de toutes les agences."
+      }
+    ]
+  },
+  "conciergeContact": {
+    "metaTitle": "Nous contacter — Conciergerie MyConciergeHotel | Agence IATA",
+    "metaDesc": "Joindre notre conciergerie : téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. MyConciergeHotel, agence de voyage IATA / APST dédiée aux Palaces et hôtels 5★.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Joindre votre concierge",
+    "title": "Nous contacter",
+    "lede": "Notre conciergerie répond en français et en anglais, du lundi au samedi de 9h à 19h (heure de Paris). Réponse aux demandes écrites sous 24h ouvrées. Pour une réservation urgente, privilégiez le téléphone aux horaires d'ouverture.",
+    "lastReviewed": "2026-05-15",
+    "aeoQuestion": "Comment joindre la conciergerie MyConciergeHotel ?",
+    "aeoAnswer": "Trois canaux : téléphone +33 1 84 60 95 50 (lundi-samedi 9h-19h, heure de Paris), e-mail contact@myconciergehotel.com (réponse sous 24h ouvrées), formulaire en ligne sur cette page. Nous répondons en français et en anglais. Pour une demande de devis MICE ou un séjour groupe, voir aussi /le-concierge/mice-et-seminaires. Mise à jour {date}.",
+    "channels": {
+      "title": "Trois canaux",
+      "phone": {
+        "title": "Téléphone",
+        "body": "Pour une réservation urgente, une question rapide, ou si vous préférez la voix.",
+        "value": "+33 1 84 60 95 50",
+        "hours": "Lundi-samedi 9h-19h (Paris)"
+      },
+      "email": {
+        "title": "E-mail",
+        "body": "Pour une demande détaillée, un devis sur-mesure, une question sur le programme de fidélité.",
+        "value": "contact@myconciergehotel.com",
+        "hours": "Réponse sous 24h ouvrées"
+      },
+      "form": {
+        "title": "Formulaire",
+        "body": "Si vous préférez tout consigner par écrit. Nous vous répondons par e-mail.",
+        "value": "Voir ci-dessous"
+      }
+    },
+    "form": {
+      "title": "Envoyer un message",
+      "lede": "Décrivez votre besoin en quelques lignes. Nous vous répondons sous 24h ouvrées.",
+      "namePlaceholder": "Votre prénom et nom",
+      "emailPlaceholder": "Adresse e-mail",
+      "subjectPlaceholder": "Sujet (réservation, devis, question…)",
+      "messagePlaceholder": "Votre message…",
+      "consent": "J'accepte que mes données soient utilisées pour traiter ma demande (politique de confidentialité).",
+      "submit": "Envoyer ma demande",
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com."
+    },
+    "legal": {
+      "title": "Identité de l'éditeur",
+      "company": "MyConciergeHotel SAS",
+      "address": "Adresse : voir mentions légales",
+      "iata": "Agence IATA accréditée — n° d'immatriculation Atout France IM075 (à confirmer publication)",
+      "guarantee": "Garantie financière APST — Association Professionnelle de Solidarité du Tourisme",
+      "dpo": "Délégué à la protection des données : dpo@myconciergehotel.com",
+      "press": "Demandes presse : voir /le-concierge/presse-et-partenaires"
+    },
+    "faqTitle": "Contact — questions fréquentes",
+    "faq": [
+      {
+        "q": "Sous quel délai répondez-vous ?",
+        "a": "Sous 24 heures ouvrées pour les demandes écrites (e-mail et formulaire). Plus rapide aux horaires d'ouverture du standard (lundi-samedi 9h-19h, heure de Paris) — souvent sous 4 à 6 heures aux heures de bureau. Au téléphone, vous parlez directement à un conseiller (pas de serveur vocal interactif)."
+      },
+      {
+        "q": "Parlez-vous d'autres langues que le français ?",
+        "a": "Oui — toute l'équipe parle français et anglais couramment. Espagnol et italien possibles selon les conseillers disponibles. Les demandes en allemand, arabe ou mandarin sont traitées par e-mail avec un délai de réponse légèrement plus long (mise en relation avec le bon interlocuteur)."
+      },
+      {
+        "q": "Que faire en cas d'urgence pendant mon séjour ?",
+        "a": "Le numéro d'urgence 24/7 vous est communiqué dans votre confirmation de réservation. Il permet de joindre un conseiller en astreinte pour les sujets critiques (problème majeur dans l'hôtel, sujet de sécurité). Pour les questions non urgentes pendant le séjour, écrivez à votre concierge dédié — vous avez son nom et e-mail direct."
+      },
+      {
+        "q": "Êtes-vous une agence de voyage ou une plateforme en ligne ?",
+        "a": "Une agence de voyage. MyConciergeHotel SAS est immatriculée IATA, membre APST avec garantie financière, et soumise au Code du tourisme français. Notre activité est encadrée — contrairement à une plateforme en ligne qui ne fait qu'intermédiation. Vos paiements sont protégés en cas de défaillance par la garantie APST."
+      },
+      {
+        "q": "Comment exercer mes droits RGPD (accès, rectification, suppression) ?",
+        "a": "Écrivez à dpo@myconciergehotel.com en précisant votre demande (accès aux données, rectification, suppression, portabilité, opposition). Nous répondons sous 30 jours conformément au RGPD. Pour suppression complète de votre compte client, l'accès est aussi disponible depuis /compte (section « Confidentialité »)."
+      },
+      {
+        "q": "Acceptez-vous des candidatures spontanées d'hôtels souhaitant intégrer votre catalogue ?",
+        "a": "Non — notre catalogue éditorial est constitué sur proposition interne (voir /le-concierge/methode-editoriale). Les hôteliers souhaitant un partenariat MICE / groupes / événements doivent passer par /le-concierge/pour-les-hoteliers. Les demandes presse vont à /le-concierge/presse-et-partenaires."
+      }
+    ]
   },
   "consent": {
     "title": "Vos préférences cookies",
@@ -529,7 +2484,8 @@
     },
     "breadcrumb": {
       "home": "Accueil",
-      "hotels": "Hôtels"
+      "hotels": "Hôtels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "Hôtels 5★ et Palaces à {city}",
@@ -539,6 +2495,51 @@
       "question": "Combien d'hôtels 5★ et Palaces proposez-vous à {city} ?",
       "answerSingular": "MyConciergeHotel propose actuellement 1 adresse à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}.",
       "answerPlural": "MyConciergeHotel propose actuellement {count} adresses à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}."
+    },
+    "cityFaq": {
+      "title": "Séjourner à {city} — questions fréquentes",
+      "items": [
+        {
+          "q": "Quels sont les meilleurs quartiers où dormir à {city} ?",
+          "a": "Les adresses 5★ et Palace de {city} se concentrent dans les quartiers historiques et les abords des principaux POIs. Notre conciergerie vous oriente selon votre programme : pour les sorties culturelles, choisissez le centre ; pour le calme, les quartiers résidentiels en périphérie ; pour la vue, les fronts de mer ou les pieds-dans-l'eau. Chaque fiche hôtel précise le quartier exact et les distances à pied/en voiture aux POIs majeurs."
+        },
+        {
+          "q": "Quelle est la meilleure période pour visiter {city} ?",
+          "a": "{city} se visite toute l'année, mais certaines saisons concentrent les événements (festivals, cérémonies, calendrier sportif) et les tarifs hôteliers atteignent leur pic. Notre conciergerie peut vous proposer des fenêtres optimales — généralement les épaules de saison (mai-juin, septembre) — où l'expérience est complète sans la sur-fréquentation. Les fiches hôtel mentionnent la haute/basse saison locale."
+        },
+        {
+          "q": "Comment rejoindre {city} depuis Paris ou un aéroport international ?",
+          "a": "Les distances et accès sont précisés sur chaque fiche hôtel (aéroport le plus proche, gare TGV, distance en voiture). Notre conciergerie organise les transferts sur demande : taxi premium, voiture avec chauffeur, hélicoptère pour les destinations Alpes/Côte d'Azur. Le tarif est communiqué avant confirmation, sans intermédiaire ajouté."
+        },
+        {
+          "q": "Quels musées, restaurants ou expériences ne pas manquer à {city} ?",
+          "a": "Chaque fiche hôtel intègre une section « Que faire autour » avec les POIs nommés (musées, tables étoilées, marchés, points de vue) et leur distance précise. Notre conciergerie peut aussi vous suggérer des expériences signature (visite privée d'un musée hors heures d'ouverture, table d'un chef étoilé) selon votre séjour."
+        },
+        {
+          "q": "Les hôtels de {city} acceptent-ils les animaux de compagnie ?",
+          "a": "La politique pets-friendly varie selon l'hôtel — la plupart des Palaces acceptent les chiens (souvent avec supplément, parfois avec service dédié type bols, paniers, dog-sitting). Chaque fiche hôtel précise dans sa section « Politiques » : taille acceptée, frais, restrictions. Notre conciergerie peut négocier les conditions avec l'hôtel avant réservation."
+        },
+        {
+          "q": "Y a-t-il un parking gratuit ou un service voiturier dans vos hôtels à {city} ?",
+          "a": "Les hôtels 5★ et Palace proposent généralement un service voiturier (parfois inclus dans le tarif, parfois facturé en supplément 30-80 €/nuit). Le parking gratuit est rare en centre-ville mais fréquent dans les destinations rurales ou alpines. La politique exacte (gratuit / payant / valet / hauteur véhicule) figure dans la section « Politiques » de chaque fiche."
+        },
+        {
+          "q": "Vos hôtels à {city} sont-ils accessibles PMR ?",
+          "a": "La plupart des hôtels 5★ et Palace de {city} ont des chambres accessibles PMR (ascenseur, salle de bain adaptée, accès aux espaces communs). Notre conciergerie vérifie l'accessibilité spécifique de votre besoin (douche italienne, hauteur de lit, accès piscine/spa) auprès de l'hôtel avant confirmation. Précisez vos contraintes au moment de la demande."
+        },
+        {
+          "q": "Quelle est la politique d'annulation pour les hôtels de {city} ?",
+          "a": "Chaque tarif Amadeus indique sa politique d'annulation (souvent : flexible jusqu'à 24-48h avant l'arrivée, non remboursable pour les tarifs early-bird). Notre conciergerie peut proposer des tarifs avec annulation gratuite jusqu'à la veille même quand l'offre publique de l'hôtel est non-remboursable, selon les négociations agence."
+        },
+        {
+          "q": "Le petit-déjeuner est-il inclus dans le tarif des hôtels {city} ?",
+          "a": "L'inclusion varie : la plupart des Palaces proposent un tarif chambre seule et un tarif chambre + petit-déjeuner. Notre programme de fidélité MyConciergeHotel offre le petit-déjeuner pour deux dès la première nuit sur les hôtels du catalogue Little Hotelier. La politique exacte de l'hôtel figure dans sa fiche."
+        },
+        {
+          "q": "Comment réserver un Palace ou hôtel 5★ à {city} via MyConciergeHotel ?",
+          "a": "Cliquez sur la fiche hôtel qui vous intéresse, choisissez vos dates dans le moteur de réservation Amadeus, payez en ligne (carte sécurisée PCI-DSS, 3D-Secure). Confirmation instantanée par e-mail. Pour les hôtels hors GDS, votre concierge vous adresse une proposition sous 24h ouvrées. Aucun supplément agence sur les tarifs nets."
+        }
+      ]
     },
     "card": {
       "palace": "Palace",
@@ -551,6 +2552,35 @@
     "directory": {
       "title": "Toutes nos destinations",
       "subtitle": "{count, plural, one {# destination disponible} other {# destinations disponibles}}.",
+      "aeoQuestion": "Quelles destinations couvre la conciergerie MyConciergeHotel ?",
+      "aeoAnswer": "MyConciergeHotel couvre {count} destinations — villes françaises (Paris, Cannes, Courchevel, Bordeaux, Reims, Biarritz, Porto-Vecchio) et pays internationaux avec guide éditorial (Italie, Suisse, Maroc, Émirats, Maldives, Thaïlande, Japon, États-Unis). Chaque destination ouvre une fiche avec sélection d'hôtels 5★ et Palaces, contexte local et conseils opérationnels du Concierge. Mise à jour {date}.",
+      "faqTitle": "Nos destinations — questions fréquentes",
+      "faqItems": [
+        {
+          "q": "Quelles villes françaises sont couvertes ?",
+          "a": "Notre catalogue couvre les pôles historiques du tourisme premium en France : Paris (Plaza Athénée, Le Bristol, Le Meurice, Ritz, George V, Cheval Blanc), Côte d'Azur (Cannes, Nice, Cap-Ferrat, Monaco), Alpes (Courchevel, Megève, Val d'Isère, Chamonix), Provence (Aix, Saint-Tropez, Avignon), Bordelais (Bordeaux, Saint-Émilion), Champagne (Reims, Épernay), Pays basque (Biarritz), Corse (Porto-Vecchio, Calvi, Ajaccio)."
+        },
+        {
+          "q": "Proposez-vous des destinations internationales ?",
+          "a": "Oui — 8 pays sont publiés avec guide éditorial (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis) et notre réseau Amadeus couvre 950 000 hôtels dans le monde sur demande. Le catalogue international s'enrichit chaque trimestre — voir la page guide de chaque pays pour la sélection d'auteur."
+        },
+        {
+          "q": "Comment choisissez-vous les villes éditoriales ?",
+          "a": "Nous publions une destination quand notre conciergerie a sélectionné au moins 3 adresses 5★ ou Palace dans la ville et peut signer un guide éditorial de 2000 mots avec POIs nommés (musées, tables, accès). Une ville sans masse critique apparaît en sous-page mais pas comme destination de premier niveau."
+        },
+        {
+          "q": "Une ville absente sera-t-elle ajoutée ?",
+          "a": "Le calendrier de publication est trimestriel. Pour suggérer une destination, contactez la conciergerie via /le-concierge — nous publions en priorité les villes où nos clients réservent déjà via le mode Amadeus sans guide éditorial."
+        },
+        {
+          "q": "Quelle différence entre une destination et un guide ?",
+          "a": "Depuis ADR-0015, les deux routes ont fusionné : /destination/{ville} héberge à la fois le hub catalogue (sélection d'hôtels) et le guide long-read (POIs, art de vivre, infos pratiques). /guide/{ville} redirige vers la destination en 308."
+        },
+        {
+          "q": "Les guides sont-ils disponibles en anglais ?",
+          "a": "Oui — toute destination publiée a sa version EN (/en/destination/{slug}) avec traduction native par notre équipe éditoriale (pas de traduction machine brute). hreflang fr-FR / en / x-default émis sur chaque page."
+        }
+      ],
       "count": "{count, plural, one {# hôtel} other {# hôtels}}",
       "franceSection": {
         "title": "France — par ville",

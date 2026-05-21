@@ -1,0 +1,78 @@
+{
+  "slug_fr": "reims-champagne-week-end",
+  "slug_en": "reims-champagne-weekend",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Grand Est",
+  "destination_city": "Reims",
+  "themes": ["gastronomie", "vignobles"],
+  "duration_min_days": 2,
+  "duration_max_days": 2,
+  "travel_style": "luxe",
+  "season": "toute-saison",
+  "target_word_count": 1800,
+  "meta_title_fr_hint": "Week-end Reims Champagne luxe — Crayères, Royal Champagne, caves & cathédrale | MyConciergeHotel",
+  "meta_desc_fr_hint": "Week-end à Reims : Les Crayères, Royal Champagne. Cathédrale UNESCO, caves Ruinart, Dom Pérignon Hautvillers. Sélection Concierge gastronomie champagne.",
+  "hotel_slugs_target": ["les-crayeres", "royal-champagne"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Reims et Épernay présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-reims", "guide-champagne"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-reims", "meilleurs-hotels-champagne"],
+  "related_itinerary_slugs_target": [
+    "bordeaux-vignobles-gastronomie-5-jours",
+    "lyon-gastronomie-3-jours"
+  ],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Reims",
+      "hotel_slug_hint": "les-crayeres",
+      "key_pois": [
+        "Cathédrale Notre-Dame de Reims",
+        "Palais du Tau",
+        "Caves Ruinart",
+        "Basilique Saint-Remi"
+      ],
+      "step_angle": "Arrivée Crayères — cathédrale en fin d'après-midi (lumière sur les vitraux Chagall), caves Ruinart visite privée sur RDV (la plus ancienne maison de champagne), dîner Philippe Mille 2 étoiles",
+      "title_fr_hint": "Jour 1 : Reims — Cathédrale, caves Ruinart et table 2 étoiles",
+      "title_en_hint": "Day 1: Reims — Cathedral, Ruinart cellars and 2-star dining"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Épernay & Hautvillers",
+      "hotel_slug_hint": "royal-champagne",
+      "key_pois": [
+        "Avenue de Champagne Épernay",
+        "Dom Pérignon Hautvillers",
+        "Caves Moët & Chandon",
+        "Cumières village vigneron"
+      ],
+      "step_angle": "Épernay & Hautvillers — Royal Champagne vue vignes Vallée de la Marne, Hautvillers abbaye Dom Pérignon matin (visite sur demande Moët), Avenue de Champagne visite libre Perrier-Jouët, déjeuner vigneron à Cumières",
+      "title_fr_hint": "Jour 2 : Épernay & Hautvillers — Dom Pérignon, Avenue de Champagne",
+      "title_en_hint": "Day 2: Épernay & Hautvillers — Dom Pérignon, Avenue de Champagne"
+    }
+  ],
+  "aeo_question_fr_hint": "Que faire à Reims et en Champagne le temps d'un week-end luxe ?",
+  "aeo_answer_fr_hint": "Jour 1 : Reims — cathédrale UNESCO, caves Ruinart (réserver), dîner Philippe Mille aux Crayères. Jour 2 : Épernay Avenue de Champagne, Hautvillers abbaye Dom Pérignon, Royal Champagne vue vignes. Budget indicatif : 500-900 € / nuit. Idéal en semaine pour éviter les groupes en caves. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter Reims et la Champagne ?",
+    "Comment visiter les caves de champagne à Reims ?",
+    "Quels sont les meilleurs hôtels à Reims et en Champagne ?",
+    "Quel budget prévoir pour un week-end luxe à Reims ?",
+    "Reims est-elle accessible depuis Paris en train ?",
+    "Quels champagnes déguster et rapporter de Reims ?",
+    "Que voir à Épernay lors d'un week-end champagne ?",
+    "La cathédrale de Reims est-elle classée UNESCO ?",
+    "Peut-on faire un week-end champagne en dehors de la saison estivale ?",
+    "Quels restaurants gastronomiques à Reims valent le détour ?"
+  ],
+  "concierge_secret_hint": "Aux Crayères, demander la chambre 'Cuvée du Roy' ou une Junior Suite côté parc — vue directe sur les 7 ha de jardin à la française sans vue sur la route. La visite privée de Ruinart (non touristique, dans les crayères classées UNESCO) se réserve uniquement par mail auprès du bureau des visites de la maison, 4 semaines à l'avance.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Reims / Champagne (autorité destination). Angle unique = week-end 2 jours structuré Reims–Épernay–Hautvillers avec focus caves privées + table étoilée + AEO week-end. Le guide Reims reste l'autorité sur la destination.",
+  "sources_to_cite": [
+    "Atout France — Champagne Tourisme",
+    "Comité Champagne (CIVC)",
+    "UNESCO — Coteaux, maisons et caves de Champagne",
+    "Michelin Guide France"
+  ]
+}

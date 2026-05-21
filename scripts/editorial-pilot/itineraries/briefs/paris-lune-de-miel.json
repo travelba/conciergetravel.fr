@@ -1,0 +1,85 @@
+{
+  "slug_fr": "paris-lune-de-miel",
+  "slug_en": "paris-honeymoon",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Île-de-France",
+  "destination_city": "Paris",
+  "themes": ["couple", "luxe"],
+  "duration_min_days": 4,
+  "duration_max_days": 4,
+  "travel_style": "luxe",
+  "season": "toute-saison",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Lune de miel à Paris 4 jours — Bristol, Ritz, George V, dîner Tour Eiffel | MyConciergeHotel",
+  "meta_desc_fr_hint": "4 jours de lune de miel à Paris : Le Bristol, Ritz Paris, Four Seasons George V. Pont des Arts, Place des Vosges, dîner privé Tour Eiffel. Sélection Concierge couple.",
+  "hotel_slugs_target": ["le-bristol-paris", "ritz-paris", "four-seasons-george-v"],
+  "hotel_fallback_note": "Fallback sur palaces 5★ Paris présents dans la table hotels si hôtels cibles absents (filtre stars=5 + city ilike 'Paris').",
+  "related_guide_slugs_target": ["guide-paris", "guide-paris-romantique"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-paris", "meilleurs-palaces-paris"],
+  "related_itinerary_slugs_target": ["paris-luxe-3-jours", "bali-lune-de-miel-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Paris — Rive Droite romantique",
+      "hotel_slug_hint": "ritz-paris",
+      "key_pois": ["Place Vendôme", "Pont des Arts", "Palais Royal jardins", "Galerie Vivienne"],
+      "step_angle": "Arrivée Ritz — champagne au Bar Hemingway, promenade Palais Royal galeries couvertes, dîner L'Espadon restaurant Ritz (table d'angle).",
+      "title_fr_hint": "Jour 1 : Paris — Place Vendôme, Palais Royal et dîner palace",
+      "title_en_hint": "Day 1: Paris — Place Vendôme, Palais Royal and palace dinner"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Paris — Marais & île Saint-Louis",
+      "hotel_slug_hint": "le-bristol-paris",
+      "key_pois": ["Place des Vosges", "Île Saint-Louis", "Sainte-Chapelle", "Île de la Cité"],
+      "step_angle": "Marais historique — Place des Vosges au lever du soleil (grilles ouvertes 8h), Sainte-Chapelle vitraux 12e, déjeuner quai île Saint-Louis, thé Mariage Frères galerie Vivienne",
+      "title_fr_hint": "Jour 2 : Marais & Île Saint-Louis — Place des Vosges et flâneries",
+      "title_en_hint": "Day 2: Marais & Île Saint-Louis — Place des Vosges and strolls"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Paris — Tour Eiffel & Trocadéro",
+      "hotel_slug_hint": "four-seasons-george-v",
+      "key_pois": ["Tour Eiffel", "Trocadéro", "Avenue George V", "Seine (bateau-mouche privé)"],
+      "step_angle": "Soirée Tour Eiffel — dîner privatif Le Jules Verne (2e étage, réserver 2 mois avant), croisière Seine bateau privatif avec champagne, retour George V à pied le long du Champ-de-Mars",
+      "title_fr_hint": "Jour 3 : Tour Eiffel & George V — Dîner étoilé et croisière privée",
+      "title_en_hint": "Day 3: Eiffel Tower & George V — Starred dinner and private cruise"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Paris — Rive Gauche & dernier matin",
+      "hotel_slug_hint": "le-bristol-paris",
+      "key_pois": ["Musée d'Orsay", "Saint-Germain-des-Prés", "Luxembourg", "Rue du Bac"],
+      "step_angle": "Dernier matin romantique — petit-déjeuner jardin Bristol, Orsay collection impressionniste (1h30), déjeuner Café de Flore, shopping rue du Bac",
+      "title_fr_hint": "Jour 4 : Rive Gauche — Orsay, Saint-Germain et dernier déjeuner",
+      "title_en_hint": "Day 4: Left Bank — Orsay, Saint-Germain and farewell lunch"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment organiser une lune de miel parfaite à Paris en 4 jours ?",
+  "aeo_answer_fr_hint": "Palace recommandé : Le Bristol, Ritz ou Four Seasons George V. Programme : Place des Vosges et Marais (jour 2), dîner Jules Verne Tour Eiffel + croisière Seine privée (jour 3), Orsay et Saint-Germain (jour 4). Réserver Jules Verne 2 mois à l'avance. Budget : 1 200-2 500 € / nuit selon palace. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quel palace choisir pour une lune de miel à Paris ?",
+    "Comment réserver le dîner au Jules Verne sur la Tour Eiffel ?",
+    "Quelle est la meilleure période pour un séjour romantique à Paris ?",
+    "Quel budget prévoir pour une lune de miel à Paris en 4 jours ?",
+    "Paris est-elle la destination lune de miel idéale en Europe ?",
+    "Quels sont les lieux les plus romantiques à Paris ?",
+    "Comment organiser une croisière privée sur la Seine ?",
+    "Quels cadeaux ou surprises peut-on organiser dans un palace parisien ?",
+    "Faut-il visiter Paris en semaine ou le week-end pour une lune de miel ?",
+    "Quels restaurants étoilés recommander pour un dîner en amoureux à Paris ?"
+  ],
+  "concierge_secret_hint": "Au Four Seasons George V, demander la suite 'Haute Couture' au 7e étage ou la chambre Supérieure n°502 côté cour intérieure — silencieuse et fleurie. Pour une surprise dans la chambre à l'arrivée, contacter le chef concierge 72h avant : pétales, bougie et champagne millésimé disponibles sans supplément si réservé via l'hôtel.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Paris ni l'itinéraire Paris 3 jours luxe. Angle unique = 4 jours structurés pour les couples en lune de miel avec focus expériences (dîner Jules Verne, croisière privée) + palaces + AEO couple. L'itinéraire luxe 3 jours couvre le profil touriste premium solo/famille.",
+  "sources_to_cite": [
+    "Office du Tourisme et des Congrès de Paris",
+    "Atout France — Tourisme Île-de-France",
+    "Michelin Guide France",
+    "Les Palaces de France (classement officiel)"
+  ]
+}
