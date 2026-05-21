@@ -249,7 +249,6 @@ export const routing = defineRouting({
     '/le-concierge/methode-editoriale': {
       fr: '/le-concierge/methode-editoriale',
       en: '/le-concierge/editorial-method',
-      // V2: /de/das-konzierge/redaktionsmethode etc.
     },
     '/le-concierge/reserver': {
       fr: '/le-concierge/reserver',
@@ -262,7 +261,6 @@ export const routing = defineRouting({
     '/le-concierge/fidelite': {
       fr: '/le-concierge/fidelite',
       en: '/le-concierge/loyalty',
-      // V2: /de/das-konzierge/treueprogramm etc.
     },
     '/le-concierge/faq': {
       fr: '/le-concierge/faq',
@@ -288,15 +286,6 @@ export const routing = defineRouting({
       fr: '/le-concierge/newsletter',
       en: '/le-concierge/newsletter',
     },
-    // Itineraries hub uses the plural FR slug `/itineraires` to keep
-    // parity with `/classements`, `/guides`, `/marques`, `/hotels`.
-    // Slug stays identical FR/EN per ADR-0008 (no `/itineraries` EN
-    // alias) — the editorial body is what carries the locale signal,
-    // and the hreflang alternates point readers to the right `[locale]`
-    // prefix. The detail route stays at `/itineraire/[slug]` (singular,
-    // FR canonical) so existing in-flight links remain stable; a 308
-    // redirect from `/itineraire` (bare) → `/itineraires` is set up in
-    // `next.config.ts`.
     '/itineraires': '/itineraires',
     '/itineraire/[slug]': '/itineraire/[slug]',
   } as const,
