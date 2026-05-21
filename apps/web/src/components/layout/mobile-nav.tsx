@@ -355,7 +355,9 @@ export function MobileNav(): ReactElement {
                 </div>
               </details>
 
-              {/* 5 — Le Concierge */}
+              {/* 5 — Le Concierge (Vague-5 institutional pages now
+                  reachable as dedicated routes; remaining entries
+                  still on /le-concierge until their pages ship). */}
               <details className="group">
                 <summary className={summaryClass}>
                   <span>{t('primaryNav.concierge')}</span>
@@ -365,19 +367,28 @@ export function MobileNav(): ReactElement {
                   <Link href="/le-concierge" className={subLinkClass}>
                     {t('primaryNav.conciergeAboutLink')}
                   </Link>
+                  <Link href="/le-concierge/reserver" className={subLinkClass}>
+                    {t('primaryNav.conciergeBooking')}
+                  </Link>
+                  <Link href="/le-concierge/fidelite" className={subLinkClass}>
+                    {t('primaryNav.conciergeLoyalty')}
+                  </Link>
+                  <Link href="/le-concierge/faq" className={subLinkClass}>
+                    {t('primaryNav.conciergeFaq')}
+                  </Link>
+                  <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
+                    {t('primaryNav.conciergeMethod')}
+                  </Link>
                   <Link href="/le-concierge" className={subLinkClass}>
                     {t('primaryNav.conciergeTip')}
                   </Link>
-                  <Link href="/itineraire" className={subLinkClass}>
+                  <Link href="/itineraires" className={subLinkClass}>
                     {t('primaryNav.conciergeItineraries')}
                   </Link>
                   <Link href="/guides" className={subLinkClass}>
                     {t('primaryNav.conciergeGuides')}
                   </Link>
-                  <Link href="/le-concierge" className={subLinkClass}>
-                    {t('primaryNav.conciergeLoyalty')}
-                  </Link>
-                  <Link href="/le-concierge" className={subLinkClass}>
+                  <Link href="/le-concierge/contact" className={subLinkClass}>
                     {t('primaryNav.conciergeContact')}
                   </Link>
                 </div>
