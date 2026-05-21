@@ -85,38 +85,42 @@ export async function GET(): Promise<NextResponse> {
         | '/le-concierge/presse-et-partenaires'
         | '/le-concierge/newsletter'
         | '/guide/italie'
+        | '/guide/suisse'
+        | '/guide/maroc'
+        | '/guide/maldives'
+        | '/guide/emirats-arabes-unis'
+        | '/guide/japon'
+        | '/guide/thailande'
+        | '/guide/etats-unis'
         | '/itineraires';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
       { href: '/le-concierge', priority: 0.6 },
-      // Vague-6 — international country guides ship one by one.
-      // First template: Italy. Priority 0.7 alongside top-funnel
-      // editorial pages because the guide doubles as destination
-      // discovery + LLM citation surface.
+      // Vague-6 — all 8 international country guides indexable.
+      // Priority 0.7 alongside top-funnel editorial pages because
+      // each guide doubles as destination discovery + LLM citation
+      // surface (long-tail queries "luxury hotel in {country}").
       { href: '/guide/italie', priority: 0.7 },
-      // Vague 5 — institutional pages around /le-concierge. EEAT
-      // methodology and the contact page are high-priority surfaces
-      // (Knowledge Panel signals). "Reserver" is conversion-critical.
+      { href: '/guide/suisse', priority: 0.7 },
+      { href: '/guide/maroc', priority: 0.7 },
+      { href: '/guide/maldives', priority: 0.7 },
+      { href: '/guide/emirats-arabes-unis', priority: 0.7 },
+      { href: '/guide/japon', priority: 0.7 },
+      { href: '/guide/thailande', priority: 0.7 },
+      { href: '/guide/etats-unis', priority: 0.7 },
+      // Vague 5 — institutional pages around /le-concierge.
       { href: '/le-concierge/methode-editoriale', priority: 0.6 },
       { href: '/le-concierge/reserver', priority: 0.6 },
       { href: '/le-concierge/contact', priority: 0.5 },
-      // Vague 5 batch 2 — Loyalty is conversion-related, FAQ is AEO-premium (35 Q&A).
       { href: '/le-concierge/fidelite', priority: 0.6 },
       { href: '/le-concierge/faq', priority: 0.7 },
-      // Vague-5 P1 — B2B surfaces (hotelier partnerships + MICE events).
       { href: '/le-concierge/pour-les-hoteliers', priority: 0.5 },
       { href: '/le-concierge/mice-et-seminaires', priority: 0.5 },
-      // Vague-5 P1 — Le Conseil du Concierge USP hub (highest priority
-      // alongside the marketing pages because it carries the unique
-      // value proposition).
       { href: '/le-conseil-du-concierge', priority: 0.7 },
       { href: '/le-concierge/presse-et-partenaires', priority: 0.4 },
       { href: '/le-concierge/newsletter', priority: 0.5 },
-      // Bumped from 0.4 to 0.7 once the hub goes from coming-soon to a
-      // real listing (PR2 — Sprint 2). `last_updated` per slug ships
-      // separately in `/sitemaps/itineraries.xml` (PR3).
       { href: '/itineraires', priority: 0.7 },
     ];
     for (const hub of staticHubs) {

@@ -279,13 +279,45 @@ export function MobileNav(): ReactElement {
                     linkClass={subLinkClass}
                   />
                   <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
-                  <MobileLinkList
-                    entries={INTL_DESTINATION_NAV_ENTRIES}
-                    locale={locale}
-                    pathname="/destination/[citySlug]"
-                    paramKey="citySlug"
-                    linkClass={subLinkClass}
-                  />
+                  {/*
+                    Vague-6 — all 8 international country guides
+                    indexable. Each entry routes to its dedicated
+                    /guide/<slug> page. Inline switch keeps the typed
+                    `Href` strict (no string assembly).
+                  */}
+                  <ul className="flex flex-col gap-0.5">
+                    {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+                      const href = ((): React.ComponentProps<typeof Link>['href'] => {
+                        switch (entry.slug) {
+                          case 'italie':
+                            return '/guide/italie';
+                          case 'suisse':
+                            return '/guide/suisse';
+                          case 'maroc':
+                            return '/guide/maroc';
+                          case 'maldives':
+                            return '/guide/maldives';
+                          case 'emirats-arabes-unis':
+                            return '/guide/emirats-arabes-unis';
+                          case 'thailande':
+                            return '/guide/thailande';
+                          case 'japon':
+                            return '/guide/japon';
+                          case 'etats-unis':
+                            return '/guide/etats-unis';
+                          default:
+                            return '/hotels';
+                        }
+                      })();
+                      return (
+                        <li key={entry.slug}>
+                          <Link href={href} className={subLinkClass}>
+                            {pickEntryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                   <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
                     {t('primaryNav.destinationsBrowseAll')}
                   </Link>
