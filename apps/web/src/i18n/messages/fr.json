@@ -18,6 +18,8 @@
     "agency": "L'agence"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge des Palaces et hôtels 5★ en France",
+    "metaDesc": "Agence IATA dédiée aux Palaces et hôtels 5★ français. Chaque fiche se conclut par un Conseil du Concierge. Tarifs nets GDS, paiement Amadeus, fidélité dès la 1re nuit.",
     "title": "Votre concierge des Palaces et hôtels 5★ en France",
     "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
     "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
@@ -132,19 +134,45 @@
       "submit": "Rechercher",
       "submitAria": "Lancer la recherche"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Itinéraires sur-mesure",
       "title": "Vos itinéraires de voyage",
       "lede": "Nos itinéraires sur-mesure assemblent étapes, hôtels d'exception et timings recommandés par notre conciergerie. Première vague de publications attendue prochainement.",
       "metaTitle": "Itinéraires de voyage sur-mesure — Palaces & Hôtels 5★ | MyConciergeHotel",
       "metaDesc": "Itinéraires de voyage 5★ rédigés par notre conciergerie : 3 à 14 jours, étapes nommées, hôtels d'exception, gastronomie, accès. Publications à venir.",
       "breadcrumbHome": "Accueil",
+      "breadcrumbHub": "Itinéraires",
       "comingSoon": "À venir",
       "comingSoonBody": "Nous préparons les premiers itinéraires éditoriaux 5★ — Paris, Côte d'Azur, Italie, Maroc. Notification possible par e-mail lors de la publication.",
       "fallbackTitle": "En attendant, explorez :",
       "fallbackInspiration": "Toutes les inspirations (thèmes × occasions × saisons)",
       "fallbackRankings": "Tous les classements éditoriaux",
-      "fallbackDestinations": "Tous les guides destination"
+      "fallbackDestinations": "Tous les guides destination",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 itinéraire publié} other {# itinéraires publiés}}",
+        "filtersLabel": "Affiner",
+        "byCountry": "Par pays",
+        "byTravelStyle": "Par style de voyage",
+        "byDuration": "Par durée",
+        "durationDays": "{min, plural, =1 {1 jour} other {# jours}}",
+        "durationRange": "{min}–{max} jours"
+      },
+      "detail": {
+        "stepLabel": "Étape {n}",
+        "stepsHeading": "L'itinéraire pas à pas",
+        "stepsLead": "Chaque étape combine un hôtel d'exception, un timing testé et nos recommandations sur place.",
+        "faqHeading": "Questions fréquentes",
+        "relatedRankingsHeading": "Classements éditoriaux à consulter",
+        "relatedGuidesHeading": "À lire aussi",
+        "relatedItinerariesHeading": "Autres itinéraires qui pourraient vous plaire",
+        "viewHotel": "Voir la fiche de l'hôtel",
+        "bookAtHotel": "Réserver à {hotelName}",
+        "stayDuration": "Durée du séjour : {n, plural, =1 {1 jour} other {# jours}}",
+        "city": "Ville",
+        "poiHeading": "À voir / à faire",
+        "allItineraries": "Tous nos itinéraires",
+        "ariaSkipToSteps": "Aller directement à l'itinéraire pas à pas"
+      }
     },
     "inspiration": {
       "eyebrow": "Inspiration",
@@ -529,7 +557,8 @@
     },
     "breadcrumb": {
       "home": "Accueil",
-      "hotels": "Hôtels"
+      "hotels": "Hôtels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "Hôtels 5★ et Palaces à {city}",

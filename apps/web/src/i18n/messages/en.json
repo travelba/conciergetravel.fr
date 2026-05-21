@@ -18,6 +18,8 @@
     "agency": "The agency"
   },
   "homepage": {
+    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
+    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
     "title": "Your concierge for France's Palaces and 5-star hotels",
     "intlBadge": "30 countries joining soon — international expansion underway.",
     "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
@@ -132,19 +134,45 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "itineraire": {
+    "itineraires": {
       "eyebrow": "Bespoke itineraries",
       "title": "Your travel itineraries",
       "lede": "Our bespoke itineraries assemble stops, exceptional hotels and timings recommended by our concierge desk. First publications coming soon.",
       "metaTitle": "Bespoke travel itineraries — Palaces & 5★ Hotels | MyConciergeHotel",
       "metaDesc": "5★ travel itineraries written by our concierge desk: 3 to 14 days, named stops, exceptional hotels, gastronomy, access. Publications coming soon.",
       "breadcrumbHome": "Home",
+      "breadcrumbHub": "Itineraries",
       "comingSoon": "Coming soon",
       "comingSoonBody": "We are preparing the first 5★ editorial itineraries — Paris, French Riviera, Italy, Morocco. Subscribe by e-mail to be notified at publication.",
       "fallbackTitle": "In the meantime, explore:",
       "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
       "fallbackRankings": "All editorial rankings",
-      "fallbackDestinations": "All destination guides"
+      "fallbackDestinations": "All destination guides",
+      "listing": {
+        "totalLabel": "{count, plural, =1 {1 published itinerary} other {# published itineraries}}",
+        "filtersLabel": "Refine",
+        "byCountry": "By country",
+        "byTravelStyle": "By travel style",
+        "byDuration": "By duration",
+        "durationDays": "{min, plural, =1 {1 day} other {# days}}",
+        "durationRange": "{min}–{max} days"
+      },
+      "detail": {
+        "stepLabel": "Day {n}",
+        "stepsHeading": "The itinerary, step by step",
+        "stepsLead": "Each step combines an exceptional hotel, a tested timing and our on-site recommendations.",
+        "faqHeading": "Frequently asked questions",
+        "relatedRankingsHeading": "Editorial rankings to read",
+        "relatedGuidesHeading": "Read also",
+        "relatedItinerariesHeading": "Other itineraries you might enjoy",
+        "viewHotel": "View hotel page",
+        "bookAtHotel": "Book at {hotelName}",
+        "stayDuration": "Stay duration: {n, plural, =1 {1 day} other {# days}}",
+        "city": "City",
+        "poiHeading": "Things to see / do",
+        "allItineraries": "All our itineraries",
+        "ariaSkipToSteps": "Skip directly to the step-by-step itinerary"
+      }
     },
     "inspiration": {
       "eyebrow": "Inspiration",
@@ -529,7 +557,8 @@
     },
     "breadcrumb": {
       "home": "Home",
-      "hotels": "Hotels"
+      "hotels": "Hotels",
+      "destinations": "Destinations"
     },
     "eyebrow": "Destination",
     "title": "5★ hotels and Palaces in {city}",

@@ -15,17 +15,25 @@ Voix éditoriale → `.cursor/rules/editorial-voice.mdc` + `EDITORIAL_VOICE.md`
 
 ## 1. URL & Routing i18n
 
-- Route FR : `/[locale]/itineraire/[slug]` — slug depuis `itineraries.slug_fr`
-- Route EN : `/[locale]/itinerary/[slug]` — slug depuis `itineraries.slug_en`
-- Hub FR : `/[locale]/itineraires` | Hub EN : `/[locale]/itineraries`
-- Définir dans `lib/i18n/routing.ts` > `pathnames` (même pattern que `/recherche` → `/search`) :
+**Décision adoptée Sprint 2 (PR #100)** : on conserve le préfixe FR sur les
+deux locales, conformément au principe ADR-0008 « flat slug » (le slug est
+une URL stable, pas une traduction). Cela aligne aussi `/itineraire(s)/` sur
+`/destination/`, `/classements/`, `/hotel/` qui suivent la même règle.
+
+- Hub : `/[locale]/itineraires` (FR + EN, **pas** `/itineraries` côté EN)
+- Détail : `/[locale]/itineraire/[slug]` (FR + EN, slug = `itineraries.slug_fr`)
+- Définition dans [`apps/web/src/i18n/routing.ts`](mdc:apps/web/src/i18n/routing.ts) > `pathnames` :
 
 ```ts
-'/itineraires': { fr: '/itineraires', en: '/itineraries' },
-'/itineraire/[slug]': { fr: '/itineraire/[slug]', en: '/itinerary/[slug]' },
+'/itineraires':      { fr: '/itineraires',      en: '/itineraires' },
+'/itineraire/[slug]': { fr: '/itineraire/[slug]', en: '/itineraire/[slug]' },
 ```
 
-- **Jamais** rediriger `/itinerary/` vers `/itineraire/` — chemins séparés par locale.
+- L'historique singulier `/itineraire` (index sans `[slug]`) est cassé via
+  un **redirect 308** vers `/itineraires` dans `next.config.ts` (FR + EN)
+  pour préserver les liens externes et signaux SEO.
+- **Slug EN** : `slug_en` peut exister en DB pour les meta_*, mais l'URL
+  reste construite à partir de `slug_fr` (canonique unique).
 
 ---
 
@@ -41,9 +49,7 @@ export async function generateMetadata({
   const itinerary = await getItineraryBySlug(slug, locale);
   if (!itinerary) return { robots: { index: false, follow: false } };
 
-  const canonical = `/${locale}/${
-    locale === 'fr' ? 'itineraire' : 'itinerary'
-  }/${slug}`;
+  const canonical = `/${locale}/itineraire/${slug}`;
 
   return {
     title:       locale === 'fr' ? itinerary.meta_title_fr : itinerary.meta_title_en,
@@ -52,7 +58,7 @@ export async function generateMetadata({
       canonical,
       languages: {
         'fr-FR':    `/fr/itineraire/${itinerary.slug_fr}`,
-        'en':       `/en/itinerary/${itinerary.slug_en ?? itinerary.slug_fr}`,
+        'en':       `/en/itineraire/${itinerary.slug_fr}`, // slug ET path FR conservés (ADR-0008)
         'x-default': `/fr/itineraire/${itinerary.slug_fr}`,
       },
     },
@@ -73,10 +79,19 @@ export async function generateMetadata({
 
 ### 3.1 HowTo — `packages/seo/src/jsonld/howto.ts`
 
+Builder dédié `itineraryHowToJsonLd` (livré dans PR #98 / commit `2cd4198`),
+distinct de `bookingHowToJsonLd` car les itinéraires éditoriaux portent une
+copy par slug (pas de template figé). Cap à 14 steps (assez pour un long
+séjour, évite la sérialisation d'un blob jsonb géant).
+
 ```ts
-buildHowTo({
-  name:      locale === 'fr' ? itinerary.title_fr : itinerary.title_en,
-  totalTime: `P${itinerary.duration_min_days}D`,
+import { itineraryHowToJsonLd } from '@mch/seo';
+
+itineraryHowToJsonLd({
+  name:         locale === 'fr' ? itinerary.title_fr : itinerary.title_en,
+  description:  locale === 'fr' ? itinerary.factual_summary_fr : itinerary.factual_summary_en,
+  durationDays: itinerary.duration_min_days, // sérialisé en `P${n}D`
+  locale,                                    // émet `fr-FR` ou `en-GB`
   steps: itinerary.sections.map((s) => ({
     name:  locale === 'fr' ? s.title_fr : s.title_en,
     text:  locale === 'fr' ? s.body_fr  : s.body_en,
@@ -85,6 +100,11 @@ buildHowTo({
   })),
 });
 ```
+
+- L'image du premier step est promue au top-level `image` (cover) pour
+  optimiser les rich-results.
+- Le builder retourne un POJO Schema.org-compliant ; à émettre via
+  `<JsonLdScript>` (CSP nonce — cf. `security-engineering`).
 
 ### 3.2 ItemList — `packages/seo/src/jsonld/item-list.ts`
 

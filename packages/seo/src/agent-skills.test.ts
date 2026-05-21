@@ -48,6 +48,11 @@ describe('agent-skills', () => {
     );
   });
 
+  it('exposes the itinerary skills (CDC §6.1, migration 0045)', () => {
+    const skillNames = DEFAULT_AGENT_SKILLS.skills.map((skill) => skill.name);
+    expect(skillNames).toEqual(expect.arrayContaining(['get-itinerary', 'list-itineraries']));
+  });
+
   it('skill names are unique', () => {
     const names = DEFAULT_AGENT_SKILLS.skills.map((s) => s.name);
     expect(new Set(names).size).toBe(names.length);

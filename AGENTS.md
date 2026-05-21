@@ -131,3 +131,35 @@ shell/env gotchas, prompt-engineering tactics that worked, type-level
 interop oddities. Anything that took you more than one iteration to fix.
 
 Welcome aboard.
+
+## Cursor Cloud specific instructions
+
+### Environment basics
+
+- **Node 20.19.4** (from `.nvmrc`) via nvm; **pnpm 10.33.2** via corepack.
+- The update script handles `nvm install`, `corepack prepare`, and `pnpm install --frozen-lockfile`.
+- After install, pnpm warns about ignored build scripts (esbuild, sharp, msw, etc.). The platform-specific binaries (`@esbuild+linux-x64`, `@next/swc-linux-x64-gnu`) are installed as separate packages so **no manual `pnpm approve-builds` or `pnpm rebuild` is needed** — the dev server and build work without running postinstall scripts.
+
+### Running the web app (`apps/web`)
+
+- Create `apps/web/.env.local` (not just workspace root) with `SKIP_ENV_VALIDATION=true` and `NEXT_PUBLIC_SKIP_ENV_VALIDATION=true`. The `@t3-oss/env-nextjs` loader in the middleware will crash without this flag when real credentials are absent.
+- The `pnpm dev:web` script uses `--turbopack`, which is **incompatible** with `experimental.typedRoutes` in `next.config.ts`. Run the dev server without Turbopack: `cd apps/web && npx next dev --port 3000`.
+- First page compile takes ~15–19 s (webpack mode); subsequent HMR is fast.
+- The app degrades gracefully without real Supabase/Redis/Algolia/Amadeus credentials — pages render but data-dependent sections return empty/null.
+
+### Running lint / typecheck / tests
+
+- `pnpm lint` — runs ESLint on `@mch/web` and `@mch/admin` (2 packages have lint scripts).
+- `pnpm typecheck` — runs `tsc --noEmit` across all 11 workspace packages.
+- `pnpm test:unit` — runs Vitest in `@mch/domain`, `@mch/web`, `@mch/integrations`.
+- All three commands work out of the box with no external services.
+
+### Build
+
+- `SKIP_ENV_VALIDATION=true NEXT_PUBLIC_SKIP_ENV_VALIDATION=true pnpm build` succeeds without real credentials (~90 s).
+- Sentry wrapper is automatically skipped when `SENTRY_AUTH_TOKEN` is absent.
+
+### Key gotchas
+
+- `.env.local` must live in `apps/web/` (not just the monorepo root) because `next dev` reads env from its CWD.
+- The `pre-push` hook runs `pnpm turbo run typecheck` and `pnpm validate:skills` — ensure both pass before pushing.
