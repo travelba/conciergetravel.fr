@@ -77,20 +77,33 @@ function scenarioHeadline(scenario: ComparisonScenario, labels: PriceComparatorL
   return map[scenario.kind];
 }
 
+function makePropsKey(props: PriceComparatorClientProps): string {
+  return `${props.hotelId}|${props.checkIn}|${props.checkOut}|${props.adults}`;
+}
+
 export function PriceComparatorClient(props: PriceComparatorClientProps): ReactElement | null {
   const [state, setState] = useState<
-    | { readonly status: 'idle' }
     | { readonly status: 'loading' }
     | { readonly status: 'unavailable' }
     | { readonly status: 'available'; readonly data: ApiResponseAvailable }
-  >({ status: 'idle' });
+  >({ status: 'loading' });
+
+  // Reset to `loading` when the underlying request changes, using the
+  // React 19 "track previous value" pattern so the transition happens
+  // during render and complies with `react-hooks/set-state-in-effect`.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const propsKey = makePropsKey(props);
+  const [previousPropsKey, setPreviousPropsKey] = useState(propsKey);
+  if (previousPropsKey !== propsKey) {
+    setPreviousPropsKey(propsKey);
+    setState({ status: 'loading' });
+  }
 
   useEffect(() => {
     // Fetch *after* mount + after first paint: deferred via `requestIdleCallback`
     // when available, falls back to a 200 ms timeout. The comparator must
     // never delay LCP per skill performance guardrail.
     let cancelled = false;
-    setState({ status: 'loading' });
 
     const trigger = () => {
       if (cancelled) return;
@@ -143,9 +156,9 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
     };
   }, [props.hotelId, props.checkIn, props.checkOut, props.adults]);
 
-  if (state.status === 'idle' || state.status === 'loading') {
+  if (state.status === 'loading') {
     return (
-      <p className="text-muted text-sm" aria-live="polite" aria-busy={state.status === 'loading'}>
+      <p className="text-muted text-sm" aria-live="polite" aria-busy="true">
         {props.labels.loading}
       </p>
     );

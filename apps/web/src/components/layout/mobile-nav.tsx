@@ -50,11 +50,16 @@ export function MobileNav(): ReactElement {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  // Close on route change.
+  // Close on route change — using the React 19 "store previous value"
+  // pattern so the close happens during render rather than from an
+  // effect, satisfying `react-hooks/set-state-in-effect`.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const pathname = usePathname();
-  useEffect(() => {
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  if (previousPathname !== pathname) {
+    setPreviousPathname(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Body scroll lock + Esc handler.
   useEffect(() => {

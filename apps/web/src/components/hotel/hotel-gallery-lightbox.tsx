@@ -233,8 +233,9 @@ export function HotelGalleryLightbox({
 
       {/* The dialog has explicit keyboard paths (Escape closes natively, the
           on-screen ✕ button, and global arrow-key handler); the onClick here
-          only adds the optional backdrop-click-to-close convenience. */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
+          only adds the optional backdrop-click-to-close convenience.
+          (eslint-config-next 16 no longer flags these jsx-a11y rules on
+          <dialog>, so the previous disable directive was removed.) */}
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}

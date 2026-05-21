@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
 import type { ConsentState } from '@mch/domain/consent';
 
@@ -26,26 +26,45 @@ function toView(state: ConsentState | null): ConsentView {
   return { hasDecision: true, analytics: state.analytics, essential: true };
 }
 
+// Snapshot cache — `useSyncExternalStore` requires `getSnapshot` to return
+// a referentially stable value between consecutive calls when nothing
+// changed, otherwise React bails out with an infinite-render warning.
+// We invalidate via the document.cookie string, which mutates whenever
+// `writeConsentClient` runs (it rewrites the same name+value pair).
+let cachedRaw: string | null | undefined;
+let cachedState: ConsentState | null = null;
+
+function getConsentSnapshot(): ConsentState | null {
+  const raw = typeof document === 'undefined' ? null : document.cookie;
+  if (raw === cachedRaw) return cachedState;
+  cachedRaw = raw;
+  cachedState = readConsentClient();
+  return cachedState;
+}
+
+function getServerSnapshot(): ConsentState | null {
+  return null;
+}
+
+function subscribe(notify: () => void): () => void {
+  return onConsentChanged(() => {
+    cachedRaw = undefined;
+    notify();
+  });
+}
+
 /**
  * Reactive consent state — subscribes to `mch:consent-changed` and
  * re-renders dependent islands when the user updates their choices.
  *
  * Critical guarantees (skill: security-engineering §GDPR):
  *  - SSR-safe: returns `NO_DECISION_VIEW` on the server and during the
- *    first client render so no analytics SDK ever renders until consent
- *    is confirmed.
+ *    first client render (via `getServerSnapshot`) so no analytics SDK
+ *    ever renders until consent is confirmed.
  *  - Cross-tab updates are picked up on the next mount via the cookie
  *    read (browsers don't broadcast custom events across tabs).
  */
 export function useConsent(): ConsentView {
-  const [view, setView] = useState<ConsentView>(NO_DECISION_VIEW);
-
-  useEffect(() => {
-    // First-paint reconciliation with the persisted cookie.
-    setView(toView(readConsentClient()));
-    const off = onConsentChanged((state) => setView(toView(state)));
-    return off;
-  }, []);
-
-  return view;
+  const state = useSyncExternalStore(subscribe, getConsentSnapshot, getServerSnapshot);
+  return useMemo(() => toView(state), [state]);
 }

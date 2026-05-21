@@ -36,19 +36,30 @@ export function ConsentBanner(): ReactElement | null {
 
   const [view, setView] = useState<ViewState>('closed');
   const [analyticsChecked, setAnalyticsChecked] = useState<boolean>(true);
+  const [hasDecision, setHasDecision] = useState<boolean>(false);
+  const [initDone, setInitDone] = useState<boolean>(false);
   const firstActionRef = useRef<HTMLButtonElement | null>(null);
-  const decisionRef = useRef<boolean>(false);
 
-  useEffect(() => {
-    // Decide initial visibility from the persisted cookie.
+  // First-paint reconciliation with the persisted cookie. Performed
+  // during render (post-hydration, gated by `initDone`) rather than
+  // inside an effect so `react-hooks/set-state-in-effect` is satisfied.
+  // React batches the four setters into a single follow-up render.
+  // SSR renders `view = 'closed'`; the client catches up on the first
+  // render where `document` is defined.
+  if (!initDone && typeof document !== 'undefined') {
+    setInitDone(true);
     const current = readConsentClient();
-    decisionRef.current = current !== null;
+    setHasDecision(current !== null);
     if (current === null) {
       setView('summary');
     } else {
       setAnalyticsChecked(current.analytics);
     }
+  }
 
+  useEffect(() => {
+    // setState inside the callback is allowed by the rule (it's an
+    // event handler, not the effect body itself).
     const off = onConsentReopen(() => {
       setView('summary');
       const fresh = readConsentClient();
@@ -68,16 +79,16 @@ export function ConsentBanner(): ReactElement | null {
     if (view === 'closed') return undefined;
     const onKey = (ev: KeyboardEvent): void => {
       if (ev.key !== 'Escape') return;
-      if (!decisionRef.current) return; // first visit must choose
+      if (!hasDecision) return; // first visit must choose
       setView('closed');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [view]);
+  }, [view, hasDecision]);
 
   const persist = (state: ConsentState): void => {
     writeConsentClient(state);
-    decisionRef.current = true;
+    setHasDecision(true);
     setAnalyticsChecked(state.analytics);
     setView('closed');
   };

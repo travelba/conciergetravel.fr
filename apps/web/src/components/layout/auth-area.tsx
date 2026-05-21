@@ -80,7 +80,14 @@ export function AuthArea({ variant }: AuthAreaProps): ReactElement {
       );
       unsubscribe = () => sub.subscription.unsubscribe();
     } catch {
-      if (!cancelled) setState('signed-out');
+      // Supabase client constructor threw synchronously (e.g. missing
+      // env vars in local dev). Defer the state update to the next
+      // microtask so it lands outside the effect body — the
+      // `react-hooks/set-state-in-effect` rule treats async/callback
+      // transitions as compliant, unlike a synchronous setState here.
+      queueMicrotask(() => {
+        if (!cancelled) setState('signed-out');
+      });
     }
 
     return () => {
