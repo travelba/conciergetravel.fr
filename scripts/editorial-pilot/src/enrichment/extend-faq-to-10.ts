@@ -271,7 +271,10 @@ async function main(): Promise<void> {
   const env = loadEnv();
   const apiKey = env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY missing');
-  const openai = new OpenAI({ apiKey });
+  // SDK defaults silently hang for ~30 min on broken sockets (10-min request
+  // timeout × 3 attempts). FAQ calls finish in ≤ 30s so a 120s ceiling
+  // surfaces stuck requests fast. See concierge-voice-pipeline SKILL Rule 13.
+  const openai = new OpenAI({ apiKey, timeout: 120_000, maxRetries: 2 });
 
   const opts = parseArgs();
   const hotels = await listHotelsNeedingExtension({

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-21T04:59:16.522Z",
+  "generated_at": "2026-05-21T05:28:45.619Z",
   "hotels": {
     "total": 936,
     "by_country": {
@@ -1037,10 +1037,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "25hours-hotel-one-central",
@@ -1060,10 +1060,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "address-sky-view",
@@ -1083,10 +1083,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "al-maha-a-luxury-collection-desert-resort-and-spa-dubai",
@@ -1106,10 +1106,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "anantara-the-palm-dubai-resort",
@@ -1175,10 +1175,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "armani-hotel-dubai",
@@ -1198,10 +1198,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "atlantis-the-royal",
@@ -1313,10 +1313,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "four-seasons-resort-dubai-at-jumeirah-beach",
@@ -1359,10 +1359,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "jumeirah-dar-al-masyaf",
@@ -1382,10 +1382,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "jumeirah-marsa-al-arab",
@@ -1428,10 +1428,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "mandarin-oriental-downtown",
@@ -1520,10 +1520,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "nikki-beach-resort-and-spa-dubai",
@@ -1543,10 +1543,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "one-and-only-one-za-abeel",
@@ -1658,10 +1658,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "the-lana",
@@ -1704,10 +1704,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "altstadt-vienna",
@@ -1727,10 +1727,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "ambassador-wien",
@@ -1750,10 +1750,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "falkensteiner-schlosshotel-velden",
@@ -1773,10 +1773,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "hotel-fernblick-montafon",
@@ -1796,10 +1796,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-goldener-hirsch-a-luxury-collection-hotel",
@@ -1819,10 +1819,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-sacher",
@@ -1842,10 +1842,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-sacher-salzburg",
@@ -1865,10 +1865,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "hotel-sacher-vienna",
@@ -1911,10 +1911,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "palais-coburg-hotel-residenz",
@@ -1934,10 +1934,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "rosewood-schloss-fuschl",
@@ -1980,10 +1980,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "severin-s-the-alpine-retreat",
@@ -2003,10 +2003,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "walch-s-rote-wand-gourmet-hotel",
@@ -2026,10 +2026,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "wiesergut",
@@ -2049,10 +2049,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "adina-apartment",
@@ -2072,10 +2072,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "arkaba-homestead",
@@ -2095,10 +2095,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "bamurru-plains",
@@ -2118,10 +2118,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "capella-lodge",
@@ -2141,10 +2141,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "capella-sydney",
@@ -2187,10 +2187,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "el-questro-homestead",
@@ -2210,10 +2210,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "hotel-x",
@@ -2233,10 +2233,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "lake-house-hotel",
@@ -2256,10 +2256,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "lon-retreat-and-spa",
@@ -2279,10 +2279,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "longitude-131",
@@ -2302,10 +2302,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "saffire-freycinet",
@@ -2325,10 +2325,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "southern-ocean-lodge",
@@ -2371,10 +2371,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "spicers-peak-lodge",
@@ -2394,10 +2394,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "the-calile",
@@ -2440,10 +2440,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "august",
@@ -2463,10 +2463,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "eden-rock",
@@ -2739,10 +2739,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-beau-rivage-palace",
@@ -2785,10 +2785,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-woodward",
@@ -2900,10 +2900,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "east-hong-kong",
@@ -2923,10 +2923,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "four-season-hong-kong",
@@ -3015,10 +3015,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "lanson-place-causeway-bay",
@@ -3038,10 +3038,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "mandarin-oriental-hong-kong",
@@ -3130,10 +3130,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:06"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "regent-beijing",
@@ -3245,10 +3245,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-middle-house",
@@ -3337,10 +3337,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "upper-house-hong-kong",
@@ -3383,10 +3383,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "hacienda-altagracia-auberge-resorts-collection",
@@ -3498,10 +3498,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "almanac-x-alcron-prague",
@@ -3521,10 +3521,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "buddha-bar-hotel-prague",
@@ -3544,10 +3544,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "domus-balthasar",
@@ -3567,10 +3567,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "four-seasons-hotel-prague",
@@ -3613,10 +3613,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "hotel-aria",
@@ -3636,10 +3636,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-josef",
@@ -3659,10 +3659,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "intercontinental-prague",
@@ -3682,10 +3682,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "kempinski-hybernska",
@@ -3728,10 +3728,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "mamaison-suite-hotel-pachtuv-palace",
@@ -3751,10 +3751,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "mandarin-oriental-prague",
@@ -3797,10 +3797,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "the-augustine-hotel",
@@ -3820,10 +3820,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-emblem",
@@ -3843,10 +3843,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-icon-hotel-and-lounge",
@@ -3866,10 +3866,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "ayurveda-parkschlosschen",
@@ -3889,10 +3889,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "brenners-park-hotel-and-spa",
@@ -3912,10 +3912,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "casa-camper-berlin",
@@ -3935,10 +3935,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "cosmo-hotel-berlin-mitte",
@@ -3958,10 +3958,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "das-stue",
@@ -3981,10 +3981,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "dormero-brandenburger-hof",
@@ -4004,10 +4004,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "grand-hyatt-berlin",
@@ -4050,10 +4050,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-adlon-kempinski",
@@ -4073,10 +4073,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-adlon-kempinski-berlin",
@@ -4119,10 +4119,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-de-rome",
@@ -4142,10 +4142,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-q",
@@ -4165,10 +4165,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "michelberger-hotel",
@@ -4188,10 +4188,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "motel-one-berlin-alexanderplatz",
@@ -4211,10 +4211,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "nhow-berlin",
@@ -4234,10 +4234,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "parkschlosschen",
@@ -4257,10 +4257,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 17:34"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "patrick-hellmann-schlosshotel",
@@ -4280,10 +4280,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "radisson-blu-berlin",
@@ -4303,10 +4303,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "sofitel-berlin-gendarmenmarkt",
@@ -4349,10 +4349,10 @@
         "coords_set": false,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "the-mandala-hotel",
@@ -4372,10 +4372,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-regent-berlin",
@@ -4395,10 +4395,10 @@
         "coords_set": false,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-ritz-carlton-berlin",
@@ -4441,10 +4441,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "coulibri-ridge",
@@ -4464,10 +4464,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "secret-bay",
@@ -4487,10 +4487,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "al-moudira",
@@ -4533,10 +4533,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "akelarre",
@@ -4579,10 +4579,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "barcelo-raval",
@@ -4602,10 +4602,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "can-meno",
@@ -4625,10 +4625,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "casa-camper-hotel-barcelona",
@@ -4648,10 +4648,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "chic-and-basic-born",
@@ -4671,10 +4671,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "el-palace-hotel",
@@ -4694,10 +4694,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "fontenille-santa-ponsa",
@@ -4717,10 +4717,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "four-seasons-madrid",
@@ -4763,10 +4763,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "grand-hotel-son-net",
@@ -4809,10 +4809,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-1898",
@@ -4832,10 +4832,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-arts-barcelona",
@@ -4878,10 +4878,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-casa-fuster",
@@ -4901,10 +4901,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-claris",
@@ -4924,10 +4924,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-jazz",
@@ -4947,10 +4947,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-neri",
@@ -4970,10 +4970,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "la-moraleja",
@@ -5039,10 +5039,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "mandarin-oriental-barcelona",
@@ -5108,10 +5108,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "murmuri-hotel-barcelona",
@@ -5131,10 +5131,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "praktik-rambla",
@@ -5154,10 +5154,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "son-net",
@@ -5223,10 +5223,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "villa-cadaques-finca",
@@ -5246,10 +5246,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:05"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "villa-cadaques-oliveres",
@@ -5269,10 +5269,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "villa-cadaques-village",
@@ -5292,10 +5292,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "villa-kenai-le-collectionist",
@@ -5338,10 +5338,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "w-barcelona",
@@ -5361,10 +5361,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "5-terres-hotel-spa-mgallery-by-sofitel",
@@ -5476,10 +5476,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "anantara-plaza-nice-hotel",
@@ -5499,10 +5499,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "auberge-des-templiers",
@@ -5614,10 +5614,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "baumaniere",
@@ -5729,10 +5729,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "bulgari-hotel-paris",
@@ -5890,10 +5890,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "carlton-cannes",
@@ -5959,10 +5959,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "chateau-dapigne",
@@ -6350,10 +6350,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "chateau-lafaurie-peyraguey",
@@ -6557,10 +6557,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "cour-des-vosges",
@@ -7178,10 +7178,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-and-spa-du-castellet",
@@ -7339,10 +7339,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-barriere-le-royal-la-baule",
@@ -8213,10 +8213,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-la-borde",
@@ -9179,10 +9179,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-the-peninsula-paris",
@@ -9340,10 +9340,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "l-auberge-du-jeu-de-paume",
@@ -9455,10 +9455,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "la-fantaisie",
@@ -9501,10 +9501,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "la-licorne-troyes",
@@ -9524,10 +9524,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "la-maison-villeroy",
@@ -9639,10 +9639,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "la-villa-calvi",
@@ -10030,10 +10030,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "le-negresco-nice",
@@ -10145,10 +10145,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "le-roch-hotel-and-spa",
@@ -10214,10 +10214,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "le-royal-monceau-raffles-paris",
@@ -10260,10 +10260,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "le-vallon-de-valrugues-and-spa",
@@ -10375,10 +10375,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "les-crayeres",
@@ -10743,10 +10743,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "maison-breguet",
@@ -10789,10 +10789,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "maison-lameloise",
@@ -10835,10 +10835,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "maison-souquet",
@@ -10996,10 +10996,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "nolinski-paris",
@@ -11341,10 +11341,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 15:46"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "so-paris-hotel",
@@ -11364,10 +11364,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "sofitel-le-scribe-paris-opera",
@@ -11502,10 +11502,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "tiara-miramar-beach-resort",
@@ -11525,10 +11525,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "villa-belrose",
@@ -11663,10 +11663,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "45-park-lane",
@@ -11686,10 +11686,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "althoff-st-james-hotel-and-club-mayfair-london",
@@ -11709,10 +11709,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "andaz-london-liverpool-street",
@@ -11778,10 +11778,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "bulgari-hotel-and-residences-london",
@@ -11824,10 +11824,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "citizenm-london-bankside",
@@ -11847,10 +11847,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "claridge-s",
@@ -11893,10 +11893,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "claridges",
@@ -11939,10 +11939,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "como-metropolitan-london",
@@ -11985,10 +11985,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "eccleston-square-hotel",
@@ -12008,10 +12008,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "estelle-manor",
@@ -12100,10 +12100,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-cafe-royal",
@@ -12123,10 +12123,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "raffles-london-at-the-owo",
@@ -12192,10 +12192,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "shangri-la-the-shard",
@@ -12261,10 +12261,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "stylotel-london",
@@ -12284,10 +12284,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "the-ampersand",
@@ -12307,10 +12307,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-berkeley",
@@ -12330,10 +12330,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-connaught",
@@ -12399,10 +12399,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-emory",
@@ -12468,10 +12468,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-hoxton-shoreditch",
@@ -12491,10 +12491,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-langham-hotel",
@@ -12514,10 +12514,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-london-edition",
@@ -12537,10 +12537,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 18:35"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-londoner",
@@ -12560,10 +12560,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-marylebone-hotel",
@@ -12583,10 +12583,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-montcalm-mayfair-autograph-collection",
@@ -12606,10 +12606,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-ned",
@@ -12629,10 +12629,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-peninsula-london",
@@ -12652,10 +12652,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-resident-soho",
@@ -12675,10 +12675,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-soho-hotel",
@@ -12698,10 +12698,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-standard",
@@ -12721,10 +12721,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-zetter-hotel",
@@ -12744,10 +12744,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "acro-wellness-suites",
@@ -12767,10 +12767,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "aggello-boutique-hotel",
@@ -12790,10 +12790,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "belvedere-hilltop-rooms-and-suites",
@@ -12813,10 +12813,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "boheme-mykonos",
@@ -12836,10 +12836,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "chania-flair-deluxe-boutique-hotel",
@@ -12859,10 +12859,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "creta-maris-resort",
@@ -12882,10 +12882,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "cretan-malia-park",
@@ -12905,10 +12905,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "elounda-mare",
@@ -12928,10 +12928,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "fouquet-s-mykonos",
@@ -12951,10 +12951,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "four-seasons-astir-palace",
@@ -13043,10 +13043,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "minos-beach-art-hotel",
@@ -13066,10 +13066,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "nautilux-by-mage-hotels",
@@ -13089,10 +13089,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "niko-seaside-resort-mgallery",
@@ -13112,10 +13112,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "nomad-hotel",
@@ -13135,10 +13135,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "numo-ierapetra-beach-resort",
@@ -13158,10 +13158,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "once-in-mykonos",
@@ -13181,10 +13181,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "santa-marina-a-luxury-collection-resort",
@@ -13227,10 +13227,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "stella-island-luxury-resort-and-spa",
@@ -13250,10 +13250,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "verina-astra",
@@ -13296,10 +13296,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "hyatt-regency-sha-tin",
@@ -13365,10 +13365,10 @@
         "coords_set": false,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "tai-o-heritage-hotel",
@@ -13388,10 +13388,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-upper-house",
@@ -13457,10 +13457,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "aria-hotel-budapest",
@@ -13480,10 +13480,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "corinthia",
@@ -13503,10 +13503,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "four-seasons-gresham-palace",
@@ -13549,10 +13549,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "kozmo-hotel-suites-and-spa",
@@ -13572,10 +13572,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "matild-palace",
@@ -13595,10 +13595,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "parisi-udvar-hotel-budapest",
@@ -13641,10 +13641,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "amankila",
@@ -13779,10 +13779,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "mandapa",
@@ -13848,10 +13848,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 19:20"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-mulia",
@@ -14055,10 +14055,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "taj-lake-palace",
@@ -14331,10 +14331,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:04"
       },
       {
         "slug": "aki-family-resort-plose",
@@ -14354,10 +14354,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "aman-venice",
@@ -14561,10 +14561,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "castelfalfi",
@@ -14653,10 +14653,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "collegio-alla-querce",
@@ -14699,10 +14699,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "como-castello-del-nero",
@@ -14722,10 +14722,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "forestis-dolomites",
@@ -14745,10 +14745,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "four-seasons-hotel-firenze",
@@ -14860,10 +14860,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-de-russie-rocco-forte-collection",
@@ -14883,10 +14883,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-eden",
@@ -14906,10 +14906,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-hassler",
@@ -14929,10 +14929,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-il-pellicano",
@@ -14975,10 +14975,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "il-palazzo-experimental",
@@ -14998,10 +14998,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "il-salviatino-florence-italy",
@@ -15044,10 +15044,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "le-sirenuse",
@@ -15090,10 +15090,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "londra-palace-venezia",
@@ -15113,10 +15113,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "miramonti-boutique-hotel",
@@ -15136,10 +15136,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "my-arbor",
@@ -15159,10 +15159,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "nolinski-venezia",
@@ -15182,10 +15182,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "orient-express-la-minerva",
@@ -15228,10 +15228,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "passalacqua",
@@ -15297,10 +15297,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "portrait-milano",
@@ -15343,10 +15343,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "reschio-hotel",
@@ -15389,10 +15389,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "rome-cavalieri",
@@ -15412,10 +15412,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "sofitel-rome-villa-borghese",
@@ -15435,10 +15435,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "splendido",
@@ -15504,10 +15504,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-lake-como-edition",
@@ -15527,10 +15527,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-st-regis-rome",
@@ -15550,10 +15550,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-venice-venice-hotel",
@@ -15619,10 +15619,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "villa-sant-andrea-a-belmond-hotel-taormina-mare-sicily-italy",
@@ -15665,10 +15665,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "aman-kyoto",
@@ -15734,10 +15734,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "andon-ryokan",
@@ -15757,10 +15757,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "bulgari-tokyo",
@@ -15803,10 +15803,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "four-seasons-hotel-tokyo-at-otemachi",
@@ -15895,10 +15895,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hoshino-resorts-kai-hakone",
@@ -15964,10 +15964,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 20:24"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "hotel-the-mitsui",
@@ -16010,10 +16010,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "janu-tokyo",
@@ -16102,10 +16102,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "park-hyatt-kyoto",
@@ -16171,10 +16171,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "ryokan-ryumeikan-honten",
@@ -16194,10 +16194,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "ryokan-sawanoya",
@@ -16217,10 +16217,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "shangri-la-hotel-tokyo",
@@ -16286,10 +16286,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-capitol-hotel-tokyu",
@@ -16309,10 +16309,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-gate-hotel-kaminarimon",
@@ -16332,10 +16332,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-peninsula-tokyo",
@@ -16378,10 +16378,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-ritz-carlton-kyoto",
@@ -16447,10 +16447,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-tokyo-edition-toranomon",
@@ -16493,10 +16493,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-westin-tokyo",
@@ -16700,10 +16700,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "cap-maison",
@@ -16723,10 +16723,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "jade-mountain",
@@ -16746,10 +16746,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "amangalla",
@@ -16792,10 +16792,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "club-med-exclusive-collection-marrakech-le-riad",
@@ -16815,10 +16815,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "hotel-barriere-le-naoura",
@@ -16838,10 +16838,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-sahrai",
@@ -16861,10 +16861,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "kasbah-tamadot",
@@ -16930,10 +16930,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "le-naoura",
@@ -16953,10 +16953,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "les-jardins-de-la-koutoubia",
@@ -16976,10 +16976,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "les-jardins-de-la-medina",
@@ -16999,10 +16999,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "mandarin-oriental-marrakech",
@@ -17045,10 +17045,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "park-hyatt-marrakech",
@@ -17091,10 +17091,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "riad-el-amine",
@@ -17114,10 +17114,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "riad-fes-relais-and-chateaux",
@@ -17137,10 +17137,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "royal-mansour",
@@ -17206,10 +17206,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "villa-mabrouka",
@@ -17275,10 +17275,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "heritage-le-telfair-golf-and-spa-resort",
@@ -17298,10 +17298,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "hotel-20-degres-sud",
@@ -17321,10 +17321,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:11"
       },
       {
         "slug": "lux-le-morne",
@@ -17344,10 +17344,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "veranda-grand-baie",
@@ -17367,10 +17367,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "veranda-palmar-beach-hotel",
@@ -17390,10 +17390,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "joali-maldives",
@@ -17528,10 +17528,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:06"
       },
       {
         "slug": "casa-de-sierra-nevada-a-belmond-hotel-san-miguel-de-allende",
@@ -17712,10 +17712,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:14"
       },
       {
         "slug": "la-casa-de-la-playa",
@@ -17784,7 +17784,7 @@
         "faq_count": 12,
         "hero_set": true,
         "is_published": true,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:02"
       },
       {
         "slug": "maroma",
@@ -18034,10 +18034,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "rancho-santana",
@@ -18126,10 +18126,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "flockhill-lodge",
@@ -18425,10 +18425,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:09"
       },
       {
         "slug": "hotel-parador-santa-catarina",
@@ -18448,10 +18448,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "m-ou-co",
@@ -18471,10 +18471,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:17"
       },
       {
         "slug": "octant-douro",
@@ -18494,10 +18494,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "quinta-de-la-rosa",
@@ -18517,10 +18517,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "quinta-sao-jose-do-barrilario",
@@ -18540,10 +18540,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "six-senses-douro-valley",
@@ -18563,10 +18563,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "the-vintage-house-hotel-douro",
@@ -18586,10 +18586,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-wine-house-hotel-quinta-da-pacheca",
@@ -18609,10 +18609,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "torel-quinta-da-vacaria",
@@ -18632,10 +18632,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "ventozelo-douro",
@@ -18655,10 +18655,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "raffles-doha",
@@ -18701,10 +18701,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:07"
       },
       {
         "slug": "our-habitas-alula",
@@ -18724,10 +18724,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "cheval-blanc-seychelles",
@@ -18839,10 +18839,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 21:52"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "capella-singapore",
@@ -19092,10 +19092,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "the-siam",
@@ -19138,10 +19138,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "empress-zoe-hotel",
@@ -19161,10 +19161,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:10"
       },
       {
         "slug": "four-seasons-bosphorus",
@@ -19253,10 +19253,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-les-ottomans-istanbul",
@@ -19276,10 +19276,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:13"
       },
       {
         "slug": "kempinski-ciragan-palace-istanbul",
@@ -19299,10 +19299,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:15"
       },
       {
         "slug": "macak-z",
@@ -19414,10 +19414,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "prince-s-palace",
@@ -19437,10 +19437,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "raffles-istanbul",
@@ -19506,10 +19506,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "shangri-la-bosphorus",
@@ -19575,10 +19575,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "sumahan-on-the-water",
@@ -19598,10 +19598,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "swissotel-istanbul",
@@ -19621,10 +19621,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-bank-hotel",
@@ -19644,10 +19644,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-house-hotel-bosphorus",
@@ -19667,10 +19667,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-peninsula-istanbul",
@@ -19736,10 +19736,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:39"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "witt-istanbul-suites",
@@ -19759,10 +19759,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:39"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "kilindi-zanzibar",
@@ -19805,10 +19805,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:39"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "ace-hotel-new-york",
@@ -19828,10 +19828,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "aka-back-bay",
@@ -19851,10 +19851,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:05"
       },
       {
         "slug": "aman-new-york",
@@ -19966,10 +19966,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "chelsea-pines-inn",
@@ -19989,10 +19989,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 22:38"
+        "updated_at": "2026-05-21 05:08"
       },
       {
         "slug": "faena-hotel-miami-beach",
@@ -20196,10 +20196,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:12"
       },
       {
         "slug": "hotel-bel-air",
@@ -20357,10 +20357,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:16"
       },
       {
         "slug": "limelight-aspen",
@@ -20495,10 +20495,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:18"
       },
       {
         "slug": "primland-resort-auberge-resorts-collection",
@@ -20541,10 +20541,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "quisisana-resort",
@@ -20587,10 +20587,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:19"
       },
       {
         "slug": "san-ysidro-ranch",
@@ -20656,10 +20656,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "sheraton-boston-hotel",
@@ -20679,10 +20679,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:20"
       },
       {
         "slug": "smith-fork-ranch",
@@ -20748,10 +20748,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:21"
       },
       {
         "slug": "solage-auberge-resorts-collection",
@@ -20817,10 +20817,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-beverly-hills-hotel",
@@ -20863,10 +20863,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-box-house-hotel",
@@ -20886,10 +20886,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-bryant-park-hotel",
@@ -20909,10 +20909,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-carlyle",
@@ -20978,10 +20978,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:22"
       },
       {
         "slug": "the-dunlin-auberge-resorts-collection",
@@ -21024,10 +21024,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-fifth-avenue-hotel",
@@ -21116,10 +21116,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-hotel-chelsea",
@@ -21139,10 +21139,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-inn-at-mattei-s-tavern-auberge-resorts-collection",
@@ -21254,10 +21254,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-lowell-hotel",
@@ -21277,10 +21277,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-ludlow-hotel",
@@ -21300,10 +21300,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:23"
       },
       {
         "slug": "the-mark",
@@ -21346,10 +21346,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-mercer",
@@ -21369,10 +21369,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-ned-nomad",
@@ -21392,10 +21392,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-newbury-boston",
@@ -21415,10 +21415,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-nolitan-hotel",
@@ -21438,10 +21438,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-norumbega",
@@ -21530,10 +21530,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-post-ranch-inn",
@@ -21645,10 +21645,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-sparrow",
@@ -21714,10 +21714,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-standard-high-line",
@@ -21737,10 +21737,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-surrey",
@@ -21760,10 +21760,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:24"
       },
       {
         "slug": "the-verb-hotel",
@@ -21783,10 +21783,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-vineta-hotel",
@@ -21806,10 +21806,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 11,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-westin-nashville",
@@ -21852,10 +21852,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-20 23:37"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "the-whitley-a-luxury-collection-hotel-atlanta-buckhead",
@@ -21944,10 +21944,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:08"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "villa-mara",
@@ -22151,10 +22151,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:08"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "yotel-new-york-at-times-square-west",
@@ -22174,10 +22174,10 @@
         "coords_set": true,
         "wikidata_set": true,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:08"
+        "updated_at": "2026-05-21 05:26"
       },
       {
         "slug": "anantara-quy-nhon-villas",
@@ -22289,10 +22289,10 @@
         "coords_set": true,
         "wikidata_set": false,
         "gallery_count": 0,
-        "faq_count": 0,
+        "faq_count": 12,
         "hero_set": false,
         "is_published": false,
-        "updated_at": "2026-05-21 00:08"
+        "updated_at": "2026-05-21 05:25"
       },
       {
         "slug": "villa-le-corail-a-gran-melia-hotel",
@@ -22545,7 +22545,7 @@
         "faq_count": 12,
         "hero_set": true,
         "is_published": true,
-        "updated_at": "2026-05-21 00:25"
+        "updated_at": "2026-05-21 05:02"
       }
     ]
   },
@@ -26028,15 +26028,16 @@
   "guides": {
     "total": 86,
     "bucket_counts": {
-      "ready_to_publish": 80,
-      "needs_summary_long": 4,
+      "ready_to_publish": 84,
+      "needs_summary_long": 1,
       "needs_faq": 0,
-      "needs_full_content": 2
+      "needs_full_content": 1
     },
     "bucket_slugs": {
       "ready_to_publish": [
         "aix-en-provence",
         "allemagne",
+        "alpes",
         "alsace",
         "annecy",
         "arles",
@@ -26082,6 +26083,7 @@
         "guide-maurice",
         "guide-mexique",
         "guide-perou",
+        "guide-philippines",
         "guide-portugal",
         "guide-royaume-uni",
         "guide-sainte-lucie",
@@ -26109,16 +26111,18 @@
         "paris",
         "pays-basque",
         "pays-de-la-loire",
+        "reims-champagne",
         "royaume-uni",
         "saint-remy-de-provence",
         "saint-tropez",
         "sologne",
         "sud-ouest",
-        "turquie"
+        "turquie",
+        "vexin"
       ],
-      "needs_summary_long": ["alpes", "provence", "reims-champagne", "vexin"],
+      "needs_summary_long": ["provence"],
       "needs_faq": [],
-      "needs_full_content": ["guide-espagne", "guide-philippines"]
+      "needs_full_content": ["guide-espagne"]
     },
     "records": [
       {
@@ -26149,10 +26153,10 @@
       },
       {
         "slug": "alpes",
-        "bucket": "needs_summary_long",
+        "bucket": "ready_to_publish",
         "name_fr": "Alpes françaises",
-        "summary_words": 26,
-        "section_count": 0,
+        "summary_words": 575,
+        "section_count": 9,
         "long_sentences": 0,
         "faq_count": 25,
         "meta_set": true,
@@ -26760,10 +26764,10 @@
       },
       {
         "slug": "guide-philippines",
-        "bucket": "needs_full_content",
+        "bucket": "ready_to_publish",
         "name_fr": "Philippines",
-        "summary_words": 24,
-        "section_count": 0,
+        "summary_words": 645,
+        "section_count": 9,
         "long_sentences": 0,
         "faq_count": 7,
         "meta_set": false,
@@ -27137,10 +27141,10 @@
       },
       {
         "slug": "reims-champagne",
-        "bucket": "needs_summary_long",
+        "bucket": "ready_to_publish",
         "name_fr": "Reims & Champagne",
-        "summary_words": 20,
-        "section_count": 0,
+        "summary_words": 544,
+        "section_count": 9,
         "long_sentences": 0,
         "faq_count": 25,
         "meta_set": true,
@@ -27228,10 +27232,10 @@
       },
       {
         "slug": "vexin",
-        "bucket": "needs_summary_long",
+        "bucket": "ready_to_publish",
         "name_fr": "Vexin Français",
-        "summary_words": 21,
-        "section_count": 0,
+        "summary_words": 551,
+        "section_count": 9,
         "long_sentences": 0,
         "faq_count": 25,
         "meta_set": true,
