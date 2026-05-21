@@ -20,8 +20,8 @@
   },
   "devDependencies": {
     "@mch/config": "workspace:*",
-    "@types/react": "^19.0.7",
-    "@types/react-dom": "^19.0.3",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "react-email": "^3.0.4",
     "typescript": "catalog:"
   }

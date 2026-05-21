@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "catalog:",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.5",
     "zod": "catalog:"
   },
@@ -27,8 +27,8 @@
     "@mch/config": "workspace:*",
     "@mch/integrations": "workspace:*",
     "@types/node": "^25.9.1",
-    "drizzle-kit": "^0.30.2",
-    "tsx": "^4.19.2",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.22.3",
     "typescript": "catalog:"
   }
 }

@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "@mch/config": "workspace:*",
-    "@types/react": "^19.0.7",
-    "@types/react-dom": "^19.0.3",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
