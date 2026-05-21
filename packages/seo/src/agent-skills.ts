@@ -80,6 +80,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/cities' },
     },
     {
       name: 'get-hotel',
@@ -125,6 +126,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['hotelSlug', 'roomSlug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/hotel/{hotelSlug}/room/{roomSlug}' },
     },
     {
       name: 'filter',
@@ -134,18 +136,18 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'list-rankings',
       description:
-        'Lister les classements rédigés par le concierge ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
+        'Lister les classements rédigés par le concierge ("Les meilleurs Palaces de France", "Plus beaux hôtels de Paris", "Palaces avec spa", etc.). Filtrable par axe (type, lieu, thème, occasion, saison). URL hub : /classements ; URL sous-hub : /classements/{axe}/{valeur}.',
       inputSchema: {
         type: 'object',
         properties: {
           axe: {
             type: 'string',
-            description: 'Axe de filtrage : "type" | "lieu" | "theme" | "occasion".',
+            description: 'Axe de filtrage : "type" | "lieu" | "theme" | "occasion" | "saison".',
           },
           valeur: {
             type: 'string',
             description:
-              'Valeur de l\'axe (slug kebab-case, ex. "palace", "paris", "spa-bienetre", "lune-de-miel").',
+              'Valeur de l\'axe (slug kebab-case, ex. "palace", "paris", "spa-bienetre", "lune-de-miel", "hiver").',
           },
           locale: {
             type: 'string',
@@ -153,6 +155,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           },
         },
       },
+      endpoint: { method: 'GET', path: '/api/agent/rankings' },
     },
     {
       name: 'get-ranking',
@@ -173,6 +176,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/ranking/{slug}' },
     },
     {
       name: 'compare-prices',
@@ -188,6 +192,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['hotelSlug', 'checkin', 'checkout'],
       },
+      endpoint: { method: 'POST', path: '/api/agent/compare-prices' },
     },
     {
       name: 'booking',
@@ -219,6 +224,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       name: 'loyalty',
       description:
         'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
+      endpoint: { method: 'GET', path: '/api/agent/loyalty' },
     },
     // ── ADR-0014 — new agentic surfaces ─────────────────────────────────
     {
@@ -229,6 +235,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/categories' },
     },
     {
       name: 'list-themes',
@@ -238,6 +245,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/themes' },
     },
     {
       name: 'list-occasions',
@@ -247,6 +255,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/occasions' },
     },
     {
       name: 'list-brands',
@@ -256,6 +265,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         type: 'object',
         properties: {},
       },
+      endpoint: { method: 'GET', path: '/api/agent/brands' },
     },
     {
       name: 'get-concierge-tip',
@@ -275,6 +285,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         },
         required: ['slug'],
       },
+      endpoint: { method: 'GET', path: '/api/agent/concierge-tip/{slug}' },
     },
   ],
 };
