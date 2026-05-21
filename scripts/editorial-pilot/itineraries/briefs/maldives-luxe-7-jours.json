@@ -1,0 +1,75 @@
+{
+  "slug_fr": "maldives-luxe-7-jours",
+  "slug_en": "maldives-luxury-7-days",
+  "priority": "P0",
+  "destination_country": "Maldives",
+  "destination_region": "Atolls Nord et Centre",
+  "destination_city": "Atoll de Noonu, Atoll de Baa, Atoll de Nord Malé",
+  "themes": ["couple", "luxe", "mer"],
+  "duration_min_days": 7,
+  "duration_max_days": 7,
+  "travel_style": "luxe",
+  "season": "hiver",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Maldives 7 jours luxe — One&Only, Soneva Fushi, Cheval Blanc Randheli | MyConciergeHotel",
+  "meta_desc_fr_hint": "7 jours aux Maldives en séjour luxe : One&Only Reethi Rah, Soneva Fushi, Cheval Blanc Randheli. Snorkeling Hanifaru Bay, plongée raie manta. Sélection Concierge couple.",
+  "hotel_slugs_target": ["one-and-only-reethi-rah", "soneva-fushi", "cheval-blanc-randheli"],
+  "hotel_fallback_note": "Fallback sur resorts 5★ Maldives (atolls Nord Malé, Baa, Noonu) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-maldives"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-maldives", "meilleurs-resorts-maldives"],
+  "related_itinerary_slugs_target": ["bali-lune-de-miel-10-jours", "dubai-luxe-week-end"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 3,
+      "city": "Atoll de Noonu — Cheval Blanc Randheli",
+      "hotel_slug_hint": "cheval-blanc-randheli",
+      "key_pois": ["Villa sur pilotis Randheli", "Lagoon snorkeling", "Dîner sous-marin", "Spa CHI"],
+      "step_angle": "Arrivée Randheli — hydravion depuis Malé (35 min), villa pilotis accès direct lagon, dîner sous-marin Divers Room vitrine sur le récif, manta snorkeling au lever",
+      "title_fr_hint": "Jours 1-3 : Cheval Blanc Randheli — Villa sur pilotis et lagon privé",
+      "title_en_hint": "Days 1-3: Cheval Blanc Randheli — Overwater villa and private lagoon"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Atoll de Baa — Soneva Fushi",
+      "hotel_slug_hint": "soneva-fushi",
+      "key_pois": ["Hanifaru Bay (raies manta et baleines)", "Cinéma en plein air Cinema Paradiso", "Potager Soneva", "Soneva Soul spa"],
+      "step_angle": "Soneva Fushi expériences — hydravion Malé, Hanifaru Bay UNESCO bateau Soneva (juin-novembre, réserver à l'avance), observatoire astronomique nocturne, glace artisanale So Chill",
+      "title_fr_hint": "Jours 4-5 : Soneva Fushi — Hanifaru Bay, cinéma plein air et spa",
+      "title_en_hint": "Days 4-5: Soneva Fushi — Hanifaru Bay, open-air cinema and spa"
+    },
+    {
+      "step": 3,
+      "duration_days": 2,
+      "city": "Atoll de Nord Malé — One&Only Reethi Rah",
+      "hotel_slug_hint": "one-and-only-reethi-rah",
+      "key_pois": ["Beach villas Reethi Rah", "Plongée récifs Nord Malé", "Restaurant REETHI", "Transfert speedboat Malé 45 min"],
+      "step_angle": "Reethi Rah finale — speedboat 45 min depuis Malé, plongée récifs coralliens guide privé, dîner REETHI pieds dans le sable, vol retour depuis Malé J+7",
+      "title_fr_hint": "Jours 6-7 : One&Only Reethi Rah — Récifs, plongée et fin de séjour",
+      "title_en_hint": "Days 6-7: One&Only Reethi Rah — Reefs, diving and farewell"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire pour les Maldives en 7 jours en séjour luxe ?",
+  "aeo_answer_fr_hint": "Cheval Blanc Randheli atoll Noonu (3 nuits, hydravion, villa pilotis, lagon), Soneva Fushi atoll Baa (2 nuits, Hanifaru Bay UNESCO, cinéma plein air), One&Only Reethi Rah (2 nuits, plongée récif, Malé 45 min en speedboat). Meilleure période : novembre-avril (saison sèche). Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour aller aux Maldives ?",
+    "Quels sont les meilleurs resorts de luxe aux Maldives ?",
+    "Quel budget prévoir pour 7 jours luxe aux Maldives ?",
+    "Comment rejoindre les différents atolls aux Maldives ?",
+    "Les Maldives sont-elles adaptées à la plongée sous-marine ?",
+    "Comment réserver une villa sur pilotis aux Maldives ?",
+    "Les Maldives sont-elles une bonne destination pour une lune de miel ?",
+    "Que faire aux Maldives en dehors de la plage et du snorkeling ?",
+    "Faut-il un visa pour les Maldives depuis la France ?",
+    "Combien coûte un hydravion inter-atolls aux Maldives ?"
+  ],
+  "concierge_secret_hint": "À Cheval Blanc Randheli, la Water Villa 6 (côté Est) bénéficie d'un coucher de soleil sur le lagon plutôt qu'en pleine mer — moins spectaculaire mais le silence est total face à l'intérieur de l'atoll. À Soneva Fushi, l'accès à Hanifaru Bay se fait uniquement en saison mousson (juin-novembre) : hors saison, le guide peut organiser des sorties manta en dehors de la baie protégée.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Maldives (autorité destination). Angle unique = 7 jours circuit 3 resorts différents avec logique géographique (atolls Nord→Baa→Noonu) + focus plongée/nature + AEO. Différencier de Bali (même cible couple mais nature marine vs culturelle).",
+  "sources_to_cite": [
+    "Maldives Tourism (Visit Maldives)",
+    "UNESCO — Réserve de biosphère de Baa (Hanifaru Bay)",
+    "PADI — Plongée récifs Maldives",
+    "Michelin Guide (Asie)"
+  ]
+}

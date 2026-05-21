@@ -1,0 +1,85 @@
+{
+  "slug_fr": "toscane-gastronomie-7-jours",
+  "slug_en": "tuscany-gastronomy-7-days",
+  "priority": "P0",
+  "destination_country": "Italie",
+  "destination_region": "Toscane",
+  "destination_city": "Florence, Sienne, Val d'Orcia, Chianti",
+  "themes": ["gastronomie", "vignobles", "culture"],
+  "duration_min_days": 7,
+  "duration_max_days": 7,
+  "travel_style": "luxe",
+  "season": "printemps",
+  "target_word_count": 2200,
+  "meta_title_fr_hint": "Itinéraire Toscane 7 jours gastronomie & vignobles — Florence, Chianti, Val d'Orcia | MyConciergeHotel",
+  "meta_desc_fr_hint": "7 jours en Toscane : Borgo San Felice, Rosewood Castiglion del Bosco, Belmond Castello di Casole. Uffizi, Brunello, San Gimignano. Sélection Concierge.",
+  "hotel_slugs_target": ["borgo-san-felice", "rosewood-castiglion-del-bosco", "belmond-castello-di-casole"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Toscane (Florence, Sienne, Chianti, Val d'Orcia) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-toscane", "guide-florence", "guide-chianti"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-toscane", "meilleurs-hotels-florence"],
+  "related_itinerary_slugs_target": ["bordeaux-vignobles-gastronomie-5-jours", "provence-culture-gastronomie-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 2,
+      "city": "Florence",
+      "hotel_slug_hint": "borgo-san-felice",
+      "key_pois": ["Galerie des Offices (Uffizi)", "Ponte Vecchio", "Palais Pitti", "Jardins de Boboli"],
+      "step_angle": "Florence Renaissance — Uffizi réservation créneau 9h avant files, Ponte Vecchio lever du soleil sans touristes, déjeuner Trattoria Mario (cash uniquement), Bargello musée sculpture",
+      "title_fr_hint": "Jours 1-2 : Florence — Uffizi, Renaissance et ponts de l'Arno",
+      "title_en_hint": "Days 1-2: Florence — Uffizi, Renaissance and Arno bridges"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Chianti & Borgo San Felice",
+      "hotel_slug_hint": "borgo-san-felice",
+      "key_pois": ["Route des Vins Chianti Classico", "Greve in Chianti", "Radda in Chianti", "Castello di Ama (art contemporain)"],
+      "step_angle": "Chianti vignoble — Borgo San Felice hamlet privé DOCG Berardenga, vélo entre vignes matin (parcours balisé hôtel), Castello di Ama visite art et vin, déjeuner Osteria del Grifo Greve",
+      "title_fr_hint": "Jours 3-4 : Chianti — Vignobles, cyclotourisme et art contemporain",
+      "title_en_hint": "Days 3-4: Chianti — Vineyards, cycling and contemporary art"
+    },
+    {
+      "step": 3,
+      "duration_days": 2,
+      "city": "Val d'Orcia & Montalcino",
+      "hotel_slug_hint": "rosewood-castiglion-del-bosco",
+      "key_pois": ["Pienza (ville idéale UNESCO)", "Montalcino et Brunello", "Bagno Vignoni (source thermale)", "San Quirico d'Orcia"],
+      "step_angle": "Val d'Orcia UNESCO — Rosewood Castiglion del Bosco estate Brunello (cave privée), Pienza avant 9h (photographie facades), Bagno Vignoni bain thermal historique, dégustation Brunello Biondi-Santi",
+      "title_fr_hint": "Jours 5-6 : Val d'Orcia — Brunello, Pienza et thermes",
+      "title_en_hint": "Days 5-6: Val d'Orcia — Brunello, Pienza and thermal baths"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Sienne & San Gimignano",
+      "hotel_slug_hint": "belmond-castello-di-casole",
+      "key_pois": ["Piazza del Campo Sienne", "Cathédrale Sienne (Duomo)", "San Gimignano tours médiévales", "Vernaccia di San Gimignano"],
+      "step_angle": "Sienne & San Gimignano — Belmond Casole base, Piazza del Campo 8h sans groupes, Duomo Sienne bibliothèque Piccolomini, San Gimignano Vernaccia dégustation Teruzzi",
+      "title_fr_hint": "Jour 7 : Sienne & San Gimignano — Piazza del Campo et tours médiévales",
+      "title_en_hint": "Day 7: Siena & San Gimignano — Piazza del Campo and medieval towers"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire Toscane gastronomie et vignobles en 7 jours ?",
+  "aeo_answer_fr_hint": "Florence (2 nuits, Uffizi, Ponte Vecchio), Chianti (2 nuits Borgo San Felice, cyclotourisme vignes), Val d'Orcia (2 nuits Rosewood Castiglion, Brunello Biondi-Santi, Pienza UNESCO), Sienne/San Gimignano (1 journée, Belmond Casole). Meilleure période : mai ou septembre. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter la Toscane ?",
+    "Comment visiter les Offices sans faire la queue ?",
+    "Quels sont les meilleurs hôtels de luxe en Toscane ?",
+    "Quel budget prévoir pour un itinéraire Toscane 7 jours gastronomie ?",
+    "Faut-il louer une voiture pour visiter la Toscane ?",
+    "Quels vins déguster dans le Chianti et à Montalcino ?",
+    "Pienza est-elle classée au patrimoine UNESCO ?",
+    "Quels restaurants gastronomiques réserver en Toscane ?",
+    "Vaut-il mieux visiter Florence 1 jour ou 2 jours ?",
+    "Que faire en Toscane hors vignobles et musées ?"
+  ],
+  "concierge_secret_hint": "Au Rosewood Castiglion del Bosco, la suite Torre di Bosco dans la tour médiévale (n°1) offre une vue à 360° sur le Val d'Orcia — seule chambre avec fenêtres en ogive sur quatre façades. La dégustation privée de Brunello chez Biondi-Santi (la maison fondatrice du Brunello) se réserve exclusivement par mail à la tenuta, 6 semaines à l'avance, non disponible en passant par un intermédiaire.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Toscane (autorité destination). Angle unique = 7 jours structurés par zones gastronomiques et viticoles (Florence → Chianti → Val d'Orcia → Sienne) avec focus Brunello + art + AEO. Le guide Toscane reste l'autorité globale sur la destination.",
+  "sources_to_cite": [
+    "ENIT — Agence nationale italienne du tourisme",
+    "UNESCO — Val d'Orcia et Pienza",
+    "Michelin Guide Italie",
+    "Consorzio del Vino Brunello di Montalcino"
+  ]
+}

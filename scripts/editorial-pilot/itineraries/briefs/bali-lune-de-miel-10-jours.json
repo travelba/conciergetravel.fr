@@ -1,0 +1,75 @@
+{
+  "slug_fr": "bali-lune-de-miel-10-jours",
+  "slug_en": "bali-honeymoon-10-days",
+  "priority": "P0",
+  "destination_country": "Indonésie",
+  "destination_region": "Bali",
+  "destination_city": "Ubud, Jimbaran, Nusa Dua",
+  "themes": ["couple", "bien-etre"],
+  "duration_min_days": 10,
+  "duration_max_days": 10,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2200,
+  "meta_title_fr_hint": "Lune de miel Bali 10 jours — Ubud, Jimbaran, Nusa Dua | MyConciergeHotel",
+  "meta_desc_fr_hint": "10 jours de lune de miel à Bali : COMO Uma Ubud, Four Seasons Jimbaran, Amankila. Rizières, temples, spa balinais, plongée. Sélection Concierge couple.",
+  "hotel_slugs_target": ["como-uma-ubud", "four-seasons-jimbaran", "amankila"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Bali (Ubud, Jimbaran, Nusa Dua, Seminyak) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-bali", "guide-ubud", "guide-jimbaran"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-bali", "meilleurs-resorts-ubud"],
+  "related_itinerary_slugs_target": ["maldives-luxe-7-jours", "paris-lune-de-miel"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 4,
+      "city": "Ubud",
+      "hotel_slug_hint": "como-uma-ubud",
+      "key_pois": ["Rizières Tegallalang", "Temple Tirta Empul", "Monkey Forest", "Musée Agung Rai (ARMA)"],
+      "step_angle": "Ubud spirituel — COMO Uma arrivée cours yoga privé sunset, rizières Tegallalang 7h avant touristes, cérémonie purification Tirta Empul sur demande, dîner Locavore restaurant",
+      "title_fr_hint": "Jours 1-4 : Ubud — Rizières, temples et bien-être",
+      "title_en_hint": "Days 1-4: Ubud — Rice terraces, temples and wellness"
+    },
+    {
+      "step": 2,
+      "duration_days": 3,
+      "city": "Jimbaran",
+      "hotel_slug_hint": "four-seasons-jimbaran",
+      "key_pois": ["Plage de Jimbaran", "Temple Tanah Lot (sunset)", "Poissonnerie Jimbaran BBQ", "Pura Luhur Uluwatu"],
+      "step_angle": "Jimbaran & falaises Bukit — Four Seasons villa privée piscine, BBQ poissons plage Jimbaran coucher de soleil, Uluwatu temple kecak 18h (réserver tôt), Tanah Lot au lever",
+      "title_fr_hint": "Jours 5-7 : Jimbaran — Plages, temples falaises et dîner sur sable",
+      "title_en_hint": "Days 5-7: Jimbaran — Beaches, clifftop temples and dinner on sand"
+    },
+    {
+      "step": 3,
+      "duration_days": 3,
+      "city": "Nusa Dua & Amankila",
+      "hotel_slug_hint": "amankila",
+      "key_pois": ["Plage Amankila Candidasa", "Snorkeling Nusa Lembongan", "Temple Besakih (Mère des temples)", "Côte Est Bali"],
+      "step_angle": "Côte Est exclusive — Amankila 3 piscines en cascade face à la mer de Lombok, snorkeling manta Nusa Penida (bateau privé Amankila), Besakih visite sans agences 8h",
+      "title_fr_hint": "Jours 8-10 : Côte Est — Amankila, Besakih et départ",
+      "title_en_hint": "Days 8-10: East Coast — Amankila, Besakih and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment organiser une lune de miel parfaite à Bali en 10 jours ?",
+  "aeo_answer_fr_hint": "Ubud (4 nuits COMO Uma, rizières, yoga, temples), Jimbaran (3 nuits Four Seasons, plage, BBQ coucher soleil, Uluwatu), Amankila côte Est (3 nuits, manta snorkeling, Besakih). Meilleure période : avril-octobre (saison sèche). Vols Paris-Bali : 14h avec escale Singapour ou Kuala Lumpur. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour une lune de miel à Bali ?",
+    "Quels sont les meilleurs hôtels luxe à Bali pour les couples ?",
+    "Quel budget prévoir pour 10 jours lune de miel à Bali ?",
+    "Comment se déplacer entre Ubud, Jimbaran et la côte Est ?",
+    "Bali est-elle une destination sûre pour les lunes de miel ?",
+    "Quels temples visiter à Bali lors d'une lune de miel ?",
+    "Peut-on faire de la plongée ou du snorkeling depuis Bali ?",
+    "Que faire à Ubud en dehors des rizières ?",
+    "Quels soins spa typiquement balinais réserver pour un couple ?",
+    "Faut-il un visa pour aller à Bali depuis la France ?"
+  ],
+  "concierge_secret_hint": "À l'Amankila, les suites Aman Suite 31-34 donnent directement sur les 3 piscines en cascade face à la mer de Lombok — éviter les suites Garden qui n'ont pas de vue mer directe. Pour l'excursion manta rays à Nusa Penida, demander au desk Amankila le créneau 7h-10h : la visibilité est maximale avant que les bateaux de tourisme arrivent.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Bali (autorité destination). Angle unique = 10 jours lune de miel avec circuit 3 zones (Ubud culturel, Jimbaran balnéaire, Amankila côte Est) + focus couple/spa + AEO. Différencier des Maldives (même cible couple, autre destination).",
+  "sources_to_cite": [
+    "Bali Tourism Board (BPPD Bali)",
+    "Indonesia Tourism",
+    "Michelin Guide (Asie du Sud-Est)",
+    "Lonely Planet Bali — référence itinéraires officiels"
+  ]
+}

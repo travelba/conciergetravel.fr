@@ -1,0 +1,85 @@
+{
+  "slug_fr": "megeve-ski-luxe-5-jours",
+  "slug_en": "megeve-ski-luxury-5-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Auvergne-Rhône-Alpes",
+  "destination_city": "Megève",
+  "themes": ["luxe", "ski", "bien-etre"],
+  "duration_min_days": 5,
+  "duration_max_days": 5,
+  "travel_style": "luxe",
+  "season": "hiver",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Megève ski luxe 5 jours — Palaces, Mont d'Arbois, bien-être | MyConciergeHotel",
+  "meta_desc_fr_hint": "5 jours à Megève : Les Fermes de Marie, Chalet Zannier, Four Seasons. Mont d'Arbois, Rochebrune, restaurant 1920 étoilé. Sélection Concierge ski luxe.",
+  "hotel_slugs_target": ["les-fermes-de-marie", "le-chalet-zannier", "four-seasons-megeve"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Megève ou Chamonix présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-megeve", "guide-alpes-ski-luxe"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-megeve", "meilleures-stations-ski-luxe-france"],
+  "related_itinerary_slugs_target": ["cote-d-azur-luxe-7-jours", "saint-tropez-ete-5-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Megève — Arrivée & village",
+      "hotel_slug_hint": "les-fermes-de-marie",
+      "key_pois": ["Village de Megève centre", "Télécabine Chamois", "Patinoire de Megève", "Place de l'Église"],
+      "step_angle": "Arrivée village — ski check-in équipements chez Techni Ski (ski sur mesure), dîner Les Fermes de Marie restaurant La Table, tour village en calèche le soir",
+      "title_fr_hint": "Jour 1 : Megève — Arrivée, village et premières pistes",
+      "title_en_hint": "Day 1: Megève — Arrival, village and first runs"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Megève — Domaine Mont d'Arbois",
+      "hotel_slug_hint": "four-seasons-megeve",
+      "key_pois": ["Mont d'Arbois", "Télécabine Rochebrune", "Restaurant 1920 (étoilé)", "Princesse (piste noire)"],
+      "step_angle": "Ski haute altitude — Four Seasons ski-in ski-out Mont d'Arbois, moniteur ESF privé 9h-12h, déjeuner refuge Le Fer à Cheval 1 900m, dîner 1920 Emmanuel Renaut",
+      "title_fr_hint": "Jours 2-3 : Mont d'Arbois — Pistes, refuges d'altitude et étoilés",
+      "title_en_hint": "Days 2-3: Mont d'Arbois — Slopes, mountain refuges and starred dining"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Megève — Bien-être & spa",
+      "hotel_slug_hint": "les-fermes-de-marie",
+      "key_pois": ["Spa Les Fermes de Marie", "Bain nordique", "Snowshoeing Côte 2000"],
+      "step_angle": "Journée récupération — spa thermal aux Fermes de Marie (piscine 33° extérieure), raquettes Côte 2000 avec guide, dîner raclette authentique chalet privé",
+      "title_fr_hint": "Jour 4 : Megève — Spa, raquettes et gastronomie montagnarde",
+      "title_en_hint": "Day 4: Megève — Spa, snowshoeing and mountain gastronomy"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Megève — Départ & Chamonix optionnel",
+      "hotel_slug_hint": "le-chalet-zannier",
+      "key_pois": ["Helbronner (excursion Chamonix optionnelle)", "Marché local Megève", "Boutiques village"],
+      "step_angle": "Dernier matin — Aiguille du Midi option si météo (30 min depuis Megève), shopping art de vivre montagne, transfert Genève-Cointrin ou Lyon Saint-Exupéry",
+      "title_fr_hint": "Jour 5 : Megève — Dernier matin et départ",
+      "title_en_hint": "Day 5: Megève — Last morning and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire ski luxe à Megève en 5 jours ?",
+  "aeo_answer_fr_hint": "Megève 5 jours : arrivée village (1 nuit Fermes de Marie), ski domaine Mont d'Arbois (2 nuits Four Seasons ski-in ski-out), journée spa (Fermes de Marie), départ. Incontournables : dîner 1920 Emmanuel Renaut (réserver 1 mois avant), moniteur ESF privé, refuge Le Fer à Cheval 1 900m. Meilleure période : janvier-mars. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour skier à Megève ?",
+    "Megève est-elle une station adaptée aux débutants ?",
+    "Quels sont les meilleurs hôtels de luxe à Megève ?",
+    "Quel budget prévoir pour 5 jours ski luxe à Megève ?",
+    "Comment rejoindre Megève depuis Paris ou Genève ?",
+    "Quels restaurants étoilés à Megève vaut-il mieux réserver ?",
+    "Megève est-elle accessible en famille avec enfants en bas âge ?",
+    "Que faire à Megève hors ski ?",
+    "Megève vs Courchevel — quelle station choisir pour un séjour luxe ?",
+    "Peut-on faire du héliski à Megève ?"
+  ],
+  "concierge_secret_hint": "Au Four Seasons Megève, demander une Chalet Suite avec sauna privatif — les suites 401 et 402 disposent d'une terrasse exposée plein sud avec vue Mont Blanc dégagée. Le restaurant 1920 d'Emmanuel Renaut n'affiche pas les disponibilités en ligne avant 10h : appeler directement l'hôtel pour les tables du samedi.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Megève (autorité destination). Angle unique = 5 jours ski luxe structurés par type d'activité (ski, gastronomie, spa) + recommandations concrètes de pistes et refuges + AEO station. Le guide reste l'autorité sur la destination.",
+  "sources_to_cite": [
+    "Atout France — Montagne Tourisme",
+    "Megève Tourisme Office",
+    "Michelin Guide France",
+    "ESF Megève (École du Ski Français)"
+  ]
+}

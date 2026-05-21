@@ -1,0 +1,105 @@
+{
+  "slug_fr": "japon-culture-2-semaines",
+  "slug_en": "japan-culture-2-weeks",
+  "priority": "P0",
+  "destination_country": "Japon",
+  "destination_region": "Honshu",
+  "destination_city": "Tokyo, Kyoto, Hakone, Hiroshima, Naoshima",
+  "themes": ["culture", "luxe"],
+  "duration_min_days": 14,
+  "duration_max_days": 14,
+  "travel_style": "luxe",
+  "season": "printemps",
+  "target_word_count": 2600,
+  "meta_title_fr_hint": "Itinéraire Japon 2 semaines culture et luxe — Tokyo, Kyoto, Hiroshima, Naoshima | MyConciergeHotel",
+  "meta_desc_fr_hint": "14 jours au Japon : Aman Tokyo, Park Hyatt Kyoto, Aman Kyoto, Hakone Ginyu. Hiroshima, Naoshima, cerisiers printemps. Sélection Concierge culture et luxe.",
+  "hotel_slugs_target": ["aman-tokyo", "park-hyatt-kyoto", "aman-kyoto", "hakone-ginyu"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Japon (Tokyo, Kyoto, Hakone) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-japon", "guide-tokyo", "guide-kyoto"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-tokyo", "meilleurs-hotels-kyoto"],
+  "related_itinerary_slugs_target": ["japon-luxe-7-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 3,
+      "city": "Tokyo",
+      "hotel_slug_hint": "aman-tokyo",
+      "key_pois": ["Senso-ji Asakusa", "Ginza", "TeamLab Planets", "Hamarikyu"],
+      "step_angle": "Tokyo immersion — Aman Tokyo Otemachi, sushi Saito (réservation concierge uniquement), Hamarikyu jardin 7h avant ouverture officielle, TeamLab Planets Toyosu en nocturne",
+      "title_fr_hint": "Jours 1-3 : Tokyo — Mégapole entre tradition et avant-garde",
+      "title_en_hint": "Days 1-3: Tokyo — Megacity between tradition and avant-garde"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Hakone",
+      "hotel_slug_hint": "hakone-ginyu",
+      "key_pois": ["Mont Fuji vue", "Musée en Plein Air Hakone", "Lac Ashi", "Onsen Owakudani"],
+      "step_angle": "Hakone ryokan — Hakone Ginyu onsen privatif vue Fuji, Open Air Museum sculptures Rodin, croisière lac Ashi au lever (brume matinale), dégustion wagyu local",
+      "title_fr_hint": "Jours 4-5 : Hakone — Mont Fuji, onsen et art en plein air",
+      "title_en_hint": "Days 4-5: Hakone — Mount Fuji, onsen and open-air art"
+    },
+    {
+      "step": 3,
+      "duration_days": 4,
+      "city": "Kyoto",
+      "hotel_slug_hint": "aman-kyoto",
+      "key_pois": ["Fushimi Inari", "Arashiyama bambouseraie", "Kinkaku-ji", "Gion district", "Kiyomizu-dera"],
+      "step_angle": "Kyoto impériale — Aman Kyoto jardin 8 000 m², Fushimi Inari 6h (sans touristes), kaiseki Kikunoi Honten réservation 1 mois, Gion 17h-19h pour geiko",
+      "title_fr_hint": "Jours 6-9 : Kyoto — Capitale impériale, temples et kaiseki",
+      "title_en_hint": "Days 6-9: Kyoto — Imperial capital, temples and kaiseki"
+    },
+    {
+      "step": 4,
+      "duration_days": 2,
+      "city": "Hiroshima & Miyajima",
+      "hotel_slug_hint": "park-hyatt-kyoto",
+      "key_pois": ["Mémorial de la Paix Hiroshima", "Île Miyajima", "Torii flottant Itsukushima", "Momijidani"],
+      "step_angle": "Hiroshima & Miyajima — shinkansen depuis Kyoto 45 min, Mémorial de la Paix ouverture 8h30, ferry Miyajima 30 min, torii flottant marée basse, nuit à Hiroshima ou retour Kyoto",
+      "title_fr_hint": "Jours 10-11 : Hiroshima & Miyajima — Mémoire et torii flottant",
+      "title_en_hint": "Days 10-11: Hiroshima & Miyajima — Memory and floating torii"
+    },
+    {
+      "step": 5,
+      "duration_days": 2,
+      "city": "Naoshima",
+      "hotel_slug_hint": "aman-kyoto",
+      "key_pois": ["Musée Chichu (Tadao Ando)", "Yayoi Kusama citrouilles", "Benesse House", "Inujima"],
+      "step_angle": "Naoshima art — ferry Uno depuis Okayama 20 min, Chichu Museum Monet Room lumière naturelle (billet J+1 obligatoire), Benesse House resort art, Kusama citrouilles plage",
+      "title_fr_hint": "Jours 12-13 : Naoshima — Île de l'art contemporain",
+      "title_en_hint": "Days 12-13: Naoshima — Contemporary art island"
+    },
+    {
+      "step": 6,
+      "duration_days": 1,
+      "city": "Tokyo — Départ",
+      "hotel_slug_hint": "aman-tokyo",
+      "key_pois": ["Shinkansen Naoshima-Tokyo", "Akihabara", "Odaiba"],
+      "step_angle": "Retour Tokyo — shinkansen panoramique, shopping Ginza ou Omotesando dernier après-midi, vol international NRT ou HND",
+      "title_fr_hint": "Jour 14 : Tokyo — Dernier shinkansen et départ",
+      "title_en_hint": "Day 14: Tokyo — Last shinkansen and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire pour découvrir la culture japonaise en 2 semaines ?",
+  "aeo_answer_fr_hint": "Tokyo (3 nuits Aman Tokyo), Hakone (2 nuits ryokan Ginyu, vue Fuji), Kyoto (4 nuits Aman Kyoto, Fushimi Inari, kaiseki), Hiroshima-Miyajima (2 jours), Naoshima (2 jours Chichu Museum, Benesse). Cérisiers : fin mars-début avril. Japan Rail Pass 14 jours recommandé. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter le Japon ?",
+    "Combien de jours faut-il pour visiter le Japon ?",
+    "Faut-il un Japan Rail Pass pour un itinéraire 2 semaines ?",
+    "Quel budget prévoir pour un voyage luxe au Japon en 14 jours ?",
+    "Comment visiter Naoshima depuis Kyoto ou Tokyo ?",
+    "Quels temples de Kyoto visiter en dehors des foules ?",
+    "Quels restaurants kaiseki réserver à Kyoto ?",
+    "Le Japon est-il accessible aux voyageurs francophones ?",
+    "Faut-il combiner Hiroshima et Miyajima lors d'un séjour Japon ?",
+    "Quand ont lieu les cerisiers au Japon ?"
+  ],
+  "concierge_secret_hint": "À l'Aman Tokyo, le spa (piscine 30m vue Skytree) est praticable avant 7h sans partage avec d'autres résidents — réserver le créneau 6h30-8h dès l'enregistrement. Chichu Museum sur Naoshima : les billets pour la salle Monet s'épuisent à 10h pour le lendemain ; acheter en ligne depuis la France avant le départ (site Benesse Art Site).",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Japon (autorité destination globale). Différencier de l'itinéraire Japon 7 jours luxe : ce brief couvre 14 jours avec Hiroshima, Naoshima, et un focus culture approfondie. L'itinéraire 7 jours reste le brief luxe court. Le guide Japon couvre la destination au sens large.",
+  "sources_to_cite": [
+    "JNTO — Japan National Tourism Organization",
+    "Benesse Art Site Naoshima",
+    "Michelin Guide Japan",
+    "UNESCO — Monuments historiques de l'ancienne Nara et Kyoto"
+  ]
+}

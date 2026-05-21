@@ -1,0 +1,75 @@
+{
+  "slug_fr": "biarritz-pays-basque-5-jours",
+  "slug_en": "biarritz-basque-country-5-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Nouvelle-Aquitaine",
+  "destination_city": "Biarritz, Saint-Jean-de-Luz, San Sebastian",
+  "themes": ["culture", "mer"],
+  "duration_min_days": 5,
+  "duration_max_days": 5,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Biarritz & Pays Basque 5 jours — Côte des Basques, pintxos San Sebastian | MyConciergeHotel",
+  "meta_desc_fr_hint": "5 jours au Pays Basque : Hôtel du Palais Biarritz, Brindos. Côte des Basques, Saint-Jean-de-Luz, pintxos San Sebastian. Sélection Concierge culture et mer.",
+  "hotel_slugs_target": ["hotel-du-palais-biarritz", "brindos"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Pays Basque (Biarritz, Anglet, Saint-Jean-de-Luz) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-biarritz", "guide-pays-basque"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-biarritz", "meilleurs-hotels-pays-basque"],
+  "related_itinerary_slugs_target": ["saint-tropez-ete-5-jours", "bordeaux-vignobles-gastronomie-5-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 2,
+      "city": "Biarritz",
+      "hotel_slug_hint": "hotel-du-palais-biarritz",
+      "key_pois": ["Côte des Basques", "Grand Plage", "Rocher de la Vierge", "Musée de la Mer"],
+      "step_angle": "Biarritz impériale — Hôtel du Palais chambre côté océan, Côte des Basques surf observation matinale, Musée de la Mer 9h avant groupes, dîner L'Atelier de Gaztelur",
+      "title_fr_hint": "Jours 1-2 : Biarritz — Palais impérial, Côte des Basques et surf",
+      "title_en_hint": "Days 1-2: Biarritz — Imperial Palace, Basque Coast and surf"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Saint-Jean-de-Luz",
+      "hotel_slug_hint": "brindos",
+      "key_pois": ["Port de Saint-Jean-de-Luz", "Église Saint-Jean-Baptiste", "Maison Louis XIV", "Plage de Saint-Jean-de-Luz"],
+      "step_angle": "Saint-Jean pittoresque — Brindos base (lac privé, canots), Maison Louis XIV visite 10h, port thon rouge déjeuner chez Chez Pantxoa, plage familiale après-midi",
+      "title_fr_hint": "Jour 3 : Saint-Jean-de-Luz — Port, Maison Louis XIV et plage",
+      "title_en_hint": "Day 3: Saint-Jean-de-Luz — Port, Louis XIV House and beach"
+    },
+    {
+      "step": 3,
+      "duration_days": 2,
+      "city": "San Sebastian (Donostia)",
+      "hotel_slug_hint": "hotel-du-palais-biarritz",
+      "key_pois": ["Vieille Ville (Parte Vieja)", "Pintxos bars Calle 31 de Agosto", "Plage de la Concha", "Musée San Telmo"],
+      "step_angle": "San Sebastian gastronomique — excursion depuis Biarritz (30 min), Parte Vieja pintxos crawl Bar Nestor (réserver côtelette 24h avant), plage La Concha, option restaurant étoilé Arzak ou Mugaritz",
+      "title_fr_hint": "Jours 4-5 : San Sebastian — Pintxos, Concha et haute gastronomie",
+      "title_en_hint": "Days 4-5: San Sebastian — Pintxos, Concha and haute cuisine"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire Biarritz et Pays Basque en 5 jours ?",
+  "aeo_answer_fr_hint": "Biarritz (2 nuits Hôtel du Palais, Côte des Basques, Rocher de la Vierge), Saint-Jean-de-Luz (1 nuit Brindos, port, Louis XIV), San Sebastian (2 jours, pintxos Parte Vieja, Bar Nestor, Concha). Option étoilée : Arzak ou Mugaritz (réserver 2 mois à l'avance). Meilleure période : juin ou septembre. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter Biarritz et le Pays Basque ?",
+    "Comment se rendre à San Sebastian depuis Biarritz ?",
+    "Quels sont les meilleurs hôtels de luxe à Biarritz ?",
+    "Quel budget prévoir pour 5 jours au Pays Basque en séjour luxe ?",
+    "Où manger les meilleurs pintxos à San Sebastian ?",
+    "La plage de la Côte des Basques est-elle adaptée à la baignade ?",
+    "Faut-il un passeport pour aller à San Sebastian depuis Biarritz ?",
+    "Quels restaurants étoilés réserver au Pays Basque espagnol ?",
+    "Biarritz est-elle accessible depuis Paris en train ?",
+    "Que faire au Pays Basque hors plage et gastronomie ?"
+  ],
+  "concierge_secret_hint": "À l'Hôtel du Palais, les chambres côté océan numéros 213 à 218 (2e étage) offrent une vue plongeante sur la Grand Plage sans les balustrades qui obstruent les vues du 1er étage. À San Sebastian, Bar Nestor (Calle Pescadería 11) n'a que 4 côtelettes de bœuf par service : appeler le matin même avant 11h pour réserver, pas de liste en ligne.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Biarritz ni le guide Pays Basque. Angle unique = 5 jours transfrontalier (France + Espagne) avec focus gastronomie pintxos + plages + palaces impériaux + AEO. Les guides restent l'autorité sur chaque sous-destination.",
+  "sources_to_cite": [
+    "Atout France — Tourisme Pays Basque",
+    "Euskadi Basque Country Tourism",
+    "Michelin Guide France et Guide Michelin Espagne",
+    "Office du Tourisme de Biarritz"
+  ]
+}

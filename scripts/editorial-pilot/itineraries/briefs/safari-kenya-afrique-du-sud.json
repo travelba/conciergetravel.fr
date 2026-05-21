@@ -1,0 +1,75 @@
+{
+  "slug_fr": "safari-kenya-afrique-du-sud",
+  "slug_en": "safari-kenya-south-africa",
+  "priority": "P0",
+  "destination_country": "Kenya / Afrique du Sud",
+  "destination_region": "Masai Mara, Sabi Sands, Cap-Occidental",
+  "destination_city": "Masai Mara, Sabi Sands, Cape Town",
+  "themes": ["aventure", "nature"],
+  "duration_min_days": 12,
+  "duration_max_days": 12,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2400,
+  "meta_title_fr_hint": "Safari Kenya & Afrique du Sud 12 jours luxe — Masai Mara, Sabi Sands, Cape Town | MyConciergeHotel",
+  "meta_desc_fr_hint": "12 jours safari luxe : Singita Grumeti Kenya, Royal Malewane Sabi Sands, Cape Town. Grande Migration, Big Five, Winelands. Sélection Concierge aventure nature.",
+  "hotel_slugs_target": ["singita-grumeti", "royal-malewane", "mara-plains-camp"],
+  "hotel_fallback_note": "Fallback sur lodges 5★ Kenya (Masai Mara, Laikipia) et Afrique du Sud (Sabi Sands, Kruger) présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-kenya-safari", "guide-afrique-du-sud", "guide-cape-town"],
+  "related_ranking_slugs_target": ["meilleurs-lodges-safari-kenya", "meilleurs-lodges-afrique-du-sud"],
+  "related_itinerary_slugs_target": ["maroc-culture-10-jours", "maldives-luxe-7-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 4,
+      "city": "Masai Mara — Kenya",
+      "hotel_slug_hint": "mara-plains-camp",
+      "key_pois": ["Grande Migration (juillet-octobre)", "Rivière Mara (crossing)", "Triangle Masai Mara", "Cultures Maasaï"],
+      "step_angle": "Grande Migration — Mara Plains Camp (airstrip direct depuis Nairobi 45 min), game drives 4x4 aube et crépuscule, crossing rivière Mara juillet-août (selon saison), nuit sous les étoiles verandah",
+      "title_fr_hint": "Jours 1-4 : Masai Mara — Grande Migration et savane kenyane",
+      "title_en_hint": "Days 1-4: Masai Mara — Great Migration and Kenyan savanna"
+    },
+    {
+      "step": 2,
+      "duration_days": 4,
+      "city": "Sabi Sands — Afrique du Sud",
+      "hotel_slug_hint": "royal-malewane",
+      "key_pois": ["Big Five Sabi Sands", "Léopards Sabi (densité unique)", "Réserve privée adjacente Kruger", "Bush walk accompagné"],
+      "step_angle": "Sabi Sands Big Five — Royal Malewane (vol Nairobi-Johannesburg-Hoedspruit), bush walk matin avec ranger ranger certifié, tracking léopards (Sabi = meilleure densité Afrique), star bed nuit optionnelle",
+      "title_fr_hint": "Jours 5-8 : Sabi Sands — Big Five, léopards et bush walks",
+      "title_en_hint": "Days 5-8: Sabi Sands — Big Five, leopards and bush walks"
+    },
+    {
+      "step": 3,
+      "duration_days": 4,
+      "city": "Cape Town",
+      "hotel_slug_hint": "singita-grumeti",
+      "key_pois": ["Table Mountain", "Péninsule du Cap (Cap de Bonne-Espérance)", "Winelands (Franschhoek, Stellenbosch)", "Robben Island"],
+      "step_angle": "Cape Town urbain — Ellerman House ou Silo Hotel (fallback si Singita Grumeti absence Cape Town), Table Mountain télécabine 8h30, Winelands Franschhoek déjeuner La Petite Colombe, Boulders Beach manchots",
+      "title_fr_hint": "Jours 9-12 : Cape Town — Table Mountain, Winelands et péninsule",
+      "title_en_hint": "Days 9-12: Cape Town — Table Mountain, Winelands and peninsula"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment organiser un safari luxe Kenya et Afrique du Sud en 12 jours ?",
+  "aeo_answer_fr_hint": "Masai Mara (4 nuits Mara Plains Camp, Grande Migration juillet-octobre, game drives), Sabi Sands (4 nuits Royal Malewane, Big Five, tracking léopards), Cape Town (4 nuits, Table Mountain, Winelands Franschhoek). Vols : Paris-Nairobi direct Air France, puis vols intérieurs Kenya-Johannesburg. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour le safari au Kenya ?",
+    "Quelle différence entre Masai Mara et Sabi Sands pour un safari ?",
+    "Quels sont les meilleurs lodges de luxe pour un safari en Afrique ?",
+    "Quel budget prévoir pour un safari luxe Kenya + Afrique du Sud 12 jours ?",
+    "Comment se déplacer entre le Kenya et l'Afrique du Sud ?",
+    "La Grande Migration est-elle visible toute l'année au Masai Mara ?",
+    "Cape Town est-elle sûre pour les voyageurs français ?",
+    "Quels vaccins sont nécessaires pour le Kenya et l'Afrique du Sud ?",
+    "Faut-il un visa pour le Kenya et l'Afrique du Sud depuis la France ?",
+    "Peut-on combiner safari et plage (Zanzibar, Mozambique) ?"
+  ],
+  "concierge_secret_hint": "Au Royal Malewane, la suite Lelapa (n°8) dispose d'une piscine privée chauffée face à la savane et d'une star bed optionnelle sur le toit — demander expressément au moment de la réservation car la star bed est partagée entre plusieurs suites et s'épuise rapidement en juillet. Pour le crossing Mara, contacter le camp la veille au soir : les guides repèrent les gnous en fin d'après-midi et informent les résidents le matin très tôt (4h30).",
+  "anti_cannibalisation_notes": "Ne pas dupliquer les guides Kenya ou Afrique du Sud (autorités destination). Angle unique = 12 jours combiné transfrontalier structuré (savane kenyane + bush sud-africain + ville côtière) + focus saison Migration + AEO safari. Les guides pays restent l'autorité sur les destinations respectives.",
+  "sources_to_cite": [
+    "Kenya Tourism Board",
+    "South African Tourism",
+    "WWF — Grande Migration Masai Mara",
+    "Michelin Guide Afrique du Sud (Cape Town)"
+  ]
+}

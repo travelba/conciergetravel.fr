@@ -1,0 +1,75 @@
+{
+  "slug_fr": "dubai-luxe-week-end",
+  "slug_en": "dubai-luxury-weekend",
+  "priority": "P0",
+  "destination_country": "Émirats Arabes Unis",
+  "destination_region": "Dubaï",
+  "destination_city": "Dubaï",
+  "themes": ["luxe", "desert"],
+  "duration_min_days": 3,
+  "duration_max_days": 3,
+  "travel_style": "luxe",
+  "season": "hiver",
+  "target_word_count": 1800,
+  "meta_title_fr_hint": "Week-end Dubaï luxe 3 jours — Burj Al Arab, Atlantis The Royal, désert Al Maha | MyConciergeHotel",
+  "meta_desc_fr_hint": "Week-end à Dubaï : Burj Al Arab, Atlantis The Royal, Four Seasons Jumeirah. Burj Khalifa, désert Al Maha, marina yacht. Sélection Concierge luxe Dubaï.",
+  "hotel_slugs_target": ["burj-al-arab", "atlantis-the-royal", "four-seasons-jumeirah"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Dubaï présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-dubai", "guide-emirats-arabes-unis"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-dubai", "meilleurs-hotels-moyen-orient"],
+  "related_itinerary_slugs_target": ["new-york-luxe-5-jours", "maldives-luxe-7-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Dubaï — Downtown & Jumeirah",
+      "hotel_slug_hint": "burj-al-arab",
+      "key_pois": ["Burj Khalifa", "Dubai Fountain", "Dubai Mall", "Old Dubai (Bastakiya)"],
+      "step_angle": "Arrivée Dubaï — transfert Burj Al Arab Butler, Burj Khalifa At the Top Sunrise (réserver online), dîner Al Mahara (aquarium Burj Al Arab), Dubai Fountain show 22h",
+      "title_fr_hint": "Jour 1 : Dubaï Downtown — Burj Khalifa, Fontaines et Burj Al Arab",
+      "title_en_hint": "Day 1: Dubai Downtown — Burj Khalifa, fountains and Burj Al Arab"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Dubaï — Désert & excursion Al Maha",
+      "hotel_slug_hint": "atlantis-the-royal",
+      "key_pois": ["Désert de Dubaï Al Maha Conservation Reserve", "Dune bashing 4x4", "Camel ride sunrise", "Atlantis The Royal piscine infinité"],
+      "step_angle": "Désert Al Maha — excursion 4x4 Dubaï Desert Conservation Reserve (1h de Downtown), petit-déjeuner bédouin sous tente, retour Atlantis The Royal piscine Sky Pool 21e étage, dîner Ariana's Persian Kitchen",
+      "title_fr_hint": "Jour 2 : Désert & Atlantis — Dunes, 4x4 et resort ultra-luxe",
+      "title_en_hint": "Day 2: Desert & Atlantis — Dunes, 4x4 and ultra-luxury resort"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Dubaï — Marina & départ",
+      "hotel_slug_hint": "four-seasons-jumeirah",
+      "key_pois": ["Dubai Marina", "JBR Beach (Jumeirah Beach Residence)", "Palm Jumeirah", "Souk Madinat Jumeirah"],
+      "step_angle": "Marina finale — location yacht (2h depuis Dubai Marina 750-1200 AED), vue Palm Jumeirah depuis l'eau, déjeuner Pierchic (restaurant sur ponton mer), départ DXB",
+      "title_fr_hint": "Jour 3 : Dubai Marina — Yacht, Palm Jumeirah et départ",
+      "title_en_hint": "Day 3: Dubai Marina — Yacht, Palm Jumeirah and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Que faire à Dubaï en 3 jours en séjour luxe ?",
+  "aeo_answer_fr_hint": "Jour 1 : Burj Khalifa Sunrise + Burj Al Arab dîner aquarium. Jour 2 : Désert Al Maha Conservation Reserve (4x4, bédouin, oryx), Atlantis The Royal Sky Pool. Jour 3 : yacht Dubai Marina, Pierchic déjeuner mer, vol retour. Meilleure période : novembre-mars (24-32°C). Vols Paris-Dubaï : 6h30 direct. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter Dubaï ?",
+    "Quels sont les meilleurs hôtels de luxe à Dubaï ?",
+    "Quel budget prévoir pour un week-end luxe à Dubaï ?",
+    "Comment visiter le désert depuis Dubaï ?",
+    "Dubaï est-elle une destination adaptée aux femmes voyageant seules ?",
+    "Que faire à Dubaï hors shopping et plage ?",
+    "Comment réserver une croisière yacht à Dubaï ?",
+    "Quels restaurants haut de gamme à Dubaï valent le détour ?",
+    "Faut-il un visa pour Dubaï depuis la France ?",
+    "Dubaï est-elle une bonne destination pour un week-end en couple ?"
+  ],
+  "concierge_secret_hint": "Au Burj Al Arab, demander la Panoramic Suite plutôt que la Deluxe Suite — même superficie mais vue sur les deux côtés (mer et ville). La réservation du restaurant Al Mahara est indépendante de l'hôtel : appeler directement le restaurant 2-3 semaines avant pour les tables côté aquarium (tables C1-C4, côté vitre principal). Au Palm Jumeirah, la location de yacht s'organise depuis Dubai Marina Gate 3 : négocier directement avec les capitaines pour les sorties de 2h (tarifs 30% inférieurs aux agences en ligne).",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Dubaï (autorité destination). Angle unique = 3 jours structurés avec mix Downtown luxe + désert + marina nautique + AEO week-end court. Le guide reste l'autorité sur la destination Dubaï au sens large.",
+  "sources_to_cite": [
+    "Dubai Tourism (Visit Dubai)",
+    "Dubaï Conservation Reserve — Al Maha",
+    "Michelin Guide Dubai",
+    "Atout France — Émirats Arabes Unis"
+  ]
+}

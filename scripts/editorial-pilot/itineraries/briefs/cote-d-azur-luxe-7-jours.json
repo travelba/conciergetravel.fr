@@ -1,0 +1,95 @@
+{
+  "slug_fr": "cote-d-azur-luxe-7-jours",
+  "slug_en": "french-riviera-luxury-7-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Provence-Alpes-Côte d'Azur",
+  "destination_city": "Cannes, Antibes, Cap Ferrat, Èze, Monaco",
+  "themes": ["luxe", "mer"],
+  "duration_min_days": 7,
+  "duration_max_days": 7,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2200,
+  "meta_title_fr_hint": "Itinéraire Côte d'Azur 7 jours luxe — Cannes, Cap Ferrat, Monaco | MyConciergeHotel",
+  "meta_desc_fr_hint": "7 jours sur la Riviera entre Hôtel du Cap Eden Roc, Grand-Hôtel Cap Ferrat et Chèvre d'Or à Èze. Croisette, Monaco, Saint-Paul-de-Vence. Sélection Concierge.",
+  "hotel_slugs_target": ["hotel-du-cap-eden-roc", "grand-hotel-du-cap-ferrat", "la-chevre-d-or"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Côte d'Azur (Cannes, Nice, Antibes, Monaco) présents dans la table hotels si les hôtels cibles sont absents.",
+  "related_guide_slugs_target": ["guide-cote-d-azur", "guide-provence", "guide-monaco"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-cote-d-azur", "meilleurs-hotels-cannes"],
+  "related_itinerary_slugs_target": ["saint-tropez-ete-5-jours", "provence-culture-gastronomie-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 2,
+      "city": "Cannes & Antibes",
+      "hotel_slug_hint": "hotel-du-cap-eden-roc",
+      "key_pois": ["La Croisette", "Îles de Lérins", "Musée Picasso Antibes", "Vieux-Antibes"],
+      "step_angle": "Arrivée Eden Roc — baignade piscine taillée dans le roc, ferry Île Sainte-Honorat, déjeuner Niçoise restaurant de plage étoilé",
+      "title_fr_hint": "Jours 1-2 : Cannes & Antibes — La Riviera dans toute sa splendeur",
+      "title_en_hint": "Days 1-2: Cannes & Antibes — The Riviera at its finest"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Cap Ferrat & Villefranche",
+      "hotel_slug_hint": "grand-hotel-du-cap-ferrat",
+      "key_pois": ["Villa Ephrussi de Rothschild", "Sentier du Littoral Cap Ferrat", "Baie de Villefranche", "Port de Saint-Jean-Cap-Ferrat"],
+      "step_angle": "Cap Ferrat exclusive — tour du cap à pied (sentier côtier 45 min), Villa Ephrussi jardins 9h avant les groupes, déjeuner au Capitaine Cook",
+      "title_fr_hint": "Jours 3-4 : Cap Ferrat — La presqu'île la plus chic d'Europe",
+      "title_en_hint": "Days 3-4: Cap Ferrat — Europe's most exclusive peninsula"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Èze & arrière-pays",
+      "hotel_slug_hint": "la-chevre-d-or",
+      "key_pois": ["Village perché d'Èze", "Jardin Exotique d'Èze", "Parfumerie Fragonard Èze", "Col d'Eze"],
+      "step_angle": "Èze suspendue — visite village avant 9h (sans touristes), jardin cactées vue mer, dîner Chèvre d'Or terrasse étoilée avec panorama 180°",
+      "title_fr_hint": "Jour 5 : Èze — Village perché, vue mer, dîner étoilé",
+      "title_en_hint": "Day 5: Èze — Hilltop village, sea views, Michelin dinner"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Saint-Paul-de-Vence & arrière-pays",
+      "hotel_slug_hint": "la-chevre-d-or",
+      "key_pois": ["Fondation Maeght", "Saint-Paul-de-Vence remparts", "Vence cathédrale Matisse"],
+      "step_angle": "Art et lumière — Fondation Maeght ouverture 10h (sculptures Giacometti dans le jardin), déjeuner La Colombe d'Or terrasse",
+      "title_fr_hint": "Jour 6 : Saint-Paul-de-Vence — Art contemporain et lumière provençale",
+      "title_en_hint": "Day 6: Saint-Paul-de-Vence — Contemporary art and Provençal light"
+    },
+    {
+      "step": 5,
+      "duration_days": 1,
+      "city": "Monaco",
+      "hotel_slug_hint": "hotel-du-cap-eden-roc",
+      "key_pois": ["Casino de Monte-Carlo", "Rocher de Monaco", "Musée Océanographique", "Port Hercule"],
+      "step_angle": "Monaco en demi-journée — Rocher et palais princier 10h, déjeuner Café de Paris, casino Salle Europe en soirée (accès 18h)",
+      "title_fr_hint": "Jour 7 : Monaco — Le Rocher, le casino et le grand départ",
+      "title_en_hint": "Day 7: Monaco — The Rock, the casino and farewell"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire Côte d'Azur en 7 jours en séjour luxe ?",
+  "aeo_answer_fr_hint": "Cannes/Antibes (2 nuits Hôtel du Cap Eden Roc), Cap Ferrat (2 nuits Grand-Hôtel), Èze/arrière-pays (2 nuits Chèvre d'Or), Monaco (1 journée). Incontournables : Villa Ephrussi, Fondation Maeght, sentier côtier Cap Ferrat. Meilleure période : juin ou septembre pour éviter l'affluence d'août. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter la Côte d'Azur ?",
+    "Quels sont les meilleurs hôtels 5 étoiles sur la Côte d'Azur ?",
+    "Comment se déplacer entre Cannes, Nice et Monaco ?",
+    "Quel budget prévoir pour 7 jours luxe sur la Côte d'Azur ?",
+    "Faut-il louer un bateau ou un yacht sur la Côte d'Azur ?",
+    "Quels restaurants étoilés réserver sur la Riviera française ?",
+    "Comment visiter Monaco en une journée ?",
+    "La Côte d'Azur est-elle adaptée pour un voyage en couple ?",
+    "Quelles activités faire sur la Côte d'Azur hors plage ?",
+    "Vaut-il mieux partir en juin ou en juillet sur la Côte d'Azur ?"
+  ],
+  "concierge_secret_hint": "À l'Hôtel du Cap Eden Roc, demander une Cabana au niveau du pool rocher (numéros 1 à 4) — accès direct à la mer par escalier privé. Au Grand-Hôtel du Cap Ferrat, réserver la table du bord de piscine au restaurant Le Cap avant 8h pour le breakfast : vue sur le cap sans parasols.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Côte d'Azur (qui couvre la destination globale). Angle unique de cet itinéraire = 7 jours structurés par tronçons géographiques (Cannes/Antibes → Cap Ferrat → Èze → Monaco) + sélection hôtels + AEO. Le guide reste l'autorité sur la Riviera en général.",
+  "sources_to_cite": [
+    "Atout France — Côte d'Azur Tourisme",
+    "Comité Régional du Tourisme Côte d'Azur",
+    "Michelin Guide France",
+    "Monaco Tourisme & Congrès"
+  ]
+}

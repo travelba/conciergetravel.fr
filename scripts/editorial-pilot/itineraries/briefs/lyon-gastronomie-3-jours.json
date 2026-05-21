@@ -1,0 +1,75 @@
+{
+  "slug_fr": "lyon-gastronomie-3-jours",
+  "slug_en": "lyon-gastronomy-3-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Auvergne-Rhône-Alpes",
+  "destination_city": "Lyon",
+  "themes": ["gastronomie"],
+  "duration_min_days": 3,
+  "duration_max_days": 3,
+  "travel_style": "luxe",
+  "season": "toute-saison",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Lyon gastronomie 3 jours — Bouchons, Paul Bocuse, Halles, traboules | MyConciergeHotel",
+  "meta_desc_fr_hint": "3 jours à Lyon capitale gastronomique : Villa Maïa, InterContinental Grand Hôtel-Dieu. Vieux Lyon, Halles Paul Bocuse, Mère Brazier. Sélection Concierge.",
+  "hotel_slugs_target": ["villa-maia", "intercontinental-lyon-grand-hotel-dieu"],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Lyon présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-lyon", "guide-rhone-alpes-gastronomie"],
+  "related_ranking_slugs_target": ["meilleurs-hotels-lyon", "meilleurs-restaurants-lyon"],
+  "related_itinerary_slugs_target": ["bordeaux-vignobles-gastronomie-5-jours", "provence-culture-gastronomie-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Lyon — Vieux Lyon & Presqu'île",
+      "hotel_slug_hint": "intercontinental-lyon-grand-hotel-dieu",
+      "key_pois": ["Vieux Lyon Saint-Jean", "Traboules", "Musée Gadagne", "Pont de la Guillotière"],
+      "step_angle": "Arrivée Grand Hôtel-Dieu — traboules Vieux Lyon avec guide 10h (sans touristes), bouchon lyonnais déjeuner Daniel & Denise Saint-Jean, montée Fourvière funiculaire coucher de soleil",
+      "title_fr_hint": "Jour 1 : Vieux Lyon — Traboules, bouchon et Fourvière",
+      "title_en_hint": "Day 1: Old Lyon — Traboules, bouchon and Fourvière"
+    },
+    {
+      "step": 2,
+      "duration_days": 1,
+      "city": "Lyon — Halles & Bocuse",
+      "hotel_slug_hint": "villa-maia",
+      "key_pois": ["Halles Paul Bocuse", "Restaurant Paul Bocuse Collonges-au-Mont-d'Or", "Marché quai Saint-Antoine", "Confluence"],
+      "step_angle": "Halles en immersion — Halles Paul Bocuse ouverture 8h (achat produits régionaux), déjeuner marché Saint-Antoine, dîner Mère Brazier Mathieu Viannay (2 étoiles, réserver 1 mois avant)",
+      "title_fr_hint": "Jour 2 : Halles & gastronomie — De Bocuse à la Mère Brazier",
+      "title_en_hint": "Day 2: Halles & gastronomy — From Bocuse to La Mère Brazier"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Lyon — Croix-Rousse & soieries",
+      "hotel_slug_hint": "villa-maia",
+      "key_pois": ["Croix-Rousse", "Maison des Canuts", "Musée des Tissus", "Rue de la République"],
+      "step_angle": "Lyon canut — Villa Maïa rooftop vue Fourvière matin, Croix-Rousse marché samedi 7h (meilleur de Lyon), Maison des Canuts visite atelier soie, déjeuner bistrot bocusien Croix-Rousse",
+      "title_fr_hint": "Jour 3 : Croix-Rousse — Soieries, marché et terrasse Maïa",
+      "title_en_hint": "Day 3: Croix-Rousse — Silk, market and Maïa rooftop"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment découvrir la gastronomie lyonnaise en 3 jours ?",
+  "aeo_answer_fr_hint": "Jour 1 : Vieux Lyon traboules, bouchon Daniel & Denise, Fourvière. Jour 2 : Halles Paul Bocuse 8h, dîner Mère Brazier (réserver 1 mois avant). Jour 3 : marché Croix-Rousse, Maison des Canuts, rooftop Villa Maïa. Hôtels recommandés : InterContinental Grand Hôtel-Dieu (Presqu'île) ou Villa Maïa (colline). Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Pourquoi Lyon est-elle la capitale gastronomique de la France ?",
+    "Quels bouchons lyonnais recommande-t-on en 2025 ?",
+    "Quels sont les meilleurs hôtels de luxe à Lyon ?",
+    "Quel budget prévoir pour 3 jours gastronomie à Lyon ?",
+    "Comment visiter les Halles Paul Bocuse ?",
+    "Lyon est-elle accessible depuis Paris en train ?",
+    "Que faire à Lyon en dehors des restaurants ?",
+    "Quand éviter de venir à Lyon (festivals, Fête des Lumières) ?",
+    "Quels marchés visiter à Lyon le week-end ?",
+    "La Mère Brazier est-elle toujours ouverte et étoilée ?"
+  ],
+  "concierge_secret_hint": "À la Villa Maïa, demander la chambre n°201 ou 202 — seules chambres disposant d'une terrasse privée avec vue directe sur Fourvière et le Vieux Lyon sans pilier de rambarde. À l'InterContinental Grand Hôtel-Dieu, réserver le spa en matinée (8h-10h) : les bassins thermaux côté Rhône sont occupés uniquement par les résidents.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Lyon (autorité destination). Angle unique = 3 jours structurés autour de la gastronomie (halles, bouchons, tables étoilées) + hôtels 5★ + AEO capitale culinaire. Le guide Lyon reste l'autorité sur la destination et la culture.",
+  "sources_to_cite": [
+    "Atout France — Lyon Tourisme",
+    "Lyon Tourisme & Congrès",
+    "Michelin Guide France",
+    "UNESCO — Vieux Lyon (site inscrit)"
+  ]
+}
