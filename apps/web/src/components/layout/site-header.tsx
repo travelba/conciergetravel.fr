@@ -490,6 +490,17 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 
 // ─── Mega-menu 5 — Le Concierge ──────────────────────────────────────────
 
+/**
+ * Concierge mega-menu — wired to the dedicated Vague-5 institutional
+ * pages (PRs #83 + #84) instead of all 12 entries collapsing onto
+ * `/le-concierge`. The remaining pointers (`conciergeTip`,
+ * `conciergeJournal`, `conciergeHotelier`, `conciergeMice`,
+ * `conciergePress`) keep their `/le-concierge` parent until their
+ * dedicated pages ship in Vague 5 batch 3 (P1/P2 — `/le-conseil-
+ * du-concierge`, `/le-concierge/journal`, `/le-concierge/pour-les-
+ * hoteliers`, `/le-concierge/mice-et-seminaires`, `/le-concierge/
+ * presse-et-partenaires`).
+ */
 function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
@@ -501,13 +512,20 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         <MegaColumn heading={t('primaryNav.conciergeAbout')}>
           <>
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeAboutLink')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeBooking')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeLoyalty')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeFaq')} />
+            <MegaLink href="/le-concierge/reserver" label={t('primaryNav.conciergeBooking')} />
+            <MegaLink href="/le-concierge/fidelite" label={t('primaryNav.conciergeLoyalty')} />
+            <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
+            <MegaLink
+              href="/le-concierge/methode-editoriale"
+              label={t('primaryNav.conciergeMethod')}
+            />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergeContent')}>
           <>
+            {/* `conciergeTip` still routes to `/le-concierge` (the
+                Conseil USP block is rendered there). Vague-5 P1 will
+                ship `/le-conseil-du-concierge` as a dedicated hub. */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeTip')} />
             <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
@@ -516,9 +534,11 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>
           <>
+            {/* Hotelier / MICE / press still pointing to `/le-concierge`
+                until their dedicated pages ship in Vague-5 P1/P2. */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeHotelier')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeMice')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeContact')} />
+            <MegaLink href="/le-concierge/contact" label={t('primaryNav.conciergeContact')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergePress')} />
           </>
         </MegaColumn>
