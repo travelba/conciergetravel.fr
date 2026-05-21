@@ -5,10 +5,12 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 
 /**
@@ -94,6 +96,17 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
 
   const faqItems = t.raw('faq.items') as FaqItem[];
 
+  // Freshness signal for the AEO answer + the visible LastUpdatedBadge.
+  // The Concierge page is institutional content — we use `todayIso` as
+  // the freshness anchor because the page itself is recomputed on
+  // every `force-dynamic` request and the editorial content is
+  // refreshed on each i18n message bump.
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const todayIso = new Date().toISOString();
+
   // ─── JSON-LD payloads ──────────────────────────────────────────────────
 
   const travelAgencyJsonLd = JsonLd.withSchemaOrgContext(
@@ -148,7 +161,22 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
         <p className="text-muted mt-4 text-base md:text-lg">{t('lede')}</p>
+        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
+
+      {/*
+        AEO block (skill `geo-llm-optimization` §AEO). `emitJsonLd={false}`
+        because the page already ships a canonical multi-Q `FAQPage`
+        JSON-LD over the 5+ items below (ADR-0011 C1 — exactly one
+        FAQPage per page). The visible `<section data-aeo>` remains
+        for AI Overview snippet picking.
+      */}
+      <HubAeoSection
+        question={t('aeoQuestion')}
+        answer={t('aeoAnswer', { date: freshnessDate })}
+        headingId="le-concierge-aeo-title"
+        emitJsonLd={false}
+      />
 
       {/* ── Trust signals — 3 columns ───────────────────────────────────── */}
       <section aria-labelledby="trust-title" className="mb-14">

@@ -5,10 +5,13 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
 import { listInternationalDestinations } from '@/server/destinations/list-destination-countries';
@@ -96,6 +99,21 @@ export default async function DestinationDirectoryPage({
     }),
   );
 
+  // Freshness signal for the AEO answer + the visible badge.
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const todayIso = new Date().toISOString();
+
+  // Read FAQ items as an array (next-intl `t.raw` returns the JSON
+  // payload untouched — same pattern as `/le-concierge` page).
+  interface FaqItem {
+    readonly q: string;
+    readonly a: string;
+  }
+  const faqItems = t.raw('directory.faqItems') as FaqItem[];
+
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
@@ -106,7 +124,14 @@ export default async function DestinationDirectoryPage({
           {t('directory.title')}
         </h1>
         <p className="text-muted mt-3">{t('directory.subtitle', { count: totalDestinations })}</p>
+        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
+
+      <HubAeoSection
+        question={t('directory.aeoQuestion')}
+        answer={t('directory.aeoAnswer', { count: totalDestinations, date: freshnessDate })}
+        headingId="destination-directory-aeo-title"
+      />
 
       {totalDestinations === 0 ? (
         <p className="text-muted text-sm">{t('empty')}</p>
@@ -200,6 +225,11 @@ export default async function DestinationDirectoryPage({
           )}
         </div>
       )}
+
+      <HubFaqSection
+        heading={t('directory.faqTitle')}
+        items={faqItems.map((it) => ({ question: it.q, answer: it.a }))}
+      />
     </main>
   );
 }

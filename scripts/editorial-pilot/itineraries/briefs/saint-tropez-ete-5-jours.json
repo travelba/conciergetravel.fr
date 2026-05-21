@@ -1,0 +1,97 @@
+{
+  "slug_fr": "saint-tropez-ete-5-jours",
+  "slug_en": "saint-tropez-summer-5-days",
+  "priority": "P0",
+  "destination_country": "France",
+  "destination_region": "Provence-Alpes-Côte d'Azur",
+  "destination_city": "Saint-Tropez",
+  "themes": ["luxe", "mer"],
+  "duration_min_days": 5,
+  "duration_max_days": 5,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2000,
+  "meta_title_fr_hint": "Itinéraire Saint-Tropez été 5 jours luxe — Pampelonne, citadelle, Ramatuelle | MyConciergeHotel",
+  "meta_desc_fr_hint": "5 jours à Saint-Tropez : Cheval Blanc, Lily of the Valley, Château de la Messardière. Pampelonne, citadelle, port, Ramatuelle. Sélection Concierge été luxe.",
+  "hotel_slugs_target": [
+    "cheval-blanc-saint-tropez",
+    "lily-of-the-valley",
+    "chateau-de-la-messardiere"
+  ],
+  "hotel_fallback_note": "Fallback sur hôtels 5★ Saint-Tropez et Ramatuelle présents dans la table hotels si hôtels cibles absents.",
+  "related_guide_slugs_target": ["guide-saint-tropez", "guide-cote-d-azur"],
+  "related_ranking_slugs_target": [
+    "meilleurs-hotels-saint-tropez",
+    "meilleures-plages-saint-tropez"
+  ],
+  "related_itinerary_slugs_target": ["cote-d-azur-luxe-7-jours", "biarritz-pays-basque-5-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 1,
+      "city": "Saint-Tropez — Port & village",
+      "hotel_slug_hint": "cheval-blanc-saint-tropez",
+      "key_pois": ["Port de Saint-Tropez", "Place des Lices", "Musée de l'Annonciade", "Citadelle"],
+      "step_angle": "Arrivée Cheval Blanc — accès direct mer depuis l'hôtel, marché Place des Lices le mardi ou samedi avant 10h, apéritif Café de Paris quai Jean-Jaurès",
+      "title_fr_hint": "Jour 1 : Saint-Tropez — Port, village et marché des Lices",
+      "title_en_hint": "Day 1: Saint-Tropez — Port, village and Les Lices market"
+    },
+    {
+      "step": 2,
+      "duration_days": 2,
+      "city": "Pampelonne & Ramatuelle",
+      "hotel_slug_hint": "lily-of-the-valley",
+      "key_pois": ["Plage de Pampelonne", "Tahiti Beach", "Club 55", "Ramatuelle village"],
+      "step_angle": "Pampelonne en douceur — Lily of the Valley navette privée plage 9h (avant afflux), Club 55 déjeuner réservation obligatoire 2 semaines avant, sunset Ramatuelle village",
+      "title_fr_hint": "Jours 2-3 : Pampelonne — Plages privées et Club 55",
+      "title_en_hint": "Days 2-3: Pampelonne — Private beaches and Club 55"
+    },
+    {
+      "step": 3,
+      "duration_days": 1,
+      "city": "Saint-Tropez — Citadelle & arrière-pays",
+      "hotel_slug_hint": "chateau-de-la-messardiere",
+      "key_pois": [
+        "Citadelle de Saint-Tropez",
+        "Chapelle Sainte-Anne",
+        "Grimaud",
+        "Golfe de Saint-Tropez"
+      ],
+      "step_angle": "Citadelle et arrière-pays — visite citadelle 9h (vue sur le golfe sans monde), route vignes vers Gassin, déjeuner terrasse Château de la Messardière vue mer",
+      "title_fr_hint": "Jour 4 : Citadelle & arrière-pays — Vignes, chapelles et vue golfe",
+      "title_en_hint": "Day 4: Citadelle & hinterland — Vineyards, chapels and gulf views"
+    },
+    {
+      "step": 4,
+      "duration_days": 1,
+      "city": "Saint-Tropez — Excursion nautique & départ",
+      "hotel_slug_hint": "cheval-blanc-saint-tropez",
+      "key_pois": ["Calanques du Var (bateau)", "Port Grimaud", "Les Porquerolles (option)"],
+      "step_angle": "Excursion bateau — location semi-rigide ou yacht depuis le port, Porquerolles (1h30) ou calanques du Var, déjeuner à bord, retour port 17h",
+      "title_fr_hint": "Jour 5 : Saint-Tropez — Excursion nautique et départ",
+      "title_en_hint": "Day 5: Saint-Tropez — Boat excursion and departure"
+    }
+  ],
+  "aeo_question_fr_hint": "Quel est le meilleur itinéraire Saint-Tropez été en 5 jours ?",
+  "aeo_answer_fr_hint": "Arrivée Cheval Blanc Saint-Tropez (port), Pampelonne plage Club 55 (2 nuits Lily of the Valley), journée citadelle et arrière-pays (Messardière), excursion bateau Porquerolles. Réserver Club 55 et restaurant Cheval Blanc 2-3 semaines avant en juillet-août. Éviter les week-ends 14 juillet et 15 août (saturation totale). Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Quelle est la meilleure période pour visiter Saint-Tropez ?",
+    "Comment arriver à Saint-Tropez sans voiture ?",
+    "Quels sont les meilleurs hôtels luxe à Saint-Tropez ?",
+    "Quel budget prévoir pour 5 jours à Saint-Tropez en été ?",
+    "Comment réserver une table au Club 55 à Pampelonne ?",
+    "Saint-Tropez est-il adapté pour un séjour en famille ?",
+    "Quelles plages privées de Saint-Tropez valent le détour ?",
+    "Peut-on louer un bateau à Saint-Tropez ?",
+    "Que faire à Saint-Tropez en dehors de la plage ?",
+    "Saint-Tropez vs Ibiza — où passer ses vacances luxe en été ?"
+  ],
+  "concierge_secret_hint": "Au Cheval Blanc Saint-Tropez, les suites du 3e étage côté port (301 à 303) offrent une vue directe sur les yachts sans les palmiers qui masquent les chambres inférieures. Pour Club 55, appeler dès l'ouverture des réservations (1er mars) pour les dates de juillet-août : les tables en front de plage (secteur A) sont prises en 48h.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer le guide Saint-Tropez (autorité destination). Angle unique = 5 jours été structurés (port/village → Pampelonne → arrière-pays → nautique) avec focus sur le timing et les réservations indispensables. Le guide reste l'autorité sur Saint-Tropez au sens large.",
+  "sources_to_cite": [
+    "Atout France — Var Tourisme",
+    "Office du Tourisme de Saint-Tropez",
+    "Michelin Guide France",
+    "Comité Régional du Tourisme Côte d'Azur"
+  ]
+}

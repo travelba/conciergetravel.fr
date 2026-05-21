@@ -527,7 +527,7 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
                 Conseil USP block is rendered there). Vague-5 P1 will
                 ship `/le-conseil-du-concierge` as a dedicated hub. */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeTip')} />
-            <MegaLink href="/itineraire" label={t('primaryNav.conciergeItineraries')} />
+            <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeJournal')} />
           </>

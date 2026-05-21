@@ -31,6 +31,12 @@ export async function generateMetadata({
       canonical,
       languages: buildHreflangAlternates((l) => getPathname({ locale: l, href: '/recherche' })),
     },
+    // Skill `seo-technical` §Indexability per segment:
+    // search results pages get `noindex, follow` — we want Google to
+    // crawl the categorical links but never index parameterised URLs.
+    // The same rule applies to `/recherche` even without query params:
+    // the page itself is the search shell, not editorial content.
+    robots: { index: false, follow: true },
   };
 }
 
