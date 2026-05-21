@@ -29,9 +29,9 @@
     min-height: 100dvh;
   }
 
-  /* Headlines use Noto Serif at weight 400 (DESIGN.md §3 — literary,
-     authoritative, breathable). Tighter line-height + slight negative
-     letter-spacing for the editorial feel. */
+  /* Headlines use Noto Serif at weight 400 — literary, authoritative,
+     breathable. Tighter line-height + slight negative letter-spacing for
+     the editorial feel. */
   h1,
   h2,
   h3 {

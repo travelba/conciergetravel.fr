@@ -3,8 +3,7 @@ import type { Config } from 'tailwindcss';
 /**
  * Tailwind preset shared between apps/web, apps/admin and packages/ui.
  *
- * Source of truth: docs/design/DESIGN.md (mirror of Stitch DS asset
- * `assets/5552533c32214a9b977d438e80eb455c` — "Concierge Travel Visual Language").
+ * Aligned with CDC §10 (visual identity).
  *
  * Tokens come from CSS custom properties (see packages/ui/src/tokens.css)
  * so the design can be re-styled by overriding a single tokens file.
@@ -38,7 +37,7 @@ const preset = {
     extend: {
       colors: {
         /* ---------------------------------------------------------------- */
-        /* Brand tokens (preferred — semantic) — DESIGN.md §2              */
+        /* Brand tokens (preferred — semantic)                              */
         /* ---------------------------------------------------------------- */
         charcoal: 'var(--color-charcoal)',
         'off-white': 'var(--color-off-white)',
@@ -46,7 +45,7 @@ const preset = {
         sage: 'var(--color-sage)',
 
         /* ---------------------------------------------------------------- */
-        /* Material Design 3 named tokens — DESIGN.md §2b                   */
+        /* Material Design 3 named tokens                                   */
         /* (only the most-used; full set available as CSS vars in tokens.css) */
         /* ---------------------------------------------------------------- */
         surface: {
@@ -92,7 +91,7 @@ const preset = {
       },
 
       /* ----------------------------------------------------------------- */
-      /* Type scale — DESIGN.md §3                                         */
+      /* Type scale                                                        */
       /* (the default Tailwind sizes remain available; these are extras)   */
       /* ----------------------------------------------------------------- */
       fontSize: {
@@ -106,7 +105,7 @@ const preset = {
       },
 
       /* ----------------------------------------------------------------- */
-      /* Radius — DESIGN.md §5 (Stitch ROUND_FOUR)                          */
+      /* Radius — soft 4px DEFAULT                                          */
       /* ----------------------------------------------------------------- */
       borderRadius: {
         none: '0',
@@ -120,7 +119,7 @@ const preset = {
       },
 
       /* ----------------------------------------------------------------- */
-      /* Spacing — DESIGN.md §4 (named tokens for editorial layout)        */
+      /* Spacing — named tokens for editorial layout                       */
       /* ----------------------------------------------------------------- */
       spacing: {
         '4.5': '1.125rem',

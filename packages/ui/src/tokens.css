@@ -2,13 +2,12 @@
  * Design tokens — the entire visual identity is driven by these CSS custom
  * properties. Restyling the product = override this file in apps/web/src/styles.
  *
- * Source of truth: docs/design/DESIGN.md (mirror of Stitch DS asset
- * `assets/5552533c32214a9b977d438e80eb455c` — "Concierge Travel Visual Language").
+ * Aligned with CDC §10.1 (visual identity — sober editorial luxe).
  *
  * Philosophy: "Sober Luxury" — quality whispered through white space and
  * precise typography rather than shouted through ornamentation.
  *
- * Order of token sections matches DESIGN.md sections 2-5:
+ * Token sections:
  *   2. Colors (brand palette + Material Design 3 named tokens)
  *   3. Typography
  *   4. Layout & spacing
@@ -36,7 +35,6 @@
 
   /* =========================================================================
    * 2b. Material Design 3 named tokens — for advanced surface/interaction work
-   * (cf. DESIGN.md §2 system colors, FIDELITY variant)
    * ======================================================================= */
   --color-surface: #fdf8f8;
   --color-surface-bright: #fdf8f8;
@@ -88,10 +86,10 @@
 
   /* =========================================================================
    * 5. Shape language — soft, slightly rounded
-   * DEFAULT = 0.25rem (4px) ≈ Stitch ROUND_FOUR
+   * DEFAULT = 0.25rem (4px)
    * ======================================================================= */
   --radius-xs: 0.125rem; /* 2px  — subtle inputs */
-  --radius-sm: 0.25rem; /* 4px  — buttons, cards (Stitch ROUND_FOUR) */
+  --radius-sm: 0.25rem; /* 4px  — buttons, cards */
   --radius-md: 0.375rem; /* 6px */
   --radius-lg: 0.5rem; /* 8px */
   --radius-xl: 0.75rem; /* 12px — badges, chips */
