@@ -1,8 +1,7 @@
 # Plan d'intégration — Feature Itinéraires SEO/GEO
 
 > **Audience** : Cursor AI · Benjamin (oversight)
-> **Repo** : [`travelba/conciergetravel.fr`](https://github.com/travelba/conciergetravel.fr)
-> **Référence contractuelle** : [`docs/cdc-itineraires.md`](./cdc-itineraires.md) v1.0
+> **Repo** : [`travelba/conciergetravel.fr`](https://github.com/travelba/conciergetravel.fr) > **Référence contractuelle** : [`docs/cdc-itineraires.md`](./cdc-itineraires.md) v1.0
 > **Backlog requêtes** : `itineraires_voyages_master.csv` (375 requêtes), `itineraires_voyages_seo_geo.md` (rapport 1 065+ lignes)
 > **Statut cible** : Implémentable en 4 sprints Cursor · sortie production sous 3 semaines
 
@@ -22,43 +21,43 @@
 
 ### 1.1 Ce qui est déjà en place ✅
 
-| Élément | Localisation | État |
-|---|---|---|
-| CDC complet | `docs/cdc-itineraires.md` | v1.0 — 515 lignes, 10 sections, 35 itinéraires P0/P1 listés |
-| Skill agent dédié | `.cursor/skills/itinerary-editorial-pipeline/SKILL.md` | Pipeline 6 passes documenté |
-| Route détail (stub) | `apps/web/src/app/[locale]/itineraire/[slug]/page.tsx` | Existe, retourne `notFound()` en attendant la table |
-| Routing i18n | `apps/web/src/i18n/routing.ts` lignes 213-214 | `/itineraire` + `/itineraire/[slug]` enregistrés |
-| Package `@mch/seo` complet | `packages/seo/src/` | `howto`, `item-list`, `faq`, `breadcrumb`, `article`, `aeo`, `agent-skills`, `llms` — **tout est dispo** |
-| Patterns réutilisables | `apps/web/src/components/editorial/`, `apps/web/src/components/rankings/` | `enriched-text`, `toc-sidebar`, `editorial-callout`, `rankings-facets` |
-| Pipeline LLM voix Concierge | `.cursor/skills/concierge-voice-pipeline/SKILL.md` | Réutilisable directement pour les sections itinéraires |
-| Tables référencées | `hotels`, `editorial_guides`, `editorial_rankings`, `authors` | Existantes en production Supabase |
+| Élément                     | Localisation                                                              | État                                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| CDC complet                 | `docs/cdc-itineraires.md`                                                 | v1.0 — 515 lignes, 10 sections, 35 itinéraires P0/P1 listés                                              |
+| Skill agent dédié           | `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`                    | Pipeline 6 passes documenté                                                                              |
+| Route détail (stub)         | `apps/web/src/app/[locale]/itineraire/[slug]/page.tsx`                    | Existe, retourne `notFound()` en attendant la table                                                      |
+| Routing i18n                | `apps/web/src/i18n/routing.ts` lignes 213-214                             | `/itineraire` + `/itineraire/[slug]` enregistrés                                                         |
+| Package `@mch/seo` complet  | `packages/seo/src/`                                                       | `howto`, `item-list`, `faq`, `breadcrumb`, `article`, `aeo`, `agent-skills`, `llms` — **tout est dispo** |
+| Patterns réutilisables      | `apps/web/src/components/editorial/`, `apps/web/src/components/rankings/` | `enriched-text`, `toc-sidebar`, `editorial-callout`, `rankings-facets`                                   |
+| Pipeline LLM voix Concierge | `.cursor/skills/concierge-voice-pipeline/SKILL.md`                        | Réutilisable directement pour les sections itinéraires                                                   |
+| Tables référencées          | `hotels`, `editorial_guides`, `editorial_rankings`, `authors`             | Existantes en production Supabase                                                                        |
 
 ### 1.2 Ce qui manque ou est cassé ❌
 
-| Manque | Impact | Effort |
-|---|---|---|
-| **Migration `itineraries`** | **Bloquant** — pas de table = pas de contenu | S |
-| **Renumérotation** : le CDC parle de `0038` mais ce numéro est déjà pris (`0038_hotels_source_layering.sql`). Dernière migration = `0044`. À nommer `0045_itineraries.sql` | Documentation à corriger | XS |
-| **Hub `/itineraires`** (FR) et `/itineraries` (EN) | Pas de page index = pas d'autorité topique | M |
-| Routing i18n EN — pathname `/itineraries` pour EN manquant | Lien EN cassé | XS |
-| Page détail désactivée (`notFound()` inconditionnel) | Aucun itinéraire affichable | M |
-| Composants UI : `<ItinerarySteps>`, `<ItineraryHotelCard>`, `<ItineraryAeoBlock>`, `<RelatedItineraries>` | Composants à créer | M |
-| Skills agent `get-itinerary` + `list-itineraries` dans `packages/seo/src/agent-skills.ts` | GEO incomplet | XS |
-| Section `## Itinéraires` dans `llms.txt` et `llms-full.txt` (routes existantes) | LLM crawlers ignorent la section | S |
-| Sitemap `/sitemaps/itineraries.xml` + référence dans `/sitemap.xml/route.ts` | URL non découvrables | S |
-| Server queries : `getItineraryBySlug`, `listPublishedItineraries`, `getRelatedItineraries` dans `apps/web/src/server/itineraries/` | Dossier inexistant | M |
-| Type Zod + Drizzle schema | Aucune validation à l'import | S |
-| Seed SQL P0 (10 France + 10 International) | Aucun contenu | L (LLM pipeline) |
-| Maillage entrant : guides pays + fiches hôtels + nav principale | Page orpheline si non câblé | M |
-| Cluster `trains-de-luxe` et `croisières luxe` (quick wins identifiés rapport SEO) **non couverts** par les 35 itinéraires CDC | Manque de couverture stratégique | M |
+| Manque                                                                                                                                                                     | Impact                                       | Effort           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ---------------- |
+| **Migration `itineraries`**                                                                                                                                                | **Bloquant** — pas de table = pas de contenu | S                |
+| **Renumérotation** : le CDC parle de `0038` mais ce numéro est déjà pris (`0038_hotels_source_layering.sql`). Dernière migration = `0044`. À nommer `0045_itineraries.sql` | Documentation à corriger                     | XS               |
+| **Hub `/itineraires`** (FR) et `/itineraries` (EN)                                                                                                                         | Pas de page index = pas d'autorité topique   | M                |
+| Routing i18n EN — pathname `/itineraries` pour EN manquant                                                                                                                 | Lien EN cassé                                | XS               |
+| Page détail désactivée (`notFound()` inconditionnel)                                                                                                                       | Aucun itinéraire affichable                  | M                |
+| Composants UI : `<ItinerarySteps>`, `<ItineraryHotelCard>`, `<ItineraryAeoBlock>`, `<RelatedItineraries>`                                                                  | Composants à créer                           | M                |
+| Skills agent `get-itinerary` + `list-itineraries` dans `packages/seo/src/agent-skills.ts`                                                                                  | GEO incomplet                                | XS               |
+| Section `## Itinéraires` dans `llms.txt` et `llms-full.txt` (routes existantes)                                                                                            | LLM crawlers ignorent la section             | S                |
+| Sitemap `/sitemaps/itineraries.xml` + référence dans `/sitemap.xml/route.ts`                                                                                               | URL non découvrables                         | S                |
+| Server queries : `getItineraryBySlug`, `listPublishedItineraries`, `getRelatedItineraries` dans `apps/web/src/server/itineraries/`                                         | Dossier inexistant                           | M                |
+| Type Zod + Drizzle schema                                                                                                                                                  | Aucune validation à l'import                 | S                |
+| Seed SQL P0 (10 France + 10 International)                                                                                                                                 | Aucun contenu                                | L (LLM pipeline) |
+| Maillage entrant : guides pays + fiches hôtels + nav principale                                                                                                            | Page orpheline si non câblé                  | M                |
+| Cluster `trains-de-luxe` et `croisières luxe` (quick wins identifiés rapport SEO) **non couverts** par les 35 itinéraires CDC                                              | Manque de couverture stratégique             | M                |
 
 ### 1.3 Décisions structurantes à acter (3)
 
-| # | Décision | Recommandation | Raison |
-|---|---|---|---|
-| D1 | **Numéro de migration** | `0045_itineraries.sql` (pas `0038`) | `0038` déjà appliqué — règle AGENTS.md §4.5 "Migrations forward-only" |
-| D2 | **Slug hub FR** | Garder `/itineraires` (pluriel) cohérent avec `/guides`, `/classements`, `/hotels` | Cohérence d'arborescence |
-| D3 | **Stratégie sitemap** | Créer un sitemap dédié `/sitemaps/itineraries.xml` plutôt qu'enrichir `editorial.xml` | Volume cible 100+ URLs, séparation = monitoring GSC plus clair |
+| #   | Décision                | Recommandation                                                                        | Raison                                                                |
+| --- | ----------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| D1  | **Numéro de migration** | `0045_itineraries.sql` (pas `0038`)                                                   | `0038` déjà appliqué — règle AGENTS.md §4.5 "Migrations forward-only" |
+| D2  | **Slug hub FR**         | Garder `/itineraires` (pluriel) cohérent avec `/guides`, `/classements`, `/hotels`    | Cohérence d'arborescence                                              |
+| D3  | **Stratégie sitemap**   | Créer un sitemap dédié `/sitemaps/itineraries.xml` plutôt qu'enrichir `editorial.xml` | Volume cible 100+ URLs, séparation = monitoring GSC plus clair        |
 
 ---
 
@@ -98,15 +97,15 @@ Respect strict des layers définis dans `AGENTS.md §2` :
 
 #### Tickets
 
-| ID | Titre | Fichier(s) | Effort |
-|---|---|---|---|
-| S1.1 | Migration `0045_itineraries.sql` | `packages/db/migrations/0045_itineraries.sql` | S |
-| S1.2 | Drizzle schema `itineraries` | `packages/db/src/schema/itineraries.ts` | S |
-| S1.3 | Zod `ItinerarySchema` + types `Section`, `FaqItem` | `packages/domain/src/itineraries/schema.ts` | M |
-| S1.4 | Server queries (3) | `apps/web/src/server/itineraries/` (3 fichiers) | M |
-| S1.5 | Tests Vitest queries + Zod | `*.test.ts` colocalisés | S |
-| S1.6 | Skills agent `get-itinerary` + `list-itineraries` | `packages/seo/src/agent-skills.ts` (DEFAULT_AGENT_SKILLS) | XS |
-| S1.7 | Tests `agent-skills.test.ts` étendus | `packages/seo/src/agent-skills.test.ts` | XS |
+| ID   | Titre                                              | Fichier(s)                                                | Effort |
+| ---- | -------------------------------------------------- | --------------------------------------------------------- | ------ |
+| S1.1 | Migration `0045_itineraries.sql`                   | `packages/db/migrations/0045_itineraries.sql`             | S      |
+| S1.2 | Drizzle schema `itineraries`                       | `packages/db/src/schema/itineraries.ts`                   | S      |
+| S1.3 | Zod `ItinerarySchema` + types `Section`, `FaqItem` | `packages/domain/src/itineraries/schema.ts`               | M      |
+| S1.4 | Server queries (3)                                 | `apps/web/src/server/itineraries/` (3 fichiers)           | M      |
+| S1.5 | Tests Vitest queries + Zod                         | `*.test.ts` colocalisés                                   | S      |
+| S1.6 | Skills agent `get-itinerary` + `list-itineraries`  | `packages/seo/src/agent-skills.ts` (DEFAULT_AGENT_SKILLS) | XS     |
+| S1.7 | Tests `agent-skills.test.ts` étendus               | `packages/seo/src/agent-skills.test.ts`                   | XS     |
 
 #### Prompt Cursor — S1.1
 
@@ -196,18 +195,18 @@ skills n'apparaîtront pas en production).
 
 #### Tickets
 
-| ID | Titre | Fichier(s) | Effort |
-|---|---|---|---|
-| S2.1 | Routing i18n EN — pathnames `/itineraires` + `/itinerary/[slug]` | `apps/web/src/i18n/routing.ts` | XS |
-| S2.2 | Hub `/[locale]/itineraires/page.tsx` | nouveau dossier `itineraires/` | M |
-| S2.3 | Composant `<ItineraryCard>` (carte hub + maillage) | `components/itineraries/itinerary-card.tsx` | S |
-| S2.4 | Composant `<ItineraryFacets>` (filtres hub) | `components/itineraries/itinerary-facets.tsx` (client) | M |
-| S2.5 | Page détail réelle (remplacer `notFound()`) | `apps/web/src/app/[locale]/itineraire/[slug]/page.tsx` | M |
-| S2.6 | Composants détail (4) | `components/itineraries/` | L |
-| S2.7 | JSON-LD wiring (HowTo + ItemList + FAQPage + BreadcrumbList + Article) | dans `page.tsx` détail | M |
-| S2.8 | `generateMetadata` + canonical + hreflang | dans `page.tsx` détail | S |
-| S2.9 | Strings i18n FR + EN | `i18n/messages/{fr,en}.json` | S |
-| S2.10 | E2E Playwright — `itinerary-detail.spec.ts` | `apps/web/e2e/` | M |
+| ID    | Titre                                                                  | Fichier(s)                                             | Effort |
+| ----- | ---------------------------------------------------------------------- | ------------------------------------------------------ | ------ |
+| S2.1  | Routing i18n EN — pathnames `/itineraires` + `/itinerary/[slug]`       | `apps/web/src/i18n/routing.ts`                         | XS     |
+| S2.2  | Hub `/[locale]/itineraires/page.tsx`                                   | nouveau dossier `itineraires/`                         | M      |
+| S2.3  | Composant `<ItineraryCard>` (carte hub + maillage)                     | `components/itineraries/itinerary-card.tsx`            | S      |
+| S2.4  | Composant `<ItineraryFacets>` (filtres hub)                            | `components/itineraries/itinerary-facets.tsx` (client) | M      |
+| S2.5  | Page détail réelle (remplacer `notFound()`)                            | `apps/web/src/app/[locale]/itineraire/[slug]/page.tsx` | M      |
+| S2.6  | Composants détail (4)                                                  | `components/itineraries/`                              | L      |
+| S2.7  | JSON-LD wiring (HowTo + ItemList + FAQPage + BreadcrumbList + Article) | dans `page.tsx` détail                                 | M      |
+| S2.8  | `generateMetadata` + canonical + hreflang                              | dans `page.tsx` détail                                 | S      |
+| S2.9  | Strings i18n FR + EN                                                   | `i18n/messages/{fr,en}.json`                           | S      |
+| S2.10 | E2E Playwright — `itinerary-detail.spec.ts`                            | `apps/web/e2e/`                                        | M      |
 
 #### Détail composants à créer
 
@@ -351,16 +350,16 @@ avec `editorial.*` ou `guides.*`. Vérifier que le test
 
 #### Tickets
 
-| ID | Titre | Fichier(s) | Effort |
-|---|---|---|---|
-| S3.1 | Sitemap `/sitemaps/itineraries.xml` | `apps/web/src/app/sitemaps/itineraries.xml/route.ts` | S |
-| S3.2 | Référence dans sitemap index | `apps/web/src/app/sitemap.xml/route.ts` | XS |
-| S3.3 | Section itinéraires dans `llms.txt` | `apps/web/src/app/llms.txt/route.ts` | S |
-| S3.4 | Entrées dans `llms-full.txt` | `apps/web/src/app/llms-full.txt/route.ts` | M |
-| S3.5 | Bloc "Nos itinéraires pour [Pays]" sur guides pays | `components/editorial/*` (à intégrer) | M |
-| S3.6 | Widget "Cet hôtel dans nos itinéraires" sur fiche hôtel | `components/hotel/*` | M |
-| S3.7 | Lien "Itinéraires" dans navigation principale | `components/layout/*` | S |
-| S3.8 | OnAir cache invalidation tags | côté Payload hook | S |
+| ID   | Titre                                                   | Fichier(s)                                           | Effort |
+| ---- | ------------------------------------------------------- | ---------------------------------------------------- | ------ |
+| S3.1 | Sitemap `/sitemaps/itineraries.xml`                     | `apps/web/src/app/sitemaps/itineraries.xml/route.ts` | S      |
+| S3.2 | Référence dans sitemap index                            | `apps/web/src/app/sitemap.xml/route.ts`              | XS     |
+| S3.3 | Section itinéraires dans `llms.txt`                     | `apps/web/src/app/llms.txt/route.ts`                 | S      |
+| S3.4 | Entrées dans `llms-full.txt`                            | `apps/web/src/app/llms-full.txt/route.ts`            | M      |
+| S3.5 | Bloc "Nos itinéraires pour [Pays]" sur guides pays      | `components/editorial/*` (à intégrer)                | M      |
+| S3.6 | Widget "Cet hôtel dans nos itinéraires" sur fiche hôtel | `components/hotel/*`                                 | M      |
+| S3.7 | Lien "Itinéraires" dans navigation principale           | `components/layout/*`                                | S      |
+| S3.8 | OnAir cache invalidation tags                           | côté Payload hook                                    | S      |
 
 #### Prompt Cursor — S3.1
 
@@ -460,14 +459,14 @@ Anti-cannibalisation (cf. CDC §5.5) :
 
 #### Tickets
 
-| ID | Titre | Effort |
-|---|---|---|
-| S4.1 | Adapter pipeline `concierge-voice-pipeline` → seed itineraries | M |
-| S4.2 | Briefs JSON pour les 20 itinéraires P0 (10 FR + 10 INTL) | L |
-| S4.3 | Génération automatisée (GPT-4o → validation → seed SQL) | L |
-| S4.4 | Audit AEO word count + voix Concierge | M |
-| S4.5 | QA éditoriale humaine (Benjamin) sur les 20 P0 | L |
-| S4.6 | Seed production via Supabase MCP | S |
+| ID   | Titre                                                          | Effort |
+| ---- | -------------------------------------------------------------- | ------ |
+| S4.1 | Adapter pipeline `concierge-voice-pipeline` → seed itineraries | M      |
+| S4.2 | Briefs JSON pour les 20 itinéraires P0 (10 FR + 10 INTL)       | L      |
+| S4.3 | Génération automatisée (GPT-4o → validation → seed SQL)        | L      |
+| S4.4 | Audit AEO word count + voix Concierge                          | M      |
+| S4.5 | QA éditoriale humaine (Benjamin) sur les 20 P0                 | L      |
+| S4.6 | Seed production via Supabase MCP                               | S      |
 
 #### P0 — Source de vérité
 
@@ -475,18 +474,19 @@ Les 20 P0 sont définis dans CDC §7 (matrice 35 items P0/P1 — prendre les 20 
 
 **Couverture par cluster du rapport SEO** (croisement entre CDC §7 et `itineraires_voyages_master.csv`) :
 
-| Cluster master.csv | Couvert par CDC P0/P1 ? | Action |
-|---|---|---|
-| Japon (34 requêtes) | ✅ Oui — `japon-culture-2-semaines`, `japon-luxe-7-jours` | Conserver |
-| Safari (23) | ✅ Partiel — `safari-kenya-afrique-du-sud`, `tanzanie-safari-zanzibar` | Conserver + ajouter Botswana |
-| Méditerranée (23) | ✅ Partiel — `cote-d-azur-luxe-7-jours`, `grece-iles-couple-10-jours` | Conserver |
-| Maldives (20) | ✅ Oui — `maldives-luxe-7-jours` | Conserver |
-| Asie SE (19) | ✅ Partiel — Bali, Vietnam, Thaïlande couverts | Ajouter Cambodge + Laos en P2 |
-| **Trains de luxe (17)** | ❌ **Non couvert** | **Backlog P1 à créer** (cf. §4 ci-dessous) |
-| Multi-destinations (16) | ✅ Partiel | Conserver |
-| Croisière (14) | ❌ **Non couvert** | **Backlog P2 — Méditerranée yacht, Norvège** |
+| Cluster master.csv      | Couvert par CDC P0/P1 ?                                                | Action                                       |
+| ----------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
+| Japon (34 requêtes)     | ✅ Oui — `japon-culture-2-semaines`, `japon-luxe-7-jours`              | Conserver                                    |
+| Safari (23)             | ✅ Partiel — `safari-kenya-afrique-du-sud`, `tanzanie-safari-zanzibar` | Conserver + ajouter Botswana                 |
+| Méditerranée (23)       | ✅ Partiel — `cote-d-azur-luxe-7-jours`, `grece-iles-couple-10-jours`  | Conserver                                    |
+| Maldives (20)           | ✅ Oui — `maldives-luxe-7-jours`                                       | Conserver                                    |
+| Asie SE (19)            | ✅ Partiel — Bali, Vietnam, Thaïlande couverts                         | Ajouter Cambodge + Laos en P2                |
+| **Trains de luxe (17)** | ❌ **Non couvert**                                                     | **Backlog P1 à créer** (cf. §4 ci-dessous)   |
+| Multi-destinations (16) | ✅ Partiel                                                             | Conserver                                    |
+| Croisière (14)          | ❌ **Non couvert**                                                     | **Backlog P2 — Méditerranée yacht, Norvège** |
 
 ⚠️ **Décision à acter** : ajouter au backlog 4 itinéraires P1 supplémentaires non listés au CDC v1.0 :
+
 - `train-orient-express-paris-venise` (cluster trains de luxe — quick win identifié)
 - `train-maharajas-express-rajasthan` (idem)
 - `croisiere-yacht-mediterranee-luxe` (cluster croisière — quick win)
@@ -543,6 +543,7 @@ Réutiliser massivement :
 À créer dans `scripts/editorial-pilot/itineraries/briefs/` :
 
 **France (10)** :
+
 1. `paris-luxe-3-jours.json`
 2. `cote-d-azur-luxe-7-jours.json`
 3. `provence-culture-gastronomie-10-jours.json`
@@ -554,17 +555,7 @@ Réutiliser massivement :
 9. `lyon-gastronomie-3-jours.json`
 10. `biarritz-pays-basque-5-jours.json`
 
-**International (10)** :
-11. `japon-culture-2-semaines.json`
-12. `japon-luxe-7-jours.json`
-13. `bali-lune-de-miel-10-jours.json`
-14. `maldives-luxe-7-jours.json`
-15. `toscane-gastronomie-7-jours.json`
-16. `maroc-culture-10-jours.json`
-17. `safari-kenya-afrique-du-sud.json`
-18. `new-york-luxe-5-jours.json`
-19. `dubai-luxe-week-end.json`
-20. `train-orient-express-paris-venise.json` ← **ajout cluster manquant**
+**International (10)** : 11. `japon-culture-2-semaines.json` 12. `japon-luxe-7-jours.json` 13. `bali-lune-de-miel-10-jours.json` 14. `maldives-luxe-7-jours.json` 15. `toscane-gastronomie-7-jours.json` 16. `maroc-culture-10-jours.json` 17. `safari-kenya-afrique-du-sud.json` 18. `new-york-luxe-5-jours.json` 19. `dubai-luxe-week-end.json` 20. `train-orient-express-paris-venise.json` ← **ajout cluster manquant**
 
 #### DoD Sprint 4
 
@@ -595,12 +586,12 @@ Le `itineraires_voyages_master.csv` contient 375 requêtes priorisées. Une fois
 
 ### 4.2 Cibles quantitatives 6 mois
 
-| Tranche | Volume | Sprint |
-|---|---|---|
-| P0 (publié) | 20 | Sprint 4 |
-| P1 (à publier mois 2) | 30 (15 France + 15 INTL) | Sprint 5 |
-| P2 (mois 3-4) | 50 (combinés multi-destinations + variantes saisonnières) | Sprints 6-7 |
-| P3 (mois 5-6) | 100+ (longue traîne) | Sprints 8-12 |
+| Tranche               | Volume                                                    | Sprint       |
+| --------------------- | --------------------------------------------------------- | ------------ |
+| P0 (publié)           | 20                                                        | Sprint 4     |
+| P1 (à publier mois 2) | 30 (15 France + 15 INTL)                                  | Sprint 5     |
+| P2 (mois 3-4)         | 50 (combinés multi-destinations + variantes saisonnières) | Sprints 6-7  |
+| P3 (mois 5-6)         | 100+ (longue traîne)                                      | Sprints 8-12 |
 
 **Total 6 mois : 200 itinéraires publiés** = couverture quasi-complète des 375 requêtes master.csv (1 itinéraire absorbe en moyenne 2 requêtes via les FAQ).
 
@@ -608,13 +599,13 @@ Le `itineraires_voyages_master.csv` contient 375 requêtes priorisées. Une fois
 
 À ajouter dans CDC v1.1 :
 
-| Cluster | Itinéraires à créer |
-|---|---|
-| **Trains de luxe** (gap GEO majeur — quasi-désert FR) | Orient Express Paris-Venise, Maharajas Express Rajasthan, Rocky Mountaineer Canada, Belmond Andean Explorer |
-| **Croisières luxe** | Yacht Méditerranée 7j, Norvège fjords luxe, Antarctique expédition Silversea, Galápagos National Geographic |
-| **Comparatifs honeymoon** (format chouchou des IA — Perplexity/ChatGPT) | Maldives vs Polynésie, Bali vs Phuket, Seychelles vs Maurice, Santorini vs Capri |
-| **Wellness retraite** | Bali wellness 7j, Kerala Ayurveda 14j, Koh Samui retraite, Suisse alpine bien-être |
-| **Multi-destinations combo** | Vietnam+Cambodge, Tanzanie+Zanzibar, Pérou+Bolivie, Maroc+Sahara |
+| Cluster                                                                 | Itinéraires à créer                                                                                         |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Trains de luxe** (gap GEO majeur — quasi-désert FR)                   | Orient Express Paris-Venise, Maharajas Express Rajasthan, Rocky Mountaineer Canada, Belmond Andean Explorer |
+| **Croisières luxe**                                                     | Yacht Méditerranée 7j, Norvège fjords luxe, Antarctique expédition Silversea, Galápagos National Geographic |
+| **Comparatifs honeymoon** (format chouchou des IA — Perplexity/ChatGPT) | Maldives vs Polynésie, Bali vs Phuket, Seychelles vs Maurice, Santorini vs Capri                            |
+| **Wellness retraite**                                                   | Bali wellness 7j, Kerala Ayurveda 14j, Koh Samui retraite, Suisse alpine bien-être                          |
+| **Multi-destinations combo**                                            | Vietnam+Cambodge, Tanzanie+Zanzibar, Pérou+Bolivie, Maroc+Sahara                                            |
 
 ---
 
@@ -631,14 +622,14 @@ Le `itineraires_voyages_master.csv` contient 375 requêtes priorisées. Une fois
 
 D'après le rapport SEO précédent (section "Stratégie GEO") :
 
-| Format | Quand l'utiliser | Bénéfice GEO |
-|---|---|---|
-| Réponse directe en 1 phrase (AEO 40-80 mots) | En tête de page | Citation Perplexity / ChatGPT |
-| Tableau jour-par-jour | Section `<ItinerarySteps>` | Extraction Google/Bing AI Overview |
-| FAQ 8-15 Q&A `<details>` | Bas de page | Featured snippet + LLM Q&A |
-| Données chiffrées (km, jours, °C, prix indicatifs) | Body sections | Trust signal LLM |
-| Sources nommées (Atout France, Michelin, Routard) | Footer + inline | E-E-A-T |
-| LastUpdated badge visible | Header fiche | Freshness signal |
+| Format                                             | Quand l'utiliser           | Bénéfice GEO                       |
+| -------------------------------------------------- | -------------------------- | ---------------------------------- |
+| Réponse directe en 1 phrase (AEO 40-80 mots)       | En tête de page            | Citation Perplexity / ChatGPT      |
+| Tableau jour-par-jour                              | Section `<ItinerarySteps>` | Extraction Google/Bing AI Overview |
+| FAQ 8-15 Q&A `<details>`                           | Bas de page                | Featured snippet + LLM Q&A         |
+| Données chiffrées (km, jours, °C, prix indicatifs) | Body sections              | Trust signal LLM                   |
+| Sources nommées (Atout France, Michelin, Routard)  | Footer + inline            | E-E-A-T                            |
+| LastUpdated badge visible                          | Header fiche               | Freshness signal                   |
 
 ### 5.3 Robots.txt — vérifier que ces bots sont autorisés
 
@@ -705,25 +696,25 @@ Allow: /
 
 ## 7. Risques + mitigation
 
-| Risque | Probabilité | Impact | Mitigation |
-|---|---|---|---|
-| Migration 0045 collision en prod si numéro déjà utilisé sur staging | Faible | Bloquant | `gh api repos/travelba/conciergetravel.fr/contents/packages/db/migrations` avant de pousser |
-| Cache `unstable_cache` retourne Map au lieu de Record (régression hotfix 4d02187) | Moyen | Page crash | Test Vitest dédié dans `server/itineraries/` |
-| Slug FR≠EN désynchronisé → hreflang cassé | Moyen | Perte SEO EN | Check unique constraint en DB + test E2E sur 3 P0 |
-| Body section < 150 mots passé en prod | Élevé sans validateur | Pénalité Google "Thin content" | `validate-itinerary.mjs` obligatoire en CI pre-merge |
-| `description_fr` d'hôtel copié dans une section (duplicate content) | Moyen | Cannibalisation | Linter `detect-hotel-description-leak.mjs` à créer (réutilise pattern `detect-yonder-duplicates.mjs`) |
-| Robots.txt bloque accidentellement GPTBot/PerplexityBot | Faible | GEO 0 citation | E2E sur `/robots.txt` (assertion Allow: /) |
+| Risque                                                                            | Probabilité           | Impact                         | Mitigation                                                                                            |
+| --------------------------------------------------------------------------------- | --------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Migration 0045 collision en prod si numéro déjà utilisé sur staging               | Faible                | Bloquant                       | `gh api repos/travelba/conciergetravel.fr/contents/packages/db/migrations` avant de pousser           |
+| Cache `unstable_cache` retourne Map au lieu de Record (régression hotfix 4d02187) | Moyen                 | Page crash                     | Test Vitest dédié dans `server/itineraries/`                                                          |
+| Slug FR≠EN désynchronisé → hreflang cassé                                         | Moyen                 | Perte SEO EN                   | Check unique constraint en DB + test E2E sur 3 P0                                                     |
+| Body section < 150 mots passé en prod                                             | Élevé sans validateur | Pénalité Google "Thin content" | `validate-itinerary.mjs` obligatoire en CI pre-merge                                                  |
+| `description_fr` d'hôtel copié dans une section (duplicate content)               | Moyen                 | Cannibalisation                | Linter `detect-hotel-description-leak.mjs` à créer (réutilise pattern `detect-yonder-duplicates.mjs`) |
+| Robots.txt bloque accidentellement GPTBot/PerplexityBot                           | Faible                | GEO 0 citation                 | E2E sur `/robots.txt` (assertion Allow: /)                                                            |
 
 ---
 
 ## 8. Ce que Cursor doit lire AVANT de commencer chaque sprint
 
-| Sprint | Lecture obligatoire |
-|---|---|
-| S1 | `AGENTS.md`, `docs/cdc-itineraires.md` §2, `.cursor/rules/architecture-layers.mdc`, `.cursor/rules/supabase-rls.mdc` |
-| S2 | `.cursor/rules/nextjs-app-router.mdc`, `.cursor/skills/structured-data-schema-org/SKILL.md`, `.cursor/skills/editorial-long-read-rendering/SKILL.md`, `EDITORIAL_VOICE.md` |
-| S3 | `.cursor/skills/seo-technical/SKILL.md`, `.cursor/skills/geo-llm-optimization/SKILL.md` |
-| S4 | `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`, `.cursor/skills/concierge-voice-pipeline/SKILL.md`, `.cursor/skills/llm-output-robustness/SKILL.md` |
+| Sprint | Lecture obligatoire                                                                                                                                                        |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1     | `AGENTS.md`, `docs/cdc-itineraires.md` §2, `.cursor/rules/architecture-layers.mdc`, `.cursor/rules/supabase-rls.mdc`                                                       |
+| S2     | `.cursor/rules/nextjs-app-router.mdc`, `.cursor/skills/structured-data-schema-org/SKILL.md`, `.cursor/skills/editorial-long-read-rendering/SKILL.md`, `EDITORIAL_VOICE.md` |
+| S3     | `.cursor/skills/seo-technical/SKILL.md`, `.cursor/skills/geo-llm-optimization/SKILL.md`                                                                                    |
+| S4     | `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`, `.cursor/skills/concierge-voice-pipeline/SKILL.md`, `.cursor/skills/llm-output-robustness/SKILL.md`                |
 
 ---
 
