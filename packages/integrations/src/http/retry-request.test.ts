@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { retryingJsonRequest } from './retry-request.js';
+import { retryingJsonRequest } from './retry-request';
 
 describe('retryingJsonRequest', () => {
   afterEach(() => {

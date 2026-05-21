@@ -2,13 +2,13 @@ import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { retryingJsonRequest } from '@mch/integrations/http';
 
-import type { BrevoError } from './errors.js';
+import type { BrevoError } from './errors';
 import {
   BrevoSendEmailInputSchema,
   BrevoSendEmailResponseSchema,
   type BrevoSendEmailInput,
   type BrevoSendEmailResponse,
-} from './types.js';
+} from './types';
 
 const BREVO_SMTP_URL = 'https://api.brevo.com/v3/smtp/email' as const;
 

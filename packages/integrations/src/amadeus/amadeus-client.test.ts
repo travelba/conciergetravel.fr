@@ -2,10 +2,10 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import type { IntegrationRedis } from '../redis/cache-helpers.js';
+import type { IntegrationRedis } from '../redis/cache-helpers';
 
-import { createAmadeusClient } from './amadeus-client.js';
-import type { HotelOrderCreateInput } from './types.js';
+import { createAmadeusClient } from './amadeus-client';
+import type { HotelOrderCreateInput } from './types';
 
 function createMemoryRedis(): IntegrationRedis {
   const store = new Map<string, string>();

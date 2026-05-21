@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCityAlgoliaRecord, popularityScore } from './map-city-record.js';
-import type { CitySourceRow } from './types.js';
+import { buildCityAlgoliaRecord, popularityScore } from './map-city-record';
+import type { CitySourceRow } from './types';
 
 const baseRow: CitySourceRow = {
   id: '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d',

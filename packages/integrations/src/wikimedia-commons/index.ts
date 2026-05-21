@@ -7,7 +7,7 @@
  */
 export const COMMONS_INTEGRATION_VERSION = '0.0.1' as const;
 
-export type { CommonsError } from './errors.js';
+export type { CommonsError } from './errors';
 export {
   type CommonsClientConfig,
   DEFAULT_COMMONS_API_BASE,
@@ -15,7 +15,7 @@ export {
   buildCmTitle,
   defaultCommonsConfig,
   fetchCategoryPhotos,
-} from './client.js';
+} from './client';
 export {
   ALLOWED_IMAGE_MIMES,
   CategoryMembersResponseSchema,
@@ -24,4 +24,4 @@ export {
   type CategoryMembersResponse,
   type ImageInfoResponse,
   type NormalisedCommonsPhoto,
-} from './types.js';
+} from './types';

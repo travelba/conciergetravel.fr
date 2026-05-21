@@ -1,8 +1,8 @@
 import { normaliseCancellationPolicy, type CancellationPolicy } from '@mch/domain/booking';
 import { err, ok, type Result } from '@mch/domain/shared';
 
-import type { AmadeusError } from './errors.js';
-import type { AmadeusOffer } from './types.js';
+import type { AmadeusError } from './errors';
+import type { AmadeusOffer } from './types';
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 

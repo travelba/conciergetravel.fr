@@ -1,12 +1,12 @@
 import { err, ok, type Result } from '@mch/domain/shared';
 import { algoliasearch, type Algoliasearch } from 'algoliasearch';
 
-import { DEFAULT_CITIES_INDEX_SETTINGS } from './city-index-settings.js';
-import type { AlgoliaIndexingError } from './errors.js';
-import { DEFAULT_HOTELS_INDEX_SETTINGS } from './hotel-index-settings.js';
-import { citiesIndexName, hotelsIndexName, type SearchLocale } from './index-names.js';
-import type { SynonymEntry } from './synonyms.js';
-import type { AlgoliaCityRecord, AlgoliaHotelRecord } from './types.js';
+import { DEFAULT_CITIES_INDEX_SETTINGS } from './city-index-settings';
+import type { AlgoliaIndexingError } from './errors';
+import { DEFAULT_HOTELS_INDEX_SETTINGS } from './hotel-index-settings';
+import { citiesIndexName, hotelsIndexName, type SearchLocale } from './index-names';
+import type { SynonymEntry } from './synonyms';
+import type { AlgoliaCityRecord, AlgoliaHotelRecord } from './types';
 
 export type AlgoliaIndexingConfig = {
   readonly appId: string;

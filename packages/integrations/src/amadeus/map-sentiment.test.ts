@@ -4,8 +4,8 @@ import {
   AMADEUS_SENTIMENT_CATEGORY_KEYS,
   amadeusSentimentToAggregateRating,
   amadeusSentimentToCategoryBreakdown,
-} from './map-sentiment.js';
-import type { HotelSentimentEntry } from './types.js';
+} from './map-sentiment';
+import type { HotelSentimentEntry } from './types';
 
 const base: HotelSentimentEntry = {
   hotelId: 'HTLPAR123',

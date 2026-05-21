@@ -10,9 +10,9 @@ export {
   type FetchTransitOptions,
   type NormalisedTransitStation,
   type TransitStationMode,
-} from './client.js';
+} from './client';
 
-export type { OverpassError } from './errors.js';
+export type { OverpassError } from './errors';
 
 export {
   UTILITY_AMENITY_TAGS,
@@ -20,4 +20,4 @@ export {
   type OverpassElement,
   type OverpassResponse,
   type UtilityAmenityTag,
-} from './types.js';
+} from './types';

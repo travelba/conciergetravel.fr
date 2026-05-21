@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildHotelAlgoliaRecord } from './map-hotel-record.js';
-import type { HotelSourceRow } from './types.js';
+import { buildHotelAlgoliaRecord } from './map-hotel-record';
+import type { HotelSourceRow } from './types';
 
 const baseRow: HotelSourceRow = {
   id: '8b2b2b2b-2b2b-2b2b-2b2b-2b2b2b2b2b2b',

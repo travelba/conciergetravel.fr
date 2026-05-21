@@ -3,10 +3,10 @@
  */
 export const APIFY_INTEGRATION_VERSION = '0.0.1' as const;
 
-export type { ApifyError } from './errors.js';
+export type { ApifyError } from './errors';
 export {
   fetchApifyHotelQuotes,
   apifyConfigFromSharedEnv,
   type ApifyClientConfig,
   type ApifyHotelQuoteInput,
-} from './client.js';
+} from './client';

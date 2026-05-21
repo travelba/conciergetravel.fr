@@ -1,5 +1,5 @@
-import type { SearchLocale } from './index-names.js';
-import type { AlgoliaCityRecord, CitySourceRow } from './types.js';
+import type { SearchLocale } from './index-names';
+import type { AlgoliaCityRecord, CitySourceRow } from './types';
 
 const ALIASES_MAX = 10;
 const POPULARITY_POPULAR_BOOST = 1000;

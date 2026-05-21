@@ -1,9 +1,9 @@
 import { err, type Result } from '@mch/domain/shared';
 
-import type { AlgoliaIndexingError } from './errors.js';
-import { buildCityAlgoliaRecord } from './map-city-record.js';
-import type { AlgoliaIndexingService } from './indexing-service.js';
-import { AlgoliaCityRecordSchema, CitySourceRowSchema, type CitySourceRow } from './types.js';
+import type { AlgoliaIndexingError } from './errors';
+import { buildCityAlgoliaRecord } from './map-city-record';
+import type { AlgoliaIndexingService } from './indexing-service';
+import { AlgoliaCityRecordSchema, CitySourceRowSchema, type CitySourceRow } from './types';
 
 /**
  * Mirrors Payload publish rules for cities: unpublished → delete from both

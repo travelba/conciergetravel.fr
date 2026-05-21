@@ -1,4 +1,4 @@
-import type { HttpError } from '../http/http-error.js';
+import type { HttpError } from '../http/http-error';
 
 /**
  * Adapter-level error variants for the Amadeus integration (skill:

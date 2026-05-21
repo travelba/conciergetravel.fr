@@ -1,17 +1,17 @@
 import { err, ok, type Result } from '@mch/domain/shared';
 import { z } from 'zod';
 
-import { retryingJsonRequest, type RequestBody } from '../http/index.js';
+import { retryingJsonRequest, type RequestBody } from '../http/index';
 import {
   redisGetString,
   redisSetStringWithTtl,
   runWithRedisLock,
   type IntegrationRedis,
-} from '../redis/cache-helpers.js';
+} from '../redis/cache-helpers';
 
-import { amadeusAuthLockKey, amadeusAuthTokenKey } from './cache-keys.js';
-import type { AmadeusError } from './errors.js';
-import { AmadeusOAuthTokenSchema } from './types.js';
+import { amadeusAuthLockKey, amadeusAuthTokenKey } from './cache-keys';
+import type { AmadeusError } from './errors';
+import { AmadeusOAuthTokenSchema } from './types';
 
 const TOKEN_SKEW_MS = 60_000;
 

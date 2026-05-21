@@ -1,5 +1,5 @@
 {
-  "extends": "@mch/config/tsconfig/node.json",
+  "extends": "@mch/config/tsconfig/library.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",

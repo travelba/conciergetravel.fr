@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { amadeusOfferToDomain, DEFAULT_OFFER_LOCK_SECONDS } from './map-offer.js';
-import type { AmadeusOffer } from './types.js';
+import { amadeusOfferToDomain, DEFAULT_OFFER_LOCK_SECONDS } from './map-offer';
+import type { AmadeusOffer } from './types';
 
 const baseOffer: AmadeusOffer = {
   id: 'amadeus-offer-1',

@@ -1,4 +1,4 @@
-import type { HotelSentimentCategories, HotelSentimentEntry } from './types.js';
+import type { HotelSentimentCategories, HotelSentimentEntry } from './types';
 
 /**
  * Schema.org-friendly aggregate rating shape (mirror of

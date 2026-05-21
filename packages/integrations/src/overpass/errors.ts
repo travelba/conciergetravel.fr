@@ -9,7 +9,7 @@
  * commerces found" but should not crash the pipeline).
  */
 
-import type { HttpError } from '../http/http-error.js';
+import type { HttpError } from '../http/http-error';
 
 export type OverpassError =
   | { readonly kind: 'http'; readonly error: HttpError }

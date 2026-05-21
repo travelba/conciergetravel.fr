@@ -8,7 +8,7 @@
  * extmetadata blob to keep Sentry breadcrumbs small.
  */
 
-import type { HttpError } from '../http/http-error.js';
+import type { HttpError } from '../http/http-error';
 
 export type CommonsError =
   | { readonly kind: 'http'; readonly error: HttpError }

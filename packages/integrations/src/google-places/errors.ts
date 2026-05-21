@@ -7,7 +7,7 @@
  *   - `RESOURCE_EXHAUSTED` → quota exceeded (per-day or per-minute)
  *   - `PERMISSION_DENIED` → key missing the right Places API enablement
  */
-import type { HttpError } from '../http/http-error.js';
+import type { HttpError } from '../http/http-error';
 
 export type GooglePlacesError =
   | { readonly kind: 'http'; readonly error: HttpError }

@@ -11,7 +11,7 @@
  */
 export const GPLACES_INTEGRATION_VERSION = '0.0.2' as const;
 
-export type { GooglePlacesError } from './errors.js';
+export type { GooglePlacesError } from './errors';
 export {
   DEFAULT_PLACES_API_BASE,
   defaultPlacesConfig,
@@ -20,7 +20,7 @@ export {
   searchPlaceByNameAndCity,
   type GeocodeMatch,
   type GooglePlacesClientConfig,
-} from './client.js';
+} from './client';
 export {
   NormalisedPlacesPhotoSchema,
   PhotoMediaResponseSchema,
@@ -33,4 +33,4 @@ export {
   type PlacePhoto,
   type PlaceSearchResult,
   type TextSearchResponse,
-} from './types.js';
+} from './types';

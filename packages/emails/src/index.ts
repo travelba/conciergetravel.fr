@@ -5,13 +5,13 @@
  */
 export const EMAILS_PACKAGE_VERSION = '0.0.1' as const;
 
-export { renderEmailHtml, renderEmailText } from './render.js';
+export { renderEmailHtml, renderEmailText } from './render';
 
-export { default as EmailRequestGuest } from './templates/email-request-guest.js';
-export type { EmailRequestGuestProps } from './templates/email-request-guest.js';
+export { default as EmailRequestGuest } from './templates/email-request-guest';
+export type { EmailRequestGuestProps } from './templates/email-request-guest';
 
-export { default as EmailRequestOps } from './templates/email-request-ops.js';
-export type { EmailRequestOpsProps } from './templates/email-request-ops.js';
+export { default as EmailRequestOps } from './templates/email-request-ops';
+export type { EmailRequestOpsProps } from './templates/email-request-ops';
 
-export { default as BookingConfirmationGuest } from './templates/booking-confirmation-guest.js';
-export type { BookingConfirmationGuestProps } from './templates/booking-confirmation-guest.js';
+export { default as BookingConfirmationGuest } from './templates/booking-confirmation-guest';
+export type { BookingConfirmationGuestProps } from './templates/booking-confirmation-guest';

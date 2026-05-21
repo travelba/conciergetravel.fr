@@ -1,6 +1,6 @@
 import { err, ok, type Result } from '@mch/domain/shared';
 
-import type { HttpError } from './http-error.js';
+import type { HttpError } from './http-error';
 
 export type RequestBody =
   | { readonly kind: 'none' }

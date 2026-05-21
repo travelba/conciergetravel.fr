@@ -7,7 +7,7 @@ import {
   fetchAmenitiesAround,
   fetchTransitStationsAround,
   haversineMeters,
-} from './client.js';
+} from './client';
 
 const TEST_ENDPOINT = 'https://example-overpass.test/api/interpreter';
 const cfg = {

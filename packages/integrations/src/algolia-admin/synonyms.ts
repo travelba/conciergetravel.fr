@@ -1,4 +1,4 @@
-import type { SearchLocale } from './index-names.js';
+import type { SearchLocale } from './index-names';
 
 /**
  * Synonyms are seeded per locale on `hotels_<locale>` indices.

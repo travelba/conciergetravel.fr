@@ -2,8 +2,8 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import type { IntegrationRedis } from '../redis/cache-helpers.js';
-import { getAmadeusAccessToken } from './oauth-token.js';
+import type { IntegrationRedis } from '../redis/cache-helpers';
+import { getAmadeusAccessToken } from './oauth-token';
 
 function createMemoryRedis(): IntegrationRedis {
   const store = new Map<string, string>();

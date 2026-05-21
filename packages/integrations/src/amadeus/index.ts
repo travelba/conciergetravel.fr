@@ -3,16 +3,16 @@
  */
 export const AMADEUS_INTEGRATION_VERSION = '0.0.1' as const;
 
-export type { AmadeusClient, AmadeusCredentials, PricedOffer } from './amadeus-client.js';
-export { createAmadeusClient, createAmadeusClientFromSharedEnv } from './amadeus-client.js';
-export * from './cache-keys.js';
-export type { AmadeusError } from './errors.js';
+export type { AmadeusClient, AmadeusCredentials, PricedOffer } from './amadeus-client';
+export { createAmadeusClient, createAmadeusClientFromSharedEnv } from './amadeus-client';
+export * from './cache-keys';
+export type { AmadeusError } from './errors';
 export {
   amadeusOfferToDomain,
   DEFAULT_OFFER_LOCK_SECONDS,
   type OfferMappingContext,
-} from './map-offer.js';
-export { amadeusPoliciesToCancellation } from './map-cancellation-policy.js';
+} from './map-offer';
+export { amadeusPoliciesToCancellation } from './map-cancellation-policy';
 export {
   AMADEUS_SENTIMENT_CATEGORY_KEYS,
   amadeusSentimentToAggregateRating,
@@ -21,7 +21,7 @@ export {
   type AmadeusSentimentCategory,
   type AmadeusSentimentCategoryKey,
   type CategoryBreakdownOptions,
-} from './map-sentiment.js';
-export type { AmadeusOAuthConfig } from './oauth-token.js';
-export { getAmadeusAccessToken } from './oauth-token.js';
-export * from './types.js';
+} from './map-sentiment';
+export type { AmadeusOAuthConfig } from './oauth-token';
+export { getAmadeusAccessToken } from './oauth-token';
+export * from './types';

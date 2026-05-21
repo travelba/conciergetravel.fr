@@ -2,14 +2,14 @@ import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import type { CancellationPolicy, Offer } from '@mch/domain/booking';
 import { err, ok, type Result } from '@mch/domain/shared';
 
-import { retryingJsonRequest } from '../http/index.js';
-import { getRedis } from '../redis/index.js';
-import { redisGetString, redisSetStringWithTtl } from '../redis/cache-helpers.js';
+import { retryingJsonRequest } from '../http/index';
+import { getRedis } from '../redis/index';
+import { redisGetString, redisSetStringWithTtl } from '../redis/cache-helpers';
 
-import { amadeusHotelOffersCacheKey, amadeusHotelSentimentsCacheKey } from './cache-keys.js';
-import type { AmadeusError } from './errors.js';
-import { amadeusOfferToDomain } from './map-offer.js';
-import { getAmadeusAccessToken, type AmadeusOAuthConfig } from './oauth-token.js';
+import { amadeusHotelOffersCacheKey, amadeusHotelSentimentsCacheKey } from './cache-keys';
+import type { AmadeusError } from './errors';
+import { amadeusOfferToDomain } from './map-offer';
+import { getAmadeusAccessToken, type AmadeusOAuthConfig } from './oauth-token';
 import {
   HotelOffersInputSchema,
   HotelOffersResponseSchema,
@@ -29,7 +29,7 @@ import {
   type HotelSentimentsResponse,
   type HotelsByCityResponse,
   type SearchHotelsByCityInput,
-} from './types.js';
+} from './types';
 
 const HOTEL_OFFERS_TTL_SEC = 15 * 60;
 const HOTELS_BY_CITY_TTL_SEC = 24 * 60 * 60;

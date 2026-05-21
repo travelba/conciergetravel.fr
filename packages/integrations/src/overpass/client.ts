@@ -20,9 +20,9 @@
  */
 
 import { err, ok, type Result } from '@mch/domain/shared';
-import { retryingJsonRequest } from '../http/retry-request.js';
+import { retryingJsonRequest } from '../http/retry-request';
 
-import type { OverpassError } from './errors.js';
+import type { OverpassError } from './errors';
 import {
   NormalisedOsmAmenitySchema,
   OverpassResponseSchema,
@@ -30,7 +30,7 @@ import {
   type NormalisedOsmAmenity,
   type OverpassElement,
   type UtilityAmenityTag,
-} from './types.js';
+} from './types';
 
 export interface OverpassClientConfig {
   /** Default `https://overpass-api.de/api/interpreter`. Override in tests. */

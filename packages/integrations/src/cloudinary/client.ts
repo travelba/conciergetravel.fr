@@ -19,12 +19,12 @@
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import { err, ok, type Result } from '@mch/domain/shared';
 
-import type { CloudinaryError } from './errors.js';
+import type { CloudinaryError } from './errors';
 import {
   CloudinaryUploadResultSchema,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,
-} from './types.js';
+} from './types';
 
 export interface CloudinaryClientConfig {
   readonly cloudName: string;

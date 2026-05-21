@@ -2,8 +2,8 @@ import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { retryingJsonRequest } from '@mch/integrations/http';
 
-import { parseMakcorpsResponse, type ParsedMakcorpsEntry } from '../makcorps/parse.js';
-import type { ApifyError } from './errors.js';
+import { parseMakcorpsResponse, type ParsedMakcorpsEntry } from '../makcorps/parse';
+import type { ApifyError } from './errors';
 
 export interface ApifyClientConfig {
   readonly token: string;

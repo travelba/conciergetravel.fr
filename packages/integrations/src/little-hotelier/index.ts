@@ -3,10 +3,10 @@
  */
 export const LITTLE_INTEGRATION_VERSION = '0.0.1' as const;
 
-export type { LittleHotelierError } from './errors.js';
+export type { LittleHotelierError } from './errors';
 export {
   fetchLittleHotelierProperties,
   littleHotelierConfigFromSharedEnv,
   type LittleHotelierClientConfig,
-} from './client.js';
-export { normalizeLittlePropertiesList } from './types.js';
+} from './client';
+export { normalizeLittlePropertiesList } from './types';

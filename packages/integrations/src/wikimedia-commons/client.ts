@@ -12,16 +12,16 @@
  */
 
 import { err, ok, type Result } from '@mch/domain/shared';
-import { retryingJsonRequest } from '../http/retry-request.js';
+import { retryingJsonRequest } from '../http/retry-request';
 
-import type { CommonsError } from './errors.js';
+import type { CommonsError } from './errors';
 import {
   ALLOWED_IMAGE_MIMES,
   CategoryMembersResponseSchema,
   ImageInfoResponseSchema,
   NormalisedCommonsPhotoSchema,
   type NormalisedCommonsPhoto,
-} from './types.js';
+} from './types';
 
 export interface CommonsClientConfig {
   /** Default `https://commons.wikimedia.org/w/api.php`. Override in tests. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseMakcorpsResponse } from './parse.js';
+import { parseMakcorpsResponse } from './parse';
 
 describe('parseMakcorpsResponse', () => {
   it('handles the flat vendor1/price1 shape', () => {

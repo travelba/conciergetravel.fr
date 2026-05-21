@@ -1,5 +1,5 @@
-import type { AlgoliaHotelRecord, HotelSourceRow } from './types.js';
-import type { SearchLocale } from './index-names.js';
+import type { AlgoliaHotelRecord, HotelSourceRow } from './types';
+import type { SearchLocale } from './index-names';
 
 const EXCERPT_LEN = 200;
 const AMENITIES_TOP = 10;

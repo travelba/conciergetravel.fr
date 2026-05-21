@@ -1,9 +1,9 @@
 import type { CancellationPolicy, Offer } from '@mch/domain/booking';
 import { err, ok, type Result } from '@mch/domain/shared';
 
-import type { AmadeusError } from './errors.js';
-import { amadeusPoliciesToCancellation } from './map-cancellation-policy.js';
-import type { AmadeusOffer } from './types.js';
+import type { AmadeusError } from './errors';
+import { amadeusPoliciesToCancellation } from './map-cancellation-policy';
+import type { AmadeusOffer } from './types';
 
 /** Conventional lock window applied when Amadeus does not expose one. */
 export const DEFAULT_OFFER_LOCK_SECONDS = 10 * 60;

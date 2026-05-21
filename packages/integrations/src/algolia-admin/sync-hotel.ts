@@ -1,10 +1,10 @@
 import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import { err, type Result } from '@mch/domain/shared';
 
-import type { AlgoliaIndexingError } from './errors.js';
-import { AlgoliaHotelRecordSchema, HotelSourceRowSchema, type HotelSourceRow } from './types.js';
-import { createAlgoliaIndexingService, type AlgoliaIndexingService } from './indexing-service.js';
-import { buildHotelAlgoliaRecord } from './map-hotel-record.js';
+import type { AlgoliaIndexingError } from './errors';
+import { AlgoliaHotelRecordSchema, HotelSourceRowSchema, type HotelSourceRow } from './types';
+import { createAlgoliaIndexingService, type AlgoliaIndexingService } from './indexing-service';
+import { buildHotelAlgoliaRecord } from './map-hotel-record';
 
 export function createAlgoliaIndexingServiceFromSharedEnv(
   source?: SharedEnv,

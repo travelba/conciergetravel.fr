@@ -7,16 +7,16 @@
  */
 export const CLOUDINARY_INTEGRATION_VERSION = '0.0.1' as const;
 
-export type { CloudinaryError } from './errors.js';
+export type { CloudinaryError } from './errors';
 export {
   type CloudinaryClientConfig,
   configureCloudinary,
   toGalleryRow,
   uploadFromUrl,
-} from './client.js';
+} from './client';
 export {
   CloudinaryUploadResultSchema,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,
   type GalleryImageRow,
-} from './types.js';
+} from './types';

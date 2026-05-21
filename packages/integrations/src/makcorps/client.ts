@@ -2,8 +2,8 @@ import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { retryingJsonRequest } from '@mch/integrations/http';
 
-import type { MakcorpsError } from './errors.js';
-import { MakcorpsHotelQuoteInputSchema, type MakcorpsHotelQuoteInput } from './types.js';
+import type { MakcorpsError } from './errors';
+import { MakcorpsHotelQuoteInputSchema, type MakcorpsHotelQuoteInput } from './types';
 
 export type MakcorpsClientConfig = {
   readonly baseUrl: string;

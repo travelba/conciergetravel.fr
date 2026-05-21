@@ -3,8 +3,8 @@
  */
 import { Redis } from '@upstash/redis';
 
-export type { IntegrationRedis } from './cache-helpers.js';
-export { redisGetString, redisSetStringWithTtl, runWithRedisLock } from './cache-helpers.js';
+export type { IntegrationRedis } from './cache-helpers';
+export { redisGetString, redisSetStringWithTtl, runWithRedisLock } from './cache-helpers';
 
 let cached: Redis | undefined;
 

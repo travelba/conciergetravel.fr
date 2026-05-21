@@ -2,8 +2,8 @@ import { loadSharedEnv, type SharedEnv } from '@mch/config/env';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { retryingJsonRequest } from '@mch/integrations/http';
 
-import type { LittleHotelierError } from './errors.js';
-import { normalizeLittlePropertiesList } from './types.js';
+import type { LittleHotelierError } from './errors';
+import { normalizeLittlePropertiesList } from './types';
 
 export type LittleHotelierClientConfig = {
   readonly baseUrl: string;

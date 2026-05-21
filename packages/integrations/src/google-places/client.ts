@@ -20,9 +20,9 @@
  */
 
 import { err, ok, type Result } from '@mch/domain/shared';
-import { retryingJsonRequest } from '../http/retry-request.js';
+import { retryingJsonRequest } from '../http/retry-request';
 
-import type { GooglePlacesError } from './errors.js';
+import type { GooglePlacesError } from './errors';
 import {
   type NormalisedPlacesPhoto,
   NormalisedPlacesPhotoSchema,
@@ -30,7 +30,7 @@ import {
   type PlacePhoto,
   type PlaceSearchResult,
   TextSearchResponseSchema,
-} from './types.js';
+} from './types';
 
 export interface GooglePlacesClientConfig {
   readonly apiBase: string;
