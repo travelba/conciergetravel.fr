@@ -58,7 +58,7 @@
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.20",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9.18.0",
     "eslint-config-next": "16.2.6",
     "msw": "catalog:",
