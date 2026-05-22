@@ -114,3 +114,6 @@ scripts/editorial-pilot/output-test-*/
 # Local commit-message scratch files
 .git-msg.txt
 commit-msg.tmp
+
+# Local API scratch dumps
+runs.json
