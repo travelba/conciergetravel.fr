@@ -12,8 +12,11 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Doing the redirect here keeps Payload as the *single* source of
  * truth for the document shell, and avoids a prerender failure at
  * build time.
+ *
+ * Next 16 renamed the `middleware` file convention to `proxy` to mark
+ * it as a thin network-boundary helper.
  */
-export function middleware(request: NextRequest): NextResponse {
+export function proxy(request: NextRequest): NextResponse {
   const url = new URL(request.url);
   if (url.pathname === '/' || url.pathname === '') {
     url.pathname = '/admin';
