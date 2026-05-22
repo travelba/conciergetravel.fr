@@ -62,7 +62,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@mch/domain": "workspace:*",
     "@mch/integrations": "workspace:*",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.4.2",
     "openai": "^4.78.0",
     "zod": "^3.24.1"
   },
