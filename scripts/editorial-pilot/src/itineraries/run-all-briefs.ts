@@ -4,25 +4,34 @@
  * `paris-luxe-3-jours` (which is the polished, hand-tuned reference
  * already published in DB).
  *
- * Each generated SQL inserts the itinerary as `status='draft'` and with
- * `hotel_ids = []` / `section.hotel_id = null` — the editor wires the
- * real hotel UUIDs and polishes the prose via the back-office (Payload)
- * before publishing. The pipeline output is therefore a structured
- * starting surface that *passes validation* (≥150-word sections,
- * 40-80-word AEO, 50-100-word FAQ, 140-160-char meta_desc), not the
- * final editorial-grade content.
+ * Modes:
+ *   - templated (default): destination-neutral prose from
+ *     `compose-from-brief.ts`. No external calls, deterministic.
+ *     Output is a *draft scaffold* — editor must polish before publish.
+ *   - `--llm`: OpenAI-powered prose via `compose-from-brief-llm.ts`.
+ *     5 calls per brief (~10-15 k tokens), still emitted as `status='draft'`
+ *     unless `--publish` is also passed. Re-runs the validator.
+ *
+ * Selection:
+ *   - `--slug=<brief-slug>` runs a single brief instead of the whole batch.
+ *   - `--briefs-dir=<path>` / `--out-dir=<path>` override defaults.
  *
  * Usage:
- *   tsx src/itineraries/run-all-briefs.ts [--briefs-dir=path] [--out-dir=path]
- *   pnpm itineraries:batch
+ *   tsx src/itineraries/run-all-briefs.ts                     # templated batch
+ *   tsx src/itineraries/run-all-briefs.ts --llm                # LLM batch
+ *   tsx src/itineraries/run-all-briefs.ts --llm --slug=reims-champagne-week-end
+ *   pnpm itineraries:batch [-- --llm] [--slug=<slug>]
  */
 import { readdirSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { composeItineraryFromBrief } from './compose-from-brief.js';
+import { composeItineraryWithLlm } from './compose-from-brief-llm.js';
+import { loadEnv } from '../env.js';
 import { loadItineraryBrief } from './load-brief.js';
 import { itineraryToSql } from './to-sql.js';
+import type { GeneratedItinerary } from './types.js';
 import { validateItinerary } from './validate-itinerary.js';
 
 const PARIS_SLUG = 'paris-luxe-3-jours';
@@ -42,10 +51,26 @@ interface RunResult {
   readonly error?: string;
 }
 
-async function processBrief(slug: string, outDir: string): Promise<RunResult> {
+interface ProcessOptions {
+  readonly outDir: string;
+  readonly useLlm: boolean;
+  readonly publish: boolean;
+}
+
+async function processBrief(slug: string, opts: ProcessOptions): Promise<RunResult> {
   try {
     const brief = await loadItineraryBrief(slug);
-    const composed = composeItineraryFromBrief(brief, [], { status: 'draft' });
+    const composeOpts = { status: opts.publish ? 'published' : 'draft' } as const;
+    let composed: GeneratedItinerary;
+    if (opts.useLlm) {
+      // Load env lazily per call so a missing OPENAI_API_KEY surfaces a
+      // clean error message instead of an unhelpful TypeError at startup
+      // when --llm is not used.
+      const env = loadEnv();
+      composed = await composeItineraryWithLlm(brief, [], env, composeOpts);
+    } else {
+      composed = composeItineraryFromBrief(brief, [], composeOpts);
+    }
 
     const validation = validateItinerary(composed);
     if (!validation.ok || validation.data === null) {
@@ -53,7 +78,7 @@ async function processBrief(slug: string, outDir: string): Promise<RunResult> {
     }
 
     const sql = itineraryToSql(validation.data);
-    const outPath = join(outDir, `${slug}.sql`);
+    const outPath = join(opts.outDir, `${slug}.sql`);
     writeFileSync(outPath, sql, 'utf8');
     return { slug, status: 'ok' };
   } catch (err) {
@@ -76,6 +101,9 @@ async function main(): Promise<void> {
 
   const briefsDir = parseFlag(args, 'briefs-dir') ?? defaultBriefsDir;
   const outDir = parseFlag(args, 'out-dir') ?? defaultOutDir;
+  const slugFilter = parseFlag(args, 'slug');
+  const useLlm = args.includes('--llm');
+  const publish = args.includes('--publish');
 
   if (!existsSync(briefsDir)) {
     console.error(`Briefs dir not found: ${briefsDir}`);
@@ -83,34 +111,49 @@ async function main(): Promise<void> {
   }
   mkdirSync(outDir, { recursive: true });
 
-  const slugs = readdirSync(briefsDir)
+  let slugs = readdirSync(briefsDir)
     .filter((f) => f.endsWith('.json'))
     .map((f) => f.replace(/\.json$/u, ''))
     .filter((s) => s !== PARIS_SLUG)
     .sort();
+  if (slugFilter !== null) {
+    if (!slugs.includes(slugFilter)) {
+      console.error(
+        `Slug "${slugFilter}" not found in ${briefsDir} (or it is the Paris reference brief which the batch skips by design).`,
+      );
+      process.exit(1);
+    }
+    slugs = [slugFilter];
+  }
 
-  console.error(`Found ${slugs.length} briefs (excluding ${PARIS_SLUG}).`);
+  const modeLabel = useLlm ? 'LLM (OpenAI)' : 'templated';
+  const statusLabel = publish ? 'published' : 'draft';
+  console.error(
+    `Found ${slugs.length} brief(s) to process — mode=${modeLabel}, status=${statusLabel}.`,
+  );
 
   const results: RunResult[] = [];
   for (const slug of slugs) {
     process.stderr.write(`  · ${slug.padEnd(45)} `);
-    const r = await processBrief(slug, outDir);
+    const t0 = Date.now();
+    const r = await processBrief(slug, { outDir, useLlm, publish });
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     results.push(r);
     if (r.status === 'ok') {
-      process.stderr.write('OK\n');
+      process.stderr.write(`OK  (${elapsed}s)\n`);
     } else if (r.status === 'validation_failed') {
-      process.stderr.write(`VALIDATION FAILED (${r.issues?.length ?? 0} issues)\n`);
+      process.stderr.write(`VALIDATION FAILED (${r.issues?.length ?? 0} issues, ${elapsed}s)\n`);
       for (const issue of r.issues ?? []) {
         process.stderr.write(`      ${issue.path}: ${issue.message}\n`);
       }
     } else {
-      process.stderr.write(`ERROR: ${r.error}\n`);
+      process.stderr.write(`ERROR (${elapsed}s): ${r.error}\n`);
     }
   }
 
   const ok = results.filter((r) => r.status === 'ok').length;
   const failed = results.length - ok;
-  console.error(`\n${ok}/${results.length} briefs produced valid SQL (${failed} failed).`);
+  console.error(`\n${ok}/${results.length} brief(s) produced valid SQL (${failed} failed).`);
   if (failed > 0) process.exit(1);
 }
 

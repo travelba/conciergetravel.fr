@@ -117,3 +117,6 @@ commit-msg.tmp
 
 # Local API scratch dumps
 runs.json
+
+# Editorial pilot scratch files (LLM previews, diffs)
+scripts/editorial-pilot/.tmp/
