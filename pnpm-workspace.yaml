@@ -21,8 +21,8 @@ catalog:
   "react-hook-form": ^7.54.2
   "@hookform/resolvers": ^3.10.0
   pino: ^10.3.1
-  vitest: ^2.1.8
-  "@vitest/coverage-v8": ^2.1.8
+  vitest: ^4.1.7
+  "@vitest/coverage-v8": ^4.1.7
   "@playwright/test": ^1.49.1
   "@axe-core/playwright": ^4.10.1
   msw: ^2.14.6
