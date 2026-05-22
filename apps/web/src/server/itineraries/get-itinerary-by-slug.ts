@@ -119,15 +119,19 @@ export const ItineraryRowSchema = z.object({
   ]),
   season: z.enum(['printemps', 'ete', 'automne', 'hiver', 'toute-saison']).nullable(),
   hotel_ids: z.array(z.string().uuid()).default([]),
-  sections: z.array(ItinerarySectionSchema).default([]),
-  faq_content: z.array(ItineraryFaqEntrySchema).default([]),
+  // jsonb columns are nullable in the DDL — Supabase returns `null` (not
+  // `undefined`) when an editor hasn't filled them, so we preprocess to
+  // an empty array before the array parser runs. Without this preprocess
+  // step the reader fails its safeParse and the page silently 404s.
+  sections: z.preprocess((v) => v ?? [], z.array(ItinerarySectionSchema)),
+  faq_content: z.preprocess((v) => v ?? [], z.array(ItineraryFaqEntrySchema)),
   related_ranking_ids: z.array(z.string().uuid()).default([]),
   related_guide_slugs: z.array(z.string()).default([]),
   related_itinerary_slugs: z.array(z.string()).default([]),
   hero_cloudinary_id: z.string().nullable(),
   hero_alt_fr: z.string().nullable(),
   hero_alt_en: z.string().nullable(),
-  gallery_images: z.array(ItineraryGalleryImageSchema).default([]),
+  gallery_images: z.preprocess((v) => v ?? [], z.array(ItineraryGalleryImageSchema)),
   author_id: z.string().uuid().nullable(),
   last_updated: z.string(),
   status: z.enum(['draft', 'published']),
