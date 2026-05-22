@@ -16,7 +16,7 @@ import type { Config } from 'tailwindcss';
  *     backward-compat with existing components
  */
 const preset = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [],
   theme: {
     container: {

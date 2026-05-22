@@ -1,1 +1,12 @@
+/*
+ * apps/web entry stylesheet.
+ *
+ * Tailwind CSS v4 reads theme tokens primarily from CSS (@theme), but we
+ * still need our v3 preset (packages/config/src/tailwind/preset.ts) which
+ * declares ~30 design-token aliases. We load it through the v4 @config
+ * directive — Tailwind reads the JS preset and merges it with v4's
+ * implicit defaults.
+ */
+@config "../../tailwind.config.ts";
+
 @import '@mch/ui/globals.css';
