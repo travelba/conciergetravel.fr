@@ -5,7 +5,8 @@
     "outDir": "./dist",
     "noEmit": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2023"]
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src/**/*"]
 }
