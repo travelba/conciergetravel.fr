@@ -11,6 +11,8 @@ export const ItineraryBriefStepSchema = z.object({
   title_en_hint: z.string().min(1),
 });
 
+export type ItineraryBriefStep = z.infer<typeof ItineraryBriefStepSchema>;
+
 export const ItineraryBriefSchema = z.object({
   slug_fr: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u),
   slug_en: z

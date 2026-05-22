@@ -61,6 +61,7 @@
     "itineraries:run:dry": "tsx src/itineraries/run-itinerary.ts --dry-run",
     "itineraries:paris": "tsx src/itineraries/run-itinerary.ts paris-luxe-3-jours",
     "itineraries:dump": "tsx src/itineraries/dump-itinerary.ts",
+    "itineraries:batch": "tsx src/itineraries/run-all-briefs.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

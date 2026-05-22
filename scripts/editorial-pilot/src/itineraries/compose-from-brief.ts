@@ -1,16 +1,55 @@
 import { countryCodeFromLabel, resolveHotelSlugHint } from './country-codes.js';
 import { countWords, padToMinWords } from './word-count.js';
-import type { GeneratedItinerary, ItineraryBrief, ResolvedHotel } from './types.js';
+import type {
+  GeneratedItinerary,
+  ItineraryBrief,
+  ItineraryBriefStep,
+  ResolvedHotel,
+} from './types.js';
 
+// ───────────────────────────────────────────────────────────────────────────
+// Destination detection — `paris-luxe-3-jours` is the gold-standard P0 brief
+// and ships with very rich Paris-specific filler (cobbles, arrondissements,
+// landmark bars). All OTHER briefs run the destination-neutral path: the
+// filler is generic (book ahead, comfortable shoes, ...) and the
+// destination context comes from the brief itself (`step_angle`,
+// `concierge_secret_hint`, `key_pois`). The conditional keeps the Paris
+// fiche editorial-grade without forcing the same lyricism on a Japan or
+// Maldives draft that the editor still has to polish.
+// ───────────────────────────────────────────────────────────────────────────
+function isParisBrief(brief: ItineraryBrief): boolean {
+  if (brief.slug_fr === 'paris-luxe-3-jours') return true;
+  const city = brief.destination_city?.toLowerCase() ?? '';
+  return city === 'paris';
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Intro — Paris keeps its hand-tuned copy, the rest get a neutral but
+// destination-aware paragraph driven by brief.themes + key POIs.
+// ───────────────────────────────────────────────────────────────────────────
 function buildIntroFr(brief: ItineraryBrief, hotelNames: readonly string[]): string {
   const hotels =
     hotelNames.length > 0 ? hotelNames.join(', ') : brief.hotel_slugs_target.join(', ');
-  const base = `Trois jours à ${brief.destination_city ?? brief.destination_country} en mode luxe : ce plan Concierge enchaîne les arrondissements avec des timings qui évitent les files, des adresses réservables et des palaces testés sur le terrain. Base recommandée : ${hotels}. Chaque journée associe un quartier, un musée ou une promenade ciblée, et un repère gastronomique. Budget indicatif : 1 500 à 3 000 € par nuit en palace, hors vols et shopping.`;
+  const dest = brief.destination_city ?? brief.destination_country;
+  if (isParisBrief(brief)) {
+    const base = `Trois jours à ${dest} en mode luxe : ce plan Concierge enchaîne les arrondissements avec des timings qui évitent les files, des adresses réservables et des palaces testés sur le terrain. Base recommandée : ${hotels}. Chaque journée associe un quartier, un musée ou une promenade ciblée, et un repère gastronomique. Budget indicatif : 1 500 à 3 000 € par nuit en palace, hors vols et shopping.`;
+    return padToMinWords(
+      base,
+      [
+        "Réservez les créneaux musées 72 h à l'avance et demandez au concierge de l'hôtel les accès coulisses quand ils existent.",
+        'Privilégiez les déplacements à pied entre le 1er, le 8e et le 7e : les trajets restent sous vingt minutes sans taxi.',
+      ],
+      120,
+    );
+  }
+  const themesLabel = brief.themes.length > 0 ? brief.themes.join(' / ') : 'luxe';
+  const base = `${brief.duration_min_days} jours à ${dest} en mode ${themesLabel} : ce plan Concierge enchaîne les étapes avec des timings éprouvés, des adresses réservables et des hôtels d'exception sélectionnés sur place. Base recommandée : ${hotels}. Chaque journée associe un secteur, des points d'intérêt ciblés et un repère gastronomique pour préserver l'équilibre exploration / repos.`;
   return padToMinWords(
     base,
     [
-      "Réservez les créneaux musées 72 h à l'avance et demandez au concierge de l'hôtel les accès coulisses quand ils existent.",
-      'Privilégiez les déplacements à pied entre le 1er, le 8e et le 7e : les trajets restent sous vingt minutes sans taxi.',
+      "Demandez au concierge de l'hôtel les accès privés et les créneaux peu fréquentés des sites majeurs — beaucoup ne sont pas réservables en ligne.",
+      `Anticipez les transferts entre étapes : sur ${brief.duration_min_days} jours, chaque heure de logistique se paie sur le temps d'expérience.`,
+      "Gardez une demi-journée tampon pour ajuster en fonction de la météo, des fermetures saisonnières ou d'une découverte sur place.",
     ],
     120,
   );
@@ -19,71 +58,128 @@ function buildIntroFr(brief: ItineraryBrief, hotelNames: readonly string[]): str
 function buildIntroEn(brief: ItineraryBrief, hotelNames: readonly string[]): string {
   const hotels =
     hotelNames.length > 0 ? hotelNames.join(', ') : brief.hotel_slugs_target.join(', ');
-  const base = `Three days in ${brief.destination_city ?? brief.destination_country} at a luxury pace: this Concierge plan strings together districts with queue-avoiding timings, bookable addresses, and field-tested palaces. Recommended bases: ${hotels}. Each day pairs a neighbourhood, a focused museum or walk, and a gastronomic anchor. Indicative budget: €1,500–3,000 per palace night, excluding flights and shopping.`;
+  const dest = brief.destination_city ?? brief.destination_country;
+  if (isParisBrief(brief)) {
+    const base = `Three days in ${dest} at a luxury pace: this Concierge plan strings together districts with queue-avoiding timings, bookable addresses, and field-tested palaces. Recommended bases: ${hotels}. Each day pairs a neighbourhood, a focused museum or walk, and a gastronomic anchor. Indicative budget: €1,500–3,000 per palace night, excluding flights and shopping.`;
+    return padToMinWords(
+      base,
+      [
+        'Book museum slots 72 hours ahead and ask the hotel concierge for backstage access when available.',
+        'Walk between the 1st, 8th, and 7th arrondissements — most legs stay under twenty minutes without a taxi.',
+      ],
+      120,
+    );
+  }
+  const themesLabel = brief.themes.length > 0 ? brief.themes.join(' / ') : 'luxury';
+  const base = `${brief.duration_min_days} days in ${dest} on a ${themesLabel} brief: this Concierge plan threads each leg with proven timings, bookable addresses, and a small set of trusted luxury bases. Recommended properties: ${hotels}. Every day pairs one sector, a focused set of stops, and a gastronomic anchor so exploration and rest stay balanced.`;
   return padToMinWords(
     base,
     [
-      'Book museum slots 72 hours ahead and ask the hotel concierge for backstage access when available.',
-      'Walk between the 1st, 8th, and 7th arrondissements — most legs stay under twenty minutes without a taxi.',
+      'Ask the hotel concierge for private access and quieter time-slots at marquee sites — many are not reservable online and the desk unlocks them within a day.',
+      `Plan transfers between stages: over ${brief.duration_min_days} days every logistics hour is paid for in lost experience time, so consolidate transfers around meals.`,
+      'Hold half a day in reserve to adjust for weather, seasonal closures, or a discovery you would otherwise rush past on the published agenda.',
     ],
     120,
   );
 }
 
+// ───────────────────────────────────────────────────────────────────────────
+// Step bodies — same split. Paris fillers stay (cobbles, arcades, etc.).
+// Generic fillers stay neutral and reuse brief data instead.
+// ───────────────────────────────────────────────────────────────────────────
 function stepBodyFr(
-  stepAngle: string,
-  city: string,
-  pois: readonly string[],
+  brief: ItineraryBrief,
+  step: ItineraryBriefStep,
   hotelName: string | null,
-  conciergeSecret: string | undefined,
 ): string {
-  const poiList = pois.join(', ');
-  const hotelLine =
-    hotelName !== null
-      ? `Nuit au ${hotelName} : demandez au concierge l\'horaire exact du petit-déjeuner jardin pour éviter la ruée Place.`
-      : 'Choisissez un palace du 1er ou 8e arrondissement pour limiter les transferts.';
+  const poiList = step.key_pois.join(', ');
+  const conciergeSecret = brief.concierge_secret_hint;
   const secret =
     conciergeSecret !== undefined && conciergeSecret.length > 0
       ? ` Mon conseil : ${conciergeSecret.split('.')[0] ?? conciergeSecret}.`
       : '';
-  const base = `${stepAngle}. Secteur : ${city}. Points clés : ${poiList}. ${hotelLine} Prévoyez des chaussures confortables : les pavés parisiens usent les semelles fines en fin de journée.${secret}`;
+  if (isParisBrief(brief)) {
+    const hotelLine =
+      hotelName !== null
+        ? `Nuit au ${hotelName} : demandez au concierge l\'horaire exact du petit-déjeuner jardin pour éviter la ruée Place.`
+        : 'Choisissez un palace du 1er ou 8e arrondissement pour limiter les transferts.';
+    const base = `${step.step_angle}. Secteur : ${step.city}. Points clés : ${poiList}. ${hotelLine} Prévoyez des chaussures confortables : les pavés parisiens usent les semelles fines en fin de journée.${secret}`;
+    return padToMinWords(
+      base,
+      [
+        'Anticipez un créneau déjeuner 12 h 30–13 h 30 pour profiter des salles calmes avant la reprise des groupes.',
+        'Gardez une veste légère : les galeries couvertes chauffent, les quais de Seine restent venteux au coucher du soleil.',
+        'Photographiez les façades tôt le matin : la lumière rasante sur la pierre parisienne vaut mieux que le flash de midi.',
+      ],
+      150,
+    );
+  }
+  const hotelLine =
+    hotelName !== null
+      ? `Nuit au ${hotelName} : demandez au concierge les horaires des services peu fréquentés (petit-déjeuner tôt, spa avant 8 h) pour profiter des espaces vides.`
+      : `Privilégiez un hôtel central à ${step.city} pour limiter les transferts et gagner du temps sur les sites majeurs.`;
+  const base = `${step.step_angle}. Secteur : ${step.city}. Points clés : ${poiList}. ${hotelLine} Prévoyez des chaussures confortables et adaptées à la météo locale, et gardez une marge horaire entre chaque visite pour absorber les imprévus.${secret}`;
   return padToMinWords(
     base,
     [
-      'Anticipez un créneau déjeuner 12 h 30–13 h 30 pour profiter des salles calmes avant la reprise des groupes.',
-      'Gardez une veste légère : les galeries couvertes chauffent, les quais de Seine restent venteux au coucher du soleil.',
-      'Photographiez les façades tôt le matin : la lumière rasante sur la pierre parisienne vaut mieux que le flash de midi.',
+      `Anticipez les créneaux les moins fréquentés sur les sites incontournables de ${step.city} — souvent tôt le matin ou en fin d'après-midi juste avant la fermeture.`,
+      "Réservez les déjeuners gastronomiques au moins trois semaines à l'avance ; les chefs étoilés limitent volontairement les couverts en haute saison.",
+      "Gardez une demi-journée libre sur la durée totale pour ajuster en fonction de la météo, des fermetures saisonnières ou d'une recommandation locale.",
+      "Demandez au concierge les contacts privilégiés pour les visites privées : musées, caves, ateliers d'artisans sont régulièrement accessibles sans file via leurs partenaires.",
     ],
     150,
   );
 }
 
 function stepBodyEn(
-  stepAngle: string,
-  city: string,
-  pois: readonly string[],
+  brief: ItineraryBrief,
+  step: ItineraryBriefStep,
   hotelName: string | null,
 ): string {
-  const poiList = pois.join(', ');
+  const poiList = step.key_pois.join(', ');
+  if (isParisBrief(brief)) {
+    const hotelLine =
+      hotelName !== null
+        ? `Overnight at ${hotelName}: ask the concierge for the exact garden breakfast window to skip the Place-side rush.`
+        : 'Pick a palace in the 1st or 8th arrondissement to keep transfers short.';
+    const base = `${step.step_angle}. Area: ${step.city}. Key stops: ${poiList}. ${hotelLine} Wear comfortable shoes — Paris cobbles punish thin soles by late afternoon, especially on the Marais side streets and Place Vendôme paving stones.`;
+    return padToMinWords(
+      base,
+      [
+        'Target lunch between 12:30 and 1:30 pm to enjoy quieter dining rooms before tour groups return from morning museums.',
+        'Carry a light jacket: covered arcades run warm while Seine quays stay breezy at sunset even in summer months.',
+        'Shoot façades early: low morning light on Paris limestone beats harsh midday glare and avoids the noon crowds.',
+        'Reserve your evening table at least three weeks ahead in shoulder season — palace dining rooms fill weeks before peak.',
+        'Tip the bell desk if you want concierge connections beyond your hotel — small Paris luxury circles reward courtesy.',
+        'Block one quiet half-hour mid-afternoon at the hotel bar to plan tomorrow rather than improvising at midnight.',
+      ],
+      150,
+    );
+  }
   const hotelLine =
     hotelName !== null
-      ? `Overnight at ${hotelName}: ask the concierge for the exact garden breakfast window to skip the Place-side rush.`
-      : 'Pick a palace in the 1st or 8th arrondissement to keep transfers short.';
-  const base = `${stepAngle}. Area: ${city}. Key stops: ${poiList}. ${hotelLine} Wear comfortable shoes — Paris cobbles punish thin soles by late afternoon, especially on the Marais side streets and Place Vendôme paving stones.`;
+      ? `Overnight at ${hotelName}: ask the concierge for the quieter service windows (early breakfast, pre-8am spa) to enjoy the property at its emptiest.`
+      : `Pick a centrally located hotel in ${step.city} to keep transfer time low and free up the most experience-rich hours.`;
+  const base = `${step.step_angle}. Area: ${step.city}. Key stops: ${poiList}. ${hotelLine} Wear comfortable shoes adapted to local weather, and keep a fifteen-minute buffer between stops to absorb the unexpected — a slow check-in, a longer queue, a chance encounter worth pausing for.`;
   return padToMinWords(
     base,
     [
-      'Target lunch between 12:30 and 1:30 pm to enjoy quieter dining rooms before tour groups return from morning museums.',
-      'Carry a light jacket: covered arcades run warm while Seine quays stay breezy at sunset even in summer months.',
-      'Shoot façades early: low morning light on Paris limestone beats harsh midday glare and avoids the noon crowds.',
-      'Reserve your evening table at least three weeks ahead in shoulder season — palace dining rooms fill weeks before peak.',
-      'Tip the bell desk if you want concierge connections beyond your hotel — small Paris luxury circles reward courtesy.',
-      'Block one quiet half-hour mid-afternoon at the hotel bar to plan tomorrow rather than improvising at midnight.',
+      `Time your visits to the marquee sites in ${step.city} for the least crowded windows — usually early morning or the last hour before closing.`,
+      'Book starred lunches at least three weeks ahead in shoulder season; top chefs cap covers deliberately and refuse late requests during peak weeks.',
+      'Hold half a day in reserve over the full trip to absorb weather changes, seasonal closures, or a local recommendation worth following.',
+      'Ask the hotel concierge for direct contacts at museums, cellars, or artisan workshops — private visits without queues are often a single phone call away.',
+      'Pack one slightly warmer layer than the forecast suggests: evenings and indoor sites with strong air-conditioning catch even seasoned travellers off-guard.',
+      'Carry small local cash for tipping doormen, drivers, and guides — service standards relax noticeably for courteous, prepared guests.',
     ],
     150,
   );
 }
 
+// ───────────────────────────────────────────────────────────────────────────
+// FAQ — Paris keeps its hand-curated dictionary. Other destinations get a
+// destination-aware fallback that pads to ≥50 words while staying neutral
+// enough not to fabricate facts (the editor will polish via the LLM pass).
+// ───────────────────────────────────────────────────────────────────────────
 const FAQ_ANSWERS_FR: Readonly<Record<string, string>> = {
   'Quelle est la meilleure période pour visiter Paris ?':
     "Avril à juin et septembre à octobre offrent des températures douces et des jardins en fleur sans la chaleur estivale ni la foule juillet-août. Décembre attire pour les vitrines des grands magasins et les tables étoilées moins demandées en semaine. Évitez août si vous visez les restaurants fermés et une ville plus calme. Réservez les palaces dès février pour les ponts de mai, et trois mois à l'avance pour la Fashion Week.",
@@ -130,35 +226,52 @@ const FAQ_ANSWERS_EN: Readonly<Record<string, string>> = {
     "Yes for the Louvre, Musée d'Orsay, and major Grand Palais or Fondation Louis Vuitton temporary shows. Morning slots sell out first, three to four weeks ahead of date. Keep a one-hour buffer — security can add ten minutes even with timed tickets. A palace concierge can often unlock a skip-the-line slot at the last minute when booking direct fails.",
 };
 
+function genericFaqAnswerFr(question: string, brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  const themes = brief.themes.length > 0 ? brief.themes.join(', ') : 'luxe';
+  // Strip the trailing question mark for a clean answer opening.
+  const q = question.replace(/\s*\?\s*$/u, '');
+  const base = `Pour ${dest} (${brief.duration_min_days} jours, profil ${brief.travel_style}, thèmes ${themes}) : ${q.toLowerCase()} relève d'un arbitrage entre saison, disponibilité hôtelière et expériences réservables. Nos concierges recommandent de bloquer les étapes structurantes 8 à 12 semaines à l'avance, puis d'affiner les transferts et les tables une fois la base hôtelière confirmée.`;
+  return padToMinWords(
+    base,
+    [
+      `Vérifiez les fermetures saisonnières spécifiques à ${dest} : musées, restaurants ou stations peuvent observer un jour de repos hebdomadaire qui décale tout le programme si on ne l'anticipe pas.`,
+      `Demandez au concierge de l'hôtel une liste personnalisée d'expériences hors-programme : excursions privées, ateliers d'artisans, dégustations à huis clos sont rarement référencés en ligne.`,
+      'Mis à jour mai 2026.',
+    ],
+    50,
+  );
+}
+
+function genericFaqAnswerEn(question: string, brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  const themes = brief.themes.length > 0 ? brief.themes.join(', ') : 'luxury';
+  const q = question.replace(/\s*\?\s*$/u, '');
+  const base = `For ${dest} (${brief.duration_min_days} days, ${brief.travel_style} profile, themes ${themes}): ${q.toLowerCase()} is a trade-off between season, hotel availability, and bookable experiences. Our concierges recommend locking in the structuring stages 8 to 12 weeks ahead, then refining transfers and tables once the hotel base is confirmed.`;
+  return padToMinWords(
+    base,
+    [
+      `Check ${dest}-specific seasonal closures: museums, restaurants, or resorts may observe a weekly rest day that shifts the whole programme if overlooked.`,
+      `Ask the hotel concierge for a personalised list of off-programme experiences: private excursions, artisan workshops, and discreet tastings rarely show up in online directories.`,
+      'Updated May 2026.',
+    ],
+    50,
+  );
+}
+
 function faqAnswerFr(question: string, brief: ItineraryBrief): string {
   const direct = FAQ_ANSWERS_FR[question];
   if (direct !== undefined) return direct;
-  return padToMinWords(
-    `Pour ${brief.destination_city ?? brief.destination_country}, ${question.replace('?', '')} : nos concierges recommandent de réserver tôt et d\'aligner les horaires musées avec les créneaux calmes.`,
-    ['Mis à jour mai 2026.'],
-    50,
-  );
+  return genericFaqAnswerFr(question, brief);
 }
 
 function faqAnswerEn(question: string, brief: ItineraryBrief): string {
   const direct = FAQ_ANSWERS_EN[question];
   if (direct !== undefined) return direct;
-  return padToMinWords(
-    `For ${brief.destination_city ?? brief.destination_country}, ${question.replace('?', '')}: book early and align museum slots with quieter windows.`,
-    ['Updated May 2026.'],
-    50,
-  );
+  return genericFaqAnswerEn(question, brief);
 }
 
-function buildAeoAnswerEn(brief: ItineraryBrief, hotelNames: readonly string[]): string {
-  const palaces =
-    hotelNames.length > 0 ? hotelNames.slice(0, 3).join(', ') : 'Ritz, Plaza Athénée, Crillon';
-  const dest = brief.destination_city ?? brief.destination_country;
-  const base = `For ${brief.duration_min_days} days in ${dest}, your Concierge plan: Day 1 around Place Vendôme and the Louvre Denon wing, Day 2 along Avenue Montaigne and the Grand Palais, Day 3 across Musée d'Orsay, Saint-Germain and the Eiffel Tower at sunset. Recommended palace bases: ${palaces}. Best months: April-June or September-October. Updated May 2026.`;
-  return padToMinWords(base, [], 40);
-}
-
-function faqQuestionEn(frQuestion: string): string {
+function faqQuestionEn(frQuestion: string, brief: ItineraryBrief): string {
   const map: Readonly<Record<string, string>> = {
     'Quelle est la meilleure période pour visiter Paris ?': 'What is the best time to visit Paris?',
     'Combien de jours faut-il pour visiter Paris ?': 'How many days do you need in Paris?',
@@ -174,12 +287,172 @@ function faqQuestionEn(frQuestion: string): string {
       'Which luxury boutiques are unmissable in Paris?',
     "Faut-il réserver les musées à l'avance à Paris ?": 'Should you book Paris museums in advance?',
   };
-  return map[frQuestion] ?? frQuestion;
+  const direct = map[frQuestion];
+  if (direct !== undefined) return direct;
+  // Generic EN fallback: take the FR question, lowercase the first letter,
+  // prefix with a destination-aware "About …, …" wrapper. The editor
+  // refines later in the LLM pass; this keeps the FAQPage JSON-LD valid.
+  const dest = brief.destination_city ?? brief.destination_country;
+  return `${frQuestion.replace(/\?\s*$/u, '').trim()} (about ${dest})?`;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// AEO answer EN — Paris keeps its hand-curated sentence. Other briefs
+// compose a structured EN summary from the brief's own steps_outline so
+// the wording remains factual (no fabricated landmarks).
+// ───────────────────────────────────────────────────────────────────────────
+function buildAeoAnswerEn(brief: ItineraryBrief, hotelNames: readonly string[]): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  if (isParisBrief(brief)) {
+    const palaces =
+      hotelNames.length > 0 ? hotelNames.slice(0, 3).join(', ') : 'Ritz, Plaza Athénée, Crillon';
+    const base = `For ${brief.duration_min_days} days in ${dest}, your Concierge plan: Day 1 around Place Vendôme and the Louvre Denon wing, Day 2 along Avenue Montaigne and the Grand Palais, Day 3 across Musée d'Orsay, Saint-Germain and the Eiffel Tower at sunset. Recommended palace bases: ${palaces}. Best months: April-June or September-October. Updated May 2026.`;
+    return padToMinWords(base, [], 40);
+  }
+  const bases =
+    hotelNames.length > 0 ? hotelNames.slice(0, 3).join(', ') : brief.hotel_slugs_target.join(', ');
+  const legs = brief.steps_outline
+    .map((s) => `${s.city} (${s.duration_days} day${s.duration_days > 1 ? 's' : ''})`)
+    .join(', ');
+  const seasonLabel: Readonly<Record<string, string>> = {
+    printemps: 'spring',
+    ete: 'summer',
+    automne: 'autumn',
+    hiver: 'winter',
+    'toute-saison': 'all seasons',
+  };
+  const season = seasonLabel[brief.season] ?? brief.season;
+  const base = `For ${brief.duration_min_days} days in ${dest}, your Concierge plan covers ${legs}. Recommended luxury bases: ${bases}. Profile: ${brief.travel_style}. Best window: ${season}. Updated May 2026.`;
+  return padToMinWords(
+    base,
+    [
+      'Book the structuring nights and the marquee dining slots 8–12 weeks ahead; transfers and side-visits stay flexible.',
+      'Ask the hotel concierge for the private experiences not listed online — they unlock the difference between a good itinerary and a memorable one.',
+    ],
+    40,
+  );
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// meta_desc_en — hard constraint 140-160 chars (validator). We build a few
+// templated candidates ordered from rich to compact and pick the first one
+// that fits, then pad/trim as a last resort. The destination string can be
+// very short ("Lyon") or very long ("Atolls Noonu, Baa, Nord Malé"), so we
+// can't just hard-code one sentence.
+// ───────────────────────────────────────────────────────────────────────────
+const META_DESC_MIN = 140;
+const META_DESC_MAX = 160;
+
+function trimToWordBoundary(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  if (lastSpace > max - 25) {
+    return `${cut.slice(0, lastSpace).replace(/[,;:.\s]+$/u, '')}.`;
+  }
+  return `${cut.replace(/[,;:.\s]+$/u, '')}.`;
+}
+
+function buildMetaDescFr(brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  const hint = brief.meta_desc_fr_hint;
+  // The editor sometimes hands us a hint that overshoots the 160-char
+  // SERP ceiling. We trim at a word boundary rather than silently
+  // shipping a truncated mid-word string. When the hint is too short,
+  // we append a neutral suffix to climb back into the 140+ window.
+  if (hint !== undefined) {
+    if (hint.length >= META_DESC_MIN && hint.length <= META_DESC_MAX) return hint;
+    if (hint.length > META_DESC_MAX) return trimToWordBoundary(hint, META_DESC_MAX);
+    // Too short: pad with a neutral filler that suits any destination.
+    const suffix = ' Hôtels réservables et timings vérifiés.';
+    let padded = hint;
+    if (padded.length + suffix.length <= META_DESC_MAX) padded = `${padded}${suffix}`;
+    return padded;
+  }
+  // No hint at all — synthesise from brief data.
+  const themes = brief.themes.length > 0 ? brief.themes.join(', ') : 'luxe';
+  const synth = `Itinéraire ${brief.duration_min_days} jours à ${dest} (${themes}). Hôtels d'exception, étapes Concierge, tables étoilées et adresses vérifiées.`;
+  if (synth.length >= META_DESC_MIN && synth.length <= META_DESC_MAX) return synth;
+  if (synth.length > META_DESC_MAX) return trimToWordBoundary(synth, META_DESC_MAX);
+  return `${synth} MyConciergeHotel.`;
+}
+
+function buildMetaDescEn(brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  const themes = brief.themes.length > 0 ? brief.themes.join(', ') : 'luxury';
+  if (isParisBrief(brief)) {
+    return `A ${brief.duration_min_days}-day luxury ${dest} route: Ritz, Plaza Athénée and Crillon bases, Louvre, Left Bank, starred dining. Concierge timings and bookable hotels.`;
+  }
+  const candidates = [
+    `A ${brief.duration_min_days}-day ${brief.travel_style} itinerary across ${dest}. Concierge timings, luxury hotels, ${themes} highlights, and verified bookable addresses curated for MyConciergeHotel.`,
+    `A ${brief.duration_min_days}-day ${brief.travel_style} itinerary in ${dest}. Concierge timings, luxury hotels, ${themes} highlights, and verified bookable addresses curated for MyConciergeHotel.`,
+    `A ${brief.duration_min_days}-day ${brief.travel_style} itinerary in ${dest}. Concierge timings, luxury hotels, ${themes} highlights, and verified bookable addresses.`,
+    `${brief.duration_min_days}-day ${brief.travel_style} itinerary in ${dest}. Concierge timings, luxury hotels, ${themes} highlights, verified bookable addresses by MyConciergeHotel.`,
+    `${brief.duration_min_days}-day ${brief.travel_style} itinerary in ${dest}. Concierge timings, ${themes} highlights, verified addresses by MyConciergeHotel.`,
+    `${brief.duration_min_days}-day ${brief.travel_style} itinerary in ${dest}. ${themes} picks and Concierge timings.`,
+  ];
+  for (const candidate of candidates) {
+    if (candidate.length >= META_DESC_MIN && candidate.length <= META_DESC_MAX) {
+      return candidate;
+    }
+  }
+  // Last resort: take the longest candidate and trim to 160 at a word boundary.
+  // We accept that the result may still be marginally short; the validator
+  // surfaces it as an issue and the editor pads in a follow-up pass.
+  const longest = candidates.reduce((a, b) => (a.length > b.length ? a : b));
+  if (longest.length > META_DESC_MAX) return trimToWordBoundary(longest, META_DESC_MAX);
+  // Pad with neutral suffix until we hit 140 chars (without exceeding 160).
+  let padded = longest;
+  const suffix = ' Curated by our luxury travel experts on the ground.';
+  while (padded.length < META_DESC_MIN && padded.length + suffix.length <= META_DESC_MAX) {
+    padded = `${padded}${suffix}`;
+  }
+  return padded.length > META_DESC_MAX ? trimToWordBoundary(padded, META_DESC_MAX) : padded;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Title generators — Paris uses its hand-tuned title, others fall back to
+// the brief's meta_title_fr_hint or a neutral pattern.
+// ───────────────────────────────────────────────────────────────────────────
+function titleSuffix(brief: ItineraryBrief): string {
+  const primaryTheme = brief.themes[0];
+  const styleLabel = brief.travel_style;
+  // De-dupe when the first theme already matches the travel style — e.g.
+  // a `luxe` brief tagged with the `luxe` theme would otherwise produce
+  // `… — luxe luxe`.
+  if (primaryTheme !== undefined && primaryTheme !== styleLabel) {
+    return `${primaryTheme} ${styleLabel}`;
+  }
+  return styleLabel;
+}
+
+function buildTitleFr(brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  if (isParisBrief(brief)) {
+    return `Itinéraire ${dest} ${brief.duration_min_days} jours — luxe`;
+  }
+  return `Itinéraire ${dest} ${brief.duration_min_days} jours — ${titleSuffix(brief)}`;
+}
+
+function buildTitleEn(brief: ItineraryBrief): string {
+  const dest = brief.destination_city ?? brief.destination_country;
+  if (isParisBrief(brief)) {
+    return `${dest} ${brief.duration_min_days}-day luxury itinerary`;
+  }
+  return `${dest} ${brief.duration_min_days}-day ${titleSuffix(brief)} itinerary`;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Main composer.
+// ───────────────────────────────────────────────────────────────────────────
+export interface ComposeOptions {
+  readonly status?: 'draft' | 'published';
 }
 
 export function composeItineraryFromBrief(
   brief: ItineraryBrief,
   hotels: readonly ResolvedHotel[],
+  options: ComposeOptions = {},
 ): GeneratedItinerary {
   const hotelBySlug = new Map(hotels.map((h) => [h.slug, h] as const));
 
@@ -202,14 +475,8 @@ export function composeItineraryFromBrief(
       step: step.step,
       title_fr: step.title_fr_hint,
       title_en: step.title_en_hint,
-      body_fr: stepBodyFr(
-        step.step_angle,
-        step.city,
-        step.key_pois,
-        hotel?.name ?? null,
-        brief.concierge_secret_hint,
-      ),
-      body_en: stepBodyEn(step.step_angle, step.city, step.key_pois, hotel?.name ?? null),
+      body_fr: stepBodyFr(brief, step, hotel?.name ?? null),
+      body_en: stepBodyEn(brief, step, hotel?.name ?? null),
       hotel_id: hotel?.id ?? null,
       duration_days: step.duration_days,
       city: step.city,
@@ -220,35 +487,40 @@ export function composeItineraryFromBrief(
   const faq_content = brief.faq_questions_to_cover.map((q_fr) => ({
     q_fr,
     a_fr: faqAnswerFr(q_fr, brief),
-    q_en: faqQuestionEn(q_fr),
+    q_en: faqQuestionEn(q_fr, brief),
     a_en: faqAnswerEn(q_fr, brief),
   }));
 
   const hotelNames = hotels.map((h) => h.name);
   const slugEn = brief.slug_en ?? brief.slug_fr;
+  const dest = brief.destination_city ?? brief.destination_country;
 
   return {
     slug_fr: brief.slug_fr,
     slug_en: slugEn,
-    title_fr: `Itinéraire ${brief.destination_city ?? brief.destination_country} ${brief.duration_min_days} jours — luxe`,
-    title_en: `${brief.destination_city ?? brief.destination_country} ${brief.duration_min_days}-day luxury itinerary`,
+    title_fr: buildTitleFr(brief),
+    title_en: buildTitleEn(brief),
     meta_title_fr:
       brief.meta_title_fr_hint ??
-      `Itinéraire ${brief.destination_city ?? brief.destination_country} ${brief.duration_min_days} jours | MyConciergeHotel`,
-    meta_title_en: `Itinerary ${brief.destination_city ?? brief.destination_country} ${brief.duration_min_days} days | MyConciergeHotel`,
-    meta_desc_fr:
-      brief.meta_desc_fr_hint ??
-      `Itinéraire ${brief.duration_min_days} jours à ${brief.destination_city ?? brief.destination_country} avec palaces et étapes Concierge.`,
-    meta_desc_en: `A ${brief.duration_min_days}-day luxury ${brief.destination_city ?? brief.destination_country} route: Ritz, Plaza Athénée and Crillon bases, Louvre, Left Bank, starred dining. Concierge timings and bookable hotels.`,
+      `Itinéraire ${dest} ${brief.duration_min_days} jours | MyConciergeHotel`,
+    meta_title_en: `Itinerary ${dest} ${brief.duration_min_days} days | MyConciergeHotel`,
+    meta_desc_fr: buildMetaDescFr(brief),
+    meta_desc_en: buildMetaDescEn(brief),
     intro_fr: buildIntroFr(brief, hotelNames),
     intro_en: buildIntroEn(brief, hotelNames),
     aeo_question_fr:
       brief.aeo_question_fr_hint ??
-      `Quel est le meilleur itinéraire pour ${brief.destination_city ?? brief.destination_country} en ${brief.duration_min_days} jours ?`,
-    aeo_answer_fr:
+      `Quel est le meilleur itinéraire pour ${dest} en ${brief.duration_min_days} jours ?`,
+    aeo_answer_fr: padToMinWords(
       brief.aeo_answer_fr_hint ??
-      `Itinéraire ${brief.duration_min_days} jours à ${brief.destination_city ?? brief.destination_country}. Mis à jour mai 2026.`,
-    aeo_question_en: `What is the best ${brief.duration_min_days}-day itinerary for ${brief.destination_city ?? brief.destination_country}?`,
+        `Itinéraire ${brief.duration_min_days} jours à ${dest}. Mis à jour mai 2026.`,
+      [
+        `Réservez les étapes structurantes 8 à 12 semaines à l'avance et affinez les expériences une fois la base hôtelière confirmée.`,
+        'Mis à jour mai 2026.',
+      ],
+      40,
+    ),
+    aeo_question_en: `What is the best ${brief.duration_min_days}-day itinerary for ${dest}?`,
     aeo_answer_en: buildAeoAnswerEn(brief, hotelNames),
     country_code: countryCodeFromLabel(brief.destination_country),
     destination_region: brief.destination_region ?? null,
@@ -265,7 +537,7 @@ export function composeItineraryFromBrief(
     related_itinerary_slugs: brief.related_itinerary_slugs_target,
     related_ranking_ids: [],
     priority: brief.priority,
-    status: 'published',
+    status: options.status ?? 'published',
   };
 }
 
