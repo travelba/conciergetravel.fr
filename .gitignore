@@ -110,3 +110,7 @@ scripts/editorial-pilot/audit-buckets.json
 scripts/editorial-pilot/audit-guides-en-gaps.json
 scripts/editorial-pilot/output-test-*/
 
+
+# Local commit-message scratch files
+.git-msg.txt
+commit-msg.tmp
