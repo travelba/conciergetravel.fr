@@ -16,11 +16,19 @@
  *   - `--slug=<brief-slug>` runs a single brief instead of the whole batch.
  *   - `--briefs-dir=<path>` / `--out-dir=<path>` override defaults.
  *
+ * Hotel resolution:
+ *   - `--resolve-hotels` reads the static `hotel-map.generated.ts` snapshot
+ *     and injects real `ResolvedHotel[]` (with UUIDs) into the composer.
+ *     Without this flag, the composer receives an empty hotel array and
+ *     the generated SQL ends up with `hotel_ids = '{}'::uuid[]` and
+ *     `sections[].hotel_id: null` (still valid, just unlinked).
+ *
  * Usage:
- *   tsx src/itineraries/run-all-briefs.ts                     # templated batch
- *   tsx src/itineraries/run-all-briefs.ts --llm                # LLM batch
+ *   tsx src/itineraries/run-all-briefs.ts                                 # templated, no hotels
+ *   tsx src/itineraries/run-all-briefs.ts --llm                            # LLM, no hotels
+ *   tsx src/itineraries/run-all-briefs.ts --llm --resolve-hotels           # LLM, real UUIDs
  *   tsx src/itineraries/run-all-briefs.ts --llm --slug=reims-champagne-week-end
- *   pnpm itineraries:batch [-- --llm] [--slug=<slug>]
+ *   pnpm itineraries:batch [-- --llm] [--resolve-hotels] [--slug=<slug>]
  */
 import { readdirSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -30,8 +38,9 @@ import { composeItineraryFromBrief } from './compose-from-brief.js';
 import { composeItineraryWithLlm } from './compose-from-brief-llm.js';
 import { loadEnv } from '../env.js';
 import { loadItineraryBrief } from './load-brief.js';
+import { resolveHotelsFromSnapshot } from './resolve-hotels-from-snapshot.js';
 import { itineraryToSql } from './to-sql.js';
-import type { GeneratedItinerary } from './types.js';
+import type { GeneratedItinerary, ResolvedHotel } from './types.js';
 import { validateItinerary } from './validate-itinerary.js';
 
 const PARIS_SLUG = 'paris-luxe-3-jours';
@@ -55,21 +64,25 @@ interface ProcessOptions {
   readonly outDir: string;
   readonly useLlm: boolean;
   readonly publish: boolean;
+  readonly resolveHotels: boolean;
 }
 
 async function processBrief(slug: string, opts: ProcessOptions): Promise<RunResult> {
   try {
     const brief = await loadItineraryBrief(slug);
     const composeOpts = { status: opts.publish ? 'published' : 'draft' } as const;
+    const hotels: readonly ResolvedHotel[] = opts.resolveHotels
+      ? resolveHotelsFromSnapshot(brief)
+      : [];
     let composed: GeneratedItinerary;
     if (opts.useLlm) {
       // Load env lazily per call so a missing OPENAI_API_KEY surfaces a
       // clean error message instead of an unhelpful TypeError at startup
       // when --llm is not used.
       const env = loadEnv();
-      composed = await composeItineraryWithLlm(brief, [], env, composeOpts);
+      composed = await composeItineraryWithLlm(brief, hotels, env, composeOpts);
     } else {
-      composed = composeItineraryFromBrief(brief, [], composeOpts);
+      composed = composeItineraryFromBrief(brief, hotels, composeOpts);
     }
 
     const validation = validateItinerary(composed);
@@ -104,6 +117,7 @@ async function main(): Promise<void> {
   const slugFilter = parseFlag(args, 'slug');
   const useLlm = args.includes('--llm');
   const publish = args.includes('--publish');
+  const resolveHotels = args.includes('--resolve-hotels');
 
   if (!existsSync(briefsDir)) {
     console.error(`Briefs dir not found: ${briefsDir}`);
@@ -128,15 +142,16 @@ async function main(): Promise<void> {
 
   const modeLabel = useLlm ? 'LLM (OpenAI)' : 'templated';
   const statusLabel = publish ? 'published' : 'draft';
+  const hotelsLabel = resolveHotels ? 'on (snapshot)' : 'off';
   console.error(
-    `Found ${slugs.length} brief(s) to process — mode=${modeLabel}, status=${statusLabel}.`,
+    `Found ${slugs.length} brief(s) to process — mode=${modeLabel}, status=${statusLabel}, hotel resolution=${hotelsLabel}.`,
   );
 
   const results: RunResult[] = [];
   for (const slug of slugs) {
     process.stderr.write(`  · ${slug.padEnd(45)} `);
     const t0 = Date.now();
-    const r = await processBrief(slug, { outDir, useLlm, publish });
+    const r = await processBrief(slug, { outDir, useLlm, publish, resolveHotels });
     const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     results.push(r);
     if (r.status === 'ok') {
