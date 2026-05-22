@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { LEGACY_EN_PREFIX_REDIRECTS, matchLegacyEnRedirect } from './i18n/legacy-en-redirects';
 
 /**
- * The redirect logic itself is wired into `middleware.ts` ahead of the
+ * The redirect logic itself is wired into `proxy.ts` ahead of the
  * next-intl middleware (see comment "// 0. Legacy EN URL redirects").
  * This file exercises the pure `matchLegacyEnRedirect` helper that
  * decides whether a redirect applies — the integration test (request
- * → NextResponse.redirect) would require booting Next.js' Edge runtime
+ * → NextResponse.redirect) would require booting Next.js' Node runtime
  * with `@supabase/ssr` mocked, which is significantly more brittle
- * than asserting on the table the middleware reads.
+ * than asserting on the table the proxy reads.
  */
 describe('matchLegacyEnRedirect', () => {
   it('redirects bare /en/recherche to /en/search', () => {

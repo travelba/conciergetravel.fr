@@ -1,4 +1,4 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components';
+import { Body, Container, Head, Heading, Html, Preview, Text } from 'react-email';
 import type { JSX, ReactElement } from 'react';
 
 export interface EmailRequestOpsProps {

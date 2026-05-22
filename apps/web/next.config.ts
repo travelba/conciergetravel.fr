@@ -29,10 +29,10 @@ const nextConfig: NextConfig = {
     '@mch/db',
     '@mch/integrations',
   ],
-  // Allow NodeNext-style `.js` import specifiers in TS sources from
-  // workspace packages (e.g. `export * from './client.js'`). Webpack
-  // doesn't do the TS→JS extension swap by default; this teaches it to
-  // try `.ts` / `.tsx` first when it sees a `.js` request.
+  // Webpack fallback for `next build --webpack` / `next dev --webpack`.
+  // Turbopack (the default since Next 16) resolves `./foo.js` -> `./foo.ts`
+  // natively for `transpilePackages` sources, so this block is only consulted
+  // when somebody opts back into the legacy webpack bundler.
   webpack: (config) => {
     config.resolve = config.resolve ?? {};
     config.resolve.extensionAlias = {
@@ -133,7 +133,7 @@ const nextConfig: NextConfig = {
  *
  * `tunnelRoute: '/monitoring'` routes browser beacons through our origin to
  * bypass adblockers — the matching path is already excluded from the
- * `middleware.ts` matcher.
+ * `proxy.ts` matcher.
  *
  * `silent: !CI` keeps local builds quiet; CI gets full upload logs. The auth
  * token is optional: when missing (CI smoke build, dev) no upload happens and

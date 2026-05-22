@@ -9,7 +9,21 @@ const intlMiddleware = createMiddleware(routing);
 
 const IS_DEV = process.env['NODE_ENV'] !== 'production';
 
-export async function middleware(request: NextRequest): Promise<NextResponse> {
+/**
+ * Network-boundary proxy. Formerly `middleware`/`middleware.ts` in
+ * Next.js 15; Next.js 16 renamed the convention to `proxy`/`proxy.ts`
+ * to clarify it as a thin network gateway (no heavy app logic).
+ *
+ * Pipeline:
+ *   0. Legacy `/en/<old-fr-slug>` -> canonical `/en/<localised-slug>` 301
+ *   1. Per-request CSP nonce
+ *   1b. Expose pathname to RSCs via `x-pathname`
+ *   2. next-intl routing
+ *   3. Supabase session refresh
+ *   4. Security headers (CSP)
+ *   5. Agent-skills discovery Link header
+ */
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   // 0. Legacy EN URL redirects (i18n V2 — Phase 2).
   //    Before Phase 2 the FR slugs (`/en/recherche`, `/en/compte`,
   //    `/en/reservation/...`, `/en/cgv`, …) were served under the

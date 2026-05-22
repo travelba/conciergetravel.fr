@@ -28,7 +28,11 @@ const REPO_ROOT = resolve(__filename, '..', '..', '..');
 const SKILLS_DIR = join(REPO_ROOT, '.cursor', 'skills');
 const README_PATH = join(SKILLS_DIR, 'README.md');
 
-const MAX_LINES = 500;
+// Soft cap: skills above this length are flagged for refactor. Dense
+// runbook-style skills (multi-rule LLM pipelines, multi-source content
+// enrichment) routinely exceed 500 lines and capitalise weeks of work;
+// 700 is a saner ceiling. Anything above 700 is a strong refactor signal.
+const MAX_LINES = 700;
 const REQUIRED_FRONTMATTER_KEYS = ['name', 'description'];
 const REQUIRED_SECTIONS = ['## Triggers', '## References'];
 

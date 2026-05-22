@@ -116,3 +116,12 @@ docs/
 
 - CDC v3.0 §15.
 - All other skills (each may add a section to its corresponding integration / module doc).
+
+### Related skills
+
+- `product-architecture` — `docs/01-architecture.md` is its canonical surface.
+- `cicd-release-management` — `docs/07-deployment.md` is its canonical surface.
+- `security-engineering` — `docs/09-checklists/security.md` mirrors §11.
+- `seo-technical` and `geo-llm-optimization` — `docs/04-seo-geo-aeo.md` is shared.
+- `api-integration` — every integration must own a doc under `docs/03-integrations/`.
+- `amadeus-gds`, `little-hotelier`, `competitive-pricing-comparison`, `email-workflow-automation`, `search-engineering`, `observability-monitoring`, `redis-caching` — each provides a per-vendor runbook docs file using the template above.

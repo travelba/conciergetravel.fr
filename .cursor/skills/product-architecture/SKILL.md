@@ -61,3 +61,15 @@ Invoke this skill when:
 - Cahier des charges v3.0 §2.2 (rendering matrix), §5 (architecture produit), §11 (security).
 - `docs/01-architecture.md`
 - ADRs: `docs/adr/0001-stack.md`, `docs/adr/0002-monorepo-turborepo.md`
+
+### Related skills
+
+- `domain-driven-design` — pure bounded-contexts inside `packages/domain/`.
+- `nextjs-app-router` — rendering strategy (SSG / ISR / SSR) per route group.
+- `redis-caching` — 3-tier cache enforced for booking API routes.
+- `backoffice-cms` — Payload CMS surface and `revalidateTag`-driven publish flow.
+- `booking-engine` — booking tunnel layer constraints.
+- `loyalty-program` — loyalty layer constraints.
+- `seo-technical` and `geo-llm-optimization` — editorial layer SEO/GEO contracts.
+- `performance-engineering` — Core Web Vitals budget enforcement (LCP/CLS/INP).
+- `cicd-release-management` — release-time invariant checks for the layer boundaries above.

@@ -1,13 +1,4 @@
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Section,
-  Text,
-} from '@react-email/components';
+import { Body, Container, Head, Heading, Html, Preview, Section, Text } from 'react-email';
 import type { JSX } from 'react';
 
 export interface BookingConfirmationGuestProps {

@@ -13,16 +13,14 @@
     "export": "email export --dir ./src/templates --outDir ./dist"
   },
   "dependencies": {
-    "@react-email/components": "^0.0.32",
-    "@react-email/render": "^1.0.4",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-email": "^6.0.0"
   },
   "devDependencies": {
     "@mch/config": "workspace:*",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "react-email": "^3.0.4",
     "typescript": "catalog:"
   }
 }

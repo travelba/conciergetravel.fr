@@ -11,7 +11,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
  *
  * Rendering contract:
  * - Server Component, reads the current pathname from the `x-pathname`
- *   request header (set by `middleware.ts`).
+ *   request header (set by `proxy.ts`).
  * - Renders **nothing** on the home page (`/` or `/<locale>`).
  * - On every other page, emits a sober `<nav aria-label="Fil d'ariane">`
  *   with up to 3 levels: Home → (Section) → Current.
@@ -43,7 +43,7 @@ export async function Breadcrumb(): Promise<ReactElement | null> {
 
   // Strip the leading `/<locale>` prefix to get the bare path. For
   // the default locale (fr) next-intl doesn't add the prefix to the
-  // URL but the middleware header still uses the raw URL — we handle
+  // URL but the proxy header still uses the raw URL — we handle
   // both shapes.
   const localePrefix = `/${locale}`;
   const bare =

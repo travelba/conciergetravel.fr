@@ -77,3 +77,13 @@ export const lockOffer = (
 - Cahier des charges v3.0 §4 (data model), §7 (booking flow), §8 (loyalty).
 - Eric Evans / Vaughn Vernon DDD canon — adapted to TypeScript.
 - `docs/01-architecture.md`
+
+### Related skills
+
+- `product-architecture` — hexagonal layering, ports, monorepo boundaries that this skill operationalises.
+- `booking-engine` — booking aggregate / state machine concrete implementation.
+- `loyalty-program` — tier / benefits domain layer.
+- `competitive-pricing-comparison` — pricing comparator domain shape.
+- `typescript-strict` — branded types, `Result<T, E>`, exhaustive unions enforced at the type level.
+- `typescript-strict-zod-interop` — Zod parsers at the integration boundary, brand carry-over into domain types.
+- `test-strategy` — Vitest unit tests collocated with pure domain modules.
