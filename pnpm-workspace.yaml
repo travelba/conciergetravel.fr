@@ -20,7 +20,7 @@ catalog:
   "@sentry/nextjs": ^10.53.1
   "react-hook-form": ^7.54.2
   "@hookform/resolvers": ^3.10.0
-  pino: ^9.5.0
+  pino: ^10.3.1
   vitest: ^2.1.8
   "@vitest/coverage-v8": ^2.1.8
   "@playwright/test": ^1.49.1
