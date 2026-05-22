@@ -56,6 +56,11 @@
     "photos:sync:intl": "tsx src/global-sources/photos-sync-intl.ts",
     "photos:sync:intl:dry": "tsx src/global-sources/photos-sync-intl.ts --dry-run",
     "enrich:wikidata": "tsx src/enrichment/enrich-wikidata-ids.ts",
+    "itineraries:check-db": "tsx src/itineraries/check-db.ts",
+    "itineraries:run": "tsx src/itineraries/run-itinerary.ts",
+    "itineraries:run:dry": "tsx src/itineraries/run-itinerary.ts --dry-run",
+    "itineraries:paris": "tsx src/itineraries/run-itinerary.ts paris-luxe-3-jours",
+    "itineraries:dump": "tsx src/itineraries/dump-itinerary.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

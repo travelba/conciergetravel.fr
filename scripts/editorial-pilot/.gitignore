@@ -3,3 +3,6 @@ output/
 runs/
 *.log
 .tsbuildinfo
+# Local intermediate artefacts produced by the itineraries pipeline.
+# Final, reproducible seed SQLs live under itineraries/seed/.
+.tmp-*
