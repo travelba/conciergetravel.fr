@@ -1,0 +1,17 @@
+chore(deps): bump openai 4.78 -> 6.38 (@mch/editorial-pilot)
+
+openai SDK v4 -> v6 covers two majors:
+- v5: migrated from node-fetch to built-in fetch (transparent for our
+  usage; we never set a custom httpAgent or relied on node-fetch types)
+- v6: ResponseFunctionToolCallOutputItem.output and ResponseCustomToolCallOutput.output
+  shapes changed (only relevant for the Responses API tool-calling
+  surface; we exclusively use chat.completions which is unaffected)
+
+Our editorial-pilot client uses:
+- new OpenAI({ apiKey, timeout, maxRetries }) -> stable since v4
+- client.chat.completions.create(...) -> stable since v4
+- response.choices[0].message.content, response.usage.{prompt,completion}_tokens
+  -> stable since v4
+
+Verification: typecheck + lint + test:unit + build all green (18/18
+tasks). No code changes required.
