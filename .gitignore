@@ -120,3 +120,6 @@ runs.json
 
 # Editorial pilot scratch files (LLM previews, diffs)
 scripts/editorial-pilot/.tmp/
+.vercel
+# Env files pulled from Vercel for one-off scripts
+apps/web/.env.*.local
