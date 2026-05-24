@@ -1,23 +1,37 @@
 #!/usr/bin/env tsx
 /**
- * Apply every `itineraries/seed/*.sql` UPSERT to the live Supabase
- * project via the `_exec_itinerary_seed` RPC (migration 0049).
+ * Apply every `itineraries/seed/*.sql` UPSERT to a Supabase project via
+ * the `_exec_itinerary_seed_b64` RPC (migration 0050 — base64 variant).
  *
- * Why not the agent-side `execute_sql` MCP tool ? The 19 LLM-generated
- * UPSERTs are each ~25-35 KB of escaped JSONB and arrays. Submitting
- * them one-by-one through the MCP would mean 19 long round-trips with
- * fragile JSON escaping per call. This script reads the files from
- * disk and POSTs them to PostgREST, keeping the agent loop fast.
+ * Three apply paths exist now, pick the one that matches your context :
  *
- * Auth :
- *   - Reads `apps/web/.env.itineraries-import.local` (created via
- *     `vercel env pull --environment=production`). The file is
- *     gitignored and lives outside the repo's normal env path.
- *   - Uses `SUPABASE_SERVICE_ROLE_KEY` for the RPC. The RPC itself
- *     is locked to `INSERT INTO public.itineraries` only (see 0049).
+ *   1. **Agent loop via MCP + GitHub fetch** (migrations 0053+0054).
+ *      - Enqueue via `select net.http_get('https://raw.githubusercontent.com/.../seed/<slug>.sql')`.
+ *      - Wait a few seconds for pg_net.
+ *      - Apply each with `select public.apply_itinerary_from_response(<slug>, <request_id>)`.
+ *      - Best for the agent loop because each MCP call is ~150 chars
+ *        instead of 30 KB of inlined SQL/base64.
+ *      - Requires the seed file to be pushed to GitHub `main`.
  *
- * Usage :
- *   pnpm itineraries:apply              # all 19 (paris stays as-is)
+ *   2. **CI / scripted via this file + b64 RPC** (migration 0050).
+ *      - This script reads each seed from disk, base64-encodes it,
+ *        and POSTs to `_exec_itinerary_seed_b64`.
+ *      - Best for cron / deploy / disaster recovery jobs that have
+ *        the `SUPABASE_SERVICE_ROLE_KEY` available.
+ *      - Auth file : `apps/web/.env.itineraries-import.local` (created
+ *        via `vercel env pull --environment=production`, gitignored).
+ *
+ *   3. **Direct MCP + inline SQL** (migration 0049).
+ *      - `select public._exec_itinerary_seed(<raw sql>)`.
+ *      - Avoid for the agent loop — 30 KB of SQL inlined into a tool
+ *        call args is too easy to corrupt during LLM generation
+ *        (regenerate-from-context drift).
+ *
+ * All three paths land on the same allowlist `INSERT INTO
+ * public.itineraries` safety contract at the DB boundary.
+ *
+ * Usage of this script :
+ *   pnpm itineraries:apply              # all 20 (UPSERTs, idempotent)
  *   pnpm itineraries:apply --slug=reims-champagne-week-end
  *   pnpm itineraries:apply --dry-run    # parse only, no POST
  */
