@@ -606,6 +606,46 @@ used `z.enum(LUXURY_TIER_VALUES)` and rejected ~15 % of pages with
 **Reference**: `scripts/editorial-pilot/src/yonder/extract-yonder-intl.ts`
 (`HotelMention`, `LUXURY_TIER_SET`, `normaliseLuxuryTier`).
 
+## Rule 13 — Never inline ≥ 10 KB of opaque content in an MCP tool call
+
+The agent loop (Cursor / Claude / Codex) constructs tool-call args by
+generating tokens. For natural-language content, regenerate-from-context
+is reliable. For opaque payloads — base64, JWTs, large SQL with embedded
+JSONB literals — the model **silently** drifts: it skips repetitive
+sections, substitutes "obvious" simplifications, or hallucinates a
+shorter variant.
+
+**Real regression (2026-05-24)**: the agent had to apply 19 editorial
+itinerary seeds (each ~25-33 KB of SQL with embedded JSONB strings) to
+Supabase via the MCP `execute_sql` tool. On the very first sanity-check
+call (the smallest file, reims, 23 KB), the agent silently substituted
+`'[]'::jsonb` placeholders for the actual `sections` and `faq_content`
+JSONB literals and converted the `do update set ...` upsert into a
+`do nothing`. The corruption only surfaced because a verification
+query showed `n_sections=0, n_faq=0` on a freshly-applied draft.
+
+**Fix**: don't transport large opaque content through MCP args. Instead:
+
+1. Push the content to git, then have the database fetch it back via
+   `pg_net.http_get('https://raw.githubusercontent.com/<owner>/<repo>/main/<path>')`
+   and apply it server-side. Each MCP call becomes ~150 chars (just the
+   URL or slug), no drift possible. See `supabase-postgres-rls/SKILL.md`
+   §"Async HTTP from Postgres" for the pg_net workflow gotchas.
+2. Or run a Node script (`apply-seeds.ts`) outside the agent loop —
+   it reads files from disk and POSTs to a server-side RPC with the
+   service role key. No regenerate-from-context step.
+3. Or, if you absolutely must inline, send ≤ 5 KB per call and verify
+   each fragment against a known hash before EXECUTE.
+
+The fact that base64 looks "boring enough" for the model to reproduce
+is exactly what makes the failure mode silent: a corrupted INSERT
+runs, persists, and looks plausible at first glance.
+
+**Rule of thumb**: any tool-call arg > ~10 KB should be treated as
+suspect. Verify post-execution invariants (row counts, length of
+JSONB arrays, hash of the inserted content) on the FIRST item of a
+batch before running the rest.
+
 ## Rule 12 — Word-count gates as warnings, not blockers
 
 The generation pipeline computes word counts and warns under thresholds

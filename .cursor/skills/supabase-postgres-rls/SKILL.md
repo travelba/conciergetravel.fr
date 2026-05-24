@@ -137,6 +137,71 @@ Invoke when:
 - Validated by Zod at app layer before insert/update.
 - Document expected shape in a comment at the top of the migration.
 
+### Async HTTP from Postgres (`pg_net`) — gotchas
+
+We use `pg_net` to let the agent loop apply ≥ 30 KB editorial seeds without
+having to inline raw SQL through MCP tool calls (LLM regenerate-from-context
+drift corrupts long opaque payloads — see `llm-output-robustness/SKILL.md`
+§rule-10 for the failure mode). The pattern works but each step has a
+trap. Don't relitigate these:
+
+1. **`net.http_get(...)` is async + transactional.** It writes to the
+   `net.http_request_queue` table inside the calling transaction. If the
+   transaction rolls back (function raises, or PostgREST returns 4xx),
+   the enqueue is erased before the pg_net worker ever sees it. So
+   **never** loop-wait for the response inside the same function that
+   enqueued it — every retry just enqueues, sleeps, times out, rolls
+   back, repeat ad infinitum.
+
+2. **`commit;` inside a procedure fails under MCP/PostgREST.** The
+   obvious "fix" — `procedure ... { http_get(); commit; loop wait }` —
+   raises `2D000: invalid transaction termination` because PostgREST
+   wraps every `CALL` in its own transaction. The procedure is still
+   useful for direct `psql` / `pg` clients, but it's dead-on-arrival
+   for the agent loop.
+
+3. **Split the workflow into two committable steps.** This is what
+   `apply_itinerary_from_response(slug, request_id)` does (migration
+   0054). Step 1 is a single `select net.http_get(...)` (one MCP call,
+   auto-commits when the statement returns — worker can see it). Step
+   2 is one `select apply_itinerary_from_response(...)` per slug after
+   a few seconds of wait. The collect function does NOT call
+   `http_get`, it only reads `net._http_response`.
+
+4. **Worker cold-starts cost ~5 s after `create extension`.** The
+   pg_net background worker doesn't process the queue immediately
+   after the extension is created. The first request enqueued always
+   times out unless you wait. Subsequent requests are fast (≤ 1 s for
+   small bodies).
+
+5. **`net._http_response` is keyed by `id bigint`.** The id grows
+   monotonically across all requests in the project, not per slug.
+   Keep the (slug, request_id) mapping from the enqueue call to feed
+   it back into the collect function.
+
+### DDL/DML guard regex in `EXECUTE`-style RPCs
+
+When a `SECURITY DEFINER` function uses `EXECUTE v_body` on text from
+an external source (HTTP, base64, file upload), it needs a guard
+regex that refuses dangerous tokens. The trap: a regex like
+`drop\s` matches editorial copy that says "car drop at the foot of
+the Rocher" (English itinerary body). The guard must require a SQL
+**object keyword** (`table`, `function`, `schema`, …) after the
+verb, otherwise it false-positives on natural language:
+
+```sql
+-- ❌ Too aggressive — refuses any seed that contains "drop " in prose
+if v_lowered ~ '(^|[^a-z_])drop\s' then ...
+
+-- ✅ Requires a real DDL object after the verb
+if v_lowered ~ '(^|[^a-z_])drop\s+(table|function|procedure|schema|view|index|extension|database|role|user|policy|trigger|sequence|materialized)\y' then ...
+```
+
+Migrations `0049`–`0054` are the canonical reference for the
+agent-loop-friendly seed loader. The four-migration sequence
+intentionally walks through each iteration mistake (forward-only
+history) so the next agent doesn't repeat them.
+
 ## Anti-patterns to refuse
 
 - Disabling RLS to "make it work".

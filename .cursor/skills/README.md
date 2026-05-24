@@ -240,3 +240,7 @@ This batch capitalised the editorial v2 launch:
 | **`next-intl` namespace nesting silently 500s `force-dynamic` pages** (PR #71 → hotfix PR #72)       | `nextjs-app-router` §Internationalization (extended) + smoke contract in `e2e/smoke.spec.ts` |
 | **PowerShell `git commit -m` mangles `>`, `&`, `\|`, newlines → use `git commit -F`** (PR #71)       | `windows-dev-environment` §Rule 9 ter                                                        |
 | **"Mystery commit" on local `main` recovery without `--force` to origin** (commit `49953e2`)         | `windows-dev-environment` §Rule 9 quater                                                     |
+| **MCP tool-call args drift on ≥ 10 KB opaque payloads** (lost JSONB sections on reims, 2026-05-24)   | `llm-output-robustness` rule 13                                                              |
+| **`pg_net` async + transactional**: enqueue inside SECURITY DEFINER + loop-wait + raise = dead loop  | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
+| **`commit;` inside procedure fails under PostgREST/MCP** (`2D000 invalid transaction termination`)   | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
+| **DDL guard regex must require SQL object keyword** to avoid matching "car drop at the foot of..."   | `supabase-postgres-rls` §DDL/DML guard regex                                                 |
