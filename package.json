@@ -24,6 +24,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "validate:skills": "node scripts/skills/validate-skills.mjs",
+    "bootstrap:env": "node scripts/bootstrap/env.mjs",
     "clean": "turbo run clean && rimraf node_modules",
     "prepare": "husky"
   },

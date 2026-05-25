@@ -180,7 +180,7 @@ Remove-Item -Recurse -Force apps/web/.next
 $env:SKIP_ENV_VALIDATION="true"; pnpm --filter @mch/web exec next dev --port 3000
 ```
 
-## Rule 9 quater — MCP Supabase ≠ editorial-pilot scripts: keep root `.env.local` Supabase creds even if you only ever use the MCP for DB reads
+## Rule 9 quater — MCP Supabase ≠ editorial-pilot scripts: bootstrap your `.env.local` from Vercel (ADR-0018)
 
 Symptom: a pipeline like
 `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts`
@@ -199,39 +199,58 @@ for ad-hoc SQL but **editorial-pilot scripts write through the
 Supabase REST API** (`fetch(${SUPABASE_URL}/rest/v1/...)`), which
 needs the env vars in the **root** `.env.local`.
 
-Fix once, for the whole pipeline portfolio:
+### One-time fix (ADR-0018)
 
-1. Dashboard → <https://supabase.com/dashboard/project/fsmfozxgujskluxakeoq/settings/api>
-2. Copy `Project URL` + `service_role` (secret) keys.
-3. Add to **root** `.env.local` (gitignored via `*.local`):
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://fsmfozxgujskluxakeoq.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=eyJhbG... (the long one, not the anon)
-   ```
+The repo ships a `pnpm bootstrap:env` script that pulls all managed
+secrets from Vercel and merges them with the existing local-only
+keys. Run it once:
 
-Reason it falls through:
+```powershell
+pnpm bootstrap:env
+```
 
-- `apps/web/.env.local` is the Next.js one (loaded by `next dev`);
-  the maintainer keeps it lean because the Vercel preview/prod
-  envs fill in everything else.
-- Root `.env.local` is the **scripts** one (loaded by
-  `loadDotenv({ path: '../../../../.env.local' })` from the
-  pipelines — see Rule 7).
-- These two never share state. MCP-only DB usage means root
-  `.env.local` stays empty until the first pipeline run, which
-  then fails surprisingly.
+This fills both `.env.local` (root) and `apps/web/.env.local` with
+everything Vercel knows about. If the required keys are EMPTY in
+Vercel, add them there first via:
+<https://vercel.com/travelba/myconciergehotel-com/settings/environment-variables>
 
-Alternative escape hatch (defer if you can): rewrite the pipeline
-to emit a `UPDATE ... SET factual_summary_fr=...` SQL file that's
-applied via the Supabase MCP `execute_sql`. Avoids ever putting
-the service_role key on a developer machine, at the cost of 30
-min of plumbing per pipeline. Tracked as future improvement when
-we move pipelines to GitHub Actions / Vercel Cron.
+Then re-run `pnpm bootstrap:env`.
 
-Reference incident: 2026-05-25 session — the maintainer had pushed
-itinerary content via SQL seeds + Supabase MCP for weeks; only
-when the next written-content chantier (factual_summary re-run)
-came up did the missing root creds surface.
+### Why a two-section `.env.local`
+
+The bootstrap writes `.env.local` with two clearly delineated sections:
+
+1. `# --- managed by Vercel` — refreshed at every bootstrap run.
+2. `# --- local-only` — preserved verbatim (`OPENAI_API_KEY`,
+   `ANTHROPIC_API_KEY`, `TAVILY_API_KEY`, `DATATOURISME_API_KEY`, …).
+
+Never edit the "managed by Vercel" section by hand — it will be
+overwritten. Add new local-only keys (LLM API keys, scratch tokens)
+under the `# --- local-only` marker, then re-run bootstrap.
+
+### Alternative for the paranoid
+
+If you don't want the service_role key ever on a dev machine,
+rewrite the pipeline to emit a `UPDATE … SET factual_summary_fr=…`
+SQL file applied via the Supabase MCP `execute_sql`. Avoids ever
+putting the key locally, at the cost of 30 min of plumbing per
+pipeline. To consider once pipelines move to GitHub Actions /
+Vercel Cron.
+
+### Reference incidents (2026-05-25)
+
+- **morning** — the maintainer had pushed itinerary content via
+  SQL seeds + Supabase MCP for weeks; only when the next
+  written-content chantier (factual_summary re-run) came up did
+  the missing root creds surface.
+- **afternoon** — the first draft of `bootstrap:env` did
+  `vercel env pull > .env.local` (overwrite mode) and **lost the
+  maintainer's local OPENAI_API_KEY**. The merge-with-preserve
+  semantics in the current `scripts/bootstrap/env.mjs` exist
+  because of this incident.
+
+See [ADR-0018](../../../docs/adr/0018-env-vars-vercel-source-of-truth.md)
+for the full rationale and the alternatives we considered.
 
 ## Rule 9 bis — `spawn` + `shell:true` on Windows mangles `&|<>` even when quoted
 

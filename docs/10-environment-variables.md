@@ -4,6 +4,71 @@ Toute variable d'environnement utilisée par le projet est listée ici. Le fichi
 
 > Convention : préfixe `NEXT_PUBLIC_` = exposé au client. Tout le reste est server-only.
 
+## Quotidien — flow opérationnel (ADR-0018)
+
+**Source de vérité : Vercel.** Tous les secrets vivent dans Vercel Project Settings (3 envs : Development / Preview / Production). Localement, le script `pnpm bootstrap:env` synchronise tout en une commande.
+
+### Première mise en place (une fois)
+
+```powershell
+# 1. Installer Vercel CLI globalement
+pnpm add -g vercel
+
+# 2. Lier le repo au projet Vercel (idempotent — relancer ne casse rien)
+vercel link --yes --project=myconciergehotel-com --scope=travelba
+
+# 3. Vérifier que Vercel contient bien toutes les vars de .env.example
+#    https://vercel.com/travelba/myconciergehotel-com/settings/environment-variables
+
+# 4. Pull les secrets dans .env.local + apps/web/.env.local
+pnpm bootstrap:env
+```
+
+### Au quotidien
+
+```powershell
+# Rotation d'un secret : modifier dans Vercel UI, puis :
+pnpm bootstrap:env                  # refresh .env.local + apps/web/.env.local
+
+# Nouveau dev qui clone le repo :
+pnpm install && pnpm bootstrap:env  # une commande, tout est prêt
+```
+
+### Clés "local-only" (LLM, recherche éditoriale)
+
+Les clés utilisées **uniquement** par les pipelines `scripts/editorial-pilot/*` et qui n'atteignent jamais la production web app peuvent rester locales. Elles sont **préservées automatiquement** lors des `bootstrap:env`. Pour les ajouter :
+
+```powershell
+# Ajouter la clé EN BAS du fichier, sous le marqueur "# --- local-only"
+Add-Content .env.local 'OPENAI_API_KEY="sk-proj-…"'
+Add-Content .env.local 'ANTHROPIC_API_KEY="sk-ant-…"'
+Add-Content .env.local 'TAVILY_API_KEY="tvly-prod-…"'
+Add-Content .env.local 'DATATOURISME_API_KEY="…"'
+
+# Re-lancer bootstrap → la section "local-only" est préservée
+pnpm bootstrap:env
+```
+
+> ⚠️ **Anti-pattern** : ne JAMAIS coller une clé dans `.cursor/mcp.json` du repo. Les MCP Cursor (Tavily, Cloudinary, Resend, Vercel, …) gèrent leur OAuth tout seuls via le store sécurisé Cursor. Les MCP custom déclarés dans `~/.cursor/mcp.json` user-level utilisent l'interpolation `${VAR}` qui lit depuis shell env Windows (`setx`).
+
+### Options du script
+
+```powershell
+pnpm bootstrap:env                  # default: pull development env
+pnpm bootstrap:env --env=preview    # pull preview env
+pnpm bootstrap:env --env=production # pull production env (handle with care)
+pnpm bootstrap:env --no-mirror      # do NOT copy to apps/web/.env.local
+pnpm bootstrap:env --no-check       # skip the .env.example cross-check
+```
+
+Le cross-check par défaut affiche les clés présentes dans `.env.example` mais absentes ou vides dans Vercel. C'est ainsi qu'on garde le portfolio Vercel synchrone avec les besoins runtime.
+
+### Référence
+
+- Décision et alternatives écartées : [ADR-0018](adr/0018-env-vars-vercel-source-of-truth.md)
+- Script : [`scripts/bootstrap/env.mjs`](../scripts/bootstrap/env.mjs)
+- Skill gotchas Windows : [`.cursor/skills/windows-dev-environment/SKILL.md`](../.cursor/skills/windows-dev-environment/SKILL.md) Rule 9 + Rule 9 quater
+
 ## Public site
 
 | Variable                     | Type         | Scope           | Description                                                           |
