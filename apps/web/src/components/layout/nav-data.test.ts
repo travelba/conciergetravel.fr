@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  HERO_REGION_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
   INTL_NAV_SLUG_TO_ISO,
   NAV_HOTEL_TYPE_TO_AXIS_VALUE,
+  TOP_DESTINATION_NAV_ENTRIES,
+  TOP_RANKING_NAV_ENTRIES,
   intlNavSlugToIso,
   navHotelTypeToAxisValue,
 } from './nav-data';
@@ -76,5 +79,42 @@ describe('nav-data slug mappings', () => {
   it('intlNavSlugToIso returns null for unknown slugs', () => {
     expect(intlNavSlugToIso('atlantis')).toBeNull();
     expect(intlNavSlugToIso('')).toBeNull();
+  });
+});
+
+/**
+ * Slug-shape guards — kebab-case, ASCII-only. The actual existence of
+ * each slug in Supabase (e.g. `meilleurs-5-etoiles-paris` must point at
+ * a published `editorial_rankings` row) is enforced by the E2E
+ * `navigation-routes.spec.ts` Playwright suite, which hits every header
+ * link and asserts a 200 + non-`noindex` status. Snapshot of the audit
+ * is in `canvases/audit-menu-navigation.canvas.tsx` (2026-05-25).
+ */
+describe('nav-data slug shape guards', () => {
+  const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+
+  it('TOP_RANKING_NAV_ENTRIES slugs are kebab-case ASCII', () => {
+    for (const entry of TOP_RANKING_NAV_ENTRIES) {
+      expect(entry.slug).toMatch(SLUG_RE);
+    }
+  });
+
+  it('TOP_RANKING_NAV_ENTRIES has 6 entries (mega-menu fixed layout)', () => {
+    expect(TOP_RANKING_NAV_ENTRIES).toHaveLength(6);
+  });
+
+  it('HERO_REGION_NAV_ENTRIES + TOP_DESTINATION_NAV_ENTRIES slugs are kebab-case ASCII', () => {
+    for (const entry of [...HERO_REGION_NAV_ENTRIES, ...TOP_DESTINATION_NAV_ENTRIES]) {
+      expect(entry.slug).toMatch(SLUG_RE);
+    }
+  });
+
+  it('HERO_REGION_NAV_ENTRIES are stable region taxonomy keys (no overlap with TOP_DESTINATION cities except bordeaux)', () => {
+    // Bordeaux is intentionally in both lists — it is both a city
+    // (catalogue mostly draft) and a wine region (rankings hub).
+    const heroSlugs = new Set(HERO_REGION_NAV_ENTRIES.map((e) => e.slug));
+    const destSlugs = new Set(TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug));
+    const intersection = [...heroSlugs].filter((s) => destSlugs.has(s));
+    expect(intersection).toEqual(['bordeaux']);
   });
 });

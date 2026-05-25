@@ -277,11 +277,17 @@ export function MobileNav(): ReactElement {
                     linkClass={subLinkClass}
                   />
                   <p className={subHeadingClass}>{t('primaryNav.destinationsHeroes')}</p>
-                  <MobileLinkList
+                  {/*
+                    HERO region slugs (`cote-d-azur`, `provence`, etc.)
+                    are NOT cities — `getDestinationBySlug` would 404.
+                    Route them through the rankings axis (`lieu`) where
+                    they fall back to a noindex empty state at worst.
+                    Audit 2026-05-25 — see `site-header.tsx` for context.
+                  */}
+                  <AxisLinkList
                     entries={HERO_REGION_NAV_ENTRIES}
                     locale={locale}
-                    pathname="/destination/[citySlug]"
-                    paramKey="citySlug"
+                    axe="lieu"
                     linkClass={subLinkClass}
                   />
                   <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
@@ -400,9 +406,12 @@ export function MobileNav(): ReactElement {
                 </div>
               </details>
 
-              {/* 5 — Le Concierge (Vague-5 institutional pages now
-                  reachable as dedicated routes; remaining entries
-                  still on /le-concierge until their pages ship). */}
+              {/* 5 — Le Concierge.
+                  Audit 2026-05-25: every dedicated institutional page
+                  exists (`/le-conseil-du-concierge`, `/le-concierge/
+                  pour-les-hoteliers`, `/le-concierge/mice-et-seminaires`,
+                  `/le-concierge/presse-et-partenaires`). Header & mobile
+                  now route to those instead of the parent hub. */}
               <details className="group">
                 <summary className={summaryClass}>
                   <span>{t('primaryNav.concierge')}</span>
@@ -424,7 +433,7 @@ export function MobileNav(): ReactElement {
                   <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
                     {t('primaryNav.conciergeMethod')}
                   </Link>
-                  <Link href="/le-concierge" className={subLinkClass}>
+                  <Link href="/le-conseil-du-concierge" className={subLinkClass}>
                     {t('primaryNav.conciergeTip')}
                   </Link>
                   <Link href="/itineraires" className={subLinkClass}>
@@ -433,8 +442,17 @@ export function MobileNav(): ReactElement {
                   <Link href="/guides" className={subLinkClass}>
                     {t('primaryNav.conciergeGuides')}
                   </Link>
+                  <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>
+                    {t('primaryNav.conciergeHotelier')}
+                  </Link>
+                  <Link href="/le-concierge/mice-et-seminaires" className={subLinkClass}>
+                    {t('primaryNav.conciergeMice')}
+                  </Link>
                   <Link href="/le-concierge/contact" className={subLinkClass}>
                     {t('primaryNav.conciergeContact')}
+                  </Link>
+                  <Link href="/le-concierge/presse-et-partenaires" className={subLinkClass}>
+                    {t('primaryNav.conciergePress')}
                   </Link>
                 </div>
               </details>

@@ -327,13 +327,31 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.destinationsHeroes')}>
+          {/*
+            HERO_REGION_NAV_ENTRIES uses region slugs (`cote-d-azur`,
+            `provence`, `alpes`, `champagne`, `corse`, `pays-basque`,
+            `loire`). These are NOT city slugs — `getDestinationBySlug`
+            filters strictly on `citySlug(h.city) === slug` (FR-only),
+            so routing them to `/destination/[citySlug]` was producing
+            8 `notFound()` 404s page-wide (nav audit 2026-05-25).
+
+            We route them to `/classements/lieu/[slug]` instead, which:
+            - tolerates known taxonomy values via `isKnownTaxonomyValue`
+              (HERO_REGION_NAV_ENTRIES is in KNOWN_LIEU_VALUES);
+            - renders the matching rankings when present (4/8: alpes 12,
+              cote-d-azur 13, corse 4, loire 3);
+            - degrades to a noindex empty state otherwise — never a 404.
+
+            Long-term fix: ship dedicated `/destination/region/[slug]`
+            pages once the editorial region hubs are seeded (Phase 2).
+          */}
           <>
             {HERO_REGION_NAV_ENTRIES.map((entry) => (
               <MegaLink
                 key={entry.slug}
                 href={{
-                  pathname: '/destination/[citySlug]',
-                  params: { citySlug: entry.slug },
+                  pathname: '/classements/[axe]/[valeur]',
+                  params: { axe: 'lieu', valeur: entry.slug },
                 }}
                 label={pickEntryLabel(entry, locale)}
               />
@@ -590,15 +608,20 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 // ─── Mega-menu 5 — Le Concierge ──────────────────────────────────────────
 
 /**
- * Concierge mega-menu — wired to the dedicated Vague-5 institutional
- * pages (PRs #83 + #84) instead of all 12 entries collapsing onto
- * `/le-concierge`. The remaining pointers (`conciergeTip`,
- * `conciergeJournal`, `conciergeHotelier`, `conciergeMice`,
- * `conciergePress`) keep their `/le-concierge` parent until their
- * dedicated pages ship in Vague 5 batch 3 (P1/P2 — `/le-conseil-
- * du-concierge`, `/le-concierge/journal`, `/le-concierge/pour-les-
- * hoteliers`, `/le-concierge/mice-et-seminaires`, `/le-concierge/
- * presse-et-partenaires`).
+ * Concierge mega-menu — wired to the dedicated institutional pages.
+ *
+ * Audit 2026-05-25: 5 entries were still pointing at `/le-concierge`
+ * even though the dedicated pages had landed (footer used them
+ * already, header was lagging). We now route every link to its
+ * canonical destination:
+ *
+ * - `conciergeTip`       → `/le-conseil-du-concierge`
+ * - `conciergeHotelier`  → `/le-concierge/pour-les-hoteliers`
+ * - `conciergeMice`      → `/le-concierge/mice-et-seminaires`
+ * - `conciergePress`     → `/le-concierge/presse-et-partenaires`
+ *
+ * `conciergeJournal` keeps pointing at `/le-concierge` (the dedicated
+ * journal hub is still on the Phase-1 editorial backlog — no page yet).
  */
 function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
   return (
@@ -622,23 +645,29 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergeContent')}>
           <>
-            {/* `conciergeTip` still routes to `/le-concierge` (the
-                Conseil USP block is rendered there). Vague-5 P1 will
-                ship `/le-conseil-du-concierge` as a dedicated hub. */}
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeTip')} />
+            <MegaLink href="/le-conseil-du-concierge" label={t('primaryNav.conciergeTip')} />
             <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
+            {/* `conciergeJournal` still maps to `/le-concierge` until the
+                dedicated editorial journal hub ships (Phase-1 backlog). */}
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeJournal')} />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>
           <>
-            {/* Hotelier / MICE / press still pointing to `/le-concierge`
-                until their dedicated pages ship in Vague-5 P1/P2. */}
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeHotelier')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeMice')} />
+            <MegaLink
+              href="/le-concierge/pour-les-hoteliers"
+              label={t('primaryNav.conciergeHotelier')}
+            />
+            <MegaLink
+              href="/le-concierge/mice-et-seminaires"
+              label={t('primaryNav.conciergeMice')}
+            />
             <MegaLink href="/le-concierge/contact" label={t('primaryNav.conciergeContact')} />
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergePress')} />
+            <MegaLink
+              href="/le-concierge/presse-et-partenaires"
+              label={t('primaryNav.conciergePress')}
+            />
           </>
         </MegaColumn>
       </div>

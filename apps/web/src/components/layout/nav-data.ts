@@ -286,10 +286,19 @@ export const HERO_REGION_NAV_ENTRIES: readonly NavLabeledEntry[] = [
 // ─── 8. Top rankings — "Classements > Les plus populaires" ───────────────
 
 /**
- * Curated "best-of" rankings surfaced in the Classements mega-menu.
- * Slugs match published `editorial_rankings.slug` in Supabase. If a
- * slug isn't yet published, the link still resolves (Next.js
- * `notFound()` from `/classement/[slug]/page.tsx`).
+ * Curated "best-of" rankings surfaced in the Classements mega-menu and
+ * the footer top-rankings column.
+ *
+ * Slugs MUST match published `editorial_rankings.slug` in Supabase. The
+ * 2026-05-25 nav audit revealed that 4/6 of the previous lineup pointed
+ * at slugs that did not exist in the DB at all — emitting 4 dead `404`s
+ * page-wide on every render (header + footer). This list is now the
+ * intersection of the editorial menu intent and the published catalogue.
+ *
+ * Audit script: run the SQL in
+ * `apps/web/src/components/layout/nav-data.test.ts` "TOP_RANKING_NAV_ENTRIES
+ * slugs are all published in DB" whenever the menu changes. The CI
+ * gate guarantees no orphan menu link ships to production.
  *
  * Update this list after a quarterly content review based on GSC top
  * impressions for `/classement/*` pages.
@@ -301,22 +310,22 @@ export const TOP_RANKING_NAV_ENTRIES: readonly NavLabeledEntry[] = [
     labelEn: 'Best Palaces of France',
   },
   {
-    slug: 'meilleurs-hotels-5-etoiles-paris',
+    slug: 'meilleurs-5-etoiles-paris',
     labelFr: 'Meilleurs hôtels 5★ Paris',
     labelEn: 'Best 5-Star Hotels Paris',
   },
   {
-    slug: 'meilleurs-spas-hoteliers',
-    labelFr: 'Meilleurs spas hôteliers',
+    slug: 'meilleurs-hotels-spa-france',
+    labelFr: 'Meilleurs hôtels avec spa',
     labelEn: 'Best hotel spas',
   },
   {
-    slug: 'plus-belles-piscines-hotels',
+    slug: 'meilleurs-hotels-piscine-france',
     labelFr: 'Plus belles piscines d’hôtels',
     labelEn: 'Most beautiful hotel pools',
   },
   {
-    slug: 'meilleurs-hotels-bord-de-mer',
+    slug: 'meilleurs-hotels-bord-de-mer-france',
     labelFr: 'Meilleurs hôtels en bord de mer',
     labelEn: 'Best seafront hotels',
   },

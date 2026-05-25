@@ -177,7 +177,88 @@ after their descriptions are enriched.
 Once published-quality is conformant, Phase 2 promotes the 924 drafts
 (now including the full Relais & Châteaux roster scaffolded on
 2026-05-25). Phase 3 finishes editorial guides + rankings. Phase 4 is
-the photo migration.
+the photo migration. Phase 5 ships multilingual V2/V3. **Phase 6 (and
+only then) wires the booking APIs** — see §4ter below for the explicit
+phasing decision and the list of items that are deliberately out of
+scope until then.
+
+## 4ter. Booking API integration is the LAST brick (2026-05-25)
+
+Product-owner decision (2026-05-25): **all reservation / pricing /
+availability data is sourced from APIs that will only be wired at the
+end of the project**. Until then, the site ships as an editorial-only
+property. When an agent considers proposing or implementing any
+booking-side work, **stop** and reread this section first.
+
+### Phasing matrix (top-down) — single source of truth for sequencing
+
+Aligns the §4bis content-completion ladder with the API-last decision.
+
+| Phase                                                   | Status                               | Includes                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1 — Editorial-only on published catalogue** ← current | 🟢 in progress                       | Close the 4 gaps on the 443 published hotels (factual summary, meta_desc, description, policies). Improve Concierge voice (`<ConciergeAdvice>`). Internal maillage (menu audit 2026-05-25). SEO/GEO foundations: sitemaps, JSON-LD (without `Offer`), `llms.txt`, `agent-skills.json`. Institutional pages (mentions légales, méthode éditoriale, pour-les-hôteliers, MICE, presse). EEAT (`external_sources`, `author_name`, outbound links). |
+| **2 — Promote the 924 hotel drafts to published**       | ⏳ next                              | Apply the same 4-block content gate to every draft, including the 471 Relais & Châteaux roster. Multilingual FR ↔ EN parity.                                                                                                                                                                                                                                                                                                                   |
+| **3 — Finish editorial drafts (rankings + guides)**     | ⏳                                   | Promote the 85 ranking drafts + 36 guide drafts after the catalogue is fully published. Fill the menu gaps surfaced by the audit (rooftop, sport-golf, printemps, etc.).                                                                                                                                                                                                                                                                       |
+| **4 — Photo pipeline**                                  | ⏳                                   | Sourcing, legal hygiene, Cloudinary migration, alt enrichment, Structured Metadata fields, hero fallback chain, JSON-LD `ImageObject` (≥ 30 photos per hotel, 10 categories). See `.cursor/skills/photo-pipeline/SKILL.md`.                                                                                                                                                                                                                    |
+| **5 — Multilingual V2 / V3**                            | ⏳                                   | DE / ES / IT (V2 — German first per `seo-geo.mdc`), then AR / ZH / JA (V3). Native rewrites, not machine translations.                                                                                                                                                                                                                                                                                                                         |
+| **6 — Booking APIs (LAST brick)**                       | 🔴 frozen until catalogue is shipped | Amadeus GDS Self-Service Hotels (search, offers, booking, sentiments), Little Hotelier (loyalty-eligible inventory), Makcorps + Apify (non-affiliated price comparator), Amadeus Payments (3DS2, Apple/Google Pay). All `Offer` JSON-LD, `priceValidUntil`, `LimitedAvailability`, idempotency keys, payment iframe, sentiment enrichment go live at this stage.                                                                               |
+
+### What is OUT of scope until Phase 6 (do NOT propose, do NOT implement)
+
+- `Offer` + `priceValidUntil` emission in JSON-LD (depends on Amadeus
+  offers). The hotel detail page must NOT emit an `Offer` block — emit
+  only `Hotel` + `Place` + `BreadcrumbList` + `FAQPage` +
+  `AggregateRating` (when real reviews exist) + `Review[]` +
+  `ImageObject[]` + `Award[]`.
+- Booking widget in the hotel fiche. Keep an editorial CTA "Réserver via
+  le Concierge" that opens a static `/le-concierge/reserver` /
+  `/le-concierge/contact` flow — no GDS round-trip.
+- Funnel `/recherche → /results → /offer → /checkout` with live GDS
+  calls. The `/recherche` page may exist but renders only catalogue
+  filters; no Amadeus, no Algolia hotelOffer index, no `priceValidUntil`.
+- Makcorps / Apify price comparator widget.
+- Amadeus sentiments enrichment in `ReviewsBlock`.
+- Loyalty tier calculation derived from booking history.
+- "X personnes consultent" / `LimitedAvailability` / stock indicators
+  (the CDC §2.8 rule banning them stays in force AND the topic itself
+  is non-applicable until the API ships).
+- Payment iframe (Amadeus Payments, 3DS2, Apple Pay).
+- All `idempotencyKey` flows that wrap booking-side actions.
+- `force-dynamic` on routes that are only dynamic because of booking
+  cookies — flip them back to ISR if the only reason was an Amadeus
+  fetch.
+
+### What IS in scope right now (the real chantier)
+
+- The 443 published + 924 drafts hotel fiches (close the 4 gaps in §4bis).
+- The Concierge voice + `<ConciergeAdvice>` block in every hotel page.
+- Rankings, guides, itineraries content completion.
+- Internal maillage (the menu audit 2026-05-25 is the canonical TODO —
+  see `canvases/audit-menu-navigation.canvas.tsx`).
+- AEO / FAQ / `llms.txt` / `agent-skills.json` quality.
+- EEAT: `external_sources` + `author_name` + outbound links to Atout
+  France / Michelin Guide / Forbes / R&C.
+- Photo pipeline (Phase 2 next).
+- Institutional pages (mentions légales, méthode éditoriale, conseil
+  du concierge, pour les hôteliers, MICE, presse, etc.).
+- Multilingual FR ↔ EN parity, then DE/ES/IT in Phase 4.
+
+### Implications for code review
+
+- A PR that adds an Amadeus / Little / Makcorps client call to a public
+  route is **out of phase** — defer it, do not merge.
+- A PR that adds an `Offer` to the hotel JSON-LD is **out of phase**.
+- A PR that touches the `/le-concierge/reserver` static page is fine
+  (it's an editorial CTA, not a booking surface).
+- A PR that strengthens the editorial validators (Zod schema, gate QA,
+  factual summary band, FAQ rules) is **in phase** and should be
+  prioritised.
+
+The corresponding code skills (`amadeus-gds`, `little-hotelier`,
+`booking-engine`, `payment-orchestration`,
+`competitive-pricing-comparison`, `loyalty-program`) stay in
+`.cursor/skills/` as reference material — **don't act on them until
+Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
