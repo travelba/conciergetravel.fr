@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-05-25
-- Refs: [`docs/10-environment-variables.md`](../10-environment-variables.md), [`scripts/bootstrap/env.mjs`](../../scripts/bootstrap/env.mjs), skill `windows-dev-environment` Rule 9 quater, `.env.example`
+- Refs: [`docs/10-environment-variables.md`](../10-environment-variables.md), [`scripts/bootstrap/env.mjs`](../../scripts/bootstrap/env.mjs), [`scripts/bootstrap/PROMPTS.md`](../../scripts/bootstrap/PROMPTS.md) (browser-automation playbooks for Vercel UI), skill `windows-dev-environment` Rule 9 quater, `.env.example`
 
 ## Décision
 
