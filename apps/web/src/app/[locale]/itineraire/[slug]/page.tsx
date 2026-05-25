@@ -25,6 +25,7 @@ import {
   getHotelsByIds,
   getItinerariesBySlugs,
   getRankingsByIds,
+  type HotelLookup,
   type ItineraryMiniCard,
 } from '@/server/itineraries/get-related-data';
 import { getRelatedItineraries } from '@/server/itineraries/get-related-itineraries';
@@ -61,6 +62,63 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
+}
+
+/**
+ * Resolve a hero source string into a fully-qualified delivery URL.
+ *
+ * `source` may be:
+ *   - `null` → returns `null`
+ *   - a Cloudinary public_id (heuristic: does not start with `http`) →
+ *     wrapped in `buildCloudinarySrc` with the requested transforms
+ *   - a fully-qualified URL (Wikimedia, vendor site, Pinterest hotlink…) →
+ *     returned as-is (the browser fetches it directly, no Cloudinary
+ *     transformation, no breakage of the existing CDN chain)
+ *
+ * Skill `photo-pipeline` §fallback documents the legality + perf trade-offs
+ * of each shape. The longer-term goal is to migrate every external URL
+ * into Cloudinary (one public_id per hotel) so this helper only ever
+ * deals with branch #2, but until that pipeline ships we keep both
+ * branches working so 5/20 itineraries gain an Article.image + OG
+ * preview immediately.
+ */
+function resolveHeroUrl(
+  source: string | null,
+  transforms: string,
+  cloudName: string | undefined,
+): string | null {
+  if (source === null || source.length === 0) return null;
+  if (source.startsWith('http://') || source.startsWith('https://')) return source;
+  if (cloudName === undefined) return null;
+  return buildCloudinarySrc({ cloudName, publicId: source, transforms });
+}
+
+/**
+ * Itinerary hero fallback (skill `photo-pipeline` §fallback):
+ *   1. Use `itineraries.hero_cloudinary_id` if set (editorial intent).
+ *   2. Else fall back to the first hotel's `hero_image` (5/20 itineraries
+ *      benefit immediately as of 2026-05-25).
+ *   3. Else return `null` and the hero block is omitted entirely.
+ *
+ * Reads from `itinerary.hotel_ids[0]` rather than `sections[0].hotel_id`
+ * because the canonical order is the editorial `hotel_ids[]` array.
+ */
+function pickHeroSource(
+  itinerary: ItineraryRow,
+  hotelById: Map<string, HotelLookup>,
+): { source: string; altHint: string | null } | null {
+  if (itinerary.hero_cloudinary_id !== null && itinerary.hero_cloudinary_id.length > 0) {
+    return { source: itinerary.hero_cloudinary_id, altHint: null };
+  }
+  const firstHotelId = itinerary.hotel_ids[0];
+  if (firstHotelId === undefined) return null;
+  const firstHotel = hotelById.get(firstHotelId);
+  if (firstHotel === undefined || firstHotel.heroImage === null) return null;
+  const altHint =
+    firstHotel.city !== null && firstHotel.city.length > 0
+      ? `${firstHotel.nameFr} — ${firstHotel.city}`
+      : firstHotel.nameFr;
+  return { source: firstHotel.heroImage, altHint };
 }
 
 /**
@@ -108,14 +166,22 @@ export async function generateMetadata({
     getPathname({ locale: l, href: { pathname: '/itineraire/[slug]', params: { slug } } });
 
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const ogImage =
-    itinerary.hero_cloudinary_id !== null && cloudName !== undefined
-      ? buildCloudinarySrc({
-          cloudName,
-          publicId: itinerary.hero_cloudinary_id,
-          transforms: 'f_auto,q_auto,c_fill,g_auto,w_1200,h_630',
-        })
+  // Resolve the OG image with the same fallback rule as the main page
+  // (skill `photo-pipeline` §fallback): editorial hero first, then first
+  // hotel's hero_image. We deliberately fetch only the first hotel here
+  // rather than the full list — a single-row Supabase SELECT IN is sub-
+  // 100ms and lives inside the ISR cache window so the cost is paid
+  // once per `revalidate` cycle.
+  const firstHotelId = itinerary.hotel_ids[0];
+  const firstHotelHero =
+    itinerary.hero_cloudinary_id === null && typeof firstHotelId === 'string'
+      ? ((await getHotelsByIds([firstHotelId]))[0]?.heroImage ?? null)
       : null;
+  const ogImage = resolveHeroUrl(
+    itinerary.hero_cloudinary_id ?? firstHotelHero,
+    'f_auto,q_auto,c_fill,g_auto,w_1200,h_630',
+    cloudName,
+  );
 
   return {
     title,
@@ -305,13 +371,14 @@ export default async function ItineraireDetailPage({
     })}`;
   };
 
+  // Hero resolution with fallback to the first hotel's `hero_image`
+  // (skill `photo-pipeline` §fallback) — unblocks 5/20 itineraries with
+  // zero data migration, then degrades to the legacy behaviour for the
+  // 15 itineraries whose first hotel is also imageless.
+  const heroPick = pickHeroSource(itinerary, hotelById);
   const heroImageUrl =
-    itinerary.hero_cloudinary_id !== null && cloudName !== undefined
-      ? buildCloudinarySrc({
-          cloudName,
-          publicId: itinerary.hero_cloudinary_id,
-          transforms: 'f_auto,q_auto,c_fill,g_auto,w_1600,h_900',
-        })
+    heroPick !== null
+      ? resolveHeroUrl(heroPick.source, 'f_auto,q_auto,c_fill,g_auto,w_1600,h_900', cloudName)
       : null;
 
   const title = pickByLocale(locale, itinerary.title_fr, itinerary.title_en ?? itinerary.title_fr);
@@ -449,7 +516,11 @@ export default async function ItineraireDetailPage({
         eyebrow={tHub('eyebrow')}
         factualSummary={factualSummary}
         heroImageUrl={heroImageUrl}
-        heroAlt={pickByLocale(locale, itinerary.hero_alt_fr, itinerary.hero_alt_en)}
+        heroAlt={
+          pickByLocale(locale, itinerary.hero_alt_fr, itinerary.hero_alt_en) ??
+          heroPick?.altHint ??
+          null
+        }
         lastUpdated={itinerary.last_updated}
         durationLabel={durationLabel(itinerary, locale)}
         destinationLabel={destinationLabel(itinerary)}

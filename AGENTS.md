@@ -41,6 +41,7 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 | **Voix du Concierge** (ADR-0011, pass 8, `<ConciergeAdvice>`, shortener phrases > 25 mots) | `.cursor/skills/concierge-voice-pipeline/SKILL.md`                                                                   |
 | **LLM extraction from web content (Tavily)**                                               | `.cursor/skills/content-enrichment-pipeline/SKILL.md` + `llm-output-robustness` §rule-9                              |
 | **Multi-source factual enrichment**                                                        | `.cursor/skills/content-enrichment-pipeline/SKILL.md`                                                                |
+| **Photo pipeline / hero / alt enrichment / Pinterest hotlink risk**                        | `.cursor/skills/photo-pipeline/SKILL.md`                                                                             |
 | **Zod schema → React props**                                                               | `.cursor/skills/typescript-strict-zod-interop/SKILL.md`                                                              |
 | **PowerShell / Windows dev commands**                                                      | `.cursor/skills/windows-dev-environment/SKILL.md`                                                                    |
 | New public route                                                                           | `apps/web/src/app/[locale]/` + `.cursor/rules/nextjs-app-router.mdc`                                                 |
@@ -97,10 +98,19 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):
-  - ✅ **Operational**: `user-supabase` (DB schema + SQL exec), `plugin-vercel-vercel` (deployments + build logs), `plugin-sanity-Sanity` (CMS docs, OAuth `contact@travelba.fr`), `plugin-cloudinary-cloudinary-asset-mgmt`, `plugin-cloudinary-cloudinary-env-config`, `cursor-app-control`, `cursor-backend-control`, `cursor-ide-browser`.
-  - ⚠️ **Needs OAuth click** (only expose `mcp_auth`): `plugin-cloudinary-cloudinary-smd`, `plugin-cloudinary-cloudinary-analysis`, `plugin-opsera-devsecops-opsera`. Authenticate when the task actually needs them — the OAuth popup must be clicked in the IDE within 2 min.
-  - ❌ **Broken credentials**: `plugin-tavily-tavily` (token expired — "Not connected"), `plugin-resend-resend` ("API key is invalid"). Regenerate the API key in the vendor dashboard, then re-link in Cursor → Settings → Plugins / MCP.
+  - ✅ **Operational**: `user-supabase` (DB schema + SQL exec), `plugin-vercel-vercel` (deployments + build logs), `plugin-sanity-Sanity` (CMS docs, OAuth `contact@travelba.fr`), `plugin-cloudinary-cloudinary-asset-mgmt` (27 tools — upload, search, transform), `plugin-cloudinary-cloudinary-env-config` (26 tools — presets, transformations, triggers), `plugin-cloudinary-cloudinary-smd` (11 tools — Structured Metadata fields + rules), `cursor-app-control`, `cursor-backend-control`, `cursor-ide-browser`.
+  - ⚠️ **Auth claimed but tools not yet exposed**: `plugin-cloudinary-cloudinary-analysis` — `mcp_auth` returned success but no tools surface in the available list. Possibly a lazy-load quirk. Retry `mcp_auth` if the next call still fails.
+  - ⚠️ **Needs OAuth click** (only expose `mcp_auth`): `plugin-opsera-devsecops-opsera`. Authenticate when the task actually needs it — the OAuth popup must be clicked in the IDE within 2 min.
+  - ❌ **Broken credentials**: `plugin-tavily-tavily` (token expired — "Not connected"; reconnect via Cursor → Settings → Tools & Integrations → MCP → Tavily → Reconnect), `plugin-resend-resend` ("API key is invalid" — regenerate at `resend.com/api-keys` with Full Access then paste in Cursor MCP settings).
   - 🚫 **Mentioned in past sessions but NOT configured on this machine**: Datadog, GitHub, Superhuman, shadcn — either install them or stop referencing them in agent prompts.
+
+  **Gotcha — Cloudinary is exposed as 5 separate MCPs in Cursor**:
+  `asset-mgmt`, `env-config`, `smd` (Structured Metadata), `analysis` (AI vision),
+  `mediaflows` (workflow automation). **Each has its own OAuth** even though the
+  vendor dashboard groups them under one Cloudinary login. Clicking "Connect" on
+  the Cursor plugin row covers `asset-mgmt + env-config` only; the other three
+  require an extra `mcp_auth` round-trip per MCP. **Auth them lazily** when a
+  workflow actually needs them — don't bulk-auth upfront.
 
   Prefer MCP tools to manual shell when the task fits, but always check the MCP descriptor (`mcps/<server>/tools/<tool>.json`) before calling — schema drift is the #1 source of `Invalid arguments` errors.
 

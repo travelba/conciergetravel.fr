@@ -40,6 +40,13 @@ export interface HotelLookup {
   readonly city: string | null;
   readonly stars: number | null;
   readonly isPalace: boolean;
+  /**
+   * Hotel hero image — either a fully-qualified URL (Wikimedia, vendor
+   * site, …) or a Cloudinary public_id (`cct/hotels/<slug>/…`). The
+   * itinerary page falls back to this when the row has no
+   * `hero_cloudinary_id` of its own (skill `photo-pipeline` §fallback).
+   */
+  readonly heroImage: string | null;
 }
 
 const HotelLookupRowSchema = z.object({
@@ -51,6 +58,7 @@ const HotelLookupRowSchema = z.object({
   city: z.string().nullable(),
   stars: z.number().int().nullable(),
   is_palace: z.boolean(),
+  hero_image: z.string().nullable(),
 });
 
 export async function getHotelsByIds(ids: readonly string[]): Promise<readonly HotelLookup[]> {
@@ -61,7 +69,7 @@ export async function getHotelsByIds(ids: readonly string[]): Promise<readonly H
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('id, slug, slug_en, name, name_en, city, stars, is_palace')
+      .select('id, slug, slug_en, name, name_en, city, stars, is_palace, hero_image')
       .in('id', unique)
       .eq('is_published', true);
 
@@ -88,6 +96,7 @@ export async function getHotelsByIds(ids: readonly string[]): Promise<readonly H
         city: parsed.data.city,
         stars: parsed.data.stars,
         isPalace: parsed.data.is_palace,
+        heroImage: parsed.data.hero_image,
       });
     }
     return out;
