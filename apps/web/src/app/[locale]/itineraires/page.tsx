@@ -25,15 +25,24 @@ import { listItineraries, type ItineraryCard } from '@/server/itineraries/list-i
  *     `/itineraire` route is rendered instead. Same hreflang + OG
  *     tags stay valid in both modes.
  *
- * ISR — `revalidate = 86400` per rule itinerary-page.mdc §6 (hub TTL).
- * Cache invalidation is driven by Payload `afterChange` hooks emitting
- * `revalidateTag('itineraries-hub')` (PR3).
+ * ISR — `revalidate = 3600` (1 h), aligned on every other editorial
+ * hub of the site (`/classements`, `/classements/[axe]/[valeur]`,
+ * `/classement/[slug]`, `/hotel/[slug]`) and on the itinerary detail
+ * page itself. A 24 h TTL was kept here while the catalogue was a
+ * single seed; once published itineraries multiply (20 rows at the
+ * 2026-05-25 batch), a 1 h refresh window matches editorial reality —
+ * a freshly published itinerary must surface on the hub within an hour
+ * of an `update … set status = 'published'`, not 24.
  *
- * @see .cursor/rules/itinerary-page.mdc
+ * Cache invalidation is also driven by Payload `afterChange` hooks
+ * emitting `revalidateTag('itineraries-hub')` whenever an itinerary
+ * is created, edited or unpublished (PR3).
+ *
+ * @see .cursor/skills/itinerary-editorial-pipeline/SKILL.md
  * @see .cursor/rules/seo-geo.mdc
  * @see docs/plan-itineraires-reprise.md §3.2.1
  */
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
