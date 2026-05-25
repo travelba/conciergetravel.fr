@@ -4,13 +4,30 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
+import { HotelImage } from '@mch/ui';
 
 import { InternationalComingSoon } from '@/components/destinations/international-coming-soon';
+import { HotelImagePlaceholder } from '@/components/hotel/hotel-image-placeholder';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { getPathname } from '@/i18n/navigation';
+import {
+  TOP_DESTINATION_NAV_ENTRIES,
+  TOP_RANKING_NAV_ENTRIES,
+  pickEntryLabel,
+} from '@/components/layout/nav-data';
+import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
+import { listPublishedCities } from '@/server/destinations/cities';
+import {
+  listPublishedHotelsForIndex,
+  type PublishedHotelIndexCard,
+} from '@/server/hotels/get-hotel-by-slug';
+import {
+  listPublishedRankings,
+  type PublishedRankingCard,
+} from '@/server/rankings/get-ranking-by-slug';
 
 // The page reads `headers()` to forward the per-request CSP nonce to its
 // inline JSON-LD scripts (skill: security-engineering §CSP). That dynamic
@@ -21,6 +38,9 @@ import { env } from '@/lib/env';
 export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
+
+const FEATURED_HOTEL_COUNT = 6;
+const FEATURED_DESTINATION_COUNT = 6;
 
 /**
  * Home `generateMetadata` — canonical, hreflang, OG.
@@ -62,6 +82,61 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Pick the N highest-priority published hotels for the home featured grid.
+ * Prefers rows with a `hero_image` so the visual section never opens with
+ * a wall of placeholders; falls back to placeholder-only entries when the
+ * catalogue is still in editorial-only mode (Phase 1 — see AGENTS.md §4ter).
+ */
+function pickFeaturedHotels(
+  rows: readonly PublishedHotelIndexCard[],
+  limit: number,
+): readonly PublishedHotelIndexCard[] {
+  const withHero = rows.filter((r) => r.heroPublicId !== null);
+  if (withHero.length >= limit) return withHero.slice(0, limit);
+  // Top-up with hero-less rows so we always render `limit` cards.
+  const withoutHero = rows.filter((r) => r.heroPublicId === null);
+  return [...withHero, ...withoutHero].slice(0, limit);
+}
+
+interface FeaturedDestinationCard {
+  readonly slug: string;
+  readonly label: string;
+  readonly count: number;
+}
+
+/**
+ * Top destinations for the home featured grid. Joins the editorial menu
+ * pick (`TOP_DESTINATION_NAV_ENTRIES`) with the live published hotel
+ * counts so the homepage never sends a visitor to a 0-hotel page.
+ *
+ * The 4 menu entries that currently render 0 hotels (cannes, aix, reims,
+ * bordeaux — drafts only as of 2026-05-25) are skipped here even though
+ * they remain in the mega-menu, because the homepage CTA promises
+ * concrete inventory.
+ */
+function pickFeaturedDestinations(
+  cities: ReadonlyMap<string, number>,
+  locale: Locale,
+  limit: number,
+): readonly FeaturedDestinationCard[] {
+  const out: FeaturedDestinationCard[] = [];
+  for (const entry of TOP_DESTINATION_NAV_ENTRIES) {
+    const count = cities.get(entry.slug) ?? 0;
+    if (count === 0) continue;
+    out.push({ slug: entry.slug, label: pickEntryLabel(entry, locale), count });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function pickFeaturedRankings(
+  all: readonly PublishedRankingCard[],
+): readonly PublishedRankingCard[] {
+  const allowed = new Set(TOP_RANKING_NAV_ENTRIES.map((e) => e.slug));
+  return all.filter((r) => allowed.has(r.slug));
+}
+
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRoutingLocale(locale)) notFound();
@@ -70,7 +145,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const tCommon = await getTranslations('common');
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
+  // Fetch the 3 editorial datasets in parallel — they back the featured
+  // sections below. Each helper is defensive (returns `[]` on Supabase
+  // outages) so the home never 500s in a degraded environment.
+  const [hotelIndex, cities, rankings] = await Promise.all([
+    listPublishedHotelsForIndex(40),
+    listPublishedCities(),
+    listPublishedRankings(),
+  ]);
+  const featuredHotels = pickFeaturedHotels(hotelIndex, FEATURED_HOTEL_COUNT);
+  const cityCounts = new Map(cities.map((c) => [c.slug, c.count] as const));
+  const featuredDestinations = pickFeaturedDestinations(
+    cityCounts,
+    locale,
+    FEATURED_DESTINATION_COUNT,
+  );
+  const featuredRankings = pickFeaturedRankings(rankings);
+
   const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
+  const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const agencyJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.travelAgencyJsonLd({
       name: 'MyConciergeHotel',
@@ -111,48 +204,297 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     JsonLd.faqPageJsonLd([{ question: aeoQuestion, answer: aeoAnswer }]),
   );
 
+  // ItemList of the featured hotels — surfaces the home as a small
+  // editorial carousel in Google Rich Results without requiring any
+  // booking-side data (Phase 1 compatible: no `Offer`, no `priceValidUntil`).
+  const featuredItemListJsonLd =
+    featuredHotels.length > 0
+      ? JsonLd.withSchemaOrgContext(
+          JsonLd.itemListJsonLd({
+            name: t('featuredHotels.title'),
+            items: featuredHotels.map((h) => {
+              const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
+              const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
+              const isValidStarRating = (n: number): n is 1 | 2 | 3 | 4 | 5 =>
+                n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
+              return {
+                name,
+                url: `${siteUrl}${getPathname({
+                  locale,
+                  href: { pathname: '/hotel/[slug]', params: { slug } },
+                })}`,
+                ...(isValidStarRating(h.stars) ? { hotel: { starRating: h.stars } } : {}),
+              };
+            }),
+          }),
+        )
+      : null;
+
   return (
-    <main className="max-w-editorial container mx-auto flex min-h-[60vh] flex-col items-start justify-center gap-6 px-4 py-16 sm:py-24">
+    <main className="bg-bg">
       <JsonLdScript data={agencyJsonLd} nonce={nonce} />
       <JsonLdScript data={websiteSearchJsonLd} nonce={nonce} />
       <JsonLdScript data={homeFaqJsonLd} nonce={nonce} />
-      <p className="text-muted text-xs uppercase tracking-[0.18em]">
-        {tCommon('siteName')} — France
-      </p>
-      <h1 className="text-fg font-serif text-4xl sm:text-5xl md:text-6xl">{t('title')}</h1>
-      {/*
-        Secondary signal for the international expansion (Phase 7).
-        Stays sober — the brand DNA is France-first, so this sits as a
-        subtle eyebrow under the H1 rather than competing with the
-        subtitle below.
-      */}
-      <p className="text-fg/70 -mt-2 font-serif text-base italic sm:text-lg">{t('intlBadge')}</p>
-      <p className="text-muted max-w-prose text-lg sm:text-xl">{t('subtitle')}</p>
+      {featuredItemListJsonLd !== null ? (
+        <JsonLdScript data={featuredItemListJsonLd} nonce={nonce} />
+      ) : null}
 
-      <div className="text-muted mt-6 flex flex-wrap items-center gap-3 text-xs">
-        <span className="border-border bg-bg rounded-md border px-3 py-1.5">{t('trust.iata')}</span>
-        <span className="border-border bg-bg rounded-md border px-3 py-1.5">
-          {t('trust.aspst')}
-        </span>
-        <span className="border-border bg-bg rounded-md border px-3 py-1.5">
-          {t('trust.amadeus')}
-        </span>
-      </div>
+      {/* ─── Hero ──────────────────────────────────────────────────── */}
+      <section className="container mx-auto max-w-screen-xl px-4 py-16 sm:py-24">
+        <div className="flex max-w-3xl flex-col gap-6">
+          <p className="text-muted text-xs uppercase tracking-[0.18em]">
+            {tCommon('siteName')} — France
+          </p>
+          <h1 className="text-fg font-serif text-4xl sm:text-5xl md:text-6xl">{t('title')}</h1>
+          {/*
+            Secondary signal for the international expansion (Phase 5
+            multilingual — see AGENTS.md §4ter). Stays sober — the brand
+            DNA is France-first, so this sits as a subtle eyebrow under
+            the H1 rather than competing with the subtitle below.
+          */}
+          <p className="text-fg/70 -mt-2 font-serif text-base italic sm:text-lg">
+            {t('intlBadge')}
+          </p>
+          <p className="text-muted max-w-prose text-lg sm:text-xl">{t('subtitle')}</p>
 
-      <section
-        data-aeo
-        aria-labelledby="home-aeo-title"
-        className="border-border bg-bg mt-10 max-w-prose rounded-lg border p-5"
-      >
-        <h2 id="home-aeo-title" className="text-fg font-serif text-lg">
-          {aeoQuestion}
-        </h2>
-        <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
+          <div className="text-muted mt-4 flex flex-wrap items-center gap-3 text-xs">
+            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
+              {t('trust.iata')}
+            </span>
+            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
+              {t('trust.aspst')}
+            </span>
+            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
+              {t('trust.amadeus')}
+            </span>
+          </div>
+
+          {/* AEO Q&A — sits inside the hero so LLM crawlers find the
+              value-prop in the first viewport without scrolling. */}
+          <section
+            data-aeo
+            aria-labelledby="home-aeo-title"
+            className="border-border bg-bg mt-6 max-w-prose rounded-lg border p-5"
+          >
+            <h2 id="home-aeo-title" className="text-fg font-serif text-lg">
+              {aeoQuestion}
+            </h2>
+            <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
+          </section>
+        </div>
       </section>
 
-      <InternationalComingSoon locale={locale} />
+      {/* ─── Featured Hotels ───────────────────────────────────────── */}
+      {featuredHotels.length > 0 ? (
+        <section
+          aria-labelledby="home-featured-hotels"
+          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
+        >
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+            <div className="max-w-2xl">
+              <p className="text-muted text-xs uppercase tracking-[0.18em]">
+                {t('featuredHotels.eyebrow')}
+              </p>
+              <h2
+                id="home-featured-hotels"
+                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
+              >
+                {t('featuredHotels.title')}
+              </h2>
+              <p className="text-muted mt-3 text-sm sm:text-base">{t('featuredHotels.subtitle')}</p>
+            </div>
+            <Link
+              href="/hotels"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('featuredHotels.seeAll')}
+            </Link>
+          </div>
 
-      <p className="text-muted mt-12 text-sm">{t('comingSoon')}</p>
+          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredHotels.map((h) => {
+              const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
+              const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
+              return (
+                <li key={h.slugFr}>
+                  <article className="border-border bg-bg group h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
+                    <Link
+                      href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                      className="block focus-visible:outline-none"
+                    >
+                      <div className="relative aspect-[4/3] w-full overflow-hidden">
+                        {h.heroPublicId !== null ? (
+                          <HotelImage
+                            cloudName={cloudName}
+                            publicId={h.heroPublicId}
+                            alt={name}
+                            width={640}
+                            height={480}
+                            transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_480"
+                          />
+                        ) : (
+                          <HotelImagePlaceholder variant="thumbnail" hotelName={name} />
+                        )}
+                      </div>
+                      <div className="p-4 sm:p-5">
+                        <div className="text-muted flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em]">
+                          {h.isPalace ? (
+                            <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-900">
+                              {t('featuredHotels.palace')}
+                            </span>
+                          ) : (
+                            <span className="border-border bg-bg rounded-md border px-2 py-0.5">
+                              {'★'.repeat(h.stars)}
+                            </span>
+                          )}
+                          <span>{h.city}</span>
+                        </div>
+                        <h3 className="text-fg mt-3 font-serif text-lg leading-snug">{name}</h3>
+                        <p className="text-muted mt-3 inline-flex items-center text-xs underline-offset-2 group-hover:underline">
+                          {t('featuredHotels.viewFiche')} →
+                        </p>
+                      </div>
+                    </Link>
+                  </article>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* ─── Featured Destinations ─────────────────────────────────── */}
+      {featuredDestinations.length > 0 ? (
+        <section
+          aria-labelledby="home-featured-destinations"
+          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
+        >
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+            <div className="max-w-2xl">
+              <p className="text-muted text-xs uppercase tracking-[0.18em]">
+                {t('featuredDestinations.eyebrow')}
+              </p>
+              <h2
+                id="home-featured-destinations"
+                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
+              >
+                {t('featuredDestinations.title')}
+              </h2>
+              <p className="text-muted mt-3 text-sm sm:text-base">
+                {t('featuredDestinations.subtitle')}
+              </p>
+            </div>
+            <Link
+              href="/destination"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('featuredDestinations.seeAll')}
+            </Link>
+          </div>
+
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {featuredDestinations.map((d) => (
+              <li key={d.slug}>
+                <Link
+                  href={{ pathname: '/destination/[citySlug]', params: { citySlug: d.slug } }}
+                  className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                >
+                  <p className="text-fg font-serif text-base">{d.label}</p>
+                  <p className="text-muted mt-1 text-xs">
+                    {t('featuredDestinations.countLabel', { count: d.count })}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* ─── Featured Rankings ─────────────────────────────────────── */}
+      {featuredRankings.length > 0 ? (
+        <section
+          aria-labelledby="home-featured-rankings"
+          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
+        >
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+            <div className="max-w-2xl">
+              <p className="text-muted text-xs uppercase tracking-[0.18em]">
+                {t('featuredRankings.eyebrow')}
+              </p>
+              <h2
+                id="home-featured-rankings"
+                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
+              >
+                {t('featuredRankings.title')}
+              </h2>
+              <p className="text-muted mt-3 text-sm sm:text-base">
+                {t('featuredRankings.subtitle')}
+              </p>
+            </div>
+            <Link
+              href="/classements"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('featuredRankings.seeAll')}
+            </Link>
+          </div>
+
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredRankings.map((r) => {
+              const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
+              const summary = pickByLocale(
+                locale,
+                r.factualSummaryFr ?? '',
+                r.factualSummaryEn ?? r.factualSummaryFr ?? '',
+              );
+              return (
+                <li key={r.slug}>
+                  <Link
+                    href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
+                    className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-5 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                  >
+                    <p className="text-muted text-[10px] uppercase tracking-[0.18em]">
+                      {r.entryCount > 0
+                        ? t('featuredDestinations.countLabel', { count: r.entryCount })
+                        : null}
+                    </p>
+                    <h3 className="text-fg mt-1 font-serif text-lg leading-snug">{title}</h3>
+                    {summary !== '' ? (
+                      <p className="text-muted mt-3 line-clamp-3 text-sm">{summary}</p>
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* ─── Le Conseil du Concierge teaser ────────────────────────── */}
+      <section
+        aria-labelledby="home-concierge-teaser"
+        className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
+      >
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-muted text-xs uppercase tracking-[0.18em]">
+            {t('conciergeTeaser.eyebrow')}
+          </p>
+          <h2 id="home-concierge-teaser" className="text-fg mt-3 font-serif text-3xl sm:text-4xl">
+            {t('conciergeTeaser.title')}
+          </h2>
+          <p className="text-muted mt-4 text-base sm:text-lg">{t('conciergeTeaser.body')}</p>
+          <Link
+            href="/le-conseil-du-concierge"
+            className="border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring mt-6 inline-flex rounded-md border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+          >
+            {t('conciergeTeaser.cta')}
+          </Link>
+        </div>
+      </section>
+
+      <div className="container mx-auto max-w-screen-xl px-4 pb-16 sm:pb-24">
+        <InternationalComingSoon locale={locale} />
+      </div>
     </main>
   );
 }

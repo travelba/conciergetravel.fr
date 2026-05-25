@@ -40,6 +40,33 @@
       "listAria": "Pays bientôt disponibles sur MyConciergeHotel",
       "countLabel": "{count, plural, one {# palace} other {# palaces}}",
       "guideComingSoon": "Guide complet à venir"
+    },
+    "featuredHotels": {
+      "eyebrow": "Sélection du Concierge",
+      "title": "Les fiches du moment",
+      "subtitle": "Six adresses passées au crible de notre conciergerie. Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "seeAll": "Voir le catalogue complet →",
+      "palace": "Palace",
+      "viewFiche": "Lire la fiche"
+    },
+    "featuredDestinations": {
+      "eyebrow": "Destinations",
+      "title": "Là où le Concierge aime envoyer ses clients",
+      "subtitle": "Paris, Côte d'Azur, Alpes, Provence, vignobles bordelais, Champagne, Corse, Pays basque. Chaque destination ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
+      "seeAll": "Toutes les destinations →",
+      "countLabel": "{count, plural, one {# adresse} other {# adresses}}"
+    },
+    "featuredRankings": {
+      "eyebrow": "Classements éditoriaux",
+      "title": "Les meilleurs hôtels par usage",
+      "subtitle": "Nos classements croisent la distinction Atout France, les étoiles Michelin, les Forbes Travel et notre propre score éditorial. Pas de pay-to-play : chaque entrée est gagnée.",
+      "seeAll": "Tous les classements →"
+    },
+    "conciergeTeaser": {
+      "eyebrow": "Le Conseil du Concierge",
+      "title": "Le secret opérationnel qui change un séjour",
+      "body": "Une chambre d'angle qu'on ne trouve qu'en demandant son numéro. Une table d'hôtel qu'on réserve trois mois à l'avance. Un horaire d'arrivée qui fait basculer le séjour. C'est ce que partage notre Concierge en bas de chaque fiche — gratuitement, parce que ce sont nos hôteliers partenaires qui nous l'ont confié.",
+      "cta": "Découvrir tous les Conseils du Concierge →"
     }
   },
   "searchPage": {

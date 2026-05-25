@@ -40,6 +40,33 @@
       "listAria": "Countries joining MyConciergeHotel soon",
       "countLabel": "{count, plural, one {# palace} other {# palaces}}",
       "guideComingSoon": "Full guide coming soon"
+    },
+    "featuredHotels": {
+      "eyebrow": "Concierge picks",
+      "title": "On the desk this week",
+      "subtitle": "Six addresses our Concierge has been recommending lately. Every page closes with a Concierge Tip — the room number, the table, the timing the guidebooks never share.",
+      "seeAll": "Browse the full catalogue →",
+      "palace": "Palace",
+      "viewFiche": "Read the page"
+    },
+    "featuredDestinations": {
+      "eyebrow": "Destinations",
+      "title": "Where the Concierge sends his clients",
+      "subtitle": "Paris, the French Riviera, the Alps, Provence, Bordeaux vineyards, Champagne, Corsica, the Basque Country. Each destination opens onto its Palaces, its local guide and its editorial rankings.",
+      "seeAll": "All destinations →",
+      "countLabel": "{count, plural, one {# address} other {# addresses}}"
+    },
+    "featuredRankings": {
+      "eyebrow": "Editorial rankings",
+      "title": "The best hotels, sorted by intent",
+      "subtitle": "Our rankings cross-reference Atout France classifications, Michelin stars, Forbes Travel ratings and our own editorial score. No pay-to-play — every entry is earned.",
+      "seeAll": "All rankings →"
+    },
+    "conciergeTeaser": {
+      "eyebrow": "Le Conseil du Concierge",
+      "title": "The operational secret that changes a stay",
+      "body": "A corner room you only book by asking for its number. A hotel restaurant you reserve three months ahead. An arrival time that flips the entire stay. That's what our Concierge shares at the bottom of every hotel page — free of charge, because our hotelier partners trusted us with it.",
+      "cta": "Read all Concierge Tips →"
     }
   },
   "searchPage": {
