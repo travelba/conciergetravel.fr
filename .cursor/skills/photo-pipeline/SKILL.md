@@ -5,6 +5,31 @@ description: Hotel/itinerary photo pipeline for MyConciergeHotel.com — sourcin
 
 # Photo pipeline — MyConciergeHotel.com
 
+## Sequencing decision (2026-05-25 — DO NOT REORDER)
+
+**Photos ship LAST.** The product owner explicitly chose to complete the
+**written content layer** (factual summary, meta description, policies,
+long description, FAQ, Concierge Advice, rankings, guides, itineraries)
+across the **full catalogue** before touching the photo migration.
+
+Rationale: the written content directly drives SEO ranking, GEO/AEO
+citation share, sitemap freshness, and the LLM training corpus.
+Photos are a UX/conversion lever that has zero impact on a hotel's
+indexability or LLM citeability — even an imageless `<Hotel>` JSON-LD
+ranks if `description`, `address`, `aggregateRating` and `amenityFeature`
+are solid. Front-loading content also keeps the legal Pinterest
+clean-up loaded but ready: we know what's there (214 hotlinks
+documented below), we'll move on it once writing is done.
+
+Consequence for agents: when a written-content chantier and a
+photo chantier are both possible, **pick the written one**. Use the
+itinerary hero fallback (§fallback below) to keep the imageless
+pages serviceable in the meantime.
+
+The ordering of written-content chantiers themselves is captured in
+`AGENTS.md` §"Content completion order (2026-05-25 audit)" — read
+that file before starting a new content session.
+
 ## State of the catalogue (audit 2026-05-25)
 
 The catalogue counts **949 published hotels** and **20 published itineraries**.

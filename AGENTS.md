@@ -92,6 +92,48 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 15. **Room sub-page canonical** strict vers elle-même, jamais vers la fiche parent.
 16. **Alt enrichi** mots-clés + contexte sur toute image hôtel (`alt="piscine extérieure chauffée Hôtel X Nice"`).
 
+## 4bis. Content completion order (2026-05-25 audit — written content first, photos last)
+
+Product-owner decision (2026-05-25): **finish the written content layer
+across the full catalogue before touching photos** (`.cursor/skills/photo-pipeline/SKILL.md`
+§Sequencing decision documents the rationale). When you face a choice
+between a written-content chantier and a photo chantier, **pick the
+written one**.
+
+Catalogue snapshot at the time of the decision:
+
+| Surface              | Total | Published | Draft |
+| -------------------- | ----- | --------- | ----- |
+| `hotels`             | 949   | 443       | 506   |
+| `editorial_rankings` | 216   | 131       | 85    |
+| `editorial_guides`   | 86    | 50        | 36    |
+| `itineraries`        | 20    | 20        | 0     |
+
+Field-by-field completeness on the **443 published hotels** (chase
+these gaps in this order — top of the list is the most painful trade-off
+between effort and impact):
+
+| Rank | Field                                                              | Conforming | Gap     | Pipeline outillé ?                                                   |
+| ---- | ------------------------------------------------------------------ | ---------- | ------- | -------------------------------------------------------------------- |
+| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes) | 86 (19%)   | **357** | ❌ to build                                                          |
+| 2    | `factual_summary_fr/en` (CDC §2.3, 130-150 chars, strict template) | 204 (46%)  | **239** | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts` |
+| 3    | `meta_desc_fr/en` (140-170 chars, GSC click-through)               | 164 (37%)  | **279** | ❌ to build                                                          |
+| 4    | `description_fr` ≥ 600 chars (CDC §2.4)                            | 337 (76%)  | 106     | ❌ to build (some upstream extension would also do it)               |
+| ✅   | `long_description_sections` ≥ 3                                    | 443 (100%) | 0       | already done                                                         |
+| ✅   | `faq_content` ≥ 10                                                 | 443 (100%) | 0       | already done                                                         |
+| ✅   | `concierge_advice`                                                 | 443 (100%) | 0       | already done                                                         |
+
+Then the 506 draft hotels need the same 4 blocks (they already have
+long_description_sections + faq + concierge_advice → only #1-4 separate
+them from publish). Then editorial guides drafts (36), then rankings
+drafts (85). Itineraries are 20/20 published — done.
+
+**Phase 1 = chase the 4 gaps on published hotels.** That's roughly
+0.36 × 443 ≈ 160 hotels needing all four blocks, plus partial work
+on the rest. Once published-quality is conformant, Phase 2 promotes
+the 506 drafts. Phase 3 finishes editorial guides + rankings. Phase 4
+is the photo migration.
+
 ## 5. Operational essentials
 
 - **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Currently empty (0 rows). Migrations applied via the Supabase MCP (`apply_migration`).
