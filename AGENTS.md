@@ -104,7 +104,7 @@ Catalogue snapshot at the time of the decision:
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
-| `hotels`             | 949   | 443       | 506   |
+| `hotels`             | 1367  | 443       | 924   |
 | `editorial_rankings` | 216   | 131       | 85    |
 | `editorial_guides`   | 86    | 50        | 36    |
 | `itineraries`        | 20    | 20        | 0     |
@@ -135,10 +135,18 @@ between effort and impact):
 | ✅   | `faq_content` ≥ 10                                                                                                                                                                 | 443 (100%)                                                                                                                               | (same)                                                                                                                           | already done                                                                        |
 | ✅   | `concierge_advice`                                                                                                                                                                 | 443 (100%)                                                                                                                               | (same)                                                                                                                           | already done                                                                        |
 
-Then the 506 draft hotels need the same 4 blocks (they already have
+Then the 924 draft hotels need the same 4 blocks (they already have
 long_description_sections + faq + concierge_advice → only #1-4 separate
 them from publish). Then editorial guides drafts (36), then rankings
 drafts (85). Itineraries are 20/20 published — done.
+
+> Note: the draft count jumped from 506 → 924 on 2026-05-25 after the
+> Relais & Châteaux scaffold pass (418 new drafts inserted as
+> `luxury_tier='relais_chateaux'`, `booking_mode='display_only'`, `P2`).
+> See `scripts/editorial-pilot/src/global-sources/extract-relais-chateaux.ts`
+> and `scripts/editorial-pilot/global-sources/rc-hotels.json` for the
+> source artefacts; 53 pre-existing rows were also patched with R&C
+> membership in `external_sources` (idempotent jsonb merge).
 
 **Phase 1 published-quality envelope closure (2026-05-25)**
 
@@ -166,13 +174,14 @@ Places / Tavily-sourced data, extend the 106 short `description_fr`
 to ≥ 600 chars, and re-run meta_desc on the 16 thin-source failures
 after their descriptions are enriched.
 
-Once published-quality is conformant, Phase 2 promotes the 506 drafts.
-Phase 3 finishes editorial guides + rankings. Phase 4 is the photo
-migration.
+Once published-quality is conformant, Phase 2 promotes the 924 drafts
+(now including the full Relais & Châteaux roster scaffolded on
+2026-05-25). Phase 3 finishes editorial guides + rankings. Phase 4 is
+the photo migration.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue as of 2026-05-25: 949 hotels (443 published), 216 rankings, 86 editorial guides, 20 itineraries. Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue as of 2026-05-25 (post-R&C scaffold): 1367 hotels (443 published, 924 drafts including the full 471-hotel Relais & Châteaux roster), 216 rankings, 86 editorial guides, 20 itineraries. Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

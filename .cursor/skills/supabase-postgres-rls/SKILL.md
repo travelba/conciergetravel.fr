@@ -210,6 +210,64 @@ history) so the next agent doesn't repeat them.
 - Storing card data, even hashed (CDC §11 — PCI is delegated to Amadeus).
 - Selecting `*` from `auth.users` in app code.
 
+## Scripted ETL writes without a pooler URL — use PostgREST + service_role
+
+The repo intentionally **does not commit a `SUPABASE_DB_POOLER_URL`**
+to `.env.local` (the agent uses the Supabase MCP for ad-hoc SQL, and
+the apps use `createServerClient` / `getSupabaseAdminClient`). When a
+batch ETL script (e.g. scaffolding 400+ catalogue rows) needs to write
+to Postgres, **use the PostgREST API directly** via the
+`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` that are
+already in `.env.local`. No new env vars, no `pg` client.
+
+```ts
+const restBase = `${env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1`;
+const headers = {
+  apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+  Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
+
+// ✅ Idempotent bulk upsert — REQUIRES `?on_conflict=<col>`
+const res = await fetch(`${restBase}/hotels?on_conflict=slug`, {
+  method: 'POST',
+  headers: {
+    ...headers,
+    Prefer: 'resolution=ignore-duplicates,return=representation',
+  },
+  body: JSON.stringify(rows), // array of objects, batch up to ~100
+});
+```
+
+### Hard rules (PostgREST upsert)
+
+1. **`Prefer: resolution=ignore-duplicates` is not enough.** Without
+   `?on_conflict=<column>` in the URL the duplicate raises 23505 and
+   aborts the **whole chunk** — you lose dozens of rows for one
+   collision.
+2. **Use `Prefer: resolution=merge-duplicates`** if you actually want
+   to overwrite existing rows; `ignore-duplicates` skips them silently
+   and `representation` returns only the inserted rows so you can
+   count `+N/M`.
+3. **JSONB merge can't be expressed in a single PATCH.** PostgREST
+   does not parse `jsonb || expr` in the body. For idempotent jsonb
+   appends, do a 2-RTT pattern: `GET ?select=external_sources` →
+   compute merged value in JS (guard via `Array.some(...)`) → `PATCH`.
+4. **Batch size sweet spot is 50.** Above ~200 rows PostgREST tail
+   latency spikes; below 20 you waste round-trips. 50 keeps each
+   chunk < 100 KB and < 2 s.
+
+### Lesson learned (2026-05-25)
+
+Scaffolding 418 Relais & Châteaux drafts hit `23505 duplicate slug`
+on chunk 1 (we had already inserted one row via a probe MCP call).
+Without `on_conflict=slug` the entire chunk of 50 was lost. Adding
+`?on_conflict=slug` made the script fully idempotent — re-runs return
+`+0` new rows instead of erroring. See
+`scripts/editorial-pilot/src/global-sources/scaffold-relais-chateaux.ts`
+for the reference implementation.
+
 ## References
 
 - CDC v3.0 §4 (data model), §11 (security), addendum v3.2 (price_comparisons + makcorps_hotel_id).

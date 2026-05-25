@@ -555,6 +555,62 @@ The dedupe pass (Rule 4: post-validation) merges overlapping mentions
 into one entity per key. Net win: zero data loss when the canonical site
 breaks, no manual intervention needed.
 
+### Sub-rule 12-quater-bis — Next.js SSR sites: `basic` fails, `advanced` works
+
+Not every JS-rendered site is fatal to Tavily. Many modern Next.js sites
+(R&C `relaischateaux.com`, several luxury hotel chains) ship a hybrid
+SSR + hydration where:
+
+- `extract_depth: 'basic'` → ~10 % success rate (intermittent: works for
+  some pages, returns "Failed to fetch url" for others — depends on
+  whether Tavily catches the SSR HTML before the JS hydrates).
+- `extract_depth: 'advanced'` → ~99 % success rate (waits for hydration).
+
+**Real regression (2026-05-25)**: extracting 476 R&C hotel pages with
+`basic` → 280/300 (~93 %) failed. Switched to `advanced` → 474/476
+(~99.6 %) succeeded. Cost difference: 2× credits (~$5 vs $2.40 on the
+full run), tiny price for going from 6 % completion to 100 %.
+
+**Anti-pattern** (cost optimisation gone wrong): "default to basic, let
+the failed ones retry on advanced." This requires a second pass that
+adds latency AND if the first pass burned through your daily quota,
+the second pass is delayed by 24 h. Better to pick the right depth
+up-front based on whether the target uses SPA hydration.
+
+**Diagnostic shortcut**: if the homepage view-source is < 1 KB and
+contains only a `<div id="__next"></div>` style root, default to
+`advanced` immediately.
+
+### Sub-rule 12-quater-ter — Vendor catalogues: sitemap is the source of truth
+
+For any vendor catalogue (R&C members, Atout France palaces, Yonder
+listings, etc.), the **canonical XML sitemap is more complete than any
+"directory" listing page**. Reasons:
+
+- Directory pages frequently lazy-load (R&C destination pages show
+  ~10 cards before requiring a "Load more" click — Tavily captures 0).
+- Sitemaps are designed for search engines, so they enumerate every
+  indexable URL by definition.
+- Sitemaps include the full `<lastmod>` timestamp → free freshness
+  signal for incremental refresh.
+
+**Recipe**:
+
+```ts
+// Step 1: fetch robots.txt → find Sitemap: line(s)
+// Step 2: fetch sitemap.xml → parse <url><loc>...</loc></url>
+// Step 3: filter URLs by pattern (e.g. /fr/hotel/<slug>)
+// Step 4: Tavily-extract each filtered URL individually
+// Step 5: LLM-extract per page → aggregate → diff vs internal catalogue
+```
+
+**Real win (2026-05-25)**: R&C destination listing pages exposed only
+~115 URL slugs to Tavily via lazy-loaded cards. The sitemap exposed
+476 hotel URLs. 4× more coverage, same Tavily cost.
+
+See `scripts/editorial-pilot/src/global-sources/parse-rc-sitemap.ts`
+for the reference implementation.
+
 ## Rule 12-quinquies — `gpt-4o-mini` invents enum values: relax + map
 
 `gpt-4o-mini` constantly hallucinates "obviously correct" enum values
