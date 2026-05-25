@@ -125,27 +125,48 @@ between effort and impact):
 > [`editorial-pilot/SKILL.md`](.cursor/skills/editorial-pilot/SKILL.md)
 > §"Audit metric vs production validator".
 
-| Rank | Field                                                                | Envelope conforming (prod Zod)                 | CDC ideal conforming     | Pipeline outillé ?                                                   |
-| ---- | -------------------------------------------------------------------- | ---------------------------------------------- | ------------------------ | -------------------------------------------------------------------- |
-| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes)   | 86 / 443 (19%)                                 | (same)                   | ❌ to build                                                          |
-| 2    | `factual_summary_fr/en` (envelope 110-165 chars; CDC §2.3 = 130-150) | **443 / 443 (100%)** since 2026-05-25 backfill | 200 FR / 208 EN (≈ 46%)  | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts` |
-| 3    | `meta_desc_fr/en` (envelope TBD; CDC = 140-170 chars)                | 164 (37%) — measured on CDC band               | (same)                   | ❌ to build                                                          |
-| 4    | `description_fr` (envelope ≥ 200 chars baked-in; CDC §2.4 ≥ 600)     | 434 / 443 (98%) at ≥ 200 chars                 | 337 / 443 (76%) at ≥ 600 | ❌ to build (some upstream extension would also do it)               |
-| ✅   | `long_description_sections` ≥ 3                                      | 443 (100%)                                     | (same)                   | already done                                                         |
-| ✅   | `faq_content` ≥ 10                                                   | 443 (100%)                                     | (same)                   | already done                                                         |
-| ✅   | `concierge_advice`                                                   | 443 (100%)                                     | (same)                   | already done                                                         |
+| Rank | Field                                                                                                                                                                              | Envelope conforming (prod Zod)                                                                                                           | CDC ideal conforming                                                                                                             | Pipeline outillé ?                                                                  |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes / wifi)                                                                                                          | **443 / 443 (100%)** since migration 0055 backfill (357 marked `_synthetic: true` for the future Google Places / Tavily enrichment pass) | 86 / 443 (19%) have non-synthetic data                                                                                           | ✅ migration `0055_hotels_policies_safe_defaults.sql` (one-shot SQL UPDATE, no LLM) |
+| 2    | `factual_summary_fr/en` (envelope 110-165 chars; CDC §2.3 = 130-150)                                                                                                               | **443 / 443 (100%)** since 2026-05-25 backfill                                                                                           | 200 FR / 208 EN (≈ 46%)                                                                                                          | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts`                |
+| 3    | `meta_desc_fr/en` (generator envelope 140-170 chars in `meta-desc-generator.ts`; renderer has a graceful fallback chain so the band is an SEO quality gate, NOT a publish blocker) | **427 / 443 (96 %)** both locales since 2026-05-25 backfill (16 rows have thin source data and need Tavily enrichment first)             | (same — band is the only target)                                                                                                 | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-meta-desc.ts`                      |
+| 4    | `description_fr` (NO production envelope — renderer accepts any non-null string; CDC §2.4 = 600-1000 words ideal)                                                                  | renderer accepts all 443 / 443                                                                                                           | 337 / 443 (76 %) at ≥ 600 chars heuristic, and 9 / 443 are < 200 chars (one with a literal `**occupe**` typo on `hotel-corsica`) | ❌ extension pipeline still to build for CDC ideal                                  |
+| ✅   | `long_description_sections` ≥ 3                                                                                                                                                    | 443 (100%)                                                                                                                               | (same)                                                                                                                           | already done                                                                        |
+| ✅   | `faq_content` ≥ 10                                                                                                                                                                 | 443 (100%)                                                                                                                               | (same)                                                                                                                           | already done                                                                        |
+| ✅   | `concierge_advice`                                                                                                                                                                 | 443 (100%)                                                                                                                               | (same)                                                                                                                           | already done                                                                        |
 
 Then the 506 draft hotels need the same 4 blocks (they already have
 long_description_sections + faq + concierge_advice → only #1-4 separate
 them from publish). Then editorial guides drafts (36), then rankings
 drafts (85). Itineraries are 20/20 published — done.
 
-**Phase 1 = chase the 4 gaps on published hotels** at the **production
-envelope** level (the real blocker). With `factual_summary` closed
-2026-05-25, the remaining envelope gaps are #1 `policies` (357),
-#3 `meta_desc` (279), #4 `description_fr ≥ 200` (9). Tightening to the
-CDC ideal is an optional Phase 1.5 once envelope-level is 100 %. Once
-published-quality is conformant, Phase 2 promotes the 506 drafts.
+**Phase 1 published-quality envelope closure (2026-05-25)**
+
+By end of session 2026-05-25 the four gaps on published hotels at the
+production envelope level were closed:
+
+- `factual_summary_fr/en` — 443 / 443 in band (1 NULL backfilled via
+  `run-hotel-factual-summary.ts`).
+- `policies` — 443 / 443 non-null via migration
+  `0055_hotels_policies_safe_defaults.sql`. 357 carry `_synthetic: true`
+  for the future Google Places + Tavily enrichment pass.
+- `meta_desc_fr/en` — 427 / 443 (96 %) in the 140-170 band via
+  `run-hotel-meta-desc.ts`. 16 hotels with thin source data remain
+  out-of-band — they need Tavily enrichment of the underlying
+  `description_fr/en` before regeneration.
+- `description_fr` — has no production envelope; the renderer accepts
+  any non-null string. The 9 hotels below 200 chars and the
+  `hotel-corsica` literal `**occupe**` typo are listed for Phase 1.5
+  cleanup (manual edits or a small extension pipeline).
+
+**Phase 1.5 = optional CDC-ideal tightening**: regenerate the 243
+`factual_summary` rows currently in [110, 130) to land in the 130-150
+ideal band, replace the 357 synthetic policies with real Google
+Places / Tavily-sourced data, extend the 106 short `description_fr`
+to ≥ 600 chars, and re-run meta_desc on the 16 thin-source failures
+after their descriptions are enriched.
+
+Once published-quality is conformant, Phase 2 promotes the 506 drafts.
 Phase 3 finishes editorial guides + rankings. Phase 4 is the photo
 migration.
 

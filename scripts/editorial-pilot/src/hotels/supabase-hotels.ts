@@ -46,6 +46,8 @@ export interface HotelRow {
   readonly awards: unknown;
   readonly factual_summary_fr: string | null;
   readonly factual_summary_en: string | null;
+  readonly meta_desc_fr: string | null;
+  readonly meta_desc_en: string | null;
   readonly concierge_advice: unknown;
 }
 
@@ -72,6 +74,8 @@ const HOTEL_SELECT_COLUMNS = [
   'awards',
   'factual_summary_fr',
   'factual_summary_en',
+  'meta_desc_fr',
+  'meta_desc_en',
   'concierge_advice',
 ].join(',');
 
@@ -95,10 +99,28 @@ export interface ListHotelsOptions {
    * Default false — concierge_advice CLI flips it true.
    */
   readonly onlyMissingConciergeAdvice?: boolean;
+  /**
+   * Only include hotels where `meta_desc_fr` OR `meta_desc_en` is
+   * outside the production target band (140-170 chars). Default false —
+   * meta-desc CLI flips it true. Uses PostgREST `or(...)` to combine
+   * the FR and EN length checks.
+   */
+  readonly onlyOutOfBandMetaDesc?: boolean;
+  /**
+   * Restrict to `is_published = true`. Default true — editorial
+   * backfills target the live catalogue first. Set to false to
+   * include draft rows (Phase 2 work).
+   */
+  readonly onlyPublished?: boolean;
   /** Restrict to a single hotel by slug — handy for one-shot debugging. */
   readonly slug?: string;
   /** Restrict to an explicit list of slugs (comma-separated in CLI). */
   readonly slugs?: readonly string[];
+  /**
+   * Order: default `updated_at.desc`. Pass `priority.asc.nullslast` to
+   * surface high-priority hotels first when running a partial batch.
+   */
+  readonly order?: string;
 }
 
 export async function listHotelsForFactualSummary(
@@ -118,12 +140,31 @@ export async function listHotelsForConciergeAdvice(
   return listHotels(cfg, { ...opts, onlyMissingConciergeAdvice: true });
 }
 
+/**
+ * Eligible rows for the meta_desc backfill: published hotels whose
+ * `meta_desc_fr` or `meta_desc_en` falls outside the 140-170 char
+ * production target band. Also includes rows where either column is
+ * NULL or the empty string.
+ */
+export async function listHotelsForMetaDesc(
+  cfg: SupabaseRestConfig,
+  opts: Omit<ListHotelsOptions, 'onlyOutOfBandMetaDesc'> = {},
+): Promise<HotelRow[]> {
+  return listHotels(cfg, { ...opts, onlyOutOfBandMetaDesc: true });
+}
+
 async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Promise<HotelRow[]> {
   const params = new URLSearchParams();
   params.set('select', HOTEL_SELECT_COLUMNS);
-  params.set('order', 'updated_at.desc');
+  params.set('order', opts.order ?? 'updated_at.desc');
 
   const filterParts: string[] = [];
+
+  if (opts.onlyPublished !== false) {
+    // Default to published-only — Phase 1 backfills target the live
+    // catalogue; Phase 2 promotes drafts and can opt out explicitly.
+    filterParts.push('is_published=eq.true');
+  }
 
   if (opts.requireDescription !== false) {
     filterParts.push('description_fr=not.is.null');
@@ -136,6 +177,14 @@ async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Pro
   if (opts.onlyMissingConciergeAdvice === true) {
     filterParts.push('concierge_advice=is.null');
   }
+
+  // NOTE: the length-based filter for meta_desc (140-170 band) lives
+  // client-side in the run script — PostgREST doesn't expose
+  // `char_length(col)` as a filter operand, so we pull the full
+  // published set and refine in TypeScript. `onlyOutOfBandMetaDesc` is
+  // therefore a no-op on the server query, but kept on the options
+  // type for API parity with the factual_summary / concierge_advice
+  // helpers.
 
   if (opts.slug !== undefined) {
     filterParts.push(`slug=eq.${encodeURIComponent(opts.slug)}`);
@@ -206,6 +255,19 @@ export async function updateHotelConciergeAdvice(
   payload: ConciergeAdvicePayload,
 ): Promise<void> {
   await patchHotel(cfg, hotelId, { concierge_advice: payload });
+}
+
+export interface MetaDescUpdate {
+  readonly meta_desc_fr: string;
+  readonly meta_desc_en: string;
+}
+
+export async function updateHotelMetaDesc(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  payload: MetaDescUpdate,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
 }
 
 async function patchHotel(
