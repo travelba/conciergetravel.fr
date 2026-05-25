@@ -96,7 +96,13 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 - **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Currently empty (0 rows). Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
-- **MCP servers** wired up locally: Supabase, Cloudinary, Sanity, Resend, Tavily, Datadog, Opsera, Vercel, GitHub, Superhuman, shadcn. Prefer MCP tools to manual shell when the task fits.
+- **MCP servers** wired up locally (status as of 2026-05-25):
+  - ✅ **Operational**: `user-supabase` (DB schema + SQL exec), `plugin-vercel-vercel` (deployments + build logs), `plugin-sanity-Sanity` (CMS docs, OAuth `contact@travelba.fr`), `plugin-cloudinary-cloudinary-asset-mgmt`, `plugin-cloudinary-cloudinary-env-config`, `cursor-app-control`, `cursor-backend-control`, `cursor-ide-browser`.
+  - ⚠️ **Needs OAuth click** (only expose `mcp_auth`): `plugin-cloudinary-cloudinary-smd`, `plugin-cloudinary-cloudinary-analysis`, `plugin-opsera-devsecops-opsera`. Authenticate when the task actually needs them — the OAuth popup must be clicked in the IDE within 2 min.
+  - ❌ **Broken credentials**: `plugin-tavily-tavily` (token expired — "Not connected"), `plugin-resend-resend` ("API key is invalid"). Regenerate the API key in the vendor dashboard, then re-link in Cursor → Settings → Plugins / MCP.
+  - 🚫 **Mentioned in past sessions but NOT configured on this machine**: Datadog, GitHub, Superhuman, shadcn — either install them or stop referencing them in agent prompts.
+
+  Prefer MCP tools to manual shell when the task fits, but always check the MCP descriptor (`mcps/<server>/tools/<tool>.json`) before calling — schema drift is the #1 source of `Invalid arguments` errors.
 
 ## 6. Commit / PR hygiene
 

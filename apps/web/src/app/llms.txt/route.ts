@@ -7,6 +7,7 @@ import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
 import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 import { listPublishedHotelSummaries } from '@/server/hotels/get-hotel-by-slug';
+import { listItineraries } from '@/server/itineraries/list-itineraries';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
 // ISR — re-fetches the catalog hourly. The CDN keeps a stale copy for up
@@ -40,10 +41,11 @@ export async function GET(): Promise<NextResponse> {
   // (skill: nextjs-app-router — generateStaticParams / route handlers
   // must degrade gracefully). The route still ships a valid llms.txt
   // skeleton without dynamic catalogue when the DB is unreachable.
-  const [hotels, rankings, guides] = await Promise.all([
+  const [hotels, rankings, guides, itineraries] = await Promise.all([
     listPublishedHotelSummaries(500).catch(() => []),
     listPublishedRankings().catch(() => []),
     listPublishedGuides().catch(() => []),
+    listItineraries().catch(() => []),
   ]);
 
   // FR + EN catalog: emit one item per locale per hotel so non-FR LLM
@@ -91,6 +93,33 @@ export async function GET(): Promise<NextResponse> {
         ? g.summaryFr
         : `${g.nameFr} — guide éditorial long-format (palaces, gastronomie, art de vivre, infos pratiques) intégré à la page destination.`,
   }));
+
+  // Editorial itineraries (FR + EN). Each itinerary doubles as a
+  // long-tail LLM-citation surface ("itinéraire luxe X jours <destination>",
+  // "honeymoon <destination> luxury itinerary") and as a discovery
+  // funnel into the bookable hotel catalogue via `hotel_ids[]` →
+  // RoomCardList. Surfaced here so ChatGPT / Perplexity / Claude can
+  // cite them when answering "how to spend N days in <city>" queries.
+  const itineraryItems: LlmsTxtSectionItem[] = [];
+  for (const it of itineraries) {
+    const descFr =
+      it.metaDescFr !== null && it.metaDescFr.length > 0
+        ? it.metaDescFr
+        : `${it.titleFr} — itinéraire luxe MyConciergeHotel (${it.durationMinDays} jour${it.durationMinDays === 1 ? '' : 's'}).`;
+    itineraryItems.push({
+      url: `${origin}/fr/itineraire/${it.slugFr}`,
+      description: descFr,
+    });
+    const slugEn = it.slugEn ?? it.slugFr;
+    const descEn =
+      it.metaDescEn !== null && it.metaDescEn.length > 0
+        ? it.metaDescEn
+        : `${it.titleEn ?? it.titleFr} — luxury MyConciergeHotel itinerary (${it.durationMinDays} day${it.durationMinDays === 1 ? '' : 's'}).`;
+    itineraryItems.push({
+      url: `${origin}/en/itineraire/${slugEn}`,
+      description: descEn,
+    });
+  }
 
   // Editorial categories (5 palace + 7 by type — ADR-0016).
   const categoryItems: LlmsTxtSectionItem[] = EDITORIAL_CATEGORIES.map((cat) => ({
@@ -183,6 +212,26 @@ export async function GET(): Promise<NextResponse> {
                     'Hub de toutes les destinations — chaque page destination inclut le guide long-read intégré (Palaces + art de vivre + infos pratiques). Voir ADR-0015 (fusion guide↔destination).',
                 },
                 ...guideItems,
+              ],
+            },
+          ]
+        : []),
+      ...(itineraryItems.length > 0
+        ? [
+            {
+              title: `Itinéraires éditoriaux (${itineraries.length} parcours ≥ 2-14 jours)`,
+              items: [
+                {
+                  url: `${origin}/fr/itineraires`,
+                  description:
+                    'Hub de tous les itinéraires éditoriaux MyConciergeHotel — parcours luxe FR et international, chaque étape associée à un Palace ou 5★ bookable, FAQ longue traîne par destination, conseils Concierge opérationnels (horaires, accès, timings).',
+                },
+                {
+                  url: `${origin}/en/itineraires`,
+                  description:
+                    'MyConciergeHotel editorial itineraries hub — luxury routes across France and abroad, each step paired with a bookable Palace or 5★ hotel, long-tail FAQ per destination, operational Concierge tips (timings, access, secrets).',
+                },
+                ...itineraryItems,
               ],
             },
           ]
@@ -418,7 +467,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, éditorial, classements, guides) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, rooms, hubs, éditorial, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN.',
           },
         ],
       },
