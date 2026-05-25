@@ -113,30 +113,45 @@ Field-by-field completeness on the **443 published hotels** (chase
 these gaps in this order — top of the list is the most painful trade-off
 between effort and impact):
 
-| Rank | Field                                                              | Conforming | Gap     | Pipeline outillé ?                                                   |
-| ---- | ------------------------------------------------------------------ | ---------- | ------- | -------------------------------------------------------------------- |
-| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes) | 86 (19%)   | **357** | ❌ to build                                                          |
-| 2    | `factual_summary_fr/en` (CDC §2.3, 130-150 chars, strict template) | 204 (46%)  | **239** | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts` |
-| 3    | `meta_desc_fr/en` (140-170 chars, GSC click-through)               | 164 (37%)  | **279** | ❌ to build                                                          |
-| 4    | `description_fr` ≥ 600 chars (CDC §2.4)                            | 337 (76%)  | 106     | ❌ to build (some upstream extension would also do it)               |
-| ✅   | `long_description_sections` ≥ 3                                    | 443 (100%) | 0       | already done                                                         |
-| ✅   | `faq_content` ≥ 10                                                 | 443 (100%) | 0       | already done                                                         |
-| ✅   | `concierge_advice`                                                 | 443 (100%) | 0       | already done                                                         |
+> ⚠ **Audit metric ≠ production validator.** Two thresholds coexist for
+> every text field: (a) the **production envelope** baked into the Zod
+> schema that gates publish (e.g. `factual_summary` = 110-165 chars in
+> `scripts/editorial-pilot/src/hotels/factual-summary-generator.ts`),
+> and (b) the **CDC ideal** documented in the spec (e.g. 130-150 chars
+> in CDC §2.3). The first is the real blocker; the second is
+> aspirational. Always cite the production envelope when reporting gaps
+> — otherwise we over-count work and burn tokens re-generating already-
+> passing rows. See the dedicated section in
+> [`editorial-pilot/SKILL.md`](.cursor/skills/editorial-pilot/SKILL.md)
+> §"Audit metric vs production validator".
+
+| Rank | Field                                                                | Envelope conforming (prod Zod)                 | CDC ideal conforming     | Pipeline outillé ?                                                   |
+| ---- | -------------------------------------------------------------------- | ---------------------------------------------- | ------------------------ | -------------------------------------------------------------------- |
+| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes)   | 86 / 443 (19%)                                 | (same)                   | ❌ to build                                                          |
+| 2    | `factual_summary_fr/en` (envelope 110-165 chars; CDC §2.3 = 130-150) | **443 / 443 (100%)** since 2026-05-25 backfill | 200 FR / 208 EN (≈ 46%)  | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts` |
+| 3    | `meta_desc_fr/en` (envelope TBD; CDC = 140-170 chars)                | 164 (37%) — measured on CDC band               | (same)                   | ❌ to build                                                          |
+| 4    | `description_fr` (envelope ≥ 200 chars baked-in; CDC §2.4 ≥ 600)     | 434 / 443 (98%) at ≥ 200 chars                 | 337 / 443 (76%) at ≥ 600 | ❌ to build (some upstream extension would also do it)               |
+| ✅   | `long_description_sections` ≥ 3                                      | 443 (100%)                                     | (same)                   | already done                                                         |
+| ✅   | `faq_content` ≥ 10                                                   | 443 (100%)                                     | (same)                   | already done                                                         |
+| ✅   | `concierge_advice`                                                   | 443 (100%)                                     | (same)                   | already done                                                         |
 
 Then the 506 draft hotels need the same 4 blocks (they already have
 long_description_sections + faq + concierge_advice → only #1-4 separate
 them from publish). Then editorial guides drafts (36), then rankings
 drafts (85). Itineraries are 20/20 published — done.
 
-**Phase 1 = chase the 4 gaps on published hotels.** That's roughly
-0.36 × 443 ≈ 160 hotels needing all four blocks, plus partial work
-on the rest. Once published-quality is conformant, Phase 2 promotes
-the 506 drafts. Phase 3 finishes editorial guides + rankings. Phase 4
-is the photo migration.
+**Phase 1 = chase the 4 gaps on published hotels** at the **production
+envelope** level (the real blocker). With `factual_summary` closed
+2026-05-25, the remaining envelope gaps are #1 `policies` (357),
+#3 `meta_desc` (279), #4 `description_fr ≥ 200` (9). Tightening to the
+CDC ideal is an optional Phase 1.5 once envelope-level is 100 %. Once
+published-quality is conformant, Phase 2 promotes the 506 drafts.
+Phase 3 finishes editorial guides + rankings. Phase 4 is the photo
+migration.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Currently empty (0 rows). Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue as of 2026-05-25: 949 hotels (443 published), 216 rankings, 86 editorial guides, 20 itineraries. Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

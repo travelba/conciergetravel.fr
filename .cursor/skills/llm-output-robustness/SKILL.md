@@ -662,6 +662,61 @@ if (total < 3500) console.warn(`${tag} ⚠ total ${total} < 3500 — consider re
 The rule prevents the worst pathology: a pipeline silently producing
 1 200-word "long-reads" because a single section truncated.
 
+## Rule 14 — Audit metric must mirror the production validator, not the CDC ideal
+
+Every editorial field has two thresholds:
+
+1. **Production envelope** — the `z.string().min(N).max(M)` baked into
+   the generator's Zod schema. This is what gates publish. Example:
+   `FACTUAL_SUMMARY_MIN_CHARS = 110` / `MAX = 165` in
+   `scripts/editorial-pilot/src/hotels/factual-summary-generator.ts`.
+2. **CDC ideal** — the spec-document target band, often tighter.
+   Example: CDC §2.3 says `factual_summary` should be 130-150 chars.
+
+These coexist on purpose: the envelope is what the team accepts to
+ship; the ideal is what content reviewers chase post-launch. **But the
+audit metric reported to roadmap-makers (`AGENTS.md` §4bis, dashboards,
+status emails) MUST use the envelope band, not the CDC ideal.**
+
+The 2026-05-25 session learned this the hard way. `AGENTS.md` §4bis
+reported a "239 hotel gap" on `factual_summary`. The pipeline run found
+only **1 NULL row** to backfill — the other 238 were already inside the
+production envelope (110-165) but outside the CDC ideal (130-150).
+Acting on the inflated gap would have re-generated 238 already-passing
+rows at a cost of ~1 M tokens (~$5) with non-trivial regression risk.
+
+```sql
+-- ✅ Good — audit query mirrors the production Zod gate
+select count(*) filter (
+  where is_published
+    and (factual_summary_fr is null
+      or length(factual_summary_fr) not between 110 and 165)
+) as envelope_failures
+from public.hotels;
+
+-- ❌ Bad — audit query uses the CDC ideal, inflates the gap
+select count(*) filter (
+  where is_published
+    and length(factual_summary_fr) not between 130 and 150
+) as ideal_misses
+from public.hotels;
+```
+
+**Practical rules:**
+
+- The Zod schema in the generator is the single source of truth for the
+  envelope. Audit queries import or mirror its constants.
+- If the team decides the CDC ideal must become a hard rule, **tighten
+  the Zod gate first**, then re-audit. Never the other way around (gap
+  reports without a corresponding gate change just generate make-work).
+- When reporting a gap in a PR description, status update, or AGENTS.md
+  table, always state which threshold you used. Default to envelope
+  unless explicitly chasing CDC compliance.
+
+This rule applies to every editorial text field (`factual_summary`,
+`meta_desc`, `description_fr`, `concierge_advice.body`, ranking intros,
+guide sections, FAQ answer length).
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -678,6 +733,7 @@ The rule prevents the worst pathology: a pipeline silently producing
 - ❌ Default `max_tokens: 2000` on any list-extraction call → catastrophic truncation at ≥ 50 items (gpt-4o-mini outputs ~25 tokens per JSON entry).
 - ❌ Tavily-extract on a JS-rendered single-page-app without a known third-party article fallback → silent zero-hotel runs.
 - ❌ Hard `z.enum(LUXURY_TIER_VALUES)` directly on LLM output (or any open-ended brand/category enum) → 10-15 % data loss per run from invented values.
+- ❌ Reporting "X rows need re-generation" against the CDC ideal band instead of the production envelope → inflates roadmap, triggers wasted token spend on rows that already pass the publish gate.
 
 ## References
 
