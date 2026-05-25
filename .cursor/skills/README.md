@@ -63,6 +63,9 @@ Use this when you don't know where to start.
 | Unit (Vitest) + integration (MSW) + E2E (Playwright) + axe + Lighthouse                                           | [`test-strategy`](test-strategy/SKILL.md)                                                                      |
 | GitHub Actions, Vercel previews, Supabase migrations, release flow                                                | [`cicd-release-management`](cicd-release-management/SKILL.md)                                                  |
 | **Vercel env vars scoped per environment** (Production / Preview / Development trap)                              | [`cicd-release-management` §Rule 9](cicd-release-management/SKILL.md)                                          |
+| **`turbo-ignore` cancels empty commits / off-scope changes** — `--allow-empty` can't force a rebuild              | [`cicd-release-management` §Rule 10](cicd-release-management/SKILL.md) ✏️                                      |
+| **Direct SQL update bypasses Payload `afterChange`** — cache stays stale on publish via Supabase MCP              | [`backoffice-cms` §Direct SQL updates](backoffice-cms/SKILL.md) ✏️                                             |
+| **Publish itinerary seed from `draft` → `published`** — 2-phase flow, cache invalidation patterns                 | [`itinerary-editorial-pipeline` §Rule 6](itinerary-editorial-pipeline/SKILL.md) ✏️                             |
 | **Next.js App Router `_folder` private convention** (route silently 404s)                                         | [`nextjs-app-router` §Private folders](nextjs-app-router/SKILL.md)                                             |
 | **`next-intl` namespace nested under another → raw keys at runtime, prod 500** (PR #71 → #72)                     | [`nextjs-app-router` §Internationalization](nextjs-app-router/SKILL.md) ✏️                                     |
 | **PowerShell / Windows dev commands, Supabase SSL strip, `commit -F` for special chars, mystery-commit recovery** | [`windows-dev-environment`](windows-dev-environment/SKILL.md) ✏️                                               |
@@ -224,23 +227,25 @@ links to `typescript-strict-zod-interop`, etc.
 
 This batch capitalised the editorial v2 launch:
 
-| Pattern paid for                                                                                     | Capture                                                                                      |
-| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| LLM truncation on multi-faceted prompts → multi-call architecture                                    | `llm-output-robustness`                                                                      |
-| LLM extraction vs generation (temperature 0, gpt-4o-mini, evidence_quote)                            | `llm-output-robustness` rule 9                                                               |
-| `AUTO_DRAFT` sentinels for missing facts                                                             | `llm-output-robustness` rule 10                                                              |
-| Pilot → validate → scale workflow                                                                    | `llm-output-robustness` rule 11                                                              |
-| Word-count gates as warnings, not blockers                                                           | `llm-output-robustness` rule 12                                                              |
-| `exactOptionalPropertyTypes` ↔ Zod ↔ React props interop                                             | `typescript-strict-zod-interop`                                                              |
-| PowerShell quoting, Supabase SSL strip, Unix commands                                                | `windows-dev-environment`                                                                    |
-| DATAtourisme + Wikidata + Wikipedia + Tavily cascade                                                 | `content-enrichment-pipeline` ⭐                                                             |
-| DATAtourisme **events** (gotchas: `takesPlaceAt` nested, silent 0 on subtype filters, swapped dates) | `content-enrichment-pipeline` §Rule 11                                                       |
-| TOC sidebar + EnrichedText auto-link + callouts + sources footer                                     | `editorial-long-read-rendering` ⭐                                                           |
-| **CSP nonce ↔ `JsonLdScript` ↔ `force-dynamic` contract** (PR #56 / #57)                             | `structured-data-schema-org`, `nextjs-app-router`, `security-engineering` (all extended)     |
-| **`next-intl` namespace nesting silently 500s `force-dynamic` pages** (PR #71 → hotfix PR #72)       | `nextjs-app-router` §Internationalization (extended) + smoke contract in `e2e/smoke.spec.ts` |
-| **PowerShell `git commit -m` mangles `>`, `&`, `\|`, newlines → use `git commit -F`** (PR #71)       | `windows-dev-environment` §Rule 9 ter                                                        |
-| **"Mystery commit" on local `main` recovery without `--force` to origin** (commit `49953e2`)         | `windows-dev-environment` §Rule 9 quater                                                     |
-| **MCP tool-call args drift on ≥ 10 KB opaque payloads** (lost JSONB sections on reims, 2026-05-24)   | `llm-output-robustness` rule 13                                                              |
-| **`pg_net` async + transactional**: enqueue inside SECURITY DEFINER + loop-wait + raise = dead loop  | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
-| **`commit;` inside procedure fails under PostgREST/MCP** (`2D000 invalid transaction termination`)   | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
-| **DDL guard regex must require SQL object keyword** to avoid matching "car drop at the foot of..."   | `supabase-postgres-rls` §DDL/DML guard regex                                                 |
+| Pattern paid for                                                                                                    | Capture                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| LLM truncation on multi-faceted prompts → multi-call architecture                                                   | `llm-output-robustness`                                                                      |
+| LLM extraction vs generation (temperature 0, gpt-4o-mini, evidence_quote)                                           | `llm-output-robustness` rule 9                                                               |
+| `AUTO_DRAFT` sentinels for missing facts                                                                            | `llm-output-robustness` rule 10                                                              |
+| Pilot → validate → scale workflow                                                                                   | `llm-output-robustness` rule 11                                                              |
+| Word-count gates as warnings, not blockers                                                                          | `llm-output-robustness` rule 12                                                              |
+| `exactOptionalPropertyTypes` ↔ Zod ↔ React props interop                                                            | `typescript-strict-zod-interop`                                                              |
+| PowerShell quoting, Supabase SSL strip, Unix commands                                                               | `windows-dev-environment`                                                                    |
+| DATAtourisme + Wikidata + Wikipedia + Tavily cascade                                                                | `content-enrichment-pipeline` ⭐                                                             |
+| DATAtourisme **events** (gotchas: `takesPlaceAt` nested, silent 0 on subtype filters, swapped dates)                | `content-enrichment-pipeline` §Rule 11                                                       |
+| TOC sidebar + EnrichedText auto-link + callouts + sources footer                                                    | `editorial-long-read-rendering` ⭐                                                           |
+| **CSP nonce ↔ `JsonLdScript` ↔ `force-dynamic` contract** (PR #56 / #57)                                            | `structured-data-schema-org`, `nextjs-app-router`, `security-engineering` (all extended)     |
+| **`next-intl` namespace nesting silently 500s `force-dynamic` pages** (PR #71 → hotfix PR #72)                      | `nextjs-app-router` §Internationalization (extended) + smoke contract in `e2e/smoke.spec.ts` |
+| **PowerShell `git commit -m` mangles `>`, `&`, `\|`, newlines → use `git commit -F`** (PR #71)                      | `windows-dev-environment` §Rule 9 ter                                                        |
+| **"Mystery commit" on local `main` recovery without `--force` to origin** (commit `49953e2`)                        | `windows-dev-environment` §Rule 9 quater                                                     |
+| **MCP tool-call args drift on ≥ 10 KB opaque payloads** (lost JSONB sections on reims, 2026-05-24)                  | `llm-output-robustness` rule 13                                                              |
+| **`pg_net` async + transactional**: enqueue inside SECURITY DEFINER + loop-wait + raise = dead loop                 | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
+| **`commit;` inside procedure fails under PostgREST/MCP** (`2D000 invalid transaction termination`)                  | `supabase-postgres-rls` §Async HTTP from Postgres                                            |
+| **DDL guard regex must require SQL object keyword** to avoid matching "car drop at the foot of..."                  | `supabase-postgres-rls` §DDL/DML guard regex                                                 |
+| **`turbo-ignore` cancels `--allow-empty` commits → no buildId bump, no `unstable_cache` invalidation** (2026-05-25) | `cicd-release-management` Rule 10 ✏️                                                         |
+| **Direct SQL `update set status='published'` bypasses Payload `afterChange` hooks → hub cache stale** (2026-05-25)  | `backoffice-cms` §Direct SQL updates ✏️ + `itinerary-editorial-pipeline` Rule 6 ✏️           |

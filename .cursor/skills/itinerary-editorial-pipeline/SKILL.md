@@ -178,6 +178,44 @@ assert(itinerary.related_itinerary_slugs.length >= 2, 'Min 2 itinéraires simila
 
 ---
 
+## Rule 6 — Publier un seed : SQL direct = cache stale, prévoir le hook
+
+Le seed des itinéraires se fait toujours en deux phases :
+
+1. **INSERT** des rows en `status = 'draft'` (idempotent via
+   `ON CONFLICT (slug_fr) DO UPDATE`) — c'est ce que produisent les
+   fichiers `scripts/editorial-pilot/itineraries/seed/*.sql` et le
+   chemin `pg_net + apply_itinerary_from_response` (cf. migrations
+   `0051`–`0054`).
+2. **UPDATE** `status = 'draft' → 'published'` après QA humain.
+
+Si la phase 2 est faite via Supabase MCP (`update public.itineraries set
+status = 'published' where slug_fr in (...)`), **les hooks Payload
+`afterChange` ne tournent pas** parce que le process Payload n'observe
+pas le write SQL direct. Conséquence :
+
+| Surface                       | Symptôme                                                                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `/itineraire/<slug>` (détail) | ✅ Rend immédiatement via SSR-fallback (`dynamicParams = true` par défaut, `generateStaticParams` se déclenche à la demande). |
+| `/itineraires` (hub)          | ❌ Sert l'ancien snapshot jusqu'à expiration ISR (`revalidate = 3600` post-`196d97e`).                                        |
+| `/sitemap.xml` + sub-sitemaps | ❌ Idem — il faut un rebuild ou un `revalidateTag('itineraries-hub')` explicite.                                              |
+| Algolia search index          | ❌ Pas réindexé.                                                                                                              |
+
+**Pattern correct selon le contexte** :
+
+| Contexte                    | Action                                                                                                                                                                                                                                                                                                                      |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| QA légère (1-2 itinéraires) | Repasser dans Payload UI, cliquer `Save` → hooks fire → cache invalidé proprement.                                                                                                                                                                                                                                          |
+| Bulk (≥ 5 itinéraires)      | Faire le `update` SQL en MCP, **puis** : (a) ship un changement code dans `apps/web/src/**` qui invalide légitimement (typique : tightener le `revalidate` d'un hub) — voir `cicd-release-management/SKILL.md` Rule 10 — ou (b) appeler `/api/admin/revalidate?tag=itineraries-hub` (endpoint à créer si pas encore wired). |
+| Hotfix urgent               | Update SQL + push code change minimal qui affecte `@mch/web` (ex : ajustement TTL ISR) pour forcer un build Vercel propre. **Ne JAMAIS** `git commit --allow-empty` — `turbo-ignore` le cancel.                                                                                                                             |
+
+Référence : 24-25 mai 2026, 19 itinéraires `draft → published`. Le hub
+`/itineraires` a continué à afficher "1 published itinerary" jusqu'au
+commit `196d97e` qui a aligné le TTL hub à 3600s (au lieu de 86400s).
+Voir `backoffice-cms/SKILL.md` §Hooks for full incident transcript.
+
+---
+
 ## Anti-patterns
 
 | Erreur                                    | Impact                                        | Fix                                                                          |

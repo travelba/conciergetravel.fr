@@ -297,6 +297,67 @@ Mitigations:
    defensive `describe(value)` helpers so a missing var reports as
    `{ present: false }` instead of crashing the route.
 
+### Rule 10 — `turbo-ignore` Ignored Build Step cancels empty / off-scope commits
+
+The Vercel project for `@mch/web` is wired to the
+[`turbo-ignore`](https://vercel.com/docs/monorepos/turborepo#skipping-unaffected-projects)
+"Ignored Build Step" so unrelated changes in the monorepo (admin-only edits,
+package-level scripts, `.cursor/skills/`, `.cursor/rules/`, `docs/`, etc.) do
+not waste a production build slot. The trade-off is that **any commit that
+does not touch a file in the dependency closure of `@mch/web` is auto-`CANCELED`**
+after ~10–12 s with this build log:
+
+```
+≫   This project and its dependencies are not affected
+⏭ Ignoring the change
+The Deployment has been canceled as a result of running the command defined in the "Ignored Build Step" setting.
+```
+
+This bites in two recurring situations:
+
+1. **`git commit --allow-empty` to force a rebuild**. The classic "bump the
+   buildId to invalidate `unstable_cache`" trick **does not work** here —
+   turbo-ignore sees zero affected files and cancels. The empty commit is
+   harmless but useless. A real file in the `@mch/web` graph must change.
+2. **Docs-only / skills-only PRs**. Commits limited to
+   `.cursor/skills/**`, `.cursor/rules/**`, `docs/**`, `AGENTS.md`,
+   `README.md`, `EDITORIAL_VOICE.md` are all skipped. Don't expect a preview
+   URL — the deployment is created, then immediately cancelled.
+
+**Pattern when you genuinely need to invalidate `unstable_cache` / force
+`generateStaticParams` to re-run after a DB-only data change** (e.g.
+status-flip from `draft` to `published` via a direct SQL update that
+bypasses Payload `afterChange` hooks):
+
+| Approach                                                                                                                                      | When to use                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Make a meaningful code change** in `apps/web/src/**` (e.g. tighten an ISR TTL that was too lax, fix a real bug surfaced by the data change) | Default — the legitimate path, leaves an audit trail.                                                                         |
+| **Add or call a `/api/admin/revalidate?tag=…`** endpoint that wraps `revalidateTag()` (auth-gated by the operator role + a short-TTL HMAC).   | Frequent ops: re-publishing, un-archiving, content corrections. Worth a one-time investment if you do this more than monthly. |
+| **Trigger a Payload `afterChange` hook** by re-saving the doc in the back-office UI.                                                          | When the DB row is editable from Payload (most editorial collections are).                                                    |
+| `git commit --allow-empty` + `git push`                                                                                                       | ❌ NEVER — silently cancels, gives the false impression a build ran.                                                          |
+
+Reference incident (May 2026): the 19 itineraries seeded as
+`status = 'draft'` then flipped to `published` via Supabase MCP did not
+trigger Payload hooks, so `/itineraires` kept serving the cached
+"1 published itinerary" listing. Three deploys in a row got canceled
+(commits `3f51274` + the two `docs(skills)` empty pushes before it)
+until we shipped the real fix — aligning the hub `revalidate` TTL from
+`86400` to `3600` in `apps/web/src/app/[locale]/itineraires/page.tsx`
+(commit `196d97e`). That single file change triggered a build and the
+hub refreshed with all 20 cards within minutes.
+
+How to detect this happened to you:
+
+- `vercel.com/.../deployments` shows the commit in `CANCELED` state with a
+  `bld_…` id but no build output.
+- `get_deployment_build_logs` returns a 12-line transcript ending on
+  "Ignoring the change" — no `pnpm build`, no static prerender step.
+
+How to recover:
+
+- Push a real change in the `@mch/web` graph (anything under `apps/web/src/`,
+  or any `packages/*` that `apps/web` depends on per `pnpm why`).
+
 ## References
 
 - CDC v3.0 §13 (phasage), §15 (livrables).

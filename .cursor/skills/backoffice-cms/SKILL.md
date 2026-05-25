@@ -37,6 +37,54 @@ Invoke when:
 - Tags: `hotel:<slug>`, `editorial:<slug>`, `hub:<region>`, `author:<slug>`, `global:site-settings`.
 - Same hook triggers Algolia reindex.
 
+#### Direct SQL updates bypass `afterChange` — cache stays stale
+
+When a row is updated via raw SQL (Supabase MCP `execute_sql`, a one-off
+psql, a `packages/db/migrations/*.sql` data fix), **Payload hooks are not
+invoked** — the DB sees the write but the Node process embedding Payload
+never observes it. The cascade that normally fires (`revalidateTag(...)`
+on `apps/web` + Algolia reindex) is silently skipped, so:
+
+- `unstable_cache` keeps serving the stale projection until its TTL
+  expires (`itineraries-hub` is 1 h post-`196d97e`, `editorial-pages`
+  is 1 h, hotel-detail tags are 1 h).
+- Hub pages with `revalidate = 86400` (or any > 3600) refresh **a full
+  day later**, not at the next render — Next.js' ISR clock is independent
+  of the cache layer.
+- Algolia keeps returning the pre-update record set.
+
+**Pattern for any SQL-direct content change** (status flip, bulk archive,
+data correction):
+
+1. Apply the SQL update via `user-supabase.execute_sql`.
+2. Either:
+   - **(preferred when feasible)** Re-touch the row from the Payload UI
+     to fire the legitimate `afterChange` cascade, or
+   - Call the internal `/api/admin/revalidate` endpoint with the exact
+     tags you need (`itineraries-hub`, `hotel:<slug>`, …), or
+   - Push a real code change to `apps/web/src/**` that incidentally
+     invalidates the buildId (e.g. tighten the affected route's
+     `revalidate` TTL — useful if the previous TTL was too lax).
+3. Verify with a `WebFetch` on the public URL that the new shape is
+   served before declaring the operation complete.
+
+`git commit --allow-empty` does **not** work as an invalidation
+trigger because Vercel's `turbo-ignore` cancels it — see
+[`cicd-release-management/SKILL.md`](../cicd-release-management/SKILL.md)
+Rule 10 for the long story.
+
+Reference incident (24-25 May 2026): 19 itineraries flipped from
+`draft` to `published` via `update public.itineraries set status =
+'published' where status = 'draft'`. Detail pages rendered immediately
+on `myconciergehotel.com/itineraire/<slug>` via SSR-fallback
+(`dynamicParams` defaults to `true`), but the hub `/itineraires`
+kept serving the cached "1 published itinerary" snapshot for hours.
+The fix was tightening the hub's `revalidate = 86400` → `3600`
+(commit `196d97e`), which both shipped a meaningful code improvement
+AND happened to invalidate the cache. See
+[`itinerary-editorial-pipeline/SKILL.md`](../itinerary-editorial-pipeline/SKILL.md)
+for the editorial side of the same incident.
+
 ### RBAC
 
 - `admin` — all.
