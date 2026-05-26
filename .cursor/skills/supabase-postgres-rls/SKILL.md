@@ -92,6 +92,31 @@ Invoke when:
 - Booking write policies allow only matching `auth.uid() = user_id` for SELECT/UPDATE; INSERT goes through service role from server actions.
 - Loyalty members readable by owner + admin; writable by service role.
 
+#### `auth_rls_initplan` advisor — the **exact** subquery shape matters
+
+The Supabase advisor only credits the `auth.<fn>()` init-plan optimisation when the function call is the **immediate** child of the `SELECT` subquery. Anything else (operator, JSON-extract, cast) must live **outside** the parens. Mismatched parens are a real recurring source of WARN advisors — `0057` shipped with the wrong shape and required `0058` as a same-day fix.
+
+```sql
+-- ❌ Wrong — advisor still flags this even though it looks correct.
+-- The `->> 'role'` is inside the subquery, so the optimisation does not register.
+using ((select auth.jwt() ->> 'role') in ('operator', 'admin'))
+
+-- ✅ Correct — `select auth.jwt()` is the immediate child of the subquery,
+-- and the JSON extract / array membership happens outside.
+using (((select auth.jwt()) ->> 'role') = any (array['operator', 'admin']))
+```
+
+Same rule for `auth.uid()`:
+
+```sql
+-- ✅
+using (user_id = (select auth.uid()))
+```
+
+The pattern in `IN (...)` vs `= any (array[...])` is interchangeable for correctness, but the canonical repo style is `= any (array[...])` because it survives copy-paste across policies without bracket gymnastics. Match the surrounding migrations.
+
+**Always run `get_advisors` (performance lint) after applying a migration that introduces RLS policies.** If a new `auth_rls_initplan` WARN appears, ship a fix migration the same session — don't let the warning rot.
+
 ### Migrations
 
 - Files numbered `NNNN_description.sql`. Idempotent if possible. Drizzle schema kept in sync.

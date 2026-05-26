@@ -68,7 +68,16 @@
     "itineraries:paris": "tsx src/itineraries/run-itinerary.ts paris-luxe-3-jours",
     "itineraries:dump": "tsx src/itineraries/dump-itinerary.ts",
     "itineraries:batch": "tsx src/itineraries/run-all-briefs.ts",
-    "typecheck": "tsc --noEmit"
+    "club:conseil-enrichi": "tsx src/hotels/run-hotel-premium-section.ts --section=conseil_enrichi",
+    "club:conseil-enrichi:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=conseil_enrichi --dry-run --limit=3",
+    "club:quartier": "tsx src/hotels/run-hotel-premium-section.ts --section=quartier_concierge",
+    "club:quartier:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=quartier_concierge --dry-run --limit=3",
+    "club:gastronomie": "tsx src/hotels/run-hotel-premium-section.ts --section=gastronomie_concierge",
+    "club:gastronomie:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=gastronomie_concierge --dry-run --limit=3",
+    "club:timing": "tsx src/hotels/run-hotel-premium-section.ts --section=timing_acces_concierge",
+    "club:timing:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=timing_acces_concierge --dry-run --limit=3",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -83,6 +92,7 @@
     "@types/pg": "^8.20.0",
     "pg": "^8.21.0",
     "tsx": "^4.22.3",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "catalog:"
   }
 }

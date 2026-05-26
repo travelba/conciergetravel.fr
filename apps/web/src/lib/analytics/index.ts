@@ -4,6 +4,8 @@ export type {
   BookingComplete,
   BookingMode,
   BookingStart,
+  ClubBenefitsViewed,
+  ClubSignupCtaClicked,
   HotelView,
   LockSubmit,
   PricingView,

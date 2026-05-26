@@ -3180,6 +3180,8 @@
       "dashboardDescription": "Retrouvez vos réservations et demandes MyConciergeHotel.",
       "signInTitle": "Connexion",
       "signUpTitle": "Créer un compte",
+      "joinClubTitle": "Rejoindre Le Concierge Club",
+      "joinClubDescription": "Créez votre compte en 30 secondes — gratuit, sans engagement.",
       "forgotTitle": "Mot de passe oublié",
       "resetTitle": "Nouveau mot de passe",
       "favoritesTitle": "Mes favoris",
@@ -3211,6 +3213,22 @@
       "submit": "Créer mon compte",
       "haveAccount": "J'ai déjà un compte",
       "disclaimer": "En créant un compte, vous acceptez nos conditions générales et notre politique de confidentialité."
+    },
+    "joinClub": {
+      "eyebrow": "Le Concierge Club",
+      "title": "Rejoindre Le Concierge Club",
+      "subtitle": "Avantages chez nos hôtels partenaires, tarifs privilégiés à venir et l'œil du Concierge sur votre prochain séjour. Gratuit, sans CB.",
+      "firstName": "Prénom (optionnel)",
+      "submit": "Rejoindre — c'est gratuit",
+      "haveAccount": "J'ai déjà un compte",
+      "disclaimer": "En rejoignant Le Concierge Club, vous acceptez nos CGV et la politique de confidentialité. Newsletter mensuelle incluse, désinscription en un clic.",
+      "magicLinkCta": "M'envoyer un lien magique par e-mail",
+      "magicLinkHint": "Aucun mot de passe à retenir : un clic dans votre boîte de réception suffit.",
+      "magicLinkSent": "Si un compte existe avec cette adresse, un lien de connexion vient d'être envoyé. Vérifiez votre boîte de réception (et les spams).",
+      "oauthOr": "ou continuez avec",
+      "oauthGoogle": "Continuer avec Google",
+      "oauthApple": "Continuer avec Apple",
+      "pendingBanner": "Compte créé. Confirmez votre adresse e-mail pour activer votre Concierge Club."
     },
     "forgot": {
       "eyebrow": "Réinitialisation",
@@ -3276,7 +3294,9 @@
       "email_not_confirmed": "Votre e-mail n'est pas encore confirmé. Vérifiez votre boîte de réception.",
       "rate_limited": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
       "upstream": "Une erreur est survenue. Veuillez réessayer.",
-      "session_missing": "Votre session a expiré. Reconnectez-vous pour continuer."
+      "session_missing": "Votre session a expiré. Reconnectez-vous pour continuer.",
+      "oauth_unavailable": "Cette méthode de connexion est momentanément indisponible. Essayez l'e-mail ou un autre fournisseur.",
+      "magic_link_failed": "Impossible d'envoyer le lien magique. Réessayez dans quelques instants."
     },
     "favorites": {
       "eyebrow": "Espace voyageur",
@@ -3520,5 +3540,168 @@
         "other": "Autres références"
       }
     }
+  },
+  "clubBenefits": {
+    "heading": "Le Concierge Club — vos avantages",
+    "anonNotice": "Vos avantages possibles lorsque vous voyagez avec MyConciergeHotel. Les bénéfices effectifs sont confirmés à la réservation, en fonction de l'hôtel et de la disponibilité.",
+    "clubPersonalisationPending": "Personnalisation en cours. Nous activerons vos avantages hôtel par hôtel dès que nos partenaires les auront confirmés.",
+    "clubCta": "Voir tous mes avantages",
+    "prestigeCta": "Découvrir le Prestige",
+    "tierBadge": {
+      "club": "Club (gratuit)",
+      "prestige": "Prestige"
+    },
+    "subjectToAvailability": "Sur demande, selon la disponibilité de l'hôtel",
+    "phase6Notice": "Activé à la mise en service de notre comparateur de prix membre.",
+    "codes": {
+      "concierge_newsletter_monthly": {
+        "title": "Newsletter mensuelle du Concierge",
+        "body": "Une sélection mensuelle d'hôtels, d'itinéraires et de conseils opérationnels que vous ne trouverez pas sur les guides commerciaux."
+      },
+      "program_membership_account": {
+        "title": "Votre compte Le Concierge Club",
+        "body": "Suivez vos réservations, vos demandes en cours et vos favoris dans un seul tableau de bord."
+      },
+      "prestige_launch_priority": {
+        "title": "Priorité au lancement Prestige",
+        "body": "Les membres du Club seront contactés en premier lorsque le tier Prestige (essai gratuit 30 jours) ouvrira ses portes."
+      },
+      "member_rate_differential": {
+        "title": "Tarif membre",
+        "body": "Un tarif négocié inférieur au prix public sur les hôtels éligibles. Affiché en transparence à côté du prix public."
+      },
+      "breakfast_for_2": {
+        "title": "Petit-déjeuner pour deux",
+        "body": "Petit-déjeuner inclus pour deux personnes sur les hôtels Little partenaires."
+      },
+      "room_upgrade": {
+        "title": "Surclassement de chambre",
+        "body": "Si la catégorie supérieure est libre à votre arrivée, vous y êtes surclassé automatiquement."
+      },
+      "hotel_credit": {
+        "title": "Crédit hôtel",
+        "body": "Un crédit utilisable au restaurant, au spa ou sur les services in-room. Montant variable selon l'hôtel et la durée du séjour."
+      },
+      "late_checkout_14h": {
+        "title": "Check-out tardif à 14h",
+        "body": "Restez jusqu'à 14h le jour du départ, sans frais supplémentaires. Confirmation 24h avant."
+      },
+      "welcome_gift": {
+        "title": "Cadeau de bienvenue",
+        "body": "Une attention dans la chambre à votre arrivée, choisie par l'hôtel (champagne, fleurs, dégustation)."
+      },
+      "whatsapp_concierge_24_7": {
+        "title": "Concierge WhatsApp 24/7",
+        "body": "Une ligne directe avec notre concierge avant, pendant et après votre séjour."
+      },
+      "gm_introduction": {
+        "title": "Présentation au directeur",
+        "body": "Mention transmise à la direction de l'hôtel pour une attention personnalisée à votre arrivée."
+      }
+    }
+  },
+  "clubLanding": {
+    "meta": {
+      "title": "Le Concierge Club — programme fidélité MyConciergeHotel",
+      "description": "Découvrez Le Concierge Club : un compte gratuit, des avantages chez nos hôtels partenaires, et bientôt un tarif membre transparent. Sans CB, sans engagement."
+    },
+    "eyebrow": "Programme membres",
+    "title": "Le Concierge Club",
+    "lede": "Un programme sobre, sans fanfare. Vous voyagez mieux parce que vous voyagez accompagné — pas parce que vous payez pour le privilège.",
+    "primaryCta": "Rejoindre — c'est gratuit",
+    "secondaryCta": "Découvrir Prestige (bientôt)",
+    "sections": {
+      "valueTitle": "Ce que le Club apporte",
+      "valueBody": "Un compte centralise vos réservations et vos demandes. La newsletter mensuelle du Concierge sélectionne pour vous les hôtels et les itinéraires que les comparateurs n'indexent pas. À l'ouverture du tier Prestige, les membres du Club seront contactés en priorité.",
+      "freeTitle": "Gratuit, sans carte bancaire",
+      "freeBody": "Aucune information de paiement n'est demandée. Vous pouvez quitter le programme à tout moment depuis votre compte.",
+      "transparencyTitle": "Notre engagement de transparence",
+      "transparencyBody": "Les avantages présentés ici sont ceux que nous activons hôtel par hôtel, à mesure que nos partenaires signent l'avenant Concierge Club. À la réservation, vous voyez ce qui s'applique réellement à votre séjour — jamais d'effet de manche."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "items": [
+        {
+          "q": "C'est gratuit, où est le piège ?",
+          "a": "Il n'y en a pas. Le Club est un outil de relation : nous gagnons votre confiance et, plus tard, vous choisissez (ou pas) de passer en Prestige. Vous pouvez supprimer votre compte à tout moment depuis le tableau de bord."
+        },
+        {
+          "q": "Pourquoi je ne vois pas tous les avantages sur la fiche d'un hôtel ?",
+          "a": "Chaque hôtel partenaire choisit l'ensemble des avantages qu'il active. À l'ouverture du programme, certains hôtels n'auront que les avantages liés à votre compte ; d'autres ouvriront déjà petit-déjeuner et surclassement."
+        },
+        {
+          "q": "Qu'est-ce qui change avec Prestige ?",
+          "a": "Prestige (€99/an, essai gratuit 30 jours) activera l'ensemble des avantages négociés avec nos hôtels Little partenaires : petit-déjeuner, surclassement, crédit hôtel, late check-out, cadeau de bienvenue, WhatsApp Concierge 24/7."
+        }
+      ]
+    },
+    "trustNote": "Aucun spam, aucune carte bancaire demandée à l'inscription. Désinscription en un clic depuis votre compte."
+  },
+  "clubPrestigeWaitlist": {
+    "meta": {
+      "title": "Le Concierge Club Prestige — liste d'attente",
+      "description": "Prestige ouvrira ses portes en Phase 6 (essai gratuit 30 jours, €99/an). Inscrivez-vous pour être contacté en priorité."
+    },
+    "eyebrow": "Le Concierge Club Prestige",
+    "title": "Soyez parmi les premiers à essayer Prestige",
+    "lede": "Prestige active l'ensemble des avantages négociés avec nos hôtels Little partenaires. Essai gratuit 30 jours, puis €99/an. Annulation en un clic.",
+    "joinedNotice": "Vous êtes déjà inscrit. Nous vous écrirons dès l'ouverture de Prestige.",
+    "submit": "Me prévenir au lancement",
+    "successBanner": "Inscription confirmée. Vous recevrez un e-mail dès l'ouverture de Prestige.",
+    "errorBanner": "L'inscription a échoué. Veuillez réessayer dans un instant.",
+    "anonCta": "Créer mon compte Le Concierge Club",
+    "anonNote": "Le compte est nécessaire pour rejoindre la liste d'attente Prestige. Création gratuite, sans CB.",
+    "benefitsHeading": "Ce qu'activera Prestige (Phase 6)",
+    "policy": "Tarif et avantages soumis à la mise en service de notre infrastructure de réservation. Vous n'êtes engagé à rien tant que vous n'activez pas votre essai."
+  },
+  "clubPressKit": {
+    "meta": {
+      "title": "Le Concierge Club — Espace presse",
+      "description": "Espace presse Le Concierge Club : communiqué de lancement, identité du programme, FAQ presse, visuels et contacts pour journalistes et blogueurs."
+    },
+    "eyebrow": "Espace presse",
+    "title": "Le Concierge Club — Espace presse",
+    "lede": "Vous écrivez sur l'hôtellerie de luxe française ? Voici le dossier de presse du programme de fidélité MyConciergeHotel.com.",
+    "sections": {
+      "identityTitle": "Identité du programme",
+      "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les Palaces et hôtels 5★ français. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
+      "philosophyTitle": "Philosophie",
+      "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, WhatsApp Concierge) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
+      "numbersTitle": "Catalogue (mai 2026)",
+      "numbersBody": "1 367 hôtels en catalogue, 443 fiches publiées. 471 hôtels Relais & Châteaux scaffoldés en attente de publication. 216 classements éditoriaux, 86 guides destinations, 20 itinéraires luxe FR + international.",
+      "complianceTitle": "Conformité",
+      "complianceBody": "Programme conforme aux exigences DGCCRF et au Digital Services Act. Aucun indicateur d'urgence fabriqué (Atout France §2.8). Voix Concierge éditoriale (ADR-0011) : phrases ≤ 25 mots, lexique sourcé, aucun superlatif générique."
+    },
+    "faqHeading": "Questions des journalistes",
+    "faq": [
+      {
+        "q": "Qui peut rejoindre Le Concierge Club ?",
+        "a": "Tout voyageur majeur ayant un compte MyConciergeHotel.com. L'adhésion est gratuite, immédiate, sans carte bancaire. Désinscription en un clic depuis le dashboard."
+      },
+      {
+        "q": "Comment vous différenciez-vous des programmes hôteliers (Marriott Bonvoy, Accor ALL) ?",
+        "a": "Le Concierge Club n'est pas lié à une chaîne. Il est cumulable avec les programmes propres aux groupes hôteliers — vous ne perdez pas vos points en réservant via nous. Notre valeur ajoutée est éditoriale (sélection nommée), opérationnelle (négociations en direct avec les hôtels Little partenaires) et tarifaire (Phase 6)."
+      },
+      {
+        "q": "Le tarif membre est-il réel ?",
+        "a": "En phase 1, le prix membre = prix public — nous l'annonçons mais ne le différencions pas tant que notre infrastructure de réservation n'est pas en service (Phase 6). La transparence est totale : nous ne masquons pas le prix public et nous n'affichons pas de différentiel fictif."
+      },
+      {
+        "q": "Quel est le statut juridique de l'éditeur ?",
+        "a": "MyConciergeHotel.com est édité par TravelBA SAS, agence IATA / APST, RCP Hiscox. Identité complète sur /fr/mentions-legales."
+      },
+      {
+        "q": "Comment vous contacter ?",
+        "a": "presse@myconciergehotel.com — réponse sous 48 heures ouvrées."
+      }
+    ],
+    "contactsTitle": "Contacts",
+    "contacts": {
+      "press": "Relations presse — presse@myconciergehotel.com",
+      "partnerships": "Partenariats hôteliers — partenaires@myconciergehotel.com",
+      "general": "Contact général — /fr/le-concierge/contact"
+    },
+    "assetsTitle": "Visuels et assets",
+    "assetsNote": "Le kit visuel (logos vectoriels, photos d'écran, fiches argumentaires) est disponible sur demande à presse@myconciergehotel.com. Aucune image n'est rediffusable sans accord écrit préalable."
   }
 }

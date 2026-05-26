@@ -49,6 +49,12 @@ export interface HotelRow {
   readonly meta_desc_fr: string | null;
   readonly meta_desc_en: string | null;
   readonly concierge_advice: unknown;
+  // Premium Concierge sections — migration 0057 (Le Concierge Club).
+  // jsonb columns shaped `{ fr: { body }, en: { body } }`.
+  readonly conseil_enrichi: unknown;
+  readonly quartier_concierge: unknown;
+  readonly gastronomie_concierge: unknown;
+  readonly timing_acces_concierge: unknown;
 }
 
 const HOTEL_SELECT_COLUMNS = [
@@ -77,6 +83,10 @@ const HOTEL_SELECT_COLUMNS = [
   'meta_desc_fr',
   'meta_desc_en',
   'concierge_advice',
+  'conseil_enrichi',
+  'quartier_concierge',
+  'gastronomie_concierge',
+  'timing_acces_concierge',
 ].join(',');
 
 export interface ListHotelsOptions {
@@ -106,6 +116,16 @@ export interface ListHotelsOptions {
    * the FR and EN length checks.
    */
   readonly onlyOutOfBandMetaDesc?: boolean;
+  /**
+   * Only include hotels where the given premium Concierge column is
+   * currently null. Default unset — the premium-section CLI sets this
+   * to the section it's generating.
+   */
+  readonly onlyMissingPremiumSection?:
+    | 'conseil_enrichi'
+    | 'quartier_concierge'
+    | 'gastronomie_concierge'
+    | 'timing_acces_concierge';
   /**
    * Restrict to `is_published = true`. Default true — editorial
    * backfills target the live catalogue first. Set to false to
@@ -171,7 +191,10 @@ export async function listHotelsForDescriptionExtend(
   return listHotels(cfg, { ...opts, requireDescription: true });
 }
 
-async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Promise<HotelRow[]> {
+export async function listHotels(
+  cfg: SupabaseRestConfig,
+  opts: ListHotelsOptions,
+): Promise<HotelRow[]> {
   const params = new URLSearchParams();
   params.set('select', HOTEL_SELECT_COLUMNS);
   params.set('order', opts.order ?? 'updated_at.desc');
@@ -194,6 +217,10 @@ async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Pro
 
   if (opts.onlyMissingConciergeAdvice === true) {
     filterParts.push('concierge_advice=is.null');
+  }
+
+  if (opts.onlyMissingPremiumSection !== undefined) {
+    filterParts.push(`${opts.onlyMissingPremiumSection}=is.null`);
   }
 
   // NOTE: the length-based filter for meta_desc (140-170 band) lives
@@ -299,6 +326,34 @@ export async function updateHotelDescription(
   payload: DescriptionUpdate,
 ): Promise<void> {
   await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
+}
+
+/**
+ * Premium Concierge section payload — matches the jsonb shape
+ * `{ fr: { body }, en: { body }, _editorial_review_status, _generated_at, _llm_model }`
+ * applied by migration 0057.
+ */
+export interface PremiumSectionPayload {
+  readonly fr: { readonly body: string };
+  readonly en: { readonly body: string };
+  readonly _editorial_review_status?: 'draft' | 'pending' | 'approved';
+  readonly _generated_at?: string;
+  readonly _llm_model?: string;
+}
+
+export type PremiumSectionColumn =
+  | 'conseil_enrichi'
+  | 'quartier_concierge'
+  | 'gastronomie_concierge'
+  | 'timing_acces_concierge';
+
+export async function updateHotelPremiumSection(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  column: PremiumSectionColumn,
+  payload: PremiumSectionPayload,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { [column]: payload });
 }
 
 async function patchHotel(

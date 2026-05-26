@@ -3173,6 +3173,8 @@
       "dashboardDescription": "Find your MyConciergeHotel bookings and requests in one place.",
       "signInTitle": "Sign in",
       "signUpTitle": "Create an account",
+      "joinClubTitle": "Join Le Concierge Club",
+      "joinClubDescription": "Create your account in 30 seconds — free, no commitment.",
       "forgotTitle": "Forgot password",
       "resetTitle": "New password",
       "favoritesTitle": "My favorites",
@@ -3204,6 +3206,22 @@
       "submit": "Create my account",
       "haveAccount": "I already have an account",
       "disclaimer": "By creating an account, you accept our terms and privacy policy."
+    },
+    "joinClub": {
+      "eyebrow": "Le Concierge Club",
+      "title": "Join Le Concierge Club",
+      "subtitle": "Benefits at our partner hotels, member rates coming soon, and the Concierge's eye on your next stay. Free, no card.",
+      "firstName": "First name (optional)",
+      "submit": "Join — it's free",
+      "haveAccount": "I already have an account",
+      "disclaimer": "By joining Le Concierge Club, you accept our terms and privacy policy. Monthly newsletter included, one-click unsubscribe.",
+      "magicLinkCta": "Email me a magic link instead",
+      "magicLinkHint": "No password to remember — a single click in your inbox is enough.",
+      "magicLinkSent": "If an account exists for this address, a sign-in link has been sent. Check your inbox (and spam folder).",
+      "oauthOr": "or continue with",
+      "oauthGoogle": "Continue with Google",
+      "oauthApple": "Continue with Apple",
+      "pendingBanner": "Account created. Confirm your email address to activate your Concierge Club."
     },
     "forgot": {
       "eyebrow": "Reset",
@@ -3269,7 +3287,9 @@
       "email_not_confirmed": "Your email has not been confirmed yet. Check your inbox.",
       "rate_limited": "Too many attempts. Please wait a few minutes and try again.",
       "upstream": "Something went wrong. Please try again.",
-      "session_missing": "Your session has expired. Please sign in again to continue."
+      "session_missing": "Your session has expired. Please sign in again to continue.",
+      "oauth_unavailable": "This sign-in method is temporarily unavailable. Try email or another provider.",
+      "magic_link_failed": "Could not send the magic link. Please try again in a moment."
     },
     "favorites": {
       "eyebrow": "Traveller area",
@@ -3520,5 +3540,168 @@
         "other": "Other references"
       }
     }
+  },
+  "clubBenefits": {
+    "heading": "The Concierge Club — your benefits",
+    "anonNotice": "Possible benefits when you travel with MyConciergeHotel. The exact perks are confirmed at booking time, depending on the hotel and availability.",
+    "clubPersonalisationPending": "Personalisation in progress. We are activating benefits hotel by hotel as our partners confirm them.",
+    "clubCta": "See all my benefits",
+    "prestigeCta": "Discover Prestige",
+    "tierBadge": {
+      "club": "Club (free)",
+      "prestige": "Prestige"
+    },
+    "subjectToAvailability": "On request, subject to hotel availability",
+    "phase6Notice": "Activates with the launch of our member price comparator.",
+    "codes": {
+      "concierge_newsletter_monthly": {
+        "title": "Monthly Concierge newsletter",
+        "body": "A curated monthly selection of hotels, itineraries and operational tips you will not find in commercial guides."
+      },
+      "program_membership_account": {
+        "title": "Your Concierge Club account",
+        "body": "Track your bookings, pending requests and saved hotels in a single dashboard."
+      },
+      "prestige_launch_priority": {
+        "title": "Prestige launch priority",
+        "body": "Club members will be contacted first when the Prestige tier (30-day free trial) opens its doors."
+      },
+      "member_rate_differential": {
+        "title": "Member rate",
+        "body": "A negotiated rate below the public price on eligible hotels. Displayed transparently next to the public price."
+      },
+      "breakfast_for_2": {
+        "title": "Breakfast for two",
+        "body": "Breakfast included for two guests at Little partner hotels."
+      },
+      "room_upgrade": {
+        "title": "Room upgrade",
+        "body": "If the next category up is available on arrival, you are upgraded automatically."
+      },
+      "hotel_credit": {
+        "title": "Hotel credit",
+        "body": "A credit redeemable at the restaurant, spa or on in-room services. Amount varies by hotel and length of stay."
+      },
+      "late_checkout_14h": {
+        "title": "Late check-out at 2 pm",
+        "body": "Stay until 2 pm on departure day, at no extra cost. Confirmed 24 hours in advance."
+      },
+      "welcome_gift": {
+        "title": "Welcome gift",
+        "body": "An in-room attention on arrival, chosen by the hotel (champagne, flowers, tasting)."
+      },
+      "whatsapp_concierge_24_7": {
+        "title": "WhatsApp Concierge 24/7",
+        "body": "A direct line to our concierge before, during and after your stay."
+      },
+      "gm_introduction": {
+        "title": "GM introduction",
+        "body": "A note to the hotel management for a personal welcome on arrival."
+      }
+    }
+  },
+  "clubLanding": {
+    "meta": {
+      "title": "The Concierge Club — MyConciergeHotel loyalty programme",
+      "description": "Discover The Concierge Club: a free account, perks at our partner hotels, and soon a transparent member rate. No credit card, no commitment."
+    },
+    "eyebrow": "Members programme",
+    "title": "The Concierge Club",
+    "lede": "A sober programme, no fanfare. You travel better because you travel with company — not because you pay for the privilege.",
+    "primaryCta": "Join — it is free",
+    "secondaryCta": "Discover Prestige (soon)",
+    "sections": {
+      "valueTitle": "What the Club brings",
+      "valueBody": "An account centralises your bookings and requests. The monthly Concierge newsletter selects hotels and itineraries the price comparators do not index. When the Prestige tier opens, Club members are contacted first.",
+      "freeTitle": "Free, no credit card",
+      "freeBody": "No payment information is requested. You can leave the programme any time from your account.",
+      "transparencyTitle": "Our transparency commitment",
+      "transparencyBody": "The benefits shown here are the ones we are activating hotel by hotel, as our partners sign the Concierge Club addendum. At booking time, you see exactly what applies to your stay — no sleight of hand."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "It is free — where is the catch?",
+          "a": "There is none. The Club is a relationship tool: we earn your trust and, later, you decide (or not) to upgrade to Prestige. You can delete your account at any time from the dashboard."
+        },
+        {
+          "q": "Why do I not see all the benefits on a hotel page?",
+          "a": "Each partner hotel chooses the set of benefits it activates. At programme launch, some hotels will only offer the account-bound benefits; others already activate breakfast and upgrades."
+        },
+        {
+          "q": "What changes with Prestige?",
+          "a": "Prestige (€99/year, 30-day free trial) activates the full set of benefits negotiated with our Little partner hotels: breakfast, upgrade, hotel credit, late check-out, welcome gift, 24/7 Concierge WhatsApp."
+        }
+      ]
+    },
+    "trustNote": "No spam, no credit card on signup. One-click unsubscribe from your account."
+  },
+  "clubPrestigeWaitlist": {
+    "meta": {
+      "title": "The Concierge Club Prestige — waitlist",
+      "description": "Prestige opens in Phase 6 (30-day free trial, €99/year). Sign up to be contacted first."
+    },
+    "eyebrow": "The Concierge Club Prestige",
+    "title": "Be among the first to try Prestige",
+    "lede": "Prestige activates the full set of benefits negotiated with our Little partner hotels. 30-day free trial, then €99/year. One-click cancellation.",
+    "joinedNotice": "You are already on the waitlist. We will write to you as soon as Prestige opens.",
+    "submit": "Notify me at launch",
+    "successBanner": "Sign-up confirmed. You will receive an email as soon as Prestige opens.",
+    "errorBanner": "Sign-up failed. Please try again in a moment.",
+    "anonCta": "Create my Concierge Club account",
+    "anonNote": "An account is required to join the Prestige waitlist. Free signup, no credit card.",
+    "benefitsHeading": "What Prestige will activate (Phase 6)",
+    "policy": "Pricing and benefits are subject to the launch of our booking infrastructure. You are not committed to anything until you activate your trial."
+  },
+  "clubPressKit": {
+    "meta": {
+      "title": "Le Concierge Club — Press kit",
+      "description": "Press kit for Le Concierge Club: launch release, programme identity, press FAQ, visuals and contacts for journalists and bloggers."
+    },
+    "eyebrow": "Press kit",
+    "title": "Le Concierge Club — Press kit",
+    "lede": "You write about French luxury hospitality? Here is the press kit for the MyConciergeHotel.com loyalty programme.",
+    "sections": {
+      "identityTitle": "Programme identity",
+      "identityBody": "Le Concierge Club is the loyalty programme of MyConciergeHotel.com, an IATA agency specialising in French Palaces and 5★ hotels. Two tiers: Le Concierge Club (free, no credit card, no commitment) and Le Concierge Club Prestige (€99/year, 30-day trial, Phase 6 rollout). Phase 1 launch: May 2026.",
+      "philosophyTitle": "Philosophy",
+      "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, WhatsApp Concierge) and, from Phase 6, a negotiated rate below the public price.",
+      "numbersTitle": "Catalogue (May 2026)",
+      "numbersBody": "1,367 hotels in the catalogue, 443 published pages. 471 Relais & Châteaux hotels scaffolded awaiting publication. 216 editorial rankings, 86 destination guides, 20 luxury itineraries (France + international).",
+      "complianceTitle": "Compliance",
+      "complianceBody": "Programme compliant with French DGCCRF and EU Digital Services Act requirements. No fabricated urgency indicators (CDC §2.8). Editorial Concierge voice (ADR-0011): sentences ≤ 25 words, sourced vocabulary, no generic superlatives."
+    },
+    "faqHeading": "Journalist questions",
+    "faq": [
+      {
+        "q": "Who can join Le Concierge Club?",
+        "a": "Any traveller of legal age with a MyConciergeHotel.com account. Membership is free, immediate, and requires no credit card. One-click unsubscribe from the dashboard."
+      },
+      {
+        "q": "How do you differ from hotel programmes (Marriott Bonvoy, Accor ALL)?",
+        "a": "Le Concierge Club is not tied to a chain. It stacks with the brand-specific programmes — you do not lose points by booking via us. Our value is editorial (named curation), operational (direct negotiations with Little partner hotels) and tariff-based (Phase 6)."
+      },
+      {
+        "q": "Is the member rate real?",
+        "a": "In Phase 1, the member price equals the public price — we announce it but do not differentiate it until our booking infrastructure is live (Phase 6). Full transparency: we do not hide the public price and we do not show a fictional differential."
+      },
+      {
+        "q": "What is the publisher's legal status?",
+        "a": "MyConciergeHotel.com is published by TravelBA SAS, IATA / APST agency, Hiscox professional liability insurance. Full legal identity on /en/legal-notice."
+      },
+      {
+        "q": "How can journalists contact you?",
+        "a": "press@myconciergehotel.com — reply within 48 business hours."
+      }
+    ],
+    "contactsTitle": "Contacts",
+    "contacts": {
+      "press": "Press relations — press@myconciergehotel.com",
+      "partnerships": "Hotel partnerships — partners@myconciergehotel.com",
+      "general": "General contact — /en/le-concierge/contact"
+    },
+    "assetsTitle": "Visuals and assets",
+    "assetsNote": "The visual kit (vector logos, screenshots, argument fact-sheets) is available on request at press@myconciergehotel.com. No image may be redistributed without prior written agreement."
   }
 }

@@ -14,6 +14,7 @@ export * from './hotel';
 export * from './hotel-room';
 export * from './howto';
 export * from './item-list';
+export * from './member-program';
 export * from './offer';
 export * from './place-amenity';
 export * from './travel-agency';

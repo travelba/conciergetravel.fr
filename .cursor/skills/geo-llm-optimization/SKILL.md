@@ -157,3 +157,8 @@ Hard rules:
 - **`llm-output-robustness`** — allowlist post-validation patterns used
   by the editorial pipelines to guarantee EEAT signals (no hallucinated
   sources reach the DB).
+- [ADR-0019 Le Concierge Club](../../../docs/adr/0019-le-concierge-club-architecture.md) +
+  [`membership-program`](../membership-program/SKILL.md) — three new
+  `agent-skills.json` entries (`loyalty`, `join-concierge-club`,
+  `join-concierge-club-prestige-waitlist`) + new `llms.txt` sections for
+  `/le-concierge-club*` and `/presse/le-concierge-club`.

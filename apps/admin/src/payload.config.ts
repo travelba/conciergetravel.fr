@@ -5,6 +5,8 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { ClubEligibility } from './collections/club-eligibility';
+import { HotelMemberBenefits } from './collections/hotel-member-benefits';
 import { Hotels } from './collections/hotels';
 import { Users } from './collections/users';
 
@@ -36,7 +38,7 @@ export default buildConfig({
     },
   },
   editor: lexicalEditor({}),
-  collections: [Users, Hotels],
+  collections: [Users, Hotels, HotelMemberBenefits, ClubEligibility],
   db: postgresAdapter({
     schemaName: 'cms',
     disableCreateDatabase: true,

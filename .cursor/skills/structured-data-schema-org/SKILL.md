@@ -215,3 +215,7 @@ The `do` and `shop` buckets do not get their own `ItemList` to avoid noise; they
 - **`editorial-long-read-rendering`** — JSON-LD block composition for guides/rankings.
 - **`security-engineering`** — full CSP policy details and middleware setup.
 - **`nextjs-app-router`** — force-dynamic constraint when emitting JSON-LD.
+- **`membership-program`** — `MemberProgram` JSON-LD builder
+  ([`packages/seo/src/jsonld/member-program.ts`](../../../packages/seo/src/jsonld/member-program.ts))
+  - canonical emission on `/le-concierge-club*` only (never on hotel
+    fiches Phase 1). [ADR-0019](../../../docs/adr/0019-le-concierge-club-architecture.md).

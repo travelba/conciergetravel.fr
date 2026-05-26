@@ -1,0 +1,25 @@
+{
+  "name": "@mch/experiments",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./flags": "./src/flags.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@vercel/edge-config": "^1.4.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@mch/config": "workspace:*",
+    "@types/node": "^25.9.1",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

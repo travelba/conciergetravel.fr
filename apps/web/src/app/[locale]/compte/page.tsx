@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
+import { ClubBenefitsBlock } from '@/components/loyalty/club-benefits-block';
 import { Link, getPathname, redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
@@ -12,7 +13,10 @@ import {
   type EmailRequestListItem,
 } from '@/server/account/list-email-requests';
 import { signOutAction } from '@/server/auth/actions';
+import { getLoyaltyMember } from '@/server/auth/loyalty-member';
 import { getOptionalUser, pickDisplayName } from '@/server/auth/session';
+
+import * as Loyalty from '@mch/domain/loyalty';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,11 +96,16 @@ export default async function CompteDashboardPage({
   }
 
   const t = await getTranslations('account');
-  const [bookings, requests] = await Promise.all([listUserBookings(), listUserEmailRequests()]);
+  const [bookings, requests, member] = await Promise.all([
+    listUserBookings(),
+    listUserEmailRequests(),
+    getLoyaltyMember(user.id),
+  ]);
 
   const displayName = pickDisplayName(user);
   const resetBanner = sp.reset === '1';
   const signOutAction_ = signOutAction;
+  const tier: Loyalty.MemberTier = member?.tier ?? 'club';
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
@@ -138,6 +147,15 @@ export default async function CompteDashboardPage({
           {t('dashboard.resetBanner')}
         </p>
       ) : null}
+
+      <section aria-labelledby="club-panel-title" className="mb-12">
+        <ClubBenefitsBlock
+          locale={locale}
+          viewerTier={tier}
+          hotelBenefits={[]}
+          littlePersonalisationEnabled={false}
+        />
+      </section>
 
       <section aria-labelledby="bookings-title" className="mb-12">
         <h2 id="bookings-title" className="text-fg mb-4 font-serif text-2xl">

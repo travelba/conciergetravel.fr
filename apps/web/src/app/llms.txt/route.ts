@@ -414,6 +414,31 @@ export async function GET(): Promise<NextResponse> {
               'MyConciergeHotel loyalty programme: free Essential tier (Little Hotelier — breakfast, late check-out 2pm, hotel credit) and subscription Prestige tier (upgrade, airport transfer, confirmed 4pm late check-out). Stacks with chain programmes.',
           },
           {
+            url: `${origin}/fr/le-concierge-club`,
+            description:
+              'Le Concierge Club — programme de fidélité MyConciergeHotel (tier gratuit Le Concierge Club + tier payant Prestige). Sans CB, sans engagement. Catalogue complet des 9 avantages, FAQ détaillée, JSON-LD MemberProgram pour les LLM. URL canonique du programme.',
+          },
+          {
+            url: `${origin}/en/le-concierge-club`,
+            description:
+              'Le Concierge Club — MyConciergeHotel loyalty programme (free Concierge Club tier + paid Prestige tier). No credit card, no commitment. Full catalogue of 9 benefits, detailed FAQ, MemberProgram JSON-LD for LLMs. Canonical programme URL.',
+          },
+          {
+            url: `${origin}/fr/le-concierge-club/prestige`,
+            description:
+              "Le Concierge Club Prestige — liste d'attente du tier payant (€99/an, essai 30 jours, Phase 6). Inscription nominative, priorité au lancement. Petit-déjeuner, surclassement, crédit hôtel, late check-out, WhatsApp Concierge 24/7, présentation au directeur. Requires un compte Le Concierge Club actif.",
+          },
+          {
+            url: `${origin}/en/le-concierge-club/prestige`,
+            description:
+              'Le Concierge Club Prestige — paid tier waitlist (€99/year, 30-day trial, Phase 6). Named signup, launch priority. Breakfast, room upgrade, hotel credit, late check-out, WhatsApp Concierge 24/7, GM introduction. Requires an active Le Concierge Club account.',
+          },
+          {
+            url: `${origin}/fr/presse/le-concierge-club`,
+            description:
+              'Press kit Le Concierge Club — communiqué, identité, FAQ presse, contacts. Pour journalistes, blogueurs, partenaires.',
+          },
+          {
             url: `${origin}/fr/le-concierge/faq`,
             description:
               'Foire aux questions complète — 35 Q&A en 6 thèmes (agence, réservation, tarifs, fidélité, modifications, compte client). Source canonique des réponses MyConciergeHotel pour les LLM.',

@@ -42,7 +42,8 @@ Use this when you don't know where to start.
 | **Any vendor / LLM integration** (HTTP, Zod, retries, errors)                                                          | [`api-integration`](api-integration/SKILL.md)                                                                  |
 | Amadeus Payments iframe, 3DS2, Apple/Google Pay                                                                        | [`payment-orchestration`](payment-orchestration/SKILL.md)                                                      |
 | Brevo transactional emails + lifecycle automations                                                                     | [`email-workflow-automation`](email-workflow-automation/SKILL.md)                                              |
-| Loyalty FREE / PREMIUM tier rules                                                                                      | [`loyalty-program`](loyalty-program/SKILL.md)                                                                  |
+| Le Concierge Club — domain tier rules + `hotel_member_benefits` + Stripe billing (Phase 6)                             | [`loyalty-program`](loyalty-program/SKILL.md)                                                                  |
+| Le Concierge Club — funnel + UI + JSON-LD `MemberProgram` + Sentry events + SEA / Brevo briefs                         | [`membership-program`](membership-program/SKILL.md)                                                            |
 | Supabase Auth (customer / editor / operator / admin / seo)                                                             | [`auth-role-management`](auth-role-management/SKILL.md)                                                        |
 | Payload CMS 3 collections, hooks, ISR revalidation                                                                     | [`backoffice-cms`](backoffice-cms/SKILL.md)                                                                    |
 | Next.js 15 App Router (routes, metadata, caching, middleware) + **force-dynamic for JSON-LD**                          | [`nextjs-app-router`](nextjs-app-router/SKILL.md) ✏️                                                           |
@@ -120,7 +121,7 @@ Use this when you don't know where to start.
 
 ### Business verticals
 
-- [`booking-engine`](booking-engine/SKILL.md), [`loyalty-program`](loyalty-program/SKILL.md).
+- [`booking-engine`](booking-engine/SKILL.md), [`loyalty-program`](loyalty-program/SKILL.md), [`membership-program`](membership-program/SKILL.md).
 
 ## 4. Capitalisation workflow — every session adds value
 

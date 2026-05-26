@@ -207,7 +207,7 @@ function brandFaqItems(args: {
       },
       {
         question: `Quelle est la différence entre ${args.brandLabel} et un Palace indépendant ?`,
-        answer: `${args.brandLabel} est une collection ou un groupe — chaque adresse partage des standards de service (formation des équipes, programme de fidélité, signature culinaire). Un Palace indépendant comme Le Negresco ou L\'Hôtel suit ses propres codes, sans appartenance de groupe. Les deux sont éligibles au statut Palace Atout France.`,
+        answer: `${args.brandLabel} est une collection ou un groupe — chaque adresse partage des standards de service (formation des équipes, programme de fidélité, signature culinaire). Un Palace indépendant comme Le Negresco ou L'Hôtel suit ses propres codes, sans appartenance de groupe. Les deux sont éligibles au statut Palace Atout France.`,
       },
       {
         question: `MyConciergeHotel propose-t-il les avantages fidélité ${args.brandLabel} ?`,
@@ -226,11 +226,11 @@ function brandFaqItems(args: {
     },
     {
       question: `What is the difference between ${args.brandLabel} and an independent Palace?`,
-      answer: `${args.brandLabel} is a collection or group — every address shares service standards (team training, loyalty program, culinary signature). An independent Palace like Le Negresco or L\'Hôtel follows its own codes, with no group affiliation. Both can hold the Atout France Palace distinction.`,
+      answer: `${args.brandLabel} is a collection or group — every address shares service standards (team training, loyalty program, culinary signature). An independent Palace like Le Negresco or L'Hôtel follows its own codes, with no group affiliation. Both can hold the Atout France Palace distinction.`,
     },
     {
       question: `Does MyConciergeHotel honour ${args.brandLabel} loyalty benefits?`,
-      answer: `${args.brandLabel} loyalty programs (status, points, upgrades) are preserved when guests provide their membership number at booking. Our role is to guarantee the best official rate and pre-stay concierge service — never to replace the brand\'s program.`,
+      answer: `${args.brandLabel} loyalty programs (status, points, upgrades) are preserved when guests provide their membership number at booking. Our role is to guarantee the best official rate and pre-stay concierge service — never to replace the brand's program.`,
     },
   ];
 }

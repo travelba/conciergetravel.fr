@@ -126,6 +126,12 @@ test.describe('a11y / axe scan', () => {
       name: 'FR reservation start',
       path: `/reservation/start?hotelId=${E2E_FAKE_HOTEL_ID}`,
     },
+    // ----- Le Concierge Club surfaces (Sprint 5) ---------------
+    { name: 'FR Concierge Club landing', path: '/le-concierge-club' },
+    { name: 'EN Concierge Club landing', path: '/en/le-concierge-club' },
+    { name: 'FR Concierge Club Prestige', path: '/le-concierge-club/prestige' },
+    { name: 'FR Concierge Club press kit', path: '/presse/le-concierge-club' },
+    { name: 'FR /compte/rejoindre', path: '/compte/rejoindre' },
   ] as readonly AxeScanCase[]) {
     test(`${scan.name} has no serious/critical violations`, async ({ page }) => {
       await page.goto(scan.path);

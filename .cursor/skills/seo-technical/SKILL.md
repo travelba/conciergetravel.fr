@@ -294,3 +294,4 @@ the room-page indexability check: ≥ 5 photos AND ≥ 200 words).
 - [`content-modeling`](../content-modeling/SKILL.md) — modélisation Payload des champs localisés (impacté par l'ADR-0012 si l'option B "table normalisée" est retenue).
 - Rule [`seo-geo.mdc`](../../rules/seo-geo.mdc) §Rollout multilingue V2 — décrit l'objectif ; cette skill décrit l'état réel.
 - [ADR-0012](../../../docs/adr/0012-multilingual-db-schema.md) — décision schéma DB multilingue (colonnes plates / table normalisée / JSONB). Status: **proposed**, recommande l'option B (table normalisée `*_translations`).
+- [ADR-0019 Le Concierge Club architecture](../../../docs/adr/0019-le-concierge-club-architecture.md) — `/le-concierge-club`, `/le-concierge-club/prestige`, `/presse/le-concierge-club` registered in the typed routing + sitemaps + JSON-LD `MemberProgram`. See also [`membership-program`](../membership-program/SKILL.md).

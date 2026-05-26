@@ -223,8 +223,57 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'loyalty',
       description:
-        'Consulter les avantages du programme de fidélité MyConciergeHotel : tier FREE automatique sur les hôtels Little Hotelier, tier PREMIUM payant pour les attentions concierge premium.',
+        'Consulter les avantages du programme de fidélité MyConciergeHotel — Le Concierge Club (tier gratuit, attentions sur les hôtels éligibles) et Le Concierge Club Prestige (tier payant Phase 6, surclassements confirmés, transfert aéroport, late check-out 16h). URL canonique : /fr/le-concierge-club.',
       endpoint: { method: 'GET', path: '/api/agent/loyalty' },
+    },
+    {
+      name: 'join-concierge-club',
+      description:
+        "Inscrire l'utilisateur au programme Le Concierge Club (tier gratuit). Crée un compte voyageur sans CB, sans engagement, désinscription en un clic. L'inscription ouvre l'accès au dashboard /compte (Mon Concierge Club) et confirme la promesse d'attentions Concierge sur les hôtels éligibles. URL HTML : /fr/compte/rejoindre.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Adresse e-mail du futur membre — sert d’identifiant de connexion.',
+          },
+          firstName: {
+            type: 'string',
+            description: 'Prénom du membre (requis pour personnaliser l’accueil).',
+          },
+          lastName: {
+            type: 'string',
+            description: 'Nom du membre.',
+          },
+          consentMarketing: {
+            type: 'boolean',
+            description:
+              'Doit être strictement true — consentement explicite à recevoir les communications marketing (modifiable à tout moment dans /compte).',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale préférée — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['email', 'firstName', 'lastName', 'consentMarketing'],
+      },
+      endpoint: { method: 'POST', path: '/api/agent/join-concierge-club' },
+    },
+    {
+      name: 'join-concierge-club-prestige-waitlist',
+      description:
+        "Rejoindre la liste d'attente Le Concierge Club Prestige (tier payant €99/an, activation Phase 6). Requiert un compte Le Concierge Club déjà actif. L'inscription débloque la priorité d'accès, le tarif lancement et la communication preview des avantages Prestige. URL HTML : /fr/le-concierge-club/prestige.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          locale: {
+            type: 'string',
+            description: 'Locale préférée — "fr" (par défaut) ou "en".',
+          },
+        },
+      },
+      endpoint: { method: 'POST', path: '/api/agent/join-prestige-waitlist' },
     },
     {
       name: 'contact',
@@ -262,32 +311,6 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         required: ['name', 'email', 'subject', 'message'],
       },
       endpoint: { method: 'POST', path: '/api/agent/contact' },
-    },
-    {
-      name: 'newsletter',
-      description:
-        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale Palaces et hôtels 5★, conseils du Concierge, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
-      inputSchema: {
-        type: 'object',
-        properties: {
-          email: {
-            type: 'string',
-            format: 'email',
-            description: 'Adresse e-mail du destinataire.',
-          },
-          locale: {
-            type: 'string',
-            description: 'Locale préférée — "fr" (par défaut) ou "en".',
-          },
-          consent: {
-            type: 'boolean',
-            description:
-              'Doit être strictement true — consentement explicite RGPD requis. Toute autre valeur est rejetée.',
-          },
-        },
-        required: ['email', 'consent'],
-      },
-      endpoint: { method: 'POST', path: '/api/agent/newsletter' },
     },
     {
       name: 'newsletter',
@@ -355,27 +378,6 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         properties: {},
       },
       endpoint: { method: 'GET', path: '/api/agent/brands' },
-    },
-    {
-      name: 'get-country-guide',
-      description:
-        'Récupérer le guide pays MyConciergeHotel pour une destination internationale (Italie, Suisse, Maroc, Maldives, Émirats arabes unis, Japon, Thaïlande, États-Unis). Renvoie : factual summary, AEO Q&A, 5-6 régions avec adresses nommées + Conseil du Concierge opérationnel par région, infos pratiques (visa, monnaie, langues), 7 Q&A canoniques. URL canonique HTML : /fr/guide/{slug} ou /en/guide/{slug-en}.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          slug: {
-            type: 'string',
-            description:
-              "Slug du pays en français — l'un de : italie, suisse, maroc, maldives, emirats-arabes-unis, japon, thailande, etats-unis.",
-          },
-          locale: {
-            type: 'string',
-            description: 'Locale de la réponse — "fr" (par défaut) ou "en".',
-          },
-        },
-        required: ['slug'],
-      },
-      endpoint: { method: 'GET', path: '/api/agent/country-guide/{slug}' },
     },
     {
       name: 'get-country-guide',

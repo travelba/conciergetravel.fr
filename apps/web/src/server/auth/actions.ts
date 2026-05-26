@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { getPathname, redirect } from '@/i18n/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { emitClubEvent, hashUserId } from '@/server/observability/club-events';
 
 /**
  * Supported account locales. Mirrors `next-intl` routing.
@@ -45,6 +46,36 @@ const SignOutSchema = z.object({
   locale: AccountLocaleSchema,
 });
 
+/**
+ * Quick signup form on `/compte/rejoindre` — Le Concierge Club entry
+ * point. Three visible fields: email, password, optional first name.
+ * No newsletter checkbox (defaults to true at signup — club members
+ * implicitly opt in to the monthly newsletter).
+ */
+const JoinClubSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(128),
+  firstName: z.string().trim().min(1).max(80).optional(),
+  honeypot: z.string().max(0).optional(),
+  locale: AccountLocaleSchema,
+  next: z.string().startsWith('/').max(256).optional(),
+});
+
+const MagicLinkSchema = z.object({
+  email: z.string().email(),
+  honeypot: z.string().max(0).optional(),
+  locale: AccountLocaleSchema,
+  next: z.string().startsWith('/').max(256).optional(),
+});
+
+const OAuthProviderSchema = z.enum(['google', 'apple']);
+
+const OAuthSchema = z.object({
+  provider: OAuthProviderSchema,
+  locale: AccountLocaleSchema,
+  next: z.string().startsWith('/').max(256).optional(),
+});
+
 type AuthErrorKind =
   | 'invalid_input'
   | 'invalid_credentials'
@@ -53,7 +84,9 @@ type AuthErrorKind =
   | 'email_not_confirmed'
   | 'rate_limited'
   | 'upstream'
-  | 'session_missing';
+  | 'session_missing'
+  | 'oauth_unavailable'
+  | 'magic_link_failed';
 
 /**
  * The set of typed pathnames that the auth flow can redirect into. Kept as
@@ -64,6 +97,7 @@ type AccountPath =
   | '/compte'
   | '/compte/connexion'
   | '/compte/inscription'
+  | '/compte/rejoindre'
   | '/compte/mot-de-passe-oublie'
   | '/compte/nouveau-mot-de-passe';
 
@@ -305,4 +339,251 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
     href: { pathname: '/compte', query: { reset: '1' } },
     locale,
   });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Le Concierge Club — quick signup (3 fields)                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Phase 1 club signup. Same shape as `signUpAction` but:
+ *
+ *   - 3 visible fields only (email + password + optional first name).
+ *   - Implicit newsletter opt-in (`newsletter_opt_in = true`).
+ *   - Default `display_name` derived from first name when present.
+ *   - Redirects to `/compte` on success ("pending" banner shown until
+ *     the email is confirmed — same as legacy signup).
+ *
+ * Skill: membership-program + auth-role-management.
+ */
+export async function joinClubAction(formData: FormData): Promise<void> {
+  const parsed = JoinClubSchema.safeParse({
+    email: readField(formData, 'email'),
+    password: readField(formData, 'password'),
+    firstName: readField(formData, 'firstName'),
+    honeypot: readField(formData, 'website'),
+    locale: readField(formData, 'locale'),
+    next: readField(formData, 'next'),
+  });
+  if (!parsed.success) {
+    const email = readField(formData, 'email');
+    const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
+    redirectWithError(locale, '/compte/rejoindre', 'invalid_input', email);
+  }
+
+  const { email, password, firstName, locale, next } = parsed.data;
+
+  await emitClubEvent('club.signup.attempt', {
+    surface: 'rejoindre_form',
+    provider: 'password',
+    locale,
+  });
+
+  const headerList = await headers();
+  const origin = originFromHeaders(headerList);
+  // Resolve callback to `/compte` (the dashboard). The `next` query
+  // parameter on the callback URL itself is consumed by the auth
+  // callback handler; here we just store the deep-link in the
+  // user metadata as a fallback.
+  const callbackUrl = callbackUrlFor(origin, locale, '/compte');
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: callbackUrl,
+      data: {
+        display_name: firstName ?? null,
+        first_name: firstName ?? null,
+        locale_pref: locale,
+        newsletter_opt_in: true,
+        signup_source: 'concierge_club',
+        ...(typeof next === 'string' && next.length > 0 ? { next_after_signin: next } : {}),
+      },
+    },
+  });
+
+  if (error !== null) {
+    const code = error.code ?? '';
+    const kind: AuthErrorKind =
+      code === 'user_already_exists' || code === 'email_address_invalid'
+        ? 'email_taken'
+        : error.status === 429
+          ? 'rate_limited'
+          : 'upstream';
+    await emitClubEvent('club.signup.failure', {
+      surface: 'rejoindre_form',
+      provider: 'password',
+      errorKind: kind,
+      locale,
+    });
+    redirectWithError(locale, '/compte/rejoindre', kind, email);
+  }
+
+  const successUserIdHash = hashUserId(data.user?.id);
+  await emitClubEvent('club.signup.success', {
+    surface: 'rejoindre_form',
+    provider: 'password',
+    locale,
+    ...(successUserIdHash !== undefined ? { userIdHash: successUserIdHash } : {}),
+  });
+
+  redirect({
+    href: { pathname: '/compte/rejoindre', query: { pending: '1' } },
+    locale,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Magic-link (one-time email sign-in / sign-up)                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Sends a one-time magic link to the visitor's inbox. Works for both
+ * existing users (sign-in) and new ones (sign-up) — Supabase creates
+ * the auth user implicitly on first click. The flow lands the user
+ * on the requested deep-link via `emailRedirectTo`.
+ */
+export async function sendMagicLinkAction(formData: FormData): Promise<void> {
+  const parsed = MagicLinkSchema.safeParse({
+    email: readField(formData, 'email'),
+    honeypot: readField(formData, 'website'),
+    locale: readField(formData, 'locale'),
+    next: readField(formData, 'next'),
+  });
+  if (!parsed.success) {
+    const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
+    redirectWithError(locale, '/compte/rejoindre', 'invalid_input');
+  }
+
+  const { email, locale, next } = parsed.data;
+
+  await emitClubEvent('club.magic_link.attempt', {
+    surface: 'rejoindre_magic',
+    provider: 'magic_link',
+    locale,
+  });
+
+  const headerList = await headers();
+  const origin = originFromHeaders(headerList);
+  const callbackUrl = callbackUrlFor(origin, locale, '/compte');
+
+  // Append the deep-link `next` parameter onto the callback URL so the
+  // auth callback handler can forward it after exchanging the token.
+  let finalCallback = callbackUrl;
+  if (
+    typeof next === 'string' &&
+    next.length > 0 &&
+    next.startsWith('/') &&
+    !next.startsWith('//')
+  ) {
+    const u = new URL(callbackUrl);
+    u.searchParams.set('next', next);
+    finalCallback = u.toString();
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: finalCallback,
+      shouldCreateUser: true,
+      data: {
+        locale_pref: locale,
+        newsletter_opt_in: true,
+        signup_source: 'concierge_club_magic',
+      },
+    },
+  });
+
+  // Same anti-enumeration behaviour as forgot-password: never reveal
+  // whether the email is registered. Log only.
+  if (error !== null) {
+    await emitClubEvent('club.magic_link.failure', {
+      surface: 'rejoindre_magic',
+      provider: 'magic_link',
+      errorKind: error.status === 429 ? 'rate_limited' : 'upstream',
+      locale,
+    });
+    if (process.env['NODE_ENV'] !== 'production') {
+      console.warn('[sendMagicLinkAction] otp error', error.message);
+    }
+  }
+
+  redirect({
+    href: { pathname: '/compte/rejoindre', query: { magic: '1' } },
+    locale,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* OAuth (Google + Apple)                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Initiates an OAuth handshake. The Supabase client returns a URL that
+ * the browser must navigate to — we forward via Next's `nextRedirect`
+ * (Supabase OAuth URLs are external, so the locale router would refuse).
+ *
+ * Provider availability is gated by the Supabase project config; when a
+ * provider isn't enabled, the user lands back on `/compte/rejoindre`
+ * with an `oauth_unavailable` error.
+ */
+export async function signInWithOAuthAction(formData: FormData): Promise<void> {
+  const parsed = OAuthSchema.safeParse({
+    provider: readField(formData, 'provider'),
+    locale: readField(formData, 'locale'),
+    next: readField(formData, 'next'),
+  });
+  if (!parsed.success) {
+    const locale = (readField(formData, 'locale') as AccountLocale | undefined) ?? 'fr';
+    redirectWithError(locale, '/compte/rejoindre', 'invalid_input');
+  }
+
+  const { provider, locale, next } = parsed.data;
+
+  await emitClubEvent('club.oauth.attempt', {
+    surface: 'rejoindre_oauth',
+    provider,
+    locale,
+  });
+
+  const headerList = await headers();
+  const origin = originFromHeaders(headerList);
+  const callbackUrl = callbackUrlFor(origin, locale, '/compte');
+
+  let finalCallback = callbackUrl;
+  if (
+    typeof next === 'string' &&
+    next.length > 0 &&
+    next.startsWith('/') &&
+    !next.startsWith('//')
+  ) {
+    const u = new URL(callbackUrl);
+    u.searchParams.set('next', next);
+    finalCallback = u.toString();
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: finalCallback,
+      queryParams: provider === 'google' ? { access_type: 'offline', prompt: 'consent' } : {},
+    },
+  });
+
+  if (error !== null || data?.url === undefined) {
+    await emitClubEvent('club.oauth.failure', {
+      surface: 'rejoindre_oauth',
+      provider,
+      errorKind: 'oauth_unavailable',
+      locale,
+    });
+    redirectWithError(locale, '/compte/rejoindre', 'oauth_unavailable');
+  }
+
+  // External redirect — bypass the locale router.
+  nextRedirect(data.url);
 }

@@ -104,4 +104,5 @@ export async function cancelBookingAction(formData: FormData) {
 ## References
 
 - CDC v3.0 §11 (security), §8 (loyalty implies auth).
-- `supabase-postgres-rls`, `security-engineering`, `backoffice-cms` skills.
+- [ADR-0019 Le Concierge Club architecture](../../docs/adr/0019-le-concierge-club-architecture.md) — `/compte/rejoindre` 3-field signup + OAuth Google/Apple + magic link Phase 1 contract.
+- Skills: [`supabase-postgres-rls`](../supabase-postgres-rls/SKILL.md), [`security-engineering`](../security-engineering/SKILL.md), [`backoffice-cms`](../backoffice-cms/SKILL.md), [`loyalty-program`](../loyalty-program/SKILL.md), [`membership-program`](../membership-program/SKILL.md).

@@ -65,12 +65,34 @@ export type QuoteRequest = {
   readonly requestId: string;
 };
 
+/**
+ * `club.*` client-side custom events. Mirrors the server-side
+ * Sentry emitter so both sinks (Vercel Analytics, GA4 via dataLayer)
+ * report the same funnel. Surfaces match the server taxonomy.
+ *
+ * Skill: membership-program §Sentry custom events.
+ */
+export type ClubBenefitsViewed = {
+  readonly name: 'club_benefits_viewed';
+  readonly surface: 'hotel_fiche' | 'club_landing' | 'dashboard';
+  readonly tier: 'anon' | 'club' | 'prestige';
+  readonly hotelId?: string;
+};
+
+export type ClubSignupCtaClicked = {
+  readonly name: 'club_signup_cta_clicked';
+  readonly surface: 'hotel_fiche' | 'club_landing' | 'header' | 'footer';
+  readonly cta: 'join_free' | 'join_prestige' | 'learn_more';
+};
+
 export type AnalyticsEvent =
   | HotelView
   | PricingView
   | BookingStart
   | LockSubmit
   | BookingComplete
-  | QuoteRequest;
+  | QuoteRequest
+  | ClubBenefitsViewed
+  | ClubSignupCtaClicked;
 
 export type AnalyticsEventName = AnalyticsEvent['name'];

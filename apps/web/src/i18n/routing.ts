@@ -116,6 +116,14 @@ export const routing = defineRouting({
       en: '/account/sign-up',
       // de: '/konto/registrieren', es: '/cuenta/registrarse', it: '/account/registrati',
     },
+    // Le Concierge Club — quick signup (Sprint 1, ADR-0012). Distinct
+    // from `/compte/inscription` which keeps the long legacy form for
+    // legal compatibility.
+    '/compte/rejoindre': {
+      fr: '/compte/rejoindre',
+      en: '/account/join',
+      // de: '/konto/beitreten', es: '/cuenta/unirse', it: '/account/iscriviti',
+    },
     '/compte/deconnexion': {
       fr: '/compte/deconnexion',
       en: '/account/sign-out',
@@ -246,6 +254,24 @@ export const routing = defineRouting({
     '/classements/[axe]/[valeur]': '/classements/[axe]/[valeur]',
     '/inspiration': '/inspiration',
     '/le-concierge': '/le-concierge',
+    // Le Concierge Club — programme membership (Sprint 3b ships the
+    // pages). Routes registered in Sprint 1 so server-side helpers
+    // can reference them via the typed navigation API.
+    '/le-concierge-club': {
+      fr: '/le-concierge-club',
+      en: '/the-concierge-club',
+    },
+    '/le-concierge-club/prestige': {
+      fr: '/le-concierge-club/prestige',
+      en: '/the-concierge-club/prestige',
+    },
+    // Sprint 4 — press kit Le Concierge Club. Kept under `/presse/...`
+    // (and `/press/...` in EN) so /presse stays available as the
+    // top-level press hub when other programmes / topics ship later.
+    '/presse/le-concierge-club': {
+      fr: '/presse/le-concierge-club',
+      en: '/press/the-concierge-club',
+    },
     '/le-concierge/methode-editoriale': {
       fr: '/le-concierge/methode-editoriale',
       en: '/le-concierge/editorial-method',

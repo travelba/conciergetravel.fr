@@ -1,0 +1,53 @@
+{
+  "$schema": "https://googlechrome.github.io/lighthouse-ci/configuration.html",
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/hotel/hotel-de-test-e2e",
+        "http://localhost:3000/le-concierge-club",
+        "http://localhost:3000/le-concierge-club/prestige",
+        "http://localhost:3000/presse/le-concierge-club",
+        "http://localhost:3000/compte/rejoindre"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop",
+        "throttlingMethod": "simulate",
+        "screenEmulation": {
+          "mobile": false,
+          "width": 1366,
+          "height": 768,
+          "deviceScaleFactor": 1
+        },
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"]
+      },
+      "startServerCommand": "pnpm --filter @mch/web dev -- --port 3000",
+      "startServerReadyPattern": "Ready in"
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.85 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "categories:seo": ["error", { "minScore": 0.95 }],
+        "first-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
+        "largest-contentful-paint": ["warn", { "maxNumericValue": 3000 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
+        "unused-javascript": "off",
+        "uses-text-compression": "warn",
+        "render-blocking-resources": "warn",
+        "is-on-https": "off",
+        "redirects-http": "off",
+        "uses-http2": "off",
+        "valid-source-maps": "off",
+        "non-composited-animations": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
