@@ -7,6 +7,7 @@
  *   --limit=<N>              cap to N hotels (PILOT mode)
  *   --dry-run                generate + print, do NOT write to Supabase
  *   --include-all            include hotels even if factual_summary already set (default: skip)
+ *   --include-drafts         include rows where `is_published = false`
  *   --no-description-filter  include hotels without description (RISKY — may hallucinate)
  *   --concurrency=<N>        parallel LLM calls (default 3, max 8)
  *
@@ -57,6 +58,7 @@ function parseArgs(argv: readonly string[]): {
   readonly limit?: number;
   readonly dryRun: boolean;
   readonly includeAll: boolean;
+  readonly includeDrafts: boolean;
   readonly noDescriptionFilter: boolean;
   readonly concurrency: number;
 } {
@@ -78,11 +80,13 @@ function parseArgs(argv: readonly string[]): {
     limit?: number;
     dryRun: boolean;
     includeAll: boolean;
+    includeDrafts: boolean;
     noDescriptionFilter: boolean;
     concurrency: number;
   } = {
     dryRun: map.has('dry-run'),
     includeAll: map.has('include-all'),
+    includeDrafts: map.has('include-drafts'),
     noDescriptionFilter: map.has('no-description-filter'),
     concurrency,
   };
@@ -216,12 +220,14 @@ async function main(): Promise<void> {
   );
 
   const listOpts: {
+    onlyPublished: boolean;
     onlyMissingFactualSummary: boolean;
     requireDescription: boolean;
     limit?: number;
     slug?: string;
     slugs?: readonly string[];
   } = {
+    onlyPublished: !args.includeDrafts,
     onlyMissingFactualSummary: !args.includeAll,
     requireDescription: !args.noDescriptionFilter,
   };
