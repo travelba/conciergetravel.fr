@@ -63,3 +63,21 @@ refactor(domain): extract Booking state machine into dedicated module
 - ≤ 72 chars subject line; body wraps at 100 chars.
 - Reference ADRs in body when relevant: `Refs: docs/adr/0003-payload-cms.md`.
 - Breaking changes flagged with `!` and `BREAKING CHANGE:` footer.
+
+## `Tested:` footer (mandatory for user-visible changes)
+
+When the commit modifies a user-visible surface (route, UI block, copy,
+nav, form, JSON-LD), append a `Tested:` footer that summarises the
+walk-through evidence (URLs walked, locales, discoverability path,
+viewports). This proves the agent followed the hard rule
+`user-acceptance-before-commit` rather than relying on green CI alone.
+
+```
+feat(club): add Le Concierge Club ribbon on the homepage
+
+Tested: walked /fr/, /en/ via cursor-ide-browser MCP. Ribbon visible
+  above-the-fold on desktop (1280) + mobile (375). Discoverable via
+  header mega-menu (1 click) and 2 ribbon CTAs (0 clicks). Score 4/4.
+```
+
+See `.cursor/skills/user-acceptance-loop/SKILL.md` for the recipe.

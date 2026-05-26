@@ -63,6 +63,7 @@ Use this when you don't know where to start.
 | Core Web Vitals, image / font optim, code splitting, edge runtime                                                      | [`performance-engineering`](performance-engineering/SKILL.md)                                                  |
 | Sentry, structured logs, Web Vitals, alerts, dashboards                                                                | [`observability-monitoring`](observability-monitoring/SKILL.md)                                                |
 | Unit (Vitest) + integration (MSW) + E2E (Playwright) + axe + Lighthouse                                                | [`test-strategy`](test-strategy/SKILL.md)                                                                      |
+| **Walk every user-visible change as a real user BEFORE commit / push** (browser MCP, mobile + desktop, fr + en)        | [`user-acceptance-loop`](user-acceptance-loop/SKILL.md) ⭐ NEW                                                 |
 | GitHub Actions, Vercel previews, Supabase migrations, release flow                                                     | [`cicd-release-management`](cicd-release-management/SKILL.md)                                                  |
 | **Vercel env vars scoped per environment** (Production / Preview / Development trap)                                   | [`cicd-release-management` §Rule 9](cicd-release-management/SKILL.md)                                          |
 | **`turbo-ignore` cancels empty commits / off-scope changes** — `--allow-empty` can't force a rebuild                   | [`cicd-release-management` §Rule 10](cicd-release-management/SKILL.md) ✏️                                      |
@@ -113,7 +114,7 @@ Use this when you don't know where to start.
 
 ### Quality, security, ops
 
-- [`security-engineering`](security-engineering/SKILL.md), [`test-strategy`](test-strategy/SKILL.md), [`observability-monitoring`](observability-monitoring/SKILL.md), [`cicd-release-management`](cicd-release-management/SKILL.md), [`windows-dev-environment`](windows-dev-environment/SKILL.md) ⭐.
+- [`security-engineering`](security-engineering/SKILL.md), [`test-strategy`](test-strategy/SKILL.md), [`user-acceptance-loop`](user-acceptance-loop/SKILL.md) ⭐, [`observability-monitoring`](observability-monitoring/SKILL.md), [`cicd-release-management`](cicd-release-management/SKILL.md), [`windows-dev-environment`](windows-dev-environment/SKILL.md) ⭐.
 
 ### Documentation
 

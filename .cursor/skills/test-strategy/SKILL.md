@@ -15,6 +15,15 @@ Invoke when:
 - Editing CI test workflows.
 - Adjusting coverage thresholds or fixtures.
 
+> ⚠ **Tests are necessary but not sufficient.** Passing `lint` +
+> `typecheck` + `test:unit` does NOT prove that a feature is visible to
+> a real user. Before any commit/push that touches a public surface,
+> the agent MUST also walk the change as a user — see
+> [`user-acceptance-loop`](../user-acceptance-loop/SKILL.md) and the
+> hard rule `.cursor/rules/user-acceptance-before-commit.mdc`. The
+> 2026-05-26 Concierge Club case is the cautionary tale: green CI,
+> invisible feature.
+
 ## Frameworks
 
 - **Unit/integration**: Vitest + `@vitest/coverage-v8`.
@@ -96,3 +105,6 @@ Mandatory journeys:
 
 - CDC v3.0 §9.2 (Core Web Vitals), §12 (acceptance checklists).
 - `cicd-release-management`, `performance-engineering`, `accessibility` skills.
+- [`user-acceptance-loop`](../user-acceptance-loop/SKILL.md) — manual
+  user walk-through (mandatory pre-commit when the change is rendered).
+- `.cursor/rules/user-acceptance-before-commit.mdc` — hard rule.

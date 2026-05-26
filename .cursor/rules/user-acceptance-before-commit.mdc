@@ -1,0 +1,153 @@
+---
+description: Hard rule — every user-visible change must be smoke-tested as a real user (browser walk-through, screenshot, discoverability check) BEFORE git commit / push / deploy. No more "it's live but nobody can find it".
+alwaysApply: true
+---
+
+# User acceptance before commit — MyConciergeHotel.com
+
+Audit 2026-05-26 — the agent shipped Sprints 1-5 of Le Concierge Club
+(5 new public pages, 2 agent endpoints, ~50 files changed), committed,
+pushed, and reported "it's live". The PO landed on the homepage and
+saw **nothing**: no link in the nav, no hero strip, no entry in the
+footer. The work was technically deployed and functionally invisible.
+
+This rule exists so it never happens again.
+
+## The hard rule
+
+> **Before `git commit`, `git push`, or saying "it's deployed", the
+> agent MUST walk the change as a real user would and verify it is
+> visible from the entry points a real user would use.**
+
+Hand-waving ("the page exists at this URL") is not acceptance. Reading
+your own diff is not acceptance. Running unit tests is not acceptance.
+The only acceptable evidence is: **you reached the change by clicking
+through the site like a human, and you can prove it (screenshot or
+browser snapshot in the chat).**
+
+## When this rule applies
+
+Mandatory for any change that:
+
+- Adds a new public route (`/le-concierge-club`, `/itineraires/<slug>`, …).
+- Adds or modifies a UI block on an existing route (hero strip, banner,
+  CTA, mega-menu entry, footer column, dashboard card).
+- Adds or modifies a form, button, link, or interactive element.
+- Adds copy that the user sees (i18n keys, AEO blocks, FAQ entries,
+  ConciergeAdvice, factual summary).
+- Changes JSON-LD shape, canonical, hreflang, robots, sitemap entries
+  (verify via the live page source + `view-source:` or curl).
+
+**NOT** mandatory (skip the user walk-through, normal unit/typecheck
+discipline is enough):
+
+- Pure refactor with zero user-visible delta (rename a function,
+  re-organise a domain package, etc.).
+- Migrations / DB schema / RLS that don't change any rendered UI yet.
+- Vendor adapter, integration package, or LLM pipeline that is not
+  wired into a public route.
+- CI / build / tooling changes.
+- Documentation (markdown, ADRs, skills).
+
+When in doubt: **walk it**.
+
+## The walk-through checklist
+
+1. **List the entry points** — name the URLs a real user would actually
+   land on to see your change. Examples:
+   - Homepage `/` and `/en`
+   - Hotel fiche `/hotel/<test-slug>` (use the canonical test fiche
+     `/hotel/le-meurice` or any of the 443 published hotels).
+   - The new route itself (`/le-concierge-club`).
+   - The dashboard `/compte` (if signed-in change).
+2. **Build the app locally OR rely on the latest Vercel preview** —
+   `pnpm dev` from `apps/web` for fast iteration, or pull the preview
+   URL of the current branch from `vercel ls` / the PR check.
+3. **Walk through every entry point** using the `cursor-ide-browser`
+   MCP (skill `user-acceptance-loop`) OR the `browser-use` subagent:
+   - `browser_navigate` to the entry URL.
+   - `browser_snapshot` (cheap, accessibility tree) — confirm the new
+     copy / link / block is in the DOM.
+   - `browser_take_screenshot` — attach the visual proof. The agent
+     looks at it and confirms the change is **visually obvious** at
+     first glance (not buried 3 scrolls down with no contrast).
+4. **Test the discoverability path** — start from the homepage and
+   click your way to the change. If you can't reach it in ≤ 2 clicks
+   without knowing the URL, the change is invisible — fix the nav,
+   footer, or homepage strip BEFORE committing.
+5. **Test both locales** when the change ships in fr + en.
+6. **Mobile + desktop snapshot** when the change touches layout — the
+   mobile-nav is a separate component (`apps/web/src/components/
+   layout/mobile-nav.tsx`); a desktop-only check misses ~30 % of
+   sessions (GA4 baseline).
+7. **Test the failure mode** — what happens if Supabase / Algolia /
+   Cloudinary is unavailable? The page must not 500. Skill `nextjs-
+   app-router` §Data fetching covers the defensive-fallback pattern.
+
+## When the local dev server can't run (no env, no Supabase, etc.)
+
+The walk-through still applies — use the live preview / production URL.
+Two paths:
+
+- **Vercel preview URL** for the current branch: pull it via
+  `vercel ls --token=$VERCEL_TOKEN` or the GitHub PR check, then walk
+  the preview with the browser MCP. This is the canonical path for
+  catalogue / SEO changes (no localhost mocks can ever match the real
+  Supabase row counts).
+- **Production URL** for changes that landed in a previous commit but
+  weren't surfaced — the agent walks `https://myconciergehotel.com/...`
+  as a real user, screenshots the gap, then fixes it in a follow-up
+  commit. **This is exactly what 2026-05-26 demanded** — the pages
+  existed in prod, the nav didn't reference them.
+
+## What the agent reports to the user
+
+After the walk-through, the agent's message MUST include:
+
+- The exact URLs walked (with locale).
+- A 1-line summary of what is visible at each URL.
+- The discoverability proof: "starting from `/`, the user reaches
+  the change via `<menu name> > <link name>` (1 click)".
+- The screenshots taken (the IDE renders them inline).
+- The known gaps left unfixed (if any) — explicit, not implicit.
+
+A commit message MAY reference the walk-through with a `Tested:` line:
+
+```
+Tested: walked /fr/, /fr/le-concierge-club, /en/le-concierge-club via
+  browser MCP. Confirmed nav entries in Concierge mega-menu and home
+  ribbon are visible above the fold on desktop + mobile.
+```
+
+## Anti-patterns to refuse
+
+| Anti-pattern | Why it fails | Correct path |
+| --- | --- | --- |
+| "The route exists at `/le-concierge-club`, so it's live." | A URL existing ≠ a user finding it. | Walk from `/` and confirm the click path. |
+| "Tests pass, lint passes, typecheck passes — shipping." | Tests check correctness, not visibility. | Add the browser walk-through. |
+| Pushing a hero banner without ever loading the page that hosts it. | LCP regressions and dark patterns slip in silently. | Screenshot above-the-fold render. |
+| Adding a form server-action without filling the form in a real browser. | Honeypot / Zod / CSRF traps the form silently. | Submit the form once end-to-end. |
+| Adding a new nav entry without checking the mobile burger menu. | Mobile-nav is a separate component; entries can desync. | Open the burger on mobile viewport. |
+| "I trust the E2E tests in CI." | CI Playwright tests run a curated set of paths and rarely catch a missing nav entry on a NEW route. | Walk it once manually; add a Playwright case if it warrants regression coverage. |
+
+## Tooling reference
+
+- **Browser walk-through** — `mcp_cursor-ide-browser` (browser_navigate,
+  browser_snapshot, browser_take_screenshot, browser_click, browser_type).
+- **Hands-off long sequences** — `browser-use` subagent.
+- **Live preview lookup** — `mcp_plugin-vercel-vercel` (list_deployments,
+  get_deployment).
+- **E2E regression** — `apps/web/e2e/<journey>.spec.ts` (skill `e2e-
+  testing`).
+
+See `.cursor/skills/user-acceptance-loop/SKILL.md` for the concrete
+recipes (browser MCP cheat-sheet, sample walk-through prompts for the
+`browser-use` subagent, scoring rubric for "is the change visible").
+
+## Reference cases
+
+- **2026-05-26 — Concierge Club invisibility**: commit
+  `af4dc50 feat(club): Le Concierge Club programme — Sprints 1 → 5`
+  shipped 5 pages + 2 endpoints with zero nav surfacing. Required a
+  follow-up commit `87caf8b` to add header + footer + mobile + home
+  ribbon entries. The original PR should have failed acceptance.

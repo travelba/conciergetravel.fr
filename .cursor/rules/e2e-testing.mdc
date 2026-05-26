@@ -49,4 +49,15 @@ if (process.env.NODE_ENV === 'test') { … }
 - E2E job runs after lint + typecheck + unit — fail fast on cheap signals.
 - Long-running tests get `test.slow()`; the suite must stay under 5 min wall-clock.
 
+## Manual user acceptance (mandatory pre-commit)
+
+E2E regression nets catch the journeys they were written for. They do
+**not** catch a brand-new route shipped without a nav reference, a
+banner added below the fold, or a CTA that renders only in `fr`.
+Before any commit / push on a user-visible change, walk the change as
+a real user and report the evidence — see
+[`.cursor/rules/user-acceptance-before-commit.mdc`](user-acceptance-before-commit.mdc)
+(hard rule) and [`.cursor/skills/user-acceptance-loop/SKILL.md`]
+(../skills/user-acceptance-loop/SKILL.md) (operating manual).
+
 See `.cursor/skills/test-strategy/SKILL.md`.
