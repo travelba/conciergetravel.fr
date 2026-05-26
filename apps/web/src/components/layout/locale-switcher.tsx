@@ -46,6 +46,7 @@ export function LocaleSwitcher(): ReactElement {
 
   const otherLocale: Locale = currentLocale === 'fr' ? 'en' : routing.defaultLocale;
   const qs = searchParams.toString();
+  const heritage = pathname.startsWith('/hotel/');
 
   const href: Parameters<typeof Link>[0]['href'] =
     pathname.includes('[') && Object.keys(routeParams).length > 0
@@ -61,7 +62,11 @@ export function LocaleSwitcher(): ReactElement {
       locale={otherLocale}
       aria-label={t('label')}
       hrefLang={otherLocale === 'fr' ? 'fr-FR' : 'en'}
-      className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring rounded-md px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2"
+      className={
+        heritage
+          ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center text-sm focus-visible:outline-none focus-visible:ring-2'
+          : 'text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring rounded-md px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2'
+      }
     >
       <span aria-hidden>{otherLocale === 'fr' ? 'FR' : 'EN'}</span>
       <span className="sr-only">{t('switchTo')}</span>

@@ -4,8 +4,11 @@ import type { ReactElement } from 'react';
 import { intlLocaleTag } from '@/i18n/runtime';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 
+type HotelTldrVariant = 'default' | 'heritage';
+
 interface HotelTldrProps {
   readonly locale: SupportedLocale;
+  readonly variant?: HotelTldrVariant;
   readonly name: string;
   readonly city: string;
   readonly region: string;
@@ -70,6 +73,7 @@ const BOOKING_MESSAGE_KEY = {
  */
 export async function HotelTldr({
   locale,
+  variant = 'default',
   name,
   city,
   region,
@@ -126,28 +130,60 @@ export async function HotelTldr({
 
   const formattedDate = dateModified !== null ? formatDateForLocale(dateModified, locale) : null;
 
+  const isHeritage = variant === 'heritage';
+
   return (
     <aside
       id="tldr"
       aria-label={t('eyebrow')}
-      className="mb-10 rounded-xl border border-amber-200 bg-amber-50/50 p-5 md:p-6"
+      className={
+        isHeritage
+          ? 'border-outline-variant bg-surface-container-low mb-16 border p-6 md:p-8'
+          : 'mb-10 rounded-xl border border-amber-200 bg-amber-50/50 p-5 md:p-6'
+      }
     >
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-800">
+      <p
+        className={
+          isHeritage
+            ? 'text-primary-heritage text-label-caps tracking-caps mb-3 uppercase'
+            : 'mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-800'
+        }
+      >
         {t('eyebrow')}
       </p>
-      <p className="text-fg text-base leading-relaxed md:text-lg">
+      <p
+        className={
+          isHeritage
+            ? 'text-on-surface text-body-lg leading-relaxed'
+            : 'text-fg text-base leading-relaxed md:text-lg'
+        }
+      >
         {firstSentence}
         {inventoryLine !== null ? ' ' + inventoryLine + '.' : ''}
       </p>
       {openedLine !== null || architectLine !== null || bookingLine.length > 0 ? (
-        <ul className="text-muted mt-3 space-y-1 text-sm md:text-base">
+        <ul
+          className={
+            isHeritage
+              ? 'text-on-surface-variant text-body-lg mt-4 space-y-2'
+              : 'text-muted mt-3 space-y-1 text-sm md:text-base'
+          }
+        >
           {openedLine !== null ? <li>• {openedLine}.</li> : null}
           {architectLine !== null ? <li>• {architectLine}</li> : null}
           <li>• {bookingLine}</li>
         </ul>
       ) : null}
       {formattedDate !== null ? (
-        <p className="text-muted/80 mt-3 text-xs">{t('updatedAt', { date: formattedDate })}</p>
+        <p
+          className={
+            isHeritage
+              ? 'text-on-surface-variant/80 text-label-caps mt-4'
+              : 'text-muted/80 mt-3 text-xs'
+          }
+        >
+          {t('updatedAt', { date: formattedDate })}
+        </p>
       ) : null}
     </aside>
   );

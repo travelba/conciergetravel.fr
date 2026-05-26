@@ -55,6 +55,7 @@ export function MobileNav(): ReactElement {
   // effect, satisfying `react-hooks/set-state-in-effect`.
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const pathname = usePathname();
+  const heritage = pathname.startsWith('/hotel/');
   const [previousPathname, setPreviousPathname] = useState(pathname);
   if (previousPathname !== pathname) {
     setPreviousPathname(pathname);
@@ -107,7 +108,11 @@ export function MobileNav(): ReactElement {
         aria-controls={labelId}
         aria-label={open ? t('menu.close') : t('menu.open')}
         onClick={() => setOpen((v) => !v)}
-        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden"
+        className={
+          heritage
+            ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:hidden'
+            : 'border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden'
+        }
       >
         {open ? (
           <svg
@@ -152,7 +157,11 @@ export function MobileNav(): ReactElement {
             role="dialog"
             aria-modal="true"
             aria-label={t('menu.label')}
-            className="border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5 shadow-xl"
+            className={
+              heritage
+                ? 'border-outline-variant bg-surface absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5'
+                : 'border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5 shadow-xl'
+            }
           >
             <div className="mb-5 flex items-center justify-between">
               <p className="text-fg font-serif text-lg">{t('brand')}</p>

@@ -2,10 +2,17 @@ import type { ReactElement } from 'react';
 
 import type { HotelFactualSummary } from '@/server/hotels/get-hotel-by-slug';
 
+type FactualSummaryVariant = 'default' | 'heritage';
+
 interface FactualSummaryProps {
   readonly summary: HotelFactualSummary | null;
   /** Optional fallback rendered when no summary is set in DB. */
   readonly fallback: string | null;
+  /**
+   * `heritage` keeps the CDC §2.3 block in the DOM for JSON-LD / GEO
+   * without a visible line under the H1 (Stitch ATF = hero + mosaic only).
+   */
+  readonly variant?: FactualSummaryVariant;
 }
 
 /**
@@ -36,9 +43,15 @@ interface FactualSummaryProps {
  *
  * Pure RSC, no client JS.
  */
-export function FactualSummary({ summary, fallback }: FactualSummaryProps): ReactElement | null {
+export function FactualSummary({
+  summary,
+  fallback,
+  variant = 'default',
+}: FactualSummaryProps): ReactElement | null {
   const text = summary?.text ?? fallback;
   if (text === null || text.length === 0) return null;
+
+  const isHeritage = variant === 'heritage';
 
   return (
     <p
@@ -47,7 +60,9 @@ export function FactualSummary({ summary, fallback }: FactualSummaryProps): Reac
       data-llm-summary
       {...(summary !== null ? { 'data-source': 'editorial' } : { 'data-source': 'fallback' })}
       {...(summary !== null && !summary.isWithinTarget ? { 'data-length-warning': 'true' } : {})}
-      className="text-fg mt-4 max-w-prose text-lg leading-snug sm:text-xl"
+      className={
+        isHeritage ? 'sr-only' : 'text-fg mt-4 max-w-prose text-lg leading-snug sm:text-xl'
+      }
     >
       {text}
     </p>

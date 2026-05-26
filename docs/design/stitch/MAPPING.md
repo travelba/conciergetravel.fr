@@ -24,9 +24,9 @@ overwrite if needed.
 | ---------------------------------- | -------------------------------------------------- | ------------------------------------------------ | --------------------------- |
 | `8e5c5a99bf1a4fc9829525b1aa2ebc8f` | Homepage — hero château + search                   | `/`                                              | ⏳                          |
 | `1335ff1e9ff44a57b6a68f16afc172e7` | Search results — list + interactive map            | `/recherche`                                     | ⏳                          |
-| `eb47749c89c54be19472b3ec1eaec68c` | Hotel detail (desktop) — Le Bristol Paris          | `/hotel/[slug]`                                  | ⏳                          |
-| `e732529b3bb04ada8158073b4aad0c85` | Hotel detail (mobile/compact) — Le Bristol         | `/hotel/[slug]` (mobile variant)                 | ⏳                          |
-| `b64819396ca144ae96dc3003d6fee11c` | Hotel detail (variant) — Le Bristol                | `/hotel/[slug]` (alt layout)                     | ⏳                          |
+| `eb47749c89c54be19472b3ec1eaec68c` | Hotel detail (desktop) — Le Bristol Paris          | `/hotel/[slug]`                                  | ✅ Phase 2 heritage skin    |
+| `e732529b3bb04ada8158073b4aad0c85` | Hotel detail (mobile/compact) — Le Bristol         | `/hotel/[slug]` (mobile variant)                 | 🔶 header/footer mobile     |
+| `b64819396ca144ae96dc3003d6fee11c` | Hotel detail (variant) — Le Bristol                | `/hotel/[slug]` (alt layout)                     | 🔶 same route as desktop    |
 | `7a7e885544d24fc6821db5100501dc5f` | Booking funnel step 1 — room selection             | `/reservation/start` or `/hotel/[slug]/reserver` | ⏳                          |
 | `582fdb8e25504b72bd34e6c1a57136f6` | Member dashboard — "Privilège" tier + Carnet       | `/compte`                                        | ⏳ ⚠ loyalty model mismatch |
 | `2de148f26e604f5da6b505b5f5ead4f7` | Editorial guide — "Paris : Au-delà des Apparences" | `/guide/[citySlug]` or `/destination/[citySlug]` | ⏳                          |

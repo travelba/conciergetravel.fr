@@ -8,6 +8,8 @@ import { AuthArea } from './auth-area';
 import { HeaderQuickSearch } from './header-quick-search';
 import { LocaleSwitcher } from './locale-switcher';
 import { MobileNav } from './mobile-nav';
+import { isHotelHeritageRoute, readBarePathname } from '@/lib/layout/bare-pathname';
+
 import {
   BRAND_NAV_ENTRIES,
   HERO_REGION_NAV_ENTRIES,
@@ -55,6 +57,8 @@ import {
 export async function SiteHeader(): Promise<ReactElement> {
   const t = await getTranslations('header');
   const locale = (await getLocale()) as Locale;
+  const { bare } = await readBarePathname();
+  const heritage = isHotelHeritageRoute(bare);
 
   return (
     <>
@@ -65,11 +69,27 @@ export async function SiteHeader(): Promise<ReactElement> {
         {t('skipToContent')}
       </a>
 
-      <header className="border-border bg-bg/95 sticky top-0 z-40 border-b backdrop-blur">
-        <div className="container mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-3">
+      <header
+        className={
+          heritage
+            ? 'border-outline-variant bg-surface/90 sticky top-0 z-50 border-b backdrop-blur-md'
+            : 'border-border bg-bg/95 sticky top-0 z-40 border-b backdrop-blur'
+        }
+      >
+        <div
+          className={
+            heritage
+              ? 'px-margin-mobile md:px-margin-desktop mx-auto flex h-20 max-w-[1280px] items-center gap-4'
+              : 'container mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-3'
+          }
+        >
           <Link
             href="/"
-            className="text-fg focus-visible:ring-ring font-serif text-lg tracking-tight hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+            className={
+              heritage
+                ? 'text-primary-heritage focus-visible:ring-primary-heritage text-headline-md font-serif tracking-tighter hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
+                : 'text-fg focus-visible:ring-ring font-serif text-lg tracking-tight hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
+            }
             aria-label={t('brand')}
           >
             {t('brand')}
@@ -77,22 +97,30 @@ export async function SiteHeader(): Promise<ReactElement> {
 
           <nav
             aria-label={t('primaryNav.label')}
-            className="ml-4 hidden flex-1 items-center gap-0.5 md:flex"
+            className={
+              heritage
+                ? 'ml-4 hidden h-full flex-1 items-center gap-6 md:flex'
+                : 'ml-4 hidden flex-1 items-center gap-0.5 md:flex'
+            }
           >
-            <PalacesHotelsMegaMenu locale={locale} t={t} />
-            <DestinationsMegaMenu locale={locale} t={t} />
-            <InspirationMegaMenu locale={locale} t={t} />
-            <ClassementsMegaMenu locale={locale} t={t} />
-            <ConciergeMegaMenu locale={locale} t={t} />
+            <PalacesHotelsMegaMenu locale={locale} t={t} heritage={heritage} />
+            <DestinationsMegaMenu locale={locale} t={t} heritage={heritage} />
+            <InspirationMegaMenu locale={locale} t={t} heritage={heritage} />
+            <ClassementsMegaMenu locale={locale} t={t} heritage={heritage} />
+            <ConciergeMegaMenu locale={locale} t={t} heritage={heritage} />
           </nav>
 
-          <HeaderQuickSearch locale={locale} />
+          {heritage ? null : <HeaderQuickSearch locale={locale} />}
 
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-2">
             <Link
               href="/recherche"
               aria-label={t('primaryNav.search')}
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 lg:hidden"
+              className={
+                heritage
+                  ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:inline-flex'
+                  : 'text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 lg:hidden'
+              }
             >
               <svg
                 aria-hidden
@@ -117,7 +145,19 @@ export async function SiteHeader(): Promise<ReactElement> {
               <LocaleSwitcher />
             </Suspense>
 
-            <AuthArea variant="header" />
+            {heritage ? (
+              <Link
+                href="/compte"
+                aria-label={t('account.myAccount')}
+                className="text-primary-heritage hover:text-primary-heritage/80 focus-visible:ring-primary-heritage hidden h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:inline-flex"
+              >
+                <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+              </Link>
+            ) : null}
+
+            {heritage ? null : <AuthArea variant="header" />}
 
             <MobileNav />
           </div>
@@ -134,6 +174,7 @@ type T = Awaited<ReturnType<typeof getTranslations<'header'>>>;
 interface MegaMenuProps {
   readonly locale: Locale;
   readonly t: T;
+  readonly heritage?: boolean;
 }
 
 /**
@@ -148,20 +189,26 @@ function MegaTrigger({
   triggerAria,
   children,
   ariaLabel,
+  heritage = false,
 }: {
   readonly href: '/hotels' | '/destination' | '/inspiration' | '/classements' | '/le-concierge';
   readonly label: string;
   readonly triggerAria?: string;
   readonly children: ReactNode;
   readonly ariaLabel: string;
+  readonly heritage?: boolean;
 }): ReactElement {
   return (
-    <div className="group relative">
+    <div className="group relative flex h-full items-center">
       <Link
         href={href}
         aria-haspopup="menu"
         aria-label={triggerAria}
-        className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2"
+        className={
+          heritage
+            ? 'text-on-surface-variant hover:text-primary-heritage focus-visible:ring-primary-heritage text-label-caps tracking-caps inline-flex h-full items-center gap-1 px-1 focus-visible:outline-none focus-visible:ring-2'
+            : 'text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2'
+        }
       >
         {label}
         <svg
@@ -237,9 +284,10 @@ function MegaLink({
 
 // ─── Mega-menu 1 — Palaces & Hôtels ──────────────────────────────────────
 
-function PalacesHotelsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
+function PalacesHotelsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
+      heritage={heritage}
       href="/hotels"
       label={t('primaryNav.hotels')}
       ariaLabel={t('primaryNav.hotelsCategoriesLabel')}
@@ -304,9 +352,10 @@ function PalacesHotelsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 
 // ─── Mega-menu 2 — Destinations ──────────────────────────────────────────
 
-function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
+function DestinationsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
+      heritage={heritage}
       href="/destination"
       label={t('primaryNav.destinations')}
       ariaLabel={t('primaryNav.destinationsLabel')}
@@ -467,9 +516,10 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 
 // ─── Mega-menu 3 — Inspiration ───────────────────────────────────────────
 
-function InspirationMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
+function InspirationMegaMenu({ locale, t, heritage = false }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
+      heritage={heritage}
       href="/inspiration"
       label={t('primaryNav.inspiration')}
       ariaLabel={t('primaryNav.inspirationLabel')}
@@ -533,9 +583,10 @@ function InspirationMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
 
 // ─── Mega-menu 4 — Classements ───────────────────────────────────────────
 
-function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
+function ClassementsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
+      heritage={heritage}
       href="/classements"
       label={t('primaryNav.rankings')}
       ariaLabel={t('primaryNav.rankingsLabel')}
@@ -623,9 +674,10 @@ function ClassementsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
  * `conciergeJournal` keeps pointing at `/le-concierge` (the dedicated
  * journal hub is still on the Phase-1 editorial backlog — no page yet).
  */
-function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
+function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement {
   return (
     <MegaTrigger
+      heritage={heritage}
       href="/le-concierge"
       label={t('primaryNav.concierge')}
       ariaLabel={t('primaryNav.conciergeLabel')}
