@@ -21,6 +21,8 @@
   --color-off-white: #fafaf8;
   --color-gold: #c9a96e;
   --color-sage: #8c9681;
+  /* Stitch "L'Héritage Editorial" primary — forest green wordmark & CTAs */
+  --color-primary-heritage: #052419;
 
   /* Legacy aliases (kept for backward-compat with existing Tailwind classes) */
   --color-bg: var(--color-off-white);

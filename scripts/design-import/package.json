@@ -1,0 +1,23 @@
+{
+  "name": "@mch/design-import",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Pull screens, HTML and screenshots from Google Stitch into docs/design/stitch/, and expose a local stdio MCP proxy so Cursor can call Stitch tools (Cursor's native remote MCP support is incompatible with the stitch.googleapis.com/mcp endpoint — forum.cursor.com #156221).",
+  "scripts": {
+    "pull": "tsx src/pull-stitch.ts",
+    "pull:dry": "tsx src/pull-stitch.ts --dry-run",
+    "pull:project": "tsx src/pull-stitch.ts --project-id=11149337623414320821",
+    "mcp:proxy": "tsx src/stitch-mcp-proxy.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/stitch-sdk": "^0.3.5",
+    "@modelcontextprotocol/sdk": "^1.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "catalog:"
+  }
+}

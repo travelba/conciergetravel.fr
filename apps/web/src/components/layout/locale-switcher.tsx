@@ -1,11 +1,25 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 
 import { Link, usePathname } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
+
+function routeParamsFromUseParams(params: ReturnType<typeof useParams>): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (params === null) return out;
+  for (const [key, value] of Object.entries(params)) {
+    if (key === 'locale') continue;
+    if (typeof value === 'string' && value.length > 0) {
+      out[key] = value;
+    } else if (Array.isArray(value) && typeof value[0] === 'string' && value[0].length > 0) {
+      out[key] = value[0];
+    }
+  }
+  return out;
+}
 
 /**
  * Pure-link locale switcher (skill: seo-technical §hreflang).
@@ -28,17 +42,22 @@ export function LocaleSwitcher(): ReactElement {
   const currentLocale = useLocale() as Locale;
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const routeParams = routeParamsFromUseParams(useParams());
 
   const otherLocale: Locale = currentLocale === 'fr' ? 'en' : routing.defaultLocale;
   const qs = searchParams.toString();
-  const href = qs.length > 0 ? `${pathname}?${qs}` : pathname;
+
+  const href: Parameters<typeof Link>[0]['href'] =
+    pathname.includes('[') && Object.keys(routeParams).length > 0
+      ? ({
+          pathname,
+          params: routeParams,
+        } as Parameters<typeof Link>[0]['href'])
+      : ((qs.length > 0 ? `${pathname}?${qs}` : pathname) as Parameters<typeof Link>[0]['href']);
 
   return (
     <Link
-      // `pathname` is treated as a typed route — cast through unknown
-      // is the standard escape hatch in next-intl docs when the route
-      // type cannot be statically derived.
-      href={href as unknown as Parameters<typeof Link>[0]['href']}
+      href={href}
       locale={otherLocale}
       aria-label={t('label')}
       hrefLang={otherLocale === 'fr' ? 'fr-FR' : 'en'}

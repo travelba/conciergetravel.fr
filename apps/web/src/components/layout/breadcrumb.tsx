@@ -59,7 +59,7 @@ export async function Breadcrumb(): Promise<ReactElement | null> {
   const segments = bare.split('/').filter((s) => s.length > 0);
   if (segments.length === 0) return null;
 
-  const t = await getTranslations('breadcrumb');
+  const t = await getTranslations('header.breadcrumb');
 
   // Map the first segment (the top-level entry) to a label + href.
   // Dynamic params (`[slug]`, `[citySlug]`, …) live at index 1+ and
@@ -91,6 +91,10 @@ export async function Breadcrumb(): Promise<ReactElement | null> {
   };
 
   const firstSegment = segments[0] ?? '';
+
+  // Hotel fiches ship a full page-level breadcrumb (city + hotel name).
+  if (firstSegment === 'hotel') return null;
+
   const topLevel = TOP_LEVEL_LABEL[firstSegment];
   if (topLevel === undefined) {
     // Unmapped route → render no breadcrumb to avoid a confusing chain.

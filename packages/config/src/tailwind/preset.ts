@@ -43,6 +43,7 @@ const preset = {
         'off-white': 'var(--color-off-white)',
         gold: 'var(--color-gold)',
         sage: 'var(--color-sage)',
+        'primary-heritage': 'var(--color-primary-heritage)',
 
         /* ---------------------------------------------------------------- */
         /* Material Design 3 named tokens                                   */

@@ -19,6 +19,8 @@ interface HotelShareButtonProps {
    * URL it already computed for `<link rel="canonical">`.
    */
   readonly canonicalUrl: string;
+  /** Optional class override — Stitch heritage CTAs on hotel detail. */
+  readonly buttonClassName?: string;
 }
 
 /**
@@ -66,10 +68,14 @@ interface HotelShareButtonProps {
  */
 type ShareStatus = 'idle' | 'sharing' | 'copied' | 'shared' | 'failed';
 
+const defaultShareButtonClass =
+  'border-border bg-bg text-fg hover:bg-bg/80 focus-visible:ring-ring inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 disabled:opacity-60';
+
 export function HotelShareButton({
   hotelName,
   shareText,
   canonicalUrl,
+  buttonClassName,
 }: HotelShareButtonProps): React.ReactElement {
   const t = useTranslations('hotelPage.share');
   const [status, setStatus] = useState<ShareStatus>('idle');
@@ -182,7 +188,7 @@ export function HotelShareButton({
         }}
         disabled={status === 'sharing'}
         aria-label={t('buttonAria', { name: hotelName })}
-        className="border-border bg-bg text-fg hover:bg-bg/80 focus-visible:ring-ring inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 disabled:opacity-60"
+        className={buttonClassName ?? defaultShareButtonClass}
       >
         <svg
           aria-hidden="true"

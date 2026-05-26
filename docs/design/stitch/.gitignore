@@ -1,0 +1,8 @@
+# Raw payloads pulled from Stitch — large binaries, re-derivable from manifest.
+# Force-add individual files with `git add -f` when anchoring a decision in a PR.
+screens/*.html
+screenshots/*.png
+
+# But always keep these:
+!screens/.gitkeep
+!screenshots/.gitkeep

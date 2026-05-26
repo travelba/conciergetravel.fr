@@ -3,6 +3,7 @@ packages:
   - "packages/*"
   - "tests"
   - "scripts/editorial-pilot"
+  - "scripts/design-import"
 
 catalog:
   # Pinned shared dependency versions across the monorepo.

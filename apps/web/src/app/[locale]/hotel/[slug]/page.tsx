@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { ReactElement } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -1022,36 +1023,31 @@ async function renderHotelPage(
         />
       ) : null}
 
-      <nav aria-label={t('breadcrumb.hotels')} className="text-muted mb-6 text-xs">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="hover:underline">
-              {t('breadcrumb.home')}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li>
-            <Link href="/recherche" className="hover:underline">
-              {t('breadcrumb.hotels')}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li>
-            <Link
-              href={{
-                pathname: '/destination/[citySlug]',
-                params: { citySlug: cityHubSlug },
-              }}
-              className="hover:underline"
-            >
-              {row.city}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li className="text-fg" aria-current="page">
-            {name}
-          </li>
-        </ol>
+      <nav
+        aria-label={t('breadcrumb.hotels')}
+        className="text-on-surface-variant text-label-caps mb-6 flex flex-wrap items-center gap-2"
+      >
+        <Link href="/" className="hover:text-primary-heritage transition-colors">
+          {t('breadcrumb.home')}
+        </Link>
+        <BreadcrumbChevron />
+        <Link href="/recherche" className="hover:text-primary-heritage transition-colors">
+          {t('breadcrumb.hotels')}
+        </Link>
+        <BreadcrumbChevron />
+        <Link
+          href={{
+            pathname: '/destination/[citySlug]',
+            params: { citySlug: cityHubSlug },
+          }}
+          className="hover:text-primary-heritage transition-colors"
+        >
+          {row.city}
+        </Link>
+        <BreadcrumbChevron />
+        <span className="text-primary-heritage" aria-current="page">
+          {name}
+        </span>
       </nav>
 
       <HotelHero
@@ -1061,6 +1057,8 @@ async function renderHotelPage(
         city={row.city}
         district={row.district !== '' ? row.district : null}
         region={row.region}
+        address={row.address}
+        postalCode={postalCode}
         isPalace={row.is_palace}
         stars={row.stars as 1 | 2 | 3 | 4 | 5}
         canonicalUrl={canonicalUrl}
@@ -1432,5 +1430,18 @@ async function renderHotelPage(
         {lastUpdated !== null ? <p>{t('lastUpdated', { date: lastUpdated })}</p> : null}
       </footer>
     </main>
+  );
+}
+
+function BreadcrumbChevron(): ReactElement {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0 opacity-70"
+      fill="currentColor"
+    >
+      <path d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.42 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.71 6.7a1 1 0 0 0-1.42 1.41Z" />
+    </svg>
   );
 }

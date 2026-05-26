@@ -2735,6 +2735,8 @@
     "favorites": {
       "addToFavorites": "Ajouter {name} à mes favoris",
       "removeFromFavorites": "Retirer {name} de mes favoris",
+      "saveButton": "Sauvegarder",
+      "savedButton": "Sauvegardé",
       "shortAdd": "Favoris",
       "shortRemove": "En favoris",
       "confirmAdded": "{name} a été ajouté à vos favoris",

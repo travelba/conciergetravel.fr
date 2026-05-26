@@ -22,6 +22,8 @@ interface HotelHeroProps {
   readonly city: string;
   readonly district: string | null;
   readonly region: string;
+  readonly address: string | null;
+  readonly postalCode: string | null;
   readonly isPalace: boolean;
   readonly stars: 1 | 2 | 3 | 4 | 5;
   readonly canonicalUrl: string;
@@ -35,28 +37,15 @@ interface HotelHeroProps {
   readonly mapLink: string | null;
 }
 
+const heritageActionClass =
+  'border-primary-heritage text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex min-h-touch items-center gap-2 border px-6 py-3 text-label-caps tracking-caps transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-60';
+
 /**
- * Hero ATF for the hotel detail page — CDC §2 bloc 1 + ADR-0013
- * §Trust Layer.
+ * Hero ATF for the hotel detail page — Stitch "L'Héritage Editorial" layout
+ * (docs/design/stitch/screens/eb47749c…) with real catalogue data.
  *
- * Composition (top to bottom):
- *  1. Eyebrow row (palace/stars chip + city + district + region) +
- *     favourite & share actions
- *  2. H1 (hotel name, font-serif)
- *  3. AggregateRating (Amadeus first, Google Places fallback)
- *  4. IATA agency chip (anchor element of the Decision Layer trust
- *     signal — repeated in the BookingWidget)
- *  5. `<FactualSummary>` (B1) — 130-150 chars CDC §2.3
- *  6. `<ConciergeAdviceTeaser>` — short link down to the full
- *     `#concierge-advice` block (Concierge voice — ADR-0011)
- *  7. Optional OSM map link when GPS is set but no POIs to render
- *
- * Pure RSC, no client JS. The `<HotelFavoriteButton>` /
- * `<HotelShareButton>` are existing client islands re-used as-is.
- *
- * Anchored via `id="hotel-hero"` for AEO speakable + analytics
- * tracking. The factual summary is independently anchored via
- * `id="factual-summary"` inside `<FactualSummary>` (B10).
+ * CDC §2 bloc 1 content (factual summary, concierge teaser) is preserved below
+ * the Stitch header row; IATA trust chip moves to the booking widget only.
  */
 export async function HotelHero({
   locale,
@@ -65,6 +54,8 @@ export async function HotelHero({
   city,
   district,
   region,
+  address,
+  postalCode,
   isPalace,
   stars,
   canonicalUrl,
@@ -78,101 +69,121 @@ export async function HotelHero({
   mapLink,
 }: HotelHeroProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
-  const tw = await getTranslations({ locale, namespace: 'hotelPage.widget.trust' });
+
+  const addressLine = formatAddressLine(address ?? '', postalCode, city, district);
 
   return (
-    <header id="hotel-hero" className="mb-10" data-hotel-hero>
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="text-muted flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em]">
-          {isPalace ? (
-            <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-amber-900">
-              {t('hero.palace')}
-            </span>
-          ) : (
-            <span className="border-border bg-bg rounded-md border px-2 py-1">
-              {t('hero.stars', { count: stars })}
-            </span>
-          )}
-          <span>{city}</span>
-          {district !== null && district !== '' ? (
-            <>
-              <span aria-hidden>{t('hero.districtSeparator')}</span>
-              <span>{district}</span>
-            </>
+    <header id="hotel-hero" className="mb-12" data-hotel-hero>
+      <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+        <div className="min-w-0 flex-1">
+          <div className="mb-4 flex flex-wrap items-center gap-4">
+            {isPalace ? (
+              <span className="border-charcoal text-charcoal text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+                {t('hero.palace')}
+              </span>
+            ) : (
+              <span className="border-charcoal text-charcoal text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+                {t('hero.stars', { count: stars })}
+              </span>
+            )}
+            {amadeusRating !== null ? (
+              <p
+                className="text-primary-heritage inline-flex items-baseline"
+                data-testid="hotel-aggregate-rating"
+              >
+                <span
+                  className="text-headline-md font-serif"
+                  aria-label={t('rating.scoreAria', {
+                    value: amadeusRating.ratingValue.toFixed(1),
+                    best: amadeusRating.bestRating,
+                  })}
+                >
+                  {amadeusRating.ratingValue.toFixed(1)}
+                </span>
+                <span className="text-body-lg ml-1">/10</span>
+              </p>
+            ) : null}
+          </div>
+
+          <h1 className="text-primary-heritage text-display-xl mb-2 font-serif md:text-[4rem]">
+            {name}
+          </h1>
+
+          {addressLine.length > 0 ? (
+            <p className="text-on-surface-variant text-body-lg flex items-start gap-2">
+              <LocationIcon />
+              <span>{addressLine}</span>
+            </p>
           ) : null}
-          {region !== '' ? (
-            <>
-              <span aria-hidden>{t('hero.districtSeparator')}</span>
-              <span>{region}</span>
-            </>
+
+          <div className="mt-4 max-w-3xl">
+            <FactualSummary summary={factualSummary} fallback={fallbackSummary} />
+          </div>
+
+          {hasConciergeAdvice ? (
+            <div className="mt-3">
+              <ConciergeAdviceTeaser locale={locale} />
+            </div>
+          ) : null}
+
+          {hasMapLink && mapLink !== null ? (
+            <p className="mt-3 text-sm">
+              <a
+                href={mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted hover:text-fg underline"
+              >
+                {t('hero.viewMap')}
+              </a>
+            </p>
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <HotelFavoriteButton hotelId={hotelId} hotelName={name} returnPath={localePath} />
+        <div className="flex shrink-0 flex-wrap gap-4">
           <HotelShareButton
             hotelName={name}
             shareText={description !== null ? description.slice(0, 160) : null}
             canonicalUrl={canonicalUrl}
+            buttonClassName={heritageActionClass}
+          />
+          <HotelFavoriteButton
+            hotelId={hotelId}
+            hotelName={name}
+            returnPath={localePath}
+            buttonClassName={heritageActionClass}
+            useHeritageLabels
           />
         </div>
       </div>
 
-      <h1 className="text-fg mt-3 font-serif text-3xl sm:text-4xl md:text-5xl">{name}</h1>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {amadeusRating !== null ? (
-          <p
-            className="text-fg inline-flex items-center gap-2 text-sm"
-            data-testid="hotel-aggregate-rating"
-          >
-            <span
-              className="border-border bg-bg inline-flex items-center gap-1 rounded-md border px-2 py-1 font-medium"
-              aria-label={t('rating.scoreAria', {
-                value: amadeusRating.ratingValue.toFixed(1),
-                best: amadeusRating.bestRating,
-              })}
-            >
-              <span aria-hidden>★</span>
-              <span>
-                {t('rating.scoreOf', {
-                  value: amadeusRating.ratingValue.toFixed(1),
-                  best: amadeusRating.bestRating,
-                })}
-              </span>
-            </span>
-            <span className="text-muted">
-              {t('rating.reviewCount', { count: amadeusRating.reviewCount })}
-            </span>
-          </p>
-        ) : null}
-        <span
-          className="border-border bg-bg text-muted inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
-          data-trust-chip="iata"
-        >
-          <span aria-hidden>✓</span>
-          {tw('iata')}
-        </span>
-      </div>
-
-      <FactualSummary summary={factualSummary} fallback={fallbackSummary} />
-
-      {hasConciergeAdvice ? <ConciergeAdviceTeaser locale={locale} /> : null}
-
-      {hasMapLink && mapLink !== null ? (
-        <p className="mt-3 text-sm">
-          <a
-            href={mapLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted hover:text-fg underline"
-          >
-            {t('hero.viewMap')}
-          </a>
-        </p>
-      ) : null}
-      {/* localePath is referenced for analytics / share button parity */}
-      <span className="sr-only" data-canonical-path={localePath} />
+      {/* Breadcrumb parity anchor for analytics */}
+      <span className="sr-only" data-canonical-path={localePath} data-region={region} />
     </header>
+  );
+}
+
+function formatAddressLine(
+  address: string,
+  postalCode: string | null,
+  city: string,
+  district: string | null,
+): string {
+  const parts: string[] = [];
+  if (address.trim().length > 0) parts.push(address.trim());
+  const locality =
+    postalCode !== null && postalCode !== '' ? `${postalCode} ${city}`.trim() : city.trim();
+  if (locality.length > 0) parts.push(locality);
+  if (district !== null && district !== '' && !locality.includes(district)) {
+    parts.push(district);
+  }
+  return parts.join(', ');
+}
+
+function LocationIcon(): ReactElement {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 h-5 w-5 shrink-0">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+    </svg>
   );
 }

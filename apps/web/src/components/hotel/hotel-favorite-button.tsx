@@ -11,6 +11,10 @@ interface HotelFavoriteButtonProps {
   readonly hotelName: string;
   /** Same-origin path the unauthenticated user is sent back to after signing in. */
   readonly returnPath: string;
+  /** Optional class override — Stitch heritage CTAs on hotel detail. */
+  readonly buttonClassName?: string;
+  /** When true, visible label uses saveButton/savedButton (Stitch copy). */
+  readonly useHeritageLabels?: boolean;
 }
 
 type ResolvedState =
@@ -46,10 +50,15 @@ type ResolvedState =
  *
  * Skill: accessibility, responsive-ui-architecture, auth-role-management.
  */
+const defaultButtonClass =
+  'border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:cursor-progress disabled:opacity-70';
+
 export function HotelFavoriteButton({
   hotelId,
   hotelName,
   returnPath,
+  buttonClassName,
+  useHeritageLabels = false,
 }: HotelFavoriteButtonProps): ReactElement {
   const t = useTranslations('hotelPage.favorites');
   const router = useRouter();
@@ -164,7 +173,13 @@ export function HotelFavoriteButton({
 
   const favorited = state.kind === 'signed-in' && state.favorited;
   const labelKey = favorited ? 'removeFromFavorites' : 'addToFavorites';
-  const shortKey = favorited ? 'shortRemove' : 'shortAdd';
+  const visibleKey = useHeritageLabels
+    ? favorited
+      ? 'savedButton'
+      : 'saveButton'
+    : favorited
+      ? 'shortRemove'
+      : 'shortAdd';
 
   return (
     <>
@@ -174,10 +189,10 @@ export function HotelFavoriteButton({
         disabled={isPending}
         aria-pressed={favorited}
         aria-label={t(labelKey, { name: hotelName })}
-        className="border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:cursor-progress disabled:opacity-70"
+        className={buttonClassName ?? defaultButtonClass}
       >
-        <HeartIcon filled={favorited} />
-        <span className="hidden sm:inline">{t(shortKey)}</span>
+        <HeartIcon filled={favorited} heritage={useHeritageLabels} />
+        <span className={useHeritageLabels ? 'inline' : 'hidden sm:inline'}>{t(visibleKey)}</span>
       </button>
 
       <span aria-live="polite" className="sr-only">
@@ -188,7 +203,13 @@ export function HotelFavoriteButton({
   );
 }
 
-function HeartIcon({ filled }: { readonly filled: boolean }): ReactElement {
+function HeartIcon({
+  filled,
+  heritage,
+}: {
+  readonly filled: boolean;
+  readonly heritage: boolean;
+}): ReactElement {
   return (
     <svg
       width={20}
@@ -200,7 +221,7 @@ function HeartIcon({ filled }: { readonly filled: boolean }): ReactElement {
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={filled ? 'text-rose-600' : 'text-fg'}
+      className={heritage ? 'text-primary-heritage' : filled ? 'text-rose-600' : 'text-fg'}
     >
       <path d="M12 21s-7.5-4.5-9.5-9A5.25 5.25 0 0 1 12 6.75 5.25 5.25 0 0 1 21.5 12c-2 4.5-9.5 9-9.5 9z" />
     </svg>

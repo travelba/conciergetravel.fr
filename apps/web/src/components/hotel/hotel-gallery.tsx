@@ -92,6 +92,7 @@ export async function HotelGallery({
   return (
     <HotelGalleryLightbox
       cloudName={cloudName}
+      layout="mosaic"
       hero={hero}
       thumbnails={thumbnails}
       lightboxImages={allLightboxImages}

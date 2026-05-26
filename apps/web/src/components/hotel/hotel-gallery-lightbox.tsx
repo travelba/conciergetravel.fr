@@ -8,8 +8,11 @@ export interface GalleryLightboxImage {
   readonly alt: string;
 }
 
+type GalleryLayout = 'default' | 'mosaic';
+
 interface HotelGalleryLightboxProps {
   readonly cloudName: string;
+  readonly layout?: GalleryLayout;
   readonly hero: GalleryLightboxImage | null;
   /** Visible grid tiles (≤ 11 — see `MAX_THUMBNAILS` in the RSC wrapper). */
   readonly thumbnails: readonly GalleryLightboxImage[];
@@ -75,8 +78,12 @@ interface HotelGalleryLightboxProps {
  */
 const MAX_DIALOG_TRANSFORMS = 'f_auto,q_auto:good,c_limit,w_1600,h_1067';
 
+/** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
+const MOSAIC_SIDE_TILES = 4;
+
 export function HotelGalleryLightbox({
   cloudName,
+  layout = 'default',
   hero,
   thumbnails,
   lightboxImages,
@@ -162,69 +169,126 @@ export function HotelGalleryLightbox({
 
   const current = total > 0 ? allImages[currentIndex] : undefined;
 
+  const mosaicTiles = thumbnails.slice(0, MOSAIC_SIDE_TILES);
+  const mosaicOverflowOnLast =
+    mosaicTiles.length === MOSAIC_SIDE_TILES &&
+    (overflowCount > 0 || thumbnails.length > MOSAIC_SIDE_TILES);
+
+  const renderTileButton = (
+    img: GalleryLightboxImage,
+    galleryIndex: number,
+    opts: {
+      readonly showOverflow?: boolean;
+      readonly overflowCountLabel?: number;
+      readonly className?: string;
+      readonly imageClassName?: string;
+      readonly priority?: boolean;
+      readonly width?: number;
+      readonly height?: number;
+      readonly variant?: 'hero' | 'thumbnail';
+    },
+  ): React.ReactElement => (
+    <button
+      type="button"
+      className={
+        opts.className ??
+        `focus-visible:ring-ring group block h-full w-full focus-visible:outline-none focus-visible:ring-2${opts.showOverflow === true ? 'relative' : ''}`
+      }
+      onClick={() => openAt(galleryIndex)}
+      aria-label={`${translations.openLightbox} : ${img.alt}`}
+    >
+      <HotelImage
+        cloudName={cloudName}
+        publicId={img.publicId}
+        alt={img.alt}
+        width={opts.width ?? 400}
+        height={opts.height ?? 400}
+        variant={opts.variant ?? 'thumbnail'}
+        priority={opts.priority ?? false}
+        className={
+          opts.imageClassName ??
+          'h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]'
+        }
+      />
+      {opts.showOverflow === true && (opts.overflowCountLabel ?? 0) > 0 ? (
+        <span
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center bg-black/55 text-base font-medium text-white"
+        >
+          +{opts.overflowCountLabel}
+        </span>
+      ) : null}
+    </button>
+  );
+
   return (
-    <section aria-labelledby="gallery-title" className="mb-10">
+    <section aria-labelledby="gallery-title" className="mb-16">
       <h2 id="gallery-title" className="sr-only">
         {translations.lightboxLabel}
       </h2>
 
-      {hero !== null ? (
+      {layout === 'mosaic' && hero !== null ? (
+        <div
+          className="grid h-auto grid-cols-1 gap-1 md:h-[500px] md:grid-cols-4 md:grid-rows-2"
+          data-gallery-layout="mosaic"
+        >
+          <figure className="relative min-h-[240px] overflow-hidden md:col-span-2 md:row-span-2 md:min-h-0">
+            {renderTileButton(hero, 0, {
+              priority: true,
+              width: 1600,
+              height: 1067,
+              variant: 'hero',
+            })}
+          </figure>
+          {mosaicTiles.map((img, idx) => {
+            const galleryIndex = idx + 1;
+            const isLast = idx === mosaicTiles.length - 1;
+            const overflowLabel =
+              isLast && mosaicOverflowOnLast
+                ? overflowCount + Math.max(0, thumbnails.length - MOSAIC_SIDE_TILES)
+                : 0;
+            return (
+              <figure
+                key={img.publicId}
+                className="relative hidden min-h-0 overflow-hidden md:block"
+              >
+                {renderTileButton(img, galleryIndex, {
+                  showOverflow: isLast && overflowLabel > 0,
+                  overflowCountLabel: overflowLabel,
+                })}
+              </figure>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {(layout === 'default' || (layout === 'mosaic' && hero === null)) && hero !== null ? (
         <figure className="relative aspect-[16/9] overflow-hidden rounded-lg">
-          <button
-            type="button"
-            className="focus-visible:ring-ring group block h-full w-full focus-visible:outline-none focus-visible:ring-2"
-            onClick={() => openAt(0)}
-            aria-label={`${translations.openLightbox} : ${hero.alt}`}
-          >
-            <HotelImage
-              cloudName={cloudName}
-              publicId={hero.publicId}
-              alt={hero.alt}
-              width={1600}
-              height={900}
-              variant="hero"
-              priority
-              className="h-full w-full transition-transform duration-300 group-hover:scale-[1.01]"
-            />
-          </button>
+          {renderTileButton(hero, 0, {
+            priority: true,
+            width: 1600,
+            height: 900,
+            variant: 'hero',
+            imageClassName:
+              'h-full w-full transition-transform duration-300 group-hover:scale-[1.01]',
+          })}
         </figure>
       ) : null}
 
-      {thumbnails.length > 0 ? (
+      {(layout === 'default' || (layout === 'mosaic' && hero === null)) && thumbnails.length > 0 ? (
         <ul
           aria-label={translations.thumbnailsLabel}
           className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6"
         >
           {thumbnails.map((img, idx) => {
             const isOverflowSlot = idx === thumbnails.length - 1 && overflowCount > 0;
-            // Heroes are index 0; thumbnails follow at index = idx + (hero ? 1 : 0).
             const galleryIndex = hero !== null ? idx + 1 : idx;
             return (
               <li key={img.publicId} className="relative aspect-square overflow-hidden rounded-md">
-                <button
-                  type="button"
-                  className="focus-visible:ring-ring group block h-full w-full focus-visible:outline-none focus-visible:ring-2"
-                  onClick={() => openAt(galleryIndex)}
-                  aria-label={`${translations.openLightbox} : ${img.alt}`}
-                >
-                  <HotelImage
-                    cloudName={cloudName}
-                    publicId={img.publicId}
-                    alt={img.alt}
-                    width={400}
-                    height={400}
-                    variant="thumbnail"
-                    className="h-full w-full transition-transform duration-300 group-hover:scale-[1.04]"
-                  />
-                  {isOverflowSlot ? (
-                    <span
-                      aria-hidden
-                      className="absolute inset-0 flex items-center justify-center bg-black/55 text-base font-medium text-white"
-                    >
-                      +{overflowCount}
-                    </span>
-                  ) : null}
-                </button>
+                {renderTileButton(img, galleryIndex, {
+                  showOverflow: isOverflowSlot,
+                  overflowCountLabel: overflowCount,
+                })}
               </li>
             );
           })}
