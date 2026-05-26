@@ -54,7 +54,11 @@ export type ClubEventSurface =
   | 'club_landing'
   | 'prestige_landing'
   | 'hotel_fiche'
-  | 'dashboard';
+  | 'dashboard'
+  // LLM agent calling `/api/agent/join-concierge-club` or
+  // `/api/agent/join-prestige-waitlist` — the surface lets us segment
+  // chat-driven funnel attempts from regular HTML funnel traffic.
+  | 'agent_api';
 
 export interface ClubEventPayload {
   readonly surface: ClubEventSurface;

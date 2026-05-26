@@ -635,7 +635,14 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
           <>
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeAboutLink')} />
             <MegaLink href="/le-concierge/reserver" label={t('primaryNav.conciergeBooking')} />
-            <MegaLink href="/le-concierge/fidelite" label={t('primaryNav.conciergeLoyalty')} />
+            {/* Le Concierge Club programme — surfaces ADR-0019 funnel from
+                the header. `/le-concierge/fidelite` stays alive for legacy
+                inbound but the menu now points at the canonical landing. */}
+            <MegaLink href="/le-concierge-club" label={t('primaryNav.conciergeClub')} />
+            <MegaLink
+              href="/le-concierge-club/prestige"
+              label={t('primaryNav.conciergeClubPrestige')}
+            />
             <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
             <MegaLink
               href="/le-concierge/methode-editoriale"
@@ -667,6 +674,10 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
             <MegaLink
               href="/le-concierge/presse-et-partenaires"
               label={t('primaryNav.conciergePress')}
+            />
+            <MegaLink
+              href="/presse/le-concierge-club"
+              label={t('primaryNav.conciergeClubPressKit')}
             />
           </>
         </MegaColumn>

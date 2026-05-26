@@ -284,6 +284,48 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
+      {/* ─── Le Concierge Club ribbon ──────────────────────────────────
+          Surfaces the membership programme (ADR-0019) from the home page
+          without disturbing the editorial-first hero. Two CTAs:
+          1. Discover the programme (free tier — `/le-concierge-club`)
+          2. Prestige waitlist (`/le-concierge-club/prestige`)
+          The strip is intentionally sober (single-row, framed border) so
+          it reads as institutional rather than promotional — Phase 1 only
+          advertises the free tier perks (ADR-0020 SEA constraints). */}
+      <section
+        aria-labelledby="home-club-ribbon-title"
+        className="border-border container mx-auto max-w-screen-xl border-t px-4 py-10 sm:py-12"
+      >
+        <div className="border-border bg-muted/5 flex flex-col items-start gap-5 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div className="max-w-2xl">
+            <p className="text-muted text-xs uppercase tracking-[0.18em]">
+              {t('clubRibbon.eyebrow')}
+            </p>
+            <h2
+              id="home-club-ribbon-title"
+              className="text-fg mt-2 font-serif text-2xl sm:text-3xl"
+            >
+              {t('clubRibbon.title')}
+            </h2>
+            <p className="text-muted mt-2 text-sm sm:text-base">{t('clubRibbon.body')}</p>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Link
+              href="/le-concierge-club"
+              className="border-border bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('clubRibbon.ctaDiscover')}
+            </Link>
+            <Link
+              href="/le-concierge-club/prestige"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('clubRibbon.ctaPrestige')} →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Featured Hotels ───────────────────────────────────────── */}
       {featuredHotels.length > 0 ? (
         <section

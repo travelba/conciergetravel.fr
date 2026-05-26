@@ -41,6 +41,13 @@
       "countLabel": "{count, plural, one {# palace} other {# palaces}}",
       "guideComingSoon": "Guide complet à venir"
     },
+    "clubRibbon": {
+      "eyebrow": "Notre programme",
+      "title": "Le Concierge Club — la conciergerie en accès libre",
+      "body": "Créez un compte gratuit pour accéder à l'agenda de la conciergerie, sauvegarder vos sélections et recevoir les conseils opérationnels des Palaces choisis. Tier Prestige sur invitation — liste d'attente ouverte.",
+      "ctaDiscover": "Découvrir Le Concierge Club",
+      "ctaPrestige": "Espace Prestige"
+    },
     "featuredHotels": {
       "eyebrow": "Sélection du Concierge",
       "title": "Les fiches du moment",
@@ -143,6 +150,9 @@
       "conciergeAboutLink": "À propos (IATA, agence)",
       "conciergeBooking": "Comment réserver",
       "conciergeLoyalty": "Programme de fidélité",
+      "conciergeClub": "Le Concierge Club",
+      "conciergeClubPrestige": "Le Concierge Club Prestige",
+      "conciergeClubPressKit": "Espace presse",
       "conciergeTip": "Le Conseil du Concierge",
       "conciergeFaq": "FAQ générale",
       "conciergeGuides": "Guides voyage",
@@ -2396,6 +2406,8 @@
       "villas": "Villas privées",
       "allBrands": "Toutes les marques",
       "account": "Mon compte",
+      "club": "Le Concierge Club",
+      "clubPrestige": "Le Concierge Club Prestige",
       "loyalty": "Programme de fidélité",
       "support": "Aide & contact",
       "hoteliers": "Pour les hôteliers",

@@ -424,8 +424,12 @@ export function MobileNav(): ReactElement {
                   <Link href="/le-concierge/reserver" className={subLinkClass}>
                     {t('primaryNav.conciergeBooking')}
                   </Link>
-                  <Link href="/le-concierge/fidelite" className={subLinkClass}>
-                    {t('primaryNav.conciergeLoyalty')}
+                  {/* Le Concierge Club — programme dedicated landings. */}
+                  <Link href="/le-concierge-club" className={subLinkClass}>
+                    {t('primaryNav.conciergeClub')}
+                  </Link>
+                  <Link href="/le-concierge-club/prestige" className={subLinkClass}>
+                    {t('primaryNav.conciergeClubPrestige')}
                   </Link>
                   <Link href="/le-concierge/faq" className={subLinkClass}>
                     {t('primaryNav.conciergeFaq')}
@@ -453,6 +457,9 @@ export function MobileNav(): ReactElement {
                   </Link>
                   <Link href="/le-concierge/presse-et-partenaires" className={subLinkClass}>
                     {t('primaryNav.conciergePress')}
+                  </Link>
+                  <Link href="/presse/le-concierge-club" className={subLinkClass}>
+                    {t('primaryNav.conciergeClubPressKit')}
                   </Link>
                 </div>
               </details>

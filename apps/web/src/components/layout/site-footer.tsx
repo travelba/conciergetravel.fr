@@ -275,6 +275,21 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.account')}
                 </Link>
               </li>
+              {/* Le Concierge Club — programme landing (ADR-0019). Footer
+                  surfaces it from every page so the funnel is reachable
+                  without the mega-menu. The legacy `/le-concierge/fidelite`
+                  page stays alive for inbound links but the canonical CTA
+                  now lives here. */}
+              <li>
+                <Link href="/le-concierge-club" className="text-fg hover:underline">
+                  {t('links.club')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/le-concierge-club/prestige" className="text-fg hover:underline">
+                  {t('links.clubPrestige')}
+                </Link>
+              </li>
               <li>
                 <Link href="/le-concierge/fidelite" className="text-fg hover:underline">
                   {t('links.loyalty')}
