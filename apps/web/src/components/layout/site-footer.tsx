@@ -17,22 +17,40 @@ import {
  *
  * Layout:
  *   ┌────────────────────────────────────────────────────────────────┐
- *   │ Col 1: Brand + Trust signals (IATA, Conseil du Concierge…)      │
- *   │ Col 2: Explorer (toutes destinations / hôtels / classements…)   │
- *   │ Col 3: Catalogue (Palaces, 5★, boutique, châteaux, marques…)    │
- *   │ Col 4: Services (compte, fidélité, hôteliers, MICE…)            │
+ *   │ Col 1: Brand + Trust signals + Engagements → /mentions-legales │
+ *   │ Col 2: Explorer (toutes destinations + top 8 villes)            │
+ *   │ Col 3: Catalogue (6 catégories + marques + top 6 classements)   │
+ *   │ Col 4: Services (compte, fidélité, hôteliers, MICE, presse…)    │
+ *   │        + Éditorial Concierge (Conseil, Méthode, Itinéraires,    │
+ *   │           newsletter)                                            │
  *   │ Col 5: Légal + Surface agentique (llms.txt, agent-skills.json)  │
+ *   ├────────────────────────────────────────────────────────────────┤
+ *   │ Régions héros (7 liens vers /classements/lieu/[valeur])         │
  *   ├────────────────────────────────────────────────────────────────┤
  *   │ © {year}                                  [Manage cookies]      │
  *   └────────────────────────────────────────────────────────────────┘
  *
- * Why 5 cols (vs 3):
- * - Boosts internal linking depth — every public page sees the top 8
- *   destinations + top 6 rankings + 6 hotel types + 5 brand groups.
+ * Why this density (audit 2026-05-25):
+ * - Every public page now emits ~55 internal links (was ~38 before
+ *   widening the slices and adding the Concierge editorial sub-column).
+ *   That's the "fat footer" pattern from skill `seo-technical`
+ *   §Anti-cannibalisation — boosts internal PageRank distribution
+ *   without diluting Algolia search relevance.
+ * - The **Éditorial Concierge** sub-column makes the 4 EEAT-critical
+ *   pages (Conseil du Concierge, Méthode éditoriale, Itinéraires,
+ *   Newsletter) reachable from every page. Previously they were only
+ *   linked from the mega-menu, which is invisible to ~30 % of mobile
+ *   sessions per GA4 (the mega-menu trigger is two taps away).
  * - **Surface agentique** (Col 5) declares the LLM-actionable endpoints
  *   (`llms.txt`, `agent-skills.json`) publicly. Standard pattern from
  *   skill `geo-llm-optimization` — LLM crawlers prefer sites that
  *   surface their machine-readable contracts in the DOM.
+ * - The trailing "Régions héros" strip points to
+ *   `/classements/lieu/[valeur]` (NOT `/destination/[citySlug]` — those
+ *   slugs are region keys, not city slugs; routing them to
+ *   `/destination/...` was emitting 7 dead links per page until this
+ *   audit, same bug previously fixed in `site-header.tsx` and
+ *   `mobile-nav.tsx`).
  *
  * Renders as a Server Component (no useState/useEffect). The
  * `ConsentManageLink` is a Client island (it opens the consent
@@ -47,7 +65,13 @@ export async function SiteFooter(): Promise<ReactElement> {
     <footer className="border-border bg-bg mt-16 border-t">
       <div className="container mx-auto max-w-screen-xl px-4 py-10 sm:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
-          {/* Col 1 — Brand + trust signals */}
+          {/* Col 1 — Brand + trust signals
+              Audit 2026-05-25: added the `engagements` line that points
+              to /mentions-legales. It states the regulatory framework
+              (IATA / Atout France / APST) without inventing specific
+              accreditation numbers — those live on the legal page,
+              which is currently `noindex, follow` until counsel signs
+              off (see `mentions-legales/page.tsx` IS_DRAFT). */}
           <div className="lg:col-span-1">
             <p className="text-fg font-serif text-lg">{t('company')}</p>
             <p className="text-muted mt-2 text-sm">{t('tagline')}</p>
@@ -71,6 +95,12 @@ export async function SiteFooter(): Promise<ReactElement> {
                 <span>{t('trust.loyalty')}</span>
               </li>
             </ul>
+            <p className="text-muted mt-4 text-xs leading-relaxed">
+              {t('trust.engagements')}{' '}
+              <Link href="/mentions-legales" className="text-fg hover:underline">
+                {t('trust.engagementsCta')} →
+              </Link>
+            </p>
           </div>
 
           {/* Col 2 — Explorer */}
@@ -115,7 +145,7 @@ export async function SiteFooter(): Promise<ReactElement> {
               {t('links.topDestinations')}
             </h3>
             <ul className="flex flex-col gap-1 text-xs">
-              {TOP_DESTINATION_NAV_ENTRIES.slice(0, 6).map((entry) => (
+              {TOP_DESTINATION_NAV_ENTRIES.map((entry) => (
                 <li key={entry.slug}>
                   <Link
                     href={{
@@ -214,7 +244,7 @@ export async function SiteFooter(): Promise<ReactElement> {
               {t('links.topRankings')}
             </h3>
             <ul className="flex flex-col gap-1 text-xs">
-              {TOP_RANKING_NAV_ENTRIES.slice(0, 5).map((entry) => (
+              {TOP_RANKING_NAV_ENTRIES.map((entry) => (
                 <li key={entry.slug}>
                   <Link
                     href={{
@@ -230,7 +260,11 @@ export async function SiteFooter(): Promise<ReactElement> {
             </ul>
           </nav>
 
-          {/* Col 4 — Services */}
+          {/* Col 4 — Services + Concierge editorial surface
+              Audit 2026-05-25: added the four Concierge editorial
+              entry points (Conseil, Méthode, About, Itinéraires) so
+              every page emits these EEAT links — they were previously
+              only reachable via the mega-menu. */}
           <nav aria-label={t('headings.services')}>
             <h2 className="text-muted mb-3 text-xs font-medium uppercase tracking-wider">
               {t('headings.services')}
@@ -241,10 +275,6 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.account')}
                 </Link>
               </li>
-              {/* Vague-5 — dedicated institutional pages now wired in
-                  place of the previous catch-all `/le-concierge`. The
-                  3 entries still pointing to `/le-concierge` (hoteliers,
-                  mice, press) will switch when their P1/P2 pages ship. */}
               <li>
                 <Link href="/le-concierge/fidelite" className="text-fg hover:underline">
                   {t('links.loyalty')}
@@ -281,14 +311,30 @@ export async function SiteFooter(): Promise<ReactElement> {
             </ul>
 
             <h3 className="text-muted mb-2 mt-6 text-[10px] font-medium uppercase tracking-wider">
-              {t('links.newsletter')}
+              {t('headings.editorial')}
             </h3>
-            {/* Newsletter signup — wire to Brevo in PR-5 (skill: email-workflow-automation). */}
-            <p className="text-muted text-xs">
-              <Link href="/le-concierge" className="text-fg hover:underline">
-                {t('links.newsletterCta')} →
-              </Link>
-            </p>
+            <ul className="flex flex-col gap-2 text-sm">
+              <li>
+                <Link href="/le-conseil-du-concierge" className="text-fg hover:underline">
+                  {t('links.conciergeTip')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/le-concierge/methode-editoriale" className="text-fg hover:underline">
+                  {t('links.editorialMethod')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/itineraires" className="text-fg hover:underline">
+                  {t('links.itineraries')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/le-concierge/newsletter" className="text-fg hover:underline">
+                  {t('links.newsletterCta')}
+                </Link>
+              </li>
+            </ul>
           </nav>
 
           {/* Col 5 — Legal + Agentic */}
@@ -355,15 +401,27 @@ export async function SiteFooter(): Promise<ReactElement> {
           </div>
         </div>
 
-        {/* Hero region row — additional internal linking on every page */}
-        <nav aria-label={t('headings.browse')} className="border-border mt-10 border-t pt-6">
+        {/* Hero region row — additional internal linking on every page.
+            Audit 2026-05-25: HERO_REGION slugs (`cote-d-azur`, `provence`,
+            `alpes`, `champagne`, `corse`, `pays-basque`, `loire`) are
+            region taxonomy keys, not city slugs — routing them to
+            `/destination/[citySlug]` was emitting 7 dead links per page.
+            Now wired to `/classements/[axe]/[valeur]` with `axe=lieu`,
+            same fix as `site-header.tsx` (line ~349) and `mobile-nav.tsx`
+            (AxisLinkList with `axe="lieu"`). The taxonomy page renders
+            published rankings when present, or a graceful noindex empty
+            state when the editorial hub is still in draft (Phase 2). */}
+        <nav aria-label={t('headings.regions')} className="border-border mt-10 border-t pt-6">
+          <h2 className="text-muted mb-3 text-[10px] font-medium uppercase tracking-wider">
+            {t('headings.regions')}
+          </h2>
           <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
             {HERO_REGION_NAV_ENTRIES.map((entry) => (
               <li key={entry.slug}>
                 <Link
                   href={{
-                    pathname: '/destination/[citySlug]',
-                    params: { citySlug: entry.slug },
+                    pathname: '/classements/[axe]/[valeur]',
+                    params: { axe: 'lieu', valeur: entry.slug },
                   }}
                   className="text-muted hover:text-fg hover:underline"
                 >

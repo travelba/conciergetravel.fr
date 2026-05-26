@@ -2297,15 +2297,19 @@
     "tagline": "Your concierge for France's Palaces and 5★ hotels — editorial selection, operational tips, net-rate booking via our IATA-accredited desk.",
     "trust": {
       "iata": "IATA / APST agency",
-      "concierge": "The Concierge’s Tip",
-      "loyalty": "Loyalty programme"
+      "concierge": "The Concierge’s Tip at the foot of every hotel page",
+      "loyalty": "MyConcierge loyalty programme",
+      "engagements": "Full accreditations and commitments detailed in our Legal notice.",
+      "engagementsCta": "See the Legal notice"
     },
     "headings": {
       "explore": "Explore",
       "browse": "Catalogue",
       "services": "Services",
+      "editorial": "Concierge editorial",
       "legal": "Legal",
-      "agentic": "Agentic surface"
+      "agentic": "Agentic surface",
+      "regions": "Regions"
     },
     "links": {
       "destinations": "All destinations",
@@ -2332,7 +2336,10 @@
       "press": "Press",
       "concierge": "About (The Concierge)",
       "newsletter": "Newsletter",
-      "newsletterCta": "Subscribe",
+      "newsletterCta": "Subscribe to the newsletter",
+      "conciergeTip": "The Concierge’s Tip",
+      "editorialMethod": "Editorial method",
+      "itineraries": "Itineraries",
       "contact": "Contact",
       "legalNotice": "Legal notice",
       "privacy": "Privacy policy",

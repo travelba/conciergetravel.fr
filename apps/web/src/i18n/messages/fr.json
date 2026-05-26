@@ -2297,15 +2297,19 @@
     "tagline": "Votre concierge des Palaces et hôtels 5★ en France — sélection éditoriale, conseils opérationnels, réservation au tarif net via notre agence IATA.",
     "trust": {
       "iata": "Agence IATA / APST",
-      "concierge": "Le Conseil du Concierge",
-      "loyalty": "Programme de fidélité"
+      "concierge": "Le Conseil du Concierge en bas de chaque fiche",
+      "loyalty": "Programme de fidélité MyConcierge",
+      "engagements": "Engagements et accréditations détaillés sur les Mentions légales.",
+      "engagementsCta": "Voir les Mentions légales"
     },
     "headings": {
       "explore": "Explorer",
       "browse": "Catalogue",
       "services": "Services",
+      "editorial": "Éditorial Concierge",
       "legal": "Mentions",
-      "agentic": "Surface agentique"
+      "agentic": "Surface agentique",
+      "regions": "Régions"
     },
     "links": {
       "destinations": "Toutes les destinations",
@@ -2332,7 +2336,10 @@
       "press": "Presse",
       "concierge": "À propos (Le Concierge)",
       "newsletter": "Newsletter",
-      "newsletterCta": "S'inscrire",
+      "newsletterCta": "S'inscrire à la newsletter",
+      "conciergeTip": "Le Conseil du Concierge",
+      "editorialMethod": "Méthode éditoriale",
+      "itineraries": "Itinéraires",
       "contact": "Contact",
       "legalNotice": "Mentions légales",
       "privacy": "Politique de confidentialité",
