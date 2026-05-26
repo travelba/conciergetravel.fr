@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 
 import { JsonLd } from '@mch/seo';
 
+import { ConciergeSisterLinks } from '@/components/concierge/concierge-sister-links';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
@@ -288,6 +289,8 @@ export default async function LeConseilHubPage({
           </Link>
         </div>
       </section>
+
+      <ConciergeSisterLinks currentSlug="conseil" />
     </main>
   );
 }

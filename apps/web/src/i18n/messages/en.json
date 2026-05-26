@@ -357,10 +357,12 @@
     "tip": {
       "title": "The Concierge's Tip — our signature",
       "body": "This is the centrepiece of every page: a concrete operational secret shared by our team after visiting. Neither a customer review nor a marketing description — an insider shortcut, in 60-90 words. Discover our latest tips on the hotel pages.",
-      "cta": "View a page with a Tip →"
+      "ctaHub": "Learn more about The Concierge's Tip",
+      "cta": "View a page with a Tip"
     },
     "pro": {
       "title": "For pros",
+      "cta": "Learn more",
       "hotelierTitle": "For hoteliers",
       "hotelierBody": "Exceptional hotels: join our editorial catalogue. We work in direct partnership (no extra commission), with a dedicated writer per page.",
       "miceTitle": "MICE / Events",
@@ -1358,6 +1360,36 @@
       "browseCatalog": "Browse the catalogue",
       "browseRankings": "See our editorial rankings",
       "method": "Read our editorial method"
+    }
+  },
+  "conciergeNav": {
+    "heading": "Also worth exploring in the Concierge universe",
+    "cta": "Discover",
+    "items": {
+      "concierge": {
+        "title": "The Concierge — who we are",
+        "lede": "IATA agency, signed editorial method, MyConcierge loyalty programme — the institutional page."
+      },
+      "conseil": {
+        "title": "The Concierge’s Tip",
+        "lede": "Our editorial signature: a 50–110-word operational secret at the foot of every hotel page."
+      },
+      "methode": {
+        "title": "Editorial method",
+        "lede": "How we select, audit and rate Palaces and 5-star hotels — with a strict no-pay-to-play stance."
+      },
+      "hoteliers": {
+        "title": "For hoteliers",
+        "lede": "IATA-agency distribution, a signed editorial page, a premium audience. By invitation only."
+      },
+      "mice": {
+        "title": "MICE & private events",
+        "lede": "Seminars, weddings and private events in our Palaces. Tailor-made quotes within 24 h."
+      },
+      "presse": {
+        "title": "Press & partners",
+        "lede": "Media kit, press mentions, direct press desk contact for interviews and invitations."
+      }
     }
   },
   "conciergePresse": {

@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 
 import { JsonLd } from '@mch/seo';
 
+import { ConciergeSisterLinks } from '@/components/concierge/concierge-sister-links';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
@@ -237,6 +238,8 @@ export default async function ConciergePressePage({
         <p className="text-muted mt-1 text-xs">{t('contact.responseSLA')}</p>
         <p className="text-muted mt-3 text-xs italic">{t('contact.altCanal')}</p>
       </section>
+
+      <ConciergeSisterLinks currentSlug="presse" />
     </main>
   );
 }

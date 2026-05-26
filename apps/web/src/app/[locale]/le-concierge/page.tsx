@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { ConciergeSisterLinks } from '@/components/concierge/concierge-sister-links';
 import { HubAeoSection } from '@/components/seo/hub-aeo-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
@@ -211,12 +212,17 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
           ⭐ {t('tip.title')}
         </p>
         <p className="text-fg mt-2 max-w-prose text-base md:text-lg">{t('tip.body')}</p>
-        <Link
-          href="/hotels"
-          className="text-fg mt-4 inline-block text-sm font-medium underline-offset-4 hover:underline"
-        >
-          {t('tip.cta')}
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+          <Link
+            href="/le-conseil-du-concierge"
+            className="text-fg underline-offset-4 hover:underline"
+          >
+            {t('tip.ctaHub')} →
+          </Link>
+          <Link href="/hotels" className="text-fg underline-offset-4 hover:underline">
+            {t('tip.cta')} →
+          </Link>
+        </div>
       </section>
 
       {/* ── Loyalty ─────────────────────────────────────────────────────── */}
@@ -227,17 +233,38 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
         <p className="text-muted mt-3 text-base">{t('loyalty.body')}</p>
       </section>
 
-      {/* ── For pros ────────────────────────────────────────────────────── */}
+      {/* ── For pros ──────────────────────────────────────────────────────
+          Audit 2026-05-25: the 3 cards used to be static text. They now
+          link to their dedicated B2B pages so the page actually
+          channels traffic into the conversion-critical surfaces
+          (Brevo handoff for hoteliers / MICE / press). */}
       <section aria-labelledby="pro-title" className="mb-14">
         <h2 id="pro-title" className="text-fg font-serif text-2xl sm:text-3xl">
           {t('pro.title')}
         </h2>
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <TrustCard title={t('pro.hotelierTitle')} body={t('pro.hotelierBody')} />
-          <TrustCard title={t('pro.miceTitle')} body={t('pro.miceBody')} />
-          <TrustCard title={t('pro.pressTitle')} body={t('pro.pressBody')} />
+          <LinkedTrustCard
+            href="/le-concierge/pour-les-hoteliers"
+            title={t('pro.hotelierTitle')}
+            body={t('pro.hotelierBody')}
+            cta={t('pro.cta')}
+          />
+          <LinkedTrustCard
+            href="/le-concierge/mice-et-seminaires"
+            title={t('pro.miceTitle')}
+            body={t('pro.miceBody')}
+            cta={t('pro.cta')}
+          />
+          <LinkedTrustCard
+            href="/le-concierge/presse-et-partenaires"
+            title={t('pro.pressTitle')}
+            body={t('pro.pressBody')}
+            cta={t('pro.cta')}
+          />
         </div>
       </section>
+
+      <ConciergeSisterLinks currentSlug="concierge" />
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       <section aria-labelledby="faq-title">
@@ -285,6 +312,41 @@ function TrustCard({ title, body }: { readonly title: string; readonly body: str
       <h3 className="text-fg font-serif text-lg">{title}</h3>
       <p className="text-muted mt-2 text-sm">{body}</p>
     </div>
+  );
+}
+
+/**
+ * `LinkedTrustCard` — clickable variant of `TrustCard` for the "For
+ * pros" block. Wraps the entire card in a `<Link>` so the whole
+ * surface (not just the CTA) responds to clicks, which matches the
+ * pattern in `ConciergeSisterLinks` and increases tap-target size
+ * on mobile (WCAG 2.5.5).
+ */
+function LinkedTrustCard({
+  href,
+  title,
+  body,
+  cta,
+}: {
+  readonly href:
+    | '/le-concierge/pour-les-hoteliers'
+    | '/le-concierge/mice-et-seminaires'
+    | '/le-concierge/presse-et-partenaires';
+  readonly title: string;
+  readonly body: string;
+  readonly cta: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="border-border bg-bg hover:border-fg/40 focus-visible:ring-ring block h-full rounded-lg border p-5 transition focus-visible:outline-none focus-visible:ring-2"
+    >
+      <h3 className="text-fg font-serif text-lg">{title}</h3>
+      <p className="text-muted mt-2 text-sm">{body}</p>
+      <span className="text-fg mt-4 inline-block text-sm font-medium underline-offset-4">
+        {cta} →
+      </span>
+    </Link>
   );
 }
 

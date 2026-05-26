@@ -357,10 +357,12 @@
     "tip": {
       "title": "Le Conseil du Concierge — la signature",
       "body": "C'est l'élément central de chacune de nos fiches : un secret opérationnel concret partagé par notre équipe après visite. Ni avis client, ni description marketing — un raccourci d'initié, en 60-90 mots. Découvrez nos derniers Conseils sur les fiches hôtel.",
-      "cta": "Voir une fiche avec Conseil →"
+      "ctaHub": "En savoir plus sur Le Conseil du Concierge",
+      "cta": "Voir une fiche avec Conseil"
     },
     "pro": {
       "title": "Pour les pros",
+      "cta": "En savoir plus",
       "hotelierTitle": "Pour les hôteliers",
       "hotelierBody": "Hôtels d'exception : rejoignez notre catalogue éditorial. Nous fonctionnons en partenariat direct (pas de surcommission), avec un rédacteur dédié par fiche.",
       "miceTitle": "MICE / Séminaires",
@@ -1358,6 +1360,36 @@
       "browseCatalog": "Parcourir le catalogue",
       "browseRankings": "Voir nos classements éditoriaux",
       "method": "Lire notre méthode éditoriale"
+    }
+  },
+  "conciergeNav": {
+    "heading": "À explorer aussi dans l’univers Concierge",
+    "cta": "Découvrir",
+    "items": {
+      "concierge": {
+        "title": "Le Concierge — qui nous sommes",
+        "lede": "Agence IATA, méthode éditoriale signée, programme de fidélité MyConcierge — l’institutionnel."
+      },
+      "conseil": {
+        "title": "Le Conseil du Concierge",
+        "lede": "Notre signature éditoriale : un secret opérationnel de 50-110 mots en bas de chaque fiche d’hôtel."
+      },
+      "methode": {
+        "title": "Méthode éditoriale",
+        "lede": "Comment nous sélectionnons, auditons et notons les Palaces et hôtels 5★ — sans pay-to-play."
+      },
+      "hoteliers": {
+        "title": "Pour les hôteliers",
+        "lede": "Distribution agence IATA, fiche rédactionnelle signée, audience premium. Sélection à l’invitation."
+      },
+      "mice": {
+        "title": "MICE & événements privés",
+        "lede": "Séminaires, mariages, événements privés dans nos Palaces. Devis sur-mesure sous 24 h."
+      },
+      "presse": {
+        "title": "Presse & partenaires",
+        "lede": "Kit média, mentions presse, contact direct du service presse pour interviews et invitations."
+      }
     }
   },
   "conciergePresse": {
