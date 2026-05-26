@@ -2348,14 +2348,15 @@
     "noticePage": {
       "title": "Legal notice",
       "metaDescription": "MyConciergeHotel legal notice — publisher, hosting, intellectual property, travel agency licences.",
+      "draftBanner": "This page is being finalised — the legal identifiers (Trade Register number, SIREN/SIRET, VAT, Atout France registration, financial guarantee) will be completed before going live. The page is set to noindex until validated by our legal counsel.",
       "sections": {
         "editor": {
           "title": "Publisher",
-          "body": "The myconciergehotel.com website is published by MyConciergeHotel, a French SAS with share capital of €10,000, registered with the Paris Trade Register under number RCS XXX XXX XXX, whose registered office is in Paris, France. EU VAT number: FR XX XXXXXXXXX. Publication director: MyConciergeHotel management."
+          "body": "The myconciergehotel.com website is published by MyConciergeHotel, a French SAS with share capital of [TO BE COMPLETED: share capital] €, registered with the Paris Trade Register under number [TO BE COMPLETED: Trade Register number], whose registered office is at [TO BE COMPLETED: full registered address]. EU VAT number: [TO BE COMPLETED: FR + 11 digits]. Publication director: [TO BE COMPLETED: legal representative]."
         },
         "contact": {
           "title": "Contact",
-          "body": "Email: contact@myconciergehotel.com. Phone: +33 1 XX XX XX XX. Any enquiry about the site, content or bookings may be sent to this address."
+          "body": "Email: contact@myconciergehotel.com. Phone: [TO BE COMPLETED: business landline]. Any enquiry about the site, content or bookings may be sent to this address."
         },
         "hosting": {
           "title": "Hosting",
@@ -2363,7 +2364,7 @@
         },
         "license": {
           "title": "Travel agency licence",
-          "body": "MyConciergeHotel operates as a travel agent registered with Atout France under number IM XXXXXXXXX. Financial guarantee: Groupama Assurance-Crédit, 8-10 rue d'Astorg, 75008 Paris. Professional civil liability: HISCOX Europe Underwriting Ltd, 19 rue Louis Le Grand, 75002 Paris."
+          "body": "MyConciergeHotel operates as a travel agent registered with Atout France under number [TO BE COMPLETED: IM + 9 digits]. Financial guarantee: [TO BE COMPLETED: guarantor name + address]. Professional civil liability: [TO BE COMPLETED: insurer name + address]."
         },
         "ip": {
           "title": "Intellectual property",

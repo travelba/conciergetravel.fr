@@ -2348,14 +2348,15 @@
     "noticePage": {
       "title": "Mentions légales",
       "metaDescription": "Mentions légales de MyConciergeHotel — éditeur, hébergeur, propriété intellectuelle, licences agence de voyage.",
+      "draftBanner": "Page en cours de finalisation — les identifiants juridiques (RCS, SIREN/SIRET, TVA, immatriculation Atout France, garantie financière) seront complétés avant la mise en production. La page est noindex tant que ces informations ne sont pas validées par le responsable juridique.",
       "sections": {
         "editor": {
           "title": "Éditeur du site",
-          "body": "Le site myconciergehotel.com est édité par la société MyConciergeHotel, SAS au capital de 10 000 €, immatriculée au RCS de Paris sous le numéro RCS XXX XXX XXX, dont le siège social est situé à Paris, France. Numéro de TVA intracommunautaire : FR XX XXXXXXXXX. Directeur de la publication : direction de MyConciergeHotel."
+          "body": "Le site myconciergehotel.com est édité par la société MyConciergeHotel, SAS au capital de [À COMPLÉTER : capital social] €, immatriculée au RCS de Paris sous le numéro [À COMPLÉTER : numéro RCS], dont le siège social est situé à [À COMPLÉTER : adresse complète du siège]. Numéro de TVA intracommunautaire : [À COMPLÉTER : FR + 11 chiffres]. Directeur de la publication : [À COMPLÉTER : nom du représentant légal]."
         },
         "contact": {
           "title": "Contact",
-          "body": "Adresse e-mail : contact@myconciergehotel.com. Téléphone : +33 1 XX XX XX XX. Toute demande relative au site, aux contenus ou aux réservations peut être adressée à cette adresse."
+          "body": "Adresse e-mail : contact@myconciergehotel.com. Téléphone : [À COMPLÉTER : ligne téléphonique professionnelle]. Toute demande relative au site, aux contenus ou aux réservations peut être adressée à cette adresse."
         },
         "hosting": {
           "title": "Hébergement",
@@ -2363,7 +2364,7 @@
         },
         "license": {
           "title": "Licence agence de voyage",
-          "body": "MyConciergeHotel exerce en qualité d'agent de voyage immatriculé auprès d'Atout France sous le numéro IM XXXXXXXXX. Garantie financière : Groupama Assurance-Crédit, 8-10 rue d'Astorg, 75008 Paris. Responsabilité civile professionnelle : HISCOX Europe Underwriting Ltd, 19 rue Louis Le Grand, 75002 Paris."
+          "body": "MyConciergeHotel exerce en qualité d'agent de voyage immatriculé auprès d'Atout France sous le numéro [À COMPLÉTER : IM + 9 chiffres]. Garantie financière : [À COMPLÉTER : nom du garant + adresse]. Responsabilité civile professionnelle : [À COMPLÉTER : nom de l'assureur + adresse]."
         },
         "ip": {
           "title": "Propriété intellectuelle",

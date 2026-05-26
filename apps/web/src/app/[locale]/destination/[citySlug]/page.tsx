@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { TOP_DESTINATION_NAV_ENTRIES, pickEntryLabel } from '@/components/layout/nav-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
@@ -15,6 +16,20 @@ import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sentiments-batch';
+
+/**
+ * Known city slugs surfaced by the desktop + mobile mega-menu. When a
+ * deep link lands on `/destination/<slug>` with a slug from this set
+ * but `getDestinationBySlug` returns `null` (i.e. the city has zero
+ * published hotels yet — typical of Phase 1 where 10/15 menu cities
+ * are still in draft), we render a graceful noindex empty state
+ * instead of a hard `notFound()`. Off-menu slugs still 404, preserving
+ * crawl budget and surfacing broken inbound links honestly.
+ *
+ * Same pattern as `categorie/[categorySlug]`, `classements/[axe]/[valeur]`
+ * and `marque/[brandSlug]` (skill `seo-technical` §Indexability).
+ */
+const KNOWN_MENU_CITY_SLUGS = new Set<string>(TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug));
 
 /**
  * Rendering mode: the page reads `headers()` to forward the per-request CSP
@@ -79,7 +94,33 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'destinationPage' });
 
   const destination = await getDestinationBySlug(citySlug, locale);
-  if (destination === null) return { robots: { index: false, follow: false } };
+  // No published hotel matches this slug:
+  //  - on-menu slug (KNOWN_MENU_CITY_SLUGS) → render empty state under
+  //    `noindex, follow` so the menu link resolves while the catalogue
+  //    is being seeded.
+  //  - off-menu slug → hard `noindex, nofollow` and the page will 404
+  //    in the default export (preserves crawl budget).
+  if (destination === null) {
+    if (KNOWN_MENU_CITY_SLUGS.has(citySlug)) {
+      const entry = TOP_DESTINATION_NAV_ENTRIES.find((e) => e.slug === citySlug);
+      const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
+      const buildCanonicalPath = (l: Locale): string =>
+        getPathname({
+          locale: l,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug } },
+        });
+      return {
+        title: t('meta.title', { city: cityLabel }),
+        description: t('meta.description', { city: cityLabel, region: cityLabel }),
+        alternates: {
+          canonical: buildCanonicalPath(locale),
+          languages: buildHreflangAlternates(buildCanonicalPath),
+        },
+        robots: { index: false, follow: true },
+      };
+    }
+    return { robots: { index: false, follow: false } };
+  }
 
   const title = t('meta.title', { city: destination.name });
   const description = t('meta.description', { city: destination.name, region: destination.region });
@@ -119,7 +160,16 @@ export default async function DestinationHubPage({
   setRequestLocale(locale);
 
   const destination = await getDestinationBySlug(citySlug, locale);
-  if (destination === null) notFound();
+  if (destination === null) {
+    // On-menu slug with zero published hotels → empty state (noindex
+    // already set in generateMetadata). Off-menu slug → hard 404.
+    if (KNOWN_MENU_CITY_SLUGS.has(citySlug)) {
+      const entry = TOP_DESTINATION_NAV_ENTRIES.find((e) => e.slug === citySlug);
+      const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
+      return <DestinationEmptyState locale={locale} cityLabel={cityLabel} />;
+    }
+    notFound();
+  }
 
   // Fetch Amadeus ratings for every hotel in the city in a single
   // batched request (chunked internally if >20 — see helper). The
@@ -409,6 +459,99 @@ export default async function DestinationHubPage({
               <p className="text-muted mt-2 text-sm md:text-base">{item.answer}</p>
             </details>
           ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+/**
+ * Empty-state surface for on-menu city slugs that have zero published
+ * hotels yet (typical of Phase 1 where 10/15 `TOP_DESTINATION_NAV_ENTRIES`
+ * cities are still drafts). Mirrors the noindex empty state used by
+ * `categorie/[categorySlug]` and `classements/[axe]/[valeur]`.
+ *
+ * The page renders so the menu link resolves and the user is offered a
+ * graceful path back to the catalogue + rankings. `generateMetadata`
+ * has already set `robots: { index: false, follow: true }` so Google
+ * does not index the thin URL — soft-404 pollution is avoided while
+ * the catalogue grows.
+ */
+function DestinationEmptyState({
+  locale,
+  cityLabel,
+}: {
+  readonly locale: Locale;
+  readonly cityLabel: string;
+}) {
+  const heading = pickByLocale(
+    locale,
+    `${cityLabel} — sélection à venir`,
+    `${cityLabel} — selection coming soon`,
+  );
+  const lead = pickByLocale(
+    locale,
+    `Notre conciergerie sélectionne actuellement les adresses 5★ et Palaces de ${cityLabel}. Le catalogue ouvrira prochainement avec ses fiches éditoriales complètes — chacune se terminant par un Conseil du Concierge. En attendant, explorez nos destinations déjà publiées ou nos classements éditoriaux.`,
+    `Our concierge desk is curating the 5-star and Palace addresses for ${cityLabel}. The catalogue will open soon with its full editorial pages — each closing with a Concierge Tip. In the meantime, browse our published destinations or editorial rankings.`,
+  );
+  return (
+    <main className="container mx-auto max-w-3xl px-4 py-14 sm:py-20">
+      <nav aria-label="Breadcrumb" className="text-muted mb-6 text-xs">
+        <ol className="flex flex-wrap items-center gap-1.5">
+          <li>
+            <Link href="/" className="hover:underline">
+              {pickByLocale(locale, 'Accueil', 'Home')}
+            </Link>
+          </li>
+          <li aria-hidden>›</li>
+          <li>
+            <Link href="/destination" className="hover:underline">
+              {pickByLocale(locale, 'Destinations', 'Destinations')}
+            </Link>
+          </li>
+          <li aria-hidden>›</li>
+          <li className="text-fg" aria-current="page">
+            {cityLabel}
+          </li>
+        </ol>
+      </nav>
+      <header className="mb-8 max-w-2xl">
+        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
+          {pickByLocale(locale, 'Destination', 'Destination')}
+        </p>
+        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{heading}</h1>
+      </header>
+      <section
+        aria-labelledby="dest-empty-state-title"
+        className="border-border bg-muted/5 rounded-lg border p-6 md:p-8"
+      >
+        <h2 id="dest-empty-state-title" className="text-fg font-serif text-xl">
+          {pickByLocale(
+            locale,
+            'La sélection est en cours de constitution',
+            'Selection in progress',
+          )}
+        </h2>
+        <p className="text-muted mt-3 max-w-prose text-sm md:text-base">{lead}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/destination"
+            className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+          >
+            {pickByLocale(locale, 'Toutes les destinations', 'All destinations')} →
+          </Link>
+          <Link
+            href="/hotels"
+            className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+          >
+            {pickByLocale(locale, 'Voir tous les hôtels', 'See all hotels')} →
+          </Link>
+          <Link
+            href="/classements"
+            className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+          >
+            {pickByLocale(locale, 'Voir nos classements', 'See our rankings')} →
+          </Link>
         </div>
       </section>
     </main>

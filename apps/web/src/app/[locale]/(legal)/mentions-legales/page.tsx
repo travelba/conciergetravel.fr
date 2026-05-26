@@ -12,17 +12,54 @@ export const dynamic = 'force-static';
 
 const LAST_UPDATED = '2026-05-01';
 
+/**
+ * TODO: legal-review — the corporate identity fields below are draft.
+ *
+ * Audit 2026-05-25 (nav-menu Canvas): the previous text shipped with
+ * `RCS XXX XXX XXX`, `FR XX XXXXXXXXX`, `+33 1 XX XX XX XX`,
+ * `IM XXXXXXXXX` embedded in production-looking prose. As an IATA /
+ * Atout-France registered agency this is a real DGCCRF + DSA exposure.
+ *
+ * Until the responsable juridique has supplied:
+ *   - RCS / SIREN / SIRET de l'éditeur
+ *   - capital social, adresse complète du siège, directeur de
+ *     publication
+ *   - TVA intracommunautaire (FR + 11 chiffres)
+ *   - immatriculation Atout France (IM + 9 chiffres)
+ *   - garantie financière (organisme + adresse)
+ *   - assureur RC professionnelle (nom + adresse)
+ *   - ligne téléphonique professionnelle
+ *
+ * the placeholders in `messages/{fr,en}.json#legal.noticePage.sections`
+ * are now wrapped in `[À COMPLÉTER : ...]` markers so they are
+ * unmissable on visual review, and the page emits `robots: noindex,
+ * follow` so Google does not index the draft. A visible amber banner
+ * (`draftBanner` translation key) explains the state to any human
+ * visitor.
+ *
+ * Flip the `IS_DRAFT` constant below to `false` once the editor and
+ * publication director have signed off — that simultaneously removes
+ * the banner and the noindex flag.
+ */
+const IS_DRAFT = true as const;
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildLegalMetadata({
+  const base = await buildLegalMetadata({
     locale,
     pathname: '/mentions-legales',
     translationsNamespace: 'legal.noticePage',
   });
+  // While the corporate identity placeholders are still in place we
+  // explicitly noindex this page — see the TODO above.
+  if (IS_DRAFT) {
+    return { ...base, robots: { index: false, follow: true } };
+  }
+  return base;
 }
 
 export default async function LegalNoticePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -34,6 +71,15 @@ export default async function LegalNoticePage({ params }: { params: Promise<{ lo
 
   return (
     <LegalShell locale={raw} title={t('title')} lastUpdatedIso={LAST_UPDATED}>
+      {IS_DRAFT ? (
+        <div
+          role="note"
+          className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        >
+          <strong className="block font-semibold">Brouillon — à valider juridiquement</strong>
+          <span className="mt-1 block">{t('draftBanner')}</span>
+        </div>
+      ) : null}
       <LegalSection title={t('sections.editor.title')}>
         <p>{t('sections.editor.body')}</p>
       </LegalSection>
