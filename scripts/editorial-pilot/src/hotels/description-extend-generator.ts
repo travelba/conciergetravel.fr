@@ -285,10 +285,31 @@ export async function generateDescriptionExtend(
     // demanding a CUT to a target band fires the model's length-
     // budgeting circuit much more reliably.
     const lastAttempt = attempts[attempts.length - 1];
+    // Reason-aware corrective hint. When the model keeps producing
+    // > 28-word opening sentences, the "preserve opening" rule
+    // conflicts with the sentence-length cap. Explicitly authorise
+    // splitting the opening sentence into two — same content,
+    // different breakpoint. Empirical: iconic palaces (Negresco,
+    // Cap-Eden-Roc, Shangri-La Paris…) ship with rhetorical
+    // > 28-word openings; without this exception the model loops
+    // and exhausts retries.
+    let specificHint = '';
+    if (lastAttempt) {
+      const reason = lastAttempt.reason;
+      if (reason.includes('> 28 words') || reason.includes('sentence(s) > 28')) {
+        specificHint = `\nIMPORTANT — the "preserve opening" rule does NOT forbid splitting a > 28-word opening sentence into TWO shorter sentences. The content must stay; the breakpoint may move. If the original opening was a single 34-word sentence, output it as two ~17-word sentences with the same meaning.`;
+      } else if (reason.includes('too long')) {
+        specificHint = `\nThe previous attempt OVERFLOWED ${DESCRIPTION_EXTEND_MAX_CHARS} chars. CUT one secondary clause from the middle paragraph; keep operational facts.`;
+      } else if (reason.includes('too short')) {
+        specificHint = `\nThe previous attempt was BELOW ${DESCRIPTION_EXTEND_MIN_CHARS} chars. ADD ONE concrete fact (named restaurant, distance to a POI, a real award year). Do NOT pad with adjectives.`;
+      } else if (reason.includes('opening drift')) {
+        specificHint = `\nThe previous EN/FR rewrote the opening too aggressively. Keep the first 30-40 words of the original almost verbatim; only later paragraphs may be reworked.`;
+      }
+    }
     const correctiveSuffix =
       lastAttempt === undefined
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${lastAttempt.raw}\nReason: ${lastAttempt.reason}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. Preserve the original opening (first 50 tokens). Output JSON only.`;
+        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${lastAttempt.raw}\nReason: ${lastAttempt.reason}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. Preserve the original opening (first 50 tokens).${specificHint}\nOutput JSON only.`;
 
     const result = await client.call({
       systemPrompt,
