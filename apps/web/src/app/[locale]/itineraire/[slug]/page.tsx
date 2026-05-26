@@ -30,6 +30,7 @@ import {
 } from '@/server/itineraries/get-related-data';
 import { getRelatedItineraries } from '@/server/itineraries/get-related-itineraries';
 import { listPublishedItinerarySlugs } from '@/server/itineraries/list-itineraries';
+import { findRankingsForItinerary } from '@/server/rankings/find-related-rankings';
 
 /**
  * `/itineraire/[slug]` — itinerary detail (CDC §2 + ADR-0007).
@@ -302,16 +303,32 @@ export default async function ItineraireDetailPage({
     .filter((id): id is string => typeof id === 'string' && id.length > 0);
   const allHotelIds = Array.from(new Set([...stepHotelIds, ...itinerary.hotel_ids]));
 
-  const [hotels, rankings, guides, curatedRelated, autoRelated] = await Promise.all([
-    getHotelsByIds(allHotelIds),
-    getRankingsByIds(itinerary.related_ranking_ids),
-    getGuidesBySlugs(itinerary.related_guide_slugs),
-    getItinerariesBySlugs(itinerary.related_itinerary_slugs),
-    // Fall-back when the editor hasn't curated related itineraries.
-    itinerary.related_itinerary_slugs.length === 0
-      ? getRelatedItineraries(slug, { limit: 4 })
-      : Promise.resolve([] as const),
-  ]);
+  const [hotels, rankings, guides, curatedRelated, autoRelated, derivedRankings] =
+    await Promise.all([
+      getHotelsByIds(allHotelIds),
+      getRankingsByIds(itinerary.related_ranking_ids),
+      getGuidesBySlugs(itinerary.related_guide_slugs),
+      getItinerariesBySlugs(itinerary.related_itinerary_slugs),
+      // Fall-back when the editor hasn't curated related itineraries.
+      itinerary.related_itinerary_slugs.length === 0
+        ? getRelatedItineraries(slug, { limit: 4 })
+        : Promise.resolve([] as const),
+      // Fall-back rankings (P2C 2026-05-26): every published itinerary
+      // had `related_ranking_ids: null` at audit time, so the
+      // `<RelatedRankings>` block rendered nothing. We derive 3-4
+      // rankings from `destination_city` / `destination_region` and
+      // merge them only when the editor's curated set is empty.
+      itinerary.related_ranking_ids.length === 0
+        ? findRankingsForItinerary({
+            destinationCity: itinerary.destination_city,
+            destinationRegion: itinerary.destination_region,
+            countryCode: itinerary.country_code,
+            limit: 4,
+          })
+        : Promise.resolve([] as Awaited<ReturnType<typeof findRankingsForItinerary>>),
+    ]);
+
+  const allRankings = rankings.length > 0 ? rankings : derivedRankings;
 
   const relatedItineraries: ItineraryMiniCard[] =
     curatedRelated.length > 0
@@ -539,7 +556,7 @@ export default async function ItineraireDetailPage({
 
       <ItinerarySteps locale={locale} sections={itinerary.sections} hotels={hotels} />
 
-      <RelatedRankings locale={locale} rankings={rankings} />
+      <RelatedRankings locale={locale} rankings={allRankings} />
       <RelatedGuides locale={locale} guides={guides} />
       <RelatedItineraries locale={locale} itineraries={relatedItineraries} />
 

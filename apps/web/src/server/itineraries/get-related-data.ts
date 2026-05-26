@@ -137,11 +137,17 @@ export async function getRankingsByIds(ids: readonly string[]): Promise<readonly
 
   try {
     const supabase = getSupabaseAdminClient();
+    // Bug fix (2026-05-26): the source table is `editorial_rankings`
+    // (the `rankings` symbol below is the editorial CMS naming used
+    // since migration 0029) and the publish flag is `is_published`,
+    // not a `status` text column. The previous shape returned `[]`
+    // silently on every call so the `<RelatedRankings>` block on
+    // itinerary pages was always blank.
     const { data, error } = await supabase
-      .from('rankings')
+      .from('editorial_rankings')
       .select('id, slug, title_fr, title_en, factual_summary_fr, factual_summary_en')
       .in('id', unique)
-      .eq('status', 'published');
+      .eq('is_published', true);
 
     if (error !== null || !Array.isArray(data)) {
       if (error !== null) {

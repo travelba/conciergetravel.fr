@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
+import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
 import { EditorialCallout } from '@/components/editorial/editorial-callout';
 import { EditorialGlossary } from '@/components/editorial/editorial-glossary';
 import { EditorialTable } from '@/components/editorial/editorial-table';
@@ -19,6 +21,8 @@ import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
+import { findItinerariesForCity } from '@/server/itineraries/find-itineraries-for-context';
+import { findSiblingRankings } from '@/server/rankings/find-related-rankings';
 import {
   getRankingBySlug,
   getRankingEntries,
@@ -165,11 +169,19 @@ export default async function RankingPage({
   })}`;
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  // Fetch entries + internal-link map in parallel (the latter drives
-  // <EnrichedText /> auto-linking inside intro/sections/justifications).
-  const [entries, linkMap] = await Promise.all([
+  // Fetch entries + internal-link map + lateral cross-links in
+  // parallel. The cross-links use `ranking.axes.lieu.slug` to find
+  // sibling rankings on the same lieu and itineraries that pass
+  // through that lieu. Both helpers return `[]` on any error so the
+  // page degrades to "no cross-link section" rather than 500.
+  const lieuSlug = ranking.axes.lieu?.slug ?? null;
+  const [entries, linkMap, siblingRankings, lateralItineraries] = await Promise.all([
     getRankingEntries(ranking.id),
     buildEditorialLinkMap({ excludeRankingSlug: slug }),
+    findSiblingRankings({ currentSlug: slug, lieuSlug, limit: 3 }),
+    lieuSlug !== null
+      ? findItinerariesForCity({ citySlug: lieuSlug, limit: 3 })
+      : Promise.resolve([] as Awaited<ReturnType<typeof findItinerariesForCity>>),
   ]);
   const linkMapAsMap = new Map(linkMap);
 
@@ -525,6 +537,37 @@ export default async function RankingPage({
                   );
                 })}
               </div>
+            </section>
+          ) : null}
+
+          {siblingRankings.length > 0 || lateralItineraries.length > 0 ? (
+            <section id="cross-links" className="mt-14 scroll-mt-24">
+              {siblingRankings.length > 0 ? (
+                <RelatedRankingsList
+                  locale={locale}
+                  heading={pickByLocale(
+                    locale,
+                    `Autres classements ${ranking.axes.lieu?.label ?? ''}`.trim(),
+                    `Other rankings ${ranking.axes.lieu?.label ?? ''}`.trim(),
+                  )}
+                  rankings={siblingRankings}
+                  cta={pickByLocale(locale, 'Lire le classement', 'Read the ranking')}
+                />
+              ) : null}
+              {lateralItineraries.length > 0 ? (
+                <div className={siblingRankings.length > 0 ? 'mt-10' : ''}>
+                  <RelatedItinerariesList
+                    locale={locale}
+                    heading={pickByLocale(
+                      locale,
+                      `Itinéraires Concierge ${ranking.axes.lieu?.label ?? ''}`.trim(),
+                      `Concierge itineraries ${ranking.axes.lieu?.label ?? ''}`.trim(),
+                    )}
+                    itineraries={lateralItineraries}
+                    cta={pickByLocale(locale, "Voir l'itinéraire", 'View the itinerary')}
+                  />
+                </div>
+              ) : null}
             </section>
           ) : null}
 

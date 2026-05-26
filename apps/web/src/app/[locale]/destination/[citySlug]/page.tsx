@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
+import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
 import { TOP_DESTINATION_NAV_ENTRIES, pickEntryLabel } from '@/components/layout/nav-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
@@ -16,6 +18,8 @@ import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sentiments-batch';
+import { findItinerariesForCity } from '@/server/itineraries/find-itineraries-for-context';
+import { findRankingsForCity } from '@/server/rankings/find-related-rankings';
 
 /**
  * Known city slugs surfaced by the desktop + mobile mega-menu. When a
@@ -171,13 +175,16 @@ export default async function DestinationHubPage({
     notFound();
   }
 
-  // Fetch Amadeus ratings for every hotel in the city in a single
-  // batched request (chunked internally if >20 — see helper). The
-  // helper is fully forgiving, so an empty map means "no ratings to
-  // show" and the cards render without the rating chip.
-  const [t, ratingsByAmadeusId] = await Promise.all([
+  // Fetch Amadeus ratings + lateral cross-links (rankings + itineraries
+  // matching this city) in parallel. The helpers return `[]` on any
+  // error so the page degrades to "no cross-link section" rather
+  // than 500. Cross-links are an editorial mesh enhancement (P2C),
+  // not a hard requirement of the page.
+  const [t, ratingsByAmadeusId, relatedRankings, relatedItineraries] = await Promise.all([
     getTranslations('destinationPage'),
     getAmadeusAggregateRatingsBatch(destination.hotels.map((h) => h.amadeusHotelId)),
+    findRankingsForCity({ citySlug, limit: 6 }),
+    findItinerariesForCity({ citySlug, limit: 4 }),
   ]);
   const origin = siteOrigin();
   const pageUrl = `${origin}${getPathname({
@@ -417,6 +424,46 @@ export default async function DestinationHubPage({
           })}
         </ul>
       )}
+
+      {relatedRankings.length > 0 ? (
+        <div className="mt-12">
+          <RelatedRankingsList
+            locale={locale}
+            heading={pickByLocale(
+              locale,
+              `Classements éditoriaux à ${destination.name}`,
+              `Editorial rankings in ${destination.name}`,
+            )}
+            intro={pickByLocale(
+              locale,
+              `Nos classements MyConciergeHotel autour de ${destination.name} — sélections par étoiles, par thématique et par occasion.`,
+              `Our MyConciergeHotel rankings around ${destination.name} — by stars, theme and occasion.`,
+            )}
+            rankings={relatedRankings}
+            cta={pickByLocale(locale, 'Lire le classement', 'Read the ranking')}
+          />
+        </div>
+      ) : null}
+
+      {relatedItineraries.length > 0 ? (
+        <div className="mt-12">
+          <RelatedItinerariesList
+            locale={locale}
+            heading={pickByLocale(
+              locale,
+              `Itinéraires Concierge passant par ${destination.name}`,
+              `Concierge itineraries through ${destination.name}`,
+            )}
+            intro={pickByLocale(
+              locale,
+              `Combinez ${destination.name} avec d'autres étapes — itinéraires multi-villes pensés par notre conciergerie.`,
+              `Combine ${destination.name} with other stops — multi-city itineraries crafted by our concierge desk.`,
+            )}
+            itineraries={relatedItineraries}
+            cta={pickByLocale(locale, "Voir l'itinéraire", 'View the itinerary')}
+          />
+        </div>
+      ) : null}
 
       {/*
         Canonical 10-Q FAQ (skill `geo-llm-optimization` §FAQ extraction).
