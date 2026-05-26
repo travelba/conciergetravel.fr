@@ -1362,6 +1362,16 @@
       "method": "Read our editorial method"
     }
   },
+  "regionHubFallback": {
+    "eyebrow": "Concierge universe — {region}",
+    "title": "While our {region} rankings are being prepared",
+    "guidesHeading": "Editorial guides",
+    "itinerariesHeading": "Concierge itineraries",
+    "cta": {
+      "guide": "Read the guide",
+      "itinerary": "View the itinerary"
+    }
+  },
   "conciergeNav": {
     "heading": "Also worth exploring in the Concierge universe",
     "cta": "Discover",

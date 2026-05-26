@@ -12,6 +12,7 @@ import {
   HERO_REGION_NAV_ENTRIES,
   THEME_NAV_ENTRIES,
 } from '@/components/layout/nav-data';
+import { RegionHubFallback } from '@/components/destinations/region-hub-fallback';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
@@ -21,6 +22,7 @@ import { buildHreflangAlternates, hreflangKey, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
+import { getRegionHubContent, REGION_HUB_DEFS } from '@/server/destinations/region-hubs';
 
 export const revalidate = 3600;
 
@@ -312,6 +314,16 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
     return r.updatedAt > acc ? r.updatedAt : acc;
   }, null);
 
+  // When the page lands on an empty `lieu` taxonomy for one of the 4
+  // hero regions we ship editorial guides + itineraries for
+  // (champagne, provence, bordeaux, pays-basque), surface that content
+  // instead of letting the user bounce on the generic empty CTAs.
+  // Cf. `apps/web/src/server/destinations/region-hubs.ts`.
+  const regionHubContent =
+    isEmpty && axe === 'lieu' && valeur in REGION_HUB_DEFS
+      ? await getRegionHubContent(valeur as keyof typeof REGION_HUB_DEFS, locale)
+      : null;
+
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t.home, url: `${origin}${getPathname({ locale, href: '/' })}` },
@@ -363,6 +375,10 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{heading}</h1>
         <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
       </header>
+
+      {isEmpty && regionHubContent !== null ? (
+        <RegionHubFallback locale={locale} content={regionHubContent} />
+      ) : null}
 
       {isEmpty ? (
         <section
