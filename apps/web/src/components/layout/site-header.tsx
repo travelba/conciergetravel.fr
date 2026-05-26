@@ -6,6 +6,8 @@ import type { Locale } from '@/i18n/routing';
 
 import { AuthArea } from './auth-area';
 import { HeaderQuickSearch } from './header-quick-search';
+import { HeritageFlatNav } from './heritage-flat-nav';
+import { HeritageHeaderActions } from './heritage-header-actions';
 import { LocaleSwitcher } from './locale-switcher';
 import { MobileNav } from './mobile-nav';
 import { isHotelHeritageRoute, readBarePathname } from '@/lib/layout/bare-pathname';
@@ -72,7 +74,7 @@ export async function SiteHeader(): Promise<ReactElement> {
       <header
         className={
           heritage
-            ? 'border-outline-variant bg-surface/90 sticky top-0 z-50 border-b backdrop-blur-md'
+            ? 'border-outline-variant bg-surface/90 fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md'
             : 'border-border bg-bg/95 sticky top-0 z-40 border-b backdrop-blur'
         }
       >
@@ -95,69 +97,60 @@ export async function SiteHeader(): Promise<ReactElement> {
             {t('brand')}
           </Link>
 
-          <nav
-            aria-label={t('primaryNav.label')}
-            className={
-              heritage
-                ? 'ml-4 hidden h-full flex-1 items-center gap-6 md:flex'
-                : 'ml-4 hidden flex-1 items-center gap-0.5 md:flex'
-            }
-          >
-            <PalacesHotelsMegaMenu locale={locale} t={t} heritage={heritage} />
-            <DestinationsMegaMenu locale={locale} t={t} heritage={heritage} />
-            <InspirationMegaMenu locale={locale} t={t} heritage={heritage} />
-            <ClassementsMegaMenu locale={locale} t={t} heritage={heritage} />
-            <ConciergeMegaMenu locale={locale} t={t} heritage={heritage} />
-          </nav>
+          {heritage ? (
+            <nav
+              aria-label={t('primaryNav.label')}
+              className="ml-4 hidden h-full flex-1 items-center gap-8 md:flex"
+            >
+              <HeritageFlatNav layout="header" />
+            </nav>
+          ) : (
+            <nav
+              aria-label={t('primaryNav.label')}
+              className="ml-4 hidden flex-1 items-center gap-0.5 md:flex"
+            >
+              <PalacesHotelsMegaMenu locale={locale} t={t} />
+              <DestinationsMegaMenu locale={locale} t={t} />
+              <InspirationMegaMenu locale={locale} t={t} />
+              <ClassementsMegaMenu locale={locale} t={t} />
+              <ConciergeMegaMenu locale={locale} t={t} />
+            </nav>
+          )}
 
           {heritage ? null : <HeaderQuickSearch locale={locale} />}
 
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              href="/recherche"
-              aria-label={t('primaryNav.search')}
-              className={
-                heritage
-                  ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:inline-flex'
-                  : 'text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 lg:hidden'
-              }
-            >
-              <svg
-                aria-hidden
-                viewBox="0 0 20 20"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <circle cx="9" cy="9" r="5.5" />
-                <path d="M13.5 13.5l3 3" strokeLinecap="round" />
-              </svg>
-            </Link>
-
-            {/*
-              The switcher reads `useSearchParams()` (preserves the
-              query string on `/recherche` etc.), which forces a CSR
-              bailout inside statically prerendered pages — wrap it in
-              `Suspense` so the rest of the header can prerender.
-            */}
-            <Suspense fallback={null}>
-              <LocaleSwitcher />
-            </Suspense>
-
             {heritage ? (
-              <Link
-                href="/compte"
-                aria-label={t('account.myAccount')}
-                className="text-primary-heritage hover:text-primary-heritage/80 focus-visible:ring-primary-heritage hidden h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:inline-flex"
-              >
-                <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-              </Link>
-            ) : null}
+              <div className="hidden md:flex">
+                <HeritageHeaderActions />
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/recherche"
+                  aria-label={t('primaryNav.search')}
+                  className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 lg:hidden"
+                >
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 20 20"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                  >
+                    <circle cx="9" cy="9" r="5.5" />
+                    <path d="M13.5 13.5l3 3" strokeLinecap="round" />
+                  </svg>
+                </Link>
 
-            {heritage ? null : <AuthArea variant="header" />}
+                <Suspense fallback={null}>
+                  <LocaleSwitcher />
+                </Suspense>
+
+                <AuthArea variant="header" />
+              </>
+            )}
 
             <MobileNav />
           </div>

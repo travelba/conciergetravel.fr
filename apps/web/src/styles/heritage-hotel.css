@@ -24,7 +24,11 @@
   @apply text-primary-heritage text-headline-md mb-3 font-serif;
 }
 
-.heritage-body :where(section) {
+.heritage-body :where(h4) {
+  @apply text-primary-heritage mb-2 font-serif text-xl;
+}
+
+.heritage-body :where(section, aside[role='note']) {
   @apply mb-16;
 }
 
@@ -36,10 +40,68 @@
   @apply text-primary-heritage hover:underline;
 }
 
+/* Legacy design tokens → Stitch palette inside hotel fiches */
+.heritage-body :where(.text-fg) {
+  @apply text-on-surface;
+}
+
+.heritage-body :where(.text-muted) {
+  @apply text-on-surface-variant;
+}
+
+.heritage-body :where(.border-border) {
+  @apply border-outline-variant;
+}
+
+.heritage-body :where(.bg-bg) {
+  @apply bg-surface-container-lowest;
+}
+
+.heritage-body :where(.bg-muted\/5, .bg-muted\/10) {
+  @apply bg-surface-container-low;
+}
+
+.heritage-body :where(.rounded-lg, .rounded-xl, .rounded-md) {
+  @apply rounded-none;
+}
+
 .heritage-body :where([data-aeo]) {
-  @apply border-outline-variant bg-surface-container-low mb-16 rounded-none border p-6;
+  @apply border-outline-variant bg-surface-container-low border p-6;
 }
 
 .heritage-body :where([data-aeo] h2) {
   @apply text-headline-md text-primary-heritage mb-3;
+}
+
+.heritage-body :where([id='about-title'], [id^='faq'], [id='concierge-advice']) {
+  @apply text-primary-heritage text-headline-md font-serif;
+}
+
+.heritage-body :where(.prose) {
+  @apply text-on-surface-variant text-body-lg max-w-none leading-relaxed;
+}
+
+.heritage-body :where(details) {
+  @apply border-outline-variant bg-surface-container-lowest border;
+}
+
+.heritage-body :where(summary) {
+  @apply text-primary-heritage text-label-caps tracking-caps;
+}
+
+.heritage-body :where([role='progressbar']) {
+  @apply border-outline-variant bg-surface-container-low;
+}
+
+.heritage-body :where([role='progressbar'] > div) {
+  @apply bg-primary-heritage/80;
+}
+
+/* Sticky booking / comparator islands */
+.heritage-hotel :where([data-booking-surface]) {
+  @apply border-outline-variant bg-surface-container-low border;
+}
+
+.heritage-hotel :where(footer.text-muted) {
+  @apply text-on-surface-variant border-outline-variant mt-16 border-t pt-8 text-sm;
 }

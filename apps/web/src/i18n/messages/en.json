@@ -199,6 +199,10 @@
       "label": "Mobile menu",
       "sectionsLabel": "Site sections"
     },
+    "heritage": {
+      "favoritesAria": "My favorites",
+      "bookAria": "Book via the Concierge"
+    },
     "locale": {
       "label": "Choose language",
       "switchTo": "Français",

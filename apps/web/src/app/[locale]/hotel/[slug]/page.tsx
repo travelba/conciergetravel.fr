@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import type { ReactElement } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -34,6 +33,7 @@ import { HotelSignatureExperiences } from '@/components/hotel/hotel-signature-ex
 import { HotelSpa } from '@/components/hotel/hotel-spa';
 import { HotelStory } from '@/components/hotel/hotel-story';
 import { HotelTldr } from '@/components/hotel/hotel-tldr';
+import { HeritageBreadcrumbChevron } from '@/components/layout/heritage-breadcrumb-chevron';
 import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
 import { PriceComparator } from '@/components/price-comparator';
@@ -1034,8 +1034,10 @@ async function renderHotelPage(
         aria-label={t('breadcrumb.hotels')}
         className="text-on-surface-variant text-label-caps mb-6 flex flex-wrap items-center gap-2"
       >
-        <span>{countryLabel}</span>
-        <BreadcrumbChevron />
+        <Link href="/destination" className="hover:text-primary-heritage transition-colors">
+          {countryLabel}
+        </Link>
+        <HeritageBreadcrumbChevron />
         <Link
           href={{
             pathname: '/destination/[citySlug]',
@@ -1045,7 +1047,7 @@ async function renderHotelPage(
         >
           {row.city}
         </Link>
-        <BreadcrumbChevron />
+        <HeritageBreadcrumbChevron />
         <span className="text-primary-heritage" aria-current="page">
           {name}
         </span>
@@ -1138,12 +1140,12 @@ async function renderHotelPage(
           {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
           data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
           aria-labelledby="hotel-aeo-title"
-          className="border-border bg-bg mb-10 rounded-lg border p-5"
+          className="border-outline-variant bg-surface-container-low mb-16 border p-6"
         >
-          <h2 id="hotel-aeo-title" className="text-fg font-serif text-lg">
+          <h2 id="hotel-aeo-title" className="text-primary-heritage text-headline-md font-serif">
             {aeoQuestion}
           </h2>
-          <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
+          <p className="text-on-surface-variant text-body-lg mt-3 leading-relaxed">{aeoAnswer}</p>
         </section>
 
         <BookingWidget
@@ -1204,23 +1206,21 @@ async function renderHotelPage(
           experiences={signatureExperiences}
         />
 
-        <section aria-labelledby="highlights-title" className="mb-12">
-          <h2 id="highlights-title" className="text-fg mb-3 font-serif text-2xl">
-            {t('sections.highlights')}
-          </h2>
+        <section aria-labelledby="highlights-title">
+          <h2 id="highlights-title">{t('sections.highlights')}</h2>
           {highlights.length > 0 ? (
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {highlights.map((h) => (
                 <li
                   key={h}
-                  className="border-border bg-bg text-fg rounded-md border px-3 py-2 text-sm"
+                  className="border-outline-variant bg-surface-container-lowest text-on-surface border px-4 py-3 text-sm"
                 >
                   {h}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-muted text-sm">{t('noHighlights')}</p>
+            <p className="text-on-surface-variant text-sm">{t('noHighlights')}</p>
           )}
         </section>
 
@@ -1380,11 +1380,9 @@ async function renderHotelPage(
         {faqGroups.length > 0 ? (
           <HotelFaq locale={locale} groups={faqGroups} />
         ) : (
-          <section id="faq" aria-labelledby="faq-title" className="mb-12 scroll-mt-24">
-            <h2 id="faq-title" className="text-fg mb-3 font-serif text-2xl">
-              {t('sections.faq')}
-            </h2>
-            <p className="text-muted text-sm">{t('noFaq')}</p>
+          <section id="faq" aria-labelledby="faq-title" className="scroll-mt-24">
+            <h2 id="faq-title">{t('sections.faq')}</h2>
+            <p className="text-on-surface-variant text-sm">{t('noFaq')}</p>
           </section>
         )}
 
@@ -1424,23 +1422,10 @@ async function renderHotelPage(
         }}
       />
 
-      <footer className="text-muted mt-10 flex flex-col gap-2 text-xs">
+      <footer className="text-on-surface-variant border-outline-variant mt-16 flex flex-col gap-2 border-t pt-8 text-xs">
         <p>{t('loyaltyHint')}</p>
         {lastUpdated !== null ? <p>{t('lastUpdated', { date: lastUpdated })}</p> : null}
       </footer>
     </main>
-  );
-}
-
-function BreadcrumbChevron(): ReactElement {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 24 24"
-      className="h-4 w-4 shrink-0 opacity-70"
-      fill="currentColor"
-    >
-      <path d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.42 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.71 6.7a1 1 0 0 0-1.42 1.41Z" />
-    </svg>
   );
 }
