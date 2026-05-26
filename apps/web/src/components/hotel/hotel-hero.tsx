@@ -2,10 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import type { HotelFactualSummary } from '@/server/hotels/get-hotel-by-slug';
 
-import { ConciergeAdviceTeaser } from './concierge-advice-teaser';
-import { FactualSummary } from './factual-summary';
 import { HotelFavoriteButton } from './hotel-favorite-button';
 import { HotelShareButton } from './hotel-share-button';
 
@@ -19,56 +16,47 @@ interface HotelHeroProps {
   readonly locale: SupportedLocale;
   readonly hotelId: string;
   readonly name: string;
+  readonly address: string | null;
+  readonly postalCode: string | null;
   readonly city: string;
   readonly district: string | null;
   readonly region: string;
-  readonly address: string | null;
-  readonly postalCode: string | null;
   readonly isPalace: boolean;
   readonly stars: 1 | 2 | 3 | 4 | 5;
   readonly canonicalUrl: string;
   readonly localePath: string;
   readonly description: string | null;
-  readonly factualSummary: HotelFactualSummary | null;
-  readonly fallbackSummary: string | null;
   readonly amadeusRating: HotelHeroRating | null;
-  readonly hasMapLink: boolean;
-  readonly hasConciergeAdvice: boolean;
-  readonly mapLink: string | null;
 }
 
 const heritageActionClass =
-  'border-primary-heritage text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex min-h-touch items-center gap-2 border px-6 py-3 text-label-caps tracking-caps transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-60';
+  'border-primary-heritage text-primary-heritage hover:bg-surface-container focus-visible:ring-primary-heritage inline-flex min-h-touch items-center gap-2 border px-6 py-3 text-label-caps tracking-caps transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-60';
 
 /**
- * Hero ATF for the hotel detail page — Stitch "L'Héritage Editorial" layout
- * (docs/design/stitch/screens/eb47749c…) with real catalogue data.
+ * Stitch "L'Héritage Editorial" bloc 1 — docs/design/stitch/screens/eb47749c…
  *
- * CDC §2 bloc 1 content (factual summary, concierge teaser) is preserved below
- * the Stitch header row; IATA trust chip moves to the booking widget only.
+ * ATF is intentionally minimal (badge + optional rating, H1, address, Share/Save).
+ * Factual summary, concierge teaser and TLDR live below the mosaic gallery so the
+ * fold matches the Stitch mock, not the legacy editorial hero stack.
  */
 export async function HotelHero({
   locale,
   hotelId,
   name,
+  address,
+  postalCode,
   city,
   district,
   region,
-  address,
-  postalCode,
   isPalace,
   stars,
   canonicalUrl,
   localePath,
   description,
-  factualSummary,
-  fallbackSummary,
   amadeusRating,
-  hasMapLink,
-  hasConciergeAdvice,
-  mapLink,
 }: HotelHeroProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
+  void region;
 
   const addressLine = formatAddressLine(address ?? '', postalCode, city, district);
 
@@ -78,11 +66,11 @@ export async function HotelHero({
         <div className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center gap-4">
             {isPalace ? (
-              <span className="border-charcoal text-charcoal text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
-                {t('hero.palace')}
+              <span className="border-sage text-sage text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+                {t('hero.palaceBadge')}
               </span>
             ) : (
-              <span className="border-charcoal text-charcoal text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+              <span className="border-sage text-sage text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
                 {t('hero.stars', { count: stars })}
               </span>
             )}
@@ -105,9 +93,7 @@ export async function HotelHero({
             ) : null}
           </div>
 
-          <h1 className="text-primary-heritage text-display-xl mb-2 font-serif md:text-[4rem]">
-            {name}
-          </h1>
+          <h1 className="text-primary-heritage text-display-lg mb-2 font-serif">{name}</h1>
 
           {addressLine.length > 0 ? (
             <p className="text-on-surface-variant text-body-lg flex items-start gap-2">
@@ -115,32 +101,9 @@ export async function HotelHero({
               <span>{addressLine}</span>
             </p>
           ) : null}
-
-          <div className="mt-4 max-w-3xl">
-            <FactualSummary summary={factualSummary} fallback={fallbackSummary} />
-          </div>
-
-          {hasConciergeAdvice ? (
-            <div className="mt-3">
-              <ConciergeAdviceTeaser locale={locale} />
-            </div>
-          ) : null}
-
-          {hasMapLink && mapLink !== null ? (
-            <p className="mt-3 text-sm">
-              <a
-                href={mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted hover:text-fg underline"
-              >
-                {t('hero.viewMap')}
-              </a>
-            </p>
-          ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-wrap gap-4">
+        <div className="flex w-full shrink-0 flex-wrap gap-4 md:w-auto">
           <HotelShareButton
             hotelName={name}
             shareText={description !== null ? description.slice(0, 160) : null}
@@ -157,7 +120,6 @@ export async function HotelHero({
         </div>
       </div>
 
-      {/* Breadcrumb parity anchor for analytics */}
       <span className="sr-only" data-canonical-path={localePath} data-region={region} />
     </header>
   );

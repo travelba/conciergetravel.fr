@@ -12,6 +12,7 @@ import { BookingWidget } from '@/components/hotel/booking-widget';
 import { BookingWidgetMobileBar } from '@/components/hotel/booking-widget-mobile-bar';
 import { BookingWidgetUrlHydrator } from '@/components/hotel/booking-widget-url-hydrator';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
+import { FactualSummary } from '@/components/hotel/factual-summary';
 import { HotelHero } from '@/components/hotel/hotel-hero';
 import { HotelAmenities } from '@/components/hotel/hotel-amenities';
 import { LocalGuideTeaser } from '@/components/hotel/local-guide-teaser';
@@ -1000,8 +1001,14 @@ async function renderHotelPage(
         })}`
       : '';
 
+  const countryLabel = pickByLocale(
+    locale,
+    row.country_label_fr !== '' ? row.country_label_fr : 'France',
+    row.country_label_en !== '' ? row.country_label_en : 'France',
+  );
+
   return (
-    <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
+    <main className="bg-surface text-on-surface px-margin-mobile pb-section-gap md:px-margin-desktop mx-auto max-w-[1280px] pt-10 md:pt-14">
       <JsonLdScript data={hotelJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
@@ -1027,13 +1034,7 @@ async function renderHotelPage(
         aria-label={t('breadcrumb.hotels')}
         className="text-on-surface-variant text-label-caps mb-6 flex flex-wrap items-center gap-2"
       >
-        <Link href="/" className="hover:text-primary-heritage transition-colors">
-          {t('breadcrumb.home')}
-        </Link>
-        <BreadcrumbChevron />
-        <Link href="/recherche" className="hover:text-primary-heritage transition-colors">
-          {t('breadcrumb.hotels')}
-        </Link>
+        <span>{countryLabel}</span>
         <BreadcrumbChevron />
         <Link
           href={{
@@ -1064,10 +1065,6 @@ async function renderHotelPage(
         canonicalUrl={canonicalUrl}
         localePath={localePath}
         description={description}
-        factualSummary={factualSummary}
-        fallbackSummary={
-          description !== null && description.length > 0 ? truncate(description, 280) : null
-        }
         amadeusRating={
           amadeusRating !== null
             ? {
@@ -1077,16 +1074,24 @@ async function renderHotelPage(
               }
             : null
         }
-        hasConciergeAdvice={conciergeAdvice !== null}
-        hasMapLink={
-          row.latitude !== null && row.longitude !== null && location.pointsOfInterest.length === 0
-        }
-        mapLink={
-          row.latitude !== null && row.longitude !== null
-            ? `https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}&zoom=15`
-            : null
-        }
       />
+
+      <HotelGallery
+        locale={locale}
+        cloudName={cloudName}
+        hero={heroDescriptor}
+        images={galleryImages}
+        hotelName={name}
+      />
+
+      <div className="text-on-surface-variant text-body-lg mb-10 max-w-3xl">
+        <FactualSummary
+          summary={factualSummary}
+          fallback={
+            description !== null && description.length > 0 ? truncate(description, 280) : null
+          }
+        />
+      </div>
 
       <HotelTldr
         locale={locale}
@@ -1100,14 +1105,6 @@ async function renderHotelPage(
         architects={externalIds.knowledgeGraph.architects}
         bookingMode={row.booking_mode}
         dateModified={row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null}
-      />
-
-      <HotelGallery
-        locale={locale}
-        cloudName={cloudName}
-        hero={heroDescriptor}
-        images={galleryImages}
-        hotelName={name}
       />
 
       <HotelVirtualTour locale={locale} hotelName={name} tour={virtualTour} />

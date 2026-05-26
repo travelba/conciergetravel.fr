@@ -2720,6 +2720,7 @@
     },
     "hero": {
       "palace": "Distinction Palace",
+      "palaceBadge": "Palace",
       "stars": "{count}★",
       "districtSeparator": "·",
       "viewMap": "Voir sur la carte"

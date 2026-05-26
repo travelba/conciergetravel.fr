@@ -2720,6 +2720,7 @@
     },
     "hero": {
       "palace": "Palace Distinction",
+      "palaceBadge": "Palace",
       "stars": "{count}★",
       "districtSeparator": "·",
       "viewMap": "View on the map"

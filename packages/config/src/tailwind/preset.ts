@@ -97,6 +97,7 @@ const preset = {
       /* ----------------------------------------------------------------- */
       fontSize: {
         'display-xl': ['48px', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '400' }],
+        'display-lg': ['64px', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '500' }],
         'headline-lg': ['32px', { lineHeight: '1.2', fontWeight: '400' }],
         'headline-md': ['24px', { lineHeight: '1.3', fontWeight: '400' }],
         'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],

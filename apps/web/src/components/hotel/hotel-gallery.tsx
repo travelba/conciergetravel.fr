@@ -51,7 +51,7 @@ interface HotelGalleryProps {
  * catalogue without bandwidth penalty (thumbnails use `c_thumb,w_400`).
  */
 const MAX_THUMBNAILS = 11;
-const PLACEHOLDER_THUMBNAILS = 5;
+const PLACEHOLDER_MOSAIC_TILES = 4;
 
 export async function HotelGallery({
   locale,
@@ -64,14 +64,23 @@ export async function HotelGallery({
 
   if (hero === null && images.length === 0) {
     return (
-      <section aria-label={t('gallery.thumbnailsLabel')} className="grid gap-3 md:grid-cols-3">
+      <section
+        aria-label={t('gallery.thumbnailsLabel')}
+        className="mb-16 grid h-auto grid-cols-1 gap-1 md:h-[500px] md:grid-cols-4 md:grid-rows-2"
+        data-gallery-layout="mosaic-placeholder"
+      >
         <HotelImagePlaceholder
           variant="hero"
           hotelName={hotelName}
-          className="md:col-span-2 md:row-span-2"
+          className="min-h-[240px] md:col-span-2 md:row-span-2 md:min-h-0 md:rounded-none"
         />
-        {Array.from({ length: PLACEHOLDER_THUMBNAILS }).map((_, idx) => (
-          <HotelImagePlaceholder key={idx} variant="thumbnail" hotelName={hotelName} />
+        {Array.from({ length: PLACEHOLDER_MOSAIC_TILES }).map((_, idx) => (
+          <HotelImagePlaceholder
+            key={idx}
+            variant="thumbnail"
+            hotelName={hotelName}
+            className="hidden min-h-0 md:block md:rounded-none"
+          />
         ))}
       </section>
     );
