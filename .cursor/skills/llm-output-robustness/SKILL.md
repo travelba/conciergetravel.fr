@@ -846,14 +846,15 @@ Residences`, `The Inn at Mattei's Tavern`, `Château de L'île & Spa
 Strasbourg`). Hotel names are proper nouns kept verbatim across
 languages — by design the first ~30-50 chars overlap.
 
-The gate is meant to catch *literal translations of the descriptor*,
+The gate is meant to catch _literal translations of the descriptor_,
 not the proper noun. The prompt enforces `[Hotel Name], [descriptor]`
 format, so the comma is a natural anchor:
 
 ```ts
 // ❌ Bad — proper nouns in both languages dominate the comparison
 const norm = (s: string): string =>
-  s.slice(0, 30)
+  s
+    .slice(0, 30)
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase()
@@ -890,11 +891,13 @@ suffix should include a specific remediation hint:
 let lengthHint = '';
 if (last) {
   if (last.reason.includes('too short')) {
-    lengthHint = '\nAdd ONE concrete verifiable fact (a distance, a number of rooms, a named restaurant, an award year). Do NOT pad with vague adjectives.';
+    lengthHint =
+      '\nAdd ONE concrete verifiable fact (a distance, a number of rooms, a named restaurant, an award year). Do NOT pad with vague adjectives.';
   } else if (last.reason.includes('too long')) {
     lengthHint = '\nRemove one secondary clause; keep the operational fact.';
   } else if (last.reason.includes('literal translation')) {
-    lengthHint = '\nThe EN looked like a calque. Restructure the EN sentence — change clause order, swap synonyms, lead with a different fact. Same content, different shape.';
+    lengthHint =
+      '\nThe EN looked like a calque. Restructure the EN sentence — change clause order, swap synonyms, lead with a different fact. Same content, different shape.';
   }
 }
 ```
@@ -912,13 +915,81 @@ Reference impl: `scripts/editorial-pilot/src/hotels/meta-desc-generator.ts`
 
 1. ☐ Skip the proper-noun prefix (anchor on the first comma or the
    first 50 chars).
-2. ☐ Compare a window ≥ 50 chars *on the descriptor*, not 30 chars
-   *on the whole string*.
+2. ☐ Compare a window ≥ 50 chars _on the descriptor_, not 30 chars
+   _on the whole string_.
 3. ☐ Reason-aware corrective suffix that names the failure mode
    ("too short" / "too long" / "literal translation").
 4. ☐ Bump `MAX_RETRIES` to 5 when length oscillation is a known
    mode — the cost is marginal (~$0.04/hotel) and clears the
    long tail.
+
+## Rule 17 — Share one prompt across collections with the same optimisation function
+
+Empirical (2026-05-26): the rankings meta-desc pipeline cleared 84/85
+drafts in 63 s with a Concierge-voice prompt targeting curated
+editorial selection (not transactional booking). When the same gap
+landed on `editorial_guides` (36 drafts, all missing `meta_desc`), the
+naive plan was to fork the prompt + generator. Instead we projected
+the guide row into the existing `RankingLlmInput` shape with a thin
+adapter — and shipped 36/36 in 28.7 s using **the same prompt
+unchanged**.
+
+The criterion to merge is **optimisation function**, not schema shape:
+
+| Collection           | Optimisation function                                  | Audience     |
+| -------------------- | ------------------------------------------------------ | ------------ |
+| `editorial_rankings` | "Curated selection — click for the comparison"         | SERP scanner |
+| `editorial_guides`   | "Curated city/country guide — click for the deep-read" | SERP scanner |
+| `hotels`             | "This specific property — click to book / read more"   | SERP scanner |
+
+Rankings + guides share the SERP card shape (browse the page, no
+transactional intent). Hotels do not (transactional intent, named
+amenities, distances). So `rankings/meta-desc-generator.ts` is
+shareable with guides, **not** with hotels.
+
+**Pattern — thin projector:**
+
+```ts
+// scripts/editorial-pilot/src/guides/supabase-guides.ts
+import type { RankingLlmInput } from '../rankings/meta-desc-generator.js';
+
+export function projectGuideForLlm(row: GuideRow): RankingLlmInput {
+  return {
+    slug: row.slug,
+    title_fr: row.name_fr, // schema diff
+    title_en: row.name_en ?? row.name_fr,
+    kind: row.scope ?? 'guide', // schema diff
+    scope_label: row.name_fr.replace(/^guide\s+/iu, '').trim(),
+    intro_excerpt_fr: truncate(row.summary_long_fr, 600), // schema diff
+    intro_excerpt_en: truncate(row.summary_en, 600),
+    top_hotel_names: [], // guides don't list hotels
+    sections_count: arrayLen(row.editorial_sections),
+  };
+}
+
+// scripts/editorial-pilot/src/guides/run-guide-meta-desc.ts
+import { generateRankingMetaDesc } from '../rankings/meta-desc-generator.js';
+const result = await generateRankingMetaDesc(client, projectGuideForLlm(row));
+```
+
+Total new code = `supabase-guides.ts` (180 LOC) + `run-guide-meta-desc.ts`
+(280 LOC, 90 % copy of the rankings runner). Zero net new prompt, zero
+gate forked. Test cycle = one dry-run + one live run, both green
+first try.
+
+**When NOT to share:** if the new collection has a different banned-
+word list, a different format anchor (e.g. mandatory price band on
+booking-facing copy), or a different audience signal (LLM citation vs
+SERP click), fork the prompt. The merge is a one-way ratchet — easier
+to fork later than to un-fork.
+
+Reference impls:
+
+- `scripts/editorial-pilot/src/rankings/meta-desc-generator.ts` (canonical)
+- `scripts/editorial-pilot/src/rankings/run-ranking-meta-desc.ts` (canonical runner)
+- `scripts/editorial-pilot/src/guides/supabase-guides.ts` (projector)
+- `scripts/editorial-pilot/src/guides/run-guide-meta-desc.ts` (reuse)
+- `scripts/editorial-pilot/prompts/ranking-meta-desc.md` (single source of truth)
 
 ## Anti-patterns
 
@@ -940,6 +1011,7 @@ Reference impl: `scripts/editorial-pilot/src/hotels/meta-desc-generator.ts`
 - ❌ Banned-word substring match on lowercased text (`output.toLowerCase().includes(word)`) → false positives on proper nouns (`Bulle d'Osier`, `L'Écrin`, `Le Cocon`); 3 wasted retries per affected hotel before throwing. Use word-boundary + case-sensitive (Rule 15).
 - ❌ "Literal translation" gate that compares the first 30 chars of FR vs EN → rejects ~30 % of international properties whose proper noun is identical in both languages (`Four Seasons Hotel New York Downtown`, `Las Ventanas al Paraíso`). Compare the descriptor segment after the first comma (Rule 16).
 - ❌ Constant `MAX_RETRIES = 3` on a pipeline where length is the dominant failure mode → the model often needs one extra round to settle inside the envelope. Bump to 5 when the marginal LLM cost (~$0.04/hotel) buys you the long tail.
+- ❌ Forking the prompt + generator + gate for a new collection that shares the SERP-card optimisation function with an existing one → triples the maintenance surface. Project the new row into the existing input shape and reuse the generator (Rule 17). Fork only when banned-word list, format anchor, or audience signal genuinely diverges.
 
 ## References
 
