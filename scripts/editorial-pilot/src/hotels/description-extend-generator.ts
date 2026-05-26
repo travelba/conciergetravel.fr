@@ -41,7 +41,7 @@ const PROMPT_PATH = resolve(PROMPTS_DIR, 'hotel-description-extend.md');
 export const DESCRIPTION_EXTEND_MIN_CHARS = 800;
 export const DESCRIPTION_EXTEND_MAX_CHARS = 1500;
 
-export const MAX_RETRIES = 3;
+export const MAX_RETRIES = 5;
 
 const DescriptionExtendLlmOutputSchema = z.object({
   fr: z

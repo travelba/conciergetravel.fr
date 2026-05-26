@@ -836,6 +836,90 @@ factual-summary}-generator.ts` § `gateXxxFormat`.
    superlatives" instructions when the previous output contained the
    word; quoting it fires edit-mode reliably.
 
+## Rule 16 — "Literal translation" gates must skip the proper-noun prefix
+
+Empirical smoke test (meta-desc pipeline, 2026-05-26): a gate that
+compares the **first 30 characters** of FR vs EN after diacritic
+stripping rejected ~30 % of international hotels (`Las Ventanas al
+Paraíso`, `Four Seasons Hotel New York Downtown`, `Madeline Hotel &
+Residences`, `The Inn at Mattei's Tavern`, `Château de L'île & Spa
+Strasbourg`). Hotel names are proper nouns kept verbatim across
+languages — by design the first ~30-50 chars overlap.
+
+The gate is meant to catch *literal translations of the descriptor*,
+not the proper noun. The prompt enforces `[Hotel Name], [descriptor]`
+format, so the comma is a natural anchor:
+
+```ts
+// ❌ Bad — proper nouns in both languages dominate the comparison
+const norm = (s: string): string =>
+  s.slice(0, 30)
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[\s,.;:'"`-]/g, '');
+if (norm(output.fr) === norm(output.en)) failed.push('literal translation');
+
+// ✅ Good — compare the descriptor segment after the first comma
+const descriptor = (s: string): string => {
+  const commaIdx = s.indexOf(',');
+  const tail = commaIdx === -1 ? s : s.slice(commaIdx + 1);
+  return tail
+    .slice(0, 60)
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[\s,.;:'"`-]/g, '');
+};
+if (descriptor(output.fr) === descriptor(output.en) && descriptor(output.fr).length > 0) {
+  failed.push('literal translation (descriptor segment matches)');
+}
+```
+
+Why a wider comparison window (60 chars) on the descriptor segment:
+the proper noun is gone, so we now compare 60 chars of actual
+language — which is enough signal to flag calques without flagging
+distinct EN restructurings that happen to share the first 30 chars
+of the descriptor.
+
+**Companion improvement — reason-aware corrective suffix.** When the
+last retry was rejected for length or calque, the corrective
+suffix should include a specific remediation hint:
+
+```ts
+let lengthHint = '';
+if (last) {
+  if (last.reason.includes('too short')) {
+    lengthHint = '\nAdd ONE concrete verifiable fact (a distance, a number of rooms, a named restaurant, an award year). Do NOT pad with vague adjectives.';
+  } else if (last.reason.includes('too long')) {
+    lengthHint = '\nRemove one secondary clause; keep the operational fact.';
+  } else if (last.reason.includes('literal translation')) {
+    lengthHint = '\nThe EN looked like a calque. Restructure the EN sentence — change clause order, swap synonyms, lead with a different fact. Same content, different shape.';
+  }
+}
+```
+
+Empirical: switching the meta-desc gate to descriptor-segment +
+`MAX_RETRIES = 5` + reason-aware hints raised the **live success
+rate from 56 % to 94 %** on the international hotel batch (15/16
+vs 9/16). The remaining failure was a single hotel oscillating
+between 138c and 175c — flagged for manual authoring.
+
+Reference impl: `scripts/editorial-pilot/src/hotels/meta-desc-generator.ts`
+§ `gateMetaDescFormat` and § `generateMetaDesc` retry loop.
+
+**When adding a new "literal translation" gate, mandatory checklist:**
+
+1. ☐ Skip the proper-noun prefix (anchor on the first comma or the
+   first 50 chars).
+2. ☐ Compare a window ≥ 50 chars *on the descriptor*, not 30 chars
+   *on the whole string*.
+3. ☐ Reason-aware corrective suffix that names the failure mode
+   ("too short" / "too long" / "literal translation").
+4. ☐ Bump `MAX_RETRIES` to 5 when length oscillation is a known
+   mode — the cost is marginal (~$0.04/hotel) and clears the
+   long tail.
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -854,6 +938,8 @@ factual-summary}-generator.ts` § `gateXxxFormat`.
 - ❌ Hard `z.enum(LUXURY_TIER_VALUES)` directly on LLM output (or any open-ended brand/category enum) → 10-15 % data loss per run from invented values.
 - ❌ Reporting "X rows need re-generation" against the CDC ideal band instead of the production envelope → inflates roadmap, triggers wasted token spend on rows that already pass the publish gate.
 - ❌ Banned-word substring match on lowercased text (`output.toLowerCase().includes(word)`) → false positives on proper nouns (`Bulle d'Osier`, `L'Écrin`, `Le Cocon`); 3 wasted retries per affected hotel before throwing. Use word-boundary + case-sensitive (Rule 15).
+- ❌ "Literal translation" gate that compares the first 30 chars of FR vs EN → rejects ~30 % of international properties whose proper noun is identical in both languages (`Four Seasons Hotel New York Downtown`, `Las Ventanas al Paraíso`). Compare the descriptor segment after the first comma (Rule 16).
+- ❌ Constant `MAX_RETRIES = 3` on a pipeline where length is the dominant failure mode → the model often needs one extra round to settle inside the envelope. Bump to 5 when the marginal LLM cost (~$0.04/hotel) buys you the long tail.
 
 ## References
 

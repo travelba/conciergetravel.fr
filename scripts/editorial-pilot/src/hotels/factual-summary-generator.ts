@@ -31,7 +31,7 @@ const PROMPT_PATH = resolve(PROMPTS_DIR, 'hotel-factual-summary.md');
 export const FACTUAL_SUMMARY_MIN_CHARS = 110;
 export const FACTUAL_SUMMARY_MAX_CHARS = 165;
 
-export const MAX_RETRIES = 3;
+export const MAX_RETRIES = 5;
 
 const FactualSummaryLlmOutputSchema = z.object({
   fr: z

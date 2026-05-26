@@ -37,7 +37,7 @@ const PROMPT_PATH = resolve(PROMPTS_DIR, 'hotel-meta-desc.md');
 export const META_DESC_MIN_CHARS = 140;
 export const META_DESC_MAX_CHARS = 170;
 
-export const MAX_RETRIES = 3;
+export const MAX_RETRIES = 5;
 
 const MetaDescLlmOutputSchema = z.object({
   fr: z
@@ -121,17 +121,25 @@ export function gateMetaDescFormat(output: MetaDescOutput): string | null {
     failed.push(`EN banned superlatives detected: ${bannedEnHits.join(', ')}`);
   }
 
-  // EN must not be a literal translation of FR — compare the first 30
-  // chars after stripping diacritics, casing and punctuation.
-  const norm = (s: string): string =>
-    s
-      .slice(0, 30)
+  // EN must not be a literal translation of FR. International luxury
+  // properties keep their proper noun in both languages (e.g. "Four
+  // Seasons Hotel New York Downtown") so the first 30 chars commonly
+  // overlap by design. Compare the segment AFTER the first comma —
+  // that's the descriptor the gate is actually meant to police.
+  const descriptor = (s: string): string => {
+    const commaIdx = s.indexOf(',');
+    const tail = commaIdx === -1 ? s : s.slice(commaIdx + 1);
+    return tail
+      .slice(0, 60)
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .toLowerCase()
       .replace(/[\s,.;:'"`-]/g, '');
-  if (norm(output.fr) === norm(output.en) && norm(output.fr).length > 0) {
-    failed.push('EN appears to be a literal translation of FR (first 30 chars match)');
+  };
+  const frDesc = descriptor(output.fr);
+  const enDesc = descriptor(output.en);
+  if (frDesc.length > 0 && frDesc === enDesc) {
+    failed.push('EN appears to be a literal translation of FR (descriptor segment matches)');
   }
 
   return failed.length > 0 ? failed.join(' | ') : null;
@@ -180,10 +188,22 @@ export async function generateMetaDesc(
   let totalOutput = 0;
 
   for (let i = 0; i < MAX_RETRIES; i++) {
+    const last = attempts[attempts.length - 1];
+    let lengthHint = '';
+    if (last) {
+      const reason = last.reason;
+      if (reason.includes('too short')) {
+        lengthHint = `\nThe previous attempt was BELOW ${META_DESC_MIN_CHARS} chars. Add ONE concrete verifiable fact (a distance, a number of rooms, a named restaurant, a real award year). Do NOT pad with vague adjectives.`;
+      } else if (reason.includes('too long')) {
+        lengthHint = `\nThe previous attempt was ABOVE ${META_DESC_MAX_CHARS} chars. Remove one secondary clause; keep the operational fact.`;
+      } else if (reason.includes('literal translation')) {
+        lengthHint = `\nThe previous EN looked like a literal calque of the FR. Restructure the EN sentence — change clause order, swap synonyms, lead with a different fact. Same content, different shape.`;
+      }
+    }
     const correctiveSuffix =
       attempts.length === 0
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${attempts[attempts.length - 1]?.reason}\n\nFix the issue and retry. Stay inside the ${META_DESC_MIN_CHARS}-${META_DESC_MAX_CHARS} char envelope.`;
+        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${last?.raw}\nReason: ${last?.reason}\n\nFix the issue and retry. Stay inside the ${META_DESC_MIN_CHARS}-${META_DESC_MAX_CHARS} char envelope.${lengthHint}`;
 
     const result = await client.call({
       systemPrompt,
