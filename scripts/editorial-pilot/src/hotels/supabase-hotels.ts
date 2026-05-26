@@ -153,6 +153,24 @@ export async function listHotelsForMetaDesc(
   return listHotels(cfg, { ...opts, onlyOutOfBandMetaDesc: true });
 }
 
+/**
+ * Eligible rows for the description-extend backfill: published hotels
+ * whose `description_fr` is non-null but shorter than the CDC §2.4
+ * 600-char floor. The length check runs client-side (PostgREST cannot
+ * filter on `char_length`).
+ *
+ * Rows where `description_fr IS NULL` are intentionally excluded — the
+ * extend pipeline preserves the opening and therefore cannot run on
+ * an empty seed. Use the future `run-hotel-description-rewrite.ts`
+ * pipeline (TODO) for those.
+ */
+export async function listHotelsForDescriptionExtend(
+  cfg: SupabaseRestConfig,
+  opts: ListHotelsOptions = {},
+): Promise<HotelRow[]> {
+  return listHotels(cfg, { ...opts, requireDescription: true });
+}
+
 async function listHotels(cfg: SupabaseRestConfig, opts: ListHotelsOptions): Promise<HotelRow[]> {
   const params = new URLSearchParams();
   params.set('select', HOTEL_SELECT_COLUMNS);
@@ -266,6 +284,19 @@ export async function updateHotelMetaDesc(
   cfg: SupabaseRestConfig,
   hotelId: string,
   payload: MetaDescUpdate,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
+}
+
+export interface DescriptionUpdate {
+  readonly description_fr: string;
+  readonly description_en: string;
+}
+
+export async function updateHotelDescription(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  payload: DescriptionUpdate,
 ): Promise<void> {
   await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
 }
