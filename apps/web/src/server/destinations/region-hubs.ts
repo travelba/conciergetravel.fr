@@ -7,31 +7,44 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { pickByLocale, type SupportedLocale } from '@/i18n/supported-locale';
 
 /**
- * Region hub fallback data — for the 4 hero regions that have zero
- * published rankings (audit 2026-05-25) but DO have published
- * editorial guides + itineraries in the catalogue.
+ * Lieu-hub fallback data — for the regions AND cities that have zero
+ * published rankings on `/classements/lieu/<slug>` (audit 2026-05-25)
+ * but DO have published editorial guides + itineraries in the
+ * catalogue.
  *
- * Until rankings are produced for `champagne`, `provence`, `bordeaux`
- * and `pays-basque`, clicking the corresponding region in the hero
- * mega-menu lands on `/classements/lieu/<slug>` and hits the
- * generic `isEmpty` branch — two boilerplate CTAs that ignore the
- * fact we already have rich Concierge content for these places.
+ * **Scope** (extended in P2B):
+ *   - 4 hero regions: `champagne`, `provence`, `bordeaux`, `pays-basque`
+ *   - 4 city slugs from `TOP_DESTINATION_NAV_ENTRIES` that have no
+ *     hero alias: `cannes`, `aix-en-provence`, `reims`, `biarritz`
  *
- * This reader maps each hero region slug to:
+ * Until rankings are produced for these slugs, clicking the
+ * corresponding entry in the mega-menu lands on `/classements/lieu/<slug>`
+ * and hits the generic `isEmpty` branch — two boilerplate CTAs that
+ * ignore the fact we already have rich Concierge content there.
+ *
+ * This reader maps each slug to:
  *   - its parent editorial-guide slugs (`editorial_guides.slug`)
  *   - its parent itinerary slugs (`itineraries.slug_fr`)
  *
  * The bindings are explicit (not slug-pattern heuristics) so an
  * editor adding a "Champagne Premier Cru" itinerary doesn't suddenly
- * cross-link from the wrong region hub. Update this file when a new
- * matching guide or itinerary is published — there's a unit test
- * covering coverage in `region-hubs.test.ts` (TODO follow-up).
+ * cross-link from the wrong hub. Update this file when a new
+ * matching guide or itinerary is published.
  *
- * Returns `[]` defensively on any error so a transient Supabase
+ * Returns `null` defensively on any error so a transient Supabase
  * outage degrades to "no fallback" rather than a 500.
+ *
+ * **Why we accept some duplication with the hero-region entries** —
+ * cities like `biarritz` and `reims` produce the *same* guide +
+ * itinerary as their hero (`pays-basque` and `champagne`). We could
+ * deduplicate by aliasing, but the explicit duplicate keeps the
+ * binding readable and survives the day where the city-specific
+ * editorial content forks from the region-level one (very likely
+ * to happen — Reims has a different POI set from broader Champagne).
  */
 
 export type HeroRegionSlug =
+  // Regions (hero mega-menu)
   | 'champagne'
   | 'provence'
   | 'bordeaux'
@@ -43,7 +56,13 @@ export type HeroRegionSlug =
   | 'cote-d-azur'
   | 'alpes'
   | 'corse'
-  | 'loire';
+  | 'loire'
+  // Cities from TOP_DESTINATION_NAV_ENTRIES with no hero alias and
+  // zero rankings (P2B extension 2026-05-26).
+  | 'cannes'
+  | 'aix-en-provence'
+  | 'reims'
+  | 'biarritz';
 
 interface RegionHubDef {
   readonly labelFr: string;
@@ -100,6 +119,46 @@ export const REGION_HUB_DEFS: Readonly<Partial<Record<HeroRegionSlug, RegionHubD
       'De Biarritz à Saint-Jean-de-Luz, le Pays basque marie Belle Époque et Atlantique. Notre sélection rassemble les Palaces côtiers historiques et les domaines secrets de l’arrière-pays — sans oublier les passerelles vers San Sebastián.',
     introEn:
       'From Biarritz to Saint-Jean-de-Luz, the Basque Country marries Belle Époque heritage with the Atlantic. Our selection covers the coastal heritage Palaces and the secret domaines of the hinterland — including bridges to San Sebastián.',
+  },
+  cannes: {
+    labelFr: 'Cannes',
+    labelEn: 'Cannes',
+    guideSlugs: ['cannes', 'cote-d-azur'],
+    itinerarySlugs: ['cote-d-azur-luxe-7-jours'],
+    introFr:
+      'Cannes ne se résume pas à la Croisette du Festival — c’est une porte d’entrée sur Antibes, le Cap-Ferrat et Èze. Notre conciergerie réunit ici les adresses 5★ et Palaces côtiers ainsi que l’itinéraire de référence pour découvrir la Côte d’Azur en sept jours.',
+    introEn:
+      'Cannes is more than the festival Croisette — it’s the gateway to Antibes, Cap-Ferrat and Èze. Our concierge desk brings together the 5-star and Palace seafront addresses, plus the reference 7-day itinerary to discover the French Riviera.',
+  },
+  'aix-en-provence': {
+    labelFr: 'Aix-en-Provence',
+    labelEn: 'Aix-en-Provence',
+    guideSlugs: ['aix-en-provence', 'provence'],
+    itinerarySlugs: ['provence-culture-gastronomie-10-jours'],
+    introFr:
+      'Aix se vit comme un camp de base : à 20 minutes des Baux-de-Provence, 45 du Luberon, 1 h d’Avignon. Notre sélection associe les hôtels du centre historique aux domaines viticoles des coteaux d’Aix, et un itinéraire 10 jours pour la Provence éternelle.',
+    introEn:
+      'Aix works best as a base camp: 20 minutes from Les Baux-de-Provence, 45 from the Luberon, 1 h from Avignon. Our selection combines historic-centre hotels with wine estates of the coteaux d’Aix, plus a 10-day itinerary for eternal Provence.',
+  },
+  reims: {
+    labelFr: 'Reims',
+    labelEn: 'Reims',
+    guideSlugs: ['reims-champagne'],
+    itinerarySlugs: ['reims-champagne-week-end'],
+    introFr:
+      'Reims est la capitale du champagne — Pommery, Veuve Clicquot, Ruinart, Taittinger ouvrent leurs caves à quelques minutes. Notre conciergerie sélectionne les adresses 5★ du centre historique et les escapades week-end avec dégustations privées.',
+    introEn:
+      'Reims is Champagne’s capital — Pommery, Veuve Clicquot, Ruinart, Taittinger all open their cellars within minutes. Our concierge desk curates the 5-star addresses of the historic centre and the weekend escapes with private tastings.',
+  },
+  biarritz: {
+    labelFr: 'Biarritz',
+    labelEn: 'Biarritz',
+    guideSlugs: ['biarritz', 'pays-basque'],
+    itinerarySlugs: ['biarritz-pays-basque-5-jours'],
+    introFr:
+      'Biarritz cumule Belle Époque (l’Hôtel du Palais), spots de surf, et la passerelle vers San Sebastián (35 minutes). Notre sélection couvre les Palaces front de mer, les hôtels du centre et l’itinéraire 5 jours côté français + côté espagnol.',
+    introEn:
+      'Biarritz blends Belle Époque heritage (Hôtel du Palais), legendary surf spots, and the gateway to San Sebastián (35 minutes). Our selection covers seafront Palaces, town-centre hotels and the 5-day Franco-Spanish itinerary.',
   },
 };
 
@@ -292,4 +351,15 @@ export async function getRegionHubContent(
 /** Type guard usable from page components. */
 export function isHeroRegionSlug(value: string): value is HeroRegionSlug {
   return value in REGION_HUB_DEFS || ['cote-d-azur', 'alpes', 'corse', 'loire'].includes(value);
+}
+
+/**
+ * Type guard restricted to lieu slugs that ship a hub fallback. Use
+ * this from the rankings page to decide whether to call
+ * `getRegionHubContent` — it filters out hero regions that have
+ * published rankings (cote-d-azur, alpes, corse, loire) and would
+ * therefore return `null`.
+ */
+export function hasLieuHubFallback(value: string): boolean {
+  return value in REGION_HUB_DEFS;
 }

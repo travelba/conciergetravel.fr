@@ -22,7 +22,7 @@ import { buildHreflangAlternates, hreflangKey, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
-import { getRegionHubContent, REGION_HUB_DEFS } from '@/server/destinations/region-hubs';
+import { getRegionHubContent, hasLieuHubFallback } from '@/server/destinations/region-hubs';
 
 export const revalidate = 3600;
 
@@ -139,6 +139,54 @@ const AXE_LABEL: Record<Axe, { fr: string; en: string }> = {
   occasion: { fr: 'par occasion', en: 'by occasion' },
   saison: { fr: 'par saison', en: 'by season' },
 };
+
+interface RelatedAxisValue {
+  readonly value: string;
+  readonly label: string;
+  readonly count: number;
+}
+
+/**
+ * Counts how many published rankings each *other* value on the same
+ * axis carries, then returns the top 8. Used to populate the
+ * "related axis values" cross-link block when a known taxonomy
+ * (theme/occasion/saison) has no published ranking yet.
+ *
+ * Pure function over the rankings list — testable in isolation and
+ * does not hit Supabase. The caller is responsible for passing the
+ * already-fetched `listPublishedRankings()` result.
+ */
+function buildRelatedAxisValues(
+  axe: 'theme' | 'occasion' | 'saison',
+  currentValue: string,
+  rankings: readonly Awaited<ReturnType<typeof listPublishedRankings>>[number][],
+): readonly RelatedAxisValue[] {
+  const tally = new Map<string, number>();
+  for (const r of rankings) {
+    if (axe === 'theme') {
+      for (const t of r.axes.themes) {
+        if (t !== currentValue) tally.set(t, (tally.get(t) ?? 0) + 1);
+      }
+    } else if (axe === 'occasion') {
+      for (const o of r.axes.occasions) {
+        if (o !== currentValue) tally.set(o, (tally.get(o) ?? 0) + 1);
+      }
+    } else if (axe === 'saison') {
+      const s = r.axes.saison;
+      if (s !== undefined && s.length > 0 && s !== currentValue) {
+        tally.set(s, (tally.get(s) ?? 0) + 1);
+      }
+    }
+  }
+  return Array.from(tally.entries())
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 8)
+    .map(([value, count]) => ({
+      value,
+      label: humaniseTaxonomyValue(value),
+      count,
+    }));
+}
 
 function rankingMatches(
   axe: Axe,
@@ -314,15 +362,32 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
     return r.updatedAt > acc ? r.updatedAt : acc;
   }, null);
 
-  // When the page lands on an empty `lieu` taxonomy for one of the 4
-  // hero regions we ship editorial guides + itineraries for
-  // (champagne, provence, bordeaux, pays-basque), surface that content
+  // When the page lands on an empty `lieu` taxonomy for one of the
+  // hero regions or top-destination cities we ship editorial guides
+  // + itineraries for (champagne, provence, bordeaux, pays-basque,
+  // cannes, aix-en-provence, reims, biarritz), surface that content
   // instead of letting the user bounce on the generic empty CTAs.
   // Cf. `apps/web/src/server/destinations/region-hubs.ts`.
   const regionHubContent =
-    isEmpty && axe === 'lieu' && valeur in REGION_HUB_DEFS
-      ? await getRegionHubContent(valeur as keyof typeof REGION_HUB_DEFS, locale)
+    isEmpty && axe === 'lieu' && hasLieuHubFallback(valeur)
+      ? await getRegionHubContent(
+          // We narrow at runtime via hasLieuHubFallback — the runtime
+          // check is the source of truth here, the cast is type-only.
+          valeur as Parameters<typeof getRegionHubContent>[0],
+          locale,
+        )
       : null;
+
+  // For non-lieu empty taxonomies (theme=rooftop, theme=sport-golf,
+  // saison=printemps in the 2026-05-25 audit), surface up to 8 of
+  // the most-populated values on the same axis so the user has a
+  // cross-link instead of a dead-end. Skip for `lieu` (covered above)
+  // and `type` (mostly populated, less leverage). This is purely
+  // navigational — no JSON-LD emitted.
+  const relatedAxisValues: readonly RelatedAxisValue[] =
+    isEmpty && (axe === 'theme' || axe === 'occasion' || axe === 'saison')
+      ? buildRelatedAxisValues(axe, valeur, await listPublishedRankings())
+      : [];
 
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
@@ -378,6 +443,51 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
 
       {isEmpty && regionHubContent !== null ? (
         <RegionHubFallback locale={locale} content={regionHubContent} />
+      ) : null}
+
+      {isEmpty && relatedAxisValues.length > 0 ? (
+        <section
+          aria-labelledby="related-axis-title"
+          className="border-border bg-muted/5 mb-10 rounded-lg border p-6 md:p-8"
+        >
+          <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
+            {pickByLocale(locale, 'Sur le même axe', 'Same axis')}
+          </p>
+          <h2 id="related-axis-title" className="text-fg font-serif text-2xl sm:text-3xl">
+            {pickByLocale(
+              locale,
+              `Autres ${axeLabel.replace(/^par /u, '')} disponibles`,
+              `Other ${axeLabel.replace(/^by /u, '')}s available`,
+            )}
+          </h2>
+          <p className="text-muted mt-3 max-w-prose text-sm md:text-base">
+            {pickByLocale(
+              locale,
+              `Le filtre « ${label} » n'a pas encore de classement publié. En attendant, voici les classements les plus garnis sur le même axe.`,
+              `The "${label}" filter does not have a published ranking yet. In the meantime, here are the most populated rankings on the same axis.`,
+            )}
+          </p>
+          <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {relatedAxisValues.map((v) => (
+              <li key={v.value}>
+                <Link
+                  href={{
+                    pathname: '/classements/[axe]/[valeur]',
+                    params: { axe, valeur: v.value },
+                  }}
+                  className="border-border bg-bg hover:border-fg/40 focus-visible:ring-ring block h-full rounded-lg border p-3 transition focus-visible:outline-none focus-visible:ring-2"
+                >
+                  <p className="text-fg text-sm font-medium">{v.label}</p>
+                  <p className="text-muted mt-1 text-xs">
+                    {v.count === 1
+                      ? pickByLocale(locale, '1 classement', '1 ranking')
+                      : pickByLocale(locale, `${v.count} classements`, `${v.count} rankings`)}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {isEmpty ? (
