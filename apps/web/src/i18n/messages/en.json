@@ -209,6 +209,31 @@
     "fallbackInspiration": "All inspirations (themes × occasions × seasons)",
     "fallbackRankings": "All editorial rankings",
     "fallbackDestinations": "All destination guides",
+    "aeoQuestion": "How do MyConciergeHotel bespoke itineraries work?",
+    "aeoAnswer": "Our editorial itineraries assemble 3 to 14 days of named stops, each night at a hotel curated by our IATA concierge desk — Palace, 5-star or signature house. Every itinerary details tested timings, local gastronomy, transfers and direct contacts with on-site Concierges. Editorial selection, never commercial.",
+    "faqTitle": "Questions about our itineraries",
+    "faqItems": [
+      {
+        "q": "How long are MyConciergeHotel itineraries?",
+        "a": "Our itineraries span 3 days (signature weekend) to 14 days (grand Mediterranean or Alpine tour). Each page lists the min/max duration and clarifies which stops can be compressed or extended — our concierge desk can adapt on request without breaking editorial consistency."
+      },
+      {
+        "q": "Are the recommended hotels bookable via MyConciergeHotel?",
+        "a": "Yes. Each stop links to the matching hotel page, bookable at Amadeus GDS net rates through our IATA licence. You can book each night individually or ask the concierge desk for a global quote including transfers, upgrades and special requests."
+      },
+      {
+        "q": "Can I customise an itinerary to fit my trip?",
+        "a": "The published itinerary is an editorial framework. Our concierge adjusts durations, swaps a stop, adds a gastronomic detour or substitutes a hotel based on your constraints — dates, budget, mobility, family travel. A personalised quote takes 48 hours."
+      },
+      {
+        "q": "Do itineraries include transfers and chauffeurs?",
+        "a": "Itinerary pages detail transport options (high-speed rail, domestic flight, car rental, private driver) with indicative durations and our recommended partners. Chauffeur services are handled by our Concierge network, sourced locally and invoiced separately from the hotel rate."
+      },
+      {
+        "q": "Do itineraries cover destinations outside France?",
+        "a": "Yes. Our 2026 editorial catalog includes Italy (Tuscany, Lakes, Sicily), Morocco (Marrakech-Atlas), Switzerland (Alps-Lake Geneva), Japan (Tokyo-Kyoto), Maldives, UAE. Every non-French itinerary follows the same editorial grid: named stops, signature hotels, tested timings."
+      }
+    ],
     "listing": {
       "totalLabel": "{count, plural, =1 {1 published itinerary} other {# published itineraries}}",
       "filtersLabel": "Refine",

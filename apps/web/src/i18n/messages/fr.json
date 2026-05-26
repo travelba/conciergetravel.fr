@@ -209,6 +209,31 @@
     "fallbackInspiration": "Toutes les inspirations (thèmes × occasions × saisons)",
     "fallbackRankings": "Tous les classements éditoriaux",
     "fallbackDestinations": "Tous les guides destination",
+    "aeoQuestion": "Comment fonctionnent les itinéraires sur-mesure MyConciergeHotel ?",
+    "aeoAnswer": "Nos itinéraires éditoriaux assemblent 3 à 14 jours d'étapes nommées, chaque nuit dans un hôtel sélectionné par notre conciergerie IATA — Palace, 5 étoiles ou Maison signature. Chaque itinéraire détaille les timings testés, la gastronomie locale, les transferts et les contacts directs avec les Concierges sur place. Sélection éditoriale, jamais commerciale.",
+    "faqTitle": "Questions sur nos itinéraires",
+    "faqItems": [
+      {
+        "q": "Quelle est la durée d'un itinéraire MyConciergeHotel ?",
+        "a": "Nos itinéraires couvrent de 3 jours (week-end signature) à 14 jours (grand tour méditerranéen ou alpin). Chaque page indique la durée min/max et précise quelles étapes sont compressibles ou extensibles selon votre calendrier — notre conciergerie peut ajuster sur demande sans casser la cohérence éditoriale."
+      },
+      {
+        "q": "Les hôtels recommandés sont-ils réservables via MyConciergeHotel ?",
+        "a": "Oui. Chaque étape pointe vers la fiche hôtel correspondante, réservable au tarif net Amadeus GDS grâce à notre licence IATA. Vous pouvez réserver chaque nuit séparément ou demander à la conciergerie un devis global incluant transferts, surclassements et demandes spéciales."
+      },
+      {
+        "q": "Puis-je modifier un itinéraire pour l'adapter à mon voyage ?",
+        "a": "L'itinéraire publié est une trame éditoriale. Notre conciergerie ajuste les durées, remplace une étape, ajoute un détour gastronomique ou substitue un hôtel selon vos contraintes — date, budget, mobilité, voyage en famille. Une demande de devis personnalisée prend 48 h."
+      },
+      {
+        "q": "Les itinéraires incluent-ils transferts et chauffeurs ?",
+        "a": "Les pages d'itinéraire détaillent les options de transport (TGV, vol intérieur, location, chauffeur privé) avec des durées indicatives et nos partenaires recommandés. Les prestations chauffeur sont confiées à notre réseau Concierge, sourcées localement et facturées séparément du tarif hôtel."
+      },
+      {
+        "q": "Les itinéraires couvrent-ils des destinations hors France ?",
+        "a": "Oui. Notre catalogue éditorial 2026 inclut Italie (Toscane, Lacs, Sicile), Maroc (Marrakech-Atlas), Suisse (Alpes-Léman), Japon (Tokyo-Kyoto), Maldives, Émirats. Tous les itinéraires hors France suivent la même grille éditoriale : étapes nommées, hôtels signature, timings testés."
+      }
+    ],
     "listing": {
       "totalLabel": "{count, plural, =1 {1 itinéraire publié} other {# itinéraires publiés}}",
       "filtersLabel": "Affiner",

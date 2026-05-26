@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -157,6 +159,13 @@ export default async function ItinerairesHubPage({
         <p className="text-muted mt-3 text-base md:text-lg">{t('lede')}</p>
       </header>
 
+      <HubAeoSection
+        question={t('aeoQuestion')}
+        answer={t('aeoAnswer')}
+        headingId="itineraires-aeo-title"
+        emitJsonLd={false}
+      />
+
       {hasItineraries ? (
         <ItinerariesListing
           locale={locale}
@@ -174,6 +183,14 @@ export default async function ItinerairesHubPage({
           fallbackDestinations={t('fallbackDestinations')}
         />
       )}
+
+      <HubFaqSection
+        heading={t('faqTitle')}
+        items={(t.raw('faqItems') as { q: string; a: string }[]).map((it) => ({
+          question: it.q,
+          answer: it.a,
+        }))}
+      />
     </main>
   );
 }

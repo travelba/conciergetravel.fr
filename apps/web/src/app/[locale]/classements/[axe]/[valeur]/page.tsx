@@ -13,6 +13,7 @@ import {
   THEME_NAV_ENTRIES,
 } from '@/components/layout/nav-data';
 import { RegionHubFallback } from '@/components/destinations/region-hub-fallback';
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
@@ -440,6 +441,23 @@ export default async function RankingSubHubPage({ params }: { params: Promise<Pa
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{heading}</h1>
         <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
       </header>
+
+      {!isEmpty ? (
+        <HubAeoSection
+          question={pickByLocale(
+            locale,
+            `Combien de classements ${axeLabel} : ${label} sur MyConciergeHotel ?`,
+            `How many ${axeLabel.replace(/^by /u, '')} rankings on ${label} via MyConciergeHotel?`,
+          )}
+          answer={pickByLocale(
+            locale,
+            `MyConciergeHotel publie ${matches.length} classement${matches.length > 1 ? 's' : ''} éditori${matches.length > 1 ? 'aux' : 'al'} ${axeLabel} ${label}, rédigé${matches.length > 1 ? 's' : ''} par notre conciergerie IATA et révisé${matches.length > 1 ? 's' : ''} chaque trimestre. Chaque classement assemble une méthodologie transparente, des hôtels vérifiés (Palace, 5★), des justifications éditoriales et un tableau comparatif quand pertinent. Réservation au tarif net Amadeus, sans intermédiaire commissionné.`,
+            `MyConciergeHotel publishes ${matches.length} editorial ranking${matches.length > 1 ? 's' : ''} ${axeLabel} ${label}, written by our IATA concierge desk and reviewed quarterly. Each ranking assembles a transparent methodology, verified hotels (Palace, 5★), editorial justifications and a comparison table when relevant. Booking at Amadeus net rate, no commission intermediary.`,
+          )}
+          headingId="taxonomy-aeo-title"
+          emitJsonLd={false}
+        />
+      ) : null}
 
       {isEmpty && regionHubContent !== null ? (
         <RegionHubFallback locale={locale} content={regionHubContent} />
