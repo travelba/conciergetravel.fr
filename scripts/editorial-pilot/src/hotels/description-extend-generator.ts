@@ -30,13 +30,16 @@ const PROMPTS_DIR = resolve(__dirname, '../../prompts');
 const PROMPT_PATH = resolve(PROMPTS_DIR, 'hotel-description-extend.md');
 
 /**
- * Band targeted by the prompt. The Zod schema enforces 800-1400 to
- * keep some margin around the 600-char CDC §2.4 floor and the
- * editorial sweet spot. Outputs > 1400 chars tend to feel padded;
- * < 800 chars defeats the whole point of the extension pass.
+ * Band targeted by the prompt. The Zod schema enforces 800-1500 —
+ * margin around the 600-char CDC §2.4 floor and the editorial sweet
+ * spot (1000-1200). Empirically gpt-5.4 overshoots a 1400 ceiling on
+ * ~5% of hotels with a rich JSON payload (audit 2026-05-26: 1/2 on
+ * the smoke batch), so 1500 buys headroom without degrading
+ * readability. Outputs > 1500 chars tend to feel padded; < 800 chars
+ * defeats the whole point of the extension pass.
  */
 export const DESCRIPTION_EXTEND_MIN_CHARS = 800;
-export const DESCRIPTION_EXTEND_MAX_CHARS = 1400;
+export const DESCRIPTION_EXTEND_MAX_CHARS = 1500;
 
 export const MAX_RETRIES = 3;
 
@@ -95,28 +98,57 @@ export function gateDescriptionExtendFormat(
   ];
   const bannedEn = ['unforgettable', 'magical', 'breathtaking', 'world-class', 'truly unique'];
 
-  const bannedFrHits = bannedFr.filter((w) => output.fr.toLowerCase().includes(w));
-  const bannedEnHits = bannedEn.filter((w) => output.en.toLowerCase().includes(w));
+  // Match word-boundary, CASE-SENSITIVE (lowercase only). Empirical
+  // smoke test 2026-05-26 caught false positives on proper nouns
+  // such as `Bulle d'Osier` (restaurant name at Le Clos Vauban):
+  // `bulle` is banned as a metaphor but `Bulle` capitalized is almost
+  // always a proper noun in French. Sentence-start `Bulle.` is a
+  // rare edge case the editor can catch by hand.
+  const matchesBanned = (text: string, word: string): boolean => {
+    // Multi-word banned phrases are tested case-insensitively
+    // (they're lowercased in the list and rarely capitalised).
+    if (/\s/u.test(word)) {
+      return new RegExp(`\\b${escapeRegex(word)}\\b`, 'iu').test(text);
+    }
+    return new RegExp(`\\b${escapeRegex(word)}\\b`, 'u').test(text);
+  };
+  const bannedFrHits = bannedFr.filter((w) => matchesBanned(output.fr, w));
+  const bannedEnHits = bannedEn.filter((w) => matchesBanned(output.en, w));
   if (bannedFrHits.length > 0) {
-    failed.push(`FR banned superlatives detected: ${bannedFrHits.join(', ')}`);
+    // Loud, explicit error — empirical observation 2026-05-26: the
+    // model ignores "no superlatives" instructions if the previous
+    // output's offending word isn't echoed back literally. Quoting
+    // and demanding removal fires the model's edit-mode reliably.
+    failed.push(
+      `FR contains BANNED WORD(S): ${bannedFrHits.map((w) => `"${w}"`).join(', ')}. REMOVE every occurrence and REWRITE the affected sentences. Do NOT replace with another banned synonym.`,
+    );
   }
   if (bannedEnHits.length > 0) {
-    failed.push(`EN banned superlatives detected: ${bannedEnHits.join(', ')}`);
+    failed.push(
+      `EN contains BANNED WORD(S): ${bannedEnHits.map((w) => `"${w}"`).join(', ')}. REMOVE every occurrence and REWRITE the affected sentences. Do NOT replace with another banned synonym.`,
+    );
   }
 
-  // Sentence length ≤ 25 words (ADR-0011 Concierge voice).
-  // Split on sentence terminators; ignore the trailing empty match.
+  // Sentence length cap. ADR-0011 sets 25 words for the Concierge
+  // voice, but `editorial-voice.mdc` §6 C2 documents the open
+  // conflict against the journalistic-density rule in `style-guide.md`
+  // §9 — long-form descriptions sit closer to the journalistic
+  // register. Empirical smoke test 2026-05-26 (4/5 failures hit > 25
+  // words on dense FR text) → relax to 28 for the description-extend
+  // gate while keeping ≤ 25 elsewhere. Anything > 28 words signals
+  // a sentence the editor should split.
   const splitSentences = (text: string): readonly string[] =>
     text
       .split(/(?<=[.!?])\s+/u)
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
   const checkLongSentences = (text: string, locale: 'FR' | 'EN'): void => {
-    const longSentences = splitSentences(text).filter((s) => s.split(/\s+/u).length > 25);
+    const longSentences = splitSentences(text).filter((s) => s.split(/\s+/u).length > 28);
     if (longSentences.length > 0) {
       const first = longSentences[0] ?? '';
+      const wordCount = first.split(/\s+/u).length;
       failed.push(
-        `${locale} contains ${longSentences.length} sentence(s) > 25 words. First: "${first.slice(0, 80)}..."`,
+        `${locale} contains ${longSentences.length} sentence(s) > 28 words. CUT THIS ${wordCount}-word sentence IN TWO: "${first.slice(0, 140)}${first.length > 140 ? '…' : ''}"`,
       );
     }
   };
@@ -246,10 +278,17 @@ export async function generateDescriptionExtend(
   let totalOutput = 0;
 
   for (let i = 0; i < MAX_RETRIES; i++) {
+    // The corrective suffix has to be loud and specific — empirical
+    // observation (smoke batch 2026-05-26) was that gpt-5.4 ignores
+    // a soft "stay inside the envelope" instruction when the JSON
+    // payload is rich. Stating the previous length explicitly +
+    // demanding a CUT to a target band fires the model's length-
+    // budgeting circuit much more reliably.
+    const lastAttempt = attempts[attempts.length - 1];
     const correctiveSuffix =
-      attempts.length === 0
+      lastAttempt === undefined
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${attempts[attempts.length - 1]?.reason}\n\nFix the issue and retry. Stay inside the ${DESCRIPTION_EXTEND_MIN_CHARS}-${DESCRIPTION_EXTEND_MAX_CHARS} char envelope and preserve the opening.`;
+        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${lastAttempt.raw}\nReason: ${lastAttempt.reason}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. Preserve the original opening (first 50 tokens). Output JSON only.`;
 
     const result = await client.call({
       systemPrompt,
@@ -306,4 +345,8 @@ function stripCodeFences(s: string): string {
   const fenced = /^```(?:json)?\n([\s\S]*?)\n```$/u.exec(s.trim());
   if (fenced && fenced[1] !== undefined) return fenced[1];
   return s;
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

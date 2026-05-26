@@ -83,9 +83,20 @@ export function gateFactualSummaryFormat(output: FactualSummaryOutput): string |
     'bulle',
     'magique',
   ];
+  // Word-boundary + case-sensitive match for single words — empirical
+  // smoke test 2026-05-26 caught false positives on proper nouns like
+  // `Bulle d'Osier` (restaurant name at Le Clos Vauban). Capitalised
+  // single-word occurrences in French long-form text are almost always
+  // proper nouns; the gate accepts them. Multi-word phrases stay
+  // case-insensitive because they're rarely capitalised.
+  const matchesBanned = (text: string, word: string): boolean => {
+    if (/\s/u.test(word)) {
+      return new RegExp(`\\b${escapeRegex(word)}\\b`, 'iu').test(text);
+    }
+    return new RegExp(`\\b${escapeRegex(word)}\\b`, 'u').test(text);
+  };
   const bannedHits = banned.filter(
-    (w) =>
-      output.fr.toLowerCase().includes(w) || output.en.toLowerCase().includes(w.replace('é', 'e')),
+    (w) => matchesBanned(output.fr, w) || matchesBanned(output.en, w.replace('é', 'e')),
   );
 
   if (bannedHits.length > 0) {
@@ -210,4 +221,8 @@ function stripCodeFences(s: string): string {
   const fenced = /^```(?:json)?\n([\s\S]*?)\n```$/u.exec(s.trim());
   if (fenced && fenced[1] !== undefined) return fenced[1];
   return s;
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

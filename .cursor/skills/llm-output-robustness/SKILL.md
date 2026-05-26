@@ -773,6 +773,69 @@ This rule applies to every editorial text field (`factual_summary`,
 `meta_desc`, `description_fr`, `concierge_advice.body`, ranking intros,
 guide sections, FAQ answer length).
 
+## Rule 15 — Banned-word gates must use word boundaries, not substrings
+
+Empirical smoke test (description-extend pipeline, 2026-05-26): the
+naive substring match `output.fr.toLowerCase().includes(bannedWord)`
+flagged **legitimate proper nouns** as banned superlatives. Concrete
+case: `Bulle d'Osier` (the restaurant of chef Valentin Loison at
+`Le Clos Vauban`) was rejected as a "banned word `bulle` detected"
+on three consecutive retries — the model kept the restaurant name
+because it's a verifiable fact from the JSON payload, and the gate
+kept rejecting it.
+
+Same bug existed in `meta-desc-generator.ts` and
+`factual-summary-generator.ts` — both shipped with `.toLowerCase()
+.includes(word)`. The hotel catalogue contains many proper nouns
+that overlap with banned-superlative lists: `L'Écrin` (restaurant
+at Crillon), `Le Cocon` (suite category), `Bulle d'Osier`, `La
+Magique` (boutique brand).
+
+```ts
+// ❌ Bad — substring + lowercase catches proper nouns
+const bannedHits = banned.filter((w) => output.fr.toLowerCase().includes(w));
+
+// ✅ Good — word-boundary, case-sensitive for single words.
+// Multi-word phrases stay case-insensitive (rarely capitalised).
+const matchesBanned = (text: string, word: string): boolean => {
+  if (/\s/u.test(word)) {
+    return new RegExp(`\\b${escapeRegex(word)}\\b`, 'iu').test(text);
+  }
+  return new RegExp(`\\b${escapeRegex(word)}\\b`, 'u').test(text);
+};
+const bannedHits = banned.filter((w) => matchesBanned(output.fr, w));
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+```
+
+Why **case-sensitive** for single words: capitalised single-word
+occurrences in French long-form text are almost always proper nouns
+(restaurant, suite, chef, vineyard names). Lowercase `bulle` is the
+banned metaphorical use ("une bulle de luxe"); uppercase `Bulle` is
+a proper noun like `Bulle d'Osier`. The sentence-start case
+(`Bulle.`) is a rare false negative the editor catches by hand.
+
+Why **case-insensitive** for multi-word phrases: phrases like
+`art de vivre` or `véritable joyau` are essentially never capitalised
+even at sentence start, so the `i` flag does no harm and catches
+the few title-cased occurrences.
+
+Reference impls:
+`scripts/editorial-pilot/src/hotels/{description-extend,meta-desc,
+factual-summary}-generator.ts` § `gateXxxFormat`.
+
+**When adding a new banned-word gate, mandatory checklist:**
+
+1. ☐ Word-boundary anchors (`\b…\b`).
+2. ☐ Case-sensitive for single words, case-insensitive for phrases.
+3. ☐ `escapeRegex` helper for words containing `.` `'` etc.
+4. ☐ Echo the offending word back in the corrective suffix
+   (`REMOVE "bulle"`) — empirical: the model ignores generic "no
+   superlatives" instructions when the previous output contained the
+   word; quoting it fires edit-mode reliably.
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -790,6 +853,7 @@ guide sections, FAQ answer length).
 - ❌ Tavily-extract on a JS-rendered single-page-app without a known third-party article fallback → silent zero-hotel runs.
 - ❌ Hard `z.enum(LUXURY_TIER_VALUES)` directly on LLM output (or any open-ended brand/category enum) → 10-15 % data loss per run from invented values.
 - ❌ Reporting "X rows need re-generation" against the CDC ideal band instead of the production envelope → inflates roadmap, triggers wasted token spend on rows that already pass the publish gate.
+- ❌ Banned-word substring match on lowercased text (`output.toLowerCase().includes(word)`) → false positives on proper nouns (`Bulle d'Osier`, `L'Écrin`, `Le Cocon`); 3 wasted retries per affected hotel before throwing. Use word-boundary + case-sensitive (Rule 15).
 
 ## References
 
