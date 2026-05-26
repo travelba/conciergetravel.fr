@@ -18,8 +18,10 @@ export const dynamic = 'force-dynamic';
  * Rather than expose a service-role bypass that would let an agent
  * subscribe arbitrary users without their consent, this endpoint
  * acts as a deep-link router: it returns the canonical HTML URL
- * (`/{locale}/le-concierge-club/prestige`) and instructs the agent
- * to present it to the user. The HTML page handles three states
+ * (`/{locale}/le-concierge-club#prestige` — anchored section of the
+ * consolidated programme landing, post 2026-05-26 PO consolidation)
+ * and instructs the agent to present it to the user. The HTML page
+ * handles three states inside the anchored `#prestige` section
  * (unauthenticated → /compte/rejoindre with `next=`, authenticated +
  * not-on-list → join form, authenticated + on-list → confirmation).
  *
@@ -60,7 +62,11 @@ export async function POST(req: NextRequest) {
   }
   const { locale } = parsed.data;
 
-  const deepLink = `/${locale}/le-concierge-club/prestige`;
+  // Anchored URL — both tiers (free Club + Prestige waitlist) live on
+  // the same page after the 2026-05-26 PO consolidation. The hash
+  // fragment is preserved by browsers across the 301 from the old
+  // `/le-concierge-club/prestige` route.
+  const deepLink = `/${locale}/le-concierge-club#prestige`;
 
   return agentJson(
     {

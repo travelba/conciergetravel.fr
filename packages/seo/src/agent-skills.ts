@@ -223,7 +223,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'loyalty',
       description:
-        'Consulter les avantages du programme de fidélité MyConciergeHotel — Le Concierge Club (tier gratuit, attentions sur les hôtels éligibles) et Le Concierge Club Prestige (tier payant Phase 6, surclassements confirmés, transfert aéroport, late check-out 16h). URL canonique : /fr/le-concierge-club.',
+        'Consulter les avantages du programme de fidélité MyConciergeHotel — Le Concierge Club (tier gratuit, attentions sur les hôtels éligibles) et Le Concierge Club Prestige (tier payant Phase 6, surclassements confirmés, transfert aéroport, late check-out 16h). Les deux tiers vivent sur la même page : /fr/le-concierge-club (la section Prestige est ancrée à #prestige).',
       endpoint: { method: 'GET', path: '/api/agent/loyalty' },
     },
     {
@@ -263,7 +263,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'join-concierge-club-prestige-waitlist',
       description:
-        "Rejoindre la liste d'attente Le Concierge Club Prestige (tier payant €99/an, activation Phase 6). Requiert un compte Le Concierge Club déjà actif. L'inscription débloque la priorité d'accès, le tarif lancement et la communication preview des avantages Prestige. URL HTML : /fr/le-concierge-club/prestige.",
+        "Rejoindre la liste d'attente Le Concierge Club Prestige (tier payant €99/an, activation Phase 6). Requiert un compte Le Concierge Club déjà actif. L'inscription débloque la priorité d'accès, le tarif lancement et la communication preview des avantages Prestige. URL HTML : /fr/le-concierge-club#prestige (section ancrée sur la page programme).",
       inputSchema: {
         type: 'object',
         properties: {

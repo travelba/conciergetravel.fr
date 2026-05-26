@@ -44,9 +44,8 @@
     "clubRibbon": {
       "eyebrow": "Notre programme",
       "title": "Le Concierge Club — la conciergerie en accès libre",
-      "body": "Créez un compte gratuit pour accéder à l'agenda de la conciergerie, sauvegarder vos sélections et recevoir les conseils opérationnels des Palaces choisis. Tier Prestige sur invitation — liste d'attente ouverte.",
-      "ctaDiscover": "Découvrir Le Concierge Club",
-      "ctaPrestige": "Espace Prestige"
+      "body": "Créez un compte gratuit pour accéder à l'agenda de la conciergerie, sauvegarder vos sélections et recevoir les conseils opérationnels des Palaces choisis. Tier Prestige sur invitation — liste d'attente ouverte sur la même page.",
+      "ctaDiscover": "Découvrir Le Concierge Club"
     },
     "featuredHotels": {
       "eyebrow": "Sélection du Concierge",
@@ -151,7 +150,6 @@
       "conciergeBooking": "Comment réserver",
       "conciergeLoyalty": "Programme de fidélité",
       "conciergeClub": "Le Concierge Club",
-      "conciergeClubPrestige": "Le Concierge Club Prestige",
       "conciergeClubPressKit": "Espace presse",
       "conciergeTip": "Le Conseil du Concierge",
       "conciergeFaq": "FAQ générale",
@@ -2411,7 +2409,6 @@
       "allBrands": "Toutes les marques",
       "account": "Mon compte",
       "club": "Le Concierge Club",
-      "clubPrestige": "Le Concierge Club Prestige",
       "loyalty": "Programme de fidélité",
       "support": "Aide & contact",
       "hoteliers": "Pour les hôteliers",
@@ -3628,7 +3625,25 @@
     "title": "Le Concierge Club",
     "lede": "Un programme sobre, sans fanfare. Vous voyagez mieux parce que vous voyagez accompagné — pas parce que vous payez pour le privilège.",
     "primaryCta": "Rejoindre — c'est gratuit",
-    "secondaryCta": "Découvrir Prestige (bientôt)",
+    "secondaryCta": "Voir Prestige (bientôt) ↓",
+    "tiers": {
+      "heading": "Les deux niveaux du programme",
+      "club": {
+        "name": "Le Concierge Club",
+        "price": "0 €",
+        "priceSuffix": "/ sans engagement",
+        "body": "Compte gratuit, attentions activées chez les hôtels partenaires Little, newsletter du Concierge, sauvegarde des sélections.",
+        "cta": "Rejoindre — c'est gratuit"
+      },
+      "prestige": {
+        "badge": "Phase 6",
+        "name": "Le Concierge Club Prestige",
+        "price": "99 €",
+        "priceSuffix": "/ an — essai 30 jours gratuit",
+        "body": "Tous les avantages négociés avec nos hôtels Little partenaires : petit-déjeuner offert, surclassement confirmé, crédit hôtel, late check-out 16h, WhatsApp Concierge 24/7.",
+        "cta": "Rejoindre la liste d'attente ↓"
+      }
+    },
     "sections": {
       "valueTitle": "Ce que le Club apporte",
       "valueBody": "Un compte centralise vos réservations et vos demandes. La newsletter mensuelle du Concierge sélectionne pour vous les hôtels et les itinéraires que les comparateurs n'indexent pas. À l'ouverture du tier Prestige, les membres du Club seront contactés en priorité.",
@@ -3668,6 +3683,7 @@
     "submit": "Me prévenir au lancement",
     "successBanner": "Inscription confirmée. Vous recevrez un e-mail dès l'ouverture de Prestige.",
     "errorBanner": "L'inscription a échoué. Veuillez réessayer dans un instant.",
+    "gatedBanner": "Cette section est réservée aux membres Prestige. Inscrivez-vous à la liste d'attente — l'ouverture de Phase 6 vous débloquera l'accès.",
     "anonCta": "Créer mon compte Le Concierge Club",
     "anonNote": "Le compte est nécessaire pour rejoindre la liste d'attente Prestige. Création gratuite, sans CB.",
     "benefitsHeading": "Ce qu'activera Prestige (Phase 6)",

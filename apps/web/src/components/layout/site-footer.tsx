@@ -286,14 +286,12 @@ export async function SiteFooter(): Promise<ReactElement> {
                   without the mega-menu. The legacy `/le-concierge/fidelite`
                   page stays alive for inbound links but the canonical CTA
                   now lives here. */}
+              {/* Single landing post 2026-05-26 PO consolidation —
+                  both tiers (free Club + Prestige waitlist) live
+                  side-by-side on /le-concierge-club. */}
               <li>
                 <Link href="/le-concierge-club" className="text-fg hover:underline">
                   {t('links.club')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/le-concierge-club/prestige" className="text-fg hover:underline">
-                  {t('links.clubPrestige')}
                 </Link>
               </li>
               <li>

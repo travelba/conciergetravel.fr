@@ -17,8 +17,9 @@ import { emitClubEvent, hashUserId } from '@/server/observability/club-events';
  *
  * The action *requires* a signed-in user (FK on `user_id`). The page
  * gates the unauthenticated state by redirecting to `/compte/rejoindre`
- * with `next=/le-concierge-club/prestige` so the user lands back here
- * after signing up.
+ * with `next=/le-concierge-club#prestige` so the user lands back on
+ * the merged programme page (post-2026-05-26 consolidation) and the
+ * browser scrolls straight to the Prestige section after sign-up.
  *
  * Skill: loyalty-program + auth-role-management + supabase-postgres-rls.
  */
@@ -58,7 +59,7 @@ export async function joinPrestigeWaitlistAction(
     redirect({
       href: {
         pathname: '/compte/rejoindre',
-        query: { next: '/le-concierge-club/prestige' },
+        query: { next: '/le-concierge-club#prestige' },
       },
       locale: localeCandidate,
     });

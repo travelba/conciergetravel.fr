@@ -44,9 +44,8 @@
     "clubRibbon": {
       "eyebrow": "Our programme",
       "title": "Le Concierge Club — open access to the concierge desk",
-      "body": "Create a free account to unlock the concierge agenda, save your shortlist, and receive the operational tips of the Palaces we selected. Prestige tier is invitation-only — the waitlist is open.",
-      "ctaDiscover": "Discover Le Concierge Club",
-      "ctaPrestige": "Prestige waitlist"
+      "body": "Create a free account to unlock the concierge agenda, save your shortlist, and receive the operational tips of the Palaces we selected. Prestige tier is invitation-only — the waitlist sits on the same page.",
+      "ctaDiscover": "Discover Le Concierge Club"
     },
     "featuredHotels": {
       "eyebrow": "Concierge picks",
@@ -151,7 +150,6 @@
       "conciergeBooking": "How to book",
       "conciergeLoyalty": "Loyalty programme",
       "conciergeClub": "Le Concierge Club",
-      "conciergeClubPrestige": "Le Concierge Club Prestige",
       "conciergeClubPressKit": "Press kit",
       "conciergeTip": "The Concierge’s Tip",
       "conciergeFaq": "General FAQ",
@@ -2411,7 +2409,6 @@
       "allBrands": "All hotel brands",
       "account": "My account",
       "club": "Le Concierge Club",
-      "clubPrestige": "Le Concierge Club Prestige",
       "loyalty": "Loyalty programme",
       "support": "Help & contact",
       "hoteliers": "For hoteliers",
@@ -3628,7 +3625,25 @@
     "title": "The Concierge Club",
     "lede": "A sober programme, no fanfare. You travel better because you travel with company — not because you pay for the privilege.",
     "primaryCta": "Join — it is free",
-    "secondaryCta": "Discover Prestige (soon)",
+    "secondaryCta": "See Prestige (soon) ↓",
+    "tiers": {
+      "heading": "Two tiers, one programme",
+      "club": {
+        "name": "The Concierge Club",
+        "price": "€0",
+        "priceSuffix": "/ no commitment",
+        "body": "Free account, perks activated at our Little partner hotels, Concierge newsletter, shortlist save.",
+        "cta": "Join — it is free"
+      },
+      "prestige": {
+        "badge": "Phase 6",
+        "name": "The Concierge Club Prestige",
+        "price": "€99",
+        "priceSuffix": "/ year — 30-day free trial",
+        "body": "All perks negotiated with our Little partner hotels: complimentary breakfast, confirmed upgrade, hotel credit, 4 pm late check-out, 24/7 WhatsApp Concierge.",
+        "cta": "Join the waitlist ↓"
+      }
+    },
     "sections": {
       "valueTitle": "What the Club brings",
       "valueBody": "An account centralises your bookings and requests. The monthly Concierge newsletter selects hotels and itineraries the price comparators do not index. When the Prestige tier opens, Club members are contacted first.",
@@ -3668,6 +3683,7 @@
     "submit": "Notify me at launch",
     "successBanner": "Sign-up confirmed. You will receive an email as soon as Prestige opens.",
     "errorBanner": "Sign-up failed. Please try again in a moment.",
+    "gatedBanner": "This area is reserved for Prestige members. Join the waitlist — Phase 6 will unlock access for you.",
     "anonCta": "Create my Concierge Club account",
     "anonNote": "An account is required to join the Prestige waitlist. Free signup, no credit card.",
     "benefitsHeading": "What Prestige will activate (Phase 6)",

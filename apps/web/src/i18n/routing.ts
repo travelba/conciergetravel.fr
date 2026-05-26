@@ -257,13 +257,14 @@ export const routing = defineRouting({
     // Le Concierge Club — programme membership (Sprint 3b ships the
     // pages). Routes registered in Sprint 1 so server-side helpers
     // can reference them via the typed navigation API.
+    // Le Concierge Club — single-page landing (post-2026-05-26
+    // consolidation). The Prestige tier waitlist now lives as a
+    // `#prestige` anchor section on this same page. The old
+    // `/le-concierge-club/prestige` route 301-redirects here — see
+    // `next.config.ts redirects`.
     '/le-concierge-club': {
       fr: '/le-concierge-club',
       en: '/the-concierge-club',
-    },
-    '/le-concierge-club/prestige': {
-      fr: '/le-concierge-club/prestige',
-      en: '/the-concierge-club/prestige',
     },
     // Sprint 4 — press kit Le Concierge Club. Kept under `/presse/...`
     // (and `/press/...` in EN) so /presse stays available as the

@@ -286,12 +286,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ─── Le Concierge Club ribbon ──────────────────────────────────
           Surfaces the membership programme (ADR-0019) from the home page
-          without disturbing the editorial-first hero. Two CTAs:
-          1. Discover the programme (free tier — `/le-concierge-club`)
-          2. Prestige waitlist (`/le-concierge-club/prestige`)
-          The strip is intentionally sober (single-row, framed border) so
-          it reads as institutional rather than promotional — Phase 1 only
-          advertises the free tier perks (ADR-0020 SEA constraints). */}
+          without disturbing the editorial-first hero. After the 2026-05-26
+          PO consolidation both tiers (free Club + Prestige waitlist) live
+          on a single landing — the ribbon now carries one canonical CTA
+          and the Prestige tier is discovered in-page (`#prestige` anchor).
+          Single-row framed border so it reads as institutional rather than
+          promotional — Phase 1 only advertises the free tier perks
+          (ADR-0020 SEA constraints). */}
       <section
         aria-labelledby="home-club-ribbon-title"
         className="border-border container mx-auto max-w-screen-xl border-t px-4 py-10 sm:py-12"
@@ -315,12 +316,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               className="border-border bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
             >
               {t('clubRibbon.ctaDiscover')}
-            </Link>
-            <Link
-              href="/le-concierge-club/prestige"
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('clubRibbon.ctaPrestige')} →
             </Link>
           </div>
         </div>

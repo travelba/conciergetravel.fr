@@ -10,9 +10,16 @@ import { setConsentCookie } from './fixtures/consent';
  *
  * What this spec locks
  * --------------------
- *   - `/le-concierge-club` and `/le-concierge-club/prestige` render
- *     publicly (`200 OK`), serve a canonical `<link rel="canonical">`,
- *     and expose the `MemberProgram` JSON-LD with the correct shape.
+ *   - `/le-concierge-club` renders publicly (`200 OK`), serves a
+ *     canonical `<link rel="canonical">`, and exposes the
+ *     `MemberProgram` JSON-LD with BOTH tiers (free Club + paid
+ *     Prestige) — single landing post 2026-05-26 PO consolidation.
+ *   - The Prestige waitlist now lives as a `#prestige` anchored
+ *     section on that same page (no standalone route any more).
+ *   - The deprecated `/le-concierge-club/prestige` URL 301-redirects
+ *     to `/le-concierge-club#prestige` — verified end-to-end so the
+ *     old inbound links (llms.txt history, ad campaigns, social
+ *     shares) keep working.
  *   - The press kit at `/presse/le-concierge-club` renders with
  *     `Article` + `FAQPage` + `BreadcrumbList` JSON-LD payloads and
  *     respects `noindex` (it is press-only).
@@ -36,8 +43,8 @@ import { setConsentCookie } from './fixtures/consent';
  */
 
 const CLUB_LANDING_FR = '/le-concierge-club';
-const CLUB_LANDING_EN = '/en/le-concierge-club';
-const PRESTIGE_FR = '/le-concierge-club/prestige';
+const CLUB_LANDING_EN = '/en/the-concierge-club';
+const PRESTIGE_LEGACY_FR = '/le-concierge-club/prestige';
 const PRESS_FR = '/presse/le-concierge-club';
 const JOIN_FR = '/compte/rejoindre';
 
@@ -84,7 +91,9 @@ test.describe('Le Concierge Club — landing', () => {
     await setConsentCookie(page, { essential: true, analytics: false });
   });
 
-  test('FR landing renders with hero + benefits + MemberProgram JSON-LD', async ({ page }) => {
+  test('FR landing renders both tiers + MemberProgram JSON-LD (club + prestige)', async ({
+    page,
+  }) => {
     const res = await page.goto(CLUB_LANDING_FR);
     expect(res?.status()).toBe(200);
 
@@ -95,6 +104,12 @@ test.describe('Le Concierge Club — landing', () => {
     expect(canonical, 'canonical href').not.toBeNull();
     expect(canonical).toMatch(/\/le-concierge-club$/);
 
+    // The consolidated landing must surface the Prestige section
+    // inline — anchored at `#prestige`. We assert the anchor exists
+    // and points to the (visible) Prestige heading.
+    const prestigeSection = page.locator('#prestige');
+    await expect(prestigeSection).toBeVisible();
+
     const blocks = await readJsonLdBlocks(page);
     const program = findByType(blocks, 'MemberProgram');
     expect(program, 'MemberProgram JSON-LD').not.toBeNull();
@@ -104,11 +119,19 @@ test.describe('Le Concierge Club — landing', () => {
     );
     expect(Array.isArray(program!['hasTiers']), 'hasTiers is an array').toBe(true);
     const tiers = program!['hasTiers'] as ReadonlyArray<Record<string, unknown>>;
-    expect(tiers.length).toBeGreaterThanOrEqual(1);
-    // Free tier must not emit a `priceSpecification`.
+    // Post-consolidation contract: a single MemberProgram block now
+    // exposes BOTH tiers from one URL (the previous standalone
+    // `/le-concierge-club/prestige` page was merged into this one).
+    expect(tiers.length).toBeGreaterThanOrEqual(2);
     const free = tiers.find((t) => t['requiresSubscription'] === false);
     expect(free, 'free tier present').toBeTruthy();
     expect(free!['priceSpecification']).toBeUndefined();
+    const prestige = tiers.find((t) => t['requiresSubscription'] === true);
+    expect(prestige, 'prestige tier present on the same MemberProgram').toBeTruthy();
+    // Phase 1: price intentionally omitted until Stripe + Phase 6.
+    // The builder strips priceSpecification when annualPriceEur <= 0,
+    // matching the Phase 1 contract (ADR-0020 §SEA constraints).
+    expect(prestige!['priceSpecification']).toBeUndefined();
 
     const breadcrumb = findByType(blocks, 'BreadcrumbList');
     expect(breadcrumb, 'BreadcrumbList JSON-LD').not.toBeNull();
@@ -120,7 +143,20 @@ test.describe('Le Concierge Club — landing', () => {
     expect(await page.locator('html').getAttribute('lang')).toBe('en');
 
     const canonical = await readCanonical(page);
-    expect(canonical).toMatch(/\/en\/le-concierge-club$/);
+    expect(canonical).toMatch(/\/en\/the-concierge-club$/);
+  });
+
+  test('FR landing renders the unauthenticated Prestige waitlist CTA', async ({ page }) => {
+    await page.goto(CLUB_LANDING_FR);
+    // Anonymous visitor: the Prestige section renders the
+    // `anonCta` link pointing at /compte/rejoindre — no waitlist
+    // form yet. We assert the link exists and the next= query carries
+    // the `#prestige` fragment so the user lands back on the section
+    // after sign-up.
+    const anonCta = page.locator('#prestige a[href*="/compte/rejoindre"]').first();
+    await expect(anonCta).toBeVisible();
+    const href = await anonCta.getAttribute('href');
+    expect(href, 'sign-up next= preserves #prestige').toMatch(/next=.*le-concierge-club.*prestige/);
   });
 
   test('FR landing passes axe (no serious/critical violations)', async ({ page }) => {
@@ -145,39 +181,25 @@ test.describe('Le Concierge Club — landing', () => {
   });
 });
 
-test.describe('Le Concierge Club Prestige — waitlist landing', () => {
+test.describe('Le Concierge Club Prestige — legacy /prestige redirect', () => {
   test.beforeEach(async ({ page }) => {
     await setConsentCookie(page, { essential: true, analytics: false });
   });
 
-  test('FR prestige page renders with prestige MemberProgram JSON-LD', async ({ page }) => {
-    const res = await page.goto(PRESTIGE_FR);
-    expect(res?.status()).toBe(200);
-
-    const canonical = await readCanonical(page);
-    expect(canonical).toMatch(/\/le-concierge-club\/prestige$/);
-
-    const blocks = await readJsonLdBlocks(page);
-    const program = findByType(blocks, 'MemberProgram');
-    expect(program, 'Prestige MemberProgram JSON-LD').not.toBeNull();
-    const tiers = (program!['hasTiers'] ?? []) as ReadonlyArray<Record<string, unknown>>;
-    const prestige = tiers.find((t) => t['requiresSubscription'] === true);
-    expect(prestige, 'prestige tier present').toBeTruthy();
-    // Phase 1: price intentionally omitted until Stripe + Phase 6.
-    // The builder strips priceSpecification when annualPriceEur <= 0,
-    // which is also the Phase 1 contract — so the assertion is "no
-    // price specified" (matches ADR-0020 §SEA constraints).
-    expect(prestige!['priceSpecification']).toBeUndefined();
-  });
-
-  test('FR prestige page redirects unauthenticated waitlist submit to /compte/rejoindre', async ({
-    page,
-  }) => {
-    await page.goto(PRESTIGE_FR);
-    // Locate the waitlist form via its hidden `intent` input — the
-    // form CTA copy is i18n-driven so we anchor on the form itself.
-    const form = page.locator('form input[name="intent"]').first();
-    await expect(form).toHaveAttribute('value', /trial_at_launch|newsletter_only/);
+  test('FR /le-concierge-club/prestige 301s to /le-concierge-club#prestige', async ({ page }) => {
+    // Disable client redirects in Playwright? No — we follow the 301
+    // by default and assert on the final URL. Browsers honour the
+    // `#prestige` fragment in the redirect `Location` header per
+    // RFC 7231 §7.1.2, so the URL we land on must end with the
+    // anchor.
+    const response = await page.goto(PRESTIGE_LEGACY_FR);
+    expect(response?.status(), 'final response status after redirect').toBe(200);
+    const finalUrl = page.url();
+    // localePrefix: 'as-needed' means FR may serve `/le-concierge-club`
+    // (no /fr/) OR `/fr/le-concierge-club` — accept either.
+    expect(finalUrl).toMatch(/\/(fr\/)?le-concierge-club#prestige$/);
+    // And we landed on the consolidated landing (h1 present).
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 });
 
@@ -268,7 +290,13 @@ test.describe('Le Concierge Club — /compte/rejoindre', () => {
   });
 
   test('forwards the next-path as a hidden input on each form', async ({ page }) => {
-    await page.goto(`${JOIN_FR}?next=/le-concierge-club/prestige`);
+    // After the 2026-05-26 consolidation the post-signup landing is
+    // the merged programme page with a `#prestige` anchor. The
+    // `next=` query value is opaque to the signup form (it's just a
+    // round-trip string) — what matters is that the 4 forms forward
+    // it verbatim.
+    const NEXT_TARGET = '/le-concierge-club#prestige';
+    await page.goto(`${JOIN_FR}?next=${encodeURIComponent(NEXT_TARGET)}`);
     const hiddenNext = page.locator('main form input[type="hidden"][name="next"]');
     // 1 signup form + 1 magic-link form + 2 OAuth forms = 4 next inputs.
     await expect(hiddenNext).toHaveCount(4);
@@ -276,7 +304,7 @@ test.describe('Le Concierge Club — /compte/rejoindre', () => {
       els.map((e) => (e as HTMLInputElement).value),
     );
     for (const v of values) {
-      expect(v).toBe('/le-concierge-club/prestige');
+      expect(v).toBe(NEXT_TARGET);
     }
   });
 });

@@ -477,12 +477,12 @@ export function MobileNav(): ReactElement {
                       <Link href="/le-concierge/reserver" className={subLinkClass}>
                         {t('primaryNav.conciergeBooking')}
                       </Link>
-                      {/* Le Concierge Club — programme dedicated landings. */}
+                      {/* Le Concierge Club — single landing post
+                          2026-05-26 PO consolidation. Both tiers (free
+                          Club + Prestige waitlist) share one page; the
+                          Prestige sub-link is now an in-page anchor. */}
                       <Link href="/le-concierge-club" className={subLinkClass}>
                         {t('primaryNav.conciergeClub')}
-                      </Link>
-                      <Link href="/le-concierge-club/prestige" className={subLinkClass}>
-                        {t('primaryNav.conciergeClubPrestige')}
                       </Link>
                       <Link href="/le-concierge/faq" className={subLinkClass}>
                         {t('primaryNav.conciergeFaq')}

@@ -127,9 +127,13 @@ test.describe('a11y / axe scan', () => {
       path: `/reservation/start?hotelId=${E2E_FAKE_HOTEL_ID}`,
     },
     // ----- Le Concierge Club surfaces (Sprint 5) ---------------
+    // Post-2026-05-26 consolidation: a single landing now covers
+    // both tiers (free Club + Prestige waitlist anchored at
+    // `#prestige`). The old standalone `/le-concierge-club/prestige`
+    // entry was dropped — it 301-redirects to the same anchor and
+    // would just be a duplicate axe scan.
     { name: 'FR Concierge Club landing', path: '/le-concierge-club' },
-    { name: 'EN Concierge Club landing', path: '/en/le-concierge-club' },
-    { name: 'FR Concierge Club Prestige', path: '/le-concierge-club/prestige' },
+    { name: 'EN Concierge Club landing', path: '/en/the-concierge-club' },
     { name: 'FR Concierge Club press kit', path: '/presse/le-concierge-club' },
     { name: 'FR /compte/rejoindre', path: '/compte/rejoindre' },
   ] as readonly AxeScanCase[]) {

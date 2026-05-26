@@ -73,8 +73,11 @@ export async function requireUser(options: RequireUserOptions): Promise<RequireU
   const tier: Loyalty.MemberTier = member?.tier ?? 'club';
 
   if (minTier === 'prestige' && tier !== 'prestige') {
+    // Bounce non-Prestige members to the consolidated landing with the
+    // `?gated=1` flag — the page surfaces the warning banner inside the
+    // `#prestige` section and the browser scrolls to the anchor.
     redirect({
-      href: { pathname: '/le-concierge-club/prestige', query: { gated: '1' } },
+      href: { pathname: '/le-concierge-club', query: { gated: '1' } },
       locale,
     });
   }

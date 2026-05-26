@@ -120,12 +120,15 @@ export async function ClubBenefitsBlock({
         </p>
       ) : viewerTier === 'club' ? (
         <p className="mt-6">
-          <Link
-            href="/le-concierge-club/prestige"
+          {/* Anchor link to the in-page Prestige section — both tiers
+              share one landing post 2026-05-26 PO consolidation. We
+              use a raw `<a>` because typed routes don't carry hashes. */}
+          <a
+            href="#prestige"
             className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
           >
             {t('prestigeCta')}
-          </Link>
+          </a>
         </p>
       ) : null}
     </section>

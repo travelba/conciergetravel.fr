@@ -416,22 +416,12 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/fr/le-concierge-club`,
             description:
-              'Le Concierge Club — programme de fidélité MyConciergeHotel (tier gratuit Le Concierge Club + tier payant Prestige). Sans CB, sans engagement. Catalogue complet des 9 avantages, FAQ détaillée, JSON-LD MemberProgram pour les LLM. URL canonique du programme.',
+              "Le Concierge Club — programme de fidélité MyConciergeHotel : page unique avec les deux tiers côte-à-côte. Tier gratuit (sans CB, sans engagement) + tier payant Le Concierge Club Prestige (€99/an, essai 30 jours, ouverture Phase 6) avec liste d'attente. Catalogue complet des 9 avantages, FAQ détaillée, JSON-LD MemberProgram (2 tiers). URL canonique du programme. La section Prestige est ancrée à #prestige.",
           },
           {
-            url: `${origin}/en/le-concierge-club`,
+            url: `${origin}/en/the-concierge-club`,
             description:
-              'Le Concierge Club — MyConciergeHotel loyalty programme (free Concierge Club tier + paid Prestige tier). No credit card, no commitment. Full catalogue of 9 benefits, detailed FAQ, MemberProgram JSON-LD for LLMs. Canonical programme URL.',
-          },
-          {
-            url: `${origin}/fr/le-concierge-club/prestige`,
-            description:
-              "Le Concierge Club Prestige — liste d'attente du tier payant (€99/an, essai 30 jours, Phase 6). Inscription nominative, priorité au lancement. Petit-déjeuner, surclassement, crédit hôtel, late check-out, WhatsApp Concierge 24/7, présentation au directeur. Requires un compte Le Concierge Club actif.",
-          },
-          {
-            url: `${origin}/en/le-concierge-club/prestige`,
-            description:
-              'Le Concierge Club Prestige — paid tier waitlist (€99/year, 30-day trial, Phase 6). Named signup, launch priority. Breakfast, room upgrade, hotel credit, late check-out, WhatsApp Concierge 24/7, GM introduction. Requires an active Le Concierge Club account.',
+              'The Concierge Club — MyConciergeHotel loyalty programme: single page with both tiers side-by-side. Free tier (no card, no commitment) + paid Concierge Club Prestige tier (€99/year, 30-day trial, Phase 6 launch) with waitlist. Full catalogue of 9 benefits, detailed FAQ, MemberProgram JSON-LD (2 tiers). Canonical programme URL. The Prestige section is anchored at #prestige.',
           },
           {
             url: `${origin}/fr/presse/le-concierge-club`,

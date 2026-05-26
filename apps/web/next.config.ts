@@ -123,6 +123,31 @@ const nextConfig: NextConfig = {
         destination: '/itineraires',
         permanent: true,
       },
+      // PO consolidation (2026-05-26): the standalone Prestige waitlist
+      // page now lives as a `#prestige` anchor section on the main
+      // /le-concierge-club landing. The 301s preserve every inbound
+      // link, agent deep-link, llms.txt entry, ad campaign URL, and
+      // social share that pointed at the old route.
+      //
+      // Hash fragments in `destination`: Next.js forwards the
+      // `#prestige` fragment in the `Location` header. All evergreen
+      // browsers (per RFC 7231 §7.1.2) honour the fragment on 301/308
+      // by scrolling to the anchor after the redirect lands.
+      {
+        source: '/:locale(fr|en)/le-concierge-club/prestige',
+        destination: '/:locale/le-concierge-club#prestige',
+        permanent: true,
+      },
+      {
+        source: '/le-concierge-club/prestige',
+        destination: '/le-concierge-club#prestige',
+        permanent: true,
+      },
+      {
+        source: '/en/the-concierge-club/prestige',
+        destination: '/en/the-concierge-club#prestige',
+        permanent: true,
+      },
     ];
   },
 };

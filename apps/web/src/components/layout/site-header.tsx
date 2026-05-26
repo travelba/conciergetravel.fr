@@ -683,11 +683,12 @@ function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement
             {/* Le Concierge Club programme — surfaces ADR-0019 funnel from
                 the header. `/le-concierge/fidelite` stays alive for legacy
                 inbound but the menu now points at the canonical landing. */}
+            {/* Single landing page after the 2026-05-26 PO
+                consolidation — both tiers (free Club + Prestige
+                waitlist) live side-by-side on /le-concierge-club. The
+                Prestige sub-link is now an in-page anchor inside that
+                landing. */}
             <MegaLink href="/le-concierge-club" label={t('primaryNav.conciergeClub')} />
-            <MegaLink
-              href="/le-concierge-club/prestige"
-              label={t('primaryNav.conciergeClubPrestige')}
-            />
             <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
             <MegaLink
               href="/le-concierge/methode-editoriale"
