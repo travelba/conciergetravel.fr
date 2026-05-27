@@ -5,7 +5,11 @@
 
 ## 1. What this project is
 
-MyConciergeHotel.com is an **IATA-accredited online travel agency** for 5-star hotels and Palaces in France.
+MyConciergeHotel.com is **La sélection du Concierge** — an **IATA-accredited online travel agency** curating
+extraordinary hotels worldwide: Palaces (Atout France label), Relais & Châteaux, Forbes Five Star,
+Michelin Keys, Leading Hotels of the World, boutique hotels and editorial gems. The catalogue today
+covers **615 published hotels across 91 countries**. Every hotel page closes with a **Concierge's Tip** —
+the operational secret guidebooks never share. See [ADR-0021 — Pivot scope mondial](docs/adr/0021-pivot-scope-mondial.md).
 The product is split into:
 
 - **`apps/web`** — the public Next.js 15 site (booking, search, editorial, account).
@@ -107,14 +111,16 @@ across the full catalogue before touching photos** (`.cursor/skills/photo-pipeli
 between a written-content chantier and a photo chantier, **pick the
 written one**.
 
-Catalogue snapshot at the time of the decision:
+Catalogue snapshot (refreshed 2026-05-27 — post Vague 1 home rebrand):
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
-| `hotels`             | 1367  | 443       | 924   |
-| `editorial_rankings` | 216   | 131       | 85    |
+| `hotels`             | 1367  | 615       | 752   |
+| `editorial_rankings` | 290   | 205       | 85    |
 | `editorial_guides`   | 86    | 50        | 36    |
 | `itineraries`        | 20    | 20        | 0     |
+
+Of the 615 published hotels: **395 are international** across **91 countries** (top: US 75, IT 33, JP 29, GB 24, MX 19, AE 18, ES, PT, GR, MA…). **435 are Relais & Châteaux**, 228 are self-5★, 127 are World's 50 Best, 18 are Atout France Palaces. The earlier 443/924 split corresponds to the pre-Relais & Châteaux scaffold + pre-2026-05-27 international promotion pass.
 
 Field-by-field completeness on the **443 published hotels** (chase
 these gaps in this order — top of the list is the most painful trade-off
@@ -269,7 +275,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue as of 2026-05-25 (post-R&C scaffold): 1367 hotels (443 published, 924 drafts including the full 471-hotel Relais & Châteaux roster), 216 rankings, 86 editorial guides, 20 itineraries. Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-27: 1367 hotels (**615 published across 91 countries** — 435 Relais & Châteaux among them; 752 drafts), 290 rankings (205 published), 86 editorial guides (50 published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

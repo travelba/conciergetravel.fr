@@ -1,8 +1,8 @@
 # MyConciergeHotel.com
 
-> OTA luxe — réservation et éditorial premium pour les hôtels 5 étoiles et Palaces en France.
+> OTA luxe — La sélection du Concierge, hôtels d'exception dans le monde.
 
-MyConciergeHotel.com combine une couche éditoriale référence (modèle Tablet Hotels), un moteur de réservation temps réel connecté à Amadeus GDS et Little Hotelier, un programme de fidélité différenciant, et un comparateur de prix non-affilié. Le projet est cadré par le cahier des charges v3.0 (mai 2026) et respecte strictement la stack imposée.
+MyConciergeHotel.com est une agence de voyage IATA dont le catalogue couvre **615 hôtels d'exception sélectionnés dans 91 pays** : Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le produit combine une couche éditoriale référence (modèle Tablet Hotels), un Conseil du Concierge opérationnel sur chaque fiche, un moteur de réservation temps réel (Phase 6) connecté à Amadeus GDS et Little Hotelier, un programme de fidélité différenciant, et un comparateur de prix non-affilié. Le projet est cadré par le cahier des charges v3.0 (mai 2026) et respecte strictement la stack imposée. Voir [ADR-0021 — Pivot scope mondial](docs/adr/0021-pivot-scope-mondial.md).
 
 ## Stack
 
