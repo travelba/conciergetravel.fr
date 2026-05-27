@@ -1,6 +1,55 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCloudinarySrc } from './hotel-image';
+import { buildCloudinaryFetchSrc, buildCloudinarySrc, isHttpUrl } from './hotel-image';
+
+describe('isHttpUrl', () => {
+  it('detects http://', () => {
+    expect(isHttpUrl('http://example.com/img.jpg')).toBe(true);
+  });
+  it('detects https://', () => {
+    expect(isHttpUrl('https://commons.wikimedia.org/x.jpg')).toBe(true);
+  });
+  it('rejects Cloudinary public IDs', () => {
+    expect(isHttpUrl('hotels/ritz-paris/hero')).toBe(false);
+    expect(isHttpUrl('cct/hotels/le-bristol-paris/hero')).toBe(false);
+  });
+  it('rejects an empty string', () => {
+    expect(isHttpUrl('')).toBe(false);
+  });
+});
+
+describe('buildCloudinaryFetchSrc', () => {
+  it('wraps a remote URL with the default transforms', () => {
+    const url = buildCloudinaryFetchSrc({
+      cloudName: 'dvbjwh5wy',
+      remoteUrl: 'https://commons.wikimedia.org/foo.jpg',
+    });
+    expect(url).toBe(
+      'https://res.cloudinary.com/dvbjwh5wy/image/fetch/f_auto,q_auto,c_fill,g_auto/https%3A%2F%2Fcommons.wikimedia.org%2Ffoo.jpg',
+    );
+  });
+
+  it('respects a caller-supplied transforms string', () => {
+    const url = buildCloudinaryFetchSrc({
+      cloudName: 'dvbjwh5wy',
+      remoteUrl: 'https://www.travoh.com/hotel.png',
+      transforms: 'f_auto,q_auto:good,c_fill,g_auto,w_640,h_480',
+    });
+    expect(url).toBe(
+      'https://res.cloudinary.com/dvbjwh5wy/image/fetch/f_auto,q_auto:good,c_fill,g_auto,w_640,h_480/https%3A%2F%2Fwww.travoh.com%2Fhotel.png',
+    );
+  });
+
+  it('URL-encodes the remote URL so query strings and fragments survive', () => {
+    const url = buildCloudinaryFetchSrc({
+      cloudName: 'dvbjwh5wy',
+      remoteUrl: 'https://example.com/path?foo=bar&baz=qux#anchor',
+    });
+    expect(url).toContain(
+      'image/fetch/f_auto,q_auto,c_fill,g_auto/https%3A%2F%2Fexample.com%2Fpath%3Ffoo%3Dbar%26baz%3Dqux%23anchor',
+    );
+  });
+});
 
 describe('buildCloudinarySrc', () => {
   it('builds the default URL with f_auto,q_auto,c_fill,g_auto transforms', () => {

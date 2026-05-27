@@ -77,6 +77,16 @@ const DEFAULT_SIZES: Record<HotelImageVariant, string> = {
  *   })
  *   // → https://res.cloudinary.com/myconciergehotel/image/upload/f_auto,q_auto,c_fill,g_auto/hotels/ritz-paris/hero
  */
+/**
+ * Returns true when the input looks like a fully-qualified HTTP(S) URL.
+ * Used by `<HotelImage>` to detect legacy `hotels.hero_image` rows that
+ * still point at external sources instead of a Cloudinary public_id.
+ * Exposed for unit testing.
+ */
+export function isHttpUrl(value: string): boolean {
+  return value.startsWith('http://') || value.startsWith('https://');
+}
+
 export function buildCloudinarySrc(input: {
   readonly cloudName: string;
   readonly publicId: string;
@@ -88,6 +98,37 @@ export function buildCloudinarySrc(input: {
   // these are path segments in the Cloudinary URL and must be preserved.
   const publicIdSafe = input.publicId.split('/').map(encodeURIComponent).join('/');
   return `${CLOUDINARY_BASE}/${cloudName}/image/upload/${transforms}/${publicIdSafe}`;
+}
+
+/**
+ * Build a Cloudinary `image/fetch` URL — proxies a remote image through
+ * Cloudinary's CDN with the same transforms. Used as a bridge for
+ * legacy `hotels.hero_image` rows that still hold an external URL
+ * (Wikimedia, Tripadvisor, hotel-site CDN) instead of a Cloudinary
+ * public_id. This keeps the image rendering through `res.cloudinary.com`
+ * (the only remote host allowlisted in `next.config.ts.images
+ * .remotePatterns`) while we run Phase 4 of the photo migration
+ * (AGENTS.md §4 — sourcing + Cloudinary upload + alt enrichment).
+ *
+ * Exposed for unit testing.
+ *
+ * @example
+ *   buildCloudinaryFetchSrc({
+ *     cloudName: 'dvbjwh5wy',
+ *     remoteUrl: 'https://commons.wikimedia.org/foo.jpg',
+ *   })
+ *   // → https://res.cloudinary.com/dvbjwh5wy/image/fetch/<transforms>/
+ *   //   https%3A%2F%2Fcommons.wikimedia.org%2Ffoo.jpg
+ */
+export function buildCloudinaryFetchSrc(input: {
+  readonly cloudName: string;
+  readonly remoteUrl: string;
+  readonly transforms?: string;
+}): string {
+  const transforms = input.transforms ?? DEFAULT_TRANSFORMS;
+  const cloudName = encodeURIComponent(input.cloudName);
+  const encoded = encodeURIComponent(input.remoteUrl);
+  return `${CLOUDINARY_BASE}/${cloudName}/image/fetch/${transforms}/${encoded}`;
 }
 
 export const HotelImage = React.forwardRef<HTMLImageElement, HotelImageProps>(
@@ -103,14 +144,32 @@ export const HotelImage = React.forwardRef<HTMLImageElement, HotelImageProps>(
       transforms,
     } = props;
 
+    // Resolve the final `src`:
+    //   - Caller passed `src` explicitly → use as-is.
+    //   - Caller passed `publicId` that looks like a fully-qualified URL
+    //     (legacy `hotels.hero_image` data state where the photo pipeline
+    //     hasn't migrated the row to Cloudinary yet — see AGENTS.md §4
+    //     Phase 4) → proxy it through Cloudinary's `image/fetch` mode so
+    //     the image still renders through `res.cloudinary.com` (the only
+    //     external host allowlisted in `next.config.ts.images
+    //     .remotePatterns`) instead of producing the broken
+    //     `cloudinary.com/<cloud>/image/upload/.../https%3A%2F%2F...` URL
+    //     that gives `next/image` no allowed host to call.
+    //   - Otherwise → build the Cloudinary delivery URL.
     const src =
       'src' in props && props.src !== undefined
         ? props.src
-        : buildCloudinarySrc({
-            cloudName: props.cloudName,
-            publicId: props.publicId,
-            ...(transforms !== undefined ? { transforms } : {}),
-          });
+        : isHttpUrl(props.publicId)
+          ? buildCloudinaryFetchSrc({
+              cloudName: props.cloudName,
+              remoteUrl: props.publicId,
+              ...(transforms !== undefined ? { transforms } : {}),
+            })
+          : buildCloudinarySrc({
+              cloudName: props.cloudName,
+              publicId: props.publicId,
+              ...(transforms !== undefined ? { transforms } : {}),
+            });
 
     const finalSizes = sizes ?? DEFAULT_SIZES[variant];
 
