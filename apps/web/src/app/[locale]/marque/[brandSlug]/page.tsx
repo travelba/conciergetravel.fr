@@ -251,8 +251,16 @@ export async function generateMetadata({
 
   const hotels = await listPublishedHotelsForIndex();
   const count = hotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug).length;
-  const locale = raw;
-  const t = T[locale];
+  // ⚠ The local variable is named `activeLocale` (not `locale`) to defeat
+  // a Turbopack production-build minifier bug. When a local `locale`
+  // variable coexists with the destructuring pattern `{ locale: raw }`
+  // above, Turbopack fails to rewrite object-shorthand uses of `locale`
+  // in the bundled output, leading to `ReferenceError: locale is not
+  // defined` at request time. Verified by reading the minified chunk in
+  // `.next/server/chunks/ssr/...marque...page_tsx_*.js`. Renaming the
+  // local breaks the name collision and the shorthand expansion works.
+  const activeLocale: Locale = raw;
+  const t = T[activeLocale];
   const buildCanonicalPath = (l: Locale): string =>
     getPathname({
       locale: l,
@@ -263,14 +271,14 @@ export async function generateMetadata({
     title: t.metaTitle(brand.label),
     description: t.metaDesc(brand.label, count),
     alternates: {
-      canonical: buildCanonicalPath(locale),
+      canonical: buildCanonicalPath(activeLocale),
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t.metaTitle(brand.label),
       description: t.metaDesc(brand.label, count),
       type: 'website',
-      locale: ogLocale(locale),
+      locale: ogLocale(activeLocale),
     },
     // Brand exists but no published hotel yet → keep the URL resolvable
     // but mark `noindex, follow` to avoid soft-404s while Google still
@@ -289,8 +297,18 @@ export default async function BrandPage({
   const brand = KNOWN_BRANDS.find((b) => b.slug === brandSlug);
   if (brand === undefined) notFound();
 
-  const locale = raw;
-  setRequestLocale(locale);
+  // ⚠ Renamed from `locale` to `activeLocale` to defeat a Turbopack
+  // production-build minifier bug: when a local `locale` variable
+  // coexists with the destructuring pattern `{ locale: raw }` above,
+  // Turbopack fails to rewrite object-shorthand uses of `locale` in
+  // inlined helper calls (`brandAeoAnswer({ ..., locale, freshness... })`).
+  // The minified chunk emits the shorthand `locale` literally even
+  // though the binding has been renamed, producing `ReferenceError:
+  // locale is not defined` at request time. Verified by reading
+  // `.next/server/chunks/ssr/...marque...page_tsx_*.js`. Renaming
+  // breaks the collision and the shorthand expansion works.
+  const activeLocale: Locale = raw;
+  setRequestLocale(activeLocale);
 
   const allHotels = await listPublishedHotelsForIndex();
   const hotels = allHotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug);
@@ -299,7 +317,7 @@ export default async function BrandPage({
   // catalogue grows, and avoids soft-404 pollution in Search Console.
   const isEmpty = hotels.length === 0;
 
-  const t = T[locale];
+  const t = T[activeLocale];
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
@@ -315,13 +333,13 @@ export default async function BrandPage({
   const sortedCities = Array.from(cityCounts.entries())
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([city]) => city);
-  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+  const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(activeLocale), {
     month: 'long',
     year: 'numeric',
   }).format(new Date());
 
   const aeoQuestion = pickByLocale(
-    locale,
+    activeLocale,
     `Combien d'hôtels ${brand.label} sont disponibles en France via MyConciergeHotel ?`,
     `How many ${brand.label} hotels are available in France via MyConciergeHotel?`,
   );
@@ -333,7 +351,7 @@ export default async function BrandPage({
         count: hotels.length,
         cities: sortedCities,
         palaceCount,
-        locale,
+        locale: activeLocale,
         freshnessDate,
       });
   const faqItems = isEmpty
@@ -342,18 +360,24 @@ export default async function BrandPage({
         brandLabel: brand.label,
         count: hotels.length,
         cities: sortedCities,
-        locale,
+        locale: activeLocale,
       });
 
   // ── BreadcrumbList JSON-LD ───────────────────────────────────────────
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
-      { name: t.breadcrumbHome, url: `${origin}${getPathname({ locale, href: '/' })}` },
-      { name: t.breadcrumbHotels, url: `${origin}${getPathname({ locale, href: '/hotels' })}` },
+      {
+        name: t.breadcrumbHome,
+        url: `${origin}${getPathname({ locale: activeLocale, href: '/' })}`,
+      },
+      {
+        name: t.breadcrumbHotels,
+        url: `${origin}${getPathname({ locale: activeLocale, href: '/hotels' })}`,
+      },
       {
         name: brand.label,
         url: `${origin}${getPathname({
-          locale,
+          locale: activeLocale,
           href: { pathname: '/marque/[brandSlug]', params: { brandSlug: brand.slug } },
         })}`,
       },
@@ -371,7 +395,7 @@ export default async function BrandPage({
           items: hotels.map((h) => ({
             name: h.nameFr,
             url: `${origin}${getPathname({
-              locale,
+              locale: activeLocale,
               href: { pathname: '/hotel/[slug]', params: { slug: h.slugFr } },
             })}`,
             hotel: { starRating: h.stars as 1 | 2 | 3 | 4 | 5 },
@@ -413,7 +437,7 @@ export default async function BrandPage({
         <p className="text-muted mt-3 text-sm md:text-base">
           {isEmpty
             ? pickByLocale(
-                locale,
+                activeLocale,
                 `Aucune adresse ${brand.label} encore publiée dans notre catalogue. Le catalogue s'enrichit régulièrement — explorez nos autres marques ou nos sélections éditoriales en attendant.`,
                 `No ${brand.label} address published yet in our catalog. The catalog is growing — browse our other brands or editorial selections in the meantime.`,
               )
@@ -436,11 +460,11 @@ export default async function BrandPage({
           className="border-border bg-muted/5 rounded-lg border p-6 md:p-8"
         >
           <h2 id="empty-state-title" className="text-fg font-serif text-xl">
-            {pickByLocale(locale, 'Sélection en préparation', 'Selection in progress')}
+            {pickByLocale(activeLocale, 'Sélection en préparation', 'Selection in progress')}
           </h2>
           <p className="text-muted mt-3 max-w-prose text-sm md:text-base">
             {pickByLocale(
-              locale,
+              activeLocale,
               `Notre conciergerie sélectionne actuellement les adresses ${brand.label}. En attendant la publication, consultez notre index des groupes hôteliers ou notre catalogue complet.`,
               `Our concierge desk is selecting ${brand.label} addresses. While we publish them, browse our hotel-group index or our full catalog.`,
             )}
@@ -450,13 +474,13 @@ export default async function BrandPage({
               href="/marques"
               className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
             >
-              {pickByLocale(locale, 'Toutes les marques', 'All brands')} →
+              {pickByLocale(activeLocale, 'Toutes les marques', 'All brands')} →
             </Link>
             <Link
               href="/hotels"
               className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
             >
-              {pickByLocale(locale, 'Tous les hôtels', 'All hotels')} →
+              {pickByLocale(activeLocale, 'Tous les hôtels', 'All hotels')} →
             </Link>
           </div>
         </section>
@@ -466,9 +490,9 @@ export default async function BrandPage({
             {hotels.map((h) => {
               // Slug/name selection stays locale-aware (data layer) — see ADR-0012.
               // V2 locales fall back to FR until migration 0034.
-              const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
-              const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
-              const descSource = pickLocalizedText(locale, h.descriptionFr, h.descriptionEn);
+              const slug = pickByLocale(activeLocale, h.slugFr, h.slugEn ?? h.slugFr);
+              const name = pickByLocale(activeLocale, h.nameFr, h.nameEn ?? h.nameFr);
+              const descSource = pickLocalizedText(activeLocale, h.descriptionFr, h.descriptionEn);
               const desc =
                 descSource !== null && descSource.length > 200
                   ? `${descSource.slice(0, 197).trimEnd()}…`
