@@ -362,8 +362,13 @@ export async function generateMetadata({
   const allHotels = await listPublishedHotelsForIndex();
   const brandHotels = allHotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug);
   const count = brandHotels.length;
-  const locale = raw;
-  const t = T[locale];
+  const locale: Locale = raw;
+  // Explicit lookup instead of `T[locale]`. The dynamic index combined
+  // with the `as const` typing on `T` triggered a Turbopack production-
+  // build `ReferenceError: locale is not defined` on this server
+  // component (the local Node build was fine). Confirmed in Vercel
+  // runtime logs for /marque/* across two consecutive prod deploys.
+  const t = locale === 'fr' ? T.fr : T.en;
   const scope = computeBrandScope(brandHotels, locale);
   const buildCanonicalPath = (l: Locale): string =>
     getPathname({
@@ -401,7 +406,7 @@ export default async function BrandPage({
   const brand = KNOWN_BRANDS.find((b) => b.slug === brandSlug);
   if (brand === undefined) notFound();
 
-  const locale = raw;
+  const locale: Locale = raw;
   setRequestLocale(locale);
 
   const allHotels = await listPublishedHotelsForIndex();
@@ -411,7 +416,9 @@ export default async function BrandPage({
   // catalogue grows, and avoids soft-404 pollution in Search Console.
   const isEmpty = hotels.length === 0;
 
-  const t = T[locale];
+  // Explicit lookup — see `generateMetadata` for the production-build
+  // rationale.
+  const t = locale === 'fr' ? T.fr : T.en;
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
