@@ -4,23 +4,25 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
-import { HotelImage } from '@mch/ui';
 
+import { HomeAeoFaq, loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
+import { HomeClubRibbon } from '@/components/home/home-club-ribbon';
+import { HomeConciergeAdviceCarousel } from '@/components/home/home-concierge-advice-carousel';
 import { HomeDestinationGrid } from '@/components/home/home-destination-grid';
-import { HotelImagePlaceholder } from '@/components/hotel/hotel-image-placeholder';
-import { JsonLdScript } from '@/components/seo/json-ld';
+import { HomeEditorLetter } from '@/components/home/home-editor-letter';
+import { HomeHero } from '@/components/home/home-hero';
+import { HomeHotelGrid } from '@/components/home/home-hotel-grid';
+import { HomeInspirationGrid } from '@/components/home/home-inspiration-grid';
 import { TOP_RANKING_NAV_ENTRIES } from '@/components/layout/nav-data';
+import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { pickHomeDestinations } from '@/lib/home/featured-destinations';
+import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
 import { listPublishedCities } from '@/server/destinations/cities';
-import {
-  listPublishedHotelsForIndex,
-  type PublishedHotelIndexCard,
-} from '@/server/hotels/get-hotel-by-slug';
 import {
   listPublishedRankings,
   type PublishedRankingCard,
@@ -78,23 +80,6 @@ export async function generateMetadata({
   };
 }
 
-/**
- * Pick the N highest-priority published hotels for the home featured grid.
- * Prefers rows with a `hero_image` so the visual section never opens with
- * a wall of placeholders; falls back to placeholder-only entries when the
- * catalogue is still in editorial-only mode (Phase 1 — see AGENTS.md §4ter).
- */
-function pickFeaturedHotels(
-  rows: readonly PublishedHotelIndexCard[],
-  limit: number,
-): readonly PublishedHotelIndexCard[] {
-  const withHero = rows.filter((r) => r.heroPublicId !== null);
-  if (withHero.length >= limit) return withHero.slice(0, limit);
-  // Top-up with hero-less rows so we always render `limit` cards.
-  const withoutHero = rows.filter((r) => r.heroPublicId === null);
-  return [...withHero, ...withoutHero].slice(0, limit);
-}
-
 function pickFeaturedRankings(
   all: readonly PublishedRankingCard[],
 ): readonly PublishedRankingCard[] {
@@ -107,18 +92,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isRoutingLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations('homepage');
-  const tCommon = await getTranslations('common');
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Fetch the 3 editorial datasets in parallel — they back the featured
   // sections below. Each helper is defensive (returns `[]` on Supabase
-  // outages) so the home never 500s in a degraded environment.
-  const [hotelIndex, cities, rankings] = await Promise.all([
-    listPublishedHotelsForIndex(40),
+  // outages) so the home never 500s in a degraded environment. The
+  // Concierge-advice carousel runs its own cached fetch (sampled with
+  // a daily seed), so it sits outside this batch on purpose.
+  const [featuredHotels, cities, rankings] = await Promise.all([
+    getHomeFeaturedHotels(FEATURED_HOTEL_COUNT),
     listPublishedCities(),
     listPublishedRankings(),
   ]);
-  const featuredHotels = pickFeaturedHotels(hotelIndex, FEATURED_HOTEL_COUNT);
   const cityCounts = new Map(cities.map((c) => [c.slug, c.count] as const));
   const featuredRankings = pickFeaturedRankings(rankings);
 
@@ -158,13 +143,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     },
   });
 
-  // AEO block (skill: geo-llm-optimization). Short, quotable answer paired
-  // with a FAQPage JSON-LD payload so AI Overviews / ChatGPT Search can
-  // surface the value-prop verbatim without paraphrasing.
-  const aeoQuestion = t('aeo.question');
-  const aeoAnswer = t('aeo.answer');
+  // AEO entries (skill: geo-llm-optimization). The same list backs the
+  // visible `<HomeAeoFaq>` block AND the `FAQPage` JSON-LD payload — DOM
+  // ↔ JSON-LD parity is mandatory per Google's FAQPage policy (see
+  // seo-geo.mdc §AEO). Loading once and threading the array through
+  // both surfaces is the single source of truth.
+  const aeoEntries = await loadHomeAeoEntries(locale);
   const homeFaqJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.faqPageJsonLd([{ question: aeoQuestion, answer: aeoAnswer }]),
+    JsonLd.faqPageJsonLd(
+      aeoEntries.map((entry) => ({ question: entry.question, answer: entry.answer })),
+    ),
   );
 
   // ItemList of the featured hotels — surfaces the home as a small
@@ -176,7 +164,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           JsonLd.itemListJsonLd({
             name: t('featuredHotels.title'),
             items: featuredHotels.map((h) => {
-              const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
+              const slug = pickByLocale(locale, h.slug, h.slugEn ?? h.slug);
               const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
               const isValidStarRating = (n: number): n is 1 | 2 | 3 | 4 | 5 =>
                 n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
@@ -202,168 +190,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <JsonLdScript data={featuredItemListJsonLd} nonce={nonce} />
       ) : null}
 
-      {/* ─── Hero ──────────────────────────────────────────────────── */}
-      <section className="container mx-auto max-w-screen-xl px-4 py-16 sm:py-24">
-        <div className="flex max-w-3xl flex-col gap-6">
-          <p className="text-muted text-xs uppercase tracking-[0.18em]">
-            {tCommon('siteName')} — {tCommon('tagline')}
-          </p>
-          <h1 className="text-fg font-serif text-4xl sm:text-5xl md:text-6xl">{t('title')}</h1>
-          {/*
-            Global-scope metrics callout (ADR-0021). Sits as a sober
-            italic line under the H1 so the «91 pays · 615 adresses»
-            signal is visible above the fold without competing with
-            the editorial subtitle that follows.
-          */}
-          <p className="text-fg/70 -mt-2 font-serif text-base italic sm:text-lg">
-            {t('intlBadge')}
-          </p>
-          <p className="text-muted max-w-prose text-lg sm:text-xl">{t('subtitle')}</p>
+      {/* §1 — Hero éditorial avec vidéo + search Booking-style preview */}
+      <HomeHero locale={locale} cloudName={cloudName} />
 
-          <div className="text-muted mt-4 flex flex-wrap items-center gap-3 text-xs">
-            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
-              {t('trust.iata')}
-            </span>
-            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
-              {t('trust.aspst')}
-            </span>
-            <span className="border-border bg-bg rounded-md border px-3 py-1.5">
-              {t('trust.amadeus')}
-            </span>
-          </div>
+      {/* §2 — Le mot du Concierge (NEW) */}
+      <HomeEditorLetter locale={locale} />
 
-          {/* AEO Q&A — sits inside the hero so LLM crawlers find the
-              value-prop in the first viewport without scrolling. */}
-          <section
-            data-aeo
-            aria-labelledby="home-aeo-title"
-            className="border-border bg-bg mt-6 max-w-prose rounded-lg border p-5"
-          >
-            <h2 id="home-aeo-title" className="text-fg font-serif text-lg">
-              {aeoQuestion}
-            </h2>
-            <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
-          </section>
-        </div>
-      </section>
+      {/* §3 — Les fiches du moment (6 hôtels, badges luxury_tier) */}
+      <HomeHotelGrid locale={locale} hotels={featuredHotels} cloudName={cloudName} />
 
-      {/* ─── Le Concierge Club ribbon ──────────────────────────────────
-          Surfaces the membership programme (ADR-0019) from the home page
-          without disturbing the editorial-first hero. After the 2026-05-26
-          PO consolidation both tiers (free Club + Prestige waitlist) live
-          on a single landing — the ribbon now carries one canonical CTA
-          and the Prestige tier is discovered in-page (`#prestige` anchor).
-          Single-row framed border so it reads as institutional rather than
-          promotional — Phase 1 only advertises the free tier perks
-          (ADR-0020 SEA constraints). */}
-      <section
-        aria-labelledby="home-club-ribbon-title"
-        className="border-border container mx-auto max-w-screen-xl border-t px-4 py-10 sm:py-12"
-      >
-        <div className="border-border bg-muted/5 flex flex-col items-start gap-5 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-          <div className="max-w-2xl">
-            <p className="text-muted text-xs uppercase tracking-[0.18em]">
-              {t('clubRibbon.eyebrow')}
-            </p>
-            <h2
-              id="home-club-ribbon-title"
-              className="text-fg mt-2 font-serif text-2xl sm:text-3xl"
-            >
-              {t('clubRibbon.title')}
-            </h2>
-            <p className="text-muted mt-2 text-sm sm:text-base">{t('clubRibbon.body')}</p>
-          </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <Link
-              href="/le-concierge-club"
-              className="border-border bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('clubRibbon.ctaDiscover')}
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* §4 — Le Conseil du Concierge (3 conseils réels sampled) */}
+      <HomeConciergeAdviceCarousel locale={locale} />
 
-      {/* ─── Featured Hotels ───────────────────────────────────────── */}
-      {featuredHotels.length > 0 ? (
-        <section
-          aria-labelledby="home-featured-hotels"
-          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-        >
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-            <div className="max-w-2xl">
-              <p className="text-muted text-xs uppercase tracking-[0.18em]">
-                {t('featuredHotels.eyebrow')}
-              </p>
-              <h2
-                id="home-featured-hotels"
-                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
-              >
-                {t('featuredHotels.title')}
-              </h2>
-              <p className="text-muted mt-3 text-sm sm:text-base">{t('featuredHotels.subtitle')}</p>
-            </div>
-            <Link
-              href="/hotels"
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('featuredHotels.seeAll')}
-            </Link>
-          </div>
-
-          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredHotels.map((h) => {
-              const slug = pickByLocale(locale, h.slugFr, h.slugEn ?? h.slugFr);
-              const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
-              return (
-                <li key={h.slugFr}>
-                  <article className="border-border bg-bg group h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
-                    <Link
-                      href={{ pathname: '/hotel/[slug]', params: { slug } }}
-                      className="block focus-visible:outline-none"
-                    >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden">
-                        {h.heroPublicId !== null ? (
-                          <HotelImage
-                            cloudName={cloudName}
-                            publicId={h.heroPublicId}
-                            alt={name}
-                            width={640}
-                            height={480}
-                            transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_480"
-                          />
-                        ) : (
-                          <HotelImagePlaceholder variant="thumbnail" hotelName={name} />
-                        )}
-                      </div>
-                      <div className="p-4 sm:p-5">
-                        <div className="text-muted flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em]">
-                          {h.isPalace ? (
-                            <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-900">
-                              {t('featuredHotels.palace')}
-                            </span>
-                          ) : (
-                            <span className="border-border bg-bg rounded-md border px-2 py-0.5">
-                              {'★'.repeat(h.stars)}
-                            </span>
-                          )}
-                          <span>{h.city}</span>
-                        </div>
-                        <h3 className="text-fg mt-3 font-serif text-lg leading-snug">{name}</h3>
-                        <p className="text-muted mt-3 inline-flex items-center text-xs underline-offset-2 group-hover:underline">
-                          {t('featuredHotels.viewFiche')} →
-                        </p>
-                      </div>
-                    </Link>
-                  </article>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-
-      {/* ─── Featured Destinations (mixed FR cities + intl countries) */}
+      {/* §5 — Destinations (FR cities + intl countries) */}
       <HomeDestinationGrid
         locale={locale}
         destinations={pickHomeDestinations(cityCounts, locale, (count) =>
@@ -371,7 +210,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         )}
       />
 
-      {/* ─── Featured Rankings ─────────────────────────────────────── */}
+      {/* §6 — Inspirations (6 axes thème × occasion) */}
+      <HomeInspirationGrid locale={locale} />
+
+      {/* §7 — Classements éditoriaux (inline — scope sélectif) */}
       {featuredRankings.length > 0 ? (
         <section
           aria-labelledby="home-featured-rankings"
@@ -431,7 +273,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </section>
       ) : null}
 
-      {/* ─── Le Conseil du Concierge teaser ────────────────────────── */}
+      {/* §8 — AEO FAQ (4 Q&A) — same content as homeFaqJsonLd above */}
+      <HomeAeoFaq locale={locale} entries={aeoEntries} />
+
+      {/* §9 — Le Concierge Club ribbon */}
+      <HomeClubRibbon locale={locale} />
+
+      {/* §10 — Closing teaser (inline — scope sélectif) */}
       <section
         aria-labelledby="home-concierge-teaser"
         className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"

@@ -20,6 +20,7 @@
   "homepage": {
     "metaTitle": "MyConciergeHotel — The Concierge's Selection of extraordinary hotels worldwide",
     "metaDesc": "615 curated addresses across 91 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
+    "eyebrow": "MyConciergeHotel — IATA-accredited agency",
     "title": "The Concierge's Selection",
     "intlBadge": "91 countries · 615 addresses · 435 Relais & Châteaux",
     "subtitle": "A worldwide selection of extraordinary hotels, signed by our concierge desk. Every page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention.",
@@ -29,9 +30,32 @@
       "aspst": "ASPST member",
       "amadeus": "Secure Amadeus payment"
     },
+    "hero": {
+      "posterAlt": "Parisian Palace suite at dusk, rooftops view — MyConciergeHotel selection",
+      "searchTitle": "Search an extraordinary hotel",
+      "searchSubmit": "Search",
+      "searchSubmitAria": "Search the catalogue",
+      "searchPreviewDates": "Dates",
+      "searchPreviewGuests": "Guests"
+    },
     "aeo": {
-      "question": "How does MyConciergeHotel curate its hotels?",
-      "answer": "MyConciergeHotel applies a single editorial grid worldwide: official distinctions (Atout France Palace label in France, Forbes Five Star, Michelin Keys), membership of author-led collections (Relais & Châteaux, Leading Hotels of the World), and an internal score authored by our concierge desk (service, signature, location). Every page is written by hand and closes with a Concierge's Tip — a concrete operational secret (room, table, timing, access). No pay-to-play; no hotel commission influences the selection."
+      "intro": "The questions our guests ask us",
+      "q1": {
+        "question": "How does MyConciergeHotel curate its hotels?",
+        "answer": "We apply a single editorial grid: official distinctions (Atout France Palace label, Forbes Five Star, Michelin Keys), membership of author-led collections (Relais & Châteaux, Leading Hotels of the World), and an internal score authored by our concierge desk on service, signature and location. Every page is hand-written, never generated. No pay-to-play: no hotel commission influences the selection."
+      },
+      "q2": {
+        "question": "How are you different from Booking or Hotels.com?",
+        "answer": "MyConciergeHotel is an IATA agency, not a price comparison engine. Our catalogue is curated to 615 addresses against hundreds of thousands, and every page is written by our concierge desk — not by the hotels themselves. No fabricated urgency, no struck-through prices, no « only X rooms left » banner. The price displayed in Phase 6 will be the Amadeus GDS net rate, with no agency surcharge."
+      },
+      "q3": {
+        "question": "What is the Concierge's Tip at the bottom of each page?",
+        "answer": "A concrete operational secret — a corner room to ask for by number, a table to reserve three months ahead, an access route that changes your arrival. Our hotelier partners trusted us with it; we share it free of charge. It's what separates a fine stay from a memorable one."
+      },
+      "q4": {
+        "question": "Is Le Concierge Club actually free?",
+        "answer": "Yes. The free Club is a one-minute signup, no credit card, no commitment. It opens the concierge agenda, your saved shortlist, and the operational tips of the Palaces we selected. The Prestige tier (€99/year, planned for Phase 6) is invitation-only and waitlist-based — it complements the free Club without replacing it."
+      }
     },
     "intlComingSoon": {
       "eyebrow": "Going international soon",
@@ -41,11 +65,22 @@
       "countLabel": "{count, plural, one {# palace} other {# palaces}}",
       "guideComingSoon": "Full guide coming soon"
     },
+    "editorLetter": {
+      "eyebrow": "A word from the Concierge",
+      "title": "Welcome from your trusted hotelier",
+      "paragraph1": "Here is the selection we keep up to date for you: 615 extraordinary houses across 91 countries, picked one by one. No hundred-thousand-address catalogue, no algorithm that decides on our behalf.",
+      "paragraph2": "You'll find Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys and rare gems the guidebooks haven't reached yet. No pay-to-play. No hotel commission influences the selection.",
+      "paragraph3": "Our signature: every page closes with a Concierge's Tip — a room to ask for by number, a table to reserve three months ahead, an arrival time that changes everything. Our hotelier partners trusted us with it.",
+      "signatureName": "The Concierge",
+      "signatureRole": "Your trusted hotelier",
+      "cta": "Our editorial method"
+    },
     "clubRibbon": {
       "eyebrow": "Our programme",
       "title": "Le Concierge Club — open access to the concierge desk",
       "body": "Create a free account to unlock the concierge agenda, save your shortlist, and receive the operational tips of the Palaces we selected. Prestige tier is invitation-only — the waitlist sits on the same page.",
-      "ctaDiscover": "Discover Le Concierge Club"
+      "ctaDiscover": "Discover Le Concierge Club",
+      "ctaPrestige": "Prestige tier"
     },
     "featuredHotels": {
       "eyebrow": "Concierge picks",
@@ -53,6 +88,9 @@
       "subtitle": "Six addresses our Concierge has been recommending lately. Every page closes with a Concierge Tip — the room number, the table, the timing the guidebooks never share.",
       "seeAll": "Browse the full catalogue →",
       "palace": "Palace",
+      "relaisChateaux": "Relais & Châteaux",
+      "boutique": "Boutique hotel",
+      "chateau": "Château hotel",
       "viewFiche": "Read the page"
     },
     "featuredDestinations": {
@@ -67,6 +105,46 @@
       "title": "The best hotels, sorted by intent",
       "subtitle": "Our rankings cross-reference Atout France classifications, Michelin stars, Forbes Travel ratings and our own editorial score. No pay-to-play — every entry is earned.",
       "seeAll": "All rankings →"
+    },
+    "conciergeAdvice": {
+      "eyebrow": "The Concierge's Tip",
+      "title": "Three tips, picked today",
+      "subtitle": "Three operational secrets pulled from our pages — the room, the table, the timing. The detail that changes a stay, shared by our hotelier partners.",
+      "viewAll": "All Concierge Tips →",
+      "openFiche": "View the page →",
+      "empty": "Our concierge desk is compiling today's tips. Come back in a few moments."
+    },
+    "inspiration": {
+      "eyebrow": "Inspirations",
+      "title": "Pick a hotel by moment in life",
+      "subtitle": "Six axes to find the right address — from a romantic weekend to a gastronomic stay. Each axis opens onto a ranking cross-referencing Atout France, Michelin and our editorial score.",
+      "seeAll": "All inspirations →",
+      "axes": {
+        "famille": {
+          "title": "With family",
+          "subtitle": "Connecting suites, kids' club, bespoke welcome for ages 6 to 12."
+        },
+        "romantique": {
+          "title": "For two",
+          "subtitle": "View rooms, hot-tub suites, in-room dining, couple's spa."
+        },
+        "spa": {
+          "title": "Spa & wellness",
+          "subtitle": "Water cellars, signature treatments, partner skincare houses — the Concierge selection."
+        },
+        "ski": {
+          "title": "Slope-side",
+          "subtitle": "Chamonix, Megève, Courchevel, Val d'Isère — Palaces and chalet-hotels with ski room."
+        },
+        "gastronomie": {
+          "title": "Gastronomy",
+          "subtitle": "Michelin-starred chefs, signature hotel restaurants, tasting menus to reserve three months ahead."
+        },
+        "design": {
+          "title": "Design & architecture",
+          "subtitle": "Author-led boutique hotels, named architects, houses where you sleep inside a memory."
+        }
+      }
     },
     "conciergeTeaser": {
       "eyebrow": "Le Conseil du Concierge",
