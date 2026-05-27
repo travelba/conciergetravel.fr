@@ -52,9 +52,17 @@ export const env = createEnv({
      * Cloudinary cloud (e.g. "dvbjwh5wy") used to build delivery URLs.
      * Appears verbatim in every `https://res.cloudinary.com/<cloud>/…`
      * URL — not a secret. Required client-side for `<HotelImage>` /
-     * `<HotelGallery>`.
+     * `<HotelGallery>` / `<HomeHeroVideo>`.
+     *
+     * Defaults to the canonical Travelba cloud `dvbjwh5wy` so the
+     * production build never renders `https://res.cloudinary.com/undefined/…`
+     * even if the Vercel project env var is unset (which it currently is —
+     * audit 2026-05-27 surfaced /undefined/ in every Cloudinary URL once
+     * the home redesign moved hotel photos to a `cloudName`-driven path).
+     * To swap clouds, set the env var; the default is a last-resort
+     * fallback, not a recommendation.
      */
-    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1),
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1).default('dvbjwh5wy'),
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_SITE_URL: process.env['NEXT_PUBLIC_SITE_URL'],
@@ -65,7 +73,13 @@ export const env = createEnv({
     NEXT_PUBLIC_ALGOLIA_APP_ID: process.env['NEXT_PUBLIC_ALGOLIA_APP_ID'],
     NEXT_PUBLIC_ALGOLIA_SEARCH_KEY: process.env['NEXT_PUBLIC_ALGOLIA_SEARCH_KEY'],
     NEXT_PUBLIC_SENTRY_DSN: process.env['NEXT_PUBLIC_SENTRY_DSN'],
-    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env['NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'],
+    // Belt-and-suspenders fallback — when `skipValidation` is true the
+    // Zod `.default()` above does NOT run, so the raw value reaches the
+    // app as `undefined`. We coalesce here so call sites always receive
+    // a usable cloud name. Empty strings are normalised to undefined by
+    // `emptyStringAsUndefined` above, so `??` catches them too.
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
+      process.env['NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'] ?? 'dvbjwh5wy',
   },
   skipValidation:
     process.env['SKIP_ENV_VALIDATION'] === 'true' ||
