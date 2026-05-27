@@ -164,6 +164,80 @@ for editorial routes whose underlying data only changes on publish.
 - Leaking secrets to client by reading `process.env.SECRET` inside a client component.
 - Bypassing `next-intl` to hardcode FR strings in JSX.
 
+### Naming collision with a route segment param → Turbopack minifier bug
+
+**Forbidden pattern** in any `app/[locale]/<...>/page.tsx` Server Component:
+
+```ts
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isRoutingLocale(raw)) notFound();
+  const locale: Locale = raw; // ❌ local var named after the segment
+
+  return helperThatTakesLocale({
+    locale, // ❌ shorthand triggers the minifier bug
+    freshnessDate,
+  });
+}
+```
+
+What goes wrong: Turbopack's production minifier (Next 15) **silently
+fails** to rewrite the shorthand `locale,` inside the inlined object
+literal when the local variable's name collides with the destructured
+property name from the route segment (`{ locale: raw }`). At runtime
+this produces:
+
+```
+ReferenceError: locale is not defined
+```
+
+— but **only** in the production bundle. `next dev` (no minifier) and
+`tsc --noEmit` both pass. The bug was diagnosed live (2026-05-27,
+commit `0caa396`) by reading the minified chunk in
+`.next/server/chunks/ssr/apps_web_src_app_[locale]_marque_[brandSlug]_page_tsx_*.js`:
+
+```js
+// what Turbopack emitted (broken):
+let{locale:D,brandSlug:E}=await a;     // segment property → D
+// ...inlined helper call...
+let s={brandLabel:F.label, ..., locale, freshnessDate:O};
+                                 ^^^^^^
+//                              should be `locale:D`, isn't
+```
+
+**Required pattern**: rename the local to `activeLocale` (or anything
+that doesn't collide with the segment property name) AND prefer
+explicit object properties over shorthand whenever the property name
+matches a destructured segment param:
+
+```ts
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isRoutingLocale(raw)) notFound();
+  const activeLocale: Locale = raw; // ✅ no collision
+
+  return helperThatTakesLocale({
+    locale: activeLocale, // ✅ explicit, not shorthand
+    freshnessDate,
+  });
+}
+```
+
+**Debugging recipe** when a `ReferenceError` appears in prod but not in
+dev:
+
+1. Build locally with `pnpm --filter @mch/web build`.
+2. Start prod server: `cd apps/web && npx next start --port 3001`.
+3. `curl -sS http://localhost:3001/<failing-path>` to confirm reproduction.
+4. `ls apps/web/.next/server/chunks/ssr/<route>*page_tsx_*.js` to find
+   the minified chunk for the route segment.
+5. `Select-String -Pattern 'ReferenceError|<symbol>' -Path <chunk>` or
+   read a window around the helper call to inspect the minified
+   shorthand expansion.
+6. Once you find a `prop,` (shorthand) inside a `let X = { ..., prop, ... }`
+   that the minifier should have rewritten to `prop:Y`, rename the
+   colliding local and convert the shorthand to explicit.
+
 ### Defensive upstream calls in static-prerendered routes
 
 Every `page.tsx` / `route.ts` that runs at build time AND touches an
