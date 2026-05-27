@@ -72,9 +72,14 @@ loadDotenv({ path: resolve(__dirname, '../../../../.env') });
 
 const EXTRACTION_MODEL = 'gpt-4o-mini-2024-07-18';
 const TIER1 = [
+  // Editorial / award labels
   'world_50_best',
   'tl_worlds_best',
   'cn_gold_list',
+  'forbes_5_star',
+  'lhw_member',
+  'self_5_star',
+  // Wave A — ultra-luxe chain brands
   'aman',
   'belmond',
   'rosewood',
@@ -82,6 +87,32 @@ const TIER1 = [
   'mandarin_oriental',
   'park_hyatt',
   'ritz_carlton_reserve',
+  'bulgari',
+  'six_senses',
+  // Wave B — premium 5★ chains
+  'ritz_carlton',
+  'st_regis',
+  'waldorf_astoria',
+  'fairmont',
+  'kempinski',
+  'anantara',
+  'raffles',
+  'jumeirah',
+  'peninsula',
+  'dorchester',
+  // Wave C — boutique collections
+  'small_luxury_hotels',
+  'relais_chateaux',
+  // Wave D — boutique ultra-luxe
+  'cheval_blanc',
+  'como',
+  'viceroy',
+  'capella',
+  'oetker_collection',
+  'soneva',
+  'nayara',
+  'grace_hotels',
+  'nihi',
 ] as const;
 
 type Tier = (typeof TIER1)[number];
@@ -99,6 +130,15 @@ const TIER_HUMAN: Readonly<Record<Tier, { fr: string; en: string }>> = {
     fr: 'Sélectionné dans la Condé Nast Traveler Gold List 2025-2026',
     en: 'Selected in the Condé Nast Traveler Gold List 2025-2026',
   },
+  forbes_5_star: {
+    fr: 'Distingué Forbes Travel Guide Five-Star',
+    en: 'Forbes Travel Guide Five-Star',
+  },
+  lhw_member: {
+    fr: 'Membre Leading Hotels of the World',
+    en: 'Leading Hotels of the World member',
+  },
+  self_5_star: { fr: 'Hôtel 5 étoiles', en: 'Five-star hotel' },
   aman: { fr: 'Adresse Aman', en: 'Aman property' },
   belmond: { fr: 'Maison Belmond (LVMH)', en: 'Belmond property (LVMH)' },
   rosewood: { fr: 'Maison Rosewood Hotels & Resorts', en: 'Rosewood Hotels & Resorts property' },
@@ -109,6 +149,35 @@ const TIER_HUMAN: Readonly<Record<Tier, { fr: string; en: string }>> = {
     fr: 'Adresse Ritz-Carlton Reserve',
     en: 'Ritz-Carlton Reserve property',
   },
+  bulgari: { fr: 'Adresse Bulgari Hotels & Resorts', en: 'Bulgari Hotels & Resorts property' },
+  six_senses: { fr: 'Resort Six Senses', en: 'Six Senses resort' },
+  ritz_carlton: { fr: 'Adresse The Ritz-Carlton', en: 'The Ritz-Carlton property' },
+  st_regis: { fr: 'Adresse St. Regis', en: 'St. Regis property' },
+  waldorf_astoria: { fr: 'Adresse Waldorf Astoria', en: 'Waldorf Astoria property' },
+  fairmont: { fr: 'Adresse Fairmont', en: 'Fairmont property' },
+  kempinski: { fr: 'Hôtel Kempinski', en: 'Kempinski hotel' },
+  anantara: { fr: 'Resort Anantara', en: 'Anantara property' },
+  raffles: { fr: 'Adresse Raffles', en: 'Raffles property' },
+  jumeirah: { fr: 'Adresse Jumeirah', en: 'Jumeirah property' },
+  peninsula: { fr: 'Adresse The Peninsula', en: 'The Peninsula property' },
+  dorchester: { fr: 'Maison Dorchester Collection', en: 'Dorchester Collection property' },
+  small_luxury_hotels: {
+    fr: 'Membre Small Luxury Hotels of the World',
+    en: 'Small Luxury Hotels of the World member',
+  },
+  relais_chateaux: { fr: 'Maison Relais & Châteaux', en: 'Relais & Châteaux property' },
+  cheval_blanc: { fr: 'Maison Cheval Blanc (LVMH)', en: 'Cheval Blanc property (LVMH)' },
+  como: { fr: 'Resort COMO Hotels & Resorts', en: 'COMO Hotels & Resorts property' },
+  viceroy: { fr: 'Adresse Viceroy Hotels & Resorts', en: 'Viceroy Hotels & Resorts property' },
+  capella: { fr: 'Adresse Capella Hotels & Resorts', en: 'Capella Hotels & Resorts property' },
+  oetker_collection: {
+    fr: 'Maison Oetker Collection',
+    en: 'Oetker Collection masterpiece hotel',
+  },
+  soneva: { fr: 'Resort Soneva', en: 'Soneva resort' },
+  nayara: { fr: 'Resort Nayara', en: 'Nayara resort' },
+  grace_hotels: { fr: 'Adresse Grace Hotels', en: 'Grace Hotels property' },
+  nihi: { fr: 'Resort NIHI', en: 'NIHI resort' },
 };
 
 // ─── CLI parsing ───────────────────────────────────────────────────────────
@@ -118,6 +187,8 @@ interface CliArgs {
   readonly dryRun: boolean;
   readonly skipImages: boolean;
   readonly slugs: readonly string[];
+  readonly tiers: readonly string[];
+  readonly excludeFr: boolean;
   readonly concurrency: number;
 }
 
@@ -126,10 +197,15 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let dryRun = false;
   let skipImages = false;
   let slugs: string[] = [];
+  let tiers: string[] = [];
+  // Default false: include FR drafts (Bulgari Paris, Cheval Blanc Paris, etc.).
+  // Pass --exclude-fr to keep the legacy behaviour (intl only).
+  let excludeFr = false;
   let concurrency = 5;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--skip-images') skipImages = true;
+    else if (a === '--exclude-fr') excludeFr = true;
     else if (a.startsWith('--limit=')) {
       const n = Number(a.slice('--limit='.length));
       if (Number.isFinite(n) && n > 0) limit = Math.floor(n);
@@ -142,9 +218,15 @@ function parseArgs(argv: readonly string[]): CliArgs {
         .split(',')
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
+    } else if (a.startsWith('--tier=')) {
+      tiers = a
+        .slice('--tier='.length)
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
     }
   }
-  return { limit, dryRun, skipImages, slugs, concurrency };
+  return { limit, dryRun, skipImages, slugs, tiers, excludeFr, concurrency };
 }
 
 // ─── DB row shape ──────────────────────────────────────────────────────────
@@ -573,42 +655,142 @@ function postValidate(raw: SeedContent): ValidationOutcome {
   };
 }
 
-// ─── DB write ──────────────────────────────────────────────────────────────
+// ─── DB I/O via PostgREST (no DB password needed, uses service role) ──────
 
-interface PgClientLike {
-  query: (text: string, values: ReadonlyArray<unknown>) => Promise<unknown>;
+interface PostgrestEnv {
+  readonly restBase: string;
+  readonly apikey: string;
+}
+
+function loadPostgrestEnv(): PostgrestEnv {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '';
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
+  if (url.length === 0 || key.length === 0) {
+    throw new Error(
+      '[seed-tier1] NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env.local',
+    );
+  }
+  // Some local dev environments use self-signed certs on the Supabase
+  // PostgREST endpoint. Mirror the diff/scaffold scripts.
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  return { restBase: `${url.replace(/\/+$/u, '')}/rest/v1`, apikey: key };
+}
+
+function postgrestHeaders(
+  env: PostgrestEnv,
+  extra: Record<string, string> = {},
+): Record<string, string> {
+  return {
+    apikey: env.apikey,
+    Authorization: `Bearer ${env.apikey}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...extra,
+  };
+}
+
+async function fetchHotels(
+  env: PostgrestEnv,
+  tiers: readonly string[],
+  excludeFr: boolean,
+  slugs: readonly string[],
+  limit: number | null,
+): Promise<HotelRow[]> {
+  const cols =
+    'slug,name,city,country_code,country_label_fr,country_label_en,region,luxury_tier,wikidata_id,commons_category,official_url,hero_image,description_fr,meta_desc_fr';
+  const params = new URLSearchParams();
+  params.set('select', cols);
+  params.set('is_published', 'eq.false');
+  params.set('luxury_tier', `in.(${tiers.join(',')})`);
+  if (excludeFr) params.set('country_code', 'neq.FR');
+  if (slugs.length > 0) params.set('slug', `in.(${slugs.join(',')})`);
+  // Stable order; the SQL CASE-based sort isn't strictly required for
+  // correctness, only for log readability. PostgREST orders by the
+  // tier slug alphabetically — good enough.
+  params.set('order', 'luxury_tier.asc,name.asc');
+  if (limit !== null) params.set('limit', String(limit));
+
+  // PAGE the response (PostgREST default cap is 1000) so wave-wide
+  // runs (~1500 rows) succeed.
+  const PAGE = 1000;
+  const all: HotelRow[] = [];
+  let from = 0;
+  while (true) {
+    const url = `${env.restBase}/hotels?${params.toString()}`;
+    const r = await fetch(url, {
+      headers: postgrestHeaders(env, {
+        Range: `${from}-${from + PAGE - 1}`,
+        'Range-Unit': 'items',
+      }),
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      throw new Error(`PostgREST GET hotels failed: ${r.status} ${text.slice(0, 200)}`);
+    }
+    const batch = (await r.json()) as HotelRow[];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+    if (limit !== null && all.length >= limit) break;
+    from += PAGE;
+  }
+  return limit !== null ? all.slice(0, limit) : all;
 }
 
 async function writeContent(
-  client: PgClientLike,
+  env: PostgrestEnv,
   slug: string,
   content: SeedContent,
   hero: string | null,
 ): Promise<void> {
-  // COALESCE preserves any value an editor already pinned; we only ever
-  // fill blanks. Re-running the script is idempotent.
-  const sql = `
-    UPDATE public.hotels SET
-      meta_title_fr  = COALESCE(meta_title_fr,  $2),
-      meta_title_en  = COALESCE(meta_title_en,  $3),
-      meta_desc_fr   = COALESCE(meta_desc_fr,   $4),
-      meta_desc_en   = COALESCE(meta_desc_en,   $5),
-      description_fr = COALESCE(description_fr, $6),
-      description_en = COALESCE(description_en, $7),
-      hero_image     = COALESCE(hero_image,     $8),
-      updated_at     = timezone('utc', now())
-    WHERE slug = $1;
-  `.trim();
-  await client.query(sql, [
-    slug,
-    content.meta_title_fr,
-    content.meta_title_en,
-    content.meta_desc_fr,
-    content.meta_desc_en,
-    content.description_fr,
-    content.description_en,
-    hero,
-  ]);
+  // PostgREST has no COALESCE; we read the row back, only patch fields
+  // that are currently null/empty, and fall back to the existing value
+  // otherwise. The fetch is the same Range-paginated endpoint, but
+  // here we only need a single row.
+  const url = `${env.restBase}/hotels?slug=eq.${encodeURIComponent(slug)}&select=meta_title_fr,meta_title_en,meta_desc_fr,meta_desc_en,description_fr,description_en,hero_image`;
+  const got = await fetch(url, { headers: postgrestHeaders(env) });
+  if (!got.ok) {
+    throw new Error(`PostgREST GET row ${slug} failed: ${got.status}`);
+  }
+  const rows = (await got.json()) as ReadonlyArray<{
+    readonly meta_title_fr: string | null;
+    readonly meta_title_en: string | null;
+    readonly meta_desc_fr: string | null;
+    readonly meta_desc_en: string | null;
+    readonly description_fr: string | null;
+    readonly description_en: string | null;
+    readonly hero_image: string | null;
+  }>;
+  const existing = rows[0] ?? null;
+  const isBlank = (v: string | null | undefined): boolean =>
+    v === null || (v ?? '').trim().length === 0;
+  const merged = {
+    meta_title_fr: isBlank(existing?.meta_title_fr)
+      ? content.meta_title_fr
+      : existing?.meta_title_fr,
+    meta_title_en: isBlank(existing?.meta_title_en)
+      ? content.meta_title_en
+      : existing?.meta_title_en,
+    meta_desc_fr: isBlank(existing?.meta_desc_fr) ? content.meta_desc_fr : existing?.meta_desc_fr,
+    meta_desc_en: isBlank(existing?.meta_desc_en) ? content.meta_desc_en : existing?.meta_desc_en,
+    description_fr: isBlank(existing?.description_fr)
+      ? content.description_fr
+      : existing?.description_fr,
+    description_en: isBlank(existing?.description_en)
+      ? content.description_en
+      : existing?.description_en,
+    hero_image: isBlank(existing?.hero_image) ? hero : existing?.hero_image,
+  };
+
+  const patchUrl = `${env.restBase}/hotels?slug=eq.${encodeURIComponent(slug)}`;
+  const r = await fetch(patchUrl, {
+    method: 'PATCH',
+    headers: postgrestHeaders(env, { Prefer: 'return=minimal' }),
+    body: JSON.stringify(merged),
+  });
+  if (!r.ok) {
+    const text = await r.text();
+    throw new Error(`PostgREST PATCH ${slug} failed: ${r.status} ${text.slice(0, 200)}`);
+  }
 }
 
 // ─── Concurrency helper (Rule 7 — bounded, no Promise.all flood) ──────────
@@ -667,65 +849,33 @@ async function main(): Promise<void> {
     console.error('[seed-tier1] OPENAI_API_KEY missing in .env.local');
     process.exit(1);
   }
-  const connectionString =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'] ??
-    null;
-  if (!connectionString) {
-    console.error(
-      '[seed-tier1] DATABASE_URL / SUPABASE_DB_POOLER_URL / SUPABASE_DB_URL missing in .env.local',
-    );
+
+  let postgrestEnv: PostgrestEnv;
+  try {
+    postgrestEnv = loadPostgrestEnv();
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
+    return;
   }
 
   const openai = new OpenAI({ apiKey: process.env['OPENAI_API_KEY'] });
 
-  const pg = await import('pg');
-  const cleaned = connectionString.replace(/[?&]sslmode=[^&]*/giu, '');
-  const isLocal = cleaned.includes('localhost') || cleaned.includes('127.0.0.1');
-  const dbClient = new pg.Client({
-    connectionString: cleaned,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
-  });
-  await dbClient.connect();
-
   let hotels: HotelRow[] = [];
   try {
-    const filters: string[] = ["country_code != 'FR'", 'is_published = false'];
-    const params: unknown[] = [];
-    params.push(TIER1 as unknown as readonly string[]);
-    filters.push(`luxury_tier = ANY($${params.length}::text[])`);
-    if (args.slugs.length > 0) {
-      params.push(args.slugs);
-      filters.push(`slug = ANY($${params.length}::text[])`);
+    // If the caller passed --tier=xxx, honour their list (intersected
+    // with TIER1 to keep the safety boundary). Otherwise enrich the
+    // entire TIER1 perimeter.
+    const allowedTiers = TIER1 as unknown as readonly string[];
+    const tierFilter =
+      args.tiers.length > 0 ? args.tiers.filter((t) => allowedTiers.includes(t)) : allowedTiers;
+    if (tierFilter.length === 0) {
+      console.error(
+        `[seed-tier1] --tier=${args.tiers.join(',')} produced an empty intersection with TIER1, exiting.`,
+      );
+      process.exit(2);
     }
-    const limitSql = args.limit !== null ? `LIMIT ${args.limit}` : '';
-    const sql = `
-      SELECT slug, name, city, country_code, country_label_fr, country_label_en,
-             region, luxury_tier, wikidata_id, commons_category, official_url,
-             hero_image, description_fr, meta_desc_fr
-      FROM public.hotels
-      WHERE ${filters.join(' AND ')}
-      ORDER BY
-        CASE luxury_tier
-          WHEN 'world_50_best' THEN 1
-          WHEN 'tl_worlds_best' THEN 2
-          WHEN 'cn_gold_list' THEN 3
-          WHEN 'aman' THEN 4
-          WHEN 'rosewood' THEN 5
-          WHEN 'four_seasons' THEN 6
-          WHEN 'mandarin_oriental' THEN 7
-          WHEN 'belmond' THEN 8
-          WHEN 'park_hyatt' THEN 9
-          WHEN 'ritz_carlton_reserve' THEN 10
-          ELSE 11
-        END,
-        name
-      ${limitSql};
-    `.trim();
-    const r = await dbClient.query(sql, params);
-    hotels = r.rows as HotelRow[];
+    hotels = await fetchHotels(postgrestEnv, tierFilter, args.excludeFr, args.slugs, args.limit);
 
     const byTier: Record<string, number> = {};
     for (const h of hotels) byTier[h.luxury_tier] = (byTier[h.luxury_tier] ?? 0) + 1;
@@ -819,7 +969,7 @@ async function main(): Promise<void> {
         }
 
         if (!args.dryRun) {
-          await writeContent(dbClient, hotel.slug, content, hero);
+          await writeContent(postgrestEnv, hotel.slug, content, hero);
         }
 
         const heroNote = hero ? ' +hero' : '';
@@ -911,7 +1061,7 @@ async function main(): Promise<void> {
     );
     console.log(`  runlog     : ${runlogPath}`);
   } finally {
-    await dbClient.end();
+    // PostgREST is stateless — no connection to close.
   }
 }
 
