@@ -85,11 +85,11 @@ export async function GET(): Promise<NextResponse> {
 
   const body = buildLlmsFullTxt({
     siteName: 'MyConciergeHotel.com',
-    tagline: 'Agence IATA Hôtels 5★ & Palaces France',
+    tagline: "La sélection du Concierge — hôtels d'exception dans le monde",
     originUrl: origin,
     about:
-      "MyConciergeHotel.com est l'agence de voyage IATA spécialisée dans les hôtels 5 étoiles et Palaces en France. " +
-      'Tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité dès la première nuit.',
+      "MyConciergeHotel.com est la sélection éditoriale du Concierge : 615 hôtels d'exception choisis dans 91 pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. " +
+      'Conciergerie IATA accréditée. Conseil du Concierge opérationnel sur chaque fiche.',
     lastUpdatedDate: new Date().toISOString(),
     pages: [...editorialPages, ...hotelPages],
   });

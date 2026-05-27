@@ -25,38 +25,120 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
+type BrandScope =
+  | { readonly kind: 'france-only' }
+  | { readonly kind: 'multi-country'; readonly countryCount: number }
+  | { readonly kind: 'single-non-france'; readonly countryLabel: string };
+
 const T = {
   fr: {
     eyebrow: 'Groupe hôtelier',
-    titleSuffix: 'en France',
-    subtitle: (brand: string, n: number) =>
-      `Les ${n} adresses ${brand} de notre catalogue éditorial — sélection IATA MyConciergeHotel.`,
+    suffix: (scope: BrandScope): string => {
+      if (scope.kind === 'france-only') return 'en France';
+      if (scope.kind === 'single-non-france') return `— ${scope.countryLabel}`;
+      return 'dans le monde';
+    },
+    subtitle: (brand: string, n: number, scope: BrandScope): string => {
+      if (scope.kind === 'france-only') {
+        return `Les ${n} adresses ${brand} de notre catalogue éditorial en France — sélection IATA MyConciergeHotel.`;
+      }
+      if (scope.kind === 'single-non-france') {
+        return `Les ${n} adresses ${brand} sélectionnées par notre conciergerie au ${scope.countryLabel}.`;
+      }
+      return `Les ${n} adresses ${brand} sélectionnées par notre conciergerie dans ${scope.countryCount} pays.`;
+    },
     palace: 'Palace',
     stars: '★',
     seeFiche: 'Voir la fiche',
     breadcrumbHome: 'Accueil',
     breadcrumbHotels: 'Hôtels',
-    metaTitle: (brand: string) => `${brand} en France — Hôtels & Palaces | MyConciergeHotel`,
-    metaDesc: (brand: string, n: number) =>
-      `Découvrez les ${n} adresses ${brand} de notre sélection éditoriale : Palaces, hôtels 5 étoiles. Réservation IATA, tarifs nets GDS.`,
+    metaTitle: (brand: string, scope: BrandScope): string => {
+      if (scope.kind === 'france-only')
+        return `${brand} en France — Hôtels & Palaces | MyConciergeHotel`;
+      if (scope.kind === 'single-non-france')
+        return `${brand} — ${scope.countryLabel} | MyConciergeHotel`;
+      return `${brand} — sélection mondiale | MyConciergeHotel`;
+    },
+    metaDesc: (brand: string, n: number, scope: BrandScope): string => {
+      if (scope.kind === 'france-only') {
+        return `Découvrez les ${n} adresses ${brand} en France de notre sélection éditoriale : Palaces, hôtels 5 étoiles. Réservation IATA, tarifs nets GDS.`;
+      }
+      if (scope.kind === 'single-non-france') {
+        return `Découvrez les ${n} adresses ${brand} au ${scope.countryLabel}, sélectionnées par notre conciergerie. Réservation IATA, tarifs nets GDS.`;
+      }
+      return `Découvrez les ${n} adresses ${brand} dans ${scope.countryCount} pays, sélectionnées par notre conciergerie. Réservation IATA, tarifs nets GDS.`;
+    },
     faqTitle: 'Questions sur la marque',
   },
   en: {
     eyebrow: 'Hotel group',
-    titleSuffix: 'in France',
-    subtitle: (brand: string, n: number) =>
-      `The ${n} ${brand} addresses from our editorial catalog — MyConciergeHotel IATA selection.`,
+    suffix: (scope: BrandScope): string => {
+      if (scope.kind === 'france-only') return 'in France';
+      if (scope.kind === 'single-non-france') return `— ${scope.countryLabel}`;
+      return 'worldwide';
+    },
+    subtitle: (brand: string, n: number, scope: BrandScope): string => {
+      if (scope.kind === 'france-only') {
+        return `The ${n} ${brand} addresses in France from our editorial catalog — MyConciergeHotel IATA selection.`;
+      }
+      if (scope.kind === 'single-non-france') {
+        return `The ${n} ${brand} addresses in ${scope.countryLabel}, curated by our concierge desk.`;
+      }
+      return `The ${n} ${brand} addresses curated by our concierge desk across ${scope.countryCount} countries.`;
+    },
     palace: 'Palace',
     stars: '★',
     seeFiche: 'View the page',
     breadcrumbHome: 'Home',
     breadcrumbHotels: 'Hotels',
-    metaTitle: (brand: string) => `${brand} in France — Hotels & Palaces | MyConciergeHotel`,
-    metaDesc: (brand: string, n: number) =>
-      `Discover the ${n} ${brand} addresses from our editorial selection: Palaces, 5-star hotels. IATA booking, GDS net rates.`,
+    metaTitle: (brand: string, scope: BrandScope): string => {
+      if (scope.kind === 'france-only')
+        return `${brand} in France — Hotels & Palaces | MyConciergeHotel`;
+      if (scope.kind === 'single-non-france')
+        return `${brand} — ${scope.countryLabel} | MyConciergeHotel`;
+      return `${brand} — worldwide selection | MyConciergeHotel`;
+    },
+    metaDesc: (brand: string, n: number, scope: BrandScope): string => {
+      if (scope.kind === 'france-only') {
+        return `Discover the ${n} ${brand} addresses in France from our editorial selection: Palaces, 5-star hotels. IATA booking, GDS net rates.`;
+      }
+      if (scope.kind === 'single-non-france') {
+        return `Discover the ${n} ${brand} addresses in ${scope.countryLabel}, curated by our concierge desk. IATA booking, GDS net rates.`;
+      }
+      return `Discover the ${n} ${brand} addresses across ${scope.countryCount} countries, curated by our concierge desk. IATA booking, GDS net rates.`;
+    },
     faqTitle: 'Questions about the brand',
   },
 } as const;
+
+function computeBrandScope(
+  hotels: readonly {
+    readonly countryCode: string | null;
+    readonly countryLabelFr: string | null;
+    readonly countryLabelEn: string | null;
+  }[],
+  locale: Locale,
+): BrandScope {
+  const codes = new Set<string>();
+  let firstLabelFr: string | null = null;
+  let firstLabelEn: string | null = null;
+  for (const h of hotels) {
+    const code = (h.countryCode ?? 'FR').toUpperCase();
+    codes.add(code);
+    if (firstLabelFr === null) firstLabelFr = h.countryLabelFr;
+    if (firstLabelEn === null) firstLabelEn = h.countryLabelEn;
+  }
+  if (codes.size === 0 || (codes.size === 1 && codes.has('FR'))) {
+    return { kind: 'france-only' };
+  }
+  if (codes.size === 1) {
+    const label =
+      pickByLocale(locale, firstLabelFr ?? '', firstLabelEn ?? firstLabelFr ?? '') ||
+      'à l’étranger';
+    return { kind: 'single-non-france', countryLabel: label };
+  }
+  return { kind: 'multi-country', countryCount: codes.size };
+}
 
 /**
  * Editorial descriptors per brand — fuel the AEO answer block. Kept
@@ -158,6 +240,7 @@ function brandAeoAnswer(args: {
   readonly palaceCount: number;
   readonly locale: Locale;
   readonly freshnessDate: string;
+  readonly scope: BrandScope;
 }): string {
   const desc = BRAND_DESCRIPTORS[args.brandSlug];
   const positioning =
@@ -171,10 +254,22 @@ function brandAeoAnswer(args: {
           `including ${args.palaceCount} Palace${args.palaceCount > 1 ? 's' : ''} certified by Atout France`,
         )
       : pickByLocale(args.locale, 'hôtels 5 étoiles', '5-star hotels');
+  const scopeLabelFr =
+    args.scope.kind === 'france-only'
+      ? 'en France'
+      : args.scope.kind === 'single-non-france'
+        ? `au ${args.scope.countryLabel}`
+        : `dans ${args.scope.countryCount} pays`;
+  const scopeLabelEn =
+    args.scope.kind === 'france-only'
+      ? 'in France'
+      : args.scope.kind === 'single-non-france'
+        ? `in ${args.scope.countryLabel}`
+        : `across ${args.scope.countryCount} countries`;
   const intro = pickByLocale(
     args.locale,
-    `MyConciergeHotel référence ${args.count} adresse${args.count > 1 ? 's' : ''} ${args.brandLabel} en France au ${args.freshnessDate}`,
-    `MyConciergeHotel lists ${args.count} ${args.brandLabel} address${args.count > 1 ? 'es' : ''} in France as of ${args.freshnessDate}`,
+    `MyConciergeHotel référence ${args.count} adresse${args.count > 1 ? 's' : ''} ${args.brandLabel} ${scopeLabelFr} au ${args.freshnessDate}`,
+    `MyConciergeHotel lists ${args.count} ${args.brandLabel} address${args.count > 1 ? 'es' : ''} ${scopeLabelEn} as of ${args.freshnessDate}`,
   );
   const middle =
     positioning.length > 0
@@ -193,13 +288,28 @@ function brandFaqItems(args: {
   readonly count: number;
   readonly cities: readonly string[];
   readonly locale: Locale;
+  readonly scope: BrandScope;
 }): readonly { readonly question: string; readonly answer: string }[] {
   const citiesLabel = args.cities.slice(0, 4).join(', ');
+  const scopeLabelFr =
+    args.scope.kind === 'france-only'
+      ? 'en France'
+      : args.scope.kind === 'single-non-france'
+        ? `au ${args.scope.countryLabel}`
+        : `dans ${args.scope.countryCount} pays`;
+  const scopeLabelEn =
+    args.scope.kind === 'france-only'
+      ? 'in France'
+      : args.scope.kind === 'single-non-france'
+        ? `in ${args.scope.countryLabel}`
+        : `across ${args.scope.countryCount} countries`;
+  const questionScopeFr = args.scope.kind === 'france-only' ? ' en France' : '';
+  const questionScopeEn = args.scope.kind === 'france-only' ? ' in France' : '';
   if (args.locale === 'fr') {
     return [
       {
-        question: `Combien d'hôtels ${args.brandLabel} sont disponibles en France ?`,
-        answer: `MyConciergeHotel sélectionne ${args.count} adresse${args.count > 1 ? 's' : ''} ${args.brandLabel} en France, ${args.cities.length > 1 ? `réparties entre ${citiesLabel}` : `située à ${citiesLabel}`}. Chaque fiche détaille la classification (Palace, 5 étoiles), les services et les tarifs nets disponibles via notre licence IATA.`,
+        question: `Combien d'hôtels ${args.brandLabel} sont disponibles${questionScopeFr} ?`,
+        answer: `MyConciergeHotel sélectionne ${args.count} adresse${args.count > 1 ? 's' : ''} ${args.brandLabel} ${scopeLabelFr}, ${args.cities.length > 1 ? `réparties entre ${citiesLabel}` : `située à ${citiesLabel}`}. Chaque fiche détaille la classification (Palace, 5 étoiles), les services et les tarifs nets disponibles via notre licence IATA.`,
       },
       {
         question: `Comment réserver un hôtel ${args.brandLabel} via MyConciergeHotel ?`,
@@ -217,8 +327,8 @@ function brandFaqItems(args: {
   }
   return [
     {
-      question: `How many ${args.brandLabel} hotels are available in France?`,
-      answer: `MyConciergeHotel curates ${args.count} ${args.brandLabel} address${args.count > 1 ? 'es' : ''} in France, ${args.cities.length > 1 ? `spread across ${citiesLabel}` : `located in ${citiesLabel}`}. Each page details the classification (Palace, 5-star), services, and net rates available through our IATA licence.`,
+      question: `How many ${args.brandLabel} hotels are available${questionScopeEn}?`,
+      answer: `MyConciergeHotel curates ${args.count} ${args.brandLabel} address${args.count > 1 ? 'es' : ''} ${scopeLabelEn}, ${args.cities.length > 1 ? `spread across ${citiesLabel}` : `located in ${citiesLabel}`}. Each page details the classification (Palace, 5-star), services, and net rates available through our IATA licence.`,
     },
     {
       question: `How do I book a ${args.brandLabel} hotel via MyConciergeHotel?`,
@@ -249,10 +359,12 @@ export async function generateMetadata({
   const brand = KNOWN_BRANDS.find((b) => b.slug === brandSlug);
   if (brand === undefined) return {};
 
-  const hotels = await listPublishedHotelsForIndex();
-  const count = hotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug).length;
+  const allHotels = await listPublishedHotelsForIndex();
+  const brandHotels = allHotels.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug);
+  const count = brandHotels.length;
   const locale = raw;
   const t = T[locale];
+  const scope = computeBrandScope(brandHotels, locale);
   const buildCanonicalPath = (l: Locale): string =>
     getPathname({
       locale: l,
@@ -260,15 +372,15 @@ export async function generateMetadata({
     });
 
   return {
-    title: t.metaTitle(brand.label),
-    description: t.metaDesc(brand.label, count),
+    title: t.metaTitle(brand.label, scope),
+    description: t.metaDesc(brand.label, count, scope),
     alternates: {
       canonical: buildCanonicalPath(locale),
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
-      title: t.metaTitle(brand.label),
-      description: t.metaDesc(brand.label, count),
+      title: t.metaTitle(brand.label, scope),
+      description: t.metaDesc(brand.label, count, scope),
       type: 'website',
       locale: ogLocale(locale),
     },
@@ -320,10 +432,23 @@ export default async function BrandPage({
     year: 'numeric',
   }).format(new Date());
 
+  const scope = computeBrandScope(hotels, locale);
+  const scopeFrLabel =
+    scope.kind === 'france-only'
+      ? 'en France'
+      : scope.kind === 'single-non-france'
+        ? `au ${scope.countryLabel}`
+        : `dans ${scope.countryCount} pays`;
+  const scopeEnLabel =
+    scope.kind === 'france-only'
+      ? 'in France'
+      : scope.kind === 'single-non-france'
+        ? `in ${scope.countryLabel}`
+        : `across ${scope.countryCount} countries`;
   const aeoQuestion = pickByLocale(
     locale,
-    `Combien d'hôtels ${brand.label} sont disponibles en France via MyConciergeHotel ?`,
-    `How many ${brand.label} hotels are available in France via MyConciergeHotel?`,
+    `Combien d'hôtels ${brand.label} sont disponibles ${scopeFrLabel} via MyConciergeHotel ?`,
+    `How many ${brand.label} hotels are available ${scopeEnLabel} via MyConciergeHotel?`,
   );
   const aeoAnswer = isEmpty
     ? ''
@@ -335,6 +460,7 @@ export default async function BrandPage({
         palaceCount,
         locale,
         freshnessDate,
+        scope,
       });
   const faqItems = isEmpty
     ? []
@@ -343,6 +469,7 @@ export default async function BrandPage({
         count: hotels.length,
         cities: sortedCities,
         locale,
+        scope,
       });
 
   // ── BreadcrumbList JSON-LD ───────────────────────────────────────────
@@ -367,7 +494,7 @@ export default async function BrandPage({
     ? null
     : JsonLd.withSchemaOrgContext(
         JsonLd.itemListJsonLd({
-          name: `${brand.label} ${t.titleSuffix}`,
+          name: `${brand.label} ${t.suffix(scope)}`,
           items: hotels.map((h) => ({
             name: h.nameFr,
             url: `${origin}${getPathname({
@@ -408,7 +535,7 @@ export default async function BrandPage({
       <header className="mb-10 max-w-3xl">
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">
-          {brand.label} {t.titleSuffix}
+          {brand.label} {t.suffix(scope)}
         </h1>
         <p className="text-muted mt-3 text-sm md:text-base">
           {isEmpty
@@ -417,7 +544,7 @@ export default async function BrandPage({
                 `Aucune adresse ${brand.label} encore publiée dans notre catalogue. Le catalogue s'enrichit régulièrement — explorez nos autres marques ou nos sélections éditoriales en attendant.`,
                 `No ${brand.label} address published yet in our catalog. The catalog is growing — browse our other brands or editorial selections in the meantime.`,
               )
-            : t.subtitle(brand.label, hotels.length)}
+            : t.subtitle(brand.label, hotels.length, scope)}
         </p>
       </header>
 

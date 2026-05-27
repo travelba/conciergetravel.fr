@@ -9,12 +9,14 @@
 ## 1. Identité de marque
 
 - **Nom** : MyConciergeHotel.com
-- **Positionnement** : Votre concierge personnel pour les hôtels 5★ et Palaces
+- **Positionnement** : **La sélection du Concierge** — hôtels d'exception dans le monde (Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales)
+- **Périmètre catalogue** : 615 hôtels publiés dans 91 pays (snapshot 2026-05-27) — voir [ADR-0021](docs/adr/0021-pivot-scope-mondial.md)
+- **Promesse unique** : un **Conseil du Concierge** opérationnel concret sur chaque fiche — le secret que les guides ne donnent jamais
 - **Ton** : expert complice, jamais commercial, toujours précis
 
 ## 2. Le personnage — "Le Concierge"
 
-Chaque contenu est écrit à la voix du **Concierge** : un expert des Palaces qui
+Chaque contenu est écrit à la voix du **Concierge** : un expert des hôtels d'exception (Palaces, Relais & Châteaux, maisons rares à l'international) qui
 parle à ses clients comme un ami de confiance privilégié.
 
 - **Pas un journaliste** — pas de distance feinte de tiers neutre

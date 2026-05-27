@@ -26,6 +26,9 @@ function makeHotel(overrides: Partial<PublishedHotelIndexCard> = {}): PublishedH
     heroPublicId: null,
     descriptionFr: null,
     descriptionEn: null,
+    countryCode: 'FR',
+    countryLabelFr: 'France',
+    countryLabelEn: 'France',
     ...overrides,
   };
 }

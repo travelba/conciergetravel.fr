@@ -33,15 +33,15 @@ function siteOrigin(): string {
 const T = {
   fr: {
     eyebrow: 'Classements éditoriaux',
-    title: 'Nos classements de Palaces et hôtels 5★',
+    title: 'Nos classements d’hôtels d’exception',
     subtitle: (n: number) =>
-      `${n} classements éditoriaux rédigés par notre équipe : les plus beaux Palaces de France, par destination, par thématique, ou par distinction.`,
-    metaTitle: 'Classements de Palaces — MyConciergeHotel',
+      `${n} classements éditoriaux rédigés par notre conciergerie : les plus beaux hôtels d’exception dans le monde, par destination, par thématique, ou par distinction.`,
+    metaTitle: 'Classements d’hôtels d’exception — MyConciergeHotel',
     metaDesc:
-      "Découvrez nos classements éditoriaux : meilleurs Palaces de France, plus beaux Palaces de Paris, Côte d'Azur, Alpes, spa, gastronomie, romantisme.",
+      'Découvrez nos classements éditoriaux : meilleurs Palaces, Relais & Châteaux, hôtels de luxe par destination (Paris, Italie, Japon, Maroc, Maldives…), spa, gastronomie, romantisme.',
     entriesCount: (n: number) => (n === 1 ? '1 hôtel' : `${n} hôtels`),
     seeRanking: 'Lire le classement',
-    searchPlaceholder: 'Filtrer par mot-clé (ex : Paris, spa, Palace)…',
+    searchPlaceholder: 'Filtrer par mot-clé (ex : Paris, spa, Palace, Relais & Châteaux)…',
     emptyLabel: 'Aucun classement ne correspond à votre filtre.',
     clearLabel: 'Réinitialiser',
     // Template strings (no functions) so we can pass them across the
@@ -54,7 +54,7 @@ const T = {
     subhubsLabel: 'Voir le sous-hub',
     aeoQ: 'Comment fonctionnent les classements MyConciergeHotel ?',
     aeoAnswer: (n: number, freshness: string) =>
-      `MyConciergeHotel publie ${n} classements éditoriaux de Palaces et hôtels 5★, croisés sur quatre axes (type, destination, thématique, occasion) et un calendrier saisonnier. Chaque classement est rédigé par notre conciergerie : méthode transparente, sources nommées (Atout France, Michelin Keys, Forbes Travel Guide), aucun pay-to-play. Lecture moyenne 5-8 min, mise à jour ${freshness}.`,
+      `MyConciergeHotel publie ${n} classements éditoriaux d’hôtels d’exception dans le monde (Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World), croisés sur quatre axes (type, destination, thématique, occasion) et un calendrier saisonnier. Chaque classement est rédigé par notre conciergerie : méthode transparente, sources nommées, aucun pay-to-play. Lecture moyenne 5-8 min, mise à jour ${freshness}.`,
     faqTitle: 'Nos classements — questions fréquentes',
     faq: [
       {
@@ -85,15 +85,15 @@ const T = {
   },
   en: {
     eyebrow: 'Editorial rankings',
-    title: 'Our Palace and 5★ hotel rankings',
+    title: 'Our rankings of extraordinary hotels',
     subtitle: (n: number) =>
-      `${n} editorial rankings written by our team — the most beautiful Palaces of France, by destination, theme or distinction.`,
-    metaTitle: 'Palace Rankings — MyConciergeHotel',
+      `${n} editorial rankings written by our concierge desk — the most extraordinary hotels in the world, by destination, theme or distinction.`,
+    metaTitle: 'Hotel rankings — MyConciergeHotel',
     metaDesc:
-      'Discover our editorial rankings: the finest Palaces of France, the most beautiful Palaces of Paris, Riviera, Alps, spa, gastronomy, romance.',
+      'Discover our editorial rankings: the finest Palaces, Relais & Châteaux, luxury hotels by destination (Paris, Italy, Japan, Morocco, the Maldives…), spa, gastronomy, romance.',
     entriesCount: (n: number) => (n === 1 ? '1 hotel' : `${n} hotels`),
     seeRanking: 'Read the ranking',
-    searchPlaceholder: 'Filter by keyword (e.g. Paris, spa, Palace)…',
+    searchPlaceholder: 'Filter by keyword (e.g. Paris, spa, Palace, Relais & Châteaux)…',
     emptyLabel: 'No ranking matches your filter.',
     clearLabel: 'Clear',
     resultsLabelTpl: '{n} results',
@@ -104,7 +104,7 @@ const T = {
     subhubsLabel: 'View sub-hub',
     aeoQ: 'How do the MyConciergeHotel rankings work?',
     aeoAnswer: (n: number, freshness: string) =>
-      `MyConciergeHotel publishes ${n} editorial rankings of Palaces and 5-star hotels, faceted across four axes (type, destination, theme, occasion) and a seasonal calendar. Every ranking is authored by our concierge desk: transparent methodology, named sources (Atout France, Michelin Keys, Forbes Travel Guide), no pay-to-play. 5-8 min read on average, last updated ${freshness}.`,
+      `MyConciergeHotel publishes ${n} editorial rankings of extraordinary hotels worldwide (Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World), faceted across four axes (type, destination, theme, occasion) and a seasonal calendar. Every ranking is authored by our concierge desk: transparent methodology, named sources, no pay-to-play. 5-8 min read on average, last updated ${freshness}.`,
     faqTitle: 'Our rankings — frequently asked questions',
     faq: [
       {

@@ -2771,6 +2771,12 @@ export interface PublishedHotelIndexCard {
   readonly heroPublicId: string | null;
   readonly descriptionFr: string | null;
   readonly descriptionEn: string | null;
+  // International scope signals (migration 0033 + ADR-0021). Nullable
+  // because legacy FR-only rows can still ship without an explicit
+  // country code; consumers fall back to "France" when null.
+  readonly countryCode: string | null;
+  readonly countryLabelFr: string | null;
+  readonly countryLabelEn: string | null;
 }
 
 const HotelIndexRowSchema = z.object({
@@ -2791,6 +2797,14 @@ const HotelIndexRowSchema = z.object({
   hero_image: stringOrEmpty,
   description_fr: stringOrEmpty,
   description_en: stringOrEmpty,
+  // International scope (migration 0033). Country labels are optional —
+  // older rows may still be NULL while the backfill is in progress.
+  country_code: z
+    .string()
+    .nullable()
+    .transform((v) => (typeof v === 'string' && v.length === 2 ? v.toUpperCase() : null)),
+  country_label_fr: stringOrEmpty,
+  country_label_en: stringOrEmpty,
 });
 
 /**
@@ -2811,7 +2825,7 @@ export async function listPublishedHotelsForIndex(
     const { data, error } = await supabase
       .from('hotels')
       .select(
-        'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en',
+        'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en, country_code, country_label_fr, country_label_en',
       )
       .eq('is_published', true)
       .order('priority', { ascending: true })
@@ -2841,6 +2855,9 @@ export async function listPublishedHotelsForIndex(
         heroPublicId: row.hero_image,
         descriptionFr: row.description_fr,
         descriptionEn: row.description_en,
+        countryCode: row.country_code,
+        countryLabelFr: row.country_label_fr,
+        countryLabelEn: row.country_label_en,
       });
     }
     return out;
