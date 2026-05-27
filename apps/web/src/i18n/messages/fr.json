@@ -172,22 +172,6 @@
       "submit": "Rechercher",
       "submitAria": "Lancer la recherche"
     },
-    "breadcrumb": {
-      "label": "Fil d'ariane",
-      "home": "Accueil",
-      "hotels": "Palaces & Hôtels",
-      "destinations": "Destinations",
-      "rankings": "Classements",
-      "guides": "Guides",
-      "inspiration": "Inspiration",
-      "concierge": "Le Concierge",
-      "brands": "Marques hôtelières",
-      "categories": "Catégories",
-      "search": "Recherche",
-      "account": "Mon compte",
-      "booking": "Réservation",
-      "legal": "Mentions légales"
-    },
     "account": {
       "signIn": "Connexion",
       "signUp": "Créer un compte",
@@ -204,6 +188,22 @@
       "switchTo": "English",
       "current": "Français"
     }
+  },
+  "breadcrumb": {
+    "label": "Fil d'ariane",
+    "home": "Accueil",
+    "hotels": "Palaces & Hôtels",
+    "destinations": "Destinations",
+    "rankings": "Classements",
+    "guides": "Guides",
+    "inspiration": "Inspiration",
+    "concierge": "Le Concierge",
+    "brands": "Marques hôtelières",
+    "categories": "Catégories",
+    "search": "Recherche",
+    "account": "Mon compte",
+    "booking": "Réservation",
+    "legal": "Mentions légales"
   },
   "itineraires": {
     "eyebrow": "Itinéraires sur-mesure",

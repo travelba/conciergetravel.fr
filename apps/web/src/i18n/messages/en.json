@@ -172,22 +172,6 @@
       "submit": "Search",
       "submitAria": "Start the search"
     },
-    "breadcrumb": {
-      "label": "Breadcrumb",
-      "home": "Home",
-      "hotels": "Palaces & Hotels",
-      "destinations": "Destinations",
-      "rankings": "Rankings",
-      "guides": "Guides",
-      "inspiration": "Inspiration",
-      "concierge": "The Concierge",
-      "brands": "Hotel brands",
-      "categories": "Categories",
-      "search": "Search",
-      "account": "My account",
-      "booking": "Booking",
-      "legal": "Legal notice"
-    },
     "account": {
       "signIn": "Sign in",
       "signUp": "Create account",
@@ -204,6 +188,22 @@
       "switchTo": "Français",
       "current": "English"
     }
+  },
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "hotels": "Palaces & Hotels",
+    "destinations": "Destinations",
+    "rankings": "Rankings",
+    "guides": "Guides",
+    "inspiration": "Inspiration",
+    "concierge": "The Concierge",
+    "brands": "Hotel brands",
+    "categories": "Categories",
+    "search": "Search",
+    "account": "My account",
+    "booking": "Booking",
+    "legal": "Legal notice"
   },
   "itineraires": {
     "eyebrow": "Bespoke itineraries",
