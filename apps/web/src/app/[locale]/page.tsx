@@ -6,19 +6,16 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 import { HotelImage } from '@mch/ui';
 
-import { InternationalComingSoon } from '@/components/destinations/international-coming-soon';
+import { HomeDestinationGrid } from '@/components/home/home-destination-grid';
 import { HotelImagePlaceholder } from '@/components/hotel/hotel-image-placeholder';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import {
-  TOP_DESTINATION_NAV_ENTRIES,
-  TOP_RANKING_NAV_ENTRIES,
-  pickEntryLabel,
-} from '@/components/layout/nav-data';
+import { TOP_RANKING_NAV_ENTRIES } from '@/components/layout/nav-data';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
+import { pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { listPublishedCities } from '@/server/destinations/cities';
 import {
   listPublishedHotelsForIndex,
@@ -40,7 +37,6 @@ export const dynamic = 'force-dynamic';
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 const FEATURED_HOTEL_COUNT = 6;
-const FEATURED_DESTINATION_COUNT = 6;
 
 /**
  * Home `generateMetadata` — canonical, hreflang, OG.
@@ -99,37 +95,6 @@ function pickFeaturedHotels(
   return [...withHero, ...withoutHero].slice(0, limit);
 }
 
-interface FeaturedDestinationCard {
-  readonly slug: string;
-  readonly label: string;
-  readonly count: number;
-}
-
-/**
- * Top destinations for the home featured grid. Joins the editorial menu
- * pick (`TOP_DESTINATION_NAV_ENTRIES`) with the live published hotel
- * counts so the homepage never sends a visitor to a 0-hotel page.
- *
- * The 4 menu entries that currently render 0 hotels (cannes, aix, reims,
- * bordeaux — drafts only as of 2026-05-25) are skipped here even though
- * they remain in the mega-menu, because the homepage CTA promises
- * concrete inventory.
- */
-function pickFeaturedDestinations(
-  cities: ReadonlyMap<string, number>,
-  locale: Locale,
-  limit: number,
-): readonly FeaturedDestinationCard[] {
-  const out: FeaturedDestinationCard[] = [];
-  for (const entry of TOP_DESTINATION_NAV_ENTRIES) {
-    const count = cities.get(entry.slug) ?? 0;
-    if (count === 0) continue;
-    out.push({ slug: entry.slug, label: pickEntryLabel(entry, locale), count });
-    if (out.length >= limit) break;
-  }
-  return out;
-}
-
 function pickFeaturedRankings(
   all: readonly PublishedRankingCard[],
 ): readonly PublishedRankingCard[] {
@@ -155,21 +120,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   ]);
   const featuredHotels = pickFeaturedHotels(hotelIndex, FEATURED_HOTEL_COUNT);
   const cityCounts = new Map(cities.map((c) => [c.slug, c.count] as const));
-  const featuredDestinations = pickFeaturedDestinations(
-    cityCounts,
-    locale,
-    FEATURED_DESTINATION_COUNT,
-  );
   const featuredRankings = pickFeaturedRankings(rankings);
 
   const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const agencyDescription =
+    locale === 'en'
+      ? "The Concierge's Selection — 615 extraordinary hotels in 91 countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night."
+      : "La sélection du Concierge — 615 hôtels d'exception choisis dans 91 pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.";
   const agencyJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.travelAgencyJsonLd({
       name: 'MyConciergeHotel',
       url: `${siteUrl}${getPathname({ locale, href: '/' })}`,
-      description:
-        'Le concierge en ligne des Palaces et hôtels 5 étoiles en France. Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.',
+      description: agencyDescription,
       iataCode: 'FR',
     }),
   );
@@ -243,14 +206,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="container mx-auto max-w-screen-xl px-4 py-16 sm:py-24">
         <div className="flex max-w-3xl flex-col gap-6">
           <p className="text-muted text-xs uppercase tracking-[0.18em]">
-            {tCommon('siteName')} — France
+            {tCommon('siteName')} — {tCommon('tagline')}
           </p>
           <h1 className="text-fg font-serif text-4xl sm:text-5xl md:text-6xl">{t('title')}</h1>
           {/*
-            Secondary signal for the international expansion (Phase 5
-            multilingual — see AGENTS.md §4ter). Stays sober — the brand
-            DNA is France-first, so this sits as a subtle eyebrow under
-            the H1 rather than competing with the subtitle below.
+            Global-scope metrics callout (ADR-0021). Sits as a sober
+            italic line under the H1 so the «91 pays · 615 adresses»
+            signal is visible above the fold without competing with
+            the editorial subtitle that follows.
           */}
           <p className="text-fg/70 -mt-2 font-serif text-base italic sm:text-lg">
             {t('intlBadge')}
@@ -405,52 +368,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </section>
       ) : null}
 
-      {/* ─── Featured Destinations ─────────────────────────────────── */}
-      {featuredDestinations.length > 0 ? (
-        <section
-          aria-labelledby="home-featured-destinations"
-          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-        >
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-            <div className="max-w-2xl">
-              <p className="text-muted text-xs uppercase tracking-[0.18em]">
-                {t('featuredDestinations.eyebrow')}
-              </p>
-              <h2
-                id="home-featured-destinations"
-                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
-              >
-                {t('featuredDestinations.title')}
-              </h2>
-              <p className="text-muted mt-3 text-sm sm:text-base">
-                {t('featuredDestinations.subtitle')}
-              </p>
-            </div>
-            <Link
-              href="/destination"
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('featuredDestinations.seeAll')}
-            </Link>
-          </div>
-
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {featuredDestinations.map((d) => (
-              <li key={d.slug}>
-                <Link
-                  href={{ pathname: '/destination/[citySlug]', params: { citySlug: d.slug } }}
-                  className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:outline-none focus-visible:ring-2"
-                >
-                  <p className="text-fg font-serif text-base">{d.label}</p>
-                  <p className="text-muted mt-1 text-xs">
-                    {t('featuredDestinations.countLabel', { count: d.count })}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {/* ─── Featured Destinations (mixed FR cities + intl countries) */}
+      <HomeDestinationGrid
+        locale={locale}
+        destinations={pickHomeDestinations(cityCounts, locale, (count) =>
+          t('featuredDestinations.countLabel', { count }),
+        )}
+      />
 
       {/* ─── Featured Rankings ─────────────────────────────────────── */}
       {featuredRankings.length > 0 ? (
@@ -533,10 +457,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
       </section>
-
-      <div className="container mx-auto max-w-screen-xl px-4 pb-16 sm:pb-24">
-        <InternationalComingSoon locale={locale} />
-      </div>
     </main>
   );
 }
