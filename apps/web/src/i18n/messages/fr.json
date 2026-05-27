@@ -1,7 +1,7 @@
 {
   "common": {
     "siteName": "MyConciergeHotel",
-    "tagline": "Hôtels 5 étoiles et Palaces en France — sélection éditoriale et réservation premium",
+    "tagline": "La sélection du Concierge — hôtels d'exception dans le monde",
     "search": "Rechercher",
     "book": "Réserver",
     "bookingRequest": "Demande de réservation",
@@ -18,11 +18,11 @@
     "agency": "L'agence"
   },
   "homepage": {
-    "metaTitle": "MyConciergeHotel — Concierge des Palaces et hôtels 5★ en France",
-    "metaDesc": "Agence IATA dédiée aux Palaces et hôtels 5★ français. Chaque fiche se conclut par un Conseil du Concierge. Tarifs nets GDS, paiement Amadeus, fidélité dès la 1re nuit.",
-    "title": "Votre concierge des Palaces et hôtels 5★ en France",
-    "intlBadge": "+30 pays bientôt rejoints — l'international arrive.",
-    "subtitle": "Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais. Réservation au tarif net via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.",
+    "metaTitle": "MyConciergeHotel — La sélection du Concierge, hôtels d'exception dans le monde",
+    "metaDesc": "615 adresses sélectionnées dans 91 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
+    "title": "La sélection du Concierge",
+    "intlBadge": "91 pays · 615 adresses · 435 Relais & Châteaux",
+    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie. Chaque fiche s'achève par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
       "iata": "Agence accréditée IATA",
@@ -30,8 +30,8 @@
       "amadeus": "Paiement sécurisé Amadeus"
     },
     "aeo": {
-      "question": "Pourquoi passer par MyConciergeHotel pour réserver un Palace ou un hôtel 5★ ?",
-      "answer": "MyConciergeHotel est le concierge en ligne des Palaces et hôtels 5 étoiles en France. Chaque fiche est rédigée par nos conseillers et se termine par un secret opérationnel (chambre, table, horaire ou accès). Côté tarifs : agence IATA, tarifs nets GDS Amadeus, paiement sécurisé PCI-DSS, comparatif de prix non affilié pour chaque hôtel, programme de fidélité dès la première nuit. Aucun supplément ajouté par notre agence."
+      "question": "Comment MyConciergeHotel sélectionne-t-il ses hôtels ?",
+      "answer": "MyConciergeHotel applique une grille éditoriale unique au monde : distinctions officielles (Palace Atout France pour la France, Forbes Five Star, Michelin Keys), appartenance aux collections d'auteur (Relais & Châteaux, Leading Hotels of the World), et un score interne rédigé par notre conciergerie (service, signature, emplacement). Chaque fiche est écrite à la main et se termine par un Conseil du Concierge — un secret opérationnel concret (chambre, table, horaire, accès). Aucun pay-to-play, aucune commission rémunérée par l'hôtelier influence la sélection."
     },
     "intlComingSoon": {
       "eyebrow": "Bientôt à l'international",
@@ -59,7 +59,7 @@
     "featuredDestinations": {
       "eyebrow": "Destinations",
       "title": "Là où le Concierge aime envoyer ses clients",
-      "subtitle": "Paris, Côte d'Azur, Alpes, Provence, vignobles bordelais, Champagne, Corse, Pays basque. Chaque destination ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
+      "subtitle": "Paris, Côte d'Azur, Alpes, Italie, Japon, Maroc, Maldives, Suisse… Chaque destination ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
       "seeAll": "Toutes les destinations →",
       "countLabel": "{count, plural, one {# adresse} other {# adresses}}"
     },
@@ -364,7 +364,7 @@
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
-    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne dédiée aux Palaces et hôtels d'exception en France. Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 615 hôtels d'exception dans 91 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
     "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
     "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
@@ -414,7 +414,7 @@
         },
         {
           "q": "Quel est votre périmètre géographique ?",
-          "a": "En V1, nous couvrons les Palaces et hôtels 5★ en France. Nous étendons progressivement à l'Italie, la Suisse, le Maroc, les Émirats et plusieurs destinations asiatiques."
+          "a": "Notre sélection couvre 615 adresses dans 91 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
         },
         {
           "q": "Combien coûte votre service ?",
@@ -2081,8 +2081,8 @@
     ]
   },
   "conciergeMethod": {
-    "metaTitle": "Notre méthode éditoriale — Comment nous sélectionnons les Palaces | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel sélectionne les Palaces et hôtels 5★ français selon une méthode transparente : distinctions Atout France, Michelin Keys, Forbes, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "metaTitle": "Notre méthode éditoriale — Comment nous composons la sélection du Concierge | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel sélectionne 615 hôtels d'exception dans 91 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
     "breadcrumbHome": "Accueil",
     "breadcrumbConcierge": "Le Concierge",
     "eyebrow": "EEAT — méthode éditoriale",
@@ -2371,7 +2371,7 @@
   "footer": {
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. Tous droits réservés.",
-    "tagline": "Votre concierge des Palaces et hôtels 5★ en France — sélection éditoriale, conseils opérationnels, réservation au tarif net via notre agence IATA.",
+    "tagline": "La sélection du Concierge — hôtels d'exception dans le monde. Sélection éditoriale, Conseil du Concierge par fiche, agence IATA accréditée.",
     "trust": {
       "iata": "Agence IATA / APST",
       "concierge": "Le Conseil du Concierge en bas de chaque fiche",
@@ -2712,7 +2712,7 @@
   "hotelPage": {
     "meta": {
       "titleFallback": "{name} — {city}",
-      "descriptionFallback": "{name}, hôtel 5★ à {city} : fiche complète + Conseil du Concierge. Réservation au tarif net via MyConciergeHotel, agence IATA spécialisée Palaces & 5 étoiles France."
+      "descriptionFallback": "{name}, hôtel 5★ à {city} : fiche complète + Conseil du Concierge. Réservation au tarif net via MyConciergeHotel — la sélection du Concierge, hôtels d'exception dans le monde, agence IATA accréditée."
     },
     "breadcrumb": {
       "home": "Accueil",

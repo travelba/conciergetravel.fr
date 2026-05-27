@@ -1,7 +1,7 @@
 {
   "common": {
     "siteName": "MyConciergeHotel",
-    "tagline": "5-star hotels and Palaces in France — editorial selection and premium booking",
+    "tagline": "The Concierge's Selection — extraordinary hotels around the world",
     "search": "Search",
     "book": "Book",
     "bookingRequest": "Request booking",
@@ -18,11 +18,11 @@
     "agency": "The agency"
   },
   "homepage": {
-    "metaTitle": "MyConciergeHotel — Concierge for France's Palaces & 5-star hotels",
-    "metaDesc": "IATA-accredited agency for France's Palaces and 5-star hotels. Every page closes with a Concierge's Tip. GDS net rates, Amadeus payment, loyalty perks from night one.",
-    "title": "Your concierge for France's Palaces and 5-star hotels",
-    "intlBadge": "30 countries joining soon — international expansion underway.",
-    "subtitle": "Every hotel page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention. Booking at the net rate via our IATA-accredited desk, secure Amadeus payment, loyalty perks from the first night.",
+    "metaTitle": "MyConciergeHotel — The Concierge's Selection of extraordinary hotels worldwide",
+    "metaDesc": "615 curated addresses across 91 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
+    "title": "The Concierge's Selection",
+    "intlBadge": "91 countries · 615 addresses · 435 Relais & Châteaux",
+    "subtitle": "A worldwide selection of extraordinary hotels, signed by our concierge desk. Every page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention.",
     "comingSoon": "MyConciergeHotel.com — your concierge is curating the selection.",
     "trust": {
       "iata": "IATA-accredited agency",
@@ -30,8 +30,8 @@
       "amadeus": "Secure Amadeus payment"
     },
     "aeo": {
-      "question": "Why book a Palace or 5-star hotel through MyConciergeHotel?",
-      "answer": "MyConciergeHotel is the online concierge for France's Palaces and 5-star hotels. Every page is written by our advisors and closes with a concrete operational tip — the right room, the right table, the right hour. On the booking side: IATA-accredited agency, Amadeus GDS net rates, PCI-DSS payment, a non-affiliated price comparator on every hotel page, and loyalty benefits from the first night. No agency markup."
+      "question": "How does MyConciergeHotel curate its hotels?",
+      "answer": "MyConciergeHotel applies a single editorial grid worldwide: official distinctions (Atout France Palace label in France, Forbes Five Star, Michelin Keys), membership of author-led collections (Relais & Châteaux, Leading Hotels of the World), and an internal score authored by our concierge desk (service, signature, location). Every page is written by hand and closes with a Concierge's Tip — a concrete operational secret (room, table, timing, access). No pay-to-play; no hotel commission influences the selection."
     },
     "intlComingSoon": {
       "eyebrow": "Going international soon",
@@ -59,7 +59,7 @@
     "featuredDestinations": {
       "eyebrow": "Destinations",
       "title": "Where the Concierge sends his clients",
-      "subtitle": "Paris, the French Riviera, the Alps, Provence, Bordeaux vineyards, Champagne, Corsica, the Basque Country. Each destination opens onto its Palaces, its local guide and its editorial rankings.",
+      "subtitle": "Paris, the French Riviera, the Alps, Italy, Japan, Morocco, the Maldives, Switzerland… Each destination opens onto its Palaces, its local guide and its editorial rankings.",
       "seeAll": "All destinations →",
       "countLabel": "{count, plural, one {# address} other {# addresses}}"
     },
@@ -364,9 +364,9 @@
     "title": "The Concierge",
     "aeoQuestion": "Why book a Palace or 5-star hotel via MyConciergeHotel rather than direct or via an aggregator?",
     "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
-    "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks France's Palaces and exceptional hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
+    "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks extraordinary hotels across 91 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
-    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency dedicated to Palaces and exceptional hotels in France. Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
+    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 615 extraordinary hotels across 91 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
     "trust": {
       "title": "Our commitments",
       "iataTitle": "IATA / APST agency",
@@ -414,7 +414,7 @@
         },
         {
           "q": "What is your geographical scope?",
-          "a": "V1 covers Palaces and 5★ hotels in France. We are progressively extending to Italy, Switzerland, Morocco, the UAE and several Asian destinations."
+          "a": "Our selection spans 615 properties across 91 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
         },
         {
           "q": "How much does your service cost?",
@@ -2081,8 +2081,8 @@
     ]
   },
   "conciergeMethod": {
-    "metaTitle": "Our Editorial Method — How we curate Palaces | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel curates France's Palaces and 5-star hotels with a transparent method: Atout France distinctions, Michelin Keys, Forbes, internal audit. Named sources, detailed scoring, no pay-to-play.",
+    "metaTitle": "Our Editorial Method — How we curate the Concierge's Selection | MyConciergeHotel",
+    "metaDesc": "MyConciergeHotel curates 615 extraordinary hotels across 91 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
     "breadcrumbHome": "Home",
     "breadcrumbConcierge": "The Concierge",
     "eyebrow": "EEAT — Editorial method",
@@ -2371,7 +2371,7 @@
   "footer": {
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. All rights reserved.",
-    "tagline": "Your concierge for France's Palaces and 5★ hotels — editorial selection, operational tips, net-rate booking via our IATA-accredited desk.",
+    "tagline": "The Concierge's Selection — extraordinary hotels around the world. Editorial selection, Concierge's Tip on every page, IATA-accredited agency.",
     "trust": {
       "iata": "IATA / APST agency",
       "concierge": "The Concierge’s Tip at the foot of every hotel page",
@@ -2712,7 +2712,7 @@
   "hotelPage": {
     "meta": {
       "titleFallback": "{name} — {city}",
-      "descriptionFallback": "{name}, 5★ hotel in {city}: full page + Concierge's Tip. Net-rate booking via MyConciergeHotel, IATA agency specialised in France's Palaces and 5★ hotels."
+      "descriptionFallback": "{name}, 5★ hotel in {city}: full page + Concierge's Tip. Net-rate booking via MyConciergeHotel, the Concierge's Selection of extraordinary hotels worldwide — IATA accredited."
     },
     "breadcrumb": {
       "home": "Home",

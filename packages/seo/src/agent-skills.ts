@@ -55,7 +55,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'search',
       description:
-        'Trouver un Palace ou un hôtel 5★ en France par destination et dates. Le concierge renvoie une sélection paginée, triée par pertinence (et non par commission).',
+        "Trouver un hôtel d'exception (Palace, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★, boutique-hôtel) par destination et dates, dans 91 pays. Le concierge renvoie une sélection paginée, triée par pertinence éditoriale (et non par commission).",
       inputSchema: {
         type: 'object',
         properties: {
@@ -131,7 +131,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'filter',
       description:
-        'Affiner la sélection du concierge par type d’hébergement (Palace, 5★), équipements (spa, piscine, étoile Michelin), région ou ville.',
+        "Affiner la sélection du Concierge par type d'hébergement (Palace, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, 5★, boutique-hôtel, château, villa, chalet, maison d'hôtes), équipements (spa, piscine, étoile Michelin), pays, région ou ville.",
     },
     {
       name: 'list-rankings',
@@ -315,7 +315,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'newsletter',
       description:
-        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale Palaces et hôtels 5★, conseils du Concierge, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
+        "S'inscrire à la newsletter MyConciergeHotel — un numéro par mois, sélection éditoriale du Concierge (hôtels d'exception dans le monde), conseils opérationnels, classements. Désinscription en un clic, RGPD-conforme. Mode actuel : queued / dry-run (la bascule sur Brevo intervient prochainement — l'API accepte le payload et confirme l'inscription, qui sera relayée dès activation).",
       inputSchema: {
         type: 'object',
         properties: {
@@ -424,7 +424,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-itinerary',
       description:
-        'Récupérer un itinéraire complet par son slug : étapes jour par jour, hôtels 5★ et Palaces recommandés avec liens de réservation, FAQ longue traîne, conseils Concierge saisonniers, JSON-LD HowTo + ItemList + FAQPage + Article. URL canonique : /fr/itineraire/{slug} ou /en/itineraire/{slug} (slug FR identique en EN, ADR-0008).',
+        "Récupérer un itinéraire complet par son slug : étapes jour par jour, hôtels d'exception recommandés (Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, 5★) avec liens de réservation, FAQ longue traîne, conseils Concierge saisonniers, JSON-LD HowTo + ItemList + FAQPage + Article. URL canonique : /fr/itineraire/{slug} ou /en/itineraire/{slug} (slug FR identique en EN, ADR-0008).",
       inputSchema: {
         type: 'object',
         properties: {
@@ -445,7 +445,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'list-itineraries',
       description:
-        'Lister les itinéraires de voyage publiés par destination (pays ISO-2), durée, thème ou style (luxe, famille, couple, solo, aventure, bien-être, gastronomie, culture, affaires). Chaque itinéraire inclut les hôtels 5★ et Palaces sélectionnés par le Concierge. URL hub : /itineraires (FR) | /itineraries (EN).',
+        "Lister les itinéraires de voyage publiés par destination (pays ISO-2), durée, thème ou style (luxe, famille, couple, solo, aventure, bien-être, gastronomie, culture, affaires). Chaque itinéraire inclut les hôtels d'exception sélectionnés par le Concierge (Palaces, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★). URL hub : /itineraires (FR) | /itineraries (EN).",
       inputSchema: {
         type: 'object',
         properties: {
