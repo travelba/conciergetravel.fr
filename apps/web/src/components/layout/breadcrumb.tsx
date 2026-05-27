@@ -59,7 +59,12 @@ export async function Breadcrumb(): Promise<ReactElement | null> {
   const segments = bare.split('/').filter((s) => s.length > 0);
   if (segments.length === 0) return null;
 
-  const t = await getTranslations('header.breadcrumb');
+  // Namespace was promoted from `header.breadcrumb` → top-level `breadcrumb`
+  // in commit 28a6c63 (`fix(i18n): promote breadcrumb namespace to top-level`).
+  // Reading the legacy path after that move triggered `MISSING_MESSAGE:
+  // header.breadcrumb.*` and a 500 on every non-hotel section page in prod
+  // (the early-return below for `/hotel/*` had masked the issue at QA time).
+  const t = await getTranslations('breadcrumb');
 
   // Map the first segment (the top-level entry) to a label + href.
   // Dynamic params (`[slug]`, `[citySlug]`, …) live at index 1+ and
