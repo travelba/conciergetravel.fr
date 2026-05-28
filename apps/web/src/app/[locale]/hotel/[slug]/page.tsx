@@ -52,6 +52,7 @@ import {
   type AmadeusHotelSentiment,
 } from '@/server/hotels/get-amadeus-sentiment';
 import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
+import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
   getHotelBySlug,
   listPublishedHotelSlugs,
@@ -301,41 +302,34 @@ export async function generateMetadata({
         ]
       : undefined;
 
-  // EEAT guard (Phase photo-ingest, May 2026): a "stub" sheet — i.e.
-  // one that does NOT meet the minimum indexability bar — renders
-  // server-side so deep links from rankings still work, but emits
-  // `noindex, follow` so Google doesn't index thin pages and downgrade
-  // the site's overall quality signal.
+  // EEAT guard (Phase 1, May 2026 — `AGENTS.md §4ter`): a "stub" sheet
+  // — i.e. one that does NOT meet the minimum indexability bar —
+  // renders server-side so deep links from rankings still work, but
+  // emits `noindex, follow` so Google doesn't index thin pages and
+  // downgrade the site's overall quality signal.
   //
-  // A sheet is indexable when it has **a hero image** AND
-  // (**≥ 5 gallery photos** OR **≥ 1 long-form editorial section**).
+  // The predicate lives in `apps/web/src/server/hotels/indexability.ts`.
+  // Two paths to indexability:
+  //   1. Photo-rich (legacy): hero + (≥5 gallery photos OR ≥1 section)
+  //   2. Editorial-only (Phase 1): ≥1 section OR full publish-gate set
+  //      (description_fr ≥ 600, factual_summary_fr ≥ 100, concierge_advice
+  //      non-null, faq_content ≥ 10).
   //
-  // Rationale:
-  //   - Hero alone is necessary (no visual = nothing to crawl/share).
-  //   - Hero + 5 gallery shots = a credible mini-fiche, sufficient
-  //     EEAT for Google Hotels even without a long editorial body.
-  //   - Hero + 1 long section = a credible editorial fiche even if
-  //     the orchestrator only managed to pull a few photos (rare —
-  //     editor manually wrote sections without uploading more shots).
+  // Phase 1 sequencing (catalogue editorial first, photos last) means
+  // most published rows take path 2 until the photo orchestrator runs
+  // (Phase 4). When hero_image lands, path 1 takes over automatically —
+  // no DB change needed; ISR will pick it up on the next revalidate.
   //
   // As soon as the photo orchestrator hydrates the fiche
   // (`scripts/photos/sync-hotel-photos.ts`), the page becomes
   // indexable on the next request — `dynamic = 'force-dynamic'` so
   // there is no cache to invalidate.
   //
-  // `long_description_sections` and `gallery_images` are typed as
-  // `unknown` in the row schema (jsonb blobs with their own runtime
-  // parsers further down). Narrow them locally so TS strict is
-  // satisfied without an `as` cast. Keep this predicate in lockstep
-  // with `listIndexableHotelSlugs()` in
-  // `apps/web/src/server/hotels/get-hotel-by-slug.ts` — they MUST
-  // agree, otherwise the sitemap would list a noindex'd URL.
-  const sectionsRaw = row.long_description_sections;
-  const hasSections = Array.isArray(sectionsRaw) && sectionsRaw.length > 0;
-  const galleryRaw = row.gallery_images;
-  const galleryCount = Array.isArray(galleryRaw) ? galleryRaw.length : 0;
-  const isIndexable = heroPublicId !== null && (galleryCount >= 5 || hasSections);
-  const isStub = !isIndexable;
+  // Single source of truth for the predicate is `isHotelIndexable` in
+  // `apps/web/src/server/hotels/indexability.ts` — kept in lockstep
+  // with `listIndexableHotelSlugs()` (sitemap) and `list-indexable-
+  // for-llms.ts` (LLM corpus).
+  const isStub = !isHotelIndexable(row);
 
   return {
     title,

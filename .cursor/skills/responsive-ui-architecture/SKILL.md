@@ -120,6 +120,78 @@ Reference implementation: `apps/web/src/components/layout/site-header.tsx`
 - Header: phone number visible, IATA + ASPST badges with link to official registers.
 - Footer: APST financial guarantee, secure Amadeus payment with lock icon, "agence française, conseillers francophones".
 
+### Snap carousels (mobile carousel ↔ desktop grid)
+
+Long vertical scrolls on mobile (homepage grids of 4–8 cards stacked
+1-col) are the #1 perceived-bloat complaint on this site (PO feedback
+2026-05-28). The fix is a **CSS-only horizontal snap carousel on
+mobile** that collapses back to the desktop grid at `sm:` and above.
+No JS, no third-party carousel lib, **RSC-compatible**.
+
+```tsx
+<ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
+  {items.map((item) => (
+    <li key={item.id} className="shrink-0 basis-[82%] snap-start sm:basis-auto">
+      <Card />
+    </li>
+  ))}
+</ul>
+```
+
+Six things this pattern enforces:
+
+1. **`-mx-4 px-4`** — the carousel "bleeds" to the viewport edge on
+   mobile while the first card stays aligned with the page margin.
+   Drop it and the first card looks orphaned; double-pad it and the
+   peek of card #2 disappears.
+2. **`basis-[82%]`** — leaves a ~18 % peek of the next card visible
+   so the user **sees the swipe affordance without any "→" arrow**.
+   Tune to the card density:
+   - Photo-heavy / text-heavy cards (openings, rankings) → `basis-[82%]`.
+   - Compact label cards (8 destinations) → `basis-[72%]` (~28 % peek)
+     so two short labels are visible at once and 8 cards only take
+     4 swipes, not 8.
+3. **`snap-x snap-mandatory` + `snap-start` on each `<li>`** — every
+   swipe lands precisely on a card boundary. Without `mandatory` the
+   carousel free-scrolls and feels broken; without `snap-start` the
+   cards drift mid-card.
+4. **`.no-scrollbar`** — defined in `packages/ui/src/globals.css`,
+   hides the WebKit + Firefox scrollbar on the carousel only. Don't
+   apply globally — desktop pages with `overflow-y-auto` containers
+   still need a scrollbar.
+5. **`sm:overflow-visible` + `sm:snap-none` (implicit via removing
+   `snap-x`)** — the desktop grid must fully reset the flex/snap
+   behaviour. A common bug is to forget `sm:overflow-visible` →
+   sticky elements get clipped by an invisible `overflow` container
+   on desktop.
+6. **`shrink-0`** — without it Flexbox shrinks each card to `min-
+content` on mobile and the layout collapses to invisibly thin
+   stripes. Hard to debug visually because the snap behaviour still
+   "works".
+
+Reference implementations:
+
+- `apps/web/src/components/home/home-openings-grid.tsx` — photo cards,
+  4 items, `basis-[82%]`.
+- `apps/web/src/components/home/home-inspiration-grid.tsx` — text
+  cards, 6 items, `basis-[82%]`.
+- `apps/web/src/components/home/home-destination-grid.tsx` — compact
+  label cards, 8 items, `basis-[72%]` (denser).
+- `apps/web/src/components/home/home-top-rankings.tsx` — text cards,
+  6 items, `basis-[82%]`.
+
+The `.no-scrollbar` utility is whitelisted in `packages/ui/src/globals.
+css` — see the `@layer utilities` block. Reuse it for any horizontal
+strip (gallery thumbnails, room types, related hotels, …) that needs
+swipe without scrollbar noise.
+
+**Accessibility note** — `prefers-reduced-motion` is already handled
+globally (`packages/ui/src/globals.css` sets `scroll-behavior: auto`),
+so the snap carousel still works for users who disable smooth scroll.
+Keyboard navigation works via tab (each `<li>` `<Link>` is focusable);
+arrow-key paging would require a Client Component and is out of scope
+for the editorial sections — the visual peek + tab focus is enough.
+
 ### Editorial typography
 
 - Titles in serif (`--font-serif`), body in sans (`--font-sans`), 16px base minimum.

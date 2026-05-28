@@ -315,6 +315,10 @@ export const routing = defineRouting({
     },
     '/itineraires': '/itineraires',
     '/itineraire/[slug]': '/itineraire/[slug]',
+    '/ouvertures': {
+      fr: '/ouvertures',
+      en: '/openings',
+    },
   } as const,
 });
 

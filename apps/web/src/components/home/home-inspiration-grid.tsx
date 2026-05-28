@@ -7,23 +7,44 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 /**
- * `<HomeInspirationGrid>` — 6 axes thème × occasion (CDC §2 +
- * inspiration Tablet "Style & Mood" / Yonder thématiques).
+ * `<HomeInspirationGrid>` — « Trouver la bonne adresse selon l'occasion ».
  *
- * Sober editorial grid. Each axis points to `/classements` for now
- * (Phase 1 — the index page lists all rankings; specific axis slugs
- * will be wired in a follow-up once the ranking matrix is stable).
+ * Six axes choisis par le PO (2026-05-28) — un mix `theme` (5) +
+ * `occasion` (1, lune-de-miel) qui mappe sur la matrice `/classements/
+ * [axe]/[valeur]` (cf. `scripts/editorial-pilot/src/rankings/axes.ts`).
+ *
+ * - `spa-bienetre`, `famille`, `sport-golf`, `gastronomie`, `rooftop`
+ *   appartiennent au THEMES enum → axe = `theme`.
+ * - `lune-de-miel` appartient au OCCASIONS enum → axe = `occasion`.
+ *
+ * Le composant est volontairement strict : les `messageKey` sont
+ * typés et la table est explicite plutôt que générique, pour éviter le
+ * piège « j'ajoute un axe et la copie casse silencieusement ».
  *
  * Pure RSC.
  */
+
+type InspirationCard = {
+  readonly messageKey: 'spa' | 'famille' | 'golf' | 'luneDeMiel' | 'gastronomie' | 'rooftop';
+  readonly axe: 'theme' | 'occasion';
+  readonly valeur: string;
+};
+
+const CARDS: readonly InspirationCard[] = [
+  { messageKey: 'spa', axe: 'theme', valeur: 'spa-bienetre' },
+  { messageKey: 'famille', axe: 'theme', valeur: 'famille' },
+  { messageKey: 'golf', axe: 'theme', valeur: 'sport-golf' },
+  { messageKey: 'luneDeMiel', axe: 'occasion', valeur: 'lune-de-miel' },
+  { messageKey: 'gastronomie', axe: 'theme', valeur: 'gastronomie' },
+  { messageKey: 'rooftop', axe: 'theme', valeur: 'rooftop' },
+];
+
 export async function HomeInspirationGrid({
   locale,
 }: {
   readonly locale: Locale;
 }): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'homepage.inspiration' });
-
-  const axes = ['famille', 'romantique', 'spa', 'ski', 'gastronomie', 'design'] as const;
 
   return (
     <section
@@ -46,16 +67,25 @@ export async function HomeInspirationGrid({
         </Link>
       </div>
 
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {axes.map((axis) => (
-          <li key={axis}>
+      {/*
+        Mobile : carrousel snap horizontal (1 card visible + peek).
+        Desktop : grille 2-cols (sm) → 3-cols (lg). Voir
+        `.cursor/skills/responsive-ui-architecture/SKILL.md` §"Snap
+        carousels".
+      */}
+      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+        {CARDS.map((card) => (
+          <li key={card.messageKey} className="shrink-0 basis-[82%] snap-start sm:basis-auto">
             <Link
-              href="/classements"
+              href={{
+                pathname: '/classements/[axe]/[valeur]',
+                params: { axe: card.axe, valeur: card.valeur },
+              }}
               className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-5 transition-colors focus-visible:outline-none focus-visible:ring-2"
             >
-              <h3 className="text-fg font-serif text-lg">{t(`axes.${axis}.title`)}</h3>
+              <h3 className="text-fg font-serif text-lg">{t(`axes.${card.messageKey}.title`)}</h3>
               <p className="text-muted mt-2 text-sm leading-relaxed">
-                {t(`axes.${axis}.subtitle`)}
+                {t(`axes.${card.messageKey}.subtitle`)}
               </p>
             </Link>
           </li>

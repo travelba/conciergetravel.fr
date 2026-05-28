@@ -131,6 +131,41 @@ const CITY_SLUG_TO_NEEDLES: Readonly<Record<string, readonly string[]>> = {
   corse: ['corse', 'ajaccio', 'porto-vecchio', 'porto vecchio'],
   'pays-basque': ['biarritz', 'pays basque', 'saint-jean-de-luz'],
   loire: ['loire'],
+  // International cities — Phase 4.A unblock (ADR-0016, 2026-05-28).
+  // Needles match `destination_city` / `destination_region` columns of
+  // published itineraries. Add a row here when a new itinerary covers
+  // a new locale; no migration needed.
+  'new-york': ['new york', 'new-york', 'manhattan', 'brooklyn'],
+  dubai: ['dubai', 'dubaï', 'dubaï', 'émirats', 'emirats'],
+  tokyo: ['tokyo', 'japon', 'japan'],
+  marrakech: ['marrakech', 'maroc', 'morocco'],
+  mykonos: ['mykonos', 'cyclades', 'grèce', 'greece'],
+  santorin: ['santorin', 'santorini', 'cyclades', 'grèce', 'greece'],
+  bali: ['bali', 'ubud', 'seminyak', 'indonésie', 'indonesia'],
+  phuket: ['phuket', 'thaïlande', 'thailande', 'thailand'],
+  'st-moritz': ['st-moritz', 'st moritz', 'saint-moritz', 'saint moritz', 'engadine', 'suisse'],
+  'lake-como': ['lake como', 'lac de come', 'lac de côme', 'como', 'lombardie'],
+  madeira: ['madeira', 'madère', 'funchal', 'portugal'],
+  'riviera-maya': [
+    'riviera maya',
+    'tulum',
+    'playa del carmen',
+    'cancun',
+    'cancún',
+    'mexique',
+    'mexico',
+  ],
+  algarve: ['algarve', 'lagos', 'faro', 'portimão', 'portimao', 'portugal'],
+  'amalfi-coast': [
+    'amalfi',
+    'positano',
+    'ravello',
+    'côte amalfitaine',
+    'cote amalfitaine',
+    'campanie',
+    'italie',
+    'italy',
+  ],
 };
 
 /**

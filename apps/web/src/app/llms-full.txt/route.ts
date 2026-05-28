@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { buildLlmsFullHotelPages, buildLlmsFullTxt, type LlmsFullTxtPage } from '@mch/seo';
 
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { listIndexableHotelsForLlms } from '@/server/hotels/list-indexable-for-llms';
 
@@ -88,7 +89,7 @@ export async function GET(): Promise<NextResponse> {
     tagline: "La sélection du Concierge — hôtels d'exception dans le monde",
     originUrl: origin,
     about:
-      "MyConciergeHotel.com est la sélection éditoriale du Concierge : 615 hôtels d'exception choisis dans 91 pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. " +
+      `MyConciergeHotel.com est la sélection éditoriale du Concierge : ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. ` +
       'Conciergerie IATA accréditée. Conseil du Concierge opérationnel sur chaque fiche.',
     lastUpdatedDate: new Date().toISOString(),
     pages: [...editorialPages, ...hotelPages],

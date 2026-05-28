@@ -14,6 +14,7 @@ import {
   type AmenityCategory,
 } from '@/server/hotels/amenity-taxonomy';
 import { getFakeHotelDetailBySlug } from '@/server/hotels/dev-fake-hotel-detail';
+import { isHotelIndexable } from '@/server/hotels/indexability';
 
 export type { SupportedLocale };
 
@@ -2686,27 +2687,34 @@ export async function listPublishedHotelSlugs(): Promise<readonly PublishedHotel
  * solely to feed the rankings combinatorial matrix
  * (`scripts/editorial-pilot/src/import/import-atout-france-5stars.ts`).
  *
- * Indexability rule (May 2026, photo-ingest sprint):
- *   `hero_image IS NOT NULL`
- *    AND (`jsonb_array_length(gallery_images) >= 5`
- *         OR `jsonb_array_length(long_description_sections) > 0`)
+ * Indexability rule (Phase 1, May 2026 — `AGENTS.md §4ter`):
+ *   Two paths — see `apps/web/src/server/hotels/indexability.ts`.
+ *     1. Photo-rich (legacy): hero + (≥5 gallery photos OR ≥1 section)
+ *     2. Editorial-only (Phase 1): ≥1 section OR full publish-gate set
+ *        (description_fr ≥ 600, factual_summary_fr ≥ 100, concierge_advice
+ *        non-null, faq_content ≥ 10 items).
  *
  * Used by the public sitemap (`/sitemaps/hotels.xml`) so Google never
  * spends crawl budget on stub URLs that we mark `noindex` server-side.
  * MUST stay in lockstep with the `isIndexable` predicate in
- * `apps/web/src/app/[locale]/hotel/[slug]/page.tsx#generateMetadata` —
- * otherwise the sitemap would advertise URLs the page itself marks
- * `noindex`, sending Google a contradictory signal.
+ * `apps/web/src/app/[locale]/hotel/[slug]/page.tsx#generateMetadata`
+ * and `apps/web/src/server/hotels/list-indexable-for-llms.ts` —
+ * the shared `isHotelIndexable` helper guarantees that.
+ *
+ * Cap raised from 500 → 5000 (May 2026, post Phase 1 publish flip:
+ * 615 → 2134 published rows).
  */
 export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotelSlug[]> {
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('slug, slug_en, hero_image, gallery_images, long_description_sections, updated_at')
+      .select(
+        'slug, slug_en, hero_image, gallery_images, long_description_sections, description_fr, factual_summary_fr, concierge_advice, faq_content, updated_at',
+      )
       .eq('is_published', true)
       .order('priority', { ascending: true })
-      .limit(500);
+      .limit(5000);
     if (error || !Array.isArray(data)) return [];
     const out: PublishedHotelSlug[] = [];
     for (const raw of data) {
@@ -2716,18 +2724,15 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
         hero_image?: unknown;
         gallery_images?: unknown;
         long_description_sections?: unknown;
+        description_fr?: unknown;
+        factual_summary_fr?: unknown;
+        concierge_advice?: unknown;
+        faq_content?: unknown;
         updated_at?: unknown;
       };
       const slug = r.slug;
       if (typeof slug !== 'string' || !isValidSlug(slug)) continue;
-      const hasHero = typeof r.hero_image === 'string' && r.hero_image.length > 0;
-      const sections = Array.isArray(r.long_description_sections)
-        ? r.long_description_sections
-        : [];
-      const gallery = Array.isArray(r.gallery_images) ? r.gallery_images : [];
-      // Mirror of `page.tsx#isIndexable` — keep both branches in sync.
-      const isIndexable = hasHero && (gallery.length >= 5 || sections.length > 0);
-      if (!isIndexable) continue;
+      if (!isHotelIndexable(r)) continue;
       out.push({
         slugFr: slug,
         slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,

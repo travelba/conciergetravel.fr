@@ -92,7 +92,8 @@ export async function GET(): Promise<NextResponse> {
         | '/guide/japon'
         | '/guide/thailande'
         | '/guide/etats-unis'
-        | '/itineraires';
+        | '/itineraires'
+        | '/ouvertures';
       priority: number;
     }[] = [
       { href: '/inspiration', priority: 0.7 },
@@ -122,6 +123,10 @@ export async function GET(): Promise<NextResponse> {
       { href: '/le-concierge/presse-et-partenaires', priority: 0.4 },
       { href: '/le-concierge/newsletter', priority: 0.5 },
       { href: '/itineraires', priority: 0.7 },
+      // 2026-05-28 — page éditoriale "Le Concierge a frappé à leur porte"
+      // (FR `/ouvertures`, EN `/openings`). Surface canonique pour les
+      // 20 dernières adresses visitées ; CTA depuis le bloc home dédié.
+      { href: '/ouvertures', priority: 0.6 },
     ];
     for (const hub of staticHubs) {
       const hrefForLocale = (l: Locale): string =>

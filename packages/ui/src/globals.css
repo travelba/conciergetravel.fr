@@ -91,3 +91,23 @@
     }
   }
 }
+
+/*
+ * Hide scrollbar on horizontal snap carousels (mobile home sections,
+ * gallery strips, etc.) while keeping the scroll behavior. The native
+ * scrollbar otherwise floats over the bottom of the cards on Windows
+ * and adds visual noise the editorial tone can't carry.
+ *
+ * Used by `apps/web/src/components/home/*` mobile snap carousels —
+ * see `.cursor/skills/responsive-ui-architecture/SKILL.md` §"Snap
+ * carousels".
+ */
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -6,27 +6,23 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@mch/seo';
 
 import { HomeAeoFaq, loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
-import { HomeClubRibbon } from '@/components/home/home-club-ribbon';
-import { HomeConciergeAdviceCarousel } from '@/components/home/home-concierge-advice-carousel';
 import { HomeDestinationGrid } from '@/components/home/home-destination-grid';
 import { HomeEditorLetter } from '@/components/home/home-editor-letter';
 import { HomeHero } from '@/components/home/home-hero';
-import { HomeHotelGrid } from '@/components/home/home-hotel-grid';
 import { HomeInspirationGrid } from '@/components/home/home-inspiration-grid';
-import { TOP_RANKING_NAV_ENTRIES } from '@/components/layout/nav-data';
+import { HomeOpeningsGrid } from '@/components/home/home-openings-grid';
+import { HomeTopRankings } from '@/components/home/home-top-rankings';
 import { JsonLdScript } from '@/components/seo/json-ld';
-import { Link, getPathname } from '@/i18n/navigation';
+import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { pickHomeDestinations } from '@/lib/home/featured-destinations';
-import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
+import { getRecentOpenings } from '@/lib/home/recent-openings';
 import { listPublishedCities } from '@/server/destinations/cities';
-import {
-  listPublishedRankings,
-  type PublishedRankingCard,
-} from '@/server/rankings/get-ranking-by-slug';
+import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
 // The page reads `headers()` to forward the per-request CSP nonce to its
 // inline JSON-LD scripts (skill: security-engineering §CSP). That dynamic
@@ -38,7 +34,7 @@ export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
-const FEATURED_HOTEL_COUNT = 6;
+const OPENINGS_COUNT = 4;
 
 /**
  * Home `generateMetadata` — canonical, hreflang, OG.
@@ -80,13 +76,6 @@ export async function generateMetadata({
   };
 }
 
-function pickFeaturedRankings(
-  all: readonly PublishedRankingCard[],
-): readonly PublishedRankingCard[] {
-  const allowed = new Set(TOP_RANKING_NAV_ENTRIES.map((e) => e.slug));
-  return all.filter((r) => allowed.has(r.slug));
-}
-
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRoutingLocale(locale)) notFound();
@@ -94,25 +83,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations('homepage');
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  // Fetch the 3 editorial datasets in parallel — they back the featured
-  // sections below. Each helper is defensive (returns `[]` on Supabase
-  // outages) so the home never 500s in a degraded environment. The
-  // Concierge-advice carousel runs its own cached fetch (sampled with
-  // a daily seed), so it sits outside this batch on purpose.
-  const [featuredHotels, cities, rankings] = await Promise.all([
-    getHomeFeaturedHotels(FEATURED_HOTEL_COUNT),
+  // Three editorial datasets in parallel — back the openings strip,
+  // the destinations grid and the rankings strip. Each helper is
+  // defensive (returns `[]` on Supabase outages) so the home never
+  // 500s in a degraded environment. The AEO entries load separately
+  // (no DB call, just i18n) below.
+  const [openings, cities, rankings] = await Promise.all([
+    getRecentOpenings(OPENINGS_COUNT),
     listPublishedCities(),
     listPublishedRankings(),
   ]);
   const cityCounts = new Map(cities.map((c) => [c.slug, c.count] as const));
-  const featuredRankings = pickFeaturedRankings(rankings);
 
   const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const agencyDescription =
     locale === 'en'
-      ? "The Concierge's Selection — 615 extraordinary hotels in 91 countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night."
-      : "La sélection du Concierge — 615 hôtels d'exception choisis dans 91 pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.";
+      ? `The Concierge's Selection — ${CATALOGUE_PUBLISHED} extraordinary hotels in ${CATALOGUE_COUNTRIES} countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night.`
+      : `La sélection du Concierge — ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.`;
   const agencyJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.travelAgencyJsonLd({
       name: 'MyConciergeHotel',
@@ -155,19 +143,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     ),
   );
 
-  // ItemList of the featured hotels — surfaces the home as a small
+  // ItemList of the recent openings — surfaces the home as a small
   // editorial carousel in Google Rich Results without requiring any
-  // booking-side data (Phase 1 compatible: no `Offer`, no `priceValidUntil`).
-  const featuredItemListJsonLd =
-    featuredHotels.length > 0
+  // booking-side data (Phase 1 compatible: no `Offer`, no
+  // `priceValidUntil`). Mirrors the visible `<HomeOpeningsGrid>` above.
+  const isValidStarRating = (n: number): n is 1 | 2 | 3 | 4 | 5 =>
+    n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
+  const openingsItemListJsonLd =
+    openings.length > 0
       ? JsonLd.withSchemaOrgContext(
           JsonLd.itemListJsonLd({
-            name: t('featuredHotels.title'),
-            items: featuredHotels.map((h) => {
+            name: t('openings.title'),
+            items: openings.map((h) => {
               const slug = pickByLocale(locale, h.slug, h.slugEn ?? h.slug);
               const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
-              const isValidStarRating = (n: number): n is 1 | 2 | 3 | 4 | 5 =>
-                n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
               return {
                 name,
                 url: `${siteUrl}${getPathname({
@@ -186,23 +175,29 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <JsonLdScript data={agencyJsonLd} nonce={nonce} />
       <JsonLdScript data={websiteSearchJsonLd} nonce={nonce} />
       <JsonLdScript data={homeFaqJsonLd} nonce={nonce} />
-      {featuredItemListJsonLd !== null ? (
-        <JsonLdScript data={featuredItemListJsonLd} nonce={nonce} />
+      {openingsItemListJsonLd !== null ? (
+        <JsonLdScript data={openingsItemListJsonLd} nonce={nonce} />
       ) : null}
 
-      {/* §1 — Hero éditorial avec vidéo + search Booking-style preview */}
+      {/* §1 — Hero éditorial : « MyConciergeHotel — Book like a
+          concierge. » + H1 « Nous vous attendions » + chiffres
+          réels (127 pays · 2 193 adresses) */}
       <HomeHero locale={locale} cloudName={cloudName} />
 
-      {/* §2 — Le mot du Concierge (NEW) */}
+      {/* §2 — Le mot du Concierge (éditorial signé) */}
       <HomeEditorLetter locale={locale} />
 
-      {/* §3 — Les fiches du moment (6 hôtels, badges luxury_tier) */}
-      <HomeHotelGrid locale={locale} hotels={featuredHotels} cloudName={cloudName} />
+      {/* §3 — Le Concierge a frappé à leur porte (4 dernières
+          adresses passées au crible, CTA → /ouvertures) */}
+      <HomeOpeningsGrid locale={locale} openings={openings} cloudName={cloudName} />
 
-      {/* §4 — Le Conseil du Concierge (3 conseils réels sampled) */}
-      <HomeConciergeAdviceCarousel locale={locale} />
+      {/* §4 — Trouver la bonne adresse selon l'occasion (6 axes :
+          Spa, Famille, Golf, Lune de miel, Gastronomie, Rooftop) */}
+      <HomeInspirationGrid locale={locale} />
 
-      {/* §5 — Destinations (FR cities + intl countries) */}
+      {/* §5 — Là où le Concierge aime envoyer ses clients
+          (8 destinations : Paris, Côte d'Azur, Italie, Grèce,
+          Japon, Maroc, États-Unis, Royaume-Uni) */}
       <HomeDestinationGrid
         locale={locale}
         destinations={pickHomeDestinations(cityCounts, locale, (count) =>
@@ -210,96 +205,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         )}
       />
 
-      {/* §6 — Inspirations (6 axes thème × occasion) */}
-      <HomeInspirationGrid locale={locale} />
+      {/* §6 — Les meilleurs hôtels, selon nos critères (6 classements
+          avec le plus d'entrées, sélection automatique) */}
+      <HomeTopRankings locale={locale} rankings={rankings} />
 
-      {/* §7 — Classements éditoriaux (inline — scope sélectif) */}
-      {featuredRankings.length > 0 ? (
-        <section
-          aria-labelledby="home-featured-rankings"
-          className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-        >
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-            <div className="max-w-2xl">
-              <p className="text-muted text-xs uppercase tracking-[0.18em]">
-                {t('featuredRankings.eyebrow')}
-              </p>
-              <h2
-                id="home-featured-rankings"
-                className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
-              >
-                {t('featuredRankings.title')}
-              </h2>
-              <p className="text-muted mt-3 text-sm sm:text-base">
-                {t('featuredRankings.subtitle')}
-              </p>
-            </div>
-            <Link
-              href="/classements"
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('featuredRankings.seeAll')}
-            </Link>
-          </div>
-
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredRankings.map((r) => {
-              const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
-              const summary = pickByLocale(
-                locale,
-                r.factualSummaryFr ?? '',
-                r.factualSummaryEn ?? r.factualSummaryFr ?? '',
-              );
-              return (
-                <li key={r.slug}>
-                  <Link
-                    href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
-                    className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-5 transition-colors focus-visible:outline-none focus-visible:ring-2"
-                  >
-                    <p className="text-muted text-[10px] uppercase tracking-[0.18em]">
-                      {r.entryCount > 0
-                        ? t('featuredDestinations.countLabel', { count: r.entryCount })
-                        : null}
-                    </p>
-                    <h3 className="text-fg mt-1 font-serif text-lg leading-snug">{title}</h3>
-                    {summary !== '' ? (
-                      <p className="text-muted mt-3 line-clamp-3 text-sm">{summary}</p>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-
-      {/* §8 — AEO FAQ (4 Q&A) — same content as homeFaqJsonLd above */}
+      {/* §7 — Ce que vous voulez savoir (4 Q&A AEO + FAQPage JSON-LD) */}
       <HomeAeoFaq locale={locale} entries={aeoEntries} />
-
-      {/* §9 — Le Concierge Club ribbon */}
-      <HomeClubRibbon locale={locale} />
-
-      {/* §10 — Closing teaser (inline — scope sélectif) */}
-      <section
-        aria-labelledby="home-concierge-teaser"
-        className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-      >
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted text-xs uppercase tracking-[0.18em]">
-            {t('conciergeTeaser.eyebrow')}
-          </p>
-          <h2 id="home-concierge-teaser" className="text-fg mt-3 font-serif text-3xl sm:text-4xl">
-            {t('conciergeTeaser.title')}
-          </h2>
-          <p className="text-muted mt-4 text-base sm:text-lg">{t('conciergeTeaser.body')}</p>
-          <Link
-            href="/le-conseil-du-concierge"
-            className="border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring mt-6 inline-flex rounded-md border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-          >
-            {t('conciergeTeaser.cta')}
-          </Link>
-        </div>
-      </section>
     </main>
   );
 }

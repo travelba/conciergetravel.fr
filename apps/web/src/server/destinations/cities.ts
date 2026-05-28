@@ -74,6 +74,19 @@ const HOTELS_FOR_GROUPING_COLUMNS =
 
 const PRIORITY_RANK: Record<HotelGroupRow['priority'], number> = { P0: 0, P1: 1, P2: 2 };
 
+/**
+ * Page size for the paginated catalogue read. Supabase enforces a
+ * server-side `db_max_rows` cap (default `1000` in our project) that
+ * silently truncates `.limit(N)` calls to that cap, regardless of the
+ * value passed by the client. ADR-0022 unblocked the international
+ * route only to discover Riviera Maya / Madeira / etc. hotels still
+ * fell off the data set because the catalogue had grown to ~2200
+ * published rows. We page in chunks of `PAGE_SIZE` until exhaustion,
+ * with a hard ceiling to avoid runaway loops on misconfigured envs.
+ */
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 8;
+
 async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
   // Both env-construction (build without secrets) and the network call may
   // throw; the destination pages tolerate an empty catalog so we coerce all
@@ -86,39 +99,46 @@ async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
   // logged error contains nothing user-related.
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('hotels')
-      .select(HOTELS_FOR_GROUPING_COLUMNS)
-      .eq('is_published', true)
-      .order('priority', { ascending: true })
-      .order('name', { ascending: true })
-      .limit(2000);
-    if (error) {
-      console.error('[destinations.cities] Supabase returned error:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-      });
-      return [];
-    }
-    if (!Array.isArray(data)) {
-      console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
-      return [];
-    }
     const out: HotelGroupRow[] = [];
     let parseFailures = 0;
-    for (const raw of data) {
-      const parsed = HotelGroupRowSchema.safeParse(raw);
-      if (parsed.success) {
-        out.push(parsed.data);
-      } else {
-        parseFailures += 1;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, error } = await supabase
+        .from('hotels')
+        .select(HOTELS_FOR_GROUPING_COLUMNS)
+        .eq('is_published', true)
+        .order('priority', { ascending: true })
+        .order('name', { ascending: true })
+        .range(from, to);
+      if (error) {
+        console.error('[destinations.cities] Supabase returned error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          page,
+        });
+        return out;
       }
+      if (!Array.isArray(data)) {
+        console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
+        return out;
+      }
+      for (const raw of data) {
+        const parsed = HotelGroupRowSchema.safeParse(raw);
+        if (parsed.success) {
+          out.push(parsed.data);
+        } else {
+          parseFailures += 1;
+        }
+      }
+      // Last page reached when the response was smaller than PAGE_SIZE.
+      if (data.length < PAGE_SIZE) break;
     }
     if (parseFailures > 0) {
       console.error('[destinations.cities] Schema validation failures:', {
-        totalRows: data.length,
+        totalRows: out.length + parseFailures,
         parsed: out.length,
         failures: parseFailures,
       });
@@ -136,43 +156,77 @@ async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
 export interface CitySummary {
   readonly slug: string;
   readonly name: string;
-  readonly region: string;
+  /** ISO 3166-1 alpha-2. Drives the `/destination/[citySlug]` JSON-LD `addressCountry`. */
+  readonly countryCode: string;
+  /** Localised country label — used as fall-back for the `region` line on international cities (region is null off-FR). */
+  readonly countryLabelFr: string | null;
+  readonly countryLabelEn: string | null;
+  /**
+   * French administrative region. `null` for international cities since
+   * migration 0033 (foreign rows don't carry an FR-region equivalent).
+   * Consumers fall back to `countryLabel*` for the visible "region" line
+   * and the JSON-LD `addressRegion` field — see ADR-0016.
+   */
+  readonly region: string | null;
   readonly count: number;
   readonly hasPalace: boolean;
 }
 
 /**
- * Aggregates the published catalog into French city groups. One row per
- * distinct `city` value (case-sensitive — the catalog is editor-curated
- * so casing is stable). Region is taken from the **first** hotel found,
- * since a city never spans regions in the French administrative
- * division we use.
+ * Aggregates the published catalog into city groups across **every
+ * country**. One row per distinct `city` value (case-sensitive — the
+ * catalog is editor-curated so casing is stable). Region is taken from
+ * the first hotel found for FR cities, and is `null` for international
+ * rows (post migration 0033 international hotels carry no
+ * French-region equivalent). The country triplet
+ * (`countryCode` + `countryLabelFr` + `countryLabelEn`) is propagated
+ * so the detail page can render an international fall-back for the
+ * "region" line.
  *
- * **Scope** — French cities only. International countries are surfaced
- * separately by `listInternationalDestinations` in
- * `list-destination-countries.ts`, which the `/destination` hub renders
- * alongside this output as a second "Monde — par pays" section. The
- * `/destination/[citySlug]` detail page also stays France-only (foreign
- * destinations route through `/guide/[countrySlug]` instead, since
- * country guides are far richer than a ville-style hub).
+ * Historical note — the FR-only filter (`country_code === 'FR'`) was
+ * lifted in ADR-0016 (2026-05-28) so the Phase 4.A international city
+ * guides (Marrakech, NYC, Tokyo, Bali, …) can finally surface. The
+ * world-by-country directory hub (`listInternationalDestinations` in
+ * `list-destination-countries.ts`) keeps grouping foreign hotels by
+ * country for navigation breadth.
  */
 export async function listPublishedCities(): Promise<readonly CitySummary[]> {
   const all = await fetchAllPublished();
   const map = new Map<
     string,
-    { name: string; region: string; count: number; hasPalace: boolean }
+    {
+      name: string;
+      countryCode: string;
+      countryLabelFr: string | null;
+      countryLabelEn: string | null;
+      region: string | null;
+      count: number;
+      hasPalace: boolean;
+    }
   >();
   for (const h of all) {
-    if (h.country_code !== 'FR') continue;
-    if (h.region === null) continue;
     const slug = citySlug(h.city);
     if (slug.length === 0) continue;
     const existing = map.get(slug);
     if (existing === undefined) {
-      map.set(slug, { name: h.city, region: h.region, count: 1, hasPalace: h.is_palace });
+      map.set(slug, {
+        name: h.city,
+        countryCode: h.country_code,
+        countryLabelFr: h.country_label_fr,
+        countryLabelEn: h.country_label_en,
+        region: h.region,
+        count: 1,
+        hasPalace: h.is_palace,
+      });
     } else {
       existing.count += 1;
       if (h.is_palace) existing.hasPalace = true;
+      // First-non-null wins for region — preserves the historical FR
+      // behaviour while letting international rows back-fill if the
+      // first row had no `region` and a later sibling does.
+      if (existing.region === null && h.region !== null) {
+        existing.region = h.region;
+      }
     }
   }
   const out: CitySummary[] = [];
@@ -180,6 +234,9 @@ export async function listPublishedCities(): Promise<readonly CitySummary[]> {
     out.push({
       slug,
       name: value.name,
+      countryCode: value.countryCode,
+      countryLabelFr: value.countryLabelFr,
+      countryLabelEn: value.countryLabelEn,
       region: value.region,
       count: value.count,
       hasPalace: value.hasPalace,
@@ -206,7 +263,16 @@ export interface DestinationHotel {
 export interface DestinationDetail {
   readonly slug: string;
   readonly name: string;
-  readonly region: string;
+  /**
+   * French administrative region. `null` for international cities (post
+   * migration 0033). The page falls back to `countryLabel*` for the
+   * visible region line + the JSON-LD `addressRegion` — see ADR-0016.
+   */
+  readonly region: string | null;
+  /** ISO 3166-1 alpha-2 (drives JSON-LD `addressCountry`). */
+  readonly countryCode: string;
+  readonly countryLabelFr: string | null;
+  readonly countryLabelEn: string | null;
   readonly hotels: readonly DestinationHotel[];
 }
 
@@ -246,20 +312,26 @@ export async function getDestinationBySlug(
   const all = await fetchAllPublished();
   if (all.length === 0) return null;
 
-  // `/destination/[city]` is FR-only until the international guide
-  // pipeline ships. Reject foreign cities (and FR rows missing a region,
-  // which would also break the back-compat CitySummary contract).
-  const matching = all.filter(
-    (h) => h.country_code === 'FR' && h.region !== null && citySlug(h.city) === slug,
-  );
+  // ADR-0016 (2026-05-28) — the FR-only filter was lifted so
+  // international city guides (Marrakech, NYC, Tokyo, …) can render.
+  // `region` may now be `null` for foreign rows; consumers must fall
+  // back to `countryLabel*` for the visible region line and JSON-LD.
+  const matching = all.filter((h) => citySlug(h.city) === slug);
   const [first] = matching;
   if (first === undefined) return null;
 
   const cityName = first.city;
-  // `first.region` is narrowed by the filter above, but TS doesn't see
-  // through `Array.prototype.filter` — guard explicitly.
-  if (first.region === null) return null;
-  const region = first.region;
+  // First-non-null wins for region (matches `listPublishedCities`).
+  // Stays null when every matching row is international.
+  let region: string | null = first.region;
+  if (region === null) {
+    for (const h of matching) {
+      if (h.region !== null) {
+        region = h.region;
+        break;
+      }
+    }
+  }
 
   const sorted = [...matching].sort((a, b) => {
     const pr = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
@@ -281,7 +353,15 @@ export async function getDestinationBySlug(
     amadeusHotelId: row.amadeus_hotel_id,
   }));
 
-  return { slug, name: cityName, region, hotels };
+  return {
+    slug,
+    name: cityName,
+    region,
+    countryCode: first.country_code,
+    countryLabelFr: first.country_label_fr,
+    countryLabelEn: first.country_label_en,
+    hotels,
+  };
 }
 
 // ───────────────────────────────────────────────────────────────────────

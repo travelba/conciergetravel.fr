@@ -5,9 +5,23 @@ import type { ReactElement } from 'react';
 
 import { CatalogSearchForm } from '@/components/search/catalog-search-form';
 import type { Locale } from '@/i18n/routing';
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { resolveHomeHeroMedia } from '@/lib/home/hero-media';
 
 import { HomeHeroVideo } from './home-hero-video';
+
+/**
+ * Format a catalogue stat with locale-aware thousands separators.
+ *
+ * Server-side `Intl.NumberFormat` is locale-safe; the function is pure
+ * and ships a stable string into the hero so the LCP text is identical
+ * between SSR and the (absent) client hydration of this Server
+ * Component. Avoids the "2,193 → 2 193" hydration mismatch trap.
+ */
+function formatStat(n: number, locale: Locale): string {
+  const tag = locale === 'en' ? 'en-US' : 'fr-FR';
+  return new Intl.NumberFormat(tag).format(n);
+}
 
 /**
  * `<HomeHero>` — editorial hero block with optional Cloudinary video
@@ -72,7 +86,10 @@ export async function HomeHero({
             {t('title')}
           </h1>
           <p className="-mt-2 font-serif text-base italic text-white/80 sm:text-lg">
-            {t('intlBadge')}
+            {t('stats', {
+              countries: formatStat(CATALOGUE_COUNTRIES, locale),
+              hotels: formatStat(CATALOGUE_PUBLISHED, locale),
+            })}
           </p>
           <p className="max-w-prose text-lg text-white/90 sm:text-xl">{t('subtitle')}</p>
 

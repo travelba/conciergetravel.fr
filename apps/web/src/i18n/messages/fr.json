@@ -19,11 +19,12 @@
   },
   "homepage": {
     "metaTitle": "MyConciergeHotel — La sélection du Concierge, hôtels d'exception dans le monde",
-    "metaDesc": "615 adresses sélectionnées dans 91 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
-    "eyebrow": "MyConciergeHotel — Agence IATA accréditée",
-    "title": "La sélection du Concierge",
-    "intlBadge": "91 pays · 615 adresses · 435 Relais & Châteaux",
-    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie. Chaque fiche s'achève par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+    "metaDesc": "2 193 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
+    "eyebrow": "MyConciergeHotel — Book like a concierge. Stay like a guest.",
+    "title": "Nous vous attendions",
+    "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
+    "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
+    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
       "iata": "Agence accréditée IATA",
@@ -39,14 +40,14 @@
       "searchPreviewGuests": "Voyageurs"
     },
     "aeo": {
-      "intro": "Les questions que nos clients nous posent",
+      "intro": "Ce que vous voulez savoir",
       "q1": {
         "question": "Comment MyConciergeHotel sélectionne-t-il ses hôtels ?",
         "answer": "Nous appliquons une grille éditoriale unique : distinctions officielles (Palace Atout France, Forbes Five Star, Michelin Keys), appartenance aux collections d'auteur (Relais & Châteaux, Leading Hotels of the World) et un score interne rédigé par notre conciergerie sur le service, la signature et l'emplacement. Chaque fiche est écrite à la main, jamais générée. Aucun pay-to-play : aucune commission hôtelière n'influence l'entrée au catalogue."
       },
       "q2": {
         "question": "En quoi diffère-t-on de Booking ou Hotels.com ?",
-        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 615 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
+        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 2 193 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
       },
       "q3": {
         "question": "Qu'est-ce que le Conseil du Concierge en bas de chaque fiche ?",
@@ -68,7 +69,7 @@
     "editorLetter": {
       "eyebrow": "Le mot du Concierge",
       "title": "Bienvenue chez votre hôtelier de confiance",
-      "paragraph1": "Voici la sélection que nous tenons à jour pour vous : 615 maisons d'exception dans 91 pays, choisies une par une. Pas de catalogue de cent mille adresses, pas d'algorithme qui décide à notre place.",
+      "paragraph1": "Voici la sélection que nous tenons à jour pour vous : 2 193 maisons d'exception dans 127 pays, choisies une par une. Pas de catalogue de cent mille adresses, pas d'algorithme qui décide à notre place.",
       "paragraph2": "Vous y trouverez des Palaces Atout France, des Relais & Châteaux, des Forbes Five Star, des Michelin Keys et des pépites que les guides ignorent encore. Pas de pay-to-play. Aucune commission hôtelière n'influence la sélection.",
       "paragraph3": "Notre signature : chaque fiche se termine par un Conseil du Concierge — une chambre à demander par son numéro, une table à réserver trois mois en avance, un horaire d'arrivée qui change tout. Ce sont nos hôteliers partenaires qui nous l'ont confié.",
       "signatureName": "Le Concierge",
@@ -81,6 +82,23 @@
       "body": "Créez un compte gratuit pour accéder à l'agenda de la conciergerie, sauvegarder vos sélections et recevoir les conseils opérationnels des Palaces choisis. Tier Prestige sur invitation — liste d'attente ouverte sur la même page.",
       "ctaDiscover": "Découvrir Le Concierge Club",
       "ctaPrestige": "Espace Prestige"
+    },
+    "openings": {
+      "eyebrow": "Récemment passés au crible",
+      "title": "Le Concierge a frappé à leur porte",
+      "subtitle": "Les quatre dernières adresses passées au crible de notre conciergerie. Chaque fiche s'achève par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "seeAll": "Voir toutes les ouvertures →",
+      "viewFiche": "Lire la fiche"
+    },
+    "openingsPage": {
+      "metaTitle": "Les dernières adresses du Concierge — ouvertures et visites récentes",
+      "metaDesc": "Les vingt dernières adresses passées au crible de notre conciergerie : palaces, Relais & Châteaux, boutique-hôtels et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "eyebrow": "Le Concierge sur la route",
+      "title": "Le Concierge a frappé à leur porte",
+      "lead": "Les vingt dernières maisons visitées par notre conciergerie. Pas de pay-to-play : aucune commission hôtelière n'influence l'ordre. Le tri suit la priorité éditoriale — les coups de cœur en premier, les valeurs sûres ensuite.",
+      "viewFiche": "Lire la fiche",
+      "empty": "Notre conciergerie compile les dernières visites. Revenez dans quelques instants.",
+      "backToHome": "Retour à l'accueil"
     },
     "featuredHotels": {
       "eyebrow": "Sélection du Concierge",
@@ -96,15 +114,16 @@
     "featuredDestinations": {
       "eyebrow": "Destinations",
       "title": "Là où le Concierge aime envoyer ses clients",
-      "subtitle": "Paris, Côte d'Azur, Alpes, Italie, Japon, Maroc, Maldives, Suisse… Chaque destination ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
+      "subtitle": "Paris, Côte d'Azur, Italie, Grèce, Japon, Maroc, États-Unis, Royaume-Uni — huit géographies où notre conciergerie a tissé ses meilleures adresses. Chacune ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
       "seeAll": "Toutes les destinations →",
       "countLabel": "{count, plural, one {# adresse} other {# adresses}}"
     },
     "featuredRankings": {
       "eyebrow": "Classements éditoriaux",
-      "title": "Les meilleurs hôtels par usage",
+      "title": "Les meilleurs hôtels, selon nos critères",
       "subtitle": "Nos classements croisent la distinction Atout France, les étoiles Michelin, les Forbes Travel et notre propre score éditorial. Pas de pay-to-play : chaque entrée est gagnée.",
-      "seeAll": "Tous les classements →"
+      "seeAll": "Tous les classements →",
+      "entryCount": "{count, plural, one {# hôtel sélectionné} other {# hôtels sélectionnés}}"
     },
     "conciergeAdvice": {
       "eyebrow": "Le Conseil du Concierge",
@@ -115,34 +134,34 @@
       "empty": "Notre conciergerie compile les conseils du jour. Revenez dans quelques instants."
     },
     "inspiration": {
-      "eyebrow": "Inspirations",
-      "title": "Choisir un hôtel par moment de vie",
-      "subtitle": "Six axes pour trouver l'adresse juste — du week-end romantique au séjour gastronomique. Chaque axe ouvre sur un classement croisé Atout France × Michelin × score éditorial.",
+      "eyebrow": "Selon l'occasion",
+      "title": "Trouver la bonne adresse selon l'occasion",
+      "subtitle": "Six axes pour trouver l'adresse juste. Chaque catégorie ouvre sur un classement croisé Atout France × Michelin × score éditorial — pas de pay-to-play.",
       "seeAll": "Toutes les inspirations →",
       "axes": {
-        "famille": {
-          "title": "En famille",
-          "subtitle": "Suites communicantes, club enfants, accueil sur-mesure pour les 6-12 ans."
-        },
-        "romantique": {
-          "title": "À deux",
-          "subtitle": "Chambres avec vue, suites bain à remous, dîner servi en chambre, spa en couple."
-        },
         "spa": {
           "title": "Spa & bien-être",
           "subtitle": "Caves à eau, signature treatments, marques de soin partenaires — la sélection Concierge."
         },
-        "ski": {
-          "title": "Au pied des pistes",
-          "subtitle": "Chamonix, Megève, Courchevel, Val d'Isère — Palaces et chalets-hôtels avec ski-room."
+        "famille": {
+          "title": "Famille",
+          "subtitle": "Suites communicantes, club enfants, accueil sur-mesure pour les 6-12 ans."
+        },
+        "golf": {
+          "title": "Golf",
+          "subtitle": "Hôtels-resorts avec parcours signature, green fees inclus, club-house gastronomique."
+        },
+        "luneDeMiel": {
+          "title": "Lune de miel",
+          "subtitle": "Suites avec vue, dîner servi en chambre, spa en couple, transferts privés — l'écrin du voyage de noces."
         },
         "gastronomie": {
-          "title": "Gastronomie",
+          "title": "Gastronomie & étoiles Michelin",
           "subtitle": "Chefs étoilés Michelin, tables d'hôtel signature, menus dégustation à réserver trois mois en avance."
         },
-        "design": {
-          "title": "Design & architecture",
-          "subtitle": "Boutiques-hôtels d'auteur, architectes nommés, maisons d'art où l'on dort dans un lieu de mémoire."
+        "rooftop": {
+          "title": "Rooftop",
+          "subtitle": "Toits-bars panoramiques, suites avec terrasse, piscine ciel — l'apéritif les pieds dans la skyline."
         }
       }
     },
@@ -444,7 +463,7 @@
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
-    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 615 hôtels d'exception dans 91 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 2 193 hôtels d'exception dans 127 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
     "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
     "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
@@ -494,7 +513,7 @@
         },
         {
           "q": "Quel est votre périmètre géographique ?",
-          "a": "Notre sélection couvre 615 adresses dans 91 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
+          "a": "Notre sélection couvre 2 193 adresses dans 127 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
         },
         {
           "q": "Combien coûte votre service ?",
@@ -2162,7 +2181,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Notre méthode éditoriale — Comment nous composons la sélection du Concierge | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel sélectionne 615 hôtels d'exception dans 91 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "metaDesc": "MyConciergeHotel sélectionne 2 193 hôtels d'exception dans 127 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
     "breadcrumbHome": "Accueil",
     "breadcrumbConcierge": "Le Concierge",
     "eyebrow": "EEAT — méthode éditoriale",
@@ -2778,6 +2797,10 @@
       "franceSection": {
         "title": "France — par ville",
         "subtitle": "{count, plural, one {# ville française} other {# villes françaises}}."
+      },
+      "intlCitiesSection": {
+        "title": "Monde — par ville",
+        "subtitle": "{count, plural, one {# ville internationale} other {# villes internationales}}."
       },
       "worldSection": {
         "title": "Monde — par pays",

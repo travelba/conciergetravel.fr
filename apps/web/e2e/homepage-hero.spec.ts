@@ -65,7 +65,7 @@ test.describe('homepage hero — La sélection du Concierge', () => {
       const el = document.querySelector('head meta[name="description"]');
       return el?.getAttribute('content') ?? '';
     });
-    expect(description).toMatch(/91 pays|615 adresses|hôtels d'exception/i);
+    expect(description).toMatch(/127 pays|2[\s ]?134 adresses|hôtels d'exception/i);
     expect(description).not.toMatch(/en France\b/i);
   });
 

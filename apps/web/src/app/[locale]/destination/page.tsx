@@ -10,11 +10,23 @@ import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
+import { TOP_INTL_DESTINATION_NAV_ENTRIES } from '@/components/layout/nav-data';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag } from '@/i18n/runtime';
+import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
 import { listInternationalDestinations } from '@/server/destinations/list-destination-countries';
+
+/**
+ * Phase 4.A nav-pinned international slugs — we surface these first in
+ * the "Monde — par ville" section regardless of their hotel count, so a
+ * city like Marrakech (rank ~13 by count) lands above the fold next to
+ * the high-volume cities (London, NYC, Dubai). Slugs that have zero
+ * published hotels still appear here as the graceful empty-state link.
+ * The cap on the rest of the long tail kicks in after this set.
+ */
+const PHASE_4A_INTL_SLUGS = new Set(TOP_INTL_DESTINATION_NAV_ENTRIES.map((e) => e.slug));
 
 // The page emits a `JsonLdScript` carrying the per-request CSP nonce
 // (skill: security-engineering §CSP). Reading `headers()` for that nonce
@@ -64,6 +76,25 @@ export default async function DestinationDirectoryPage({
     listPublishedCities(),
     listInternationalDestinations(locale),
   ]);
+  // ADR-0022 — `cities` now mixes FR + international rows. We split
+  // them visually: FR cities under "France — par ville", international
+  // cities under "Monde — par ville". The "Monde — par pays" section
+  // (countries with published editorial country-guides) keeps surfacing
+  // separately for breadth, since not every country has a city-level
+  // page (and not every international city has a published country
+  // guide).
+  //
+  // The intl city sort is two-tiered: the 14 Phase 4.A nav-pinned slugs
+  // bubble to the top regardless of count, then the remaining cities
+  // follow by hotel count DESC capped at 40 (cap covers the long tail
+  // without flooding the page; Phase 4.A slugs always appear).
+  const frCities = cities.filter((c) => c.countryCode === 'FR');
+  const allIntlCities = cities.filter((c) => c.countryCode !== 'FR');
+  const intlPinned = allIntlCities.filter((c) => PHASE_4A_INTL_SLUGS.has(c.slug));
+  const intlPinnedSet = new Set(intlPinned.map((c) => c.slug));
+  const intlRest = allIntlCities.filter((c) => !intlPinnedSet.has(c.slug)).slice(0, 40);
+  const intlCities = [...intlPinned, ...intlRest];
+
   // We only surface countries that already have a published country
   // guide — sending traffic to a deep-link without an editorial landing
   // page would dilute the directory's curated promise. The remaining
@@ -72,13 +103,20 @@ export default async function DestinationDirectoryPage({
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  const totalDestinations = cities.length + guidedCountries.length;
+  const totalDestinations = frCities.length + intlCities.length + guidedCountries.length;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
       name: t('directory.title'),
       items: [
-        ...cities.map((c) => ({
+        ...frCities.map((c) => ({
+          name: c.name,
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
+          })}`,
+        })),
+        ...intlCities.map((c) => ({
           name: c.name,
           url: `${origin}${getPathname({
             locale,
@@ -137,7 +175,7 @@ export default async function DestinationDirectoryPage({
         <p className="text-muted text-sm">{t('empty')}</p>
       ) : (
         <div className="space-y-12">
-          {cities.length > 0 && (
+          {frCities.length > 0 && (
             <section aria-labelledby="destination-france-heading">
               <header className="mb-4 flex items-baseline justify-between gap-4">
                 <h2
@@ -147,11 +185,11 @@ export default async function DestinationDirectoryPage({
                   {t('directory.franceSection.title')}
                 </h2>
                 <p className="text-muted text-xs">
-                  {t('directory.franceSection.subtitle', { count: cities.length })}
+                  {t('directory.franceSection.subtitle', { count: frCities.length })}
                 </p>
               </header>
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {cities.map((c) => (
+                {frCities.map((c) => (
                   <li key={c.slug}>
                     <Link
                       href={{
@@ -162,7 +200,9 @@ export default async function DestinationDirectoryPage({
                     >
                       <span>
                         <span className="text-fg font-serif text-lg">{c.name}</span>
-                        <span className="text-muted ml-2 text-xs">{c.region}</span>
+                        {c.region !== null && (
+                          <span className="text-muted ml-2 text-xs">{c.region}</span>
+                        )}
                       </span>
                       <span className="text-muted text-xs">
                         {t('directory.count', { count: c.count })}
@@ -170,6 +210,48 @@ export default async function DestinationDirectoryPage({
                     </Link>
                   </li>
                 ))}
+              </ul>
+            </section>
+          )}
+
+          {intlCities.length > 0 && (
+            <section aria-labelledby="destination-intl-cities-heading">
+              <header className="mb-4 flex items-baseline justify-between gap-4">
+                <h2
+                  id="destination-intl-cities-heading"
+                  className="text-fg font-serif text-2xl sm:text-3xl"
+                >
+                  {t('directory.intlCitiesSection.title')}
+                </h2>
+                <p className="text-muted text-xs">
+                  {t('directory.intlCitiesSection.subtitle', { count: intlCities.length })}
+                </p>
+              </header>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {intlCities.map((c) => {
+                  const country = pickByLocale(locale, c.countryLabelFr, c.countryLabelEn);
+                  return (
+                    <li key={c.slug}>
+                      <Link
+                        href={{
+                          pathname: '/destination/[citySlug]',
+                          params: { citySlug: c.slug },
+                        }}
+                        className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
+                      >
+                        <span>
+                          <span className="text-fg font-serif text-lg">{c.name}</span>
+                          {country !== null && (
+                            <span className="text-muted ml-2 text-xs">{country}</span>
+                          )}
+                        </span>
+                        <span className="text-muted text-xs">
+                          {t('directory.count', { count: c.count })}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           )}

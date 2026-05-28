@@ -227,6 +227,98 @@ if (wordsTotal < 3500) {
 A renderer NEVER tries to lengthen content. If the generation undershoots,
 re-run the generator (see [`llm-output-robustness`](../llm-output-robustness/SKILL.md)).
 
+## Rule 10 — `/destination/[citySlug]` international (UNBLOCKED — ADR-0022, 2026-05-28)
+
+**STATUS — RESOLVED.** ADR-0022 lifted the FR-only filter in
+`listPublishedCities` and `getDestinationBySlug`. The route now accepts
+every published city. The historical write-up below is kept for context
+on the constraints the unblock had to satisfy.
+
+### Resolution summary
+
+1. `CitySummary` and `DestinationDetail` now carry `region: string | null`
+   plus a `countryCode` + `countryLabelFr` + `countryLabelEn` triplet.
+2. The page detail (`page.tsx`) falls back to `countryLabel*` via a
+   local `pickRegionLabel(destination, locale)` helper for the visible
+   "region" line, the JSON-LD `Place.addressRegion`, and the breadcrumb
+   subtitle. JSON-LD `addressCountry` mirrors the real ISO-2 code.
+3. `KNOWN_MENU_CITY_SLUGS` merges `TOP_DESTINATION_NAV_ENTRIES` (FR) and
+   the new `TOP_INTL_DESTINATION_NAV_ENTRIES` (14 Phase 4.A cities).
+4. `generateStaticParams` is capped at top-100 by `count DESC` to keep
+   build time bounded. Long tail rends via on-demand ISR.
+5. The `/destination` directory hub splits the cities by `countryCode`
+   into "France — par ville" and a new "Monde — par ville" section.
+6. `CITY_SLUG_TO_NEEDLES` in
+   `find-itineraries-for-context.ts` got 14 international entries so
+   the `<RelatedItinerariesList>` cross-links work end-to-end.
+
+### Historical context (kept for the audit trail)
+
+Since ADR-0015 the `/guide/[citySlug]` route 308-redirects to
+`/destination/[citySlug]`, which uses `listPublishedCities` /
+`getDestinationBySlug` from
+[`apps/web/src/server/destinations/cities.ts`](../../apps/web/src/server/destinations/cities.ts).
+**Until 2026-05-28 both helpers hard-filtered `country_code === 'FR'`.**
+The consequence : any international city slug (NYC, Dubaï, Bali, Tokyo,
+Marrakech, Mykonos, Santorin, St-Moritz, Phuket, Lake Como, Madère,
+Riviera Maya, Algarve, …) returned **404**, even if its
+`editorial_guides` row was fully generated and `is_published = true`.
+
+The Phase 4.A request (2026-05-28) asked for 14 international city
+guides. The pipeline (`scripts/editorial-pilot/src/guides/run-guides-v2.ts`
+
+- `push-guide-via-rest.mjs`) can produce them perfectly — they would
+  land in `editorial_guides`, but no public surface renders them.
+
+**Unblocking checklist (the next session must complete this BEFORE
+generating international guides)** :
+
+1. **Decide** — extend the FR filter to `country_code IN ('FR', …)` with
+   a per-country allowlist, OR open a new route
+   `/destination/[country]/[city]` for non-French cities. The latter
+   reads cleaner but doubles the cross-link surface (related rankings,
+   itineraries, hotels-in-city) that the FR route already handles.
+2. **Schema** — the `cities` aggregation already exposes
+   `country_code`, no migration needed. The `KNOWN_MENU_CITY_SLUGS`
+   guard at the top of
+   [`apps/web/src/app/[locale]/destination/[citySlug]/page.tsx`](../../apps/web/src/app/[locale]/destination/[citySlug]/page.tsx)
+   needs an international counterpart, otherwise off-menu international
+   slugs would render an "empty state" instead of `notFound()`.
+3. **`generateStaticParams`** — `listPublishedCities` powers it ;
+   removing the FR filter expands the param set to ~127 countries.
+   Consider capping at top-N by `published_hotels DESC` to keep build
+   time reasonable.
+4. **Tests** — `e2e/destination-guide-merge.spec.ts` covers
+   `/fr/guide/paris` → 308 → `/fr/destination/paris`. Add an
+   `e2e/destination-international.spec.ts` covering `/fr/destination/
+marrakech` and `/en/destination/marrakech` end-to-end (must include
+   the AggregateRating fallback when there are no Amadeus sentiments
+   yet).
+5. **Cross-link** — `<RelatedRankingsList>` and
+   `<RelatedItinerariesList>` query by `city_slug` ; verify their
+   helpers don't silently filter FR-only either.
+6. **Sitemap** — `apps/web/src/app/sitemaps/destinations.xml/route.ts`
+   re-uses `listPublishedCities`, so the international rows pick up
+   automatically once the filter relaxes.
+7. **Hreflang** — international guides ship `fr` + `en` in V1 (same
+   policy as the FR catalogue). DE/ES/IT/AR/ZH/JA are V2/V3 work.
+
+The blocker was discovered during Phase 4 (chain rankings shipped fine
+because `/classement/<slug>` is country-agnostic). It's a 3-5 hour task,
+deserves its own PR + ADR-0016. Until it lands, **don't generate
+international city guides** — the `editorial_guides` table would
+accumulate dark surfaces and the `revalidate = 3600` ISR cache would
+hide the 404 from causal inspection.
+
+**Workaround note (now obsolete since ADR-0022)** : prior to the unblock,
+the Marrakech / Lake Como / Madère / etc. seeds had to be authored in
+`destinations-catalog.ts` with `scope: 'city'` and `country_code: '<code>'`,
+but the pipeline runner had to skip them until the route accepted them.
+The existing scope=`country` guides (`france`, `italie`, etc.) kept
+working — they hit `/guide/[countrySlug]`, a separate route that has no
+FR filter. **Since 2026-05-28, both scopes ship to production through
+their canonical routes.**
+
 ## Anti-patterns
 
 - ❌ Building the TOC by querying the rendered DOM client-side.

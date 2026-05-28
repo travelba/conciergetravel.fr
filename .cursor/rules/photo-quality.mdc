@@ -1,0 +1,73 @@
+---
+description: Hard rules qualité photo pour MyConciergeHotel.com — quotas, formats, alt text bilingue, JSON-LD ImageObject, LCP, agentique. PR bloquée si non respecté.
+globs: "{apps/web/src/components/hotel/hotel-gallery.tsx,apps/web/src/components/hotel/hotel-hero.tsx,apps/web/src/app/**/hotel/**/*.{ts,tsx},scripts/photos/**/*.ts,packages/ui/src/cloudinary.ts,packages/seo/src/jsonld/hotel.ts}"
+alwaysApply: true
+---
+
+# Photo Quality — Hard Rules (PR gate)
+
+Toute PR touchant la galerie, le hero, le JSON-LD ImageObject, le script
+de sync photos ou `buildCloudinarySrc` **doit** passer cette checklist.
+Un seul point manquant = PR refusée.
+
+## Checklist PR obligatoire
+
+### ✅ Quotas
+- [ ] `gallery_images` >= 30 entrées par hôtel publié
+- [ ] >= 10 catégories distinctes couvertes (`photo_category` SMD)
+- [ ] Au moins 1 photo dans chaque catégorie : `exterior`, `lobby`, `room`, `dining`, `spa`, `pool`, `view`, `detail`, `concierge`, `events`
+- [ ] Si `mice_info` non null -> catégorie `events` >= 2 photos
+
+### ✅ Sources légales (aucun hotlink)
+- [ ] Aucune URL `i.pinimg.com` dans `hero_image` ou `gallery_images`
+- [ ] Aucune URL `www.<hotel>.com/` (site officiel hotlink)
+- [ ] Toutes les photos Cloudinary : public_id format `cct/hotels/<slug>/<role>-<n>`
+- [ ] SMD `licence` renseigné pour chaque asset (`cc-by-sa-4.0`, `cc-by-4.0`, `cc0`, `all-rights-reserved`, `fair-use`)
+
+### ✅ Qualité technique
+- [ ] Original uploadé Cloudinary >= 2400 px grand côté
+- [ ] `buildCloudinarySrc` utilisé pour TOUTES les URLs (jamais `next/image` sur assets hôtels)
+- [ ] Hero : `loading="eager"` + `fetchpriority="high"` + preset `w_2400,h_1350`
+- [ ] Gallery : `loading="lazy"` + `decoding="async"` + preset `w_1230,h_820`
+- [ ] LQIP (`q_1,w_20,e_blur:500`) utilisé comme placeholder hero
+- [ ] Lighthouse CI : LCP < 2.5 s mobile, CLS < 0.1 (rapport dans la PR)
+
+### ✅ Alt text — SEO + GEO (Hard Rule 16)
+- [ ] `alt_fr` renseigné — format : "[Adjectif descriptif] [Hôtel X] [Ville]"
+- [ ] `alt_en` renseigné (même exigence)
+- [ ] Aucun `alt` vide, générique ("photo", "image") ou technique ("hero-1")
+- [ ] Longueur 10-100 chars (validé par `AltTextSchema` Zod)
+
+### ✅ JSON-LD ImageObject
+- [ ] Hero -> `ImageObject` avec `representativeOfPage: true` (1 seul par page)
+- [ ] Hero -> `caption` = phrase complète <= 120 chars, auto-explicative
+- [ ] Gallery : 5 premiers -> `ImageObject` rich (url + caption + width + height)
+- [ ] Aucun `ImageObject` sans `caption` non vide
+- [ ] `width` et `height` corrects (pas de 0 ou null)
+- [ ] JSON-LD émis via `JsonLdScript` (jamais `<script>` inline — CSP nonce)
+
+### ✅ EEAT indexability guard
+- [ ] `isIndexable` guard NON modifié sans ADR
+- [ ] Condition : `heroPublicId !== null && (galleryCount >= 5 || hasSections)`
+- [ ] Fiche sans hero -> `noindex, follow` (ne pas forcer `index` manuellement)
+
+### ✅ Surface agentique
+- [ ] `getHotelPhotos` présent dans `DEFAULT_AGENT_SKILLS`
+- [ ] `public/agent-skills.json` régénéré (`pnpm build:agent-skills`)
+- [ ] `public/llms.txt` mentionne l'endpoint `/api/mcp/hotel-photos`
+- [ ] Endpoint REST rate-limited (60 req/min)
+
+### ✅ Room subpages
+- [ ] Chaque sous-page chambre publiée : >= 5 `ImageObject` dans le JSON-LD
+- [ ] 1 `ImageObject` avec `representativeOfPage: true`
+- [ ] `isPartOf` -> URL canonique du `Hotel` parent
+
+## Références
+
+- `.cursor/skills/photo-quality-seo-geo-agentique/SKILL.md` — spec complète
+- `.cursor/skills/photo-pipeline/SKILL.md` — sourcing légal, migration
+- `.cursor/rules/hotel-detail-page.mdc` paragraphe Hard Rules 9+16
+- `.cursor/rules/seo-geo.mdc` paragraphe JSON-LD et LLM-actionable surfaces
+- `packages/ui/src/cloudinary.ts` -> `buildCloudinarySrc`, `CLOUDINARY_PRESETS`
+- `packages/seo/src/jsonld/hotel.ts` -> `hotelJsonLd` builder
+- `scripts/photos/sync-hotel-photos.ts` — sync batch Cloudinary -> Supabase

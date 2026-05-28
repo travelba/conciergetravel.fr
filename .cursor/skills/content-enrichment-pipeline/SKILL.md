@@ -564,6 +564,67 @@ no-op (English keys no longer match the dict; pet `notes_fr ≠ notes_en` for
 already-fixed rows). Reference impl:
 `scripts/editorial-pilot/src/i18n/translate-fr-residuals.ts`.
 
+## Rule 13 — `factual_summary` template duplicates the city when no POI is exploitable
+
+Discovered while walking the 73-draft Phase 1.5 seed batch (2026-05-28).
+The prompt
+[`scripts/editorial-pilot/prompts/hotel-factual-summary.md`](../../scripts/editorial-pilot/prompts/hotel-factual-summary.md)
+defines two slots that can independently resolve to the same string:
+
+```
+[Type] [étoiles] situé [quartier/ville], à [distance] de [POI majeur], avec [3 USP].
+```
+
+Where:
+
+- `[quartier/ville]` falls back to `city` when `district` is null.
+- `[POI majeur]` falls back to `« au cœur de [quartier/ville] »` when no
+  POI passes the exploitable filter.
+
+When both fallbacks fire (urban hotels with no `points_of_interest`
+populated, e.g. London, Tokyo, Saint-Tropez seed rows), the LLM emits:
+
+```
+Palace 5 étoiles situé Londres, au cœur de Londres, avec service personnalisé...
+```
+
+The audit query (regex tested on the live catalogue):
+
+```sql
+select count(*) from public.hotels
+where is_published = true
+  and factual_summary_fr ~* 'situé\s+([\wÀ-ÿ-]+),?\s+(au\s+cœur\s+de\s+|à\s+)\1';
+```
+
+2026-05-28 catalogue snapshot: **465 / 2193 published hotels** match,
+including **9 / 56** of the freshly-seeded Phase 1.5 batch. The bug is
+purely cosmetic — `factual_summary_fr.length` stays in the 110-165
+band so the publish gate passes — but the H1 sub-line then renders
+`"...situé Londres, au cœur de Londres..."` which is visibly awkward
+and degrades the AEO citation quality (LLMs strip duplicates and end up
+quoting a shorter, less specific anchor).
+
+Mitigation has three layers, applied in order:
+
+1. **Patch the prompt** — add a CHECKLIST item: « Si `[quartier/ville]`
+   et le fallback `[POI]` résolvent à la même chaîne, supprime la
+   clause `au cœur de …` (la ville est déjà mentionnée dans `situé X`) ».
+   Cheapest fix; prevents new occurrences on every subsequent run of
+   `run-hotel-factual-summary.ts`.
+2. **One-shot regen** — re-run the factual-summary pipeline filtered to
+   the 465 affected slugs (`--slugs=…`). Cost ≈ $0.20 (gpt-5.4 input
+   ≈2.6k tokens × 465 + ≈80 output tokens × 465). Idempotent because
+   the gate only writes if the new output is in the 110-165 band AND
+   passes `gateFactualSummaryFormat`.
+3. **CI audit** — fold the regex above into the post-enrichment audit
+   suite alongside Rule 12, so the next batch surfaces the issue
+   automatically.
+
+Until the prompt patch lands, **do not** treat factual_summary band
+compliance as the only quality signal. The publish gate length checks
+(`factual_summary_fr ∈ [100, 200]`) accept the duplicated city and
+will not flag it.
+
 ## Anti-patterns
 
 - ❌ Calling `fetch()` directly on a third-party hotel website — bot
@@ -619,6 +680,12 @@ already-fixed rows). Reference impl:
   per-string cache. 75 hotels share ~50 unique source strings — paying
   the LLM for the same translation 75 times wastes credits and produces
   inconsistent FR copy across hotels.
+- ❌ Letting the `factual_summary` prompt emit `« situé Londres, au
+cœur de Londres »` on cityname-only inputs. The two slots
+  `[quartier/ville]` and the no-POI fallback `« au cœur de … »` collapse
+  to the same string and the gate accepts the duplicate. See Rule 13;
+  patch the prompt CHECKLIST and audit with the regex
+  `'situé\s+([\wÀ-ÿ-]+),?\s+(au\s+cœur\s+de\s+|à\s+)\1'`.
 
 ## References
 

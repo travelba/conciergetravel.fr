@@ -256,15 +256,30 @@ export async function listPublishedRankings(): Promise<readonly PublishedRanking
   const ids = data.map((r) => r.id as string);
   const counts = new Map<string, number>();
   if (ids.length > 0) {
-    const { data: entries } = await supabase
-      .from('editorial_ranking_entries')
-      .select('ranking_id')
-      .in('ranking_id', ids);
-    if (entries !== null) {
+    // Supabase REST caps each `.select()` at 1000 rows by default.
+    // At 2026-05-28 the catalogue holds 2260 entries across 190
+    // rankings, so a single fetch silently truncates and under-counts
+    // the biggest lists (50 Best, Gold List). We paginate explicitly
+    // with `.range()` until the batch is shorter than the page size.
+    const PAGE_SIZE = 1000;
+    let from = 0;
+    // Hard ceiling so a runaway query can never hammer the DB —
+    // 20k entries = 10× the current catalogue, well above any
+    // realistic 24-month growth.
+    const SAFETY_CEILING = 20000;
+    while (from < SAFETY_CEILING) {
+      const { data: entries } = await supabase
+        .from('editorial_ranking_entries')
+        .select('ranking_id')
+        .in('ranking_id', ids)
+        .range(from, from + PAGE_SIZE - 1);
+      if (entries === null || entries.length === 0) break;
       for (const e of entries) {
         const k = e.ranking_id as string;
         counts.set(k, (counts.get(k) ?? 0) + 1);
       }
+      if (entries.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
     }
   }
   return data.map((r) => {
