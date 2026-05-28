@@ -44,10 +44,15 @@ const __dirname = dirname(__filename);
 loadDotenv({ path: resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: resolve(__dirname, '../../../../.env') });
 
-interface ConciergeAdvice {
-  readonly body_fr?: string;
-  readonly body_en?: string;
+interface ConciergeAdviceLocale {
+  readonly title?: string;
+  readonly body?: string;
   readonly tip_for?: string;
+}
+
+interface ConciergeAdvice {
+  readonly fr?: ConciergeAdviceLocale;
+  readonly en?: ConciergeAdviceLocale;
 }
 
 interface FaqItem {
@@ -138,15 +143,15 @@ function evaluateGate(h: HotelRow): GateOutcome {
     failures.push(`factual_summary_en out of band (${fsEn.length} chars, target 100-200)`);
   }
 
-  // concierge_advice
+  // concierge_advice — actual JSONB shape is { fr: { body, title, tip_for }, en: { ... } }
   const ca = h.concierge_advice;
   if (ca === null || typeof ca !== 'object') {
     failures.push('concierge_advice missing');
   } else {
-    const wFr = wordCount(ca.body_fr ?? '');
-    const wEn = wordCount(ca.body_en ?? '');
-    if (wFr < 30) failures.push(`concierge_advice.body_fr too short (${wFr} words)`);
-    if (wEn < 30) failures.push(`concierge_advice.body_en too short (${wEn} words)`);
+    const wFr = wordCount(ca.fr?.body ?? '');
+    const wEn = wordCount(ca.en?.body ?? '');
+    if (wFr < 30) failures.push(`concierge_advice.fr.body too short (${wFr} words)`);
+    if (wEn < 30) failures.push(`concierge_advice.en.body too short (${wEn} words)`);
   }
 
   // faq_content
