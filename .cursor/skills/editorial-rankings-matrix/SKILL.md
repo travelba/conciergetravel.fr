@@ -232,6 +232,53 @@ Anti-pattern associé : tester avec `--draft` "pour être prudent" sur un corpus
 qui contient des slugs déjà publiés. **Avec le ratchet en place, `--draft` est
 sûr**. Sans le ratchet, c'est un fusil à pompe.
 
+## Rule 8 — Chain rankings hors matrice (workflow PostgREST direct)
+
+Quand on veut produire un **cross-chain ranking** (`Top 25 Aman`, `Top 30
+Four Seasons palaces`, `Best Mandarin Oriental`, etc.) on **ne passe pas
+par la matrice combinator**. Raison : ces rankings ne se déduisent pas
+d'axes (`lieu × type × theme`) — ils sont définis par un filtre brand-
+specific (`luxury_tier = 'aman'` + `name ILIKE '%aman%'`) qui n'a pas
+sa place dans `buildMatrix()`. Les forcer dans la matrice pollue les
+axes et complique `inspect-matrix`.
+
+Le workflow validé (Phase 4.B 2026-05-28) :
+
+1. **Seed déclaratif** dans `src/rankings/run-chain-ranking.ts`
+   (`CHAIN_SPECS`) — un objet `{ slug, axisChainKey, titleFr, titleEn,
+topN, eligibilityFilter? }` par marque.
+2. **Dump SQL par chaîne** via `split-chain-dump.mjs` (entrée = bulk
+   SQL dump depuis MCP `execute_sql`, sortie = un JSON normalisé
+   `HotelCatalogRow[]` par chaîne dans `out/chain-hotels/<chain>.json`).
+3. **Génération LLM** par `run-chain-ranking.ts` (réutilise
+   `generateRankingV2` — même multi-call que le bulk runner). Sortie
+   cachée localement dans `data/rankings-cache/<slug>/generated.json`
+   - `seed.json`.
+4. **Push DB** via `push-ranking-via-rest.mjs` — PostgREST direct (pas
+   d'`apply_migration` / `execute_sql` MCP — les payloads dépassent
+   souvent les 50K tokens). Le script applique le ratchet `is_published`
+   (Rule 6), tronque `justification_fr/en` à 1200 chars (check
+   constraint), et émet les bons `toc_anchors` (`introduction`,
+   `tableaux`, `ranking`, `glossaire`, `conclusion`, `faq`, `sources`
+   — IDs exacts utilisés par
+   [`apps/web/src/app/[locale]/classement/[slug]/page.tsx`](../../apps/web/src/app/[locale]/classement/[slug]/page.tsx)).
+5. **Verify** via `verify-chain-rankings.mjs` — lit la DB via PostgREST,
+   confirme `is_published = true` + dump le slug réellement persisté
+   (le suffix `-hotels-monde` vs `-monde` peut différer entre `CHAIN_SPECS`
+   et la DB selon la convention de la chaîne).
+6. **Unpublish legacy** — quand on rebuild une chaîne déjà couverte par
+   un slug contaminé (Aman, FS, MO, PH ont été live avec des hôtels
+   hors-marque jusqu'au 2026-05-28), `update editorial_rankings set
+is_published = false where slug = '<legacy_slug>'` pour éviter la
+   cannibalisation SEO.
+
+**Pourquoi pas `execute_sql` MCP pour le push** : les 25-30 entrées
+contiennent chacune 1000+ chars de markdown FR + EN. Le SQL transaction
+dépasse les 32K tokens et fait tomber l'outil MCP avec un message
+opaque. PostgREST avale les payloads sans broncher et donne des erreurs
+claires par row (cf. l'incident `justification_fr_ck` qui a été
+diagnostiqué en une requête PostgREST).
+
 ## Rule 7 — Ne pas hardcoder l'ordre de matchers `lieuMatches`
 
 `resolveLieu(raw)` est appelé en chaîne (exact → label normalisé →
@@ -276,17 +323,21 @@ pnpm rankings:bulk --source=yonder --draft
 
 ## Fichiers du squelette
 
-| Fichier                                                                                                   | Rôle                                                                        |
-| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [`axes.ts`](../../scripts/editorial-pilot/src/rankings/axes.ts)                                           | `HotelType`, `Theme`, `Occasion`, `LieuDef`, `RankingAxes`, `resolveLieu`.  |
-| [`templates.ts`](../../scripts/editorial-pilot/src/rankings/templates.ts)                                 | 9 templates : `axes → slug + titre`. Pure string functions.                 |
-| [`combinator.ts`](../../scripts/editorial-pilot/src/rankings/combinator.ts)                               | `buildMatrix()`, `eligibilityFor()`, `MANUAL_OVERRIDES`, `lieuMatches`.     |
-| [`rankings-catalog-v2.ts`](../../scripts/editorial-pilot/src/rankings/rankings-catalog-v2.ts)             | Loader public — assemble catalog + classified sources + buildMatrix.        |
-| [`run-rankings-v2-bulk.ts`](../../scripts/editorial-pilot/src/rankings/run-rankings-v2-bulk.ts)           | CLI batch runner (concurrent, cache, draft mode, dry-run).                  |
-| [`inspect-matrix.ts`](../../scripts/editorial-pilot/src/rankings/inspect-matrix.ts)                       | Diagnostic stats + filter (rapide).                                         |
-| [`inspect-scaffold-coverage.ts`](../../scripts/editorial-pilot/src/rankings/inspect-scaffold-coverage.ts) | Diagnostic spécifique scaffold (coverage 64/64 + distribution eligibility). |
-| [`yonder/classify-yonder-axes.ts`](../../scripts/editorial-pilot/src/yonder/classify-yonder-axes.ts)      | Classifier LLM (titres libres).                                             |
-| [`yonder/classify-scaffold-axes.ts`](../../scripts/editorial-pilot/src/yonder/classify-scaffold-axes.ts)  | Classifier déterministe (slugs structurés).                                 |
+| Fichier                                                                                                      | Rôle                                                                        |
+| ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| [`axes.ts`](../../scripts/editorial-pilot/src/rankings/axes.ts)                                              | `HotelType`, `Theme`, `Occasion`, `LieuDef`, `RankingAxes`, `resolveLieu`.  |
+| [`templates.ts`](../../scripts/editorial-pilot/src/rankings/templates.ts)                                    | 9 templates : `axes → slug + titre`. Pure string functions.                 |
+| [`combinator.ts`](../../scripts/editorial-pilot/src/rankings/combinator.ts)                                  | `buildMatrix()`, `eligibilityFor()`, `MANUAL_OVERRIDES`, `lieuMatches`.     |
+| [`rankings-catalog-v2.ts`](../../scripts/editorial-pilot/src/rankings/rankings-catalog-v2.ts)                | Loader public — assemble catalog + classified sources + buildMatrix.        |
+| [`run-rankings-v2-bulk.ts`](../../scripts/editorial-pilot/src/rankings/run-rankings-v2-bulk.ts)              | CLI batch runner (concurrent, cache, draft mode, dry-run).                  |
+| [`inspect-matrix.ts`](../../scripts/editorial-pilot/src/rankings/inspect-matrix.ts)                          | Diagnostic stats + filter (rapide).                                         |
+| [`inspect-scaffold-coverage.ts`](../../scripts/editorial-pilot/src/rankings/inspect-scaffold-coverage.ts)    | Diagnostic spécifique scaffold (coverage 64/64 + distribution eligibility). |
+| [`yonder/classify-yonder-axes.ts`](../../scripts/editorial-pilot/src/yonder/classify-yonder-axes.ts)         | Classifier LLM (titres libres).                                             |
+| [`yonder/classify-scaffold-axes.ts`](../../scripts/editorial-pilot/src/yonder/classify-scaffold-axes.ts)     | Classifier déterministe (slugs structurés).                                 |
+| [`rankings/run-chain-ranking.ts`](../../scripts/editorial-pilot/src/rankings/run-chain-ranking.ts)           | Chain rankings (Rule 8) — `CHAIN_SPECS` + génération LLM par marque.        |
+| [`rankings/split-chain-dump.mjs`](../../scripts/editorial-pilot/src/rankings/split-chain-dump.mjs)           | Dump SQL → JSON normalisé par chaîne dans `out/chain-hotels/`.              |
+| [`rankings/push-ranking-via-rest.mjs`](../../scripts/editorial-pilot/src/rankings/push-ranking-via-rest.mjs) | Push d'un ranking en DB via PostgREST (ratchet + truncation + TOC).         |
+| [`rankings/verify-chain-rankings.mjs`](../../scripts/editorial-pilot/src/rankings/verify-chain-rankings.mjs) | Check existence + statut publish des chain slugs.                           |
 
 ## References
 
