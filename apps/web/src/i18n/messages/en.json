@@ -24,12 +24,13 @@
     "title": "We were waiting for you",
     "intlBadge": "{countries} countries · {hotels} addresses · 434 Relais & Châteaux",
     "stats": "{countries} countries · {hotels} extraordinary addresses, hand-picked one by one",
-    "subtitle": "Access the upgrades and VIP privileges reserved for regulars of the world's finest houses.",
+    "subtitle": "A worldwide selection of extraordinary hotels, signed by our concierge desk.",
+    "subtitleSecondary": "Access the upgrades and VIP privileges reserved for regulars of the world's finest houses.",
     "comingSoon": "MyConciergeHotel.com — your concierge is curating the selection.",
     "trust": {
-      "iata": "Free cancellation",
-      "aspst": "Pay at the hotel",
-      "amadeus": "Best price guaranteed"
+      "iata": "IATA-accredited agency",
+      "aspst": "ASPST member",
+      "amadeus": "Secure Amadeus payment"
     },
     "hero": {
       "posterAlt": "Parisian Palace suite at dusk, rooftops view — MyConciergeHotel selection",
@@ -98,7 +99,53 @@
       "lead": "The twenty latest houses our concierge desk has visited. No pay-to-play — no hotel commission influences the order. Sorted by editorial priority: the favourites first, the safe bets next.",
       "viewFiche": "Read the page",
       "empty": "Our concierge desk is compiling the latest visits. Come back in a few moments.",
-      "backToHome": "Back to home"
+      "backToHome": "Back to home",
+      "openedInYear": "Opened in {year}",
+      "aeoQuestion": "Which extraordinary hotels have recently opened or been visited by our concierge desk?",
+      "aeoAnswer": "This page lists the twenty most recent addresses inspected by our IATA concierge desk — Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World and rare editorial gems. The order follows the Concierge's editorial priority — no hotel commission influences the ranking. Every page closes with a Concierge's Tip: the room, the table or the timing the guidebooks never share.",
+      "faqTitle": "Frequently asked questions about Concierge openings and visits",
+      "faqItems": [
+        {
+          "q": "How does the Concierge select the hotels that appear on this page?",
+          "a": "Our advisers personally visit the hotels listed, or rely on the Concierge inspector network — Atout France for the Palace label, the Michelin Guide for the Keys, Forbes Travel Guide, Relais & Châteaux and Leading Hotels of the World. No hotel pays to be listed here. The twenty addresses on display are the most recent picks — the list rotates as soon as a new visit is validated."
+        },
+        {
+          "q": "Which palaces or Relais & Châteaux feature among the recent openings?",
+          "a": "Our catalogue covers 615 extraordinary hotels in 91 countries, including 435 Relais & Châteaux and 18 Atout France Palaces. This page highlights houses that have reopened after renovation, changed chef, earned a Michelin Key or a Forbes Five Star, or that we have just visited. Current examples include Le Bristol Paris, Akelarre (Spanish Basque Country), Al Moudira (Luxor), Alila Jabal Akhdar (Oman)."
+        },
+        {
+          "q": "Can I book a recently opened hotel through the Concierge?",
+          "a": "Yes for every address listed in our catalogue. You can browse the page, request a personalised quote via the concierge form (reply within 24 business hours), or — once Phase 6 of the project ships — book directly at net GDS rates through our IATA licence. Most bookings today flow through our concierge desk so guests benefit from upgrades, transfers and special requests negotiated directly with each property."
+        },
+        {
+          "q": "How often is this page updated?",
+          "a": "The list is regenerated hourly server-side (Next.js ISR) from our concierge database. A new hotel appears as soon as its page is published and a visit has been validated by an adviser. Hotels move up or down according to the editorial priority adjusted by our editors."
+        },
+        {
+          "q": "What is a 'validated' visit by your concierge desk?",
+          "a": "One of our advisers has spent at least one night on site, tested breakfast, the spa, two restaurants if available, and met the head concierge. When a direct visit is not possible, the hotel must combine at least two external authority signals (Atout France Palace, Michelin Key, Forbes Five Star, Relais & Châteaux, Leading Hotels of the World) and a photo plus press audit. No copy-paste from Booking or TripAdvisor."
+        },
+        {
+          "q": "Do recently opened hotels cost more than an established address?",
+          "a": "Not systematically. Openings often benefit from launch rates ('opening rates') 10–20 % below catalogue, or even free nights during pre-opening. Our concierge desk negotiates these conditions directly when possible. Conversely, some historic Palaces charge more after a heavy renovation (Hôtel de Crillon, Lutetia)."
+        },
+        {
+          "q": "What does 'opening' mean on this page?",
+          "a": "Several cases: a new build (a hotel that did not exist before), an editorial re-opening (a hotel reopening after heavy renovation, under a new brand or new chef), or a first visit by our concierge desk (an established hotel we have just inspected and added to the catalogue). The context is spelt out in the Concierge's Tip at the bottom of each page."
+        },
+        {
+          "q": "Do you cover openings outside France and Europe?",
+          "a": "Yes. Our 2026 catalogue spans 91 countries — flagship openings include Asia (Aman Tokyo, Capella Bangkok, Bvlgari Dubai), the Middle East, Africa (Al Moudira in Luxor, Singita lodges), Latin America (Riviera Maya, Patagonia), the Caribbean and the Indian Ocean. We favour signature houses over mass-market chains, wherever they are."
+        },
+        {
+          "q": "How can I be notified about upcoming Concierge openings?",
+          "a": "Our newsletter Le Concierge — a single monthly issue, no commercial tracking — announces notable openings and closures, major renovations and new Michelin Keys or Forbes Five Star awards. Free subscription via the Newsletter page. You can also follow individual hotels from your account (favourites) to receive an alert when a major update lands."
+        },
+        {
+          "q": "Does this list replace a ranking or a guide?",
+          "a": "No. This page is a chronological feed of the latest visits — it is the logbook of our concierge desk. To compare, rank or choose, consult our editorial rankings ('Best Palaces of France', 'Best hotel spas', etc.) or the destination guides (Paris, French Riviera, Italy, Japan…). The three surfaces complement each other."
+        }
+      ]
     },
     "featuredHotels": {
       "eyebrow": "Concierge picks",
@@ -252,6 +299,7 @@
       "conciergeFaq": "General FAQ",
       "conciergeGuides": "Travel guides",
       "conciergeItineraries": "Tailor-made itineraries",
+      "conciergeOpenings": "Recent openings and visits",
       "conciergeJournal": "Concierge Journal",
       "conciergeHotelier": "For hoteliers",
       "conciergeMice": "MICE / Events",
@@ -2517,6 +2565,7 @@
       "conciergeTip": "The Concierge’s Tip",
       "editorialMethod": "Editorial method",
       "itineraries": "Itineraries",
+      "openings": "Concierge openings & visits",
       "contact": "Contact",
       "legalNotice": "Legal notice",
       "privacy": "Privacy policy",

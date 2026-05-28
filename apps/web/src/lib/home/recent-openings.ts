@@ -43,6 +43,13 @@ export interface RecentOpeningCard {
   readonly heroPublicId: string;
   /** ISO date `YYYY-MM-DD` when the hotel opened. `null` until back-filled. */
   readonly openedAt: string | null;
+  /**
+   * ISO timestamp of the last database update on the row. Surfaced so
+   * the `/ouvertures` page can drive a `<LastUpdatedBadge />` from the
+   * `max(updated_at)` of the projected list (triple-sync freshness
+   * signal — see `.cursor/rules/seo-geo.mdc` §Freshness signal).
+   */
+  readonly updatedAt: string | null;
 }
 
 const RowSchema = z.object({
@@ -81,6 +88,10 @@ const RowSchema = z.object({
     .string()
     .nullish()
     .transform((v) => v ?? null),
+  updated_at: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? null),
 });
 
 async function fetchRecentOpenings(limit: number): Promise<readonly RecentOpeningCard[]> {
@@ -89,7 +100,7 @@ async function fetchRecentOpenings(limit: number): Promise<readonly RecentOpenin
     const { data, error } = await supabase
       .from('hotels')
       .select(
-        'slug, slug_en, name, name_en, city, stars, is_palace, luxury_tier, country_code, country_label_fr, country_label_en, hero_image, opened_at, priority',
+        'slug, slug_en, name, name_en, city, stars, is_palace, luxury_tier, country_code, country_label_fr, country_label_en, hero_image, opened_at, updated_at, priority',
       )
       .eq('is_published', true)
       .not('hero_image', 'is', null)
@@ -117,6 +128,7 @@ async function fetchRecentOpenings(limit: number): Promise<readonly RecentOpenin
         countryLabelEn: r.data.country_label_en,
         heroPublicId: r.data.hero_image,
         openedAt: r.data.opened_at,
+        updatedAt: r.data.updated_at,
       });
     }
     return out;

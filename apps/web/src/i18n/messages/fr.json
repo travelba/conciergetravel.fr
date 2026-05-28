@@ -24,12 +24,13 @@
     "title": "Nous vous attendions",
     "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
     "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
-    "subtitle": "Accédez aux surclassements et privilèges VIP réservés aux habitués des plus belles maisons.",
+    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
+    "subtitleSecondary": "Accédez aux surclassements et privilèges VIP réservés aux habitués des plus belles maisons.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
-      "iata": "Annulation gratuite",
-      "aspst": "Paiement sur place",
-      "amadeus": "Meilleur prix garanti"
+      "iata": "Agence accréditée IATA",
+      "aspst": "Membre ASPST",
+      "amadeus": "Paiement sécurisé Amadeus"
     },
     "hero": {
       "posterAlt": "Suite d'un Palace parisien au crépuscule, vue sur les toits — sélection MyConciergeHotel",
@@ -98,7 +99,53 @@
       "lead": "Les vingt dernières maisons visitées par notre conciergerie. Pas de pay-to-play : aucune commission hôtelière n'influence l'ordre. Le tri suit la priorité éditoriale — les coups de cœur en premier, les valeurs sûres ensuite.",
       "viewFiche": "Lire la fiche",
       "empty": "Notre conciergerie compile les dernières visites. Revenez dans quelques instants.",
-      "backToHome": "Retour à l'accueil"
+      "backToHome": "Retour à l'accueil",
+      "openedInYear": "Ouvert en {year}",
+      "aeoQuestion": "Quels sont les hôtels d'exception ouverts ou récemment visités par notre conciergerie ?",
+      "aeoAnswer": "Cette page liste les vingt dernières adresses passées au crible de notre conciergerie IATA — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Le tri suit la priorité éditoriale du Concierge ; aucune commission hôtelière n'influence l'ordre. Chaque fiche se termine par un Conseil du Concierge : la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "faqTitle": "Questions fréquentes sur les ouvertures et visites du Concierge",
+      "faqItems": [
+        {
+          "q": "Comment Le Concierge sélectionne-t-il les hôtels qui apparaissent sur cette page ?",
+          "a": "Nos conseillers visitent personnellement les hôtels listés ou s'appuient sur le réseau d'inspecteurs du Concierge — Atout France pour le label Palace, le Guide Michelin pour les Clefs, Forbes Travel Guide, Relais & Châteaux et Leading Hotels of the World. Aucun hôtel ne paie pour figurer ici. Les vingt adresses présentées sont les plus récentes coups de cœur — la liste tourne dès qu'une nouvelle visite est validée."
+        },
+        {
+          "q": "Quels palaces ou Relais & Châteaux figurent parmi les ouvertures récentes ?",
+          "a": "Notre catalogue couvre 615 hôtels d'exception dans 91 pays, dont 435 Relais & Châteaux et 18 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
+        },
+        {
+          "q": "Puis-je réserver via le Concierge un hôtel récemment ouvert ?",
+          "a": "Oui pour toutes les adresses référencées dans notre catalogue. Vous pouvez consulter la fiche, demander un devis personnalisé via le formulaire concierge (réponse sous 24 h ouvrées) ou, en Phase 6 du projet, réserver directement aux tarifs nets GDS via notre licence IATA. Aujourd'hui, la majorité des réservations passent par notre conciergerie pour bénéficier de surclassements, transferts et demandes spéciales négociés en direct."
+        },
+        {
+          "q": "À quelle fréquence cette page est-elle mise à jour ?",
+          "a": "La liste est régénérée chaque heure côté serveur (ISR Next.js) à partir de la base de notre conciergerie. Un nouvel hôtel apparaît dès que sa fiche est publiée et qu'une visite a été validée par un conseiller. Les hôtels remontent ou descendent selon la priorité éditoriale ajustée par nos rédacteurs."
+        },
+        {
+          "q": "Qu'est-ce qu'une visite « validée » par votre conciergerie ?",
+          "a": "Un de nos conseillers a passé au moins une nuit sur place, testé le petit-déjeuner, le spa, deux restaurants si disponibles, et rencontré le concierge en chef. Lorsque la visite directe n'est pas possible, l'hôtel doit cumuler au moins deux signaux d'autorité externes (Palace Atout France, Clef Michelin, Forbes Five Star, Relais & Châteaux, Leading Hotels of the World) et un audit photo + presse. Aucun copier-coller depuis Booking ou TripAdvisor."
+        },
+        {
+          "q": "Les hôtels récemment ouverts coûtent-ils plus cher qu'une adresse établie ?",
+          "a": "Pas systématiquement. Les ouvertures bénéficient souvent de tarifs de lancement (« opening rates ») 10 à 20 % en dessous du tarif catalogue, voire de nuits gratuites en pré-ouverture. Notre conciergerie négocie ces conditions en direct lorsque c'est possible. À l'inverse, certains Palaces historiques affichent des tarifs supérieurs après rénovation lourde (Hôtel de Crillon, Lutetia)."
+        },
+        {
+          "q": "Que signifie « ouverture » sur cette page ?",
+          "a": "Plusieurs cas : nouvelle construction (un hôtel qui n'existait pas auparavant), reprise éditoriale (un hôtel qui rouvre après rénovation lourde, sous une nouvelle marque ou un nouveau chef), ou première visite par notre conciergerie (un hôtel établi que nous venons d'inspecter et d'ajouter au catalogue). Le contexte est précisé dans le Conseil du Concierge en bas de chaque fiche."
+        },
+        {
+          "q": "Couvrez-vous les ouvertures hors France et hors Europe ?",
+          "a": "Oui. Notre catalogue 2026 couvre 91 pays — les ouvertures phares incluent l'Asie (Aman Tokyo, Capella Bangkok, Bvlgari Dubaï), le Moyen-Orient, l'Afrique (Al Moudira à Louxor, lodges Singita), l'Amérique latine (Riviera Maya, Patagonie), les Caraïbes et l'océan Indien. La sélection privilégie les maisons signature plutôt que les chaînes de masse, où qu'elles soient."
+        },
+        {
+          "q": "Comment être prévenu des prochaines ouvertures suivies par le Concierge ?",
+          "a": "Notre newsletter Le Concierge — un envoi mensuel, sans tracking commercial — annonce les ouvertures et fermetures notables, les rénovations majeures et les nouvelles Clefs Michelin ou Forbes Five Star. Inscription gratuite sur la page Newsletter. Vous pouvez aussi suivre les fiches individuelles depuis votre compte (favoris) pour recevoir une alerte lors d'une mise à jour majeure."
+        },
+        {
+          "q": "Cette liste remplace-t-elle un classement ou un guide ?",
+          "a": "Non. Cette page est un flux chronologique des dernières visites — c'est le journal de bord de notre conciergerie. Pour comparer, hiérarchiser ou choisir, consultez nos classements éditoriaux (« Meilleurs Palaces de France », « Meilleurs hôtels avec spa »…) ou les guides destination (Paris, Côte d'Azur, Italie, Japon…). Les trois surfaces se complètent."
+        }
+      ]
     },
     "featuredHotels": {
       "eyebrow": "Sélection du Concierge",
@@ -252,6 +299,7 @@
       "conciergeFaq": "FAQ générale",
       "conciergeGuides": "Guides voyage",
       "conciergeItineraries": "Itinéraires sur-mesure",
+      "conciergeOpenings": "Ouvertures et visites récentes",
       "conciergeJournal": "Journal du Concierge",
       "conciergeHotelier": "Pour les hôteliers",
       "conciergeMice": "MICE / Séminaires",
@@ -2517,6 +2565,7 @@
       "conciergeTip": "Le Conseil du Concierge",
       "editorialMethod": "Méthode éditoriale",
       "itineraries": "Itinéraires",
+      "openings": "Ouvertures & visites du Concierge",
       "contact": "Contact",
       "legalNotice": "Mentions légales",
       "privacy": "Politique de confidentialité",

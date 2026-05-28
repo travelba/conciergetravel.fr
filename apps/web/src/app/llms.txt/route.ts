@@ -176,6 +176,21 @@ export async function GET(): Promise<NextResponse> {
             description:
               'Live search by city and dates — your concierge surfaces the best options (net GDS rates, Amadeus payment).',
           },
+          // Ouvertures & visites récentes — chronological feed of the
+          // most recent addresses visited by our concierge desk. Each
+          // card links back to a hotel page; the AEO + FAQ on the
+          // landing surface long-tail queries ("hôtels récemment ouverts
+          // Paris", "new luxury hotel openings 2026", "Concierge visits").
+          {
+            url: `${origin}/fr/ouvertures`,
+            description:
+              'Ouvertures & visites du Concierge — flux chronologique des 20 dernières adresses inspectées par notre conciergerie IATA (Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys). AEO + FAQ longue traîne sur les ouvertures récentes, le tri éditorial et le mode de validation des visites.',
+          },
+          {
+            url: `${origin}/en/openings`,
+            description:
+              'Concierge openings & visits — chronological feed of the 20 most recent addresses inspected by our IATA concierge desk (Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys). AEO + long-tail FAQ on recent openings, editorial ordering and visit validation process.',
+          },
         ],
       },
       ...(catalogItems.length > 0

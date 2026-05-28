@@ -11,8 +11,12 @@ import { setConsentCookie } from './fixtures/consent';
  *                    dates + guests `aria-disabled="true"` with no `name`
  *                    so only `destination` reaches `/recherche`.
  *   §2  Editor letter — visible eyebrow + link to the editorial method.
- *   §3  Hotel grid — at least one card carries a tier badge (Palace,
- *                    Relais & Châteaux, boutique, château, or stars).
+ *   §3  Openings grid — "Le Concierge a frappé à leur porte" (≤ 4 cards
+ *                    + CTA "Voir toutes les ouvertures →" pointing to
+ *                    `/ouvertures` — the dedicated openings hub). At
+ *                    least one card carries a tier badge (Palace, R&C,
+ *                    boutique, château, or stars). The legacy "Les fiches
+ *                    du moment" `HomeHotelGrid` was retired 2026-05-26.
  *   §4  Concierge advice carousel — either ≥ 1 advice card or the sober
  *                    fallback message (never a 500).
  *   §8  AEO FAQ   — 4 `<details>` items, first one open, all 4 questions
@@ -98,17 +102,26 @@ test.describe('homepage redesign — 10 sections', () => {
     await expect(methodLink).toHaveAttribute('href', /\/le-concierge\/editorial-method$/u);
   });
 
-  test('FR — hotel grid carries at least one tier badge', async ({ page }) => {
+  test('FR — openings grid renders + CTA points at /ouvertures', async ({ page }) => {
     await page.goto('/');
-    const heading = page.getByRole('heading', { name: /Les fiches du moment/i });
+    const heading = page.getByRole('heading', { name: /Le Concierge a frappé à leur porte/i });
     await expect(heading).toBeVisible();
+
+    // The CTA "Voir toutes les ouvertures →" must point at the
+    // dedicated openings hub — discoverability blocker captured by
+    // `.cursor/rules/user-acceptance-before-commit.mdc` (2026-05-26
+    // reference case).
+    const seeAll = page.getByRole('link', { name: /Voir toutes les ouvertures/i });
+    await expect(seeAll).toBeVisible();
+    await expect(seeAll).toHaveAttribute('href', /\/ouvertures$/u);
+
     // Tier badges are one of: Palace, Relais & Châteaux, Boutique-hôtel,
-    // Château-hôtel, or a stars sequence (★★★★★). The grid degrades to
-    // stars when the catalogue has no palaces with a hero image — both
-    // are acceptable.
+    // Château-hôtel, or a stars sequence (★★★★★). The grid degrades
+    // gracefully when the catalogue has no published rows with a hero
+    // image (Supabase outage etc.) — we annotate instead of failing.
     const section = page
       .locator('section')
-      .filter({ has: page.getByRole('heading', { name: /Les fiches du moment/i }) });
+      .filter({ has: page.getByRole('heading', { name: /Le Concierge a frappé/i }) });
     if ((await section.locator('li').count()) > 0) {
       const text = (await section.textContent()) ?? '';
       const hasTierBadge = /(Palace|Relais & Châteaux|Boutique-hôtel|Château-hôtel|★)/u.test(text);
@@ -116,9 +129,34 @@ test.describe('homepage redesign — 10 sections', () => {
     } else {
       test.info().annotations.push({
         type: 'note',
-        description: 'HomeHotelGrid empty — degraded Supabase or no published rows with hero.',
+        description: 'HomeOpeningsGrid empty — degraded Supabase or no published rows with hero.',
       });
     }
+  });
+
+  test('FR — /ouvertures hub surfaces the AEO + FAQ blocks and the breadcrumb', async ({
+    page,
+  }) => {
+    await page.goto('/ouvertures');
+
+    // Breadcrumb back to home.
+    const homeCrumb = page.getByRole('link', { name: /Retour à l'accueil/i });
+    await expect(homeCrumb.first()).toBeVisible();
+
+    // AEO block — visible question heading + answer in the DOM.
+    const aeoTitle = page.locator('#ouvertures-aeo-title');
+    await expect(aeoTitle).toBeVisible();
+    await expect(aeoTitle).toContainText(/hôtels d'exception/i);
+
+    // FAQ block — at least 9 Q&A items (10 authored, first one open).
+    const faqHeading = page.getByRole('heading', {
+      name: /Questions fréquentes sur les ouvertures et visites du Concierge/i,
+    });
+    await expect(faqHeading).toBeVisible();
+    const faqSection = page.locator('section').filter({ has: faqHeading });
+    const items = faqSection.locator('details');
+    expect(await items.count()).toBeGreaterThanOrEqual(9);
+    await expect(items.nth(0)).toHaveAttribute('open', '');
   });
 
   test('FR — Concierge advice carousel renders ≥ 1 card OR the sober fallback', async ({

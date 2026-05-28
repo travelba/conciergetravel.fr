@@ -6,13 +6,16 @@ import { notFound } from 'next/navigation';
 import { HotelImage } from '@mch/ui';
 import { JsonLd } from '@mch/seo';
 
+import { HubAeoSection } from '@/components/seo/hub-aeo-section';
+import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
+import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
-import { getRecentOpenings } from '@/lib/home/recent-openings';
+import { getRecentOpenings, type RecentOpeningCard } from '@/lib/home/recent-openings';
 
 /**
  * `/ouvertures` (FR) / `/openings` (EN) — page éditoriale qui liste les
@@ -76,6 +79,20 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
   const pageUrl = `${siteUrl}${getPathname({ locale, href: '/ouvertures' })}`;
   const homeUrl = `${siteUrl}${getPathname({ locale, href: '/' })}`;
 
+  // Triple-sync freshness signal (skill seo-technical §Freshness signal).
+  // We pick the max `updated_at` over the projected list so the visible
+  // badge tracks the most recent editorial change on any displayed row.
+  // Sitemap `<lastmod>` for `/ouvertures` is currently a static date in
+  // `hubs.xml/route.ts`; aligning the two is a follow-up — the badge
+  // already reflects the most accurate signal we have today.
+  const maxUpdatedAt = computeMaxUpdatedAt(openings);
+
+  // Pre-format the opening year on the server so we keep a single
+  // Intl pass per locale (cards don't ship as Client Components).
+  const yearFormatter = new Intl.DateTimeFormat(intlLocaleTag(locale), { year: 'numeric' });
+
+  const faqItemsRaw = t.raw('faqItems') as { q: string; a: string }[];
+
   const collectionPageJsonLd = JsonLd.withSchemaOrgContext({
     '@type': 'CollectionPage',
     '@id': `${pageUrl}#page`,
@@ -136,11 +153,22 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
         </ol>
       </nav>
 
-      <header className="mb-10 max-w-3xl">
+      <header className="mb-8 max-w-3xl">
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
         <p className="text-muted mt-3 text-base md:text-lg">{t('lead')}</p>
+        <LastUpdatedBadge isoDate={maxUpdatedAt} locale={locale} variant="inline" />
       </header>
+
+      {/* AEO block — single Q&A, 40-80 mots, citable LLM. The FAQPage
+          JSON-LD is emitted by `<HubFaqSection>` below (ADR-0011 C1:
+          exactly one FAQPage per page), so we suppress it here. */}
+      <HubAeoSection
+        question={t('aeoQuestion')}
+        answer={t('aeoAnswer')}
+        headingId="ouvertures-aeo-title"
+        emitJsonLd={false}
+      />
 
       {openings.length === 0 ? (
         <p className="text-muted py-12 text-center">{t('empty')}</p>
@@ -154,6 +182,9 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
               h.countryLabelFr,
               h.countryLabelEn !== '' ? h.countryLabelEn : h.countryLabelFr,
             );
+            const openedYear = parseOpenedYear(h.openedAt, yearFormatter);
+            const openedLabel =
+              openedYear !== null ? t('openedInYear', { year: openedYear }) : null;
             return (
               <li key={h.slug}>
                 <article className="border-border bg-bg group h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
@@ -181,6 +212,9 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
                         </span>
                       </div>
                       <h3 className="text-fg mt-3 font-serif text-base leading-snug">{name}</h3>
+                      {openedLabel !== null ? (
+                        <p className="text-muted mt-1 text-xs">{openedLabel}</p>
+                      ) : null}
                       <p className="text-muted mt-3 inline-flex items-center text-xs underline-offset-2 group-hover:underline">
                         {t('viewFiche')} →
                       </p>
@@ -192,6 +226,47 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
           })}
         </ul>
       )}
+
+      <HubFaqSection
+        heading={t('faqTitle')}
+        items={faqItemsRaw.map((it) => ({ question: it.q, answer: it.a }))}
+      />
     </main>
   );
+}
+
+// ─── helpers ───────────────────────────────────────────────────────────────
+
+/**
+ * Compute the most-recent `updated_at` across the projected openings.
+ * Returns `null` when no row carries a timestamp — the
+ * `<LastUpdatedBadge>` then renders nothing (defensive: ISR cache + cold
+ * starts can serve an empty list during Supabase outages; skill
+ * `nextjs-app-router` §Data fetching covers this graceful-fallback
+ * pattern).
+ */
+function computeMaxUpdatedAt(openings: readonly RecentOpeningCard[]): string | null {
+  let max: string | null = null;
+  for (const h of openings) {
+    if (h.updatedAt === null) continue;
+    if (max === null || h.updatedAt > max) max = h.updatedAt;
+  }
+  return max;
+}
+
+/**
+ * Parse the "year-only" token to feed into `t('openedInYear', { year })`.
+ * Silent when `opened_at` is NULL (the catalogue back-fill landed
+ * 0/2193 rows in May 2026 — the badge will populate progressively as
+ * the back-fill ships).
+ *
+ * Locale-aware via `Intl.DateTimeFormat`; the year-only token avoids
+ * any month-day surprise when a row has only a year-precision input
+ * (e.g. `1925-01-01` from an editorial first-opening source).
+ */
+function parseOpenedYear(isoDate: string | null, formatter: Intl.DateTimeFormat): string | null {
+  if (isoDate === null || isoDate.length === 0) return null;
+  const d = new Date(isoDate);
+  if (Number.isNaN(d.getTime())) return null;
+  return formatter.format(d);
 }

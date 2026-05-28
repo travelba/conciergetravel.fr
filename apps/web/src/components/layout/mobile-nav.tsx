@@ -496,6 +496,13 @@ export function MobileNav(): ReactElement {
                       <Link href="/itineraires" className={subLinkClass}>
                         {t('primaryNav.conciergeItineraries')}
                       </Link>
+                      {/* Ouvertures & visites — discoverable from
+                          mobile (the burger absorbs ~30 % of GA4
+                          sessions; missing here would drop the page
+                          below the visibility threshold). */}
+                      <Link href="/ouvertures" className={subLinkClass}>
+                        {t('primaryNav.conciergeOpenings')}
+                      </Link>
                       <Link href="/guides" className={subLinkClass}>
                         {t('primaryNav.conciergeGuides')}
                       </Link>

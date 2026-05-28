@@ -348,6 +348,17 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.itineraries')}
                 </Link>
               </li>
+              {/* Ouvertures & visites du Concierge — flux
+                  chronologique des dernières adresses inspectées.
+                  Footer-link audit 2026-05-28: la page existait depuis
+                  Vague 1 mais n'était surfacée que depuis la home
+                  strip — la rendre joignable depuis chaque page
+                  consolide l'EEAT + le maillage interne. */}
+              <li>
+                <Link href="/ouvertures" className="text-fg hover:underline">
+                  {t('links.openings')}
+                </Link>
+              </li>
               <li>
                 <Link href="/le-concierge/newsletter" className="text-fg hover:underline">
                   {t('links.newsletterCta')}

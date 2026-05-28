@@ -700,6 +700,11 @@ function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement
           <>
             <MegaLink href="/le-conseil-du-concierge" label={t('primaryNav.conciergeTip')} />
             <MegaLink href="/itineraires" label={t('primaryNav.conciergeItineraries')} />
+            {/* Ouvertures & visites — chronological feed of the most
+                recent addresses visited by our concierge desk (refonte
+                2026-05-28: surfaces the existing `/ouvertures` page
+                that was reachable from the home strip only). */}
+            <MegaLink href="/ouvertures" label={t('primaryNav.conciergeOpenings')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
             {/* `conciergeJournal` still maps to `/le-concierge` until the
                 dedicated editorial journal hub ships (Phase-1 backlog). */}
