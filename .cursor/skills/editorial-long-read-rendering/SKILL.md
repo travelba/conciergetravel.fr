@@ -227,12 +227,32 @@ if (wordsTotal < 3500) {
 A renderer NEVER tries to lengthen content. If the generation undershoots,
 re-run the generator (see [`llm-output-robustness`](../llm-output-robustness/SKILL.md)).
 
-## Rule 10 — `/destination/[citySlug]` international (UNBLOCKED — ADR-0022, 2026-05-28)
+## Rule 10 — `/destination/[citySlug]` international (UNBLOCKED route, **rendering gap remains**)
 
-**STATUS — RESOLVED.** ADR-0022 lifted the FR-only filter in
+**STATUS — PARTIALLY RESOLVED.** ADR-0022 lifted the FR-only filter in
 `listPublishedCities` and `getDestinationBySlug`. The route now accepts
-every published city. The historical write-up below is kept for context
-on the constraints the unblock had to satisfy.
+every published city and serves the **hotel hub** in 200 OK on all 14
+Phase 4.A international slugs (`new-york`, `dubai`, `bali`, `tokyo`,
+`amalfi-coast`, `marrakech`, `mykonos`, `santorin`, `st-moritz`,
+`phuket`, `lake-como`, `madeira`, `riviera-maya`, `algarve`).
+
+**HOWEVER** — ADR-0015 step 1 (inline `<CityGuideArticle>` in
+`apps/web/src/app/[locale]/destination/[citySlug]/page.tsx`) was
+**never executed**. The 14 city guides shipped to `editorial_guides`
+on 2026-05-28 (12-14 sections, 29-42 FAQ, 16-18 TOC, 5-10 sources each)
+remain dark on the canonical public route — they surface only in
+`llms.txt`, the `<LocalGuideTeaser>` of hotel detail pages, and the
+country-guide API endpoint.
+
+See [ADR-0015 §Implementation status](../../../docs/adr/0015-merge-guide-destination.md#implementation-status-2026-05-28-audit)
+for the audit table and the PR-15bis follow-up checklist (3-5 hours of
+work, 1 file changed, 1 new Playwright case). **Until that PR ships,
+do not generate additional international city guides** — they would
+accumulate dark JSONB rows without any public render surface besides
+LLM ingestion.
+
+The historical write-up below is kept for context on the constraints
+the route unblock had to satisfy.
 
 ### Resolution summary
 

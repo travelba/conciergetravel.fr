@@ -1,8 +1,88 @@
 # ADR 0015 — Fusion `/guide/[city]` → `/destination/[city]`
 
-- Status: accepted
-- Date: 2026-05-20
-- Refs: ADR-0008 (URL plate hôtel), ADR-0009 (sous-pages chambres indexables), ADR-0014 (architecture menu v2), skill `seo-technical` §Anti-cannibalisation, skill `editorial-long-read-rendering`, skill `geo-llm-optimization`, rule `nextjs-app-router`, rule `seo-geo`
+- Status: accepted — **execution partially complete (steps 2/3/7 done, steps 1/5/6 still pending — see §Implementation status)**
+- Date: 2026-05-20 (revisited 2026-05-28)
+- Refs: ADR-0008 (URL plate hôtel), ADR-0009 (sous-pages chambres indexables), ADR-0014 (architecture menu v2), ADR-0022 (international city slugs), skill `seo-technical` §Anti-cannibalisation, skill `editorial-long-read-rendering`, skill `geo-llm-optimization`, rule `nextjs-app-router`, rule `seo-geo`
+
+## Implementation status (2026-05-28 audit)
+
+Six months after this ADR was accepted, only the **redirect** half landed.
+The **inlining** half (the actual benefit: surfacing the long-read body
+on `/destination/[citySlug]`) was never executed.
+
+| Step                                                                  | Status         | Evidence                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1 — Inline `<CityGuideArticle>` in `/destination/[citySlug]/page.tsx` | ❌ **pending** | Page renders hub only: H1 + AEO + hotel cards + related rankings + related itineraries + canonical 10-Q FAQ. No call to `getGuideBySlug`, no `<TocSidebar>`, no sections, no `<EditorialCallout>`, no `<EditorialGlossary>`, no `<ExternalSourcesFooter>`.                                                                                             |
+| 2 — `/guide/[citySlug]/page.tsx` permanent redirect                   | ✅ done        | The file is now a 5-line `permanentRedirect()` to `/destination/[citySlug]` — its own comment ([apps/web/src/app/[locale]/guide/[citySlug]/page.tsx](../../apps/web/src/app/[locale]/guide/[citySlug]/page.tsx) line 25-28) says "slated for inlining in the destination page in the next PR (ADR-0015 step 1)" — never happened.                      |
+| 3 — `/guides` index permanent redirect                                | ✅ done        | Removed from menu and sitemap.                                                                                                                                                                                                                                                                                                                         |
+| 4 — Sitemap cleanup                                                   | ⚠ partial      | `/sitemaps/guides.xml` still exists ([apps/web/src/app/sitemaps/guides.xml/route.ts](../../apps/web/src/app/sitemaps/guides.xml/route.ts)) for **country guides** (`/guide/<countrySlug>` — italie, japon, maldives, maroc, suisse, thailande, etats-unis, emirats-arabes-unis). Those are separate from city guides and intentionally not redirected. |
+| 5 — Composite JSON-LD `Article + Place` on destination page           | ❌ pending     | The destination page emits `ItemList + BreadcrumbList + Place + FAQPage`. No `Article` block, no `isPartOf` link.                                                                                                                                                                                                                                      |
+| 6 — Playwright `destination-guide-merge.spec.ts`                      | ⚠ partial      | The 308 redirect spec exists, but it does NOT assert the presence of the inlined long-read H2 / sticky TOC / `Article` JSON-LD on the destination page (step 1 was never shipped, so the assertion would fail).                                                                                                                                        |
+| 7 — CTA href refactor `/guide/[citySlug]` → `/destination/[citySlug]` | ✅ done        | grep returns 0 hits in `apps/web/src` for `pathname: '/guide/[citySlug]'`.                                                                                                                                                                                                                                                                             |
+
+### Observable consequence on production (2026-05-28)
+
+Phase 4.A shipped 14 international city guides to `editorial_guides`
+(`new-york`, `dubai`, `bali`, `tokyo`, `amalfi-coast`, `marrakech`,
+`mykonos`, `santorin`, `st-moritz`, `phuket`, `lake-como`, `madeira`,
+`riviera-maya`, `algarve`) — each row carrying 12-14 sections, 29-42
+FAQ items, 16-18 TOC anchors, 5-10 external sources. UAT walk-through
+(28 URLs, fr + en) on 2026-05-28 confirms:
+
+- 28/28 routes return **200 OK** (ADR-0022 unblocked international slugs as intended).
+- 13/14 cities render their **hotel hub** correctly (`marrakech` 16 hotels, `tokyo` 34, `new-york` 47, `dubai` 53, `bali` 22, `phuket` 7, `mykonos` 14, `santorin` 7, `riviera-maya` 12, etc.).
+- 1/14 (`algarve`, zero hotels) renders the graceful **empty-state** (noindex, follow) — same `<DestinationEmptyState>` used for FR cities still in draft.
+- **0/14** surface the **long-read guide body** on the canonical URL.
+
+The 14 guide rows are visible only to:
+
+- `llms.txt` (LLM crawlers — still indexed for ingestion).
+- `/api/agent/country-guide` (the country-guide endpoint, distinct from city guides).
+- The `<LocalGuideTeaser>` block on each hotel detail page (`hotel/[slug]`) — which reads `editorial_guides` and renders a short teaser linking back to `/destination/[citySlug]`, where the long-form content is then invisible.
+
+In effect the editorial pipeline is producing high-quality JSONB rows
+that are dark on every public surface but `llms.txt` and the hotel-
+detail teaser. SEO-wise this is a silent regression on the long-read
+EEAT signal (3 500+ words, sticky TOC, sources footer) that the
+pipeline was designed to deliver.
+
+### What still needs to happen (PR-15bis — follow-up ADR-0015 step 1)
+
+A focused PR limited to the `/destination/[citySlug]` rendering surface:
+
+1. **Server fetch** — add a `getGuideBySlug(citySlug, locale)` call in
+   parallel to the existing `getDestinationBySlug` / ratings batch /
+   related-rankings / related-itineraries fan-out. The helper already
+   exists at `apps/web/src/server/guides/get-guide-by-slug.ts`.
+2. **Conditional render** — when the guide row exists and `is_published =
+true`, mount `<CityGuideArticle guide={…} locale={locale} />` after
+   the hotel hub but before the canonical 10-Q FAQ. Re-use the
+   `editorial-long-read-rendering` skill components verbatim
+   (`<TocSidebar>`, `<EnrichedText>`, `<EditorialCallout>`,
+   `<EditorialTable>`, `<EditorialGlossary>`, `<ExternalSourcesFooter>`).
+3. **JSON-LD `Article`** — add `Article` JSON-LD with `@id =
+${pageUrl}#guide-article`, `isPartOf = { @id: ${pageUrl}#place }`,
+   `headline`, `description`, `author = Organization`, `inLanguage`,
+   `dateModified` (from `editorial_guides.updated_at`).
+4. **Two-level FAQ** — split `editorial_guides.faq` by `section_anchor`
+   (skill §Rule 5) and merge with the canonical 10-Q list. The
+   `FAQPage` JSON-LD already emitted on the destination page absorbs
+   the guide FAQs — keep a single `FAQPage` per page (ADR-0011 C1).
+5. **Layout** — switch from the current single-column `max-w-editorial`
+   container to the two-column `lg:grid lg:grid-cols-[1fr_240px]` when
+   a guide row is present, so the `<TocSidebar>` has its 240 px aside.
+6. **Playwright** — extend `destination-guide-merge.spec.ts` to assert
+   the inlined H2 / sticky TOC / `Article` JSON-LD presence on
+   `marrakech`, `tokyo`, `new-york` (one FR-canonical city + two
+   international from Phase 4.A).
+7. **Sitemap `lastmod`** — pick `MAX(hotels.updated_at, editorial_guides.updated_at)`
+   so the freshness signal moves when the editorial team re-runs a guide
+   without changing the hotel catalogue.
+
+The estimated effort is 3-5 hours (1 file changed plus 1 new Playwright
+case). The blocker is no longer technical (ADR-0022 unblocked the
+route, the guide rows exist, the components exist, the helper exists)
+— it's purely sequencing: the inlining PR was never written.
 
 ## Décision
 
