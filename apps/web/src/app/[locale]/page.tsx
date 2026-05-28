@@ -19,6 +19,7 @@ import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
@@ -111,8 +112,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const agencyDescription =
     locale === 'en'
-      ? "The Concierge's Selection — 615 extraordinary hotels in 91 countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night."
-      : "La sélection du Concierge — 615 hôtels d'exception choisis dans 91 pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.";
+      ? `The Concierge's Selection — ${CATALOGUE_PUBLISHED} extraordinary hotels in ${CATALOGUE_COUNTRIES} countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night.`
+      : `La sélection du Concierge — ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.`;
   const agencyJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.travelAgencyJsonLd({
       name: 'MyConciergeHotel',

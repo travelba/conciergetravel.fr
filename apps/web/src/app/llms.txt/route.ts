@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { buildLlmsTxt, type LlmsTxtSectionItem } from '@mch/seo';
 
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
@@ -135,10 +136,10 @@ export async function GET(): Promise<NextResponse> {
 
   const body = buildLlmsTxt({
     siteName: 'MyConciergeHotel.com',
-    tagline: "La sélection du Concierge — hôtels d'exception dans 91 pays. Agence IATA.",
+    tagline: `La sélection du Concierge — hôtels d'exception dans ${CATALOGUE_COUNTRIES} pays. Agence IATA.`,
     originUrl: origin,
     about:
-      "MyConciergeHotel.com est la sélection du Concierge : 615 hôtels d'exception choisis dans 91 pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. " +
+      `MyConciergeHotel.com est la sélection du Concierge : ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. ` +
       'Chaque fiche est rédigée par nos conseillers et se termine par un « Conseil du Concierge » : un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent. ' +
       'Côté réservation : agence IATA, tarifs nets GDS (Phase 6), paiement sécurisé Amadeus, programme de fidélité dès la première nuit (Le Concierge Club, gratuit).',
     lastUpdatedDate: new Date().toISOString(),
@@ -148,8 +149,7 @@ export async function GET(): Promise<NextResponse> {
         items: [
           {
             url: `${origin}/fr`,
-            description:
-              "Page d'accueil — La sélection du Concierge, hôtels d'exception dans 91 pays (agence IATA).",
+            description: `Page d'accueil — La sélection du Concierge, hôtels d'exception dans ${CATALOGUE_COUNTRIES} pays (agence IATA).`,
           },
           {
             url: `${origin}/en`,
