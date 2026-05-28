@@ -189,6 +189,7 @@ interface CliArgs {
   readonly slugs: readonly string[];
   readonly tiers: readonly string[];
   readonly excludeFr: boolean;
+  readonly anyTier: boolean;
   readonly concurrency: number;
 }
 
@@ -201,11 +202,17 @@ function parseArgs(argv: readonly string[]): CliArgs {
   // Default false: include FR drafts (Bulgari Paris, Cheval Blanc Paris, etc.).
   // Pass --exclude-fr to keep the legacy behaviour (intl only).
   let excludeFr = false;
+  // Phase 1.5: drafts seeded from boutique_hotels.xlsx have luxury_tier=null
+  // and would otherwise miss the TIER1 gate. `--any-tier` drops the
+  // luxury_tier filter and is meant to be paired with `--slug=…` so the
+  // safety boundary is enforced by an explicit slug list.
+  let anyTier = false;
   let concurrency = 5;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--skip-images') skipImages = true;
     else if (a === '--exclude-fr') excludeFr = true;
+    else if (a === '--any-tier') anyTier = true;
     else if (a.startsWith('--limit=')) {
       const n = Number(a.slice('--limit='.length));
       if (Number.isFinite(n) && n > 0) limit = Math.floor(n);
@@ -226,7 +233,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
         .filter((s) => s.length > 0);
     }
   }
-  return { limit, dryRun, skipImages, slugs, tiers, excludeFr, concurrency };
+  return { limit, dryRun, skipImages, slugs, tiers, excludeFr, anyTier, concurrency };
 }
 
 // ─── DB row shape ──────────────────────────────────────────────────────────
@@ -695,13 +702,14 @@ async function fetchHotels(
   excludeFr: boolean,
   slugs: readonly string[],
   limit: number | null,
+  anyTier: boolean,
 ): Promise<HotelRow[]> {
   const cols =
     'slug,name,city,country_code,country_label_fr,country_label_en,region,luxury_tier,wikidata_id,commons_category,official_url,hero_image,description_fr,meta_desc_fr';
   const params = new URLSearchParams();
   params.set('select', cols);
   params.set('is_published', 'eq.false');
-  params.set('luxury_tier', `in.(${tiers.join(',')})`);
+  if (!anyTier) params.set('luxury_tier', `in.(${tiers.join(',')})`);
   if (excludeFr) params.set('country_code', 'neq.FR');
   if (slugs.length > 0) params.set('slug', `in.(${slugs.join(',')})`);
   // Stable order; the SQL CASE-based sort isn't strictly required for
@@ -875,7 +883,14 @@ async function main(): Promise<void> {
       );
       process.exit(2);
     }
-    hotels = await fetchHotels(postgrestEnv, tierFilter, args.excludeFr, args.slugs, args.limit);
+    hotels = await fetchHotels(
+      postgrestEnv,
+      tierFilter,
+      args.excludeFr,
+      args.slugs,
+      args.limit,
+      args.anyTier,
+    );
 
     const byTier: Record<string, number> = {};
     for (const h of hotels) byTier[h.luxury_tier] = (byTier[h.luxury_tier] ?? 0) + 1;

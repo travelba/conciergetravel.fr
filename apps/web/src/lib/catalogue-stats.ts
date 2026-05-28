@@ -20,7 +20,7 @@
  *   2026-05-28 — 2134 / 127 / 434 (post Phase 1 publish flip — 1519 new
  *                published hotels via `publish-eligible-drafts.ts`).
  */
-export const CATALOGUE_PUBLISHED = 2134;
+export const CATALOGUE_PUBLISHED = 2193;
 export const CATALOGUE_COUNTRIES = 127;
 export const CATALOGUE_RELAIS_CHATEAUX = 434;
 export const CATALOGUE_SMALL_LUXURY = 197;

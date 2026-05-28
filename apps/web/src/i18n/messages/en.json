@@ -19,10 +19,10 @@
   },
   "homepage": {
     "metaTitle": "MyConciergeHotel — The Concierge's Selection of extraordinary hotels worldwide",
-    "metaDesc": "2,134 curated addresses across 127 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
+    "metaDesc": "2,193 curated addresses across 127 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
     "eyebrow": "MyConciergeHotel — IATA-accredited agency",
     "title": "The Concierge's Selection",
-    "intlBadge": "127 countries · 2,134 addresses · 434 Relais & Châteaux",
+    "intlBadge": "127 countries · 2,193 addresses · 434 Relais & Châteaux",
     "subtitle": "A worldwide selection of extraordinary hotels, signed by our concierge desk. Every page closes with a Concierge's Tip — the room, table or timing the guidebooks never mention.",
     "comingSoon": "MyConciergeHotel.com — your concierge is curating the selection.",
     "trust": {
@@ -46,7 +46,7 @@
       },
       "q2": {
         "question": "How are you different from Booking or Hotels.com?",
-        "answer": "MyConciergeHotel is an IATA agency, not a price comparison engine. Our catalogue is curated to 2,134 addresses against hundreds of thousands, and every page is written by our concierge desk — not by the hotels themselves. No fabricated urgency, no struck-through prices, no « only X rooms left » banner. The price displayed in Phase 6 will be the Amadeus GDS net rate, with no agency surcharge."
+        "answer": "MyConciergeHotel is an IATA agency, not a price comparison engine. Our catalogue is curated to 2,193 addresses against hundreds of thousands, and every page is written by our concierge desk — not by the hotels themselves. No fabricated urgency, no struck-through prices, no « only X rooms left » banner. The price displayed in Phase 6 will be the Amadeus GDS net rate, with no agency surcharge."
       },
       "q3": {
         "question": "What is the Concierge's Tip at the bottom of each page?",
@@ -68,7 +68,7 @@
     "editorLetter": {
       "eyebrow": "A word from the Concierge",
       "title": "Welcome from your trusted hotelier",
-      "paragraph1": "Here is the selection we keep up to date for you: 2,134 extraordinary houses across 127 countries, picked one by one. No hundred-thousand-address catalogue, no algorithm that decides on our behalf.",
+      "paragraph1": "Here is the selection we keep up to date for you: 2,193 extraordinary houses across 127 countries, picked one by one. No hundred-thousand-address catalogue, no algorithm that decides on our behalf.",
       "paragraph2": "You'll find Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys and rare gems the guidebooks haven't reached yet. No pay-to-play. No hotel commission influences the selection.",
       "paragraph3": "Our signature: every page closes with a Concierge's Tip — a room to ask for by number, a table to reserve three months ahead, an arrival time that changes everything. Our hotelier partners trusted us with it.",
       "signatureName": "The Concierge",
@@ -446,7 +446,7 @@
     "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
     "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks extraordinary hotels across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
-    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,134 extraordinary hotels across 127 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
+    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,193 extraordinary hotels across 127 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
     "trust": {
       "title": "Our commitments",
       "iataTitle": "IATA / APST agency",
@@ -494,7 +494,7 @@
         },
         {
           "q": "What is your geographical scope?",
-          "a": "Our selection spans 2,134 properties across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
+          "a": "Our selection spans 2,193 properties across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
         },
         {
           "q": "How much does your service cost?",
@@ -2162,7 +2162,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Our Editorial Method — How we curate the Concierge's Selection | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel curates 2,134 extraordinary hotels across 127 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
+    "metaDesc": "MyConciergeHotel curates 2,193 extraordinary hotels across 127 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
     "breadcrumbHome": "Home",
     "breadcrumbConcierge": "The Concierge",
     "eyebrow": "EEAT — Editorial method",
