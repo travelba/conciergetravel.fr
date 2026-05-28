@@ -293,6 +293,77 @@ Without `on_conflict=slug` the entire chunk of 50 was lost. Adding
 `scripts/editorial-pilot/src/global-sources/scaffold-relais-chateaux.ts`
 for the reference implementation.
 
+## Supabase REST silently caps `.select()` at 1000 rows
+
+Every Supabase REST query (`supabase-js`, `createServerClient`,
+`getSupabaseAdminClient`, the MCP) is capped by a server-side
+`max_rows` setting that defaults to **1000**. The cap is silent —
+no error, no warning, no `count` field tells you that the result
+was truncated. Sort + limit + slice on the **client** then under-
+counts large datasets without any visible failure.
+
+```ts
+// ❌ Silent truncation — at 2026-05-28 the catalogue holds 2 260
+// `editorial_ranking_entries`. This query returns the first 1 000
+// only, so when we Map.set(count) per ranking we under-count the
+// biggest lists (50 Best, Gold List). The homepage "top 6 rankings"
+// surfaced the wrong rankings for weeks before anyone noticed.
+const { data } = await supabase
+  .from('editorial_ranking_entries')
+  .select('ranking_id')
+  .in('ranking_id', ids);
+
+// ✅ Explicit pagination via `.range(from, to)` until the batch is
+// shorter than the page size. Add a SAFETY_CEILING so a runaway
+// query can never hammer the DB.
+const PAGE_SIZE = 1000;
+const SAFETY_CEILING = 20000;
+let from = 0;
+while (from < SAFETY_CEILING) {
+  const { data } = await supabase
+    .from('editorial_ranking_entries')
+    .select('ranking_id')
+    .in('ranking_id', ids)
+    .range(from, from + PAGE_SIZE - 1);
+  if (!data || data.length === 0) break;
+  for (const row of data) /* aggregate */ ;
+  if (data.length < PAGE_SIZE) break;
+  from += PAGE_SIZE;
+}
+```
+
+**Heuristic** — any `.select()` whose result set could plausibly
+grow past 1 000 rows over the project lifetime needs explicit
+pagination. Big offenders: `editorial_ranking_entries`,
+`hotel_amenities`, `reviews`, `hotel_pois`, `gallery_images`,
+any `*_translations` table at full multilingual rollout.
+
+**Better fix when aggregation is the goal** — push the aggregation
+to PostgREST with a view or RPC (`select ranking_id, count(*) ...
+group by ranking_id`) and fetch a single row per ranking. Avoids
+the pagination loop entirely and stays under `max_rows` even at
+100 k entries.
+
+### Lesson learned (2026-05-28)
+
+`listPublishedRankings()` in `apps/web/src/server/rankings/get-
+ranking-by-slug.ts` ran the buggy single-call pattern. The bug was
+invisible while the function sorted rankings alphabetically; it
+became user-visible when the new home component `HomeTopRankings`
+sorted by `entryCount`. Fix landed alongside the homepage rebuild
+(2026-05-28). See ` packages/db` audit query if you suspect another
+adapter has the same drift:
+
+```sql
+-- count rows per ranking, compare to UI display
+select r.slug, count(e.ranking_id) as actual_entries
+from public.editorial_rankings r
+left join public.editorial_ranking_entries e on e.ranking_id = r.id
+where r.is_published = true
+group by r.slug
+order by actual_entries desc;
+```
+
 ## References
 
 - CDC v3.0 §4 (data model), §11 (security), addendum v3.2 (price_comparisons + makcorps_hotel_id).
