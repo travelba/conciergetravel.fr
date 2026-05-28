@@ -91,7 +91,11 @@ export async function HomeHero({
               hotels: formatStat(CATALOGUE_PUBLISHED, locale),
             })}
           </p>
-          <p className="max-w-prose text-lg text-white/90 sm:text-xl">{t('subtitle')}</p>
+          <p className="max-w-prose text-lg text-white/90 sm:text-xl">
+            {t('subtitle')}
+            <br />
+            {t('subtitleSecondary')}
+          </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/70">
             <span className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5">
