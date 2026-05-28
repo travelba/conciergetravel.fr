@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { isHotelIndexable } from '@/server/hotels/indexability';
 
 /**
  * Slim hotel summary tuned for `/llms-full.txt`.
@@ -11,11 +12,10 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
  * 500 rows ≈ 2.5 MB upper-bound; well under the per-route Vercel
  * limit).
  *
- * Indexability mirror — applies the same `hero_image NOT NULL` AND
- * (`gallery >= 5 photos` OR `long_description_sections >= 1`) filter
- * used by `listIndexableHotelSlugs` so stub hotels (catalog-only
- * sheets seeded for the rankings combinator) never leak into the LLM
- * corpus.
+ * Indexability mirror — uses the shared `isHotelIndexable` predicate
+ * so stub hotels (catalog-only sheets seeded for the rankings
+ * combinator) never leak into the LLM corpus. Phase 1 (May 2026)
+ * relaxes the photo requirement; see `indexability.ts`.
  *
  * Skill: geo-llm-optimization, content-modeling.
  */
@@ -36,7 +36,7 @@ export interface LlmIndexableHotel {
 }
 
 const SELECT_COLUMNS =
-  'slug, slug_en, name, name_en, city, stars, is_palace, factual_summary_fr, factual_summary_en, description_fr, description_en, booking_mode, updated_at, hero_image, gallery_images, long_description_sections';
+  'slug, slug_en, name, name_en, city, stars, is_palace, factual_summary_fr, factual_summary_en, description_fr, description_en, booking_mode, updated_at, hero_image, gallery_images, long_description_sections, concierge_advice, faq_content';
 
 function stringOrNull(v: unknown): string | null {
   return typeof v === 'string' && v.length > 0 ? v : null;
@@ -72,14 +72,8 @@ export async function listIndexableHotelsForLlms(): Promise<readonly LlmIndexabl
       const slug = stringOrNull(r['slug']);
       if (slug === null) continue;
 
-      const hasHero = stringOrNull(r['hero_image']) !== null;
-      const gallery = Array.isArray(r['gallery_images']) ? r['gallery_images'] : [];
-      const sections = Array.isArray(r['long_description_sections'])
-        ? r['long_description_sections']
-        : [];
-      // Mirror of `page.tsx#isIndexable` + `listIndexableHotelSlugs`.
-      const isIndexable = hasHero && (gallery.length >= 5 || sections.length > 0);
-      if (!isIndexable) continue;
+      // Single source of truth — `apps/web/src/server/hotels/indexability.ts`.
+      if (!isHotelIndexable(r)) continue;
 
       const bookingMode = r['booking_mode'];
       if (!isBookingMode(bookingMode)) continue;
