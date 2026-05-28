@@ -90,7 +90,11 @@ export const config = {
   // Run on app routes only — skip static, _next, api/cron (handled separately), well-known.
   // `sitemaps` (no extension) covers every `sitemaps/*.xml` sub-sitemap;
   // without it next-intl rewrites them to `/fr/sitemaps/...` which 404s.
+  // `logos` covers every static brand asset in `public/logos/*` (logo PNGs,
+  // SVG marks, etc.) — same trap as `sitemaps`: without the explicit
+  // exclusion next-intl rewrites `/logos/foo.png` to `/fr/logos/foo.png`
+  // which 404s, and the `next/image` lambda then 404s in turn.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos).*)',
   ],
 };

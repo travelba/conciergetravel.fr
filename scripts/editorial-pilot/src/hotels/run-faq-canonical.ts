@@ -168,8 +168,9 @@ const SYSTEM_PROMPT = [
   '',
   'CONTRAINTES STRICTES :',
   '- Tu ne modifies PAS les questions. Elles sont fixes — tu ne fais que répondre.',
-  '- 1 réponse FR + 1 réponse EN par question, 50-100 mots chacune.',
+  '- 1 réponse FR + 1 réponse EN par question, OBLIGATOIREMENT 50-100 mots chacune (longueur stricte, minimum 50 mots ≈ 280 caractères).',
   "- Si tu n'as pas l'info exacte, donne une réponse honnête (\"Contactez la conciergerie pour confirmer\") plutôt que d'inventer.",
+  "- INTERDIT : réponses lapidaires type « Non. » / « No. » / « Pas de piscine. ». Même quand la réponse de fond est négative (pas de piscine, pas d'animaux, pas de parking), tu DOIS étoffer en 50-100 mots : expliquer la décision, contextualiser, et orienter le client vers la conciergerie pour des alternatives concrètes (service de garde d'animaux à proximité, accès piscine partenaire, parking public le plus proche, etc.).",
   '- Ton expert, sobre, factuel — voix concierge complice. Pas de superlatifs creux (« incroyable », « magnifique », « exceptionnel », « sublime »).',
   '- Aucune balise HTML, aucun emoji, aucun lien.',
   "- Sortie JSON STRICTE : { answers: [{ answer_fr, answer_en }, …] } avec exactement 10 entrées dans l'ordre des questions données.",
@@ -341,26 +342,65 @@ function isAlreadyCanonical(hotel: HotelRow): boolean {
  * LLM call
  * ─────────────────────────────────────────────────────────────────────── */
 
-async function generateAnswers(openai: OpenAI, hotel: HotelRow): Promise<GeneratedAnswers> {
+async function callLlm(
+  openai: OpenAI,
+  hotel: HotelRow,
+  reinforcement: string | null,
+): Promise<unknown> {
+  const messages: { role: 'system' | 'user'; content: string }[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: buildUserPrompt(hotel) },
+  ];
+  if (reinforcement !== null) {
+    messages.push({ role: 'user', content: reinforcement });
+  }
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini-2024-07-18',
     response_format: { type: 'json_object' },
     temperature: 0.3,
     max_tokens: 3500,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: buildUserPrompt(hotel) },
-    ],
+    messages,
   });
   const raw = response.choices[0]?.message.content ?? '';
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch {
     throw new Error(`Invalid JSON: ${raw.slice(0, 200)}`);
   }
-  const validated = AnswersSchema.parse(parsed);
-  return validated.answers;
+}
+
+async function generateAnswers(openai: OpenAI, hotel: HotelRow): Promise<GeneratedAnswers> {
+  // First pass — strict prompt only.
+  const first = await callLlm(openai, hotel, null);
+  const parsed1 = AnswersSchema.safeParse(first);
+  if (parsed1.success) return parsed1.data.answers;
+
+  // Build a targeted reinforcement message naming the offending indices,
+  // then retry once. Empirically fixes the "Non. / No." short-answer
+  // failure mode that the Zod min(40) catches on hotels with negative
+  // answers for pets / pool / parking.
+  const issues = parsed1.error.issues.filter((i) => i.code === 'too_small');
+  const offendingIndices = Array.from(
+    new Set(issues.map((i) => i.path[1]).filter((n): n is number => typeof n === 'number')),
+  ).sort((a, b) => a - b);
+  const offendingQuestions = offendingIndices
+    .map((idx) => {
+      const q = CANONICAL_QUESTIONS[idx];
+      if (!q) return null;
+      return `  - Question #${idx + 1} (${q.key}) : ${q.question_fr.replaceAll('{{name}}', hotel.name)}`;
+    })
+    .filter((s): s is string => s !== null)
+    .join('\n');
+  const reinforcement = [
+    'Ta réponse précédente était invalide : plusieurs réponses font moins de 40 caractères, donc beaucoup moins que les 50-100 mots requis.',
+    'Questions concernées :',
+    offendingQuestions,
+    '',
+    "REGÉNÈRE l'intégralité du JSON. Pour CHAQUE question (pas seulement celles listées), écris une réponse FR ET une réponse EN de 50-100 mots STRICTEMENT — au moins 280 caractères chacune. Quand la réponse de fond est négative (pas de piscine, pas d'animaux, pas de parking), étoffe en expliquant la décision puis en orientant vers la conciergerie pour des alternatives concrètes (services de garde, accès piscine d'un partenaire, parking public le plus proche, etc.). Toujours le même format JSON strict : { answers: [{ answer_fr, answer_en }, …] }.",
+  ].join('\n');
+  const second = await callLlm(openai, hotel, reinforcement);
+  const parsed2 = AnswersSchema.parse(second);
+  return parsed2.answers;
 }
 
 function buildCanonicalFaq(hotel: HotelRow, answers: GeneratedAnswers): FaqItemDb[] {

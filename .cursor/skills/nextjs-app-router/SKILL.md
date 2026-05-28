@@ -351,12 +351,34 @@ need only the folder name without extension:
 
 ```ts
 matcher: [
-  '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring).*)',
+  '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos).*)',
 ];
 ```
 
 Symptom of a missing entry: route handler exists, build log lists it as
 prerendered (`○ /sitemaps/rankings.xml`), but production returns 404.
+
+**`public/` subfolders are NOT auto-bypassed** — this is the trap to remember.
+`/favicon.ico` is special-cased by Next.js but `/og/*`, `/logos/*`,
+`/manifest/*` are NOT. If you put a static asset under `public/<folder>/`
+you MUST add `<folder>` to the matcher. Worse, the symptom is double:
+
+1. Direct `<img src="/logos/logo.png">` returns 404.
+2. `<Image src="/logos/logo.png">` ALSO returns 404 because the
+   `/_next/image?url=%2Flogos%2Flogo.png&w=...` lambda fetches the source
+   over HTTP internally and that fetch hits the middleware too.
+
+Real example (2026-05-28 — PR #112): committed `apps/web/public/logos/
+logo-dark.png` + `<Image src="/logos/logo-dark.png">`, shipped via PR,
+PO landed on `/dev/logo-preview` and saw 8 broken-image icons. Root
+cause: `logos` was missing from the matcher above. Fix = add `logos`
+and force a redeploy.
+
+**Rule of thumb when adding to `public/`**: if it's not a top-level
+single file already in the matcher (`robots.txt`, `sitemap.xml`,
+`favicon.ico`, `manifest.webmanifest`), then either (a) put it under
+an already-bypassed folder, (b) add the new folder to the matcher, or
+(c) keep it as an `app/` route handler that returns the binary.
 
 ## Example: marketing page with ISR + JSON-LD + AEO
 
