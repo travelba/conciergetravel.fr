@@ -7,7 +7,11 @@ import { JsonLd } from '@mch/seo';
 
 import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
 import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
-import { TOP_DESTINATION_NAV_ENTRIES, pickEntryLabel } from '@/components/layout/nav-data';
+import {
+  TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
+  pickEntryLabel,
+} from '@/components/layout/nav-data';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link } from '@/i18n/navigation';
@@ -30,10 +34,26 @@ import { findRankingsForCity } from '@/server/rankings/find-related-rankings';
  * instead of a hard `notFound()`. Off-menu slugs still 404, preserving
  * crawl budget and surfacing broken inbound links honestly.
  *
+ * ADR-0016 — international city slugs (Marrakech, NYC, Tokyo, Bali,
+ * Mykonos…) join the FR menu set so the same graceful empty-state
+ * applies on cold deploys before the guide pipeline writes the
+ * `editorial_guides` row.
+ *
  * Same pattern as `categorie/[categorySlug]`, `classements/[axe]/[valeur]`
  * and `marque/[brandSlug]` (skill `seo-technical` §Indexability).
  */
-const KNOWN_MENU_CITY_SLUGS = new Set<string>(TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug));
+const KNOWN_MENU_CITY_SLUGS = new Set<string>([
+  ...TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug),
+  ...TOP_INTL_DESTINATION_NAV_ENTRIES.map((e) => e.slug),
+]);
+
+/**
+ * Combined nav lookup so the empty-state can resolve a friendly label
+ * for any known menu slug (FR or international) without bothering
+ * Supabase. Order matters: TOP_DESTINATION first preserves the
+ * historical FR resolution, the int'l set is added on top.
+ */
+const ALL_MENU_NAV_ENTRIES = [...TOP_DESTINATION_NAV_ENTRIES, ...TOP_INTL_DESTINATION_NAV_ENTRIES];
 
 /**
  * Rendering mode: the page reads `headers()` to forward the per-request CSP
@@ -73,11 +93,23 @@ function narrowStars(value: number): 1 | 2 | 3 | 4 | 5 | null {
   }
 }
 
+/**
+ * Cap on the number of cities materialised at build time. After
+ * ADR-0016 (international expansion), `listPublishedCities` returns
+ * the FR catalogue + every distinct international city — > 200 rows.
+ * Multiplied by 2 locales that's 400+ ISR pages on cold deploy. We
+ * cap at the top-N by `count DESC` so the highest-traffic cities are
+ * pre-rendered; the long tail still works via on-demand ISR (the
+ * route stays `force-dynamic` so the cap only affects build cost).
+ */
+const STATIC_PARAMS_TOP_N = 100;
+
 export async function generateStaticParams(): Promise<Array<{ locale: string; citySlug: string }>> {
   try {
     const cities = await listPublishedCities();
+    const top = cities.slice(0, STATIC_PARAMS_TOP_N);
     const params: Array<{ locale: string; citySlug: string }> = [];
-    for (const c of cities) {
+    for (const c of top) {
       params.push({ locale: 'fr', citySlug: c.slug });
       params.push({ locale: 'en', citySlug: c.slug });
     }
@@ -85,6 +117,28 @@ export async function generateStaticParams(): Promise<Array<{ locale: string; ci
   } catch {
     return [];
   }
+}
+
+/**
+ * Renders the visible "region" line. FR cities use their administrative
+ * region (e.g. "Île-de-France", "PACA"). International cities fall back
+ * to their localised country label ("Maroc" / "Morocco") since
+ * migration 0033 left `region` null off-FR. The fall-back ensures the
+ * subtitle / breadcrumb / metadata never read "null" for foreign rows.
+ */
+function pickRegionLabel(
+  destination: {
+    readonly region: string | null;
+    readonly countryLabelFr: string | null;
+    readonly countryLabelEn: string | null;
+    readonly countryCode: string;
+  },
+  locale: Locale,
+): string {
+  if (destination.region !== null && destination.region.length > 0) return destination.region;
+  const localized = pickByLocale(locale, destination.countryLabelFr, destination.countryLabelEn);
+  if (localized !== null && localized.length > 0) return localized;
+  return destination.countryCode;
 }
 
 export async function generateMetadata({
@@ -106,7 +160,7 @@ export async function generateMetadata({
   //    in the default export (preserves crawl budget).
   if (destination === null) {
     if (KNOWN_MENU_CITY_SLUGS.has(citySlug)) {
-      const entry = TOP_DESTINATION_NAV_ENTRIES.find((e) => e.slug === citySlug);
+      const entry = ALL_MENU_NAV_ENTRIES.find((e) => e.slug === citySlug);
       const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
       const buildCanonicalPath = (l: Locale): string =>
         getPathname({
@@ -127,7 +181,10 @@ export async function generateMetadata({
   }
 
   const title = t('meta.title', { city: destination.name });
-  const description = t('meta.description', { city: destination.name, region: destination.region });
+  const description = t('meta.description', {
+    city: destination.name,
+    region: pickRegionLabel(destination, locale),
+  });
   // citySlug is locale-invariant (no localized variant in destination data).
   const buildCanonicalPath = (l: Locale): string =>
     getPathname({
@@ -168,7 +225,7 @@ export default async function DestinationHubPage({
     // On-menu slug with zero published hotels → empty state (noindex
     // already set in generateMetadata). Off-menu slug → hard 404.
     if (KNOWN_MENU_CITY_SLUGS.has(citySlug)) {
-      const entry = TOP_DESTINATION_NAV_ENTRIES.find((e) => e.slug === citySlug);
+      const entry = ALL_MENU_NAV_ENTRIES.find((e) => e.slug === citySlug);
       const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
       return <DestinationEmptyState locale={locale} cityLabel={cityLabel} />;
     }
@@ -255,10 +312,11 @@ export default async function DestinationHubPage({
     dateStyle: 'long',
   }).format(new Date());
   const count = destination.hotels.length;
+  const regionLabel = pickRegionLabel(destination, locale);
   const aeoAnswer = t(count === 1 ? 'aeo.answerSingular' : 'aeo.answerPlural', {
     count,
     city: destination.name,
-    region: destination.region,
+    region: regionLabel,
     date: today,
   });
   const aeoQuestion = t('aeo.question', { city: destination.name });
@@ -282,6 +340,11 @@ export default async function DestinationHubPage({
   // entity anchor for the destination separate from the hotel list.
   // GeoCoordinates omitted (server data model doesn't expose city
   // centroid yet — to be added in a future PR with `pois` table).
+  // ADR-0016 — `addressCountry` mirrors the real ISO-2 code (FR / MA /
+  // US / JP …) instead of the previous hard-coded `'FR'`. `addressRegion`
+  // and `containedInPlace.name` fall back to the localised country
+  // label when the FR-region is null (international rows since
+  // migration 0033). LLM crawlers see a self-consistent address.
   const placeJsonLd = JsonLd.withSchemaOrgContext({
     '@type': 'Place',
     '@id': `${pageUrl}#place`,
@@ -289,12 +352,12 @@ export default async function DestinationHubPage({
     address: {
       '@type': 'PostalAddress',
       addressLocality: destination.name,
-      addressRegion: destination.region,
-      addressCountry: 'FR',
+      addressRegion: regionLabel,
+      addressCountry: destination.countryCode,
     },
     containedInPlace: {
       '@type': 'AdministrativeArea',
-      name: destination.region,
+      name: regionLabel,
     },
   });
 
@@ -338,7 +401,7 @@ export default async function DestinationHubPage({
           {t('title', { city: destination.name })}
         </h1>
         <p className="text-muted mt-3 text-lg sm:text-xl">
-          {t('subtitle', { count, city: destination.name, region: destination.region })}
+          {t('subtitle', { count, city: destination.name, region: regionLabel })}
         </p>
         <LastUpdatedBadge isoDate={latestUpdateIso} locale={locale} variant="inline" />
       </header>

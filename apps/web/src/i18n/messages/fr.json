@@ -2779,6 +2779,10 @@
         "title": "France — par ville",
         "subtitle": "{count, plural, one {# ville française} other {# villes françaises}}."
       },
+      "intlCitiesSection": {
+        "title": "Monde — par ville",
+        "subtitle": "{count, plural, one {# ville internationale} other {# villes internationales}}."
+      },
       "worldSection": {
         "title": "Monde — par pays",
         "subtitle": "{count, plural, one {# pays international avec guide} other {# pays internationaux avec guide}}.",

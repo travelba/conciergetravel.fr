@@ -267,6 +267,38 @@ export const TOP_DESTINATION_NAV_ENTRIES: readonly NavLabeledEntry[] = [
 ];
 
 /**
+ * International city slugs surfaced by the Phase 4.A guides + the
+ * `/destination` directory. Same shape as `TOP_DESTINATION_NAV_ENTRIES`
+ * — `KNOWN_MENU_CITY_SLUGS` (in `app/[locale]/destination/[citySlug]/
+ * page.tsx`) merges this array with the FR set so an off-menu deep link
+ * to e.g. `/destination/marrakech` resolves with the graceful empty
+ * state instead of a hard 404 while the guide is being seeded.
+ *
+ * Slug source — these are the literal `citySlug(city)` outputs
+ * computed from `public.hotels` (so `dubai` not `dubaï`, `new-york`
+ * not `nyc`). Adding a slug here is metadata only; the route
+ * `/destination/[citySlug]` reads its data directly from Supabase.
+ *
+ * Added 2026-05-28 alongside ADR-0016 — international guide unblock.
+ */
+export const TOP_INTL_DESTINATION_NAV_ENTRIES: readonly NavLabeledEntry[] = [
+  { slug: 'new-york', labelFr: 'New York', labelEn: 'New York' },
+  { slug: 'dubai', labelFr: 'Dubaï', labelEn: 'Dubai' },
+  { slug: 'tokyo', labelFr: 'Tokyo', labelEn: 'Tokyo' },
+  { slug: 'marrakech', labelFr: 'Marrakech', labelEn: 'Marrakech' },
+  { slug: 'mykonos', labelFr: 'Mykonos', labelEn: 'Mykonos' },
+  { slug: 'santorin', labelFr: 'Santorin', labelEn: 'Santorini' },
+  { slug: 'bali', labelFr: 'Bali', labelEn: 'Bali' },
+  { slug: 'phuket', labelFr: 'Phuket', labelEn: 'Phuket' },
+  { slug: 'st-moritz', labelFr: 'St-Moritz', labelEn: 'St. Moritz' },
+  { slug: 'lake-como', labelFr: 'Lac de Côme', labelEn: 'Lake Como' },
+  { slug: 'madeira', labelFr: 'Madère', labelEn: 'Madeira' },
+  { slug: 'riviera-maya', labelFr: 'Riviera Maya', labelEn: 'Riviera Maya' },
+  { slug: 'algarve', labelFr: 'Algarve', labelEn: 'Algarve' },
+  { slug: 'amalfi-coast', labelFr: 'Côte amalfitaine', labelEn: 'Amalfi Coast' },
+];
+
+/**
  * Hero region slugs — used in the "Régions héros" column of the
  * Destinations mega-menu. These are editorial clusters from `LIEUX`
  * (scope: cluster/region) that get a dedicated card in the
