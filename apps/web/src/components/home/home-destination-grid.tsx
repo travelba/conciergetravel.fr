@@ -20,12 +20,15 @@ export type CountryGuideHref =
   | '/guide/etats-unis';
 
 /**
- * One destination card on the home grid. Two variants:
- * - `city`   — published French city with a real hotel count, links to
- *              `/destination/[citySlug]`.
- * - `country` — intl editorial country guide (no live count yet — Phase
- *               1 still has zero published rows outside France), links
- *               to `/guide/<country>` with a typed href.
+ * One destination card on the home grid. Three variants:
+ * - `city`    — published French city with a real hotel count, links to
+ *               `/destination/[citySlug]`.
+ * - `country` — intl editorial country guide (Italie, Japon, Maroc, USA…),
+ *               links to `/guide/<country>` with a typed href.
+ * - `ranking` — fallback for countries without a dedicated guide page
+ *               yet (Grèce, Royaume-Uni). Lands on the country ranking
+ *               `/classement/<slug>` so the user still gets a real
+ *               editorial surface, not a 404.
  */
 export type HomeDestinationCardData =
   | {
@@ -40,6 +43,12 @@ export type HomeDestinationCardData =
       readonly label: string;
       readonly variant: 'country';
       readonly href: CountryGuideHref;
+    }
+  | {
+      readonly key: string;
+      readonly label: string;
+      readonly variant: 'ranking';
+      readonly rankingSlug: string;
     };
 
 interface HomeDestinationGridProps {
@@ -97,11 +106,20 @@ export async function HomeDestinationGrid({
         </Link>
       </div>
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {/*
+        Mobile : carrousel snap horizontal — 8 destinations en swipe
+        plutôt qu'en grille 2×4 qui obligeait à scroller. Le peek
+        (~28 %) montre que la liste est plus longue que ce qui est
+        visible. Desktop : grille 3-cols (sm) → 4-cols (lg).
+        Voir `.cursor/skills/responsive-ui-architecture/SKILL.md`
+        §"Snap carousels".
+      */}
+      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
         {destinations.map((d) => {
+          const liClassName = 'shrink-0 basis-[72%] snap-start sm:basis-auto';
           if (d.variant === 'city') {
             return (
-              <li key={d.key}>
+              <li key={d.key} className={liClassName}>
                 <Link
                   href={{ pathname: '/destination/[citySlug]', params: { citySlug: d.citySlug } }}
                   className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:outline-none focus-visible:ring-2"
@@ -114,10 +132,25 @@ export async function HomeDestinationGrid({
               </li>
             );
           }
+          if (d.variant === 'country') {
+            return (
+              <li key={d.key} className={liClassName}>
+                <Link
+                  href={d.href}
+                  className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                >
+                  <p className="text-fg font-serif text-base leading-snug">{d.label}</p>
+                  <p className="text-muted mt-1 text-[11px] uppercase tracking-[0.18em]">
+                    {t('featuredDestinations.eyebrow')}
+                  </p>
+                </Link>
+              </li>
+            );
+          }
           return (
-            <li key={d.key}>
+            <li key={d.key} className={liClassName}>
               <Link
-                href={d.href}
+                href={{ pathname: '/classement/[slug]', params: { slug: d.rankingSlug } }}
                 className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:outline-none focus-visible:ring-2"
               >
                 <p className="text-fg font-serif text-base leading-snug">{d.label}</p>

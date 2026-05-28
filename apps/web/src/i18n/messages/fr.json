@@ -20,10 +20,11 @@
   "homepage": {
     "metaTitle": "MyConciergeHotel — La sélection du Concierge, hôtels d'exception dans le monde",
     "metaDesc": "2 193 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
-    "eyebrow": "MyConciergeHotel — Agence IATA accréditée",
-    "title": "La sélection du Concierge",
-    "intlBadge": "127 pays · 2 193 adresses · 434 Relais & Châteaux",
-    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie. Chaque fiche s'achève par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+    "eyebrow": "MyConciergeHotel — Book like a concierge. Stay like a guest.",
+    "title": "Nous vous attendions",
+    "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
+    "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
+    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
       "iata": "Agence accréditée IATA",
@@ -39,7 +40,7 @@
       "searchPreviewGuests": "Voyageurs"
     },
     "aeo": {
-      "intro": "Les questions que nos clients nous posent",
+      "intro": "Ce que vous voulez savoir",
       "q1": {
         "question": "Comment MyConciergeHotel sélectionne-t-il ses hôtels ?",
         "answer": "Nous appliquons une grille éditoriale unique : distinctions officielles (Palace Atout France, Forbes Five Star, Michelin Keys), appartenance aux collections d'auteur (Relais & Châteaux, Leading Hotels of the World) et un score interne rédigé par notre conciergerie sur le service, la signature et l'emplacement. Chaque fiche est écrite à la main, jamais générée. Aucun pay-to-play : aucune commission hôtelière n'influence l'entrée au catalogue."
@@ -82,6 +83,23 @@
       "ctaDiscover": "Découvrir Le Concierge Club",
       "ctaPrestige": "Espace Prestige"
     },
+    "openings": {
+      "eyebrow": "Récemment passés au crible",
+      "title": "Le Concierge a frappé à leur porte",
+      "subtitle": "Les quatre dernières adresses passées au crible de notre conciergerie. Chaque fiche s'achève par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "seeAll": "Voir toutes les ouvertures →",
+      "viewFiche": "Lire la fiche"
+    },
+    "openingsPage": {
+      "metaTitle": "Les dernières adresses du Concierge — ouvertures et visites récentes",
+      "metaDesc": "Les vingt dernières adresses passées au crible de notre conciergerie : palaces, Relais & Châteaux, boutique-hôtels et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge — la chambre, la table ou l'horaire que les guides ne précisent jamais.",
+      "eyebrow": "Le Concierge sur la route",
+      "title": "Le Concierge a frappé à leur porte",
+      "lead": "Les vingt dernières maisons visitées par notre conciergerie. Pas de pay-to-play : aucune commission hôtelière n'influence l'ordre. Le tri suit la priorité éditoriale — les coups de cœur en premier, les valeurs sûres ensuite.",
+      "viewFiche": "Lire la fiche",
+      "empty": "Notre conciergerie compile les dernières visites. Revenez dans quelques instants.",
+      "backToHome": "Retour à l'accueil"
+    },
     "featuredHotels": {
       "eyebrow": "Sélection du Concierge",
       "title": "Les fiches du moment",
@@ -96,15 +114,16 @@
     "featuredDestinations": {
       "eyebrow": "Destinations",
       "title": "Là où le Concierge aime envoyer ses clients",
-      "subtitle": "Paris, Côte d'Azur, Alpes, Italie, Japon, Maroc, Maldives, Suisse… Chaque destination ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
+      "subtitle": "Paris, Côte d'Azur, Italie, Grèce, Japon, Maroc, États-Unis, Royaume-Uni — huit géographies où notre conciergerie a tissé ses meilleures adresses. Chacune ouvre sur ses Palaces, son guide local et ses classements éditoriaux.",
       "seeAll": "Toutes les destinations →",
       "countLabel": "{count, plural, one {# adresse} other {# adresses}}"
     },
     "featuredRankings": {
       "eyebrow": "Classements éditoriaux",
-      "title": "Les meilleurs hôtels par usage",
+      "title": "Les meilleurs hôtels, selon nos critères",
       "subtitle": "Nos classements croisent la distinction Atout France, les étoiles Michelin, les Forbes Travel et notre propre score éditorial. Pas de pay-to-play : chaque entrée est gagnée.",
-      "seeAll": "Tous les classements →"
+      "seeAll": "Tous les classements →",
+      "entryCount": "{count, plural, one {# hôtel sélectionné} other {# hôtels sélectionnés}}"
     },
     "conciergeAdvice": {
       "eyebrow": "Le Conseil du Concierge",
@@ -115,34 +134,34 @@
       "empty": "Notre conciergerie compile les conseils du jour. Revenez dans quelques instants."
     },
     "inspiration": {
-      "eyebrow": "Inspirations",
-      "title": "Choisir un hôtel par moment de vie",
-      "subtitle": "Six axes pour trouver l'adresse juste — du week-end romantique au séjour gastronomique. Chaque axe ouvre sur un classement croisé Atout France × Michelin × score éditorial.",
+      "eyebrow": "Selon l'occasion",
+      "title": "Trouver la bonne adresse selon l'occasion",
+      "subtitle": "Six axes pour trouver l'adresse juste. Chaque catégorie ouvre sur un classement croisé Atout France × Michelin × score éditorial — pas de pay-to-play.",
       "seeAll": "Toutes les inspirations →",
       "axes": {
-        "famille": {
-          "title": "En famille",
-          "subtitle": "Suites communicantes, club enfants, accueil sur-mesure pour les 6-12 ans."
-        },
-        "romantique": {
-          "title": "À deux",
-          "subtitle": "Chambres avec vue, suites bain à remous, dîner servi en chambre, spa en couple."
-        },
         "spa": {
           "title": "Spa & bien-être",
           "subtitle": "Caves à eau, signature treatments, marques de soin partenaires — la sélection Concierge."
         },
-        "ski": {
-          "title": "Au pied des pistes",
-          "subtitle": "Chamonix, Megève, Courchevel, Val d'Isère — Palaces et chalets-hôtels avec ski-room."
+        "famille": {
+          "title": "Famille",
+          "subtitle": "Suites communicantes, club enfants, accueil sur-mesure pour les 6-12 ans."
+        },
+        "golf": {
+          "title": "Golf",
+          "subtitle": "Hôtels-resorts avec parcours signature, green fees inclus, club-house gastronomique."
+        },
+        "luneDeMiel": {
+          "title": "Lune de miel",
+          "subtitle": "Suites avec vue, dîner servi en chambre, spa en couple, transferts privés — l'écrin du voyage de noces."
         },
         "gastronomie": {
-          "title": "Gastronomie",
+          "title": "Gastronomie & étoiles Michelin",
           "subtitle": "Chefs étoilés Michelin, tables d'hôtel signature, menus dégustation à réserver trois mois en avance."
         },
-        "design": {
-          "title": "Design & architecture",
-          "subtitle": "Boutiques-hôtels d'auteur, architectes nommés, maisons d'art où l'on dort dans un lieu de mémoire."
+        "rooftop": {
+          "title": "Rooftop",
+          "subtitle": "Toits-bars panoramiques, suites avec terrasse, piscine ciel — l'apéritif les pieds dans la skyline."
         }
       }
     },
