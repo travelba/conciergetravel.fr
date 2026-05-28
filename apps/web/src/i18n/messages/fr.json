@@ -24,12 +24,12 @@
     "title": "Nous vous attendions",
     "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
     "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
-    "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
+    "subtitle": "Accédez aux surclassements et privilèges VIP réservés aux habitués des plus belles maisons.",
     "comingSoon": "MyConciergeHotel.com — votre concierge prépare la sélection.",
     "trust": {
-      "iata": "Agence accréditée IATA",
-      "aspst": "Membre ASPST",
-      "amadeus": "Paiement sécurisé Amadeus"
+      "iata": "Annulation gratuite",
+      "aspst": "Paiement sur place",
+      "amadeus": "Meilleur prix garanti"
     },
     "hero": {
       "posterAlt": "Suite d'un Palace parisien au crépuscule, vue sur les toits — sélection MyConciergeHotel",
