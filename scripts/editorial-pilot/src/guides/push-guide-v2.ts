@@ -34,6 +34,27 @@ function resolveConnectionString(): string {
   return conn;
 }
 
+interface PostgrestEnv {
+  readonly restBase: string;
+  readonly apikey: string;
+}
+
+function tryLoadPostgrestEnv(): PostgrestEnv | null {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '';
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
+  if (url.length === 0 || key.length === 0) return null;
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  return { restBase: `${url.replace(/\/+$/u, '')}/rest/v1`, apikey: key };
+}
+
+function hasPostgresConnection(): boolean {
+  return (
+    (process.env['DATABASE_URL'] ?? '').length > 0 ||
+    (process.env['SUPABASE_DB_POOLER_URL'] ?? '').length > 0 ||
+    (process.env['SUPABASE_DB_URL'] ?? '').length > 0
+  );
+}
+
 interface TocAnchor {
   readonly anchor: string;
   readonly label_fr: string;
@@ -89,11 +110,96 @@ function buildTocAnchors(guide: GeneratedGuideV2): TocAnchor[] {
   return out;
 }
 
+interface ExistingRow {
+  readonly id: string;
+  readonly is_published: boolean;
+}
+
+async function pushViaPostgrest(
+  seed: DestinationGuideSeed,
+  guide: GeneratedGuideV2,
+  publish: boolean,
+  env: PostgrestEnv,
+): Promise<void> {
+  const headers = {
+    apikey: env.apikey,
+    Authorization: `Bearer ${env.apikey}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  } as const;
+
+  // Ratchet: never downgrade an already-published guide back to draft on
+  // a bulk re-push (regression 2026-05-19 — mirrors push-ranking-via-rest).
+  const lookupUrl = `${env.restBase}/editorial_guides?slug=eq.${encodeURIComponent(seed.slug)}&select=id,is_published`;
+  const lookup = await fetch(lookupUrl, { headers });
+  if (!lookup.ok) {
+    throw new Error(
+      `PostgREST GET editorial_guides failed: ${lookup.status} ${(await lookup.text()).slice(0, 200)}`,
+    );
+  }
+  const lookupJson = (await lookup.json()) as ExistingRow[];
+  const existing: ExistingRow | undefined = lookupJson[0];
+  const finalPublish = (existing?.is_published ?? false) || publish;
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tocAnchors = buildTocAnchors(guide);
+  const row = {
+    slug: seed.slug,
+    name_fr: seed.nameFr,
+    name_en: seed.nameEn,
+    scope: seed.scope,
+    country_code: seed.countryCode,
+    summary_fr: guide.summary_fr,
+    summary_en: guide.summary_en,
+    sections: guide.sections,
+    faq: guide.faq,
+    featured_reviews: [],
+    highlights: guide.highlights,
+    practical_info: guide.practical_info,
+    hero_image: seed.heroImage ?? null,
+    meta_title_fr: guide.meta_title_fr,
+    meta_title_en: guide.meta_title_en,
+    meta_desc_fr: guide.meta_desc_fr,
+    meta_desc_en: guide.meta_desc_en,
+    reviewed_at: todayIso,
+    author_name: 'MyConciergeHotel Éditorial',
+    author_url: '/equipe/editorial',
+    is_published: finalPublish,
+    tables: guide.tables,
+    glossary: guide.glossary,
+    external_sources: guide.external_sources,
+    editorial_callouts: guide.editorial_callouts,
+    toc_anchors: tocAnchors,
+  };
+
+  const upsertUrl = `${env.restBase}/editorial_guides?on_conflict=slug`;
+  const upsert = await fetch(upsertUrl, {
+    method: 'POST',
+    headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify(row),
+  });
+  if (!upsert.ok) {
+    throw new Error(
+      `PostgREST UPSERT editorial_guides failed: ${upsert.status} ${(await upsert.text()).slice(0, 200)}`,
+    );
+  }
+}
+
 export async function pushGuideV2(
   seed: DestinationGuideSeed,
   guide: GeneratedGuideV2,
   options: { readonly publish: boolean } = { publish: true },
 ): Promise<void> {
+  // Prefer PostgREST when SUPABASE_SERVICE_ROLE_KEY is configured (no
+  // direct DB connection required, matches push-ranking-via-rest +
+  // run-faq-canonical). Fall back to direct Postgres only when an
+  // explicit DATABASE_URL is set AND the REST env is missing.
+  const restEnv = tryLoadPostgrestEnv();
+  if (restEnv !== null && !hasPostgresConnection()) {
+    await pushViaPostgrest(seed, guide, options.publish, restEnv);
+    return;
+  }
+
   const pgModule = (await import('pg')) as typeof import('pg');
   const cleaned = resolveConnectionString().replace(/[?&]sslmode=[^&]*/giu, '');
   const isLocal = cleaned.includes('localhost') || cleaned.includes('127.0.0.1');
