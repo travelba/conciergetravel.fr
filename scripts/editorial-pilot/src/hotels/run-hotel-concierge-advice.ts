@@ -54,6 +54,7 @@ function parseArgs(argv: readonly string[]): {
   limit?: number;
   dryRun: boolean;
   noDescriptionFilter: boolean;
+  includeDrafts: boolean;
   concurrency: number;
 } {
   const map = new Map<string, string | true>();
@@ -74,10 +75,12 @@ function parseArgs(argv: readonly string[]): {
     limit?: number;
     dryRun: boolean;
     noDescriptionFilter: boolean;
+    includeDrafts: boolean;
     concurrency: number;
   } = {
     dryRun: map.has('dry-run'),
     noDescriptionFilter: map.has('no-description-filter'),
+    includeDrafts: map.has('include-drafts'),
     concurrency,
   };
   if (typeof slugRaw === 'string') out.slug = slugRaw;
@@ -221,11 +224,13 @@ async function main(): Promise<void> {
 
   const listOpts: {
     requireDescription: boolean;
+    onlyPublished: boolean;
     limit?: number;
     slug?: string;
     slugs?: readonly string[];
   } = {
     requireDescription: !args.noDescriptionFilter,
+    onlyPublished: !args.includeDrafts,
   };
   if (args.limit !== undefined) listOpts.limit = args.limit;
   if (args.slug !== undefined) listOpts.slug = args.slug;
