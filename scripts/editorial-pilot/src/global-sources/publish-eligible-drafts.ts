@@ -302,7 +302,7 @@ async function main(): Promise<void> {
         args,
         stats: { considered: rows.length, pass: pass.length, fail: fail.length },
         topReasons: sortedReasons.slice(0, 30),
-        failures: fail.slice(0, 50).map((f) => ({ slug: f.slug, failures: f.failures })),
+        failures: fail.map((f) => ({ slug: f.slug, failures: f.failures })),
       },
       null,
       2,
