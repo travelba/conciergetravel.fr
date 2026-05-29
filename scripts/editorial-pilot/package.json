@@ -62,6 +62,8 @@
     "grecotel:diff": "tsx src/global-sources/diff-grecotel.ts",
     "grecotel:scaffold": "tsx src/global-sources/scaffold-grecotel.ts",
     "grecotel:scaffold:dry": "tsx src/global-sources/scaffold-grecotel.ts --dry-run",
+    "atout-france:palaces": "tsx src/global-sources/fetch-atout-france-palaces.ts",
+    "atout-france:palaces:dry": "tsx src/global-sources/fetch-atout-france-palaces.ts --dry-run",
     "seed:tier1": "tsx src/global-sources/seed-tier1-content.ts",
     "seed:tier1:dry": "tsx src/global-sources/seed-tier1-content.ts --dry-run --limit=5",
     "enrich:brand": "tsx src/global-sources/enrich-brand-tier1.ts",

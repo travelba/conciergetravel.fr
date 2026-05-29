@@ -10,6 +10,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "migrate": "tsx scripts/migrate.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "seed:peninsula": "tsx scripts/seed-peninsula-paris.ts",
@@ -29,6 +31,7 @@
     "@types/node": "^25.9.1",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.22.3",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

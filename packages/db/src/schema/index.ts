@@ -3,4 +3,6 @@
  *
  * Increment when a new numbered migration lands; migrations remain the DDL source of truth.
  */
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
+
+export * from './affiliations';
