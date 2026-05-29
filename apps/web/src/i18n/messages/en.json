@@ -2913,6 +2913,7 @@
       "location": "Location & access",
       "policies": "Stay policies",
       "awards": "Awards & recognitions",
+      "trustSignals": "Distinctions & affiliations",
       "reassurance": "Why book with us",
       "concierge": "Concierge booking",
       "signatureExperiences": "Signature experiences",
@@ -2922,6 +2923,13 @@
       "intro": "Official distinctions and recognitions awarded to this property.",
       "issuerWithYear": "{issuer} · {year, number}",
       "viewSource": "View source"
+    },
+    "trustSignals": {
+      "brand": "Brand",
+      "labels": "Labels & distinctions",
+      "rankings": "Rankings",
+      "guides": "Featured in",
+      "since": "since {year}"
     },
     "signatureExperiences": {
       "intro": "Exclusive on-site programmes that define this property's character, beyond the room key.",

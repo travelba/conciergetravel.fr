@@ -33,6 +33,7 @@ import { HotelSignatureExperiences } from '@/components/hotel/hotel-signature-ex
 import { HotelSpa } from '@/components/hotel/hotel-spa';
 import { HotelStory } from '@/components/hotel/hotel-story';
 import { HotelTldr } from '@/components/hotel/hotel-tldr';
+import { HotelTrustSignals } from '@/components/hotel/hotel-trust-signals';
 import { HeritageBreadcrumbChevron } from '@/components/layout/heritage-breadcrumb-chevron';
 import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
@@ -1409,6 +1410,16 @@ async function renderHotelPage(
         )}
 
         <LocalGuideTeaser locale={locale} cityLabel={row.city} guide={guideTeaser} />
+
+        {/*
+          CDC §2 bloc 13 — Trust signals (structured affiliations).
+          Mirrors the JSON-LD `Hotel.brand` + `Hotel.award[]` already
+          emitted above by `mapAffiliationsToBrand` /
+          `mapAffiliationsToAwardStrings`. Self-elides when there is
+          no verified affiliation AND `isPalace === false`. See
+          `apps/web/src/components/hotel/hotel-trust-signals.tsx`.
+        */}
+        <HotelTrustSignals locale={locale} affiliations={affiliations} isPalace={row.is_palace} />
 
         <HotelReassurance locale={locale} />
 
