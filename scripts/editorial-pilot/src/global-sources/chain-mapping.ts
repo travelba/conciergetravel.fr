@@ -54,7 +54,8 @@ export type LuxuryTier =
   | 'soneva'
   | 'nayara'
   | 'grace_hotels'
-  | 'nihi';
+  | 'nihi'
+  | 'grecotel';
 
 export type Wave = 'A' | 'B' | 'C' | 'D';
 export type Priority = 'P1' | 'P2' | 'P3';
@@ -344,6 +345,24 @@ const CHAIN_DEFS: ReadonlyArray<{
       priority: 'P2',
       displayName: 'NIHI Hotels',
       facetSlug: 'nihi',
+    },
+  },
+
+  // Wave C — boutique-independent / regional national operator (Greece-only)
+  // Grecotel = Daskalantonakis Group, ~30 properties across mainland Greece +
+  // islands, mixed tiering from 4★ family resorts to 5★ Luxe Me Exclusive
+  // Resorts (Cape Sounio is also SLH; Amirandes is a flagship). Scaffolded as
+  // P2 / Wave C because the brand carries weak international recognition vs
+  // the chains above — individual flagships earn editorial weight, the family-
+  // resort tail does not. Editorial review will gate the publishable subset.
+  {
+    aliases: ['grecotel', 'grecotel hotels & resorts', 'grecotel hotels and resorts'],
+    meta: {
+      tier: 'grecotel',
+      wave: 'C',
+      priority: 'P2',
+      displayName: 'Grecotel Hotels & Resorts',
+      facetSlug: 'grecotel',
     },
   },
 ];
