@@ -199,14 +199,23 @@ export async function listHotelsForDescriptionExtend(
   return listHotels(cfg, { ...opts, requireDescription: true });
 }
 
+/**
+ * PostgREST caps an unbounded SELECT at the server `max-rows` setting
+ * (1000 on Supabase). Catalogue-wide backfills run on 2000+ published
+ * hotels, so we paginate with `offset` until a short page comes back.
+ *
+ * Tie-breaker: the mass-publish passes stamped thousands of rows with an
+ * identical `updated_at`, which makes offset pagination over
+ * `updated_at.desc` non-deterministic (rows can be skipped or
+ * duplicated across pages). We always append `slug.asc` (unique) as a
+ * secondary sort and dedupe by slug as a belt-and-braces guard.
+ */
+const POSTGREST_PAGE_SIZE = 1000;
+
 export async function listHotels(
   cfg: SupabaseRestConfig,
   opts: ListHotelsOptions,
 ): Promise<HotelRow[]> {
-  const params = new URLSearchParams();
-  params.set('select', HOTEL_SELECT_COLUMNS);
-  params.set('order', opts.order ?? 'updated_at.desc');
-
   const filterParts: string[] = [];
 
   if (opts.onlyPublished !== false) {
@@ -246,31 +255,50 @@ export async function listHotels(
     filterParts.push(`slug=in.(${list})`);
   }
 
-  if (opts.limit !== undefined) {
-    params.set('limit', String(opts.limit));
+  const baseOrder = opts.order ?? 'updated_at.desc';
+  const order = baseOrder.includes('slug') ? baseOrder : `${baseOrder},slug.asc`;
+  const filterSuffix = filterParts.length > 0 ? `&${filterParts.join('&')}` : '';
+
+  const fetchPage = async (limit: number, offset: number): Promise<HotelRow[]> => {
+    const params = new URLSearchParams();
+    params.set('select', HOTEL_SELECT_COLUMNS);
+    params.set('order', order);
+    params.set('limit', String(limit));
+    if (offset > 0) params.set('offset', String(offset));
+    const url = `${cfg.url}/rest/v1/hotels?${params.toString()}${filterSuffix}`;
+    const res = await fetch(url, {
+      headers: {
+        apikey: cfg.serviceRoleKey,
+        Authorization: `Bearer ${cfg.serviceRoleKey}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`[supabase-hotels] SELECT failed (${res.status}): ${body.slice(0, 300)}`);
+    }
+    const json: unknown = await res.json();
+    if (!Array.isArray(json)) {
+      throw new Error('[supabase-hotels] SELECT did not return an array');
+    }
+    return json as HotelRow[];
+  };
+
+  const bySlug = new Map<string, HotelRow>();
+  let offset = 0;
+  for (;;) {
+    const remaining = opts.limit !== undefined ? opts.limit - bySlug.size : POSTGREST_PAGE_SIZE;
+    if (remaining <= 0) break;
+    const pageLimit = Math.min(POSTGREST_PAGE_SIZE, remaining);
+    const page = await fetchPage(pageLimit, offset);
+    for (const row of page) {
+      if (!bySlug.has(row.slug)) bySlug.set(row.slug, row);
+    }
+    offset += page.length;
+    if (page.length < pageLimit) break;
   }
 
-  const qs = `${params.toString()}${filterParts.length > 0 ? `&${filterParts.join('&')}` : ''}`;
-  const url = `${cfg.url}/rest/v1/hotels?${qs}`;
-
-  const res = await fetch(url, {
-    headers: {
-      apikey: cfg.serviceRoleKey,
-      Authorization: `Bearer ${cfg.serviceRoleKey}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`[supabase-hotels] SELECT failed (${res.status}): ${body.slice(0, 300)}`);
-  }
-
-  const json: unknown = await res.json();
-  if (!Array.isArray(json)) {
-    throw new Error('[supabase-hotels] SELECT did not return an array');
-  }
-  return json as HotelRow[];
+  return [...bySlug.values()];
 }
 
 export interface FactualSummaryUpdate {
