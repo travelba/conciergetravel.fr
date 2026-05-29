@@ -12,17 +12,47 @@ Un seul point manquant = PR refusée.
 
 ## Checklist PR obligatoire
 
-### ✅ Quotas
-- [ ] `gallery_images` >= 30 entrées par hôtel publié
-- [ ] >= 10 catégories distinctes couvertes (`photo_category` SMD)
+### ✅ Quotas (révisés Phase 1 — 2026-05-29)
+
+- [ ] `gallery_images` >= **10** entrées par hôtel publié (Phase 1). Le ratio cible Phase 2+ reste 30+ une fois le sourcing complémentaire (Tavily extract + Cloudinary upload) industrialisé sur tout le catalogue.
+- [ ] >= **10 catégories distinctes couvertes** (`photo_category` SMD) — **non négociable**, Phase 1 et après. Une fiche qui ne couvre pas les 10 catégories ne s'indexe pas (passe en `noindex,follow` jusqu'à complétion).
 - [ ] Au moins 1 photo dans chaque catégorie : `exterior`, `lobby`, `room`, `dining`, `spa`, `pool`, `view`, `detail`, `concierge`, `events`
 - [ ] Si `mice_info` non null -> catégorie `events` >= 2 photos
 
-### ✅ Sources légales (aucun hotlink)
-- [ ] Aucune URL `i.pinimg.com` dans `hero_image` ou `gallery_images`
-- [ ] Aucune URL `www.<hotel>.com/` (site officiel hotlink)
-- [ ] Toutes les photos Cloudinary : public_id format `cct/hotels/<slug>/<role>-<n>`
-- [ ] SMD `licence` renseigné pour chaque asset (`cc-by-sa-4.0`, `cc-by-4.0`, `cc0`, `all-rights-reserved`, `fair-use`)
+**Pourquoi 10 photos min (au lieu de 30) en Phase 1** : Google Places renvoie 8-11 photos par hôtel max, et le sourcing complémentaire via site officiel (Tavily extract) ajoute 5-15 photos. Atteindre 30 photos par hôtel sur les 615+ fiches publiées nécessite une Phase 2 dédiée. La couverture catégorielle (10/10 cats) est l'optimum SEO/GEO le plus important — un hôtel avec 12 photos couvrant 10 catégories vaut mieux qu'un hôtel avec 30 photos toutes en `room`. Voir [photo-pipeline/SKILL.md](../skills/photo-pipeline/SKILL.md) §Sequencing decision.
+
+### ✅ Catégorisation LLM (Phase 1 lock-in)
+
+- [ ] Toute photo dans `gallery_images` a un `category` non null
+- [ ] La catégorisation passe par **OpenAI Vision (gpt-4o-mini)** — script `scripts/editorial-pilot/src/photos/test-openai-vision.ts` pour le format, `scripts/editorial-pilot/src/photos/categorize-with-vision.ts` pour le batch pipeline
+- [ ] Schema Zod `VisionAnswerSchema` doit accepter les 12 catégories (`exterior | lobby | room | suite | dining | spa | pool | view | detail | concierge | events | other`)
+- [ ] Coût réel ~$0.0007/photo (gpt-4o-mini avec image `detail: high` à 1600px width) — budget Phase 1 < $0.30 pour 4 fiches
+- [ ] Photos marquées `keep=false` par Vision **doivent** être exclues du `gallery_images` final (raison stockée dans un log d'audit, pas en DB)
+
+### ✅ Sources officielles uniquement (Hard Rule renforcée 2026-05-29)
+
+**Photos autorisées** (par ordre de préférence) :
+1. **Site officiel de l'hôtel** — galerie publique, press kit, fiche brand (Aman, R&C, LHW, FS, MO). Récupéré via Tavily extract puis upload Cloudinary.
+2. **Google Places API** (photos publiées par l'hôtel sur Google Business Profile — pas les photos user-generated).
+3. **Press kits institutionnels** — Forbes Travel Guide, Atout France (Palaces), Michelin Guide (hotels), Relais & Châteaux portal, World's 50 Best Hotels, Condé Nast Gold List.
+4. **Wikimedia Commons** UNIQUEMENT si la photo est `professional/architectural` (filtre OpenAI Vision `keep=true` ET `quality_score >= 8`) avec attribution explicite `cc-by-sa-4.0` / `cc-by-4.0` / `cc0`.
+
+**Photos INTERDITES** (refus PR automatique) :
+- ❌ Tripadvisor CDN (`dynamic-media-cdn.tripadvisor.com`, `static.tacdn.com`) — photos user-generated reviews, droits incertains, qualité variable, ne reflète pas la voix Concierge.
+- ❌ Booking.com CDN (`cf.bstatic.com`, `q-xx.bstatic.com`).
+- ❌ Expedia / Hotels.com / Agoda CDN.
+- ❌ Pinterest (`i.pinimg.com`, `pinimg.com`).
+- ❌ Instagram user posts (`scontent.cdninstagram.com`).
+- ❌ Foursquare / Yelp user photos.
+- ❌ Hotlink direct au site officiel (`www.<hotel>.com/photos/...`) — toujours uploader sur Cloudinary après extraction.
+
+**Exception unique au sourcing user-gen** : une photo user-generated peut être autorisée SI ET SEULEMENT SI :
+- (a) elle est exceptionnellement belle (OpenAI Vision `quality_score >= 9` ET catégorie identifiable),
+- (b) elle est passée dans le filtre signature production (cf. preview `/dev/photo-filter-preview`),
+- (c) sa licence permet l'usage commercial (cc-by/cc-by-sa avec attribution, ou autorisation explicite),
+- (d) elle est marquée `source: 'user-gen-curated'` dans le SMD et tracée dans un log d'audit.
+
+**Toutes les photos publiées en gallery doivent vivre sur Cloudinary** : `public_id` format `cct/hotels/<slug>/<role>-<n>`. Le SMD `licence` est renseigné pour chaque asset (`cc-by-sa-4.0`, `cc-by-4.0`, `cc0`, `all-rights-reserved`, `fair-use-press`).
 
 ### ✅ Qualité technique
 - [ ] Original uploadé Cloudinary >= 2400 px grand côté
