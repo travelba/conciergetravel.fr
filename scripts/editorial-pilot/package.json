@@ -91,6 +91,8 @@
     "club:gastronomie:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=gastronomie_concierge --dry-run --limit=3",
     "club:timing": "tsx src/hotels/run-hotel-premium-section.ts --section=timing_acces_concierge",
     "club:timing:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=timing_acces_concierge --dry-run --limit=3",
+    "audit:hotel-fiches": "tsx src/hotels/audit-hotel-fiche.ts",
+    "audit:hotel-fiches:published": "tsx src/hotels/audit-hotel-fiche.ts --published-only",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run"
   },
