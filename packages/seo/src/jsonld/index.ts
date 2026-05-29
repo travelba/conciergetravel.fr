@@ -4,6 +4,7 @@
  * the `<JsonLd>` component in `apps/web` (a thin wrapper around
  * `<script type="application/ld+json">`).
  */
+export * from './affiliations';
 export * from './aggregate-rating';
 export * from './article';
 export * from './breadcrumb';

@@ -56,6 +56,7 @@ import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
   getHotelBySlug,
   listPublishedHotelSlugs,
+  readAffiliations,
   readAmenities,
   readAmenitiesByCategory,
   readAwards,
@@ -412,6 +413,7 @@ async function renderHotelPage(
   const location = readLocation(row, locale);
   const policies = readPolicies(row, locale);
   const awards = readAwards(row, locale);
+  const affiliations = readAffiliations(row);
   const postalCode = readPostalCode(row);
   const phoneE164 = readPhoneE164(row);
   const inventory = readInventoryCounts(row);
@@ -489,17 +491,42 @@ async function renderHotelPage(
     }
   }
 
-  // Award strings for JSON-LD: prefer "Name — Issuer, Year" to give Google /
-  // LLMs a self-contained sentence. The regulated *Palace* distinction is
-  // already emitted by `hotelJsonLd` when `isPalace === true`, so we only
-  // forward the editorial entries here. We also drop the duplicate Palace
-  // entry from the seed array (matched on issuer "Atout France") to avoid
-  // emitting it twice.
-  const jsonLdAwards: string[] = awards
+  // Award strings for JSON-LD — three independent sources merged here:
+  //
+  //  1. Editorial `awards` jsonb column (legacy, `readAwards`) — manual
+  //     entries from the back-office: "Best Hotel of the Year — Magazine
+  //     X, 2023". Self-contained "Name — Issuer, Year" sentence.
+  //
+  //  2. Structured `affiliations` jsonb (migration 0062 / ADR-0023) —
+  //     systematic ingestion of authoritative lists (Forbes 5-Star,
+  //     Atout France Palaces, Relais & Châteaux, World's 50 Best, …).
+  //     Only `verified: true` non-brand kinds (label / ranking / guide)
+  //     are emitted — see Hard Rule 14 in
+  //     `.cursor/rules/hotel-detail-page.mdc`.
+  //
+  //  3. `isPalace: row.is_palace` flag (forwarded to the builder) which
+  //     emits the regulated "Distinction Palace — Atout France" string
+  //     automatically. We dedupe by dropping any award entry whose
+  //     issuer is "Atout France" so the Palace line never appears twice.
+  //
+  // Final dedup pass is case-insensitive so an editor's manual
+  // "Forbes Travel Guide 5 Stars" entry doesn't collide with the
+  // ingested "Forbes Travel Guide Five-Star" affiliation string.
+  const editorialAwards: string[] = awards
     .filter((a) => a.issuer.toLowerCase() !== 'atout france')
     .map((a) =>
       a.year !== null ? `${a.name} — ${a.issuer}, ${a.year}` : `${a.name} — ${a.issuer}`,
     );
+  const affiliationAwards = JsonLd.mapAffiliationsToAwardStrings(affiliations);
+  const affiliationBrand = JsonLd.mapAffiliationsToBrand(affiliations);
+  const jsonLdAwardSeen = new Set<string>();
+  const jsonLdAwards: string[] = [];
+  for (const a of [...editorialAwards, ...affiliationAwards]) {
+    const key = a.trim().toLowerCase();
+    if (key.length === 0 || jsonLdAwardSeen.has(key)) continue;
+    jsonLdAwardSeen.add(key);
+    jsonLdAwards.push(a.trim());
+  }
 
   const hotelInput: JsonLd.HotelJsonLdInput = {
     name,
@@ -512,6 +539,7 @@ async function renderHotelPage(
     ...(jsonLdImages.length > 0 ? { images: jsonLdImages } : {}),
     ...(amenities.length > 0 ? { amenityFeatures: amenities } : {}),
     ...(jsonLdAwards.length > 0 ? { awards: jsonLdAwards } : {}),
+    ...(affiliationBrand !== null ? { brand: affiliationBrand } : {}),
     // Telephone (Phase 10.29 / CDC §2.15). E.164 format only — `readPhoneE164`
     // refuses loose / partial entries so the JSON-LD never carries a half-typed
     // number. Google Hotels uses this for both the SERP card and click-to-call.

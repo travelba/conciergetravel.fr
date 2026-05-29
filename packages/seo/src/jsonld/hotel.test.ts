@@ -538,4 +538,59 @@ describe('hotelJsonLd', () => {
     });
     expect(node.containsPlace).toBeUndefined();
   });
+
+  describe('brand (chain operator) — ADR-0023 affiliation surface', () => {
+    it('emits Hotel.brand as a Brand node with name + sameAs + identifier', () => {
+      const node = hotelJsonLd({
+        name: 'Le Bristol Paris',
+        url: 'https://example.com/p',
+        brand: {
+          name: 'Oetker Collection',
+          sameAs: 'https://www.oetkercollection.com/',
+          identifier: 'oetker-collection',
+        },
+      });
+      expect(node.brand).toEqual({
+        '@type': 'Brand',
+        name: 'Oetker Collection',
+        sameAs: 'https://www.oetkercollection.com/',
+        identifier: 'oetker-collection',
+      });
+    });
+
+    it('emits brand with name only when sameAs + identifier are absent', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        brand: { name: 'Rosewood Hotels & Resorts' },
+      });
+      expect(node.brand).toEqual({
+        '@type': 'Brand',
+        name: 'Rosewood Hotels & Resorts',
+      });
+    });
+
+    it('omits sameAs when the URL is non-https (defensive filter)', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        brand: { name: 'Aman', sameAs: 'http://insecure.example.com/' },
+      });
+      expect(node.brand).toEqual({ '@type': 'Brand', name: 'Aman' });
+    });
+
+    it('drops the entire brand when name is empty / whitespace', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        brand: { name: '   ' },
+      });
+      expect(node.brand).toBeUndefined();
+    });
+
+    it('omits brand when not provided', () => {
+      const node = hotelJsonLd({ name: 'Hôtel A', url: 'https://example.com/a' });
+      expect(node.brand).toBeUndefined();
+    });
+  });
 });

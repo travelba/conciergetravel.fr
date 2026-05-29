@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
 import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
@@ -73,6 +74,10 @@ export const HotelDetailRowSchema = z.object({
   upcoming_events: z.unknown().nullable().optional(),
   policies: z.unknown().nullable().optional(),
   awards: z.unknown().nullable().optional(),
+  // Migration 0062 — structured affiliations (brand / label / ranking / guide).
+  // Parsed by `readAffiliations` and surfaced into Hotel.brand + Hotel.award[].
+  // See ADR-0023 and `.cursor/rules/hotel-detail-page.mdc` Hard Rule 14.
+  affiliations: z.unknown().nullable().optional(),
   signature_experiences: z.unknown().nullable().optional(),
   concierge_advice: z.unknown().nullable().optional(),
   featured_reviews: z.unknown().nullable().optional(),
@@ -144,7 +149,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -2060,6 +2065,34 @@ export function readAwards(
     if (right.year === null) return -1;
     return right.year - left.year;
   });
+}
+
+// ---------------------------------------------------------------------------
+// affiliations (jsonb) — migration 0062 / ADR-0023
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the **verified** affiliations stored in `hotels.affiliations[]`.
+ *
+ * Verification is the boundary between "scaffolded scrape" and "JSON-LD
+ * emission" — only entries marked `verified: true` by the ingestion
+ * pipelines (Atout France Palaces, Forbes 5-Star, brand ownership, …)
+ * surface here. Hard Rule 14 (`.cursor/rules/hotel-detail-page.mdc`)
+ * forbids emitting unverified affiliations to the public graph.
+ *
+ * Lenient parsing: a single malformed entry never crashes the fiche —
+ * see `parseAffiliationsLenient` in `@mch/db`. Empty array is a valid
+ * "no affiliations recorded" state.
+ *
+ * The page-level composer downstream feeds the result into:
+ *   - `mapAffiliationsToAwardStrings()` (→ `Hotel.award[]`)
+ *   - `mapAffiliationsToBrand()` (→ `Hotel.brand`)
+ *
+ * (Both live in `@mch/seo/jsonld`.)
+ */
+export function readAffiliations(row: HotelDetailRow): readonly HotelAffiliation[] {
+  const parsed = parseAffiliationsLenient(row.affiliations);
+  return parsed.filter((a) => a.verified === true);
 }
 
 // ---------------------------------------------------------------------------

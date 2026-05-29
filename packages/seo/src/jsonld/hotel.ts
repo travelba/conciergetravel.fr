@@ -1,6 +1,7 @@
 import type { Hotel } from 'schema-dts';
 
 import { aggregateRatingJsonLd, type AggregateRatingInput } from './aggregate-rating';
+import { type HotelBrandInput } from './affiliations';
 import { offerJsonLd, type OfferInput } from './offer';
 import {
   buildOpeningHoursSpecification,
@@ -40,11 +41,24 @@ type SpeakableNode = {
   cssSelector: readonly string[];
 };
 
+/** Brand sub-node — `Brand` is one of the union types accepted by
+ * Schema.org for `Hotel.brand` (the other being `Organization`). We
+ * always emit `Brand` for our affiliation flow; the operational chain
+ * is the brand, not the legal entity owning the property. */
+type BrandNode = {
+  '@type': 'Brand';
+  name: string;
+  sameAs?: string;
+  identifier?: string;
+};
+
 /** Hotel without the bare-IRI string union from schema-dts. */
 export type HotelNode = HotelBaseNode & {
   dateModified?: string;
   nearbyAttractions?: readonly NearbyAttractionNode[] | NearbyAttractionNode;
   containsPlace?: readonly ContainedPlaceNode[] | ContainedPlaceNode;
+  /** Operational chain. See `HotelJsonLdInput.brand`. */
+  brand?: BrandNode;
   /**
    * Schema.org defines `tourBookingPage` on `LodgingBusiness` as
    * "A page providing information about how to book a tour of some
@@ -447,6 +461,23 @@ export interface HotelJsonLdInput {
   readonly architects?: readonly string[];
   /** Always `true` for our 5★ + Palace catalogue (Palaces are non-smoking by law). */
   readonly smokingAllowed?: boolean;
+  /**
+   * Operational brand (chain) — emitted as `Hotel.brand` (Schema.org's
+   * `Brand` shape). At most one per hotel by definition (see ADR-0023);
+   * `mapAffiliationsToBrand` enforces single-brand at the boundary.
+   *
+   * When provided, surfaces:
+   *   - `Hotel.brand.@type: 'Brand'`
+   *   - `Hotel.brand.name: <display_name>`
+   *   - `Hotel.brand.sameAs: <https URL>` if known
+   *   - `Hotel.brand.identifier: <kebab slug>` if known
+   *
+   * This is a critical agentic + AI-overview signal: knowing that
+   * "Hôtel Le Bristol Paris" is operated under the **Oetker Collection**
+   * brand lets an LLM disambiguate the property against the chain's
+   * own catalogue without re-crawling.
+   */
+  readonly brand?: HotelBrandInput;
 }
 
 export interface SubjectOfInput {
@@ -879,6 +910,19 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
       .map((name) => ({ '@type': 'Person' as const, name }));
     if (founderNodes.length > 0) {
       out.founder = founderNodes;
+    }
+  }
+  if (input.brand !== undefined) {
+    const trimmedName = input.brand.name.trim();
+    if (trimmedName.length > 0) {
+      const node: BrandNode = { '@type': 'Brand', name: trimmedName };
+      if (input.brand.sameAs !== undefined && /^https:\/\//iu.test(input.brand.sameAs)) {
+        node.sameAs = input.brand.sameAs;
+      }
+      if (input.brand.identifier !== undefined && input.brand.identifier.length > 0) {
+        node.identifier = input.brand.identifier;
+      }
+      out.brand = node;
     }
   }
   // Speakable — surfaces the AEO TL;DR / FAQ / FactualSummary / ConciergeAdvice
