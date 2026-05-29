@@ -110,6 +110,24 @@ const COUNTRY_LABEL_TO_ISO: Readonly<Record<string, string>> = {
   'royaume-uni': 'GB',
   uk: 'GB',
   vietnam: 'VN',
+  // ─── MICHELIN Keys 2025 expansion (additional countries) ─────────────────
+  // Added 2026-05-29 to support `fetch-michelin-keys.ts`. ISO 3166-1 alpha-2.
+  // Only entries NOT already covered by the Original or Forbes blocks above.
+  chile: 'CL',
+  chili: 'CL',
+  peru: 'PE',
+  pérou: 'PE',
+  perou: 'PE',
+  namibia: 'NA',
+  namibie: 'NA',
+  croatia: 'HR',
+  croatie: 'HR',
+  india: 'IN',
+  inde: 'IN',
+  indonesie: 'ID',
+  'sri lanka': 'LK',
+  germany: 'DE',
+  allemagne: 'DE',
 };
 
 function normaliseLabel(label: string): string {
