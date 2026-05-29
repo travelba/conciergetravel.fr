@@ -434,8 +434,9 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const { rows, guideSlugs, roomStats } = await fetchCatalogue(args);
   let results = evaluateAll(rows, guideSlugs, roomStats);
-  if (args.minScore !== null) {
-    results = results.filter((r) => r.score_cdc < args.minScore);
+  const minScore = args.minScore;
+  if (minScore !== null) {
+    results = results.filter((r) => r.score_cdc < minScore);
   }
 
   const stamp = todayStamp();

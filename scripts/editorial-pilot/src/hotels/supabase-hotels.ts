@@ -39,11 +39,15 @@ export interface HotelRow {
   readonly description_fr: string | null;
   readonly description_en: string | null;
   readonly points_of_interest: unknown;
+  readonly transports: unknown;
+  readonly highlights: unknown;
   readonly restaurant_info: unknown;
   readonly spa_info: unknown;
   readonly amenities: unknown;
   readonly signature_experiences: unknown;
   readonly awards: unknown;
+  readonly policies: unknown;
+  readonly official_url: string | null;
   readonly factual_summary_fr: string | null;
   readonly factual_summary_en: string | null;
   readonly meta_desc_fr: string | null;
@@ -73,11 +77,15 @@ const HOTEL_SELECT_COLUMNS = [
   'description_fr',
   'description_en',
   'points_of_interest',
+  'transports',
+  'highlights',
   'restaurant_info',
   'spa_info',
   'amenities',
   'signature_experiences',
   'awards',
+  'policies',
+  'official_url',
   'factual_summary_fr',
   'factual_summary_en',
   'meta_desc_fr',
@@ -313,6 +321,30 @@ export async function updateHotelMetaDesc(
   payload: MetaDescUpdate,
 ): Promise<void> {
   await patchHotel(cfg, hotelId, payload as unknown as Record<string, unknown>);
+}
+
+/**
+ * Geo-context payload — `highlights` (jsonb array of `{ label_fr,
+ * label_en }`) and `transports` (jsonb array matching the web reader's
+ * `TransportSchema`). Either field may be omitted when the generator
+ * could not ground it (anti-hallucination — we never invent transit
+ * distances).
+ */
+export interface GeoContextUpdate {
+  readonly highlights?: unknown;
+  readonly transports?: unknown;
+}
+
+export async function updateHotelGeoContext(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  payload: GeoContextUpdate,
+): Promise<void> {
+  const body: Record<string, unknown> = {};
+  if (payload.highlights !== undefined) body['highlights'] = payload.highlights;
+  if (payload.transports !== undefined) body['transports'] = payload.transports;
+  if (Object.keys(body).length === 0) return;
+  await patchHotel(cfg, hotelId, body);
 }
 
 export interface DescriptionUpdate {
