@@ -93,6 +93,8 @@
     "club:timing:dry": "tsx src/hotels/run-hotel-premium-section.ts --section=timing_acces_concierge --dry-run --limit=3",
     "audit:hotel-fiches": "tsx src/hotels/audit-hotel-fiche.ts",
     "audit:hotel-fiches:published": "tsx src/hotels/audit-hotel-fiche.ts --published-only",
+    "audit:hotel-fiches-cdc": "tsx src/hotels/audit-hotel-fiche-cdc.ts",
+    "audit:hotel-fiches-cdc:published": "tsx src/hotels/audit-hotel-fiche-cdc.ts --published-only",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run"
   },

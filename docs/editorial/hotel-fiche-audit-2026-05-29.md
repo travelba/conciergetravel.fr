@@ -14,6 +14,9 @@ Commande pour rejouer l'audit :
 pnpm --filter @mch/editorial-pilot audit:hotel-fiches
 ```
 
+**Audit CDC exhaustif** (16 blocs + SEO + GEO + agentique + maillage + JSON-LD + photos) :
+voir [`hotel-fiche-cdc-audit-2026-05-29.md`](./hotel-fiche-cdc-audit-2026-05-29.md) — commande `pnpm --filter @mch/editorial-pilot audit:hotel-fiches-cdc`.
+
 ---
 
 ## TL;DR
