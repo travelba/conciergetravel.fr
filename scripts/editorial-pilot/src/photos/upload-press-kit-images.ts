@@ -47,6 +47,11 @@ import {
 
 import { loadEnv } from '../env.js';
 import { loadPhotoEnv, requirePhotoEnv } from './env-photos.js';
+import {
+  isBlocklistedHostname,
+  isWhitelistedHostname,
+  trustedDomainsForHotel,
+} from './parent-group-mapping.js';
 import { selectHotels, patchHotelById, type SupabaseRestConfig } from './supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -149,17 +154,19 @@ function readDiscoveryFile(path: string): DiscoveryReport {
   return parsed.data;
 }
 
-// ─── Per-slug hostname whitelist ───────────────────────────────────────────
+// ─── Per-slug hostname whitelist (optional ADD-ON, never the only gate) ─────
 
 /**
- * Whitelist of image CDN hostnames per hotel slug. Only images served
- * from these hosts pass the filter — keeps tier-3 magazines, OTA CDNs,
- * and group-boutique e-commerce out of the gallery.
+ * Per-slug CDN hints. These are EXTRA allowances for hotels whose
+ * legitimate press-kit CDN isn't covered by `trustedDomainsForHotel`
+ * (own domain + parent-group DAM) nor by `HOSTNAME_WHITELIST_GLOBAL`.
  *
- * Substring match (hostname.endsWith / hostname.includes). Add a new
- * row when discovery finds a legitimate CDN that's not yet listed.
+ * IMPORTANT: unlike the previous design, an empty/absent entry does
+ * NOT mean "pass everything". The source filter below is
+ * **safe-by-default** — a hotel with no per-slug hint still only
+ * accepts images on its trusted domains or a globally-trusted CDN.
  */
-const HOSTNAME_WHITELIST: Readonly<Record<string, readonly string[]>> = {
+const SLUG_EXTRA_ALLOWED_HOSTS: Readonly<Record<string, readonly string[]>> = {
   // Oetker Collection → Contentful CDN
   'le-bristol-paris': ['images.eu.ctfassets.net'],
   // Akelarre own WordPress + R&C CDN
@@ -168,16 +175,65 @@ const HOSTNAME_WHITELIST: Readonly<Record<string, readonly string[]>> = {
   'al-moudira': ['static.wixstatic.com'],
   // Hyatt corporate DAM
   'alila-jabal-akhdar': ['assets.hyatt.com'],
+  // Fawn Bluff's brand site (fawnbluff.com) differs from its `official_url`
+  // parent path (flospitality.com/fawnbluff). Both are legitimate.
+  'fawn-bluff-private-lodge': ['fawnbluff.com'],
 };
 
-function passesWhitelist(slug: string, img: DiscoveryImage): boolean {
-  const whitelist = HOSTNAME_WHITELIST[slug];
-  if (!whitelist || whitelist.length === 0) return true; // no whitelist = pass-through
+/**
+ * Safe-by-default source filter. An image is accepted ONLY when it is
+ * not blocklisted AND it comes from a domain we trust for this hotel.
+ *
+ * Why this replaced the old pass-through default (2026-05-31): the
+ * previous `passesWhitelist` returned `true` for any slug missing a
+ * hardcoded entry — so a non-tuned hotel (the 99% case for a
+ * catalogue-wide B2 sourcing run) would happily upload Instagram,
+ * Condé Nast, Telegraph, agency-CDN images to Cloudinary, violating
+ * the photo-quality hard rule. The blocklist + trusted-domain resolver
+ * already exist in `parent-group-mapping.ts`; this wires them in so
+ * the filter is correct for EVERY slug, tuned or not.
+ *
+ * Three checks, in order:
+ *   1. Reject if the hostname OR the full URL matches the global
+ *      blocklist (catches `cdn-xxx.nitrocdn.com/...cdninstagram.com/...`
+ *      proxies where the blocked term is in the PATH, not the host).
+ *   2. Accept if the host/URL is on a trusted domain for this hotel
+ *      (own official domain + parent-group DAM) — URL substring match
+ *      so a NitroPack/Cloudflare proxy of the official site's own
+ *      `wp-content/uploads` still passes.
+ *   3. Accept if the host is a globally-trusted CDN (Contentful, S3,
+ *      Cloudfront, parent-group DAMs…) or an explicit per-slug hint.
+ * Otherwise reject.
+ */
+function passesSourceFilter(
+  slug: string,
+  img: DiscoveryImage,
+  trustedDomains: readonly string[],
+): boolean {
   const url = img.url.toLowerCase();
   const host = img.hostname.toLowerCase();
-  return whitelist.some(
-    (entry) => host.includes(entry.toLowerCase()) || url.includes(entry.toLowerCase()),
-  );
+
+  // 1. Hard blocklist — check both hostname and full URL.
+  if (isBlocklistedHostname(host)) return false;
+  if (isBlocklistedHostname(url)) return false;
+
+  // 2. Trusted domains for this specific hotel (own + parent group).
+  if (
+    trustedDomains.some(
+      (d) => host === d || host.endsWith(`.${d}`) || url.includes(`/${d}/`) || url.includes(d),
+    )
+  ) {
+    return true;
+  }
+
+  // 3. Globally-trusted CDNs + per-slug extra hints.
+  if (isWhitelistedHostname(host)) return true;
+  const extra = SLUG_EXTRA_ALLOWED_HOSTS[slug];
+  if (extra && extra.some((e) => host.includes(e.toLowerCase()) || url.includes(e.toLowerCase()))) {
+    return true;
+  }
+
+  return false;
 }
 
 // ─── OpenAI Vision (categorize + alt + caption + quality) ──────────────────
@@ -360,6 +416,8 @@ interface HotelDbRow {
   readonly name: string;
   readonly city: string;
   readonly hero_image: string | null;
+  readonly official_url: string | null;
+  readonly luxury_tier: string | null;
   readonly gallery_images: ReadonlyArray<Record<string, unknown>>;
 }
 
@@ -369,12 +427,14 @@ interface RawHotelDbRow {
   readonly name: unknown;
   readonly city: unknown;
   readonly hero_image: unknown;
+  readonly official_url: unknown;
+  readonly luxury_tier: unknown;
   readonly gallery_images: unknown;
 }
 
 async function fetchHotelRow(cfg: SupabaseRestConfig, slug: string): Promise<HotelDbRow> {
   const raws = await selectHotels<RawHotelDbRow>(cfg, {
-    columns: 'id,slug,name,city,hero_image,gallery_images',
+    columns: 'id,slug,name,city,hero_image,official_url,luxury_tier,gallery_images',
     filters: [`slug=eq.${encodeURIComponent(slug)}`],
     limit: 1,
   });
@@ -391,6 +451,8 @@ async function fetchHotelRow(cfg: SupabaseRestConfig, slug: string): Promise<Hot
     name: String(row.name),
     city: typeof row.city === 'string' ? row.city : '',
     hero_image: typeof row.hero_image === 'string' ? row.hero_image : null,
+    official_url: typeof row.official_url === 'string' ? row.official_url : null,
+    luxury_tier: typeof row.luxury_tier === 'string' ? row.luxury_tier : null,
     gallery_images: gallery,
   };
 }
@@ -424,17 +486,30 @@ async function processHotel(
   const slug = report.slug;
   console.log(`\n[${slug}] (${report.name})`);
 
-  const filtered = report.images.filter((img) => passesWhitelist(slug, img));
+  const dbRow = await fetchHotelRow(supabaseCfg, slug);
+
+  // Safe-by-default source filter scoped to THIS hotel's trusted
+  // domains (own official domain + parent-group DAM). Prefer the DB
+  // `official_url` (authoritative) but fall back to the discovery
+  // report's copy.
+  const trustedDomains = trustedDomainsForHotel({
+    slug,
+    officialUrl: dbRow.official_url ?? report.officialUrl,
+    luxuryTier: dbRow.luxury_tier,
+  });
+  const filtered = report.images.filter((img) => passesSourceFilter(slug, img, trustedDomains));
   console.log(
-    `  ${report.images.length} candidates → ${filtered.length} after whitelist (limit ${limit})`,
+    `  ${report.images.length} candidates → ${filtered.length} after source filter ` +
+      `(trusted: ${trustedDomains.length > 0 ? trustedDomains.join(', ') : 'none'}; limit ${limit})`,
   );
 
   if (filtered.length === 0) {
-    console.warn(`  [WARN] no images survived whitelist — extend HOSTNAME_WHITELIST in script`);
+    console.warn(
+      `  [WARN] no images survived the source filter — all candidates were blocklisted or off-domain`,
+    );
     return { slug, uploaded: 0, skipped: 0, errors: 0, heroPromoted: false };
   }
 
-  const dbRow = await fetchHotelRow(supabaseCfg, slug);
   const existingPublicIds = new Set(
     dbRow.gallery_images
       .map((row) => row['public_id'])
