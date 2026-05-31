@@ -59,10 +59,10 @@ Mêmes règles, en EN-GB (« featuring », pas « featured »). Distances en EN-
 ### FR — Le Bristol Paris (palace 5★)
 
 ```
-Palace 5 étoiles situé 8ᵉ arrondissement, à 400 m de l'Élysée, avec restaurant 3 étoiles Michelin, spa La Prairie et rooftop.
+Palace 5 étoiles situé 8ᵉ arrondissement (Paris), à 400 m de l'Élysée, avec restaurant 3 étoiles Michelin, spa La Prairie et rooftop piscine.
 ```
 
-(118 caractères ✅)
+(141 caractères ✅ — sweet spot CDC §2.3)
 
 ### EN — Le Bristol Paris
 
@@ -75,10 +75,16 @@ Palace 5-star in the 8th arrondissement, 400 m from the Élysée, featuring a 3-
 ### FR — Four Seasons Istanbul at the Bosphorus
 
 ```
-Hôtel 5 étoiles situé Beşiktaş (Istanbul), à 800 m du palais de Dolmabahçe, avec spa Sisley, terrasse Bosphore et majordome 24/7.
+Hôtel 5 étoiles situé Beşiktaş (Istanbul), à 800 m du palais de Dolmabahçe, avec spa Sisley, terrasse Bosphore et service majordome 24/7.
 ```
 
-(130 caractères ✅)
+(137 caractères ✅ — sweet spot CDC §2.3)
+
+> ⚠️ Les deux exemples ci-dessus atterrissent **dans la bande idéale
+> 130-150**, pas en-dessous. Quand tu rédiges, calque cette densité,
+> pas une version raccourcie. Si tu fais 118 caractères, tu rates la
+> cible AEO — étoffe d'un POI supplémentaire, d'un détail spa, ou d'un
+> qualificatif de quartier.
 
 ---
 

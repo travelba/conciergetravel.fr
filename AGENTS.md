@@ -113,16 +113,36 @@ across the full catalogue before touching photos** (`.cursor/skills/photo-pipeli
 between a written-content chantier and a photo chantier, **pick the
 written one**.
 
-Catalogue snapshot (refreshed 2026-05-27 — post Vague 1 home rebrand):
+Catalogue snapshot (refreshed 2026-05-31 — post drafts audit + cleanup):
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
-| `hotels`             | 1367  | 615       | 752   |
-| `editorial_rankings` | 290   | 205       | 85    |
-| `editorial_guides`   | 86    | 50        | 36    |
+| `hotels`             | 2219  | **2218**  | 1     |
+| `editorial_rankings` | 220   | **209**   | 11    |
+| `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
 
-Of the 615 published hotels: **395 are international** across **91 countries** (top: US 75, IT 33, JP 29, GB 24, MX 19, AE 18, ES, PT, GR, MA…). **435 are Relais & Châteaux**, 228 are self-5★, 127 are World's 50 Best, 18 are Atout France Palaces. The earlier 443/924 split corresponds to the pre-Relais & Châteaux scaffold + pre-2026-05-27 international promotion pass.
+Of the 2218 published hotels: see the per-country breakdown in
+`apps/web/src/lib/catalogue-stats.ts` (single source of truth) — the
+earlier 615/752 split was stale (pre-2026-05-28 Phase 1 catalogue flip).
+
+**Cleanup 2026-05-31 — 5 doublons éditoriaux supprimés**:
+
+- 4 `editorial_rankings` `classement-*` chaînes (Aman, Four Seasons,
+  Mandarin Oriental, Park Hyatt) qui doublonnaient les `top-*` canoniques
+  déjà publiés (cf. `run-chain-ranking.ts`).
+- 1 `editorial_guides` `guide-espagne` (stub abandonné, doublon du
+  `editorial_guides/espagne` déjà publié).
+- Snapshot intégral des 5 rows + manifest dans
+  `scripts/editorial-pilot/runs/duplicates-deleted-2026-05-31.md` +
+  `scripts/editorial-pilot/runs/duplicates-snapshot-2026-05-31.json`.
+
+The 11 ranking drafts restants sont des **geographic/awarded sans
+`editorial_sections`** (Marais, Reims, Mexique, Prague, Quartier Latin,
+Rome, Tours, Venise, Vexin, EAU, Travel+Leisure World's Best 2025). Pour
+les publier, lancer `scripts/editorial-pilot/src/rankings/run-rankings-v2-bulk.ts`
+ciblé sur ces 11 slugs (~50-60 LLM calls). Pas urgent — Phase 1.5
+tightening + photos prioritaires.
 
 Field-by-field completeness on the **443 published hotels** (chase
 these gaps in this order — top of the list is the most painful trade-off

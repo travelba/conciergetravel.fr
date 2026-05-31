@@ -153,9 +153,24 @@ export interface GenerateFactualSummaryResult {
   readonly outputTokens: number;
 }
 
+export interface GenerateFactualSummaryOptions {
+  /**
+   * Tighter accept band requested on top of the production envelope
+   * [110, 165]. When provided, an output that passes Zod + format gate
+   * but lands outside this tighter band triggers a retry with a band-
+   * specific hint in the corrective prompt. If all retries miss the
+   * tighter band, the last in-envelope attempt is accepted (fallback)
+   * so the run never throws purely on band misses — partial improvement
+   * still beats a hard failure. Use `{ min: 130, max: 150 }` for CDC
+   * §2.3 ideal-band tightening passes.
+   */
+  readonly idealBand?: { readonly min: number; readonly max: number };
+}
+
 export async function generateFactualSummary(
   client: LlmClient,
   hotel: HotelLlmInput,
+  options: GenerateFactualSummaryOptions = {},
 ): Promise<GenerateFactualSummaryResult> {
   const systemPrompt = await loadPrompt();
   const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}`;
@@ -163,12 +178,17 @@ export async function generateFactualSummary(
   const attempts: Array<{ raw: string; reason: string }> = [];
   let totalInput = 0;
   let totalOutput = 0;
+  let fallback: GenerateFactualSummaryResult | null = null;
 
   for (let i = 0; i < MAX_RETRIES; i++) {
     const correctiveSuffix =
       attempts.length === 0
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${attempts[attempts.length - 1]?.reason}\n\nFix the issue and retry. Stay inside the 110-165 char envelope.`;
+        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${attempts[attempts.length - 1]?.reason}\n\nFix the issue and retry. Stay inside the 110-165 char envelope.${
+            options.idealBand !== undefined
+              ? ` STRICT TARGET: aim for ${options.idealBand.min}-${options.idealBand.max} chars for FR and EN (CDC §2.3 ideal band).`
+              : ''
+          }`;
 
     const result = await client.call({
       systemPrompt,
@@ -205,12 +225,42 @@ export async function generateFactualSummary(
       continue;
     }
 
+    // At this point the output passes Zod (production envelope) +
+    // format gate. If a tighter idealBand was requested, retry on miss
+    // but stash the current attempt as fallback so we don't throw away
+    // a valid envelope output just because it missed the ideal band.
+    if (options.idealBand !== undefined) {
+      const frLen = zod.data.fr.length;
+      const enLen = zod.data.en.length;
+      const frOff = frLen < options.idealBand.min || frLen > options.idealBand.max;
+      const enOff = enLen < options.idealBand.min || enLen > options.idealBand.max;
+      if (frOff || enOff) {
+        const reason = `fr=${frLen}c en=${enLen}c outside ideal band [${options.idealBand.min}, ${options.idealBand.max}]`;
+        attempts.push({ raw, reason });
+        // Keep the most recent in-envelope attempt as fallback.
+        fallback = {
+          output: zod.data,
+          attempts: attempts.length,
+          inputTokens: totalInput,
+          outputTokens: totalOutput,
+        };
+        continue;
+      }
+    }
+
     return {
       output: zod.data,
       attempts: attempts.length + 1,
       inputTokens: totalInput,
       outputTokens: totalOutput,
     };
+  }
+
+  // Tight-band miss across all retries — return the best in-envelope
+  // attempt instead of failing hard. This keeps tightening passes
+  // productive (partial gain) even on stubborn rows.
+  if (fallback !== null) {
+    return fallback;
   }
 
   throw new FactualSummaryGenerationError(hotel.slug, attempts);

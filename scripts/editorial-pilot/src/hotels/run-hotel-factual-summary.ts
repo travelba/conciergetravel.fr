@@ -148,11 +148,26 @@ async function runOnHotel(
   client: ReturnType<typeof buildLlmClient>,
   supabase: SupabaseRestConfig,
   row: HotelRow,
-  options: { dryRun: boolean },
+  options: { dryRun: boolean; cdcTightening: boolean },
 ): Promise<PerHotelResult> {
   const input = projectHotelForLlm(row);
   try {
-    const result = await generateFactualSummary(client, input);
+    // When the runner is in `--cdc-tightening` mode, pass the CDC §2.3
+    // ideal band [130, 150] to the generator so retries push toward
+    // the AEO citability sweet spot instead of just landing inside the
+    // looser production envelope [110, 165].
+    const result = await generateFactualSummary(
+      client,
+      input,
+      options.cdcTightening
+        ? {
+            idealBand: {
+              min: CDC_FACTUAL_SUMMARY_IDEAL_MIN,
+              max: CDC_FACTUAL_SUMMARY_IDEAL_MAX,
+            },
+          }
+        : {},
+    );
     if (!options.dryRun) {
       await updateHotelFactualSummary(supabase, row.id, {
         factual_summary_fr: result.output.fr,
@@ -291,7 +306,11 @@ async function main(): Promise<void> {
   const results = await withConcurrency(
     rows,
     args.concurrency,
-    (row) => runOnHotel(client, supabase, row, { dryRun: args.dryRun }),
+    (row) =>
+      runOnHotel(client, supabase, row, {
+        dryRun: args.dryRun,
+        cdcTightening: args.cdcTightening,
+      }),
     (done, total, last) => {
       const status = last.success
         ? `OK (${last.attempts}x, ${last.fr?.length}c/${last.en?.length}c)`
