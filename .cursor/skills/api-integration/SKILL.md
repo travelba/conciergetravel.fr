@@ -224,6 +224,33 @@ export async function httpRequest<T>(opts: {
 }
 ```
 
+## Gotcha — MSW string paths with a colon swallow sibling RPC endpoints
+
+Google's "New" APIs use colon-suffixed RPC URLs (`…/v1/places:searchText`,
+`…/v1/places:searchNearby`). In MSW (path-to-regexp under the hood), a
+literal `:` in a **string** matcher is parsed as a **path parameter**, so
+
+```ts
+http.post('https://places.test/v1/places:searchText', resolver);
+```
+
+actually matches `places:ANYTHING` — including `places:searchNearby`. The
+first registered handler silently swallows the second endpoint's requests,
+and the symptom is baffling: the call "succeeds" (`res.ok === true`) but
+returns the _wrong_ body, so your normaliser drops everything and you get
+an empty array with no error (verified 2026-05-31 on the Places POI
+fallback — searchNearby got searchText's location-less places → 0 POIs).
+
+Fix: use an **anchored RegExp** matcher for colon-suffixed endpoints so
+the URL is matched literally:
+
+```ts
+http.post(/\/v1\/places:searchText$/u, resolver);
+http.post(/\/v1\/places:searchNearby$/u, resolver);
+```
+
+See `packages/integrations/src/google-places/client.test.ts`.
+
 ## References
 
 - CDC v3.0 §5 (intégrations externes), §11 (security).

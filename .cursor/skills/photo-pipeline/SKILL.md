@@ -163,6 +163,43 @@ In decreasing risk order:
      illustrative". Use only as a last resort for inventory hotels we
      have no real photos of, never for palaces.
 
+## Gotcha — Cloudinary "rate_limited" is usually a Commons 429 (fetch the bytes yourself)
+
+When uploading at scale you will hit a wall of
+`{"kind":"rate_limited"}` from `uploadFromUrl` that **no Cloudinary plan
+upgrade fixes** (verified 2026-05-31: upgraded free → Plus, 0.5 % credit
+usage, still rate-limited at concurrency 1). The error is a red herring.
+
+Root cause: passing a **Wikimedia Commons URL** to Cloudinary's _remote
+fetcher_ (`uploader.upload(remoteUrl, …)`) makes **Wikimedia** return
+`429 Too Many Requests` — Cloudinary's shared egress IP/UA is throttled by
+Commons across all its customers. The SDK surfaces this as
+`http_code: 400, message: "Error in loading <url> - 429 Too Many Requests"`,
+and `mapSdkError` (matching "too many requests") mislabels it as a
+Cloudinary rate limit.
+
+The fix (shipped in `packages/integrations/src/cloudinary/client.ts`):
+**fetch the source bytes ourselves** with a Wikimedia-policy-compliant
+`User-Agent`, then hand Cloudinary a base64 data URI so it never
+re-fetches the source. Diagnostic proof:
+
+```text
+upload(remoteCommonsUrl)        -> 2 uploads FAILED rate_limited in 177 s
+fetch(url,{UA}) -> 200 in 94ms; upload(dataUri) -> 11 uploads OK in 30 s
+```
+
+Notes for the next agent:
+
+- Cap the **raw** source bytes at ~14 MB, not 20 MB: the base64 data URI
+  inflates the POST payload ~33 %, and Cloudinary's POST limit is 20 MB
+  (`media_limits.image_max_size_bytes`). A 16 MB original → 21 MB base64 →
+  Cloudinary `asset_too_large`.
+- Google Places photo URLs (`lh3.googleusercontent.com`, signed) do **not**
+  429 — only the Commons remote fetch does. But fetching bytes ourselves is
+  uniformly more robust, so the client does it for every source.
+- To re-run only the rows still missing a hero (skip the ~328 already
+  hydrated), set `MCH_ONLY_MISSING_HERO=1` on `sync-hotel-photos.ts`.
+
 ## Anti-patterns
 
 - ❌ Plugging a Pinterest URL into `hero_image`. **Hard refused at PR
