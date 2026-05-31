@@ -257,6 +257,39 @@ weren't directly queryable from a tool call — agents now have a 1-RPC
 shortcut to citation-grade provenance for any of the 1370 hotels with
 ≥ 1 source.
 
+**Phase 5 mini-sweep follow-up — EEAT becomes user-visible (2026-05-31)**
+
+The API surface was great for LLMs, but Google crawlers and humans
+read the page DOM. The new
+[`<HotelExternalSourcesFooter>`](apps/web/src/components/hotel/hotel-external-sources-footer.tsx)
+component (CDC §2 bloc 13bis) renders the `external_sources` payload
+visibly at the bottom of the EEAT cluster (after `<HotelTrustSignals>`,
+before `<HotelReassurance>`). Two complementary blocks:
+
+- **Faits vérifiés** — opening year, architects, heritage designations
+  attributed to Wikidata (high-trust because the Q-page link is one
+  click away).
+- **Références externes** — canonical URLs (Wikidata, Wikipédia FR/EN,
+  Wikimedia Commons, official site, TripAdvisor, Booking.com) with
+  `rel="nofollow noopener"`.
+
+Self-elides when the column carries no publicly useful entries
+(currently 848 fiches at Phase 1.5 close — drafts promoted without
+Wikidata resolution). Powered by a new `readExternalSourcesProvenance`
+reader in `get-hotel-by-slug.ts` (same lenient parsing as the agent
+endpoint — duplicated schema to avoid circular imports, tested in
+[`external-sources-provenance.test.ts`](apps/web/src/server/hotels/external-sources-provenance.test.ts)
+with 10 cases). i18n keys live under `hotelPage.sources.*`.
+
+Verified end-to-end on Ritz Paris (12 sources): both FR and EN render
+the block with all facts + 6 references; Le K2 Palace (no sources)
+correctly skips the block. The shape difference between editorial
+provenance (per-citation `{url, label_fr, label_en, type}`) and hotel
+provenance (per-fact `{field, value, source, source_url}`) is
+documented in
+[`get-hotel-external-sources.ts`](apps/web/src/server/hotels/get-hotel-external-sources.ts)
+§"Why the shape diverges".
+
 **What's still gappy** (carry-over for the next Phase 1.5 pass):
 
 - 702 FR / 670 EN `factual_summary` rows remain in the production

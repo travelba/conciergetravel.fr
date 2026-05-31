@@ -2961,6 +2961,30 @@
       "guides": "Sélections",
       "since": "depuis {year}"
     },
+    "sources": {
+      "heading": "Sources & vérifications",
+      "intro": "Les informations factuelles publiées sur cette fiche sont sourcées et vérifiables auprès d'encyclopédies ouvertes et de bases de données de référence.",
+      "lastCollected": "Données collectées le {date}.",
+      "facts": {
+        "heading": "Faits vérifiés",
+        "inceptionYear": "Année d'ouverture",
+        "architects": "{count, plural, one {Architecte} other {Architectes}}",
+        "heritageDesignations": "Distinctions patrimoniales",
+        "attribution": {
+          "wikidata": "(Wikidata)"
+        }
+      },
+      "references": {
+        "heading": "Références externes",
+        "wikidata": "Wikidata",
+        "wikipediaFr": "Wikipédia (FR)",
+        "wikipediaEn": "Wikipedia (EN)",
+        "commons": "Wikimedia Commons",
+        "official": "Site officiel",
+        "tripadvisor": "TripAdvisor",
+        "bookingCom": "Booking.com"
+      }
+    },
     "signatureExperiences": {
       "intro": "Des programmes exclusifs qui font la singularité de cet établissement, au-delà de la nuitée.",
       "listAria": "Liste des expériences signature de l'établissement",

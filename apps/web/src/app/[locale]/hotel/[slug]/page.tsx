@@ -34,6 +34,7 @@ import { HotelSpa } from '@/components/hotel/hotel-spa';
 import { HotelStory } from '@/components/hotel/hotel-story';
 import { HotelTldr } from '@/components/hotel/hotel-tldr';
 import { HotelTrustSignals } from '@/components/hotel/hotel-trust-signals';
+import { HotelExternalSourcesFooter } from '@/components/hotel/hotel-external-sources-footer';
 import { HeritageBreadcrumbChevron } from '@/components/layout/heritage-breadcrumb-chevron';
 import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
@@ -81,6 +82,7 @@ import {
   readPolicies,
   readPostalCode,
   readConciergeAdvice,
+  readExternalSourcesProvenance,
   readFactualSummary,
   readRestaurants,
   readSignatureExperiences,
@@ -422,6 +424,7 @@ async function renderHotelPage(
   const storySections = readHotelStory(row, locale);
   const signatureExperiences = readSignatureExperiences(row, locale);
   const conciergeAdvice = readConciergeAdvice(row, locale);
+  const externalSourcesProvenance = readExternalSourcesProvenance(row);
   const factualSummary = readFactualSummary(row, locale);
   const featuredReviews = readFeaturedReviews(row, locale);
   const faqs = readFaq(row, locale);
@@ -1420,6 +1423,15 @@ async function renderHotelPage(
           `apps/web/src/components/hotel/hotel-trust-signals.tsx`.
         */}
         <HotelTrustSignals locale={locale} affiliations={affiliations} isPalace={row.is_palace} />
+
+        {/*
+          CDC §2 bloc 13bis — EEAT external sources provenance.
+          Renders the structured `external_sources` JSONB column hydrated by
+          the Phase 1.5 backfill. Self-elides when the column carries no
+          publicly useful entries (~38 % of catalogue at Phase 1.5 close).
+          See `apps/web/src/components/hotel/hotel-external-sources-footer.tsx`.
+        */}
+        <HotelExternalSourcesFooter locale={locale} provenance={externalSourcesProvenance} />
 
         <HotelReassurance locale={locale} />
 

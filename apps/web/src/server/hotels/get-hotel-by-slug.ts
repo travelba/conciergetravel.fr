@@ -131,6 +131,11 @@ export const HotelDetailRowSchema = z.object({
   email_reservations: stringOrEmpty,
   commons_category: stringOrEmpty,
   external_sameas: z.unknown().nullable().optional(),
+  // EEAT provenance (migration 0061 + Phase 1.5 backfill). Per-fact
+  // provenance entries — `{ field, value, source, source_url,
+  // confidence, collected_at }`. Surfaced by `readExternalSourcesProvenance`
+  // for the public `<HotelExternalSourcesFooter>` (CDC §2 bloc 13bis).
+  external_sources: z.unknown().nullable().optional(),
   // International support (migration 0033). FR for legacy rows; ISO-3166-1
   // alpha-2 for new intl entries. Country labels are denormalised so the UI
   // doesn't need a separate join.
@@ -149,7 +154,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -2093,6 +2098,204 @@ export function readAwards(
 export function readAffiliations(row: HotelDetailRow): readonly HotelAffiliation[] {
   const parsed = parseAffiliationsLenient(row.affiliations);
   return parsed.filter((a) => a.verified === true);
+}
+
+// ---------------------------------------------------------------------------
+// external_sources (jsonb) — EEAT provenance, CDC §2 bloc 13bis
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-fact provenance entry mirrored from migration 0061 / Phase 1.5
+ * backfill (`scripts/editorial-pilot/src/enrichment/convert-wikidata-
+ * to-external-sources.ts`). Shape is `{ field, value, source,
+ * source_url, confidence, collected_at }`.
+ *
+ * Schema is duplicated here (instead of imported from
+ * `get-hotel-external-sources.ts`) on purpose: that module already
+ * imports `isValidSlug` from this file, so reusing its export would
+ * create a circular dependency. The shape is small and stable enough
+ * to live in both places — the test in
+ * `get-hotel-external-sources.test.ts` asserts they stay in sync.
+ */
+const ExternalSourceEntrySchema = z.object({
+  field: z.string().min(1),
+  value: z.unknown(),
+  source: z.string().min(1),
+  source_url: z.string().url().optional(),
+  confidence: z.enum(['high', 'medium', 'low']).optional(),
+  collected_at: z.string().min(1).optional(),
+});
+
+/**
+ * The "kind" a public reference belongs to. Each kind maps to one
+ * row in `<HotelExternalSourcesFooter>` and to one i18n label.
+ *
+ * `wikipedia_fr` / `wikipedia_en` are kept distinct so the footer
+ * can show both side-by-side when both are present — LLM ingestion
+ * weights French Wikipedia coverage independently from English.
+ */
+export type HotelExternalSourceReferenceKind =
+  | 'wikidata'
+  | 'wikipedia_fr'
+  | 'wikipedia_en'
+  | 'official'
+  | 'commons'
+  | 'tripadvisor'
+  | 'booking_com';
+
+export interface HotelExternalSourceReference {
+  readonly kind: HotelExternalSourceReferenceKind;
+  readonly url: string;
+  /** Identifier displayed inline (Wikidata Q-id, TripAdvisor numeric id, …). */
+  readonly identifier: string | null;
+}
+
+export interface HotelExternalSourceFacts {
+  readonly inceptionYear: number | null;
+  readonly architects: readonly string[];
+  readonly heritageDesignations: readonly string[];
+}
+
+export interface HotelExternalSourcesProvenance {
+  readonly references: readonly HotelExternalSourceReference[];
+  readonly facts: HotelExternalSourceFacts;
+  /** Most recent `collected_at` across all entries — drives the freshness microtext. */
+  readonly collectedAt: string | null;
+}
+
+/** Map an entry's `field` name to a public reference `kind`. */
+function refKindForField(field: string): HotelExternalSourceReferenceKind | null {
+  switch (field) {
+    case 'wikidata_id':
+      return 'wikidata';
+    case 'wikipedia_url_fr':
+      return 'wikipedia_fr';
+    case 'wikipedia_url_en':
+      return 'wikipedia_en';
+    case 'official_url':
+      return 'official';
+    case 'commons_category':
+      return 'commons';
+    case 'tripadvisor_location_id':
+      return 'tripadvisor';
+    case 'booking_com_hotel_id':
+      return 'booking_com';
+    default:
+      return null;
+  }
+}
+
+/**
+ * EEAT provenance reader — CDC §2 bloc 13bis.
+ *
+ * Returns `null` when the column is missing, empty, or carries no
+ * publicly useful entries (e.g. only `social_handle` rows, which we
+ * intentionally exclude from this surface — they belong in the
+ * footer's social block, not the EEAT footer).
+ *
+ * The reader is **lenient**: a single malformed entry is dropped, not
+ * the whole row, so the public surface keeps working while the
+ * backfill catches up.
+ *
+ * Architects + heritage designations are surfaced as facts (not as
+ * separate references) because they answer "what is this place?"
+ * rather than "who says so?". Their `source_url` (Wikidata Q-page)
+ * is already exposed via the `wikidata` reference.
+ */
+export function readExternalSourcesProvenance(
+  row: HotelDetailRow,
+): HotelExternalSourcesProvenance | null {
+  if (!Array.isArray(row.external_sources)) return null;
+
+  const refByKind = new Map<HotelExternalSourceReferenceKind, HotelExternalSourceReference>();
+  let inceptionYear: number | null = null;
+  const architects: string[] = [];
+  const heritage: string[] = [];
+  let mostRecent: string | null = null;
+
+  for (const candidate of row.external_sources) {
+    const parsed = ExternalSourceEntrySchema.safeParse(candidate);
+    if (!parsed.success) continue;
+    const entry = parsed.data;
+    if (entry.collected_at !== undefined) {
+      if (mostRecent === null || entry.collected_at > mostRecent) {
+        mostRecent = entry.collected_at;
+      }
+    }
+
+    const kind = refKindForField(entry.field);
+    if (kind !== null && entry.source_url !== undefined) {
+      // First entry wins (stable ordering = ingestion order). Subsequent
+      // entries for the same kind are dropped silently — the convertor
+      // is idempotent, so duplicates only happen when an editor adds a
+      // manual entry on top of a Wikidata-resolved one.
+      if (!refByKind.has(kind)) {
+        // Q-id / numeric id displayed inline next to the link. Falls
+        // back to `null` when `value` is a URL (already conveyed by
+        // the link itself) or a non-string scalar.
+        let identifier: string | null = null;
+        if (typeof entry.value === 'string') {
+          if (kind === 'wikidata' && /^Q\d+$/.test(entry.value)) identifier = entry.value;
+          if (kind === 'tripadvisor' && /^\d+$/.test(entry.value)) identifier = entry.value;
+        }
+        refByKind.set(kind, { kind, url: entry.source_url, identifier });
+      }
+      continue;
+    }
+
+    // Derived facts (high-trust, attributed to Wikidata).
+    if (entry.field === 'inception_year' && typeof entry.value === 'number') {
+      if (entry.value > 1000 && entry.value < 9999) inceptionYear = entry.value;
+      continue;
+    }
+    if (entry.field === 'architects' && Array.isArray(entry.value)) {
+      for (const a of entry.value) {
+        if (typeof a === 'string' && a.trim().length > 0) architects.push(a.trim());
+      }
+      continue;
+    }
+    if (entry.field === 'heritage_designations' && Array.isArray(entry.value)) {
+      for (const h of entry.value) {
+        if (typeof h === 'string' && h.trim().length > 0) heritage.push(h.trim());
+      }
+      continue;
+    }
+    // `social_handle` and other unknown fields are intentionally
+    // skipped — they don't belong in the "Sources & vérifications"
+    // surface.
+  }
+
+  // Stable ordering for the references list — encyclopaedias first,
+  // then official + Commons, then aggregators. Mirrors the editorial
+  // sources footer hierarchy.
+  const ORDER: readonly HotelExternalSourceReferenceKind[] = [
+    'wikidata',
+    'wikipedia_fr',
+    'wikipedia_en',
+    'commons',
+    'official',
+    'tripadvisor',
+    'booking_com',
+  ];
+  const references: HotelExternalSourceReference[] = [];
+  for (const k of ORDER) {
+    const ref = refByKind.get(k);
+    if (ref !== undefined) references.push(ref);
+  }
+
+  const facts: HotelExternalSourceFacts = {
+    inceptionYear,
+    architects,
+    heritageDesignations: heritage,
+  };
+
+  const hasFacts =
+    facts.inceptionYear !== null ||
+    facts.architects.length > 0 ||
+    facts.heritageDesignations.length > 0;
+  if (references.length === 0 && !hasFacts) return null;
+
+  return { references, facts, collectedAt: mostRecent };
 }
 
 // ---------------------------------------------------------------------------

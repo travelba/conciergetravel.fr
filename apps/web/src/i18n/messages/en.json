@@ -2961,6 +2961,30 @@
       "guides": "Featured in",
       "since": "since {year}"
     },
+    "sources": {
+      "heading": "Sources & verification",
+      "intro": "The factual information on this page is sourced from and verifiable against open encyclopaedias and reference databases.",
+      "lastCollected": "Data collected on {date}.",
+      "facts": {
+        "heading": "Verified facts",
+        "inceptionYear": "Year opened",
+        "architects": "{count, plural, one {Architect} other {Architects}}",
+        "heritageDesignations": "Heritage designations",
+        "attribution": {
+          "wikidata": "(Wikidata)"
+        }
+      },
+      "references": {
+        "heading": "External references",
+        "wikidata": "Wikidata",
+        "wikipediaFr": "Wikipédia (FR)",
+        "wikipediaEn": "Wikipedia (EN)",
+        "commons": "Wikimedia Commons",
+        "official": "Official website",
+        "tripadvisor": "TripAdvisor",
+        "bookingCom": "Booking.com"
+      }
+    },
     "signatureExperiences": {
       "intro": "Exclusive on-site programmes that define this property's character, beyond the room key.",
       "listAria": "List of the property's signature experiences",
