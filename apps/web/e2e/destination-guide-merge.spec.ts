@@ -59,3 +59,72 @@ test.describe('ADR-0015 — guide ↔ destination 308 redirects', () => {
     await expect(page).toHaveURL(/\/en\/destination$/);
   });
 });
+
+/**
+ * ADR-0015 step 1 — the long-read editorial guide now renders inline
+ * on `/destination/[citySlug]` for cities with an `editorial_guides`
+ * row (33 published city guides at 2026-05-28). These tests assert the
+ * end-to-end visibility contract on three high-impact cities — one
+ * domestic Palace hotspot (Paris) plus two international long-reads
+ * (Marrakech, Tokyo) — covering the FR + EN locales.
+ *
+ * Hard-rule contract:
+ *  - The `<article id="city-guide-article">` element must mount in
+ *    the DOM (skill `user-acceptance-loop` — invisibility was the
+ *    2026-05-26 incident pattern).
+ *  - The page must emit a JSON-LD `Article` block with `@id`
+ *    `…#guide-article` and `isPartOf` `…#place` so LLM crawlers see
+ *    the article and the `Place` as a single editorial entity.
+ *  - The sticky `<TocSidebar>` must be present (desktop viewport).
+ */
+test.describe('ADR-0015 step 1 — city guide rendered inline on /destination/[city]', () => {
+  test.beforeEach(async ({ page }) => {
+    await setConsentCookie(page, { essential: true, analytics: false });
+  });
+
+  for (const slug of ['paris', 'marrakech', 'tokyo']) {
+    test(`/fr/destination/${slug} renders the long-read article + Article JSON-LD`, async ({
+      page,
+    }) => {
+      await page.goto(`/destination/${slug}`);
+      // Long-read article element is mounted inline.
+      await expect(page.locator('article#city-guide-article')).toBeVisible();
+      // Sticky TOC sidebar (desktop) is present in DOM.
+      await expect(page.locator('nav[aria-label="Sur cette page"]')).toHaveCount(1);
+      // Article JSON-LD with `@id = …#guide-article` and `isPartOf = …#place`.
+      const ldScripts = await page.locator('script[type="application/ld+json"]').allTextContents();
+      const articleNode = ldScripts
+        .map((raw) => {
+          try {
+            return JSON.parse(raw) as Record<string, unknown>;
+          } catch {
+            return null;
+          }
+        })
+        .find((n) => n !== null && n['@type'] === 'Article');
+      expect(articleNode, 'expected an Article JSON-LD on the destination page').not.toBeNull();
+      expect(articleNode!['@id']).toMatch(/#guide-article$/);
+      const isPartOf = articleNode!['isPartOf'] as Record<string, unknown> | undefined;
+      expect(isPartOf?.['@id']).toMatch(/#place$/);
+    });
+
+    test(`/en/destination/${slug} renders the long-read article + Article JSON-LD`, async ({
+      page,
+    }) => {
+      await page.goto(`/en/destination/${slug}`);
+      await expect(page.locator('article#city-guide-article')).toBeVisible();
+      const ldScripts = await page.locator('script[type="application/ld+json"]').allTextContents();
+      const articleNode = ldScripts
+        .map((raw) => {
+          try {
+            return JSON.parse(raw) as Record<string, unknown>;
+          } catch {
+            return null;
+          }
+        })
+        .find((n) => n !== null && n['@type'] === 'Article');
+      expect(articleNode, 'expected an Article JSON-LD on the destination page').not.toBeNull();
+      expect(articleNode!['inLanguage']).toBe('en');
+    });
+  }
+});

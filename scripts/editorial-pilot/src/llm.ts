@@ -44,13 +44,14 @@ class OpenAiClient implements LlmClient {
   public readonly model: string;
   private readonly client: OpenAI;
 
-  constructor(apiKey: string, model: string) {
+  constructor(apiKey: string, model: string, timeoutMs = 120_000) {
     // SDK defaults silently hang for ~30 min on broken sockets (10-min request
-    // timeout × 3 attempts). Editorial passes finish in 30s so a 120s ceiling
-    // surfaces stuck requests fast and lets the pipeline retry the next pass.
+    // timeout × 3 attempts). Light editorial passes finish in 30s so the 120s
+    // default surfaces stuck requests fast. Heavy generations (16k output
+    // tokens on a reasoning model) override via EDITORIAL_PILOT_OPENAI_TIMEOUT_MS.
     this.client = new OpenAI({
       apiKey,
-      timeout: 120_000,
+      timeout: timeoutMs,
       maxRetries: 2,
     });
     this.model = model;
@@ -142,7 +143,11 @@ class AnthropicClient implements LlmClient {
 export function buildLlmClient(env: Env, provider: Provider): LlmClient {
   if (provider === 'openai') {
     if (!env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY missing.');
-    return new OpenAiClient(env.OPENAI_API_KEY, env.EDITORIAL_PILOT_OPENAI_MODEL);
+    return new OpenAiClient(
+      env.OPENAI_API_KEY,
+      env.EDITORIAL_PILOT_OPENAI_MODEL,
+      env.EDITORIAL_PILOT_OPENAI_TIMEOUT_MS,
+    );
   }
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY missing.');
   return new AnthropicClient(env.ANTHROPIC_API_KEY, env.EDITORIAL_PILOT_ANTHROPIC_MODEL);

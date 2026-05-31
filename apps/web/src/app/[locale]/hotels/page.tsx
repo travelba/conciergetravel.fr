@@ -23,6 +23,7 @@ import {
   type HotelGroupRow,
 } from '@/server/destinations/cities';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 
 // CSP nonce read forces dynamic rendering — same contract as the
 // destination directory. Catalog stays edge-cached at the CDN layer.
@@ -37,12 +38,9 @@ function siteOrigin(): string {
 const T = {
   fr: {
     eyebrow: 'Catalogue éditorial',
-    titleFrance: 'Hôtels 5★ et Palaces en France',
-    titleWorld: 'Hôtels 5★ et Palaces dans le monde',
-    subtitleFrance: (n: number) =>
-      `${n} adresses éditorialement sélectionnées par notre conciergerie : Palaces parisiens, retraites alpines, refuges Côte d'Azur, vignobles bordelais et villas de Provence.`,
-    subtitleWorld: (n: number) =>
-      `${n} adresses sélectionnées par notre conciergerie : Palaces parisiens, retraites alpines, refuges Côte d'Azur, plus nos premières adresses à l'international — Asie, Amériques, Europe et Moyen-Orient.`,
+    title: 'Hôtels d\u2019exception dans le monde',
+    subtitle: (n: number) =>
+      `${n} adresses sélectionnées par notre conciergerie à travers ${CATALOGUE_COUNTRIES} pays : Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys et boutique-hôtels d\u2019auteur — Asie, Amériques, Europe, Moyen-Orient et Afrique.`,
     sectionByRegion: 'Par région',
     sectionByCountry: 'Par pays',
     sectionByBrand: 'Par groupe hôtelier',
@@ -52,40 +50,36 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 adresse' : `${n} adresses`),
     seeFiche: 'Voir la fiche',
-    metaTitleFrance: 'Hôtels 5★ et Palaces en France — Sélection MyConciergeHotel',
-    metaTitleWorld: 'Hôtels 5★ et Palaces dans le monde — Sélection MyConciergeHotel',
-    metaDescFrance:
-      "Découvrez notre sélection éditoriale d'hôtels 5 étoiles et Palaces en France : Paris, Côte d'Azur, Alpes, Provence, Aquitaine. Réservation IATA, tarifs nets GDS.",
-    metaDescWorld:
-      "Sélection éditoriale d'hôtels 5 étoiles et Palaces — France et premières adresses internationales : Asie, Amériques, Europe et Moyen-Orient. Réservation IATA, tarifs nets GDS.",
+    metaTitle: 'Hôtels d\u2019exception dans le monde — Sélection du Concierge',
+    metaDesc: `Notre sélection éditoriale couvre ${CATALOGUE_PUBLISHED} hôtels d\u2019exception dans ${CATALOGUE_COUNTRIES} pays : Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, boutique-hôtels. Réservation IATA, tarifs nets GDS.`,
     // AEO + FAQ surfaces (skill geo-llm-optimization). The AEO answer
     // weighs 60-70 words so it sits inside the 40-80 range required by
     // `buildAeoBlock`; freshness signal "Mise à jour" is templated
     // with the current month so LLMs flag the page as up-to-date.
-    aeoQ: 'Quels hôtels 5★ et Palaces MyConciergeHotel propose-t-il en France ?',
+    aeoQ: 'Quels hôtels d\u2019exception MyConciergeHotel sélectionne-t-il dans le monde ?',
     aeoAnswer: (count: number, freshness: string) =>
-      `MyConciergeHotel sélectionne ${count} adresses 5 étoiles et Palaces en France et à l'international, regroupées par région et par marque (Cheval Blanc, Airelles, Four Seasons, Rosewood, Oetker, Dorchester). Chaque fiche est rédigée par notre conciergerie IATA et se conclut par un Conseil du Concierge — secret opérationnel concret. Réservation au tarif net GDS, paiement sécurisé Amadeus. Mise à jour ${freshness}.`,
+      `MyConciergeHotel sélectionne ${count} hôtels d\u2019exception à travers ${CATALOGUE_COUNTRIES} pays — Palaces (Atout France), Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et maisons d\u2019auteur (Aman, Belmond, Six Senses, Cheval Blanc, Mandarin Oriental, Four Seasons). Chaque fiche est rédigée par notre conciergerie IATA et se conclut par un Conseil du Concierge — secret opérationnel concret. Réservation au tarif net GDS, paiement sécurisé Amadeus. Mise à jour ${freshness}.`,
     faqTitle: 'Le catalogue MyConciergeHotel — questions fréquentes',
     faq: [
       {
         q: 'Comment choisissez-vous les hôtels du catalogue ?',
-        a: "Notre sélection est éditoriale et indépendante : un hôtel n'achète pas son entrée. Nous croisons la distinction Atout France (Palace), les étoiles Michelin de la table, le classement Forbes Travel Guide, les Michelin Keys, l'appartenance à une collection d'auteur (Relais & Châteaux, Leading Hotels of the World) et notre propre score interne (service, emplacement, signature). Chaque entrée est revue chaque trimestre par notre conciergerie.",
+        a: "Notre sélection est éditoriale et indépendante : un hôtel n'achète pas son entrée. Nous croisons la distinction Atout France (Palace), les étoiles Michelin de la table, le classement Forbes Travel Guide, les Michelin Keys, l'appartenance à une collection d'auteur (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels) et notre propre score interne (service, emplacement, signature). Chaque entrée est revue chaque trimestre par notre conciergerie.",
       },
       {
         q: 'Quels sont les principaux groupes hôteliers représentés ?',
-        a: 'Le catalogue couvre 13 collections : Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections (Courchevel) et Caudalie. Les adresses indépendantes — Negresco, Lutetia, Crillon, Villa La Coste — sont également présentes sans appartenance à une chaîne.',
+        a: 'Le catalogue couvre les grandes collections internationales : Aman, Belmond, Six Senses, Bulgari, Mandarin Oriental, Four Seasons, Rosewood, Park Hyatt, Raffles, The Peninsula, Shangri-La, Oetker Collection, Dorchester Collection ; les maisons françaises Cheval Blanc, Airelles, Les K2, Caudalie ; ainsi que les indépendants iconiques (Negresco, Lutetia, Crillon, Villa La Coste, Reid\u2019s Palace, Hôtel du Cap-Eden-Roc).',
       },
       {
         q: 'Quelle différence entre un Palace et un hôtel 5 étoiles ?',
-        a: 'La mention « Palace » est une distinction officielle décernée par Atout France à seulement ~30 hôtels sur tout le territoire français, au-delà des 5 étoiles. Critères : service personnalisé, art de vivre, infrastructures (spa, restauration étoilée, conciergerie 24/7), rayonnement international. Tous les Palaces sont 5 étoiles, mais tous les 5 étoiles ne sont pas Palaces.',
+        a: 'La mention « Palace » est une distinction officielle décernée par Atout France à environ 30 hôtels du territoire français, au-delà des 5 étoiles. Critères : service personnalisé, art de vivre, infrastructures (spa, restauration étoilée, conciergerie 24/7), rayonnement international. Tous les Palaces sont 5 étoiles, mais tous les 5 étoiles ne sont pas Palaces. À l\u2019international, les distinctions équivalentes sont les Forbes Five Star et les Michelin Keys.',
       },
       {
         q: "Vos tarifs sont-ils plus chers que sur le site de l'hôtel ?",
         a: "Non. Nous sommes une agence IATA accréditée : nous accédons aux tarifs nets GDS d'Amadeus, identiques au tarif officiel public. Aucune commission ajoutée à votre charge. Notre comparateur de prix non affilié affiche en transparence les tarifs Booking, Hotels.com, Expedia pour les mêmes dates — vous voyez immédiatement le delta.",
       },
       {
-        q: 'Puis-je réserver un hôtel international (Italie, Suisse, Maroc, Maldives) ?',
-        a: 'Oui pour les pays ouverts dans notre catalogue international (Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis). Notre réseau GDS Amadeus couvre 950 000 hôtels dans le monde — au-delà du catalogue éditorial, tout hôtel listé peut être réservé sur demande via notre conciergerie.',
+        q: 'Dans quels pays pouvez-vous réserver ?',
+        a: `Notre catalogue éditorial couvre ${CATALOGUE_COUNTRIES} pays : France (Paris, Côte d\u2019Azur, Alpes, Provence, Aquitaine, Bourgogne, Corse), Italie, Suisse, Espagne, Portugal, Grèce, Maroc, Émirats arabes unis, Maldives, Thaïlande, Indonésie (Bali), Japon, États-Unis, Mexique, Brésil et bien d\u2019autres. Au-delà de notre sélection éditoriale, notre réseau GDS Amadeus couvre plus de 950 000 hôtels dans le monde, réservables sur demande via notre conciergerie.`,
       },
       {
         q: 'Combien de temps pour confirmer ma réservation ?',
@@ -95,12 +89,9 @@ const T = {
   },
   en: {
     eyebrow: 'Editorial catalog',
-    titleFrance: '5★ Hotels and Palaces in France',
-    titleWorld: '5★ Hotels and Palaces worldwide',
-    subtitleFrance: (n: number) =>
-      `${n} addresses curated by our concierge desk: Parisian Palaces, alpine retreats, Riviera havens, Bordeaux vineyards and Provence villas.`,
-    subtitleWorld: (n: number) =>
-      `${n} addresses curated by our concierge desk: Parisian Palaces, alpine retreats, Riviera havens, plus our first international entries across Asia, the Americas, Europe and the Middle East.`,
+    title: 'Extraordinary hotels worldwide',
+    subtitle: (n: number) =>
+      `${n} addresses curated by our concierge desk across ${CATALOGUE_COUNTRIES} countries: Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys and boutique signature houses — Asia, the Americas, Europe, the Middle East and Africa.`,
     sectionByRegion: 'By region',
     sectionByCountry: 'By country',
     sectionByBrand: 'By hotel group',
@@ -110,36 +101,32 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 address' : `${n} addresses`),
     seeFiche: 'View the page',
-    metaTitleFrance: '5★ Hotels and Palaces in France — MyConciergeHotel Selection',
-    metaTitleWorld: '5★ Hotels and Palaces worldwide — MyConciergeHotel Selection',
-    metaDescFrance:
-      'Discover our editorial selection of 5-star hotels and Palaces in France: Paris, French Riviera, Alps, Provence, Aquitaine. IATA booking, GDS net rates.',
-    metaDescWorld:
-      'Editorial selection of 5-star hotels and Palaces — France and our first international addresses across Asia, the Americas, Europe and the Middle East. IATA booking, GDS net rates.',
-    aeoQ: 'Which 5-star hotels and Palaces does MyConciergeHotel cover in France?',
+    metaTitle: 'Extraordinary hotels worldwide — The Concierge\u2019s Selection',
+    metaDesc: `Our editorial selection covers ${CATALOGUE_PUBLISHED} extraordinary hotels across ${CATALOGUE_COUNTRIES} countries: Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, boutique houses. IATA booking, GDS net rates.`,
+    aeoQ: 'Which extraordinary hotels does MyConciergeHotel cover worldwide?',
     aeoAnswer: (count: number, freshness: string) =>
-      `MyConciergeHotel curates ${count} 5-star and Palace addresses across France and internationally, grouped by region and by collection (Cheval Blanc, Airelles, Four Seasons, Rosewood, Oetker, Dorchester). Every page is written by our IATA concierge desk and ends with a Concierge's Tip — a concrete operational secret. Booking at net GDS rates, secure Amadeus payment. Last updated ${freshness}.`,
+      `MyConciergeHotel curates ${count} extraordinary hotels across ${CATALOGUE_COUNTRIES} countries — Palaces (Atout France), Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World and signature houses (Aman, Belmond, Six Senses, Cheval Blanc, Mandarin Oriental, Four Seasons). Every page is written by our IATA concierge desk and ends with a Concierge's Tip — a concrete operational secret. Booking at net GDS rates, secure Amadeus payment. Last updated ${freshness}.`,
     faqTitle: 'The MyConciergeHotel catalogue — frequently asked questions',
     faq: [
       {
         q: 'How do you choose the hotels in your catalogue?',
-        a: "Our selection is editorial and independent — a hotel does not pay to be listed. We cross-reference Atout France's Palace distinction, the table's Michelin stars, the Forbes Travel Guide ranking, Michelin Keys, membership of an author collection (Relais & Châteaux, Leading Hotels of the World) and our own internal score (service, location, signature). Every entry is reviewed quarterly by our concierge team.",
+        a: "Our selection is editorial and independent — a hotel does not pay to be listed. We cross-reference Atout France's Palace distinction, the table's Michelin stars, the Forbes Travel Guide ranking, Michelin Keys, membership of an author collection (Relais & Châteaux, Leading Hotels of the World, Small Luxury Hotels) and our own internal score (service, location, signature). Every entry is reviewed quarterly by our concierge team.",
       },
       {
         q: 'Which hotel groups are represented?',
-        a: 'The catalogue covers 13 collections: Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections (Courchevel) and Caudalie. Independent addresses — Negresco, Lutetia, Crillon, Villa La Coste — are also featured without chain affiliation.',
+        a: 'The catalogue covers the major international collections: Aman, Belmond, Six Senses, Bulgari, Mandarin Oriental, Four Seasons, Rosewood, Park Hyatt, Raffles, The Peninsula, Shangri-La, Oetker Collection, Dorchester Collection; French signature houses Cheval Blanc, Airelles, Les K2, Caudalie; plus iconic independents (Negresco, Lutetia, Crillon, Villa La Coste, Reid\u2019s Palace, Hôtel du Cap-Eden-Roc).',
       },
       {
         q: 'What is the difference between a Palace and a 5-star hotel?',
-        a: 'The "Palace" mention is an official distinction awarded by Atout France to roughly 30 hotels nationwide, above and beyond the 5-star rating. Criteria: bespoke service, art of living, infrastructure (spa, Michelin dining, 24/7 concierge), international reach. Every Palace is a 5-star, but not every 5-star is a Palace.',
+        a: 'The "Palace" mention is an official distinction awarded by Atout France to roughly 30 hotels on French territory, above and beyond the 5-star rating. Criteria: bespoke service, art of living, infrastructure (spa, Michelin dining, 24/7 concierge), international reach. Every Palace is a 5-star, but not every 5-star is a Palace. Internationally, the equivalent distinctions are Forbes Five Star and Michelin Keys.',
       },
       {
         q: 'Are your rates more expensive than booking direct?',
         a: "No. We are an IATA-accredited agency: we access Amadeus GDS net rates, identical to the hotel's public published rate. No commission is added to your bill. Our non-affiliated price comparator transparently displays Booking, Hotels.com and Expedia rates for the same dates — you immediately see the delta.",
       },
       {
-        q: 'Can I book an international hotel (Italy, Switzerland, Morocco, Maldives)?',
-        a: 'Yes for the countries open in our international catalogue (Italy, Switzerland, Morocco, UAE, Maldives, Thailand, Japan, USA). Our Amadeus GDS network covers 950,000 hotels worldwide — beyond the editorial catalogue, any listed property can be booked on request via our concierge desk.',
+        q: 'Which countries can you book?',
+        a: `Our editorial catalogue covers ${CATALOGUE_COUNTRIES} countries: France (Paris, French Riviera, Alps, Provence, Aquitaine, Burgundy, Corsica), Italy, Switzerland, Spain, Portugal, Greece, Morocco, UAE, Maldives, Thailand, Indonesia (Bali), Japan, USA, Mexico, Brazil and many more. Beyond our editorial selection, our Amadeus GDS network covers 950,000+ hotels worldwide, bookable on request via our concierge desk.`,
       },
       {
         q: 'How long does it take to confirm my booking?',
@@ -159,15 +146,8 @@ export async function generateMetadata({
   const locale = raw;
   const t = T[locale];
 
-  // generateMetadata runs before render so we sample the catalog here too.
-  // The query is cached at the Supabase edge — second hit during render
-  // returns in <5ms.
-  const rows = await listPublishedHotelsForGrouping();
-  const { foreign } = partitionByDomesticForeign(rows);
-  const hasForeign = foreign.length > 0;
-
-  const title = hasForeign ? t.metaTitleWorld : t.metaTitleFrance;
-  const description = hasForeign ? t.metaDescWorld : t.metaDescFrance;
+  const title = t.metaTitle;
+  const description = t.metaDesc;
   const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/hotels' });
   return {
     title,
@@ -231,8 +211,8 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  const title = hasForeign ? t.titleWorld : t.titleFrance;
-  const subtitle = hasForeign ? t.subtitleWorld(rows.length) : t.subtitleFrance(domestic.length);
+  const title = t.title;
+  const subtitle = t.subtitle(rows.length);
 
   // ── Region clusters (France) ──────────────────────────────────────────
   const byRegion = groupByRegion(domestic);
@@ -312,7 +292,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
       {regionsOrdered.length > 0 ? (
         <nav
           aria-label={t.sectionByRegion}
-          className="border-border mb-10 flex flex-wrap items-center gap-2 border-y py-3"
+          className="border-border mb-6 flex flex-wrap items-center gap-2 border-y py-3"
         >
           <span className="text-muted text-xs font-semibold uppercase tracking-wide">
             {t.sectionByRegion} :
@@ -335,6 +315,41 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
               {t.sectionByCountry}
               <span className="text-muted ml-1.5">({foreign.length})</span>
             </a>
+          ) : null}
+        </nav>
+      ) : null}
+
+      {/* Top countries jump strip — PR-D, ADR-0021 Vague 4. Surfaces the
+          top 30 countries by hotel count above the fold so the catalogue's
+          worldwide footprint is visible immediately, not buried at the
+          bottom of the page. The `#country-<code>` anchors are emitted
+          on the per-country sections below. */}
+      {countriesOrdered.length > 0 ? (
+        <nav
+          aria-label={t.sectionByCountry}
+          className="border-border mb-10 flex flex-wrap items-center gap-2 border-b pb-3"
+        >
+          <span className="text-muted text-xs font-semibold uppercase tracking-wide">
+            {t.sectionByCountry} :
+          </span>
+          {countriesOrdered.slice(0, 30).map((g) => (
+            <a
+              key={g.code}
+              href={`#country-${g.code.toLowerCase()}`}
+              className="border-border bg-bg hover:bg-muted/10 rounded-full border px-3 py-1 text-xs"
+            >
+              {g.label}
+              <span className="text-muted ml-1.5">({g.hotels.length})</span>
+            </a>
+          ))}
+          {countriesOrdered.length > 30 ? (
+            <span className="text-muted ml-1 text-xs">
+              {pickByLocale(
+                locale,
+                `+ ${countriesOrdered.length - 30} autres`,
+                `+ ${countriesOrdered.length - 30} more`,
+              )}
+            </span>
           ) : null}
         </nav>
       ) : null}

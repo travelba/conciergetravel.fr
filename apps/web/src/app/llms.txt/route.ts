@@ -153,8 +153,7 @@ export async function GET(): Promise<NextResponse> {
           },
           {
             url: `${origin}/en`,
-            description:
-              "Homepage (EN) — The Concierge's Selection, extraordinary hotels across 91 countries (IATA agency).",
+            description: `Homepage (EN) — The Concierge's Selection, extraordinary hotels across ${CATALOGUE_COUNTRIES} countries (IATA agency).`,
           },
           {
             url: `${origin}/fr/destination`,

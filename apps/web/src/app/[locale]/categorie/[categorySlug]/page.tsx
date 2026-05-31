@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import type { ReactElement } from 'react';
 
 import { JsonLd } from '@mch/seo';
 
@@ -297,6 +298,96 @@ const CATEGORY_AEO: Readonly<
   },
 };
 
+/**
+ * Worldwide companion target rendered as a "Voir aussi monde" inline
+ * callout for the 5 Atout-France-bound Palace categories. Returns the
+ * typed `<Link>` ready to render — encapsulates the per-slug pathname
+ * shape (some are static, some are templated) so the JSX stays a
+ * single conditional render. PR-D, ADR-0021 Vague 4.
+ *
+ * The Palace label itself is a French ministerial distinction
+ * (legitimate context — CDC §2.1 + `editorial-voice`), but the
+ * categorical promise of every Palace page ("luxe bord de mer /
+ * vignobles / montagne / capitale") deserves a worldwide pendant so
+ * the user never experiences the catalogue as France-only by accident.
+ *
+ * Targets are deliberately conservative — every entry resolves to a
+ * route enforced by `nav-data.ts` and the `menu-no-404` E2E spec, so
+ * the callout never 404s.
+ */
+function renderWorldwideCompanion(categorySlug: string, locale: Locale): ReactElement | null {
+  const labelClass =
+    'text-fg hover:bg-muted/10 inline-flex items-center gap-1 underline decoration-dotted underline-offset-2';
+  switch (categorySlug) {
+    case 'palaces-france':
+      return (
+        <Link href="/hotels" className={labelClass}>
+          {pickByLocale(
+            locale,
+            'Tous nos hôtels d\u2019exception dans le monde',
+            'All our extraordinary hotels worldwide',
+          )}{' '}
+          →
+        </Link>
+      );
+    case 'palaces-paris':
+      return (
+        <Link href="/destination" className={labelClass}>
+          {pickByLocale(
+            locale,
+            'Capitales du monde — New York, Tokyo, Dubaï, Marrakech\u2026',
+            'World capitals — New York, Tokyo, Dubai, Marrakech\u2026',
+          )}{' '}
+          →
+        </Link>
+      );
+    case 'palaces-bord-de-mer':
+      return (
+        <Link
+          href={{ pathname: '/destination/[citySlug]', params: { citySlug: 'bali' } }}
+          className={labelClass}
+        >
+          {pickByLocale(
+            locale,
+            'Resorts bord de mer à Bali, aux Maldives, à Mykonos\u2026',
+            'Seaside resorts in Bali, the Maldives, Mykonos\u2026',
+          )}{' '}
+          →
+        </Link>
+      );
+    case 'palaces-montagne':
+      return (
+        <Link
+          href={{ pathname: '/guide/[citySlug]', params: { citySlug: 'suisse' } }}
+          className={labelClass}
+        >
+          {pickByLocale(
+            locale,
+            'Resorts de montagne en Suisse, au Bhoutan, dans les Rocheuses\u2026',
+            'Mountain resorts in Switzerland, Bhutan, the Rockies\u2026',
+          )}{' '}
+          →
+        </Link>
+      );
+    case 'palaces-vignobles':
+      return (
+        <Link
+          href={{ pathname: '/marque/[brandSlug]', params: { brandSlug: 'six-senses' } }}
+          className={labelClass}
+        >
+          {pickByLocale(
+            locale,
+            'Hôtels viticoles dans le monde — Toscane, Douro, Napa Valley\u2026',
+            'Vineyard hotels worldwide — Tuscany, Douro, Napa Valley\u2026',
+          )}{' '}
+          →
+        </Link>
+      );
+    default:
+      return null;
+  }
+}
+
 export async function generateStaticParams(): Promise<{ categorySlug: string }[]> {
   return EDITORIAL_CATEGORIES.map((c) => ({ categorySlug: c.slug }));
 }
@@ -372,6 +463,7 @@ export default async function CategoryPage({
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   const categoryAeoDesc = CATEGORY_AEO[category.slug];
+  const worldwideCompanion = renderWorldwideCompanion(category.slug, locale);
   void intlLocaleTag; // reserved for future freshness signal
 
   const h1 = pickByLocale(locale, category.h1Fr, category.h1En);
@@ -446,6 +538,22 @@ export default async function CategoryPage({
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{h1}</h1>
         <p className="text-muted mt-3 text-sm md:text-base">{subtitle}</p>
       </header>
+
+      {/* Worldwide companion callout — only the 5 Palace France categories
+          surface this. Renders an inline "Voir aussi monde" link so the
+          user never reads the page as France-bounded by accident
+          (PR-D, ADR-0021 Vague 4). */}
+      {!isEmpty && worldwideCompanion !== null ? (
+        <aside
+          aria-label={pickByLocale(locale, 'Équivalent worldwide', 'Worldwide companion')}
+          className="border-border bg-muted/5 mb-10 rounded-lg border px-4 py-3 text-sm md:px-5 md:py-4"
+        >
+          <span className="text-muted mr-2">
+            {pickByLocale(locale, 'Voir aussi dans le monde :', 'See also worldwide:')}
+          </span>
+          {worldwideCompanion}
+        </aside>
+      ) : null}
 
       {!isEmpty && categoryAeoDesc !== undefined ? (
         <HubAeoSection

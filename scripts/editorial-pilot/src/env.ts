@@ -53,6 +53,15 @@ const EnvSchema = z
       (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
       z.string().min(2).default('claude-sonnet-4-5-20250929'),
     ),
+    // OpenAI per-request timeout (ms). Default 120s surfaces stuck sockets
+    // fast for the light editorial passes; heavy generations (e.g.
+    // long_description_sections at 16k output tokens on a gpt-5.x reasoning
+    // model) legitimately run past 120s, so the content-backfill chain
+    // bumps this to 600s. Capped at 20min to keep a real ceiling.
+    EDITORIAL_PILOT_OPENAI_TIMEOUT_MS: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim().length === 0 ? undefined : v),
+      z.coerce.number().int().min(10_000).max(1_200_000).default(120_000),
+    ),
     DATATOURISME_API_KEY: optionalUuid,
     DATATOURISME_API_BASE: z.string().url().default('https://api.datatourisme.fr/v1'),
     TAVILY_API_KEY: z.preprocess(

@@ -192,6 +192,30 @@ export default async function ConciergeLoyaltyPage({
         </ol>
       </nav>
 
+      {/* PR-E — Banner pointing at the current Club programme. The
+          historical two-tier loyalty doc (ADR-0005) lives on for SEO
+          continuity but the active funnel is `/le-concierge-club`
+          (ADR-0019). The banner makes the discoverability path
+          explicit since the footer no longer surfaces this URL. */}
+      <aside
+        aria-labelledby="loyalty-club-banner-title"
+        className="mb-10 rounded-lg border border-amber-300 bg-amber-50/40 p-5 dark:bg-amber-900/10"
+      >
+        <p id="loyalty-club-banner-title" className="text-fg font-serif text-base md:text-lg">
+          {t('clubBanner.title')}
+        </p>
+        <p className="text-muted mt-2 text-sm md:text-base">
+          {t('clubBanner.body')}{' '}
+          <Link
+            href="/le-concierge-club"
+            className="text-fg font-medium underline decoration-amber-500 decoration-2 underline-offset-2"
+          >
+            {t('clubBanner.linkLabel')}
+          </Link>
+          .
+        </p>
+      </aside>
+
       <header className="mb-12 max-w-3xl">
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>

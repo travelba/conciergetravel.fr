@@ -7,6 +7,7 @@ import type { Locale } from '@/i18n/routing';
 import { env } from '@/lib/env';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
+import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
 import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 
@@ -30,7 +31,19 @@ export async function GET(): Promise<NextResponse> {
   let entries: SitemapEntry[] = [];
 
   try {
-    const cities = await listPublishedCities();
+    // ADR-0015 step 1 — lastmod for `/destination/<city>` entries
+    // mirrors the editorial guide `updated_at` when one exists. The
+    // city hub now hosts the long-read article inline, so the guide's
+    // freshness drives the sitemap signal — Google + GPTBot pick up
+    // the editorial refresh without us having to push a per-hotel
+    // MAX aggregation. Hub-only cities (no guide yet) keep no
+    // lastmod, which matches the previous behaviour.
+    const [cities, guides] = await Promise.all([listPublishedCities(), listPublishedGuides()]);
+    const guideUpdatedAtBySlug = new Map<string, string>();
+    for (const g of guides) {
+      const iso = g.updatedAt ?? g.reviewedAt;
+      if (iso !== null) guideUpdatedAtBySlug.set(g.slug, iso);
+    }
 
     // Root home — highest-priority URL of the site. Without this entry
     // the sitemap index never explicitly advertises `/` and `/en`, and
@@ -59,10 +72,12 @@ export async function GET(): Promise<NextResponse> {
           locale: l,
           href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
         })}`;
+      const lastmod = guideUpdatedAtBySlug.get(c.slug);
       entries.push({
         loc: hrefForLocale('fr'),
         changefreq: 'weekly',
         priority: 0.7,
+        ...(lastmod !== undefined ? { lastmod } : {}),
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }

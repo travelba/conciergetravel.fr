@@ -117,7 +117,7 @@ export default function LogoPreviewPage(): React.ReactElement {
           description="Le logo en overlay sur une image lifestyle — usage potentiel sur la home ou pages éditoriales premium."
           bg="bg-gradient-to-br from-[#3a2e25] via-[#2b1f15] to-[#0a0807]"
         >
-          <div className="flex h-48 items-center justify-center px-6">
+          <div className="flex h-60 flex-col items-center justify-center gap-3 px-6">
             <Image
               src={LOGO_SRC}
               alt="MyConciergeHotel"
@@ -125,6 +125,9 @@ export default function LogoPreviewPage(): React.ReactElement {
               height={LOGO_H}
               className="h-32 w-auto"
             />
+            <p className="max-w-md text-center font-serif text-sm italic text-white/85">
+              Une sélection mondiale d&apos;hôtels d&apos;exception, signée par notre conciergerie.
+            </p>
           </div>
         </Frame>
 
@@ -169,29 +172,32 @@ export default function LogoPreviewPage(): React.ReactElement {
 
         <Frame
           title="7. OG image preview — 1200×630 (LinkedIn, X, Slack)"
-          description="Format Open Graph standard. Logo centré sur fond noir avec un peu de contexte tagline."
+          description="Format Open Graph standard. Logo + tagline française canonique pour les partages francophones."
           bg="bg-black"
         >
-          <div className="relative flex aspect-[1200/630] w-full flex-col items-center justify-center gap-4 px-12">
+          <div className="relative flex aspect-[1200/630] w-full flex-col items-center justify-center gap-3 px-12">
             <Image
               src={LOGO_SRC}
               alt="OG preview"
               width={LOGO_W}
               height={LOGO_H}
-              className="h-2/3 w-auto"
+              className="h-1/2 w-auto"
             />
-            <p className="text-center text-xs font-medium uppercase tracking-[0.3em] text-amber-200/60">
+            <p className="max-w-[80%] text-center font-serif text-base italic text-white/85">
+              Une sélection mondiale d&apos;hôtels d&apos;exception, signée par notre conciergerie.
+            </p>
+            <p className="text-center text-[10px] font-medium uppercase tracking-[0.3em] text-amber-200/60">
               Book like a concierge · Stay like a guest
             </p>
           </div>
         </Frame>
 
         <Frame
-          title="8. Bonus — Email transactionnel (Brevo / Resend header)"
-          description="Le header d'un email de réservation. Fond noir = parfaitement compatible."
+          title="8. Email transactionnel (Brevo / Resend header)"
+          description="Le header d'un email de réservation. Fond noir + tagline pour rappeler la signature éditoriale."
           bg="bg-black"
         >
-          <div className="flex h-24 items-center justify-center">
+          <div className="flex h-32 flex-col items-center justify-center gap-2">
             <Image
               src={LOGO_SRC}
               alt="email header"
@@ -199,6 +205,34 @@ export default function LogoPreviewPage(): React.ReactElement {
               height={LOGO_H}
               className="h-16 w-auto"
             />
+            <p className="text-center font-serif text-xs italic text-white/70">
+              Une sélection mondiale d&apos;hôtels d&apos;exception, signée par notre conciergerie.
+            </p>
+          </div>
+        </Frame>
+
+        <Frame
+          title="9. Card éditoriale plein cadre (signature complète)"
+          description="Signature de marque complète — logo + tagline française canonique + tagline EN. Usage : pied de page éditorial, splash screen, page corporate."
+          bg="bg-black"
+        >
+          <div className="flex h-72 flex-col items-center justify-center gap-5 px-8">
+            <Image
+              src={LOGO_SRC}
+              alt="MyConciergeHotel"
+              width={LOGO_W}
+              height={LOGO_H}
+              className="h-40 w-auto"
+            />
+            <div className="flex flex-col items-center gap-3">
+              <p className="max-w-md text-center font-serif text-base italic text-white/90">
+                Une sélection mondiale d&apos;hôtels d&apos;exception, signée par notre
+                conciergerie.
+              </p>
+              <p className="text-center text-[11px] font-medium uppercase tracking-[0.35em] text-amber-200/70">
+                Book like a concierge · Stay like a guest
+              </p>
+            </div>
           </div>
         </Frame>
       </div>

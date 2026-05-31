@@ -92,18 +92,29 @@ export default async function DestinationDirectoryPage({
   const allIntlCities = cities.filter((c) => c.countryCode !== 'FR');
   const intlPinned = allIntlCities.filter((c) => PHASE_4A_INTL_SLUGS.has(c.slug));
   const intlPinnedSet = new Set(intlPinned.map((c) => c.slug));
-  const intlRest = allIntlCities.filter((c) => !intlPinnedSet.has(c.slug)).slice(0, 40);
+  // PR-D — bumped from 40 → 80 (ADR-0021 Vague 4: the catalogue
+  // exposes 127 countries; 40 was an early-phase guard against an
+  // empty long tail, which no longer applies). The pinned list still
+  // bubbles to the top so the curated cities stay above the fold.
+  const intlRest = allIntlCities.filter((c) => !intlPinnedSet.has(c.slug)).slice(0, 80);
   const intlCities = [...intlPinned, ...intlRest];
 
-  // We only surface countries that already have a published country
-  // guide — sending traffic to a deep-link without an editorial landing
-  // page would dilute the directory's curated promise. The remaining
-  // countries are reachable from `/hotels` (the full catalog).
+  // PR-D — split the country directory into TWO sections so the
+  // worldwide footprint is no longer hidden behind the 8 published
+  // country-guides. Countries with a guide get the editorial deep
+  // link; countries with > 3 published hotels but no guide yet are
+  // surfaced as anchor links into `/hotels#country-<code>` (the
+  // catalogue page emits matching `id="country-<code>"` sections).
+  // Threshold = 4 because 1-3 hotels in a country is the long tail
+  // already accessible from `/hotels`; surfacing them here would
+  // dilute the directory.
   const guidedCountries = countries.filter((c) => c.guideSlug !== null);
+  const unguidedCountries = countries.filter((c) => c.guideSlug === null && c.hotelCount >= 4);
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  const totalDestinations = frCities.length + intlCities.length + guidedCountries.length;
+  const totalDestinations =
+    frCities.length + intlCities.length + guidedCountries.length + unguidedCountries.length;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
@@ -303,6 +314,48 @@ export default async function DestinationDirectoryPage({
                   {t('directory.worldSection.fullCatalogLink')}
                 </Link>
               </p>
+            </section>
+          )}
+
+          {/* PR-D — "Autres pays au catalogue" : countries with ≥ 4
+              published hotels but no editorial guide yet. The link
+              targets the per-country anchor on `/hotels` (emitted by
+              `apps/web/src/app/[locale]/hotels/page.tsx` line ~415,
+              `id="country-<code>"`), so users discover the worldwide
+              breadth without 404ing on a non-existent guide. */}
+          {unguidedCountries.length > 0 && (
+            <section aria-labelledby="destination-world-unguided-heading">
+              <header className="mb-4 flex items-baseline justify-between gap-4">
+                <h2
+                  id="destination-world-unguided-heading"
+                  className="text-fg font-serif text-2xl sm:text-3xl"
+                >
+                  {t('directory.unguidedCountriesSection.title')}
+                </h2>
+                <p className="text-muted text-xs">
+                  {t('directory.unguidedCountriesSection.subtitle', {
+                    count: unguidedCountries.length,
+                  })}
+                </p>
+              </header>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {unguidedCountries.map((c) => (
+                  <li key={c.code}>
+                    <Link
+                      href={{
+                        pathname: '/hotels',
+                        hash: `country-${c.code.toLowerCase()}`,
+                      }}
+                      className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
+                    >
+                      <span className="text-fg font-serif text-base">{c.name}</span>
+                      <span className="text-muted text-xs">
+                        {t('directory.count', { count: c.hotelCount })}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
         </div>

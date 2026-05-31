@@ -113,6 +113,12 @@ const TIER1 = [
   'nayara',
   'grace_hotels',
   'nihi',
+  // Wave E — regional collections (V2 catalogue expansion).
+  // `grecotel` covers the Greek catalogue scaffolded by
+  // `grecotel:scaffold`; the brand signal is rendered via TIER_HUMAN
+  // below and TIER1 inclusion is required so the script can run
+  // without `--any-tier`.
+  'grecotel',
 ] as const;
 
 type Tier = (typeof TIER1)[number];
@@ -178,6 +184,10 @@ const TIER_HUMAN: Readonly<Record<Tier, { fr: string; en: string }>> = {
   nayara: { fr: 'Resort Nayara', en: 'Nayara resort' },
   grace_hotels: { fr: 'Adresse Grace Hotels', en: 'Grace Hotels property' },
   nihi: { fr: 'Resort NIHI', en: 'NIHI resort' },
+  grecotel: {
+    fr: 'Hôtel signé Grecotel — premier groupe hôtelier de Grèce',
+    en: 'Grecotel property — leading hospitality group in Greece',
+  },
 };
 
 // ─── CLI parsing ───────────────────────────────────────────────────────────
@@ -238,6 +248,15 @@ function parseArgs(argv: readonly string[]): CliArgs {
 
 // ─── DB row shape ──────────────────────────────────────────────────────────
 
+interface ExternalSourceEntry {
+  readonly field: string;
+  readonly value: unknown;
+  readonly source: string;
+  readonly source_url?: string;
+  readonly confidence?: 'high' | 'medium' | 'low';
+  readonly collected_at?: string;
+}
+
 interface HotelRow {
   readonly slug: string;
   readonly name: string;
@@ -253,6 +272,7 @@ interface HotelRow {
   readonly hero_image: string | null;
   readonly description_fr: string | null;
   readonly meta_desc_fr: string | null;
+  readonly external_sources: ReadonlyArray<ExternalSourceEntry> | null;
 }
 
 // ─── Wikidata facts ────────────────────────────────────────────────────────
@@ -422,6 +442,30 @@ interface LlmFail {
 }
 type LlmResult = LlmOk | LlmFail;
 
+/**
+ * Pull every entry from `external_sources` whose `source` is in the
+ * trusted-set for editorial seeding. Today the Tavily pipeline writes
+ * `field: 'description_seed'` with `value = { title, content, url,
+ * relevance_score }`. We keep the structure narrow so the LLM has
+ * exactly one block to ground on, regardless of which scraper wrote it.
+ */
+function extractTavilySeed(
+  row: HotelRow,
+): { readonly title: string; readonly content: string; readonly url: string } | null {
+  if (!Array.isArray(row.external_sources)) return null;
+  for (const entry of row.external_sources) {
+    if (entry.source !== 'tavily') continue;
+    if (entry.field !== 'description_seed') continue;
+    const v = entry.value;
+    if (v === null || typeof v !== 'object') continue;
+    const obj = v as { title?: unknown; content?: unknown; url?: unknown };
+    if (typeof obj.title !== 'string' || typeof obj.content !== 'string') continue;
+    const url = typeof obj.url === 'string' ? obj.url : '';
+    return { title: obj.title, content: obj.content, url };
+  }
+  return null;
+}
+
 async function generateContent(
   client: OpenAI,
   hotel: HotelRow,
@@ -448,6 +492,22 @@ async function generateContent(
       )
     : 'null';
 
+  // Second factual block — Tavily extract from the brand's official site
+  // (ADR-0023 §external_sources). Same anti-hallucination contract as
+  // Wikidata: if absent OR a key is missing, the LLM must stay generic.
+  const tavily = extractTavilySeed(hotel);
+  const tavilyBlock = tavily
+    ? JSON.stringify(
+        {
+          page_title: tavily.title,
+          excerpt: tavily.content.slice(0, 1500),
+          source_url: tavily.url,
+        },
+        null,
+        2,
+      )
+    : 'null';
+
   const userPrompt = [
     `HOTEL_NAME: ${hotel.name}`,
     `CITY: ${hotel.city}`,
@@ -460,7 +520,10 @@ async function generateContent(
     "WIKIDATA_FACTS (seul matériau autorisé pour les faits concrets — n'invente rien hors de ce bloc) :",
     wikidataBlock,
     '',
-    'Rappel critique : si WIKIDATA_FACTS est null OU si une clé vaut null, NE LA MENTIONNE PAS dans la prose. Reste générique sur le segment manquant.',
+    "TAVILY_SEED (extrait du site officiel — paraphrase-le mais n'invente RIEN qui ne soit présent ici ; si null, reste générique) :",
+    tavilyBlock,
+    '',
+    'Rappel critique : si WIKIDATA_FACTS et TAVILY_SEED sont null OU si une clé vaut null, NE LA MENTIONNE PAS dans la prose. Reste générique sur le segment manquant.',
     '',
     'Retourne UNIQUEMENT le JSON object maintenant.',
   ]
@@ -705,7 +768,7 @@ async function fetchHotels(
   anyTier: boolean,
 ): Promise<HotelRow[]> {
   const cols =
-    'slug,name,city,country_code,country_label_fr,country_label_en,region,luxury_tier,wikidata_id,commons_category,official_url,hero_image,description_fr,meta_desc_fr';
+    'slug,name,city,country_code,country_label_fr,country_label_en,region,luxury_tier,wikidata_id,commons_category,official_url,hero_image,description_fr,meta_desc_fr,external_sources';
   const params = new URLSearchParams();
   params.set('select', cols);
   params.set('is_published', 'eq.false');

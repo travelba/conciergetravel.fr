@@ -12,6 +12,7 @@ import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
+import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 
 /**
@@ -248,6 +249,65 @@ export default async function ConciergeMethodPage({
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* PR-E — Editorial scope: surfaces the worldwide footprint
+          (CATALOGUE_PUBLISHED hotels in CATALOGUE_COUNTRIES countries
+          + 14 city guides + 8 country guides) so the catalogue is
+          never read as France-bounded. ADR-0021 Vague 4. */}
+      <section aria-labelledby="scope-title" className="mb-14">
+        <h2 id="scope-title" className="text-fg font-serif text-2xl sm:text-3xl">
+          {t('scope.title')}
+        </h2>
+        <p className="text-muted mt-3 max-w-3xl text-sm md:text-base">{t('scope.lede')}</p>
+
+        <dl className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="border-border bg-bg rounded-lg border p-5 text-center">
+            <dt className="text-muted text-xs uppercase tracking-wider">
+              {t('scope.stats.hotelsLabel')}
+            </dt>
+            <dd className="text-fg mt-2 font-serif text-3xl">
+              {CATALOGUE_PUBLISHED.toLocaleString(intlLocaleTag(locale))}
+            </dd>
+          </div>
+          <div className="border-border bg-bg rounded-lg border p-5 text-center">
+            <dt className="text-muted text-xs uppercase tracking-wider">
+              {t('scope.stats.countriesLabel')}
+            </dt>
+            <dd className="text-fg mt-2 font-serif text-3xl">{CATALOGUE_COUNTRIES}</dd>
+          </div>
+          <div className="border-border bg-bg rounded-lg border p-5 text-center">
+            <dt className="text-muted text-xs uppercase tracking-wider">
+              {t('scope.stats.cityGuidesLabel')}
+            </dt>
+            <dd className="text-fg mt-2 font-serif text-3xl">{t('scope.stats.cityGuidesValue')}</dd>
+          </div>
+          <div className="border-border bg-bg rounded-lg border p-5 text-center">
+            <dt className="text-muted text-xs uppercase tracking-wider">
+              {t('scope.stats.countryGuidesLabel')}
+            </dt>
+            <dd className="text-fg mt-2 font-serif text-3xl">
+              {t('scope.stats.countryGuidesValue')}
+            </dd>
+          </div>
+        </dl>
+
+        <p className="text-muted mt-6 max-w-3xl text-sm md:text-base">
+          {t('scope.body', {
+            hotels: CATALOGUE_PUBLISHED.toLocaleString(intlLocaleTag(locale)),
+            countries: CATALOGUE_COUNTRIES,
+          })}
+        </p>
+
+        <p className="text-muted mt-6 max-w-3xl text-sm md:text-base">{t('scope.guidesIntro')}</p>
+        <ul className="mt-3 space-y-3">
+          <li className="border-border bg-bg rounded-lg border p-5">
+            <p className="text-muted text-sm md:text-base">{t('scope.cityGuidesBody')}</p>
+          </li>
+          <li className="border-border bg-bg rounded-lg border p-5">
+            <p className="text-muted text-sm md:text-base">{t('scope.countryGuidesBody')}</p>
+          </li>
+        </ul>
       </section>
 
       {/* 4-step process */}
