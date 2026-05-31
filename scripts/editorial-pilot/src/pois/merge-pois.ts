@@ -11,6 +11,7 @@
  */
 
 import type { NormalisedOsmAmenity, NormalisedTransitStation } from '@mch/integrations/overpass';
+import type { NormalisedPlacePoi } from '@mch/integrations/google-places';
 
 import type { DtPoi, DtPoiBucket, DtPoiCategory } from '../enrichment/datatourisme.js';
 
@@ -167,6 +168,116 @@ const OSM_TO_SCHEMA_URL: Readonly<Record<NormalisedOsmAmenity['tag'], string>> =
 };
 
 // ---------------------------------------------------------------------------
+// Google Places (New) type → bucket + FR/EN label
+// ---------------------------------------------------------------------------
+
+interface GoogleTypeMapping {
+  readonly bucket: PoiBucket;
+  readonly fr: string;
+  readonly en: string;
+  readonly schema?: string;
+}
+
+/**
+ * Maps Google Places (New) Table-A `primaryType`/`types[]` to the
+ * editorial visit/do/shop buckets with localised labels. Only the types
+ * we request in `DEFAULT_NEARBY_POI_TYPES` (+ a few common neighbours)
+ * are listed; anything else falls back to a generic "visit" POI.
+ */
+const GOOGLE_TYPE_MAP: Readonly<Record<string, GoogleTypeMapping>> = {
+  tourist_attraction: { bucket: 'visit', fr: 'Site touristique', en: 'Tourist attraction' },
+  museum: { bucket: 'visit', fr: 'Musée', en: 'Museum', schema: 'https://schema.org/Museum' },
+  art_gallery: {
+    bucket: 'visit',
+    fr: "Galerie d'art",
+    en: 'Art gallery',
+    schema: 'https://schema.org/ArtGallery',
+  },
+  historical_landmark: { bucket: 'visit', fr: 'Site historique', en: 'Historic landmark' },
+  cultural_landmark: { bucket: 'visit', fr: 'Site culturel', en: 'Cultural landmark' },
+  historical_place: { bucket: 'visit', fr: 'Lieu historique', en: 'Historic place' },
+  monument: { bucket: 'visit', fr: 'Monument', en: 'Monument' },
+  church: {
+    bucket: 'visit',
+    fr: 'Édifice religieux',
+    en: 'Church',
+    schema: 'https://schema.org/Church',
+  },
+  mosque: { bucket: 'visit', fr: 'Mosquée', en: 'Mosque', schema: 'https://schema.org/Mosque' },
+  hindu_temple: {
+    bucket: 'visit',
+    fr: 'Temple',
+    en: 'Temple',
+    schema: 'https://schema.org/HinduTemple',
+  },
+  synagogue: {
+    bucket: 'visit',
+    fr: 'Synagogue',
+    en: 'Synagogue',
+    schema: 'https://schema.org/Synagogue',
+  },
+  place_of_worship: { bucket: 'visit', fr: 'Édifice religieux', en: 'Place of worship' },
+  aquarium: { bucket: 'visit', fr: 'Aquarium', en: 'Aquarium' },
+  zoo: { bucket: 'visit', fr: 'Zoo', en: 'Zoo', schema: 'https://schema.org/Zoo' },
+  opera_house: { bucket: 'visit', fr: 'Opéra', en: 'Opera house' },
+  performing_arts_theater: { bucket: 'visit', fr: 'Salle de spectacle', en: 'Performing arts' },
+  observation_deck: { bucket: 'visit', fr: 'Point de vue', en: 'Observation deck' },
+  park: { bucket: 'do', fr: 'Parc', en: 'Park', schema: 'https://schema.org/Park' },
+  national_park: { bucket: 'do', fr: 'Parc national', en: 'National park' },
+  botanical_garden: { bucket: 'do', fr: 'Jardin botanique', en: 'Botanical garden' },
+  garden: { bucket: 'do', fr: 'Jardin', en: 'Garden' },
+  plaza: { bucket: 'do', fr: 'Place', en: 'Square' },
+  marina: { bucket: 'do', fr: 'Port de plaisance', en: 'Marina' },
+  shopping_mall: { bucket: 'shop', fr: 'Centre commercial', en: 'Shopping mall' },
+  department_store: { bucket: 'shop', fr: 'Grand magasin', en: 'Department store' },
+  market: { bucket: 'shop', fr: 'Marché', en: 'Market' },
+};
+
+const GOOGLE_TYPE_FALLBACK: GoogleTypeMapping = {
+  bucket: 'visit',
+  fr: 'À découvrir',
+  en: 'Point of interest',
+};
+
+function resolveGoogleType(poi: NormalisedPlacePoi): GoogleTypeMapping {
+  if (poi.primaryType !== undefined) {
+    const direct = GOOGLE_TYPE_MAP[poi.primaryType];
+    if (direct !== undefined) return direct;
+  }
+  for (const t of poi.types) {
+    const m = GOOGLE_TYPE_MAP[t];
+    if (m !== undefined) return m;
+  }
+  return GOOGLE_TYPE_FALLBACK;
+}
+
+function fromGooglePoi(
+  poi: NormalisedPlacePoi,
+  anchor: { latitude: number; longitude: number },
+  transit: readonly NormalisedTransitStation[],
+): MergedPoi {
+  const mapping = resolveGoogleType(poi);
+  const distance = Math.round(
+    haversine(anchor.latitude, anchor.longitude, poi.latitude, poi.longitude),
+  );
+  const transitRef = nearestTransitFor(poi, transit, 400);
+  return {
+    name: poi.name,
+    type: poi.primaryType ?? mapping.en.toLowerCase().replace(/\s+/gu, '_'),
+    category_fr: mapping.fr,
+    category_en: mapping.en,
+    distance_meters: distance,
+    walk_minutes: walkMinutes(distance),
+    latitude: poi.latitude,
+    longitude: poi.longitude,
+    bucket: mapping.bucket,
+    osm_id: `gplaces/${poi.placeId}`,
+    ...(mapping.schema !== undefined ? { schema_type: mapping.schema } : {}),
+    ...(transitRef !== undefined ? { nearest_transit: transitRef } : {}),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // DT POI → MergedPoi
 // ---------------------------------------------------------------------------
 
@@ -240,17 +351,45 @@ export const DEFAULT_MERGE_CAPS: MergeCaps = { visit: 8, do: 6, shop: 8 };
  * DT POI with the same bucket. This avoids "Pharmacie X" appearing
  * twice when DT and OSM both reference it.
  */
+export interface MergeExtras {
+  /** Worldwide Google Places POIs (fallback when DT/Overpass are empty). */
+  readonly googlePois?: readonly NormalisedPlacePoi[];
+  /** Hotel anchor — required to compute Google POI distances. */
+  readonly anchor?: { readonly latitude: number; readonly longitude: number };
+}
+
 export function mergePois(
   dtPois: readonly DtPoi[],
   osmAmenities: readonly NormalisedOsmAmenity[],
   transit: readonly NormalisedTransitStation[],
   caps: MergeCaps = DEFAULT_MERGE_CAPS,
+  extras: MergeExtras = {},
 ): readonly MergedPoi[] {
   const byBucket: Record<PoiBucket, MergedPoi[]> = { visit: [], do: [], shop: [] };
 
   for (const dt of dtPois) {
     const merged = fromDtPoi(dt, transit);
     byBucket[merged.bucket].push(merged);
+  }
+
+  // Google Places POIs (visit/do) — deduped against already-included
+  // POIs in the same bucket (within 50 m) so France hotels that have
+  // both DT and Google coverage don't list the same monument twice.
+  const { googlePois, anchor } = extras;
+  if (googlePois !== undefined && googlePois.length > 0 && anchor !== undefined) {
+    for (const g of googlePois) {
+      const candidate = fromGooglePoi(g, anchor, transit);
+      const dupe = byBucket[candidate.bucket].some(
+        (existing) =>
+          haversine(
+            existing.latitude,
+            existing.longitude,
+            candidate.latitude,
+            candidate.longitude,
+          ) < 50,
+      );
+      if (!dupe) byBucket[candidate.bucket].push(candidate);
+    }
   }
 
   for (const osm of osmAmenities) {
@@ -285,6 +424,9 @@ export const _internals = {
   nearestTransitFor,
   fromDtPoi,
   fromOsmAmenity,
+  fromGooglePoi,
+  resolveGoogleType,
+  GOOGLE_TYPE_MAP,
   DT_CATEGORY_LABELS,
   OSM_AMENITY_LABELS,
   OSM_TO_SCHEMA_URL,

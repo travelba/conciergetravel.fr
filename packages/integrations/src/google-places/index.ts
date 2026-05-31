@@ -13,21 +13,30 @@ export const GPLACES_INTEGRATION_VERSION = '0.0.2' as const;
 
 export type { GooglePlacesError } from './errors';
 export {
+  DEFAULT_NEARBY_POI_TYPES,
   DEFAULT_PLACES_API_BASE,
   defaultPlacesConfig,
   fetchPlacePhotos,
   geocodeHotelQuery,
+  searchNearbyPois,
   searchPlaceByNameAndCity,
   type GeocodeMatch,
   type GooglePlacesClientConfig,
+  type NearbyPoiOptions,
 } from './client';
 export {
+  NearbyPlaceSchema,
+  NearbySearchResponseSchema,
+  NormalisedPlacePoiSchema,
   NormalisedPlacesPhotoSchema,
   PhotoMediaResponseSchema,
   PlaceLocationSchema,
   PlacePhotoSchema,
   PlaceSearchResultSchema,
   TextSearchResponseSchema,
+  type NearbyPlace,
+  type NearbySearchResponse,
+  type NormalisedPlacePoi,
   type NormalisedPlacesPhoto,
   type PlaceLocation,
   type PlacePhoto,

@@ -43,6 +43,12 @@ import {
   fetchAmenitiesAround,
   fetchTransitStationsAround,
 } from '@mch/integrations/overpass';
+import {
+  defaultPlacesConfig,
+  searchNearbyPois,
+  type GooglePlacesClientConfig,
+  type NormalisedPlacePoi,
+} from '@mch/integrations/google-places';
 
 import {
   fetchPOIsAround,
@@ -71,6 +77,7 @@ interface CliArgs {
   readonly concurrency: number;
   readonly noLlm: boolean;
   readonly dryRun: boolean;
+  readonly noGoogle: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -80,9 +87,11 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let concurrency = 2;
   let noLlm = false;
   let dryRun = false;
+  let noGoogle = false;
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true;
     else if (arg === '--no-llm') noLlm = true;
+    else if (arg === '--no-google') noGoogle = true;
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
     else if (arg.startsWith('--bucket=')) {
       const v = arg.slice('--bucket='.length);
@@ -103,7 +112,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     throw new Error('Either --slug=<hotel-slug> or --bucket=<name> is required. See --help.');
   }
   if (!Number.isFinite(limit) || limit <= 0) throw new Error('--limit must be a positive integer');
-  return { slug, bucket, limit, concurrency, noLlm, dryRun };
+  return { slug, bucket, limit, concurrency, noLlm, dryRun, noGoogle };
 }
 
 function printHelp(): void {
@@ -116,6 +125,7 @@ Options
   --limit=N             Cap hotels (default 150)
   --concurrency=N       Parallel hotels (default 2; Overpass throttles hard above 3)
   --no-llm              Skip LLM descriptions (free, fast)
+  --no-google           Skip the Google Places worldwide POI fallback
   --dry-run             Skip UPDATE + print preview
   --help                Show this message
 
@@ -247,6 +257,7 @@ interface RunlogEntry {
   readonly dt_count?: number;
   readonly osm_count?: number;
   readonly transit_count?: number;
+  readonly google_count?: number;
   readonly merged_count?: number;
   readonly llm_described?: number;
   readonly llm_failed?: number;
@@ -301,6 +312,7 @@ interface HotelOutcome {
   readonly dtCount: number;
   readonly osmCount: number;
   readonly transitCount: number;
+  readonly googleCount: number;
   readonly mergedCount: number;
   readonly llmDescribed: number;
   readonly llmFailed: number;
@@ -311,6 +323,7 @@ async function processHotel(
   hotel: HotelRow,
   args: CliArgs,
   supa: SupabaseRestConfig,
+  placesCfg: GooglePlacesClientConfig | null,
 ): Promise<HotelOutcome> {
   console.log(`\n→ ${hotel.slug} (${hotel.name}, ${hotel.city})`);
 
@@ -322,6 +335,7 @@ async function processHotel(
       dtCount: 0,
       osmCount: 0,
       transitCount: 0,
+      googleCount: 0,
       mergedCount: 0,
       llmDescribed: 0,
       llmFailed: 0,
@@ -384,8 +398,31 @@ async function processHotel(
     }
   }
 
+  // 3b. Google Places Nearby (worldwide fallback). Gated on a sparse DT
+  // result so we don't pay a call on France hotels that DATAtourisme
+  // already covers richly. Every international hotel has dtPois.length===0
+  // so this always fires for them — exactly the coverage gap Overpass
+  // (down) + DT (France-only) leave open.
+  let googlePois: readonly NormalisedPlacePoi[] = [];
+  if (placesCfg !== null && !args.noGoogle && dtPois.length < 6) {
+    const radius = urban ? 1500 : 5000;
+    const gRes = await searchNearbyPois(placesCfg, hotel.latitude, hotel.longitude, {
+      radiusMeters: radius,
+      maxResults: 20,
+    });
+    if (gRes.ok) {
+      googlePois = gRes.value;
+      console.log(`  [gpl]   ${googlePois.length} Google POIs (radius ${radius}m)`);
+    } else {
+      console.warn(`  [gpl]   FAILED: ${JSON.stringify(gRes.error)} — proceeding`);
+    }
+  }
+
   // 4. Merge
-  const merged = mergePois(dtPois, osmAmenities, transit);
+  const merged = mergePois(dtPois, osmAmenities, transit, undefined, {
+    googlePois,
+    anchor: { latitude: hotel.latitude, longitude: hotel.longitude },
+  });
   console.log(`  [merge] ${merged.length} POIs after cap+dedup`);
 
   if (merged.length === 0) {
@@ -396,6 +433,7 @@ async function processHotel(
       dtCount: dtPois.length,
       osmCount: osmAmenities.length,
       transitCount: transit.length,
+      googleCount: googlePois.length,
       mergedCount: 0,
       llmDescribed: 0,
       llmFailed: 0,
@@ -449,6 +487,7 @@ async function processHotel(
     dtCount: dtPois.length,
     osmCount: osmAmenities.length,
     transitCount: transit.length,
+    googleCount: googlePois.length,
     mergedCount: described.length,
     llmDescribed,
     llmFailed,
@@ -467,8 +506,16 @@ async function main(): Promise<void> {
     serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
   };
 
+  const placesCfg: GooglePlacesClientConfig | null =
+    !args.noGoogle && env.GOOGLE_PLACES_API_KEY !== undefined
+      ? defaultPlacesConfig(env.GOOGLE_PLACES_API_KEY)
+      : null;
+
   const runlogPath = ensureRunlog();
   console.log(`POI orchestrator — args: ${JSON.stringify(args)}`);
+  console.log(
+    `Google Places fallback: ${placesCfg !== null ? 'ENABLED' : 'disabled (no key / --no-google)'}`,
+  );
   console.log(`Runlog: ${runlogPath}`);
 
   const hotels = await pickHotels(supa, args);
@@ -486,7 +533,7 @@ async function main(): Promise<void> {
       const hotel = queue.shift();
       if (hotel === undefined) break;
       try {
-        const out = await processHotel(hotel, args, supa);
+        const out = await processHotel(hotel, args, supa, placesCfg);
         results.push(out);
         logEntry(runlogPath, {
           ts: new Date().toISOString(),
@@ -496,6 +543,7 @@ async function main(): Promise<void> {
           dt_count: out.dtCount,
           osm_count: out.osmCount,
           transit_count: out.transitCount,
+          google_count: out.googleCount,
           merged_count: out.mergedCount,
           llm_described: out.llmDescribed,
           llm_failed: out.llmFailed,
@@ -511,6 +559,7 @@ async function main(): Promise<void> {
           dtCount: 0,
           osmCount: 0,
           transitCount: 0,
+          googleCount: 0,
           mergedCount: 0,
           llmDescribed: 0,
           llmFailed: 0,
@@ -536,12 +585,14 @@ async function main(): Promise<void> {
   const failCount = results.filter((r) => r.outcome === 'fail').length;
   const totalPois = results.reduce((acc, r) => acc + r.mergedCount, 0);
   const totalDescribed = results.reduce((acc, r) => acc + r.llmDescribed, 0);
+  const totalGoogle = results.reduce((acc, r) => acc + r.googleCount, 0);
 
   console.log(`\n=== Summary ===`);
   console.log(`OK:   ${okCount}`);
   console.log(`SKIP: ${skipCount}`);
   console.log(`FAIL: ${failCount}`);
   console.log(`Total POIs persisted: ${totalPois}`);
+  console.log(`Total Google POIs sourced: ${totalGoogle}`);
   console.log(`Total LLM descriptions: ${totalDescribed}`);
   console.log(`Runlog: ${runlogPath}`);
 }

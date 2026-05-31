@@ -89,3 +89,42 @@ export const NormalisedPlacesPhotoSchema = z.object({
   license: z.literal('Google Places'),
 });
 export type NormalisedPlacesPhoto = z.infer<typeof NormalisedPlacesPhotoSchema>;
+
+// ---------------------------------------------------------------------------
+// Nearby Search (New) — POST /v1/places:searchNearby
+// ---------------------------------------------------------------------------
+//
+// Used as the WORLDWIDE POI fallback for hotel detail pages when
+// DATAtourisme (France-only) and Overpass (frequently throttled/down)
+// return nothing. The New API exposes `primaryType` + `types[]` (Table A
+// place types) which we map to the editorial visit/do/shop buckets.
+
+/** One place returned by `places:searchNearby`. */
+export const NearbyPlaceSchema = z.object({
+  id: z.string().min(1),
+  displayName: LocalizedTextSchema.optional(),
+  location: PlaceLocationSchema.optional(),
+  primaryType: z.string().optional(),
+  types: z.array(z.string()).default([]),
+});
+export type NearbyPlace = z.infer<typeof NearbyPlaceSchema>;
+
+export const NearbySearchResponseSchema = z.object({
+  places: z.array(NearbyPlaceSchema).default([]),
+});
+export type NearbySearchResponse = z.infer<typeof NearbySearchResponseSchema>;
+
+/**
+ * Normalised nearby POI, runtime-agnostic, ready for the merge layer.
+ * Distance is computed by the caller against the hotel anchor (the API
+ * does not return a distance field).
+ */
+export const NormalisedPlacePoiSchema = z.object({
+  placeId: z.string().min(1),
+  name: z.string().min(1),
+  latitude: z.number(),
+  longitude: z.number(),
+  primaryType: z.string().optional(),
+  types: z.array(z.string()).default([]),
+});
+export type NormalisedPlacePoi = z.infer<typeof NormalisedPlacePoiSchema>;

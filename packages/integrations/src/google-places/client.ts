@@ -24,6 +24,8 @@ import { retryingJsonRequest } from '../http/retry-request';
 
 import type { GooglePlacesError } from './errors';
 import {
+  NearbySearchResponseSchema,
+  type NormalisedPlacePoi,
   type NormalisedPlacesPhoto,
   NormalisedPlacesPhotoSchema,
   PhotoMediaResponseSchema,
@@ -220,6 +222,138 @@ export async function geocodeHotelQuery(
     displayName: winner.displayName?.text ?? null,
     confidence,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Nearby Search — worldwide POI fallback for hotel detail pages.
+// ---------------------------------------------------------------------------
+
+/**
+ * Default Table-A place types we treat as editorial POIs. Curated to
+ * "things a guest would walk to" — sightseeing + culture + outdoors —
+ * and deliberately excludes lodging, transit and generic services
+ * (the merge layer adds Overpass utility amenities separately when
+ * available). See
+ * https://developers.google.com/maps/documentation/places/web-service/place-types
+ */
+export const DEFAULT_NEARBY_POI_TYPES: readonly string[] = [
+  'tourist_attraction',
+  'museum',
+  'art_gallery',
+  'historical_landmark',
+  'cultural_landmark',
+  'monument',
+  'historical_place',
+  'church',
+  'mosque',
+  'hindu_temple',
+  'synagogue',
+  'park',
+  'national_park',
+  'botanical_garden',
+  'garden',
+  'plaza',
+  'observation_deck',
+  'marina',
+  'aquarium',
+  'zoo',
+  'opera_house',
+  'performing_arts_theater',
+];
+
+export interface NearbyPoiOptions {
+  /** Search radius in metres (max 50 000 per the API). Default 1500. */
+  readonly radiusMeters?: number;
+  /** Cap on returned places (max 20 per the API). Default 20. */
+  readonly maxResults?: number;
+  /** Table-A types to include. Defaults to {@link DEFAULT_NEARBY_POI_TYPES}. */
+  readonly includedTypes?: readonly string[];
+  /** Response language. Default 'fr'. */
+  readonly languageCode?: string;
+}
+
+/**
+ * Search Google Places (New) for tourist POIs around a coordinate.
+ *
+ * This is the WORLDWIDE fallback used by the POI orchestrator: Overpass
+ * (`overpass-api.de`) is frequently overloaded/unreachable and
+ * DATAtourisme only covers France, so international hotels would
+ * otherwise persist zero POIs. The Nearby Search SKU is $32/1k requests
+ * (≈ $0.003/hotel) — one call per hotel.
+ *
+ * Returns a normalised list (no distance — the caller computes haversine
+ * against the hotel anchor). Empty list (not an error) when Google has
+ * no matching POI in radius.
+ */
+export async function searchNearbyPois(
+  cfg: GooglePlacesClientConfig,
+  latitude: number,
+  longitude: number,
+  options: NearbyPoiOptions = {},
+): Promise<Result<readonly NormalisedPlacePoi[], GooglePlacesError>> {
+  const radius = Math.min(Math.max(options.radiusMeters ?? 1500, 1), 50_000);
+  const maxResults = Math.min(Math.max(options.maxResults ?? 20, 1), 20);
+  const includedTypes = options.includedTypes ?? DEFAULT_NEARBY_POI_TYPES;
+  const res = await retryingJsonRequest({
+    url: `${cfg.apiBase}/places:searchNearby`,
+    method: 'POST',
+    headers: {
+      'X-Goog-Api-Key': cfg.apiKey,
+      'X-Goog-FieldMask':
+        'places.id,places.displayName,places.location,places.primaryType,places.types',
+      Accept: 'application/json',
+    },
+    body: {
+      kind: 'json',
+      value: {
+        includedTypes,
+        maxResultCount: maxResults,
+        rankPreference: 'POPULARITY',
+        languageCode: options.languageCode ?? 'fr',
+        locationRestriction: {
+          circle: {
+            center: { latitude, longitude },
+            radius,
+          },
+        },
+      },
+    },
+  });
+  if (!res.ok) {
+    if (res.error.kind === 'auth_failed') return err({ kind: 'auth_failed' });
+    if (res.error.kind === 'rate_limited') return err({ kind: 'quota_exceeded' });
+    return err({ kind: 'http', error: res.error });
+  }
+  // An empty body (`{}`) is a valid "no POIs in radius" response.
+  if (res.value.json === undefined) return ok([]);
+
+  const parsed = NearbySearchResponseSchema.safeParse(res.value.json);
+  if (!parsed.success) {
+    return err({
+      kind: 'parse_failure',
+      details: `searchNearby schema mismatch: ${parsed.error.issues
+        .slice(0, 3)
+        .map((i) => `${i.path.join('.')}: ${i.message}`)
+        .join(' | ')}`,
+    });
+  }
+
+  const out: NormalisedPlacePoi[] = [];
+  for (const place of parsed.data.places) {
+    const name = place.displayName?.text;
+    if (name === undefined || name.length === 0 || place.location === undefined) {
+      continue;
+    }
+    out.push({
+      placeId: place.id,
+      name,
+      latitude: place.location.latitude,
+      longitude: place.location.longitude,
+      ...(place.primaryType !== undefined ? { primaryType: place.primaryType } : {}),
+      types: place.types,
+    });
+  }
+  return ok(out);
 }
 
 /**

@@ -2,7 +2,12 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { defaultPlacesConfig, fetchPlacePhotos, searchPlaceByNameAndCity } from './client';
+import {
+  defaultPlacesConfig,
+  fetchPlacePhotos,
+  searchNearbyPois,
+  searchPlaceByNameAndCity,
+} from './client';
 
 const cfg = { ...defaultPlacesConfig('TEST-KEY'), apiBase: 'https://places.test/v1' };
 
@@ -10,7 +15,10 @@ const PLACE_ID = 'ChIJTestPlaceId123';
 const PHOTO_NAME = `places/${PLACE_ID}/photos/AABCxyz_photo_1`;
 
 const handlers = [
-  http.post('https://places.test/v1/places:searchText', async ({ request }) => {
+  // NB: a literal colon in an MSW string path (`places:searchText`) is
+  // parsed as a `:searchText` path param and would also swallow
+  // `places:searchNearby`. Anchored RegExp matchers avoid the collision.
+  http.post(/\/v1\/places:searchText$/u, async ({ request }) => {
     const body = (await request.json()) as { textQuery?: string };
     const q = body.textQuery ?? '';
     if (q.includes('Empty Match')) {
@@ -65,6 +73,40 @@ const handlers = [
       photoUri: 'https://lh3.googleusercontent.com/places-cdn/test-signed-url-67890.jpg',
     }),
   ),
+  http.post(/\/v1\/places:searchNearby$/u, async ({ request }) => {
+    const body = (await request.json()) as {
+      locationRestriction?: { circle?: { radius?: number } };
+    };
+    // A degenerate radius is our "empty result" trigger for the test.
+    if (body.locationRestriction?.circle?.radius === 1) {
+      return HttpResponse.json({});
+    }
+    return HttpResponse.json({
+      places: [
+        {
+          id: 'POI_MUSEUM',
+          displayName: { text: 'Museo Nazionale', languageCode: 'it' },
+          location: { latitude: 45.4642, longitude: 9.19 },
+          primaryType: 'museum',
+          types: ['museum', 'tourist_attraction'],
+        },
+        {
+          id: 'POI_PARK',
+          displayName: { text: 'Parco Sempione' },
+          location: { latitude: 45.4725, longitude: 9.1772 },
+          primaryType: 'park',
+          types: ['park'],
+        },
+        // No location → must be dropped by the normaliser.
+        {
+          id: 'POI_NOLOC',
+          displayName: { text: 'Ghost POI' },
+          primaryType: 'tourist_attraction',
+          types: ['tourist_attraction'],
+        },
+      ],
+    });
+  }),
 ];
 
 const server = setupServer(...handlers);
@@ -112,6 +154,25 @@ describe('fetchPlacePhotos', () => {
 
   it('returns an empty array when maxN is 0', async () => {
     const res = await fetchPlacePhotos(cfg, [{ name: 'ignored', authorAttributions: [] }], 0);
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.value).toEqual([]);
+  });
+});
+
+describe('searchNearbyPois', () => {
+  it('normalises nearby POIs and drops entries without a location', async () => {
+    const res = await searchNearbyPois(cfg, 45.4642, 9.19, { radiusMeters: 1500 });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.value).toHaveLength(2);
+    expect(res.value[0]?.placeId).toBe('POI_MUSEUM');
+    expect(res.value[0]?.primaryType).toBe('museum');
+    expect(res.value.map((p) => p.placeId)).not.toContain('POI_NOLOC');
+  });
+
+  it('returns an empty list (not an error) when Google has no POIs in radius', async () => {
+    const res = await searchNearbyPois(cfg, 0, 0, { radiusMeters: 1 });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.value).toEqual([]);
