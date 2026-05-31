@@ -218,6 +218,7 @@ interface Args {
   readonly all: boolean;
   readonly force: boolean;
   readonly missingEn: boolean;
+  readonly concurrency: number;
 }
 /** Client-side reproduction of the SQL `--missing-en` predicate. */
 function firstSignatureLacksEn(h: HotelRow): boolean {
@@ -235,13 +236,18 @@ function parseArgs(): Args {
   let all = false;
   let force = false;
   let missingEn = false;
+  let concurrency = 4;
   for (const a of args) {
     if (a === '--all') all = true;
     else if (a === '--force') force = true;
     else if (a === '--missing-en') missingEn = true;
     else if (a.startsWith('--slug=')) slug = a.slice('--slug='.length).trim();
+    else if (a.startsWith('--concurrency=')) {
+      const n = Number.parseInt(a.slice('--concurrency='.length), 10);
+      if (Number.isFinite(n) && n >= 1 && n <= 8) concurrency = n;
+    }
   }
-  return { slug, all, force, missingEn };
+  return { slug, all, force, missingEn, concurrency };
 }
 
 async function main(): Promise<void> {
@@ -274,25 +280,36 @@ async function main(): Promise<void> {
     order: 'is_palace.desc.nullslast,stars.desc.nullslast,name.asc',
   });
   const hotels = args.missingEn ? fetched.filter(firstSignatureLacksEn) : fetched;
-  console.log(`Found ${hotels.length} hotel(s) needing signature_experiences.`);
+  console.log(
+    `Found ${hotels.length} hotel(s) needing signature_experiences (concurrency=${args.concurrency}).`,
+  );
 
   let ok = 0;
   let fail = 0;
-  for (const h of hotels) {
-    const tag = `[${h.slug}]`;
-    try {
-      const t0 = Date.now();
-      const sigs = await generateForHotel(h);
-      console.log(`${tag} ✓ ${sigs.length} signatures (${Date.now() - t0} ms)`);
-      await patchHotelById(cfg, h.id, { signature_experiences: sigs });
-      console.log(`${tag} ✓ persisted`);
-      ok += 1;
-      await new Promise((r) => setTimeout(r, 1200));
-    } catch (err) {
-      fail += 1;
-      console.error(`${tag} ✗ ${err instanceof Error ? err.message : String(err)}`);
+  let started = 0;
+  const total = hotels.length;
+  const queue = [...hotels];
+
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const h = queue.shift();
+      if (h === undefined) break;
+      const idx = (started += 1);
+      const tag = `[${idx}/${total} ${h.slug}]`;
+      try {
+        const t0 = Date.now();
+        const sigs = await generateForHotel(h);
+        await patchHotelById(cfg, h.id, { signature_experiences: sigs });
+        console.log(`${tag} ✓ ${sigs.length} signatures (${Date.now() - t0} ms)`);
+        ok += 1;
+      } catch (err) {
+        fail += 1;
+        console.error(`${tag} ✗ ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
-  }
+  };
+
+  await Promise.all(Array.from({ length: args.concurrency }, () => worker()));
   console.log(`Done — ${ok} OK / ${fail} failed.`);
 }
 

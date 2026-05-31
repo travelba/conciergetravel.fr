@@ -239,6 +239,7 @@ interface Args {
   readonly slug: string | null;
   readonly all: boolean;
   readonly force: boolean;
+  readonly concurrency: number;
 }
 
 function parseArgs(): Args {
@@ -246,49 +247,63 @@ function parseArgs(): Args {
   let slug: string | null = null;
   let all = false;
   let force = false;
+  let concurrency = 4;
   for (const arg of a) {
     if (arg === '--all') all = true;
     else if (arg === '--force') force = true;
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length).trim();
+    else if (arg.startsWith('--concurrency=')) {
+      const n = Number.parseInt(arg.slice('--concurrency='.length), 10);
+      if (Number.isFinite(n) && n >= 1 && n <= 8) concurrency = n;
+    }
   }
-  return { slug, all, force };
+  return { slug, all, force, concurrency };
 }
 
 async function main(): Promise<void> {
   const args = parseArgs();
   if (args.slug === null && !args.all) {
     console.error(
-      'Usage: tsx src/enrichment/enrich-hotel-content.ts --slug=<slug> | --all [--force]',
+      'Usage: tsx src/enrichment/enrich-hotel-content.ts --slug=<slug> | --all [--force] [--concurrency=N]',
     );
     process.exit(1);
   }
   const cfg = loadRestConfig();
   const hotels = await listHotels(cfg, args.slug, args.force);
-  console.log(`Found ${hotels.length} hotel(s) to enrich.`);
+  console.log(`Found ${hotels.length} hotel(s) to enrich (concurrency=${args.concurrency}).`);
+
   let ok = 0;
   let fail = 0;
-  for (const h of hotels) {
-    const tag = `[${h.slug}]`;
-    try {
-      console.log(`${tag} enriching…`);
-      const t0 = Date.now();
-      const out = await generateEnrichment(h);
-      const wordsFr = out.long_description_sections.reduce(
-        (acc, s) => acc + s.body_fr.split(/\s+/u).length,
-        0,
-      );
-      console.log(
-        `${tag} ✓ sections=${out.long_description_sections.length}, exp=${out.signature_experiences.length}, words_fr≈${wordsFr} (${Date.now() - t0} ms)`,
-      );
-      await persistEnrichment(cfg, h.id, out);
-      console.log(`${tag} ✓ persisted`);
-      ok += 1;
-      await new Promise((r) => setTimeout(r, 1200));
-    } catch (err) {
-      fail += 1;
-      console.error(`${tag} ✗ ${err instanceof Error ? err.message : String(err)}`);
+  let started = 0;
+  const total = hotels.length;
+  const queue = [...hotels];
+
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const h = queue.shift();
+      if (h === undefined) break;
+      const idx = (started += 1);
+      const tag = `[${idx}/${total} ${h.slug}]`;
+      try {
+        const t0 = Date.now();
+        const out = await generateEnrichment(h);
+        const wordsFr = out.long_description_sections.reduce(
+          (acc, s) => acc + s.body_fr.split(/\s+/u).length,
+          0,
+        );
+        await persistEnrichment(cfg, h.id, out);
+        console.log(
+          `${tag} ✓ sections=${out.long_description_sections.length}, exp=${out.signature_experiences.length}, words_fr≈${wordsFr} (${Date.now() - t0} ms)`,
+        );
+        ok += 1;
+      } catch (err) {
+        fail += 1;
+        console.error(`${tag} ✗ ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
-  }
+  };
+
+  await Promise.all(Array.from({ length: args.concurrency }, () => worker()));
   console.log(`Done — ${ok} OK / ${fail} failed.`);
 }
 
