@@ -41,7 +41,7 @@ import type { RankingSeed } from './rankings-catalog.js';
 
 // ─── Schemas ─────────────────────────────────────────────────────────
 
-const FaqSchema = z
+export const FaqSchema = z
   .object({
     question_fr: z.string().max(260).optional().default(''),
     question_en: z.string().max(260).optional().default(''),
@@ -339,7 +339,7 @@ const SectionTypeField = z.preprocess(
 );
 
 // Editorial section (additional long-form content beside entries).
-const EditorialSectionSchema = z.object({
+export const EditorialSectionSchema = z.object({
   key: z
     .string()
     .regex(/^[a-z0-9_-]+$/u)
@@ -464,7 +464,7 @@ export type GeneratedRankingV2 = z.infer<typeof GeneratedRankingV2Schema>;
 
 // ─── Prompts ─────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier pour MyConciergeHotel.com — La sélection du Concierge, hôtels d'exception dans le monde (615 adresses dans 91 pays : Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels). Conciergerie agréée IATA.
+export const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier pour MyConciergeHotel.com — La sélection du Concierge, hôtels d'exception dans le monde (615 adresses dans 91 pays : Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels). Conciergerie agréée IATA.
 
 Tu construis des classements éditoriaux ("Les meilleurs Palaces de X", "Top 10 Palaces avec spa", etc.) au ton hybride "long-read Condé Nast Traveler" + voix de marque "Le Concierge" (ADR-0011). Style :
 - Précis, factuel, JAMAIS de superlatifs creux ("incroyable", "magique", "sublime", "véritable joyau", "art de vivre").
@@ -486,7 +486,7 @@ function eligibilityLines(eligible: ReadonlyArray<HotelCatalogRow>): string {
     .join('\n');
 }
 
-function buildPromptCallMMeta(seed: RankingSeed): string {
+export function buildPromptCallMMeta(seed: RankingSeed): string {
   const lines: string[] = [];
   lines.push(`Classement : **${seed.titleFr}** (kind=${seed.kind})`);
   lines.push(`Objectif : ${seed.targetLength} hôtels classés.`);
@@ -626,7 +626,7 @@ function buildPromptCallEBatch(
   return lines.join('\n');
 }
 
-function buildPromptCallS(
+export function buildPromptCallS(
   seed: RankingSeed,
   plan: z.infer<typeof SectionPlanItemSchema>,
   allPlan: ReadonlyArray<z.infer<typeof SectionPlanItemSchema>>,
@@ -715,7 +715,10 @@ function buildPromptCallB(seed: RankingSeed, eligible: ReadonlyArray<HotelCatalo
  * AEO-ready FAQ blocks that LLMs (Perplexity, ChatGPT, Google AI
  * Overviews) can extract verbatim.
  */
-function buildPromptCallFaq(seed: RankingSeed, sectionAnchors: ReadonlyArray<string>): string {
+export function buildPromptCallFaq(
+  seed: RankingSeed,
+  sectionAnchors: ReadonlyArray<string>,
+): string {
   const lines: string[] = [];
   lines.push(`Classement : **${seed.titleFr}** (kind=${seed.kind})`);
   lines.push('');
@@ -851,7 +854,7 @@ function buildPromptCallSources(seed: RankingSeed): string {
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-async function callLlm<S extends z.ZodTypeAny>(
+export async function callLlm<S extends z.ZodTypeAny>(
   client: LlmClient,
   systemPrompt: string,
   userPrompt: string,
@@ -883,7 +886,7 @@ async function callLlm<S extends z.ZodTypeAny>(
   return validation.data as z.infer<S>;
 }
 
-async function runWithConcurrency<T, R>(
+export async function runWithConcurrency<T, R>(
   items: ReadonlyArray<T>,
   limit: number,
   fn: (item: T, index: number) => Promise<R>,
@@ -964,7 +967,7 @@ const CANONICAL_FAQ_KEYWORDS: ReadonlyArray<{
   },
 ];
 
-function postValidateFaq(
+export function postValidateFaq(
   faq: ReadonlyArray<z.infer<typeof FaqSchema>>,
   slug: string,
 ): z.infer<typeof FaqSchema>[] {

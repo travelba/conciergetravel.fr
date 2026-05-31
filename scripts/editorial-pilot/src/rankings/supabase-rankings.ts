@@ -130,6 +130,37 @@ export async function publishRanking(cfg: SupabaseRestConfig, rankingId: string)
   await patchRanking(cfg, rankingId, { is_published: true });
 }
 
+export interface SectionsAndFaqUpdate {
+  /** Serialised `EditorialSection[]` payload (see `generate-ranking-v2.ts`). */
+  readonly editorial_sections: unknown;
+  /** Serialised FAQ array (see `generate-ranking-v2.ts` `FaqSchema`). */
+  readonly faq: unknown;
+  /** When true, flip `is_published` to true in the same PATCH. */
+  readonly publish?: boolean;
+}
+
+/**
+ * Patch a ranking row with the freshly generated `editorial_sections`
+ * and `faq` payloads, optionally flipping `is_published` to true in the
+ * same call. Used by `enrich-ranking-sections-only.ts` to back-fill
+ * curated rankings (e.g. `classement-travel-leisure-worlds-best-2025`)
+ * without touching the existing intro/outro/entries.
+ */
+export async function updateRankingSectionsAndFaq(
+  cfg: SupabaseRestConfig,
+  rankingId: string,
+  payload: SectionsAndFaqUpdate,
+): Promise<void> {
+  const body: Record<string, unknown> = {
+    editorial_sections: payload.editorial_sections,
+    faq: payload.faq,
+  };
+  if (payload.publish === true) {
+    body['is_published'] = true;
+  }
+  await patchRanking(cfg, rankingId, body);
+}
+
 async function patchRanking(
   cfg: SupabaseRestConfig,
   rankingId: string,

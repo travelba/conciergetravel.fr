@@ -118,7 +118,7 @@ Catalogue snapshot (refreshed 2026-05-31 — post Track A geographic rankings):
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
 | `hotels`             | 2219  | **2219**  | 0     |
-| `editorial_rankings` | 220   | **216**   | 4     |
+| `editorial_rankings` | 220   | **217**   | 3     |
 | `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
 
@@ -143,14 +143,27 @@ The bulk pipeline (`run-rankings-v2-bulk.ts`) ran in 240 s + a single Rome
 retry (LLM had emitted a `justification_fr > 1200` chars on one entry).
 All 7 walks confirmed live on prod (Rome / Mexique / Marais snapshotted).
 
-**4 drafts remaining** (subject to follow-up):
+**3 drafts remaining** (subject to follow-up):
 
 - `meilleurs-hotels-quartier-latin` — only 2 eligible hotels (under MIN_ELIGIBLE=3).
 - `meilleurs-hotels-tours` — only 1 eligible hotel.
 - `meilleurs-hotels-vexin` — 0 eligible hotels (scaffold artefact).
-- `classement-travel-leisure-worlds-best-2025` — 84 authentic entries, needs a
-  bespoke enricher that only writes `editorial_sections` + `axes` without
-  touching entries (`push-ranking-v2.ts` does delete-and-replace today).
+
+**Curated ranking T+L 2025 published 2026-05-31 17:56**:
+
+`classement-travel-leisure-worlds-best-2025` — 84 authentic Travel + Leisure
+award entries, previously stuck as a draft because the v2 bulk runner
+(`push-ranking-v2.ts` → delete-and-replace) would have destroyed the
+authentic ordering. Resolved via a new surgical script
+`scripts/editorial-pilot/src/rankings/enrich-ranking-sections-only.ts`
+that calls Call M Meta + Calls S + Call FAQ (reusing helpers exported
+from `generate-ranking-v2.ts`) and PATCHes only `editorial_sections`
+
+- `faq` + `is_published`. Result: 7 editorial sections (~4 000 words),
+  13 FAQ Q&A, 84 entries preserved untouched. Walk-through validated on
+  prod (2574-line snapshot, the richest ranking page in the catalogue).
+  This new script is now the canonical path for any future curated
+  ranking that must preserve manually-sourced entries.
 
 Of the 2219 published hotels: see the per-country breakdown in
 `apps/web/src/lib/catalogue-stats.ts` (single source of truth) — the
@@ -478,7 +491,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 220 rankings (216 published, 4 thin drafts left), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 220 rankings (217 published, 3 thin drafts left), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):
