@@ -181,14 +181,21 @@ export async function generateFactualSummary(
   let fallback: GenerateFactualSummaryResult | null = null;
 
   for (let i = 0; i < MAX_RETRIES; i++) {
+    const previousReason = attempts[attempts.length - 1]?.reason ?? '';
+    const isBandMiss =
+      options.idealBand !== undefined && previousReason.includes('outside ideal band');
+    const expansionHint =
+      isBandMiss && options.idealBand !== undefined
+        ? `\n\nThe previous attempts landed below ${options.idealBand.min} characters. To push past ${options.idealBand.min} without breaking the strict format, EXPAND with ONE concrete factual addition picked from this priority list:\n  1. A precise distance to a recognisable landmark (e.g. "à 250 m de la place Vendôme", "1,2 km du Vieux-Port") if not already in the summary.\n  2. A second or third differentiating USP (e.g. "+ spa Sothys", "table étoilée Michelin", "rooftop avec vue mer", "piscine extérieure chauffée").\n  3. A named district / neighbourhood the hotel sits in (e.g. "dans le Triangle d'Or", "sur la Promenade des Anglais").\n  4. A short qualifier on the architecture (e.g. "hôtel particulier Belle Époque", "ancien couvent du 17e siècle") if verifiable.\nDO NOT add fabricated facts, fabricated star counts, fabricated awards, or vague filler ("idéal pour", "lieu d'exception"). Stay strictly format-compliant. Aim for ${options.idealBand.min}-${options.idealBand.max} chars on FR AND EN. Same expansion strategy applies to both languages.`
+        : '';
     const correctiveSuffix =
       attempts.length === 0
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${attempts[attempts.length - 1]?.reason}\n\nFix the issue and retry. Stay inside the 110-165 char envelope.${
+        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${attempts[attempts.length - 1]?.raw}\nReason: ${previousReason}\n\nFix the issue and retry. Stay inside the 110-165 char envelope.${
             options.idealBand !== undefined
               ? ` STRICT TARGET: aim for ${options.idealBand.min}-${options.idealBand.max} chars for FR and EN (CDC §2.3 ideal band).`
               : ''
-          }`;
+          }${expansionHint}`;
 
     const result = await client.call({
       systemPrompt,
