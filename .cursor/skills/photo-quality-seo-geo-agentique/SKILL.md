@@ -183,6 +183,53 @@ Catégorie de la photo : {category}
 **Validation** : `AltTextSchema` Zod dans `packages/seo/src/alt-text.ts`
 (10–100 chars, pas de substring "photo", "image", "img", chaîne vide).
 
+### Catalogue-wide Vision categorize — batch d'enrichissement (2026-05-31)
+
+Le pipeline `scripts/editorial-pilot/src/photos/categorize-with-vision.ts`
+est la voie canonique pour enrichir alt + category + caption + scores en
+batch sur tout le catalogue. Run éprouvé 2026-05-31 (catalogue 2 219 publishés) :
+
+| Métrique              | Avant run | Après run   | Delta |
+| --------------------- | --------- | ----------- | ----- |
+| Total photos publiées | 22 206    | 22 110      | -96   |
+| `alt_fr` non-null     | 99.3 %    | 99.99 %     | +0.7  |
+| `alt_en` non-null     | 85.7 %    | **99.88 %** | +14.2 |
+| `category` non-null   | 85.7 %    | **99.88 %** | +14.2 |
+| `caption_fr` non-null | 85.6 %    | **99.88 %** | +14.3 |
+| `representativeness`  | 0 %       | **98.19 %** | +98.2 |
+| `hero_suitable`       | 0 %       | **98.19 %** | +98.2 |
+
+Cost : **$1.94** for 2 774 photos classified (en parallèle avec un autre
+agent `--backfill-scores`), 195 dropped (URLs Cloudinary invalides ou
+LLM error). 43.7 min wall-clock @ concurrency=4. Tokens : 91M in / 403K
+out (gpt-4o-mini est ~$0.0007 / image classifiée).
+
+**Mode par défaut** (sans flag) : ne touche que les photos sans
+`category`. Les photos déjà catégorisées passent par le filtre
+`hotelNeedsCategorisation` qui les SKIP. C'est sûr par défaut — ne
+relance pas l'enrichissement sur les photos déjà traitées.
+
+**Concurrent-safe** : le pipeline filtre les photos missing-category
+au niveau Vision call, donc lancer en parallèle d'un autre run (par
+exemple `--backfill-scores`) ne crée pas de conflit — les targets sont
+disjoints.
+
+**Limites observées** :
+
+1. **Floor 10 catégories distinctes (CDC §2.2) toujours à 0/2219**
+   après le run. Cause : les hotels ont en moyenne ~10 photos couvrant
+   4.7 catégories distinctes. Le Vision ne crée pas de catégories — il
+   les attribue à des photos existantes. Pour atteindre le floor, il
+   faut **sourcer plus de photos** (Phase 2 sourcing + sync), pas
+   relancer Vision.
+2. **`width` / `height` toujours à 1.7 %** après le run (376 photos
+   sur 22 110). Vision ne backfill PAS les dimensions Cloudinary —
+   il faut un pipeline séparé qui appelle l'admin API
+   `GET /resources/image/upload/<public_id>` et patch les meta. C'est
+   un blocker pour la Hard Rule 16 (JSON-LD `ImageObject` complet) — à
+   chantier ouvrir si la Phase 2 sourcing n'inclut pas déjà le
+   width/height à l'upload.
+
 ### GEO — captions LLM-citables
 
 Les LLMs citent les photos par leur `caption` dans le JSON-LD `ImageObject`.
