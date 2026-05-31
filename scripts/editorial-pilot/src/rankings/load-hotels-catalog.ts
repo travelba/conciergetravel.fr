@@ -15,7 +15,7 @@ const HotelRowSchema = z.object({
   stars: z.number().int(),
   is_palace: z.boolean(),
   city: z.string(),
-  region: z.string(),
+  region: z.string().nullable(),
   description_fr: z.string().nullable(),
   address: z.string().nullable(),
   postal_code: z.string().nullable(),
