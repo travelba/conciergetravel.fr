@@ -89,6 +89,33 @@ export async function selectHotels<T = unknown>(
   return rows;
 }
 
+/**
+ * Generic single-row PATCH on `hotels` by id. Used by the enrichment
+ * pipelines that were ported off the `pg` client (no DATABASE_URL needed
+ * — same service-role REST path as the photo/geo orchestrators).
+ */
+export async function patchHotelById(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  body: Readonly<Record<string, unknown>>,
+): Promise<void> {
+  const url = `${cfg.url}/rest/v1/hotels?id=eq.${encodeURIComponent(hotelId)}`;
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: cfg.serviceRoleKey,
+      Authorization: `Bearer ${cfg.serviceRoleKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase PATCH failed (${res.status}): ${text.slice(0, 300)}`);
+  }
+}
+
 export async function updateHotelPhotos(
   cfg: SupabaseRestConfig,
   hotelId: string,

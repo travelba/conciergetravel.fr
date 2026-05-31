@@ -24,10 +24,12 @@ import { z } from 'zod';
 
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
+import { selectHotels, patchHotelById, type SupabaseRestConfig } from '../photos/supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 loadDotenv({ path: path.resolve(__dirname, '../../../../.env.local') });
+loadDotenv({ path: path.resolve(__dirname, '../../../../.env') });
 
 const SignatureExperienceSchema = z.object({
   key: z.preprocess(
@@ -65,10 +67,10 @@ interface HotelRow {
   readonly id: string;
   readonly slug: string;
   readonly name: string;
-  readonly stars: number;
+  readonly stars: number | null;
   readonly is_palace: boolean;
   readonly city: string;
-  readonly region: string;
+  readonly region: string | null;
   readonly description_fr: string | null;
   readonly highlights: unknown;
   readonly amenities: unknown;
@@ -77,30 +79,20 @@ interface HotelRow {
   readonly signature_experiences: unknown;
 }
 
-function resolveConn(): string {
-  const c =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'] ??
-    null;
-  if (c === null) throw new Error('No DB connection');
-  return c;
-}
+const HOTEL_COLS =
+  'id,slug,name,stars,is_palace,city,region,description_fr,highlights,amenities,' +
+  'restaurant_info,spa_info,signature_experiences';
 
-async function withClient<T>(fn: (c: import('pg').Client) => Promise<T>): Promise<T> {
-  const pgMod = (await import('pg')) as typeof import('pg');
-  const conn = resolveConn().replace(/[?&]sslmode=[^&]*/giu, '');
-  const isLocal = conn.includes('localhost') || conn.includes('127.0.0.1');
-  const c = new pgMod.Client({
-    connectionString: conn,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
-  });
-  await c.connect();
-  try {
-    return await fn(c);
-  } finally {
-    await c.end();
+function loadRestConfig(): SupabaseRestConfig {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  if (typeof url !== 'string' || url.length === 0) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL missing in .env.local');
   }
+  if (typeof key !== 'string' || key.length < 40) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY missing in .env.local');
+  }
+  return { url, serviceRoleKey: key };
 }
 
 const SYSTEM_PROMPT = `Tu es un rédacteur éditorial spécialisé dans le luxe hôtelier français pour MyConciergeHotel.com.
@@ -118,8 +110,10 @@ Format de sortie : JSON strict avec la clé "signature_experiences".`;
 function buildPrompt(h: HotelRow): string {
   const lines: string[] = [];
   lines.push(`Hôtel : **${h.name}**`);
-  lines.push(`Statut : ${h.is_palace ? 'Palace Atout France' : `${h.stars}★`}`);
-  lines.push(`Ville : ${h.city} (${h.region})`);
+  lines.push(`Statut : ${h.is_palace ? 'Palace Atout France' : `${h.stars ?? 5}★`}`);
+  lines.push(
+    `Ville : ${h.region !== null && h.region.length > 0 ? `${h.city} (${h.region})` : h.city}`,
+  );
   lines.push('');
   if (typeof h.description_fr === 'string' && h.description_fr.length > 0) {
     lines.push('### Description courte');
@@ -225,6 +219,16 @@ interface Args {
   readonly force: boolean;
   readonly missingEn: boolean;
 }
+/** Client-side reproduction of the SQL `--missing-en` predicate. */
+function firstSignatureLacksEn(h: HotelRow): boolean {
+  const sig = h.signature_experiences;
+  if (!Array.isArray(sig) || sig.length < 4) return true;
+  const first: unknown = sig[0];
+  if (typeof first !== 'object' || first === null) return true;
+  const en = (first as { description_en?: unknown }).description_en;
+  return typeof en !== 'string' || en.length < 30;
+}
+
 function parseArgs(): Args {
   const args = process.argv.slice(2);
   let slug: string | null = null;
@@ -249,36 +253,27 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const hotels = await withClient(async (c) => {
-    const filters: string[] = ['is_published = true'];
-    const params: unknown[] = [];
-    if (args.slug !== null) {
-      filters.push(`slug = $${params.length + 1}`);
-      params.push(args.slug);
-    }
-    if (args.missingEn) {
-      // Hotels where the first signature lacks a meaningful EN description.
-      filters.push(
-        `(signature_experiences is null
-          or jsonb_array_length(signature_experiences) < 4
-          or (signature_experiences -> 0 ->> 'description_en') is null
-          or length(signature_experiences -> 0 ->> 'description_en') < 30)`,
-      );
-    } else if (!args.force) {
-      filters.push(
-        '(signature_experiences is null or jsonb_array_length(signature_experiences) < 4)',
-      );
-    }
-    const r = await c.query<HotelRow>(
-      `select id, slug, name, stars, is_palace, city, region, description_fr,
-              highlights, amenities, restaurant_info, spa_info, signature_experiences
-       from public.hotels
-       where ${filters.join(' and ')}
-       order by is_palace desc, stars desc, name asc`,
-      params,
-    );
-    return r.rows;
+  const cfg = loadRestConfig();
+  // Ported off `pg` to the service-role PostgREST path (no DATABASE_URL on
+  // this machine). The `jsonb_array_length < 4` predicate is approximated
+  // with `signature_experiences=is.null` — every gap row is strictly NULL
+  // (verified 2026-05-31: 2112 null, 0 empty array). `--missing-en` pulls
+  // the small set of rows that already have signatures and filters EN gaps
+  // client-side.
+  const filters: string[] = ['is_published=eq.true'];
+  if (args.slug !== null) {
+    filters.push(`slug=eq.${args.slug}`);
+  } else if (args.missingEn) {
+    filters.push('signature_experiences=not.is.null');
+  } else if (!args.force) {
+    filters.push('signature_experiences=is.null');
+  }
+  const fetched = await selectHotels<HotelRow>(cfg, {
+    columns: HOTEL_COLS,
+    filters,
+    order: 'is_palace.desc.nullslast,stars.desc.nullslast,name.asc',
   });
+  const hotels = args.missingEn ? fetched.filter(firstSignatureLacksEn) : fetched;
   console.log(`Found ${hotels.length} hotel(s) needing signature_experiences.`);
 
   let ok = 0;
@@ -289,12 +284,7 @@ async function main(): Promise<void> {
       const t0 = Date.now();
       const sigs = await generateForHotel(h);
       console.log(`${tag} ✓ ${sigs.length} signatures (${Date.now() - t0} ms)`);
-      await withClient(async (c) => {
-        await c.query(`update public.hotels set signature_experiences = $2::jsonb where id = $1`, [
-          h.id,
-          JSON.stringify(sigs),
-        ]);
-      });
+      await patchHotelById(cfg, h.id, { signature_experiences: sigs });
       console.log(`${tag} ✓ persisted`);
       ok += 1;
       await new Promise((r) => setTimeout(r, 1200));

@@ -57,6 +57,7 @@ import { config as loadDotenv } from 'dotenv';
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
 import { lintConciergeSummary } from '../linter.js';
+import { selectHotels, patchHotelById, type SupabaseRestConfig } from '../photos/supabase-rest.js';
 import { ConciergeFaqBatchSchema, type ConciergeFaqAnswer } from '../schemas.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -142,23 +143,18 @@ function parseArgs(argv: readonly string[]): CliArgs {
   return { slug, slugs, all, missing, invalid, concurrency, dryRun, batchSize };
 }
 
-async function connectPg(): Promise<import('pg').Client> {
-  const connStr =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'];
-  if (connStr === undefined) {
-    throw new Error('Set DATABASE_URL or SUPABASE_DB_POOLER_URL in .env.local.');
+// Ported off `pg` (no DATABASE_URL on this machine) to the service-role
+// PostgREST path — same pattern as the photo/geo/enrichment orchestrators.
+function loadRestConfig(): SupabaseRestConfig {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  if (typeof url !== 'string' || url.length === 0) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL missing in .env.local');
   }
-  const pgModule = (await import('pg')) as typeof import('pg');
-  const cleaned = connStr.replace(/[?&]sslmode=[^&]*/giu, '');
-  const isLocal = cleaned.includes('localhost') || cleaned.includes('127.0.0.1');
-  const client = new pgModule.Client({
-    connectionString: cleaned,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
-  });
-  await client.connect();
-  return client;
+  if (typeof key !== 'string' || key.length < 40) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY missing in .env.local');
+  }
+  return { url, serviceRoleKey: key };
 }
 
 interface FaqInDb {
@@ -197,23 +193,29 @@ function countWords(s: string): number {
   return t.split(/[^\p{L}\p{N}]+/u).filter((x) => x.length > 0).length;
 }
 
-async function listSlugs(client: import('pg').Client, args: CliArgs): Promise<readonly string[]> {
+async function listSlugs(cfg: SupabaseRestConfig, args: CliArgs): Promise<readonly string[]> {
   if (args.slug !== null) return [args.slug];
   if (args.slugs.length > 0) return args.slugs;
-  const baseClause = `is_published = true and jsonb_array_length(coalesce(faq_content, '[]'::jsonb)) > 0`;
-  const r = await client.query<{ slug: string }>(
-    `select slug from public.hotels where ${baseClause} order by slug`,
-  );
-  return r.rows.map((row) => row.slug);
+  // `jsonb_array_length(coalesce(faq_content,'[]')) > 0` → keep rows whose
+  // faq_content is a non-empty array (filtered client-side; PostgREST has
+  // no array-length filter).
+  const rows = await selectHotels<{ slug: string; faq_content: unknown }>(cfg, {
+    columns: 'slug,faq_content',
+    filters: ['is_published=eq.true', 'faq_content=not.is.null'],
+    order: 'slug.asc',
+  });
+  return rows
+    .filter((r) => Array.isArray(r.faq_content) && r.faq_content.length > 0)
+    .map((r) => r.slug);
 }
 
-async function fetchHotel(client: import('pg').Client, slug: string): Promise<HotelRow | null> {
-  const r = await client.query<HotelRow>(
-    `select id, slug, name, city, faq_content
-     from public.hotels where slug = $1 limit 1`,
-    [slug],
-  );
-  return r.rows[0] ?? null;
+async function fetchHotel(cfg: SupabaseRestConfig, slug: string): Promise<HotelRow | null> {
+  const rows = await selectHotels<HotelRow>(cfg, {
+    columns: 'id,slug,name,city,faq_content',
+    filters: [`slug=eq.${slug}`],
+    limit: 1,
+  });
+  return rows[0] ?? null;
 }
 
 function pickFaqsToRewrite(faqs: readonly FaqInDb[], args: CliArgs): readonly FaqInDb[] {
@@ -647,12 +649,12 @@ interface RunResult {
 }
 
 async function runOne(
-  client: import('pg').Client,
+  cfg: SupabaseRestConfig,
   slug: string,
   prompt: string,
   args: CliArgs,
 ): Promise<RunResult> {
-  const row = await fetchHotel(client, slug);
+  const row = await fetchHotel(cfg, slug);
   if (row === null) return { slug, status: 'failed', reason: 'hotel not found' };
   const faqs = row.faq_content ?? [];
   if (faqs.length === 0) return { slug, status: 'skipped', reason: 'no FAQs' };
@@ -710,10 +712,10 @@ async function runOne(
     };
   }
 
-  await client.query(
-    `update public.hotels set faq_content = $1::jsonb, updated_at = now() where slug = $2`,
-    [JSON.stringify(merged), slug],
-  );
+  await patchHotelById(cfg, row.id, {
+    faq_content: merged,
+    updated_at: new Date().toISOString(),
+  });
 
   return {
     slug,
@@ -728,7 +730,7 @@ async function runOne(
 }
 
 async function runWithConcurrency(
-  client: import('pg').Client,
+  cfg: SupabaseRestConfig,
   slugs: readonly string[],
   prompt: string,
   args: CliArgs,
@@ -747,7 +749,7 @@ async function runWithConcurrency(
         started += 1;
         const idx = started;
         console.log(`[${idx}/${total}] start ${slug} (active=${active})`);
-        runOne(client, slug, prompt, args)
+        runOne(cfg, slug, prompt, args)
           .then((r) => {
             out.push(r);
             const tag = r.status === 'ok' ? 'OK' : r.status === 'skipped' ? 'SKIP' : 'FAIL';
@@ -796,9 +798,9 @@ async function main(): Promise<void> {
     process.exit(2);
   }
   const prompt = await fs.readFile(PROMPT_PATH, 'utf8');
-  const client = await connectPg();
-  try {
-    const slugs = await listSlugs(client, args);
+  const cfg = loadRestConfig();
+  {
+    const slugs = await listSlugs(cfg, args);
     console.log(
       `[concierge-faq-humanizer] targets: ${slugs.length} hotel(s), concurrency=${args.concurrency}, batchSize=${args.batchSize}, dryRun=${args.dryRun}`,
     );
@@ -806,7 +808,7 @@ async function main(): Promise<void> {
       console.log('Nothing to do.');
       return;
     }
-    const results = await runWithConcurrency(client, slugs, prompt, args);
+    const results = await runWithConcurrency(cfg, slugs, prompt, args);
     const ok = results.filter((r) => r.status === 'ok').length;
     const skipped = results.filter((r) => r.status === 'skipped').length;
     const failed = results.filter((r) => r.status === 'failed').length;
@@ -831,8 +833,6 @@ async function main(): Promise<void> {
     console.log(`  total tokens in/out : ${tokens.input} / ${tokens.output}`);
     console.log(`  runlog    : ${runLogPath}`);
     if (failed > 0) process.exitCode = 2;
-  } finally {
-    await client.end();
   }
 }
 

@@ -24,10 +24,12 @@ import { z } from 'zod';
 
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
+import { selectHotels, patchHotelById, type SupabaseRestConfig } from '../photos/supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 loadDotenv({ path: path.resolve(__dirname, '../../../../.env.local') });
+loadDotenv({ path: path.resolve(__dirname, '../../../../.env') });
 
 // ─── Schemas (mirror DB JSONB shapes) ────────────────────────────────
 
@@ -63,10 +65,10 @@ interface HotelInput {
   readonly id: string;
   readonly slug: string;
   readonly name: string;
-  readonly stars: number;
+  readonly stars: number | null;
   readonly is_palace: boolean;
   readonly city: string;
-  readonly region: string;
+  readonly region: string | null;
   readonly description_fr: string | null;
   readonly long_description_sections: unknown;
   readonly signature_experiences: unknown;
@@ -76,70 +78,53 @@ interface HotelInput {
   readonly spa_info: unknown;
 }
 
-function resolveConnectionString(): string {
-  const conn =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'] ??
-    null;
-  if (conn === null) throw new Error('No DB connection string.');
-  return conn;
-}
+const HOTEL_COLS =
+  'id,slug,name,stars,is_palace,city,region,description_fr,long_description_sections,' +
+  'signature_experiences,highlights,amenities,restaurant_info,spa_info';
 
-async function withClient<T>(fn: (client: import('pg').Client) => Promise<T>): Promise<T> {
-  const pgMod = (await import('pg')) as typeof import('pg');
-  const cleaned = resolveConnectionString().replace(/[?&]sslmode=[^&]*/giu, '');
-  const isLocal = cleaned.includes('localhost') || cleaned.includes('127.0.0.1');
-  const client = new pgMod.Client({
-    connectionString: cleaned,
-    ssl: isLocal ? false : { rejectUnauthorized: false },
-  });
-  await client.connect();
-  try {
-    return await fn(client);
-  } finally {
-    await client.end();
+function loadRestConfig(): SupabaseRestConfig {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  if (typeof url !== 'string' || url.length === 0) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL missing in .env.local');
   }
+  if (typeof key !== 'string' || key.length < 40) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY missing in .env.local');
+  }
+  return { url, serviceRoleKey: key };
 }
 
-async function listHotels(slug: string | null, force: boolean): Promise<readonly HotelInput[]> {
-  return withClient(async (client) => {
-    const filters: string[] = ['is_published = true'];
-    const params: unknown[] = [];
-    if (slug !== null) {
-      filters.push(`slug = $${params.length + 1}`);
-      params.push(slug);
-    }
-    if (!force) {
-      // Only hotels that have an empty or null `long_description_sections`.
-      filters.push(
-        '(long_description_sections is null or jsonb_array_length(long_description_sections) < 5)',
-      );
-    }
-    const sql = `select id, slug, name, stars, is_palace, city, region, description_fr,
-                        long_description_sections, signature_experiences, highlights,
-                        amenities, restaurant_info, spa_info
-                 from public.hotels
-                 where ${filters.join(' and ')}
-                 order by is_palace desc, stars desc, name asc`;
-    const r = await client.query<HotelInput>(sql, params);
-    return r.rows;
+/**
+ * Ported off `pg` (no DATABASE_URL on this machine) to the service-role
+ * PostgREST path. The original `jsonb_array_length(...) < 5` predicate is
+ * approximated with `long_description_sections=is.null` — every gap row in
+ * the catalogue is strictly NULL (verified 2026-05-31: 1302 null, 0 empty
+ * array, only 1 row with a non-null length < 5), so the simple null filter
+ * avoids paging the heavy section blobs of the ~916 already-rich rows.
+ */
+async function listHotels(
+  cfg: SupabaseRestConfig,
+  slug: string | null,
+  force: boolean,
+): Promise<readonly HotelInput[]> {
+  const filters: string[] = ['is_published=eq.true'];
+  if (slug !== null) filters.push(`slug=eq.${slug}`);
+  if (!force && slug === null) filters.push('long_description_sections=is.null');
+  return selectHotels<HotelInput>(cfg, {
+    columns: HOTEL_COLS,
+    filters,
+    order: 'is_palace.desc.nullslast,stars.desc.nullslast,name.asc',
   });
 }
 
-async function persistEnrichment(hotelId: string, out: EnrichmentOutput): Promise<void> {
-  await withClient(async (client) => {
-    await client.query(
-      `update public.hotels
-         set long_description_sections = $2::jsonb,
-             signature_experiences = $3::jsonb
-       where id = $1`,
-      [
-        hotelId,
-        JSON.stringify(out.long_description_sections),
-        JSON.stringify(out.signature_experiences),
-      ],
-    );
+async function persistEnrichment(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  out: EnrichmentOutput,
+): Promise<void> {
+  await patchHotelById(cfg, hotelId, {
+    long_description_sections: out.long_description_sections,
+    signature_experiences: out.signature_experiences,
   });
 }
 
@@ -160,8 +145,10 @@ Format de sortie : JSON strict.`;
 function buildUserPrompt(h: HotelInput): string {
   const lines: string[] = [];
   lines.push(`Hôtel : ${h.name}`);
-  lines.push(`Statut : ${h.is_palace ? 'Palace Atout France' : `${h.stars}★`}`);
-  lines.push(`Ville : ${h.city} (${h.region})`);
+  lines.push(`Statut : ${h.is_palace ? 'Palace Atout France' : `${h.stars ?? 5}★`}`);
+  lines.push(
+    `Ville : ${h.region !== null && h.region.length > 0 ? `${h.city} (${h.region})` : h.city}`,
+  );
   lines.push('');
   if (typeof h.description_fr === 'string' && h.description_fr.length > 0) {
     lines.push('### Description courte existante');
@@ -275,7 +262,8 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
-  const hotels = await listHotels(args.slug, args.force);
+  const cfg = loadRestConfig();
+  const hotels = await listHotels(cfg, args.slug, args.force);
   console.log(`Found ${hotels.length} hotel(s) to enrich.`);
   let ok = 0;
   let fail = 0;
@@ -292,7 +280,7 @@ async function main(): Promise<void> {
       console.log(
         `${tag} ✓ sections=${out.long_description_sections.length}, exp=${out.signature_experiences.length}, words_fr≈${wordsFr} (${Date.now() - t0} ms)`,
       );
-      await persistEnrichment(h.id, out);
+      await persistEnrichment(cfg, h.id, out);
       console.log(`${tag} ✓ persisted`);
       ok += 1;
       await new Promise((r) => setTimeout(r, 1200));
