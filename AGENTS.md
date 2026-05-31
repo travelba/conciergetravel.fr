@@ -113,14 +113,44 @@ across the full catalogue before touching photos** (`.cursor/skills/photo-pipeli
 between a written-content chantier and a photo chantier, **pick the
 written one**.
 
-Catalogue snapshot (refreshed 2026-05-31 — post Akelarre flip + blockers cleared):
+Catalogue snapshot (refreshed 2026-05-31 — post Track A geographic rankings):
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
 | `hotels`             | 2219  | **2219**  | 0     |
-| `editorial_rankings` | 220   | **209**   | 11    |
+| `editorial_rankings` | 220   | **216**   | 4     |
 | `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
+
+**Track A — 7 geographic rankings published 2026-05-31**:
+
+| Slug                                   | Lieu scope | Entries | FAQ | Sections | Words  |
+| -------------------------------------- | ---------- | ------- | --- | -------- | ------ |
+| `meilleurs-hotels-emirats-arabes-unis` | pays (AE)  | 10      | 14  | 7        | 8 099  |
+| `meilleurs-hotels-mexique`             | pays (MX)  | 10      | 12  | 6        | 7 193  |
+| `meilleurs-hotels-rome`                | ville      | 8       | 12  | 7        | 7 542  |
+| `meilleurs-hotels-venise`              | ville      | 8       | 13  | 8        | 7 212  |
+| `meilleurs-hotels-prague`              | ville      | 8       | 12  | 7        | 6 967  |
+| `meilleurs-hotels-marais`              | quartier   | 5       | 12  | 7        | 6 448  |
+| `meilleurs-hotels-reims`               | ville      | 5       | 12  | 7        | 6 865  |
+| **Total**                              |            | **54**  | 87  | 49       | 50 326 |
+
+Implementation: extended `combinator.LieuDef` to support a new `pays` scope
+with optional `countryCodes` field (matches hotels by `country_code` instead
+of `hotelCityKeys`), added 5 new `LIEUX` entries (Mexique, EAU, Rome,
+Venise, Prague), and 7 `MANUAL_OVERRIDES` for the freshly enabled slugs.
+The bulk pipeline (`run-rankings-v2-bulk.ts`) ran in 240 s + a single Rome
+retry (LLM had emitted a `justification_fr > 1200` chars on one entry).
+All 7 walks confirmed live on prod (Rome / Mexique / Marais snapshotted).
+
+**4 drafts remaining** (subject to follow-up):
+
+- `meilleurs-hotels-quartier-latin` — only 2 eligible hotels (under MIN_ELIGIBLE=3).
+- `meilleurs-hotels-tours` — only 1 eligible hotel.
+- `meilleurs-hotels-vexin` — 0 eligible hotels (scaffold artefact).
+- `classement-travel-leisure-worlds-best-2025` — 84 authentic entries, needs a
+  bespoke enricher that only writes `editorial_sections` + `axes` without
+  touching entries (`push-ranking-v2.ts` does delete-and-replace today).
 
 Of the 2219 published hotels: see the per-country breakdown in
 `apps/web/src/lib/catalogue-stats.ts` (single source of truth) — the
@@ -448,7 +478,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-27: 1367 hotels (**615 published across 91 countries** — 435 Relais & Châteaux among them; 752 drafts), 290 rankings (205 published), 86 editorial guides (50 published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 220 rankings (216 published, 4 thin drafts left), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

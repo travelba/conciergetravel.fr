@@ -48,6 +48,7 @@ const TARGET_LENGTH_BY_LIEU_SCOPE: Readonly<Record<LieuDef['scope'], number>> = 
   station: 8,
   departement: 8,
   monde: 10,
+  pays: 10,
 };
 
 // ─── Eligibility predicates ──────────────────────────────────────────────
@@ -56,6 +57,14 @@ const lc = (s: string): string => s.toLowerCase();
 
 function lieuMatches(h: HotelCatalogRow, lieu: LieuDef): boolean {
   if (lieu.slug === 'france') return true;
+  // 2026-05-31 — country scope: a hotel matches when its `country_code`
+  // is in the lieu's `countryCodes` list. Used by international country
+  // rankings (`meilleurs-hotels-mexique`, `-emirats-arabes-unis`, …).
+  // City keys are ignored when a country list is set.
+  if (lieu.countryCodes !== undefined && lieu.countryCodes.length > 0) {
+    const cc = (h.country_code ?? '').toUpperCase();
+    return lieu.countryCodes.some((target) => target.toUpperCase() === cc);
+  }
   const c = lc(h.city);
   const cityMatch = lieu.hotelCityKeys.some((k) => c === lc(k) || c.includes(lc(k)));
   if (!cityMatch) return false;
@@ -466,6 +475,112 @@ const MANUAL_OVERRIDES: readonly ManualOverride[] = [
       saison: 'toute-annee',
     },
     kind: 'thematic',
+  },
+
+  // ─── 2026-05-31 — Back-fill of international + sub-Paris scaffold
+  // rankings whose draft rows pre-existed in Supabase but whose slugs
+  // were absent from the auto matrix. Each entry pins the canonical
+  // slug + the axes the LLM should reason about. Country-scope axes
+  // rely on `countryCodes` in `axes.ts`. City-scope and arrondissement
+  // axes use the existing LieuDef registered in `axes.ts`.
+
+  // Geographic — cities outside France.
+  {
+    slug: 'meilleurs-hotels-rome',
+    titleFr: 'Les meilleurs hôtels de Rome',
+    titleEn: 'The best hotels in Rome',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'rome', label: 'Rome' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-venise',
+    titleFr: 'Les meilleurs hôtels de Venise',
+    titleEn: 'The best hotels in Venice',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'venise', label: 'Venise' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-prague',
+    titleFr: 'Les meilleurs hôtels de Prague',
+    titleEn: 'The best hotels in Prague',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'prague', label: 'Prague' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // Geographic — countries.
+  {
+    slug: 'meilleurs-hotels-mexique',
+    titleFr: 'Les meilleurs hôtels du Mexique',
+    titleEn: 'The best hotels in Mexico',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'pays', slug: 'mexique', label: 'Mexique' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-emirats-arabes-unis',
+    titleFr: 'Les meilleurs hôtels des Émirats arabes unis',
+    titleEn: 'The best hotels in the United Arab Emirates',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'pays', slug: 'emirats-arabes-unis', label: 'Émirats arabes unis' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // Geographic — French cities not yet covered.
+  {
+    slug: 'meilleurs-hotels-reims',
+    titleFr: 'Les meilleurs hôtels de Reims',
+    titleEn: 'The best hotels in Reims',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'reims', label: 'Reims' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // Geographic — Paris quartier (Marais maps to 75003 + 75004).
+  {
+    slug: 'meilleurs-hotels-marais',
+    titleFr: 'Les meilleurs hôtels du Marais (Paris)',
+    titleEn: 'The best hotels in Le Marais (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'marais', label: 'Le Marais (Paris)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
   },
 ];
 

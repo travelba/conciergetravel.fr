@@ -194,7 +194,8 @@ function classify(entry: ScaffoldPlanEntry): ScaffoldClassifiedEntry | null {
     | 'ville'
     | 'arrondissement'
     | 'station'
-    | 'monde' = 'france';
+    | 'monde'
+    | 'pays' = 'france';
 
   // Priority 1: explicit Paris arrondissement (paris-N).
   const arrdtMatch = /^paris-(\d{1,2})$/u.exec(tailCore);

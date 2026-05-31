@@ -48,6 +48,7 @@ export const LIEU_SCOPES = [
   'arrondissement',
   'station',
   'monde',
+  'pays',
 ] as const;
 export type LieuScope = (typeof LIEU_SCOPES)[number];
 
@@ -76,6 +77,17 @@ export interface LieuDef {
    * May 19, 2026 — A2 Yonder slug alignment).
    */
   readonly postalCodePrefixes?: readonly string[];
+  /**
+   * Optional ISO 3166-1 alpha-2 country code(s) used to scope a lieu
+   * to an entire country (e.g. Mexico, UAE). When present, the lieu
+   * matches any hotel whose `country_code` is in the list, regardless
+   * of `hotelCityKeys`. This is how `meilleurs-hotels-mexique` or
+   * `meilleurs-hotels-emirats-arabes-unis` get every published hotel
+   * from MX / AE without enumerating each city. Introduced 2026-05-31
+   * to back-fill the 11 international scaffold rankings dropped by
+   * the v2 combinator.
+   */
+  readonly countryCodes?: readonly string[];
 }
 
 export const LIEUX: readonly LieuDef[] = [
@@ -671,6 +683,44 @@ export const LIEUX: readonly LieuDef[] = [
     scope: 'arrondissement',
     hotelCityKeys: ['paris'],
     postalCodePrefixes: ['75007', '75015', '75016'],
+  },
+
+  // ─── 2026-05-31 — International scope (countries + iconic cities)
+  // Required to back-fill the 11 international scaffold rankings created
+  // by `scaffold-guides-rankings-intl.ts` whose slugs were not in the
+  // v2 matrix. Country scope uses `countryCodes`; city scope uses the
+  // standard `hotelCityKeys` flow.
+  {
+    slug: 'mexique',
+    label: 'Mexique',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['MX'],
+  },
+  {
+    slug: 'emirats-arabes-unis',
+    label: 'Émirats arabes unis',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['AE'],
+  },
+  {
+    slug: 'rome',
+    label: 'Rome',
+    scope: 'ville',
+    hotelCityKeys: ['rome', 'roma'],
+  },
+  {
+    slug: 'venise',
+    label: 'Venise',
+    scope: 'ville',
+    hotelCityKeys: ['venise', 'venice', 'venezia'],
+  },
+  {
+    slug: 'prague',
+    label: 'Prague',
+    scope: 'ville',
+    hotelCityKeys: ['prague'],
   },
 ];
 

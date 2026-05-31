@@ -211,6 +211,7 @@ async function loadChainHotels(chainKey: string): Promise<HotelCatalogRow[]> {
     is_palace: h.is_palace,
     city: h.city,
     region: h.region,
+    country_code: h.country_code ?? null,
     description_fr: h.description_fr ?? null,
     address: h.address ?? null,
     postal_code: h.postal_code ?? null,

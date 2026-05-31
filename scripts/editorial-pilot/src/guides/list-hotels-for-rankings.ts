@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   await client.connect();
   try {
     const r = await client.query(
-      `select id, slug, slug_en, name, name_en, stars, is_palace, city, region,
+      `select id, slug, slug_en, name, name_en, stars, is_palace, city, region, country_code,
               description_fr, address, postal_code, latitude, longitude
        from public.hotels
        where is_published = true
@@ -45,6 +45,7 @@ async function main(): Promise<void> {
       is_palace: row.is_palace,
       city: row.city,
       region: row.region,
+      country_code: row.country_code,
       description_fr: row.description_fr,
       address: row.address,
       postal_code: row.postal_code,
