@@ -42,6 +42,7 @@ import { fileURLToPath } from 'node:url';
 
 import { tavilySearch, type TavilyImage } from '../enrichment/tavily-client.js';
 import { loadPhotoEnv } from './env-photos.js';
+import { isBlocklistedHostname, trustedDomainsForHotel } from './parent-group-mapping.js';
 import { selectHotels, type SupabaseRestConfig } from './supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -58,6 +59,7 @@ interface HotelRow {
   readonly name: string;
   readonly city: string;
   readonly country_code: string | null;
+  readonly luxury_tier: string | null;
   readonly official_url: string | null;
   readonly gallery_count: number;
 }
@@ -122,6 +124,7 @@ interface RawHotelRow {
   readonly name: unknown;
   readonly city: unknown;
   readonly country_code: unknown;
+  readonly luxury_tier: unknown;
   readonly official_url: unknown;
   readonly gallery_images: unknown;
 }
@@ -133,7 +136,7 @@ async function fetchHotelMeta(
   // PostgREST `in.(a,b,c)` filter syntax.
   const inFilter = `slug=in.(${slugs.map((s) => encodeURIComponent(s)).join(',')})`;
   const raws = await selectHotels<RawHotelRow>(cfg, {
-    columns: 'slug,name,city,country_code,official_url,gallery_images',
+    columns: 'slug,name,city,country_code,luxury_tier,official_url,gallery_images',
     filters: [inFilter],
     limit: slugs.length,
   });
@@ -145,6 +148,7 @@ async function fetchHotelMeta(
       name: String(row.name),
       city: typeof row.city === 'string' ? row.city : '',
       country_code: typeof row.country_code === 'string' ? row.country_code : null,
+      luxury_tier: typeof row.luxury_tier === 'string' ? row.luxury_tier : null,
       official_url: typeof row.official_url === 'string' ? row.official_url : null,
       gallery_count: gallery.length,
     };
@@ -154,40 +158,25 @@ async function fetchHotelMeta(
 // ─── Domain inference ──────────────────────────────────────────────────────
 
 /**
- * Map of slug → extra trusted domains (parent group / consortium) that
- * should be included alongside the hotel's own `official_url`.
+ * Domain inference is centralised in `parent-group-mapping.ts` so
+ * `discover-press-kit-images.ts`, `upload-press-kit-images.ts` and
+ * `audit-photo-readiness.ts` share the same single source of truth.
  *
- * Rationale: many flagship properties have a thin marketing site (or
- * even none) and rely on their parent group or curation consortium
- * for the full press kit + gallery:
+ * The helper combines:
+ *   - the hotel's own `official_url` hostname
+ *   - the parent group's press-kit CDN(s) (Oetker, Hyatt, R&C, …)
+ *     resolved via {@link inferParentGroup} using `official_url` then
+ *     `luxury_tier` then a small slug-pinned override map.
  *
- *   - Le Bristol Paris  → Oetker Collection (`oetkercollection.com`)
- *   - Akelarre          → Relais & Châteaux (`relaischateaux.com`)
- *   - Alila Jabal Akhdar → Hyatt corporate (`hyatt.com`)
- *
- * Add new entries as needed when discovery returns 0 image for a
- * hotel's primary domain.
+ * Add a new parent group? Edit `parent-group-mapping.ts` once and
+ * every consumer benefits — no per-script forks.
  */
-const PARENT_DOMAINS: Readonly<Record<string, readonly string[]>> = {
-  'le-bristol-paris': ['oetkercollection.com', 'oetkerhotels.com'],
-  akelarre: ['relaischateaux.com', 'akelarre.net'],
-  'alila-jabal-akhdar': ['hyatt.com'],
-};
-
-function inferDomainList(slug: string, officialUrl: string | null): readonly string[] {
-  const domains = new Set<string>();
-  if (officialUrl) {
-    try {
-      const u = new URL(officialUrl);
-      domains.add(u.hostname.replace(/^www\./u, ''));
-    } catch {
-      // ignore — fall back to parent domains only
-    }
-  }
-  for (const d of PARENT_DOMAINS[slug] ?? []) {
-    domains.add(d);
-  }
-  return [...domains];
+function inferDomainList(
+  slug: string,
+  officialUrl: string | null,
+  luxuryTier: string | null,
+): readonly string[] {
+  return trustedDomainsForHotel({ slug, officialUrl, luxuryTier });
 }
 
 // ─── Discovery queries ─────────────────────────────────────────────────────
@@ -231,27 +220,10 @@ const REJECT_HINTS = [
 ];
 
 /**
- * Hard blocklist — these are NEVER official sources per `photo-quality.mdc`.
- * The hostname check uses substring match, so wildcards aren't necessary.
+ * Hostname blocklist (`HOSTNAME_BLOCKLIST_GLOBAL`) is centralised in
+ * `parent-group-mapping.ts`. Same source of truth for discovery,
+ * upload, and the catalogue audit.
  */
-const HOSTNAME_BLOCKLIST = [
-  'tripadvisor.com',
-  'tripadvisor.fr',
-  'tripadvisor.it',
-  'tripadvisor.co.uk',
-  'booking.com',
-  'expedia.',
-  'hotels.com',
-  'pinimg.com', // Pinterest CDN
-  'pinterest.',
-  'agoda.',
-  'kayak.',
-  'trivago.',
-  'fbcdn.net', // Facebook CDN — user-generated
-  'cdninstagram.com',
-  'instagram.com',
-  'twimg.com', // Twitter CDN
-];
 
 function extractExtension(url: string): string | null {
   try {
@@ -286,7 +258,7 @@ function getHostname(url: string): string {
 // ─── Discovery loop ────────────────────────────────────────────────────────
 
 async function discoverForHotel(hotel: HotelRow): Promise<DiscoveryReport> {
-  const domains = inferDomainList(hotel.slug, hotel.official_url);
+  const domains = inferDomainList(hotel.slug, hotel.official_url, hotel.luxury_tier);
   const queries = buildQueries(hotel);
 
   // url → { description, fromQueries[] }
@@ -365,8 +337,7 @@ function passesFilter(img: TavilyImage): boolean {
   const ext = extractExtension(img.url);
   if (ext === null || !IMAGE_EXTENSIONS.has(ext)) return false;
   if (looksLikeRejectedAsset(img.url)) return false;
-  const host = getHostname(img.url).toLowerCase();
-  if (HOSTNAME_BLOCKLIST.some((b) => host.includes(b))) return false;
+  if (isBlocklistedHostname(getHostname(img.url))) return false;
   return true;
 }
 
@@ -407,7 +378,7 @@ async function main(): Promise<void> {
 
   for (const hotel of ordered) {
     console.log(`\n[${hotel.slug}] (${hotel.name} — ${hotel.city}, ${hotel.country_code ?? '??'})`);
-    const domains = inferDomainList(hotel.slug, hotel.official_url);
+    const domains = inferDomainList(hotel.slug, hotel.official_url, hotel.luxury_tier);
     console.log(`  current gallery_count = ${hotel.gallery_count}`);
     console.log(`  official_url          = ${hotel.official_url ?? 'NONE'}`);
     console.log(

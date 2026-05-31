@@ -31,7 +31,9 @@ import {
   VISION_CATEGORIES,
   coverageCount,
   hotelNeedsCategorisation,
+  hotelNeedsScores,
   imagesNeedingCategory,
+  imagesNeedingScores,
   mergeVisionAnswers,
   type GalleryImage,
   type VisionAnswer,
@@ -86,6 +88,12 @@ interface Args {
   readonly dryRun: boolean;
   readonly includeDrafts: boolean;
   readonly force: boolean;
+  /**
+   * Re-classify only photos missing the `representativeness` score (the
+   * resumable "run on everything" mode). Cheaper than `--force` because
+   * already-scored photos are skipped, so a crashed run never re-pays.
+   */
+  readonly backfillScores: boolean;
   readonly concurrency: number;
   readonly maxPhotosPerHotel?: number;
 }
@@ -111,6 +119,7 @@ function parseArgs(argv: readonly string[]): Args {
     dryRun: map.has('dry-run'),
     includeDrafts: map.has('include-drafts'),
     force: map.has('force'),
+    backfillScores: map.has('backfill-scores'),
     concurrency: concRaw !== undefined ? Math.min(6, Math.max(1, concRaw)) : 3,
     ...(typeof slugRaw === 'string' ? { slug: slugRaw } : {}),
     ...(limitRaw !== undefined ? { limit: limitRaw } : {}),
@@ -247,7 +256,18 @@ async function runOnHotel(
   const gallery = row.gallery_images ?? [];
   const base = { slug: row.slug, name: row.name, coverageBefore: coverageCount(gallery) };
   try {
-    const targets = args.force ? gallery : imagesNeedingCategory(gallery);
+    // Target selection:
+    //  - --force          → every photo (full re-classification)
+    //  - --backfill-scores → photos missing a representativeness score
+    //                        (a superset of "missing category", since a row
+    //                        without a category was never scored either) —
+    //                        resumable, so a crashed run never re-pays
+    //  - default          → photos missing a category
+    const targets = args.force
+      ? gallery
+      : args.backfillScores
+        ? imagesNeedingScores(gallery)
+        : imagesNeedingCategory(gallery);
     const capped =
       args.maxPhotosPerHotel !== undefined ? targets.slice(0, args.maxPhotosPerHotel) : targets;
     if (capped.length === 0) {
@@ -359,7 +379,7 @@ async function main(): Promise<void> {
   };
 
   console.log(
-    `[vision] dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} force=${args.force} maxPhotos=${args.maxPhotosPerHotel ?? '∞'}`,
+    `[vision] dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} force=${args.force} backfillScores=${args.backfillScores} maxPhotos=${args.maxPhotosPerHotel ?? '∞'}`,
   );
 
   const filters: string[] = [];
@@ -376,9 +396,13 @@ async function main(): Promise<void> {
     order: 'slug.asc',
   });
 
-  const eligible = rows.filter((r) =>
-    hotelNeedsCategorisation(r.gallery_images ?? [], { force: args.force }),
-  );
+  const eligible = rows.filter((r) => {
+    const g = r.gallery_images ?? [];
+    if (hotelNeedsCategorisation(g, { force: args.force })) return true;
+    // In backfill mode, a fully-categorised hotel is still eligible if any
+    // photo lacks the newer representativeness/hero_suitable scores.
+    return args.backfillScores && hotelNeedsScores(g);
+  });
   const targets = args.limit !== undefined ? eligible.slice(0, args.limit) : eligible;
 
   console.log(

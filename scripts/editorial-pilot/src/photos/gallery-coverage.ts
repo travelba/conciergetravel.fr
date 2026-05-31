@@ -107,6 +107,22 @@ export function imagesNeedingCategory(gallery: readonly GalleryImage[]): readonl
   );
 }
 
+/**
+ * Photos still missing the `representativeness` editorial score — the ones
+ * a `--backfill-scores` pass must (re)classify so `curate-top-photos` can
+ * rank them. A photo categorised by an older Vision pass (category only,
+ * no representativeness/hero_suitable) is included here.
+ */
+export function imagesNeedingScores(gallery: readonly GalleryImage[]): readonly GalleryImage[] {
+  return gallery.filter((img) => typeof img.representativeness !== 'number');
+}
+
+/** True when at least one photo still lacks a `representativeness` score. */
+export function hotelNeedsScores(gallery: readonly GalleryImage[]): boolean {
+  if (gallery.length === 0) return false;
+  return imagesNeedingScores(gallery).length > 0;
+}
+
 export interface EligibilityOptions {
   /** Re-classify every photo regardless of current state. */
   readonly force?: boolean;
