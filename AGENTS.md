@@ -215,13 +215,29 @@ Two tightening sweeps ran across the catalogue and closed substantial
 gaps without re-touching photos or APIs (full Phase 6 still frozen).
 The pipelines + their state are now part of the standard toolbox.
 
-| Metric                                            | Before               | After                    | Delta |
-| ------------------------------------------------- | -------------------- | ------------------------ | ----- |
-| `factual_summary_fr` in CDC ideal band [130, 150] | ~1014 / 2218         | **1516 / 2218 (68 %)**   | +502  |
-| `factual_summary_en` in CDC ideal band [130, 150] | ~1014 / 2218         | **1548 / 2218 (70 %)**   | +534  |
-| `meta_desc_{fr,en}` in 140-170 band               | 2216 / 2218 (99.9 %) | 2218 / 2218 (100 %)      | +2    |
-| `external_sources` populated (≥ 1 entry)          | 26 / 2218 (1.2 %)    | **1370 / 2218 (61.8 %)** | +1344 |
-| `external_sources` with 5+ provenance entries     | 0                    | 409 (18.4 %)             | +409  |
+| Metric                                            | Before               | After 1st wave       | After 2nd wave (12:30 PM) | Total Δ |
+| ------------------------------------------------- | -------------------- | -------------------- | ------------------------- | ------- |
+| `factual_summary_fr` in CDC ideal band [130, 150] | ~1014 / 2218         | 1516 / 2218 (68 %)   | **1903 / 2218 (86 %)**    | +889    |
+| `factual_summary_en` in CDC ideal band [130, 150] | ~1014 / 2218         | 1548 / 2218 (70 %)   | **1881 / 2218 (85 %)**    | +867    |
+| `factual_summary_fr` above 150 (over-band)        | 41                   | 41                   | **2**                     | -39     |
+| `factual_summary_en` above 150 (over-band)        | 61                   | 61                   | **1**                     | -60     |
+| `meta_desc_{fr,en}` in 140-170 band               | 2216 / 2218 (99.9 %) | 2218 / 2218 (100 %)  | 2218 / 2218 (100 %)       | +2      |
+| `external_sources` populated (≥ 1 entry)          | 26 / 2218 (1.2 %)    | 1370 / 2218 (61.8 %) | 1370 / 2218 (61.8 %)      | +1344   |
+| `external_sources` with 5+ provenance entries     | 0                    | 409 (18.4 %)         | 409 (18.4 %)              | +409    |
+
+**2nd wave fix recap (2026-05-31 commit `497a6b6`)** — the `--cdc-
+tightening` re-run had previously only landed 10 % of outputs in the
+[130, 150] sweet spot. Root cause: the canonical FR example in
+`prompts/hotel-factual-summary.md` was 118 chars and explicitly
+annotated `(118 caractères ✅)`, biasing the LLM toward sub-130
+outputs regardless of the stated rule. Replaced with a 141-char
+example + warning paragraph + added optional `idealBand` retry hint
+to the generator with safe fallback to the last in-envelope attempt.
+Dry-run hit rate jumped from 1/10 to 8/10. The 313 FR / 336 EN rows
+still under 130 chars carry the "thin source data" signature (Ritz-
+Carlton APAC, Belmond, etc.) — they need Tavily / Google Places
+enrichment of the underlying `description_fr/en` before another
+tightening pass can move them.
 
 **Tooling capitalised** (now reusable across the project):
 
