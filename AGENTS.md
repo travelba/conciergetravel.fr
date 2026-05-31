@@ -118,9 +118,14 @@ Catalogue snapshot (refreshed 2026-05-31 — post Track A geographic rankings):
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
 | `hotels`             | 2219  | **2219**  | 0     |
-| `editorial_rankings` | 220   | **217**   | 3     |
+| `editorial_rankings` | 217   | **217**   | 0     |
 | `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
+
+**Catalogue 100% published across all 4 editorial surfaces** as of
+2026-05-31 17:58. Last remaining drafts (Quartier Latin, Tours, Vexin)
+deleted with rationale in
+`docs/audits/thin-ranking-drafts-deleted-2026-05-31.md`.
 
 **Track A — 7 geographic rankings published 2026-05-31**:
 
@@ -143,11 +148,9 @@ The bulk pipeline (`run-rankings-v2-bulk.ts`) ran in 240 s + a single Rome
 retry (LLM had emitted a `justification_fr > 1200` chars on one entry).
 All 7 walks confirmed live on prod (Rome / Mexique / Marais snapshotted).
 
-**3 drafts remaining** (subject to follow-up):
-
-- `meilleurs-hotels-quartier-latin` — only 2 eligible hotels (under MIN_ELIGIBLE=3).
-- `meilleurs-hotels-tours` — only 1 eligible hotel.
-- `meilleurs-hotels-vexin` — 0 eligible hotels (scaffold artefact).
+**0 drafts remaining** — the 3 thin scaffold drafts (Quartier Latin,
+Tours, Vexin) were deleted 2026-05-31 (rationale + future-paths in
+`docs/audits/thin-ranking-drafts-deleted-2026-05-31.md`).
 
 **Curated ranking T+L 2025 published 2026-05-31 17:56**:
 
@@ -491,7 +494,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 220 rankings (217 published, 3 thin drafts left), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 217 rankings (all published), 99 editorial guides (all published), 20 itineraries (all published). Catalogue is 100% published across all 4 editorial surfaces — zero drafts. Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):
