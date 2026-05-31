@@ -294,10 +294,39 @@ export async function generateDescriptionExtend(
     // > 28-word openings; without this exception the model loops
     // and exhausts retries.
     let specificHint = '';
+    let openingRule =
+      'Preserve the original opening (first 50 tokens). Light rewording is fine; outright rewrites are not.';
+    const reason = lastAttempt?.reason ?? '';
+    const isLongOpening = reason.includes('> 28 words') || reason.includes('sentence(s) > 28');
+    // Detect oscillation: when the model has already hit BOTH the
+    // length cap AND the sentence-length cap in previous attempts, it
+    // is ping-ponging between the two. The corrective must mention the
+    // joint constraint loudly so the model holds both at once.
+    const historyHasLength = attempts.some(
+      (a) => a.reason.includes('too long') || a.reason.includes('too short'),
+    );
+    const historyHasWords = attempts.some(
+      (a) => a.reason.includes('> 28 words') || a.reason.includes('sentence(s) > 28'),
+    );
+    const isOscillating = attempts.length >= 2 && historyHasLength && historyHasWords;
     if (lastAttempt) {
-      const reason = lastAttempt.reason;
-      if (reason.includes('> 28 words') || reason.includes('sentence(s) > 28')) {
-        specificHint = `\nIMPORTANT — the "preserve opening" rule does NOT forbid splitting a > 28-word opening sentence into TWO shorter sentences. The content must stay; the breakpoint may move. If the original opening was a single 34-word sentence, output it as two ~17-word sentences with the same meaning.`;
+      if (isLongOpening) {
+        // Iconic palaces (Cap-Eden-Roc, Airelles Saint-Tropez, Sources de
+        // Cheverny, Hôtel des Berges…) ship with rhetorical > 28-word
+        // openings. Empirically, gpt-5.4 holds "preserve opening" stronger
+        // than the 28-word cap and loops indefinitely. Two changes here:
+        //   1. Soften the "preserve opening" rule to authorise a split.
+        //   2. Hoist a concrete cut example to the TOP of the corrective
+        //      block so the model sees the action before reading the
+        //      length envelope.
+        openingRule =
+          "Preserve the original opening's CONTENT (the first ~50 tokens of meaning) but FEEL FREE TO SPLIT the opening sentence into two shorter sentences when it exceeds 28 words. Same facts, different breakpoint.";
+        const offending = reason.match(/CUT THIS (\d+)-word sentence IN TWO: "([^"]+)/u);
+        const exampleBlock =
+          offending !== null
+            ? `\nCONCRETE EXAMPLE — the rejected opening is ${offending[1]} words:\n  "${offending[2]?.slice(0, 180) ?? ''}…"\nSplit it after the first natural breath (a comma, a colon, or the locative clause). Example pattern:\n  Before: "Nestled in the heart of the Loire Valley, between the majestic Château de Chambord and the elegance of Chenonceau, Les Sources de Cheverny reveals itself amidst a verdant environment." (29 words)\n  After:  "Nestled in the heart of the Loire Valley, between the majestic Château de Chambord and the elegance of Chenonceau. Les Sources de Cheverny reveals itself amidst a verdant environment." (15 + 13 words)`
+            : '';
+        specificHint = `\n=== PRIORITY FIX ===\nThe opening sentence is too long. SPLIT IT IN TWO SHORT SENTENCES. The "preserve opening" rule applies to CONTENT, not to sentence boundary. Keep every fact, every name, every distance — just add a period in the middle.${exampleBlock}`;
       } else if (reason.includes('too long')) {
         specificHint = `\nThe previous attempt OVERFLOWED ${DESCRIPTION_EXTEND_MAX_CHARS} chars. CUT one secondary clause from the middle paragraph; keep operational facts.`;
       } else if (reason.includes('too short')) {
@@ -305,11 +334,22 @@ export async function generateDescriptionExtend(
       } else if (reason.includes('opening drift')) {
         specificHint = `\nThe previous EN/FR rewrote the opening too aggressively. Keep the first 30-40 words of the original almost verbatim; only later paragraphs may be reworked.`;
       }
+      if (isOscillating) {
+        // The model corrects one constraint and then violates the other.
+        // Force it to plan for BOTH simultaneously before generating.
+        specificHint = `\n=== OSCILLATION DETECTED ===\nPrior attempts alternated between "too long" and "> 28 words". You MUST satisfy BOTH constraints AT THE SAME TIME:\n  1. Each locale strictly ${DESCRIPTION_EXTEND_MIN_CHARS}-${DESCRIPTION_EXTEND_MAX_CHARS} chars (aim 1000-1200).\n  2. NO sentence exceeds 28 words ANYWHERE (opening, middle, end).\nStrategy: prefer SHORT, PUNCHY sentences (12-20 words). If you list 4 experiences in one sentence, split into two. If you describe a location in one long clause, split after the comma.${specificHint}`;
+      }
     }
+    // Layout: when the failure is a long opening, the PRIORITY FIX block
+    // (with example) lands above the length envelope; otherwise the legacy
+    // order is preserved. Empirical observation 2026-05-31: gpt-5.4 reads
+    // the corrective top-down and applies the first actionable instruction.
     const correctiveSuffix =
       lastAttempt === undefined
         ? ''
-        : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${lastAttempt.raw}\nReason: ${lastAttempt.reason}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. Preserve the original opening (first 50 tokens).${specificHint}\nOutput JSON only.`;
+        : isLongOpening
+          ? `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nReason: ${lastAttempt.reason}${specificHint}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. ${openingRule}\nOutput JSON only.`
+          : `\n\n=== ATTEMPT ${attempts.length} REJECTED ===\nPrevious output:\n${lastAttempt.raw}\nReason: ${lastAttempt.reason}\n\n=== ACTION ===\nCRITICAL: each locale MUST be between ${DESCRIPTION_EXTEND_MIN_CHARS} and ${DESCRIPTION_EXTEND_MAX_CHARS} characters. Aim for the 1000-1200 sweet spot. CUT redundant phrasing. ${openingRule}${specificHint}\nOutput JSON only.`;
 
     const result = await client.call({
       systemPrompt,
