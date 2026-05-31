@@ -33,12 +33,51 @@ export interface CloudinaryClientConfig {
 }
 
 /**
- * Bytes ceiling for a single upload. The Cloudinary free tier hard-caps
- * single-upload at 10 MB; paid tiers go higher but we keep 10 MB as a
- * safe default because Commons sometimes ships 30-40 MB originals
- * (we always request the 1600px thumb so it should fit).
+ * Bytes ceiling for a single upload. The Plus tier caps single-upload at
+ * 20 MB (`media_limits.image_max_size_bytes`). Upstream integrations
+ * already hand us sized thumbs (Commons 1600px, Places maxWidthPx) so
+ * real payloads sit well under this, but we guard before uploading to
+ * avoid wasting a round-trip on a pathological original.
  */
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
+/**
+ * Ceiling on the *raw* source bytes we fetch. We upload the bytes as a
+ * base64 data URI, which inflates the POST payload by ~33 %, so the raw
+ * original must stay under ≈14.5 MB to land below Cloudinary's 20 MB POST
+ * limit. Hotel thumbs (Commons 1600px, Places) are far smaller; this only
+ * drops pathological full-resolution Commons originals.
+ */
+const MAX_SOURCE_BYTES = 14 * 1024 * 1024;
+
+/**
+ * User-Agent for fetching source bytes ourselves.
+ *
+ * Root-cause (2026-05-31): passing a Commons URL to Cloudinary's remote
+ * fetcher made *Wikimedia* return `429 Too Many Requests` (Cloudinary's
+ * shared egress IP/UA is rate-limited by Commons). The SDK surfaced this
+ * as `http_code: 400, message: "...429 Too Many Requests"`, which our
+ * mapper read as a Cloudinary `rate_limited` — a red herring that no plan
+ * upgrade could fix. Fetching the bytes ourselves with a descriptive,
+ * policy-compliant User-Agent (Wikimedia UA policy) returns 200, and we
+ * then hand the bytes to Cloudinary (no second source fetch).
+ */
+const SOURCE_UA =
+  'MyConciergeHotelBot/1.0 (+https://myconciergehotel.com; contact: tech@myconciergehotel.com)';
+
+/** Per-attempt timeout for the source byte fetch. */
+const SOURCE_FETCH_TIMEOUT_MS = 20_000;
+
+/** Retries when the SOURCE host (Commons, lh3, …) throttles or 5xxs. */
+const SOURCE_FETCH_RETRIES = 4;
+
+/** Parses a `Retry-After` header (delta-seconds form) into milliseconds. */
+function parseRetryAfterMs(header: string | null): number | null {
+  if (header === null) return null;
+  const secs = Number.parseInt(header.trim(), 10);
+  if (Number.isFinite(secs) && secs >= 0) return Math.min(secs, 60) * 1000;
+  return null;
+}
 
 /**
  * Allowed formats. Cloudinary detects them from the byte stream — we
@@ -182,6 +221,72 @@ function sleep(ms: number): Promise<void> {
 const RATE_LIMIT_RETRIES = 5;
 
 /**
+ * Fetches the source image bytes ourselves and returns them as a base64
+ * data URI ready to hand to Cloudinary's uploader.
+ *
+ * This is the surface that actually gets throttled (Commons 429), so the
+ * exponential back-off + `Retry-After` handling lives here, not around the
+ * Cloudinary call. A `429`/`5xx` that survives all retries is reported as
+ * `rate_limited`; a `404`/`410` as `source_unreachable`; an oversize body
+ * as `asset_too_large` (checked before the upload round-trip).
+ */
+async function fetchSourceBytes(
+  url: string,
+): Promise<Result<{ readonly dataUri: string; readonly bytes: number }, CloudinaryError>> {
+  let lastMessage = 'source fetch failed';
+  for (let attempt = 0; attempt <= SOURCE_FETCH_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, SOURCE_FETCH_TIMEOUT_MS);
+    try {
+      const resp = await fetch(url, {
+        headers: { 'User-Agent': SOURCE_UA, Accept: 'image/*' },
+        signal: controller.signal,
+        redirect: 'follow',
+      });
+
+      if (resp.status === 429 || resp.status >= 500) {
+        lastMessage = `source returned ${resp.status}`;
+        if (attempt === SOURCE_FETCH_RETRIES) return err({ kind: 'rate_limited' });
+        const retryAfter = parseRetryAfterMs(resp.headers.get('retry-after'));
+        const backoff = 1500 * 2 ** attempt + Math.floor(Math.random() * 500);
+        await sleep(retryAfter ?? backoff);
+        continue;
+      }
+      if (resp.status === 404 || resp.status === 410) {
+        return err({ kind: 'source_unreachable', url });
+      }
+      if (!resp.ok) {
+        return err({ kind: 'unknown', message: `source http ${resp.status}` });
+      }
+
+      const contentType = resp.headers.get('content-type') ?? 'image/jpeg';
+      if (!contentType.startsWith('image/')) {
+        return err({
+          kind: 'unsupported_format',
+          format: contentType.split(';')[0] ?? contentType,
+        });
+      }
+      const arrayBuffer = await resp.arrayBuffer();
+      const bytes = arrayBuffer.byteLength;
+      if (bytes === 0) return err({ kind: 'source_unreachable', url });
+      if (bytes > MAX_SOURCE_BYTES) return err({ kind: 'asset_too_large', bytes });
+
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      return ok({ dataUri: `data:${contentType};base64,${base64}`, bytes });
+    } catch (e) {
+      lastMessage = e instanceof Error ? e.message : 'source fetch threw';
+      if (attempt === SOURCE_FETCH_RETRIES) return err({ kind: 'source_unreachable', url });
+      await sleep(1500 * 2 ** attempt);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return err({ kind: 'unknown', message: lastMessage.slice(0, 200) });
+}
+
+/**
  * Upload an image from a public URL into the hotel folder.
  *
  * Idempotent: if a public_id already exists, Cloudinary overwrites
@@ -220,10 +325,16 @@ export async function uploadFromUrl(
   }
   const context = contextParts.join('|');
 
+  // Fetch the source bytes ourselves (policy-compliant UA) so Cloudinary
+  // never re-fetches the source — this is what was triggering Commons 429.
+  const fetched = await fetchSourceBytes(input.sourceUrl);
+  if (!fetched.ok) return err(fetched.error);
+  const uploadPayload = fetched.value.dataUri;
+
   let lastError: CloudinaryError | null = null;
   for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
     try {
-      const sdkResult = await cloudinaryV2.uploader.upload(input.sourceUrl, {
+      const sdkResult = await cloudinaryV2.uploader.upload(uploadPayload, {
         folder,
         public_id: publicIdShort,
         overwrite: true,
