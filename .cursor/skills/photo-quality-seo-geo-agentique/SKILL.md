@@ -297,23 +297,104 @@ pnpm build:agent-skills
 
 ## 8. Anti-patterns bloquants
 
-| Anti-pattern                                                                                                                | Conséquence                                                                          | Résolution                                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `alt=""` ou `alt="photo"`                                                                                                   | Google ignore l'ImageObject, LLM ne cite pas                                         | Script LLM seeding                                                                              |
-| `caption` absent dans ImageObject                                                                                           | Perte totale du signal GEO LLM                                                       | Obligatoire dans hotelJsonLd                                                                    |
-| `next/image` sur hero/gallery                                                                                               | Bypass Cloudinary CDN, LCP +300–800 ms                                               | `buildCloudinarySrc` + `<img>`                                                                  |
-| URL Pinterest dans gallery_images                                                                                           | Risque légal + instabilité CDN                                                       | Sourcer via Wikimedia/press kit                                                                 |
-| `representativeOfPage: true` sur N > 1                                                                                      | Google ignore le signal hero                                                         | Un seul par page                                                                                |
-| `bestRating: '10'` dans AggregateRating                                                                                     | Hard Rule seo-geo.mdc                                                                | Toujours `'5'`, `ratingValue × 2` en UI                                                         |
-| Catégorie `events` absente si MICE présent                                                                                  | Bloc 14 orphelin                                                                     | ≥ 2 photos events si `mice_info` non null                                                       |
-| LCP hero > 2.5 s mobile                                                                                                     | Core Web Vitals rouge, déclassement GSC                                              | `fetchpriority="high"` + LQIP + `w_2400`                                                        |
-| Ajouter `e_improve` / `e_sharpen` / `e_saturation` / `e_contrast` / `e_auto_color` au `SIGNATURE_TRANSFORM` sans nouvel ADR | Effet invisible sur photos officielles + divergence GEO + LCP +200-400 ms cold start | Garder Baseline ADR-0024 ; pour explorer un filtre, rebuild la page `/dev/photo-filter-preview` |
-| Hardcoder un transform Cloudinary dans un composant (`<img src="…/upload/w_1230,h_820,…/…"/>`)                              | Drift entre composants, cache CDN fragmenté                                          | Importer `HERO_TRANSFORM` / `GALLERY_TRANSFORM` / `THUMBNAIL_TRANSFORM` depuis `@mch/ui`        |
-| `q_auto:best` sur une page indexable                                                                                        | LCP +350 ms pour gain visuel imperceptible                                           | `q_auto` (la valeur par défaut de `SIGNATURE_TRANSFORM`)                                        |
+| Anti-pattern                                                                                                                | Conséquence                                                                                                    | Résolution                                                                                      |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `alt=""` ou `alt="photo"`                                                                                                   | Google ignore l'ImageObject, LLM ne cite pas                                                                   | Script LLM seeding                                                                              |
+| `caption` absent dans ImageObject                                                                                           | Perte totale du signal GEO LLM                                                                                 | Obligatoire dans hotelJsonLd                                                                    |
+| `next/image` sur hero/gallery                                                                                               | Bypass Cloudinary CDN, LCP +300–800 ms                                                                         | `buildCloudinarySrc` + `<img>`                                                                  |
+| URL Pinterest dans gallery_images                                                                                           | Risque légal + instabilité CDN                                                                                 | Sourcer via Wikimedia/press kit                                                                 |
+| `representativeOfPage: true` sur N > 1                                                                                      | Google ignore le signal hero                                                                                   | Un seul par page                                                                                |
+| `bestRating: '10'` dans AggregateRating                                                                                     | Hard Rule seo-geo.mdc                                                                                          | Toujours `'5'`, `ratingValue × 2` en UI                                                         |
+| Catégorie `events` absente si MICE présent                                                                                  | Bloc 14 orphelin                                                                                               | ≥ 2 photos events si `mice_info` non null                                                       |
+| LCP hero > 2.5 s mobile                                                                                                     | Core Web Vitals rouge, déclassement GSC                                                                        | `fetchpriority="high"` + LQIP + `w_2400`                                                        |
+| Ajouter `e_improve` / `e_sharpen` / `e_saturation` / `e_contrast` / `e_auto_color` au `SIGNATURE_TRANSFORM` sans nouvel ADR | Effet invisible sur photos officielles + divergence GEO + LCP +200-400 ms cold start                           | Garder Baseline ADR-0024 ; pour explorer un filtre, rebuild la page `/dev/photo-filter-preview` |
+| Hardcoder un transform Cloudinary dans un composant (`<img src="…/upload/w_1230,h_820,…/…"/>`)                              | Drift entre composants, cache CDN fragmenté                                                                    | Importer `HERO_TRANSFORM` / `GALLERY_TRANSFORM` / `THUMBNAIL_TRANSFORM` depuis `@mch/ui`        |
+| `q_auto:best` sur une page indexable                                                                                        | LCP +350 ms pour gain visuel imperceptible                                                                     | `q_auto` (la valeur par défaut de `SIGNATURE_TRANSFORM`)                                        |
+| Curation qui **exclut** le hero de `gallery_images` (le stocke seul dans `hero_image`)                                      | Perte des métadonnées hero (alt/caption/scores), curation **non idempotente** (le hero churne à chaque re-run) | Garder le hero en `gallery_images[0]` ; la page exclut l'index 0 du mosaïque/lightbox (cf. §9)  |
 
 ---
 
-## 9. Références croisées
+## 9. Curation TOP 5 — hero + 4 tuiles (`curate-top-photos.ts`)
+
+La sélection des 5 photos affichées en haut de fiche (hero + 4 tuiles
+mosaïque) est produite par
+[`scripts/editorial-pilot/src/photos/curate-top-photos.ts`](../../scripts/editorial-pilot/src/photos/curate-top-photos.ts)
+(+ helpers purs `pickHero` / `selectTop4` / `orderGallery` dans
+[`gallery-coverage.ts`](../../scripts/editorial-pilot/src/photos/gallery-coverage.ts)).
+C'est une passe **DB-only** (aucun appel Cloudinary/OpenAI) qui lit les
+scores Vision déjà écrits.
+
+### Les deux scores Vision qui pilotent la sélection
+
+Le prompt `categorize-with-vision.ts` produit, en plus de `quality_score`
+(technique : netteté, compo, lumière), deux signaux **éditoriaux** :
+
+- `representativeness` (1-10) — « cette photo donne-t-elle tout de suite
+  la _tendance_ / le caractère de l'hôtel ? ». Pondéré **×2** dans
+  `combinedScore = representativeness*2 + quality_score` : le TOP 5 doit
+  _communiquer l'âme_ de l'hôtel, pas juste être net.
+- `hero_suitable` (bool) — cadrage large + sujet emblématique, éligible
+  au slot hero.
+
+`pickHero` : cascade `hero_suitable` ∈ catégorie signature
+(`exterior/lobby/pool/view/dining/exterior`) → tout `hero_suitable` → top
+`combinedScore`. `selectTop4` : 4 catégories distinctes (hors catégorie
+du hero) par priorité, puis remplissage au score.
+
+### Règle d'or — le hero reste DANS `gallery_images[0]`
+
+`sync-hotel-photos.ts` historiquement **excluait** le hero de
+`gallery_images` (`galleryWithoutHero`). **Ne pas reproduire ce pattern
+dans la curation.** Stocker le hero uniquement comme `public_id` nu dans
+`hotels.hero_image` a deux conséquences graves :
+
+1. **Perte de métadonnées** — `alt_fr/en`, `caption_fr/en`, `category`,
+   `representativeness`, `hero_suitable` vivent sur la _ligne galerie_.
+   Exclure le hero les jette → la page perd l'alt/caption du hero pour le
+   JSON-LD `ImageObject` + l'a11y (fallback au nom de l'hôtel).
+2. **Non-idempotence** — au re-run, `combinePool` replie le hero nu (score
+   0, pas `hero_suitable`) ; une autre photo gagne donc le slot et le hero
+   **churne à l'infini** (writes DB + revalidation ISR + `lastmod` sitemap
+   inutiles).
+
+`orderGallery` renvoie donc `orderedGallery = [hero, ...top4, ...rest]`
+(hero **inclus** à l'index 0). Conséquences côté rendu
+([`hotel/[slug]/page.tsx`](../../apps/web/src/app/%5Blocale%5D/hotel/%5Bslug%5D/page.tsx)) :
+le hero est rendu séparément (`heroDescriptor`), donc on **exclut
+l'index 0** du mosaïque + lightbox (`galleryTiles = galleryImages.filter(
+g => g.publicId !== heroPublicId)`) et des 4 tuiles JSON-LD (le hero est
+émis une seule fois, avec `representativeOfPage: true`).
+
+### Garde-fou intégrité (perte de photos silencieuse)
+
+`orderGallery` indexe par `public_id` dans une `Map`. Une galerie avec
+`public_id` manquant (lignes legacy pré-Cloudinary stockées sous `url`,
+CDN interdits TripAdvisor/Instagram/momondo…) ou dupliqué ferait
+**collapser** des entrées → PATCH d'une galerie **rétrécie** (perte de
+photos). `curate-top-photos.ts` **skip** donc tout hôtel dont une entrée
+n'a pas de `public_id` string non vide (ou en a un dupliqué). Ces ~320
+fiches relèvent du chantier Phase-2 de re-sourcing, pas de la curation.
+
+### Mode `--backfill-scores` (run « sur tout » reprenable)
+
+Pour scorer `representativeness`/`hero_suitable` sur tout le catalogue
+sans re-payer en cas d'interruption : `pnpm photos:categorize:backfill`
+(flag `--backfill-scores`). Éligibilité = hôtels dont ≥ 1 photo manque
+`representativeness` ; cibles = photos sans `representativeness` **ET**
+avec un `public_id` Cloudinary utilisable (les lignes legacy sans
+`public_id` sont ignorées — inutile d'envoyer une URL 404 à OpenAI).
+Coût réel observé 2026-05-31 : ~9 000 photos scorées pour ≈ 6,3 $.
+
+### Séquence de convergence (si le hero a déjà été exclu par un run antérieur)
+
+Si une passe a déjà exclu les heros (métadonnées perdues) : (1) re-curate
+(ré-injecte le hero nu dans la galerie), (2) `--backfill-scores`
+(re-score les heros nus), (3) re-curate (le meilleur cliché redevient
+hero, **idempotent** ensuite — vérifié : 2027/2197 `noop` au re-run).
+
+---
+
+## 10. Références croisées
 
 - `photo-pipeline/SKILL.md` — sourcing légal, migration Cloudinary, SMD setup
 - `hotel-detail-page.mdc` §Hard Rules 9 + 16

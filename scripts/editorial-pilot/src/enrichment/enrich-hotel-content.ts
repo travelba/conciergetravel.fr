@@ -165,11 +165,20 @@ async function persistEnrichment(
   cfg: SupabaseRestConfig,
   hotelId: string,
   out: EnrichmentOutput,
+  preserveExperiences: boolean,
 ): Promise<void> {
-  await patchHotelById(cfg, hotelId, {
+  // Safety: do NOT overwrite an existing `signature_experiences` array. Some
+  // fiches (notably the late R&C + Marriott scaffold pass) shipped with
+  // hand-curated experiences but a NULL `long_description_sections`. Running
+  // this script on them must close the sections gap without erasing the
+  // experiences. The caller decides per-row by reading the input row first.
+  const patch: Record<string, unknown> = {
     long_description_sections: out.long_description_sections,
-    signature_experiences: out.signature_experiences,
-  });
+  };
+  if (!preserveExperiences) {
+    patch['signature_experiences'] = out.signature_experiences;
+  }
+  await patchHotelById(cfg, hotelId, patch);
 }
 
 // ─── LLM prompts ─────────────────────────────────────────────────────
@@ -338,9 +347,13 @@ async function main(): Promise<void> {
           (acc, s) => acc + s.body_fr.split(/\s+/u).length,
           0,
         );
-        await persistEnrichment(cfg, h.id, out);
+        const existingExperiences = Array.isArray(h.signature_experiences)
+          ? h.signature_experiences.length
+          : 0;
+        const preserveExperiences = existingExperiences > 0;
+        await persistEnrichment(cfg, h.id, out, preserveExperiences);
         console.log(
-          `${tag} ✓ sections=${out.long_description_sections.length}, exp=${out.signature_experiences.length}, words_fr≈${wordsFr} (${Date.now() - t0} ms)`,
+          `${tag} ✓ sections=${out.long_description_sections.length}, exp=${preserveExperiences ? `kept ${existingExperiences} existing` : out.signature_experiences.length}, words_fr≈${wordsFr} (${Date.now() - t0} ms)`,
         );
         ok += 1;
       } catch (err) {

@@ -357,6 +357,30 @@ export const HOSTNAME_BLOCKLIST_GLOBAL: readonly string[] = [
   // never represent the hotel's own voice.
   'forbestravelguide.com',
   'travelagentcentral.com',
+  // Affiliate / luxury OTA aggregators (not the official hotel — `.cursor/
+  // rules/photo-quality.mdc` interdit OTA + photos d'agents). Caught
+  // 2026-05-31 during the R&C Tier B batch: Lake Placid Lodge had 3
+  // photos from luxurylink.com poured into its gallery.
+  'luxurylink.com',
+  'mrandmrssmith.com',
+  'tablethotels.com',
+  'historichotels.org',
+  // Destination CDNs and tourist-board sites (catch-all for "city +
+  // hotel" URL aliasing — e.g. `cdn.lakeplacid.com` serves arbitrary
+  // photos of the town, not a specific property).
+  'cdn.lakeplacid.com',
+  '.ny.gov', // US local-government sites (Lake Placid case: northelba.villageoflakeplacid.ny.gov)
+  'villageoflakeplacid.',
+  // Generic catch: ANY hotel site whose hostname embeds a DIFFERENT
+  // hotel name. Tavily sometimes returns these because the page
+  // happens to mention the target hotel. We add the worst offenders
+  // case-by-case as they're discovered.
+  'thewhitefacelodge.com', // returned for `lake-placid-lodge` query
+  // Generic content / news sites that aren't hotel sources.
+  'globaltravelerusa.com',
+  'audleytravel.com',
+  'scottdunn.com', // tour operator
+  'audubonnaturalist.org',
   // User-generated social CDNs
   'pinimg.com',
   'pinterest.',
