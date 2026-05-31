@@ -333,6 +333,105 @@ pnpm photos:audit            # published hotels only
 pnpm photos:audit:drafts     # include drafts (full catalogue view)
 ```
 
+## Pattern — Catalogue-wide `official_url` backfill (Phase A.5, 2026-05-31)
+
+Two months of editorial cohort building left the catalogue with
+**~1500 published hotels missing `official_url`** and **64 with a
+corporate-root URL** (the Mandarin Cortina contamination case). The
+photo pipeline is downstream of `official_url` — when it's wrong,
+even the safest Tavily filters produce mismatched photos. Fixing the
+upstream signal once unlocks every subsequent photo run.
+
+### Why a single Tavily-driven script (not per-chain templates)
+
+Templating 30+ chain URL patterns (`fourseasons.com/<slug>`,
+`hyatt.com/en-US/hotel/<country>/<name>/<code>`, …) looks tempting
+but rots fast (chains rename properties, rebrand, change CMS).
+Instead: `scripts/editorial-pilot/src/photos/backfill-official-url.ts`
+runs **one Tavily search** per hotel (`"<name> <city> official site"`,
+OTAs excluded) and applies a confidence rubric to the top 6 results
+to pick the right one. **70 % match rate on the first attempt, 100 %
+on the top-N pass** on a varied 10-hotel dry-run.
+
+### Confidence rubric (order matters — exit on first match)
+
+1. **Blocklist check** — `isBlocklistedHostname(host)` (OTAs, Forbes
+   Travel Guide, Trip.com, Baidu, Facebook, …) → skip.
+2. **Corporate-root check** — `isCorporateRootUrl(url)` → skip.
+3. **HIGH-CONFIDENCE** (accept even with trivial path):
+   _hostname embeds a significant token of the hotel name AND looks
+   like a dedicated single-property site_. Example:
+   `fourseasonstianjin.com/en` → ✓ even though the path is `/en` only,
+   because the hostname alone identifies the hotel.
+4. **Trivial-path SKIP** (anything else with `/`, `/en`, `/fr` only):
+   no way to disambiguate.
+5. **MEDIUM** — parent-group domain + hotel-name in the path. Example:
+   `mandarinoriental.com/en/muscat/shatti-al-qurum`.
+6. **MEDIUM** — high Tavily score (≥ 0.8) + dedicated-looking domain
+   + name token in path. Example:
+   `hongkong.ihghotels.cn/regent-hong-kong/...`.
+7. Else **SKIP** with reason logged (`low-confidence(host=...)`).
+
+### Iteration on top-N candidates (critical)
+
+Take the top 6 Tavily results, not just `#1`. The first result is
+often Facebook / Instagram / Forbes Travel Guide, but `#2` is the
+real hotel site. Iterating recovered ~30 % more matches on the
+dry-run. Cost: ~0 extra credits (the search returns all 6 anyway).
+
+### Tavily 100 req/min free-tier ceiling
+
+The catalogue is 1500 NULL + 64 corporate-root rows. At
+`concurrency=6` (~6 req/sec = 360/min), the script hits 429s after
+~100 hotels (~16s). Two mitigations baked into the script:
+
+- `--throttle-ms=1500` (per-worker sleep between successive Tavily
+  calls). With `--concurrency=2`, that's ~1.33 req/s = 80 req/min,
+  comfortably under the 100/min ceiling. Estimated runtime for the
+  ~1500 NULL set: ~20 min.
+- `--resume-from=<jsonl>` reads the previous runlog and excludes
+  every slug that finished with `status !== 'failed'`. Hotels that
+  were UPDATED are also auto-excluded because their `official_url`
+  is no longer NULL.
+
+### CLI cheat sheet
+
+```bash
+# Dry-run on 10 hotels covering all paths.
+pnpm photos:backfill-url --slugs=akelarre,le-bristol-paris,... --dry-run
+
+# Fix the 64 landmines first (highest ROI per credit spent).
+pnpm photos:backfill-url --only-corporate-root --concurrency=4
+
+# Then the ~1500 NULL hotels at a safe pace.
+pnpm photos:backfill-url --only-null --concurrency=2 --throttle-ms=1500
+
+# After a 429, resume from the previous runlog.
+pnpm photos:backfill-url --only-null --concurrency=2 --throttle-ms=1500 \
+  --resume-from=runs/backfill-official-url-2026-05-31T15-48-33-830Z.jsonl
+```
+
+### Run-once before any catalogue-wide photo batch
+
+Before ever launching `discover` / `upload-press-kit` at scale,
+verify the URL gate is clean:
+
+```sql
+SELECT
+  CASE
+    WHEN official_url IS NULL THEN 'NULL'
+    WHEN isCorporateRootUrl(official_url) THEN 'CORPORATE_ROOT'
+    ELSE 'OK'
+  END AS status,
+  COUNT(*)
+FROM hotels
+WHERE is_published = true
+GROUP BY 1;
+```
+
+Aim for `OK = total`. Anything else means the next photo batch will
+produce Tier A pilot-style contamination.
+
 ## Pattern — Shared parent-group mapping (single source of truth)
 
 `scripts/editorial-pilot/src/photos/parent-group-mapping.ts` is the
