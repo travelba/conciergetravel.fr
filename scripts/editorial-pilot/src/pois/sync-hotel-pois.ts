@@ -78,6 +78,7 @@ interface CliArgs {
   readonly noLlm: boolean;
   readonly dryRun: boolean;
   readonly noGoogle: boolean;
+  readonly noOsm: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -88,10 +89,12 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let noLlm = false;
   let dryRun = false;
   let noGoogle = false;
+  let noOsm = false;
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true;
     else if (arg === '--no-llm') noLlm = true;
     else if (arg === '--no-google') noGoogle = true;
+    else if (arg === '--no-osm') noOsm = true;
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
     else if (arg.startsWith('--bucket=')) {
       const v = arg.slice('--bucket='.length);
@@ -112,7 +115,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     throw new Error('Either --slug=<hotel-slug> or --bucket=<name> is required. See --help.');
   }
   if (!Number.isFinite(limit) || limit <= 0) throw new Error('--limit must be a positive integer');
-  return { slug, bucket, limit, concurrency, noLlm, dryRun, noGoogle };
+  return { slug, bucket, limit, concurrency, noLlm, dryRun, noGoogle, noOsm };
 }
 
 function printHelp(): void {
@@ -126,6 +129,7 @@ Options
   --concurrency=N       Parallel hotels (default 2; Overpass throttles hard above 3)
   --no-llm              Skip LLM descriptions (free, fast)
   --no-google           Skip the Google Places worldwide POI fallback
+  --no-osm              Skip Overpass (use when overpass-api.de is down)
   --dry-run             Skip UPDATE + print preview
   --help                Show this message
 
@@ -362,21 +366,27 @@ async function processHotel(
   }
 
   // 2. Overpass utility amenities (always 400 m urban, 800 m rural)
+  // `--no-osm` skips Overpass entirely: it times out 100% from some hosts
+  // (overpass-api.de + kumi mirror) and wastes ~30s/hotel on the network
+  // timeout. DT covers France, Google covers worldwide — Overpass is dead
+  // weight when it's down.
   const amenRadius = urban ? 400 : 800;
-  const amenRes = await fetchAmenitiesAround(ovCfg, hotel.latitude, hotel.longitude, {
-    radiusMeters: amenRadius,
-    limit: 12,
-  });
-  let osmAmenities: typeof amenRes extends infer R
+  let osmAmenities: Awaited<ReturnType<typeof fetchAmenitiesAround>> extends infer R
     ? R extends { value: infer V }
       ? V
       : never
     : never = [] as never;
-  if (amenRes.ok) {
-    osmAmenities = amenRes.value as typeof osmAmenities;
-    console.log(`  [osm]   ${osmAmenities.length} utility amenities (radius ${amenRadius}m)`);
-  } else {
-    console.warn(`  [osm]   FAILED: ${JSON.stringify(amenRes.error)} — proceeding`);
+  if (!args.noOsm) {
+    const amenRes = await fetchAmenitiesAround(ovCfg, hotel.latitude, hotel.longitude, {
+      radiusMeters: amenRadius,
+      limit: 12,
+    });
+    if (amenRes.ok) {
+      osmAmenities = amenRes.value as typeof osmAmenities;
+      console.log(`  [osm]   ${osmAmenities.length} utility amenities (radius ${amenRadius}m)`);
+    } else {
+      console.warn(`  [osm]   FAILED: ${JSON.stringify(amenRes.error)} — proceeding`);
+    }
   }
 
   // 3. Overpass transit stations (urban only — rural rarely has metro)
@@ -385,7 +395,7 @@ async function processHotel(
       ? V
       : never
     : never = [] as never;
-  if (urban) {
+  if (urban && !args.noOsm) {
     const trRes = await fetchTransitStationsAround(ovCfg, hotel.latitude, hotel.longitude, {
       radiusMeters: 600,
       limit: 20,

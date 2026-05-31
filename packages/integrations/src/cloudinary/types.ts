@@ -22,8 +22,8 @@ export interface CloudinaryUploadInput {
   readonly sourceUrl: string;
   /** Hotel slug — drives the destination folder. */
   readonly hotelSlug: string;
-  /** Provenance — `commons`, `places`, `manual`. Used in `public_id` + tags. */
-  readonly source: 'commons' | 'places' | 'manual';
+  /** Provenance — `commons`, `places`, `press` (official media kit), `manual`. Used in `public_id` + tags. */
+  readonly source: 'commons' | 'places' | 'press' | 'manual';
   /** 1-based index within the source batch (used in `public_id`). */
   readonly index: number;
   /** Alt text (French). Surfaced in `<HotelImage alt>`. */
