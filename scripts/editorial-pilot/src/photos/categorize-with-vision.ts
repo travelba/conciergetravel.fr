@@ -50,6 +50,8 @@ const VisionAnswerSchema = z.object({
   caption_fr: z.string().min(20).max(160),
   caption_en: z.string().min(20).max(160),
   quality_score: z.number().int().min(1).max(10),
+  representativeness: z.number().int().min(1).max(10),
+  hero_suitable: z.boolean(),
   keep: z.boolean(),
   reason_if_drop: z.string().max(160).nullable(),
 });
@@ -62,7 +64,9 @@ Renvoie un JSON strict (et SEULEMENT ce JSON, sans backticks) avec:
 - alt_en: meme exigence, en anglais.
 - caption_fr: 20-160 caracteres, phrase complete auto-explicative pour un JSON-LD ImageObject.
 - caption_en: meme exigence, en anglais.
-- quality_score: entier 1-10 (nettete, composition, eclairage, absence de parasites, representativite du luxe).
+- quality_score: entier 1-10. Qualite TECHNIQUE uniquement (nettete, composition, eclairage, absence de parasites, resolution).
+- representativeness: entier 1-10. A quel point cette photo communique INSTANTANEMENT le caractere et la tendance de l'hotel (signature architecturale, vue iconique, ambiance distinctive, identite du lieu). Une chambre generique ou un detail anonyme = bas; une facade emblematique, une piscine signature ou une vue iconique = haut. C'est distinct de quality_score: une photo nette mais banale a un bon quality_score et une representativeness basse.
+- hero_suitable: boolean. true si la photo peut servir d'IMAGE PRINCIPALE de la fiche: cadrage large (paysage 3:2 ou 16:9), sujet emblematique qui donne d'emblee la tendance de l'hotel, pas de gros plan de detail, pas de portrait vertical etroit. false sinon.
 - keep: boolean. false UNIQUEMENT si: floue, voiture/parking/rue non architecturale, screenshot, touristes/personnel en gros plan, capture de site, filigrane visible, image clairement non-hotel.
 - reason_if_drop: si keep=false, raison courte (10-160 chars). Sinon null.`;
 

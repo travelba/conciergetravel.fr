@@ -8,6 +8,17 @@ export { Button, type ButtonProps } from './components/button';
 export {
   HotelImage,
   buildCloudinarySrc,
+  buildCloudinaryFetchSrc,
+  isHttpUrl,
   type HotelImageProps,
   type HotelImageVariant,
 } from './components/hotel-image';
+export {
+  SIGNATURE_TRANSFORM,
+  SIGNATURE_LQIP,
+  HERO_TRANSFORM,
+  GALLERY_TRANSFORM,
+  THUMBNAIL_TRANSFORM,
+  CLOUDINARY_PRESETS,
+  type CloudinaryPresetKey,
+} from './cloudinary-presets';

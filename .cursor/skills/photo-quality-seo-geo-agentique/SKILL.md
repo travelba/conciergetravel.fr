@@ -87,33 +87,67 @@ Les originaux uploadés sur Cloudinary doivent mesurer **≥ 2400 px** sur le pe
 - **LCP budget** : hero < 2.5 s sur 4G mobile. LCP > 4 s bloque le merge.
 - `decoding="async"` sur toutes les `<img>` non-hero.
 
-### Recettes Cloudinary canoniques
+### Signature transform LOCKED — ADR-0024 (2026-05-31)
+
+La constante canonique de transformation Cloudinary est :
+
+```ts
+export const SIGNATURE_TRANSFORM = 'f_auto,q_auto,c_fill,g_auto';
+```
+
+Exposée par `@mch/ui` depuis [`packages/ui/src/cloudinary-presets.ts`](../../packages/ui/src/cloudinary-presets.ts).
+**Ne JAMAIS ajouter** `e_improve`, `e_sharpen`, `e_saturation`,
+`e_contrast`, `e_auto_color`, `e_upscale`, `e_gen_remove`, ou tout
+autre filtre `e_*` sans un nouvel ADR qui révoque
+[ADR-0024](../../docs/adr/0024-photo-signature-transform.md).
+
+Rationale empirique (page de preview
+[`/dev/photo-filter-preview`](../../apps/web/src/app/%5Blocale%5D/dev/photo-filter-preview/page.tsx),
+2026-05-31, 4 variantes × 6 photos officielles) :
+
+- Les photos sourcées Google Places API sont déjà curées par
+  l'hôtelier → `e_improve` n'a rien à corriger, effet visuel
+  imperceptible à taille écran.
+- Un filtre signature marqué crée une **divergence GEO** avec ce
+  que les LLMs indexent ailleurs (Google Image, Bing) → perte de
+  confiance « image fidèle » sur les citations.
+- `q_auto:best` ajoute ~ 350 ms de LCP pour gain visuel
+  imperceptible sur hotel media. **Toujours `q_auto`, jamais
+  `q_auto:best`** sur les pages indexables.
+
+La signature visuelle MyConciergeHotel repose sur **le sourcing**
+(officiel only, cf. `.cursor/rules/photo-quality.mdc`) + **l'alt /
+caption / ImageObject** + **l'unité de cadrage** (presets ci-dessous),
+**pas** sur le post-processing.
+
+### Recettes Cloudinary canoniques (presets de dimensions)
+
+Toutes basées sur la même `SIGNATURE_TRANSFORM` + variantes de
+cadrage. Centralisées dans [`packages/ui/src/cloudinary-presets.ts`](../../packages/ui/src/cloudinary-presets.ts),
+exposées via `CLOUDINARY_PRESETS`.
 
 ```ts
 // Hero page hôtel (LCP, 16:9)
-'f_auto,q_auto,w_2400,h_1350,c_fill,g_auto,dpr_auto';
-
-// OG / Twitter Card
-'f_jpg,q_auto,c_fill,g_auto,w_1200,h_630';
+HERO_TRANSFORM = 'w_2400,h_1350,f_auto,q_auto,c_fill,g_auto';
 
 // Gallery card (3:2, responsive)
-'f_auto,q_auto,w_1230,h_820,c_fill,g_auto';
+GALLERY_TRANSFORM = 'w_1230,h_820,f_auto,q_auto,c_fill,g_auto';
 
-// Thumbnail lightbox
-'f_auto,q_auto,w_400,h_266,c_fill,g_auto';
+// Thumbnail (search results, sidebar suggestions)
+THUMBNAIL_TRANSFORM = 'w_192,h_192,f_auto,q_auto,c_fill,g_auto';
 
-// Room subpage hero
-'f_auto,q_auto,w_1600,h_1067,c_fill,g_auto';
+// LQIP placeholder (blur-up hero)
+SIGNATURE_LQIP = 'w_20,q_1,e_blur:1000,f_auto';
 
-// JSON-LD ImageObject (hero)
-'f_auto,q_auto,w_1600,h_900,c_fill,g_auto';
-
-// Blur placeholder (LQIP)
-'f_auto,q_1,w_20,h_14,c_fill,g_auto,e_blur:500';
+// Cas particulier : OG / Twitter Card forcée JPG (Twitter ne supporte pas AVIF)
+// Construit côté seo/og-image.ts (PAS dans cloudinary-presets car non-rendu UI)
+('f_jpg,q_auto,c_fill,g_auto,w_1200,h_630');
 ```
 
-Centralisées dans `packages/ui/src/cloudinary.ts` via `CLOUDINARY_PRESETS`.
-Ne jamais hardcoder les transforms dans les composants.
+**Ne jamais hardcoder les transforms dans les composants.** Importer
+depuis `@mch/ui` (`SIGNATURE_TRANSFORM`, `HERO_TRANSFORM`,
+`GALLERY_TRANSFORM`, `THUMBNAIL_TRANSFORM`, `SIGNATURE_LQIP`,
+`CLOUDINARY_PRESETS`).
 
 ---
 
@@ -263,16 +297,19 @@ pnpm build:agent-skills
 
 ## 8. Anti-patterns bloquants
 
-| Anti-pattern                               | Conséquence                                  | Résolution                                |
-| ------------------------------------------ | -------------------------------------------- | ----------------------------------------- |
-| `alt=""` ou `alt="photo"`                  | Google ignore l'ImageObject, LLM ne cite pas | Script LLM seeding                        |
-| `caption` absent dans ImageObject          | Perte totale du signal GEO LLM               | Obligatoire dans hotelJsonLd              |
-| `next/image` sur hero/gallery              | Bypass Cloudinary CDN, LCP +300–800 ms       | `buildCloudinarySrc` + `<img>`            |
-| URL Pinterest dans gallery_images          | Risque légal + instabilité CDN               | Sourcer via Wikimedia/press kit           |
-| `representativeOfPage: true` sur N > 1     | Google ignore le signal hero                 | Un seul par page                          |
-| `bestRating: '10'` dans AggregateRating    | Hard Rule seo-geo.mdc                        | Toujours `'5'`, `ratingValue × 2` en UI   |
-| Catégorie `events` absente si MICE présent | Bloc 14 orphelin                             | ≥ 2 photos events si `mice_info` non null |
-| LCP hero > 2.5 s mobile                    | Core Web Vitals rouge, déclassement GSC      | `fetchpriority="high"` + LQIP + `w_2400`  |
+| Anti-pattern                                                                                                                | Conséquence                                                                          | Résolution                                                                                      |
+| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `alt=""` ou `alt="photo"`                                                                                                   | Google ignore l'ImageObject, LLM ne cite pas                                         | Script LLM seeding                                                                              |
+| `caption` absent dans ImageObject                                                                                           | Perte totale du signal GEO LLM                                                       | Obligatoire dans hotelJsonLd                                                                    |
+| `next/image` sur hero/gallery                                                                                               | Bypass Cloudinary CDN, LCP +300–800 ms                                               | `buildCloudinarySrc` + `<img>`                                                                  |
+| URL Pinterest dans gallery_images                                                                                           | Risque légal + instabilité CDN                                                       | Sourcer via Wikimedia/press kit                                                                 |
+| `representativeOfPage: true` sur N > 1                                                                                      | Google ignore le signal hero                                                         | Un seul par page                                                                                |
+| `bestRating: '10'` dans AggregateRating                                                                                     | Hard Rule seo-geo.mdc                                                                | Toujours `'5'`, `ratingValue × 2` en UI                                                         |
+| Catégorie `events` absente si MICE présent                                                                                  | Bloc 14 orphelin                                                                     | ≥ 2 photos events si `mice_info` non null                                                       |
+| LCP hero > 2.5 s mobile                                                                                                     | Core Web Vitals rouge, déclassement GSC                                              | `fetchpriority="high"` + LQIP + `w_2400`                                                        |
+| Ajouter `e_improve` / `e_sharpen` / `e_saturation` / `e_contrast` / `e_auto_color` au `SIGNATURE_TRANSFORM` sans nouvel ADR | Effet invisible sur photos officielles + divergence GEO + LCP +200-400 ms cold start | Garder Baseline ADR-0024 ; pour explorer un filtre, rebuild la page `/dev/photo-filter-preview` |
+| Hardcoder un transform Cloudinary dans un composant (`<img src="…/upload/w_1230,h_820,…/…"/>`)                              | Drift entre composants, cache CDN fragmenté                                          | Importer `HERO_TRANSFORM` / `GALLERY_TRANSFORM` / `THUMBNAIL_TRANSFORM` depuis `@mch/ui`        |
+| `q_auto:best` sur une page indexable                                                                                        | LCP +350 ms pour gain visuel imperceptible                                           | `q_auto` (la valeur par défaut de `SIGNATURE_TRANSFORM`)                                        |
 
 ---
 
@@ -281,7 +318,10 @@ pnpm build:agent-skills
 - `photo-pipeline/SKILL.md` — sourcing légal, migration Cloudinary, SMD setup
 - `hotel-detail-page.mdc` §Hard Rules 9 + 16
 - `seo-geo.mdc` §JSON-LD §LLM-actionable surfaces
-- `packages/ui/src/cloudinary.ts` → `buildCloudinarySrc`, `CLOUDINARY_PRESETS`
+- [`packages/ui/src/cloudinary-presets.ts`](../../packages/ui/src/cloudinary-presets.ts) → `SIGNATURE_TRANSFORM`, `HERO_TRANSFORM`, `GALLERY_TRANSFORM`, `THUMBNAIL_TRANSFORM`, `SIGNATURE_LQIP`, `CLOUDINARY_PRESETS`
+- [`packages/ui/src/components/hotel-image.tsx`](../../packages/ui/src/components/hotel-image.tsx) → `buildCloudinarySrc`, `buildCloudinaryFetchSrc`, `<HotelImage>`
 - `packages/seo/src/jsonld/hotel.ts` → `hotelJsonLd`
 - `packages/seo/src/agent-skills.ts` → `DEFAULT_AGENT_SKILLS`
 - `scripts/photos/sync-hotel-photos.ts` — sync batch Cloudinary → Supabase
+- [`docs/adr/0024-photo-signature-transform.md`](../../docs/adr/0024-photo-signature-transform.md) — décision Baseline + rationale visuel/SEO/GEO/agentique
+- [`apps/web/src/app/[locale]/dev/photo-filter-preview/page.tsx`](../../apps/web/src/app/%5Blocale%5D/dev/photo-filter-preview/page.tsx) — page de preview filtre, à recréer pour tout nouvel ADR successeur

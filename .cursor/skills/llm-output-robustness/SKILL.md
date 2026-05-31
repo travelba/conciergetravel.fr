@@ -991,6 +991,94 @@ Reference impls:
 - `scripts/editorial-pilot/src/guides/run-guide-meta-desc.ts` (reuse)
 - `scripts/editorial-pilot/prompts/ranking-meta-desc.md` (single source of truth)
 
+## Rule 18 — Schema bounds must match prompt instructions, AND constraints must be co-satisfiable
+
+Two failure modes empirically observed during the 2026-05-31 catalogue-wide
+runs (`enrich-signature-experiences.ts` + `run-hotel-description-extend.ts`):
+
+### 18a — Schema/prompt drift on length bounds
+
+The signature_experiences pipeline shipped with:
+
+```ts
+const SignatureExperienceSchema = z.object({
+  description_fr: z.string().min(40).max(800), // schema
+  description_en: z.string().min(40).max(800),
+});
+// ... prompt asked for "description_fr (60-180 mots, précis et factuel)"
+```
+
+180 French words ≈ 1 080-1 100 chars. The LLM dutifully produced 1 100-char
+strings, the schema rejected them with `description_fr too long (must be ≤ 800
+chars)`, the retry loop burned 5 attempts before giving up. **Hotel after hotel,
+the same drift.** Cost = 5× the necessary tokens per failed hotel.
+
+**Fix:** either tighten the prompt to match the schema (`60-120 mots`) OR widen
+the schema to fit the prompt (`max(1200)`). The latter is usually safer because
+the prompt-side word range is the editorial intent; the schema is just an
+upper-bound guardrail.
+
+**Audit checklist** for every Zod-validated LLM pipeline:
+
+| Prompt says    | Schema `max(N)` must be at least |
+| -------------- | -------------------------------- |
+| "60-120 mots"  | 800                              |
+| "60-180 mots"  | 1200                             |
+| "100-200 mots" | 1400                             |
+| "150-250 mots" | 1800                             |
+| "200-300 mots" | 2200                             |
+| "300-500 mots" | 3500                             |
+
+Heuristic: `max_chars ≈ max_words × 6.5` (FR) or `× 6` (EN). Pad +10 % for
+safety. The cost of a too-loose `max()` is near-zero (LLM will rarely produce
+30 % more than asked); the cost of a too-tight `max()` is 5× retries per row.
+
+### 18b — Contraintes co-non-satisfiables (longform regression 2026-05-31)
+
+`run-hotel-description-extend.ts` was launched catalogue-wide. 4 hotels were
+eligible (Les Sources de Cheverny, Les Airelles Saint-Tropez, Hôtel du
+Cap-Eden-Roc, Hôtel des Berges). **All 4 failed 5/5 attempts.** Reading the
+`runs/description-extend-live-*.json` reveals the LLM oscillates between three
+incompatible constraints:
+
+1. `description_fr/en` ≤ 1 500 chars (Zod schema)
+2. Every sentence ≤ 28 words (Concierge voice gate, see
+   `concierge-voice-pipeline` skill)
+3. Banned words list (`breathtaking`, etc.)
+
+Each attempt fixes one constraint and breaks another:
+
+| Attempt | Length OK? | Sentences ≤ 28 w? | Banned word?      |
+| ------- | ---------- | ----------------- | ----------------- |
+| 1       | ❌ both    | ✅                | ✅                |
+| 2       | ✅ FR only | ❌ EN 29 w        | ✅                |
+| 3       | ❌ FR      | ✅                | ✅                |
+| 4       | ❌ FR      | ❌ FR 32 w        | ❌ "breathtaking" |
+| 5       | ❌ FR      | ✅                | ✅                |
+
+The Palace properties have dense factual content (Atout France classification,
+Michelin stars, 6 dining venues, named chefs, distances to POIs) that does not
+compress below 1 500 chars without losing the very signals that justify the
+descriptor "extend". **The constraints are co-non-satisfiable for this corpus.**
+
+**Diagnosis test** before shipping a pipeline that combines length + sentence-
+length + banlist + factual-density requirements:
+
+1. Take the 5 most factually dense rows (Palaces, R&C, 5★ with multiple
+   restaurants and amenities).
+2. Hand-write a paragraph that satisfies **all** constraints.
+3. If you cannot, the constraints are co-non-satisfiable on that corpus —
+   relax ONE constraint before shipping. Usually the right one is the length
+   plafond (push 1 500 → 2 500), not the editorial gates.
+
+**Reference cases:**
+
+- `scripts/editorial-pilot/runs/description-extend-live-2026-05-31T08-44-36-529Z.json`
+  (4/4 fail, 25 attempts logged with the oscillation pattern visible).
+- `scripts/editorial-pilot/src/hotels/run-hotel-description-extend.ts` —
+  needs Phase 1.5 fix: relax `max(1500)` → `max(2500)` for the description
+  body (the 600-1 000 words CDC §2.4 ideal cannot fit in 1 500 chars).
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -1012,6 +1100,8 @@ Reference impls:
 - ❌ "Literal translation" gate that compares the first 30 chars of FR vs EN → rejects ~30 % of international properties whose proper noun is identical in both languages (`Four Seasons Hotel New York Downtown`, `Las Ventanas al Paraíso`). Compare the descriptor segment after the first comma (Rule 16).
 - ❌ Constant `MAX_RETRIES = 3` on a pipeline where length is the dominant failure mode → the model often needs one extra round to settle inside the envelope. Bump to 5 when the marginal LLM cost (~$0.04/hotel) buys you the long tail.
 - ❌ Forking the prompt + generator + gate for a new collection that shares the SERP-card optimisation function with an existing one → triples the maintenance surface. Project the new row into the existing input shape and reuse the generator (Rule 17). Fork only when banned-word list, format anchor, or audience signal genuinely diverges.
+- ❌ Shipping a Zod `max(N)` that contradicts what the prompt explicitly asks for (e.g. schema `max(800)` while prompt says "60-180 mots" = ~1100 chars). The LLM follows the prompt, the schema rejects, retries burn 5×. Always cross-check the `max_chars ≈ max_words × 6.5` table when designing a pipeline (Rule 18a).
+- ❌ Combining a length plafond, a sentence-length cap, a banlist, and a "must extend with new factual content" instruction on factually dense rows (Palaces, R&C, 5★) → constraints become co-non-satisfiable → all attempts fail. Hand-write the target on the densest 5 rows before shipping; if you can't, relax ONE constraint (usually the length plafond) (Rule 18b).
 
 ## References
 

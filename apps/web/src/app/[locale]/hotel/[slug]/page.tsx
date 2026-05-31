@@ -438,8 +438,15 @@ async function renderHotelPage(
   const upcomingEvents = readUpcomingEvents(row, locale);
   const externalIds = readExternalIds(row);
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  // Hero alt: prefer the gallery row whose public_id matches hero_image —
+  // never the arbitrary `galleryImages[0]` which is unrelated when the
+  // hero was uploaded outside the gallery flow. Falls back to the hotel
+  // name (always a safe, descriptive alt) rather than to a stray entry.
+  // Fix 2026-05-31 (`photo-quality.mdc` Hard Rule 16 + WCAG 1.1.1).
+  const heroGalleryMatch =
+    heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
   const heroDescriptor =
-    heroPublicId !== null ? { publicId: heroPublicId, alt: galleryImages[0]?.alt ?? name } : null;
+    heroPublicId !== null ? { publicId: heroPublicId, alt: heroGalleryMatch?.alt ?? name } : null;
 
   const defaults = defaultStay();
   const checkIn = pickIsoDate(sp.checkIn, defaults.checkIn);
@@ -470,13 +477,16 @@ async function renderHotelPage(
   // gallery row has no editorial alt text yet.
   const jsonLdImages: (string | JsonLd.ImageObjectInput)[] = [];
   if (heroPublicId !== null) {
+    // Prefer the curated full-sentence caption (LLM-citable) on the first
+    // gallery shot, fall back to its alt text, then the hotel name.
+    const firstImage = galleryImages[0];
     jsonLdImages.push({
       url: buildCloudinarySrc({
         cloudName,
         publicId: heroPublicId,
         transforms: 'f_auto,q_auto,w_1600,h_900,c_fill,g_auto',
       }),
-      caption: galleryImages[0]?.alt ?? name,
+      caption: firstImage?.caption ?? firstImage?.alt ?? name,
       width: 1600,
       height: 900,
       representativeOfPage: true,
@@ -488,8 +498,11 @@ async function renderHotelPage(
       publicId: img.publicId,
       transforms: 'f_auto,q_auto,w_1230,h_820,c_fill,g_auto',
     });
-    if (img.alt !== undefined && img.alt.length > 0) {
-      jsonLdImages.push({ url, caption: img.alt, width: 1230, height: 820 });
+    // `caption` is the full sentence the LLMs cite; `alt` is the short
+    // keyword string. Either makes the ImageObject rich — prefer caption.
+    const caption = img.caption ?? (img.alt.length > 0 ? img.alt : null);
+    if (caption !== null) {
+      jsonLdImages.push({ url, caption, width: 1230, height: 820 });
     } else {
       jsonLdImages.push(url);
     }

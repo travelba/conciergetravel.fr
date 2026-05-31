@@ -181,8 +181,12 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+  const onlyMissingHero = process.env['MCH_ONLY_MISSING_HERO'] === '1';
   const filters: string[] = [];
   if (!includeDrafts) filters.push('is_published=eq.true');
+  // Full-catalogue backfill: only touch rows that still lack a hero so we
+  // don't re-fetch Commons / re-upload for the ~327 already-hydrated rows.
+  if (onlyMissingHero) filters.push('hero_image=is.null');
   if (args.bucket === 'palaces-enriched') {
     filters.push('is_palace=eq.true', 'long_description_sections=not.is.null');
   } else if (args.bucket === 'stars5-enriched') {

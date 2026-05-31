@@ -53,6 +53,15 @@ export interface GalleryImage {
   readonly caption_en?: string | null;
   readonly category?: string | null;
   readonly quality_score?: number | null;
+  /**
+   * Editorial "does this photo instantly convey the hotel's character"
+   * score (1-10) — distinct from `quality_score` which is purely
+   * technical (sharpness, composition, lighting). Drives hero + TOP 5
+   * selection (see `pickHero` / `selectTop4` below).
+   */
+  readonly representativeness?: number | null;
+  /** True when the photo is wide-framed + emblematic enough to be the page hero. */
+  readonly hero_suitable?: boolean | null;
   readonly [key: string]: unknown;
 }
 
@@ -63,6 +72,8 @@ export interface VisionAnswer {
   readonly caption_fr: string;
   readonly caption_en: string;
   readonly quality_score: number;
+  readonly representativeness: number;
+  readonly hero_suitable: boolean;
   readonly keep: boolean;
   readonly reason_if_drop: string | null;
 }
@@ -130,6 +141,8 @@ export function applyVisionAnswer(img: GalleryImage, answer: VisionAnswer): Gall
     caption_fr: answer.caption_fr,
     caption_en: answer.caption_en,
     quality_score: answer.quality_score,
+    representativeness: answer.representativeness,
+    hero_suitable: answer.hero_suitable,
   };
 }
 
@@ -168,4 +181,165 @@ export function mergeVisionAnswers(
     classified++;
   }
   return { gallery: out, dropped, classified };
+}
+
+// ---------------------------------------------------------------------------
+// TOP 5 selection — hero + first 4 gallery shots (curate-top-photos.ts)
+// ---------------------------------------------------------------------------
+
+/**
+ * Categories that can carry the page hero. A hero must give the hotel's
+ * "tendance" at first glance — a signature facade, an iconic view, the
+ * signature pool, or the emblematic lobby. A close-up `detail` or an
+ * anonymous `room` does not qualify as a hero (low representativeness).
+ */
+export const HERO_CATEGORIES = ['exterior', 'view', 'pool', 'lobby'] as const;
+
+/**
+ * Diversity order for the 4 tiles shown next to the hero in the
+ * above-the-fold mosaic (`hotel-gallery.tsx`). We pick the best photo of
+ * each category in this order (skipping the hero's category) so the
+ * TOP 5 showcases the hotel's range — a room, the dining, a pool/view,
+ * a signature detail. `suite` folds into `room` (see `normalizeForCoverage`).
+ */
+export const TOP4_CATEGORY_PRIORITY = [
+  'room',
+  'dining',
+  'pool',
+  'view',
+  'detail',
+  'spa',
+  'lobby',
+  'exterior',
+  'events',
+  'concierge',
+] as const;
+
+/**
+ * Combined ranking score. `representativeness` (how much the photo
+ * conveys the hotel's character) is weighted twice the technical
+ * `quality_score`, because the TOP 5's job is to communicate the
+ * hotel's tendance, not just be sharp. Missing values default to 0 so a
+ * not-yet-scored gallery degrades to plain `quality_score` ordering.
+ */
+export function combinedScore(img: GalleryImage): number {
+  const rep = typeof img.representativeness === 'number' ? img.representativeness : 0;
+  const quality = typeof img.quality_score === 'number' ? img.quality_score : 0;
+  return rep * 2 + quality;
+}
+
+/** Stable descending comparator on `combinedScore` (preserves source order on ties). */
+function byScoreDescStable(gallery: readonly GalleryImage[]): GalleryImage[] {
+  return gallery
+    .map((img, index) => ({ img, index }))
+    .sort((a, b) => {
+      const diff = combinedScore(b.img) - combinedScore(a.img);
+      if (diff !== 0) return diff;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.img);
+}
+
+/**
+ * Pick the hero — the single most emblematic photo. Preference cascade:
+ *   1. `hero_suitable` photos in a signature category (`HERO_CATEGORIES`).
+ *   2. any `hero_suitable` photo.
+ *   3. the highest combined-score photo (last resort, e.g. un-scored gallery).
+ * Returns `null` for an empty gallery.
+ */
+export function pickHero(gallery: readonly GalleryImage[]): string | null {
+  if (gallery.length === 0) return null;
+  const heroCats = HERO_CATEGORIES as readonly string[];
+  const suitable = gallery.filter((img) => img.hero_suitable === true);
+  const signature = suitable.filter(
+    (img) =>
+      typeof img.category === 'string' && heroCats.includes(normalizeForCoverage(img.category)),
+  );
+  const pool = signature.length > 0 ? signature : suitable.length > 0 ? suitable : gallery;
+  const best = byScoreDescStable(pool)[0];
+  return best?.public_id ?? null;
+}
+
+/**
+ * Select up to 4 gallery photos (excluding the hero) that maximise
+ * category diversity, then fill any remaining slots with the best
+ * leftover photos. Returns the chosen `public_id`s in display order.
+ */
+export function selectTop4(
+  gallery: readonly GalleryImage[],
+  heroPublicId: string | null,
+): string[] {
+  const candidates = gallery.filter((img) => img.public_id !== heroPublicId);
+  const heroImg = gallery.find((img) => img.public_id === heroPublicId) ?? null;
+  const heroCat =
+    heroImg !== null && typeof heroImg.category === 'string'
+      ? normalizeForCoverage(heroImg.category)
+      : null;
+
+  const picked: string[] = [];
+  const usedIds = new Set<string>();
+
+  for (const cat of TOP4_CATEGORY_PRIORITY) {
+    if (picked.length >= 4) break;
+    if (cat === heroCat) continue;
+    const inCat = candidates.filter(
+      (img) =>
+        !usedIds.has(img.public_id) &&
+        typeof img.category === 'string' &&
+        normalizeForCoverage(img.category) === cat,
+    );
+    if (inCat.length === 0) continue;
+    const best = byScoreDescStable(inCat)[0];
+    if (best === undefined) continue;
+    picked.push(best.public_id);
+    usedIds.add(best.public_id);
+  }
+
+  // Fill remaining slots with the best leftover photos regardless of category.
+  if (picked.length < 4) {
+    const leftover = byScoreDescStable(candidates.filter((img) => !usedIds.has(img.public_id)));
+    for (const img of leftover) {
+      if (picked.length >= 4) break;
+      picked.push(img.public_id);
+      usedIds.add(img.public_id);
+    }
+  }
+
+  return picked;
+}
+
+export interface OrderGalleryResult {
+  /** The chosen hero `public_id` (also written to `hotels.hero_image`). */
+  readonly heroPublicId: string | null;
+  /**
+   * Gallery to persist in `hotels.gallery_images`, hero EXCLUDED (mirrors
+   * the `galleryWithoutHero` shape produced by `sync-hotel-photos.ts`):
+   * the diverse TOP 4 first, then the rest by descending score.
+   */
+  readonly orderedGallery: readonly GalleryImage[];
+}
+
+/**
+ * Compute the curated hero + gallery ordering for a hotel.
+ *
+ * The first 4 entries of `orderedGallery` are the diversity-curated tiles
+ * that, together with the hero, form the above-the-fold mosaic and the
+ * 5 `ImageObject` JSON-LD nodes (`page.tsx` slices `gallery.slice(0, 5)`).
+ * Pure + idempotent: re-running on an already-ordered gallery is a no-op.
+ */
+export function orderGallery(gallery: readonly GalleryImage[]): OrderGalleryResult {
+  const heroPublicId = pickHero(gallery);
+  const top4 = selectTop4(gallery, heroPublicId);
+  const top4Set = new Set(top4);
+  const byId = new Map(gallery.map((img) => [img.public_id, img]));
+
+  const orderedTop4 = top4
+    .map((id) => byId.get(id))
+    .filter((img): img is GalleryImage => img !== undefined);
+
+  const rest = byScoreDescStable(
+    gallery.filter((img) => img.public_id !== heroPublicId && !top4Set.has(img.public_id)),
+  );
+
+  return { heroPublicId, orderedGallery: [...orderedTop4, ...rest] };
 }

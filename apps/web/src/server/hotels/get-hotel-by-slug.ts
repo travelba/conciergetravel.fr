@@ -1198,6 +1198,8 @@ const GalleryImageSchema = z.object({
   public_id: CloudinaryPublicIdSchema,
   alt_fr: z.string().min(1).optional(),
   alt_en: z.string().min(1).optional(),
+  caption_fr: z.string().min(1).optional(),
+  caption_en: z.string().min(1).optional(),
   category: z.string().min(1).optional(),
 });
 
@@ -1206,6 +1208,12 @@ const GalleryImagesSchema = z.array(GalleryImageSchema);
 export interface LocalisedGalleryImage {
   readonly publicId: string;
   readonly alt: string;
+  /**
+   * Localised full-sentence caption for the JSON-LD `ImageObject`
+   * (LLM-citable, see photo-quality-seo-geo-agentique). Falls back to
+   * `alt` when the gallery row has no caption yet.
+   */
+  readonly caption: string | null;
   readonly category: string | null;
 }
 
@@ -1225,6 +1233,7 @@ export function readGallery(
   return parsed.data.map((img) => ({
     publicId: img.public_id,
     alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackName,
+    caption: pickLocalizedText(locale, img.caption_fr, img.caption_en) ?? null,
     category: img.category ?? null,
   }));
 }

@@ -29,10 +29,13 @@
 import NextImage, { type ImageProps as NextImageProps } from 'next/image';
 import * as React from 'react';
 
+import { SIGNATURE_TRANSFORM } from '../cloudinary-presets';
 import { cn } from '../lib/cn';
 
 const CLOUDINARY_BASE = 'https://res.cloudinary.com';
-const DEFAULT_TRANSFORMS = 'f_auto,q_auto,c_fill,g_auto';
+
+// Locked 2026-05-31 by ADR-0024. Edit `cloudinary-presets.ts`, never here.
+const DEFAULT_TRANSFORMS = SIGNATURE_TRANSFORM;
 
 export type HotelImageVariant = 'hero' | 'card' | 'thumbnail';
 

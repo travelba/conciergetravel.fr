@@ -200,6 +200,87 @@ Notes for the next agent:
 - To re-run only the rows still missing a hero (skip the ~328 already
   hydrated), set `MCH_ONLY_MISSING_HERO=1` on `sync-hotel-photos.ts`.
 
+## Pattern — Tavily press-kit discovery for flagship hotels (2026-05-31)
+
+When the in-place pipeline (`sync-hotel-photos.ts` Commons + Places)
+returns too few photos for a flagship hotel, the next legal source is
+the **official press kit** crawled via Tavily. The pattern was
+validated on 4 hotels (Bristol, Akelarre, Al Moudira, Alila) — went
+from 1/9 → 11/14/21/18 photos in 2 minutes of API time.
+
+### Two-script pipeline (READ-ONLY discovery → curated upload)
+
+The split is non-negotiable: Cloudinary uploads consume plan quota,
+and hotel sites frequently embed boutique/product/poster images that
+look hotel-shaped but are not. The PO (or the agent in PO mode) must
+review the JSON before any byte hits Cloudinary.
+
+- **Step 1 (read-only):** `scripts/editorial-pilot/src/photos/discover-press-kit-images.ts`
+  - Runs 4 Tavily Searches per hotel (press-kit, rooms-suites, dining-spa, exterior-pool)
+  - `include_images: true` + `include_image_descriptions: true` + `include_domains` = trusted set
+  - Outputs `runs/press-kit-discovery-<slug>-<ts>.json` with every candidate URL + Tavily caption
+- **Step 2 (write):** `scripts/editorial-pilot/src/photos/upload-press-kit-images.ts`
+  - Reads the JSON, applies per-slug `HOSTNAME_WHITELIST`
+  - For each surviving URL: OpenAI Vision (`gpt-4o-mini`) → `{category, alt_fr, alt_en, caption_fr, caption_en, quality_score 1-10, keep}`
+  - Drops `keep=false` or `quality_score < 6`
+  - Cloudinary upload via the existing `uploadFromUrl()` (folder `cct/hotels/<slug>/press-<N>`)
+  - PATCHes `hotels.gallery_images` JSONB (append, preserve existing)
+
+### Critical learnings (do not re-pay this cost)
+
+1. **Trusted-domain set ≠ image hostname.** Tavily honours `include_domains`
+   for the source PAGE, but the page can reference any CDN. Filtering
+   images by `host.includes(officialDomain)` rejected ALL images on
+   the first pass (Le Bristol → 0 results). Fix: trust the image
+   URL because it came from a trusted page; filter only via a
+   per-slug `HOSTNAME_WHITELIST` of legitimate CDNs (`images.eu.ctfassets.net`
+   for Oetker, `assets.hyatt.com` for Hyatt, `static.wixstatic.com` for
+   Wix-hosted sites, etc.).
+2. **Parent-group domains matter.** Le Bristol's own site (`hotel-bristol.com`)
+   returns 1 thin page. The full press kit is on `oetkercollection.com`
+   (Contentful CDN). Akelarre → `relaischateaux.com` (R&C consortium).
+   Alila → `hyatt.com` (corporate DAM). Maintain a `PARENT_DOMAINS`
+   table in `discover-press-kit-images.ts`.
+3. **OpenAI Vision and corporate DAMs.** `assets.hyatt.com` hotlink-blocks
+   OpenAI's egress (`Error while downloading`). Fix: fetch the bytes
+   yourself (UA `MyConciergeHotelBot/1.0`) and pass `data:image/jpeg;base64,…`
+   to the Vision endpoint. Cap source bytes at 5 MB before base64-encoding
+   (the OpenAI payload budget is 20 MB but `low`-detail Vision doesn't
+   benefit from > 1k × 1k anyway). Fallback to bare URL when fetch fails.
+4. **Reject hostlists** (mandatory): `tripadvisor.*`, `booking.com`,
+   `expedia.*`, `hotels.com`, `pinimg.com`, `pinterest.*`, `agoda.*`,
+   `kayak.*`, `trivago.*`, `fbcdn.net`, `cdninstagram.com`, `twimg.com`.
+   These are NEVER official sources per `.cursor/rules/photo-quality.mdc`.
+5. **Boutique/shop pollution.** Group websites often surface e-commerce
+   (`boutique.oetkercollection.com/cdn/shop/files/…`, posters, branded
+   apparel) in the same search. Reject paths containing `/shop/`,
+   `/cdn/shop/`, `/products/`, hostname `boutique.`, `shop.`.
+
+## Pattern — Hero alt MUST come from the matching gallery row (2026-05-31 bug fix)
+
+`apps/web/src/app/[locale]/hotel/[slug]/page.tsx` historically used
+`galleryImages[0]?.alt` as the hero alt fallback. That breaks when
+the `hero_image` `public_id` is **not** in `gallery_images` (e.g. the
+hero was uploaded via a different pipeline, or the matching row was
+later removed). For Le Bristol Paris, the hero (`commons-1`) had no
+gallery row, so the alt silently inherited `commons-10` (a stray
+"Toyota Century parked in front of Le Bristol" archive photo — a
+WCAG 1.1.1 violation and a Hard Rule 16 violation).
+
+Correct lookup:
+
+```ts
+const heroGalleryMatch =
+  heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
+const heroDescriptor =
+  heroPublicId !== null ? { publicId: heroPublicId, alt: heroGalleryMatch?.alt ?? name } : null;
+```
+
+Fallback to the hotel `name` (always safe + descriptive). NEVER to a
+random gallery entry. Audit any new code that uses `gallery[0]` or
+`[N]` indexing — it's almost always a smell when the underlying data
+isn't guaranteed-sorted.
+
 ## Anti-patterns
 
 - ❌ Plugging a Pinterest URL into `hero_image`. **Hard refused at PR
@@ -218,11 +299,25 @@ Notes for the next agent:
 - ❌ Building a third fallback level in `pickHeroSource` (e.g. second
   hotel, ranking entries, random destination photo). Fix the data
   instead.
+- ❌ Using `galleryImages[0]?.alt` (or any positional index) as the
+  hero alt fallback — see "Hero alt MUST come from the matching
+  gallery row" above. Use `find(g => g.publicId === heroPublicId)`
+  and fall back to the hotel `name`.
+- ❌ Filtering Tavily images by `hostname.includes(officialDomain)`.
+  Images live on the page's CDN, not on the page's domain. Maintain
+  a per-slug `HOSTNAME_WHITELIST` of trusted CDNs instead.
+- ❌ Passing a raw URL to OpenAI Vision when the source is a corporate
+  DAM (Hyatt, Marriott, IHG). Most hotlink-block OpenAI's egress;
+  fetch the bytes yourself with a descriptive UA and pass a base64
+  data URI.
 
 ## References
 
 - `.cursor/rules/hotel-detail-page.mdc` §Hard Rules 9 + 16 (≥ 30 photos,
   alt enriched).
+- `.cursor/rules/photo-quality.mdc` (sourcing legality, banned domains).
+- `.cursor/skills/photo-quality-seo-geo-agentique/SKILL.md` (signature
+  transform `ADR-0024`, JSON-LD ImageObject contract).
 - `.cursor/skills/content-enrichment-pipeline/SKILL.md` (Wikimedia,
   Tavily extract).
 - `.cursor/skills/backoffice-cms/SKILL.md` §direct-sql-bypass (cache
@@ -233,3 +328,9 @@ Notes for the next agent:
   `resolveHeroUrl()` — current fallback implementation.
 - `apps/web/src/server/itineraries/get-related-data.ts` → `HotelLookup.heroImage`
   exposes the field downstream.
+- `scripts/editorial-pilot/src/photos/discover-press-kit-images.ts` →
+  Tavily press-kit discovery script (read-only, JSON report).
+- `scripts/editorial-pilot/src/photos/upload-press-kit-images.ts` →
+  Vision-curated Cloudinary upload + Supabase patch (write).
+- `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` → `heroDescriptor`
+  lookup pattern (match `publicId`, fallback to `name`).
