@@ -401,8 +401,33 @@ The CI duration is the same as the original PR (the workflow is keyed off the he
 
 **When this can be avoided:** if the Cursor Cloud agent owning the PR is still alive, ask it to rebase its branch itself via its own dialog rather than pushing manually. The auto-close is triggered by _unexpected_ foreign pushes, not by agent-driven updates.
 
+## `$Args` is a reserved automatic variable — never name a param `$Args`
+
+A long-running overnight orchestrator script silently no-op'd: every
+pipeline step exited 0 in < 1 s with zero output. Root cause — the
+runner helper was declared `function Step { param([string]$Name,
+[string[]]$Args) … & npx tsx @Args }`. `$Args` is a **PowerShell
+automatic variable** (the array of unbound arguments). The binding
+collided, `@Args` splatted empty, and `npx tsx` ran with no script —
+opening a REPL that immediately EOF'd and returned exit 0. No error,
+no output, just a 1 s no-op per step.
+
+```powershell
+# ❌ silent no-op — $Args collides with the automatic variable
+function Step { param([string]$Name, [string[]]$Args) & npx tsx @Args }
+
+# ✅ rename the parameter (and the splat)
+function Step { param([string]$Name, [string[]]$CmdArgs) & npx tsx @CmdArgs }
+```
+
+Other reserved automatics to avoid as param names: `$Input`, `$PSItem`,
+`$Error`, `$Host`, `$Matches`. When a backgrounded script "finishes
+instantly with exit 0 and no output", suspect an automatic-variable
+collision or a heredoc/quoting issue before assuming the work is done.
+
 ## Anti-patterns
 
+- ❌ Naming a PowerShell function/script parameter `$Args` (or other automatic vars) → silent empty splat.
 - ❌ `pnpm … --slug=a,b,c` without quotes → PowerShell mangles the args.
 - ❌ Piping through `head`, `tail`, `grep`, `wc` in a Shell tool call.
 - ❌ Hardcoding `C:\Users\…` paths in committed code.
@@ -416,4 +441,5 @@ The CI duration is the same as the original PR (the workflow is keyed off the he
 
 - `cli-for-agents` skill (CLI design that's terminal-agnostic).
 - `llm-output-robustness` skill (referenced in editorial-pilot scripts).
+- `content-enrichment-pipeline` skill (PostgREST 1000-row cap on unbounded SELECT + jsonb-array audit false-gap gotchas).
 - Reference impls: `scripts/editorial-pilot/src/guides/inspect-guide.ts`, `scripts/editorial-pilot/src/guides/audit-v2-status.ts`.

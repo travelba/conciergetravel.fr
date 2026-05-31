@@ -687,9 +687,50 @@ cœur de Londres »` on cityname-only inputs. The two slots
   patch the prompt CHECKLIST and audit with the regex
   `'situé\s+([\wÀ-ÿ-]+),?\s+(au\s+cœur\s+de\s+|à\s+)\1'`.
 
+## Gotcha — PostgREST caps an unbounded SELECT at 1000 rows
+
+A catalogue-wide backfill on 2218 published hotels only ever touched
+the first 1000: `listHotels` issued a single PostgREST GET with no
+`limit`, and Supabase's `max-rows` setting silently truncates at 1000.
+Every pipeline that selects "all eligible" rows (meta-desc, policies,
+geo-context, wikidata) inherits the cap.
+
+Fix — paginate with `offset` until a short page returns, and add a
+**unique tiebreaker** to the sort, because the mass-publish passes
+stamped thousands of rows with an identical `updated_at`, which makes
+`order=updated_at.desc` + `offset` non-deterministic (rows skipped or
+duplicated across pages):
+
+```ts
+const order = baseOrder.includes('slug') ? baseOrder : `${baseOrder},slug.asc`;
+const bySlug = new Map<string, HotelRow>();
+let offset = 0;
+for (;;) {
+  const page = await fetchPage(1000, offset); // limit + offset + order
+  for (const r of page) if (!bySlug.has(r.slug)) bySlug.set(r.slug, r);
+  offset += page.length;
+  if (page.length < 1000) break;
+}
+```
+
+Watch out: scripts with their **own** un-paginated query (`geocode`,
+`pois:sync`) still cap at 1000 — they need a second run or their own
+pagination. The shared `listHotels` (supabase-hotels.ts) is fixed.
+
+## Gotcha — the CDC audit reports false gaps on jsonb-array fields
+
+`faq_content` is a jsonb **array** of `{question_fr, answer_fr,
+question_en, answer_en}` items. The CDC audit checks
+`faq_content->>'answer_fr'` at the **array root** (always null), so it
+reports "answer_fr missing: 2218/2218" even though every item carries a
+populated `answer_fr` (and the FAQ renders fine in prod). Before
+launching a remediation pipeline off an audit "gap", confirm the field
+shape — a root-level key probe on an array column is a false negative.
+
 ## References
 
 - `llm-output-robustness` — generation pipeline that consumes the enriched briefs.
+- `windows-dev-environment` — PowerShell `$Args` automatic-variable collision (silent no-op in overnight orchestrators) + Supabase `pg` SSL gotcha.
 - `api-integration` — base HTTP / Zod / retry pattern.
 - `supabase-postgres-rls` — destination tables and migrations.
 - `geo-llm-optimization` — EEAT + source attribution surface in `llms.txt`.
