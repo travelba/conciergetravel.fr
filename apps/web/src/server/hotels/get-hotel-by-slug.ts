@@ -2815,6 +2815,15 @@ export interface PublishedHotelIndexCard {
   readonly countryCode: string | null;
   readonly countryLabelFr: string | null;
   readonly countryLabelEn: string | null;
+  // ── Affiliation facet slugs (migration 0063 + commit 5b23300) ────────
+  // `facet_slug` values from verified `affiliations[]` entries, indexed by
+  // `kind`. Feeds the `/marque/[brandSlug]` and `/label/[facetSlug]`
+  // collection pages so they no longer rely solely on regex name matching
+  // (which misses Ritz-Carlton, Kempinski, etc. that don't have a
+  // `BRAND_FAMILIES` regex entry but DO have a structured affiliation).
+  readonly affiliationBrandSlugs: readonly string[];
+  readonly affiliationLabelSlugs: readonly string[];
+  readonly affiliationRankingSlugs: readonly string[];
 }
 
 const HotelIndexRowSchema = z.object({
@@ -2843,6 +2852,10 @@ const HotelIndexRowSchema = z.object({
     .transform((v) => (typeof v === 'string' && v.length === 2 ? v.toUpperCase() : null)),
   country_label_fr: stringOrEmpty,
   country_label_en: stringOrEmpty,
+  // Verified affiliations (migration 0063). Parsed leniently via
+  // `parseAffiliationsLenient` downstream so a corrupt row never breaks
+  // the index listing.
+  affiliations: z.unknown().nullable().optional(),
 });
 
 /**
@@ -2857,13 +2870,18 @@ const HotelIndexRowSchema = z.object({
 export async function listPublishedHotelsForIndex(
   limit = 200,
 ): Promise<readonly PublishedHotelIndexCard[]> {
-  const safeLimit = Math.max(1, Math.min(500, limit));
+  // Plafond élargi à 3000 — la migration 0063 + le scaffold international
+  // ont gonflé le catalogue publié au-delà de 2000 lignes. Les pages
+  // `/marque/[brandSlug]` et `/label/[facetSlug]` peuvent pointer sur
+  // ~500 hôtels chacune (Ritz-Carlton ~100, Relais & Châteaux ~478),
+  // et le default 200 est conservé pour le catalogue de tête.
+  const safeLimit = Math.max(1, Math.min(3000, limit));
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
       .select(
-        'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en, country_code, country_label_fr, country_label_en',
+        'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en, country_code, country_label_fr, country_label_en, affiliations',
       )
       .eq('is_published', true)
       .order('priority', { ascending: true })
@@ -2877,6 +2895,18 @@ export async function listPublishedHotelsForIndex(
       if (!parsed.success) continue;
       const row = parsed.data;
       if (!isValidSlug(row.slug)) continue;
+      const affs = parseAffiliationsLenient(row.affiliations).filter((a) => a.verified === true);
+      const brandSlugs: string[] = [];
+      const labelSlugs: string[] = [];
+      const rankingSlugs: string[] = [];
+      for (const a of affs) {
+        if (typeof a.facet_slug !== 'string' || a.facet_slug.length === 0) continue;
+        if (a.kind === 'brand' && !brandSlugs.includes(a.facet_slug)) brandSlugs.push(a.facet_slug);
+        else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug))
+          labelSlugs.push(a.facet_slug);
+        else if (a.kind === 'ranking' && !rankingSlugs.includes(a.facet_slug))
+          rankingSlugs.push(a.facet_slug);
+      }
       out.push({
         slugFr: row.slug,
         slugEn:
@@ -2896,6 +2926,108 @@ export async function listPublishedHotelsForIndex(
         countryCode: row.country_code,
         countryLabelFr: row.country_label_fr,
         countryLabelEn: row.country_label_en,
+        affiliationBrandSlugs: brandSlugs,
+        affiliationLabelSlugs: labelSlugs,
+        affiliationRankingSlugs: rankingSlugs,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * DB-filtered read for the `/marque/[brandSlug]` and `/label/[facetSlug]`
+ * collection pages — bypasses the in-memory affiliation filter that hits
+ * the PostgREST row cap for P2-only chains (e.g. Ritz-Carlton's 100
+ * scaffold drafts all sit past the 1000-row default of
+ * `listPublishedHotelsForIndex`).
+ *
+ * Uses the `@>` JSONB containment operator backed by the
+ * `hotels_affiliations_gin` GIN index (migration 0063), so the planner
+ * returns only matching rows without a full-table scan.
+ *
+ * The filter is `verified: true` AND `facet_slug = '<slug>'` — i.e.
+ * exactly what `Hotel.award[]` / `Hotel.brand` emit in JSON-LD via
+ * `@mch/seo/jsonld/affiliations`. This keeps the JSON-LD signal and the
+ * `/marque|label/` listing in lockstep (no row appears on the collection
+ * page that doesn't carry the matching distinction in its structured data).
+ *
+ * `kind` narrows the lookup for label vs brand vs ranking — used by the
+ * `/label/[facetSlug]` route to avoid mixing kinds in a single page.
+ */
+export async function listPublishedHotelsByAffiliation(args: {
+  readonly facetSlug: string;
+  readonly kind?: 'brand' | 'label' | 'ranking' | 'guide';
+  readonly limit?: number;
+}): Promise<readonly PublishedHotelIndexCard[]> {
+  const safeLimit = Math.max(1, Math.min(1500, args.limit ?? 1500));
+  // ── Why an RPC instead of `.contains()` on the table?
+  //
+  // We need `affiliations @> '[{"facet_slug":"<slug>","verified":true,
+  // "kind":"<kind>"}]'::jsonb`. The Supabase JS client's `.contains()`
+  // helper serializes that payload in a way that PostgREST silently
+  // ignores: direct SQL counted 478 Relais & Châteaux rows, the route
+  // returned 0 (cf. migration 0065 header). The RPC sidesteps the
+  // serialisation altogether by passing primitive `text` arguments to
+  // a SQL function that builds the JSONB matcher server-side via
+  // `jsonb_build_object`. PostgreSQL still uses the
+  // `hotels_affiliations_gin` index — the `@>` predicate stays
+  // index-pushable.
+  //
+  // Bonus: the RPC's own `limit greatest(1, least(p_limit, 3000))`
+  // bypasses PostgREST's default `max-rows = 1000` cap that was hiding
+  // every P2-only chain (Ritz-Carlton 100, R&C 478 …).
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase.rpc('published_hotels_by_affiliation', {
+      p_facet_slug: args.facetSlug,
+      p_kind: typeof args.kind === 'string' ? args.kind : null,
+      p_limit: safeLimit,
+    });
+    if (error || !Array.isArray(data)) return [];
+
+    const out: PublishedHotelIndexCard[] = [];
+    for (const raw of data) {
+      const parsed = HotelIndexRowSchema.safeParse(raw);
+      if (!parsed.success) continue;
+      const row = parsed.data;
+      if (!isValidSlug(row.slug)) continue;
+      const affs = parseAffiliationsLenient(row.affiliations).filter((a) => a.verified === true);
+      const brandSlugs: string[] = [];
+      const labelSlugs: string[] = [];
+      const rankingSlugs: string[] = [];
+      for (const a of affs) {
+        if (typeof a.facet_slug !== 'string' || a.facet_slug.length === 0) continue;
+        if (a.kind === 'brand' && !brandSlugs.includes(a.facet_slug)) brandSlugs.push(a.facet_slug);
+        else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug))
+          labelSlugs.push(a.facet_slug);
+        else if (a.kind === 'ranking' && !rankingSlugs.includes(a.facet_slug))
+          rankingSlugs.push(a.facet_slug);
+      }
+      out.push({
+        slugFr: row.slug,
+        slugEn:
+          row.slug_en !== null && row.slug_en.length > 0 && isValidSlug(row.slug_en)
+            ? row.slug_en
+            : null,
+        nameFr: row.name,
+        nameEn: row.name_en !== null && row.name_en.length > 0 ? row.name_en : null,
+        city: row.city,
+        region: row.region,
+        stars: row.stars,
+        isPalace: row.is_palace,
+        priority: row.priority,
+        heroPublicId: row.hero_image,
+        descriptionFr: row.description_fr,
+        descriptionEn: row.description_en,
+        countryCode: row.country_code,
+        countryLabelFr: row.country_label_fr,
+        countryLabelEn: row.country_label_en,
+        affiliationBrandSlugs: brandSlugs,
+        affiliationLabelSlugs: labelSlugs,
+        affiliationRankingSlugs: rankingSlugs,
       });
     }
     return out;

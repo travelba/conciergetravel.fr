@@ -147,29 +147,100 @@ export function navHotelTypeToAxisValue(navSlug: string): string | null {
 
 /**
  * Subset of `BRAND_FAMILIES` (server/hotels/get-related-hotels.ts) shown
- * in the mega-menu. Limited to 8 visible entries + a "Toutes les
- * marques →" lien vers `/marques`. The mega-menu UI defers to
- * `<SiteHeader>` which slices this array — keep the full set declared
- * here so the footer can surface a longer list.
+ * in the mega-menu. The mega-menu UI defers to `<SiteHeader>` which
+ * slices this array (now `slice(0, 12)` — 12 visible entries to expose
+ * the international roster post ADR-0021). The footer can surface a
+ * longer subset.
+ *
+ * Order convention: international author collections first (Aman,
+ * Belmond, Six Senses, Bulgari, Auberge Resorts) so the mega-menu
+ * leads with the catalogue's worldwide footprint rather than the FR
+ * roster alone — see [ADR-0021](/docs/adr/0021-pivot-scope-mondial.md).
  */
 export const BRAND_NAV_ENTRIES: readonly NavLabeledEntry[] = [
+  // ── International collections surfaced first (PR-C, ADR-0021 Vague 4)
+  // so the menu reads as global. The first 5 are the 2026-05-28
+  // additions; the mega-menu slices (0, 12) so all 5 fit above the
+  // historical roster. Test guard: `nav-data.test.ts` asserts these
+  // 5 slugs are inside `slice(0, 12)`.
+  { slug: 'aman', labelFr: 'Aman', labelEn: 'Aman' },
+  { slug: 'belmond', labelFr: 'Belmond', labelEn: 'Belmond' },
+  { slug: 'six-senses', labelFr: 'Six Senses', labelEn: 'Six Senses' },
+  { slug: 'bulgari', labelFr: 'Bulgari', labelEn: 'Bulgari' },
+  { slug: 'auberge-resorts', labelFr: 'Auberge Resorts', labelEn: 'Auberge Resorts' },
+  // ── Historical roster (still surfaced inside the slice up to 12) ─────
+  { slug: 'four-seasons', labelFr: 'Four Seasons', labelEn: 'Four Seasons' },
+  { slug: 'mandarin-oriental', labelFr: 'Mandarin Oriental', labelEn: 'Mandarin Oriental' },
+  { slug: 'rosewood', labelFr: 'Rosewood', labelEn: 'Rosewood' },
+  { slug: 'park-hyatt', labelFr: 'Park Hyatt', labelEn: 'Park Hyatt' },
   { slug: 'cheval-blanc', labelFr: 'Cheval Blanc', labelEn: 'Cheval Blanc' },
   { slug: 'airelles', labelFr: 'Airelles', labelEn: 'Airelles' },
-  { slug: 'four-seasons', labelFr: 'Four Seasons', labelEn: 'Four Seasons' },
-  { slug: 'rosewood', labelFr: 'Rosewood', labelEn: 'Rosewood' },
-  { slug: 'mandarin-oriental', labelFr: 'Mandarin Oriental', labelEn: 'Mandarin Oriental' },
-  { slug: 'raffles', labelFr: 'Raffles', labelEn: 'Raffles' },
-  { slug: 'peninsula', labelFr: 'The Peninsula', labelEn: 'The Peninsula' },
   { slug: 'oetker-collection', labelFr: 'Oetker Collection', labelEn: 'Oetker Collection' },
+  // ── Below the mega-menu fold — visible only on `/marques` index ──────
   {
     slug: 'dorchester-collection',
     labelFr: 'Dorchester Collection',
     labelEn: 'Dorchester Collection',
   },
+  { slug: 'raffles', labelFr: 'Raffles', labelEn: 'Raffles' },
+  { slug: 'peninsula', labelFr: 'The Peninsula', labelEn: 'The Peninsula' },
   { slug: 'shangri-la', labelFr: 'Shangri-La', labelEn: 'Shangri-La' },
-  { slug: 'park-hyatt', labelFr: 'Park Hyatt', labelEn: 'Park Hyatt' },
   { slug: 'les-k2', labelFr: 'Les K2 Collections', labelEn: 'Les K2 Collections' },
   { slug: 'caudalie', labelFr: 'Caudalie', labelEn: 'Caudalie' },
+];
+
+// ─── 3bis. Editorial labels & rankings — "Palaces & Hôtels > Distinctions"
+//
+// Sourced from `affiliations[].facet_slug` written by migration 0063.
+// These distinctions stack with brand membership (a Four Seasons can
+// also be Forbes 5-Star and an LHW member). Mega-menu surfaces the
+// 6 most prestigious in a horizontal chip row; the footer adds the
+// remaining rankings. URL pattern: `/label/[facetSlug]`.
+
+/** Catalogue-driven editorial distinctions (labels + rankings). */
+export const LABEL_NAV_ENTRIES: readonly NavLabeledEntry[] = [
+  {
+    slug: 'relais-chateaux',
+    labelFr: 'Relais & Châteaux',
+    labelEn: 'Relais & Châteaux',
+  },
+  {
+    slug: 'small-luxury-hotels',
+    labelFr: 'Small Luxury Hotels',
+    labelEn: 'Small Luxury Hotels',
+  },
+  {
+    slug: 'leading-hotels-of-the-world',
+    labelFr: 'Leading Hotels of the World',
+    labelEn: 'Leading Hotels of the World',
+  },
+  { slug: 'forbes-5-star', labelFr: 'Forbes 5-Star', labelEn: 'Forbes 5-Star' },
+  {
+    slug: 'michelin-3-keys',
+    labelFr: 'Michelin — Trois Clés',
+    labelEn: 'Michelin — Three Keys',
+  },
+  {
+    slug: 'palace-atout-france',
+    labelFr: 'Palaces Atout France',
+    labelEn: 'Atout France Palaces',
+  },
+  // ── Rankings (annual editorial classements) ───────────────────────────
+  {
+    slug: 'world-50-best',
+    labelFr: "World's 50 Best Hotels",
+    labelEn: "World's 50 Best Hotels",
+  },
+  {
+    slug: 'travel-leisure-worlds-best',
+    labelFr: "Travel + Leisure World's Best",
+    labelEn: "Travel + Leisure World's Best",
+  },
+  {
+    slug: 'conde-nast-gold-list',
+    labelFr: 'Condé Nast Gold List',
+    labelEn: 'Condé Nast Gold List',
+  },
 ];
 
 // ─── 4. Themes — "Inspiration > Par thème" ───────────────────────────────
@@ -346,25 +417,28 @@ export const TOP_RANKING_NAV_ENTRIES: readonly NavLabeledEntry[] = [
     labelFr: 'Meilleurs hôtels 5★ Paris',
     labelEn: 'Best 5-Star Hotels Paris',
   },
+  // ── International rankings (ADR-0021 — added 2026-05-28) ────────────────
+  // Replaces 2 FR rankings to balance the lineup with the worldwide
+  // catalogue. Both slugs are confirmed published in `editorial_rankings`.
+  {
+    slug: 'top-aman-hotels-monde',
+    labelFr: 'Top Aman dans le monde',
+    labelEn: 'Top Aman hotels worldwide',
+  },
+  {
+    slug: 'top-mandarin-oriental-hotels-monde',
+    labelFr: 'Top Mandarin Oriental',
+    labelEn: 'Top Mandarin Oriental',
+  },
   {
     slug: 'meilleurs-hotels-spa-france',
     labelFr: 'Meilleurs hôtels avec spa',
     labelEn: 'Best hotel spas',
   },
   {
-    slug: 'meilleurs-hotels-piscine-france',
-    labelFr: 'Plus belles piscines d’hôtels',
-    labelEn: 'Most beautiful hotel pools',
-  },
-  {
-    slug: 'meilleurs-hotels-bord-de-mer-france',
-    labelFr: 'Meilleurs hôtels en bord de mer',
-    labelEn: 'Best seafront hotels',
-  },
-  {
-    slug: 'meilleurs-hotels-famille-france',
-    labelFr: 'Meilleurs hôtels famille',
-    labelEn: 'Best family hotels',
+    slug: 'classement-worlds-50-best-hotels-2025',
+    labelFr: "World's 50 Best Hotels 2025",
+    labelEn: "World's 50 Best Hotels 2025",
   },
 ];
 

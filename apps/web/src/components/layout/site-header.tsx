@@ -19,6 +19,7 @@ import {
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
   intlNavSlugToIso,
+  LABEL_NAV_ENTRIES,
   navHotelTypeToAxisValue,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
@@ -26,6 +27,7 @@ import {
   SAISON_NAV_ENTRIES,
   THEME_NAV_ENTRIES,
   TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
   TOP_RANKING_NAV_ENTRIES,
 } from './nav-data';
 
@@ -316,7 +318,13 @@ function PalacesHotelsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): 
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.hotelsByBrand')}>
           <>
-            {BRAND_NAV_ENTRIES.slice(0, 8).map((entry) => (
+            {/* Slice 12 — exposes the 5 international additions (Aman,
+                Belmond, Six Senses, Bulgari, Auberge Resorts) in addition
+                to the 7 historical FR/Asian author collections. ADR-0021
+                Vague 4 — the mega-menu now incarnates the worldwide
+                catalogue scope. The full set of 18 brands lives in
+                BRAND_NAV_ENTRIES; the footer surfaces a wider subset. */}
+            {BRAND_NAV_ENTRIES.slice(0, 12).map((entry) => (
               <MegaLink
                 key={entry.slug}
                 href={{
@@ -329,6 +337,35 @@ function PalacesHotelsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): 
             <MegaLink href="/marques" label={t('primaryNav.hotelsBrowseAllBrands')} muted />
           </>
         </MegaColumn>
+      </div>
+      {/* ── Editorial distinctions row (2026-05-29) ────────────────────────
+          Surfaces the structured `affiliations[]` facets backfilled by
+          migration 0063: 6 prestige labels (R&C, SLH, LHW, Forbes,
+          Michelin Keys, Palace Atout France). The footer carries the
+          rankings (T+L, CN Gold, World's 50 Best). Anti-invisibility
+          measure — see `.cursor/rules/user-acceptance-before-commit.mdc`. */}
+      <div className="border-border mt-3 border-t pt-3" aria-labelledby="mega-distinctions-heading">
+        <p
+          id="mega-distinctions-heading"
+          className="text-muted mb-2 px-2.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+        >
+          {t('primaryNav.hotelsByLabel')}
+        </p>
+        <div className="flex flex-wrap gap-1.5 px-1.5">
+          {LABEL_NAV_ENTRIES.slice(0, 6).map((entry) => (
+            <Link
+              key={entry.slug}
+              role="menuitem"
+              href={{
+                pathname: '/label/[facetSlug]',
+                params: { facetSlug: entry.slug },
+              }}
+              className="border-border text-muted hover:text-fg focus-visible:ring-ring rounded-full border bg-transparent px-2.5 py-1 text-[11px] transition hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
+            >
+              {pickEntryLabel(entry, locale)}
+            </Link>
+          ))}
+        </div>
       </div>
       <div className="border-border mt-3 border-t pt-2">
         <Link
@@ -345,7 +382,35 @@ function PalacesHotelsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): 
 
 // ─── Mega-menu 2 — Destinations ──────────────────────────────────────────
 
+/**
+ * Curated 8-city subset of `TOP_INTL_DESTINATION_NAV_ENTRIES` rendered in
+ * the new `Monde — villes` column. Hand-picked from the 14 published
+ * city guides (post PR-A inline merge, 2026-05-28) — every slug now
+ * renders the long-read editorial body inside `/destination/[citySlug]`,
+ * so the mega-menu link lands on a fully-rendered page rather than the
+ * pre-merge "hub-only" placeholder.
+ */
+const INTL_CITY_MENU_SLUGS = [
+  'new-york',
+  'tokyo',
+  'dubai',
+  'marrakech',
+  'mykonos',
+  'santorin',
+  'bali',
+  'amalfi-coast',
+] as const;
+
 function DestinationsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): ReactElement {
+  // Pull the curated intl city subset in declared order — `find` keeps
+  // the same labels as the master `TOP_INTL_DESTINATION_NAV_ENTRIES`
+  // declaration so a single edit reflects everywhere (footer + nav).
+  const intlCityEntries = INTL_CITY_MENU_SLUGS.map((slug) =>
+    TOP_INTL_DESTINATION_NAV_ENTRIES.find((entry) => entry.slug === slug),
+  ).filter(
+    (entry): entry is (typeof TOP_INTL_DESTINATION_NAV_ENTRIES)[number] => entry !== undefined,
+  );
+
   return (
     <MegaTrigger
       heritage={heritage}
@@ -353,7 +418,10 @@ function DestinationsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): R
       label={t('primaryNav.destinations')}
       ariaLabel={t('primaryNav.destinationsLabel')}
     >
-      <div className="grid grid-cols-3 gap-x-6 gap-y-2">
+      {/* 4-column layout (post ADR-0021 Vague 4) — splits Monde into
+          villes (city long-reads) + pays (country guides). Falls back
+          to 2 columns ≤ md to keep the mega-menu readable. */}
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2 md:grid-cols-4">
         <MegaColumn heading={t('primaryNav.destinationsFrance')}>
           <>
             {TOP_DESTINATION_NAV_ENTRIES.map((entry) => (
@@ -394,6 +462,29 @@ function DestinationsMegaMenu({ locale, t, heritage = false }: MegaMenuProps): R
                 href={{
                   pathname: '/classements/[axe]/[valeur]',
                   params: { axe: 'lieu', valeur: entry.slug },
+                }}
+                label={pickEntryLabel(entry, locale)}
+              />
+            ))}
+          </>
+        </MegaColumn>
+        <MegaColumn heading={t('primaryNav.destinationsWorldCities')}>
+          {/*
+            New `Monde — villes` column (PR-C, ADR-0021 Vague 4). Each
+            slug now renders a long-read city guide inline on
+            `/destination/[citySlug]` (PR-A — ADR-0015 step 1), so the
+            mega-menu link lands on a proper editorial page rather than
+            the pre-merge hub-only placeholder. The 8 selected slugs
+            cover the highest-traffic global capitals + iconic island
+            destinations from the 14 published city guides.
+          */}
+          <>
+            {intlCityEntries.map((entry) => (
+              <MegaLink
+                key={entry.slug}
+                href={{
+                  pathname: '/destination/[citySlug]',
+                  params: { citySlug: entry.slug },
                 }}
                 label={pickEntryLabel(entry, locale)}
               />
@@ -675,25 +766,35 @@ function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement
       label={t('primaryNav.concierge')}
       ariaLabel={t('primaryNav.conciergeLabel')}
     >
+      {/*
+        PR-C trim — the mega-menu now ships 11 entries instead of 15
+        (audit 2026-05-28). Dropped:
+          - `conciergeBooking` → reachable from the footer + every
+            hotel fiche CTA (no need in the institutional menu).
+          - `conciergeJournal` → was a placeholder pointing at
+            `/le-concierge` (the editorial journal hub never shipped);
+            keeping the link advertised stale content.
+          - `conciergeContact` → reachable from the footer Services
+            block (no first-class menu entry needed).
+          - `conciergeClubPressKit` → consolidated under
+            `conciergePress` (`/le-concierge/presse-et-partenaires`)
+            which links to the Club press kit on the same page.
+      */}
       <div className="grid grid-cols-3 gap-x-6 gap-y-2">
         <MegaColumn heading={t('primaryNav.conciergeAbout')}>
           <>
             <MegaLink href="/le-concierge" label={t('primaryNav.conciergeAboutLink')} />
-            <MegaLink href="/le-concierge/reserver" label={t('primaryNav.conciergeBooking')} />
-            {/* Le Concierge Club programme — surfaces ADR-0019 funnel from
-                the header. `/le-concierge/fidelite` stays alive for legacy
-                inbound but the menu now points at the canonical landing. */}
             {/* Single landing page after the 2026-05-26 PO
                 consolidation — both tiers (free Club + Prestige
                 waitlist) live side-by-side on /le-concierge-club. The
                 Prestige sub-link is now an in-page anchor inside that
                 landing. */}
             <MegaLink href="/le-concierge-club" label={t('primaryNav.conciergeClub')} />
-            <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
             <MegaLink
               href="/le-concierge/methode-editoriale"
               label={t('primaryNav.conciergeMethod')}
             />
+            <MegaLink href="/le-concierge/faq" label={t('primaryNav.conciergeFaq')} />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergeContent')}>
@@ -706,9 +807,6 @@ function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement
                 that was reachable from the home strip only). */}
             <MegaLink href="/ouvertures" label={t('primaryNav.conciergeOpenings')} />
             <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
-            {/* `conciergeJournal` still maps to `/le-concierge` until the
-                dedicated editorial journal hub ships (Phase-1 backlog). */}
-            <MegaLink href="/le-concierge" label={t('primaryNav.conciergeJournal')} />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>
@@ -721,14 +819,9 @@ function ConciergeMegaMenu({ t, heritage = false }: MegaMenuProps): ReactElement
               href="/le-concierge/mice-et-seminaires"
               label={t('primaryNav.conciergeMice')}
             />
-            <MegaLink href="/le-concierge/contact" label={t('primaryNav.conciergeContact')} />
             <MegaLink
               href="/le-concierge/presse-et-partenaires"
               label={t('primaryNav.conciergePress')}
-            />
-            <MegaLink
-              href="/presse/le-concierge-club"
-              label={t('primaryNav.conciergeClubPressKit')}
             />
           </>
         </MegaColumn>

@@ -212,6 +212,11 @@ export const routing = defineRouting({
     '/guides': '/guides',
     '/marque/[brandSlug]': '/marque/[brandSlug]',
     '/marques': '/marques',
+    // ── Label / ranking facets (R&C, SLH, LHW, Forbes, Michelin Keys,
+    //    Palace Atout France, T+L World's Best, Condé Nast Gold List…).
+    //    Routes ship 2026-05-29 alongside the JSON-LD `Hotel.award[]`
+    //    wireup. Slug = `affiliations[].facet_slug` from migration 0063.
+    '/label/[facetSlug]': '/label/[facetSlug]',
     // Vague 6 — international country guides. First template
     // (Italie) ships in PR #91; the remaining 7 countries (Suisse,
     // Maroc, EAU, Maldives, Thaïlande, Japon, USA) ship in

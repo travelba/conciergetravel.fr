@@ -29,6 +29,9 @@ function makeHotel(overrides: Partial<PublishedHotelIndexCard> = {}): PublishedH
     countryCode: 'FR',
     countryLabelFr: 'France',
     countryLabelEn: 'France',
+    affiliationBrandSlugs: [],
+    affiliationLabelSlugs: [],
+    affiliationRankingSlugs: [],
     ...overrides,
   };
 }

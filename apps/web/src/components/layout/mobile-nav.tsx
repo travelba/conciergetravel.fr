@@ -15,15 +15,34 @@ import {
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
   intlNavSlugToIso,
+  LABEL_NAV_ENTRIES,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
   SAISON_NAV_ENTRIES,
   THEME_NAV_ENTRIES,
   TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
   TOP_RANKING_NAV_ENTRIES,
   type NavLabeledEntry,
 } from './nav-data';
+
+/**
+ * Same curated 8-city subset surfaced in `<SiteHeader>` (PR-C). Kept
+ * inline rather than re-exported from `nav-data` because the desktop
+ * mega-menu needs typed `find()` filtering — duplicating 8 strings
+ * here is cheaper than introducing a runtime guard everywhere.
+ */
+const INTL_CITY_MOBILE_SLUGS = [
+  'new-york',
+  'tokyo',
+  'dubai',
+  'marrakech',
+  'mykonos',
+  'santorin',
+  'bali',
+  'amalfi-coast',
+] as const;
 
 /**
  * Mobile slide-over menu — refonte ADR-0014.
@@ -289,7 +308,12 @@ export function MobileNav(): ReactElement {
                       </ul>
                       <p className={subHeadingClass}>{t('primaryNav.hotelsByBrand')}</p>
                       <ul className="flex flex-col gap-0.5">
-                        {BRAND_NAV_ENTRIES.slice(0, 6).map((entry) => (
+                        {/* Slice 12 — match the desktop mega-menu so
+                            mobile users discover the international
+                            additions (Aman, Belmond, Six Senses,
+                            Bulgari, Auberge Resorts) too. ADR-0021
+                            Vague 4 — see `site-header.tsx`. */}
+                        {BRAND_NAV_ENTRIES.slice(0, 12).map((entry) => (
                           <li key={entry.slug}>
                             <Link
                               href={{
@@ -307,6 +331,24 @@ export function MobileNav(): ReactElement {
                             {t('primaryNav.hotelsBrowseAllBrands')}
                           </Link>
                         </li>
+                      </ul>
+                      {/* ── Distinctions row (2026-05-29) — anti-invisibility
+                            for the new `/label/[facetSlug]` routes. */}
+                      <p className={subHeadingClass}>{t('primaryNav.hotelsByLabel')}</p>
+                      <ul className="flex flex-col gap-0.5">
+                        {LABEL_NAV_ENTRIES.map((entry) => (
+                          <li key={entry.slug}>
+                            <Link
+                              href={{
+                                pathname: '/label/[facetSlug]',
+                                params: { facetSlug: entry.slug },
+                              }}
+                              className={subLinkClass}
+                            >
+                              {pickEntryLabel(entry, locale)}
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                       <Link href="/hotels" className={`${subLinkClass} text-muted text-xs`}>
                         {t('primaryNav.hotelsBrowseAll')}
@@ -343,6 +385,35 @@ export function MobileNav(): ReactElement {
                         axe="lieu"
                         linkClass={subLinkClass}
                       />
+                      <p className={subHeadingClass}>{t('primaryNav.destinationsWorldCities')}</p>
+                      {/*
+                        New `Monde — villes` group (PR-C, ADR-0021
+                        Vague 4). Each slug now renders a long-read
+                        city guide inline on `/destination/[citySlug]`
+                        (PR-A). Mobile mirrors desktop so the discovery
+                        path is identical.
+                      */}
+                      <ul className="flex flex-col gap-0.5">
+                        {INTL_CITY_MOBILE_SLUGS.map((citySlug) => {
+                          const entry = TOP_INTL_DESTINATION_NAV_ENTRIES.find(
+                            (e) => e.slug === citySlug,
+                          );
+                          if (entry === undefined) return null;
+                          return (
+                            <li key={citySlug}>
+                              <Link
+                                href={{
+                                  pathname: '/destination/[citySlug]',
+                                  params: { citySlug },
+                                }}
+                                className={subLinkClass}
+                              >
+                                {pickEntryLabel(entry, locale)}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
                       <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
                       {/*
                     Vague-6 — all 8 international country guides
@@ -471,24 +542,26 @@ export function MobileNav(): ReactElement {
                       <Chevron />
                     </summary>
                     <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-1 border-l pb-2 pl-3">
+                      {/*
+                        PR-C trim — desktop and mobile now ship the
+                        same 11 entries (was 15). Dropped:
+                          - `conciergeBooking` → reachable from footer
+                          - `conciergeJournal` → stale placeholder
+                          - `conciergeContact` → reachable from footer
+                          - `conciergeClubPressKit` → consolidated under
+                            `conciergePress` on the same page.
+                      */}
                       <Link href="/le-concierge" className={subLinkClass}>
                         {t('primaryNav.conciergeAboutLink')}
                       </Link>
-                      <Link href="/le-concierge/reserver" className={subLinkClass}>
-                        {t('primaryNav.conciergeBooking')}
-                      </Link>
-                      {/* Le Concierge Club — single landing post
-                          2026-05-26 PO consolidation. Both tiers (free
-                          Club + Prestige waitlist) share one page; the
-                          Prestige sub-link is now an in-page anchor. */}
                       <Link href="/le-concierge-club" className={subLinkClass}>
                         {t('primaryNav.conciergeClub')}
                       </Link>
-                      <Link href="/le-concierge/faq" className={subLinkClass}>
-                        {t('primaryNav.conciergeFaq')}
-                      </Link>
                       <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
                         {t('primaryNav.conciergeMethod')}
+                      </Link>
+                      <Link href="/le-concierge/faq" className={subLinkClass}>
+                        {t('primaryNav.conciergeFaq')}
                       </Link>
                       <Link href="/le-conseil-du-concierge" className={subLinkClass}>
                         {t('primaryNav.conciergeTip')}
@@ -496,10 +569,6 @@ export function MobileNav(): ReactElement {
                       <Link href="/itineraires" className={subLinkClass}>
                         {t('primaryNav.conciergeItineraries')}
                       </Link>
-                      {/* Ouvertures & visites — discoverable from
-                          mobile (the burger absorbs ~30 % of GA4
-                          sessions; missing here would drop the page
-                          below the visibility threshold). */}
                       <Link href="/ouvertures" className={subLinkClass}>
                         {t('primaryNav.conciergeOpenings')}
                       </Link>
@@ -512,14 +581,8 @@ export function MobileNav(): ReactElement {
                       <Link href="/le-concierge/mice-et-seminaires" className={subLinkClass}>
                         {t('primaryNav.conciergeMice')}
                       </Link>
-                      <Link href="/le-concierge/contact" className={subLinkClass}>
-                        {t('primaryNav.conciergeContact')}
-                      </Link>
                       <Link href="/le-concierge/presse-et-partenaires" className={subLinkClass}>
                         {t('primaryNav.conciergePress')}
-                      </Link>
-                      <Link href="/presse/le-concierge-club" className={subLinkClass}>
-                        {t('primaryNav.conciergeClubPressKit')}
                       </Link>
                     </div>
                   </details>

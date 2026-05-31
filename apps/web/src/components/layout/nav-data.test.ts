@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  BRAND_NAV_ENTRIES,
   HERO_REGION_NAV_ENTRIES,
   HOTEL_TYPE_NAV_ENTRIES,
   INTL_DESTINATION_NAV_ENTRIES,
   INTL_NAV_SLUG_TO_ISO,
   NAV_HOTEL_TYPE_TO_AXIS_VALUE,
   TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
   TOP_RANKING_NAV_ENTRIES,
   intlNavSlugToIso,
   navHotelTypeToAxisValue,
@@ -116,5 +118,66 @@ describe('nav-data slug shape guards', () => {
     const destSlugs = new Set(TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug));
     const intersection = [...heroSlugs].filter((s) => destSlugs.has(s));
     expect(intersection).toEqual(['bordeaux']);
+  });
+
+  it('BRAND_NAV_ENTRIES + TOP_INTL_DESTINATION_NAV_ENTRIES slugs are kebab-case ASCII', () => {
+    for (const entry of [...BRAND_NAV_ENTRIES, ...TOP_INTL_DESTINATION_NAV_ENTRIES]) {
+      expect(entry.slug).toMatch(SLUG_RE);
+    }
+  });
+});
+
+/**
+ * BRAND_NAV_ENTRIES <-> BRAND_FAMILIES alignment guard (PR-C).
+ *
+ * Every brand surfaced by the navigation MUST also have a detection
+ * pattern in `BRAND_FAMILIES` (server/hotels/get-related-hotels.ts);
+ * otherwise the `/marque/[slug]` page renders an empty list because no
+ * hotel name matches.
+ *
+ * Mirrored inline rather than imported because `get-related-hotels.ts`
+ * carries the `'server-only'` directive, which Vitest is happy to load
+ * but which would couple this unit test to Supabase admin client
+ * resolution. The mirror MUST stay in sync — a CI grep would catch
+ * drift, but the assertion below catches it earlier.
+ */
+describe('BRAND_NAV_ENTRIES alignment with BRAND_FAMILIES', () => {
+  const BRAND_FAMILY_SLUGS = new Set([
+    'aman',
+    'belmond',
+    'six-senses',
+    'bulgari',
+    'auberge-resorts',
+    'cheval-blanc',
+    'airelles',
+    'four-seasons',
+    'rosewood',
+    'raffles',
+    'peninsula',
+    'mandarin-oriental',
+    'shangri-la',
+    'park-hyatt',
+    'oetker-collection',
+    'dorchester-collection',
+    'les-k2',
+    'caudalie',
+  ]);
+
+  it('every BRAND_NAV_ENTRIES slug is a known BRAND_FAMILIES detection slug', () => {
+    for (const entry of BRAND_NAV_ENTRIES) {
+      expect(BRAND_FAMILY_SLUGS.has(entry.slug)).toBe(true);
+    }
+  });
+
+  it('the mega-menu slice (12 brands) starts with the 5 international additions', () => {
+    // PR-C ADR-0021 Vague 4: surface the international collections
+    // first so the menu reads as global (Aman, Belmond, Six Senses,
+    // Bulgari, Auberge Resorts come before the historical roster).
+    const slice = BRAND_NAV_ENTRIES.slice(0, 12).map((e) => e.slug);
+    expect(slice).toContain('aman');
+    expect(slice).toContain('belmond');
+    expect(slice).toContain('six-senses');
+    expect(slice).toContain('bulgari');
+    expect(slice).toContain('auberge-resorts');
   });
 });

@@ -75,13 +75,19 @@ export default async function BrandsIndexPage({ params }: { params: Promise<{ lo
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   // Compute per-brand counts in a single pass over the published catalogue.
-  const allHotels = await listPublishedHotelsForIndex();
+  // Widened to 2500 — large chains (Ritz-Carlton ~100, Four Seasons ~98)
+  // can extend past the default 200-row cap.
+  const allHotels = await listPublishedHotelsForIndex(2500);
   const counts = new Map<string, number>();
   for (const h of allHotels) {
-    const brand = detectBrand(h.nameFr);
-    if (brand !== null) {
-      counts.set(brand.slug, (counts.get(brand.slug) ?? 0) + 1);
-    }
+    // Union of name-regex (legacy) and structured `affiliations[]`
+    // (migration 0063). Each hotel counts at most once per brand slug
+    // even when both detections agree.
+    const matched = new Set<string>();
+    const detected = detectBrand(h.nameFr);
+    if (detected !== null) matched.add(detected.slug);
+    for (const s of h.affiliationBrandSlugs) matched.add(s);
+    for (const slug of matched) counts.set(slug, (counts.get(slug) ?? 0) + 1);
   }
 
   // Render brands by descending count so the most-populated families

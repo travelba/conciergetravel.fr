@@ -111,7 +111,7 @@
         },
         {
           "q": "Quels palaces ou Relais & Châteaux figurent parmi les ouvertures récentes ?",
-          "a": "Notre catalogue couvre 615 hôtels d'exception dans 91 pays, dont 435 Relais & Châteaux et 18 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
+          "a": "Notre catalogue couvre 2 193 hôtels d'exception dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
         },
         {
           "q": "Puis-je réserver via le Concierge un hôtel récemment ouvert ?",
@@ -135,7 +135,7 @@
         },
         {
           "q": "Couvrez-vous les ouvertures hors France et hors Europe ?",
-          "a": "Oui. Notre catalogue 2026 couvre 91 pays — les ouvertures phares incluent l'Asie (Aman Tokyo, Capella Bangkok, Bvlgari Dubaï), le Moyen-Orient, l'Afrique (Al Moudira à Louxor, lodges Singita), l'Amérique latine (Riviera Maya, Patagonie), les Caraïbes et l'océan Indien. La sélection privilégie les maisons signature plutôt que les chaînes de masse, où qu'elles soient."
+          "a": "Oui. Notre catalogue 2026 couvre 127 pays — les ouvertures phares incluent l'Asie (Aman Tokyo, Capella Bangkok, Bvlgari Dubaï), le Moyen-Orient, l'Afrique (Al Moudira à Louxor, lodges Singita), l'Amérique latine (Riviera Maya, Patagonie), les Caraïbes et l'océan Indien. La sélection privilégie les maisons signature plutôt que les chaînes de masse, où qu'elles soient."
         },
         {
           "q": "Comment être prévenu des prochaines ouvertures suivies par le Concierge ?",
@@ -259,14 +259,15 @@
       "label": "Navigation principale",
       "destinations": "Destinations",
       "search": "Rechercher",
-      "hotels": "Palaces & Hôtels",
+      "hotels": "Hôtels",
       "hotelsAllAria": "Voir tous les hôtels",
       "hotelsCategoriesLabel": "Catégories d'hôtels",
       "hotelsBrowseAll": "Tous les hôtels du catalogue",
-      "hotelsByDistinction": "Par distinction",
+      "hotelsByDistinction": "Sélections françaises",
       "hotelsByType": "Par type",
-      "hotelsByBrand": "Par groupe hôtelier",
+      "hotelsByBrand": "Par marque",
       "hotelsBrowseAllBrands": "Toutes les marques →",
+      "hotelsByLabel": "Par distinction éditoriale",
       "rankings": "Classements",
       "rankingsLabel": "Classements éditoriaux",
       "rankingsTop": "Les plus populaires",
@@ -282,8 +283,9 @@
       "inspirationBrowseAll": "Voir toutes les inspirations →",
       "destinationsLabel": "Toutes les destinations",
       "destinationsFrance": "France",
-      "destinationsHeroes": "Régions héros",
-      "destinationsWorld": "À l'international",
+      "destinationsHeroes": "Régions FR (classements)",
+      "destinationsWorldCities": "Monde — par ville",
+      "destinationsWorld": "Monde — par pays",
       "destinationsBrowseAll": "Toutes les destinations →",
       "concierge": "Le Concierge",
       "conciergeLabel": "À propos & contenus",
@@ -477,7 +479,7 @@
     "viewBrand": "Voir les hôtels {brand} →",
     "empty": "Aucun hôtel publié pour cette marque pour le moment.",
     "aeoQuestion": "Quels groupes hôteliers représente MyConciergeHotel dans son catalogue ?",
-    "aeoAnswer": "MyConciergeHotel couvre {count} collections hôtelières d'auteur — Cheval Blanc, Airelles, Four Seasons, Rosewood, Mandarin Oriental, Raffles, The Peninsula, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Shangri-La, Park Hyatt, Les K2 Collections, Caudalie. Les adresses indépendantes (Negresco, Lutetia, Crillon, Villa La Coste) figurent également sans appartenance à une chaîne. Mise à jour {date}.",
+    "aeoAnswer": "MyConciergeHotel couvre {count} collections hôtelières d'auteur dans le monde — Aman, Belmond, Six Senses, Bulgari, Mandarin Oriental, Four Seasons, Rosewood, Park Hyatt, Raffles, The Peninsula, Shangri-La, Oetker Collection (Le Bristol, Hôtel du Cap-Eden-Roc), Dorchester Collection (Le Meurice, Plaza Athénée), Cheval Blanc, Airelles, Les K2, Caudalie. Les adresses indépendantes iconiques (Negresco, Lutetia, Crillon, Villa La Coste, Reid's Palace) figurent également sans appartenance à une chaîne. Mise à jour {date}.",
     "faqTitle": "Les marques d'hôtels — questions fréquentes",
     "faqItems": [
       {
@@ -485,12 +487,12 @@
         "a": "Non. MyConciergeHotel est une agence IATA indépendante. Aucune marque ne paie pour figurer ou être mise en avant. Notre commission vient des réservations (standard IATA), identique d'une marque à l'autre — la sélection est strictement éditoriale."
       },
       {
-        "q": "Pourquoi certaines marques de luxe sont absentes (Aman, Six Senses, Belmond) ?",
-        "a": "Soit parce que la marque n'a pas encore d'adresse en France dans notre catalogue (Aman, Six Senses), soit parce que la connectivité GDS n'est pas optimale (Belmond — connecté par lots, en cours d'enrichissement). Notre conciergerie peut néanmoins réserver toute adresse via Amadeus sur demande."
+        "q": "Quelles grandes maisons internationales sont au catalogue ?",
+        "a": "Notre catalogue couvre les principales collections d'auteur : Aman (Asie, Amériques, Europe), Belmond (Italie, Amérique latine, Train Orient-Express), Six Senses (Bali, Maldives, Suisse, Portugal), Bulgari (Milan, Dubaï, Tokyo, Paris), Mandarin Oriental, Four Seasons, Rosewood, Park Hyatt, Raffles, The Peninsula, Shangri-La. Les nouvelles ouvertures sont publiées sur /ouvertures dès la visite validée par notre conciergerie."
       },
       {
         "q": "Comment une marque rejoint-elle votre catalogue éditorial ?",
-        "a": "Nous sélectionnons les groupes hôteliers en croisant trois critères : présence d'au moins une adresse française 5★ ou Palace, connectivité Amadeus GDS pour la réservation directe, signature éditoriale forte (collection d'auteur, pas simple bannière marketing). Une marque ne se candidate pas — c'est notre conciergerie qui propose."
+        "a": "Nous sélectionnons les groupes hôteliers en croisant trois critères : signature éditoriale forte (collection d'auteur, pas simple bannière marketing), distinctions verifiables (Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World), connectivité Amadeus GDS pour la réservation directe. Une marque ne se candidate pas — c'est notre conciergerie qui propose."
       },
       {
         "q": "Que signifie « collection » vs « chaîne » dans votre catalogue ?",
@@ -1719,7 +1721,7 @@
     "lede": "MyConciergeHotel est un canal de distribution éditorial pour Palaces et hôtels 5 étoiles. Nous sélectionnons à l'invitation, sur audit, et signons chaque fiche. Voici les avantages pour les hôteliers retenus et le processus de candidature.",
     "lastReviewed": "2026-05-12",
     "aeoQuestion": "Comment intégrer le catalogue éditorial MyConciergeHotel en tant qu'hôtelier ?",
-    "aeoAnswer": "MyConciergeHotel sélectionne à l'invitation, sur 8 critères croisés (Atout France, Michelin Keys, Forbes, audit interne, signature éditoriale — voir /le-concierge/methode-editoriale). Les hôteliers Palaces et 5★ français peuvent toutefois nous écrire pour signaler leur disponibilité GDS Amadeus et leur appétence à un partenariat. Réponse de notre cellule partenariats sous 5 jours ouvrés. Aucun frais d'entrée — agence IATA, commissions standard sur réservations. Mise à jour {date}.",
+    "aeoAnswer": "MyConciergeHotel sélectionne à l'invitation, sur 8 critères croisés (Atout France, Michelin Keys, Forbes, Relais & Châteaux, Leading Hotels of the World, audit interne, signature éditoriale — voir /le-concierge/methode-editoriale). Les hôteliers Palaces et 5★ du monde entier peuvent toutefois nous écrire pour signaler leur disponibilité GDS Amadeus et leur appétence à un partenariat. Réponse de notre cellule partenariats sous 5 jours ouvrés. Aucun frais d'entrée — agence IATA, commissions standard sur réservations. Mise à jour {date}.",
     "benefits": {
       "title": "5 avantages pour les hôtels partenaires",
       "items": [
@@ -1850,7 +1852,8 @@
         "Côte d'Azur : Hôtel du Cap-Eden-Roc (cap 250 en plein air), Grand-Hôtel du Cap-Ferrat (cap 200), Hôtel Martinez Cannes (cap 800 en plénière), La Réserve Ramatuelle (cap 80 intime).",
         "Alpes : Cheval Blanc Courchevel (privatisations 30-50), Les Airelles Gstaad (cap 100), Four Seasons Megève (privatisations 60-120), Le K2 Palace (cap 60).",
         "Bordelais : Les Sources de Caudalie (cap 150 vignobles), Château Smith Haut Lafitte (cap 200 réceptions).",
-        "Champagne : Domaine Les Crayères (cap 80 cérémonies)."
+        "Champagne : Domaine Les Crayères (cap 80 cérémonies).",
+        "International — sur devis : Italie (Belmond Hotel Cipriani Venise, Aman Venise, Belmond Hotel Caruso Côte amalfitaine), Suisse (Badrutt's Palace St-Moritz, Beau-Rivage Genève), Maroc (La Mamounia & Royal Mansour Marrakech, Le Mirage Tanger), Émirats (Bulgari & Burj Al Arab Dubaï), Grèce (Mystique Santorin, Bill & Coo Mykonos). Privatisations intégrales possibles sur les Maldives, Bali et la Riviera Maya — délais 60-120 jours."
       ]
     },
     "form": {
@@ -1908,6 +1911,11 @@
     "metaDesc": "Notre programme de fidélité : tier Essentiel automatique (Little Hotelier — petit-déj offert, late check-out, crédit hôtel) et tier Prestige (abonnement — surclassement, transfert aéroport). Conditions complètes.",
     "breadcrumbHome": "Accueil",
     "breadcrumbConcierge": "Le Concierge",
+    "clubBanner": {
+      "title": "Le Concierge Club est notre programme actuel",
+      "body": "Cette page documente l'historique des deux tiers Essentiel et Prestige (ADR-0005). Pour rejoindre le programme actif gratuit sans CB et sans engagement, allez sur",
+      "linkLabel": "Le Concierge Club"
+    },
     "eyebrow": "Programme de fidélité",
     "title": "Le programme de fidélité MyConciergeHotel",
     "lede": "Dès votre première nuit, MyConciergeHotel vous offre des avantages cumulables avec les programmes de chaîne. Deux tiers : Essentiel (gratuit, automatique sur le catalogue Little Hotelier) et Prestige (abonnement, avantages renforcés sur l'ensemble du catalogue Palaces et 5★).",
@@ -2295,6 +2303,22 @@
         }
       ]
     },
+    "scope": {
+      "title": "Notre périmètre éditorial",
+      "lede": "MyConciergeHotel n'est pas un agrégateur mondial. Notre catalogue est délibérément resserré sur les adresses qui passent les 8 critères — un volume signal-élevé qui rend chaque ouverture éditoriale significative.",
+      "stats": {
+        "hotelsLabel": "hôtels publiés",
+        "countriesLabel": "pays couverts",
+        "cityGuidesLabel": "guides de villes",
+        "countryGuidesLabel": "guides de pays",
+        "cityGuidesValue": "14",
+        "countryGuidesValue": "8"
+      },
+      "body": "Nos {hotels} hôtels publiés se répartissent sur {countries} pays — Europe (France, Italie, Suisse, Espagne, Portugal, Grèce, Royaume-Uni, Allemagne…), Amériques (États-Unis, Mexique, Brésil, Pérou, Chili…), Asie (Japon, Thaïlande, Indonésie, Maldives…), Moyen-Orient (Émirats, Oman, Arabie Saoudite), Afrique (Maroc, Afrique du Sud, Tanzanie, Kenya, Botswana). Au-delà des fiches éditoriales, notre conciergerie peut réserver via Amadeus GDS plus de 950 000 hôtels dans le monde sur demande — pour une adresse non encore publiée, écrivez-nous via /le-concierge/contact.",
+      "guidesIntro": "Pour aider à se repérer dans cette densité, nous publions deux familles de guides éditoriaux :",
+      "cityGuidesBody": "Guides de villes (14 publiés en mai 2026) — New York, Tokyo, Bali, Dubaï, Marrakech, Mykonos, Santorin, Saint-Moritz, Phuket, Lake Como, Madère, Riviera Maya, Algarve, Côte d'Amalfi. Chaque guide combine la sélection d'hôtels et un long-read de 2000 mots (POIs, art de vivre, infos pratiques).",
+      "countryGuidesBody": "Guides de pays (8 publiés) — Italie, Suisse, Maroc, Émirats arabes unis, Maldives, Thaïlande, Japon, États-Unis. Format : sélection cumulée de villes du pays + signature culturelle / éditoriale du Concierge."
+    },
     "process": {
       "title": "Comment une adresse rejoint notre catalogue",
       "step1Title": "Proposition interne",
@@ -2543,7 +2567,9 @@
       "inspiration": "Inspiration",
       "search": "Recherche",
       "topDestinations": "Top destinations",
+      "topIntlDestinations": "Destinations dans le monde",
       "topRankings": "Top classements",
+      "editorialLabels": "Distinctions éditoriales",
       "selection": "Sélection",
       "palaces": "Palaces",
       "fiveStars": "Hôtels 5★",
@@ -2769,8 +2795,8 @@
           "a": "{city} se visite toute l'année, mais certaines saisons concentrent les événements (festivals, cérémonies, calendrier sportif) et les tarifs hôteliers atteignent leur pic. Notre conciergerie peut vous proposer des fenêtres optimales — généralement les épaules de saison (mai-juin, septembre) — où l'expérience est complète sans la sur-fréquentation. Les fiches hôtel mentionnent la haute/basse saison locale."
         },
         {
-          "q": "Comment rejoindre {city} depuis Paris ou un aéroport international ?",
-          "a": "Les distances et accès sont précisés sur chaque fiche hôtel (aéroport le plus proche, gare TGV, distance en voiture). Notre conciergerie organise les transferts sur demande : taxi premium, voiture avec chauffeur, hélicoptère pour les destinations Alpes/Côte d'Azur. Le tarif est communiqué avant confirmation, sans intermédiaire ajouté."
+          "q": "Comment rejoindre {city} depuis un aéroport ou une grande gare ?",
+          "a": "Les distances et accès sont précisés sur chaque fiche hôtel (aéroport le plus proche, gare ferroviaire, distance en voiture). Notre conciergerie organise les transferts sur demande : taxi premium, voiture avec chauffeur, hélicoptère pour les destinations Alpes / Côte d'Azur / archipel. Le tarif est communiqué avant confirmation, sans intermédiaire ajouté."
         },
         {
           "q": "Quels musées, restaurants ou expériences ne pas manquer à {city} ?",
@@ -2835,7 +2861,7 @@
         },
         {
           "q": "Quelle différence entre une destination et un guide ?",
-          "a": "Depuis ADR-0015, les deux routes ont fusionné : /destination/{ville} héberge à la fois le hub catalogue (sélection d'hôtels) et le guide long-read (POIs, art de vivre, infos pratiques). /guide/{ville} redirige vers la destination en 308."
+          "a": "Les deux surfaces sont désormais fusionnées sur une seule URL : /destination/{ville} héberge à la fois le hub catalogue (sélection d'hôtels Palaces et 5★) et le long-read éditorial du Concierge (POIs nommés, art de vivre, infos pratiques, sources d'autorité). L'ancienne route /guide/{ville} redirige en 308 vers la destination — une seule canonique, un seul signal SEO. Les guides pays restent sur /guide/{pays}."
         },
         {
           "q": "Les guides sont-ils disponibles en anglais ?",
@@ -2857,6 +2883,10 @@
         "hotelsCount": "{count, plural, one {# hôtel} other {# hôtels}}",
         "fullCatalogHint": "{count, plural, =0 {Notre catalogue couvre aussi d'autres pays —} one {Un autre pays est représenté à notre catalogue —} other {# autres pays sont représentés à notre catalogue —}}",
         "fullCatalogLink": "voir tous les hôtels."
+      },
+      "unguidedCountriesSection": {
+        "title": "Autres pays au catalogue",
+        "subtitle": "{count, plural, one {# pays sans guide éditorial dédié} other {# pays sans guide éditorial dédié}}."
       }
     }
   },
@@ -3857,11 +3887,11 @@
     "lede": "Vous écrivez sur l'hôtellerie de luxe française ? Voici le dossier de presse du programme de fidélité MyConciergeHotel.com.",
     "sections": {
       "identityTitle": "Identité du programme",
-      "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les Palaces et hôtels 5★ français. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
+      "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les hôtels d'exception du monde — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
       "philosophyTitle": "Philosophie",
       "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, WhatsApp Concierge) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
       "numbersTitle": "Catalogue (mai 2026)",
-      "numbersBody": "1 367 hôtels en catalogue, 443 fiches publiées. 471 hôtels Relais & Châteaux scaffoldés en attente de publication. 216 classements éditoriaux, 86 guides destinations, 20 itinéraires luxe FR + international.",
+      "numbersBody": "2 193 fiches hôtels publiées dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. 290 classements éditoriaux, 86 guides destinations, 20 itinéraires luxe France + international.",
       "complianceTitle": "Conformité",
       "complianceBody": "Programme conforme aux exigences DGCCRF et au Digital Services Act. Aucun indicateur d'urgence fabriqué (Atout France §2.8). Voix Concierge éditoriale (ADR-0011) : phrases ≤ 25 mots, lexique sourcé, aucun superlatif générique."
     },

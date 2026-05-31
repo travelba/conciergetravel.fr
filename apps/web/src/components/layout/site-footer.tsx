@@ -8,10 +8,20 @@ import { isHotelHeritageRoute, readBarePathname } from '@/lib/layout/bare-pathna
 
 import {
   HERO_REGION_NAV_ENTRIES,
+  LABEL_NAV_ENTRIES,
   pickEntryLabel,
   TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
   TOP_RANKING_NAV_ENTRIES,
 } from './nav-data';
+
+/**
+ * Footer top-international subset — kept in sync with the curated mega-
+ * menu cities (PR-C, ADR-0021 Vague 4) so the footer surface mirrors
+ * the header without duplicating slug definitions. Only 4 cities — the
+ * footer column is dense enough already.
+ */
+const FOOTER_TOP_INTL_SLUGS = ['new-york', 'tokyo', 'dubai', 'marrakech'] as const;
 
 /**
  * Site-wide footer — refonte ADR-0014 (fat-footer 5 colonnes).
@@ -135,11 +145,12 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.inspiration')}
                 </Link>
               </li>
-              <li>
-                <Link href="/guides" className="text-fg hover:underline">
-                  {t('links.guides')}
-                </Link>
-              </li>
+              {/* PR-C drop — `/guides` index removed from the footer.
+                  ADR-0015 step 1 inlined city long-reads into
+                  `/destination/[citySlug]`, leaving `/guides` as a
+                  shrinking listing kept alive for the 8 country
+                  guides only. The "Top destinations" sub-list below
+                  is the new discoverability path. */}
               <li>
                 <Link href="/recherche" className="text-fg hover:underline">
                   {t('links.search')}
@@ -164,6 +175,33 @@ export async function SiteFooter(): Promise<ReactElement> {
                   </Link>
                 </li>
               ))}
+            </ul>
+
+            {/* Worldwide cities — exposes the catalogue's global
+                footprint from every footer (ADR-0021 Vague 4). The
+                4 picked cities all have a long-read editorial body
+                rendered inline on `/destination/[citySlug]` (PR-A). */}
+            <h3 className="text-muted mb-2 mt-6 text-[10px] font-medium uppercase tracking-wider">
+              {t('links.topIntlDestinations')}
+            </h3>
+            <ul className="flex flex-col gap-1 text-xs">
+              {FOOTER_TOP_INTL_SLUGS.map((citySlug) => {
+                const entry = TOP_INTL_DESTINATION_NAV_ENTRIES.find((e) => e.slug === citySlug);
+                if (entry === undefined) return null;
+                return (
+                  <li key={citySlug}>
+                    <Link
+                      href={{
+                        pathname: '/destination/[citySlug]',
+                        params: { citySlug },
+                      }}
+                      className="text-muted hover:text-fg hover:underline"
+                    >
+                      {pickEntryLabel(entry, locale)}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -264,6 +302,29 @@ export async function SiteFooter(): Promise<ReactElement> {
                 </li>
               ))}
             </ul>
+
+            {/* ── Editorial distinctions (2026-05-29) ─────────────────────
+                Surfaces the 9 verified label/ranking facets backfilled by
+                migration 0063. Footer is the long-tail entry point — the
+                mega-menu chip row only carries the 6 most prestigious. */}
+            <h3 className="text-muted mb-2 mt-6 text-[10px] font-medium uppercase tracking-wider">
+              {t('links.editorialLabels')}
+            </h3>
+            <ul className="flex flex-col gap-1 text-xs">
+              {LABEL_NAV_ENTRIES.map((entry) => (
+                <li key={entry.slug}>
+                  <Link
+                    href={{
+                      pathname: '/label/[facetSlug]',
+                      params: { facetSlug: entry.slug },
+                    }}
+                    className="text-muted hover:text-fg hover:underline"
+                  >
+                    {pickEntryLabel(entry, locale)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
 
           {/* Col 4 — Services + Concierge editorial surface
@@ -285,18 +346,16 @@ export async function SiteFooter(): Promise<ReactElement> {
                   surfaces it from every page so the funnel is reachable
                   without the mega-menu. The legacy `/le-concierge/fidelite`
                   page stays alive for inbound links but the canonical CTA
-                  now lives here. */}
-              {/* Single landing post 2026-05-26 PO consolidation —
-                  both tiers (free Club + Prestige waitlist) live
-                  side-by-side on /le-concierge-club. */}
+                  now lives here.
+
+                  PR-C — `/le-concierge/fidelite` link removed from
+                  the footer (alias of `/le-concierge-club` since the
+                  2026-05-26 PO consolidation; keeping both paths in a
+                  single column was duplicative). The fidelite page
+                  itself stays alive for SEO inbound links. */}
               <li>
                 <Link href="/le-concierge-club" className="text-fg hover:underline">
                   {t('links.club')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/le-concierge/fidelite" className="text-fg hover:underline">
-                  {t('links.loyalty')}
                 </Link>
               </li>
               <li>

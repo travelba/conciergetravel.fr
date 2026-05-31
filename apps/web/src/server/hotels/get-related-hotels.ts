@@ -7,11 +7,45 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 /**
  * Editorial brand families surfaced as cross-link clusters. Detection
  * runs against the hotel name (case-insensitive). The order matters:
- * narrower needles win (e.g. `Cheval Blanc` before `Maison`).
+ * narrower needles win (e.g. `Ritz-Carlton Reserve` before `Ritz-Carlton`).
  *
  * Each family produces a stable slug that powers `/marque/[slug]`.
+ *
+ * ## Two-tier detection (2026-05-29)
+ *
+ * - `pattern !== null` → regex match against the hotel name. Detects
+ *   un-affiliated rows (legacy catalogue, draft scaffolds) and the
+ *   hotels whose `affiliations[]` column is still empty.
+ * - `pattern === null` → no regex available (ambiguous needle, or brand
+ *   identified solely via the structured `affiliations[]` column).
+ *   The `/marque/[brandSlug]` route still resolves the slug from
+ *   `affiliationBrandSlugs` on the index card.
+ *
+ * Either way, `KNOWN_BRANDS` is the source of truth for static params.
+ * Brand slugs in `BRAND_FAMILIES` MUST stay aligned with `facet_slug`
+ * values written by migration 0063 (so the JSON-LD `Brand.identifier`
+ * → `/marque/<slug>` link never produces a soft-404).
  */
-const BRAND_FAMILIES: readonly { slug: string; label: string; pattern: RegExp }[] = [
+const BRAND_FAMILIES: readonly {
+  slug: string;
+  label: string;
+  pattern: RegExp | null;
+}[] = [
+  // ── International collections (ADR-0021 — added 2026-05-28) ────────────
+  // Aman: 37 published hotels — pattern matches "Aman Tokyo", "Amanjena",
+  // "Amanpuri", … but NOT unrelated names like "Hotel Amano" (anchored
+  // at start of name + must be followed by uppercase word boundary or
+  // another lowercase letter for the portmanteau form).
+  { slug: 'aman', label: 'Aman', pattern: /^aman(\b|[a-z])/iu },
+  { slug: 'belmond', label: 'Belmond', pattern: /\bbelmond\b/iu },
+  { slug: 'six-senses', label: 'Six Senses', pattern: /six\s*senses/iu },
+  { slug: 'bulgari', label: 'Bulgari', pattern: /\bbulgari\b/iu },
+  {
+    slug: 'auberge-resorts',
+    label: 'Auberge Resorts Collection',
+    pattern: /auberge\s*resorts/iu,
+  },
+  // ── French + Asian author collections ──────────────────────────────────
   { slug: 'cheval-blanc', label: 'Cheval Blanc', pattern: /cheval\s*blanc/iu },
   { slug: 'airelles', label: 'Airelles', pattern: /\bairelles\b/iu },
   { slug: 'four-seasons', label: 'Four Seasons', pattern: /four\s*seasons/iu },
@@ -33,15 +67,46 @@ const BRAND_FAMILIES: readonly { slug: string; label: string; pattern: RegExp }[
   },
   { slug: 'les-k2', label: 'Les K2 Collections', pattern: /\bk2\b/iu },
   { slug: 'caudalie', label: 'Caudalie', pattern: /caudalie/iu },
+  // ── Major American/Middle-Eastern/Asian chains backfilled by migration
+  //    0063 (`affiliations[].kind = 'brand'`). Order matters: narrower
+  //    needles like `ritz-carlton-reserve` must precede `ritz-carlton`.
+  // ── 2026-05-29 ───────────────────────────────────────────────────────
+  {
+    slug: 'ritz-carlton-reserve',
+    label: 'The Ritz-Carlton Reserve',
+    pattern: /ritz[.\s-]*carlton[.\s-]*reserve/iu,
+  },
+  { slug: 'ritz-carlton', label: 'The Ritz-Carlton', pattern: /ritz[.\s-]*carlton/iu },
+  { slug: 'st-regis', label: 'St. Regis', pattern: /\bst\.?\s*regis\b/iu },
+  { slug: 'waldorf-astoria', label: 'Waldorf Astoria', pattern: /waldorf[\s-]*astoria/iu },
+  { slug: 'fairmont', label: 'Fairmont', pattern: /\bfairmont\b/iu },
+  { slug: 'kempinski', label: 'Kempinski', pattern: /\bkempinski\b/iu },
+  { slug: 'anantara', label: 'Anantara', pattern: /\banantara\b/iu },
+  { slug: 'jumeirah', label: 'Jumeirah', pattern: /\bjumeirah\b/iu },
+  { slug: 'como', label: 'COMO Hotels', pattern: /\bcomo\b/iu },
+  { slug: 'capella', label: 'Capella', pattern: /\bcapella\b/iu },
+  { slug: 'viceroy', label: 'Viceroy', pattern: /\bviceroy\b/iu },
+  { slug: 'soneva', label: 'Soneva', pattern: /\bsoneva\b/iu },
+  { slug: 'nayara', label: 'Nayara', pattern: /\bnayara\b/iu },
+  // No regex — name overlaps too easily with the English word "grace".
+  // Resolved exclusively through the affiliations facet slug.
+  { slug: 'grace-hotels', label: 'Grace Hotels', pattern: null },
+  // Alias of `dorchester-collection` written by migration 0063. The two
+  // co-exist transitionally; the route handler treats them as synonyms.
+  { slug: 'dorchester', label: 'Dorchester Collection', pattern: null },
 ];
 
 /**
  * Detects the editorial brand family for a hotel from its name.
  * Returns `null` when no family matches — independent properties
  * (Negresco, Lutetia, Crillon, Villa La Coste, etc.) stay un-clustered.
+ *
+ * Families with `pattern === null` are skipped (they rely on the
+ * structured `affiliations[]` column instead).
  */
 export function detectBrand(name: string): { slug: string; label: string } | null {
   for (const f of BRAND_FAMILIES) {
+    if (f.pattern === null) continue;
     if (f.pattern.test(name)) return { slug: f.slug, label: f.label };
   }
   return null;
