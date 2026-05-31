@@ -33,8 +33,27 @@ loadDotenv({ path: path.resolve(__dirname, '../../../../.env') });
 
 // ─── Schemas (mirror DB JSONB shapes) ────────────────────────────────
 
+/**
+ * Slugify an LLM-produced anchor/key into kebab-case ASCII. The model
+ * routinely returns accented or spaced keys ("Petit-déjeuner sur la
+ * terrasse") that fail the `^[a-z0-9-]+$` regex and would hard-fail the
+ * whole hotel. Per llm-output-robustness §post-validation, we self-heal
+ * the deterministic shape rather than rejecting the generation.
+ */
+function slugifyKey(input: unknown): unknown {
+  if (typeof input !== 'string') return input;
+  const out = input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '')
+    .slice(0, 60);
+  return out.length > 0 ? out : input;
+}
+
 const LongSectionSchema = z.object({
-  anchor: z.string().regex(/^[a-z0-9-]+$/u),
+  anchor: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(4).max(120),
   title_en: z.string().min(4).max(120).optional().default(''),
   body_fr: z.string().min(300),
@@ -42,7 +61,7 @@ const LongSectionSchema = z.object({
 });
 
 const SignatureExperienceSchema = z.object({
-  key: z.string().regex(/^[a-z0-9-]+$/u),
+  key: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(3).max(120),
   title_en: z.string().min(3).max(120).optional().default(''),
   description_fr: z.string().min(40).max(700),
@@ -191,6 +210,9 @@ function buildUserPrompt(h: HotelInput): string {
     '2. `signature_experiences` (5-7 expériences) — chaque entrée : { key, title_fr, title_en, description_fr (≥ 50 mots), description_en, badge_fr (optionnel), booking_required (boolean) }.',
   );
   lines.push(
+    '   `key` OBLIGATOIREMENT en kebab-case ASCII (minuscules, chiffres et tirets uniquement, AUCUN accent ni espace), ex. "petit-dejeuner-terrasse", "cours-cuisine-chef".',
+  );
+  lines.push(
     '   Exemples de signature : "Petit-déjeuner sur la terrasse", "Cours de cuisine avec le Chef", "Routine bien-être personnalisée au Spa", "Visite privée du domaine", "Initiation à la dégustation", "Coucher de soleil en hélicoptère"…',
   );
   lines.push(
@@ -254,7 +276,7 @@ function parseArgs(): Args {
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length).trim();
     else if (arg.startsWith('--concurrency=')) {
       const n = Number.parseInt(arg.slice('--concurrency='.length), 10);
-      if (Number.isFinite(n) && n >= 1 && n <= 8) concurrency = n;
+      if (Number.isFinite(n) && n >= 1 && n <= 16) concurrency = n;
     }
   }
   return { slug, all, force, concurrency };

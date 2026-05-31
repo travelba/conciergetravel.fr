@@ -244,7 +244,7 @@ function parseArgs(): Args {
     else if (a.startsWith('--slug=')) slug = a.slice('--slug='.length).trim();
     else if (a.startsWith('--concurrency=')) {
       const n = Number.parseInt(a.slice('--concurrency='.length), 10);
-      if (Number.isFinite(n) && n >= 1 && n <= 8) concurrency = n;
+      if (Number.isFinite(n) && n >= 1 && n <= 16) concurrency = n;
     }
   }
   return { slug, all, force, missingEn, concurrency };
