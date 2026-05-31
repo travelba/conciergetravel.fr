@@ -31,6 +31,22 @@ const __dirname = path.dirname(__filename);
 loadDotenv({ path: path.resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: path.resolve(__dirname, '../../../../.env') });
 
+/** Clamp an over-long LLM string to `max` chars at a sentence/word boundary. */
+function clampText(max: number): (v: unknown) => unknown {
+  return (v: unknown): unknown => {
+    if (typeof v !== 'string' || v.length <= max) return v;
+    const slice = v.slice(0, max);
+    const lastStop = Math.max(
+      slice.lastIndexOf('. '),
+      slice.lastIndexOf('! '),
+      slice.lastIndexOf('? '),
+    );
+    if (lastStop > max * 0.6) return slice.slice(0, lastStop + 1).trim();
+    const lastSpace = slice.lastIndexOf(' ');
+    return (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim();
+  };
+}
+
 const SignatureExperienceSchema = z.object({
   key: z.preprocess(
     (v) =>
@@ -52,8 +68,8 @@ const SignatureExperienceSchema = z.object({
   ),
   title_fr: z.string().min(3).max(120),
   title_en: z.string().min(3).max(120),
-  description_fr: z.string().min(40).max(800),
-  description_en: z.string().min(40).max(800),
+  description_fr: z.preprocess(clampText(1200), z.string().min(40).max(1200)),
+  description_en: z.preprocess(clampText(1200), z.string().min(40).max(1200)),
   badge_fr: z.string().max(60).optional().nullable(),
   badge_en: z.string().max(60).optional().nullable(),
   booking_required: z.boolean().default(false),

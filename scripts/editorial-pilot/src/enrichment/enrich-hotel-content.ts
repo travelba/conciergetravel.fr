@@ -52,6 +52,28 @@ function slugifyKey(input: unknown): unknown {
   return out.length > 0 ? out : input;
 }
 
+/**
+ * Clamp an over-long LLM string to `max` chars at a sentence/word
+ * boundary. gpt-5.x routinely overshoots a hard char cap by a few dozen
+ * chars on free-form descriptions; rejecting the whole hotel for a 5-char
+ * overflow wastes a full (expensive) generation. Per llm-output-robustness
+ * §post-validation we self-heal the deterministic shape instead.
+ */
+function clampText(max: number): (v: unknown) => unknown {
+  return (v: unknown): unknown => {
+    if (typeof v !== 'string' || v.length <= max) return v;
+    const slice = v.slice(0, max);
+    const lastStop = Math.max(
+      slice.lastIndexOf('. '),
+      slice.lastIndexOf('! '),
+      slice.lastIndexOf('? '),
+    );
+    if (lastStop > max * 0.6) return slice.slice(0, lastStop + 1).trim();
+    const lastSpace = slice.lastIndexOf(' ');
+    return (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim();
+  };
+}
+
 const LongSectionSchema = z.object({
   anchor: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(4).max(120),
@@ -64,8 +86,11 @@ const SignatureExperienceSchema = z.object({
   key: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(3).max(120),
   title_en: z.string().min(3).max(120).optional().default(''),
-  description_fr: z.string().min(40).max(700),
-  description_en: z.string().min(20).max(700).optional().default(''),
+  description_fr: z.preprocess(clampText(1200), z.string().min(40).max(1200)),
+  description_en: z.preprocess(
+    clampText(1200),
+    z.string().min(20).max(1200).optional().default(''),
+  ),
   badge_fr: z.string().max(40).optional().nullable(),
   badge_en: z.string().max(40).optional().nullable(),
   booking_required: z.boolean().default(false),
