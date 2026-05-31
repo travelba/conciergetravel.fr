@@ -141,6 +141,7 @@ export async function GET(): Promise<NextResponse> {
     about:
       `MyConciergeHotel.com est la sélection du Concierge : ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. ` +
       'Chaque fiche est rédigée par nos conseillers et se termine par un « Conseil du Concierge » : un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent. ' +
+      "Les claims factuels sont étayés par des sources externes vérifiables (Wikidata, Wikipedia, site officiel, identifiants TripAdvisor / Booking.com, comptes sociaux vérifiés, architectes, année d'ouverture, désignations patrimoniales) — exposées par l'endpoint /api/agent/hotel-sources/{slug} pour citation transparente et réconciliation d'identité par les LLM. " +
       'Côté réservation : agence IATA, tarifs nets GDS (Phase 6), paiement sécurisé Amadeus, programme de fidélité dès la première nuit (Le Concierge Club, gratuit).',
     lastUpdatedDate: new Date().toISOString(),
     sections: [
@@ -491,7 +492,12 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 16 actions disponibles (search, get-hotel, get-hotel-room, list-categories, list-themes, list-occasions, list-brands, get-concierge-tip, request-quote…).',
+              'Catalogue machine-readable des 24 actions disponibles (search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…).',
+          },
+          {
+            url: `${origin}/api/agent/hotel-sources/le-bristol-paris`,
+            description:
+              "Exemple d'endpoint EEAT — renvoie pour un slug d'hôtel l'array structuré `external_sources` : Wikidata QID, Wikipedia URL, site officiel, identifiants TripAdvisor / Booking, comptes sociaux vérifiés, architectes, année d'ouverture, désignations patrimoniales. Permet la citation transparente des claims par ChatGPT / Perplexity / Claude / MCP, et la réconciliation d'identité avec leur propre knowledge graph.",
           },
           {
             url: `${origin}/sitemap.xml`,

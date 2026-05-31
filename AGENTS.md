@@ -223,6 +223,40 @@ twitter,instagram,facebook,youtube,linkedin}`) into structured
   `(source, field)`. Re-run whenever `enrich-wikidata-ids.ts`
   resolves new identifiers.
 
+**Phase 5 mini-sweep — EEAT becomes LLM-actionable (2026-05-31)**
+
+The EEAT `external_sources` data backfilled above is now exposed as a
+first-class agent skill, so ChatGPT / Claude / Perplexity / MCP can
+cite provenance without scraping the page:
+
+- New endpoint
+  [`/api/agent/hotel-sources/{slug}`](apps/web/src/app/api/agent/hotel-sources/[slug]/route.ts) —
+  returns `{ slug, hotelName, sources[], canonicalUrl, updatedAt }`
+  where each source carries `{ field, value, source, sourceUrl,
+confidence, collectedAt }`. Soft-404s with `note: 'no_sources_yet'`
+  when the row exists but has no provenance. Rate-limited (60/min/IP),
+  cached `private max-age=1800`.
+- New skill `get-hotel-sources` in
+  [`packages/seo/src/agent-skills.ts`](packages/seo/src/agent-skills.ts) —
+  ships with `inputSchema` + `endpoint`, validated by the existing
+  `agent-skills-routes.test.ts` (every advertised endpoint must resolve
+  to a route file on disk).
+- New data-layer reader
+  [`apps/web/src/server/hotels/get-hotel-external-sources.ts`](apps/web/src/server/hotels/get-hotel-external-sources.ts) —
+  lenient parser that drops bad entries instead of failing the row.
+- [`llms.txt`](apps/web/src/app/llms.txt/route.ts) updated: stale `16
+actions` count refreshed to `24`, `about` block now mentions the
+  EEAT provenance surface, new endpoint listed in the "API LLM-
+  actionnables" section.
+
+**Why this matters for SEO/GEO**: it closes the loop between the
+backfill (data on disk) and the surface (agent-consumable). Before
+this commit, the new `external_sources` rows were rendered server-side
+in the page DOM (so LLM crawlers eventually picked them up) but
+weren't directly queryable from a tool call — agents now have a 1-RPC
+shortcut to citation-grade provenance for any of the 1370 hotels with
+≥ 1 source.
+
 **What's still gappy** (carry-over for the next Phase 1.5 pass):
 
 - 702 FR / 670 EN `factual_summary` rows remain in the production

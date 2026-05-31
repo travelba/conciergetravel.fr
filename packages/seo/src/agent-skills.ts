@@ -420,6 +420,28 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       },
       endpoint: { method: 'GET', path: '/api/agent/concierge-tip/{slug}' },
     },
+    {
+      name: 'get-hotel-sources',
+      description:
+        "Récupérer les sources externes (Wikidata, Wikipedia, site officiel, TripAdvisor, Booking.com, Wikimedia Commons, comptes sociaux vérifiés) qui étayent les informations d'un hôtel. Chaque entrée est une revendication factuelle (architecte, année d'ouverture, désignation patrimoniale, identifiant externe) reliée à une URL vérifiable et à un niveau de confiance. Permet à l'agent LLM de citer ses sources, de réconcilier l'identité avec son propre knowledge graph, et de filtrer les claims selon leur fiabilité. EEAT-grade signal — issu du pipeline `convert-wikidata-to-external-sources.ts` (Phase 1.5, ADR-0023).",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description:
+              'Slug kebab-case de l’hôtel (FR ou EN, ex. "ritz-paris", "hotel-du-cap-eden-roc").',
+          },
+          locale: {
+            type: 'string',
+            description:
+              'Locale demandée — "fr" (par défaut) ou "en". Affecte le nom de l’hôtel et l’URL canonique de la réponse, pas le contenu des sources externes.',
+          },
+        },
+        required: ['slug'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/hotel-sources/{slug}' },
+    },
     // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
     {
       name: 'get-itinerary',
