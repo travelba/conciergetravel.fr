@@ -226,6 +226,30 @@ export const SLUG_PARENT_GROUP_OVERRIDES: Readonly<Record<string, ParentGroup>> 
  * script can mark the hotel as "needs editorial review" instead of
  * over-trusting).
  */
+/**
+ * Multi-property corporate path fragments that NEVER identify a
+ * single property. Even with a non-trivial path, a URL like
+ * `sixsenses.com/en/corporate/media-center/press-releases/2025/...`
+ * is a corporate aggregator: Tavily crawls it and mixes images from
+ * every property in the chain. Discovered 2026-05-31 during the Tier
+ * A re-launch: Six Senses Bangkok showed Yao Noi karst islands.
+ */
+const CORPORATE_PATH_FRAGMENTS: readonly string[] = [
+  '/corporate/',
+  '/press-releases/',
+  '/press-release/',
+  '/media-center/',
+  '/media-centre/',
+  '/news/',
+  '/new-openings/',
+  '/newsroom/',
+  '/awards/',
+  '/about/',
+  '/about-us/',
+  '/sustainability/',
+  '/careers/',
+];
+
 export function isCorporateRootUrl(officialUrl: string | null): boolean {
   if (!officialUrl) return false;
   let parsed: URL;
@@ -237,17 +261,32 @@ export function isCorporateRootUrl(officialUrl: string | null): boolean {
   const host = parsed.hostname.toLowerCase().replace(/^www\./u, '');
   const cleanPath = parsed.pathname.replace(/\/$/u, '');
 
-  // Path must be empty, root, or a 2-3 char locale (`/en`, `/fr`, `/de`).
-  const pathIsRootOrLocaleOnly =
-    cleanPath === '' || /^\/[a-z]{2}(?:[-_][a-z]{2})?$/iu.test(cleanPath);
-  if (!pathIsRootOrLocaleOnly) return false;
-
-  // Hostname must match (or be a subdomain of) any known parent group.
+  // Check 1: hostname is a known parent group.
+  let hostIsParent = false;
   for (const domains of Object.values(PARENT_DOMAINS_BY_GROUP)) {
     for (const d of domains) {
-      if (host === d || host.endsWith(`.${d}`)) return true;
+      if (host === d || host.endsWith(`.${d}`)) {
+        hostIsParent = true;
+        break;
+      }
     }
+    if (hostIsParent) break;
   }
+  if (!hostIsParent) return false;
+
+  // Check 2a: trivial path on a parent domain = pure corporate root.
+  const pathIsRootOrLocaleOnly =
+    cleanPath === '' || /^\/[a-z]{2}(?:[-_][a-z]{2})?$/iu.test(cleanPath);
+  if (pathIsRootOrLocaleOnly) return true;
+
+  // Check 2b: path contains a corporate aggregator fragment.
+  // E.g. /en/corporate/media-center/press-releases/2025/<hotel>-announcement
+  // → Tavily crawls the press kit and mixes other-property images.
+  const pathLower = `${parsed.pathname.toLowerCase()}/`;
+  for (const fragment of CORPORATE_PATH_FRAGMENTS) {
+    if (pathLower.includes(fragment)) return true;
+  }
+
   return false;
 }
 

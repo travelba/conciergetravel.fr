@@ -328,9 +328,20 @@ export interface OrderGalleryResult {
   /** The chosen hero `public_id` (also written to `hotels.hero_image`). */
   readonly heroPublicId: string | null;
   /**
-   * Gallery to persist in `hotels.gallery_images`, hero EXCLUDED (mirrors
-   * the `galleryWithoutHero` shape produced by `sync-hotel-photos.ts`):
-   * the diverse TOP 4 first, then the rest by descending score.
+   * Gallery to persist in `hotels.gallery_images`, hero INCLUDED at index 0,
+   * then the diverse TOP 4 tiles, then the rest by descending score.
+   *
+   * Why the hero stays in the gallery (vs `sync-hotel-photos.ts`, which
+   * excluded it): the hero's Vision metadata (`representativeness`,
+   * `hero_suitable`, `category`, `caption_*`, `alt_*`) lives on the gallery
+   * row. Storing the hero only as a bare `public_id` in `hotels.hero_image`
+   * would (1) strip that metadata — the hero would lose its alt/caption for
+   * JSON-LD + a11y — and (2) make re-curation non-idempotent: a re-run folds
+   * the hero back with no scores, so a different photo wins the hero slot
+   * and the hero churns forever. Keeping the hero as `orderedGallery[0]`
+   * fixes both: the page reads its rich alt/caption and `pickHero` re-selects
+   * the same emblematic shot. The page excludes index 0 from the thumbnail
+   * mosaic + lightbox so the hero is never rendered twice.
    */
   readonly orderedGallery: readonly GalleryImage[];
 }
@@ -338,16 +349,17 @@ export interface OrderGalleryResult {
 /**
  * Compute the curated hero + gallery ordering for a hotel.
  *
- * The first 4 entries of `orderedGallery` are the diversity-curated tiles
- * that, together with the hero, form the above-the-fold mosaic and the
- * 5 `ImageObject` JSON-LD nodes (`page.tsx` slices `gallery.slice(0, 5)`).
- * Pure + idempotent: re-running on an already-ordered gallery is a no-op.
+ * `orderedGallery[0]` is the hero; entries 1-4 are the diversity-curated
+ * tiles that, with the hero, form the above-the-fold mosaic and the 5
+ * `ImageObject` JSON-LD nodes. Pure + idempotent: re-running on an
+ * already-ordered gallery returns the same hero + order.
  */
 export function orderGallery(gallery: readonly GalleryImage[]): OrderGalleryResult {
   const heroPublicId = pickHero(gallery);
   const top4 = selectTop4(gallery, heroPublicId);
   const top4Set = new Set(top4);
   const byId = new Map(gallery.map((img) => [img.public_id, img]));
+  const heroImg = heroPublicId !== null ? byId.get(heroPublicId) : undefined;
 
   const orderedTop4 = top4
     .map((id) => byId.get(id))
@@ -357,5 +369,8 @@ export function orderGallery(gallery: readonly GalleryImage[]): OrderGalleryResu
     gallery.filter((img) => img.public_id !== heroPublicId && !top4Set.has(img.public_id)),
   );
 
-  return { heroPublicId, orderedGallery: [...orderedTop4, ...rest] };
+  return {
+    heroPublicId,
+    orderedGallery: [...(heroImg !== undefined ? [heroImg] : []), ...orderedTop4, ...rest],
+  };
 }

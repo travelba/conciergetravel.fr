@@ -180,10 +180,12 @@ interface PerHotelResult {
   readonly reason?: string;
 }
 
-/** Hero + the first 4 gallery entries = exactly what the fiche surfaces first. */
-function top5Of(heroAfter: string | null, gallery: readonly GalleryImage[]): readonly string[] {
-  const tiles = gallery.slice(0, 4).map((img) => img.public_id);
-  return heroAfter !== null ? [heroAfter, ...tiles] : tiles;
+/**
+ * The first 5 gallery entries = exactly what the fiche surfaces first
+ * (`orderedGallery[0]` is the hero, 1-4 are the mosaic tiles).
+ */
+function top5Of(gallery: readonly GalleryImage[]): readonly string[] {
+  return gallery.slice(0, 5).map((img) => img.public_id);
 }
 
 /**
@@ -234,14 +236,34 @@ async function curateHotel(
     };
   }
 
+  // Integrity guard — `orderGallery` keys photos by `public_id` in a Map, so a
+  // gallery with missing or duplicate `public_id`s would collapse entries and
+  // PATCH a SHRUNKEN gallery (silent photo loss). Legacy pre-Cloudinary rows
+  // store the image under `url` with no `public_id` — those belong to the
+  // Phase-2 photo re-sourcing chantier, not this DB-only curation pass.
+  const ids = gallery.map((img) => img.public_id);
+  const hasMissingId = ids.some((id) => typeof id !== 'string' || id.trim().length === 0);
+  const hasDuplicateId = new Set(ids).size !== ids.length;
+  if (hasMissingId || hasDuplicateId) {
+    return {
+      ...base,
+      outcome: 'skip',
+      heroAfter: row.hero_image,
+      galleryCount: gallery.length,
+      top5: [],
+      reason: hasMissingId
+        ? 'gallery has entries without public_id (legacy pre-Cloudinary)'
+        : 'gallery has duplicate public_id',
+    };
+  }
+
   const pool = combinePool(row.hero_image, gallery);
   const { heroPublicId, orderedGallery } = orderGallery(pool);
-  const top5 = top5Of(heroPublicId, orderedGallery);
+  const top5 = top5Of(orderedGallery);
 
   // No-op when the hero AND the gallery order are already what we'd write.
-  // `orderedGallery` excludes the (re)selected hero, so when the hero is
-  // unchanged it holds exactly the original gallery's photos — compare
-  // position-by-position.
+  // `orderedGallery` now INCLUDES the hero at index 0, so a stable hotel has
+  // `gallery_images` identical to `orderedGallery` position-by-position.
   const sameHero = (row.hero_image ?? null) === heroPublicId;
   const sameOrder =
     gallery.length === orderedGallery.length &&

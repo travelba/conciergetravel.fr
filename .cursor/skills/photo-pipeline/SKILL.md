@@ -276,6 +276,30 @@ review the JSON before any byte hits Cloudinary.
      to use them as `trustedDomainsForHotel` seeds. The right corpus is
      the empty `official_url` set (forcing parent-DAM-only crawl) +
      manually-curated per-hotel URLs.
+7. **CRITICAL — corporate-path variants are just as toxic as corporate
+   root.** The 2026-05-31 re-launch of the 4 reverted Tier A hotels
+   re-contaminated `six-senses-bangkok` (hero showed Yao Noi karst
+   islands) and `six-senses-milan` (suite tropicale). Cause:
+   `official_url = https://www.sixsenses.com/en/corporate/media-center/
+press-releases/2025/six-senses-bangkok-announcement` — non-trivial
+   path, but a **multi-property aggregator** (press releases reference
+   every property in the chain). `isCorporateRootUrl` was extended to
+   reject path fragments: `/corporate/`, `/press-releases/`,
+   `/press-release/`, `/media-center/`, `/media-centre/`, `/news/`,
+   `/new-openings/`, `/newsroom/`, `/about/`, `/about-us/`,
+   `/sustainability/`, `/careers/` whenever the hostname is a known
+   parent domain. The rule:
+   - Reject `sixsenses.com/en/corporate/news/<slug>` ✗
+   - Reject `sixsenses.com/en/new-openings/milan` ✗
+   - Reject `peninsula.com/en/newsroom/london` ✗
+   - Accept `sixsenses.com/en/hotels-resorts/europe/italy/milan` ✓
+     (would be the right URL once Six Senses Milan opens)
+   - Accept `mandarinoriental.com/en/cortina/cristallo` ✓
+     (`/region/hotel-name/` pattern — single property)
+     When a hotel has no dedicated page yet (typically still-pre-opening
+     properties like Six Senses Bangkok 2025), the only honest
+     `official_url` is `NULL`. The press-release URL leads to
+     contamination, not to a usable signal.
 
 ## Pattern — Audit-driven rollout (2026-05-31, lesson from the 4-hotel pilot)
 
@@ -368,8 +392,8 @@ on the top-N pass** on a varied 10-hotel dry-run.
 5. **MEDIUM** — parent-group domain + hotel-name in the path. Example:
    `mandarinoriental.com/en/muscat/shatti-al-qurum`.
 6. **MEDIUM** — high Tavily score (≥ 0.8) + dedicated-looking domain
-   + name token in path. Example:
-   `hongkong.ihghotels.cn/regent-hong-kong/...`.
+   - name token in path. Example:
+     `hongkong.ihghotels.cn/regent-hong-kong/...`.
 7. Else **SKIP** with reason logged (`low-confidence(host=...)`).
 
 ### Iteration on top-N candidates (critical)

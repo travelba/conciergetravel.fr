@@ -266,7 +266,13 @@ async function runOnHotel(
     const targets = args.force
       ? gallery
       : args.backfillScores
-        ? imagesNeedingScores(gallery)
+        ? // Only re-score photos with a usable Cloudinary public_id. Legacy
+          // pre-Cloudinary rows store the image under `url` with no
+          // `public_id` (forbidden-CDN scrapes) — sending those to OpenAI
+          // just 404s. They belong to the Phase-2 re-sourcing chantier.
+          imagesNeedingScores(gallery).filter(
+            (img) => typeof img.public_id === 'string' && img.public_id.trim().length > 0,
+          )
         : imagesNeedingCategory(gallery);
     const capped =
       args.maxPhotosPerHotel !== undefined ? targets.slice(0, args.maxPhotosPerHotel) : targets;

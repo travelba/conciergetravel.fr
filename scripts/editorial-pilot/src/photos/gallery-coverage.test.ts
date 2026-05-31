@@ -246,7 +246,7 @@ describe('selectTop4', () => {
 });
 
 describe('orderGallery', () => {
-  it('excludes the hero and front-loads the diverse TOP 4, then the rest by score', () => {
+  it('puts the hero first, then the diverse TOP 4, then the rest by score', () => {
     const gallery = [
       scored('ext-1', {
         category: 'exterior',
@@ -262,9 +262,11 @@ describe('orderGallery', () => {
     ];
     const { heroPublicId, orderedGallery } = orderGallery(gallery);
     expect(heroPublicId).toBe('ext-1');
-    expect(orderedGallery.some((img) => img.public_id === 'ext-1')).toBe(false);
-    // TOP 4 = diversity picks (room, dining, pool, detail), then spa by score.
+    // Hero stays at index 0 so its metadata persists + re-curation is idempotent.
+    expect(orderedGallery[0]?.public_id).toBe('ext-1');
+    // hero + TOP 4 diversity picks (room, dining, pool, detail), then spa by score.
     expect(orderedGallery.map((img) => img.public_id)).toEqual([
+      'ext-1',
       'room-1',
       'dining-1',
       'pool-1',
@@ -273,7 +275,7 @@ describe('orderGallery', () => {
     ]);
   });
 
-  it('is idempotent — re-running on an ordered gallery keeps the same order', () => {
+  it('is idempotent — re-running on an ordered gallery keeps the same hero + order', () => {
     const gallery = [
       scored('ext-1', {
         category: 'exterior',
@@ -287,10 +289,9 @@ describe('orderGallery', () => {
       scored('detail-1', { category: 'detail', representativeness: 5, quality_score: 9 }),
     ];
     const first = orderGallery(gallery);
-    const heroRow = gallery.find((img) => img.public_id === first.heroPublicId);
-    expect(heroRow).toBeDefined();
-    const reconstructed = heroRow ? [heroRow, ...first.orderedGallery] : [...first.orderedGallery];
-    const second = orderGallery(reconstructed);
+    // `orderedGallery` already includes the hero at index 0, so feeding it
+    // straight back must reproduce the same hero + order verbatim.
+    const second = orderGallery(first.orderedGallery);
     expect(second.heroPublicId).toBe(first.heroPublicId);
     expect(second.orderedGallery.map((i) => i.public_id)).toEqual(
       first.orderedGallery.map((i) => i.public_id),

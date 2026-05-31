@@ -448,6 +448,15 @@ async function renderHotelPage(
   const heroDescriptor =
     heroPublicId !== null ? { publicId: heroPublicId, alt: heroGalleryMatch?.alt ?? name } : null;
 
+  // The curation pass (`curate-top-photos.ts`) keeps the hero as
+  // `gallery_images[0]` so its alt/caption metadata survives and re-curation
+  // stays idempotent. The mosaic + lightbox render the hero separately
+  // (`heroDescriptor`), so exclude it here to avoid showing it twice.
+  const galleryTiles =
+    heroPublicId !== null
+      ? galleryImages.filter((g) => g.publicId !== heroPublicId)
+      : galleryImages;
+
   const defaults = defaultStay();
   const checkIn = pickIsoDate(sp.checkIn, defaults.checkIn);
   const checkOut = pickIsoDate(sp.checkOut, defaults.checkOut);
@@ -477,22 +486,23 @@ async function renderHotelPage(
   // gallery row has no editorial alt text yet.
   const jsonLdImages: (string | JsonLd.ImageObjectInput)[] = [];
   if (heroPublicId !== null) {
-    // Prefer the curated full-sentence caption (LLM-citable) on the first
-    // gallery shot, fall back to its alt text, then the hotel name.
-    const firstImage = galleryImages[0];
+    // Hero caption: prefer the hero gallery row's curated full-sentence
+    // caption (LLM-citable), fall back to its alt text, then the hotel name.
     jsonLdImages.push({
       url: buildCloudinarySrc({
         cloudName,
         publicId: heroPublicId,
         transforms: 'f_auto,q_auto,w_1600,h_900,c_fill,g_auto',
       }),
-      caption: firstImage?.caption ?? firstImage?.alt ?? name,
+      caption: heroGalleryMatch?.caption ?? heroGalleryMatch?.alt ?? name,
       width: 1600,
       height: 900,
       representativeOfPage: true,
     });
   }
-  for (const img of galleryImages.slice(0, 5)) {
+  // Tiles exclude the hero (already emitted above as `representativeOfPage`)
+  // so the 5 ImageObject nodes are hero + 4 distinct mosaic tiles.
+  for (const img of galleryTiles.slice(0, 4)) {
     const url = buildCloudinarySrc({
       cloudName,
       publicId: img.publicId,
@@ -1129,7 +1139,7 @@ async function renderHotelPage(
         locale={locale}
         cloudName={cloudName}
         hero={heroDescriptor}
-        images={galleryImages}
+        images={galleryTiles}
         hotelName={name}
       />
 
