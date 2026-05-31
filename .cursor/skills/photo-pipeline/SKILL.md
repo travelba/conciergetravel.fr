@@ -231,11 +231,10 @@ review the JSON before any byte hits Cloudinary.
 1. **Trusted-domain set ≠ image hostname.** Tavily honours `include_domains`
    for the source PAGE, but the page can reference any CDN. Filtering
    images by `host.includes(officialDomain)` rejected ALL images on
-   the first pass (Le Bristol → 0 results). Fix: trust the image
-   URL because it came from a trusted page; filter only via a
-   per-slug `HOSTNAME_WHITELIST` of legitimate CDNs (`images.eu.ctfassets.net`
-   for Oetker, `assets.hyatt.com` for Hyatt, `static.wixstatic.com` for
-   Wix-hosted sites, etc.).
+   the first pass (Le Bristol → 0 results). Fix: accept an image when
+   its host/URL matches the hotel's `trustedDomainsForHotel` (own
+   official domain + parent-group DAM) OR a globally-trusted CDN
+   (`HOSTNAME_WHITELIST_GLOBAL`: Contentful, S3, Cloudfront, Wix…).
 2. **Parent-group domains matter.** Le Bristol's own site (`hotel-bristol.com`)
    returns 1 thin page. The full press kit is on `oetkercollection.com`
    (Contentful CDN). Akelarre → `relaischateaux.com` (R&C consortium).
@@ -300,6 +299,37 @@ press-releases/2025/six-senses-bangkok-announcement` — non-trivial
      properties like Six Senses Bangkok 2025), the only honest
      `official_url` is `NULL`. The press-release URL leads to
      contamination, not to a usable signal.
+8. **CRITICAL — `upload-press-kit-images.ts` must be safe-by-DEFAULT, never
+   pass-through.** Until 2026-05-31 the upload filter (`passesWhitelist`)
+   returned `true` for ANY slug missing a hardcoded `HOSTNAME_WHITELIST`
+   entry — fine for the 4 tuned flagships, catastrophic the moment you
+   point it at the catalogue: a non-tuned hotel would happily upload
+   Instagram-via-NitroCDN proxies, Condé Nast / Telegraph press photos
+   and agency CDNs to Cloudinary (they all pass `keep` + `quality≥6`),
+   silently violating `photo-quality.mdc`. Caught on `southern-ocean-lodge`
+   (13 candidates → would have uploaded Instagram + cntraveler). Fix:
+   the filter now imports `isBlocklistedHostname` + `trustedDomainsForHotel`
+   from `parent-group-mapping.ts` and rejects by default:
+   - reject if hostname OR **full URL** is blocklisted (the blocked term
+     is often in the PATH, e.g. `cdn-xxx.nitrocdn.com/.../cdninstagram.com/...`
+     — checking only `img.hostname` misses it);
+   - accept only on the hotel's trusted domains (URL substring match so a
+     NitroPack/Cloudflare proxy of the site's own `wp-content/uploads`
+     passes) or a globally-trusted CDN;
+   - the per-slug map (`SLUG_EXTRA_ALLOWED_HOSTS`) is now an ADD-ON, never
+     the only gate (e.g. `fawn-bluff-private-lodge: ['fawnbluff.com']`
+     because its brand domain ≠ its `official_url` parent path
+     `flospitality.com/fawnbluff`).
+9. **Tavily yield is highly source-dependent — do NOT assume a blast reaches
+   the floor.** 2026-05-31 B2 pilot (5 under-10-photo hotels): Mandarin
+   Oriental Paris +5 (rich `mandarinoriental.com` extraction), Four Seasons
+   Seattle +1 of 19 candidates (DAM hotlink-blocks egress → 13 fetch
+   errors), and the three Relais & Châteaux portal pages (`relaischateaux.com/...`)
+   yielded **0** — their galleries are JS-rendered on off-domain CDNs that
+   `include_images` can't extract. Since R&C is the single largest cohort
+   (435 published), a catalogue-wide Tavily-on-`relaischateaux.com` run is
+   near-worthless; those hotels need the R&C consortium DAM
+   (`images.relaischateaux.com`) or Google Places, not the portal page.
 
 ## Pattern — Audit-driven rollout (2026-05-31, lesson from the 4-hotel pilot)
 
