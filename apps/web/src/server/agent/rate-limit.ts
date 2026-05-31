@@ -38,11 +38,46 @@ function isE2EBypass(): boolean {
   );
 }
 
+/**
+ * Detect at call-time whether the Upstash Redis backing the rate
+ * limiter is configured. When `SKIP_ENV_VALIDATION=true` is used at
+ * build time (Vercel preview, local dev) the `UPSTASH_REDIS_REST_URL`
+ * may be undefined at runtime — the Upstash client only logs a warning
+ * and explodes on the first `.limit()` call, surfacing as a 500 on
+ * every `/api/agent/*` endpoint.
+ *
+ * Reading `process.env` directly (not via the validated `env` module)
+ * avoids re-throwing the same validation error inside the gate. If
+ * either var is missing the gate fails open — agents can still call
+ * the endpoint, the surface degrades gracefully, and a separate
+ * runbook step (env-vars sync) restores rate limiting.
+ */
+function isRedisConfigured(): boolean {
+  const url = process.env['UPSTASH_REDIS_REST_URL'];
+  const token = process.env['UPSTASH_REDIS_REST_TOKEN'];
+  return typeof url === 'string' && url.length > 0 && typeof token === 'string' && token.length > 0;
+}
+
 export async function gateAgentByIp(ip: string): Promise<AgentRateLimitVerdict> {
   if (isE2EBypass()) return { ok: true, retryAfterSec: 0 };
-  const r = await agentByIpRateLimit.limit(ip);
-  const retryMs = Math.max(0, r.reset - Date.now());
-  return { ok: r.success, retryAfterSec: Math.ceil(retryMs / 1000) };
+  // Fail-open when the backing store isn't configured. This is a
+  // graceful-degradation choice (skill: nextjs-app-router §Data
+  // fetching — public surfaces must not 500 when a dependency is
+  // mis-provisioned). The trade-off (no rate-limit when Redis is
+  // down) is logged via the Upstash client warning that already
+  // surfaces in the Vercel runtime logs.
+  if (!isRedisConfigured()) return { ok: true, retryAfterSec: 0 };
+  try {
+    const r = await agentByIpRateLimit.limit(ip);
+    const retryMs = Math.max(0, r.reset - Date.now());
+    return { ok: r.success, retryAfterSec: Math.ceil(retryMs / 1000) };
+  } catch {
+    // Upstash unreachable / 5xx / network blip — degrade open. The
+    // alternative (return 500) would take down the entire agentic
+    // surface on a third-party hiccup. Better to lose rate limiting
+    // for one window than to 500 every LLM tool call.
+    return { ok: true, retryAfterSec: 0 };
+  }
 }
 
 /**
