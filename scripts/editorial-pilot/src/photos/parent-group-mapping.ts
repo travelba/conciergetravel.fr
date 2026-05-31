@@ -298,13 +298,9 @@ export function trustedDomainsForHotel(input: {
  * Substring-matched against the image URL hostname.
  */
 export const HOSTNAME_BLOCKLIST_GLOBAL: readonly string[] = [
-  // OTA + meta-search aggregators
-  'tripadvisor.com',
-  'tripadvisor.fr',
-  'tripadvisor.it',
-  'tripadvisor.co.uk',
-  'tripadvisor.de',
-  'tripadvisor.es',
+  // OTA + meta-search aggregators (substring match catches all TLDs:
+  // tripadvisor.in / .ch / .ca / .com.au etc. via 'tripadvisor.').
+  'tripadvisor.',
   'booking.com',
   'bstatic.com', // Booking CDN
   'expedia.',
@@ -315,12 +311,20 @@ export const HOSTNAME_BLOCKLIST_GLOBAL: readonly string[] = [
   'kayak.',
   'trivago.',
   'priceline.com',
+  'trip.com', // Trip.com (Ctrip)
+  'us.trip.com',
+  'baike.baidu.com', // Baidu Wikipedia clones
+  // Travel magazines / industry sites that often top Tavily but
+  // never represent the hotel's own voice.
+  'forbestravelguide.com',
+  'travelagentcentral.com',
   // User-generated social CDNs
   'pinimg.com',
   'pinterest.',
   'fbcdn.net',
   'cdninstagram.com',
   'instagram.com',
+  'facebook.com',
   'twimg.com',
   'tiktokcdn.com',
 ];

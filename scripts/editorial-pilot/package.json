@@ -93,6 +93,8 @@
     "photos:audit:drafts": "tsx src/photos/audit-photo-readiness.ts --include-drafts",
     "photos:discover": "tsx src/photos/discover-press-kit-images.ts",
     "photos:upload-press-kit": "tsx src/photos/upload-press-kit-images.ts",
+    "photos:backfill-url": "tsx src/photos/backfill-official-url.ts",
+    "photos:backfill-url:dry": "tsx src/photos/backfill-official-url.ts --dry-run --limit=10",
     "itineraries:check-db": "tsx src/itineraries/check-db.ts",
     "itineraries:run": "tsx src/itineraries/run-itinerary.ts",
     "itineraries:run:dry": "tsx src/itineraries/run-itinerary.ts --dry-run",
