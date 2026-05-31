@@ -1067,17 +1067,79 @@ length + banlist + factual-density requirements:
 1. Take the 5 most factually dense rows (Palaces, R&C, 5★ with multiple
    restaurants and amenities).
 2. Hand-write a paragraph that satisfies **all** constraints.
-3. If you cannot, the constraints are co-non-satisfiable on that corpus —
-   relax ONE constraint before shipping. Usually the right one is the length
-   plafond (push 1 500 → 2 500), not the editorial gates.
+3. If you cannot, you have two choices: (a) relax ONE constraint before
+   shipping, or (b) help the LLM hold ALL constraints simultaneously via
+   the oscillation-detector pattern in 18c.
+
+### 18c — Oscillation detector + hint hoisting (longform fix 2026-05-31)
+
+Before reaching for a constraint relaxation, try the prompt-side fix.
+`run-hotel-description-extend.ts` reduced the 4-hotel failure to 1
+(Cheverny + Airelles + Berges resolved; only Cap-Eden-Roc holds 1602 c
+and refuses to cut below 1500) using two complementary patterns in the
+corrective suffix:
+
+**Pattern A — Hint hoisting on the dominant failure reason:**
+
+When the reason mentions `> 28 words`, the corrective places the
+`=== PRIORITY FIX ===` block BEFORE the length envelope block, with a
+**concrete inline example** of how to cut (using the rejected sentence
+text itself):
+
+```ts
+const offending = reason.match(/CUT THIS (\d+)-word sentence IN TWO: "([^"]+)/u);
+const exampleBlock =
+  offending !== null
+    ? `\nCONCRETE EXAMPLE — the rejected opening is ${offending[1]} words:\n  "${offending[2]?.slice(0, 180) ?? ''}…"\nSplit after the first natural breath (a comma, a colon, or the locative clause). Example pattern:\n  Before: "Nestled in the heart of the Loire Valley, between the majestic Château de Chambord and the elegance of Chenonceau, Les Sources de Cheverny reveals itself amidst a verdant environment." (29 words)\n  After:  "Nestled in the heart of the Loire Valley, between the majestic Château de Chambord and the elegance of Chenonceau. Les Sources de Cheverny reveals itself amidst a verdant environment." (15 + 13 words)`
+    : '';
+```
+
+Empirical: gpt-5.4 reads the corrective top-down and applies the first
+actionable instruction. Hiding the cut instruction at the bottom (after
+"preserve original opening") yields 5/5 failures; hoisting it to the top
+yields 5/5 success on the same prompt.
+
+**Pattern B — Oscillation detector across attempts:**
+
+When prior attempts have alternated between "too long" and "> 28 words",
+the model is ping-ponging — it fixes one constraint and breaks the other.
+Detect this in the loop and emit a **joint constraint hint**:
+
+```ts
+const historyHasLength = attempts.some(
+  (a) => a.reason.includes('too long') || a.reason.includes('too short'),
+);
+const historyHasWords = attempts.some((a) => a.reason.includes('> 28 words'));
+const isOscillating = attempts.length >= 2 && historyHasLength && historyHasWords;
+if (isOscillating) {
+  specificHint = `\n=== OSCILLATION DETECTED ===\nPrior attempts alternated between "too long" and "> 28 words". You MUST satisfy BOTH constraints AT THE SAME TIME:\n  1. Each locale strictly ${MIN}-${MAX} chars (aim middle).\n  2. NO sentence exceeds 28 words ANYWHERE (opening, middle, end).\nStrategy: prefer SHORT, PUNCHY sentences (12-20 words). If you list 4 experiences in one sentence, split into two. If you describe a location in one long clause, split after the comma.`;
+}
+```
+
+Empirical results on the 4 Phase 1.5 outliers (commit `923e181`):
+
+| Hotel                     | Before | After  | Attempts | Status                         |
+| ------------------------- | ------ | ------ | -------- | ------------------------------ |
+| les-sources-de-cheverny   | 494 c  | 1309 c | 5x       | ✅ resolved                    |
+| les-airelles-saint-tropez | 368 c  | 1343 c | 4x       | ✅ resolved                    |
+| hotel-des-berges          | 597 c  | 1404 c | 5x       | ✅ resolved                    |
+| hotel-du-cap-eden-roc     | 534 c  | (n/a)  | 5x exh.  | ❌ residual (LLM holds 1602 c) |
+
+The remaining 1/2219 outlier (0.045 %) is acceptable; the renderer accepts
+any length and Cap-Eden-Roc has rich `long_description_sections` + FAQ + AEO
+elsewhere to carry SEO weight.
+
+**Generalisation:** when a multi-constraint LLM pipeline shows ping-ponging,
+always try the hint-hoisting + oscillation-detector fix BEFORE relaxing a
+schema bound. The fix is content-aware (LLM-side) instead of structural
+(schema-side) — preserves the editorial intent of the gate.
 
 **Reference cases:**
 
-- `scripts/editorial-pilot/runs/description-extend-live-2026-05-31T08-44-36-529Z.json`
-  (4/4 fail, 25 attempts logged with the oscillation pattern visible).
-- `scripts/editorial-pilot/src/hotels/run-hotel-description-extend.ts` —
-  needs Phase 1.5 fix: relax `max(1500)` → `max(2500)` for the description
-  body (the 600-1 000 words CDC §2.4 ideal cannot fit in 1 500 chars).
+- `scripts/editorial-pilot/runs/description-extend-live-2026-05-31T20-58-10-964Z.json`
+  (3/4 success with the new corrective; previously 0/4).
+- `scripts/editorial-pilot/src/hotels/description-extend-generator.ts` —
+  `isOscillating` + `openingRule` toggle + example block.
 
 ## Anti-patterns
 
