@@ -42,7 +42,11 @@ import { fileURLToPath } from 'node:url';
 
 import { tavilySearch, type TavilyImage } from '../enrichment/tavily-client.js';
 import { loadPhotoEnv } from './env-photos.js';
-import { isBlocklistedHostname, trustedDomainsForHotel } from './parent-group-mapping.js';
+import {
+  isBlocklistedHostname,
+  isCorporateRootUrl,
+  trustedDomainsForHotel,
+} from './parent-group-mapping.js';
 import { selectHotels, type SupabaseRestConfig } from './supabase-rest.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -389,6 +393,17 @@ async function main(): Promise<void> {
       console.warn(
         `  [WARN] No official_url in DB — discovery will run unrestricted (less reliable for legal sourcing). Recommend setting hotels.official_url first.`,
       );
+    } else if (isCorporateRootUrl(hotel.official_url)) {
+      // 2026-05-31 incident: corporate-root URLs (e.g.
+      // `https://www.mandarinoriental.com/`) poison the Tavily crawl
+      // with photos from sibling properties. We refuse to source from
+      // them — the operator must either set a hotel-specific path
+      // (`/hotels/cristallo-cortina`) or null the field out so the
+      // parent-DAM-only fallback applies.
+      console.error(
+        `  [SKIP ] official_url is a corporate root (${hotel.official_url}) — this would mix photos from every property in the chain. Fix the row in Supabase (set a hotel-specific path) before re-running.`,
+      );
+      continue;
     }
 
     try {

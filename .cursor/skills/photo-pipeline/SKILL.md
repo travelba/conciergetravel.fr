@@ -255,6 +255,136 @@ review the JSON before any byte hits Cloudinary.
    (`boutique.oetkercollection.com/cdn/shop/files/…`, posters, branded
    apparel) in the same search. Reject paths containing `/shop/`,
    `/cdn/shop/`, `/products/`, hostname `boutique.`, `shop.`.
+6. **CRITICAL — `official_url` MUST point to the hotel's specific page,
+   NEVER to the corporate domain root.** The 2026-05-31 Tier-A pilot
+   uploaded photos to `mandarin-oriental-cristallo-cortina` that
+   visually showed an urban building with a London taxi — because
+   `official_url = https://www.mandarinoriental.com/` let Tavily
+   crawl every Mandarin Oriental property worldwide and Vision had
+   no way to detect the mismatch (it just stamped the hotel name in
+   the alt text). The 4 contaminated hotels (`mandarin-oriental-*`
+   and `six-senses-*`) had to be SQL-reverted. Operational rules:
+   - Accept `https://www.aman.com/resorts/amankila` (path identifies
+     the hotel) ✓
+   - Accept `https://www.chewtonglen.com/` (single-property domain) ✓
+   - Reject `https://www.mandarinoriental.com/` (multi-property root) ✗
+   - Reject `https://www.sixsenses.com/` (multi-property root) ✗
+   - Reject `https://www.fourseasons.com/` (multi-property root) ✗
+   - Reject ANY URL whose hostname is in `PARENT_DOMAINS_BY_GROUP[<group>]`
+     without a hotel-specific path.
+     The audit should flag these rows; the discover script should refuse
+     to use them as `trustedDomainsForHotel` seeds. The right corpus is
+     the empty `official_url` set (forcing parent-DAM-only crawl) +
+     manually-curated per-hotel URLs.
+
+## Pattern — Audit-driven rollout (2026-05-31, lesson from the 4-hotel pilot)
+
+The 4-hotel pilot (Bristol, Akelarre, Al Moudira, Alila) worked but
+revealed the cost of acting on a hunch. **Never launch a press-kit
+pipeline batch over the catalogue without running the audit first.**
+
+The audit script (`scripts/editorial-pilot/src/photos/audit-photo-readiness.ts`,
+3.5 s on 2219 hotels) classifies every hotel into five urgency tiers
+and a parent-group bucket — the two axes that drive the rollout
+sequence:
+
+| Tier | Definition                                                 | Action                                                    |
+| ---- | ---------------------------------------------------------- | --------------------------------------------------------- |
+| A    | 0-2 photos + identifiable `parent_group` (≠ `independent`) | Highest ROI — press kit + parent DAM in one shot          |
+| B    | 3-9 photos + identifiable `parent_group`                   | Chain-by-chain (`--parent-group=relais_chateaux` etc.)    |
+| C    | ≥ 10 photos but `hero_image IS NULL`                       | Pure hero-promotion (no Cloudinary upload needed in many) |
+| D    | 0-9 photos + `parent_group = independent`                  | Tavily on `official_url` only + manual editorial review   |
+| DONE | ≥ 10 photos AND has `hero_image`                           | Skip entirely (idempotent re-run never re-pays)           |
+
+**Why this matters:**
+
+1. **Independents need a different strategy.** Tier D (1282 hotels =
+   58 % of the catalogue) cannot rely on a parent press kit. Running
+   the same script on them produces noise and wastes Tavily/Vision
+   quota. They need either Google Places API (always available) +
+   tighter Vision filtering, or manual editorial sourcing.
+2. **R&C dominates.** A single `--parent-group=relais_chateaux` batch
+   covers 400 Tier B hotels (18 % of the catalogue) with one trusted
+   press-kit domain. That's the biggest single ROI unlock — but only
+   visible if you aggregated by `parent_group` first.
+3. **Hero-only Tier C is "free."** Those hotels already have ≥ 10
+   photos in gallery; they just need the existing top-quality entry
+   promoted to `hero_image`. No Cloudinary upload required. The audit
+   surfaces them so we don't waste a press-kit run on them.
+4. **Idempotency check is real.** `MCH_ONLY_MISSING_HERO=1` skips
+   already-hydrated rows, but it doesn't tell you ahead of time **how
+   many** rows are eligible. The audit's `by_urgency` count does.
+
+The audit also surfaces `suspicious_hotlinks` rows in 3 seconds (every
+row that still carries a Pinterest, TripAdvisor, or Booking hostname
+in `gallery_images` — these are publish-blocked per
+`.cursor/rules/photo-quality.mdc` and surface zero on 2026-05-31 after
+the migration).
+
+**Output:** `scripts/editorial-pilot/runs/photo-readiness-<ts>.{json,md}`.
+The Markdown report is PO-friendly and lists the top 20 countries +
+parent groups + the first 50 Tier A slugs verbatim — ready to be
+copy-pasted into the next `--slugs=...` invocation.
+
+CLI:
+
+```bash
+pnpm photos:audit            # published hotels only
+pnpm photos:audit:drafts     # include drafts (full catalogue view)
+```
+
+## Pattern — Shared parent-group mapping (single source of truth)
+
+`scripts/editorial-pilot/src/photos/parent-group-mapping.ts` is the
+**single** source of truth for: which hotel chains exist, which
+domains host their press kits, which CDNs to trust, which hostnames
+are always toxic. Three earlier scripts (`discover-press-kit-images`,
+`upload-press-kit-images`, `sync-hotel-photos`) had each grown their
+own local `PARENT_DOMAINS` / `HOSTNAME_WHITELIST` / `HOSTNAME_BLOCKLIST`
+copy — drift was inevitable.
+
+The module exposes:
+
+- **`ParentGroup`** — closed string union of 19 known groups
+  (`oetker`, `cheval_blanc`, `aman`, `four_seasons`,
+  `mandarin_oriental`, `belmond`, `six_senses`, `como`, `rosewood`,
+  `bulgari`, `relais_chateaux`, `lhw`, `hyatt`, `marriott_lux`,
+  `ihg_lux`, `accor_lux`, `auberge_resorts`, `oberoi`, `anantara`).
+  Use `independent` as the default fallback.
+- **`PARENT_DOMAINS_BY_GROUP`** — `Record<ParentGroup, string[]>`
+  mapping each group to its press-kit hostnames. Independents map to
+  `[]`; the per-hotel `official_url` is added separately by
+  `trustedDomainsForHotel`.
+- **`inferParentGroup(hotel)`** — inference order:
+  1. `SLUG_PARENT_GROUP_OVERRIDES[slug]` (escape hatch for outliers)
+  2. `official_url` hostname matches a known parent domain
+  3. `luxury_tier` matches a known group enum
+  4. fall back to `independent`
+- **`trustedDomainsForHotel(hotel)`** — concatenates the hotel's own
+  domain (from `official_url`) with its parent group's domains. The
+  set is passed verbatim to Tavily's `include_domains`.
+- **`HOSTNAME_BLOCKLIST_GLOBAL`** — exact-match hostnames that are
+  NEVER official (TripAdvisor, Booking, Pinterest, Instagram, …).
+  Use `isBlocklistedHostname(host)` — it handles subdomain matches.
+- **`HOSTNAME_WHITELIST_GLOBAL`** — CDNs commonly hosting press-kit
+  bytes for trusted brands (`images.eu.ctfassets.net` for Oetker,
+  `assets.hyatt.com` for Hyatt, `static.wixstatic.com` for Wix-
+  hosted boutiques, …). Tavily honours `include_domains` for the
+  source PAGE; the actual image URL almost always lives on a CDN,
+  hence the whitelist.
+- **`countSuspiciousGalleryRows(gallery)`** — audit helper, returns
+  how many entries reference a blocklisted hostname.
+
+**Extending it:** when you discover a new parent group, add:
+
+1. A new entry in the `ParentGroup` union.
+2. Its press-kit domains in `PARENT_DOMAINS_BY_GROUP`.
+3. The matching `LUXURY_TIER_PARENT_GROUP` mapping (if the group is
+   already an enum on `hotels.luxury_tier`).
+4. Optional `SLUG_PARENT_GROUP_OVERRIDES` entries for outliers.
+
+Then rerun `pnpm photos:audit` — the count of `independent` should
+drop. If it doesn't, the inference order is failing for that group.
 
 ## Pattern — Hero alt MUST come from the matching gallery row (2026-05-31 bug fix)
 
@@ -310,6 +440,34 @@ isn't guaranteed-sorted.
   DAM (Hyatt, Marriott, IHG). Most hotlink-block OpenAI's egress;
   fetch the bytes yourself with a descriptive UA and pass a base64
   data URI.
+- ❌ Launching a press-kit batch over the catalogue without running
+  `pnpm photos:audit` first. The tier (A/B/C/D/DONE) drives the
+  strategy: Tier C only needs hero promotion (no upload), Tier D
+  needs a different script (independents don't have a parent press
+  kit), and `MCH_ONLY_MISSING_HERO` alone doesn't tell you how many
+  hotels are actually eligible per group. Three seconds of audit
+  save hours of wasted Tavily/Vision quota.
+- ❌ Duplicating `PARENT_DOMAINS` / `HOSTNAME_WHITELIST` / `HOSTNAME_BLOCKLIST`
+  inside a new photo script. Import them from
+  `scripts/editorial-pilot/src/photos/parent-group-mapping.ts`
+  instead. If a chain is missing, add it to the shared module — every
+  other script benefits immediately.
+- ❌ Accepting a corporate-domain root (`mandarinoriental.com/`,
+  `sixsenses.com/`, `fourseasons.com/`, `hyatt.com/`) as a hotel's
+  `official_url`. It POISONS the Tavily crawl with photos from sibling
+  properties and Vision cannot detect the mismatch (the alt is built
+  from the hotel name, not from the image content). The 2026-05-31
+  Tier-A pilot lost 4 hotels this way — `mandarin-oriental-cristallo-cortina`
+  ended up with photos of a Mandarin in central London. Always
+  require either a path-specific URL (`aman.com/resorts/amankila`)
+  or leave `official_url` NULL (the parent-DAM crawl is safer than
+  a misleading corporate root).
+- ❌ Trusting Vision to spot a hotel mismatch. `gpt-4o-mini` will
+  cheerfully stamp "Luxueux Hôtel <name> <city>" on any palace-style
+  image, because the prompt frames the hotel name as ground truth.
+  Mismatch detection requires either (a) an `official_url` that
+  scopes the crawl to one property, or (b) a manual editorial review
+  pass after upload.
 
 ## References
 
@@ -334,3 +492,8 @@ isn't guaranteed-sorted.
   Vision-curated Cloudinary upload + Supabase patch (write).
 - `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` → `heroDescriptor`
   lookup pattern (match `publicId`, fallback to `name`).
+- `scripts/editorial-pilot/src/photos/audit-photo-readiness.ts` →
+  catalogue-wide urgency-tier audit (`pnpm photos:audit`).
+- `scripts/editorial-pilot/src/photos/parent-group-mapping.ts` → single
+  source of truth for `ParentGroup`, `PARENT_DOMAINS_BY_GROUP`,
+  `HOSTNAME_BLOCKLIST_GLOBAL`, `HOSTNAME_WHITELIST_GLOBAL`.

@@ -207,10 +207,61 @@ export const SLUG_PARENT_GROUP_OVERRIDES: Readonly<Record<string, ParentGroup>> 
 };
 
 /**
+ * Detect a corporate-root `official_url` — a URL whose hostname matches
+ * a parent group's domain (e.g. `mandarinoriental.com`,
+ * `sixsenses.com`, `fourseasons.com`) AND whose path is either empty,
+ * `/`, or a locale-only prefix (`/en`, `/fr`).
+ *
+ * Why this matters: the 2026-05-31 Tier-A pilot uploaded photos of
+ * Mandarin Oriental London onto `mandarin-oriental-cristallo-cortina`
+ * because the latter's `official_url` was `https://www.mandarinoriental.com/`
+ * — Tavily was free to crawl every Mandarin property worldwide and
+ * Vision had no way to detect the mismatch. The 4 contaminated hotels
+ * had to be SQL-reverted. See `photo-pipeline` skill §Critical
+ * learnings #6 for the full incident report.
+ *
+ * Use this as a guard in any script that consumes `official_url` as a
+ * Tavily seed: if `true`, drop the URL and rely on the parent-group
+ * DAM fallback (still scoped to the same domain, but the discover
+ * script can mark the hotel as "needs editorial review" instead of
+ * over-trusting).
+ */
+export function isCorporateRootUrl(officialUrl: string | null): boolean {
+  if (!officialUrl) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(officialUrl);
+  } catch {
+    return false;
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^www\./u, '');
+  const cleanPath = parsed.pathname.replace(/\/$/u, '');
+
+  // Path must be empty, root, or a 2-3 char locale (`/en`, `/fr`, `/de`).
+  const pathIsRootOrLocaleOnly =
+    cleanPath === '' || /^\/[a-z]{2}(?:[-_][a-z]{2})?$/iu.test(cleanPath);
+  if (!pathIsRootOrLocaleOnly) return false;
+
+  // Hostname must match (or be a subdomain of) any known parent group.
+  for (const domains of Object.values(PARENT_DOMAINS_BY_GROUP)) {
+    for (const d of domains) {
+      if (host === d || host.endsWith(`.${d}`)) return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Convenience: full list of trusted domains for a hotel (own + parent
  * group fallback). Empty when no parent group can be inferred AND no
  * official_url exists — in that case the caller should skip Tavily
  * (no legal sourcing possible).
+ *
+ * **Corporate-root protection**: if the hotel's `official_url` is
+ * detected as a corporate root (per `isCorporateRootUrl`), the URL's
+ * hostname is NOT added to the trusted set — the parent-group
+ * fallback handles the same domain anyway, but the caller can now
+ * surface a warning and skip the hotel for the auto-batch.
  */
 export function trustedDomainsForHotel(input: {
   readonly slug: string;
@@ -218,7 +269,7 @@ export function trustedDomainsForHotel(input: {
   readonly luxuryTier: string | null;
 }): readonly string[] {
   const domains = new Set<string>();
-  if (input.officialUrl) {
+  if (input.officialUrl && !isCorporateRootUrl(input.officialUrl)) {
     try {
       domains.add(new URL(input.officialUrl).hostname.toLowerCase().replace(/^www\./u, ''));
     } catch {
