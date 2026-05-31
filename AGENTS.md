@@ -113,18 +113,29 @@ across the full catalogue before touching photos** (`.cursor/skills/photo-pipeli
 between a written-content chantier and a photo chantier, **pick the
 written one**.
 
-Catalogue snapshot (refreshed 2026-05-31 — post drafts audit + cleanup):
+Catalogue snapshot (refreshed 2026-05-31 — post Akelarre flip + blockers cleared):
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
-| `hotels`             | 2219  | **2218**  | 1     |
+| `hotels`             | 2219  | **2219**  | 0     |
 | `editorial_rankings` | 220   | **209**   | 11    |
 | `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
 
-Of the 2218 published hotels: see the per-country breakdown in
+Of the 2219 published hotels: see the per-country breakdown in
 `apps/web/src/lib/catalogue-stats.ts` (single source of truth) — the
 earlier 615/752 split was stale (pre-2026-05-28 Phase 1 catalogue flip).
+
+**Flip 2026-05-31 15:36 — `akelarre-restaurant-hotel`**:
+
+Dernier draft hôtel restant (Akelarre, restaurant 3⭐ Michelin de Pedro
+Subijana à Saint-Sébastien, Relais & Châteaux). Passé tous les gates du
+`publish-eligible-drafts.ts` après le clear des pipelines `humanizer-faq`
+
+- `enrich-signatures` + `enrich-policies` (terminés 15:33-15:35) :
+  `desc_fr=1120c`, `md_fr=138c`, `fs_fr=145c` (in CDC band [130, 150]),
+  FAQ=10, concierge_advice ✅. **Le catalogue hôtels est désormais zéro
+  draft.**
 
 **Cleanup 2026-05-31 — 5 doublons éditoriaux supprimés**:
 
