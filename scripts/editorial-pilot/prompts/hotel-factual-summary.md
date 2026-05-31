@@ -15,7 +15,7 @@ Tu reçois un objet hôtel JSON avec :
 
 ## Ta mission
 
-Produire **deux résumés** (FR + EN) au format **exact** ci-dessous, chacun **110-165 caractères**. Le format est non-négociable — il sert d'ancrage AEO.
+Produire **deux résumés** (FR + EN) au format **exact** ci-dessous, chacun **130-150 caractères (cible CDC §2.3 — viser 135-145)**. Hard cap **110-165** (envelope production). Le format est non-négociable — il sert d'ancrage AEO et la sweet spot 130-150 maximise la citabilité par les LLM (ChatGPT/Perplexity/Claude) sans cannibaliser le bloc AEO complet.
 
 ### Format strict (FR)
 
@@ -43,7 +43,7 @@ Mêmes règles, en EN-GB (« featuring », pas « featured »). Distances en EN-
 
 ## Règles dures (gate post-LLM)
 
-1. **Longueur** : 110-165 caractères pour CHAQUE locale. **Compte les caractères AVANT de répondre.**
+1. **Longueur** : 110-165 caractères pour CHAQUE locale (envelope production). **Viser 130-150 (CDC §2.3 ideal)** — la cible AEO sweet spot. **Compte les caractères AVANT de répondre.**
 2. **Format** : la phrase commence par `Palace` ou `Hôtel`/`Hotel`, contient une virgule avant la distance, et finit par un point.
 3. **Aucun fait inventé** : tout chiffre, tout nom de chef, toute distance vient du JSON source. Si tu hésites, omets.
 4. **Pas de superlatif vide** : interdits « incroyable », « magnifique », « exceptionnel » (sauf classification Atout France/Michelin), « sublime », « véritable joyau », « art de vivre », « écrin », « cocon », « bulle ».
@@ -99,8 +99,8 @@ Pas de commentaire. Pas de markdown fences. Pas de clé supplémentaire.
 
 ## CHECKLIST avant de répondre
 
-1. ☐ `fr.length` ∈ [110, 165] — compte les caractères
-2. ☐ `en.length` ∈ [110, 165] — compte les caractères
+1. ☐ `fr.length` ∈ [110, 165] (hard cap) — viser [130, 150] (CDC ideal) — compte les caractères
+2. ☐ `en.length` ∈ [110, 165] (hard cap) — viser [130, 150] (CDC ideal) — compte les caractères
 3. ☐ FR commence par `Palace ` ou `Hôtel `
 4. ☐ EN commence par `Palace ` ou `Hotel `
 5. ☐ Distance vient du `points_of_interest` du JSON source (ou phrase « au cœur de » si aucun POI exploitable)

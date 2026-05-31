@@ -9,6 +9,14 @@
  *   --include-all            include hotels even if factual_summary already set (default: skip)
  *   --include-drafts         include rows where `is_published = false`
  *   --no-description-filter  include hotels without description (RISKY — may hallucinate)
+ *   --cdc-tightening         re-run on hotels whose `factual_summary_{fr,en}`
+ *                            is OUTSIDE the CDC §2.3 ideal band [130, 150]
+ *                            (production envelope is [110, 165] — see
+ *                            `factual-summary-generator.ts`). Forces
+ *                            `--include-all` server-side then filters
+ *                            client-side on char length. Use to land
+ *                            existing rows back into the 130-150 sweet
+ *                            spot for AEO citability.
  *   --concurrency=<N>        parallel LLM calls (default 3, max 8)
  *
  * Examples:
@@ -52,6 +60,17 @@ const SupabaseEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(40),
 });
 
+/** CDC §2.3 — sweet spot band for AEO citability. */
+const CDC_FACTUAL_SUMMARY_IDEAL_MIN = 130;
+const CDC_FACTUAL_SUMMARY_IDEAL_MAX = 150;
+
+function isOutsideCdcBand(value: string | null): boolean {
+  if (value === null || value.length === 0) return true;
+  return (
+    value.length < CDC_FACTUAL_SUMMARY_IDEAL_MIN || value.length > CDC_FACTUAL_SUMMARY_IDEAL_MAX
+  );
+}
+
 function parseArgs(argv: readonly string[]): {
   readonly slug?: string;
   readonly slugs?: readonly string[];
@@ -60,6 +79,7 @@ function parseArgs(argv: readonly string[]): {
   readonly includeAll: boolean;
   readonly includeDrafts: boolean;
   readonly noDescriptionFilter: boolean;
+  readonly cdcTightening: boolean;
   readonly concurrency: number;
 } {
   const map = new Map<string, string | true>();
@@ -74,6 +94,7 @@ function parseArgs(argv: readonly string[]): {
   const limitRaw = map.get('limit');
   const slugsRaw = map.get('slugs');
   const slugRaw = map.get('slug');
+  const cdcTightening = map.has('cdc-tightening');
   const out: {
     slug?: string;
     slugs?: readonly string[];
@@ -82,12 +103,18 @@ function parseArgs(argv: readonly string[]): {
     includeAll: boolean;
     includeDrafts: boolean;
     noDescriptionFilter: boolean;
+    cdcTightening: boolean;
     concurrency: number;
   } = {
     dryRun: map.has('dry-run'),
-    includeAll: map.has('include-all'),
+    // `--cdc-tightening` implies `--include-all` — we deliberately want
+    // to re-touch rows that already have a (production-valid but
+    // off-CDC-ideal) factual_summary set. The client-side band filter
+    // below then narrows the candidate pool back down.
+    includeAll: map.has('include-all') || cdcTightening,
     includeDrafts: map.has('include-drafts'),
     noDescriptionFilter: map.has('no-description-filter'),
+    cdcTightening,
     concurrency,
   };
   if (typeof slugRaw === 'string') out.slug = slugRaw;
@@ -231,10 +258,28 @@ async function main(): Promise<void> {
     onlyMissingFactualSummary: !args.includeAll,
     requireDescription: !args.noDescriptionFilter,
   };
-  if (args.limit !== undefined) listOpts.limit = args.limit;
+  // When `--cdc-tightening` is set, do NOT cap server-side by `--limit`
+  // until we've applied the client-side band filter; otherwise the
+  // limit hits the unfiltered set and we skip the rows we actually
+  // want to re-touch. The limit is enforced below on `rows` instead.
+  if (args.limit !== undefined && !args.cdcTightening) listOpts.limit = args.limit;
   if (args.slug !== undefined) listOpts.slug = args.slug;
   if (args.slugs !== undefined) listOpts.slugs = args.slugs;
-  const rows = await listHotelsForFactualSummary(supabase, listOpts);
+  let rows = await listHotelsForFactualSummary(supabase, listOpts);
+
+  if (args.cdcTightening) {
+    const fetched = rows.length;
+    rows = rows.filter(
+      (r) => isOutsideCdcBand(r.factual_summary_fr) || isOutsideCdcBand(r.factual_summary_en),
+    );
+    console.log(
+      `[factual-summary] cdc-tightening: ${rows.length}/${fetched} rows outside CDC ideal band [${CDC_FACTUAL_SUMMARY_IDEAL_MIN}, ${CDC_FACTUAL_SUMMARY_IDEAL_MAX}].`,
+    );
+    if (args.limit !== undefined) {
+      rows = rows.slice(0, args.limit);
+      console.log(`[factual-summary] cdc-tightening: limited to ${rows.length} rows.`);
+    }
+  }
 
   console.log(`[factual-summary] ${rows.length} hotel(s) eligible.`);
   if (rows.length === 0) {

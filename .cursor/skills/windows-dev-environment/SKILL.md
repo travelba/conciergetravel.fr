@@ -373,6 +373,44 @@ When validation fails in the browser, the React Dev Overlay surfaces a red error
 
 Reference: `packages/config/src/env-web.ts`.
 
+## Rule 12 — Supabase pooler URL: region is `eu-west-1`, not eu-west-3
+
+The Supabase **project hosting region** (Frankfurt / Paris / Ireland) is **not necessarily** the **pooler region**. For this project:
+
+- Project ref : `fsmfozxgujskluxakeoq`
+- Pooler URL : `postgresql://postgres.fsmfozxgujskluxakeoq:<PASSWORD>@aws-0-eu-west-1.pooler.supabase.com:6543/postgres`
+
+Common WRONG guesses that fail with `(ENOTFOUND) tenant/user postgres.<ref> not found`:
+
+- `aws-0-eu-west-3.pooler.supabase.com` (Paris)
+- `aws-0-eu-central-1.pooler.supabase.com` (Frankfurt)
+
+**Confirmed working** : `aws-0-eu-west-1.pooler.supabase.com` (Ireland).
+
+When you need to discover the pooler region for a different project, probe 3-4 candidates with a 5s timeout — the wrong tenant fails fast, the right one returns `SELECT 1` immediately:
+
+```ts
+import pg from 'pg';
+const REGIONS = ['eu-west-3', 'eu-central-1', 'eu-west-1', 'us-east-1'];
+for (const region of REGIONS) {
+  const url = `postgresql://postgres.${PROJECT_REF}:${PASSWORD_ENCODED}@aws-0-${region}.pooler.supabase.com:6543/postgres`;
+  const c = new pg.Client({ connectionString: url, connectionTimeoutMillis: 5_000 });
+  try {
+    await c.connect();
+    await c.query('SELECT 1');
+    console.log(`OK ${region}`);
+    break;
+  } catch {
+    /* try next */
+  }
+  await c.end().catch(() => {});
+}
+```
+
+**Important — URL-encode the password.** `Benboubou55@@` becomes `Benboubou55%40%40` because `@` is the userinfo/host delimiter in URIs. Otherwise the parser silently truncates at the first unencoded `@` and you get `ENOTFOUND` or `auth failed` errors that look identical to the wrong-region error.
+
+**Never commit the throwaway probe script** — it carries the password in clear. Use it locally, delete it before the next commit (lesson 2026-05-31: a `test-db-connection.ts` was created during region discovery; deleted immediately after).
+
 ## Rule 11 — Cursor Cloud PRs may auto-close when you push a manual conflict resolution
 
 When a Cursor Cloud-spawned PR (head ref `cursor/<slug>-78ae`) is conflicting with `main`, the natural fix is to check the branch out locally, merge `main`, resolve, and push back to the same head ref. **Sometimes the Cursor Cloud backend detects this as a foreign push and closes the PR + clears its head ref** (`gh pr view N --json headRefName,baseRefName` returns `null` for both, even though the remote branch still exists).

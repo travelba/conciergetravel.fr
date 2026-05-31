@@ -189,6 +189,62 @@ Places / Tavily-sourced data, extend the 106 short `description_fr`
 to ≥ 600 chars, and re-run meta_desc on the 16 thin-source failures
 after their descriptions are enriched.
 
+**Phase 1.5 partial close (2026-05-31 — chantier "A et B")**
+
+Two tightening sweeps ran across the catalogue and closed substantial
+gaps without re-touching photos or APIs (full Phase 6 still frozen).
+The pipelines + their state are now part of the standard toolbox.
+
+| Metric                                            | Before               | After                    | Delta |
+| ------------------------------------------------- | -------------------- | ------------------------ | ----- |
+| `factual_summary_fr` in CDC ideal band [130, 150] | ~1014 / 2218         | **1516 / 2218 (68 %)**   | +502  |
+| `factual_summary_en` in CDC ideal band [130, 150] | ~1014 / 2218         | **1548 / 2218 (70 %)**   | +534  |
+| `meta_desc_{fr,en}` in 140-170 band               | 2216 / 2218 (99.9 %) | 2218 / 2218 (100 %)      | +2    |
+| `external_sources` populated (≥ 1 entry)          | 26 / 2218 (1.2 %)    | **1370 / 2218 (61.8 %)** | +1344 |
+| `external_sources` with 5+ provenance entries     | 0                    | 409 (18.4 %)             | +409  |
+
+**Tooling capitalised** (now reusable across the project):
+
+- New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
+  forces `--include-all` server-side then filters client-side on the
+  CDC ideal band [130, 150]. The factual_summary prompt was also
+  tightened to target the 130-150 sweet spot while keeping the
+  110-165 production envelope as the hard Zod gate.
+- New pipeline
+  [`scripts/editorial-pilot/src/enrichment/convert-wikidata-to-external-sources.ts`](scripts/editorial-pilot/src/enrichment/convert-wikidata-to-external-sources.ts) —
+  re-projects the Wikidata-resolved scalar columns
+  (`wikidata_id`, `wikipedia_url_fr/en`, `official_url`,
+  `tripadvisor_location_id`, `booking_com_hotel_id`, `commons_category`,
+  `external_sameas.{architects,inception_year,heritage_designations,
+twitter,instagram,facebook,youtube,linkedin}`) into structured
+  provenance entries on `hotels.external_sources` (see ADR-0023 +
+  `seed-grecotel-external-sources.ts` for the shape). Zero new API
+  calls — purely a data-shape conversion. Idempotent merge by
+  `(source, field)`. Re-run whenever `enrich-wikidata-ids.ts`
+  resolves new identifiers.
+
+**What's still gappy** (carry-over for the next Phase 1.5 pass):
+
+- 702 FR / 670 EN `factual_summary` rows remain in the production
+  envelope [110, 165] but outside the CDC ideal [130, 150]. They
+  cluster in [110, 129] (LLM under-shot) or [151, 165] (LLM
+  over-shot). A 2nd pass is possible but ROI is dropping — these are
+  the structurally short or long hotels where the source text doesn't
+  give the generator enough hooks. Defer to a manual editorial sweep.
+- 848 / 2218 hotels still have no `external_sources` because they
+  carry NO Wikidata-derived scalar at all (drafts/scaffolds promoted
+  via the publish flip). They are the natural targets for the next
+  enrichment wave: re-run `enrich-wikidata-ids.ts` (Wikidata
+  resolver) on the un-resolved drafts, then re-run
+  `convert-wikidata-to-external-sources.ts` to fold the new
+  identifiers into the provenance array.
+- 4 hotels with `description_fr < 600 chars` still fail
+  `run-hotel-description-extend.ts` because the generator can't
+  reconcile the 1500-char hard cap with the ≤ 28-word sentence rule
+  on dense palace fiches (Cap-Eden-Roc, Airelles Saint-Tropez,
+  Hôtel des Berges, Sources de Cheverny). Renderer accepts any
+  length — defer to manual extension.
+
 Once published-quality is conformant, Phase 2 promotes the 924 drafts
 (now including the full Relais & Châteaux roster scaffolded on
 2026-05-25). Phase 3 finishes editorial guides + rankings. Phase 4 is
