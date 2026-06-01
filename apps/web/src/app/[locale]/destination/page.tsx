@@ -17,6 +17,7 @@ import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedCities } from '@/server/destinations/cities';
 import { listInternationalDestinations } from '@/server/destinations/list-destination-countries';
+import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 
 /**
  * Phase 4.A nav-pinned international slugs — we surface these first in
@@ -72,10 +73,19 @@ export default async function DestinationDirectoryPage({
   setRequestLocale(locale);
 
   const t = await getTranslations('destinationPage');
-  const [cities, countries] = await Promise.all([
+  const [cities, countries, allGuides] = await Promise.all([
     listPublishedCities(),
     listInternationalDestinations(locale),
+    listPublishedGuides(),
   ]);
+  // Phase 1.5 — region & cluster guides (Provence, Côte d'Azur, Alsace…)
+  // are now served as standalone long-reads at `/destination/<slug>`
+  // (see `standalone-guide-page.tsx`). Surface them in their own hub
+  // section so they're reachable in 1 click from the directory (was
+  // previously 404 / undiscoverable).
+  const regionGuides = allGuides
+    .filter((g) => g.scope === 'region' || g.scope === 'cluster')
+    .sort((a, b) => a.nameFr.localeCompare(b.nameFr, locale));
   // ADR-0022 — `cities` now mixes FR + international rows. We split
   // them visually: FR cities under "France — par ville", international
   // cities under "Monde — par ville". The "Monde — par pays" section
@@ -114,7 +124,11 @@ export default async function DestinationDirectoryPage({
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   const totalDestinations =
-    frCities.length + intlCities.length + guidedCountries.length + unguidedCountries.length;
+    frCities.length +
+    regionGuides.length +
+    intlCities.length +
+    guidedCountries.length +
+    unguidedCountries.length;
 
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
@@ -125,6 +139,13 @@ export default async function DestinationDirectoryPage({
           url: `${origin}${getPathname({
             locale,
             href: { pathname: '/destination/[citySlug]', params: { citySlug: c.slug } },
+          })}`,
+        })),
+        ...regionGuides.map((g) => ({
+          name: pickByLocale(locale, g.nameFr, g.nameEn ?? g.nameFr),
+          url: `${origin}${getPathname({
+            locale,
+            href: { pathname: '/destination/[citySlug]', params: { citySlug: g.slug } },
           })}`,
         })),
         ...intlCities.map((c) => ({
@@ -217,6 +238,42 @@ export default async function DestinationDirectoryPage({
                       </span>
                       <span className="text-muted text-xs">
                         {t('directory.count', { count: c.count })}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {regionGuides.length > 0 && (
+            <section aria-labelledby="destination-regions-heading">
+              <header className="mb-4 flex items-baseline justify-between gap-4">
+                <h2
+                  id="destination-regions-heading"
+                  className="text-fg font-serif text-2xl sm:text-3xl"
+                >
+                  {t('directory.regionsSection.title')}
+                </h2>
+                <p className="text-muted text-xs">
+                  {t('directory.regionsSection.subtitle', { count: regionGuides.length })}
+                </p>
+              </header>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {regionGuides.map((g) => (
+                  <li key={g.slug}>
+                    <Link
+                      href={{
+                        pathname: '/destination/[citySlug]',
+                        params: { citySlug: g.slug },
+                      }}
+                      className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
+                    >
+                      <span className="text-fg font-serif text-lg">
+                        {pickByLocale(locale, g.nameFr, g.nameEn ?? g.nameFr)}
+                      </span>
+                      <span className="text-muted text-xs uppercase tracking-wide">
+                        {pickByLocale(locale, 'Guide', 'Guide')}
                       </span>
                     </Link>
                   </li>

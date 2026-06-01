@@ -82,6 +82,28 @@ export async function GET(): Promise<NextResponse> {
       });
     }
 
+    // Phase 1.5 — region & cluster guides are now served standalone at
+    // `/destination/<slug>` (see `standalone-guide-page.tsx`). Their slugs
+    // are disjoint from city slugs, so emit one entry each with the
+    // guide's own `updated_at` as lastmod. Country-scope guides stay out
+    // (the 8 hand-built `/guide/<country>` pages are listed below).
+    for (const g of guides) {
+      if (g.scope !== 'region' && g.scope !== 'cluster') continue;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug: g.slug } },
+        })}`;
+      const lastmod = g.updatedAt ?? g.reviewedAt;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'monthly',
+        priority: 0.6,
+        ...(lastmod !== null ? { lastmod } : {}),
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
     // ── Static hub pages (ADR-0014) ──────────────────────────────────────
     // Each entry is locale-aware via `buildSitemapAlternates`.
     const staticHubs: {

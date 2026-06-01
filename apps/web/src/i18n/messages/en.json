@@ -2873,6 +2873,10 @@
         "title": "France — by city",
         "subtitle": "{count, plural, one {# French city} other {# French cities}}."
       },
+      "regionsSection": {
+        "title": "France — by region & terroir",
+        "subtitle": "{count, plural, one {# regional guide} other {# regional guides}}."
+      },
       "intlCitiesSection": {
         "title": "World — by city",
         "subtitle": "{count, plural, one {# international city} other {# international cities}}."
