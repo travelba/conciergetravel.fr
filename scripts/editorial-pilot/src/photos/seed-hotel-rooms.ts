@@ -170,13 +170,24 @@ function normaliseHotel(raw: RawHotelRow): HotelRow {
 
 // ─── Extraction schema ─────────────────────────────────────────────────────
 
+/**
+ * Truncate over-long LLM strings instead of letting one bad field reject the
+ * whole `rooms` array (cf. llm-output-robustness §clampText). A room name that
+ * blows past 120 chars is usually a description mis-tagged as a name — we keep
+ * the (truncated) row rather than dropping every valid sibling room.
+ */
+const clampStr =
+  (max: number) =>
+  (v: unknown): unknown =>
+    typeof v === 'string' ? v.slice(0, max) : v;
+
 const ExtractedRoomSchema = z.object({
-  name: z.string().min(2).max(120),
+  name: z.preprocess(clampStr(120), z.string().min(2).max(120)),
   size_sqm: z.number().nullable(),
-  bed_type: z.string().max(80).nullable(),
+  bed_type: z.preprocess(clampStr(80), z.string().max(80).nullable()),
   max_occupancy: z.number().nullable(),
-  short_description: z.string().max(400).nullable(),
-  evidence_quote: z.string().max(400).nullable(),
+  short_description: z.preprocess(clampStr(400), z.string().max(400).nullable()),
+  evidence_quote: z.preprocess(clampStr(400), z.string().max(400).nullable()),
 });
 const RoomsExtractSchema = z.object({ rooms: z.array(ExtractedRoomSchema) });
 
@@ -262,13 +273,32 @@ function buildCopyPrompt(hotel: HotelRow, room: ExtractedRoomClean): string {
 // ─── Slug / dedup helpers ────────────────────────────────────────────────────
 
 function slugify(input: string): string {
-  return input
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/gu, '-')
-    .replace(/^-+|-+$/gu, '')
-    .slice(0, 60);
+  return (
+    input
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gu, '-')
+      .replace(/^-+|-+$/gu, '')
+      .slice(0, 60)
+      // Re-trim a hyphen the .slice(0, 60) may have exposed at the cut point.
+      // Without this, a long room name yields `…-terrace-` which violates the
+      // DB CHECK `hotel_rooms_slug_ck` (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) → 23514.
+      .replace(/-+$/gu, '')
+  );
+}
+
+/** DB CHECK `hotel_rooms_slug_ck` (migration 0010). */
+const SLUG_CK = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+
+/**
+ * Strip NUL + other C0 control characters that Postgres `text` rejects
+ * (`22P05: \u0000 cannot be converted to text`). Tabs/newlines are kept so
+ * the paragraph split (`\n\n`) on the room sub-page still works.
+ */
+function sanitizeText(s: string): string {
+  // eslint-disable-next-line no-control-regex -- intentional C0 strip
+  return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/gu, '').trim();
 }
 
 function countWords(s: string): number {
@@ -353,7 +383,7 @@ async function upsertRooms(cfg: SupabaseRestConfig, rooms: readonly RoomUpsert[]
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`hotel_rooms upsert failed (${res.status}): ${text.slice(0, 300)}`);
+    throw new Error(`hotel_rooms upsert failed (${res.status}): ${text.slice(0, 2000)}`);
   }
 }
 
@@ -474,6 +504,8 @@ async function processHotel(
     const room = clean[i];
     if (room === undefined) continue;
     const sl = slugify(room.name);
+    // Belt-and-suspenders: never POST a slug the DB CHECK would reject.
+    if (!SLUG_CK.test(sl)) continue;
     let copy: z.infer<typeof RoomCopySchema> | null = null;
     try {
       const res = await client.call({
@@ -490,11 +522,13 @@ async function processHotel(
       copy = null;
     }
     // Fallback: never block on copy — ship the factual short source if the LLM fails.
-    const shortFr = copy?.short_fr ?? room.shortSource ?? `${room.name} — ${hotel.name}.`;
-    const longFr = copy?.long_fr ?? shortFr;
-    const longEn = copy?.long_en ?? longFr;
-    const shortEn = copy?.short_en ?? shortFr;
-    const nameEn = copy?.name_en ?? room.name;
+    const shortFr = sanitizeText(
+      copy?.short_fr ?? room.shortSource ?? `${room.name} — ${hotel.name}.`,
+    );
+    const longFr = sanitizeText(copy?.long_fr ?? shortFr);
+    const longEn = sanitizeText(copy?.long_en ?? longFr);
+    const shortEn = sanitizeText(copy?.short_en ?? shortFr);
+    const nameEn = sanitizeText(copy?.name_en ?? room.name);
 
     const bucket = buckets[i] ?? [];
     const hero = bucket[0]?.public_id ?? null;
@@ -506,14 +540,14 @@ async function processHotel(
       hotel_id: hotel.id,
       room_code: sl,
       slug: sl,
-      name_fr: room.name,
+      name_fr: sanitizeText(room.name),
       name_en: nameEn,
       description_fr: shortFr,
       description_en: shortEn,
       long_description_fr: longFr,
       long_description_en: longEn,
       size_sqm: room.sizeSqm,
-      bed_type: room.bedType,
+      bed_type: room.bedType !== null ? sanitizeText(room.bedType) : null,
       max_occupancy: room.maxOccupancy,
       amenities: [],
       images: bucket,
