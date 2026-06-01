@@ -3026,6 +3026,12 @@
       "lead": "The questions my guests ask me most. Direct answers, no fluff.",
       "tipPrefix": "My tip"
     },
+    "bookingComingSoon": {
+      "eyebrow": "Booking",
+      "headline": "Booking coming soon",
+      "body": "Online booking for {name} is coming soon. In the meantime, explore the full profile and the Concierge's tip to plan your stay.",
+      "note": "Live net rates and availability coming soon."
+    },
     "displayOnly": {
       "headline": "Book through your personal concierge",
       "explainer": "{name} is booked through our concierge desk: your dedicated concierge confirms the room, secures extra perks and emails you a tailored proposal.",
@@ -3082,10 +3088,23 @@
       "historyOpenedOnly": "Opened in {opened}",
       "historyOpenedRenovated": "Opened in {opened} · Renovated in {renovated}",
       "historyRenovatedOnly": "Renovated in {renovated}",
+      "architectLabel": "Architect(s)",
       "geoLabel": "Coordinates",
       "updatedAt": "Information last updated on {date}.",
       "updatedAtShort": "Updated",
       "updatedAtAria": "Information last updated on {date}"
+    },
+    "toc": {
+      "heading": "On this page",
+      "enBref": "At a glance",
+      "recit": "The story",
+      "services": "Services & amenities",
+      "chambres": "Rooms",
+      "lieu": "Location & access",
+      "avis": "Reviews & awards",
+      "conseil": "The Concierge's tip",
+      "faq": "FAQ",
+      "booking": "Booking"
     },
     "reassurance": {
       "title": "Why book with MyConciergeHotel?",
@@ -3191,11 +3210,9 @@
       "indicativePriceRange": "{from} – {to} / night"
     },
     "aeo": {
-      "question": "How do I book {name} through MyConciergeHotel?",
-      "answer": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
-      "answerNoStay": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city} ({region}). Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
-      "answerNoRegion": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city}. Pick your dates and guest count to receive the Amadeus GDS net rate, locked for 10 minutes, then pay online through Amadeus Payments (PCI-DSS, 3-D Secure). No agency markup, transparent price comparator, MyConciergeHotel loyalty benefits applied from the first night. Updated {date}.",
-      "answerNoStayNoRegion": "MyConciergeHotel is the IATA-accredited agency partnered with this hotel in {city}. Our rate is the Amadeus GDS net rate — no agency markup, 10-minute price lock, secure payment through Amadeus Payments (PCI-DSS, 3-D Secure), non-affiliated price comparator and MyConciergeHotel loyalty benefits applied from the first night. Updated {date}."
+      "question": "Why choose {name}?",
+      "answer": "{name} is an exceptional address in {city} ({region}), chosen by the Concierge for its location, service and character. This page gathers verified facts — rooms, dining, amenities, access and policies — together with the Concierge's tip, the operational secret worth knowing before you go. Updated {date}.",
+      "answerNoRegion": "{name} is an exceptional address in {city}, chosen by the Concierge for its location, service and character. This page gathers verified facts — rooms, dining, amenities, access and policies — together with the Concierge's tip, the operational secret worth knowing before you go. Updated {date}."
     },
     "noFaq": "No questions yet for this property.",
     "noAmenities": "Detailed services coming soon.",

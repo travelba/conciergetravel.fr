@@ -3026,6 +3026,12 @@
       "lead": "Les questions que mes clients me posent le plus souvent. Réponses directes, sans détour.",
       "tipPrefix": "Mon conseil"
     },
+    "bookingComingSoon": {
+      "eyebrow": "Réservation",
+      "headline": "Réservation bientôt disponible",
+      "body": "La réservation en ligne de {name} arrive prochainement. En attendant, parcourez la fiche complète et le Conseil du Concierge pour préparer votre séjour.",
+      "note": "Tarifs nets et disponibilités en temps réel à venir."
+    },
     "displayOnly": {
       "headline": "Réservation via votre concierge personnel",
       "explainer": "{name} se réserve via notre conciergerie : votre concierge dédié confirme la chambre, négocie les attentions et vous transmet la proposition par e-mail.",
@@ -3082,10 +3088,23 @@
       "historyOpenedOnly": "Ouverture en {opened}",
       "historyOpenedRenovated": "Ouverture en {opened} · Rénové en {renovated}",
       "historyRenovatedOnly": "Rénové en {renovated}",
+      "architectLabel": "Architecte(s)",
       "geoLabel": "Coordonnées",
       "updatedAt": "Informations mises à jour le {date}.",
       "updatedAtShort": "Mis à jour le",
       "updatedAtAria": "Informations mises à jour le {date}"
+    },
+    "toc": {
+      "heading": "Sur cette page",
+      "enBref": "En bref",
+      "recit": "Le récit",
+      "services": "Services & équipements",
+      "chambres": "Chambres",
+      "lieu": "Emplacement & accès",
+      "avis": "Avis & distinctions",
+      "conseil": "Le Conseil du Concierge",
+      "faq": "Questions fréquentes",
+      "booking": "Réservation"
     },
     "reassurance": {
       "title": "Pourquoi réserver avec MyConciergeHotel ?",
@@ -3191,11 +3210,9 @@
       "indicativePriceRange": "{from} – {to} / nuit"
     },
     "aeo": {
-      "question": "Comment réserver {name} via MyConciergeHotel ?",
-      "answer": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city} ({region}). Sélectionnez vos dates et le nombre de voyageurs pour obtenir le tarif net GDS, verrouillé 10 minutes, payable en ligne via Amadeus Payments (PCI-DSS, 3-D Secure). Aucun supplément agence, comparatif de prix transparent, programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
-      "answerNoStay": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city} ({region}). Notre tarif est le tarif net GDS Amadeus, sans supplément agence, avec verrouillage 10 minutes, paiement sécurisé Amadeus Payments (PCI-DSS, 3-D Secure), comparatif de prix non affilié et programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
-      "answerNoRegion": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city}. Sélectionnez vos dates et le nombre de voyageurs pour obtenir le tarif net GDS, verrouillé 10 minutes, payable en ligne via Amadeus Payments (PCI-DSS, 3-D Secure). Aucun supplément agence, comparatif de prix transparent, programme de fidélité applicable dès la première nuit. Mise à jour {date}.",
-      "answerNoStayNoRegion": "MyConciergeHotel est l'agence IATA partenaire de cet hôtel à {city}. Notre tarif est le tarif net GDS Amadeus, sans supplément agence, avec verrouillage 10 minutes, paiement sécurisé Amadeus Payments (PCI-DSS, 3-D Secure), comparatif de prix non affilié et programme de fidélité applicable dès la première nuit. Mise à jour {date}."
+      "question": "Pourquoi choisir {name} ?",
+      "answer": "{name} est une adresse d'exception à {city} ({region}), retenue par le Concierge pour son emplacement, son service et son caractère. Cette fiche réunit les informations vérifiées — chambres, restauration, équipements, accès et politiques — ainsi que le Conseil du Concierge, le secret opérationnel à connaître avant de venir. Mise à jour {date}.",
+      "answerNoRegion": "{name} est une adresse d'exception à {city}, retenue par le Concierge pour son emplacement, son service et son caractère. Cette fiche réunit les informations vérifiées — chambres, restauration, équipements, accès et politiques — ainsi que le Conseil du Concierge, le secret opérationnel à connaître avant de venir. Mise à jour {date}."
     },
     "noFaq": "Aucune question pour cet établissement pour le moment.",
     "noAmenities": "Détail des services à venir.",
