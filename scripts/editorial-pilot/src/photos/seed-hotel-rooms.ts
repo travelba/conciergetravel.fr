@@ -383,7 +383,7 @@ async function upsertRooms(cfg: SupabaseRestConfig, rooms: readonly RoomUpsert[]
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`hotel_rooms upsert failed (${res.status}): ${text.slice(0, 2000)}`);
+    throw new Error(`hotel_rooms upsert failed (${res.status}): ${text.slice(0, 600)}`);
   }
 }
 
@@ -499,13 +499,32 @@ async function processHotel(
 
   // 7. Editorial copy (grounded) + assemble upserts.
   const upserts: RoomUpsert[] = [];
+  // Two distinct room names can collapse to the same slug after the
+  // `.slice(0, 60)` truncation (e.g. two 70-char names sharing a 60-char
+  // prefix). A within-batch duplicate slug makes the `on_conflict` upsert
+  // fail atomically (PostgREST 400 → whole hotel errors, 0 rooms written).
+  // Disambiguate with a numeric suffix so every slug in the batch is unique
+  // AND still matches `hotel_rooms_slug_ck`.
+  const usedSlugs = new Set<string>();
   let indexable = 0;
   for (let i = 0; i < clean.length; i++) {
     const room = clean[i];
     if (room === undefined) continue;
-    const sl = slugify(room.name);
+    let sl = slugify(room.name);
     // Belt-and-suspenders: never POST a slug the DB CHECK would reject.
     if (!SLUG_CK.test(sl)) continue;
+    if (usedSlugs.has(sl)) {
+      let n = 2;
+      // Trim to leave room for the `-NN` suffix while staying ≤ 60 chars.
+      const stem = sl.slice(0, 56).replace(/-+$/u, '');
+      let candidate = `${stem}-${n}`;
+      while (usedSlugs.has(candidate)) {
+        n += 1;
+        candidate = `${stem}-${n}`;
+      }
+      sl = candidate;
+    }
+    usedSlugs.add(sl);
     let copy: z.infer<typeof RoomCopySchema> | null = null;
     try {
       const res = await client.call({
