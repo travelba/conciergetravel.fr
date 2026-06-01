@@ -140,11 +140,12 @@ async function fetchPublishedCountryGuides(): Promise<Readonly<Record<string, st
       .select('slug, country_code')
       .eq('is_published', true)
       .eq('scope', 'country')
-      // Exclude the legacy `guide-*` rows: they only carry
-      // `editorial_sections` (no renderable `sections`) so they 404 at
-      // `/destination/<slug>` until their Tranche 2 conversion renames
-      // them to a plain slug. Only plain-slug country guides are
-      // currently linkable at `/destination`.
+      // Exclude any remaining `guide-*` rows. Tranche 2 (2026-06-01)
+      // converted + renamed the 22 published country guides to plain
+      // slugs (afrique-du-sud, grece, portugal, …); the only `guide-*`
+      // rows left are unpublished twins of the 8 hand-built `/guide`
+      // pages (or duplicates), which must never surface here. Only
+      // plain-slug published country guides are linkable at `/destination`.
       .not('slug', 'like', 'guide-%');
     if (error !== null || !Array.isArray(data)) return {};
     const out: Record<string, string> = {};
@@ -218,8 +219,17 @@ const cachedAggregates = unstable_cache(
 // persisted a JSON-serialised empty Map (`{}`) and would crash the
 // new consumer if served. The bump guarantees a fresh fetch on the
 // first request after deploy.
+//
+// Bumped to v3 (Tranche 2 — 2026-06-01) when 22 `guide-*` country rows
+// were converted to renderable `sections` + renamed to plain slugs
+// (afrique-du-sud, australie, grece, portugal, …). The v2 entry still
+// held the pre-rename projection (those 22 codes mapped to nothing
+// because `guide-%` is filtered), so the directory would have kept
+// routing them to the `/hotels` anchor until the 1 h TTL lapsed. The
+// key bump forces an immediate fresh fetch so the 22 link to their new
+// `/destination/<slug>` guide on the first request after deploy.
 const cachedGuideSlugs = unstable_cache(
   fetchPublishedCountryGuides,
-  ['intl-destinations-guide-slugs-v2'],
+  ['intl-destinations-guide-slugs-v3'],
   { revalidate: 3600, tags: ['intl-destinations', 'editorial-guides'] },
 );

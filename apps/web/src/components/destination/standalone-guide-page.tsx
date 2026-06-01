@@ -34,9 +34,11 @@ import type { GuideRow } from '@/server/guides/get-guide-by-slug';
  * Phase 1.5 — surfaces the 21 region/cluster guides + the DB-backed
  * country guides previously dark (see AGENTS.md §4bis + ADR-0015). The
  * 8 hand-built `/guide/<country>` pages stay canonical (their slug is
- * 308-redirected upstream); the legacy FR-only `guide-*` country rows
- * are gated out by the `sections.length > 0` check until their Tranche 2
- * conversion populates a renderable `sections` array.
+ * 308-redirected upstream). Tranche 2 (2026-06-01) converted the 22
+ * remaining `guide-*` country rows to a renderable `sections` array +
+ * plain slug (afrique-du-sud, grece, portugal, …) so they now render
+ * here too; the `sections.length > 0` check still gates any unpublished
+ * `guide-*` twin that lacks a converted body.
  */
 interface Props {
   readonly guide: GuideRow;
