@@ -187,10 +187,12 @@ export async function generateMetadata({
     // Phase 1.5 — region/cluster/country guides have no city destination
     // row but carry a full bilingual long-read. Serve their metadata here
     // so the standalone guide render (default export) is indexable +
-    // canonical. The `sections.length > 0` gate keeps FR-only `guide-*`
-    // country rows (editorial_sections only, no renderable `sections`) out
-    // until their Tranche 2 conversion. Hand-built `/guide/<country>` slugs
-    // are excluded — the default export 308-redirects them.
+    // canonical. The `sections.length > 0` gate keeps any unconverted
+    // `guide-*` twin (editorial_sections only, no renderable `sections`)
+    // out; Tranche 2 (2026-06-01) converted + renamed the 22 published
+    // country rows to plain slugs so they pass the gate. Hand-built
+    // `/guide/<country>` slugs are excluded — the default export
+    // 308-redirects them.
     const guide = await getGuideBySlug(citySlug);
     if (
       guide !== null &&
@@ -297,10 +299,11 @@ export default async function DestinationHubPage({
     // Phase 1.5 — region/cluster/country editorial guide with no city hub:
     // render it as a standalone long-read instead of 404ing (these carry
     // 9-12 bilingual sections + TOC + FAQ). City guides keep their
-    // hub-inlined render below. The `sections.length > 0` gate keeps the
-    // FR-only `guide-*` country rows (editorial_sections only) out until
-    // their Tranche 2 conversion populates `sections`; hand-built country
-    // slugs already 308-redirected above.
+    // hub-inlined render below. The `sections.length > 0` gate keeps any
+    // unconverted `guide-*` twin (editorial_sections only) out; Tranche 2
+    // (2026-06-01) converted + renamed the 22 published country rows so
+    // they render here. Hand-built country slugs already 308-redirected
+    // above.
     const standaloneGuide = await getGuideBySlug(citySlug);
     if (
       standaloneGuide !== null &&
