@@ -26,6 +26,7 @@
  *     [--only=slug-a,slug-b]
  */
 
+import { readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -95,6 +96,16 @@ function parseArgs(): CliArgs {
           .map((s) => s.trim())
           .filter((s) => s.length > 0),
       );
+    } else if (a.startsWith('--only-file=')) {
+      // Newline-separated slug list — avoids a multi-KB --only= CLI arg
+      // (PowerShell chokes on long comma lists, cf. windows-dev-environment).
+      const file = a.slice('--only-file='.length).trim();
+      const raw = readFileSync(file, 'utf-8');
+      const slugs = raw
+        .split(/\r?\n/u)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith('#'));
+      only = new Set([...(only ?? []), ...slugs]);
     }
   }
   return { concurrency, limit, sources, force, dryRun, publish, noPush, only };

@@ -368,9 +368,11 @@ export const CallMMetaSchema = z.object({
   meta_title_en: z.string().max(90).optional().default(''),
   meta_desc_fr: z.string().min(50).max(220),
   meta_desc_en: z.string().max(240).optional().default(''),
-  // Slight headroom over the prompt's 5-6 directive — the LLM
-  // occasionally proposes 7 sections when the kind is rich (e.g. Paris).
-  section_plan: z.array(SectionPlanItemSchema).min(3).max(8),
+  // Headroom over the prompt's 5-6 directive — the LLM occasionally
+  // proposes up to ~10 sections on rich kinds (Paris, EAU). We accept the
+  // overflow here and truncate to 8 downstream (cf. generateRankingV2)
+  // rather than hard-failing the whole generation on a benign over-shoot.
+  section_plan: z.array(SectionPlanItemSchema).min(3).max(14),
 });
 
 // Call M-intro — focused intro + outro (no other concerns).
@@ -598,7 +600,7 @@ function buildPromptCallEBatch(
   lines.push('');
   lines.push('### MINIMUMS IMPÉRATIFS (par entrée)');
   lines.push(
-    '- **`justification_fr` : MINIMUM 130 mots, idéal 160-200 mots**. Argumentaire éditorial étoffé.',
+    '- **`justification_fr` : MINIMUM 130 mots, idéal 150-180 mots, MAXIMUM 190 mots (≤ 1150 caractères, contrainte stricte)**. Argumentaire éditorial étoffé mais jamais au-delà de 1150 caractères.',
   );
   lines.push(
     '- `badge_fr` (optionnel, ≤ 60 chars) : ex "Le sacre absolu", "Mention spa", "Coup de cœur famille".',
@@ -861,29 +863,59 @@ export async function callLlm<S extends z.ZodTypeAny>(
   schema: S,
   label: string,
 ): Promise<z.infer<S>> {
-  const result = await client.call({
-    systemPrompt,
-    userPrompt,
-    temperature: 0.55,
-    maxOutputTokens: 16000,
-    responseFormat: 'json',
-  });
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(result.content);
-  } catch (err) {
-    throw new Error(
-      `[${label}] non-JSON output: ${(err as Error).message}. First 300 chars: ${result.content.slice(0, 300)}`,
-    );
+  // At ~5000 LLM calls across the full matrix regeneration, transient
+  // JSON / schema drift (truncated output, an extra array element, a
+  // missing optional) is statistically certain. A single re-call at the
+  // same temperature almost always lands a valid payload, so we retry up
+  // to 3 attempts before surfacing the failure to the bulk runner. The
+  // corrective hint is appended on retries to nudge the model. Cf.
+  // `.cursor/skills/llm-output-robustness/SKILL.md` (retry strategy).
+  const MAX_ATTEMPTS = 3;
+  let lastError = '';
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const userWithHint =
+      attempt === 1
+        ? userPrompt
+        : `${userPrompt}\n\n---\nIMPORTANT (tentative ${attempt}/${MAX_ATTEMPTS}) : la sortie précédente était invalide (${lastError}). Réponds UNIQUEMENT avec un objet JSON strictement conforme au schéma demandé, sans texte autour.`;
+    let content: string;
+    try {
+      const result = await client.call({
+        systemPrompt,
+        userPrompt: userWithHint,
+        temperature: 0.55,
+        maxOutputTokens: 16000,
+        responseFormat: 'json',
+      });
+      content = result.content;
+    } catch (err) {
+      lastError = `call error: ${(err as Error).message}`;
+      if (attempt === MAX_ATTEMPTS) throw new Error(`[${label}] ${lastError}`);
+      continue;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch (err) {
+      lastError = `non-JSON: ${(err as Error).message}`;
+      if (attempt === MAX_ATTEMPTS) {
+        throw new Error(
+          `[${label}] non-JSON output after ${MAX_ATTEMPTS} attempts. First 300 chars: ${content.slice(0, 300)}`,
+        );
+      }
+      continue;
+    }
+
+    const validation = schema.safeParse(parsed);
+    if (validation.success) return validation.data as z.infer<S>;
+
+    lastError = validation.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    if (attempt === MAX_ATTEMPTS) {
+      throw new Error(`[${label}] schema-fail after ${MAX_ATTEMPTS} attempts:\n${lastError}`);
+    }
   }
-  const validation = schema.safeParse(parsed);
-  if (!validation.success) {
-    const issues = validation.error.issues
-      .map((i) => `- ${i.path.join('.')}: ${i.message}`)
-      .join('\n');
-    throw new Error(`[${label}] schema-fail:\n${issues}`);
-  }
-  return validation.data as z.infer<S>;
+  // Unreachable — the loop either returns or throws on the last attempt.
+  throw new Error(`[${label}] exhausted retries`);
 }
 
 export async function runWithConcurrency<T, R>(
@@ -1038,9 +1070,29 @@ function postValidateFactualSummary(
   return { factual_summary_fr: fr, factual_summary_en: en };
 }
 
+// DB CHECK constraint `editorial_ranking_entries_justification_fr_ck`:
+// 40 ≤ char_length ≤ 1200. The LLM occasionally over-produces (160-200
+// words ≈ 1300+ chars), which fails the whole push. Clamp at a sentence
+// boundary just under the cap rather than rejecting the batch.
+const JUSTIFICATION_MAX = 1200;
+
+function clampJustification(value: string, slug: string, rank: number): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= JUSTIFICATION_MAX) return trimmed;
+  const head = trimmed.slice(0, JUSTIFICATION_MAX);
+  // Backtrack to the last sentence terminator so we don't cut mid-phrase.
+  const lastStop = Math.max(head.lastIndexOf('. '), head.lastIndexOf('! '), head.lastIndexOf('? '));
+  const cut = lastStop >= 600 ? head.slice(0, lastStop + 1) : head.replace(/\s+\S*$/, '');
+  console.warn(
+    `  ⚠ [${slug}] justification rank ${rank} clamped ${trimmed.length} → ${cut.length} chars (DB cap ${JUSTIFICATION_MAX}).`,
+  );
+  return cut.trim();
+}
+
 function postValidateEntries(
   entries: ReadonlyArray<z.infer<typeof EntrySchema>>,
   eligible: ReadonlyArray<HotelCatalogRow>,
+  slug: string,
 ): z.infer<typeof EntrySchema>[] {
   const known = new Set(eligible.map((h) => h.id));
   const seenIds = new Set<string>();
@@ -1055,7 +1107,13 @@ function postValidateEntries(
     if (seenRanks.has(e.rank)) continue;
     seenIds.add(e.hotel_id);
     seenRanks.add(e.rank);
-    out.push(e);
+    out.push({
+      ...e,
+      justification_fr: clampJustification(e.justification_fr, slug, e.rank),
+      justification_en: e.justification_en
+        ? clampJustification(e.justification_en, slug, e.rank)
+        : e.justification_en,
+    });
   }
   out.sort((a, b) => a.rank - b.rank);
   return out.map((e, idx) => ({ ...e, rank: idx + 1 }));
@@ -1142,9 +1200,11 @@ export async function generateRankingV2(
     ),
   ]);
 
-  // Normalize section plan keys (unique anchors).
+  // Normalize section plan keys (unique anchors). Truncate to 8 — the
+  // schema tolerates LLM over-production (up to 14) but the page contract
+  // is ≤ 8 editorial sections, and each extra section is one more LLM call.
   const seenKeys = new Set<string>();
-  const plan = callMMeta.section_plan.map((p) => {
+  const plan = callMMeta.section_plan.slice(0, 8).map((p) => {
     let k = p.key;
     let suffix = 1;
     while (seenKeys.has(k)) {
@@ -1213,7 +1273,7 @@ export async function generateRankingV2(
     };
   });
 
-  const cleanedEntries = postValidateEntries(entriesRaw, eligible);
+  const cleanedEntries = postValidateEntries(entriesRaw, eligible, seed.slug);
   if (cleanedEntries.length < 3) {
     throw new Error(`Only ${cleanedEntries.length} valid entries after dedupe.`);
   }

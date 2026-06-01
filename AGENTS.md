@@ -113,14 +113,33 @@ across the full catalogue before touching photos** (`.cursor/skills/photo-pipeli
 between a written-content chantier and a photo chantier, **pick the
 written one**.
 
-Catalogue snapshot (refreshed 2026-05-31 — post Track A geographic rankings):
+Catalogue snapshot (refreshed 2026-06-01 — post matrix re-scan + bulk ranking generation):
 
 | Surface              | Total | Published | Draft |
 | -------------------- | ----- | --------- | ----- |
 | `hotels`             | 2219  | **2219**  | 0     |
-| `editorial_rankings` | 217   | **217**   | 0     |
+| `editorial_rankings` | 562   | **549**   | 13    |
 | `editorial_guides`   | 99    | **99**    | 0     |
 | `itineraries`        | 20    | 20        | 0     |
+
+**2026-06-01 — ranking matrix re-scan + bulk generation (217 → 549 published).**
+After the catalogue flip (2219 hotels), the eligibility matrix had never been
+re-run, so most eligible city/theme/quartier rankings were missing. Workflow:
+(1) `inspect-matrix` → 449 eligible seeds (≥3 hotels); (2) reconciliation script
+vs the 217 existing rows → 345 net-new, 28 thin, 28 published-but-empty orphans;
+(3) **bridged the 28 orphans** into `combinator.ts` `MANUAL_OVERRIDES` (15 had
+≥3 hotels and were generated; 13 had <3 — incl. `4-etoiles-france`=0 since the
+catalogue is ~100% palace/5★ — and were **unpublished**); (4) generated 360
+net-new + regenerated 28 thin via `run-rankings-v2-bulk.ts` in waves
+(`--only-file=…`, concurrency 3-4). A transient network outage killed ~71
+mid-run; the per-slug disk cache (`data/rankings-cache/`) + a DB reconciliation
+(`wanted` vs `present`) made recovery lossless (re-run skips cached, regenerates
+only the gaps). Robustness fix capitalised: **clamp `justification_fr/_en` ≤ 1200
+chars** at a sentence boundary in `postValidateEntries` (DB CHECK
+`editorial_ranking_entries_justification_fr_ck` = 40..1200) — the LLM's 160-200
+word target occasionally overshot and failed the whole push. The 13 unpublished
+zero-inventory slugs are the only remaining drafts. Walk-through validated on
+prod (`/classement/meilleurs-palaces-provence` + `/classements` index).
 
 **Catalogue 100% published across all 4 editorial surfaces** as of
 2026-05-31 17:58. Last remaining drafts (Quartier Latin, Tours, Vexin)
@@ -494,7 +513,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-05-31: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 217 rankings (all published), 99 editorial guides (all published), 20 itineraries (all published). Catalogue is 100% published across all 4 editorial surfaces — zero drafts. Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-06-01: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 549 rankings published (562 total — 13 zero-inventory slugs intentionally unpublished after the matrix re-scan), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

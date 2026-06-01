@@ -582,6 +582,389 @@ const MANUAL_OVERRIDES: readonly ManualOverride[] = [
     },
     kind: 'geographic',
   },
+
+  // ─── 2026-06-01 — Bridge of 28 published-but-empty scaffold slugs.
+  // These generic `meilleurs-hotels-<lieu>` (type=all, no theme) pages
+  // existed in Supabase as published rows with ZERO entries because the
+  // auto matrix skips `type=all` and never emits the bare-lieu form.
+  // Pinning them as MANUAL_OVERRIDES (slug verbatim + existing LieuDef)
+  // lets the bulk runner generate real entries against the 2219-hotel
+  // catalogue. Eligibility relies on the LieuDef already registered in
+  // `axes.ts` (cities, clusters, Paris arrondissements with postal_code
+  // prefixes). Slugs with < MIN_ELIGIBLE hotels stay underfilled and are
+  // unpublished separately rather than generated empty.
+
+  // Generic city / region / cluster rankings (all stars, no theme).
+  {
+    slug: 'meilleurs-hotels-nice',
+    titleFr: 'Les meilleurs hôtels de Nice',
+    titleEn: 'The best hotels in Nice',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'nice', label: 'Nice' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-lyon',
+    titleFr: 'Les meilleurs hôtels de Lyon',
+    titleEn: 'The best hotels in Lyon',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'lyon', label: 'Lyon' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-bordeaux',
+    titleFr: 'Les meilleurs hôtels de Bordeaux',
+    titleEn: 'The best hotels in Bordeaux',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'bordeaux', label: 'Bordeaux' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-dijon',
+    titleFr: 'Les meilleurs hôtels de Dijon',
+    titleEn: 'The best hotels in Dijon',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'dijon', label: 'Dijon' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-colmar',
+    titleFr: 'Les meilleurs hôtels de Colmar',
+    titleEn: 'The best hotels in Colmar',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'colmar', label: 'Colmar' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-provence',
+    titleFr: 'Les meilleurs hôtels de Provence',
+    titleEn: 'The best hotels in Provence',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'provence', label: 'Provence' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-champagne',
+    titleFr: 'Les meilleurs hôtels en Champagne',
+    titleEn: 'The best hotels in Champagne',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'champagne', label: 'Champagne' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-sologne',
+    titleFr: 'Les meilleurs hôtels de Sologne',
+    titleEn: 'The best hotels in Sologne',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'sologne', label: 'Sologne' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-alpilles',
+    titleFr: 'Les meilleurs hôtels des Alpilles',
+    titleEn: 'The best hotels in the Alpilles',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'alpilles', label: 'Alpilles' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-ile-de-france',
+    titleFr: "Les meilleurs hôtels d'Île-de-France",
+    titleEn: 'The best hotels in Île-de-France',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'region', slug: 'ile-de-france', label: 'Île-de-France' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-cote-atlantique',
+    titleFr: 'Les meilleurs hôtels de la Côte Atlantique',
+    titleEn: 'The best hotels on the Atlantic Coast',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'cote-atlantique', label: 'Côte Atlantique' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-chantilly',
+    titleFr: 'Les meilleurs hôtels de Chantilly',
+    titleEn: 'The best hotels in Chantilly',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'chantilly', label: 'Chantilly' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-lac-leman',
+    titleFr: 'Les meilleurs hôtels du Lac Léman',
+    titleEn: 'The best hotels on Lake Geneva',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'lac-leman', label: 'Lac Léman' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-sud-ouest',
+    titleFr: 'Les meilleurs hôtels du Sud-Ouest',
+    titleEn: 'The best hotels in South-West France',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'cluster', slug: 'sud-ouest', label: 'Sud-Ouest' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // Paris named quartiers (all stars, eligibility via postal_code).
+  {
+    slug: 'meilleurs-hotels-tour-eiffel',
+    titleFr: 'Les meilleurs hôtels près de la Tour Eiffel (Paris)',
+    titleEn: 'The best hotels near the Eiffel Tower (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'tour-eiffel', label: 'Tour Eiffel (Paris 7e)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-bastille',
+    titleFr: 'Les meilleurs hôtels du quartier Bastille (Paris)',
+    titleEn: 'The best hotels around Bastille (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'bastille', label: 'Bastille (Paris 11e–12e)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-bercy',
+    titleFr: 'Les meilleurs hôtels de Bercy (Paris)',
+    titleEn: 'The best hotels in Bercy (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'bercy', label: 'Bercy (Paris 12e)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-gare-de-lyon',
+    titleFr: 'Les meilleurs hôtels près de la Gare de Lyon (Paris)',
+    titleEn: 'The best hotels near Gare de Lyon (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'gare-de-lyon', label: 'Gare de Lyon (Paris 12e)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-montmartre',
+    titleFr: 'Les meilleurs hôtels de Montmartre (Paris)',
+    titleEn: 'The best hotels in Montmartre (Paris)',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'montmartre', label: 'Montmartre (Paris 18e)' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // Paris arrondissements (generic, all stars).
+  {
+    slug: 'meilleurs-hotels-paris-2',
+    titleFr: 'Les meilleurs hôtels du 2e arrondissement de Paris',
+    titleEn: 'The best hotels in the 2nd arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-2', label: 'Paris 2e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-5',
+    titleFr: 'Les meilleurs hôtels du 5e arrondissement de Paris',
+    titleEn: 'The best hotels in the 5th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-5', label: 'Paris 5e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-12',
+    titleFr: 'Les meilleurs hôtels du 12e arrondissement de Paris',
+    titleEn: 'The best hotels in the 12th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-12', label: 'Paris 12e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-13',
+    titleFr: 'Les meilleurs hôtels du 13e arrondissement de Paris',
+    titleEn: 'The best hotels in the 13th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-13', label: 'Paris 13e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-15',
+    titleFr: 'Les meilleurs hôtels du 15e arrondissement de Paris',
+    titleEn: 'The best hotels in the 15th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-15', label: 'Paris 15e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-16',
+    titleFr: 'Les meilleurs hôtels du 16e arrondissement de Paris',
+    titleEn: 'The best hotels in the 16th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-16', label: 'Paris 16e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-17',
+    titleFr: 'Les meilleurs hôtels du 17e arrondissement de Paris',
+    titleEn: 'The best hotels in the 17th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-17', label: 'Paris 17e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+  {
+    slug: 'meilleurs-hotels-paris-18',
+    titleFr: 'Les meilleurs hôtels du 18e arrondissement de Paris',
+    titleEn: 'The best hotels in the 18th arrondissement of Paris',
+    axes: {
+      types: ['all'],
+      lieu: { scope: 'arrondissement', slug: 'paris-18', label: 'Paris 18e' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'geographic',
+  },
+
+  // National 4-star pillar.
+  {
+    slug: 'meilleurs-hotels-4-etoiles-france',
+    titleFr: 'Les meilleurs hôtels 4 étoiles de France',
+    titleEn: 'The best 4-star hotels in France',
+    axes: {
+      types: ['4-etoiles'],
+      lieu: { scope: 'france', slug: 'france', label: 'France' },
+      themes: [],
+      occasions: [],
+      saison: 'toute-annee',
+    },
+    kind: 'best_of',
+  },
 ];
 
 // ─── Combinator entry point ──────────────────────────────────────────────
