@@ -159,10 +159,17 @@ export default async function DestinationDirectoryPage({
           name: c.name,
           url: `${origin}${getPathname({
             locale,
-            // `guideSlug` is non-null in this branch — the filter above
-            // narrows the type for humans, but TS can't see through
-            // `Array.prototype.filter`, hence the assertion-free fallback.
-            href: { pathname: '/guide/[citySlug]', params: { citySlug: c.guideSlug ?? '' } },
+            // `guideSlug` is non-null in this branch (filtered above).
+            // `guideRoute` decides whether it resolves to a hand-built
+            // `/guide/<slug>` page or a DB-backed `/destination/<slug>`
+            // standalone guide.
+            href:
+              c.guideRoute === 'guide'
+                ? { pathname: '/guide/[citySlug]', params: { citySlug: c.guideSlug ?? '' } }
+                : {
+                    pathname: '/destination/[citySlug]',
+                    params: { citySlug: c.guideSlug ?? '' },
+                  },
           })}`,
         })),
       ],
@@ -341,10 +348,17 @@ export default async function DestinationDirectoryPage({
                 {guidedCountries.map((c) => (
                   <li key={c.code}>
                     <Link
-                      href={{
-                        pathname: '/guide/[citySlug]',
-                        params: { citySlug: c.guideSlug ?? '' },
-                      }}
+                      href={
+                        c.guideRoute === 'guide'
+                          ? {
+                              pathname: '/guide/[citySlug]',
+                              params: { citySlug: c.guideSlug ?? '' },
+                            }
+                          : {
+                              pathname: '/destination/[citySlug]',
+                              params: { citySlug: c.guideSlug ?? '' },
+                            }
+                      }
                       className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
                     >
                       <span>

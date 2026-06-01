@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
@@ -24,6 +24,7 @@ import { getPathname } from '@/i18n/navigation';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
+import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getGuideBySlug } from '@/server/guides/get-guide-by-slug';
@@ -183,11 +184,20 @@ export async function generateMetadata({
         robots: { index: false, follow: true },
       };
     }
-    // Phase 1.5 — region/cluster guides have no city destination row but
-    // carry a full bilingual long-read. Serve their metadata here so the
-    // standalone guide render (default export) is indexable + canonical.
+    // Phase 1.5 — region/cluster/country guides have no city destination
+    // row but carry a full bilingual long-read. Serve their metadata here
+    // so the standalone guide render (default export) is indexable +
+    // canonical. The `sections.length > 0` gate keeps FR-only `guide-*`
+    // country rows (editorial_sections only, no renderable `sections`) out
+    // until their Tranche 2 conversion. Hand-built `/guide/<country>` slugs
+    // are excluded — the default export 308-redirects them.
     const guide = await getGuideBySlug(citySlug);
-    if (guide !== null && (guide.scope === 'region' || guide.scope === 'cluster')) {
+    if (
+      guide !== null &&
+      guide.sections.length > 0 &&
+      (guide.scope === 'region' || guide.scope === 'cluster' || guide.scope === 'country') &&
+      !isHandBuiltCountrySlug(citySlug)
+    ) {
       const gName = pickByLocale(locale, guide.name_fr, guide.name_en ?? guide.name_fr);
       const gTitle =
         pickByLocale(locale, guide.meta_title_fr ?? '', guide.meta_title_en ?? '').length > 0
@@ -262,6 +272,19 @@ export default async function DestinationHubPage({
   const locale = raw;
   setRequestLocale(locale);
 
+  // Hand-built country guides keep `/guide/<country>` canonical (richer,
+  // natively bilingual React pages). 308-redirect `/destination/<slug>`
+  // → `/guide/<slug>` so the two URLs never compete in the SERP and any
+  // inbound link to the destination form resolves to the canonical page.
+  if (isHandBuiltCountrySlug(citySlug)) {
+    permanentRedirect(
+      getPathname({
+        locale,
+        href: { pathname: '/guide/[citySlug]', params: { citySlug } },
+      }),
+    );
+  }
+
   const destination = await getDestinationBySlug(citySlug, locale);
   if (destination === null) {
     // On-menu slug with zero published hotels → empty state (noindex
@@ -271,15 +294,20 @@ export default async function DestinationHubPage({
       const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
       return <DestinationEmptyState locale={locale} cityLabel={cityLabel} />;
     }
-    // Phase 1.5 — region/cluster editorial guide with no city hub: render
-    // it as a standalone long-read instead of 404ing (these carry 10-12
-    // bilingual sections + TOC + FAQ). City guides keep their hub-inlined
-    // render below; country scope stays out (8 hand-built `/guide/<x>`
-    // pages remain canonical — handled separately).
+    // Phase 1.5 — region/cluster/country editorial guide with no city hub:
+    // render it as a standalone long-read instead of 404ing (these carry
+    // 9-12 bilingual sections + TOC + FAQ). City guides keep their
+    // hub-inlined render below. The `sections.length > 0` gate keeps the
+    // FR-only `guide-*` country rows (editorial_sections only) out until
+    // their Tranche 2 conversion populates `sections`; hand-built country
+    // slugs already 308-redirected above.
     const standaloneGuide = await getGuideBySlug(citySlug);
     if (
       standaloneGuide !== null &&
-      (standaloneGuide.scope === 'region' || standaloneGuide.scope === 'cluster')
+      standaloneGuide.sections.length > 0 &&
+      (standaloneGuide.scope === 'region' ||
+        standaloneGuide.scope === 'cluster' ||
+        standaloneGuide.scope === 'country')
     ) {
       const origin = siteOrigin();
       const pageUrl = `${origin}${getPathname({
