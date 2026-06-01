@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
 import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
 import { CityGuideArticle } from '@/components/destination/city-guide-article';
+import { StandaloneGuidePage } from '@/components/destination/standalone-guide-page';
 import type { EditorialLink, EditorialLinkMap } from '@/components/editorial/enriched-text';
 import { TocSidebar } from '@/components/editorial/toc-sidebar';
 import {
@@ -182,6 +183,42 @@ export async function generateMetadata({
         robots: { index: false, follow: true },
       };
     }
+    // Phase 1.5 — region/cluster guides have no city destination row but
+    // carry a full bilingual long-read. Serve their metadata here so the
+    // standalone guide render (default export) is indexable + canonical.
+    const guide = await getGuideBySlug(citySlug);
+    if (guide !== null && (guide.scope === 'region' || guide.scope === 'cluster')) {
+      const gName = pickByLocale(locale, guide.name_fr, guide.name_en ?? guide.name_fr);
+      const gTitle =
+        pickByLocale(locale, guide.meta_title_fr ?? '', guide.meta_title_en ?? '').length > 0
+          ? pickByLocale(locale, guide.meta_title_fr ?? '', guide.meta_title_en ?? '')
+          : pickByLocale(locale, `${gName} — Guide du Concierge`, `${gName} — Concierge guide`);
+      const gDescRaw = pickByLocale(locale, guide.meta_desc_fr ?? '', guide.meta_desc_en ?? '');
+      const gDesc =
+        gDescRaw.length > 0
+          ? gDescRaw
+          : pickByLocale(locale, guide.summary_fr, guide.summary_en ?? guide.summary_fr);
+      const buildGuideCanonicalPath = (l: Locale): string =>
+        getPathname({
+          locale: l,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug } },
+        });
+      return {
+        title: gTitle,
+        description: gDesc,
+        alternates: {
+          canonical: buildGuideCanonicalPath(locale),
+          languages: buildHreflangAlternates(buildGuideCanonicalPath),
+        },
+        openGraph: {
+          type: 'article',
+          title: gTitle,
+          description: gDesc,
+          locale: ogLocale(locale),
+          siteName: 'MyConciergeHotel',
+        },
+      };
+    }
     return { robots: { index: false, follow: false } };
   }
 
@@ -228,12 +265,41 @@ export default async function DestinationHubPage({
   const destination = await getDestinationBySlug(citySlug, locale);
   if (destination === null) {
     // On-menu slug with zero published hotels → empty state (noindex
-    // already set in generateMetadata). Off-menu slug → hard 404.
+    // already set in generateMetadata).
     if (KNOWN_MENU_CITY_SLUGS.has(citySlug)) {
       const entry = ALL_MENU_NAV_ENTRIES.find((e) => e.slug === citySlug);
       const cityLabel = entry !== undefined ? pickEntryLabel(entry, locale) : citySlug;
       return <DestinationEmptyState locale={locale} cityLabel={cityLabel} />;
     }
+    // Phase 1.5 — region/cluster editorial guide with no city hub: render
+    // it as a standalone long-read instead of 404ing (these carry 10-12
+    // bilingual sections + TOC + FAQ). City guides keep their hub-inlined
+    // render below; country scope stays out (8 hand-built `/guide/<x>`
+    // pages remain canonical — handled separately).
+    const standaloneGuide = await getGuideBySlug(citySlug);
+    if (
+      standaloneGuide !== null &&
+      (standaloneGuide.scope === 'region' || standaloneGuide.scope === 'cluster')
+    ) {
+      const origin = siteOrigin();
+      const pageUrl = `${origin}${getPathname({
+        locale,
+        href: { pathname: '/destination/[citySlug]', params: { citySlug } },
+      })}`;
+      const nonce = (await headers()).get('x-nonce') ?? undefined;
+      const linkMap = await buildEditorialLinkMap({ excludeGuideSlug: standaloneGuide.slug });
+      return (
+        <StandaloneGuidePage
+          guide={standaloneGuide}
+          locale={locale}
+          linkMap={linkMap}
+          pageUrl={pageUrl}
+          origin={origin}
+          nonce={nonce}
+        />
+      );
+    }
+    // Off-menu, no guide → hard 404 (preserves crawl budget).
     notFound();
   }
 
