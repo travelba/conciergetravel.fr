@@ -1,0 +1,110 @@
+{
+  "slug_fr": "maldives-atoll-hopping",
+  "slug_en": "maldives-atoll-hopping",
+  "priority": "P1",
+  "destination_country": "Maldives",
+  "destination_region": "Atolls de Baa, Noonu, Malé Sud et Raa",
+  "destination_city": "Atoll de Baa, Atoll de Noonu, Atoll de Malé Sud, Atoll de Raa",
+  "themes": ["luxe", "bien-etre", "nature"],
+  "duration_min_days": 13,
+  "duration_max_days": 13,
+  "travel_style": "luxe",
+  "season": "hiver",
+  "target_word_count": 2400,
+  "meta_title_fr_hint": "Maldives Atoll Hopping 13 jours — Soneva Fushi, Cheval Blanc, Waldorf Astoria, Joali | MyConciergeHotel",
+  "meta_desc_fr_hint": "Maldives atoll hopping, 13 jours : Soneva Fushi (Baa), Cheval Blanc Randheli (Noonu), Waldorf Astoria Ithaafushi (Malé Sud), Joali (Raa). Transferts hydravion Concierge.",
+  "hotel_slugs_target": [
+    "soneva-fushi",
+    "cheval-blanc-randheli",
+    "waldorf-astoria-maldives-ithaafushi",
+    "joali-maldives"
+  ],
+  "hotel_fallback_note": "Tous les hôtels cibles sont des resorts maldiviens présents dans la table hotels, chacun sur un atoll distinct.",
+  "related_guide_slugs_target": [],
+  "related_ranking_slugs_target": [],
+  "related_itinerary_slugs_target": ["maldives-luxe-7-jours", "bali-lune-de-miel-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 3,
+      "city": "Atoll de Baa",
+      "hotel_slug_hint": "soneva-fushi",
+      "key_pois": [
+        "Réserve de biosphère UNESCO de l'atoll de Baa",
+        "Hanifaru Bay (raies manta)",
+        "Observatoire astronomique du resort",
+        "Cinéma plein air Cinema Paradiso"
+      ],
+      "step_angle": "Baa pieds nus — Soneva Fushi a inventé le luxe pieds nus aux Maldives, villas de jardin sur une île boisée de l'atoll de Baa, réserve de biosphère UNESCO. Snorkeling avec les raies manta à Hanifaru Bay en saison, observatoire astronomique le soir, glacier et chocolaterie en accès libre",
+      "title_fr_hint": "Jours 1-3 : Atoll de Baa — Soneva Fushi et le luxe pieds nus",
+      "title_en_hint": "Days 1-3: Baa Atoll — Soneva Fushi and barefoot luxury"
+    },
+    {
+      "step": 2,
+      "duration_days": 3,
+      "city": "Atoll de Noonu",
+      "hotel_slug_hint": "cheval-blanc-randheli",
+      "key_pois": [
+        "Lagon privé de Randheli",
+        "Spa Guerlain sur île dédiée",
+        "Plongée sur les récifs du Noonu",
+        "Maison de l'art de vivre LVMH"
+      ],
+      "step_angle": "Noonu couture — Cheval Blanc Randheli porte la signature LVMH sur l'atoll de Noonu, 45 villas dessinées par Jean-Michel Gathy. Spa Guerlain sur sa propre île reliée en bateau, déjeuner au Diptyque les pieds dans le sable. Hydravion privé depuis Malé en 40 minutes",
+      "title_fr_hint": "Jours 4-6 : Atoll de Noonu — Cheval Blanc Randheli, la couture LVMH",
+      "title_en_hint": "Days 4-6: Noonu Atoll — Cheval Blanc Randheli, LVMH couture"
+    },
+    {
+      "step": 3,
+      "duration_days": 3,
+      "city": "Atoll de Malé Sud",
+      "hotel_slug_hint": "waldorf-astoria-maldives-ithaafushi",
+      "key_pois": [
+        "Île privée Ithaafushi",
+        "Onze restaurants et bars du resort",
+        "Spa flottant",
+        "Récif maison de South Malé"
+      ],
+      "step_angle": "Malé Sud panoramique — Waldorf Astoria Ithaafushi déploie trois îles reliées sur l'atoll de Malé Sud, transfert direct en hydravion ou vedette depuis l'aéroport. Onze tables dont une cave immergée, villa privée Ithaafushi The Private Island pour les grandes familles. Récif maison accessible à la nage",
+      "title_fr_hint": "Jours 7-9 : Atoll de Malé Sud — Waldorf Astoria Ithaafushi",
+      "title_en_hint": "Days 7-9: South Malé Atoll — Waldorf Astoria Ithaafushi"
+    },
+    {
+      "step": 4,
+      "duration_days": 4,
+      "city": "Atoll de Raa",
+      "hotel_slug_hint": "joali-maldives",
+      "key_pois": [
+        "Parcours d'art immersif Joali",
+        "Maison de l'arbre Manta Ray",
+        "Spa Espace par Joali",
+        "Récif corallien de l'atoll de Raa"
+      ],
+      "step_angle": "Raa artistique — Joali Maldives est le premier resort d'art des Maldives sur l'atoll de Raa, œuvres installées dans la nature, dont la Maison de l'arbre Manta Ray surplombant le lagon. Villas avec toboggan vers la mer, spa Espace, hydravion depuis Malé en 45 minutes. Finale contemplative du circuit",
+      "title_fr_hint": "Jours 10-13 : Atoll de Raa — Joali, le resort d'art maldivien",
+      "title_en_hint": "Days 10-13: Raa Atoll — Joali, the Maldivian art resort"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment faire de l'atoll hopping aux Maldives entre plusieurs resorts ?",
+  "aeo_answer_fr_hint": "Treize jours entre quatre atolls maldiviens : Soneva Fushi à Baa (3 nuits, pieds nus), Cheval Blanc Randheli à Noonu (3 nuits, LVMH), Waldorf Astoria Ithaafushi à Malé Sud (3 nuits), Joali à Raa (4 nuits, art). Transferts en hydravion privé entre chaque atoll. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Combien de jours faut-il pour de l'atoll hopping aux Maldives ?",
+    "Comment se déplacer entre les atolls des Maldives ?",
+    "Quelle est la meilleure période pour visiter les Maldives ?",
+    "Peut-on voir les raies manta à Hanifaru Bay toute l'année ?",
+    "Quel resort maldivien choisir pour une lune de miel ?",
+    "Quel budget prévoir pour 13 jours aux Maldives en resort de luxe ?",
+    "L'atoll hopping convient-il à un voyage en famille ?",
+    "Combien coûtent les transferts en hydravion aux Maldives ?",
+    "Quelle différence entre les atolls de Baa, Noonu, Malé Sud et Raa ?",
+    "Peut-on combiner plage et plongée sur ce circuit maldivien ?"
+  ],
+  "concierge_secret_hint": "Les hydravions maldiviens ne volent qu'à la lumière du jour : caler les transferts entre atolls en milieu de matinée évite les attentes au salon de Malé et garde l'après-midi libre à l'arrivée. À Soneva Fushi, demander la sortie snorkeling à Hanifaru Bay dès le premier jour de pleine lune entre mai et novembre — c'est le pic d'agrégation des raies manta, et le nombre de bateaux est plafonné par la réserve UNESCO, donc les créneaux partent vite.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer l'itinéraire maldives-luxe-7-jours (mono-resort). Angle unique = atoll hopping multi-resort sur quatre atolls distincts (Baa UNESCO + Noonu LVMH + Malé Sud + Raa art) avec focus transferts hydravion et signatures de marque contrastées. L'itinéraire 7 jours reste l'option courte mono-île.",
+  "sources_to_cite": [
+    "UNESCO — Baa Atoll Biosphere Reserve",
+    "Maldives Marine Research Institute — Hanifaru Bay",
+    "Soneva, LVMH, Hilton, Joali — sites officiels",
+    "Maldives Tourism"
+  ]
+}

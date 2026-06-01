@@ -88,6 +88,27 @@ export async function resolveHotelsForBrief(
   }
 }
 
+export async function resolveRankingIdsBySlug(slugs: readonly string[]): Promise<string[]> {
+  if (slugs.length === 0) return [];
+  const client = await createPgClient();
+  try {
+    const res = await client.query<{ id: string; slug: string }>(
+      `select id, slug from public.editorial_rankings
+       where slug = any($1::text[]) and is_published = true`,
+      [slugs],
+    );
+    const bySlug = new Map(res.rows.map((r) => [r.slug, r.id] as const));
+    const out: string[] = [];
+    for (const slug of slugs) {
+      const id = bySlug.get(slug);
+      if (id !== undefined) out.push(id);
+    }
+    return out;
+  } finally {
+    await client.end();
+  }
+}
+
 export async function pushItinerary(
   itinerary: GeneratedItinerary,
   options: { readonly dryRun?: boolean } = {},

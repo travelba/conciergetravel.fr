@@ -1,0 +1,129 @@
+{
+  "slug_fr": "mediterranee-belmond",
+  "slug_en": "belmond-mediterranean",
+  "priority": "P1",
+  "destination_country": "Italie / Espagne",
+  "destination_region": "Vénétie, Ligurie, Toscane, Côte amalfitaine, Baléares",
+  "destination_city": "Venise, Portofino, Florence, Ravello, Majorque",
+  "themes": ["luxe", "culture", "gastronomie"],
+  "duration_min_days": 15,
+  "duration_max_days": 15,
+  "travel_style": "luxe",
+  "season": "ete",
+  "target_word_count": 2600,
+  "meta_title_fr_hint": "Méditerranée Belmond 15 jours — Venise, Portofino, Florence, Ravello, Majorque | MyConciergeHotel",
+  "meta_desc_fr_hint": "Méditerranée Belmond, 15 jours : Hotel Cipriani Venise, Splendido Portofino, Villa San Michele Florence, Caruso Ravello, La Residencia Majorque. Étapes Concierge.",
+  "hotel_slugs_target": [
+    "belmond-hotel-cipriani",
+    "splendido-a-belmond-hotel-portofino",
+    "belmond-villa-san-michele",
+    "belmond-caruso",
+    "la-residencia-a-belmond-hotel-mallorca"
+  ],
+  "hotel_fallback_note": "Tous les hôtels cibles sont des Belmond présents dans la table hotels. belmond-hotel-cipriani est aliasé vers hotel-cipriani (Venise).",
+  "related_guide_slugs_target": [],
+  "related_ranking_slugs_target": ["top-belmond-hotels-monde"],
+  "related_itinerary_slugs_target": [
+    "toscane-gastronomie-7-jours",
+    "train-orient-express-paris-venise"
+  ],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 3,
+      "city": "Venise — Italie",
+      "hotel_slug_hint": "belmond-hotel-cipriani",
+      "key_pois": [
+        "Place Saint-Marc",
+        "Basilique San Giorgio Maggiore",
+        "Palais des Doges",
+        "Piscine olympique du Cipriani"
+      ],
+      "step_angle": "Venise insulaire — le Belmond Hotel Cipriani occupe la pointe de l'île de la Giudecca, à l'écart de la foule, navette privée vers Saint-Marc en trois minutes. Seule piscine d'eau salée de taille olympique de Venise, jardins clos rares dans la lagune",
+      "title_fr_hint": "Jours 1-3 : Venise — le Cipriani sur la Giudecca, loin de la foule",
+      "title_en_hint": "Days 1-3: Venice — the Cipriani on Giudecca, away from the crowds"
+    },
+    {
+      "step": 2,
+      "duration_days": 3,
+      "city": "Portofino — Italie",
+      "hotel_slug_hint": "splendido-a-belmond-hotel-portofino",
+      "key_pois": [
+        "Piazzetta de Portofino",
+        "Abbaye de San Fruttuoso",
+        "Sentier vers Santa Margherita",
+        "Baie de Paraggi"
+      ],
+      "step_angle": "Ligurie suspendue — le Splendido, ancien monastère du XVIe siècle, domine le golfe de Portofino depuis la colline. Descente en navette vers la piazzetta, déjeuner les pieds dans l'eau au Splendido Mare. Sortie en bateau privé vers l'abbaye de San Fruttuoso le matin",
+      "title_fr_hint": "Jours 4-6 : Portofino — le Splendido au-dessus du golfe ligure",
+      "title_en_hint": "Days 4-6: Portofino — the Splendido above the Ligurian gulf"
+    },
+    {
+      "step": 3,
+      "duration_days": 3,
+      "city": "Florence — Italie",
+      "hotel_slug_hint": "belmond-villa-san-michele",
+      "key_pois": [
+        "Galerie des Offices",
+        "Cathédrale Santa Maria del Fiore",
+        "Collines de Fiesole",
+        "Jardins de Boboli"
+      ],
+      "step_angle": "Florence en surplomb — Villa San Michele, façade attribuée à Michel-Ange, perchée à Fiesole au-dessus de Florence. Navette vers le centre, créneau Offices réservé à l'ouverture 8 h 15 pour éviter la file. Dîner sous la loggia face au Duomo au coucher du soleil",
+      "title_fr_hint": "Jours 7-9 : Florence — Villa San Michele et les collines de Fiesole",
+      "title_en_hint": "Days 7-9: Florence — Villa San Michele and the Fiesole hills"
+    },
+    {
+      "step": 4,
+      "duration_days": 3,
+      "city": "Ravello — Italie",
+      "hotel_slug_hint": "belmond-caruso",
+      "key_pois": [
+        "Villa Rufolo",
+        "Villa Cimbrone",
+        "Côte amalfitaine (Amalfi, Positano)",
+        "Piscine à débordement du Caruso"
+      ],
+      "step_angle": "Côte amalfitaine en hauteur — le Caruso, palais du XIe siècle à Ravello, surplombe la côte à 350 mètres. Piscine à débordement face au golfe de Salerne, l'une des plus photographiées d'Italie. Sortie en bateau privé vers Amalfi et Positano tôt le matin avant la chaleur",
+      "title_fr_hint": "Jours 10-12 : Ravello — le Caruso et la côte amalfitaine d'en haut",
+      "title_en_hint": "Days 10-12: Ravello — the Caruso and the Amalfi Coast from above"
+    },
+    {
+      "step": 5,
+      "duration_days": 3,
+      "city": "Majorque — Espagne",
+      "hotel_slug_hint": "la-residencia-a-belmond-hotel-mallorca",
+      "key_pois": [
+        "Village de Deià",
+        "Sierra de Tramuntana (UNESCO)",
+        "Crique de Cala Deià",
+        "Atelier de tapas et oliveraies"
+      ],
+      "step_angle": "Baléares artistes — La Residencia, deux manoirs du XVIe siècle au cœur de Deià, dans la Sierra de Tramuntana classée UNESCO. Navette vers la crique de Cala Deià pour le déjeuner de poisson grillé. Collection d'art de 800 œuvres dans l'hôtel, oliveraies privées en terrasses",
+      "title_fr_hint": "Jours 13-15 : Majorque — La Residencia à Deià, finale baléare",
+      "title_en_hint": "Days 13-15: Mallorca — La Residencia in Deià, the Balearic finale"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment composer un circuit Belmond en Méditerranée ?",
+  "aeo_answer_fr_hint": "Quinze jours entre cinq Belmond méditerranéens : Hotel Cipriani Venise (3 nuits), Splendido Portofino (3 nuits), Villa San Michele Florence (3 nuits), Caruso Ravello (3 nuits), La Residencia Majorque (3 nuits). Transferts privés voiture et bateau entre chaque étape. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Combien de jours faut-il pour un circuit Belmond en Méditerranée ?",
+    "Quel est le plus beau Belmond d'Italie ?",
+    "Comment rejoindre Portofino depuis Venise ?",
+    "La piscine du Belmond Caruso est-elle réservée aux clients ?",
+    "Quelle est la meilleure période pour ce circuit méditerranéen ?",
+    "Quel budget prévoir pour 15 jours en Belmond Méditerranée ?",
+    "Peut-on visiter les Offices de Florence sans faire la queue ?",
+    "Comment se rendre à Majorque depuis la côte amalfitaine ?",
+    "Ce circuit Belmond convient-il à une lune de miel ?",
+    "Peut-on raccourcir le circuit à trois étapes italiennes ?"
+  ],
+  "concierge_secret_hint": "Au Splendido de Portofino, la table 1 de la terrasse, à l'angle nord, offre la seule vue plongeante sur le golfe sans pilier — la réserver au dîner au moins une semaine avant, le maître d'hôtel la garde pour les résidents qui demandent nommément. Au Caruso de Ravello, la piscine à débordement se vide de ses visiteurs après 17 h : c'est le créneau pour la photo face au golfe de Salerne, lumière dorée et bassin désert.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer l'itinéraire Toscane ni le train Orient-Express Paris-Venise. Angle unique = circuit mono-marque Belmond méditerranéen (lagune Venise + Ligurie + collines Florence + côte amalfitaine + Baléares) avec focus transferts bateau et accès privés. Le classement top-belmond-hotels-monde reste l'autorité sur le palmarès.",
+  "sources_to_cite": [
+    "Belmond — site officiel",
+    "UNESCO — Serra de Tramuntana, Majorque",
+    "Michelin Guide Italie",
+    "Atout France — patrimoine méditerranéen"
+  ]
+}

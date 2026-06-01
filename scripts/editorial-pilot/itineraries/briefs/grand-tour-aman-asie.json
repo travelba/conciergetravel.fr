@@ -1,0 +1,120 @@
+{
+  "slug_fr": "grand-tour-aman-asie",
+  "slug_en": "grand-tour-aman-asia",
+  "priority": "P1",
+  "destination_country": "Japon / Thaïlande / Indonésie / Bhoutan",
+  "destination_region": "Tokyo, Phuket, Java, Bali, Himalaya bhoutanais",
+  "destination_city": "Tokyo, Phuket, Magelang, Bali, Paro",
+  "themes": ["luxe", "culture", "bien-etre"],
+  "duration_min_days": 16,
+  "duration_max_days": 16,
+  "travel_style": "luxe",
+  "season": "automne",
+  "target_word_count": 2600,
+  "meta_title_fr_hint": "Grand Tour Aman en Asie 16 jours — Tokyo, Phuket, Java, Bali, Bhoutan | MyConciergeHotel",
+  "meta_desc_fr_hint": "Grand tour Aman en Asie, 16 jours : Aman Tokyo, Amanpuri Phuket, Amanjiwo Java, Amankila Bali, Amankora Bhoutan. Étapes et transferts privés signés Concierge.",
+  "hotel_slugs_target": ["aman-tokyo", "amanpuri", "amanjiwo", "amankila", "amankora"],
+  "hotel_fallback_note": "Tous les hôtels cibles sont des Aman présents dans la table hotels. Pas de fallback nécessaire.",
+  "related_guide_slugs_target": [],
+  "related_ranking_slugs_target": ["top-aman-hotels-monde"],
+  "related_itinerary_slugs_target": ["japon-luxe-7-jours", "bali-lune-de-miel-10-jours"],
+  "steps_outline": [
+    {
+      "step": 1,
+      "duration_days": 3,
+      "city": "Tokyo — Japon",
+      "hotel_slug_hint": "aman-tokyo",
+      "key_pois": [
+        "Otemachi et Palais Impérial",
+        "Quartier de Ginza",
+        "Sanctuaire Meiji-jingu",
+        "Spa Aman Tokyo (33e étage)"
+      ],
+      "step_angle": "Tokyo vertical — Aman Tokyo occupe les six derniers étages de la tower Otemachi, lobby de 30 mètres de haut en washi et pierre. Spa de 2 500 m² avec bains face au Fuji par temps clair, sessions tôt le matin moins fréquentées",
+      "title_fr_hint": "Jours 1-3 : Tokyo — Aman vertical et calme minéral en plein Otemachi",
+      "title_en_hint": "Days 1-3: Tokyo — vertical Aman calm above Otemachi"
+    },
+    {
+      "step": 2,
+      "duration_days": 3,
+      "city": "Phuket — Thaïlande",
+      "hotel_slug_hint": "amanpuri",
+      "key_pois": [
+        "Plage privée Pansea",
+        "Cap Amanpuri et pavillons thaï",
+        "Sortie en jonque Aman",
+        "Spa holistique Amanpuri"
+      ],
+      "step_angle": "Phuket fondateur — Amanpuri, premier Aman ouvert en 1988, pavillons thaï sur une cocoteraie privée au-dessus de la plage de Pansea. Demander une villa avec piscine côté couchant, sortie en jonque privée vers les îles Similan en matinée",
+      "title_fr_hint": "Jours 4-6 : Phuket — Amanpuri, le berceau de la marque",
+      "title_en_hint": "Days 4-6: Phuket — Amanpuri, the brand's birthplace"
+    },
+    {
+      "step": 3,
+      "duration_days": 3,
+      "city": "Magelang — Java, Indonésie",
+      "hotel_slug_hint": "amanjiwo",
+      "key_pois": [
+        "Temple de Borobudur (UNESCO)",
+        "Volcan Merapi",
+        "Vallée du Kedu",
+        "Temple Mendut"
+      ],
+      "step_angle": "Java spirituel — Amanjiwo fait face à Borobudur, plus grand temple bouddhiste du monde (UNESCO). Accès privé au lever du soleil depuis l'hôtel, avant l'ouverture publique. Dôme central de pierre inspiré du stupa, vue directe sur le sanctuaire et le Merapi",
+      "title_fr_hint": "Jours 7-9 : Java — Amanjiwo face à Borobudur au lever du jour",
+      "title_en_hint": "Days 7-9: Java — Amanjiwo facing Borobudur at dawn"
+    },
+    {
+      "step": 4,
+      "duration_days": 3,
+      "city": "Manggis — Bali, Indonésie",
+      "hotel_slug_hint": "amankila",
+      "key_pois": [
+        "Piscine à débordement trois niveaux",
+        "Plage privée Amankila",
+        "Palais d'eau de Tirta Gangga",
+        "Village de Tenganan"
+      ],
+      "step_angle": "Bali oriental — Amankila domine la mer de Bali sur la côte est, loin de la foule du sud. Piscine signature à trois bassins en cascade face au détroit de Lombok. Plage privée en contrebas, excursion au palais d'eau de Tirta Gangga tôt le matin",
+      "title_fr_hint": "Jours 10-12 : Bali — Amankila et la côte est confidentielle",
+      "title_en_hint": "Days 10-12: Bali — Amankila and the quiet east coast"
+    },
+    {
+      "step": 5,
+      "duration_days": 4,
+      "city": "Paro / Thimphu — Bhoutan",
+      "hotel_slug_hint": "amankora",
+      "key_pois": [
+        "Monastère de Taktshang (Tiger's Nest)",
+        "Vallée de Paro",
+        "Dzong de Punakha",
+        "Vallée de Gangtey"
+      ],
+      "step_angle": "Bhoutan itinérant — Amankora relie cinq lodges dans les vallées de l'Himalaya (Paro, Thimphu, Punakha, Gangtey, Bumthang). Ascension du Tiger's Nest perché à 3 120 m, départ 7 h pour éviter la chaleur et la foule. Forfait quotidien bhoutanais inclus dans le tarif",
+      "title_fr_hint": "Jours 13-16 : Bhoutan — Amankora et l'ascension du Tiger's Nest",
+      "title_en_hint": "Days 13-16: Bhutan — Amankora and the Tiger's Nest climb"
+    }
+  ],
+  "aeo_question_fr_hint": "Comment enchaîner plusieurs hôtels Aman en Asie en un seul voyage ?",
+  "aeo_answer_fr_hint": "Seize jours entre cinq Aman d'Asie : Aman Tokyo (3 nuits, ville verticale), Amanpuri Phuket (3 nuits, plage), Amanjiwo Java (3 nuits, Borobudur), Amankila Bali (3 nuits, côte est), Amankora Bhoutan (4 nuits, Himalaya). Transferts privés et vols intérieurs entre chaque étape. Mis à jour mai 2026.",
+  "faq_questions_to_cover": [
+    "Combien de temps faut-il pour un grand tour Aman en Asie ?",
+    "Quel est le meilleur Aman pour découvrir la marque ?",
+    "Peut-on voir le lever du soleil sur Borobudur depuis l'Amanjiwo ?",
+    "Comment se déroule l'itinérance Amankora au Bhoutan ?",
+    "Quelle est la meilleure période pour ce circuit Aman en Asie ?",
+    "Quel budget prévoir pour un grand tour Aman de 16 jours ?",
+    "Comment organiser les vols entre le Japon, la Thaïlande, l'Indonésie et le Bhoutan ?",
+    "Faut-il un visa pour le Bhoutan depuis la France ?",
+    "Ce circuit Aman convient-il à un voyage en famille ?",
+    "Peut-on raccourcir le grand tour Aman à trois étapes ?"
+  ],
+  "concierge_secret_hint": "À l'Amanjiwo, l'accès privé à Borobudur part de l'hôtel à 4 h 30 : le concierge ouvre une porte latérale réservée aux résidents avant l'arrivée des cars touristiques, on monte au sommet du stupa dans le silence. Au Bhoutan, demander à Amankora de caler l'ascension du Tiger's Nest un jour de semaine hors fête religieuse — le sentier est nettement plus calme et les chevaux pour la première moitié de montée se réservent la veille au lodge de Paro.",
+  "anti_cannibalisation_notes": "Ne pas dupliquer les itinéraires Japon ou Bali existants. Angle unique = grand tour mono-marque Aman transcontinental (ville Tokyo + plage Phuket + temple Java + mer Bali + Himalaya Bhoutan) avec focus accès privés et itinérance Amankora. Le classement top-aman-hotels-monde reste l'autorité sur le palmarès des adresses.",
+  "sources_to_cite": [
+    "Aman Resorts — site officiel",
+    "UNESCO — Borobudur Temple Compounds",
+    "Tourism Council of Bhutan",
+    "Michelin Guide Tokyo"
+  ]
+}
