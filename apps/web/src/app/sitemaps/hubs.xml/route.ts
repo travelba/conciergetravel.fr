@@ -5,6 +5,7 @@ import { buildSitemapXml, type SitemapEntry } from '@mch/seo';
 import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { env } from '@/lib/env';
+import { HAND_BUILT_COUNTRY_GUIDE_SLUGS } from '@/lib/destinations/hand-built-country-guides';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
@@ -99,6 +100,31 @@ export async function GET(): Promise<NextResponse> {
         loc: hrefForLocale('fr'),
         changefreq: 'monthly',
         priority: 0.6,
+        ...(lastmod !== null ? { lastmod } : {}),
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // Phase 1.5 — DB-backed country guides surfaced at `/destination/<slug>`
+    // (`<StandaloneGuidePage>`). Only plain-slug published country guides
+    // are renderable; the legacy `guide-*` rows (editorial_sections only)
+    // and the 8 hand-built `/guide/<country>` pages (listed in staticHubs
+    // below) are excluded so the sitemap never advertises a 404 or a
+    // duplicate of a hand-built page.
+    for (const g of guides) {
+      if (g.scope !== 'country') continue;
+      if (g.slug.startsWith('guide-')) continue;
+      if (HAND_BUILT_COUNTRY_GUIDE_SLUGS.has(g.slug)) continue;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/destination/[citySlug]', params: { citySlug: g.slug } },
+        })}`;
+      const lastmod = g.updatedAt ?? g.reviewedAt;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'monthly',
+        priority: 0.7,
         ...(lastmod !== null ? { lastmod } : {}),
         alternates: buildSitemapAlternates(hrefForLocale),
       });

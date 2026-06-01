@@ -31,10 +31,12 @@ import type { GuideRow } from '@/server/guides/get-guide-by-slug';
  * `<CityGuideArticle>` only renders the section body (single source of
  * truth for the long-read rendering, shared with city guides).
  *
- * Phase 1.5 — surfaces the 21 region/cluster guides previously dark
- * (see AGENTS.md §4bis + ADR-0015). Country scope is wired here too but
- * gated upstream (the 8 hand-built `/guide/<country>` pages stay
- * canonical; FR-only country rows are excluded until their EN pass).
+ * Phase 1.5 — surfaces the 21 region/cluster guides + the DB-backed
+ * country guides previously dark (see AGENTS.md §4bis + ADR-0015). The
+ * 8 hand-built `/guide/<country>` pages stay canonical (their slug is
+ * 308-redirected upstream); the legacy FR-only `guide-*` country rows
+ * are gated out by the `sections.length > 0` check until their Tranche 2
+ * conversion populates a renderable `sections` array.
  */
 interface Props {
   readonly guide: GuideRow;

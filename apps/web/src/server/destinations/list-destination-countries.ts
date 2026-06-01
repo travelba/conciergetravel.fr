@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 
 import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
+import { HAND_BUILT_COUNTRY_GUIDE_BY_CODE } from '@/lib/destinations/hand-built-country-guides';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -29,11 +30,19 @@ export interface InternationalDestinationCard {
   /** Number of published hotels in this country. */
   readonly hotelCount: number;
   /**
-   * Slug of the published country guide, when one exists. The route is
-   * `/<locale>/guide/<slug>` — the consumer composes the URL via
-   * `getPathname` from `@/i18n/navigation`.
+   * Slug of the linkable country guide, when one exists. Resolves to
+   * either a DB-backed editorial guide (rendered at `/destination/<slug>`)
+   * or one of the 8 hand-built `/guide/<slug>` pages — see `guideRoute`.
    */
   readonly guideSlug: string | null;
+  /**
+   * Which route renders `guideSlug`:
+   *  - `'guide'`       → hand-built `/guide/<slug>` (8 polished countries).
+   *  - `'destination'` → DB-backed `<StandaloneGuidePage>` at
+   *                      `/destination/<slug>`.
+   *  - `null`          → no guide (country surfaced via `/hotels` anchor).
+   */
+  readonly guideRoute: 'guide' | 'destination' | null;
 }
 
 const HotelCountryRowSchema = z.object({
@@ -130,7 +139,13 @@ async function fetchPublishedCountryGuides(): Promise<Readonly<Record<string, st
       .from('editorial_guides')
       .select('slug, country_code')
       .eq('is_published', true)
-      .eq('scope', 'country');
+      .eq('scope', 'country')
+      // Exclude the legacy `guide-*` rows: they only carry
+      // `editorial_sections` (no renderable `sections`) so they 404 at
+      // `/destination/<slug>` until their Tranche 2 conversion renames
+      // them to a plain slug. Only plain-slug country guides are
+      // currently linkable at `/destination`.
+      .not('slug', 'like', 'guide-%');
     if (error !== null || !Array.isArray(data)) return {};
     const out: Record<string, string> = {};
     for (const raw of data) {
@@ -167,11 +182,20 @@ export async function listInternationalDestinations(
 
   const cards: InternationalDestinationCard[] = aggregates.map((row) => {
     const name = pickLocalizedText(locale, row.labelFr, row.labelEn) ?? row.code;
+    // Hand-built country pages win over a DB row (the 4 clean rows whose
+    // country also has a hand-built page were unpublished, but we still
+    // route the country to its polished `/guide/<slug>` page).
+    const handBuilt = HAND_BUILT_COUNTRY_GUIDE_BY_CODE[row.code];
+    const dbGuide = guideSlugs[row.code];
+    const guideSlug = handBuilt ?? dbGuide ?? null;
+    const guideRoute: 'guide' | 'destination' | null =
+      handBuilt !== undefined ? 'guide' : dbGuide !== undefined ? 'destination' : null;
     return {
       code: row.code,
       name,
       hotelCount: row.hotelCount,
-      guideSlug: guideSlugs[row.code] ?? null,
+      guideSlug,
+      guideRoute,
     };
   });
 
