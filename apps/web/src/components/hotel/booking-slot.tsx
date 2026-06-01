@@ -17,7 +17,7 @@ interface BookingSlotProps {
 
 /**
  * Single seam between the editorial site (Phase 1) and the booking funnel
- * (Phase 6 — ADR-0024). The fiche always renders `<BookingSlot>` in two
+ * (Phase 6 — ADR-0025). The fiche always renders `<BookingSlot>` in two
  * positions (rail + mobilebar); only this component decides what fills
  * them.
  *

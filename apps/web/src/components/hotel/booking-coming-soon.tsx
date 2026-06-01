@@ -11,7 +11,7 @@ interface BookingComingSoonProps {
  * Passive "booking coming soon" placeholder (Phase 1 — editorial site).
  *
  * The site ships without any reservation funnel until Amadeus / Little
- * are wired in Phase 6 (see ADR-0024 + AGENTS.md §4ter). This component
+ * are wired in Phase 6 (see ADR-0025 + AGENTS.md §4ter). This component
  * occupies the **prime conversion slot** of the fiche (the sticky right
  * rail on desktop) so the future `<BookingWidget>` lands in the exact
  * same, highest-converting location with zero relayout.

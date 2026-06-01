@@ -45,7 +45,7 @@ interface HotelEnBrefProps {
  *     `Hotel.dateModified` mirrors it.
  *
  * Deliberately drops the old `bookingMode` CTA hint: the site is
- * editorial-only until Phase 6 (ADR-0024) and the conversion slot lives
+ * editorial-only until Phase 6 (ADR-0025) and the conversion slot lives
  * in the sticky rail, not in this block.
  *
  * Stable id `#en-bref` — referenced by the Hotel JSON-LD
