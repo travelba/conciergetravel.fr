@@ -185,29 +185,27 @@ export async function HotelEnBref({
       data-aeo
       data-llm-summary
       aria-label={tldr('eyebrow')}
-      className="border-outline-variant bg-surface-container-low mb-16 scroll-mt-24 border p-6 md:p-8"
+      className="border-border bg-muted/5 mb-16 scroll-mt-24 rounded-lg border p-6 md:p-8"
     >
-      <p className="text-primary-heritage text-label-caps tracking-caps mb-3 uppercase">
+      <p className="text-muted mb-3 text-xs font-medium uppercase tracking-wider">
         {tldr('eyebrow')}
       </p>
-      <p className="text-on-surface text-body-lg leading-relaxed">
+      <p className="text-fg text-base leading-relaxed">
         {firstSentence}
         {inventorySentence !== null ? ' ' + inventorySentence + '.' : ''}
       </p>
       <dl className="mt-5 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
         {entries.map((entry) => (
-          <div key={entry.key} className="text-body-md flex flex-col sm:flex-row sm:gap-2">
-            <dt className="text-on-surface-variant shrink-0 font-medium sm:min-w-[8rem]">
-              {entry.label}
-            </dt>
-            <dd className="text-on-surface">{entry.value}</dd>
+          <div key={entry.key} className="flex flex-col text-sm sm:flex-row sm:gap-2">
+            <dt className="text-muted shrink-0 font-medium sm:min-w-[8rem]">{entry.label}</dt>
+            <dd className="text-fg">{entry.value}</dd>
           </div>
         ))}
       </dl>
       {lastUpdatedLabel !== null ? (
         <p
           data-freshness
-          className="border-outline-variant text-on-surface-variant text-label-caps mt-6 inline-flex max-w-full items-center gap-1.5 border px-3 py-1"
+          className="border-border text-muted mt-6 inline-flex max-w-full items-center gap-1.5 rounded-md border px-3 py-1 text-xs"
           aria-label={fs('updatedAtAria', { date: lastUpdatedLabel })}
         >
           <svg
@@ -216,7 +214,7 @@ export async function HotelEnBref({
             viewBox="0 0 16 16"
             width={12}
             height={12}
-            className="text-primary-heritage shrink-0"
+            className="shrink-0 text-amber-600"
           >
             <path
               d="M5 1.5v1.25M11 1.5v1.25M2.5 5.75h11M3.5 3.25h9a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4.25a1 1 0 0 1 1-1Z"
@@ -229,11 +227,11 @@ export async function HotelEnBref({
           <span className="truncate">
             {fs('updatedAtShort')}{' '}
             {lastUpdatedIso !== null ? (
-              <time dateTime={lastUpdatedIso} className="text-on-surface font-medium">
+              <time dateTime={lastUpdatedIso} className="text-fg font-medium">
                 {lastUpdatedLabel}
               </time>
             ) : (
-              <span className="text-on-surface font-medium">{lastUpdatedLabel}</span>
+              <span className="text-fg font-medium">{lastUpdatedLabel}</span>
             )}
           </span>
         </p>

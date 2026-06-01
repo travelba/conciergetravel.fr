@@ -29,15 +29,9 @@ interface HotelHeroProps {
   readonly amadeusRating: HotelHeroRating | null;
 }
 
-const heritageActionClass =
-  'border-primary-heritage text-primary-heritage hover:bg-surface-container focus-visible:ring-primary-heritage inline-flex min-h-touch items-center gap-2 border px-6 py-3 text-label-caps tracking-caps transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-60';
-
 /**
- * Stitch "L'Héritage Editorial" bloc 1 — docs/design/stitch/screens/eb47749c…
- *
- * ATF is intentionally minimal (badge + optional rating, H1, address, Share/Save).
- * Factual summary, concierge teaser and TLDR live below the mosaic gallery so the
- * fold matches the Stitch mock, not the legacy editorial hero stack.
+ * Hotel fiche header (CDC §2.1) — badge + optional rating, H1, address,
+ * Share/Save actions. The media gallery renders below via `<HotelGallery>`.
  */
 export async function HotelHero({
   locale,
@@ -66,21 +60,21 @@ export async function HotelHero({
         <div className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center gap-4">
             {isPalace ? (
-              <span className="border-sage text-sage text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+              <span className="inline-block rounded-full border border-amber-700/40 px-3 py-1 text-xs font-medium uppercase tracking-wider text-amber-800">
                 {t('hero.palaceBadge')}
               </span>
             ) : (
-              <span className="border-sage text-sage text-label-caps tracking-caps inline-block border px-3 py-1 uppercase">
+              <span className="inline-block rounded-full border border-amber-700/40 px-3 py-1 text-xs font-medium uppercase tracking-wider text-amber-800">
                 {t('hero.stars', { count: stars })}
               </span>
             )}
             {amadeusRating !== null ? (
               <p
-                className="text-primary-heritage inline-flex items-baseline"
+                className="text-fg inline-flex items-baseline"
                 data-testid="hotel-aggregate-rating"
               >
                 <span
-                  className="text-headline-md font-serif"
+                  className="font-serif text-2xl font-semibold"
                   aria-label={t('rating.scoreAria', {
                     value: amadeusRating.ratingValue.toFixed(1),
                     best: amadeusRating.bestRating,
@@ -88,15 +82,17 @@ export async function HotelHero({
                 >
                   {amadeusRating.ratingValue.toFixed(1)}
                 </span>
-                <span className="text-body-lg ml-1">/10</span>
+                <span className="text-muted ml-1 text-base">/10</span>
               </p>
             ) : null}
           </div>
 
-          <h1 className="text-primary-heritage text-display-lg mb-2 font-serif">{name}</h1>
+          <h1 className="text-fg mb-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+            {name}
+          </h1>
 
           {addressLine.length > 0 ? (
-            <p className="text-on-surface-variant text-body-lg flex items-start gap-2">
+            <p className="text-muted flex items-start gap-2 text-base">
               <LocationIcon />
               <span>{addressLine}</span>
             </p>
@@ -108,15 +104,8 @@ export async function HotelHero({
             hotelName={name}
             shareText={description !== null ? description.slice(0, 160) : null}
             canonicalUrl={canonicalUrl}
-            buttonClassName={heritageActionClass}
           />
-          <HotelFavoriteButton
-            hotelId={hotelId}
-            hotelName={name}
-            returnPath={localePath}
-            buttonClassName={heritageActionClass}
-            useHeritageLabels
-          />
+          <HotelFavoriteButton hotelId={hotelId} hotelName={name} returnPath={localePath} />
         </div>
       </div>
 

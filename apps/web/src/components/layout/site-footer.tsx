@@ -4,7 +4,6 @@ import type { ReactElement } from 'react';
 import { ConsentManageLink } from '@/components/consent';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { isHotelHeritageRoute, readBarePathname } from '@/lib/layout/bare-pathname';
 
 import {
   HERO_REGION_NAV_ENTRIES,
@@ -71,11 +70,6 @@ export async function SiteFooter(): Promise<ReactElement> {
   const t = await getTranslations('footer');
   const locale = (await getLocale()) as Locale;
   const year = new Date().getFullYear();
-  const { bare } = await readBarePathname();
-
-  if (isHotelHeritageRoute(bare)) {
-    return <HeritageHotelFooter t={t} year={year} />;
-  }
 
   return (
     <footer className="border-border bg-bg mt-16 border-t">
@@ -524,91 +518,6 @@ export async function SiteFooter(): Promise<ReactElement> {
         <div className="border-border text-muted mt-6 flex flex-col gap-3 border-t pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>{t('rights', { year })}</p>
           <ConsentManageLink />
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-type FooterT = Awaited<ReturnType<typeof getTranslations<'footer'>>>;
-
-function HeritageHotelFooter({
-  t,
-  year,
-}: {
-  readonly t: FooterT;
-  readonly year: number;
-}): ReactElement {
-  return (
-    <footer className="border-outline-variant bg-surface-container-lowest border-t">
-      <div className="px-margin-mobile md:px-margin-desktop mx-auto grid max-w-[1280px] grid-cols-12 gap-6 py-16 md:gap-8 md:py-[120px]">
-        <div className="col-span-12 md:col-span-4">
-          <p className="text-primary-heritage text-headline-md mb-6 font-serif">{t('company')}</p>
-          <p className="text-on-surface-variant text-body-lg leading-relaxed">{t('tagline')}</p>
-          <p className="text-on-surface-variant mt-6 text-sm">{t('rights', { year })}</p>
-        </div>
-        <div className="col-span-12 grid grid-cols-2 gap-8 md:col-span-8 md:grid-cols-3">
-          <nav aria-label={t('headings.legal')} className="flex flex-col gap-4">
-            <h2 className="text-primary-heritage text-label-caps tracking-caps mb-2 uppercase">
-              {t('headings.legal')}
-            </h2>
-            <Link
-              href="/mentions-legales"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.legalNotice')}
-            </Link>
-            <Link
-              href="/confidentialite"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.privacy')}
-            </Link>
-            <Link
-              href="/cgv"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.terms')}
-            </Link>
-            <Link
-              href="/cookies"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.cookies')}
-            </Link>
-          </nav>
-          <nav aria-label={t('headings.services')} className="flex flex-col gap-4">
-            <h2 className="text-primary-heritage text-label-caps tracking-caps mb-2 uppercase">
-              {t('headings.services')}
-            </h2>
-            <Link
-              href="/le-concierge-club"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.club')}
-            </Link>
-            <Link
-              href="/le-concierge/pour-les-hoteliers"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.hoteliers')}
-            </Link>
-            <Link
-              href="/le-concierge/presse-et-partenaires"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.press')}
-            </Link>
-            <Link
-              href="/le-concierge/contact"
-              className="text-on-surface-variant hover:text-primary-heritage text-body-lg underline-offset-4 hover:underline"
-            >
-              {t('links.contact')}
-            </Link>
-          </nav>
-          <div className="col-span-2 flex flex-col justify-end md:col-span-1">
-            <ConsentManageLink />
-          </div>
         </div>
       </div>
     </footer>

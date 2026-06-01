@@ -191,7 +191,7 @@ export function HotelFavoriteButton({
         aria-label={t(labelKey, { name: hotelName })}
         className={buttonClassName ?? defaultButtonClass}
       >
-        <HeartIcon filled={favorited} heritage={useHeritageLabels} />
+        <HeartIcon filled={favorited} />
         <span className={useHeritageLabels ? 'inline' : 'hidden sm:inline'}>{t(visibleKey)}</span>
       </button>
 
@@ -203,13 +203,7 @@ export function HotelFavoriteButton({
   );
 }
 
-function HeartIcon({
-  filled,
-  heritage,
-}: {
-  readonly filled: boolean;
-  readonly heritage: boolean;
-}): ReactElement {
+function HeartIcon({ filled }: { readonly filled: boolean }): ReactElement {
   return (
     <svg
       width={20}
@@ -221,7 +215,7 @@ function HeartIcon({
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={heritage ? 'text-primary-heritage' : filled ? 'text-rose-600' : 'text-fg'}
+      className={filled ? 'text-rose-600' : 'text-fg'}
     >
       <path d="M12 21s-7.5-4.5-9.5-9A5.25 5.25 0 0 1 12 6.75 5.25 5.25 0 0 1 21.5 12c-2 4.5-9.5 9-9.5 9z" />
     </svg>
