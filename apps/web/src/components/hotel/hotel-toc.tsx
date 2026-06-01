@@ -60,11 +60,9 @@ export function HotelToc({ heading, items }: HotelTocProps): ReactElement | null
   return (
     <nav
       aria-label={heading}
-      className="border-outline-variant bg-surface-container-lowest hidden border p-4 lg:block"
+      className="border-border bg-muted/5 hidden rounded-lg border p-4 lg:block"
     >
-      <p className="text-on-surface-variant text-label-caps tracking-caps mb-3 uppercase">
-        {heading}
-      </p>
+      <p className="text-muted mb-3 text-xs font-medium uppercase tracking-wider">{heading}</p>
       <ul className="space-y-1 text-sm">
         {items.map((item) => {
           const isActive = activeId === item.anchor;
@@ -75,8 +73,8 @@ export function HotelToc({ heading, items }: HotelTocProps): ReactElement | null
                 aria-current={isActive ? 'true' : undefined}
                 className={`block border-l-2 py-1 pl-3 transition-colors ${
                   isActive
-                    ? 'border-l-primary-heritage text-on-surface font-medium'
-                    : 'text-on-surface-variant hover:border-l-on-surface-variant/40 hover:text-on-surface border-l-transparent'
+                    ? 'text-fg border-l-amber-600 font-medium'
+                    : 'text-muted hover:border-l-muted/40 hover:text-fg border-l-transparent'
                 }`}
               >
                 {item.label}

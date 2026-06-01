@@ -33,7 +33,6 @@ import { HotelStory } from '@/components/hotel/hotel-story';
 import { HotelToc, type HotelTocItem } from '@/components/hotel/hotel-toc';
 import { HotelTrustSignals } from '@/components/hotel/hotel-trust-signals';
 import { HotelExternalSourcesFooter } from '@/components/hotel/hotel-external-sources-footer';
-import { HeritageBreadcrumbChevron } from '@/components/layout/heritage-breadcrumb-chevron';
 import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -934,7 +933,7 @@ async function renderHotelPage(
   ];
 
   return (
-    <main className="bg-surface text-on-surface px-margin-mobile pb-section-gap md:px-margin-desktop mx-auto max-w-[1280px] pt-[100px]">
+    <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={hotelJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
@@ -955,23 +954,27 @@ async function renderHotelPage(
 
       <nav
         aria-label={t('breadcrumb.hotels')}
-        className="text-on-surface-variant text-label-caps mb-6 flex flex-wrap items-center gap-2"
+        className="text-muted mb-6 flex flex-wrap items-center gap-2 text-sm"
       >
-        <Link href="/destination" className="hover:text-primary-heritage transition-colors">
+        <Link href="/destination" className="hover:text-fg transition-colors">
           {countryLabel}
         </Link>
-        <HeritageBreadcrumbChevron />
+        <span aria-hidden className="opacity-50">
+          /
+        </span>
         <Link
           href={{
             pathname: '/destination/[citySlug]',
             params: { citySlug: cityHubSlug },
           }}
-          className="hover:text-primary-heritage transition-colors"
+          className="hover:text-fg transition-colors"
         >
           {row.city}
         </Link>
-        <HeritageBreadcrumbChevron />
-        <span className="text-primary-heritage" aria-current="page">
+        <span aria-hidden className="opacity-50">
+          /
+        </span>
+        <span className="text-fg" aria-current="page">
           {name}
         </span>
       </nav>
@@ -1002,7 +1005,6 @@ async function renderHotelPage(
       />
 
       <FactualSummary
-        variant="heritage"
         summary={factualSummary}
         fallback={
           description !== null && description.length > 0 ? truncate(description, 280) : null
@@ -1025,7 +1027,7 @@ async function renderHotelPage(
         content as a passive placeholder.
       */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
-        <div className="heritage-body min-w-0">
+        <div className="min-w-0">
           {/* Cluster 1 — En bref (fusion Tldr + FactSheet) + visite virtuelle. */}
           <HotelEnBref
             locale={locale}
@@ -1076,21 +1078,23 @@ async function renderHotelPage(
             experiences={signatureExperiences}
           />
 
-          <section aria-labelledby="highlights-title">
-            <h2 id="highlights-title">{t('sections.highlights')}</h2>
+          <section aria-labelledby="highlights-title" className="mb-12">
+            <h2 id="highlights-title" className="text-fg mb-3 font-serif text-2xl">
+              {t('sections.highlights')}
+            </h2>
             {highlights.length > 0 ? (
               <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {highlights.map((h) => (
                   <li
                     key={h}
-                    className="border-outline-variant bg-surface-container-lowest text-on-surface border px-4 py-3 text-sm"
+                    className="border-border bg-muted/5 text-fg rounded-lg border px-4 py-3 text-sm"
                   >
                     {h}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-on-surface-variant text-sm">{t('noHighlights')}</p>
+              <p className="text-muted text-sm">{t('noHighlights')}</p>
             )}
           </section>
 
@@ -1284,12 +1288,12 @@ async function renderHotelPage(
             {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
             data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
             aria-labelledby="hotel-aeo-title"
-            className="border-outline-variant bg-surface-container-low mb-16 border p-6"
+            className="border-border bg-muted/5 mb-16 rounded-lg border p-6"
           >
-            <h2 id="hotel-aeo-title" className="text-primary-heritage text-headline-md font-serif">
+            <h2 id="hotel-aeo-title" className="text-fg font-serif text-2xl font-semibold">
               {aeoQuestion}
             </h2>
-            <p className="text-on-surface-variant text-body-lg mt-3 leading-relaxed">{aeoAnswer}</p>
+            <p className="text-muted mt-3 leading-relaxed">{aeoAnswer}</p>
           </section>
 
           <TopConciergeFaq locale={locale} items={topConciergeFaq} />
@@ -1297,9 +1301,11 @@ async function renderHotelPage(
           {faqGroups.length > 0 ? (
             <HotelFaq locale={locale} groups={faqGroups} />
           ) : (
-            <section id="faq" aria-labelledby="faq-title" className="scroll-mt-24">
-              <h2 id="faq-title">{t('sections.faq')}</h2>
-              <p className="text-on-surface-variant text-sm">{t('noFaq')}</p>
+            <section id="faq" aria-labelledby="faq-title" className="mb-12 scroll-mt-24">
+              <h2 id="faq-title" className="text-fg mb-3 font-serif text-2xl">
+                {t('sections.faq')}
+              </h2>
+              <p className="text-muted text-sm">{t('noFaq')}</p>
             </section>
           )}
 
@@ -1343,7 +1349,7 @@ async function renderHotelPage(
         (fiche-reorganisation plan — dedup. The former footer duplicate
         was removed; the JSON-LD `Hotel.dateModified` still mirrors it).
       */}
-      <footer className="text-on-surface-variant border-outline-variant mt-16 flex flex-col gap-2 border-t pt-8 text-xs">
+      <footer className="text-muted border-border mt-16 flex flex-col gap-2 border-t pt-8 text-xs">
         <p>{t('loyaltyHint')}</p>
       </footer>
     </main>

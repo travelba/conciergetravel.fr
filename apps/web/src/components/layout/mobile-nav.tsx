@@ -7,7 +7,6 @@ import { Link, usePathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 import { AuthArea } from './auth-area';
-import { HERITAGE_FLAT_NAV_HREFS, HERITAGE_FLAT_NAV_LABEL_KEYS } from './heritage-nav-config';
 import {
   BRAND_NAV_ENTRIES,
   HERO_REGION_NAV_ENTRIES,
@@ -75,7 +74,6 @@ export function MobileNav(): ReactElement {
   // effect, satisfying `react-hooks/set-state-in-effect`.
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const pathname = usePathname();
-  const heritage = pathname.startsWith('/hotel/');
   const [previousPathname, setPreviousPathname] = useState(pathname);
   if (previousPathname !== pathname) {
     setPreviousPathname(pathname);
@@ -118,11 +116,6 @@ export function MobileNav(): ReactElement {
   const subLinkClass =
     'text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 block';
 
-  const heritageMobileLinkClass =
-    'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage block rounded-md px-3 py-2.5 text-base focus-visible:outline-none focus-visible:ring-2';
-  const heritageUtilityLinkClass =
-    'text-on-surface-variant hover:text-primary-heritage block rounded-md px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-heritage';
-
   return (
     <>
       <button
@@ -133,11 +126,7 @@ export function MobileNav(): ReactElement {
         aria-controls={labelId}
         aria-label={open ? t('menu.close') : t('menu.open')}
         onClick={() => setOpen((v) => !v)}
-        className={
-          heritage
-            ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2 md:hidden'
-            : 'border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden'
-        }
+        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden"
       >
         {open ? (
           <svg
@@ -182,31 +171,15 @@ export function MobileNav(): ReactElement {
             role="dialog"
             aria-modal="true"
             aria-label={t('menu.label')}
-            className={
-              heritage
-                ? 'border-outline-variant bg-surface absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5'
-                : 'border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5 shadow-xl'
-            }
+            className="border-border bg-bg absolute right-0 top-0 flex h-dvh w-[min(22rem,90vw)] flex-col overflow-y-auto border-l p-5 shadow-xl"
           >
             <div className="mb-5 flex items-center justify-between">
-              <p
-                className={
-                  heritage
-                    ? 'text-primary-heritage font-serif text-lg tracking-tight'
-                    : 'text-fg font-serif text-lg'
-                }
-              >
-                {t('brand')}
-              </p>
+              <p className="text-fg font-serif text-lg">{t('brand')}</p>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label={t('menu.close')}
-                className={
-                  heritage
-                    ? 'text-primary-heritage hover:bg-surface-container-low focus-visible:ring-primary-heritage inline-flex h-10 w-10 items-center justify-center focus-visible:outline-none focus-visible:ring-2'
-                    : 'border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2'
-                }
+                className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2"
               >
                 <svg
                   aria-hidden
@@ -221,201 +194,175 @@ export function MobileNav(): ReactElement {
               </button>
             </div>
 
-            {heritage ? (
-              <nav aria-label={t('primaryNav.label')} className="mb-6 flex flex-col gap-1">
-                {HERITAGE_FLAT_NAV_HREFS.map((item, index) => {
-                  const labelKey = HERITAGE_FLAT_NAV_LABEL_KEYS[index];
-                  if (labelKey === undefined) return null;
-                  return (
-                    <Link
-                      key={item.pathname}
-                      href={item.pathname}
-                      className={heritageMobileLinkClass}
-                    >
-                      {t(labelKey)}
-                    </Link>
-                  );
-                })}
-                <Link href="/compte/favoris" className={heritageUtilityLinkClass}>
-                  {t('heritage.favoritesAria')}
-                </Link>
-                <Link href="/compte" className={heritageUtilityLinkClass}>
-                  {t('account.myAccount')}
-                </Link>
-                <Link href="/le-concierge/reserver" className={heritageUtilityLinkClass}>
-                  {t('heritage.bookAria')}
-                </Link>
-              </nav>
-            ) : (
-              <>
-                <Link
-                  href="/recherche"
-                  className="border-border bg-muted/5 hover:bg-muted/10 mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+            <>
+              <Link
+                href="/recherche"
+                className="border-border bg-muted/5 hover:bg-muted/10 mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 20 20"
+                  className="h-4 w-4 opacity-60"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
                 >
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 20 20"
-                    className="h-4 w-4 opacity-60"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                  >
-                    <circle cx="9" cy="9" r="5.5" />
-                    <path d="M13.5 13.5l3 3" strokeLinecap="round" />
-                  </svg>
-                  <span>{t('primaryNav.search')}</span>
-                </Link>
+                  <circle cx="9" cy="9" r="5.5" />
+                  <path d="M13.5 13.5l3 3" strokeLinecap="round" />
+                </svg>
+                <span>{t('primaryNav.search')}</span>
+              </Link>
 
-                <nav aria-label={t('primaryNav.label')} className="flex flex-col gap-0.5 text-base">
-                  {/* 1 — Palaces & Hôtels */}
-                  <details className="group">
-                    <summary className={summaryClass}>
-                      <span>{t('primaryNav.hotels')}</span>
-                      <Chevron />
-                    </summary>
-                    <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
-                      <p className={subHeadingClass}>{t('primaryNav.hotelsByDistinction')}</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {HOTEL_CATEGORY_NAV_ENTRIES.map((entry) => (
-                          <li key={entry.slug}>
-                            <Link
-                              href={{
-                                pathname: '/categorie/[categorySlug]',
-                                params: { categorySlug: entry.slug },
-                              }}
-                              className={subLinkClass}
-                            >
-                              {pickCategoryLabel(entry, locale)}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <p className={subHeadingClass}>{t('primaryNav.hotelsByType')}</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {HOTEL_TYPE_NAV_ENTRIES.map((entry) => (
-                          <li key={entry.slug}>
-                            <Link
-                              href={{
-                                pathname: '/categorie/[categorySlug]',
-                                params: { categorySlug: entry.slug },
-                              }}
-                              className={subLinkClass}
-                            >
-                              {pickEntryLabel(entry, locale)}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <p className={subHeadingClass}>{t('primaryNav.hotelsByBrand')}</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {/* Slice 12 — match the desktop mega-menu so
+              <nav aria-label={t('primaryNav.label')} className="flex flex-col gap-0.5 text-base">
+                {/* 1 — Palaces & Hôtels */}
+                <details className="group">
+                  <summary className={summaryClass}>
+                    <span>{t('primaryNav.hotels')}</span>
+                    <Chevron />
+                  </summary>
+                  <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
+                    <p className={subHeadingClass}>{t('primaryNav.hotelsByDistinction')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {HOTEL_CATEGORY_NAV_ENTRIES.map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={{
+                              pathname: '/categorie/[categorySlug]',
+                              params: { categorySlug: entry.slug },
+                            }}
+                            className={subLinkClass}
+                          >
+                            {pickCategoryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className={subHeadingClass}>{t('primaryNav.hotelsByType')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {HOTEL_TYPE_NAV_ENTRIES.map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={{
+                              pathname: '/categorie/[categorySlug]',
+                              params: { categorySlug: entry.slug },
+                            }}
+                            className={subLinkClass}
+                          >
+                            {pickEntryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className={subHeadingClass}>{t('primaryNav.hotelsByBrand')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {/* Slice 12 — match the desktop mega-menu so
                             mobile users discover the international
                             additions (Aman, Belmond, Six Senses,
                             Bulgari, Auberge Resorts) too. ADR-0021
                             Vague 4 — see `site-header.tsx`. */}
-                        {BRAND_NAV_ENTRIES.slice(0, 12).map((entry) => (
-                          <li key={entry.slug}>
-                            <Link
-                              href={{
-                                pathname: '/marque/[brandSlug]',
-                                params: { brandSlug: entry.slug },
-                              }}
-                              className={subLinkClass}
-                            >
-                              {pickEntryLabel(entry, locale)}
-                            </Link>
-                          </li>
-                        ))}
-                        <li>
-                          <Link href="/marques" className={`${subLinkClass} text-muted text-xs`}>
-                            {t('primaryNav.hotelsBrowseAllBrands')}
+                      {BRAND_NAV_ENTRIES.slice(0, 12).map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={{
+                              pathname: '/marque/[brandSlug]',
+                              params: { brandSlug: entry.slug },
+                            }}
+                            className={subLinkClass}
+                          >
+                            {pickEntryLabel(entry, locale)}
                           </Link>
                         </li>
-                      </ul>
-                      {/* ── Distinctions row (2026-05-29) — anti-invisibility
+                      ))}
+                      <li>
+                        <Link href="/marques" className={`${subLinkClass} text-muted text-xs`}>
+                          {t('primaryNav.hotelsBrowseAllBrands')}
+                        </Link>
+                      </li>
+                    </ul>
+                    {/* ── Distinctions row (2026-05-29) — anti-invisibility
                             for the new `/label/[facetSlug]` routes. */}
-                      <p className={subHeadingClass}>{t('primaryNav.hotelsByLabel')}</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {LABEL_NAV_ENTRIES.map((entry) => (
-                          <li key={entry.slug}>
-                            <Link
-                              href={{
-                                pathname: '/label/[facetSlug]',
-                                params: { facetSlug: entry.slug },
-                              }}
-                              className={subLinkClass}
-                            >
-                              {pickEntryLabel(entry, locale)}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <Link href="/hotels" className={`${subLinkClass} text-muted text-xs`}>
-                        {t('primaryNav.hotelsBrowseAll')}
-                      </Link>
-                    </div>
-                  </details>
+                    <p className={subHeadingClass}>{t('primaryNav.hotelsByLabel')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {LABEL_NAV_ENTRIES.map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={{
+                              pathname: '/label/[facetSlug]',
+                              params: { facetSlug: entry.slug },
+                            }}
+                            className={subLinkClass}
+                          >
+                            {pickEntryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/hotels" className={`${subLinkClass} text-muted text-xs`}>
+                      {t('primaryNav.hotelsBrowseAll')}
+                    </Link>
+                  </div>
+                </details>
 
-                  {/* 2 — Destinations */}
-                  <details className="group">
-                    <summary className={summaryClass}>
-                      <span>{t('primaryNav.destinations')}</span>
-                      <Chevron />
-                    </summary>
-                    <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
-                      <p className={subHeadingClass}>{t('primaryNav.destinationsFrance')}</p>
-                      <MobileLinkList
-                        entries={TOP_DESTINATION_NAV_ENTRIES}
-                        locale={locale}
-                        pathname="/destination/[citySlug]"
-                        paramKey="citySlug"
-                        linkClass={subLinkClass}
-                      />
-                      <p className={subHeadingClass}>{t('primaryNav.destinationsHeroes')}</p>
-                      {/*
+                {/* 2 — Destinations */}
+                <details className="group">
+                  <summary className={summaryClass}>
+                    <span>{t('primaryNav.destinations')}</span>
+                    <Chevron />
+                  </summary>
+                  <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
+                    <p className={subHeadingClass}>{t('primaryNav.destinationsFrance')}</p>
+                    <MobileLinkList
+                      entries={TOP_DESTINATION_NAV_ENTRIES}
+                      locale={locale}
+                      pathname="/destination/[citySlug]"
+                      paramKey="citySlug"
+                      linkClass={subLinkClass}
+                    />
+                    <p className={subHeadingClass}>{t('primaryNav.destinationsHeroes')}</p>
+                    {/*
                     HERO region slugs (`cote-d-azur`, `provence`, etc.)
                     are NOT cities — `getDestinationBySlug` would 404.
                     Route them through the rankings axis (`lieu`) where
                     they fall back to a noindex empty state at worst.
                     Audit 2026-05-25 — see `site-header.tsx` for context.
                   */}
-                      <AxisLinkList
-                        entries={HERO_REGION_NAV_ENTRIES}
-                        locale={locale}
-                        axe="lieu"
-                        linkClass={subLinkClass}
-                      />
-                      <p className={subHeadingClass}>{t('primaryNav.destinationsWorldCities')}</p>
-                      {/*
+                    <AxisLinkList
+                      entries={HERO_REGION_NAV_ENTRIES}
+                      locale={locale}
+                      axe="lieu"
+                      linkClass={subLinkClass}
+                    />
+                    <p className={subHeadingClass}>{t('primaryNav.destinationsWorldCities')}</p>
+                    {/*
                         New `Monde — villes` group (PR-C, ADR-0021
                         Vague 4). Each slug now renders a long-read
                         city guide inline on `/destination/[citySlug]`
                         (PR-A). Mobile mirrors desktop so the discovery
                         path is identical.
                       */}
-                      <ul className="flex flex-col gap-0.5">
-                        {INTL_CITY_MOBILE_SLUGS.map((citySlug) => {
-                          const entry = TOP_INTL_DESTINATION_NAV_ENTRIES.find(
-                            (e) => e.slug === citySlug,
-                          );
-                          if (entry === undefined) return null;
-                          return (
-                            <li key={citySlug}>
-                              <Link
-                                href={{
-                                  pathname: '/destination/[citySlug]',
-                                  params: { citySlug },
-                                }}
-                                className={subLinkClass}
-                              >
-                                {pickEntryLabel(entry, locale)}
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
-                      {/*
+                    <ul className="flex flex-col gap-0.5">
+                      {INTL_CITY_MOBILE_SLUGS.map((citySlug) => {
+                        const entry = TOP_INTL_DESTINATION_NAV_ENTRIES.find(
+                          (e) => e.slug === citySlug,
+                        );
+                        if (entry === undefined) return null;
+                        return (
+                          <li key={citySlug}>
+                            <Link
+                              href={{
+                                pathname: '/destination/[citySlug]',
+                                params: { citySlug },
+                              }}
+                              className={subLinkClass}
+                            >
+                              {pickEntryLabel(entry, locale)}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className={subHeadingClass}>{t('primaryNav.destinationsWorld')}</p>
+                    {/*
                     Vague-6 — all 8 international country guides
                     indexable. Each entry routes to its dedicated
                     /guide/<slug> page (inline switch keeps the typed
@@ -423,126 +370,126 @@ export function MobileNav(): ReactElement {
                     appends the ISO country code for screen readers
                     so the link is unambiguous out of context.
                   */}
-                      <ul className="flex flex-col gap-0.5">
-                        {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
-                          const iso = intlNavSlugToIso(entry.slug);
-                          const ariaLabel =
-                            iso !== null
-                              ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
-                              : pickEntryLabel(entry, locale);
-                          const href = ((): React.ComponentProps<typeof Link>['href'] => {
-                            switch (entry.slug) {
-                              case 'italie':
-                                return '/guide/italie';
-                              case 'suisse':
-                                return '/guide/suisse';
-                              case 'maroc':
-                                return '/guide/maroc';
-                              case 'maldives':
-                                return '/guide/maldives';
-                              case 'emirats-arabes-unis':
-                                return '/guide/emirats-arabes-unis';
-                              case 'thailande':
-                                return '/guide/thailande';
-                              case 'japon':
-                                return '/guide/japon';
-                              case 'etats-unis':
-                                return '/guide/etats-unis';
-                              default:
-                                return '/hotels';
-                            }
-                          })();
-                          return (
-                            <li key={entry.slug}>
-                              <Link href={href} aria-label={ariaLabel} className={subLinkClass}>
-                                {pickEntryLabel(entry, locale)}
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
-                        {t('primaryNav.destinationsBrowseAll')}
-                      </Link>
-                    </div>
-                  </details>
-
-                  {/* 3 — Inspiration */}
-                  <details className="group">
-                    <summary className={summaryClass}>
-                      <span>{t('primaryNav.inspiration')}</span>
-                      <Chevron />
-                    </summary>
-                    <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
-                      <p className={subHeadingClass}>{t('primaryNav.inspirationByTheme')}</p>
-                      <AxisLinkList
-                        entries={THEME_NAV_ENTRIES}
-                        locale={locale}
-                        axe="theme"
-                        linkClass={subLinkClass}
-                      />
-                      <p className={subHeadingClass}>{t('primaryNav.inspirationByOccasion')}</p>
-                      <AxisLinkList
-                        entries={OCCASION_NAV_ENTRIES}
-                        locale={locale}
-                        axe="occasion"
-                        linkClass={subLinkClass}
-                      />
-                      <p className={subHeadingClass}>{t('primaryNav.inspirationBySaison')}</p>
-                      <AxisLinkList
-                        entries={SAISON_NAV_ENTRIES}
-                        locale={locale}
-                        axe="saison"
-                        linkClass={subLinkClass}
-                      />
-                      <Link href="/inspiration" className={`${subLinkClass} text-muted text-xs`}>
-                        {t('primaryNav.inspirationBrowseAll')}
-                      </Link>
-                    </div>
-                  </details>
-
-                  {/* 4 — Classements */}
-                  <details className="group">
-                    <summary className={summaryClass}>
-                      <span>{t('primaryNav.rankings')}</span>
-                      <Chevron />
-                    </summary>
-                    <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
-                      <p className={subHeadingClass}>{t('primaryNav.rankingsTop')}</p>
-                      <ul className="flex flex-col gap-0.5">
-                        {TOP_RANKING_NAV_ENTRIES.map((entry) => (
+                    <ul className="flex flex-col gap-0.5">
+                      {INTL_DESTINATION_NAV_ENTRIES.map((entry) => {
+                        const iso = intlNavSlugToIso(entry.slug);
+                        const ariaLabel =
+                          iso !== null
+                            ? `${pickEntryLabel(entry, locale)} — ${iso.toUpperCase()}`
+                            : pickEntryLabel(entry, locale);
+                        const href = ((): React.ComponentProps<typeof Link>['href'] => {
+                          switch (entry.slug) {
+                            case 'italie':
+                              return '/guide/italie';
+                            case 'suisse':
+                              return '/guide/suisse';
+                            case 'maroc':
+                              return '/guide/maroc';
+                            case 'maldives':
+                              return '/guide/maldives';
+                            case 'emirats-arabes-unis':
+                              return '/guide/emirats-arabes-unis';
+                            case 'thailande':
+                              return '/guide/thailande';
+                            case 'japon':
+                              return '/guide/japon';
+                            case 'etats-unis':
+                              return '/guide/etats-unis';
+                            default:
+                              return '/hotels';
+                          }
+                        })();
+                        return (
                           <li key={entry.slug}>
-                            <Link
-                              href={{
-                                pathname: '/classement/[slug]',
-                                params: { slug: entry.slug },
-                              }}
-                              className={subLinkClass}
-                            >
+                            <Link href={href} aria-label={ariaLabel} className={subLinkClass}>
                               {pickEntryLabel(entry, locale)}
                             </Link>
                           </li>
-                        ))}
-                      </ul>
-                      <Link href="/classements" className={`${subLinkClass} text-muted text-xs`}>
-                        {t('primaryNav.rankingsBrowseAll')}
-                      </Link>
-                    </div>
-                  </details>
+                        );
+                      })}
+                    </ul>
+                    <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
+                      {t('primaryNav.destinationsBrowseAll')}
+                    </Link>
+                  </div>
+                </details>
 
-                  {/* 5 — Le Concierge.
+                {/* 3 — Inspiration */}
+                <details className="group">
+                  <summary className={summaryClass}>
+                    <span>{t('primaryNav.inspiration')}</span>
+                    <Chevron />
+                  </summary>
+                  <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
+                    <p className={subHeadingClass}>{t('primaryNav.inspirationByTheme')}</p>
+                    <AxisLinkList
+                      entries={THEME_NAV_ENTRIES}
+                      locale={locale}
+                      axe="theme"
+                      linkClass={subLinkClass}
+                    />
+                    <p className={subHeadingClass}>{t('primaryNav.inspirationByOccasion')}</p>
+                    <AxisLinkList
+                      entries={OCCASION_NAV_ENTRIES}
+                      locale={locale}
+                      axe="occasion"
+                      linkClass={subLinkClass}
+                    />
+                    <p className={subHeadingClass}>{t('primaryNav.inspirationBySaison')}</p>
+                    <AxisLinkList
+                      entries={SAISON_NAV_ENTRIES}
+                      locale={locale}
+                      axe="saison"
+                      linkClass={subLinkClass}
+                    />
+                    <Link href="/inspiration" className={`${subLinkClass} text-muted text-xs`}>
+                      {t('primaryNav.inspirationBrowseAll')}
+                    </Link>
+                  </div>
+                </details>
+
+                {/* 4 — Classements */}
+                <details className="group">
+                  <summary className={summaryClass}>
+                    <span>{t('primaryNav.rankings')}</span>
+                    <Chevron />
+                  </summary>
+                  <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-2 border-l pb-2 pl-3">
+                    <p className={subHeadingClass}>{t('primaryNav.rankingsTop')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {TOP_RANKING_NAV_ENTRIES.map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={{
+                              pathname: '/classement/[slug]',
+                              params: { slug: entry.slug },
+                            }}
+                            className={subLinkClass}
+                          >
+                            {pickEntryLabel(entry, locale)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/classements" className={`${subLinkClass} text-muted text-xs`}>
+                      {t('primaryNav.rankingsBrowseAll')}
+                    </Link>
+                  </div>
+                </details>
+
+                {/* 5 — Le Concierge.
                   Audit 2026-05-25: every dedicated institutional page
                   exists (`/le-conseil-du-concierge`, `/le-concierge/
                   pour-les-hoteliers`, `/le-concierge/mice-et-seminaires`,
                   `/le-concierge/presse-et-partenaires`). Header & mobile
                   now route to those instead of the parent hub. */}
-                  <details className="group">
-                    <summary className={summaryClass}>
-                      <span>{t('primaryNav.concierge')}</span>
-                      <Chevron />
-                    </summary>
-                    <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-1 border-l pb-2 pl-3">
-                      {/*
+                <details className="group">
+                  <summary className={summaryClass}>
+                    <span>{t('primaryNav.concierge')}</span>
+                    <Chevron />
+                  </summary>
+                  <div className="border-muted/30 ml-3 mt-1 flex flex-col gap-1 border-l pb-2 pl-3">
+                    {/*
                         PR-C trim — desktop and mobile now ship the
                         same 11 entries (was 15). Dropped:
                           - `conciergeBooking` → reachable from footer
@@ -551,46 +498,45 @@ export function MobileNav(): ReactElement {
                           - `conciergeClubPressKit` → consolidated under
                             `conciergePress` on the same page.
                       */}
-                      <Link href="/le-concierge" className={subLinkClass}>
-                        {t('primaryNav.conciergeAboutLink')}
-                      </Link>
-                      <Link href="/le-concierge-club" className={subLinkClass}>
-                        {t('primaryNav.conciergeClub')}
-                      </Link>
-                      <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
-                        {t('primaryNav.conciergeMethod')}
-                      </Link>
-                      <Link href="/le-concierge/faq" className={subLinkClass}>
-                        {t('primaryNav.conciergeFaq')}
-                      </Link>
-                      <Link href="/le-conseil-du-concierge" className={subLinkClass}>
-                        {t('primaryNav.conciergeTip')}
-                      </Link>
-                      <Link href="/itineraires" className={subLinkClass}>
-                        {t('primaryNav.conciergeItineraries')}
-                      </Link>
-                      <Link href="/ouvertures" className={subLinkClass}>
-                        {t('primaryNav.conciergeOpenings')}
-                      </Link>
-                      <Link href="/guides" className={subLinkClass}>
-                        {t('primaryNav.conciergeGuides')}
-                      </Link>
-                      <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>
-                        {t('primaryNav.conciergeHotelier')}
-                      </Link>
-                      <Link href="/le-concierge/mice-et-seminaires" className={subLinkClass}>
-                        {t('primaryNav.conciergeMice')}
-                      </Link>
-                      <Link href="/le-concierge/presse-et-partenaires" className={subLinkClass}>
-                        {t('primaryNav.conciergePress')}
-                      </Link>
-                    </div>
-                  </details>
-                </nav>
+                    <Link href="/le-concierge" className={subLinkClass}>
+                      {t('primaryNav.conciergeAboutLink')}
+                    </Link>
+                    <Link href="/le-concierge-club" className={subLinkClass}>
+                      {t('primaryNav.conciergeClub')}
+                    </Link>
+                    <Link href="/le-concierge/methode-editoriale" className={subLinkClass}>
+                      {t('primaryNav.conciergeMethod')}
+                    </Link>
+                    <Link href="/le-concierge/faq" className={subLinkClass}>
+                      {t('primaryNav.conciergeFaq')}
+                    </Link>
+                    <Link href="/le-conseil-du-concierge" className={subLinkClass}>
+                      {t('primaryNav.conciergeTip')}
+                    </Link>
+                    <Link href="/itineraires" className={subLinkClass}>
+                      {t('primaryNav.conciergeItineraries')}
+                    </Link>
+                    <Link href="/ouvertures" className={subLinkClass}>
+                      {t('primaryNav.conciergeOpenings')}
+                    </Link>
+                    <Link href="/guides" className={subLinkClass}>
+                      {t('primaryNav.conciergeGuides')}
+                    </Link>
+                    <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>
+                      {t('primaryNav.conciergeHotelier')}
+                    </Link>
+                    <Link href="/le-concierge/mice-et-seminaires" className={subLinkClass}>
+                      {t('primaryNav.conciergeMice')}
+                    </Link>
+                    <Link href="/le-concierge/presse-et-partenaires" className={subLinkClass}>
+                      {t('primaryNav.conciergePress')}
+                    </Link>
+                  </div>
+                </details>
+              </nav>
 
-                <AuthArea variant="mobile" />
-              </>
-            )}
+              <AuthArea variant="mobile" />
+            </>
           </div>
         </div>
       ) : null}
