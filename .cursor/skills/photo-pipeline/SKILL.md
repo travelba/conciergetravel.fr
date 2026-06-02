@@ -331,6 +331,57 @@ press-releases/2025/six-senses-bangkok-announcement` — non-trivial
    near-worthless; those hotels need the R&C consortium DAM
    (`images.relaischateaux.com`) or Google Places, not the portal page.
 
+## Finding — the 10-category coverage floor is structurally unreachable (2026-06-02)
+
+`photo-quality.mdc` frames "10/10 distinct categories" as a non-negotiable
+floor that gates indexability. **Two facts make this false in practice —
+do not burn quota chasing 10/10:**
+
+1. **The indexability gate does NOT enforce category coverage.**
+   `apps/web/src/server/hotels/indexability.ts` has two paths (photo-rich
+   OR editorial); neither counts categories. The whole published catalogue
+   is already indexable via the editorial path. The 10-category floor is an
+   aspirational quality target, not a live `noindex` gate.
+
+2. **Two categories are structurally impossible to source at scale.**
+   Catalogue-wide coverage (2219 published, 2026-06-02):
+   `room 88% · exterior 71% · dining 67% · pool 55% · view 52% · lobby 46%
+· spa 30% · detail 10% · events 7% · concierge 0.1% (3 hotels)`.
+   `concierge` (a concierge-desk photo) and `events` (MICE ballrooms)
+   barely exist in Google Places / press kits and Vision almost never
+   emits them. **No hotel reaches 10; the realistic ceiling is ~8.**
+
+### Reclassifying `other` does NOT recover coverage (empirically tested)
+
+The intuition "re-run Vision on the `other`/null catch-all to recover
+mislabeled spa/events/concierge" was tested on the full catalogue via the
+new `--reclassify-other` flag on `categorize-with-vision.ts` (re-runs
+Vision ONLY on photos whose category is `other` or null — ~$0.67 for 962
+photos, vs a ~$16 `--force` sweep). Result:
+
+```text
+962 reclassified, 82 dropped (junk), 0/736 hotels reached 10 cats
+other 837→721 · null 208→39 · spa 964→973 (+9) · detail 307→325 (+18)
+events 198→203 (+5) · concierge 4→4 (+0)
+```
+
+The `other`/null reservoir is **redundant with the common categories**
+(room/exterior/dining/view), not a hidden stash of rare-category photos.
+Average per-hotel coverage moved ~0. **The real (and only) lever for
+coverage is sourcing genuinely-new spa/pool/view photos** — the Phase 2
+press-kit / Google Places chantier — and even that cannot manufacture
+`concierge`/`events` for hotels that have none.
+
+`--reclassify-other` still earns its keep as a **data-hygiene** pass: it
+turns `other`/null into a real category + enriched `alt_*`/`caption_*` +
+`representativeness`/`hero_suitable` scores, which improves hero/TOP-4
+curation and JSON-LD captions even when the coverage count doesn't move.
+
+**Takeaway for agents:** treat "10/10 categories" as aspirational. Target
+the sourceable categories (spa/lobby/view/pool/detail) on Tier A/B hotels
+when doing real sourcing; never gate a hotel `noindex` on coverage; and
+don't re-run Vision hoping to conjure coverage from `other`.
+
 ## Pattern — Audit-driven rollout (2026-05-31, lesson from the 4-hotel pilot)
 
 The 4-hotel pilot (Bristol, Akelarre, Al Moudira, Alila) worked but

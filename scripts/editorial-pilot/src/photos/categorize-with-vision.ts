@@ -94,8 +94,23 @@ interface Args {
    * already-scored photos are skipped, so a crashed run never re-pays.
    */
   readonly backfillScores: boolean;
+  /**
+   * Re-run Vision only on photos Vision previously dumped into the
+   * catch-all `other` bucket (plus any still-uncategorised photo). This
+   * is the cheap "squeeze coverage out of mislabeled photos before
+   * sourcing new ones" pass — it never touches the ~22k photos already
+   * confidently classified (room/exterior/dining/…), so a 1k-photo
+   * `other` reservoir costs ≈ $0.7 instead of a $16 `--force` sweep.
+   */
+  readonly reclassifyOther: boolean;
   readonly concurrency: number;
   readonly maxPhotosPerHotel?: number;
+}
+
+/** Photos in the `other` catch-all OR with no category — the reclass targets. */
+function isReclassifyOtherTarget(img: GalleryImage): boolean {
+  const cat = typeof img.category === 'string' ? img.category.trim() : '';
+  return cat.length === 0 || cat === 'other';
 }
 
 function parseArgs(argv: readonly string[]): Args {
@@ -120,6 +135,7 @@ function parseArgs(argv: readonly string[]): Args {
     includeDrafts: map.has('include-drafts'),
     force: map.has('force'),
     backfillScores: map.has('backfill-scores'),
+    reclassifyOther: map.has('reclassify-other'),
     concurrency: concRaw !== undefined ? Math.min(6, Math.max(1, concRaw)) : 3,
     ...(typeof slugRaw === 'string' ? { slug: slugRaw } : {}),
     ...(limitRaw !== undefined ? { limit: limitRaw } : {}),
@@ -265,15 +281,22 @@ async function runOnHotel(
     //  - default          → photos missing a category
     const targets = args.force
       ? gallery
-      : args.backfillScores
-        ? // Only re-score photos with a usable Cloudinary public_id. Legacy
-          // pre-Cloudinary rows store the image under `url` with no
-          // `public_id` (forbidden-CDN scrapes) — sending those to OpenAI
-          // just 404s. They belong to the Phase-2 re-sourcing chantier.
-          imagesNeedingScores(gallery).filter(
-            (img) => typeof img.public_id === 'string' && img.public_id.trim().length > 0,
+      : args.reclassifyOther
+        ? gallery.filter(
+            (img) =>
+              isReclassifyOtherTarget(img) &&
+              typeof img.public_id === 'string' &&
+              img.public_id.trim().length > 0,
           )
-        : imagesNeedingCategory(gallery);
+        : args.backfillScores
+          ? // Only re-score photos with a usable Cloudinary public_id. Legacy
+            // pre-Cloudinary rows store the image under `url` with no
+            // `public_id` (forbidden-CDN scrapes) — sending those to OpenAI
+            // just 404s. They belong to the Phase-2 re-sourcing chantier.
+            imagesNeedingScores(gallery).filter(
+              (img) => typeof img.public_id === 'string' && img.public_id.trim().length > 0,
+            )
+          : imagesNeedingCategory(gallery);
     const capped =
       args.maxPhotosPerHotel !== undefined ? targets.slice(0, args.maxPhotosPerHotel) : targets;
     if (capped.length === 0) {
@@ -385,7 +408,7 @@ async function main(): Promise<void> {
   };
 
   console.log(
-    `[vision] dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} force=${args.force} backfillScores=${args.backfillScores} maxPhotos=${args.maxPhotosPerHotel ?? '∞'}`,
+    `[vision] dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} force=${args.force} backfillScores=${args.backfillScores} reclassifyOther=${args.reclassifyOther} maxPhotos=${args.maxPhotosPerHotel ?? '∞'}`,
   );
 
   const filters: string[] = [];
@@ -404,6 +427,8 @@ async function main(): Promise<void> {
 
   const eligible = rows.filter((r) => {
     const g = r.gallery_images ?? [];
+    // In reclassify-other mode the only signal is "has an `other`/null photo".
+    if (args.reclassifyOther) return g.some(isReclassifyOtherTarget);
     if (hotelNeedsCategorisation(g, { force: args.force })) return true;
     // In backfill mode, a fully-categorised hotel is still eligible if any
     // photo lacks the newer representativeness/hero_suitable scores.
