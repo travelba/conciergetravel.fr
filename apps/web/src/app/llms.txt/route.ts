@@ -492,12 +492,17 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 24 actions disponibles (search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…).',
+              'Catalogue machine-readable des 26 actions disponibles (search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…).',
           },
           {
             url: `${origin}/api/agent/hotel-sources/le-bristol-paris`,
             description:
               "Exemple d'endpoint EEAT — renvoie pour un slug d'hôtel l'array structuré `external_sources` : Wikidata QID, Wikipedia URL, site officiel, identifiants TripAdvisor / Booking, comptes sociaux vérifiés, architectes, année d'ouverture, désignations patrimoniales. Permet la citation transparente des claims par ChatGPT / Perplexity / Claude / MCP, et la réconciliation d'identité avec leur propre knowledge graph.",
+          },
+          {
+            url: `${origin}/api/agent/directory/france/paris`,
+            description:
+              "Exemple d'endpoint annuaire géolocalisé — renvoie la liste exhaustive des hôtels publiés d'une ville (scopée par pays) avec coordonnées GPS (latitude/longitude WGS84), distinction Palace et lien fiche. Variante pays : /api/agent/directory/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tout le catalogue d'une ville ou d'un pays. Aucun tarif (gel Phase 6).",
           },
           {
             url: `${origin}/sitemap.xml`,

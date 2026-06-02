@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import { HAND_BUILT_COUNTRY_GUIDE_BY_CODE } from '@/lib/destinations/hand-built-country-guides';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { countrySlug } from '@/server/annuaire/country-slugs';
 
 /**
  * Per-country summary for the `/destination` directory hub.
@@ -43,6 +44,13 @@ export interface InternationalDestinationCard {
    *  - `null`          → no guide (country surfaced via `/hotels` anchor).
    */
   readonly guideRoute: 'guide' | 'destination' | null;
+  /**
+   * Locale-invariant annuaire slug (ADR-0026). Always set — links to
+   * `/hotels/<directorySlug>`, the exhaustive country directory. Used as
+   * the fallback discovery path for countries with no editorial guide
+   * yet (replaces the old `/hotels#country-<code>` anchor).
+   */
+  readonly directorySlug: string;
 }
 
 const HotelCountryRowSchema = z.object({
@@ -197,6 +205,7 @@ export async function listInternationalDestinations(
       hotelCount: row.hotelCount,
       guideSlug,
       guideRoute,
+      directorySlug: countrySlug(row.labelFr, row.labelEn, row.code),
     };
   });
 

@@ -206,6 +206,13 @@ export const routing = defineRouting({
     '/hotel/[slug]': '/hotel/[slug]',
     '/hotel/[slug]/chambres/[roomSlug]': '/hotel/[slug]/chambres/[roomSlug]',
     '/hotels': '/hotels',
+    // Annuaire hôtels par pays / par ville (ADR-0026). Segments
+    // identical per locale (flat, like `/hotels`) — the `pays` slug is
+    // derived from the FR country label, the `ville` slug from the city
+    // name (locale-invariant per ADR-0008). Nested under `/hotels` so it
+    // inherits the global directory's authority.
+    '/hotels/[pays]': '/hotels/[pays]',
+    '/hotels/[pays]/[ville]': '/hotels/[pays]/[ville]',
     '/destination': '/destination',
     '/destination/[citySlug]': '/destination/[citySlug]',
     '/guide/[citySlug]': '/guide/[citySlug]',
