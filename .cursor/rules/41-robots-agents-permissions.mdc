@@ -1,0 +1,60 @@
+---
+description: Politique transverse de robots, accès bots IA et cohérence entre SEO classique et consommation agentique.
+globs:
+  - "packages/seo/**/*.{ts,tsx,md,mdx}"
+  - "apps/web/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 41-robots-agents-permissions
+
+## Objectif
+Cette rule définit la politique de contrôle d’accès pour :
+- robots SEO classiques,
+- agents IA,
+- surfaces publiques,
+- surfaces privées ou sensibles.
+
+## Priorité & sources
+En cas de conflit, priment : `seo-geo.mdc` §Sitemap & robots (allow-list crawlers 2026) et `security-csp.mdc` (protection des surfaces sensibles). Cette rule ne redéfinit pas ces listes, elle en garantit la cohérence.
+
+## Principe
+La politique bots doit être cohérente avec :
+- les objectifs SEO,
+- la sécurité,
+- la confidentialité,
+- la qualité des surfaces exposées,
+- la stratégie GEO / AEO.
+
+## Robots classiques
+Toujours vérifier que :
+- les pages à fort enjeu SEO sont découvrables,
+- les pages sans valeur SEO ne polluent pas le crawl,
+- les directives robots sont cohérentes avec canonicals, sitemap et indexation.
+
+## Bots IA
+Les bots IA ne doivent pas recevoir un traitement contradictoire par rapport à la stratégie du site.
+Toute politique spécifique doit être :
+- explicite,
+- justifiée,
+- cohérente avec les surfaces publiques réellement destinées à être citées.
+
+## Surfaces sensibles
+Les zones sensibles ne doivent pas être exposées par erreur.
+Toujours vérifier :
+- endpoints privés,
+- interfaces admin,
+- données non publiques,
+- logs,
+- URLs techniques.
+
+## Cohérence documentaire
+Toute évolution robots / bots IA doit rester cohérente avec :
+- `docs/04-seo-geo-aeo.md`
+- `llms.txt`
+- les conventions du package `packages/seo`
+
+## Interdictions
+- Ne pas ouvrir une surface sensible à cause d’une règle trop large.
+- Ne pas créer une contradiction entre robots, sitemap, canonical et indexation.
+- Ne pas traiter la politique bots comme un simple détail technique.

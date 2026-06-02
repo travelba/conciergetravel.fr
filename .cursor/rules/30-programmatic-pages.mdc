@@ -1,0 +1,104 @@
+---
+description: Contrat commun des pages programmatiques SEO du projet : destinations, zones, collections, rankings et surfaces dérivées.
+globs:
+  - "apps/web/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 30-programmatic-pages
+
+## Objectif
+Cette rule définit le cadre des pages programmatiques du projet.
+Une page programmatique ne doit jamais être une simple page générée en masse.
+Elle doit être :
+- utile,
+- différenciée,
+- structurée,
+- éditorialement crédible,
+- SEO-compatible,
+- AEO-compatible.
+
+## Priorité & sources
+En cas de conflit, les sources autoritaires priment : `seo-geo.mdc` (anti-cannibalisation, indexation, sitemap) et le skill `editorial-rankings-matrix` (combinator, éligibilité, slugs). Cette rule cadre le contrat générique des pages programmatiques sans dupliquer ces sources.
+
+## Types de pages concernées
+Cette rule s’applique aux surfaces telles que :
+- pages pays,
+- pages régions,
+- pages villes,
+- pages quartiers,
+- pages collections,
+- pages rankings,
+- pages thématiques,
+- autres surfaces programmatiques validées.
+
+## Contrat minimum d’une page programmatique
+Avant indexation, une page doit avoir :
+- une intention claire,
+- un titre propre,
+- une structure éditoriale réelle,
+- un bloc principal utile,
+- un maillage interne cohérent,
+- des données ou entités fiables,
+- les metadata et schémas nécessaires.
+
+Ne pas publier de pages faibles, interchangeables ou purement générées pour capter des requêtes.
+
+## Structure attendue
+Une page programmatique doit en général contenir :
+- un angle éditorial clair,
+- une introduction utile,
+- un ou plusieurs blocs d’explication,
+- une sélection ou liste structurée,
+- des liens vers les pages profondes,
+- des éléments de réassurance ou contexte,
+- si pertinent, une FAQ utile.
+
+## Différenciation
+Deux pages programmatiques proches doivent rester distinctes.
+Toujours vérifier :
+- que l’intention n’est pas déjà couverte ailleurs,
+- que l’angle éditorial change réellement,
+- que les clusters ne se cannibalisent pas,
+- que la hiérarchie des hubs est claire.
+
+## Data quality
+Aucune page programmatique ne doit reposer sur une donnée douteuse ou mal reliée.
+Toujours vérifier :
+- entités,
+- localisation,
+- noms,
+- catégories,
+- disponibilité des contenus liés,
+- qualité des assets si affichés.
+
+## Linking interne
+Chaque page programmatique doit être intégrée à un cluster.
+Toujours prévoir :
+- liens vers le niveau supérieur,
+- liens vers les pages enfants pertinentes,
+- liens latéraux utiles,
+- liens vers fiches hôtels si nécessaire.
+
+## SEO technique
+Pour toute nouvelle page programmatique, définir explicitement :
+- index ou noindex,
+- canonical,
+- schémas attendus,
+- place dans le sitemap,
+- liens de découverte interne.
+
+## GEO / AEO
+Une page programmatique doit être facilement lisible par les agents IA.
+Utiliser :
+- titres clairs,
+- sections nommées,
+- entités explicites,
+- relations compréhensibles,
+- blocs faciles à extraire.
+
+## Interdictions
+- Ne pas créer des pages à faible valeur juste pour couvrir des variantes.
+- Ne pas générer des textes répétitifs à peine modifiés.
+- Ne pas ouvrir l’indexation sans stratégie claire.
+- Ne pas casser la hiérarchie entre hubs, clusters et pages profondes.

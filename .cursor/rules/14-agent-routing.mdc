@@ -1,0 +1,156 @@
+---
+description: Routage des tâches vers les bonnes rules, skills et zones du repo pour éviter les conflits et la duplication. Complète la table "Where to look first" d'AGENTS.md §3. À consulter avant une tâche dont la surface n'est pas évidente.
+alwaysApply: false
+---
+
+# 14-agent-routing
+
+## Objectif
+Cette rule indique comment choisir les bons points d’entrée du projet avant toute modification.
+Le repo contient déjà des rules, des skills, des packages métiers et une documentation structurée.
+L’agent doit d’abord router correctement la demande avant d’écrire du code.
+
+## Principe général
+Avant de modifier quoi que ce soit :
+1. identifier le type de tâche,
+2. identifier la surface du produit concernée,
+3. lire les rules / skills / docs les plus pertinentes,
+4. vérifier si une logique similaire existe déjà,
+5. seulement ensuite proposer ou coder.
+
+## Types de tâches et routage recommandé
+
+### 1. Tâche SEO technique
+Exemples :
+- canonicals,
+- metadata,
+- robots,
+- sitemap,
+- hreflang,
+- indexation,
+- pagination,
+- facettes.
+
+Lire en priorité :
+- `docs/04-seo-geo-aeo.md`
+- rules SEO existantes dans `.cursor/rules/`
+- package `packages/seo`
+- skills liées au SEO technique et structured data
+
+Ne jamais créer une nouvelle logique SEO sans vérifier si `packages/seo` la gère déjà.
+
+### 2. Tâche GEO / AEO / LLM visibility
+Exemples :
+- llms.txt,
+- contenus exploitables par agents,
+- réponses synthétiques,
+- structure orientée entités,
+- citations LLM.
+
+Lire en priorité :
+- `docs/04-seo-geo-aeo.md`
+- `AGENTS.md`
+- skills GEO / LLM / structured data
+- package `packages/seo`
+
+Toute modification GEO/AEO doit rester compatible avec le SEO classique.
+
+### 3. Tâche page hôtel
+Exemples :
+- structure de fiche,
+- sections éditoriales,
+- galerie,
+- highlights,
+- FAQ,
+- schema Hotel / Offer.
+
+Lire en priorité :
+- `EDITORIAL_VOICE.md`
+- rules liées aux pages hôtel
+- composants et routes existants dans `apps/web`
+- builders du package `packages/seo`
+
+Ne jamais refaire une structure de page hôtel sans analyser le template existant.
+
+### 4. Tâche contenu / éditorial
+Exemples :
+- guides,
+- rankings,
+- collections,
+- enrichissement sémantique,
+- ton rédactionnel.
+
+Lire en priorité :
+- `EDITORIAL_VOICE.md`
+- rules éditoriales existantes
+- docs SEO/GEO
+- skills content / editorial / enrichment
+
+Toujours respecter la voix concierge.
+
+### 5. Tâche search / listing / filtres
+Exemples :
+- moteur de recherche,
+- listing hôtels,
+- Algolia,
+- facettes,
+- critères.
+
+Lire en priorité :
+- packages intégration / domain / search
+- rules liées à la recherche
+- docs produit concernées
+
+Ne pas rendre indexable une facette ou une vue filtrée sans décision explicite.
+
+### 6. Tâche booking / conversion
+Exemples :
+- funnel,
+- disponibilité,
+- réservation,
+- paiements,
+- CTA,
+- forms.
+
+Lire en priorité :
+- `docs/05-booking-flow.md`
+- packages `domain`, `integrations`
+- rules et skills booking
+
+Toute logique de booking doit respecter l’ordre de phasage du projet.
+
+### 7. Tâche observabilité / performance / QA
+Exemples :
+- Lighthouse,
+- Sentry,
+- logs,
+- web vitals,
+- tests.
+
+Lire en priorité :
+- rules observability/perf existantes
+- package `observability`
+- lighthouserc
+- tests existants
+
+Ne pas optimiser un point isolé si cela détériore le SEO, la lisibilité ou la maintenabilité.
+
+## Règles de sécurité du routage
+- Si plusieurs rules semblent se contredire, stopper et signaler le conflit.
+- Si une règle spécifique existe déjà pour une page ou un domaine, elle prime sur une règle transverse générique.
+- Si une skill existe déjà pour une tâche précise, la consulter avant toute nouvelle implémentation.
+- Toujours préférer fusionner l’existant plutôt que créer une deuxième logique concurrente.
+
+## Sortie attendue avant exécution
+Avant toute tâche importante, l’agent doit être capable de résumer :
+- la surface concernée,
+- les fichiers à lire,
+- les rules applicables,
+- les skills pertinentes,
+- les risques de conflit.
+
+## Interdictions
+- Ne pas faire de refonte globale sans plan.
+- Ne pas dupliquer une convention déjà présente.
+- Ne pas contourner `AGENTS.md`, `EDITORIAL_VOICE.md` ou `docs/04-seo-geo-aeo.md`.
+- Ne pas introduire une nouvelle règle transverse si une règle existante couvre déjà correctement le besoin.
