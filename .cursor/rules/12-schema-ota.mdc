@@ -1,0 +1,108 @@
+---
+description: Cadre des données structurées OTA du projet et usage obligatoire des builders partagés du package SEO.
+globs:
+  - "apps/web/**/*.{ts,tsx}"
+  - "packages/seo/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 12-schema-ota
+
+## Objectif
+Cette rule définit les principes de données structurées du projet.
+Les schémas doivent être :
+- cohérents,
+- maintenables,
+- alignés avec le contenu visible,
+- réutilisables via `packages/seo`.
+
+## Priorité & sources
+En cas de conflit, les sources autoritaires priment sur cette rule transverse :
+- skill `structured-data-schema-org` + `seo-geo.mdc` §JSON-LD pour les règles de fond (ex. `AggregateRating.bestRating: '5'`).
+- `hotel-detail-page.mdc` pour le set de schémas de la fiche hôtel.
+- builders réels à réutiliser dans `packages/seo/src/jsonld/*` (`hotel`, `faq`, `breadcrumb`, `article`, `item-list`, `aggregate-rating`, `place-amenity`, `video-object`).
+- `ImageObject` n'a **pas** de builder dédié : il est produit à l'intérieur de `hotel.ts` et `article.ts`. Ne pas chercher (ni créer) un fichier `image.ts` séparé.
+
+## Principe général
+Toujours utiliser les builders, helpers et conventions existants dans `packages/seo` quand ils existent.
+Ne pas créer du JSON-LD isolé dans une page si une logique partagée couvre déjà le besoin.
+
+## Types de schémas prioritaires
+Selon la surface, évaluer et appliquer si pertinent :
+- `Hotel`
+- `Offer` — **gelé jusqu'à Phase 6** (voir section Offers + AGENTS.md §4ter). Ne pas émettre tant que les APIs de réservation ne sont pas câblées.
+- `LodgingBusiness` ou conventions OTA existantes du projet
+- `BreadcrumbList`
+- `FAQPage`
+- `Article` / `BlogPosting`
+- `ImageObject`
+- `AggregateRating` / `Review` (uniquement si avis réels)
+- schémas métier déjà présents dans le repo
+
+## Pages hôtels
+Une page hôtel doit être évaluée pour :
+- schéma principal hôtel,
+- offres si elles sont réellement disponibles,
+- FAQ si présente,
+- breadcrumbs,
+- images principales et galerie si la logique du projet le couvre.
+
+Le schéma ne doit pas promettre plus que ce que la page ou la donnée réelle permet.
+
+## Pages éditoriales
+Les guides, rankings, collections et contenus inspirationnels doivent utiliser les types adaptés déjà retenus par le projet.
+Toujours garder l’alignement entre :
+- titre visible,
+- metadata,
+- type de contenu,
+- schémas injectés.
+
+## Offers
+> **Gel Phase 6 (AGENTS.md §4ter).** Toute la donnée de tarif / disponibilité
+> provient d'APIs qui ne seront câblées qu'en dernière brique du projet. Tant
+> que la Phase 6 n'est pas ouverte, **ne pas émettre de `Offer` JSON-LD** sur
+> la fiche hôtel ni sur aucune surface publique. Émettre uniquement
+> `Hotel` + `Place` + `BreadcrumbList` + `FAQPage` + `AggregateRating`
+> (si avis réels) + `Review[]` + `ImageObject[]` + `Award[]`.
+
+Quand la Phase 6 sera ouverte, les `Offer` ne devront être injectées que si la
+donnée est fiable et conforme au contrat métier.
+Toujours vérifier :
+- devise,
+- disponibilité,
+- source de vérité,
+- fraîcheur de la donnée,
+- `priceValidUntil` présent (CDC §2.8),
+- cohérence avec le rendu utilisateur.
+
+Ne pas injecter d’offre fictive ou ambiguë.
+
+## FAQPage
+Ne déclarer `FAQPage` que si la FAQ est réellement visible et éditorialement utile.
+Ne pas générer des FAQ SEO artificielles sans valeur utilisateur.
+
+## BreadcrumbList
+Les breadcrumbs doivent refléter la vraie hiérarchie de navigation.
+Ne pas inventer une hiérarchie purement SEO qui n’existe pas côté UX.
+
+## ImageObject
+Quand la donnée est disponible, enrichir les images selon la logique existante du projet.
+Toujours privilégier :
+- dimensions réelles,
+- URL stables,
+- cohérence avec la galerie affichée,
+- qualité éditoriale des images.
+
+## Validation
+Avant merge d’une modification de schéma :
+- vérifier les builders existants,
+- vérifier le type de page,
+- vérifier le contenu visible,
+- éviter les champs vides ou trompeurs,
+- contrôler les impacts SEO et AEO.
+
+## Interdictions
+- Ne pas coder un nouveau système de JSON-LD parallèle.
+- Ne pas injecter des schémas non visibles ou trompeurs.
+- Ne pas déclarer des offres incertaines.
+- Ne pas casser l’alignement entre données, UI et SEO.
