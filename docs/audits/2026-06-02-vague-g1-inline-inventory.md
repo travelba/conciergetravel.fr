@@ -66,7 +66,7 @@ Un `script-src 'sha256-…'` n'autorise un script inline **que si ses octets son
 
 ## 3. 🚨 Décision requise — la prémisse de G-1 doit être arbitrée
 
-ADR-0013 (§Option B) avait **déjà rejeté** le hash build-time, et déféré le choix CSP à une **ADR-0018 (toujours non écrite)**. Le contexte a évolué depuis (gel booking Phase 6 = ADR-0025 → plus d'`Offer` Amadeus dynamique en Phase 1), **mais** cela ne débloque pas le hash : le JSON-LD éditorial reste par-page-dynamique et l'hydratation Next.js reste l'obstacle dur.
+ADR-0013 (§Option B) avait **déjà rejeté** le hash build-time, et déféré le choix CSP à une ADR dédiée — désormais rédigée sous le n° **ADR-0026** (`docs/adr/0026-csp-rendering-strategy.md` ; initialement désignée « ADR-0018 », numéro réattribué entre-temps à l'ADR env-vars). Le contexte a évolué depuis (gel booking Phase 6 = ADR-0025 → plus d'`Offer` Amadeus dynamique en Phase 1), **mais** cela ne débloque pas le hash : le JSON-LD éditorial reste par-page-dynamique et l'hydratation Next.js reste l'obstacle dur.
 
 ### Options réelles pour atteindre le _vrai_ but (perf/fraîcheur ISR sur fiches), à arbitrer
 
@@ -82,9 +82,9 @@ ADR-0013 (§Option B) avait **déjà rejeté** le hash build-time, et déféré 
 
 **Ne pas implémenter l'Étape 2 telle qu'écrite** (retrait nonce + hash statique + `csp-hash-check.mjs`) : elle casserait la prod. À la place :
 
-1. **Écrire ADR-0018** (déférée depuis ADR-0013) pour arbitrer entre **C (PPR)**, **D (`script-src-attr`)** et **E (force-dynamic optimisé)**.
+1. **ADR-0026** (rédigée — `docs/adr/0026-csp-rendering-strategy.md`, statut Proposed) arbitre entre **α (PPR)**, **β (`script-src-attr`)** et **γ (force-dynamic optimisé)**.
 2. Le feature flag `CSP_MODE=hash|nonce` (prévu en garde-fou) reste pertinent **uniquement** si une option génère réellement des hashes — ce qui n'est pas le cas des options C/D/E.
-3. Conserver `export const dynamic`/`revalidate` **inchangés** (déjà hors-scope G-1 par garde-fou) tant que l'ADR-0018 n'a pas tranché.
+3. Conserver `export const dynamic`/`revalidate` **inchangés** (déjà hors-scope G-1 par garde-fou) tant qu'ADR-0026 n'a pas tranché.
 
 ---
 
