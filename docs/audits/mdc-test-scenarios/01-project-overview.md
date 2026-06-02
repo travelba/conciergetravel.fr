@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (stack parallèle non justifiée) et renvo
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : rappelle le positionnement (OTA luxe SEO/GEO/agentic), cite la stack imposée sans en inventer, applique l'ordre de priorité. Négatif : refuse l'ajout Remix+Prisma (stack parallèle non justifiée) et renvoie vers la stack imposée + validation explicite.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

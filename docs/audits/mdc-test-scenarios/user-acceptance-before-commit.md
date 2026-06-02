@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (tests verts ≠ acceptance ; walk-through
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : walk-through navigateur fr+en, screenshots, preuve de discoverabilité (≤ 2 clics depuis `/`, nav + footer + burger mobile), rapport AVANT commit. Négatif : refuse « c'est live, pas besoin de vérifier, les tests passent » (tests verts ≠ acceptance — cas 2026-05-26).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

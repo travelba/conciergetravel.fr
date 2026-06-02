@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (`bestRating` = `'5'` ; indicateurs d'urge
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : `alternates.canonical` + hreflang V1, `bestRating: '5'`, builders `@mch/seo/jsonld/*` via `JsonLdScript`, aucun indicateur d'urgence fabriqué. Négatif : refuse `bestRating: '10'` + « 12 personnes consultent » (DSA/DGCCRF).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

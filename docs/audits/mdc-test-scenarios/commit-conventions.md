@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (format Conventional Commits + footer `Tes
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : format `type(scope): summary` impératif ≤ 72 chars, scope valide, footer `Tested:` sur surface visible. Négatif : refuse `"update stuff"` sans scope ni footer.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

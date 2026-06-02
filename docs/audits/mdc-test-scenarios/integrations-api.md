@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (validation Zod + client partagé obligato
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : structure `client/types/errors/cache-keys/__tests__`, client `_http` (timeouts, retries 5xx/429), `safeParse` Zod, erreurs mappées + spans Sentry. Négatif : refuse `fetch` direct sans Zod ni retries + cast `as VendorResp`.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

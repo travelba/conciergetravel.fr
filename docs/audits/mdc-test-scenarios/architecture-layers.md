@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (I/O interdit dans la couche domaine).
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : logique pure dans `packages/domain/` (clock/randomness injectés, `Result<T,E>`), couches basses n'importent pas les hautes. Négatif : refuse `@supabase/*` + `fetch` dans `packages/domain` (I/O interdit dans la couche domaine).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

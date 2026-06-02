@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (les seams se branchent sur un flag opt-in
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : spec `e2e/<journey>.spec.ts`, requêtes role-based, assertion axe, seam gated par flag `MCH_E2E_FAKE_*` + `MCH_DISABLE_RATE_LIMITS=1`. Négatif : refuse un seam branché sur `NODE_ENV === 'test'` en code de prod.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (locale V2 non activable sur traduction ma
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : rappelle le phasage V1 = fr+en, hreflang vers équivalents réels, canonical locale→elle-même. Négatif : refuse d'activer `es` sur traduction machine + hreflang non vérifiés.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

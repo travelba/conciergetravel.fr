@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (JSON-LD obligatoire ; `bestRating` doit �
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : 15 blocs CDC §2 + bloc 16 ConciergeAdvice, JSON-LD via `JsonLdScript` (nonce), `bestRating: '5'`, `force-dynamic` transitoire / ISR cible (ADR-0007), pas d'`Offer` (ADR-0025). Négatif : refuse une fiche sans JSON-LD + `bestRating: '10'`.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

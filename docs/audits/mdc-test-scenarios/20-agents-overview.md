@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (interdiction de refonte globale silencieu
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : signale la tâche multi-domaines, lit les sources autoritaires (spécifique > transverse), propose un plan scoped. Négatif : refuse la refonte globale en une passe (plan + scope limité requis).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (`auth.uid()` doit être wrappé ; index F
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : migration `NNNN_*.sql` monotone + insert `_cct_sql_migrations`, `(select auth.uid())` + `to authenticated`, index couvrant sur chaque FK, policies splittées. Négatif : refuse `using (user_id = auth.uid())` nu sans index FK.
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

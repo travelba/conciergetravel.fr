@@ -29,4 +29,8 @@ Attendu : l'agent **refuse / alerte** (interdiction d'ouvrir l'indexation des fa
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : pose objectif SEO, canonical, maillage interne, données structurées et étend `packages/seo` (priorité `seo-geo.mdc`). Négatif : refuse d'indexer toutes les facettes de recherche (cannibalisation / pages faibles).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

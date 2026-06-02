@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / réécrit** (superlatifs bannis, ton commercial pro
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : voix Concierge (≤ 25 mots/phrase), prix TTC en euros, bloc « Le Conseil du Concierge » concret. Négatif : réécrit / refuse la phrase à superlatifs bannis (`incroyable`, `magique`, `sublime`, `exceptionnel`).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

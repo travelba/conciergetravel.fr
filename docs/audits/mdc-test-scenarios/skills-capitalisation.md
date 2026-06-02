@@ -27,4 +27,8 @@ Attendu : l'agent **alerte** (red-flag : quirk vendor non documenté = capture o
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : auto-audit fin de tâche (leçon réutilisable ? déjà couverte ?), étend le skill le plus proche (3e personne, code concret), cross-link + README. Négatif : alerte sur « pas besoin de documenter » (red-flag : quirk vendor non documenté = capture obligatoire).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

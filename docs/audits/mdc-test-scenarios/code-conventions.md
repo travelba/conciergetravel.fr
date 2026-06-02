@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (interdiction de `any`/`as`, validation Zo
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+
+Positif : aucun `any`/`as`/`!`, narrow via Zod, kebab-case + alias `@mch/*`, erreurs typées. Négatif : refuse `as any` sur la réponse vendor (validation Zod requise).
+
+> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
