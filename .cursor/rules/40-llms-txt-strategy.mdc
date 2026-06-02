@@ -1,0 +1,52 @@
+---
+description: Stratégie de maintenance et d’évolution de llms.txt pour la visibilité agentique du projet.
+globs:
+  - "packages/seo/**/*.{ts,tsx,md,mdx}"
+  - "apps/web/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 40-llms-txt-strategy
+
+## Objectif
+Cette rule encadre la stratégie `llms.txt` du projet.
+Le fichier doit aider les agents et moteurs de réponse à comprendre quelles ressources du site sont prioritaires et fiables.
+
+## Priorité & sources
+En cas de conflit, priment : `seo-geo.mdc` §llms.txt, le skill `geo-llm-optimization`, et la logique de génération réelle dans `packages/seo/src/llms/`. Toujours étendre cette logique plutôt que d'en créer une parallèle.
+
+## Principe
+`llms.txt` ne doit pas être traité comme un gadget.
+Il doit refléter :
+- les surfaces réellement importantes,
+- les pages de référence,
+- les contenus propres,
+- les entrées utiles aux agents.
+
+## Sélection des surfaces
+Toujours prioriser dans `llms.txt` :
+- pages hubs fortes,
+- pages hôtels majeures,
+- destinations clés,
+- collections structurantes,
+- contenus très utiles et fiables,
+- ressources documentaires si elles sont publiques et pertinentes.
+
+## Cohérence
+Le contenu de `llms.txt` doit rester cohérent avec :
+- la stratégie SEO,
+- le sitemap,
+- l’indexabilité réelle,
+- les pages canoniques,
+- les surfaces effectivement maintenues.
+
+Ne pas mettre en avant des pages faibles, temporaires ou peu fiables.
+
+## Mise à jour
+Quand une nouvelle surface éditoriale ou SEO devient stratégique, vérifier si `llms.txt` doit évoluer.
+Ne pas laisser ce fichier dériver par rapport à la réalité du site.
+
+## Interdictions
+- Ne pas lister des pages non canoniques.
+- Ne pas pousser des URLs instables.
+- Ne pas utiliser `llms.txt` pour compenser une mauvaise architecture SEO.
