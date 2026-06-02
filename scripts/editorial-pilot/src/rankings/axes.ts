@@ -461,6 +461,9 @@ export const LIEUX: readonly LieuDef[] = [
     slug: 'lac-leman',
     label: 'Lac Léman',
     scope: 'cluster',
+    // Le Léman s'étend sur les deux rives ; l'inventaire luxe publié est
+    // côté suisse (Genève, Lausanne, Montreux, Vevey). On conserve les
+    // villes françaises du Chablais pour le jour où leurs hôtels publient.
     hotelCityKeys: [
       'évian',
       'evian',
@@ -468,6 +471,16 @@ export const LIEUX: readonly LieuDef[] = [
       'evian-les-bains',
       'thonon-les-bains',
       'yvoire',
+      'geneva',
+      'genève',
+      'geneve',
+      'genève-satigny',
+      'lausanne',
+      'montreux',
+      'vevey',
+      // NB: surtout pas 'nyon' — le matcher `.includes` du combinator
+      // le ferait matcher "Canyon Point" (Amangiri) et "Colca Canyon"
+      // (Belmond). Aucun hôtel publié à Nyon de toute façon.
     ],
   },
 
