@@ -6,9 +6,9 @@ alwaysApply: false
 
 # Règles — Pages Itinéraire
 
-Spec complète → `docs/cdc-itineraires.md`  
-Pipeline contenu → `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`  
-Règles SEO/GEO transversales → `.cursor/rules/seo-geo.mdc`  
+Spec complète → `docs/cdc-itineraires.md`
+Pipeline contenu → `.cursor/skills/itinerary-editorial-pipeline/SKILL.md`
+Règles SEO/GEO transversales → `.cursor/rules/seo-geo.mdc`
 Voix éditoriale → `.cursor/rules/editorial-voice.mdc` + `EDITORIAL_VOICE.md`
 
 ---
@@ -108,7 +108,7 @@ itineraryHowToJsonLd({
 
 ### 3.2 ItemList — `packages/seo/src/jsonld/item-list.ts`
 
-Items = hôtels recommandés dans l'ordre `hotel_ids[]`.  
+Items = hôtels recommandés dans l'ordre `hotel_ids[]`.
 `item['@type'] = 'Hotel'` ; `item.url = '/hotel/[slug]'`.
 
 ### 3.3 FAQPage — `packages/seo/src/jsonld/faq.ts`
@@ -121,7 +121,7 @@ Accueil → Itinéraires → [Titre de l'itinéraire]
 
 ### 3.5 Article
 
-`datePublished` = `created_at` ; `dateModified` = `last_updated` ; `author.name` = auteur.  
+`datePublished` = `created_at` ; `dateModified` = `last_updated` ; `author.name` = auteur.
 **Interdit** : `AggregateRating` fabriquée. Uniquement si `google_rating` réel ≥ 10 reviews.
 
 ---

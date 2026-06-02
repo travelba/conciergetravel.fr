@@ -1,6 +1,6 @@
 ---
 description: Hard rules qualité photo pour MyConciergeHotel.com — quotas, formats, alt text bilingue, JSON-LD ImageObject, LCP, agentique. PR bloquée si non respecté.
-globs: "{apps/web/src/components/hotel/hotel-gallery.tsx,apps/web/src/components/hotel/hotel-hero.tsx,apps/web/src/app/**/hotel/**/*.{ts,tsx},scripts/photos/**/*.ts,packages/ui/src/cloudinary.ts,packages/seo/src/jsonld/hotel.ts}"
+globs: "{apps/web/src/components/hotel/hotel-gallery.tsx,apps/web/src/components/hotel/hotel-hero.tsx,apps/web/src/app/**/hotel/**/*.{ts,tsx},scripts/photos/**/*.ts,packages/ui/src/cloudinary-presets.ts,packages/ui/src/components/hotel-image.tsx,packages/seo/src/jsonld/hotel.ts}"
 alwaysApply: true
 ---
 
@@ -98,6 +98,6 @@ Un seul point manquant = PR refusée.
 - `.cursor/skills/photo-pipeline/SKILL.md` — sourcing légal, migration
 - `.cursor/rules/hotel-detail-page.mdc` paragraphe Hard Rules 9+16
 - `.cursor/rules/seo-geo.mdc` paragraphe JSON-LD et LLM-actionable surfaces
-- `packages/ui/src/cloudinary.ts` -> `buildCloudinarySrc`, `CLOUDINARY_PRESETS`
+- `packages/ui/src/components/hotel-image.tsx` -> `buildCloudinarySrc` ; `packages/ui/src/cloudinary-presets.ts` -> `CLOUDINARY_PRESETS`
 - `packages/seo/src/jsonld/hotel.ts` -> `hotelJsonLd` builder
 - `scripts/photos/sync-hotel-photos.ts` — sync batch Cloudinary -> Supabase

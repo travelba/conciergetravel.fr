@@ -79,7 +79,7 @@ Une fiche hôtel doit avoir :
 > d'`Offer` n'est pas obtenue par suppression de code mais par le **gating
 > `booking_mode`**. En Phase 1 le catalogue est éditorial (`booking_mode` =
 > `display_only` / `email`), donc :
-> - la fiche principale (`hotel/[slug]/page.tsx`) ne fetch aucune offre (ADR-0024) ;
+> - la fiche principale (`hotel/[slug]/page.tsx`) ne fetch aucune offre (ADR-0025) ;
 > - la sous-page chambre (`hotel/[slug]/chambres/[roomSlug]/page.tsx`) porte un
 >   chemin `Offer` **dormant** : `offerJsonLd` n'est émis que si
 >   `booking_mode ∈ {amadeus, little}` ET une offre live existe. Il reste donc
