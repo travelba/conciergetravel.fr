@@ -25,10 +25,10 @@ import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
+import { countrySlug } from '@/server/annuaire/country-slugs';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getGuideBySlug } from '@/server/guides/get-guide-by-slug';
-import { getAmadeusAggregateRatingsBatch } from '@/server/hotels/get-amadeus-sentiments-batch';
 import { findItinerariesForCity } from '@/server/itineraries/find-itineraries-for-context';
 import { findRankingsForCity } from '@/server/rankings/find-related-rankings';
 
@@ -81,25 +81,6 @@ function siteOrigin(): string {
 }
 
 /**
- * Type guard that narrows a generic integer `stars` field (the
- * Supabase schema allows the full int range) to the `1..5` literal
- * union expected by the SEO `Hotel`/`ListItem` builders. Anything
- * outside the range yields `null` so the caller falls back to a
- * starRating-less item rather than crashing or emitting bogus JSON-LD.
- */
-function narrowStars(value: number): 1 | 2 | 3 | 4 | 5 | null {
-  switch (value) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-      return value;
-    default:
-      return null;
-  }
-}
-
 /**
  * Cap on the number of cities materialised at build time. After
  * ADR-0016 (international expansion), `listPublishedCities` returns
@@ -346,9 +327,8 @@ export default async function DestinationHubPage({
   // in a thin shim that returns an empty Map when no guide is loaded —
   // saves the Supabase round-trip on the hot path of FR cities that
   // don't yet have a long-read.
-  const [t, ratingsByAmadeusId, relatedRankings, relatedItineraries, guide] = await Promise.all([
+  const [t, relatedRankings, relatedItineraries, guide] = await Promise.all([
     getTranslations('destinationPage'),
-    getAmadeusAggregateRatingsBatch(destination.hotels.map((h) => h.amadeusHotelId)),
     findRankingsForCity({ citySlug, limit: 6 }),
     findItinerariesForCity({ citySlug, limit: 4 }),
     getGuideBySlug(citySlug),
@@ -365,42 +345,18 @@ export default async function DestinationHubPage({
     href: { pathname: '/destination/[citySlug]', params: { citySlug } },
   })}`;
 
-  const itemListJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.itemListJsonLd({
-      name: t('meta.title', { city: destination.name }),
-      items: destination.hotels.map((h) => {
-        const rating =
-          h.amadeusHotelId !== null ? (ratingsByAmadeusId.get(h.amadeusHotelId) ?? null) : null;
-        // Only upgrade to a `Hotel`-nested ListItem when we have a
-        // publishable rating; otherwise keep the lean navigational
-        // shape so we don't dilute the structured-data signal.
-        const stars = narrowStars(h.stars);
-        // Slug selection stays locale-aware (data-layer concern) until
-        // ADR-0012 Phase 3 — see docs/runbooks/i18n-v2-rollout.md. V2
-        // locales fall back to the FR slug until migration 0034.
-        const hotelSlugForLocale = pickByLocale(locale, h.slug, h.slugEn);
-        return {
-          name: h.name,
-          url: `${origin}${getPathname({
-            locale,
-            href: { pathname: '/hotel/[slug]', params: { slug: hotelSlugForLocale } },
-          })}`,
-          ...(rating !== null
-            ? {
-                hotel: {
-                  ...(stars !== null ? { starRating: stars } : {}),
-                  aggregateRating: {
-                    ratingValue: rating.ratingValue,
-                    reviewCount: rating.reviewCount,
-                    bestRating: rating.bestRating,
-                    worstRating: rating.worstRating,
-                  },
-                },
-              }
-            : {}),
-        };
-      }),
-    }),
+  // ADR-0026 — the destination hub is purely editorial: it no longer
+  // lists hotels (no grid, no `ItemList` JSON-LD). The exhaustive,
+  // factual list of every hotel in the city lives on the
+  // `/hotels/[pays]/[ville]` annuaire (the canonical "all hotels"
+  // intent, with the Booking-style list+map). The hub promotes a single
+  // CTA to that annuaire and links to individual fiches from the
+  // editorial body. `directoryCountrySlug` is a pure helper (no fetch).
+  const totalHotelCount = destination.hotels.length;
+  const directoryCountrySlug = countrySlug(
+    destination.countryLabelFr,
+    destination.countryLabelEn,
+    destination.countryCode,
   );
 
   // Breadcrumb : Home > Destinations > [City]. The previous variant
@@ -566,7 +522,6 @@ export default async function DestinationHubPage({
           : 'max-w-editorial container mx-auto px-4 py-10 sm:py-14'
       }
     >
-      <JsonLdScript data={itemListJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       <JsonLdScript data={placeJsonLd} nonce={nonce} />
       {articleJsonLd !== null ? <JsonLdScript data={articleJsonLd} nonce={nonce} /> : null}
@@ -616,77 +571,33 @@ export default async function DestinationHubPage({
             <p className="text-muted mt-2 text-sm">{aeoAnswer}</p>
           </section>
 
+          {/* ADR-0026 — the destination hub no longer lists hotels. A
+              single, prominent CTA hands the "all hotels" intent to the
+              city annuaire (Booking-style list + interactive map).
+              Editorial mentions in the guide body still deep-link to
+              individual fiches (auto-linked via `linkMap`). */}
           {destination.hotels.length === 0 ? (
             <p className="text-muted text-sm">{t('empty')}</p>
           ) : (
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {destination.hotels.map((hotel) => {
-                const slugForLocale = pickByLocale(locale, hotel.slug, hotel.slugEn);
-                const rating =
-                  hotel.amadeusHotelId !== null
-                    ? (ratingsByAmadeusId.get(hotel.amadeusHotelId) ?? null)
-                    : null;
-                return (
-                  <li key={hotel.id}>
-                    <article className="border-border bg-bg flex h-full flex-col rounded-lg border p-5">
-                      <header className="flex flex-wrap items-baseline justify-between gap-2">
-                        <h2 className="text-fg font-serif text-xl">
-                          <Link
-                            href={{ pathname: '/hotel/[slug]', params: { slug: slugForLocale } }}
-                            className="hover:underline"
-                          >
-                            {hotel.name}
-                          </Link>
-                        </h2>
-                        <p className="text-muted text-xs">
-                          {hotel.isPalace
-                            ? t('card.palace')
-                            : t('card.stars', { count: hotel.stars })}
-                        </p>
-                      </header>
-                      {hotel.district !== null && hotel.district.length > 0 ? (
-                        <p className="text-muted mt-1 text-xs uppercase tracking-[0.14em]">
-                          {hotel.district}
-                        </p>
-                      ) : null}
-                      {rating !== null ? (
-                        <p
-                          className="text-fg mt-2 inline-flex items-center gap-1.5 text-xs"
-                          data-testid="destination-card-rating"
-                          aria-label={t('card.ratingAria', {
-                            value: rating.ratingValue.toFixed(1),
-                            best: rating.bestRating,
-                            count: rating.reviewCount,
-                          })}
-                        >
-                          <span aria-hidden>★</span>
-                          <span className="font-medium tabular-nums">
-                            {t('card.ratingScore', {
-                              value: rating.ratingValue.toFixed(1),
-                              best: rating.bestRating,
-                            })}
-                          </span>
-                          <span className="text-muted">
-                            {t('card.ratingReviews', { count: rating.reviewCount })}
-                          </span>
-                        </p>
-                      ) : null}
-                      {hotel.excerpt.length > 0 ? (
-                        <p className="text-muted mt-3 text-sm">{hotel.excerpt}</p>
-                      ) : null}
-                      <p className="mt-4">
-                        <Link
-                          href={{ pathname: '/hotel/[slug]', params: { slug: slugForLocale } }}
-                          className="text-fg text-sm font-medium underline-offset-4 hover:underline"
-                        >
-                          {t('card.viewHotel')} →
-                        </Link>
-                      </p>
-                    </article>
-                  </li>
-                );
-              })}
-            </ul>
+            <aside
+              aria-labelledby="destination-directory-crosslink"
+              className="border-border bg-muted/5 rounded-lg border p-6"
+            >
+              <p id="destination-directory-crosslink" className="text-muted text-sm">
+                {t('annuaire.note', { city: destination.name })}
+              </p>
+              <Link
+                href={{
+                  pathname: '/hotels/[pays]/[ville]',
+                  params: { pays: directoryCountrySlug, ville: citySlug },
+                }}
+                prefetch={false}
+                className="border-border bg-bg text-fg hover:bg-muted/10 mt-4 inline-flex items-center gap-2 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors"
+              >
+                {t('annuaire.ctaAll', { count: totalHotelCount, city: destination.name })}
+                <span aria-hidden>→</span>
+              </Link>
+            </aside>
           )}
 
           {/*

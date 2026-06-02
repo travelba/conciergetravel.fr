@@ -225,10 +225,11 @@
       "description": "Browse MyConciergeHotel’s editorial selection with instant search."
     },
     "title": "Search for a hotel",
-    "subtitle": "Enter a name, city, or keyword to explore the selection.",
+    "subtitle": "Enter a hotel name, a city, or a country to explore the selection.",
     "form": {
+      "ariaLabel": "Search the catalogue",
       "label": "Your query",
-      "placeholder": "Hotel name, city…",
+      "placeholder": "Hotel name, city or country…",
       "submit": "Search"
     },
     "stay": {
@@ -241,8 +242,15 @@
       "emptyPrompt": "Enter a search to see matching hotels.",
       "noneForQuery": "No hotels match your search.",
       "count": "{count, plural, one {# result} other {# results}}",
+      "citiesHeading": "Cities",
+      "countriesHeading": "Countries",
+      "hotelsHeading": "Hotels",
+      "cityHotelsCount": "{count, plural, one {# hotel} other {# hotels}}",
       "reserveTest": "Reserve (test mode)",
       "reserveTestHint": "Synthesises a fake offer and walks the full tunnel — no Amadeus call."
+    },
+    "popular": {
+      "heading": "Popular destinations"
     },
     "badges": {
       "palace": "Palace",
@@ -251,6 +259,16 @@
     "errors": {
       "lockFailed": "Could not lock the offer ({kind}). Please check your dates and try again."
     }
+  },
+  "searchAutocomplete": {
+    "listboxLabel": "Search suggestions",
+    "groupDestinations": "Cities",
+    "groupCountries": "Countries",
+    "groupHotels": "Hotels",
+    "loading": "Searching…",
+    "resultsCount": "{count, plural, one {# suggestion} other {# suggestions}}",
+    "hotelsCount": "{count, plural, one {# hotel} other {# hotels}}",
+    "palace": "Palace"
   },
   "header": {
     "brand": "MyConciergeHotel",
@@ -263,6 +281,7 @@
       "hotelsAllAria": "View all hotels",
       "hotelsCategoriesLabel": "Hotel categories",
       "hotelsBrowseAll": "Browse the full catalogue",
+      "directoryByCountry": "Directory by country & city",
       "hotelsByDistinction": "French selections",
       "hotelsByType": "By type",
       "hotelsByBrand": "By brand",
@@ -311,7 +330,7 @@
     },
     "search": {
       "label": "Search a hotel",
-      "destinationPlaceholder": "Destination (city, region…)",
+      "destinationPlaceholder": "Hotel, city or country…",
       "checkin": "Check-in",
       "checkout": "Check-out",
       "submit": "Search",
@@ -2562,6 +2581,7 @@
     "links": {
       "destinations": "All destinations",
       "hotels": "All hotels",
+      "directoryFrance": "Directory — hotels in France",
       "rankings": "All rankings",
       "guides": "All guides",
       "inspiration": "Inspiration",
@@ -2764,6 +2784,103 @@
       "price": "Total price incl. tax"
     }
   },
+  "directoryPage": {
+    "breadcrumb": {
+      "label": "Breadcrumb",
+      "home": "Home",
+      "hotels": "Hotels"
+    },
+    "eyebrow": "Directory",
+    "results": {
+      "count": "{count, plural, one {# property} other {# properties}}",
+      "sortedBy": "Sorted by distinction"
+    },
+    "filters": {
+      "title": "Filters",
+      "open": "Filters",
+      "close": "Close",
+      "clear": "Clear all",
+      "apply": "{count, plural, one {Show # property} other {Show # properties}}",
+      "category": "Category",
+      "starLabel": "{count, plural, one {# star} other {# stars}}",
+      "distinction": "Distinction",
+      "palace": "Palace (Atout France)",
+      "district": "Neighbourhood",
+      "city": "City",
+      "brand": "Brand",
+      "noResults": "No property matches these filters."
+    },
+    "sort": {
+      "label": "Sort by",
+      "recommended": "Our selection",
+      "nameAsc": "Name (A → Z)",
+      "nameDesc": "Name (Z → A)"
+    },
+    "card": {
+      "palace": "Palace",
+      "starsSuffix": "stars",
+      "view": "View hotel"
+    },
+    "map": {
+      "toggleShow": "Show map",
+      "toggleHide": "Show list",
+      "ariaLabel": "Map of hotels in {city}",
+      "popupView": "View hotel",
+      "geocodedNote": "{located} of {total} hotels located on the map"
+    },
+    "country": {
+      "metaTitle": "All hotels in {country} — full directory",
+      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} across {cities, plural, one {# city} other {# cities}} in {country}. The complete directory of our selection, city by city.",
+      "h1": "Hotels in {country}",
+      "subtitle": "{count, plural, one {# address} other {# addresses}} across {cities, plural, one {# city} other {# cities}} — the exhaustive directory of our selection in {country}.",
+      "byCity": "By city",
+      "viewCity": "{count, plural, one {View # hotel} other {View all # hotels}}",
+      "otherCountries": "Explore other countries",
+      "aeoQuestion": "How many hotels do you list in {country}?",
+      "aeoAnswer": "Our selection includes {count, plural, one {# hotel} other {# hotels}} in {country}, spread across {cities, plural, one {# city} other {# cities}}. Each address is listed with its city, distinction and a direct link to its detailed page. Directory updated {date}.",
+      "faqTitle": "Frequently asked questions — hotels in {country}",
+      "faqItems": [
+        {
+          "q": "How many hotels are listed in {country}?",
+          "a": "This page exhaustively lists every hotel in our selection located in {country}, grouped by city. The counter at the top reflects the exact number of addresses published to date."
+        },
+        {
+          "q": "How do I find a hotel in a specific city in {country}?",
+          "a": "Use the \"By city\" strip at the top of the page to jump straight to the city you want, or click \"View hotels\" under each city section to open that city's dedicated directory."
+        },
+        {
+          "q": "How does this differ from the destination guides?",
+          "a": "This directory is neutral and exhaustive: it lists every address with no editorial ranking. Our destination guides instead offer a curated, annotated selection and the Concierge's tip."
+        }
+      ]
+    },
+    "city": {
+      "metaTitle": "All hotels in {city} — full directory",
+      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} in {city}, {country}. The complete, factual directory of our selection.",
+      "h1": "Hotels in {city}",
+      "subtitle": "{count, plural, one {# address} other {# addresses}} in {city}, {country} — the exhaustive list of our selection.",
+      "exploreLabel": "Keep exploring",
+      "backToCountry": "All hotels in {country}",
+      "editorialGuide": "{city} guide",
+      "aeoQuestion": "How many hotels do you list in {city}?",
+      "aeoAnswer": "Our selection includes {count, plural, one {# hotel} other {# hotels}} in {city}, {country}. Each address is shown with its distinction and a direct link to its page. For a curated selection, see our {city} guide. Directory updated {date}.",
+      "faqTitle": "Frequently asked questions — hotels in {city}",
+      "faqItems": [
+        {
+          "q": "How many hotels are listed in {city}?",
+          "a": "This page exhaustively lists every hotel in our selection located in {city}. The counter at the top shows the exact number of addresses published to date."
+        },
+        {
+          "q": "How do I book a hotel in {city}?",
+          "a": "Open the page of the hotel you are interested in from this list: you will find the full presentation, photos and how to book through the Concierge."
+        },
+        {
+          "q": "Is there an editorial guide for {city}?",
+          "a": "Yes. The \"{city} guide\" link at the bottom of the page leads to our destination guide: a curated, annotated selection of the best addresses and the Concierge's tip, complementing this factual directory."
+        }
+      ]
+    }
+  },
   "destinationPage": {
     "meta": {
       "title": "5★ hotels & Palaces in {city}",
@@ -2778,6 +2895,11 @@
     "title": "5★ hotels and Palaces in {city}",
     "subtitle": "{count, plural, one {Our curated selection of # property in {city}} other {Our curated selection of # properties in {city}}} — {region}.",
     "empty": "No published hotel for this destination yet.",
+    "annuaire": {
+      "note": "This page shows a selection curated by our concierge desk. The full directory lists every address in {city}, with no editorial filter.",
+      "cta": "See the full {city} directory",
+      "ctaAll": "See all {count} hotels in {city}"
+    },
     "aeo": {
       "question": "How many 5★ hotels and Palaces do you offer in {city}?",
       "answerSingular": "MyConciergeHotel currently lists 1 property in {city} ({region}): 5★ hotels and Palaces curated for location, service and Atout France distinction. Direct booking, net GDS rates, secure payment, loyalty rewards from the first night. Updated {date}.",
@@ -2911,7 +3033,9 @@
       "viewMap": "View on the map",
       "datesPlaceholder": "Check-in – Check-out",
       "guests": "2 guests",
-      "seeRates": "See rates"
+      "seeRates": "See rates",
+      "viewPhotos": "View photos",
+      "conciergeSignature": "The Concierge"
     },
     "share": {
       "button": "Share",
@@ -3027,7 +3151,9 @@
     },
     "story": {
       "tocTitle": "Contents",
-      "tocLabel": "Story table of contents"
+      "tocLabel": "Story table of contents",
+      "readMore": "Read more",
+      "readLess": "Show less"
     },
     "faq": {
       "categoryBefore": "Before your stay",
@@ -3144,7 +3270,10 @@
       "lightboxCounter": "{current} / {total}",
       "previousImage": "Previous photo",
       "nextImage": "Next photo",
-      "closeLightbox": "Close gallery"
+      "closeLightbox": "Close gallery",
+      "mosaicEyebrow": "The gallery",
+      "mosaicCount": "{count, plural, one {# photo} other {# photos}}",
+      "backToGallery": "Back to the gallery"
     },
     "virtualTour": {
       "title": "Virtual tour",

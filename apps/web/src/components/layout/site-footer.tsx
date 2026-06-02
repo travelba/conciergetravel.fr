@@ -129,6 +129,17 @@ export async function SiteFooter(): Promise<ReactElement> {
                   {t('links.hotels')}
                 </Link>
               </li>
+              {/* ADR-0026 — direct entry into the annuaire (country
+                  directory). France is the largest country page and a
+                  stable canonical slug (`france`). */}
+              <li>
+                <Link
+                  href={{ pathname: '/hotels/[pays]', params: { pays: 'france' } }}
+                  className="text-fg hover:underline"
+                >
+                  {t('links.directoryFrance')}
+                </Link>
+              </li>
               <li>
                 <Link href="/classements" className="text-fg hover:underline">
                   {t('links.rankings')}

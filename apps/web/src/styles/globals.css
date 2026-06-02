@@ -10,3 +10,31 @@
 @config "../../tailwind.config.ts";
 
 @import '@mch/ui/globals.css';
+
+/*
+ * Directory map (annuaire) — list ↔ map synchronisation states.
+ * Scoped to the directory surfaces; toggled imperatively by
+ * `directory-map-layout.tsx` (Leaflet client island).
+ */
+.mch-directory-card--active {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+.mch-directory-pin--active {
+  transform: scale(1.25);
+  transform-origin: bottom center;
+  z-index: 1000 !important;
+}
+
+.mch-directory-pin {
+  transition: transform 120ms ease;
+}
+
+.mch-directory-popup__link {
+  color: #b45309;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

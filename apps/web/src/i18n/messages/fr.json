@@ -225,10 +225,11 @@
       "description": "Parcourez la sélection éditoriale MyConciergeHotel avec recherche instantanée."
     },
     "title": "Rechercher un hôtel",
-    "subtitle": "Tapez un nom, une ville ou un mot-clé pour explorer la sélection.",
+    "subtitle": "Tapez un nom d’hôtel, une ville ou un pays pour explorer la sélection.",
     "form": {
+      "ariaLabel": "Recherche dans le catalogue",
       "label": "Votre recherche",
-      "placeholder": "Nom d’hôtel, ville…",
+      "placeholder": "Nom d’hôtel, ville ou pays…",
       "submit": "Rechercher"
     },
     "stay": {
@@ -241,8 +242,15 @@
       "emptyPrompt": "Commencez par saisir une recherche pour afficher des résultats.",
       "noneForQuery": "Aucun résultat pour cette recherche.",
       "count": "{count, plural, one {# résultat} other {# résultats}}",
+      "citiesHeading": "Villes",
+      "countriesHeading": "Pays",
+      "hotelsHeading": "Hôtels",
+      "cityHotelsCount": "{count, plural, one {# hôtel} other {# hôtels}}",
       "reserveTest": "Réserver (mode test)",
       "reserveTestHint": "Crée une offre fictive et déroule le tunnel complet sans appel Amadeus."
+    },
+    "popular": {
+      "heading": "Destinations populaires"
     },
     "badges": {
       "palace": "Palace",
@@ -251,6 +259,16 @@
     "errors": {
       "lockFailed": "Le verrouillage de l'offre a échoué ({kind}). Vérifiez les dates ou réessayez."
     }
+  },
+  "searchAutocomplete": {
+    "listboxLabel": "Suggestions de recherche",
+    "groupDestinations": "Villes",
+    "groupCountries": "Pays",
+    "groupHotels": "Hôtels",
+    "loading": "Recherche en cours…",
+    "resultsCount": "{count, plural, one {# suggestion} other {# suggestions}}",
+    "hotelsCount": "{count, plural, one {# hôtel} other {# hôtels}}",
+    "palace": "Palace"
   },
   "header": {
     "brand": "MyConciergeHotel",
@@ -263,6 +281,7 @@
       "hotelsAllAria": "Voir tous les hôtels",
       "hotelsCategoriesLabel": "Catégories d'hôtels",
       "hotelsBrowseAll": "Tous les hôtels du catalogue",
+      "directoryByCountry": "Annuaire par pays et par ville",
       "hotelsByDistinction": "Sélections françaises",
       "hotelsByType": "Par type",
       "hotelsByBrand": "Par marque",
@@ -311,7 +330,7 @@
     },
     "search": {
       "label": "Rechercher un hôtel",
-      "destinationPlaceholder": "Destination (ville, région…)",
+      "destinationPlaceholder": "Hôtel, ville ou pays…",
       "checkin": "Arrivée",
       "checkout": "Départ",
       "submit": "Rechercher",
@@ -2562,6 +2581,7 @@
     "links": {
       "destinations": "Toutes les destinations",
       "hotels": "Tous les hôtels",
+      "directoryFrance": "Annuaire — hôtels en France",
       "rankings": "Tous les classements",
       "guides": "Tous les guides",
       "inspiration": "Inspiration",
@@ -2764,6 +2784,103 @@
       "price": "Prix total TTC"
     }
   },
+  "directoryPage": {
+    "breadcrumb": {
+      "label": "Fil d'Ariane",
+      "home": "Accueil",
+      "hotels": "Hôtels"
+    },
+    "eyebrow": "Annuaire",
+    "results": {
+      "count": "{count, plural, one {# établissement} other {# établissements}}",
+      "sortedBy": "Triés par distinction"
+    },
+    "filters": {
+      "title": "Filtres",
+      "open": "Filtres",
+      "close": "Fermer",
+      "clear": "Tout effacer",
+      "apply": "{count, plural, one {Voir # établissement} other {Voir les # établissements}}",
+      "category": "Catégorie",
+      "starLabel": "{count, plural, one {# étoile} other {# étoiles}}",
+      "distinction": "Distinction",
+      "palace": "Palace (Atout France)",
+      "district": "Quartier",
+      "city": "Ville",
+      "brand": "Marque",
+      "noResults": "Aucun établissement ne correspond à ces filtres."
+    },
+    "sort": {
+      "label": "Trier par",
+      "recommended": "Notre sélection",
+      "nameAsc": "Nom (A → Z)",
+      "nameDesc": "Nom (Z → A)"
+    },
+    "card": {
+      "palace": "Palace",
+      "starsSuffix": "étoiles",
+      "view": "Voir la fiche"
+    },
+    "map": {
+      "toggleShow": "Afficher la carte",
+      "toggleHide": "Afficher la liste",
+      "ariaLabel": "Carte des hôtels à {city}",
+      "popupView": "Voir la fiche",
+      "geocodedNote": "{located} sur {total} hôtels localisés sur la carte"
+    },
+    "country": {
+      "metaTitle": "Tous les hôtels en {country} — annuaire complet",
+      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} répartis dans {cities, plural, one {# ville} other {# villes}} en {country}. L'annuaire complet de notre sélection, ville par ville.",
+      "h1": "Hôtels en {country}",
+      "subtitle": "{count, plural, one {# adresse} other {# adresses}} dans {cities, plural, one {# ville} other {# villes}} — l'annuaire exhaustif de notre sélection en {country}.",
+      "byCity": "Par ville",
+      "viewCity": "{count, plural, one {Voir # hôtel} other {Voir les # hôtels}}",
+      "otherCountries": "Explorer d'autres pays",
+      "aeoQuestion": "Combien d'hôtels proposez-vous en {country} ?",
+      "aeoAnswer": "Notre sélection compte {count, plural, one {# hôtel} other {# hôtels}} en {country}, répartis dans {cities, plural, one {# ville} other {# villes}}. Chaque adresse est référencée avec sa ville, sa distinction et un accès direct à sa fiche détaillée. Annuaire mis à jour en {date}.",
+      "faqTitle": "Questions fréquentes — hôtels en {country}",
+      "faqItems": [
+        {
+          "q": "Combien d'hôtels sont référencés en {country} ?",
+          "a": "Cette page liste de façon exhaustive tous les hôtels de notre sélection situés en {country}, groupés par ville. Le compteur affiché en haut de page reflète le nombre exact d'adresses publiées à ce jour."
+        },
+        {
+          "q": "Comment trouver un hôtel dans une ville précise de {country} ?",
+          "a": "Utilisez le bandeau « Par ville » en haut de page pour accéder directement à la ville recherchée, ou cliquez sur « Voir les hôtels » sous chaque section ville pour ouvrir l'annuaire dédié à cette ville."
+        },
+        {
+          "q": "Quelle différence avec les guides de destination ?",
+          "a": "Cet annuaire est neutre et exhaustif : il liste toutes les adresses sans hiérarchie éditoriale. Nos guides de destination proposent au contraire une sélection commentée et le conseil du Concierge."
+        }
+      ]
+    },
+    "city": {
+      "metaTitle": "Tous les hôtels à {city} — annuaire complet",
+      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} à {city}, {country}. L'annuaire complet et factuel de notre sélection.",
+      "h1": "Hôtels à {city}",
+      "subtitle": "{count, plural, one {# adresse} other {# adresses}} à {city}, {country} — la liste exhaustive de notre sélection.",
+      "exploreLabel": "Continuer l'exploration",
+      "backToCountry": "Tous les hôtels en {country}",
+      "editorialGuide": "Guide de {city}",
+      "aeoQuestion": "Combien d'hôtels proposez-vous à {city} ?",
+      "aeoAnswer": "Notre sélection compte {count, plural, one {# hôtel} other {# hôtels}} à {city}, en {country}. Chaque adresse est présentée avec sa distinction et un accès direct à sa fiche. Pour une sélection commentée, consultez notre guide de {city}. Annuaire mis à jour en {date}.",
+      "faqTitle": "Questions fréquentes — hôtels à {city}",
+      "faqItems": [
+        {
+          "q": "Combien d'hôtels sont référencés à {city} ?",
+          "a": "Cette page liste de façon exhaustive tous les hôtels de notre sélection situés à {city}. Le compteur en haut de page indique le nombre exact d'adresses publiées à ce jour."
+        },
+        {
+          "q": "Comment réserver un hôtel à {city} ?",
+          "a": "Ouvrez la fiche de l'hôtel qui vous intéresse depuis cette liste : vous y trouverez la présentation détaillée, les photos et les modalités pour réserver via le Concierge."
+        },
+        {
+          "q": "Existe-t-il un guide éditorial pour {city} ?",
+          "a": "Oui. Le lien « Guide de {city} » en bas de page mène à notre guide de destination : une sélection commentée des meilleures adresses et le conseil du Concierge, complémentaire de cet annuaire factuel."
+        }
+      ]
+    }
+  },
   "destinationPage": {
     "meta": {
       "title": "Hôtels 5 étoiles & Palaces à {city}",
@@ -2778,6 +2895,11 @@
     "title": "Hôtels 5★ et Palaces à {city}",
     "subtitle": "{count, plural, one {Notre sélection de # adresse à {city}} other {Notre sélection de # adresses à {city}}} — {region}.",
     "empty": "Aucun hôtel publié pour cette destination pour le moment.",
+    "annuaire": {
+      "note": "Cette page présente une sélection commentée par notre conciergerie. L'annuaire complet liste toutes les adresses de {city}, sans filtre éditorial.",
+      "cta": "Voir l'annuaire complet de {city}",
+      "ctaAll": "Voir les {count} hôtels de {city}"
+    },
     "aeo": {
       "question": "Combien d'hôtels 5★ et Palaces proposez-vous à {city} ?",
       "answerSingular": "MyConciergeHotel propose actuellement 1 adresse à {city} ({region}) : hôtels 5★ et Palaces sélectionnés pour leur emplacement, leur service et leur reconnaissance par Atout France. Réservation directe, tarifs nets GDS, paiement sécurisé, programme de fidélité dès la première nuit. Mise à jour {date}.",
@@ -2911,7 +3033,9 @@
       "viewMap": "Voir sur la carte",
       "datesPlaceholder": "Arrivée – Départ",
       "guests": "2 voyageurs",
-      "seeRates": "Voir les tarifs"
+      "seeRates": "Voir les tarifs",
+      "viewPhotos": "Voir les photos",
+      "conciergeSignature": "Le Concierge"
     },
     "share": {
       "button": "Partager",
@@ -3027,7 +3151,9 @@
     },
     "story": {
       "tocTitle": "Sommaire",
-      "tocLabel": "Sommaire de la présentation"
+      "tocLabel": "Sommaire de la présentation",
+      "readMore": "En savoir plus",
+      "readLess": "Réduire"
     },
     "faq": {
       "categoryBefore": "Avant votre séjour",
@@ -3144,7 +3270,10 @@
       "lightboxCounter": "{current} / {total}",
       "previousImage": "Photo précédente",
       "nextImage": "Photo suivante",
-      "closeLightbox": "Fermer la galerie"
+      "closeLightbox": "Fermer la galerie",
+      "mosaicEyebrow": "La galerie",
+      "mosaicCount": "{count, plural, one {# photo} other {# photos}}",
+      "backToGallery": "Retour à la galerie"
     },
     "virtualTour": {
       "title": "Visite virtuelle",
