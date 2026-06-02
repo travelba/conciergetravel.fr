@@ -5,7 +5,7 @@
 - Deciders: TBD (architecture review)
 - Supersedes: —
 - Superseded by: —
-- Related: ADR-0007 (ISR target), ADR-0013 (CSP strategy), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking)
+- Related: ADR-0007 (ISR target), ADR-0013 (CSP strategy), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking), ADR-0027 (CSP model evolution — préalable amont)
 
 > **Note de numérotation** : cette ADR a été désignée « ADR-0018 » dans
 > ADR-0013 §C et dans l'inventaire `docs/audits/2026-06-02-vague-g1-inline-inventory.md`.
