@@ -56,6 +56,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { tavilySearch } from '../enrichment/tavily-client.js';
+import { isToxicOfficialUrl } from '../enrichment/toxic-official-url.js';
 import { loadPhotoEnv } from './env-photos.js';
 import {
   HOSTNAME_BLOCKLIST_GLOBAL,
@@ -315,6 +316,39 @@ function tokenAppearsInUrl(token: string, url: string): boolean {
   return normalizeForMatch(url).includes(token);
 }
 
+/**
+ * City/country tokens for a hotel. These are EXCLUDED from the
+ * "hotel-name-in-host" high-confidence rule: a host like
+ * `britishchamberdubai.com` embeds "dubai" but is a chamber-of-commerce
+ * directory, not the Waldorf Astoria Dubai. Only the distinctive brand
+ * tokens (`waldorf`, `astoria`) may promote a dedicated site.
+ */
+function geoTokensFor(hotel: HotelRow): ReadonlySet<string> {
+  const out = new Set<string>();
+  if (hotel.city) {
+    for (const t of nameSignificantTokens(hotel.city)) out.add(t);
+  }
+  return out;
+}
+
+/**
+ * Stricter variant of `tokenAppearsInUrl` that only looks at the
+ * HOSTNAME (no path). This is the correct signal for "the hotel runs a
+ * dedicated single-property site" (`chewtonglen.com`,
+ * `fourseasonstianjin.com`). Checking the whole URL (path included) was
+ * the 2026-06-02 leak that let `ubyemaar.com/.../address-sky-view`,
+ * `travelweekly.com/Hotels/...` and `britishairways.com/.../Aguas-de-Ibiza`
+ * pass as "official" — re-polluting the exact 140 fiches the toxic-URL
+ * cleanup had just scrubbed.
+ */
+function tokenAppearsInHost(token: string, url: string): boolean {
+  try {
+    return normalizeForMatch(new URL(url).hostname).includes(token);
+  } catch {
+    return false;
+  }
+}
+
 // ─── Confidence scoring ────────────────────────────────────────────────────
 
 type Verdict =
@@ -393,26 +427,50 @@ function judgeCandidate(
   if (isBlocklistedHostname(host)) {
     return { status: 'skip', reason: `blocklisted-host(${hostNoWww})` };
   }
+  // SEO-squatter / booking-engine veto — shared with the converter so a
+  // candidate the photo pipeline accepts can never re-pollute the fiche
+  // the 2026-06-02 cleanup just scrubbed (`*.com-hotel.com`,
+  // `*.ae-dubai.info`, `*.parishotelinn.com`, `h-rez.com`, …). These
+  // embed the hotel name in the host, so they'd otherwise sail through
+  // the "hotel-name-in-host" high-confidence rule below.
+  if (isToxicOfficialUrl(url)) {
+    return { status: 'skip', reason: `toxic-squatter(${hostNoWww})` };
+  }
   if (isCorporateRootUrl(url)) {
     return { status: 'skip', reason: `corporate-root(${hostNoWww})` };
   }
+  // Not a hotel landing page: press-kit PDFs and corporate media hubs
+  // (`mediahub.jumeirah.com/wp-content/...pdf`) are not the hotel's site.
+  if (parsed.pathname.toLowerCase().endsWith('.pdf') || hostNoWww.startsWith('mediahub.')) {
+    return { status: 'skip', reason: `not-a-landing-page(${hostNoWww})` };
+  }
 
   const tokens = nameSignificantTokens(hotel.name);
-  const tokenHits = tokens.filter((t) => tokenAppearsInUrl(t, url)).length;
+  const geo = geoTokensFor(hotel);
+  // Distinctive (non-geo) tokens — the only ones allowed to promote a
+  // dedicated single-property site via the hostname.
+  const distinctiveTokens = tokens.filter((t) => !geo.has(t));
+  // Host-anchored hit count on distinctive tokens — the only signal we
+  // trust to call a site "the hotel's own dedicated domain".
+  const hostTokenHits = distinctiveTokens.filter((t) => tokenAppearsInHost(t, url)).length;
+  // Path-or-host hit count (all tokens) — used ONLY to confirm a known
+  // parent-brand domain actually points at THIS property
+  // (`ritzcarlton.com/.../dubai`), never to promote an unknown host.
+  const urlTokenHits = tokens.filter((t) => tokenAppearsInUrl(t, url)).length;
 
   const hostIsParent = isParentGroupDomain(hostNoWww);
   const looksDedicated = hostnameLooksLikeDedicatedSite(hostNoWww);
   const trivial = urlPathIsTrivial(url);
 
-  // HIGH-CONFIDENCE FIRST (order matters): hostname embeds the hotel
-  // name on a dedicated single-property site like `chewtonglen.com`,
-  // `fourseasonstianjin.com/en` — trivial path is OK here because the
-  // hostname alone identifies the hotel unambiguously.
-  if (tokenHits >= 1 && looksDedicated && !hostIsParent) {
+  // HIGH-CONFIDENCE: a distinctive hotel-name token is embedded in the
+  // HOSTNAME on a dedicated single-property site (`chewtonglen.com`,
+  // `fourseasonstianjin.com/en`). Trivial path is OK — the hostname
+  // alone identifies the hotel unambiguously.
+  if (hostTokenHits >= 1 && looksDedicated && !hostIsParent) {
     return {
       status: 'ok',
       confidence: 'high',
-      reason: `hotel-name-in-host(tokens=${tokenHits}/${tokens.length}${trivial ? ',trivial-path-ok' : ''})`,
+      reason: `hotel-name-in-host(tokens=${hostTokenHits}/${distinctiveTokens.length}${trivial ? ',trivial-path-ok' : ''})`,
     };
   }
 
@@ -421,29 +479,26 @@ function judgeCandidate(
     return { status: 'skip', reason: `trivial-path(host=${hostNoWww})` };
   }
 
-  // Medium-confidence: parent-group domain with a hotel-name path
-  // (e.g. `mandarinoriental.com/en/muscat/shatti-al-qurum`).
-  if (hostIsParent && tokenHits >= 1) {
+  // MEDIUM-CONFIDENCE: a KNOWN luxury parent-group domain
+  // (`ritzcarlton.com`, `stregis.com`, `anantara.com`, …) whose path
+  // identifies this property. This is the only place a non-dedicated
+  // host can win, and only because the host itself is a trusted brand.
+  if (hostIsParent && urlTokenHits >= 1) {
     return {
       status: 'ok',
       confidence: 'medium',
-      reason: `parent-domain-with-hotel-path(tokens=${tokenHits}/${tokens.length})`,
+      reason: `parent-domain-with-hotel-path(tokens=${urlTokenHits}/${tokens.length})`,
     };
   }
 
-  // Medium-confidence: high Tavily score + dedicated-looking domain
-  // + name token in path.
-  if (looksDedicated && candidate.score >= 0.8 && tokenHits >= 1) {
-    return {
-      status: 'ok',
-      confidence: 'medium',
-      reason: `high-score-dedicated(score=${candidate.score.toFixed(2)},tokens=${tokenHits})`,
-    };
-  }
-
+  // No "high-score-dedicated" fallback: a high Tavily score on an
+  // unknown host with the hotel name only in the PATH is exactly the
+  // toxic vector (airline destination pages, trade press, booking
+  // portals). Leaving official_url NULL is strictly better than
+  // re-polluting the fiche. See 2026-06-02 cleanup.
   return {
     status: 'skip',
-    reason: `low-confidence(tokens=${tokenHits}/${tokens.length},score=${candidate.score.toFixed(2)},host=${hostNoWww})`,
+    reason: `low-confidence(hostTokens=${hostTokenHits},urlTokens=${urlTokenHits},score=${candidate.score.toFixed(2)},host=${hostNoWww})`,
   };
 }
 
@@ -615,9 +670,7 @@ async function main(): Promise<void> {
       if (outcome.status === 'updated') {
         counters.updated += 1;
         const rankSuffix = outcome.triedAt > 1 ? ` (#${outcome.triedAt})` : '';
-        console.log(
-          `${tag} [UPDATED] ${hotel.slug.padEnd(40, ' ')} → ${outcome.url}${rankSuffix}`,
-        );
+        console.log(`${tag} [UPDATED] ${hotel.slug.padEnd(40, ' ')} → ${outcome.url}${rankSuffix}`);
       } else if (outcome.status === 'skipped') {
         counters.skipped += 1;
         const reasonKey = outcome.reason.replace(/\([^)]*\)/gu, '(*)');

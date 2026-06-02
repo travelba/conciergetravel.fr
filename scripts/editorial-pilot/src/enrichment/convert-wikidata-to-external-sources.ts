@@ -48,6 +48,8 @@ import { config as loadDotenv } from 'dotenv';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isToxicOfficialUrl } from './toxic-official-url.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -276,16 +278,30 @@ function deriveEntries(row: HotelRow, collectedAt: string): ExternalSourceEntry[
     });
   }
 
-  if (row.official_url !== null && row.official_url.length > 0) {
-    // `official_url` was resolved via Wikidata's P856 — the value is
-    // the hotel's own site (the verifiable resource), but its
-    // attribution / provenance is wikidata.
+  if (
+    row.official_url !== null &&
+    row.official_url.length > 0 &&
+    // Never project a known SEO-squatter / booking-engine / OTA host
+    // into the EEAT provenance array (2026-06-02 cleanup). Shared with
+    // the photo-pipeline backfill so both stay in sync.
+    !isToxicOfficialUrl(row.official_url)
+  ) {
+    // `official_url` is a SCALAR column whose discovery channel
+    // (Wikidata P856 vs Tavily backfill vs manual) is not recorded on
+    // the row. So the only honest attribution is the official site
+    // itself — the value IS the hotel's own canonical URL, and the
+    // `source_url` points straight at it. Wikidata corroboration, when
+    // it exists, lives in its OWN `wikidata_id` entry above; claiming
+    // `source: 'wikidata'` here would falsely imply the KG served the
+    // URL (it often doesn't expose P856 at all). Confidence stays
+    // `medium`: we trust the host (squatters are filtered out) but have
+    // not run a canonical-URL verification hop.
     entries.push({
       field: 'official_url',
       value: row.official_url,
-      source: 'wikidata',
+      source: 'official_site',
       source_url: row.official_url,
-      confidence: 'high',
+      confidence: 'medium',
       collected_at: collectedAt,
     });
   }
