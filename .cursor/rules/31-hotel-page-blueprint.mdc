@@ -20,7 +20,7 @@ Une fiche hôtel doit être :
 
 ## Priorité & sources
 Cette rule est un blueprint transverse. En cas de conflit, les rules spécifiques priment :
-- `hotel-detail-page.mdc` est la **source autoritaire** (contrat CDC §2, 15 blocs, hard rules, ADR-0007/0008/0009).
+- `hotel-detail-page.mdc` est la **source autoritaire** (contrat CDC §2, 15 blocs, hard rules, ADR-0007/0008/0009, ADR-0025). Note : la décision « fiche éditoriale d'abord » vit dans **ADR-0025**, pas ADR-0024 (qui concerne le transform photo signature).
 - `photo-quality.mdc` fait foi pour les quotas et la qualité photo (Phase 1 : ≥ 10 photos, 10 catégories couvertes — pas de chiffre concurrent ici).
 - `seo-geo.mdc` fait foi pour SEO / GEO / AEO et le phasage des locales.
 
