@@ -615,9 +615,7 @@ async function main(): Promise<void> {
       if (outcome.status === 'updated') {
         counters.updated += 1;
         const rankSuffix = outcome.triedAt > 1 ? ` (#${outcome.triedAt})` : '';
-        console.log(
-          `${tag} [UPDATED] ${hotel.slug.padEnd(40, ' ')} → ${outcome.url}${rankSuffix}`,
-        );
+        console.log(`${tag} [UPDATED] ${hotel.slug.padEnd(40, ' ')} → ${outcome.url}${rankSuffix}`);
       } else if (outcome.status === 'skipped') {
         counters.skipped += 1;
         const reasonKey = outcome.reason.replace(/\([^)]*\)/gu, '(*)');
