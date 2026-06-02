@@ -28,12 +28,12 @@ Attendu : l'agent **refuse / alerte** (i18n keys obligatoires ; `force-dynamic` 
 
 ## 5. Statut
 
-✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
 
 Positif : Server Component par défaut, `generateMetadata` localisé + `alternates`, ISR par défaut, `JsonLdScript` (nonce), `force-dynamic` transitoire fiche hôtel. Négatif : refuse de hardcoder les libellés FR/EN et de mettre `force-dynamic` partout sans raison.
 
 > ✅ Caveat lint résolu : le renvoi erroné « ADR-0004 for the layout decision » (L70) a été retiré en Vague F-bis (#127). La note ⚠️ ci-dessous est conservée pour traçabilité mais ne s'applique plus à la baseline.
 
-> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
 
 > ⚠️ Note lint (N1, driver D) : L70 cite « ADR-0004 for the layout decision » alors qu'ADR-0004 = Algolia (mismatch sémantique, P3). Voir rapport §3/§5.

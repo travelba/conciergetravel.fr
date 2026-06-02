@@ -28,8 +28,8 @@ Attendu : l'agent **refuse / alerte** (gel `Offer` jusqu'à Phase 6 ; pas d'offr
 
 ## 5. Statut
 
-✅ **PASS — simulation (2026-06-02, baseline post-#127)**
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
 
 Positif : réutilise les builders `packages/seo/src/jsonld/*`, n'émet pas d'`Offer` (gel Phase 6), `bestRating: '5'`, ne cherche pas de builder `image.ts`. Négatif : refuse d'émettre un `Offer` JSON-LD à prix d'exemple (gel + pas d'offre fictive).
 
-> Méthode : simulation LLM interne (rules en contexte), sans run agent live ni écriture code — cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
