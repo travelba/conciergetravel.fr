@@ -590,6 +590,57 @@ The module exposes:
 Then rerun `pnpm photos:audit` — the count of `independent` should
 drop. If it doesn't, the inference order is failing for that group.
 
+### Hardening — `backfill-official-url` re-pollutes with name-bearing squatters (2026-06-02)
+
+When you re-source `official_url` for the **hard cohort** (hotels whose
+URL was just NULLed because it was toxic — ME/Asia chains, Greek
+resorts, etc.), Tavily surfaces a dense ecosystem of SEO-spam that
+**embeds the hotel name in the hostname**, so the naive "hotel-name-in-
+host" rule promotes them straight back as "high confidence". A dry-run
+on 140 cleaned fiches proposed garbage like
+`lessourcesdecaudalie.com-hotel.com`, `slshotel.ae-dubai.info`,
+`scribe.parishotelinn.com`, `four-seasons-11321.hotels-riyadh.com`,
+`britishchamberdubai.com` (Waldorf "Dubai" → matched the _city_ token),
+`ubyemaar.com/.../address-sky-view`, `travelweekly.com/...`,
+`britishairways.com/.../Aguas-de-Ibiza`. Running it live would have
+re-polluted the exact rows the cleanup just scrubbed.
+
+Four fixes (commit `2e305bb`), all in `backfill-official-url.ts` +
+the new shared `enrichment/toxic-official-url.ts`:
+
+1. **Match the HOSTNAME only** for the "name-in-host" rule. The
+   original `tokenAppearsInUrl` matched the whole URL incl. path, so
+   `ubyemaar.com/.../address-sky-view` (name in path) won. Added
+   `tokenAppearsInHost`.
+2. **Drop the `score≥0.8 + token-in-path` fallback** entirely — it was
+   the airline/trade-press vector (`britishairways.com`,
+   `travelweekly.com`). A high Tavily score on an unknown host is NOT
+   evidence; leaving `official_url` NULL beats guessing.
+3. **Exclude city/country tokens** from the host match
+   (`geoTokensFor(hotel)`). `britishchamberdubai.com` only matched
+   because "dubai" is in the name; a chamber-of-commerce directory is
+   not the hotel.
+4. **Shared toxic detector** `isToxicOfficialUrl(url)` (unit-tested,
+   56 cases) vetoes every squatter family observed: `*.com-hotel.com`,
+   cc-glued `.<cc>-<word>.(com|info)`, `*hotelinn.com`, geo-aggregators
+   (`hotels-<city>`, `<city>-hotels-<cc>`, `hotelsof<geo>`), `h-rez.com`,
+   `reserve-online`, `hotel-dir`, OTAs. Host-anchored so brand domains
+   (`rosewoodhotels.com`, `eighthotels.it`) are NEVER caught. The SAME
+   module is imported by `convert-wikidata-to-external-sources.ts` so
+   the photo pipeline and the EEAT provenance array can never drift.
+
+Result on the 140-cohort: 101 clean sites sourced, **0 toxic**, 39
+genuinely unsourceable left NULL. Always **dry-run + eyeball the
+proposed hosts** before a live `official_url` backfill on a hard
+cohort — iterate the ruleset until the toxic/aggregator scan returns
+zero, then write.
+
+Provenance note: `official_url` is a scalar column whose discovery
+channel is not recorded, so the converter attributes it as
+`source: 'official_site'` / `confidence: 'medium'` — NOT `'wikidata'`
+(Wikidata corroboration lives in its own `wikidata_id` entry; claiming
+it served the URL would be false provenance).
+
 ## Pattern — Hero alt MUST come from the matching gallery row (2026-05-31 bug fix)
 
 `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` historically used
