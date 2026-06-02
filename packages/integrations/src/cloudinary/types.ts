@@ -62,3 +62,29 @@ export interface GalleryImageRow {
   readonly alt_en?: string;
   readonly category?: string;
 }
+
+/**
+ * Single resource returned by the Cloudinary Admin API
+ * (`GET /resources/image`). We only keep what the dimension backfill
+ * needs — `public_id` + intrinsic `width`/`height` — and drop the
+ * dozens of other vendor fields at the Zod boundary.
+ *
+ * A resource that lacks positive dimensions (rare: raw/incomplete
+ * derivations) fails this schema and is skipped by the caller rather
+ * than poisoning the map with `0`.
+ */
+export const CloudinaryResourceSchema = z.object({
+  public_id: z.string().min(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+export type CloudinaryResource = z.infer<typeof CloudinaryResourceSchema>;
+
+/**
+ * One page of the Admin API `resources` listing. `next_cursor` is
+ * present until the last page.
+ */
+export const CloudinaryResourcesPageSchema = z.object({
+  resources: z.array(z.unknown()),
+  next_cursor: z.string().optional(),
+});

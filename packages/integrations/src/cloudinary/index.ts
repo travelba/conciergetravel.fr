@@ -9,13 +9,18 @@ export const CLOUDINARY_INTEGRATION_VERSION = '0.0.1' as const;
 
 export type { CloudinaryError } from './errors';
 export {
+  type AssetDimensions,
   type CloudinaryClientConfig,
   configureCloudinary,
+  listUploadedDimensions,
   toGalleryRow,
   uploadFromUrl,
 } from './client';
 export {
+  CloudinaryResourceSchema,
+  CloudinaryResourcesPageSchema,
   CloudinaryUploadResultSchema,
+  type CloudinaryResource,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,
   type GalleryImageRow,

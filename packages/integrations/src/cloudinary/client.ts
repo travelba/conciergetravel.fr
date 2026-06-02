@@ -21,6 +21,8 @@ import { err, ok, type Result } from '@mch/domain/shared';
 
 import type { CloudinaryError } from './errors';
 import {
+  CloudinaryResourceSchema,
+  CloudinaryResourcesPageSchema,
   CloudinaryUploadResultSchema,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,
@@ -376,6 +378,87 @@ export async function uploadFromUrl(
     }
   }
   return err(lastError ?? { kind: 'unknown', message: 'retry loop exited without resolution' });
+}
+
+/** Intrinsic pixel dimensions of a stored Cloudinary asset. */
+export interface AssetDimensions {
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Maps a thrown Cloudinary Admin SDK error to our typed union.
+ *
+ * Unlike `mapSdkError` this has no source URL context (admin reads are
+ * not tied to a single upload), so `404`/auth/rate-limit are the only
+ * meaningful discriminations.
+ */
+function mapAdminError(e: unknown): CloudinaryError {
+  let raw = 'unknown admin error';
+  let httpCode: number | undefined;
+  if (e instanceof Error) raw = e.message;
+  else if (typeof e === 'object' && e !== null) {
+    const obj = e as { message?: unknown; http_code?: unknown; error?: { message?: unknown } };
+    if (typeof obj.error?.message === 'string') raw = obj.error.message;
+    else if (typeof obj.message === 'string') raw = obj.message;
+    if (typeof obj.http_code === 'number') httpCode = obj.http_code;
+  } else if (typeof e === 'string') raw = e;
+  const lower = raw.toLowerCase();
+  if (httpCode === 401 || lower.includes('invalid signature') || lower.includes('invalid api')) {
+    return { kind: 'auth_failed' };
+  }
+  if (httpCode === 420 || httpCode === 429 || lower.includes('rate limit')) {
+    return { kind: 'rate_limited' };
+  }
+  return { kind: 'unknown', message: raw.slice(0, 280) };
+}
+
+/**
+ * Lists every uploaded image under `prefix` (e.g. `cct/hotels/`) and
+ * returns a `public_id → {width,height}` map built from the Admin API.
+ *
+ * Pages through the Admin API 500 at a time (the per-call ceiling).
+ * Resources that fail `CloudinaryResourceSchema` (missing positive
+ * dimensions) are skipped rather than aborting the whole listing.
+ *
+ * NB: the Cloudinary Admin API is rate-limited (free tier ≈ 500 calls/h);
+ * a 23 k-asset catalogue is ~46 pages, well within budget. On a
+ * `rate_limited` page the caller can re-run — the map is rebuilt from
+ * scratch each time (cheap, idempotent).
+ */
+export async function listUploadedDimensions(
+  prefix: string,
+  onPage?: (pageCount: number, total: number) => void,
+): Promise<Result<Map<string, AssetDimensions>, CloudinaryError>> {
+  const out = new Map<string, AssetDimensions>();
+  let cursor: string | undefined;
+  for (;;) {
+    let raw: unknown;
+    try {
+      raw = await cloudinaryV2.api.resources({
+        resource_type: 'image',
+        type: 'upload',
+        prefix,
+        max_results: 500,
+        ...(cursor !== undefined ? { next_cursor: cursor } : {}),
+      });
+    } catch (e) {
+      return err(mapAdminError(e));
+    }
+    const page = CloudinaryResourcesPageSchema.safeParse(raw);
+    if (!page.success) {
+      return err({ kind: 'unknown', message: 'Unexpected Admin API resources shape' });
+    }
+    for (const entry of page.data.resources) {
+      const parsed = CloudinaryResourceSchema.safeParse(entry);
+      if (parsed.success)
+        out.set(parsed.data.public_id, { width: parsed.data.width, height: parsed.data.height });
+    }
+    if (onPage !== undefined) onPage(page.data.resources.length, out.size);
+    if (page.data.next_cursor === undefined) break;
+    cursor = page.data.next_cursor;
+  }
+  return ok(out);
 }
 
 /**
