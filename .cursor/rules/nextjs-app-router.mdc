@@ -67,4 +67,4 @@ apps/web/src/
   i18n/              # routing, navigation, messages
 ```
 
-See `.cursor/skills/nextjs-app-router/SKILL.md` for deeper guidance and ADR-0004 for the layout decision.
+See `.cursor/skills/nextjs-app-router/SKILL.md` for deeper guidance on the folder layout.

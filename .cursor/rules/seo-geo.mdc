@@ -154,7 +154,7 @@ Avant d'activer le routing d'une locale V2 :
 Les mots-clés SEO des `meta.title` / `meta.description` en DE/ES/IT **ne sont pas des traductions** du FR/EN.
 Ils doivent être recherchés nativement dans Semrush avec le marché cible :
 - DE → `google.de`, marché Allemagne
-- ES → `google.es`, marché Espagne  
+- ES → `google.es`, marché Espagne
 - IT → `google.it`, marché Italie
 
 Marquer les traductions provisoires avec `// TODO: native-seo-review` dans les fichiers `messages/`.
