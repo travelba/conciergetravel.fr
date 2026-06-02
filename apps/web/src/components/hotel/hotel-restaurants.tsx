@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { PracticalInfo } from '@/components/hotel/practical-info';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedRestaurants } from '@/server/hotels/get-hotel-by-slug';
 
@@ -39,7 +40,7 @@ export async function HotelRestaurants({
           : t('restaurants.summary', { count: totalCount })}
       </p>
 
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="grid items-start gap-4 md:grid-cols-2">
         {restaurants.venues.map((venue) => (
           <li
             key={venue.name}
@@ -51,11 +52,18 @@ export async function HotelRestaurants({
               <h3 className="text-fg font-medium" itemProp="name">
                 {venue.name}
               </h3>
-              {venue.michelinStars !== null && venue.michelinStars > 0 ? (
-                <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">
-                  {t('restaurants.michelinBadge', { count: venue.michelinStars })}
-                </span>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {venue.michelinStars !== null && venue.michelinStars > 0 ? (
+                  <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">
+                    {t('restaurants.michelinBadge', { count: venue.michelinStars })}
+                  </span>
+                ) : null}
+                {venue.kidFriendly === true ? (
+                  <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-900">
+                    {t('restaurants.kidFriendly')}
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             {venue.type !== null ? (
@@ -103,12 +111,6 @@ export async function HotelRestaurants({
                   </dd>
                 </div>
               ) : null}
-              {venue.hours !== null ? (
-                <div itemProp="openingHours">
-                  <dt className="sr-only">{t('restaurants.hours', { value: venue.hours })}</dt>
-                  <dd className="text-muted">{t('restaurants.hours', { value: venue.hours })}</dd>
-                </div>
-              ) : null}
             </dl>
 
             {venue.features.length > 0 ? (
@@ -125,6 +127,28 @@ export async function HotelRestaurants({
                 </ul>
               </div>
             ) : null}
+
+            <PracticalInfo
+              hours={venue.hours}
+              priceNote={venue.priceNote}
+              phone={venue.phone}
+              address={venue.address}
+              mustOrder={venue.mustOrder}
+              website={venue.website}
+              reservationUrl={venue.reservationUrl}
+              tip={venue.tip}
+              labels={{
+                title: t('practical.title'),
+                hoursLabel: t('practical.hoursLabel'),
+                priceLabel: t('practical.priceLabel'),
+                phoneLabel: t('practical.phoneLabel'),
+                addressLabel: t('practical.addressLabel'),
+                mustOrderLabel: t('practical.mustOrderLabel'),
+                website: t('practical.website'),
+                reserve: t('practical.reserve'),
+                conciergeTip: t('practical.conciergeTip'),
+              }}
+            />
           </li>
         ))}
       </ul>

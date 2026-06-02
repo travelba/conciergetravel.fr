@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedSpa } from '@/server/hotels/get-hotel-by-slug';
 
+import { PracticalInfo } from './practical-info';
+
 interface HotelSpaProps {
   readonly locale: SupportedLocale;
   readonly spa: LocalisedSpa;
@@ -11,9 +13,11 @@ interface HotelSpaProps {
 /**
  * Spa/wellness section for the hotel detail page.
  *
- * Renders the spa name, surface area, number of treatment rooms and a
- * localized feature list. Source: `hotels.spa_info` jsonb, parsed by
- * `readSpa` and exposed via `LocalisedSpa`. Pure RSC.
+ * Renders the spa name, surface area, number of treatment rooms, a localized
+ * feature list, a short editorial description and the "Concierge dossier"
+ * practical block (hours · indicative price · booking channel · tip) shared
+ * with `<HotelRestaurants>` / `<HotelLocation>`. Source: `hotels.spa_info`
+ * jsonb, parsed by `readSpa` and exposed via `LocalisedSpa`. Pure RSC.
  */
 export async function HotelSpa({ locale, spa }: HotelSpaProps): Promise<React.ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
@@ -45,6 +49,12 @@ export async function HotelSpa({ locale, spa }: HotelSpaProps): Promise<React.Re
           </ul>
         ) : null}
 
+        {spa.description !== null ? (
+          <p className="text-fg/90 mt-3 text-sm leading-relaxed" itemProp="description">
+            {spa.description}
+          </p>
+        ) : null}
+
         {spa.features.length > 0 ? (
           <div className="mt-4">
             <p className="text-muted text-xs uppercase tracking-wide">{t('spa.featuresLabel')}</p>
@@ -60,6 +70,25 @@ export async function HotelSpa({ locale, spa }: HotelSpaProps): Promise<React.Re
             </ul>
           </div>
         ) : null}
+
+        <PracticalInfo
+          hours={spa.hours}
+          priceNote={spa.priceNote}
+          phone={spa.phone}
+          website={spa.website}
+          reservationUrl={spa.reservationUrl}
+          tip={spa.tip}
+          labels={{
+            title: t('practical.title'),
+            hoursLabel: t('practical.hoursLabel'),
+            priceLabel: t('practical.priceLabel'),
+            phoneLabel: t('practical.phoneLabel'),
+            addressLabel: t('practical.addressLabel'),
+            website: t('practical.website'),
+            reserve: t('practical.reserve'),
+            conciergeTip: t('practical.conciergeTip'),
+          }}
+        />
       </div>
     </section>
   );

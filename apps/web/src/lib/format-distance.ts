@@ -54,3 +54,45 @@ export function deriveWalkMinutes(
   if (!Number.isFinite(distanceMeters) || distanceMeters <= 0) return null;
   return Math.max(1, Math.round(distanceMeters / 83));
 }
+
+/**
+ * Above this many minutes on foot, walking guidance stops being useful and
+ * a concierge would quote a driving time instead ("42 min à pied" → "6 min
+ * en voiture"). 20 min ≈ the comfortable upper bound for a casual walk.
+ */
+export const WALK_TO_DRIVE_THRESHOLD_MIN = 20;
+
+/**
+ * Derives a driving time from distance using ~35 km/h (~583 m/min) — a
+ * conservative average for the small D-roads and village approaches typical
+ * of the POIs we cite. There is no live routing API in this presentation
+ * layer, so this is an estimate (same spirit as `deriveWalkMinutes`'s flat
+ * 5 km/h). Clamped to a minimum of 1 minute.
+ */
+export function deriveDriveMinutes(distanceMeters: number): number | null {
+  if (!Number.isFinite(distanceMeters) || distanceMeters <= 0) return null;
+  return Math.max(1, Math.round(distanceMeters / 583));
+}
+
+export interface TravelEstimate {
+  readonly mode: 'walk' | 'drive';
+  readonly minutes: number;
+}
+
+/**
+ * Picks the human-sensible travel mode for a cited place: walking up to
+ * `WALK_TO_DRIVE_THRESHOLD_MIN` minutes, driving beyond that. Returns the
+ * chosen mode + rounded minutes, or `null` when distance is unknown. Falls
+ * back to walking if a drive time can't be derived.
+ */
+export function deriveTravelEstimate(
+  walkMinutes: number | null,
+  distanceMeters: number,
+): TravelEstimate | null {
+  const walk = deriveWalkMinutes(walkMinutes, distanceMeters);
+  if (walk === null) return null;
+  if (walk <= WALK_TO_DRIVE_THRESHOLD_MIN) return { mode: 'walk', minutes: walk };
+  const drive = deriveDriveMinutes(distanceMeters);
+  if (drive === null) return { mode: 'walk', minutes: walk };
+  return { mode: 'drive', minutes: drive };
+}

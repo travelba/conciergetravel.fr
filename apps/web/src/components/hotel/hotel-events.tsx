@@ -191,6 +191,18 @@ function formatEventDates(
     return fmtFull.format(start);
   }
   const end = new Date(`${endIso}T00:00:00Z`);
+  // A full calendar year (1 Jan → 31 Dec of the same year) reads as a
+  // permanent fixture, not a dated event — surface it as "open year-round"
+  // rather than the literal "1 janv. – 31 décembre 2026".
+  if (
+    start.getUTCFullYear() === end.getUTCFullYear() &&
+    start.getUTCMonth() === 0 &&
+    start.getUTCDate() === 1 &&
+    end.getUTCMonth() === 11 &&
+    end.getUTCDate() === 31
+  ) {
+    return pickByLocale(locale, 'Ouvert toute l’année', 'Open year-round');
+  }
   const fmtShort = new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     day: 'numeric',

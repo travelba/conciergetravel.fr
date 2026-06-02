@@ -1,7 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 
+import { PracticalInfo } from '@/components/hotel/practical-info';
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import { deriveWalkMinutes, formatDistanceMeters } from '@/lib/format-distance';
+import {
+  deriveTravelEstimate,
+  deriveWalkMinutes,
+  formatDistanceMeters,
+} from '@/lib/format-distance';
 
 /**
  * Local alias for the translator instance returned by next-intl. Keeps
@@ -31,6 +36,14 @@ interface HotelLocationProps {
   readonly latitude: number | null;
   readonly longitude: number | null;
   readonly location: LocalisedLocation;
+  /**
+   * Golden template only: render the address + static map + transport list,
+   * but NOT the POI buckets. The buckets (visit / do / shop) are relocated
+   * under the "Conseil du Concierge" cluster via {@link HotelNeighbourhoodBuckets}
+   * so #lieu stays a focused "where + how to get there" block. Defaults to
+   * `false` — every other fiche keeps the buckets inline.
+   */
+  readonly omitPois?: boolean;
 }
 
 const TRANSPORT_MODE_ORDER: readonly TransportMode[] = [
@@ -137,8 +150,9 @@ export async function HotelLocation({
   latitude,
   longitude,
   location,
+  omitPois = false,
 }: HotelLocationProps): Promise<React.ReactElement | null> {
-  const hasPois = location.pointsOfInterest.length > 0;
+  const hasPois = location.pointsOfInterest.length > 0 && !omitPois;
   const hasTransports = location.transports.length > 0;
   if (!hasPois && !hasTransports && address === null) return null;
 
@@ -246,9 +260,15 @@ export async function HotelLocation({
                 </div>
                 <span className="text-muted text-xs tabular-nums">
                   {t('location.distanceMeters', { meters: tr.distanceMeters })}
-                  {tr.walkMinutes !== null
-                    ? ` · ${t('location.walkMinutes', { count: tr.walkMinutes })}`
-                    : ''}
+                  {(() => {
+                    const tt = deriveTravelEstimate(tr.walkMinutes, tr.distanceMeters);
+                    if (tt === null) return '';
+                    return ` · ${
+                      tt.mode === 'drive'
+                        ? t('location.driveMinutes', { count: tt.minutes })
+                        : t('location.walkMinutes', { count: tt.minutes })
+                    }`;
+                  })()}
                 </span>
               </li>
             ))}
@@ -256,6 +276,50 @@ export async function HotelLocation({
         </div>
       ) : null}
     </section>
+  );
+}
+
+/**
+ * Neighbourhood buckets (visit / do / shop) extracted from
+ * {@link HotelLocation} so the golden-template fiche can render them under the
+ * "Conseil du Concierge" cluster instead of inside #lieu. Renders the AEO
+ * "≤ X min walk" lead line followed by one block per non-empty bucket, each
+ * carrying its concierge-voice tip and the per-POI practical handoff
+ * (website / phone / hours / price / reservation / tip). Self-elides when the
+ * row carries no POI. Pure RSC — no `'use client'`.
+ */
+export async function HotelNeighbourhoodBuckets({
+  locale,
+  location,
+}: {
+  readonly locale: SupportedLocale;
+  readonly location: LocalisedLocation;
+}): Promise<React.ReactElement | null> {
+  if (location.pointsOfInterest.length === 0) return null;
+  const t = await getTranslations({ locale, namespace: 'hotelPage' });
+  const buckets = groupByBucket(location.pointsOfInterest);
+  // The intro hook says "à X minutes à pied" — base it on the genuinely
+  // walkable POIs (≤ ~1.5 km) so far-flung activities (a winery, a balloon
+  // departure 18 km away) don't inflate the median into a misleading
+  // "27-minute walk". Falls back to all POIs when none are walkable.
+  const walkablePois = location.pointsOfInterest.filter((p) => p.distanceMeters <= 1500);
+  const introWalk = medianWalk(walkablePois.length > 0 ? walkablePois : location.pointsOfInterest);
+  return (
+    <div className="mt-2">
+      <p data-aeo="location-intro" className="text-fg/90 max-w-prose text-sm leading-relaxed">
+        {t('location.intro', { walkMinutes: introWalk })}
+      </p>
+      {BUCKET_ORDER.filter((b) => buckets[b].length > 0).map((bucket) => (
+        <PoiBucketSection
+          key={bucket}
+          bucket={bucket}
+          locale={locale}
+          pois={buckets[bucket]}
+          bucketTips={location.bucketTips}
+          t={t}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -321,7 +385,9 @@ function PoiCard({
   readonly t: Translator;
 }): React.ReactElement {
   const distance = formatDistanceMeters(poi.distanceMeters, locale);
-  const walk = deriveWalkMinutes(poi.walkMinutes, poi.distanceMeters);
+  // Walking up to ~20 min, driving beyond that — "42 min à pied" reads as
+  // broken guidance for a place a guest would obviously reach by car.
+  const travel = deriveTravelEstimate(poi.walkMinutes, poi.distanceMeters);
 
   // Opening hours — parse only when raw OSM string is present. We
   // intentionally read UTC weekday so the rendered text is ISR-stable
@@ -369,7 +435,13 @@ function PoiCard({
         </div>
         <span className="text-muted text-xs tabular-nums">
           {distance}
-          {walk !== null ? ` · ${t('location.walkMinutes', { count: walk })}` : ''}
+          {travel !== null
+            ? ` · ${
+                travel.mode === 'drive'
+                  ? t('location.driveMinutes', { count: travel.minutes })
+                  : t('location.walkMinutes', { count: travel.minutes })
+              }`
+            : ''}
         </span>
       </div>
 
@@ -409,6 +481,26 @@ function PoiCard({
           ) : null}
         </ul>
       ) : null}
+
+      <PracticalInfo
+        hours={poi.hours}
+        priceNote={poi.priceNote}
+        phone={poi.phone}
+        address={poi.address}
+        website={poi.website}
+        reservationUrl={poi.reservationUrl}
+        tip={poi.tip}
+        labels={{
+          title: t('practical.title'),
+          hoursLabel: t('practical.hoursLabel'),
+          priceLabel: t('practical.priceLabel'),
+          phoneLabel: t('practical.phoneLabel'),
+          addressLabel: t('practical.addressLabel'),
+          website: t('practical.website'),
+          reserve: t('practical.reserve'),
+          conciergeTip: t('practical.conciergeTip'),
+        }}
+      />
     </li>
   );
 }

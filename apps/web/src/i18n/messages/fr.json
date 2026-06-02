@@ -2598,8 +2598,8 @@
       "terms": "Conditions générales de vente",
       "cookies": "Politique cookies",
       "sitemap": "Plan du site",
-      "llmsTxt": "llms.txt (LLM index)",
-      "agentSkills": "agent-skills.json (API)"
+      "llmsTxt": "llms.txt",
+      "agentSkills": "agent-skills.json"
     }
   },
   "legal": {
@@ -2908,7 +2908,10 @@
       "palaceBadge": "Palace",
       "stars": "{count}★",
       "districtSeparator": "·",
-      "viewMap": "Voir sur la carte"
+      "viewMap": "Voir sur la carte",
+      "datesPlaceholder": "Arrivée – Départ",
+      "guests": "2 voyageurs",
+      "seeRates": "Voir les tarifs"
     },
     "share": {
       "button": "Partager",
@@ -2936,6 +2939,7 @@
     "sections": {
       "about": "À propos",
       "highlights": "Les essentiels",
+      "whyChoose": "Pourquoi choisir {hotel} ?",
       "amenities": "Services & équipements",
       "rooms": "Chambres & suites",
       "faq": "Questions fréquentes",
@@ -2951,7 +2955,13 @@
       "reassurance": "Pourquoi réserver avec nous",
       "concierge": "Réservation par concierge",
       "signatureExperiences": "Expériences signature",
-      "featuredReviews": "Ils en parlent"
+      "featuredReviews": "Ils en parlent",
+      "instagram": "Sur Instagram"
+    },
+    "instagram": {
+      "followers": "{count} abonnés",
+      "viewProfile": "Voir le compte",
+      "viewPost": "Voir sur Instagram"
     },
     "awards": {
       "intro": "Distinctions et reconnaissances officielles attribuées à l'établissement.",
@@ -3094,6 +3104,7 @@
       "historyRenovatedOnly": "Rénové en {renovated}",
       "architectLabel": "Architecte(s)",
       "geoLabel": "Coordonnées",
+      "detailsSummary": "Informations détaillées",
       "updatedAt": "Informations mises à jour le {date}.",
       "updatedAtShort": "Mis à jour le",
       "updatedAtAria": "Informations mises à jour le {date}"
@@ -3108,7 +3119,9 @@
       "avis": "Avis & distinctions",
       "conseil": "Le Conseil du Concierge",
       "faq": "Questions fréquentes",
-      "booking": "Réservation"
+      "booking": "Réservation",
+      "expand": "Afficher le sommaire de la page",
+      "collapse": "Masquer le sommaire"
     },
     "reassurance": {
       "title": "Pourquoi réserver avec MyConciergeHotel ?",
@@ -3210,6 +3223,9 @@
       "viewDetail": "Voir la chambre",
       "signatureBadge": "Signature",
       "signatureAria": "Suite signature de l’hôtel",
+      "conciergePick": "Le choix du Concierge",
+      "showAll": "Voir les {count} autres chambres",
+      "showLess": "Réduire l’affichage",
       "indicativePriceFrom": "À partir de {from} / nuit",
       "indicativePriceRange": "{from} – {to} / nuit"
     },
@@ -3232,7 +3248,19 @@
       "since": "Ouvert depuis {year}",
       "michelinSince": "Étoilé depuis {year}",
       "hours": "Horaires : {value}",
-      "featuresLabel": "Caractéristiques"
+      "featuresLabel": "Caractéristiques",
+      "kidFriendly": "Famille bienvenue"
+    },
+    "practical": {
+      "title": "Infos pratiques",
+      "hoursLabel": "Horaires",
+      "priceLabel": "Tarif",
+      "phoneLabel": "Téléphone",
+      "addressLabel": "Adresse",
+      "mustOrderLabel": "À commander",
+      "website": "Site officiel",
+      "reserve": "Réserver",
+      "conciergeTip": "Le mot du concierge"
     },
     "spa": {
       "surface": "{value} m²",
@@ -3251,6 +3279,7 @@
       "transportsTitle": "Transports",
       "distanceMeters": "{meters, plural, =0 {sur place} other {{meters} m}}",
       "walkMinutes": "{count, plural, one {# min à pied} other {# min à pied}}",
+      "driveMinutes": "{count, plural, one {# min en voiture} other {# min en voiture}}",
       "transportMode": {
         "metro": "Métro",
         "rer": "RER",
@@ -3275,8 +3304,8 @@
           "empty": "Aucune activité référencée à proximité immédiate."
         },
         "shop": {
-          "title": "Le pratique du quartier",
-          "lead": "Pharmacie, taxi, pressing — l’adresse que vous chercherez sans doute.",
+          "title": "Commerces à proximité",
+          "lead": "Boulangerie, épicerie fine, moulin à huile, pharmacie — les adresses utiles du village.",
           "tipFallback": "Mon conseil : la réception garde ces adresses sous la main.",
           "empty": "Aucun commerce utile référencé à proximité immédiate."
         }
@@ -3372,7 +3401,6 @@
       "noOnline": "Cet établissement n'est pas réservable en ligne. Adressez-nous une demande à la conciergerie.",
       "requestEmail": "Demande de réservation"
     },
-    "loyaltyHint": "Programme de fidélité dès la première nuit pour les hôtels du réseau Little.",
     "lastUpdated": "Fiche mise à jour le {date}",
     "localGuide": {
       "eyebrow": "Que faire autour",

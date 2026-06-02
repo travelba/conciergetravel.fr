@@ -126,3 +126,7 @@ apps/web/.env.*.local
 # Temp files written by `pnpm bootstrap:env` (Vercel env pull buffer + backup)
 .env.local.vercel-pull
 .env.local.vercel-pull.bak
+
+.tavily-key
+
+tmp-tavily/

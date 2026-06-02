@@ -11,6 +11,8 @@ import { BookingSlot } from '@/components/hotel/booking-slot';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
 import { HotelHero } from '@/components/hotel/hotel-hero';
+import { HotelBookingBar } from '@/components/hotel/hotel-booking-bar';
+import { HotelHeroOverlay } from '@/components/hotel/hotel-hero-overlay';
 import { HotelAmenities } from '@/components/hotel/hotel-amenities';
 import { LocalGuideTeaser } from '@/components/hotel/local-guide-teaser';
 import { TrackPageView } from '@/lib/analytics/hooks';
@@ -21,12 +23,13 @@ import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
 import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews';
 import { HotelGallery } from '@/components/hotel/hotel-gallery';
+import { HotelInstagram } from '@/components/hotel/hotel-instagram';
 import HotelEvents from '@/components/hotel/hotel-events';
-import { HotelLocation } from '@/components/hotel/hotel-location';
+import { HotelLocation, HotelNeighbourhoodBuckets } from '@/components/hotel/hotel-location';
 import { HotelMiceEvents } from '@/components/hotel/hotel-mice-events';
 import { HotelPolicies } from '@/components/hotel/hotel-policies';
-import { HotelReassurance } from '@/components/hotel/hotel-reassurance';
 import { HotelRestaurants } from '@/components/hotel/hotel-restaurants';
+import { HotelRoomsGrid, type HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
 import { HotelSignatureExperiences } from '@/components/hotel/hotel-signature-experiences';
 import { HotelSpa } from '@/components/hotel/hotel-spa';
 import { HotelStory } from '@/components/hotel/hotel-story';
@@ -48,6 +51,11 @@ import {
   getAmadeusHotelSentiment,
   type AmadeusHotelSentiment,
 } from '@/server/hotels/get-amadeus-sentiment';
+import {
+  isAirellesGoldenTemplate,
+  AIRELLES_CONCIERGE_PICK_SLUG,
+  AIRELLES_CONCIERGE_PICK_NOTE,
+} from '@/server/hotels/dev-override-airelles';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
   getHotelBySlug,
@@ -81,6 +89,7 @@ import {
   readRestaurants,
   readSignatureExperiences,
   readSpa,
+  readInstagram,
   readVirtualTour,
   type HotelDetail,
   type HotelDetailRow,
@@ -356,6 +365,7 @@ async function renderHotelPage(
   const amenityGroups = readAmenitiesByCategory(row, locale);
   const restaurants = readRestaurants(row, locale);
   const spa = readSpa(row, locale);
+  const instagramFeed = readInstagram(row, locale);
   const location = readLocation(row, locale);
   const policies = readPolicies(row, locale);
   const awards = readAwards(row, locale);
@@ -399,6 +409,69 @@ async function renderHotelPage(
     heroPublicId !== null
       ? galleryImages.filter((g) => g.publicId !== heroPublicId)
       : galleryImages;
+
+  // Golden-template (Airelles Gordes, local fixture only): the full-bleed
+  // overlay hero already renders `heroDescriptor` edge-to-edge at the top of
+  // the page, so the gallery mosaic below would otherwise repeat the exact
+  // same shot as its big tile. Promote the first remaining gallery photo to
+  // be the mosaic hero and shift the rest into the grid — keeping every
+  // image unique. Falls back to the standard descriptor when no tile exists.
+  const goldenTemplate = isAirellesGoldenTemplate(row.slug);
+  const firstGalleryTile = galleryTiles[0];
+  const galleryHero =
+    goldenTemplate && firstGalleryTile !== undefined
+      ? { publicId: firstGalleryTile.publicId, alt: firstGalleryTile.alt }
+      : heroDescriptor;
+  const galleryGridTiles =
+    goldenTemplate && firstGalleryTile !== undefined ? galleryTiles.slice(1) : galleryTiles;
+
+  // Golden-template rooms showcase: a 3-up card grid (photo + name +
+  // description + CTA). The rooms table carries no per-room photo yet
+  // (Phase 2), so each card borrows a distinct shot from the hotel
+  // gallery (round-robin) to stay visual without fabricating data.
+  const goldenRoomCards: readonly HotelRoomCardVM[] = goldenTemplate
+    ? rooms.map((room, index) => {
+        const tile =
+          galleryTiles.length > 0 ? galleryTiles[index % galleryTiles.length] : undefined;
+        const roomName = room.name ?? room.room_code;
+        const isConciergePick = room.slug === AIRELLES_CONCIERGE_PICK_SLUG;
+        return {
+          id: room.id,
+          slug: room.slug,
+          name: roomName,
+          description: room.description,
+          isSignature: room.isSignature,
+          isConciergePick,
+          conciergeNote: isConciergePick
+            ? locale === 'en'
+              ? AIRELLES_CONCIERGE_PICK_NOTE.en
+              : AIRELLES_CONCIERGE_PICK_NOTE.fr
+            : null,
+          occupancy:
+            room.max_occupancy !== null
+              ? t('rooms.occupancy', { count: room.max_occupancy })
+              : null,
+          priceLabel: formatIndicativePrice(room.indicativePrice, locale, t),
+          imageSrc:
+            tile !== undefined
+              ? buildCloudinarySrc({
+                  cloudName: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+                  publicId: tile.publicId,
+                  transforms: 'f_auto,q_auto,c_fill,g_auto,w_640,h_480',
+                })
+              : null,
+          imageAlt: tile?.alt ?? roomName,
+        };
+      })
+    : [];
+
+  // Surface the Concierge's recommended suite first so it leads the section,
+  // then keep only three rooms on a single row (editorial showcase, not an
+  // exhaustive catalogue — the full list lives on the room sub-pages).
+  const orderedRoomCards: readonly HotelRoomCardVM[] = [
+    ...goldenRoomCards.filter((card) => card.isConciergePick),
+    ...goldenRoomCards.filter((card) => !card.isConciergePick),
+  ].slice(0, 3);
 
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
@@ -910,27 +983,46 @@ async function renderHotelPage(
 
   const countryLabel = pickByLocale(
     locale,
-    row.country_label_fr !== '' ? row.country_label_fr : 'France',
-    row.country_label_en !== '' ? row.country_label_en : 'France',
+    row.country_label_fr !== null && row.country_label_fr !== '' ? row.country_label_fr : 'France',
+    row.country_label_en !== null && row.country_label_en !== '' ? row.country_label_en : 'France',
   );
 
   // Sticky table of contents (fiche-reorganisation plan, A1). Built
   // server-side so absent clusters (no reviews, no Concierge advice)
   // never produce a dead anchor. Anchors resolve against the lightweight
   // `<span id …>` markers placed before each cluster below.
-  const tocItems: HotelTocItem[] = [
-    { anchor: 'en-bref', label: t('toc.enBref') },
-    { anchor: 'recit', label: t('toc.recit') },
-    { anchor: 'services', label: t('toc.services') },
-    { anchor: 'chambres', label: t('toc.chambres') },
-    { anchor: 'lieu', label: t('toc.lieu') },
-    ...(featuredReviews.length > 0 || amadeusCategories.length > 0
+  const reviewsAnchor =
+    featuredReviews.length > 0 || amadeusCategories.length > 0
       ? [{ anchor: 'avis', label: t('toc.avis') }]
-      : []),
-    ...(conciergeAdvice !== null ? [{ anchor: 'conseil', label: t('toc.conseil') }] : []),
-    { anchor: 'faq', label: t('toc.faq') },
-    { anchor: 'booking', label: t('toc.booking') },
-  ];
+      : [];
+  const conseilAnchor =
+    conciergeAdvice !== null ? [{ anchor: 'conseil', label: t('toc.conseil') }] : [];
+  // Golden template (Airelles, local fixture) follows the reordered section
+  // chronology (PO request 2026-06-02): En bref → À propos → Services →
+  // Chambres → Avis → Emplacement → Conseil → FAQ. Every other fiche keeps
+  // the historical order + the Phase-6 booking anchor.
+  const tocItems: HotelTocItem[] = goldenTemplate
+    ? [
+        { anchor: 'en-bref', label: t('toc.enBref') },
+        { anchor: 'recit', label: t('toc.recit') },
+        { anchor: 'chambres', label: t('toc.chambres') },
+        { anchor: 'services', label: t('toc.services') },
+        ...reviewsAnchor,
+        { anchor: 'lieu', label: t('toc.lieu') },
+        ...conseilAnchor,
+        { anchor: 'faq', label: t('toc.faq') },
+      ]
+    : [
+        { anchor: 'recit', label: t('toc.recit') },
+        { anchor: 'chambres', label: t('toc.chambres') },
+        ...reviewsAnchor,
+        { anchor: 'services', label: t('toc.services') },
+        { anchor: 'lieu', label: t('toc.lieu') },
+        ...conseilAnchor,
+        { anchor: 'faq', label: t('toc.faq') },
+        { anchor: 'en-bref', label: t('toc.enBref') },
+        { anchor: 'booking', label: t('toc.booking') },
+      ];
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
@@ -952,57 +1044,91 @@ async function renderHotelPage(
         />
       ) : null}
 
-      <nav
-        aria-label={t('breadcrumb.hotels')}
-        className="text-muted mb-6 flex flex-wrap items-center gap-2 text-sm"
-      >
-        <Link href="/destination" className="hover:text-fg transition-colors">
-          {countryLabel}
-        </Link>
-        <span aria-hidden className="opacity-50">
-          /
-        </span>
-        <Link
-          href={{
-            pathname: '/destination/[citySlug]',
-            params: { citySlug: cityHubSlug },
-          }}
-          className="hover:text-fg transition-colors"
-        >
-          {row.city}
-        </Link>
-        <span aria-hidden className="opacity-50">
-          /
-        </span>
-        <span className="text-fg" aria-current="page">
-          {name}
-        </span>
-      </nav>
+      {goldenTemplate ? (
+        <HotelHeroOverlay
+          locale={locale}
+          hotelId={row.id}
+          name={name}
+          city={row.city}
+          district={row.district !== '' ? row.district : null}
+          region={row.region}
+          address={row.address}
+          postalCode={postalCode}
+          isPalace={row.is_palace}
+          stars={row.stars as 1 | 2 | 3 | 4 | 5}
+          canonicalUrl={canonicalUrl}
+          localePath={localePath}
+          description={description}
+          cloudName={cloudName}
+          heroPublicId={heroPublicId}
+          heroAlt={heroDescriptor?.alt ?? name}
+          countryLabel={countryLabel}
+          cityHubSlug={cityHubSlug}
+        />
+      ) : (
+        <>
+          <nav
+            aria-label={t('breadcrumb.hotels')}
+            className="text-muted mb-6 flex flex-wrap items-center gap-2 text-sm"
+          >
+            <Link href="/destination" className="hover:text-fg transition-colors">
+              {countryLabel}
+            </Link>
+            <span aria-hidden className="opacity-50">
+              /
+            </span>
+            <Link
+              href={{
+                pathname: '/destination/[citySlug]',
+                params: { citySlug: cityHubSlug },
+              }}
+              className="hover:text-fg transition-colors"
+            >
+              {row.city}
+            </Link>
+            <span aria-hidden className="opacity-50">
+              /
+            </span>
+            <span className="text-fg" aria-current="page">
+              {name}
+            </span>
+          </nav>
 
-      <HotelHero
-        locale={locale}
-        hotelId={row.id}
-        name={name}
-        city={row.city}
-        district={row.district !== '' ? row.district : null}
-        region={row.region}
-        address={row.address}
-        postalCode={postalCode}
-        isPalace={row.is_palace}
-        stars={row.stars as 1 | 2 | 3 | 4 | 5}
-        canonicalUrl={canonicalUrl}
-        localePath={localePath}
-        description={description}
-        amadeusRating={
-          amadeusRating !== null
-            ? {
-                ratingValue: amadeusRating.ratingValue,
-                reviewCount: amadeusRating.reviewCount,
-                bestRating: amadeusRating.bestRating,
-              }
-            : null
-        }
-      />
+          <HotelHero
+            locale={locale}
+            hotelId={row.id}
+            name={name}
+            city={row.city}
+            district={row.district !== '' ? row.district : null}
+            region={row.region}
+            address={row.address}
+            postalCode={postalCode}
+            isPalace={row.is_palace}
+            stars={row.stars as 1 | 2 | 3 | 4 | 5}
+            canonicalUrl={canonicalUrl}
+            localePath={localePath}
+            description={description}
+            amadeusRating={
+              amadeusRating !== null
+                ? {
+                    ratingValue: amadeusRating.ratingValue,
+                    reviewCount: amadeusRating.reviewCount,
+                    bestRating: amadeusRating.bestRating,
+                  }
+                : null
+            }
+          />
+        </>
+      )}
+
+      {/*
+        Golden template: sticky rectangular search/booking bar. Lives here (a
+        page-level sibling of the hero) so its sticky context is the whole
+        `<main>` — it stays pinned below the site header for the full scroll.
+      */}
+      {goldenTemplate ? (
+        <HotelBookingBar locale={locale} name={name} city={row.city} countryLabel={countryLabel} />
+      ) : null}
 
       <FactualSummary
         summary={factualSummary}
@@ -1014,8 +1140,8 @@ async function renderHotelPage(
       <HotelGallery
         locale={locale}
         cloudName={cloudName}
-        hero={heroDescriptor}
-        images={galleryTiles}
+        hero={galleryHero}
+        images={galleryGridTiles}
         hotelName={name}
       />
 
@@ -1026,238 +1152,487 @@ async function renderHotelPage(
         ADR-0024). Mobile: single column, the rail stacks after the
         content as a passive placeholder.
       */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
+      <div
+        className={
+          goldenTemplate
+            ? ''
+            : 'lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10'
+        }
+      >
         <div className="min-w-0">
-          {/* Cluster 1 — En bref (fusion Tldr + FactSheet) + visite virtuelle. */}
-          <HotelEnBref
-            locale={locale}
-            name={name}
-            city={row.city}
-            region={row.region}
-            isPalace={row.is_palace}
-            stars={row.stars as 1 | 2 | 3 | 4 | 5}
-            address={row.address}
-            postalCode={postalCode}
-            district={row.district}
-            latitude={row.latitude}
-            longitude={row.longitude}
-            totalRooms={inventory.totalRooms}
-            suites={inventory.suites}
-            checkInFrom={policies.checkIn !== null ? policies.checkIn.from : null}
-            checkOutUntil={policies.checkOut !== null ? policies.checkOut.until : null}
-            petsAllowed={policies.pets !== null ? policies.pets.allowed : null}
-            openedYear={historyDates.openedYear}
-            lastRenovatedYear={historyDates.lastRenovatedYear}
-            architects={externalIds.knowledgeGraph.architects}
-            lastUpdatedLabel={lastUpdated}
-            lastUpdatedIso={
-              row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null
-            }
-          />
+          {goldenTemplate ? (
+            <>
+              {/*
+                Golden template — chronologie des sections (demande PO,
+                2026-06-02). Les composants sont ré-invoqués ici dans le nouvel
+                ordre ; les fiches prod conservent l'ordre historique intact
+                (branche `else` ci-dessous). Ordre : L'essentiel du Concierge →
+                À propos → (visite virtuelle) → Services → Chambres → Avis →
+                Conditions → Expériences → Restaurants → Spa → Pourquoi choisir →
+                Emplacement → Séminaires → Conseil du Concierge (+ guide local,
+                événements, AEO, FAQ Concierge) → Questions fréquentes →
+                Distinctions → Instagram → maillage interne.
+              */}
 
-          <HotelVirtualTour locale={locale} hotelName={name} tour={virtualTour} />
+              {/* 1 — L'essentiel du Concierge (ex-"En bref", remonté en tête) */}
+              <HotelEnBref
+                locale={locale}
+                name={name}
+                city={row.city}
+                region={row.region}
+                isPalace={row.is_palace}
+                stars={row.stars as 1 | 2 | 3 | 4 | 5}
+                address={row.address}
+                postalCode={postalCode}
+                district={row.district}
+                latitude={row.latitude}
+                longitude={row.longitude}
+                totalRooms={inventory.totalRooms}
+                suites={inventory.suites}
+                checkInFrom={policies.checkIn !== null ? policies.checkIn.from : null}
+                checkOutUntil={policies.checkOut !== null ? policies.checkOut.until : null}
+                petsAllowed={policies.pets !== null ? policies.pets.allowed : null}
+                openedYear={historyDates.openedYear}
+                lastRenovatedYear={historyDates.lastRenovatedYear}
+                architects={externalIds.knowledgeGraph.architects}
+                lastUpdatedLabel={lastUpdated}
+                lastUpdatedIso={
+                  row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null
+                }
+              />
 
-          <span id="recit" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 2 — Récit : narration, expériences signature, points forts. */}
-          <HotelStory
-            locale={locale}
-            sections={storySections}
-            heroParagraphs={
-              description !== null && description.length > 0
-                ? description
-                    .split(/\n\n+/u)
-                    .map((p) => p.trim())
-                    .filter((p) => p.length > 0)
-                : null
-            }
-          />
+              {/* 2 — À propos */}
+              <span id="recit" aria-hidden className="block scroll-mt-28" />
+              <HotelStory
+                locale={locale}
+                sections={storySections}
+                heroParagraphs={
+                  description !== null && description.length > 0
+                    ? description
+                        .split(/\n\n+/u)
+                        .map((p) => p.trim())
+                        .filter((p) => p.length > 0)
+                    : null
+                }
+              />
 
-          <HotelSignatureExperiences
-            locale={locale}
-            cloudName={cloudName}
-            experiences={signatureExperiences}
-          />
+              {/* Visite virtuelle (média, conservée) */}
+              <HotelVirtualTour locale={locale} hotelName={name} tour={virtualTour} />
 
-          <section aria-labelledby="highlights-title" className="mb-12">
-            <h2 id="highlights-title" className="text-fg mb-3 font-serif text-2xl">
-              {t('sections.highlights')}
-            </h2>
-            {highlights.length > 0 ? (
-              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {highlights.map((h) => (
-                  <li
-                    key={h}
-                    className="border-border bg-muted/5 text-fg rounded-lg border px-4 py-3 text-sm"
+              {/* 3 — Chambres & suites */}
+              <span id="chambres" aria-hidden className="block scroll-mt-28" />
+              <section aria-labelledby="rooms-title-golden" className="mb-12">
+                <h2 id="rooms-title-golden" className="text-fg mb-4 font-serif text-2xl">
+                  {t('sections.rooms')}
+                </h2>
+                {orderedRoomCards.length > 0 ? (
+                  <HotelRoomsGrid
+                    slug={slugFr}
+                    rooms={orderedRoomCards}
+                    defaultVisible={3}
+                    labels={{
+                      viewDetail: t('rooms.viewDetail'),
+                      signatureBadge: t('rooms.signatureBadge'),
+                      signatureAria: t('rooms.signatureAria'),
+                      conciergePick: t('rooms.conciergePick'),
+                      showAll: t('rooms.showAll', {
+                        count: orderedRoomCards.length - 3,
+                      }),
+                      showLess: t('rooms.showLess'),
+                    }}
+                  />
+                ) : (
+                  <p className="text-muted text-sm">{t('noRooms')}</p>
+                )}
+              </section>
+
+              {/* 4 — Services & équipements */}
+              <span id="services" aria-hidden className="block scroll-mt-28" />
+              <HotelAmenities locale={locale} groups={amenityGroups} flat={amenities} />
+
+              {/* 5 — Avis voyageurs (preuve sociale, juste après les chambres) */}
+              <span id="avis" aria-hidden className="block scroll-mt-28" />
+              <HotelFeaturedReviews locale={locale} reviews={featuredReviews} />
+              {amadeusCategories.length > 0 ? (
+                <section
+                  aria-labelledby="reviews-breakdown-title-golden"
+                  className="mb-12"
+                  data-testid="hotel-review-breakdown-golden"
+                >
+                  <h2
+                    id="reviews-breakdown-title-golden"
+                    className="text-fg mb-3 font-serif text-2xl"
                   >
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted text-sm">{t('noHighlights')}</p>
-            )}
-          </section>
-
-          <span id="services" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 3 — Services : équipements, restauration, spa. */}
-          <HotelAmenities locale={locale} groups={amenityGroups} flat={amenities} />
-
-          {restaurants !== null && restaurants.venues.length > 0 ? (
-            <HotelRestaurants locale={locale} restaurants={restaurants} />
-          ) : null}
-
-          {spa !== null ? <HotelSpa locale={locale} spa={spa} /> : null}
-
-          <span id="chambres" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 4 — Chambres + politiques pratiques. */}
-          <section aria-labelledby="rooms-title" className="mb-12">
-            <h2 id="rooms-title" className="text-fg mb-4 font-serif text-2xl">
-              {t('sections.rooms')}
-            </h2>
-            {rooms.length > 0 ? (
-              <ul className="flex flex-col gap-4">
-                {rooms.map((room) => {
-                  const roomHref = {
-                    pathname: '/hotel/[slug]/chambres/[roomSlug]',
-                    params: { slug: slugFr, roomSlug: room.slug },
-                  } as const;
-                  const priceLabel = formatIndicativePrice(room.indicativePrice, locale, t);
-                  return (
-                    <li key={room.id}>
-                      <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
-                        <header className="flex flex-wrap items-baseline justify-between gap-2">
-                          <h3 className="text-fg flex items-center gap-2 font-serif text-lg">
-                            <Link href={roomHref} className="hover:underline">
-                              {room.name ?? room.room_code}
-                            </Link>
-                            {room.isSignature ? (
-                              <span
-                                className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em] text-amber-900"
-                                aria-label={t('rooms.signatureAria')}
-                              >
-                                {t('rooms.signatureBadge')}
-                              </span>
-                            ) : null}
-                          </h3>
-                          <p className="text-muted text-xs">
-                            {room.max_occupancy !== null
-                              ? t('rooms.occupancy', { count: room.max_occupancy })
-                              : null}
-                            {room.size_sqm !== null
-                              ? ` · ${t('rooms.size', { count: room.size_sqm })}`
-                              : ''}
-                            {room.bed_type !== null && room.bed_type !== ''
-                              ? ` · ${room.bed_type}`
-                              : ''}
-                          </p>
-                        </header>
-                        {room.description !== null && room.description !== '' ? (
-                          <p className="text-muted mt-2 text-sm">{room.description}</p>
-                        ) : null}
-                        {room.amenities.length > 0 ? (
-                          <ul className="mt-3 flex flex-wrap gap-1.5">
-                            {room.amenities.map((amenity) => (
-                              <li
-                                key={amenity}
-                                className="border-border text-muted rounded-md border px-2 py-0.5 text-xs"
-                              >
-                                {amenity}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null}
-                        <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="text-sm">
-                            <Link
-                              href={roomHref}
-                              className="text-fg hover:text-fg/80 inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
-                            >
-                              {t('rooms.viewDetail')}
-                              <span aria-hidden>→</span>
-                            </Link>
-                          </p>
-                          {priceLabel !== null ? (
-                            <p className="text-muted text-xs" data-room-price>
-                              {priceLabel}
-                            </p>
-                          ) : null}
+                    {t('sections.reviewBreakdown')}
+                  </h2>
+                  <ul className="flex flex-col gap-3">
+                    {amadeusCategories.map((cat) => (
+                      <li key={cat.key} className="flex flex-col gap-1.5">
+                        <div className="flex items-baseline justify-between text-sm">
+                          <span className="text-fg">{t(`reviewCategories.${cat.key}`)}</span>
+                          <span className="text-fg font-medium tabular-nums" aria-hidden>
+                            {t('reviewCategories.scoreOf', { score: cat.score })}
+                          </span>
                         </div>
-                      </article>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-muted text-sm">{t('noRooms')}</p>
-            )}
-          </section>
+                        <div
+                          role="progressbar"
+                          aria-valuenow={cat.score}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={t('reviewCategories.scoreAria', {
+                            category: t(`reviewCategories.${cat.key}`),
+                            score: cat.score,
+                          })}
+                          className="border-border bg-bg h-2 overflow-hidden rounded-full border"
+                        >
+                          <div className="bg-fg/80 h-full" style={{ width: `${cat.score}%` }} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-muted mt-3 text-xs">{t('reviewCategories.source')}</p>
+                </section>
+              ) : null}
 
-          {hasAnyPolicy(policies) ? <HotelPolicies locale={locale} policies={policies} /> : null}
+              {/* 6 — Conditions de séjour */}
+              {hasAnyPolicy(policies) ? (
+                <HotelPolicies locale={locale} policies={policies} />
+              ) : null}
 
-          <span id="lieu" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 5 — Lieu : localisation, guide local, événements, MICE. */}
-          <HotelLocation
-            locale={locale}
-            hotelName={name}
-            city={row.city}
-            address={row.address}
-            postalCode={postalCode}
-            latitude={row.latitude}
-            longitude={row.longitude}
-            location={location}
-          />
+              {/* 7 — Expériences signature */}
+              <HotelSignatureExperiences
+                locale={locale}
+                cloudName={cloudName}
+                experiences={signatureExperiences}
+              />
 
-          <LocalGuideTeaser locale={locale} cityLabel={row.city} guide={guideTeaser} />
+              {/* 8 — Restaurants & bars */}
+              {restaurants !== null && restaurants.venues.length > 0 ? (
+                <HotelRestaurants locale={locale} restaurants={restaurants} />
+              ) : null}
 
-          <HotelEvents locale={locale} hotelName={name} city={row.city} events={upcomingEvents} />
+              {/* 9 — Spa & bien-être */}
+              {spa !== null ? <HotelSpa locale={locale} spa={spa} /> : null}
 
-          <HotelMiceEvents locale={locale} hotelName={name} mice={miceInfo} />
+              {/*
+                10 — Pourquoi choisir cet hôtel ? Ce bloc héberge la réponse
+                AEO citable (`data-aeo`, indexée par les LLMs) + les points
+                forts. Un seul H2 — l'ancien bloc AEO autonome du cluster
+                Concierge est retiré pour éviter le doublon de titre.
+              */}
+              <section
+                id="aeo"
+                data-aeo
+                {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
+                data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
+                aria-labelledby="why-choose-title"
+                className="border-border bg-muted/5 mb-16 rounded-lg border p-6"
+              >
+                <h2 id="why-choose-title" className="text-fg font-serif text-2xl font-semibold">
+                  {aeoQuestion}
+                </h2>
+                <p className="text-muted mt-3 leading-relaxed">{aeoAnswer}</p>
+                {highlights.length > 0 ? (
+                  <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="border-border bg-bg text-fg rounded-lg border px-4 py-3 text-sm"
+                      >
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
 
-          <span id="avis" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 6 — Avis & autorité (avis, sous-notes, distinctions, réassurance). */}
-          <HotelFeaturedReviews locale={locale} reviews={featuredReviews} />
+              {/* 11 — Emplacement & accès (golden : carte + accès seuls — les
+                  POIs sont relocalisés sous « Le conseil du Concierge ») */}
+              <span id="lieu" aria-hidden className="block scroll-mt-28" />
+              <HotelLocation
+                locale={locale}
+                hotelName={name}
+                city={row.city}
+                address={row.address}
+                postalCode={postalCode}
+                latitude={row.latitude}
+                longitude={row.longitude}
+                location={location}
+                omitPois
+              />
 
-          {amadeusCategories.length > 0 ? (
-            <section
-              aria-labelledby="reviews-breakdown-title"
-              className="mb-12"
-              data-testid="hotel-review-breakdown"
-            >
-              <h2 id="reviews-breakdown-title" className="text-fg mb-3 font-serif text-2xl">
-                {t('sections.reviewBreakdown')}
-              </h2>
-              <ul className="flex flex-col gap-3">
-                {amadeusCategories.map((cat) => (
-                  <li key={cat.key} className="flex flex-col gap-1.5">
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="text-fg">{t(`reviewCategories.${cat.key}`)}</span>
-                      <span className="text-fg font-medium tabular-nums" aria-hidden>
-                        {t('reviewCategories.scoreOf', { score: cat.score })}
-                      </span>
-                    </div>
-                    <div
-                      role="progressbar"
-                      aria-valuenow={cat.score}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={t('reviewCategories.scoreAria', {
-                        category: t(`reviewCategories.${cat.key}`),
-                        score: cat.score,
-                      })}
-                      className="border-border bg-bg h-2 overflow-hidden rounded-full border"
-                    >
-                      <div className="bg-fg/80 h-full" style={{ width: `${cat.score}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-muted mt-3 text-xs">{t('reviewCategories.source')}</p>
-            </section>
-          ) : null}
+              {/* 12 — Séminaires & événements pro */}
+              <HotelMiceEvents locale={locale} hotelName={name} mice={miceInfo} />
 
-          <HotelAwards locale={locale} awards={awards} />
+              {/* 13 — Le conseil du Concierge (cluster) :
+                  conseil signature → quartier (visite / activités / commerces)
+                  → guide local → événements → FAQ Concierge. */}
+              <span id="conseil" aria-hidden className="block scroll-mt-28" />
+              <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
+              <HotelNeighbourhoodBuckets locale={locale} location={location} />
+              <LocalGuideTeaser locale={locale} cityLabel={row.city} guide={guideTeaser} />
+              <HotelEvents
+                locale={locale}
+                hotelName={name}
+                city={row.city}
+                events={upcomingEvents}
+              />
+              <TopConciergeFaq locale={locale} items={topConciergeFaq} />
 
-          {/*
+              {/* 14 — Questions fréquentes */}
+              {faqGroups.length > 0 ? (
+                <HotelFaq locale={locale} groups={faqGroups} />
+              ) : (
+                <section id="faq" aria-labelledby="faq-title-golden" className="mb-12 scroll-mt-24">
+                  <h2 id="faq-title-golden" className="text-fg mb-3 font-serif text-2xl">
+                    {t('sections.faq')}
+                  </h2>
+                  <p className="text-muted text-sm">{t('noFaq')}</p>
+                </section>
+              )}
+
+              {/* 15 — Distinctions, affiliations & sources (autorité / EEAT) */}
+              <HotelAwards locale={locale} awards={awards} />
+              <HotelTrustSignals
+                locale={locale}
+                affiliations={affiliations}
+                isPalace={row.is_palace}
+              />
+              <HotelExternalSourcesFooter locale={locale} provenance={externalSourcesProvenance} />
+
+              {/* 16 — Sur Instagram */}
+              <HotelInstagram locale={locale} cloudName={cloudName} feed={instagramFeed} />
+
+              {/* 17 — Maillage interne : classements + hôtels similaires */}
+              <HotelFeaturedInRankings mentions={featuredInRankings} locale={locale} />
+              <RelatedHotels
+                locale={locale}
+                bundle={relatedHotels}
+                currentRegion={row.region}
+                currentCity={row.city}
+              />
+            </>
+          ) : (
+            <>
+              {/*
+            Cluster 1 — Visite virtuelle. The "En bref" fact-sheet recap moved
+            to the end of the editorial content (2026-06-02, PO request) so the
+            top of the page leads with the narrative rather than a data table.
+            SEO/GEO-safe: the early citable answer stays in `#factual-summary`
+            under the H1, `#en-bref` is still referenced by `speakableSelectors`
+            (selector-based, position-independent), and the facts remain in the
+            Hotel JSON-LD.
+          */}
+              <HotelVirtualTour locale={locale} hotelName={name} tour={virtualTour} />
+
+              <span id="recit" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 2 — Récit : narration, expériences signature, points forts. */}
+              <HotelStory
+                locale={locale}
+                sections={storySections}
+                heroParagraphs={
+                  description !== null && description.length > 0
+                    ? description
+                        .split(/\n\n+/u)
+                        .map((p) => p.trim())
+                        .filter((p) => p.length > 0)
+                    : null
+                }
+              />
+
+              <HotelSignatureExperiences
+                locale={locale}
+                cloudName={cloudName}
+                experiences={signatureExperiences}
+              />
+
+              <section aria-labelledby="highlights-title" className="mb-12">
+                <h2 id="highlights-title" className="text-fg mb-3 font-serif text-2xl">
+                  {t('sections.highlights')}
+                </h2>
+                {highlights.length > 0 ? (
+                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {highlights.map((h) => (
+                      <li
+                        key={h}
+                        className="border-border bg-muted/5 text-fg rounded-lg border px-4 py-3 text-sm"
+                      >
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted text-sm">{t('noHighlights')}</p>
+                )}
+              </section>
+
+              <span id="chambres" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 3 — Chambres (cœur commercial, juste après le récit). */}
+              <section aria-labelledby="rooms-title" className="mb-12">
+                <h2 id="rooms-title" className="text-fg mb-4 font-serif text-2xl">
+                  {t('sections.rooms')}
+                </h2>
+                {rooms.length > 0 ? (
+                  <ul className="flex flex-col gap-4">
+                    {rooms.map((room) => {
+                      const roomHref = {
+                        pathname: '/hotel/[slug]/chambres/[roomSlug]',
+                        params: { slug: slugFr, roomSlug: room.slug },
+                      } as const;
+                      const priceLabel = formatIndicativePrice(room.indicativePrice, locale, t);
+                      return (
+                        <li key={room.id}>
+                          <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
+                            <header className="flex flex-wrap items-baseline justify-between gap-2">
+                              <h3 className="text-fg flex items-center gap-2 font-serif text-lg">
+                                <Link href={roomHref} className="hover:underline">
+                                  {room.name ?? room.room_code}
+                                </Link>
+                                {room.isSignature ? (
+                                  <span
+                                    className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em] text-amber-900"
+                                    aria-label={t('rooms.signatureAria')}
+                                  >
+                                    {t('rooms.signatureBadge')}
+                                  </span>
+                                ) : null}
+                              </h3>
+                              <p className="text-muted text-xs">
+                                {room.max_occupancy !== null
+                                  ? t('rooms.occupancy', { count: room.max_occupancy })
+                                  : null}
+                                {room.size_sqm !== null
+                                  ? ` · ${t('rooms.size', { count: room.size_sqm })}`
+                                  : ''}
+                                {room.bed_type !== null && room.bed_type !== ''
+                                  ? ` · ${room.bed_type}`
+                                  : ''}
+                              </p>
+                            </header>
+                            {room.description !== null && room.description !== '' ? (
+                              <p className="text-muted mt-2 text-sm">{room.description}</p>
+                            ) : null}
+                            {room.amenities.length > 0 ? (
+                              <ul className="mt-3 flex flex-wrap gap-1.5">
+                                {room.amenities.map((amenity) => (
+                                  <li
+                                    key={amenity}
+                                    className="border-border text-muted rounded-md border px-2 py-0.5 text-xs"
+                                  >
+                                    {amenity}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
+                            <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
+                              <p className="text-sm">
+                                <Link
+                                  href={roomHref}
+                                  className="text-fg hover:text-fg/80 inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
+                                >
+                                  {t('rooms.viewDetail')}
+                                  <span aria-hidden>→</span>
+                                </Link>
+                              </p>
+                              {priceLabel !== null ? (
+                                <p className="text-muted text-xs" data-room-price>
+                                  {priceLabel}
+                                </p>
+                              ) : null}
+                            </div>
+                          </article>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="text-muted text-sm">{t('noRooms')}</p>
+                )}
+              </section>
+
+              <span id="avis" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 4 — Avis & sous-notes (preuve sociale, juste après les chambres). */}
+              <HotelFeaturedReviews locale={locale} reviews={featuredReviews} />
+
+              {amadeusCategories.length > 0 ? (
+                <section
+                  aria-labelledby="reviews-breakdown-title"
+                  className="mb-12"
+                  data-testid="hotel-review-breakdown"
+                >
+                  <h2 id="reviews-breakdown-title" className="text-fg mb-3 font-serif text-2xl">
+                    {t('sections.reviewBreakdown')}
+                  </h2>
+                  <ul className="flex flex-col gap-3">
+                    {amadeusCategories.map((cat) => (
+                      <li key={cat.key} className="flex flex-col gap-1.5">
+                        <div className="flex items-baseline justify-between text-sm">
+                          <span className="text-fg">{t(`reviewCategories.${cat.key}`)}</span>
+                          <span className="text-fg font-medium tabular-nums" aria-hidden>
+                            {t('reviewCategories.scoreOf', { score: cat.score })}
+                          </span>
+                        </div>
+                        <div
+                          role="progressbar"
+                          aria-valuenow={cat.score}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={t('reviewCategories.scoreAria', {
+                            category: t(`reviewCategories.${cat.key}`),
+                            score: cat.score,
+                          })}
+                          className="border-border bg-bg h-2 overflow-hidden rounded-full border"
+                        >
+                          <div className="bg-fg/80 h-full" style={{ width: `${cat.score}%` }} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-muted mt-3 text-xs">{t('reviewCategories.source')}</p>
+                </section>
+              ) : null}
+
+              <span id="services" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 5 — Services : équipements, restauration, spa. */}
+              <HotelAmenities locale={locale} groups={amenityGroups} flat={amenities} />
+
+              {restaurants !== null && restaurants.venues.length > 0 ? (
+                <HotelRestaurants locale={locale} restaurants={restaurants} />
+              ) : null}
+
+              {spa !== null ? <HotelSpa locale={locale} spa={spa} /> : null}
+
+              <span id="lieu" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 6 — Lieu : localisation, politiques, guide local, événements, MICE. */}
+              <HotelLocation
+                locale={locale}
+                hotelName={name}
+                city={row.city}
+                address={row.address}
+                postalCode={postalCode}
+                latitude={row.latitude}
+                longitude={row.longitude}
+                location={location}
+              />
+
+              {hasAnyPolicy(policies) ? (
+                <HotelPolicies locale={locale} policies={policies} />
+              ) : null}
+
+              <LocalGuideTeaser locale={locale} cityLabel={row.city} guide={guideTeaser} />
+
+              <HotelEvents
+                locale={locale}
+                hotelName={name}
+                city={row.city}
+                events={upcomingEvents}
+              />
+
+              <HotelMiceEvents locale={locale} hotelName={name} mice={miceInfo} />
+
+              <HotelAwards locale={locale} awards={awards} />
+
+              {/*
           CDC §2 bloc 13 — Trust signals (structured affiliations).
           Mirrors the JSON-LD `Hotel.brand` + `Hotel.award[]` already
           emitted above by `mapAffiliationsToBrand` /
@@ -1265,71 +1640,131 @@ async function renderHotelPage(
           no verified affiliation AND `isPalace === false`. See
           `apps/web/src/components/hotel/hotel-trust-signals.tsx`.
         */}
-          <HotelTrustSignals locale={locale} affiliations={affiliations} isPalace={row.is_palace} />
+              <HotelTrustSignals
+                locale={locale}
+                affiliations={affiliations}
+                isPalace={row.is_palace}
+              />
 
-          {/*
+              {/*
           CDC §2 bloc 13bis — EEAT external sources provenance.
           Renders the structured `external_sources` JSONB column hydrated by
           the Phase 1.5 backfill. Self-elides when the column carries no
           publicly useful entries (~38 % of catalogue at Phase 1.5 close).
           See `apps/web/src/components/hotel/hotel-external-sources-footer.tsx`.
         */}
-          <HotelExternalSourcesFooter locale={locale} provenance={externalSourcesProvenance} />
+              <HotelExternalSourcesFooter locale={locale} provenance={externalSourcesProvenance} />
 
-          <HotelReassurance locale={locale} />
+              <span id="conseil" aria-hidden className="block scroll-mt-28" />
+              {/* Cluster 7 — Le Conseil du Concierge + réponse AEO en tête de la FAQ unifiée. */}
+              <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
 
-          <span id="conseil" aria-hidden className="block scroll-mt-28" />
-          {/* Cluster 7 — Le Conseil du Concierge + réponse AEO en tête de la FAQ unifiée. */}
-          <ConciergeAdvice locale={locale} advice={conciergeAdvice} />
+              <section
+                id="aeo"
+                data-aeo
+                {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
+                data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
+                aria-labelledby="hotel-aeo-title"
+                className="border-border bg-muted/5 mb-16 rounded-lg border p-6"
+              >
+                <h2 id="hotel-aeo-title" className="text-fg font-serif text-2xl font-semibold">
+                  {aeoQuestion}
+                </h2>
+                <p className="text-muted mt-3 leading-relaxed">{aeoAnswer}</p>
+              </section>
 
-          <section
-            id="aeo"
-            data-aeo
-            {...(!aeoBlockResult.ok ? { 'data-aeo-warning': aeoBlockResult.error.kind } : {})}
-            data-aeo-word-count={aeoBlockResult.ok ? aeoBlockResult.value.wordCount : undefined}
-            aria-labelledby="hotel-aeo-title"
-            className="border-border bg-muted/5 mb-16 rounded-lg border p-6"
-          >
-            <h2 id="hotel-aeo-title" className="text-fg font-serif text-2xl font-semibold">
-              {aeoQuestion}
-            </h2>
-            <p className="text-muted mt-3 leading-relaxed">{aeoAnswer}</p>
-          </section>
+              <TopConciergeFaq locale={locale} items={topConciergeFaq} />
 
-          <TopConciergeFaq locale={locale} items={topConciergeFaq} />
+              {faqGroups.length > 0 ? (
+                <HotelFaq locale={locale} groups={faqGroups} />
+              ) : (
+                <section id="faq" aria-labelledby="faq-title" className="mb-12 scroll-mt-24">
+                  <h2 id="faq-title" className="text-fg mb-3 font-serif text-2xl">
+                    {t('sections.faq')}
+                  </h2>
+                  <p className="text-muted text-sm">{t('noFaq')}</p>
+                </section>
+              )}
 
-          {faqGroups.length > 0 ? (
-            <HotelFaq locale={locale} groups={faqGroups} />
-          ) : (
-            <section id="faq" aria-labelledby="faq-title" className="mb-12 scroll-mt-24">
-              <h2 id="faq-title" className="text-fg mb-3 font-serif text-2xl">
-                {t('sections.faq')}
-              </h2>
-              <p className="text-muted text-sm">{t('noFaq')}</p>
-            </section>
+              {/* Social proof — latest Instagram posts + follow CTA. */}
+              <HotelInstagram locale={locale} cloudName={cloudName} feed={instagramFeed} />
+
+              {/* Cluster 9 — Maillage interne : classements, hôtels similaires. */}
+              <HotelFeaturedInRankings mentions={featuredInRankings} locale={locale} />
+
+              <RelatedHotels
+                locale={locale}
+                bundle={relatedHotels}
+                currentRegion={row.region}
+                currentCity={row.city}
+              />
+
+              {/*
+            "En bref" fact-sheet recap — moved here (end of editorial content)
+            on 2026-06-02. It closes the fiche with the ground-truth essentials
+            (address, category, coordinates, freshness badge) rather than
+            competing with the narrative at the top. Still `data-aeo` +
+            `data-llm-summary`, still `#en-bref` (speakable selector).
+          */}
+              <HotelEnBref
+                locale={locale}
+                name={name}
+                city={row.city}
+                region={row.region}
+                isPalace={row.is_palace}
+                stars={row.stars as 1 | 2 | 3 | 4 | 5}
+                address={row.address}
+                postalCode={postalCode}
+                district={row.district}
+                latitude={row.latitude}
+                longitude={row.longitude}
+                totalRooms={inventory.totalRooms}
+                suites={inventory.suites}
+                checkInFrom={policies.checkIn !== null ? policies.checkIn.from : null}
+                checkOutUntil={policies.checkOut !== null ? policies.checkOut.until : null}
+                petsAllowed={policies.pets !== null ? policies.pets.allowed : null}
+                openedYear={historyDates.openedYear}
+                lastRenovatedYear={historyDates.lastRenovatedYear}
+                architects={externalIds.knowledgeGraph.architects}
+                lastUpdatedLabel={lastUpdated}
+                lastUpdatedIso={
+                  row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null
+                }
+              />
+            </>
           )}
-
-          {/* Cluster 9 — Maillage interne : classements, hôtels similaires. */}
-          <HotelFeaturedInRankings mentions={featuredInRankings} locale={locale} />
-
-          <RelatedHotels
-            locale={locale}
-            bundle={relatedHotels}
-            currentRegion={row.region}
-            currentCity={row.city}
-          />
         </div>
 
-        <aside aria-label={t('sections.booking')} className="mt-12 lg:mt-0">
-          <div className="flex flex-col gap-6 lg:sticky lg:top-[100px]">
-            <HotelToc heading={t('toc.heading')} items={tocItems} />
-            <BookingSlot locale={locale} hotelName={name} surface="rail" />
-          </div>
-        </aside>
+        {/*
+          Golden template (Airelles, local fixture): no right column. The
+          fiche runs a single full-width column and the table of contents
+          becomes a collapsible floating widget (rendered below). Every other
+          fiche keeps the two-column rail with the sticky TOC and the Phase-6
+          booking seam (ADR-0024/0025).
+        */}
+        {goldenTemplate ? null : (
+          <aside aria-label={t('sections.booking')} className="mt-12 lg:mt-0">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-[100px]">
+              <HotelToc heading={t('toc.heading')} items={tocItems} />
+              <BookingSlot locale={locale} hotelName={name} surface="rail" />
+            </div>
+          </aside>
+        )}
       </div>
 
+      {/* Golden template: floating, collapsible "Sur cette page" widget. */}
+      {goldenTemplate ? (
+        <HotelToc
+          heading={t('toc.heading')}
+          items={tocItems}
+          variant="floating"
+          expandLabel={t('toc.expand')}
+          collapseLabel={t('toc.collapse')}
+        />
+      ) : null}
+
       {/* Reserved for the Phase 6 fixed mobile booking bar — inert today. */}
-      <BookingSlot locale={locale} hotelName={name} surface="mobilebar" />
+      {goldenTemplate ? null : <BookingSlot locale={locale} hotelName={name} surface="mobilebar" />}
 
       <TrackPageView
         event={{
@@ -1349,9 +1784,6 @@ async function renderHotelPage(
         (fiche-reorganisation plan — dedup. The former footer duplicate
         was removed; the JSON-LD `Hotel.dateModified` still mirrors it).
       */}
-      <footer className="text-muted border-border mt-16 flex flex-col gap-2 border-t pt-8 text-xs">
-        <p>{t('loyaltyHint')}</p>
-      </footer>
     </main>
   );
 }

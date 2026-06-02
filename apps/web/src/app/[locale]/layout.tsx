@@ -71,7 +71,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${sans.variable} ${serif.variable}`}>
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex min-h-dvh flex-col overflow-x-clip">
         <NextIntlClientProvider messages={messages}>
           <SiteHeader />
           {/*

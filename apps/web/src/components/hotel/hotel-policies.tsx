@@ -49,159 +49,180 @@ export async function HotelPolicies({
 
   return (
     <section aria-labelledby="policies-title" className="mb-12">
-      <h2 id="policies-title" className="text-fg mb-3 font-serif text-2xl">
-        {t('sections.policies')}
-      </h2>
+      {/*
+        Progressive disclosure (2026-06-01): collapsed by default to keep the
+        fiche scannable. Native <details> → zero client JS, keyboard-operable
+        (a11y skill), and the policy facts stay in the DOM so Google still
+        indexes them when folded. The <h2> lives inside <summary> to preserve
+        the heading outline. GEO-critical facts (check-in, pets, taxes) are
+        also surfaced in the factual summary + FAQ, which stay open.
+      */}
+      <details className="group">
+        <summary className="flex cursor-pointer select-none list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            width="16"
+            height="16"
+            className="text-muted shrink-0 transition-transform group-open:rotate-90"
+          >
+            <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+          <h2 id="policies-title" className="text-fg font-serif text-2xl">
+            {t('sections.policies')}
+          </h2>
+        </summary>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {policies.checkIn !== null || policies.checkOut !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.checkInOutTitle')}</h3>
-            <dl className="text-fg flex flex-col gap-1 text-sm">
-              {policies.checkIn !== null ? (
-                <div>
-                  <dt className="text-muted">{t('policies.checkInLabel')}</dt>
-                  <dd>
-                    {policies.checkIn.until !== null
-                      ? t('policies.checkInRange', {
-                          from: policies.checkIn.from,
-                          until: policies.checkIn.until,
-                        })
-                      : t('policies.checkInFrom', { from: policies.checkIn.from })}
-                  </dd>
-                </div>
-              ) : null}
-              {policies.checkOut !== null ? (
-                <div>
-                  <dt className="text-muted">{t('policies.checkOutLabel')}</dt>
-                  <dd>{t('policies.checkOutUntil', { until: policies.checkOut.until })}</dd>
-                </div>
-              ) : null}
-            </dl>
-          </article>
-        ) : null}
+        <div className="mt-3 grid gap-4 md:grid-cols-2">
+          {policies.checkIn !== null || policies.checkOut !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.checkInOutTitle')}</h3>
+              <dl className="text-fg flex flex-col gap-1 text-sm">
+                {policies.checkIn !== null ? (
+                  <div>
+                    <dt className="text-muted">{t('policies.checkInLabel')}</dt>
+                    <dd>
+                      {policies.checkIn.until !== null
+                        ? t('policies.checkInRange', {
+                            from: policies.checkIn.from,
+                            until: policies.checkIn.until,
+                          })
+                        : t('policies.checkInFrom', { from: policies.checkIn.from })}
+                    </dd>
+                  </div>
+                ) : null}
+                {policies.checkOut !== null ? (
+                  <div>
+                    <dt className="text-muted">{t('policies.checkOutLabel')}</dt>
+                    <dd>{t('policies.checkOutUntil', { until: policies.checkOut.until })}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </article>
+          ) : null}
 
-        {policies.cancellation !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.cancellationTitle')}</h3>
-            {policies.cancellation.summary !== null ? (
-              <p className="text-fg text-sm">{policies.cancellation.summary}</p>
-            ) : null}
-            {policies.cancellation.freeUntilHours !== null ? (
-              <p className="text-muted mt-2 text-sm">
-                {t('policies.cancellationFreeUntil', {
-                  count: policies.cancellation.freeUntilHours,
+          {policies.cancellation !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.cancellationTitle')}</h3>
+              {policies.cancellation.summary !== null ? (
+                <p className="text-fg text-sm">{policies.cancellation.summary}</p>
+              ) : null}
+              {policies.cancellation.freeUntilHours !== null ? (
+                <p className="text-muted mt-2 text-sm">
+                  {t('policies.cancellationFreeUntil', {
+                    count: policies.cancellation.freeUntilHours,
+                  })}
+                </p>
+              ) : null}
+              {policies.cancellation.penaltyAfter !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.cancellation.penaltyAfter}</p>
+              ) : null}
+            </article>
+          ) : null}
+
+          {policies.pets !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.petsTitle')}</h3>
+              <p className="text-fg text-sm">
+                {policies.pets.allowed
+                  ? policies.pets.feeEur !== null && policies.pets.feeEur > 0
+                    ? t('policies.petsAllowedFee', { amount: policies.pets.feeEur })
+                    : t('policies.petsAllowedFree')
+                  : t('policies.petsNotAllowed')}
+              </p>
+              {policies.pets.notes !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.pets.notes}</p>
+              ) : null}
+            </article>
+          ) : null}
+
+          {policies.children !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.childrenTitle')}</h3>
+              <p className="text-fg text-sm">
+                {policies.children.welcome
+                  ? t('policies.childrenWelcome')
+                  : t('policies.childrenNotWelcome')}
+              </p>
+              {policies.children.freeUnderAge !== null ? (
+                <p className="text-muted mt-2 text-sm">
+                  {t('policies.childrenFreeUnder', { age: policies.children.freeUnderAge })}
+                </p>
+              ) : null}
+              {policies.children.extraBedFeeEur !== null ? (
+                <p className="text-muted mt-1 text-sm">
+                  {t('policies.childrenExtraBed', { amount: policies.children.extraBedFeeEur })}
+                </p>
+              ) : null}
+              {policies.children.notes !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.children.notes}</p>
+              ) : null}
+            </article>
+          ) : null}
+
+          {policies.payment !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4 md:col-span-2">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.paymentTitle')}</h3>
+              <ul className="flex flex-wrap gap-1.5">
+                {sortMethods(policies.payment.methods).map((m) => (
+                  <li
+                    key={m}
+                    className="border-border bg-bg text-fg rounded-md border px-2 py-0.5 text-xs"
+                  >
+                    {t(`policies.paymentMethod.${m}`)}
+                  </li>
+                ))}
+              </ul>
+              {policies.payment.depositRequired !== null ? (
+                <p className="text-muted mt-3 text-sm">
+                  {policies.payment.depositRequired
+                    ? t('policies.paymentDepositRequired')
+                    : t('policies.paymentNoDeposit')}
+                </p>
+              ) : null}
+              {policies.payment.notes !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.payment.notes}</p>
+              ) : null}
+            </article>
+          ) : null}
+
+          {policies.cityTax !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.cityTaxTitle')}</h3>
+              <p className="text-fg text-sm">
+                {t('policies.cityTaxAmount', {
+                  amount: policies.cityTax.amountPerPersonPerNight.toFixed(2),
+                  currency: policies.cityTax.currency,
                 })}
               </p>
-            ) : null}
-            {policies.cancellation.penaltyAfter !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.cancellation.penaltyAfter}</p>
-            ) : null}
-          </article>
-        ) : null}
+              {policies.cityTax.freeUnderAge !== null ? (
+                <p className="text-muted mt-2 text-sm">
+                  {t('policies.cityTaxFreeUnder', { age: policies.cityTax.freeUnderAge })}
+                </p>
+              ) : null}
+              {policies.cityTax.notes !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.cityTax.notes}</p>
+              ) : null}
+            </article>
+          ) : null}
 
-        {policies.pets !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.petsTitle')}</h3>
-            <p className="text-fg text-sm">
-              {policies.pets.allowed
-                ? policies.pets.feeEur !== null && policies.pets.feeEur > 0
-                  ? t('policies.petsAllowedFee', { amount: policies.pets.feeEur })
-                  : t('policies.petsAllowedFree')
-                : t('policies.petsNotAllowed')}
-            </p>
-            {policies.pets.notes !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.pets.notes}</p>
-            ) : null}
-          </article>
-        ) : null}
-
-        {policies.children !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.childrenTitle')}</h3>
-            <p className="text-fg text-sm">
-              {policies.children.welcome
-                ? t('policies.childrenWelcome')
-                : t('policies.childrenNotWelcome')}
-            </p>
-            {policies.children.freeUnderAge !== null ? (
-              <p className="text-muted mt-2 text-sm">
-                {t('policies.childrenFreeUnder', { age: policies.children.freeUnderAge })}
+          {policies.wifi !== null ? (
+            <article className="border-border bg-bg rounded-lg border p-4">
+              <h3 className="text-fg mb-2 font-medium">{t('policies.wifiTitle')}</h3>
+              <p className="text-fg text-sm">
+                {policies.wifi.included
+                  ? policies.wifi.scope !== null
+                    ? t(`policies.wifiIncludedScope.${policies.wifi.scope}`)
+                    : t('policies.wifiIncluded')
+                  : t('policies.wifiNotIncluded')}
               </p>
-            ) : null}
-            {policies.children.extraBedFeeEur !== null ? (
-              <p className="text-muted mt-1 text-sm">
-                {t('policies.childrenExtraBed', { amount: policies.children.extraBedFeeEur })}
-              </p>
-            ) : null}
-            {policies.children.notes !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.children.notes}</p>
-            ) : null}
-          </article>
-        ) : null}
-
-        {policies.payment !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4 md:col-span-2">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.paymentTitle')}</h3>
-            <ul className="flex flex-wrap gap-1.5">
-              {sortMethods(policies.payment.methods).map((m) => (
-                <li
-                  key={m}
-                  className="border-border bg-bg text-fg rounded-md border px-2 py-0.5 text-xs"
-                >
-                  {t(`policies.paymentMethod.${m}`)}
-                </li>
-              ))}
-            </ul>
-            {policies.payment.depositRequired !== null ? (
-              <p className="text-muted mt-3 text-sm">
-                {policies.payment.depositRequired
-                  ? t('policies.paymentDepositRequired')
-                  : t('policies.paymentNoDeposit')}
-              </p>
-            ) : null}
-            {policies.payment.notes !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.payment.notes}</p>
-            ) : null}
-          </article>
-        ) : null}
-
-        {policies.cityTax !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.cityTaxTitle')}</h3>
-            <p className="text-fg text-sm">
-              {t('policies.cityTaxAmount', {
-                amount: policies.cityTax.amountPerPersonPerNight.toFixed(2),
-                currency: policies.cityTax.currency,
-              })}
-            </p>
-            {policies.cityTax.freeUnderAge !== null ? (
-              <p className="text-muted mt-2 text-sm">
-                {t('policies.cityTaxFreeUnder', { age: policies.cityTax.freeUnderAge })}
-              </p>
-            ) : null}
-            {policies.cityTax.notes !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.cityTax.notes}</p>
-            ) : null}
-          </article>
-        ) : null}
-
-        {policies.wifi !== null ? (
-          <article className="border-border bg-bg rounded-lg border p-4">
-            <h3 className="text-fg mb-2 font-medium">{t('policies.wifiTitle')}</h3>
-            <p className="text-fg text-sm">
-              {policies.wifi.included
-                ? policies.wifi.scope !== null
-                  ? t(`policies.wifiIncludedScope.${policies.wifi.scope}`)
-                  : t('policies.wifiIncluded')
-                : t('policies.wifiNotIncluded')}
-            </p>
-            {policies.wifi.notes !== null ? (
-              <p className="text-muted mt-2 text-sm">{policies.wifi.notes}</p>
-            ) : null}
-          </article>
-        ) : null}
-      </div>
+              {policies.wifi.notes !== null ? (
+                <p className="text-muted mt-2 text-sm">{policies.wifi.notes}</p>
+              ) : null}
+            </article>
+          ) : null}
+        </div>
+      </details>
     </section>
   );
 }

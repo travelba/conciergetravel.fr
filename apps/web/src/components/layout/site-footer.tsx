@@ -450,11 +450,17 @@ export async function SiteFooter(): Promise<ReactElement> {
               </ul>
             </nav>
 
+            {/*
+              Surface agentique — déclarée dans le DOM pour les crawlers LLM
+              (skill `geo-llm-optimization` §LLM-actionable surfaces), mais
+              rendue volontairement discrète pour les visiteurs humains :
+              libellés = nom de fichier brut, taille réduite, teinte atténuée.
+            */}
             <nav aria-label={t('headings.agentic')} className="mt-6">
-              <h2 className="text-muted mb-2 text-[10px] font-medium uppercase tracking-wider">
+              <h2 className="text-muted/70 mb-2 text-[10px] font-medium uppercase tracking-wider">
                 {t('headings.agentic')}
               </h2>
-              <ul className="flex flex-col gap-1.5 text-xs">
+              <ul className="text-muted/60 flex flex-col gap-1 text-[10px]">
                 <li>
                   {/*
                     Plain `<a>` (no `<Link>`) — these are absolute file
@@ -462,19 +468,19 @@ export async function SiteFooter(): Promise<ReactElement> {
                     tree. Skill `geo-llm-optimization` §LLM-actionable
                     surfaces.
                   */}
-                  <a href="/sitemap.xml" className="text-muted hover:text-fg hover:underline">
+                  <a href="/sitemap.xml" className="hover:text-fg hover:underline">
                     {t('links.sitemap')}
                   </a>
                 </li>
                 <li>
-                  <a href="/llms.txt" className="text-muted hover:text-fg hover:underline">
+                  <a href="/llms.txt" className="hover:text-fg hover:underline">
                     {t('links.llmsTxt')}
                   </a>
                 </li>
                 <li>
                   <a
                     href="/.well-known/agent-skills.json"
-                    className="text-muted hover:text-fg hover:underline"
+                    className="hover:text-fg hover:underline"
                   >
                     {t('links.agentSkills')}
                   </a>
