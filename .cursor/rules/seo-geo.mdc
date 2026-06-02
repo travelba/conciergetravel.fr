@@ -48,7 +48,7 @@ alwaysApply: true
 
 ## LLM-actionable surfaces (GEO)
 
-- `robots.txt` allow-lists the official LLM crawlers (2026): `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `anthropic-ai`, `Applebot-Extended`.
+- `robots.txt` allow-lists the official LLM crawlers (2026): `Google-Extended`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `anthropic-ai`, `Applebot-Extended`, `MistralAI-User`, `Meta-ExternalAgent`, `Meta-ExternalFetcher`, `Bytespider`, `Diffbot`.
 - `llms.txt` references **only routes that exist** — broken links destroy trust. CI should check 200s.
 - `agent-skills.json` enumerates LLM-actionable actions with Zod-validated input schemas. Every new public endpoint that an LLM could call should appear here.
 - The catalogue is built from `DEFAULT_AGENT_SKILLS` in `packages/seo/src/agent-skills.ts`. Required keys must always be a subset of declared properties (asserted in tests).
@@ -87,7 +87,7 @@ alwaysApply: true
 - Sitemap is generated from Supabase (`hotels`, `rooms`, `editorial_pages`, `redirects`) and emitted by `apps/web/src/app/sitemap.xml/route.ts`. Sub-sitemaps: `sitemap-hotels.xml`, `sitemap-rooms.xml`, `sitemap-hubs.xml`, `sitemap-editorial.xml`, `sitemap-guides.xml`, `sitemap-pois.xml`.
 - `force-static` + `revalidate = 86400`. Add `lastmod` based on `updated_at`.
 - Disallow `/api/`, `/admin/`, the booking funnel, the account area, and `/monitoring` (Sentry tunnel).
-- Robots allow-list (2026): `Googlebot`, `Google-Extended`, `Bingbot`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `anthropic-ai`, `Applebot`, `Applebot-Extended`.
+- Robots allow-list (2026): `Googlebot`, `Google-Extended`, `Bingbot`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `anthropic-ai`, `Applebot`, `Applebot-Extended`, `MistralAI-User`, `Meta-ExternalAgent`, `Meta-ExternalFetcher`, `Bytespider`, `Diffbot`. `Googlebot` / `Bingbot` / `Applebot` sont couverts par la stance `User-agent: *` ; les autres ont une stance dédiée dans `robots.txt/route.ts`.
 
 See `.cursor/skills/seo-technical/SKILL.md`, `.cursor/skills/geo-llm-optimization/SKILL.md`, `.cursor/skills/structured-data-schema-org/SKILL.md`, and `.cursor/rules/hotel-detail-page.mdc` for the 15-block checklist.
 
