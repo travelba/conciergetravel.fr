@@ -1,0 +1,147 @@
+---
+description: Vue synthétique des rôles agents du projet et règles de collaboration entre rules, skills, docs et code existant. Complète AGENTS.md sans le remplacer. À consulter quand une tâche couvre plusieurs domaines.
+alwaysApply: false
+---
+
+# 20-agents-overview
+
+## Objectif
+Cette rule résume le comportement attendu de l’agent dans ce repo.
+Elle complète `AGENTS.md` sans le remplacer.
+Elle sert à orienter l’agent vers :
+- la bonne surface produit,
+- les bons fichiers,
+- les bonnes skills,
+- le bon niveau d’intervention.
+
+## Sources obligatoires
+Avant toute tâche significative, lire selon le besoin :
+- `AGENTS.md`
+- `EDITORIAL_VOICE.md`
+- `docs/04-seo-geo-aeo.md`
+- `docs/05-booking-flow.md`
+- les rules `.cursor/rules/**`
+- les skills `.cursor/skills/**`
+- les packages concernés
+
+## Principe
+L’agent doit agir comme un opérateur prudent dans un repo déjà structuré.
+Il ne doit pas supposer que tout est à créer.
+Il doit d’abord vérifier :
+- ce qui existe déjà,
+- ce qui fait autorité,
+- ce qui doit être étendu,
+- ce qui serait une duplication.
+
+## Familles d’agents implicites dans le projet
+
+### 1. Agent architecture / repo
+Responsable de :
+- structure monorepo,
+- conventions de packages,
+- cohérence entre apps et packages,
+- respect des décisions structurantes.
+
+À utiliser quand la tâche touche :
+- `apps/`
+- `packages/`
+- architecture,
+- dépendances,
+- conventions globales.
+
+### 2. Agent SEO / GEO / AEO
+Responsable de :
+- metadata,
+- sitemaps,
+- canonicals,
+- llms.txt,
+- linking interne,
+- données structurées,
+- lisibilité pour moteurs et agents.
+
+À utiliser quand la tâche touche :
+- `packages/seo`
+- pages indexables,
+- templates éditoriaux,
+- surfaces programmatiques.
+
+### 3. Agent contenu / éditorial
+Responsable de :
+- structure narrative,
+- ton concierge,
+- enrichissement sémantique,
+- hiérarchie de l’information,
+- clarté premium.
+
+À utiliser quand la tâche touche :
+- guides,
+- collections,
+- rankings,
+- fiches hôtels,
+- landing pages éditoriales.
+
+Toujours respecter `EDITORIAL_VOICE.md`.
+
+### 4. Agent booking / conversion
+Responsable de :
+- tunnel de réservation,
+- disponibilité,
+- CTA,
+- formulaires,
+- conversion,
+- futurs flux transactionnels.
+
+À utiliser quand la tâche touche :
+- booking,
+- forms,
+- conversion,
+- paiement,
+- logique d’inventaire.
+
+Toujours vérifier le phasage du projet avant de pousser une logique trop en avance.
+
+### 5. Agent observabilité / performance / QA
+Responsable de :
+- performance,
+- instrumentation,
+- erreurs,
+- tests,
+- stabilité,
+- accessibilité.
+
+À utiliser quand la tâche touche :
+- Lighthouse,
+- Web Vitals,
+- logs,
+- Sentry,
+- tests unitaires,
+- Playwright,
+- régressions.
+
+## Règles de collaboration
+- Si une tâche touche plusieurs domaines, l’agent doit l’indiquer explicitement.
+- Une rule spécifique prime sur une rule transverse.
+- Une implémentation existante prime sur une nouvelle abstraction si elle est saine.
+- Une skill existante doit être consultée avant de créer une nouvelle convention.
+- Une doc de référence doit être lue avant toute refonte importante.
+
+## Mode opératoire attendu
+Avant de coder :
+1. identifier la tâche,
+2. identifier la surface concernée,
+3. identifier les rules pertinentes,
+4. identifier les skills pertinentes,
+5. repérer les fichiers existants,
+6. proposer un plan bref.
+
+Après modification :
+1. résumer ce qui a été fait,
+2. signaler les risques,
+3. lister les fichiers touchés,
+4. indiquer les follow-ups utiles.
+
+## Ce que l’agent ne doit pas faire
+- Ne pas lancer de refonte globale silencieuse.
+- Ne pas ignorer les rules spécialisées.
+- Ne pas créer un nouveau pattern si un pattern correct existe déjà.
+- Ne pas modifier une surface SEO, éditoriale ou booking sans vérifier les impacts transverses.

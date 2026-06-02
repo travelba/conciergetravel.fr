@@ -1,0 +1,111 @@
+---
+description: Vue d'ensemble du projet MyConciergeHotel.com, de sa stack, de ses priorités business, SEO, GEO et agentiques. Complète AGENTS.md (source always-on). À lire au démarrage d'une tâche structurante.
+alwaysApply: false
+---
+
+# 01-project-overview
+
+## Mission du projet
+MyConciergeHotel.com est une OTA luxe orientée SEO, GEO et agentic search.
+Le produit combine :
+- une couche éditoriale premium de référence,
+- un moteur de réservation temps réel en montée de phase,
+- un programme de fidélité différenciant,
+- une logique de comparaison et de recommandation haut de gamme.
+
+Le projet doit viser une exécution premium, crédible, maintenable et performante.
+
+## Positionnement
+Le site ne doit jamais ressembler à un simple annuaire d’hôtels ni à un OTA générique.
+Le ton, l’UX, l’architecture d’information et le contenu doivent exprimer :
+- sélection,
+- expertise,
+- avantage concierge,
+- désir,
+- confiance.
+
+## Stack imposée
+Toujours respecter la stack existante du repo :
+- Next.js 15 App Router
+- React 19
+- TypeScript strict
+- Supabase PostgreSQL + RLS
+- Supabase Auth
+- Upstash Redis
+- Algolia
+- Payload CMS 3
+- packages monorepo dédiés (`db`, `domain`, `integrations`, `ui`, `seo`, `emails`, `observability`, `config`)
+- Vercel pour l’hébergement
+
+Ne pas introduire de stack parallèle sans justification validée.
+
+## Sources de vérité à lire avant toute modification importante
+Toujours lire et respecter en priorité :
+- `AGENTS.md`
+- `EDITORIAL_VOICE.md`
+- `README.md`
+- `docs/00-conception-et-phasage.md`
+- `docs/04-seo-geo-aeo.md`
+- les rules `.cursor/rules/**`
+- les skills `.cursor/skills/**`
+
+En cas de contradiction :
+1. ne pas improviser,
+2. signaler le conflit,
+3. proposer une résolution explicite.
+
+## Priorités absolues
+Quand plusieurs optimisations sont possibles, prioriser dans cet ordre :
+1. justesse métier,
+2. cohérence avec l’architecture existante,
+3. SEO / GEO / AEO,
+4. qualité éditoriale,
+5. performance,
+6. maintenabilité,
+7. élégance du code.
+
+## Surfaces stratégiques du produit
+Les surfaces les plus importantes sont :
+- pages hôtels,
+- pages destinations,
+- pages pays / régions / villes / quartiers,
+- pages collections,
+- pages comparatives / rankings,
+- guides éditoriaux,
+- moteur de recherche,
+- tunnel de conversion et booking à terme.
+
+Toute nouvelle fonctionnalité doit préciser sur quelle surface elle agit.
+
+## Règles d’implémentation
+- Toujours préférer l’extension de l’existant à la création d’une logique parallèle.
+- Toujours chercher les composants, conventions, builders SEO, schémas et patterns déjà présents dans le repo avant de coder.
+- Ne jamais casser les conventions du monorepo.
+- Ne jamais dupliquer une logique si un package existant la couvre déjà.
+- Toute décision structurelle importante doit être documentée ou reliée à un ADR si nécessaire.
+
+## SEO / GEO / AEO
+Le projet doit être conçu pour :
+- bien se positionner sur le SEO classique,
+- être lisible, exploitable et citable par les LLMs,
+- structurer ses contenus autour d’entités, relations, preuves et signaux fiables,
+- limiter la cannibalisation,
+- renforcer l’interlinking contextuel.
+
+Chaque implémentation doit prendre en compte :
+- la logique de template,
+- les données structurées,
+- la clarté sémantique,
+- la performance technique,
+- l’exploitabilité par les agents.
+
+## Attitude attendue de l’agent
+Avant toute modification significative :
+1. lire le contexte existant,
+2. identifier les conventions déjà en place,
+3. proposer un plan court,
+4. agir avec un scope limité,
+5. résumer les changements,
+6. signaler les risques ou conflits.
+
+L’agent ne doit jamais faire de refonte globale silencieuse.
