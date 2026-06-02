@@ -14,7 +14,8 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 |---|---|
 | URL canonique `/hotel/[slug]` (flat slug court) | [ADR-0008](../../docs/adr/0008-url-structure-hotel-flat.md) |
 | Sous-pages chambres `/hotel/[slug]/chambres/[room-slug]` indexables | [ADR-0009](../../docs/adr/0009-hotel-room-subpages-indexable.md) |
-| ISR `revalidate = 3600` via auth client island | [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) |
+| Rendu fiche : `force-dynamic` aujourd'hui — **raison technique unique : nonce CSP par requête** (`headers()`), pas un choix d'architecture. **Cible** : retour à l'ISR `revalidate = 3600` après migration nonce CSP → hash (suivi `isr-freshness`) | [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) |
+| Fiche éditoriale d'abord : aucun moteur de réservation / `Offer` / prix live avant Phase 6 | [ADR-0025](../../docs/adr/0025-booking-integration-last-brick.md) |
 | Locales V1 = `fr` + `en` (V2 = +es/de/it, V3 = +ar/zh/ja) | [seo-technical](../skills/seo-technical/SKILL.md) |
 | Voix éditoriale « Le Concierge » + bloc obligatoire `<ConciergeAdvice>` en bas de fiche (60-90 mots FR/EN) | [ADR-0011](../../docs/adr/0011-concierge-voice.md) + [`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) |
 
@@ -57,7 +58,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 
 ```mermaid
 flowchart TB
-  page["page.tsx (RSC, revalidate=3600)"] --> header["1 HotelHeader"]
+  page["page.tsx (RSC — force-dynamic auj., ISR 3600 visé cf. ADR-0007)"] --> header["1 HotelHeader"]
   page --> gallery["2 HotelGallery"]
   page --> summary["3 FactualSummary"]
   page --> longDesc["4 LongDescription"]
@@ -87,5 +88,5 @@ flowchart TB
 ## Références
 
 - CDC v3.0 §2 (architecture fiche, 15 blocs), §3 (URL, i18n, accessibilité), §4 (data model), §6 (SEO/GEO).
-- ADR-0007, ADR-0008, ADR-0009.
+- ADR-0007 (ISR — cible de rendu), ADR-0008, ADR-0009, ADR-0025 (fiche éditoriale d'abord). Note : la décision « éditorial avant booking » vit dans **ADR-0025**, **pas** dans ADR-0024 (qui concerne le transform photo signature).
 - Skills : `seo-technical`, `geo-llm-optimization`, `structured-data-schema-org`, `content-modeling`, `accessibility`, `performance-engineering`, `booking-engine`.

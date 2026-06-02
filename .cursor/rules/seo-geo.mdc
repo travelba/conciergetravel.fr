@@ -15,7 +15,7 @@ alwaysApply: true
 | Locales V1 = `fr` + `en` ; V2 = +es/de/it ; V3 = +ar/zh/ja | Phasé | [seo-technical/SKILL.md](../skills/seo-technical/SKILL.md) |
 | `AggregateRating.bestRating: '5'` (jamais `'10'`) | Hard rule | [structured-data-schema-org/SKILL.md](../skills/structured-data-schema-org/SKILL.md) |
 | Indicateurs urgence "X personnes consultent" interdits sauf preuve Amadeus | Hard rule | DSA art. 25 + DGCCRF |
-| ISR `revalidate = 3600` sur fiche hôtel via auth client island | Adopté Sprint 4.1 | [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) |
+| Rendu fiche hôtel : `force-dynamic` aujourd'hui (nonce CSP par requête) ; ISR `revalidate = 3600` visé après migration nonce → hash (suivi `isr-freshness`) | Sprint 4.1 → cible | [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) |
 | `MemberProgram` JSON-LD émis uniquement sur `/le-concierge-club*` (jamais sur la fiche hôtel Phase 1) | Adopté Sprint 4 | [ADR-0019](../../docs/adr/0019-le-concierge-club-architecture.md) + [membership-program/SKILL.md](../skills/membership-program/SKILL.md) |
 | SEA — aucun différentiel tarifaire membre / avantage hôtel-spécifique en trafic froid Phase 1 ; "gratuit" réservé Concierge Club ; Customer Match + Hotel Center loyalty feed différés Phase 6 | Hard rule | [ADR-0020](../../docs/adr/0020-sea-member-pricing-constraints.md) |
 | Pivot scope mondial : tagline « La sélection du Concierge — hôtels d'exception dans le monde » ; aucun « en France » comme borne géographique ; aucun « Palaces et 5★ » comme borne de scope sur les surfaces publiques | Adopté 2026-05-27 | [ADR-0021](../../docs/adr/0021-pivot-scope-mondial.md) |
