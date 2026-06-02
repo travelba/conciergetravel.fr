@@ -1,0 +1,105 @@
+---
+description: Blueprint transverse des fiches hôtels premium : structure, contenu, SEO, GEO, données et promesse concierge.
+globs:
+  - "apps/web/**/*hotel*.{ts,tsx,md,mdx}"
+  - "apps/web/**/*hotels*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 31-hotel-page-blueprint
+
+## Objectif
+Cette rule définit le niveau d’exigence minimal d’une fiche hôtel.
+Une fiche hôtel doit être :
+- désirable,
+- précise,
+- fiable,
+- utile,
+- premium,
+- exploitable par les moteurs et les agents.
+
+## Priorité & sources
+Cette rule est un blueprint transverse. En cas de conflit, les rules spécifiques priment :
+- `hotel-detail-page.mdc` est la **source autoritaire** (contrat CDC §2, 15 blocs, hard rules, ADR-0007/0008/0009).
+- `photo-quality.mdc` fait foi pour les quotas et la qualité photo (Phase 1 : ≥ 10 photos, 10 catégories couvertes — pas de chiffre concurrent ici).
+- `seo-geo.mdc` fait foi pour SEO / GEO / AEO et le phasage des locales.
+
+## Références obligatoires
+Toujours consulter :
+- `EDITORIAL_VOICE.md`
+- `hotel-detail-page.mdc` (contrat de référence de la fiche)
+- les composants et patterns actuels de `apps/web`
+- les utilitaires `packages/seo`
+
+## Sections attendues
+Selon le template existant, une fiche hôtel doit couvrir la majorité des dimensions suivantes :
+- promesse principale,
+- points forts,
+- localisation,
+- chambres / suites,
+- restauration,
+- spa / bien-être,
+- expériences,
+- informations pratiques,
+- FAQ,
+- recommandations ou alternatives proches si pertinent.
+
+## Qualité du contenu
+Le contenu doit éviter le générique.
+Toujours privilégier :
+- détails concrets,
+- angle concierge,
+- éléments distinctifs,
+- informations réellement utiles à la décision,
+- cohérence avec le positionnement luxe.
+
+## Images
+Les visuels doivent être cohérents avec la promesse premium.
+Toujours vérifier :
+- qualité,
+- hiérarchie,
+- couverture des catégories importantes,
+- cohérence entre galerie, contenu et schémas.
+
+## SEO
+Une fiche hôtel doit avoir :
+- title unique,
+- metadata cohérentes (FR + EN ; locales V1 = fr + en, cf. `seo-geo.mdc`),
+- headings propres,
+- linking interne vers destination / collections / proches,
+- données structurées adaptées.
+
+> **Gel Phase 6 (AGENTS.md §4ter)** : la fiche hôtel n'émet **pas** de `Offer`
+> JSON-LD ni de widget de réservation live tant que les APIs ne sont pas
+> câblées. CTA éditorial "Réserver via le Concierge" uniquement. Schémas émis :
+> `Hotel` + `Place` + `BreadcrumbList` + `FAQPage` + `AggregateRating`
+> (si avis réels) + `Review[]` + `ImageObject[]` + `Award[]`.
+>
+> **Comment le gel est garanti (état du code, vérifié Vague B)** : l'absence
+> d'`Offer` n'est pas obtenue par suppression de code mais par le **gating
+> `booking_mode`**. En Phase 1 le catalogue est éditorial (`booking_mode` =
+> `display_only` / `email`), donc :
+> - la fiche principale (`hotel/[slug]/page.tsx`) ne fetch aucune offre (ADR-0024) ;
+> - la sous-page chambre (`hotel/[slug]/chambres/[roomSlug]/page.tsx`) porte un
+>   chemin `Offer` **dormant** : `offerJsonLd` n'est émis que si
+>   `booking_mode ∈ {amadeus, little}` ET une offre live existe. Il reste donc
+>   inerte tant qu'aucun hôtel n'est bookable, et **s'activera automatiquement
+>   en Phase 6** quand les adaptateurs Amadeus / Little seront câblés.
+>
+> Ne pas "désactiver" ce chemin par du code : le gel doit rester piloté par la
+> donnée (`booking_mode`), pas par une suppression à re-câbler en Phase 6.
+
+## GEO / AEO
+La fiche doit être lisible comme une source exploitable par un moteur de réponse.
+Toujours clarifier :
+- nom de l’hôtel,
+- lieu,
+- catégorie,
+- singularités,
+- expériences différenciantes,
+- signaux de confiance.
+
+## Interdictions
+- Ne pas publier une fiche pauvre ou trop générique.
+- Ne pas dupliquer la même structure sans différenciation réelle.
+- Ne pas promettre une offre, un service ou une expérience non confirmés.
