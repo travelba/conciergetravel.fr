@@ -178,12 +178,26 @@ function narrativeTexts(row: StarRow): string[] {
 // Extraction schema + post-validation.
 // ---------------------------------------------------------------------------
 
+/** FR/EN spelled-out star counts → integer (narratives rarely use digits). */
+const WORD_TO_STARS: Readonly<Record<string, number>> = {
+  une: 1,
+  un: 1,
+  one: 1,
+  deux: 2,
+  two: 2,
+  trois: 3,
+  three: 3,
+};
+
 const DistinctionSchema = z.object({
   restaurant_name: z.string().min(1).max(160),
   stars: z.preprocess((v) => {
     if (typeof v === 'string') {
-      const n = Number(v.trim());
-      return Number.isFinite(n) ? n : v;
+      const t = v.trim().toLowerCase();
+      const n = Number(t);
+      if (Number.isFinite(n)) return n;
+      if (t in WORD_TO_STARS) return WORD_TO_STARS[t];
+      return v;
     }
     return v;
   }, z.number().int().min(1).max(3)),
@@ -210,8 +224,15 @@ const SCHEMA_DESCRIPTION = [
   'Rules:',
   '- Extract ONLY Michelin STAR distinctions of restaurant(s) belonging to the hotel described.',
   '- Do NOT extract MICHELIN Keys (clés), Bib Gourmand, Gault&Millau toques, or stars of NEARBY/other restaurants.',
-  '- If the text does not state a numeric Michelin star count for the hotel\'s own restaurant → return an empty "distinctions" array.',
-  '- evidence_quote MUST be copied verbatim from SOURCE_CONTENT and MUST contain the star count.',
+  '- EXCLUDE any restaurant described as off-site or independent of the hotel: phrases like',
+  '  "à quelques mètres", "à proximité", "non loin", "nearby", "a few metres away",',
+  '  "X meters away", "X mètres" indicate it is NOT the hotel\'s own restaurant → skip it.',
+  '- The star count is often spelled out in words: "une étoile" = 1, "deux étoiles" /',
+  '  "doublement étoilé" = 2, "trois étoiles" = 3. Return the integer in "stars".',
+  '- "source_is_guide_michelin" is true when the text says "Guide Michelin", "au Michelin",',
+  '  "étoile(s) Michelin", "Michelin-starred", or "étoilé Michelin" — the Michelin star is the source.',
+  '- If no Michelin star is stated for the hotel\'s OWN restaurant → return an empty "distinctions" array.',
+  '- evidence_quote MUST be copied verbatim from SOURCE_CONTENT and state the star (word or digit).',
 ].join('\n');
 
 interface VerifiedAward {
@@ -221,6 +242,35 @@ interface VerifiedAward {
   readonly url: string;
   readonly verified: true;
   readonly _evidence_quote: string;
+}
+
+/**
+ * True when the evidence explicitly states a Michelin star COUNT, so we never
+ * fabricate one from a bare adjective. Accepts:
+ *  - a number (digit or word) adjacent to "étoile(s)"/"star(s)"  → "deux étoiles"
+ *  - the singular star noun "étoile" (word-boundaried, not the "étoilé" adjective) → 1
+ *  - "doublement"/"triplement" étoilé → 2 / 3
+ *  - "N MICHELIN star(s)" in English
+ */
+export function evidenceStatesStarCount(ev: string): boolean {
+  const t = ev.normalize('NFC');
+  // "doublement / triplement étoilé(e)" → 2 / 3.
+  if (/(?:doublement|triplement)\s+[ée]toil/iu.test(t)) return true;
+  // A count (digit or word) immediately followed by the star noun / "michelin star".
+  if (
+    /(?:\d|\b(?:une|deux|trois|one|two|three)\b)\s*(?:[ée]toiles?|michelin\s+stars?|stars?)/iu.test(
+      t,
+    )
+  ) {
+    return true;
+  }
+  if (/\d\s*michelin\b/iu.test(t)) return true;
+  // The star NOUN "étoile(s)" — but NOT the adjective "étoilé(e/s)": the noun is
+  // never followed by another letter. `(?!\p{L})` rejects "restaurant étoilé".
+  // A named star noun ("son étoile Michelin", "deux étoiles") is an explicit
+  // count signal; the bare adjective is not.
+  if (/[ée]toiles?(?!\p{L})/iu.test(t) && /michelin/iu.test(t)) return true;
+  return false;
 }
 
 function buildAward(d: z.infer<typeof DistinctionSchema>): VerifiedAward {
@@ -316,8 +366,15 @@ async function processFiche(row: StarRow): Promise<FicheOutcome> {
       status: 'llm_empty',
     };
   }
+  // Validation: the distinction must be sourced to the Guide Michelin AND the
+  // evidence must EXPLICITLY state the star count. We accept spelled-out counts
+  // ("deux étoiles Michelin"), the singular star noun ("son étoile Michelin" → 1)
+  // and "doublement/triplement étoilé" (2/3). We REJECT the bare adjective
+  // ("restaurant étoilé", "table étoilée") with no stated count: guessing a
+  // count there fabricates a verified award and under-counts 3-star houses
+  // (e.g. La Bouitte, Maison Lameloise) — those go to manual review instead.
   const sourced = result.data.distinctions.filter(
-    (d) => d.source_is_guide_michelin && /\d/u.test(d.evidence_quote),
+    (d) => d.source_is_guide_michelin && evidenceStatesStarCount(d.evidence_quote),
   );
   if (sourced.length === 0) {
     return {
