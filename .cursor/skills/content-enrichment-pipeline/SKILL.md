@@ -625,10 +625,59 @@ compliance as the only quality signal. The publish gate length checks
 (`factual_summary_fr ∈ [100, 200]`) accept the duplicated city and
 will not flag it.
 
+## Rule 14 — `featured_reviews` is INGESTED from a curated seed, never LLM-generated
+
+`hotels.featured_reviews` (CDC §2.10 — editorial pull-quotes from
+Forbes Travel Guide, MICHELIN Guide, Condé Nast Traveler, Travel +
+Leisure…) is the one editorial field you must **never** put through an
+LLM generator. A `featured_review` is text **attributed to a named
+third party**; generating it fabricates a press quote — a hard
+integrity violation (`.cursor/rules/hotel-detail-page.mdc` Hard Rule
+4/7, `EDITORIAL_VOICE.md`).
+
+The pipeline is therefore a **seed ingestion**, not a generator:
+
+```
+scripts/editorial-pilot/featured-reviews/seed.json     ← verified data
+scripts/editorial-pilot/featured-reviews/seed.example.json
+scripts/editorial-pilot/src/hotels/seed-featured-reviews.ts  ← CLI
+```
+
+- Each seed entry **requires** an `https` `source_url` (provenance gate
+  in the Zod schema). No URL → rejected. Source quotes verbatim (or a
+  faithful translation) of the text published at that URL.
+- `rating`/`max_rating` are optional and only set when the source
+  publishes a numeric score on a known scale (Forbes 5★, Travel +
+  Leisure /100). Never invent a number; a MICHELIN Keys / Palace
+  distinction is **not** a /5 rating.
+- `date_iso` is optional — omit it rather than guess a publication date.
+- Sourcing recipe that worked: `WebSearch` for "`<hotel>` Forbes Travel
+  Guide OR MICHELIN Guide review" → `WebFetch` the authoritative page →
+  copy a complete, literal sentence → store with the exact URL. The
+  MICHELIN Guide hotel pages (`guide.michelin.com/.../hotels-stays/...`)
+  expose clean editorial prose + the Keys designation; Forbes inspector
+  copy is equally quotable.
+
+```bash
+# Dry-run (validates the seed, resolves slugs, no write)
+pnpm exec tsx src/hotels/seed-featured-reviews.ts --dry-run
+# Write one hotel
+pnpm exec tsx src/hotels/seed-featured-reviews.ts --slug=les-airelles-gordes
+```
+
+The web `<HotelFeaturedReviews>` block self-elides when the column is
+empty, so the field is dormant catalogue-wide until an editorial
+sourcing pass fills the seed — extending coverage = add hotel blocks to
+`seed.json` and re-run. The component renders the localised `quote_fr`
+/ `quote_en` (falls back to the other locale) with a source emblem +
+`<cite>` link.
+
 ## Anti-patterns
 
 - ❌ Calling `fetch()` directly on a third-party hotel website — bot
   protection, JS rendering, dirty HTML. Use Tavily.
+- ❌ Generating `featured_reviews` (or any third-party-attributed quote)
+  with an LLM — fabrication. Ingest from the verified seed (Rule 14).
 - ❌ `gpt-4o` for extraction tasks — 10× cost for no quality gain over
   `gpt-4o-mini` at temperature 0.
 - ❌ Empty string `''` for missing facts — invisible in the DB, hard to

@@ -2618,8 +2618,8 @@
       "terms": "Terms of sale",
       "cookies": "Cookie policy",
       "sitemap": "Sitemap",
-      "llmsTxt": "llms.txt (LLM index)",
-      "agentSkills": "agent-skills.json (API)"
+      "llmsTxt": "llms.txt",
+      "agentSkills": "agent-skills.json"
     }
   },
   "legal": {
@@ -3030,7 +3030,12 @@
       "palaceBadge": "Palace",
       "stars": "{count}★",
       "districtSeparator": "·",
-      "viewMap": "View on the map"
+      "viewMap": "View on the map",
+      "datesPlaceholder": "Check-in – Check-out",
+      "guests": "2 guests",
+      "seeRates": "See rates",
+      "viewPhotos": "View photos",
+      "conciergeSignature": "The Concierge"
     },
     "share": {
       "button": "Share",
@@ -3058,6 +3063,7 @@
     "sections": {
       "about": "About",
       "highlights": "Highlights",
+      "whyChoose": "Why choose {hotel}?",
       "amenities": "Services & amenities",
       "rooms": "Rooms & suites",
       "faq": "Frequently asked questions",
@@ -3073,7 +3079,13 @@
       "reassurance": "Why book with us",
       "concierge": "Concierge booking",
       "signatureExperiences": "Signature experiences",
-      "featuredReviews": "What the press says"
+      "featuredReviews": "What the press says",
+      "instagram": "On Instagram"
+    },
+    "instagram": {
+      "followers": "{count} followers",
+      "viewProfile": "View profile",
+      "viewPost": "View on Instagram"
     },
     "awards": {
       "intro": "Official distinctions and recognitions awarded to this property.",
@@ -3218,6 +3230,7 @@
       "historyRenovatedOnly": "Renovated in {renovated}",
       "architectLabel": "Architect(s)",
       "geoLabel": "Coordinates",
+      "detailsSummary": "Detailed information",
       "updatedAt": "Information last updated on {date}.",
       "updatedAtShort": "Updated",
       "updatedAtAria": "Information last updated on {date}"
@@ -3232,7 +3245,9 @@
       "avis": "Reviews & awards",
       "conseil": "The Concierge's tip",
       "faq": "FAQ",
-      "booking": "Booking"
+      "booking": "Booking",
+      "expand": "Show page contents",
+      "collapse": "Hide contents"
     },
     "reassurance": {
       "title": "Why book with MyConciergeHotel?",
@@ -3337,6 +3352,9 @@
       "viewDetail": "View room",
       "signatureBadge": "Signature",
       "signatureAria": "Property’s signature suite",
+      "conciergePick": "The Concierge’s pick",
+      "showAll": "View the {count} other rooms",
+      "showLess": "Show fewer",
       "indicativePriceFrom": "From {from} / night",
       "indicativePriceRange": "{from} – {to} / night"
     },
@@ -3359,7 +3377,19 @@
       "since": "Open since {year}",
       "michelinSince": "Michelin-starred since {year}",
       "hours": "Hours: {value}",
-      "featuresLabel": "Highlights"
+      "featuresLabel": "Highlights",
+      "kidFriendly": "Family-friendly"
+    },
+    "practical": {
+      "title": "Practical information",
+      "hoursLabel": "Hours",
+      "priceLabel": "Price",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
+      "mustOrderLabel": "What to order",
+      "website": "Official website",
+      "reserve": "Book",
+      "conciergeTip": "The concierge’s word"
     },
     "spa": {
       "surface": "{value} sqm",
@@ -3378,6 +3408,7 @@
       "transportsTitle": "Transport",
       "distanceMeters": "{meters, plural, =0 {on site} other {{meters} m}}",
       "walkMinutes": "{count, plural, one {# min walk} other {# min walk}}",
+      "driveMinutes": "{count, plural, one {# min by car} other {# min by car}}",
       "transportMode": {
         "metro": "Metro",
         "rer": "RER",
@@ -3402,8 +3433,8 @@
           "empty": "No activity recorded within walking distance yet."
         },
         "shop": {
-          "title": "The practical side of the area",
-          "lead": "Pharmacy, taxi, dry cleaner — the address you’ll probably need.",
+          "title": "Shops nearby",
+          "lead": "Bakery, fine-food deli, olive-oil mill, pharmacy — the village’s useful addresses.",
           "tipFallback": "My tip: the front desk keeps these addresses on hand.",
           "empty": "No essential shop recorded within walking distance yet."
         }
@@ -3499,7 +3530,6 @@
       "noOnline": "This property is not bookable online. Send a request to our concierge desk.",
       "requestEmail": "Booking request"
     },
-    "loyaltyHint": "Loyalty rewards from the first night for Little catalog hotels.",
     "lastUpdated": "Page updated on {date}",
     "localGuide": {
       "eyebrow": "Around the hotel",

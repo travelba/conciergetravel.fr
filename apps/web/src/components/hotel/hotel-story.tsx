@@ -3,10 +3,19 @@ import { getTranslations } from 'next-intl/server';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedHotelStorySection } from '@/server/hotels/get-hotel-by-slug';
 
+import { HotelStoryMore } from './hotel-story-more';
+
 interface HotelStoryProps {
   readonly locale: SupportedLocale;
   readonly sections: readonly LocalisedHotelStorySection[];
   readonly heroParagraphs: readonly string[] | null;
+  /**
+   * Golden template (PO request 2026-06-02): keep the "À propos" intro
+   * paragraphs visible and collapse the detailed `<h3>` sections behind a
+   * sober "En savoir plus" disclosure. Off by default — prod fiches keep
+   * the full long read expanded.
+   */
+  readonly collapsibleSections?: boolean;
 }
 
 /**
@@ -51,6 +60,7 @@ export async function HotelStory({
   locale,
   sections,
   heroParagraphs,
+  collapsibleSections = false,
 }: HotelStoryProps): Promise<React.ReactElement | null> {
   // Nothing to render: bail before reading the messages bundle.
   const hasSections = sections.length > 0;
@@ -58,6 +68,53 @@ export async function HotelStory({
   if (!hasSections && !hasHero) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
+
+  const detailedSections = hasSections ? (
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
+      <nav
+        aria-label={t('story.tocLabel')}
+        className="border-border bg-bg rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start"
+      >
+        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
+          {t('story.tocTitle')}
+        </p>
+        <ol className="flex flex-col gap-1.5 text-sm">
+          {sections.map((section, idx) => (
+            <li key={section.anchor}>
+              <a
+                href={`#${section.anchor}`}
+                className="text-fg/90 hover:text-fg flex gap-2 underline-offset-2 hover:underline"
+              >
+                <span className="text-muted tabular-nums" aria-hidden>
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+                <span>{section.title}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      <article className="prose text-fg/90 max-w-prose text-base">
+        {sections.map((section) => (
+          <section
+            key={section.anchor}
+            aria-labelledby={section.anchor}
+            className="mb-8 last:mb-0"
+          >
+            <h3 id={section.anchor} className="text-fg mb-3 mt-0 scroll-mt-24 font-serif text-xl">
+              {section.title}
+            </h3>
+            {section.paragraphs.map((paragraph, idx) => (
+              <p key={idx} className="mb-3 last:mb-0">
+                {paragraph}
+              </p>
+            ))}
+          </section>
+        ))}
+      </article>
+    </div>
+  ) : null;
 
   return (
     <section aria-labelledby="about-title" className="mb-12">
@@ -75,55 +132,13 @@ export async function HotelStory({
         </div>
       ) : null}
 
-      {hasSections ? (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
-          <nav
-            aria-label={t('story.tocLabel')}
-            className="border-border bg-bg rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start"
-          >
-            <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
-              {t('story.tocTitle')}
-            </p>
-            <ol className="flex flex-col gap-1.5 text-sm">
-              {sections.map((section, idx) => (
-                <li key={section.anchor}>
-                  <a
-                    href={`#${section.anchor}`}
-                    className="text-fg/90 hover:text-fg flex gap-2 underline-offset-2 hover:underline"
-                  >
-                    <span className="text-muted tabular-nums" aria-hidden>
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <span>{section.title}</span>
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-
-          <article className="prose text-fg/90 max-w-prose text-base">
-            {sections.map((section) => (
-              <section
-                key={section.anchor}
-                aria-labelledby={section.anchor}
-                className="mb-8 last:mb-0"
-              >
-                <h3
-                  id={section.anchor}
-                  className="text-fg mb-3 mt-0 scroll-mt-24 font-serif text-xl"
-                >
-                  {section.title}
-                </h3>
-                {section.paragraphs.map((paragraph, idx) => (
-                  <p key={idx} className="mb-3 last:mb-0">
-                    {paragraph}
-                  </p>
-                ))}
-              </section>
-            ))}
-          </article>
-        </div>
-      ) : null}
+      {detailedSections !== null && collapsibleSections ? (
+        <HotelStoryMore labels={{ more: t('story.readMore'), less: t('story.readLess') }}>
+          {detailedSections}
+        </HotelStoryMore>
+      ) : (
+        detailedSections
+      )}
     </section>
   );
 }

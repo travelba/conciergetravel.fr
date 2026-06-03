@@ -146,6 +146,8 @@ En cas de conflit, les rules spécifiques priment sur cette rule transverse :
 - `nextjs-app-router.mdc` fait foi pour metadata, ISR et canonicals au niveau route.
 - `hotel-detail-page.mdc` fait foi pour la fiche hôtel.
 
+Phasage des locales (verrou `seo-geo.mdc`) : **V1 = `fr` + `en`**. Les locales V2 (`de`/`es`/`it`) et V3 (`ar`/`zh`/`ja`) ne sont pas routées tant que leur contenu natif n'est pas validé — ne pas émettre de `hreflang` ni de canonical vers une locale non routée.
+
 Toujours étendre la logique SEO existante (`packages/seo`) plutôt que d'en créer une parallèle.
 
 ## Interdictions

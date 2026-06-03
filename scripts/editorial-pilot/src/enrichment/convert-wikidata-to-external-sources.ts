@@ -48,6 +48,8 @@ import { config as loadDotenv } from 'dotenv';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isToxicOfficialUrl } from './toxic-official-url.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -234,27 +236,6 @@ function wikidataItemUrl(qid: string): string {
 }
 
 /**
- * SEO-squatter / OTA / booking-engine domains that the scaffold pass
- * scraped into `official_url` (see
- * `docs/audits/toxic-official-url-cleanup-2026-06-02.md`). We refuse to
- * project these into the EEAT provenance array — a spam link served to
- * Google + LLMs is worse than no link at all. Scoped to `official_url`
- * only: the canonical `tripadvisor.com` / `booking.com` URLs built from
- * the dedicated `*_location_id` / `*_hotel_id` columns ARE legitimate
- * references (their own footer kinds) and must NOT be filtered.
- *
- * OTA names are anchored to the registrable domain so brand domains that
- * merely end in `hotels.com` (rosewoodhotels.com, bulgarihotels.com,
- * comohotels.com, tajhotels.com, …) are NOT caught.
- */
-const TOXIC_OFFICIAL_URL_RE =
-  /(\.com-hotel\.(com|info))|(\.(ae-dubai|sa-riyadh|uk-hotel)\.info)|(:\/\/([a-z0-9-]+\.)*hotel[a-z]+\.info)|(h-rez\.com)|(:\/\/([a-z0-9-]+\.)*(tripadvisor\.[a-z.]+|trip\.com|booking\.com|agoda\.com|hotels\.com|expedia\.[a-z.]+|trivago\.[a-z.]+|kayak\.[a-z.]+|hostelworld\.com|ostrovok\.ru|makemytrip\.com))/iu;
-
-function isToxicOfficialUrl(url: string): boolean {
-  return TOXIC_OFFICIAL_URL_RE.test(url);
-}
-
-/**
  * Build the canonical set of `external_sources` entries that derive
  * from the scalar Wikidata-resolved columns on a hotel row.
  *
@@ -312,6 +293,10 @@ function deriveEntries(row: HotelRow, collectedAt: string): ExternalSourceEntry[
     //    `/api/agent/hotel-sources` endpoint. The footer reader maps by
     //    `field` (`official_url` → kind `official`) regardless of source,
     //    so this only refines the served attribution, not the rendering.
+    //
+    // The toxic-URL filter above (`!isToxicOfficialUrl`) is the
+    // 2026-06-02 SEO-squatter / OTA-host cleanup, shared with the
+    // photo-pipeline backfill so both stay in sync.
     const fromWikidata = row.wikidata_id !== null && row.wikidata_id.length > 0;
     entries.push({
       field: 'official_url',

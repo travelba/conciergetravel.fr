@@ -194,14 +194,41 @@ export async function HotelEnBref({
         {firstSentence}
         {inventorySentence !== null ? ' ' + inventorySentence + '.' : ''}
       </p>
-      <dl className="mt-5 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
-        {entries.map((entry) => (
-          <div key={entry.key} className="flex flex-col text-sm sm:flex-row sm:gap-2">
-            <dt className="text-muted shrink-0 font-medium sm:min-w-[8rem]">{entry.label}</dt>
-            <dd className="text-fg">{entry.value}</dd>
-          </div>
-        ))}
-      </dl>
+      {/*
+        Facts grid folded into a native <details> (2026-06-02): the quotable
+        synthesis sentence above stays visible (the actual "essentiel" + AEO
+        citation surface), while the ground-truth fields (address, category,
+        coordinates…) are demoted to an on-demand disclosure — they duplicate
+        signals already carried by the header, policies, footer and the Hotel
+        JSON-LD, so they need not compete for attention at the top of the page.
+        Zero client JS, content stays in the DOM (Google indexes closed
+        <details>), and the authoritative facts remain in the JSON-LD, so GEO
+        and the agent API are unaffected.
+      */}
+      {entries.length > 0 ? (
+        <details className="group mt-4">
+          <summary className="text-muted hover:text-fg flex cursor-pointer select-none list-none items-center gap-2 text-xs font-medium uppercase tracking-wide [&::-webkit-details-marker]:hidden">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              width="12"
+              height="12"
+              className="shrink-0 transition-transform group-open:rotate-90"
+            >
+              <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+            {fs('detailsSummary')}
+          </summary>
+          <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
+            {entries.map((entry) => (
+              <div key={entry.key} className="flex flex-col text-sm sm:flex-row sm:gap-2">
+                <dt className="text-muted shrink-0 font-medium sm:min-w-[8rem]">{entry.label}</dt>
+                <dd className="text-fg">{entry.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      ) : null}
       {lastUpdatedLabel !== null ? (
         <p
           data-freshness

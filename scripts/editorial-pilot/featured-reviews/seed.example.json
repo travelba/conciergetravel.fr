@@ -1,0 +1,19 @@
+{
+  "_doc": "EXAMPLE ONLY — copy entries into seed.json after verifying each quote against its source_url. NEVER fabricate a press quote: a featured_review is text ATTRIBUTED to a third party (Forbes Travel Guide, Conde Nast Traveler, Travel + Leisure, Michelin Guide, ...). Every entry MUST carry a real https source_url. Provide quote_fr and/or quote_en (verbatim or a faithful translation of the published quote), and optionally rating + max_rating (5-point or 100-point scale) and date_iso (YYYY-MM-DD). Run: pnpm exec tsx src/hotels/seed-featured-reviews.ts --dry-run",
+  "hotels": [
+    {
+      "slug": "le-bristol-paris",
+      "reviews": [
+        {
+          "source": "Forbes Travel Guide",
+          "source_url": "https://www.forbestravelguide.com/hotels/paris-france/le-bristol-paris",
+          "rating": 5,
+          "max_rating": 5,
+          "date_iso": "2025-01-01",
+          "quote_fr": "<< Quote verbatim ou traduction fidele du texte publie a l'URL ci-dessus. >>",
+          "quote_en": "<< Verbatim quote or faithful translation of the text published at the URL above. >>"
+        }
+      ]
+    }
+  ]
+}

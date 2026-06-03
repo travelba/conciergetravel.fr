@@ -8,6 +8,7 @@ export const DEFAULT_HOTELS_INDEX_SETTINGS = {
     'city',
     'district',
     'region',
+    'country',
     'landmarks',
     'aliases',
     'description_excerpt',
@@ -16,6 +17,8 @@ export const DEFAULT_HOTELS_INDEX_SETTINGS = {
   attributesForFaceting: [
     'searchable(region)',
     'searchable(city)',
+    'searchable(country)',
+    'country_code',
     'is_palace',
     'stars',
     'searchable(themes)',

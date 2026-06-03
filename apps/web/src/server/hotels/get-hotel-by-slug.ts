@@ -15,6 +15,10 @@ import {
   type AmenityCategory,
 } from '@/server/hotels/amenity-taxonomy';
 import { getFakeHotelDetailBySlug } from '@/server/hotels/dev-fake-hotel-detail';
+import {
+  applyAirellesLocalOverride,
+  isAirellesLocalOverrideEnabled,
+} from '@/server/hotels/dev-override-airelles';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 
 export type { SupportedLocale };
@@ -69,6 +73,11 @@ export const HotelDetailRowSchema = z.object({
   faq_content: z.unknown().nullable().optional(),
   restaurant_info: z.unknown().nullable().optional(),
   spa_info: z.unknown().nullable().optional(),
+  // Social feed teaser (no dedicated DB column yet — populated by the local
+  // golden-template override; production will hydrate it from a Graph-API →
+  // Cloudinary sync). Absent on the real query → parses to undefined → the
+  // `<HotelInstagram>` section self-elides.
+  instagram: z.unknown().nullable().optional(),
   points_of_interest: z.unknown().nullable().optional(),
   transports: z.unknown().nullable().optional(),
   upcoming_events: z.unknown().nullable().optional(),
@@ -1089,6 +1098,26 @@ const RestaurantVenueSchema = z.object({
   features: z.array(z.string().min(1)).optional(),
   hours_fr: z.string().min(1).optional(),
   hours_en: z.string().min(1).optional(),
+  // ── "Concierge handoff" practical block (golden-template extension) ──
+  // Each cited venue carries the same info a concierge would email a
+  // guest: website, reservation link, phone, address, opening hours,
+  // an indicative price note and a one-line concierge tip. All optional
+  // so existing rows stay valid; the UI renders only populated fields.
+  website: z.string().url().optional(),
+  reservation_url: z.string().url().optional(),
+  phone: z.string().min(1).max(40).optional(),
+  address: z.string().min(1).max(200).optional(),
+  price_note_fr: z.string().min(1).max(200).optional(),
+  price_note_en: z.string().min(1).max(200).optional(),
+  // "Quel plat / dessert commander" — the one concierge recommendation a
+  // guest acts on. Short, concrete (a named dish or dessert), bilingual.
+  must_order_fr: z.string().min(1).max(200).optional(),
+  must_order_en: z.string().min(1).max(200).optional(),
+  // Whether the venue is suitable for children (high chairs, kids menu,
+  // relaxed setting). `true` shows a "famille bienvenue" badge.
+  kid_friendly: z.boolean().optional(),
+  tip_fr: z.string().min(1).max(400).optional(),
+  tip_en: z.string().min(1).max(400).optional(),
 });
 
 const RestaurantInfoSchema = z.object({
@@ -1108,6 +1137,14 @@ export interface LocalisedRestaurantVenue {
   readonly michelinSince: number | null;
   readonly features: readonly string[];
   readonly hours: string | null;
+  readonly website: string | null;
+  readonly reservationUrl: string | null;
+  readonly phone: string | null;
+  readonly address: string | null;
+  readonly priceNote: string | null;
+  readonly mustOrder: string | null;
+  readonly kidFriendly: boolean | null;
+  readonly tip: string | null;
 }
 
 export interface LocalisedRestaurants {
@@ -1133,6 +1170,14 @@ export function readRestaurants(
     michelinSince: v.michelin_since ?? null,
     features: v.features ?? [],
     hours: pickLocalizedText(locale, v.hours_fr, v.hours_en),
+    website: v.website ?? null,
+    reservationUrl: v.reservation_url ?? null,
+    phone: v.phone ?? null,
+    address: v.address ?? null,
+    priceNote: pickLocalizedText(locale, v.price_note_fr, v.price_note_en),
+    mustOrder: pickLocalizedText(locale, v.must_order_fr, v.must_order_en),
+    kidFriendly: v.kid_friendly ?? null,
+    tip: pickLocalizedText(locale, v.tip_fr, v.tip_en),
   }));
   return {
     count: parsed.data.count ?? null,
@@ -1151,6 +1196,21 @@ const SpaInfoSchema = z.object({
   treatment_rooms: z.number().int().positive().optional(),
   features_fr: z.array(z.string().min(1)).optional(),
   features_en: z.array(z.string().min(1)).optional(),
+  // Concierge dossier fields (mirror RestaurantVenueSchema): a short
+  // editorial description plus the practical facts a guest needs before
+  // booking a treatment — opening hours, an indicative price note, the
+  // booking channel and a one-line Concierge tip.
+  description_fr: z.string().min(1).max(1200).optional(),
+  description_en: z.string().min(1).max(1200).optional(),
+  hours_fr: z.string().min(1).max(200).optional(),
+  hours_en: z.string().min(1).max(200).optional(),
+  price_note_fr: z.string().min(1).max(200).optional(),
+  price_note_en: z.string().min(1).max(200).optional(),
+  website: z.string().url().optional(),
+  reservation_url: z.string().url().optional(),
+  phone: z.string().min(1).max(40).optional(),
+  tip_fr: z.string().min(1).max(400).optional(),
+  tip_en: z.string().min(1).max(400).optional(),
 });
 
 export interface LocalisedSpa {
@@ -1158,6 +1218,13 @@ export interface LocalisedSpa {
   readonly surfaceSqm: number | null;
   readonly treatmentRooms: number | null;
   readonly features: readonly string[];
+  readonly description: string | null;
+  readonly hours: string | null;
+  readonly priceNote: string | null;
+  readonly website: string | null;
+  readonly reservationUrl: string | null;
+  readonly phone: string | null;
+  readonly tip: string | null;
 }
 
 export function readSpa(row: HotelDetailRow, locale: SupportedLocale): LocalisedSpa | null {
@@ -1173,6 +1240,67 @@ export function readSpa(row: HotelDetailRow, locale: SupportedLocale): Localised
     surfaceSqm: parsed.data.surface_sqm ?? null,
     treatmentRooms: parsed.data.treatment_rooms ?? null,
     features: localizedFeatures,
+    description: pickLocalizedText(locale, parsed.data.description_fr, parsed.data.description_en),
+    hours: pickLocalizedText(locale, parsed.data.hours_fr, parsed.data.hours_en),
+    priceNote: pickLocalizedText(locale, parsed.data.price_note_fr, parsed.data.price_note_en),
+    website: parsed.data.website ?? null,
+    reservationUrl: parsed.data.reservation_url ?? null,
+    phone: parsed.data.phone ?? null,
+    tip: pickLocalizedText(locale, parsed.data.tip_fr, parsed.data.tip_en),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// instagram — social feed teaser (hotels.instagram jsonb, override-only today)
+// ---------------------------------------------------------------------------
+
+const InstagramPostSchema = z.object({
+  permalink: z.string().url(),
+  // Cloudinary public_id of the mirrored image (photo-quality rule: published
+  // imagery lives on our Cloudinary, never hotlinked from scontent.cdninstagram).
+  image_public_id: z.string().min(1).optional(),
+  caption_fr: z.string().min(1).max(300).optional(),
+  caption_en: z.string().min(1).max(300).optional(),
+  posted_at: z.string().min(1).optional(),
+});
+
+const InstagramFeedSchema = z.object({
+  handle: z.string().min(1).max(60),
+  profile_url: z.string().url(),
+  followers: z.number().int().nonnegative().optional(),
+  posts: z.array(InstagramPostSchema).min(1).max(3),
+});
+
+export interface LocalisedInstagramPost {
+  readonly permalink: string;
+  readonly imagePublicId: string | null;
+  readonly caption: string | null;
+  readonly postedAtIso: string | null;
+}
+
+export interface LocalisedInstagramFeed {
+  readonly handle: string;
+  readonly profileUrl: string;
+  readonly followers: number | null;
+  readonly posts: readonly LocalisedInstagramPost[];
+}
+
+export function readInstagram(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): LocalisedInstagramFeed | null {
+  const parsed = InstagramFeedSchema.safeParse(row.instagram);
+  if (!parsed.success) return null;
+  return {
+    handle: parsed.data.handle,
+    profileUrl: parsed.data.profile_url,
+    followers: parsed.data.followers ?? null,
+    posts: parsed.data.posts.map((p) => ({
+      permalink: p.permalink,
+      imagePublicId: p.image_public_id ?? null,
+      caption: pickLocalizedText(locale, p.caption_fr, p.caption_en),
+      postedAtIso: p.posted_at ?? null,
+    })),
   };
 }
 
@@ -1338,6 +1466,23 @@ const PointOfInterestSchema = z.object({
    * never renders it but the sync script uses it to dedupe on re-runs.
    */
   osm_id: z.string().min(1).max(80).optional(),
+  // ── "Concierge handoff" practical block (golden-template extension) ──
+  // Same info a concierge would email a guest about a place worth
+  // visiting: website, reservation link, phone, address, a human-
+  // readable hours string, an indicative price note and a one-line
+  // concierge tip. All optional; the UI renders only populated fields.
+  // (`opening_hours` above stays for the OSM raw tag; `hours_fr/en` is
+  // the curated display string used by editorial overrides.)
+  website: z.string().url().optional(),
+  reservation_url: z.string().url().optional(),
+  phone: z.string().min(1).max(40).optional(),
+  address: z.string().min(1).max(200).optional(),
+  hours_fr: z.string().min(1).max(200).optional(),
+  hours_en: z.string().min(1).max(200).optional(),
+  price_note_fr: z.string().min(1).max(200).optional(),
+  price_note_en: z.string().min(1).max(200).optional(),
+  tip_fr: z.string().min(1).max(400).optional(),
+  tip_en: z.string().min(1).max(400).optional(),
 });
 
 const PointsOfInterestSchema = z.array(PointOfInterestSchema);
@@ -1397,6 +1542,13 @@ export interface LocalisedPointOfInterest {
   readonly pricing: LocalisedPoiPricing | null;
   readonly schemaType: string | null;
   readonly osmId: string | null;
+  readonly website: string | null;
+  readonly reservationUrl: string | null;
+  readonly phone: string | null;
+  readonly address: string | null;
+  readonly hours: string | null;
+  readonly priceNote: string | null;
+  readonly tip: string | null;
 }
 
 export interface LocalisedTransport {
@@ -1536,6 +1688,13 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
           pricing,
           schemaType: p.schema_type ?? null,
           osmId: p.osm_id ?? null,
+          website: p.website ?? null,
+          reservationUrl: p.reservation_url ?? null,
+          phone: p.phone ?? null,
+          address: p.address ?? null,
+          hours: pickLocalizedText(locale, p.hours_fr, p.hours_en),
+          priceNote: pickLocalizedText(locale, p.price_note_fr, p.price_note_en),
+          tip: pickLocalizedText(locale, p.tip_fr, p.tip_en),
         };
       })
     : [];
@@ -2845,6 +3004,15 @@ export async function getHotelBySlug(
           displayOrder: r.data.display_order ?? null,
         });
       }
+    }
+
+    // LOCAL-ONLY editorial sandbox. When `MCH_LOCAL_FIXTURE` is set, the
+    // Airelles Gordes fiche is patched in-memory with the curated
+    // "golden template" content (never persisted). No-op for every
+    // other slug and in production (flag unset). See
+    // `dev-override-airelles.ts`.
+    if (isAirellesLocalOverrideEnabled()) {
+      return applyAirellesLocalOverride({ row: parsed.data, rooms }, locale);
     }
 
     return { row: parsed.data, rooms };

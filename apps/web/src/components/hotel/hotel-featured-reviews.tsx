@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { DistinctionEmblem } from '@/components/hotel/distinction-emblem';
 import { intlLocaleTag } from '@/i18n/runtime';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedFeaturedReview } from '@/server/hotels/get-hotel-by-slug';
@@ -91,17 +92,20 @@ export async function HotelFeaturedReviews({
           return (
             <li key={`${review.source}-${idx}`} className="flex">
               <figure className="border-border bg-bg flex flex-1 flex-col rounded-lg border p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <DistinctionEmblem label={review.source} size="sm" />
+                  <span
+                    aria-hidden
+                    className="text-accent/25 -mt-2 select-none font-serif text-5xl leading-none"
+                  >
+                    ”
+                  </span>
+                </div>
                 <blockquote
                   cite={review.sourceUrl ?? undefined}
                   className="text-fg/90 mb-4 flex-1 text-sm leading-relaxed"
                 >
-                  <span aria-hidden className="text-muted mr-1 select-none">
-                    “
-                  </span>
                   {review.quote}
-                  <span aria-hidden className="text-muted ml-1 select-none">
-                    ”
-                  </span>
                 </blockquote>
 
                 <figcaption className="border-border flex flex-col gap-1 border-t pt-3 text-xs">

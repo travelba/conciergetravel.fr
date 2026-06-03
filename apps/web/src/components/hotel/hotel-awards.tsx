@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { DistinctionEmblem } from '@/components/hotel/distinction-emblem';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedAward } from '@/server/hotels/get-hotel-by-slug';
 
@@ -44,9 +45,10 @@ export async function HotelAwards({
         {awards.map((award, idx) => (
           <li
             key={`${award.name}-${award.year ?? idx}`}
-            className="border-border bg-bg rounded-lg border p-4"
+            className="border-border bg-bg flex items-start gap-3.5 rounded-lg border p-4"
           >
-            <dl className="flex flex-col gap-1">
+            <DistinctionEmblem label={`${award.name} ${award.issuer}`} />
+            <dl className="flex min-w-0 flex-col gap-1">
               <dt className="text-fg font-medium">{award.name}</dt>
               <dd className="text-muted text-sm">
                 {award.year !== null

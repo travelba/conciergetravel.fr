@@ -200,6 +200,41 @@ Notes for the next agent:
 - To re-run only the rows still missing a hero (skip the ~328 already
   hydrated), set `MCH_ONLY_MISSING_HERO=1` on `sync-hotel-photos.ts`.
 
+## Gotcha — Google Places caps at ~1600 px → soft hero on hi-DPI (2026-06-02)
+
+**Symptom**: "Pourquoi les photos sont floues ?" The hero looks fine at
+`dpr=1` but visibly soft on a Retina / `dpr=2` display.
+
+**Root cause**: photos hydrated from the Google Places Photo API top out
+around **1600 px** on the long side. The hero preset
+(`HERO_TRANSFORM = w_2400,h_1350,…` in `packages/ui/src/cloudinary-presets.ts`)
+then **upscales** the 1600 px source to 2400 px — Cloudinary cannot invent
+detail, so the result is mushy exactly when the device asks for 2× pixels.
+This silently violates the `photo-quality.mdc` Hard Rule (**originals ≥
+2400 px**). Confirm the diagnosis by emulating both DPRs:
+`browser_cdp Emulation.setDeviceMetricsOverride {deviceScaleFactor: 2}`,
+screenshot, compare to `deviceScaleFactor: 1`.
+
+**Fix — re-source genuine ≥ 2400 px from the official Imgix-style CDN.**
+Many luxury chains (Airelles `assets.airelles.com`, others on Imgix) serve
+press visuals through a CDN where the output width is a **query param**
+(`?auto=format%2Ccompress&w=2600`). The underlying originals are 2250–8000 px,
+so requesting `w=2600` returns a real high-res frame (not an upscale).
+Harvest the base Imgix URLs by scrolling the official category pages in the
+browser MCP (Story / Suites / Restaurants / Spa / Pools) — direct
+navigation to guessed sub-paths (`/pools`) often 404s; scroll the pages
+that exist and read the lazy-loaded `<img>` srcs. Then `uploadFromUrl()`
+(which already applies `c_limit, w_2400, h_2400` → caps without upscaling)
+and PATCH `hero_image` + `gallery_images`.
+
+**Reference one-shot**: `scripts/editorial-pilot/src/photos/resource-airelles-gordes.ts`
+— curated 12-image set (drone hero + 9 categories), `--dry-run` first,
+each upload prints real dims (all landed 2400×1349..1612, none upscaled).
+Filenames carry `©` / `–`: percent-encode with `encodeURIComponent` and
+verify each `?w=2600` URL loads before curating (some `Moyen-…` variants
+are fixed-size and 404 at 2600). Source = `press` (official media kit),
+photographer credit goes in a Cloudinary tag, not a gallery column.
+
 ## Pattern — Tavily press-kit discovery for flagship hotels (2026-05-31)
 
 When the in-place pipeline (`sync-hotel-photos.ts` Commons + Places)
@@ -589,6 +624,57 @@ The module exposes:
 
 Then rerun `pnpm photos:audit` — the count of `independent` should
 drop. If it doesn't, the inference order is failing for that group.
+
+### Hardening — `backfill-official-url` re-pollutes with name-bearing squatters (2026-06-02)
+
+When you re-source `official_url` for the **hard cohort** (hotels whose
+URL was just NULLed because it was toxic — ME/Asia chains, Greek
+resorts, etc.), Tavily surfaces a dense ecosystem of SEO-spam that
+**embeds the hotel name in the hostname**, so the naive "hotel-name-in-
+host" rule promotes them straight back as "high confidence". A dry-run
+on 140 cleaned fiches proposed garbage like
+`lessourcesdecaudalie.com-hotel.com`, `slshotel.ae-dubai.info`,
+`scribe.parishotelinn.com`, `four-seasons-11321.hotels-riyadh.com`,
+`britishchamberdubai.com` (Waldorf "Dubai" → matched the _city_ token),
+`ubyemaar.com/.../address-sky-view`, `travelweekly.com/...`,
+`britishairways.com/.../Aguas-de-Ibiza`. Running it live would have
+re-polluted the exact rows the cleanup just scrubbed.
+
+Four fixes (commit `2e305bb`), all in `backfill-official-url.ts` +
+the new shared `enrichment/toxic-official-url.ts`:
+
+1. **Match the HOSTNAME only** for the "name-in-host" rule. The
+   original `tokenAppearsInUrl` matched the whole URL incl. path, so
+   `ubyemaar.com/.../address-sky-view` (name in path) won. Added
+   `tokenAppearsInHost`.
+2. **Drop the `score≥0.8 + token-in-path` fallback** entirely — it was
+   the airline/trade-press vector (`britishairways.com`,
+   `travelweekly.com`). A high Tavily score on an unknown host is NOT
+   evidence; leaving `official_url` NULL beats guessing.
+3. **Exclude city/country tokens** from the host match
+   (`geoTokensFor(hotel)`). `britishchamberdubai.com` only matched
+   because "dubai" is in the name; a chamber-of-commerce directory is
+   not the hotel.
+4. **Shared toxic detector** `isToxicOfficialUrl(url)` (unit-tested,
+   56 cases) vetoes every squatter family observed: `*.com-hotel.com`,
+   cc-glued `.<cc>-<word>.(com|info)`, `*hotelinn.com`, geo-aggregators
+   (`hotels-<city>`, `<city>-hotels-<cc>`, `hotelsof<geo>`), `h-rez.com`,
+   `reserve-online`, `hotel-dir`, OTAs. Host-anchored so brand domains
+   (`rosewoodhotels.com`, `eighthotels.it`) are NEVER caught. The SAME
+   module is imported by `convert-wikidata-to-external-sources.ts` so
+   the photo pipeline and the EEAT provenance array can never drift.
+
+Result on the 140-cohort: 101 clean sites sourced, **0 toxic**, 39
+genuinely unsourceable left NULL. Always **dry-run + eyeball the
+proposed hosts** before a live `official_url` backfill on a hard
+cohort — iterate the ruleset until the toxic/aggregator scan returns
+zero, then write.
+
+Provenance note: `official_url` is a scalar column whose discovery
+channel is not recorded, so the converter attributes it as
+`source: 'official_site'` / `confidence: 'medium'` — NOT `'wikidata'`
+(Wikidata corroboration lives in its own `wikidata_id` entry; claiming
+it served the URL would be false provenance).
 
 ## Pattern — Hero alt MUST come from the matching gallery row (2026-05-31 bug fix)
 

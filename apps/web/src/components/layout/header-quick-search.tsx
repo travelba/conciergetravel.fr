@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
+import { SearchAutocomplete } from '@/components/search/search-autocomplete';
 import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
@@ -38,24 +39,23 @@ export async function HeaderQuickSearch({
       role="search"
       action={action}
       method="get"
-      className="border-border bg-bg ml-3 hidden h-9 items-center overflow-hidden rounded-md border focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500 lg:flex"
+      className="border-border bg-bg ml-3 hidden h-9 items-center rounded-md border focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500 lg:flex"
       aria-label={t('label')}
     >
       <label className="sr-only" htmlFor="header-quick-search-destination">
         {t('label')}
       </label>
-      <input
-        id="header-quick-search-destination"
-        type="search"
-        name="destination"
+      <SearchAutocomplete
+        locale={locale}
+        inputId="header-quick-search-destination"
         placeholder={t('destinationPlaceholder')}
-        className="text-fg placeholder:text-muted h-full w-44 bg-transparent px-3 text-sm focus:outline-none xl:w-56"
-        autoComplete="off"
+        wrapperClassName="relative"
+        inputClassName="text-fg placeholder:text-muted h-9 w-44 rounded-l-md bg-transparent px-3 text-sm focus:outline-none xl:w-56"
       />
       <button
         type="submit"
         aria-label={t('submitAria')}
-        className="bg-fg text-bg inline-flex h-full items-center justify-center px-3 text-xs font-medium hover:bg-amber-700"
+        className="bg-fg text-bg inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium hover:bg-amber-700"
       >
         <svg
           aria-hidden
