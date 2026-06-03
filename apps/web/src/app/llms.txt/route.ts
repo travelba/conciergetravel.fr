@@ -196,8 +196,15 @@ export async function GET(): Promise<NextResponse> {
       ...(catalogItems.length > 0
         ? [
             {
-              title: `Catalogue (top ${catalogItems.length} fiches éditoriales)`,
-              items: catalogItems,
+              title: `Catalogue éditorial — extrait priorisé (${catalogItems.length} liens FR+EN)`,
+              items: [
+                {
+                  url: `${origin}/.well-known/hotels.jsonl`,
+                  description:
+                    "Catalogue COMPLET et machine-readable de tous les hôtels publiés (NDJSON, 1 hôtel par ligne) : nom, ville, pays (ISO-3166-1), coordonnées GPS, distinction Palace, identifiants externes (Wikidata, Wikipedia, TripAdvisor, Booking, site officiel) et résumé factuel. Surface exhaustive et streamable — la liste ci-dessous n'est qu'un extrait éditorial priorisé. Voir aussi /llms-full.txt pour le corpus rédactionnel.",
+                },
+                ...catalogItems,
+              ],
             },
           ]
         : []),
@@ -469,10 +476,6 @@ export async function GET(): Promise<NextResponse> {
         title: 'Mentions légales & confiance',
         items: [
           {
-            url: `${origin}/fr/mentions-legales`,
-            description: 'Identité de l’éditeur, IATA, APST, RC professionnelle.',
-          },
-          {
             url: `${origin}/fr/cgv`,
             description: 'Conditions générales de vente, annulation, droit de rétractation.',
           },
@@ -492,7 +495,17 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 26 actions disponibles (search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…).',
+              'Catalogue machine-readable des 26 compétences déclarées (dont 24 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
+          },
+          {
+            url: `${origin}/.well-known/hotels.jsonl`,
+            description:
+              "Catalogue complet des hôtels publiés au format NDJSON (1 objet JSON par ligne) : identité, ville, pays ISO-3166-1, coordonnées GPS, distinction Palace, identifiants externes (Wikidata/Wikipedia/TripAdvisor/Booking/site officiel) et résumé factuel. Streamable — pensé pour l'ingestion et la réconciliation d'identité à l'échelle du catalogue entier (aucun plafond éditorial).",
+          },
+          {
+            url: `${origin}/llms-full.txt`,
+            description:
+              'Corpus LLM verbeux — préambule éditorial EEAT (agence IATA/APST) puis une section FR et une section EN par hôtel indexable (résumé factuel, faits clés, fraîcheur). Complément rédactionnel de hotels.jsonl.',
           },
           {
             url: `${origin}/api/agent/hotel-sources/le-bristol-paris`,
@@ -507,7 +520,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, éditorial, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN.',
           },
         ],
       },
