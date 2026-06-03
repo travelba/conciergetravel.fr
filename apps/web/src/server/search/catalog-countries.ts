@@ -163,8 +163,17 @@ export async function getCountryNameByCode(
  */
 interface CityDirectoryIndex {
   readonly countrySlugByCode: Readonly<Record<string, string>>;
-  /** `${country_code}::${citySlug}` for every published (country, city). */
-  readonly validPairs: ReadonlySet<string>;
+  /**
+   * `${country_code}::${citySlug}` for every published (country, city).
+   *
+   * Stored as a plain array — NOT a `Set` — because this object is the
+   * return value of an `unstable_cache` wrapper, which serialises through
+   * JSON. A `Set` survives the first (cache-miss) call in-process but
+   * deserialises to `{}` on every subsequent cache hit, so `.has()` would
+   * throw `TypeError: ... is not a function`. The resolver rebuilds the
+   * `Set` in-process. (Same gotcha as Map/Date in cached payloads.)
+   */
+  readonly validPairKeys: readonly string[];
 }
 
 function cityPairKey(countryCode: string, villeSlug: string): string {
@@ -194,12 +203,12 @@ async function buildCityDirectoryIndex(): Promise<CityDirectoryIndex> {
   for (const [code, l] of labels) {
     countrySlugByCode[code] = countrySlug(l.labelFr, l.labelEn, code);
   }
-  return { countrySlugByCode, validPairs };
+  return { countrySlugByCode, validPairKeys: Array.from(validPairs) };
 }
 
 const cachedCityDirectoryIndex = unstable_cache(
   buildCityDirectoryIndex,
-  ['catalog-city-directory-index-v1'],
+  ['catalog-city-directory-index-v2'],
   { revalidate: 3600, tags: ['intl-destinations'] },
 );
 
@@ -227,13 +236,16 @@ export async function getCityDirectoryResolver(): Promise<CityDirectoryResolver>
   } catch {
     return { resolve: () => null };
   }
+  // Rebuild the lookup Set in-process — the cached payload only carries a
+  // JSON-safe string[] (see CityDirectoryIndex doc comment).
+  const validPairs = new Set(index.validPairKeys);
   return {
     resolve(cityName: string, countryCode: string): CityDirectorySlugs | null {
       const pays = index.countrySlugByCode[countryCode];
       if (pays === undefined) return null;
       const ville = citySlug(cityName);
       if (ville.length === 0) return null;
-      return index.validPairs.has(cityPairKey(countryCode, ville)) ? { pays, ville } : null;
+      return validPairs.has(cityPairKey(countryCode, ville)) ? { pays, ville } : null;
     },
   };
 }
