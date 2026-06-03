@@ -84,6 +84,25 @@ Ne pas générer des FAQ SEO artificielles sans valeur utilisateur.
 ## BreadcrumbList
 Les breadcrumbs doivent refléter la vraie hiérarchie de navigation.
 Ne pas inventer une hiérarchie purement SEO qui n’existe pas côté UX.
+Hiérarchie fiche hôtel : Accueil → Pays (`/destination`) → Ville (`/destination/[ville]`) → Fiche. Pas de niveau « Région » tant qu'aucune route ne l'expose.
+
+## Note / AggregateRating
+- Une **seule résolution** alimente la note visible **ET** le JSON-LD (parité obligatoire, même échelle **/5**) — note marquée sans contrepartie visible ou sur une autre échelle = violation policy Google.
+- Priorité des sources : **Google Places** (`google_rating` + `google_reviews_count`) → **éditorial** (`aggregate_rating_value`, normalisé /5) → **Amadeus** (déjà /5) → sinon aucune note.
+- `bestRating: 5`, `worstRating: 1` toujours. Jamais `/10` (ni en JSON-LD, ni codé en dur dans l'UI : afficher `value/{bestRating}`).
+- Attribution de source visible obligatoire (« Note Google » + nombre d'avis).
+- Quand Google est présent, neutraliser l'agrégat éditorial concurrent (source unique). Jamais de note/compte fabriqués, ni de `reviewRating` sur une citation sans note réelle (EEAT).
+- « Comment » (résolution `resolvedRating`, fetch Places, parité) : skill `structured-data-schema-org` §AggregateRating.
+
+## Rendu JSON-LD — wrapper obligatoire
+- Tous les blocs d'une page passent par **`<SeoJsonLd nodes={[…]} nonce={nonce} />`** (`components/seo/json-ld.tsx`) : un `<script type="application/ld+json">` par nœud, avec le nonce CSP. `JsonLdScript` reste le primitif bas-niveau.
+- **Jamais** de `<script>` JSON-LD brut (casse la CSP nonce → zéro rich result indexé).
+- Nœuds typés par les builders `@mch/seo` + `withSchemaOrgContext<T>` : pas de cast `as unknown as Record<string, unknown>`.
+
+## Nœuds racine communs (Organization / WebSite)
+- `Organization` (marque = `TravelAgency`, `@id` stable) : émis **une seule fois, site-wide** via `<SiteSeoJsonLd>` dans `[locale]/layout.tsx`. Jamais redéclaré par page ; un hôtel n'est **jamais** `Organization` (il est `Hotel`/`LodgingBusiness`).
+- `WebSite` + `SearchAction` : **racine uniquement** (home), `publisher` → `@id` de l'Organization (ADR-0014 §2.2).
+- Builders communs regroupés dans `lib/jsonld/brand-organization.ts` (`buildBrandOrganizationJsonLd`, `buildWebsiteJsonLd`).
 
 ## ImageObject
 Quand la donnée est disponible, enrichir les images selon la logique existante du projet.

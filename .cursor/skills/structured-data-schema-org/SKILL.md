@@ -38,7 +38,7 @@ Invoke when:
 
 - Pure functions in `packages/seo/jsonld/<schema>.ts`. No side effects.
 - Input: a domain DTO. Output: typed JSON-LD object validated by Zod against a Schema.org subset.
-- Render via `<JsonLdScript data={…} nonce={…} />` (uses `<script type="application/ld+json">`).
+- Render every page's blocks through the shared **`<SeoJsonLd nodes={[…]} nonce={…} />`** component (`apps/web/src/components/seo/json-ld.tsx`): it accepts one node or an array (skipping `null`/`undefined`) and emits one `<script type="application/ld+json">` per node with the CSP nonce. `JsonLdScript` is the low-level primitive it wraps — do not scatter individual `JsonLdScript` calls across a page.
 - One JSON-LD block per `@type` per page; no block merging into a `@graph` unless multiple top-level types are necessary (then validate with Schema.org).
 
 ### CSP nonce contract — non-negotiable (paid for twice: PR #56, #57)
@@ -66,13 +66,22 @@ The contract this codifies:
    marks the route dynamic; the explicit `export const dynamic = 'force-dynamic'`
    keeps the contract grep-able and prevents a future ISR re-enable
    from silently stripping the nonce.
-4. **Never** emit a raw `<script>` tag — always wrap with the shared
-   `<JsonLdScript />` component (`apps/web/src/components/seo/json-ld.tsx`).
+4. **Never** emit a raw `<script>` tag — always go through the shared
+   `<SeoJsonLd />` (page-level) or its `<JsonLdScript />` primitive
+   (`apps/web/src/components/seo/json-ld.tsx`).
 
 Reference: `apps/web/src/components/seo/json-ld.tsx` (long doc comment
 explaining the PR #56/#57 regressions). See also
 `nextjs-app-router` §JSON-LD-and-dynamic-rendering and
 `security-engineering` §CSP.
+
+### Component architecture — common vs page-specific nodes
+
+- **Common root nodes are factored, not repeated.** `buildBrandOrganizationJsonLd` + `buildWebsiteJsonLd` live together in `apps/web/src/lib/jsonld/brand-organization.ts`.
+  - **Organization** (brand = `TravelAgency`, stable `@id`): emitted **once, site-wide** via `<SiteSeoJsonLd>` in `[locale]/layout.tsx`. Never re-declared per page. A hotel is **never** an `Organization` — it is a `Hotel`/`LodgingBusiness`.
+  - **WebSite** + `SearchAction`: emitted **only at the site root** (home), `publisher` referencing the brand by `@id` (ADR-0014 §2.2 — Google expects WebSite at the root, not on every page).
+- **Page-specific nodes** (`Hotel`, `Place`, `Event[]`, `FAQPage`, `ItemList`, `VideoObject`, `BreadcrumbList`, `Review`, `Award`) are built in the page and passed to `<SeoJsonLd nodes={[…]} />`.
+- **Strong typing, no casts**: builders return typed nodes (`HotelNode`, `BreadcrumbList`, …) + `withSchemaOrgContext<T>`; `SeoJsonLd` accepts them directly — never `as unknown as Record<string, unknown>`.
 
 ### Hotel
 
@@ -121,12 +130,24 @@ In addition to `Hotel.nearbyAttraction[]`, the hotel detail page emits a dedicat
 
 The `do` and `shop` buckets do not get their own `ItemList` to avoid noise; they remain in `Hotel.nearbyAttraction[]` only.
 
-### AggregateRating (mandatory `bestRating: '5'`)
+### AggregateRating (mandatory `bestRating: 5`, Google-first, displayed == marked-up)
 
-- For hotel detail: from Google Reviews (`google_rating`, `google_reviews_count`) or Amadeus sentiments.
-- For classements: aggregate of selected hotels with `bestRating: '5'`, `worstRating: '1'`.
-- **`bestRating` MUST be `'5'`** even when the UI displays `/10` — Google Rich Results renders `/5` regardless of `bestRating`, so emitting `/10` provides zero SEO upside and breaks vendor mapping. UI conversion (`displayed = stored × 2`) is the responsibility of the presentation layer only.
-- Never fabricate counts. Always reflect real `reviewCount > 0` from a vendor.
+**Single resolution, single scale.** One helper (`resolvedRating` in the hotel
+page) decides the score **once** and feeds BOTH the visible hero badge AND the
+JSON-LD `aggregateRating`. They can never diverge — emitting markup without a
+matching on-page rating (or on a different scale) is a Google policy violation.
+
+- **Source priority (descending):**
+  1. **Google Places** — `google_rating` (already /5) + `google_reviews_count`. The property's canonical public rating.
+  2. **Editorial DB** — `aggregate_rating_value`; normalise any value > 5 to /5 (e.g. Booking 9.8/10 → 4.9), origin in `aggregate_rating_source`.
+  3. **Amadeus** e-Reputation — already /5 (`overallRating / 20`, builder `amadeusSentimentToAggregateRating`).
+  4. else → **no rating at all** (never fabricate one).
+- **Always /5 in BOTH surfaces:** `bestRating: 5`, `worstRating: 1`. The hero renders `value/{bestRating}` — **NEVER hard-code `/10`** (Google, Amadeus and normalised editorial are all /5; a hard-coded `/10` mislabels the score and breaks the visible↔markup parity — this was a real latent bug).
+- **Visible source attribution is mandatory** next to the score: « Note Google » / « Google rating » + review count (i18n `rating.ratedBy`, `rating.sourceGoogle|Amadeus|Booking`, `rating.reviewCountShort`).
+- When Google is present, **null the competing editorial aggregate** (`aggregate_rating_value/count/source = NULL`) so there is a single source of truth.
+- **Fetching the Google rating** to populate `google_rating`/`google_reviews_count`: Google Places (New) v1 `places:searchText`, FieldMask `places.id,places.displayName,places.rating,places.userRatingCount` (key `GOOGLE_PLACES_API_KEY`). Industrialise via a sync script (same pattern as photos/geocoding) to roll the Google score out across **every** fiche.
+- For classements: aggregate of selected hotels with `bestRating: 5`, `worstRating: 1`.
+- Never fabricate counts. Always reflect a real `reviewCount > 0`. Never emit `reviewRating` on an editorial pull-quote that has no real score (EEAT).
 
 ### FAQPage
 
