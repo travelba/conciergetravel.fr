@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (interdiction de refonte globale silencieu
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : signale la tâche multi-domaines, lit les sources autoritaires (spécifique > transverse), propose un plan scoped. Négatif : refuse la refonte globale en une passe (plan + scope limité requis).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (stack parallèle non justifiée) et renvo
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : rappelle le positionnement (OTA luxe SEO/GEO/agentic), cite la stack imposée sans en inventer, applique l'ordre de priorité. Négatif : refuse l'ajout Remix+Prisma (stack parallèle non justifiée) et renvoie vers la stack imposée + validation explicite.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

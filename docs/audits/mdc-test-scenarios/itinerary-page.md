@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (duplication / cannibalisation ; JSON-LD +
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : JSON-LD `HowTo` + `ItemList` cohérents, maillage bidirectionnel (hôtels/rankings/guides), slug flat ADR-0008. Négatif : refuse de recopier un guide destination existant (duplication / cannibalisation).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

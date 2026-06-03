@@ -28,6 +28,12 @@ Attendu : l'agent **refuse / alerte** (sources interdites, alt obligatoire, `bui
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : ≥ 10 photos / 10 catégories (Phase 1), sources officielles, `buildCloudinarySrc` partout, `alt_fr`+`alt_en` enrichis, JSON-LD `ImageObject` avec `caption`, hero `eager`/`fetchpriority=high`. Négatif : refuse hotlink Tripadvisor/Pinterest, alt vide et `next/image` sur assets hôtels.
+
+> ✅ Caveat lint résolu : le chemin périmé `packages/ui/src/cloudinary.ts` a été corrigé en Vague F-bis (#127) → `packages/ui/src/cloudinary-presets.ts` (`CLOUDINARY_PRESETS`) + `packages/ui/src/components/hotel-image.tsx` (`buildCloudinarySrc`). La note ⚠️ ci-dessous est conservée pour traçabilité.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
 
 > ⚠️ Note lint (N1, driver B/D) : le glob/refs pointent vers `packages/ui/src/cloudinary.ts` qui **n'existe pas** (réel : `packages/ui/src/cloudinary-presets.ts`). Chemin périmé, P3. Voir rapport §3/§6.

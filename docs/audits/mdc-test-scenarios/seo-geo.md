@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (`bestRating` = `'5'` ; indicateurs d'urge
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : `alternates.canonical` + hreflang V1, `bestRating: '5'`, builders `@mch/seo/jsonld/*` via `JsonLdScript`, aucun indicateur d'urgence fabriqué. Négatif : refuse `bestRating: '10'` + « 12 personnes consultent » (DSA/DGCCRF).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

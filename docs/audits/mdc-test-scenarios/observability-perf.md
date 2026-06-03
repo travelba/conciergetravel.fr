@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (PII interdite en log ; deps bannies).
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : `pino` (`@mch/observability/logger`), champs `req_id`/`route`/`latency_ms` sans PII, appel externe wrappé dans un span Sentry, pas de `lodash`/`moment`. Négatif : refuse `console.log(user.email)` + ajout `lodash`.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

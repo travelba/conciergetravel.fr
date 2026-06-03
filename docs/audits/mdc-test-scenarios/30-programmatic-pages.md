@@ -28,4 +28,8 @@ Attendu : l'agent **refuse / alerte** (interdiction de pages faibles/interchange
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : impose intention claire, angle éditorial, différenciation, index/canonical/sitemap explicites, renvoie à `editorial-rankings-matrix`. Négatif : refuse 500 pages quasi-dupliquées (pages faibles interdites).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

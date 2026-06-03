@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (les seams se branchent sur un flag opt-in
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127) — R1 conforme avec réserve (étend l'existant)**
+
+Positif : spec `e2e/<journey>.spec.ts`, requêtes role-based, assertion axe, seam gated par flag `MCH_E2E_FAKE_*` + `MCH_DISABLE_RATE_LIMITS=1`. Négatif : refuse un seam branché sur `NODE_ENV === 'test'` en code de prod.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

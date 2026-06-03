@@ -29,4 +29,8 @@ Attendu : l'agent **refuse / alerte** (interdiction d'ouvrir l'indexation des fa
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : pose objectif SEO, canonical, maillage interne, données structurées et étend `packages/seo` (priorité `seo-geo.mdc`). Négatif : refuse d'indexer toutes les facettes de recherche (cannibalisation / pages faibles).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

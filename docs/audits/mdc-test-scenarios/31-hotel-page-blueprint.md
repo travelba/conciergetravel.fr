@@ -28,6 +28,12 @@ Attendu : l'agent **refuse / alerte** (FAQ + ConciergeAdvice obligatoires ; gel 
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : couvre les sections, voix concierge concrète, défère à `hotel-detail-page.mdc` + `photo-quality.mdc`, pas d'`Offer`/widget live (CTA éditorial). Négatif : refuse une fiche sans FAQ/ConciergeAdvice + widget de réservation live.
+
+> ✅ Caveat lint résolu : la contradiction ADR 0024/0025 (L82) a été corrigée en Vague F-bis (#127). La note ⚠️ ci-dessous est conservée pour traçabilité mais ne s'applique plus à la baseline.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
 
 > ⚠️ Note lint (N1, driver E) : ce MDC contient une contradiction interne ADR (L23 dit « éditorial-first = ADR-0025 », L82 attribue « ne fetch aucune offre » à ADR-0024). Un run réel risque d'hériter de l'ambiguïté de citation. Voir rapport §5.

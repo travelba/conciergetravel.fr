@@ -27,4 +27,8 @@ Attendu : l'agent **refuse / alerte** (router vers `packages/seo` existant, ne p
 
 ## 5. Statut
 
-⏸ pending manual run
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127)**
+
+Positif : identifie la surface SEO technique, oriente vers `docs/04-seo-geo-aeo.md` + `packages/seo`, vérifie l'existant. Négatif : refuse d'écrire une lib sitemap maison sans regarder l'existant (router vers `packages/seo`).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.
