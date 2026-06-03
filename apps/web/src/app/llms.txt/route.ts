@@ -513,6 +513,11 @@ export async function GET(): Promise<NextResponse> {
               'Catalogue machine-readable des 26 compétences déclarées (dont 24 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
           },
           {
+            url: `${origin}/api/mcp`,
+            description:
+              'Serveur MCP (Model Context Protocol, transport Streamable HTTP) — expose les 26 compétences comme tools MCP standardisés par-dessus les mêmes readers que les endpoints HTTP, plus des resources (hotels.jsonl, llms.txt, llms-full.txt, manifeste du gel Phase 6). Les capacités tarif/réservation (compare-prices, request-quote, booking) renvoient `status: "frozen"` sans appel vendor tant que la Phase 6 n’est pas activée. Découvrable via le header `Link: </api/mcp>; rel="mcp"`.',
+          },
+          {
             url: `${origin}/.well-known/hotels.jsonl`,
             description:
               "Catalogue complet des hôtels publiés au format NDJSON (1 objet JSON par ligne) : identité, ville, pays ISO-3166-1, coordonnées GPS, distinction Palace, identifiants externes (Wikidata/Wikipedia/TripAdvisor/Booking/site officiel) et résumé factuel. Streamable — pensé pour l'ingestion et la réconciliation d'identité à l'échelle du catalogue entier (aucun plafond éditorial).",

@@ -18,15 +18,16 @@ Invoke when:
 
 ## Surfaces produced
 
-| Surface                  | Path                                  | Format            | Generated from                               |
-| ------------------------ | ------------------------------------- | ----------------- | -------------------------------------------- |
-| Quick LLM guide          | `/llms.txt`                           | Markdown < 50 KB  | Static + curated key pages                   |
-| Full LLM sitemap         | `/llms-full.txt`                      | Markdown < 500 KB | Payload published pages                      |
-| Agent skills             | `/.well-known/agent-skills.json`      | JSON              | Static manifest (search/filter/booking)      |
-| Link header              | All pages                             | RFC 8288          | Middleware annotation                        |
-| AEO blocks               | Top of editorial pages + hotel detail | HTML              | `<AeoBlock>` component, content from Payload |
-| FAQ                      | Editorial + hotel pages               | HTML + JSON-LD    | Payload `faq_content` JSONB                  |
-| Sitemap with `<lastmod>` | `/sitemap.xml`                        | XML               | Payload + DB                                 |
+| Surface                  | Path                                  | Format              | Generated from                                                                          |
+| ------------------------ | ------------------------------------- | ------------------- | --------------------------------------------------------------------------------------- |
+| Quick LLM guide          | `/llms.txt`                           | Markdown < 50 KB    | Static + curated key pages                                                              |
+| Full LLM sitemap         | `/llms-full.txt`                      | Markdown < 500 KB   | Payload published pages                                                                 |
+| Agent skills             | `/.well-known/agent-skills.json`      | JSON                | Static manifest (search/filter/booking)                                                 |
+| MCP server               | `/api/mcp`                            | MCP Streamable HTTP | 26 tools + resources from same builders ([ADR-0029](../../docs/adr/0029-mcp-server.md)) |
+| Link header              | All pages                             | RFC 8288            | Middleware annotation (`rel="agent-skills"` + `rel="mcp"`)                              |
+| AEO blocks               | Top of editorial pages + hotel detail | HTML                | `<AeoBlock>` component, content from Payload                                            |
+| FAQ                      | Editorial + hotel pages               | HTML + JSON-LD      | Payload `faq_content` JSONB                                                             |
+| Sitemap with `<lastmod>` | `/sitemap.xml`                        | XML                 | Payload + DB                                                                            |
 
 ## Non-negotiable rules
 
@@ -123,6 +124,14 @@ Hard rules:
   }
   ```
 - Linked via `Link: </.well-known/agent-skills.json>; rel="agent-skills"` HTTP header set by middleware.
+
+### MCP server (`/api/mcp`) — Link Header WebMCP ([ADR-0029](../../docs/adr/0029-mcp-server.md))
+
+- MCP (Model Context Protocol) server over **Streamable HTTP**, mounted on the catch-all `apps/web/src/app/api/[transport]/route.ts` (`mcp-handler`, `basePath: '/api/mcp'`, `runtime = 'nodejs'`, `dynamic = 'force-dynamic'`). SSE is intentionally disabled (deprecated in spec + Upstash REST incompatibility).
+- **Zero duplication**: the 26 tools and the `/api/agent/*` routes call the SAME pure result-builders (`apps/web/src/server/mcp/builders/**`). Tool names + descriptions are pulled verbatim from `DEFAULT_AGENT_SKILLS` (`@mch/seo`) — never hand-write a second catalogue.
+- **Phase 6 freeze is data-driven**: pricing/booking tools (`compare-prices`, `request-quote`, `booking`) short-circuit through `apps/web/src/server/mcp/phase6.ts` to a `{ status: 'frozen', bookingMode }` envelope with **zero vendor calls** (asserted in `phase6.test.ts`). Never wire Amadeus/Makcorps/Brevo from a tool.
+- **Resources**: `hotels.jsonl`, `llms.txt`, `llms-full.txt`, and a readable `phase6` manifest (`register-resources.ts`).
+- **Discovery**: advertise the transport with a second Link header `Link: </api/mcp>; rel="mcp"` (set in `next.config.ts` + `proxy.ts`) and reference it in `llms.txt`.
 
 ### Robots authorization (cf. `seo-technical`)
 

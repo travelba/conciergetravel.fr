@@ -1,33 +1,16 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { gateAgentByIp, readClientIp } from '@/server/agent/rate-limit';
-import { getCityDirectory } from '@/server/annuaire/get-city-directory';
+import { agentJson, gateAgentRequest } from '@/server/agent/respond';
+import { buildDirectoryCityResult } from '@/server/mcp/builders/directory';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/agent/directory/[pays]/[ville] — geolocated hotel directory
- * for one city (ADR-0026).
- *
- * Machine-readable counterpart to the `/hotels/[pays]/[ville]` annuaire
- * page. Returns the exhaustive, factual list of published hotels in the
- * city with their WGS84 coordinates so an LLM / agent (ChatGPT Actions,
- * Claude Tools, Perplexity, MCP) can answer "hotels in <city>" and plot
- * or rank them by location without scraping the HTML.
- *
- * Response shape:
- *
- *   { ok: true, pays, ville, countryName, cityName,
- *     hotels: [{ name, slug, url, lat, lng, isPalace }],
- *     count, located, canonicalUrl }
- *
- * `located` = hotels with non-null coordinates (`count` is the total).
- * Hotels without coordinates are still listed (lat/lng = null) — never
- * fabricated. No pricing / availability (Phase 6 freeze).
- *
- * Skill: api-integration, geo-llm-optimization §LLM-actionable surfaces.
+ * for one city (ADR-0026). Thin shell over `buildDirectoryCityResult`
+ * (Lot 4, ADR-0029). No pricing / availability (Phase 6 freeze).
  */
 const QuerySchema = z.object({
   locale: z.enum(['fr', 'en']).default('fr'),
@@ -36,27 +19,19 @@ const QuerySchema = z.object({
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ pays: string; ville: string }> },
-): Promise<NextResponse> {
-  const ip = readClientIp(req.headers);
-  const gate = await gateAgentByIp(ip);
-  if (!gate.ok) {
-    return NextResponse.json(
-      { ok: false, error: 'rate_limited', retryAfterSec: gate.retryAfterSec },
-      { status: 429, headers: { 'Cache-Control': 'no-store' } },
-    );
-  }
+) {
+  const gate = await gateAgentRequest(req);
+  if (!gate.ok) return gate.response;
 
   const url = new URL(req.url);
-  const parsedQuery = QuerySchema.safeParse({
-    locale: url.searchParams.get('locale') ?? undefined,
-  });
-  if (!parsedQuery.success) {
-    return NextResponse.json(
+  const parsed = QuerySchema.safeParse({ locale: url.searchParams.get('locale') ?? undefined });
+  if (!parsed.success) {
+    return agentJson(
       { ok: false, error: 'invalid_query' },
-      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      { status: 400, cacheControl: 'no-store' },
     );
   }
-  const { locale } = parsedQuery.data;
+  const { locale } = parsed.data;
 
   const { pays, ville } = await params;
   if (
@@ -65,50 +40,12 @@ export async function GET(
     typeof ville !== 'string' ||
     ville.length === 0
   ) {
-    return NextResponse.json(
+    return agentJson(
       { ok: false, error: 'invalid_params' },
-      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      { status: 400, cacheControl: 'no-store' },
     );
   }
 
-  const directory = await getCityDirectory(pays, ville, locale).catch(() => null);
-  if (directory === null) {
-    return NextResponse.json(
-      { ok: false, error: 'not_found', pays, ville },
-      { status: 404, headers: { 'Cache-Control': 'no-store' } },
-    );
-  }
-
-  const prefix = locale === 'en' ? '/en/hotel/' : '/fr/hotel/';
-  const hotels = directory.hotels.map((h) => ({
-    name: h.name,
-    slug: h.slug,
-    url: `${prefix}${h.slug}`,
-    lat: h.lat,
-    lng: h.lng,
-    isPalace: h.isPalace,
-  }));
-  const located = hotels.filter((h) => h.lat !== null && h.lng !== null).length;
-
-  return NextResponse.json(
-    {
-      ok: true,
-      pays: directory.countrySlug,
-      ville: directory.citySlug,
-      countryName: directory.countryName,
-      cityName: directory.cityName,
-      hotels,
-      count: hotels.length,
-      located,
-      canonicalUrl:
-        locale === 'en'
-          ? `/en/hotels/${directory.countrySlug}/${directory.citySlug}`
-          : `/fr/hotels/${directory.countrySlug}/${directory.citySlug}`,
-    },
-    {
-      headers: {
-        'Cache-Control': 'private, max-age=1800, stale-while-revalidate=3600',
-      },
-    },
-  );
+  const result = await buildDirectoryCityResult({ pays, ville, locale });
+  return agentJson(result.body, { status: result.status, cacheControl: result.cacheControl });
 }

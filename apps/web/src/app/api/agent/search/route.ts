@@ -1,10 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { searchHotelsCatalogOnServer } from '@/lib/search/hotels-catalog';
-import { gateAgentByIp, readClientIp } from '@/server/agent/rate-limit';
-import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
-import { getHotelBySlug } from '@/server/hotels/get-hotel-by-slug';
+import { agentJson, gateAgentRequest } from '@/server/agent/respond';
+import { buildSearchResult } from '@/server/mcp/builders/hotels';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,19 +10,12 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/agent/search — LLM-actionable hotel search (C2 / CDC §6.5).
  *
- * Mirrors the declarative `search` skill in
- * `packages/seo/src/agent-skills.ts`. An LLM agent (ChatGPT, Claude,
- * Perplexity action runner) sends a JSON body with the user's intent;
- * the endpoint returns:
- *
- *   - `hotels[]` — slugs + factual summary + canonical URL (FR + EN)
- *     of the top matches from the Algolia catalogue.
- *   - `offers[]` — when `checkIn`/`checkOut`/`adults` are provided,
- *     one best-rate Amadeus offer per hotel (cached 5 min via the
- *     existing `getBestOfferForHotel` helper).
- *
- * The response is intentionally compact (≤ 8 KB even for 10 hotels)
- * so it fits in a single LLM tool-call envelope. PII is never logged.
+ * Thin transport shell: IP gate + body validation, then delegates the
+ * shaping to the shared `buildSearchResult` builder (Lot 4, ADR-0029).
+ * The HTTP route leaves the Amadeus best-offer path data-driven (it
+ * only fires for `amadeus`/`little` hotels, of which there are none in
+ * the editorial phase); the MCP tool calls the same builder with
+ * `freezeOffers: true` to guarantee zero vendor calls.
  *
  * Skill: api-integration, geo-llm-optimization, search-engineering.
  */
@@ -44,128 +35,43 @@ const SearchBodySchema = z.object({
   limit: z.number().int().min(1).max(10).default(5),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const ip = readClientIp(req.headers);
-  const gate = await gateAgentByIp(ip);
-  if (!gate.ok) {
-    return NextResponse.json(
-      { ok: false, error: 'rate_limited', retryAfterSec: gate.retryAfterSec },
-      { status: 429, headers: { 'Cache-Control': 'no-store' } },
-    );
-  }
+export async function POST(req: NextRequest) {
+  const gate = await gateAgentRequest(req);
+  if (!gate.ok) return gate.response;
 
   let raw: unknown;
   try {
     raw = await req.json();
   } catch {
-    return NextResponse.json(
+    return agentJson(
       { ok: false, error: 'invalid_json' },
-      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      { status: 400, cacheControl: 'no-store' },
     );
   }
 
   const parsed = SearchBodySchema.safeParse(raw);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
-    return NextResponse.json(
+    return agentJson(
       {
         ok: false,
         error: 'validation',
         field: issue?.path.join('.') ?? 'input',
         message: issue?.message ?? 'invalid payload',
       },
-      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      { status: 400, cacheControl: 'no-store' },
     );
   }
   const body = parsed.data;
 
-  // Algolia hot path — already cached on the search-only key.
-  const algoliaHits = await searchHotelsCatalogOnServer(body.locale, body.destination, body.limit);
-
-  // Resolve full hotel rows in parallel so we can ship canonical URLs
-  // + factual summaries. Falls back gracefully when a row is unindexed.
-  const detail = await Promise.all(
-    algoliaHits.map(async (hit) => {
-      const slug = hit.url_path?.split('/').pop() ?? null;
-      if (slug === null || slug.length === 0) return null;
-      const hotel = await getHotelBySlug(slug, body.locale).catch(() => null);
-      if (hotel === null) return null;
-      return { hit, row: hotel.row };
-    }),
-  );
-  const resolved = detail.filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-
-  // Best-offer fetch (live Amadeus, Redis-cached 5 min). Only fires
-  // when the agent supplied a stay window — otherwise we ship just
-  // the catalogue cards.
-  //
-  // Phase 6 freeze (AGENTS.md §4ter, rule 31-hotel-page-blueprint): the
-  // freeze is DATA-driven, not code-disabled. A hotel only exposes live
-  // Amadeus rates when its `booking_mode` is `amadeus`/`little`. In the
-  // editorial phase every row is `display_only`/`email`, so no live offer
-  // call fires; the path auto-activates in Phase 6 when adapters are wired
-  // and rows flip to a bookable mode (no flag to re-toggle).
-  const wantsOffers =
-    body.checkIn !== undefined && body.checkOut !== undefined && body.adults !== undefined;
-  const offers = wantsOffers
-    ? await Promise.all(
-        resolved.map(async ({ row }) => {
-          if (row.booking_mode !== 'amadeus' && row.booking_mode !== 'little') return null;
-          const result = await getBestOfferForHotel({
-            hotelId: row.id,
-            amadeusHotelId:
-              row.amadeus_hotel_id !== null && row.amadeus_hotel_id.length > 0
-                ? row.amadeus_hotel_id
-                : null,
-            checkIn: body.checkIn ?? '',
-            checkOut: body.checkOut ?? '',
-            adults: body.adults ?? 2,
-            childAges: [],
-          });
-          if (result.offerId === null || result.priceFrom === null) return null;
-          return {
-            hotelId: row.id,
-            slug: row.slug,
-            offerId: result.offerId,
-            priceFromEUR: result.priceFrom.amount.fromMinor / 100,
-            currency: result.priceFrom.amount.currency,
-            source: result.priceFrom.source,
-          };
-        }),
-      )
-    : [];
-
-  return NextResponse.json(
-    {
-      ok: true,
-      query: { destination: body.destination, locale: body.locale },
-      hotels: resolved.map(({ row, hit }) => ({
-        id: row.id,
-        slug: row.slug,
-        slugEn: row.slug_en !== null && row.slug_en.length > 0 ? row.slug_en : null,
-        name:
-          body.locale === 'en' && row.name_en !== null && row.name_en.length > 0
-            ? row.name_en
-            : row.name,
-        city: row.city,
-        stars: row.stars,
-        isPalace: row.is_palace,
-        factualSummary:
-          body.locale === 'en'
-            ? (row.factual_summary_en ?? row.factual_summary_fr ?? null)
-            : (row.factual_summary_fr ?? null),
-        canonicalUrl: hit.url_path,
-        bookingMode: row.booking_mode,
-      })),
-      offers: offers.filter((o): o is NonNullable<typeof o> => o !== null),
-    },
-    {
-      headers: {
-        // No CDN cache — every search is fresh from Algolia + Amadeus.
-        // The downstream Amadeus best-offer call is cached 5 min in
-        // Redis (see `getBestOfferForHotel`).
-        'Cache-Control': 'no-store',
-      },
-    },
-  );
+  const result = await buildSearchResult({
+    destination: body.destination,
+    locale: body.locale,
+    limit: body.limit,
+    ...(body.checkIn !== undefined ? { checkIn: body.checkIn } : {}),
+    ...(body.checkOut !== undefined ? { checkOut: body.checkOut } : {}),
+    ...(body.adults !== undefined ? { adults: body.adults } : {}),
+    ...(body.children !== undefined ? { children: body.children } : {}),
+  });
+  return agentJson(result.body, { status: result.status, cacheControl: result.cacheControl });
 }
