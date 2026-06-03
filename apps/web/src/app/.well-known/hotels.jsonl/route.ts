@@ -22,9 +22,15 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
  *
  * Per-row schema (stable contract — extend additively only):
  *   id, slug, slug_en, name, name_en, stars, is_palace, city, region,
- *   country, country_code, latitude, longitude, address, postal_code,
- *   url, url_en, hero_image (Cloudinary public_id), summary_fr,
- *   summary_en, booking_mode, has_palace_distinction, updated_at,
+ *   country, country_en, country_code, latitude, longitude, address,
+ *   postal_code, url, url_en, hero_image (Cloudinary public_id),
+ *   summary_fr, summary_en, booking_mode, has_palace_distinction, updated_at,
+ *
+ * `country` / `country_en` / `country_code` are read from the DB
+ * (migration 0033, ISO-3166-1 alpha-2), NOT hardcoded — the catalogue
+ * spans 91+ countries (ADR-0021). Legacy FR-only rows with a NULL code
+ * fall back to FR / France. `summary_*` prefers the 150-char IA-ready
+ * `factual_summary_*` and falls back to a truncated description.
  *   schema_org_type ("LodgingBusiness" | "Hotel"),
  *   external_ids: { wikidata, wikipedia_fr, wikipedia_en, tripadvisor,
  *                   booking_com, google_maps_cid, official_url }.
@@ -32,8 +38,9 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
  * Skill: geo-llm-optimization §Machine-readable surfaces.
  */
 
+// force-dynamic: the catalogue is read fresh per request; CDN caching is
+// handled by the explicit Cache-Control header below (no ISR revalidate).
 export const dynamic = 'force-dynamic';
-export const revalidate = 600;
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
@@ -60,6 +67,20 @@ function safeBool(v: unknown): boolean {
   return v === true;
 }
 
+/**
+ * Compact a long description into a citation-friendly summary when no
+ * `factual_summary` is available. Cuts on a word boundary to avoid
+ * mangled tokens, keeping JSONL rows small at catalogue scale.
+ */
+function summarise(factual: string | null, description: string | null): string | null {
+  if (factual !== null) return factual;
+  if (description === null) return null;
+  if (description.length <= 280) return description;
+  const slice = description.slice(0, 280);
+  const lastSpace = slice.lastIndexOf(' ');
+  return `${(lastSpace > 200 ? slice.slice(0, lastSpace) : slice).trimEnd()}…`;
+}
+
 export async function GET(): Promise<Response> {
   const origin = siteOrigin();
   const supabase = getSupabaseAdminClient();
@@ -67,8 +88,10 @@ export async function GET(): Promise<Response> {
     .from('hotels')
     .select(
       'id, slug, slug_en, name, name_en, stars, is_palace, city, region, ' +
+        'country_code, country_label_fr, country_label_en, ' +
         'latitude, longitude, address, postal_code, hero_image, ' +
-        'description_fr, description_en, booking_mode, updated_at, ' +
+        'factual_summary_fr, factual_summary_en, description_fr, description_en, ' +
+        'booking_mode, updated_at, ' +
         'wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, ' +
         'booking_com_hotel_id, official_url',
     )
@@ -91,10 +114,20 @@ export async function GET(): Promise<Response> {
     const slugEn = safeString(r['slug_en']);
     const name = safeString(r['name']);
     if (slug === null || name === null) continue;
-    const summaryFr = safeString(r['description_fr']);
-    const summaryEn = safeString(r['description_en']);
+    const summaryFr = summarise(
+      safeString(r['factual_summary_fr']),
+      safeString(r['description_fr']),
+    );
+    const summaryEn = summarise(
+      safeString(r['factual_summary_en']),
+      safeString(r['description_en']),
+    );
     const stars = safeNumber(r['stars']);
     const isPalace = safeBool(r['is_palace']);
+    const codeRaw = safeString(r['country_code']);
+    const countryCode = codeRaw !== null && codeRaw.length === 2 ? codeRaw.toUpperCase() : 'FR';
+    const countryFr = safeString(r['country_label_fr']) ?? (countryCode === 'FR' ? 'France' : null);
+    const countryEn = safeString(r['country_label_en']) ?? (countryCode === 'FR' ? 'France' : null);
     const obj = {
       id: safeString(r['id']),
       slug,
@@ -106,13 +139,14 @@ export async function GET(): Promise<Response> {
       schema_org_type: 'LodgingBusiness' as const,
       city: safeString(r['city']),
       region: safeString(r['region']),
-      country: 'France',
-      country_code: 'FR',
+      country: countryFr,
+      country_en: countryEn,
+      country_code: countryCode,
       address: safeString(r['address']),
       postal_code: safeString(r['postal_code']),
       latitude: safeNumber(r['latitude']),
       longitude: safeNumber(r['longitude']),
-      url: `${origin}/hotel/${slug}`,
+      url: `${origin}/fr/hotel/${slug}`,
       url_en: slugEn !== null ? `${origin}/en/hotel/${slugEn}` : null,
       hero_image: safeString(r['hero_image']),
       summary_fr: summaryFr,

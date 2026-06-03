@@ -175,7 +175,7 @@ export const buildLlmsFullHotelPages = (
 
   if (summaryFr !== null) {
     out.push({
-      url: `${origin}/hotel/${hotel.slug}/`,
+      url: `${origin}/fr/hotel/${hotel.slug}/`,
       title: `Hôtel ${hotel.nameFr} — ${hotel.city}`,
       summary: summaryFr,
       keyFacts: [`Classement : ${starsLabel}`, `Ville : ${hotel.city}`, bookingLabel],
