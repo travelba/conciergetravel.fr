@@ -95,6 +95,8 @@
     "photos:upload-press-kit": "tsx src/photos/upload-press-kit-images.ts",
     "photos:backfill-url": "tsx src/photos/backfill-official-url.ts",
     "photos:backfill-url:dry": "tsx src/photos/backfill-official-url.ts --dry-run --limit=10",
+    "search:reindex": "tsx src/search/reindex-algolia.ts",
+    "search:reindex:dry": "tsx src/search/reindex-algolia.ts --dry-run",
     "itineraries:check-db": "tsx src/itineraries/check-db.ts",
     "itineraries:run": "tsx src/itineraries/run-itinerary.ts",
     "itineraries:run:dry": "tsx src/itineraries/run-itinerary.ts --dry-run",
@@ -123,6 +125,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@mch/domain": "workspace:*",
     "@mch/integrations": "workspace:*",
+    "algoliasearch": "^5.20.0",
     "dotenv": "^17.4.2",
     "openai": "^6.38.0",
     "zod": "^3.24.1"
