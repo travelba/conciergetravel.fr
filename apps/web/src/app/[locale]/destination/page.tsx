@@ -389,11 +389,11 @@ export default async function DestinationDirectoryPage({
           )}
 
           {/* PR-D — "Autres pays au catalogue" : countries with ≥ 4
-              published hotels but no editorial guide yet. The link
-              targets the per-country anchor on `/hotels` (emitted by
-              `apps/web/src/app/[locale]/hotels/page.tsx` line ~415,
-              `id="country-<code>"`), so users discover the worldwide
-              breadth without 404ing on a non-existent guide. */}
+              published hotels but no editorial guide yet. ADR-0026 — the
+              link now targets the per-country annuaire `/hotels/[pays]`
+              (exhaustive directory grouped by city) instead of the old
+              `/hotels#country-<code>` anchor, so users land on a focused
+              country page rather than scrolling the global catalogue. */}
           {unguidedCountries.length > 0 && (
             <section aria-labelledby="destination-world-unguided-heading">
               <header className="mb-4 flex items-baseline justify-between gap-4">
@@ -414,8 +414,8 @@ export default async function DestinationDirectoryPage({
                   <li key={c.code}>
                     <Link
                       href={{
-                        pathname: '/hotels',
-                        hash: `country-${c.code.toLowerCase()}`,
+                        pathname: '/hotels/[pays]',
+                        params: { pays: c.directorySlug },
                       }}
                       className="border-border bg-bg hover:bg-muted/10 flex items-baseline justify-between gap-3 rounded-lg border px-4 py-3"
                     >

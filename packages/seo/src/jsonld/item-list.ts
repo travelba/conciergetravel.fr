@@ -1,4 +1,4 @@
-import type { ItemList, ListItem, Place } from 'schema-dts';
+import type { Hotel, ItemList, ListItem, Place } from 'schema-dts';
 
 import { type AggregateRatingInput } from './aggregate-rating';
 import { hotelJsonLd } from './hotel';
@@ -6,6 +6,7 @@ import { hotelJsonLd } from './hotel';
 export type ItemListNode = Exclude<ItemList, string>;
 type ListItemNode = Exclude<ListItem, string>;
 type PlaceNode = Exclude<Place, string>;
+type HotelNode = Exclude<Hotel, string>;
 
 /**
  * Optional Hotel payload embedded inside a `ListItem`. When provided,
@@ -13,13 +14,21 @@ type PlaceNode = Exclude<Place, string>;
  * "rich" shape (`item: { @type: 'Hotel', ... }`). Google then surfaces
  * the per-hotel rating in carousel rich-results for the hub page.
  *
- * Keep this union narrow on purpose — anything richer (offers, geo,
- * etc.) belongs on the dedicated `hotelJsonLd` builder used by the
- * detail page.
+ * Keep this union narrow on purpose — anything richer (offers, etc.)
+ * belongs on the dedicated `hotelJsonLd` builder used by the detail
+ * page.
+ *
+ * `latitude`/`longitude` are the one geo signal we forward here: the
+ * directory pages (`/hotels/[pays]`, `/hotels/[pays]/[ville]`) carry a
+ * map, so emitting `GeoCoordinates` per hotel makes the same payload
+ * legible to map-aware crawlers + LLM agents. Both must be present for
+ * the `geo` node to be emitted (no half-coordinates, no fabrication).
  */
 export interface ItemListHotelDetails {
   readonly starRating?: 1 | 2 | 3 | 4 | 5;
   readonly aggregateRating?: AggregateRatingInput;
+  readonly latitude?: number;
+  readonly longitude?: number;
 }
 
 export interface ItemListEntry {
@@ -51,7 +60,8 @@ export const itemListJsonLd = (input: ItemListInput): ItemListNode => {
 };
 
 function buildListItem(entry: ItemListEntry, index: number): ListItemNode {
-  if (entry.hotel === undefined) {
+  const details = entry.hotel;
+  if (details === undefined) {
     return {
       '@type': 'ListItem',
       position: index + 1,
@@ -60,22 +70,62 @@ function buildListItem(entry: ItemListEntry, index: number): ListItemNode {
     };
   }
 
-  // Schema.org best practice: when a list item carries rich data, nest
-  // it under `item` rather than flattening at the ListItem root. This
-  // is what Google parses for the rich-result carousel. We reuse the
-  // canonical `hotelJsonLd` builder so the nested shape stays in lock-
-  // step with the detail page's JSON-LD (skill: structured-data-schema-org).
+  const hasGeo = details.latitude !== undefined && details.longitude !== undefined;
+  const hasRichSignals = details.starRating !== undefined || details.aggregateRating !== undefined;
+
+  // Rich path (star rating / aggregate rating) → reuse the canonical
+  // `hotelJsonLd` builder so the nested shape stays in lock-step with
+  // the detail page's JSON-LD (skill: structured-data-schema-org). Used
+  // by curated hub carousels where the list is short.
+  if (hasRichSignals) {
+    return {
+      '@type': 'ListItem',
+      position: index + 1,
+      item: hotelJsonLd({
+        name: entry.name,
+        url: entry.url,
+        ...(details.starRating !== undefined ? { starRating: details.starRating } : {}),
+        ...(details.aggregateRating !== undefined
+          ? { aggregateRating: details.aggregateRating }
+          : {}),
+        ...(hasGeo && details.latitude !== undefined && details.longitude !== undefined
+          ? { geo: { latitude: details.latitude, longitude: details.longitude } }
+          : {}),
+      }),
+    };
+  }
+
+  // Lean geo-only path → a minimal `Hotel` node carrying just name + url
+  // + GeoCoordinates. Used by the exhaustive directory pages (hundreds
+  // of entries) where reusing the full hotel builder would inject
+  // page-level fields (speakable, mainEntityOfPage, payment constants)
+  // that are meaningless per list-item and would bloat the envelope.
+  // Geo gate: emit only when BOTH coordinates are present (no half-pin,
+  // no fabricated 0,0).
+  if (hasGeo && details.latitude !== undefined && details.longitude !== undefined) {
+    const hotelNode: HotelNode = {
+      '@type': 'Hotel',
+      name: entry.name,
+      url: entry.url,
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: details.latitude,
+        longitude: details.longitude,
+      },
+    };
+    return {
+      '@type': 'ListItem',
+      position: index + 1,
+      item: hotelNode,
+    };
+  }
+
+  // `hotel` present but carrying no usable signal → navigational shape.
   return {
     '@type': 'ListItem',
     position: index + 1,
-    item: hotelJsonLd({
-      name: entry.name,
-      url: entry.url,
-      ...(entry.hotel.starRating !== undefined ? { starRating: entry.hotel.starRating } : {}),
-      ...(entry.hotel.aggregateRating !== undefined
-        ? { aggregateRating: entry.hotel.aggregateRating }
-        : {}),
-    }),
+    url: entry.url,
+    name: entry.name,
   };
 }
 

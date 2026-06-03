@@ -501,5 +501,51 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       },
       endpoint: { method: 'GET', path: '/api/agent/itineraries' },
     },
+    // ── ADR-0026 — annuaire (directory) géolocalisé ─────────────────────
+    {
+      name: 'list-directory-country',
+      description:
+        "Lister l'annuaire exhaustif des hôtels d'exception d'un pays, groupés par ville, avec leurs coordonnées GPS (latitude/longitude WGS84). Réponse machine-lisible du couple page /hotels/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tous les hôtels publiés d'un pays. Aucun tarif ni disponibilité (gel Phase 6). URL canonique HTML : /fr/hotels/{pays}.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          pays: {
+            type: 'string',
+            description:
+              'Slug pays kebab-case (ex. "france", "italie", "japon", "emirats-arabes-unis"). Code ISO-2 accepté en fallback.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['pays'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/directory/{pays}' },
+    },
+    {
+      name: 'list-directory-city',
+      description:
+        "Lister l'annuaire exhaustif des hôtels d'exception d'une ville (scopé par pays pour lever les homonymes), avec leurs coordonnées GPS (latitude/longitude WGS84) et le lien vers chaque fiche. Réponse machine-lisible de la page /hotels/{pays}/{ville}. C'est la surface idéale pour répondre « quels hôtels à {ville} » et les placer sur une carte. Aucun tarif ni disponibilité (gel Phase 6). URL canonique HTML : /fr/hotels/{pays}/{ville}.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          pays: {
+            type: 'string',
+            description: 'Slug pays kebab-case (ex. "france", "italie").',
+          },
+          ville: {
+            type: 'string',
+            description: 'Slug ville kebab-case (ex. "paris", "courchevel", "saint-tropez").',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+        required: ['pays', 'ville'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/directory/{pays}/{ville}' },
+    },
   ],
 };

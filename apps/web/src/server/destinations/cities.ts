@@ -36,6 +36,22 @@ const stringOrNull = z
   .nullish()
   .transform((v) => (typeof v === 'string' ? v : null));
 
+// Postgres `numeric`/`double precision` can arrive as a number or a
+// string depending on the column type. Accept both, reject NaN, and
+// fall back to null so a malformed coordinate never throws — it just
+// drops the pin from the map while keeping the hotel in the list.
+const numberOrNull = z
+  .union([z.number(), z.string()])
+  .nullish()
+  .transform((v) => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    if (typeof v === 'string') {
+      const n = Number.parseFloat(v);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  });
+
 const HotelGroupRowSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -63,14 +79,22 @@ const HotelGroupRowSchema = z.object({
   priority: z.enum(['P0', 'P1', 'P2']),
   description_fr: stringOrNull,
   description_en: stringOrNull,
+  /** Cloudinary public_id (or absolute URL) of the hero photo — null until the Phase 2 photo pipeline ships for the row. */
+  hero_image: stringOrNull,
   /** 8-char Amadeus property code — populated by the back-office for hotels eligible to sentiment enrichment. */
   amadeus_hotel_id: stringOrNull,
+  // WGS84 coordinates (nullable — ~99% of the published catalogue is
+  // geocoded; the rest still render in the directory list but not on
+  // the annuaire map). Postgres returns numerics as strings over the
+  // wire, so coerce defensively before the null fallback.
+  latitude: numberOrNull,
+  longitude: numberOrNull,
 });
 
 export type HotelGroupRow = z.infer<typeof HotelGroupRowSchema>;
 
 const HOTELS_FOR_GROUPING_COLUMNS =
-  'id, slug, slug_en, name, name_en, city, district, region, country_code, country_label_fr, country_label_en, luxury_tier, is_palace, stars, priority, description_fr, description_en, amadeus_hotel_id';
+  'id, slug, slug_en, name, name_en, city, district, region, country_code, country_label_fr, country_label_en, luxury_tier, is_palace, stars, priority, description_fr, description_en, hero_image, amadeus_hotel_id, latitude, longitude';
 
 const PRIORITY_RANK: Record<HotelGroupRow['priority'], number> = { P0: 0, P1: 1, P2: 2 };
 
@@ -333,6 +357,26 @@ export async function getDestinationBySlug(
     }
   }
 
+  // First-non-null wins for the country labels too. Critical for the
+  // annuaire cross-link slug: e.g. France has many rows with
+  // `country_label_fr = null`; if `first` is one of them, the derived
+  // country slug collapses to the ISO code (`fr`) instead of the
+  // canonical `france`, producing a broken `/hotels/fr/<city>` link
+  // (mirrors the aggregation in `resolveCountryFromRows`, ADR-0026).
+  let countryLabelFr: string | null = first.country_label_fr;
+  let countryLabelEn: string | null = first.country_label_en;
+  if (countryLabelFr === null || countryLabelEn === null) {
+    for (const h of matching) {
+      if (countryLabelFr === null && h.country_label_fr !== null) {
+        countryLabelFr = h.country_label_fr;
+      }
+      if (countryLabelEn === null && h.country_label_en !== null) {
+        countryLabelEn = h.country_label_en;
+      }
+      if (countryLabelFr !== null && countryLabelEn !== null) break;
+    }
+  }
+
   const sorted = [...matching].sort((a, b) => {
     const pr = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
     if (pr !== 0) return pr;
@@ -358,8 +402,8 @@ export async function getDestinationBySlug(
     name: cityName,
     region,
     countryCode: first.country_code,
-    countryLabelFr: first.country_label_fr,
-    countryLabelEn: first.country_label_en,
+    countryLabelFr,
+    countryLabelEn,
     hotels,
   };
 }

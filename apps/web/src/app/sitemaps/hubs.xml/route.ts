@@ -8,6 +8,10 @@ import { env } from '@/lib/env';
 import { HAND_BUILT_COUNTRY_GUIDE_SLUGS } from '@/lib/destinations/hand-built-country-guides';
 import { buildSitemapAlternates } from '@/lib/sitemap-alternates';
 import { listPublishedCities } from '@/server/destinations/cities';
+import {
+  listDirectoryCityPaths,
+  listDirectoryCountries,
+} from '@/server/annuaire/list-directory-countries';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
 import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
@@ -126,6 +130,55 @@ export async function GET(): Promise<NextResponse> {
         changefreq: 'monthly',
         priority: 0.7,
         ...(lastmod !== null ? { lastmod } : {}),
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    // ── Annuaire (ADR-0026) — global entry + country + city directories ──
+    // `/hotels` is the annuaire root; `/hotels/[pays]` is one entry per
+    // published country (FR included); `/hotels/[pays]/[ville]` is one
+    // entry per distinct (country, city). All locale-aware via alternates.
+    const hotelsRootHref = (l: Locale): string =>
+      `${origin}${getPathname({ locale: l, href: '/hotels' })}`;
+    entries.push({
+      loc: hotelsRootHref('fr'),
+      changefreq: 'weekly',
+      priority: 0.7,
+      alternates: buildSitemapAlternates(hotelsRootHref),
+    });
+
+    const [directoryCountries, directoryCityPaths] = await Promise.all([
+      listDirectoryCountries('fr'),
+      listDirectoryCityPaths(),
+    ]);
+
+    for (const country of directoryCountries) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/hotels/[pays]', params: { pays: country.slug } },
+        })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.6,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
+    for (const path of directoryCityPaths) {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: {
+            pathname: '/hotels/[pays]/[ville]',
+            params: { pays: path.paysSlug, ville: path.villeSlug },
+          },
+        })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.5,
         alternates: buildSitemapAlternates(hrefForLocale),
       });
     }

@@ -22,6 +22,7 @@ import {
   partitionByDomesticForeign,
   type HotelGroupRow,
 } from '@/server/destinations/cities';
+import { buildCountryDirectoryList } from '@/server/annuaire/country-slugs';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 
@@ -50,6 +51,9 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 adresse' : `${n} adresses`),
     seeFiche: 'Voir la fiche',
+    seeDirectory: 'Annuaire complet',
+    directoryHint:
+      'Besoin de la liste exhaustive d\u2019une ville ou d\u2019un pays ? Parcourez l\u2019annuaire par pays ci-dessous — chaque pays ouvre la liste complète, ville par ville.',
     metaTitle: 'Hôtels d\u2019exception dans le monde — Sélection du Concierge',
     metaDesc: `Notre sélection éditoriale couvre ${CATALOGUE_PUBLISHED} hôtels d\u2019exception dans ${CATALOGUE_COUNTRIES} pays : Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, boutique-hôtels. Réservation IATA, tarifs nets GDS.`,
     // AEO + FAQ surfaces (skill geo-llm-optimization). The AEO answer
@@ -101,6 +105,9 @@ const T = {
     stars: '★',
     count: (n: number) => (n === 1 ? '1 address' : `${n} addresses`),
     seeFiche: 'View the page',
+    seeDirectory: 'Full directory',
+    directoryHint:
+      'Need the exhaustive list for a city or a country? Browse the directory by country below — each country opens the complete list, city by city.',
     metaTitle: 'Extraordinary hotels worldwide — The Concierge\u2019s Selection',
     metaDesc: `Our editorial selection covers ${CATALOGUE_PUBLISHED} extraordinary hotels across ${CATALOGUE_COUNTRIES} countries: Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, boutique houses. IATA booking, GDS net rates.`,
     aeoQ: 'Which extraordinary hotels does MyConciergeHotel cover worldwide?',
@@ -224,6 +231,13 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
     (a, b) => b.hotels.length - a.hotels.length || a.label.localeCompare(b.label, locale),
   );
 
+  // Map ISO code → derived annuaire slug (ADR-0026). Reuses the directory
+  // aggregator so the slug logic stays in lock-step with `/hotels/[pays]`.
+  const countrySlugByCode = new Map(
+    buildCountryDirectoryList(rows, locale).map((c) => [c.code, c.slug] as const),
+  );
+  const franceDirectorySlug = countrySlugByCode.get('FR') ?? null;
+
   // ── Cluster by brand for the secondary navigation strip ──────────────
   // Brand collections still feed off the full catalog — chain affiliations
   // are global (Aman, Mandarin Oriental, Rosewood, …).
@@ -319,39 +333,68 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
         </nav>
       ) : null}
 
-      {/* Top countries jump strip — PR-D, ADR-0021 Vague 4. Surfaces the
-          top 30 countries by hotel count above the fold so the catalogue's
-          worldwide footprint is visible immediately, not buried at the
-          bottom of the page. The `#country-<code>` anchors are emitted
-          on the per-country sections below. */}
-      {countriesOrdered.length > 0 ? (
-        <nav
-          aria-label={t.sectionByCountry}
-          className="border-border mb-10 flex flex-wrap items-center gap-2 border-b pb-3"
-        >
-          <span className="text-muted text-xs font-semibold uppercase tracking-wide">
-            {t.sectionByCountry} :
-          </span>
-          {countriesOrdered.slice(0, 30).map((g) => (
-            <a
-              key={g.code}
-              href={`#country-${g.code.toLowerCase()}`}
-              className="border-border bg-bg hover:bg-muted/10 rounded-full border px-3 py-1 text-xs"
-            >
-              {g.label}
-              <span className="text-muted ml-1.5">({g.hotels.length})</span>
-            </a>
-          ))}
-          {countriesOrdered.length > 30 ? (
-            <span className="text-muted ml-1 text-xs">
-              {pickByLocale(
-                locale,
-                `+ ${countriesOrdered.length - 30} autres`,
-                `+ ${countriesOrdered.length - 30} more`,
-              )}
+      {/* Top countries strip — now a discovery surface for the per-country
+          annuaire (ADR-0026). Each chip links to `/hotels/[pays]`, the
+          exhaustive country directory grouped by city, instead of an
+          in-page anchor. France gets its own directory chip too. */}
+      {countriesOrdered.length > 0 || franceDirectorySlug !== null ? (
+        <>
+          <p className="text-muted mb-3 text-sm">{t.directoryHint}</p>
+          <nav
+            aria-label={t.sectionByCountry}
+            className="border-border mb-10 flex flex-wrap items-center gap-2 border-b pb-3"
+          >
+            <span className="text-muted text-xs font-semibold uppercase tracking-wide">
+              {t.sectionByCountry} :
             </span>
-          ) : null}
-        </nav>
+            {franceDirectorySlug !== null && domestic.length > 0 ? (
+              <Link
+                href={{ pathname: '/hotels/[pays]', params: { pays: franceDirectorySlug } }}
+                prefetch={false}
+                className="border-border bg-bg hover:bg-muted/10 rounded-full border px-3 py-1 text-xs"
+              >
+                France
+                <span className="text-muted ml-1.5">({domestic.length})</span>
+              </Link>
+            ) : null}
+            {countriesOrdered.slice(0, 30).map((g) => {
+              const slug = countrySlugByCode.get(g.code);
+              const inner = (
+                <>
+                  {g.label}
+                  <span className="text-muted ml-1.5">({g.hotels.length})</span>
+                </>
+              );
+              return slug !== undefined ? (
+                <Link
+                  key={g.code}
+                  href={{ pathname: '/hotels/[pays]', params: { pays: slug } }}
+                  prefetch={false}
+                  className="border-border bg-bg hover:bg-muted/10 rounded-full border px-3 py-1 text-xs"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <a
+                  key={g.code}
+                  href={`#country-${g.code.toLowerCase()}`}
+                  className="border-border bg-bg hover:bg-muted/10 rounded-full border px-3 py-1 text-xs"
+                >
+                  {inner}
+                </a>
+              );
+            })}
+            {countriesOrdered.length > 30 ? (
+              <span className="text-muted ml-1 text-xs">
+                {pickByLocale(
+                  locale,
+                  `+ ${countriesOrdered.length - 30} autres`,
+                  `+ ${countriesOrdered.length - 30} more`,
+                )}
+              </span>
+            ) : null}
+          </nav>
+        </>
       ) : null}
 
       {/* Brand collections — strong internal linking signal */}
@@ -379,7 +422,18 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
 
       {/* ── France — par région ───────────────────────────────────────── */}
       {hasForeign && regionsOrdered.length > 0 ? (
-        <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.franceSectionTitle}</h2>
+        <div className="mb-6 flex items-baseline justify-between gap-3">
+          <h2 className="text-fg font-serif text-2xl md:text-3xl">{t.franceSectionTitle}</h2>
+          {franceDirectorySlug !== null ? (
+            <Link
+              href={{ pathname: '/hotels/[pays]', params: { pays: franceDirectorySlug } }}
+              prefetch={false}
+              className="whitespace-nowrap text-xs font-medium text-amber-700 underline-offset-2 hover:underline"
+            >
+              {t.seeDirectory} →
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       {regionsOrdered.map((g) => (
@@ -455,11 +509,25 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                 aria-labelledby={`${anchor}-title`}
                 className="mb-14 scroll-mt-24"
               >
-                <header className="mb-6 flex items-baseline justify-between">
+                <header className="mb-6 flex items-baseline justify-between gap-3">
                   <h3 id={`${anchor}-title`} className="text-fg font-serif text-xl md:text-2xl">
                     {g.label}
                   </h3>
-                  <span className="text-muted text-sm">{t.count(g.hotels.length)}</span>
+                  <span className="flex items-baseline gap-3">
+                    {(() => {
+                      const slug = countrySlugByCode.get(g.code);
+                      return slug !== undefined ? (
+                        <Link
+                          href={{ pathname: '/hotels/[pays]', params: { pays: slug } }}
+                          prefetch={false}
+                          className="whitespace-nowrap text-xs font-medium text-amber-700 underline-offset-2 hover:underline"
+                        >
+                          {t.seeDirectory} →
+                        </Link>
+                      ) : null;
+                    })()}
+                    <span className="text-muted text-sm">{t.count(g.hotels.length)}</span>
+                  </span>
                 </header>
 
                 <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

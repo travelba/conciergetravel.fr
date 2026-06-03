@@ -321,13 +321,21 @@ function PalacesHotelsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
           ))}
         </div>
       </div>
-      <div className="border-border mt-3 border-t pt-2">
+      <div className="border-border mt-3 flex flex-col gap-1 border-t pt-2">
         <Link
           role="menuitem"
           href="/hotels"
           className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
         >
           {t('primaryNav.hotelsBrowseAll')}
+        </Link>
+        {/* ADR-0026 — annuaire entry (country directory by city). */}
+        <Link
+          role="menuitem"
+          href={{ pathname: '/hotels/[pays]', params: { pays: 'france' } }}
+          className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
+        >
+          {t('primaryNav.directoryByCountry')}
         </Link>
       </div>
     </MegaTrigger>
