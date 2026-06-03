@@ -234,6 +234,27 @@ function wikidataItemUrl(qid: string): string {
 }
 
 /**
+ * SEO-squatter / OTA / booking-engine domains that the scaffold pass
+ * scraped into `official_url` (see
+ * `docs/audits/toxic-official-url-cleanup-2026-06-02.md`). We refuse to
+ * project these into the EEAT provenance array — a spam link served to
+ * Google + LLMs is worse than no link at all. Scoped to `official_url`
+ * only: the canonical `tripadvisor.com` / `booking.com` URLs built from
+ * the dedicated `*_location_id` / `*_hotel_id` columns ARE legitimate
+ * references (their own footer kinds) and must NOT be filtered.
+ *
+ * OTA names are anchored to the registrable domain so brand domains that
+ * merely end in `hotels.com` (rosewoodhotels.com, bulgarihotels.com,
+ * comohotels.com, tajhotels.com, …) are NOT caught.
+ */
+const TOXIC_OFFICIAL_URL_RE =
+  /(\.com-hotel\.(com|info))|(\.(ae-dubai|sa-riyadh|uk-hotel)\.info)|(:\/\/([a-z0-9-]+\.)*hotel[a-z]+\.info)|(h-rez\.com)|(:\/\/([a-z0-9-]+\.)*(tripadvisor\.[a-z.]+|trip\.com|booking\.com|agoda\.com|hotels\.com|expedia\.[a-z.]+|trivago\.[a-z.]+|kayak\.[a-z.]+|hostelworld\.com|ostrovok\.ru|makemytrip\.com))/iu;
+
+function isToxicOfficialUrl(url: string): boolean {
+  return TOXIC_OFFICIAL_URL_RE.test(url);
+}
+
+/**
  * Build the canonical set of `external_sources` entries that derive
  * from the scalar Wikidata-resolved columns on a hotel row.
  *
@@ -276,16 +297,28 @@ function deriveEntries(row: HotelRow, collectedAt: string): ExternalSourceEntry[
     });
   }
 
-  if (row.official_url !== null && row.official_url.length > 0) {
-    // `official_url` was resolved via Wikidata's P856 — the value is
-    // the hotel's own site (the verifiable resource), but its
-    // attribution / provenance is wikidata.
+  if (
+    row.official_url !== null &&
+    row.official_url.length > 0 &&
+    !isToxicOfficialUrl(row.official_url)
+  ) {
+    // Provenance of `official_url` depends on how it was resolved:
+    //  - row carries a `wikidata_id` → the URL came from Wikidata P856,
+    //    attribute to `wikidata`, high confidence.
+    //  - otherwise it was sourced by the editorial scaffold / Tavily pass
+    //    → attribute to the site itself (`official_site`), medium
+    //    confidence (not encyclopaedia-grounded). Mislabelling these as
+    //    `wikidata` would serve a false attribution to LLMs through the
+    //    `/api/agent/hotel-sources` endpoint. The footer reader maps by
+    //    `field` (`official_url` → kind `official`) regardless of source,
+    //    so this only refines the served attribution, not the rendering.
+    const fromWikidata = row.wikidata_id !== null && row.wikidata_id.length > 0;
     entries.push({
       field: 'official_url',
       value: row.official_url,
-      source: 'wikidata',
+      source: fromWikidata ? 'wikidata' : 'official_site',
       source_url: row.official_url,
-      confidence: 'high',
+      confidence: fromWikidata ? 'high' : 'medium',
       collected_at: collectedAt,
     });
   }
