@@ -281,27 +281,29 @@ function deriveEntries(row: HotelRow, collectedAt: string): ExternalSourceEntry[
   if (
     row.official_url !== null &&
     row.official_url.length > 0 &&
-    // Never project a known SEO-squatter / booking-engine / OTA host
-    // into the EEAT provenance array (2026-06-02 cleanup). Shared with
-    // the photo-pipeline backfill so both stay in sync.
     !isToxicOfficialUrl(row.official_url)
   ) {
-    // `official_url` is a SCALAR column whose discovery channel
-    // (Wikidata P856 vs Tavily backfill vs manual) is not recorded on
-    // the row. So the only honest attribution is the official site
-    // itself — the value IS the hotel's own canonical URL, and the
-    // `source_url` points straight at it. Wikidata corroboration, when
-    // it exists, lives in its OWN `wikidata_id` entry above; claiming
-    // `source: 'wikidata'` here would falsely imply the KG served the
-    // URL (it often doesn't expose P856 at all). Confidence stays
-    // `medium`: we trust the host (squatters are filtered out) but have
-    // not run a canonical-URL verification hop.
+    // Provenance of `official_url` depends on how it was resolved:
+    //  - row carries a `wikidata_id` → the URL came from Wikidata P856,
+    //    attribute to `wikidata`, high confidence.
+    //  - otherwise it was sourced by the editorial scaffold / Tavily pass
+    //    → attribute to the site itself (`official_site`), medium
+    //    confidence (not encyclopaedia-grounded). Mislabelling these as
+    //    `wikidata` would serve a false attribution to LLMs through the
+    //    `/api/agent/hotel-sources` endpoint. The footer reader maps by
+    //    `field` (`official_url` → kind `official`) regardless of source,
+    //    so this only refines the served attribution, not the rendering.
+    //
+    // The toxic-URL filter above (`!isToxicOfficialUrl`) is the
+    // 2026-06-02 SEO-squatter / OTA-host cleanup, shared with the
+    // photo-pipeline backfill so both stay in sync.
+    const fromWikidata = row.wikidata_id !== null && row.wikidata_id.length > 0;
     entries.push({
       field: 'official_url',
       value: row.official_url,
-      source: 'official_site',
+      source: fromWikidata ? 'wikidata' : 'official_site',
       source_url: row.official_url,
-      confidence: 'medium',
+      confidence: fromWikidata ? 'high' : 'medium',
       collected_at: collectedAt,
     });
   }

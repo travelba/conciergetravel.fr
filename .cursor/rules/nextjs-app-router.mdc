@@ -1,7 +1,7 @@
 ---
 description: Next.js 15 App Router conventions for MyConciergeHotel.com (Server Components, dynamic, ISR, metadata, middleware, nonce).
 globs: "apps/web/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Next.js App Router — MyConciergeHotel.com
@@ -15,9 +15,9 @@ alwaysApply: true
 
 ## Hotel detail + room sub-pages (CDC §2 + ADR-0008/0009)
 
-- **Hotel detail** lives at `app/[locale]/hotel/[slug]/page.tsx` with `export const revalidate = 3600;` (Sprint 4.1, ADR-0007).
+- **Hotel detail** lives at `app/[locale]/hotel/[slug]/page.tsx` with **`export const dynamic = 'force-dynamic'`** — **permanent and justified** by the per-request CSP nonce read via `headers()` (hard rule `security-csp.mdc`). Per **[ADR-0027](../../docs/adr/0027-csp-model-evolution.md) (CSP-α)** the ISR runtime target is **dropped** on nonce-bearing pages and the nonce → hash migration is **not** pursued; **[ADR-0026](../../docs/adr/0026-csp-rendering-strategy.md) is Rejected**. No CDN `s-maxage` on the HTML document (a frozen nonce reopens PR #57). [ADR-0007](../../docs/adr/0007-isr-via-auth-client-island.md) is amended accordingly. The "editorial-fiche-first" decision (no live booking / `Offer` before Phase 6) is [ADR-0025](../../docs/adr/0025-booking-integration-last-brick.md) — **not** ADR-0024 (photos).
 - **Room sub-pages** live at `app/[locale]/hotel/[slug]/chambres/[roomSlug]/page.tsx`:
-  - Same `revalidate = 3600` aligned with the parent (consistent freshness signal).
+  - Same rendering as the parent: **`force-dynamic` permanent** (per-request CSP nonce, ADR-0027 CSP-α). ISR runtime is not pursued on nonce-bearing pages.
   - `generateStaticParams` should perform a **single shared Supabase fetch** that returns both parent slugs and their room slugs, returned as a flat array of `{ slug, roomSlug }` — avoids the N+1 pattern.
   - `generateMetadata` is localised, `alternates.canonical` = `/hotel/[slug]/chambres/[roomSlug]` (**never** the parent), `alternates.languages` mirrors V1 locales.
   - If the room has < 5 photos or < 200 words description, return `{ robots: { index: false, follow: false } }` (room remains visible to humans but not indexed until the editor completes it).
@@ -67,4 +67,4 @@ apps/web/src/
   i18n/              # routing, navigation, messages
 ```
 
-See `.cursor/skills/nextjs-app-router/SKILL.md` for deeper guidance and ADR-0004 for the layout decision.
+See `.cursor/skills/nextjs-app-router/SKILL.md` for deeper guidance on the folder layout.

@@ -154,4 +154,4 @@ Toujours étendre la logique SEO existante (`packages/seo`) plutôt que d'en cr�
 - Ne pas traiter le SEO comme une simple couche de metadata.
 - Ne pas ouvrir l'indexation de pages faibles ou quasi dupliquées.
 - Ne pas créer une logique SEO parallèle à `packages/seo`.
-- Ne pas contredire les décisions verrouillées dans `seo-geo.mdc`. 
+- Ne pas contredire les décisions verrouillées dans `seo-geo.mdc`.

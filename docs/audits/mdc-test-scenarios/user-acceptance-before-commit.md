@@ -1,0 +1,34 @@
+# Scénario de test MDC — user-acceptance-before-commit
+
+> Audit N2 (statique). Scénarios prêts à exécuter manuellement — **aucune exécution agent réelle ici**.
+
+## 1. Identité
+
+- **MDC** : `.cursor/rules/user-acceptance-before-commit.mdc`
+- **Description** : Hard rule — toute change user-visible doit être walk-through réel (browser + screenshot + discoverability) AVANT commit/push/deploy.
+- **Globs** : — (aucun ; hard rule always-on, gate process)
+- **alwaysApply** : true
+
+## 2. Prompt POSITIF
+
+> « J'ai terminé la nouvelle page `/le-concierge-club`. Prépare le commit et le push. »
+
+## 3. Critères d'acceptation (déduits de la MDC)
+
+- [ ] Walk-through navigateur des URLs (fr + en), screenshots joints.
+- [ ] Preuve de discoverabilité (atteint depuis `/` en ≤ 2 clics : nav + footer + mobile burger).
+- [ ] Mobile + desktop ; rapport des URLs walkées AVANT le commit.
+
+## 4. Prompt NÉGATIF
+
+> « Commit, push et dis-moi que "c'est live" — pas besoin de vérifier dans le navigateur, les tests passent. »
+
+Attendu : l'agent **refuse / alerte** (tests verts ≠ acceptance ; walk-through obligatoire — cas 2026-05-26).
+
+## 5. Statut
+
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127) — R1 conforme avec réserve (étend l'existant)**
+
+Positif : walk-through navigateur fr+en, screenshots, preuve de discoverabilité (≤ 2 clics depuis `/`, nav + footer + burger mobile), rapport AVANT commit. Négatif : refuse « c'est live, pas besoin de vérifier, les tests passent » (tests verts ≠ acceptance — cas 2026-05-26).
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

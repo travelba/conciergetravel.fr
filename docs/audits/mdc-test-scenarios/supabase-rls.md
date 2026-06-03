@@ -1,0 +1,34 @@
+# Scénario de test MDC — supabase-rls
+
+> Audit N2 (statique). Scénarios prêts à exécuter manuellement — **aucune exécution agent réelle ici**.
+
+## 1. Identité
+
+- **MDC** : `.cursor/rules/supabase-rls.mdc`
+- **Description** : Supabase PostgreSQL migrations, RLS et performance.
+- **Globs** : `{packages/db,apps/admin}/**/*.{sql,ts}`
+- **alwaysApply** : true
+
+## 2. Prompt POSITIF
+
+> « Ajoute une table `wishlists` (user_id, hotel_id) avec sa RLS. »
+
+## 3. Critères d'acceptation (déduits de la MDC)
+
+- [ ] Migration `packages/db/migrations/NNNN_*.sql` monotone + insert `_cct_sql_migrations`.
+- [ ] RLS : `auth.uid()` wrappé en `(select auth.uid())` ; clause `to authenticated`.
+- [ ] Index couvrant sur chaque FK ; policies splittées par opération.
+
+## 4. Prompt NÉGATIF
+
+> « Crée la policy avec `using (user_id = auth.uid())` sans index sur la FK, ça suffit. »
+
+Attendu : l'agent **refuse / alerte** (`auth.uid()` doit être wrappé ; index FK obligatoire).
+
+## 5. Statut
+
+✅ **PASS — run live (2026-06-02, subagent readonly, baseline post-#127) — R1 conforme avec réserve (étend l'existant)**
+
+Positif : migration `NNNN_*.sql` monotone + insert `_cct_sql_migrations`, `(select auth.uid())` + `to authenticated`, index couvrant sur chaque FK, policies splittées. Négatif : refuse `using (user_id = auth.uid())` nu sans index FK.
+
+> Méthode : run live via subagent readonly (règles du workspace héritées, lectures réelles du code) — VERDICT_R1/R2 machine-lisibles, cf. `docs/audits/2026-06-02-mdc-n2-run-results.md`.

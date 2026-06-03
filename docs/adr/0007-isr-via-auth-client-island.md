@@ -1,8 +1,21 @@
 # ADR 0007 — ISR via client island pour la zone d'authentification
 
-- Status: accepted
+- Status: accepted (amendée 2026-06-03 — voir ADR-0027)
 - Date: 2026-05-11
 - Refs: skill `nextjs-app-router`, skill `performance-engineering`, Sprint 4.1 du plan post-audit Phase 9
+
+> **Amendement 2026-06-03 (ADR-0027, CSP-α).** L'extraction de session en client
+> island reste valide (le layout `/[locale]/layout.tsx` ne lit plus `cookies()`).
+> En revanche, l'objectif **ISR runtime `revalidate = 3600`** n'est **pas**
+> poursuivi sur les pages porteuses d'un **nonce CSP** (fiches hôtels, hubs
+> destination, toute page émettant du JSON-LD inline) : le `nonce` par-requête
+> (hard rule `security-csp.mdc`) impose `export const dynamic = 'force-dynamic'`.
+> Ces pages sont donc en **`force-dynamic` permanent et justifié** (et non
+> « transitoire »). Le `s-maxage` sur le **document HTML** est proscrit — un nonce
+> figé au CDN rouvre le bug PR #57 ou dégrade la sécu ; seuls les **assets
+> statiques** (JS/CSS / Cloudinary) sont cachés au CDN. La décision de modèle CSP
+> est **CSP-α** (ADR-0027) ; ADR-0026 (rendering) est `Rejected`. Les bénéfices
+> « ISR » décrits ci-dessous valent pour les pages publiques **sans** nonce inline.
 
 ## Décision
 
