@@ -276,6 +276,27 @@ Builder : `JsonLd.hotelJsonLd` dans `packages/seo/src/jsonld/hotel.ts` — ne pa
 
 - ≥ 5 `ImageObject`, 1 avec `representativeOfPage: true`, `isPartOf` → Hotel parent
 
+### Provenance & Licensable (`credit` / `licence` → JSON-LD)
+
+Les colonnes `gallery_images.credit` (attribution) et `gallery_images.licence`
+(enum SMD : `cc-by-sa-4.0` · `cc-by-4.0` · `cc0` · `all-rights-reserved` ·
+`fair-use`) alimentent le `ImageObject` via `hotel.ts` :
+
+- **Provenance** (dès qu'un `credit` existe) : `creditText`, `creator`
+  (`Organization`), `copyrightNotice` (`© <credit>`). Signal EEAT, n'allume
+  **pas** le badge Licensable.
+- **Licensable** (`license` + `acquireLicensePage`) : **uniquement** pour une
+  licence **Creative Commons** — `licence` ∈ {`cc-by-4.0`, `cc-by-sa-4.0`,
+  `cc0`} → URL CC canonique. Ce sont typiquement les fichiers **Wikimedia**.
+- **Press kit / `all-rights-reserved` / `fair-use`** (ex. Airelles, source
+  `press`) : provenance seulement, **jamais** de `license`/`acquireLicensePage`
+  — on n'est pas le licencieur, un lien de licence serait un markup trompeur
+  (violation Google + risque juridique).
+- `license`/`acquireLicensePage` doivent être **HTTPS** (le builder drop sinon).
+
+Conséquence catalogue : le badge « Licensable » de Google Images se déclenche
+sur les ~hôtels sourcés **Wikimedia (CC)**, pas sur les press kits.
+
 ---
 
 ## 5. Indexabilité EEAT — guard `generateMetadata`

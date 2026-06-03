@@ -68,6 +68,93 @@ describe('hotelJsonLd', () => {
       expect(image[0]).toMatchObject({ '@type': 'ImageObject', caption: 'Hero' });
       expect(image[1]).toBe('https://example.com/g1.jpg');
     });
+
+    it('emits provenance (creditText/creator/copyrightNotice) without a licence link for press photos', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [
+          {
+            url: 'https://example.com/hero.jpg',
+            creditText: 'Airelles',
+            creator: 'Airelles',
+            copyrightNotice: '© Airelles',
+          },
+        ],
+      });
+      const image = node.image as unknown as readonly Record<string, unknown>[];
+      expect(image[0]).toMatchObject({
+        '@type': 'ImageObject',
+        creditText: 'Airelles',
+        creator: { '@type': 'Organization', name: 'Airelles' },
+        copyrightNotice: '© Airelles',
+      });
+      expect(image[0]).not.toHaveProperty('license');
+      expect(image[0]).not.toHaveProperty('acquireLicensePage');
+    });
+
+    it('emits a Creative-Commons licence + acquireLicensePage (Licensable badge)', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [
+          {
+            url: 'https://example.com/hero.jpg',
+            creditText: 'Wikimedia Commons — Jane Doe',
+            license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+            acquireLicensePage: 'https://example.com/photo-credits',
+          },
+        ],
+      });
+      const image = node.image as unknown as readonly Record<string, unknown>[];
+      expect(image[0]).toMatchObject({
+        license: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        acquireLicensePage: 'https://example.com/photo-credits',
+      });
+    });
+
+    it('drops a non-HTTPS licence / acquireLicensePage URL', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        images: [
+          {
+            url: 'https://example.com/hero.jpg',
+            caption: 'Hero',
+            license: 'http://insecure.example/licence',
+            acquireLicensePage: '/relative/path',
+          },
+        ],
+      });
+      const image = node.image as unknown as readonly Record<string, unknown>[];
+      expect(image[0]).not.toHaveProperty('license');
+      expect(image[0]).not.toHaveProperty('acquireLicensePage');
+    });
+  });
+
+  describe('containedInPlace — city place-hierarchy edge', () => {
+    it('emits a City node with name + HTTPS url', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        containedInPlace: { name: 'Gordes', url: 'https://example.com/fr/destination/gordes' },
+      });
+      expect(node.containedInPlace).toMatchObject({
+        '@type': 'City',
+        name: 'Gordes',
+        url: 'https://example.com/fr/destination/gordes',
+      });
+    });
+
+    it('emits the City without url when the url is not HTTPS', () => {
+      const node = hotelJsonLd({
+        name: 'Hôtel A',
+        url: 'https://example.com/a',
+        containedInPlace: { name: 'Gordes', url: '/fr/destination/gordes' },
+      });
+      expect(node.containedInPlace).toMatchObject({ '@type': 'City', name: 'Gordes' });
+      expect(node.containedInPlace).not.toHaveProperty('url');
+    });
   });
 
   it('adds Palace award without faking starRating', () => {

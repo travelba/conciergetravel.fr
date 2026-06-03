@@ -238,6 +238,40 @@ export interface ImageObjectInput {
    * canonical SERP thumbnail.
    */
   readonly representativeOfPage?: boolean;
+  /**
+   * Credit line for the photo's rightsholder / source (Schema.org
+   * `creditText`). E.g. `"© Airelles"` for an official press-kit shot,
+   * or `"Wikimedia Commons — <author>"` for a Creative-Commons file.
+   * Pure provenance / EEAT — it does NOT by itself trigger Google's
+   * Licensable badge (that requires `license` / `acquireLicensePage`).
+   */
+  readonly creditText?: string;
+  /**
+   * Name of the entity that created or owns the image. Emitted as an
+   * `Organization` under `creator`. Strengthens image provenance for
+   * search + LLM ingestion.
+   */
+  readonly creator?: string;
+  /** Copyright notice (Schema.org `copyrightNotice`), e.g. `"© Airelles"`. */
+  readonly copyrightNotice?: string;
+  /**
+   * URL of a page describing the licence governing this image's use.
+   * Required (with or without `acquireLicensePage`) for Google's
+   * **Licensable** image feature.
+   *
+   * ⚠ ONLY pass for images we are genuinely entitled to license —
+   * typically a Creative-Commons licence URL for a Wikimedia file. NEVER
+   * emit it for an official press-kit / all-rights-reserved photo we are
+   * not the licensor of (that would be a misleading-markup violation).
+   * HTTPS-only; non-HTTPS values are dropped defensively.
+   */
+  readonly license?: string;
+  /**
+   * URL of a page where a user can acquire a licence for this image.
+   * Pairs with `license` for the Licensable badge. Same HTTPS-only +
+   * "only when genuinely licensable" contract as `license`.
+   */
+  readonly acquireLicensePage?: string;
 }
 
 /**
@@ -253,6 +287,11 @@ type ImageObjectNode = {
   width?: number;
   height?: number;
   representativeOfPage?: boolean;
+  creditText?: string;
+  creator?: { '@type': 'Organization'; name: string };
+  copyrightNotice?: string;
+  license?: string;
+  acquireLicensePage?: string;
 };
 
 export interface HotelJsonLdInput {
@@ -281,6 +320,18 @@ export interface HotelJsonLdInput {
   readonly priceRange?: string;
   readonly address?: HotelAddressInput;
   readonly geo?: HotelGeoInput;
+  /**
+   * The locality (city / town) that geographically contains the hotel.
+   * Emitted as Schema.org `containedInPlace` → a `City` `Place` carrying
+   * `name` and an optional `url` (the destination hub page on our site).
+   *
+   * This complements the flat `address.addressLocality` string with an
+   * explicit place-hierarchy edge — it anchors the hotel in the
+   * "hotels in <city>" entity graph for search + LLM retrieval, and lets
+   * a knowledge engine walk Hotel → City → Region without re-parsing the
+   * postal address. `url` is HTTPS-validated; a bare name still emits.
+   */
+  readonly containedInPlace?: { readonly name: string; readonly url?: string };
   readonly amenityFeatures?: readonly string[];
   readonly aggregateRating?: AggregateRatingInput;
   readonly offer?: OfferInput;
@@ -603,6 +654,11 @@ function additionalTypeFor(input: NearbyAttractionInput, atTypeClass: string): s
 
 const PALACE_AWARD = 'Distinction Palace — Atout France';
 
+/** Defensive HTTPS-only URL guard (mirrors the `sameAs` re-filter below). */
+function isHttpsUrl(value: string | undefined): value is string {
+  return value !== undefined && /^https:\/\/[^\s<>]+$/iu.test(value);
+}
+
 /**
  * Schema.org classes that derive from `LocalBusiness` (and therefore from
  * `Organization`). On a Hotel page, a nearby POI mapped to one of these but
@@ -701,7 +757,29 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
         (entry.width !== undefined && entry.width > 0) ||
         (entry.height !== undefined && entry.height > 0);
       const hasRepFlag = entry.representativeOfPage !== undefined;
-      if (!hasCaption && !hasDimensions && !hasRepFlag) {
+      // Provenance + Licensable metadata. `license` / `acquireLicensePage`
+      // are HTTPS-validated here: a malformed/relative URL is dropped
+      // rather than emitted (a broken licence link is worse than none).
+      const creditText = entry.creditText?.trim();
+      const hasCredit = creditText !== undefined && creditText.length > 0;
+      const creator = entry.creator?.trim();
+      const hasCreator = creator !== undefined && creator.length > 0;
+      const copyrightNotice = entry.copyrightNotice?.trim();
+      const hasCopyright = copyrightNotice !== undefined && copyrightNotice.length > 0;
+      const license = isHttpsUrl(entry.license) ? entry.license : undefined;
+      const acquireLicensePage = isHttpsUrl(entry.acquireLicensePage)
+        ? entry.acquireLicensePage
+        : undefined;
+      if (
+        !hasCaption &&
+        !hasDimensions &&
+        !hasRepFlag &&
+        !hasCredit &&
+        !hasCreator &&
+        !hasCopyright &&
+        license === undefined &&
+        acquireLicensePage === undefined
+      ) {
         nodes.push(entry.url);
         continue;
       }
@@ -712,6 +790,13 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
       if (entry.representativeOfPage !== undefined) {
         node.representativeOfPage = entry.representativeOfPage;
       }
+      if (hasCredit && creditText !== undefined) node.creditText = creditText;
+      if (hasCreator && creator !== undefined) {
+        node.creator = { '@type': 'Organization', name: creator };
+      }
+      if (hasCopyright && copyrightNotice !== undefined) node.copyrightNotice = copyrightNotice;
+      if (license !== undefined) node.license = license;
+      if (acquireLicensePage !== undefined) node.acquireLicensePage = acquireLicensePage;
       nodes.push(node);
     }
     // `Hotel.image` is typed as `string | string[]` in schema-dts; we
@@ -736,6 +821,16 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
         ? { addressRegion: input.address.addressRegion }
         : {}),
     };
+  }
+  if (input.containedInPlace !== undefined) {
+    const placeName = input.containedInPlace.name.trim();
+    if (placeName.length > 0) {
+      out.containedInPlace = {
+        '@type': 'City',
+        name: placeName,
+        ...(isHttpsUrl(input.containedInPlace.url) ? { url: input.containedInPlace.url } : {}),
+      };
+    }
   }
   if (input.geo !== undefined) {
     out.geo = {

@@ -104,13 +104,20 @@ Hiérarchie fiche hôtel : Accueil → Pays (`/destination`) → Ville (`/destin
 - `WebSite` + `SearchAction` : **racine uniquement** (home), `publisher` → `@id` de l'Organization (ADR-0014 §2.2).
 - Builders communs regroupés dans `lib/jsonld/brand-organization.ts` (`buildBrandOrganizationJsonLd`, `buildWebsiteJsonLd`).
 
-## ImageObject
+## ImageObject — provenance & Licensable
 Quand la donnée est disponible, enrichir les images selon la logique existante du projet.
-Toujours privilégier :
-- dimensions réelles,
-- URL stables,
-- cohérence avec la galerie affichée,
-- qualité éditoriale des images.
+Toujours privilégier : dimensions réelles, URL stables, cohérence avec la galerie affichée, qualité éditoriale.
+Champs provenance/Licensable (builder `hotel.ts`, alimentés par `gallery_images.credit` + `gallery_images.licence`) :
+- `creditText` / `creator` (`Organization`) / `copyrightNotice` : **provenance EEAT**, émis dès qu'un `credit` existe. N'allument **pas** le badge Licensable.
+- `license` / `acquireLicensePage` : émis **uniquement** pour une image réellement licenciable — une licence **Creative Commons** (`cc-by-4.0`, `cc-by-sa-4.0`, `cc0` → URL CC canonique). **Jamais** pour un press kit / `all-rights-reserved` / `fair-use` : on n'est pas le licencieur → markup trompeur interdit.
+- HTTPS obligatoire sur `license`/`acquireLicensePage` (le builder drop sinon).
+
+## Event (à proximité)
+- `Event.image` (recommandé Google) émis **seulement** si la source (DATAtourisme) porte une image qui **représente l'événement** — jamais une photo d'hôtel ou empruntée. Champ `upcoming_events.image_url` (HTTPS), revalidé par le builder.
+- Sans image réelle : laisser vide (le « problème non critique » Google reste, c'est acceptable — ne pas fabriquer).
+
+## containedInPlace
+- `Hotel.containedInPlace` = la **ville** (`City` : `name` + `url` du hub `/destination/[ville]`). Arête de hiérarchie de lieu (Hotel → City) qui complète `address.addressLocality` pour la récupération « hôtels à <ville> ». `url` réutilise le même `cityHubUrl` que le breadcrumb (jamais deux URLs divergentes).
 
 ## Validation
 Avant merge d’une modification de schéma :

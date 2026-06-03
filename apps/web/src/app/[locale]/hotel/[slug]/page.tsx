@@ -93,6 +93,7 @@ import {
   readSpa,
   readInstagram,
   readVirtualTour,
+  type GalleryLicence,
   type HotelDetail,
   type HotelDetailRow,
   type SupportedLocale,
@@ -570,6 +571,29 @@ async function renderHotelPage(
   // ship `representativeOfPage: true` on the hero (Google honours it as
   // the canonical SERP thumbnail) and fall back to bare URLs when the
   // gallery row has no editorial alt text yet.
+  // Image provenance + Licensable metadata (photo-pipeline SMD → JSON-LD).
+  // A Creative-Commons licence resolves to its public licence URL, which
+  // lights up Google's "Licensable" badge. Press-kit / all-rights-reserved /
+  // fair-use photos emit credit + copyright ONLY — we are not the licensor,
+  // so we never claim a Licensable link for a media-kit shot (EEAT integrity).
+  const CC_LICENCE_URL: Partial<Record<GalleryLicence, string>> = {
+    'cc-by-sa-4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
+    'cc-by-4.0': 'https://creativecommons.org/licenses/by/4.0/',
+    cc0: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  };
+  const imageRights = (src: {
+    readonly credit: string | null;
+    readonly licence: GalleryLicence | null;
+  }): Pick<JsonLd.ImageObjectInput, 'creditText' | 'creator' | 'copyrightNotice' | 'license'> => {
+    const credit = src.credit?.trim();
+    const hasCredit = credit !== undefined && credit.length > 0;
+    const licenceUrl = src.licence !== null ? CC_LICENCE_URL[src.licence] : undefined;
+    return {
+      ...(hasCredit ? { creditText: credit, creator: credit, copyrightNotice: `© ${credit}` } : {}),
+      ...(licenceUrl !== undefined ? { license: licenceUrl } : {}),
+    };
+  };
+
   const jsonLdImages: (string | JsonLd.ImageObjectInput)[] = [];
   if (heroPublicId !== null) {
     // Hero caption: prefer the hero gallery row's curated full-sentence
@@ -584,6 +608,7 @@ async function renderHotelPage(
       width: 1600,
       height: 900,
       representativeOfPage: true,
+      ...(heroGalleryMatch !== undefined ? imageRights(heroGalleryMatch) : {}),
     });
   }
   // Tiles exclude the hero (already emitted above as `representativeOfPage`)
@@ -597,8 +622,12 @@ async function renderHotelPage(
     // `caption` is the full sentence the LLMs cite; `alt` is the short
     // keyword string. Either makes the ImageObject rich — prefer caption.
     const caption = img.caption ?? (img.alt.length > 0 ? img.alt : null);
+    const rights = imageRights(img);
+    const hasRights = Object.keys(rights).length > 0;
     if (caption !== null) {
-      jsonLdImages.push({ url, caption, width: 1230, height: 820 });
+      jsonLdImages.push({ url, caption, width: 1230, height: 820, ...rights });
+    } else if (hasRights) {
+      jsonLdImages.push({ url, width: 1230, height: 820, ...rights });
     } else {
       jsonLdImages.push(url);
     }
@@ -640,6 +669,15 @@ async function renderHotelPage(
     jsonLdAwardSeen.add(key);
     jsonLdAwards.push(a.trim());
   }
+
+  // City hub slug + URL — reused by both the Hotel `containedInPlace`
+  // (place-hierarchy edge) and the visible/JSON-LD breadcrumb below, so the
+  // two never point at different destination URLs for the same city.
+  const cityHubSlug = citySlug(row.city);
+  const cityHubUrl = `${origin}${getPathname({
+    locale,
+    href: { pathname: '/destination/[citySlug]', params: { citySlug: cityHubSlug } },
+  })}`;
 
   const hotelInput: JsonLd.HotelJsonLdInput = {
     name,
@@ -836,6 +874,10 @@ async function renderHotelPage(
           },
         }
       : {}),
+    // `containedInPlace` — explicit Hotel → City place-hierarchy edge, linking
+    // the fiche to its destination hub. Complements the flat
+    // `address.addressLocality` string for "hotels in <city>" entity retrieval.
+    ...(row.city !== '' ? { containedInPlace: { name: row.city, url: cityHubUrl } } : {}),
     // Knowledge-graph anchors (Phase 12.1). Pulled from migration 0025
     // columns + the Wikidata enrichment cron. Surfaces as:
     //   - additionalType → unambiguous Wikidata QID disambiguation
@@ -914,12 +956,6 @@ async function renderHotelPage(
       : {}),
   };
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
-
-  const cityHubSlug = citySlug(row.city);
-  const cityHubUrl = `${origin}${getPathname({
-    locale,
-    href: { pathname: '/destination/[citySlug]', params: { citySlug: cityHubSlug } },
-  })}`;
 
   // Country label for the breadcrumb — same source as the visible `<nav>`
   // below (computed once here to avoid duplication). Falls back to "France"
@@ -1030,6 +1066,10 @@ async function renderHotelPage(
         ...(row.region !== '' ? { addressRegion: row.region } : {}),
         ...(e.description !== null ? { description: e.description } : {}),
         ...(e.url !== null ? { officialUrl: e.url } : {}),
+        // Google-recommended `Event.image` — only when the source carries a
+        // genuine event image (never a borrowed/hotel photo). Builder
+        // re-validates HTTPS and drops anything malformed.
+        ...(e.imageUrl !== null ? { imageUrl: e.imageUrl } : {}),
         ...(e.dtUuid !== null ? { sameAs: `https://data.datatourisme.fr/poi/${e.dtUuid}` } : {}),
         ...(e.pricing !== null
           ? {

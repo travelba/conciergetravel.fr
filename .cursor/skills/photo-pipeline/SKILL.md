@@ -99,6 +99,14 @@ Configure once via `plugin-cloudinary-cloudinary-smd` MCP
 - `captured_at` (date) — freshness signal for editorial decisions
 - `is_hero` (boolean) — at most one per `hotel_slug` (rule enforced by the LLM seeding script, not Cloudinary)
 
+**JSON-LD wiring**: `gallery_images.credit` + `gallery_images.licence` now flow
+into the `Hotel` `ImageObject` (`packages/seo/src/jsonld/hotel.ts`):
+`credit` → `creditText`/`creator`/`copyrightNotice` (provenance, always); a
+**Creative-Commons** `licence` (`cc-by-4.0`/`cc-by-sa-4.0`/`cc0`) → `license` +
+`acquireLicensePage` (Google **Licensable** badge). `all-rights-reserved` /
+`fair-use` (press kits) emit provenance ONLY — never a licence link (we are not
+the licensor). See `photo-quality-seo-geo-agentique` §Provenance & Licensable.
+
 ## Hero fallback (runtime, no data migration)
 
 The itinerary detail page already implements a fallback chain in

@@ -1332,6 +1332,24 @@ const CloudinaryPublicIdSchema = z
     message: 'invalid Cloudinary public_id',
   });
 
+/**
+ * Image licence enum — mirrors the Cloudinary Structured Metadata
+ * `licence` field (see `.cursor/skills/photo-pipeline`). Drives the
+ * JSON-LD `ImageObject.license` / Licensable badge: only the
+ * Creative-Commons values resolve to a public licence URL; press-kit /
+ * `all-rights-reserved` / `fair-use` photos emit provenance metadata
+ * (credit / copyright) WITHOUT a licence link.
+ */
+const GalleryLicenceSchema = z.enum([
+  'cc-by-sa-4.0',
+  'cc-by-4.0',
+  'cc0',
+  'all-rights-reserved',
+  'fair-use',
+]);
+
+export type GalleryLicence = z.infer<typeof GalleryLicenceSchema>;
+
 const GalleryImageSchema = z.object({
   public_id: CloudinaryPublicIdSchema,
   alt_fr: z.string().min(1).optional(),
@@ -1339,6 +1357,10 @@ const GalleryImageSchema = z.object({
   caption_fr: z.string().min(1).optional(),
   caption_en: z.string().min(1).optional(),
   category: z.string().min(1).optional(),
+  /** Photographer / source attribution (Cloudinary SMD `credit`). */
+  credit: z.string().min(1).max(200).optional(),
+  /** Legal trail (Cloudinary SMD `licence`). */
+  licence: GalleryLicenceSchema.optional(),
 });
 
 const GalleryImagesSchema = z.array(GalleryImageSchema);
@@ -1353,6 +1375,10 @@ export interface LocalisedGalleryImage {
    */
   readonly caption: string | null;
   readonly category: string | null;
+  /** Rightsholder / source attribution, or `null` when unknown. */
+  readonly credit: string | null;
+  /** Licence enum, or `null` when not recorded. */
+  readonly licence: GalleryLicence | null;
 }
 
 export function readHeroImage(row: HotelDetailRow): string | null {
@@ -1373,6 +1399,8 @@ export function readGallery(
     alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackName,
     caption: pickLocalizedText(locale, img.caption_fr, img.caption_en) ?? null,
     category: img.category ?? null,
+    credit: img.credit ?? null,
+    licence: img.licence ?? null,
   }));
 }
 
@@ -1843,6 +1871,14 @@ const UpcomingEventSchema = z.object({
   url: z.string().url().max(2048).nullable().optional(),
   /** DATAtourisme UUID — emitted as `sameAs` in JSON-LD for provenance. */
   dt_uuid: z.string().min(1).max(80).nullable().optional(),
+  /**
+   * Absolute HTTPS URL of an image that genuinely depicts the event
+   * (Google-recommended `Event.image`). Populated by the editorial
+   * pipeline only when DATAtourisme/the source carries a representative
+   * image — never a borrowed or unrelated photo (the JSON-LD builder
+   * re-validates HTTPS and drops anything else).
+   */
+  image_url: z.string().url().max(2048).nullable().optional(),
 });
 
 const UpcomingEventsSchema = z.array(UpcomingEventSchema);
@@ -1861,6 +1897,8 @@ export interface LocalisedUpcomingEvent {
   readonly pricing: { readonly type: 'free' | 'paid'; readonly amountEur: number | null } | null;
   readonly url: string | null;
   readonly dtUuid: string | null;
+  /** Representative event image (absolute HTTPS), or `null` when none. */
+  readonly imageUrl: string | null;
 }
 
 /**
@@ -1919,6 +1957,7 @@ export function readUpcomingEvents(
       pricing: e.pricing ? { type: e.pricing.type, amountEur: e.pricing.amount_eur } : null,
       url: e.url ?? null,
       dtUuid: e.dt_uuid ?? null,
+      imageUrl: e.image_url ?? null,
     });
   }
 

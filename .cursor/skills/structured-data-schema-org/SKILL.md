@@ -166,6 +166,8 @@ matching on-page rating (or on a different scale) is a Google policy violation.
 
 - Every hotel image rendered as `ImageObject` with `contentUrl`, `caption` (alt-quality, SEO-keyword + context), `width`, `height`.
 - Featured image set as `Hotel.image` (string URL or array of `ImageObject`).
+- **Provenance + Licensable** (from `gallery_images.credit` / `.licence`): emit `creditText` / `creator` (`Organization`) / `copyrightNotice` whenever a credit exists (EEAT — no badge). Emit `license` + `acquireLicensePage` **only** for genuinely licensable images — a Creative-Commons `licence` (`cc-by-4.0`/`cc-by-sa-4.0`/`cc0` → canonical CC URL), typically Wikimedia files. **Never** for press-kit / `all-rights-reserved` / `fair-use` (we are not the licensor → misleading markup). HTTPS-only (builder drops otherwise). See `photo-quality-seo-geo-agentique` §Provenance.
+- **`Event.image`** (events bloc): only when DATAtourisme carries an image that depicts the event itself — never a hotel/borrowed photo. Field `upcoming_events.image_url`; absent image = leave empty (non-critical, never fabricate).
 - Hotel video (≥ 30 s, MP4 H.265) rendered as `VideoObject` with `contentUrl`, `thumbnailUrl`, `uploadDate`, `duration` (ISO 8601 `PT30S`), `description`, `transcript` if available.
 - Visite 360° (Matterport) rendered as `VirtualLocation` (Schema.org extension) or as a `VideoObject` fallback with `additionalType: "https://schema.org/VirtualLocation"`.
 
