@@ -25,6 +25,7 @@ import {
 } from '@/lib/travelport';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
+import { saveTravelportContext, type TravelportBookingContext } from './travelport-context';
 import { saveDraft, type DraftHotelSnapshot } from './draft-store';
 
 /**
@@ -179,6 +180,17 @@ export async function lockTravelportSandboxOffer(input: {
   const item = bestMatch(hotel, search.value);
   if (item === null) return { ok: false, reason: 'no_match' };
 
+  // Contexte de booking Travelport (rateKey + garantie + prix amont) : requis
+  // pour `createReservation` à l'étape de confirmation sandbox, perdu à la
+  // projection domaine. Sans rateKey/prix exploitables → pas de tarif.
+  const rate = item.lowestPublicAvailableRate;
+  const rateKey = rate?.rateKey?.value;
+  const rateAmount = rate?.totalPrice?.amount ?? rate?.total?.amount;
+  const rateCurrency = rate?.currencyCode ?? rate?.total?.currency ?? getTravelportCurrency();
+  if (rateKey === undefined || rateAmount === undefined) {
+    return { ok: false, reason: 'no_rate' };
+  }
+
   const expiresAt = new Date(now.getTime() + OFFER_TTL_SEC * 1000).toISOString();
   const mapped = travelportOfferToDomain({
     item,
@@ -208,6 +220,24 @@ export async function lockTravelportSandboxOffer(input: {
     region: hotel.region,
   };
   await saveDraft({ draft: atRecap.value, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
+
+  const bookingCtx: TravelportBookingContext = {
+    rateKey,
+    chainCode: item.chainCode,
+    propertyCode: item.propertyCode,
+    propertyName: item.name,
+    amount: rateAmount,
+    currency: rateCurrency,
+    ...(rate?.terms?.guaranteeType !== undefined
+      ? { guaranteeType: rate.terms.guaranteeType }
+      : {}),
+    checkIn,
+    checkOut,
+    adults,
+    hotelId: hotel.id,
+    hotelName: hotel.name,
+  };
+  await saveTravelportContext(atRecap.value.id, bookingCtx);
 
   return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: hotel.name };
 }

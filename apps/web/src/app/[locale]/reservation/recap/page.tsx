@@ -9,6 +9,11 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
+import {
+  cancelTravelportSandboxReservation,
+  confirmTravelportSandboxReservation,
+} from '@/server/booking/travelport-confirm';
+import { loadTravelportReservation } from '@/server/booking/travelport-context';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -95,16 +100,65 @@ async function continueToPaymentAction(): Promise<void> {
   redirectToPayment(persisted.locale);
 }
 
+/**
+ * Étape B — confirmation **réelle** d'une réservation Travelport (sandbox
+ * preprod) depuis le recap. Gated : ne s'exécute que pour une offre dont le
+ * provider est `travelport` ; aucune autre offre n'emprunte ce chemin.
+ */
+async function confirmTravelportSandboxAction(): Promise<void> {
+  'use server';
+
+  const draftId = await getDraftId();
+  if (draftId === undefined) {
+    nextRedirect('/');
+  }
+  const persisted = await loadDraft(draftId);
+  if (persisted === null) {
+    redirectExpired('fr');
+  }
+  if (persisted.draft.offer?.provider !== 'travelport') {
+    redirect({ href: '/reservation/recap', locale: persisted.locale });
+  }
+
+  const result = await confirmTravelportSandboxReservation(draftId);
+  if (!result.ok) {
+    redirect({
+      href: { pathname: '/reservation/recap', query: { error: result.reason } },
+      locale: persisted.locale,
+    });
+  }
+  redirect({ href: '/reservation/recap', locale: persisted.locale });
+}
+
+/** Étape B — annulation de la réservation sandbox depuis le recap. */
+async function cancelTravelportSandboxAction(): Promise<void> {
+  'use server';
+
+  const draftId = await getDraftId();
+  if (draftId === undefined) {
+    nextRedirect('/');
+  }
+  const persisted = await loadDraft(draftId);
+  if (persisted === null) {
+    redirectExpired('fr');
+  }
+  await cancelTravelportSandboxReservation(draftId);
+  redirect({ href: '/reservation/recap', locale: persisted.locale });
+}
+
 export default async function ReservationRecapPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const { locale: raw } = await params;
+  const [{ locale: raw }, sp] = await Promise.all([params, searchParams]);
   if (!isRoutingLocale(raw)) notFound();
   const locale = raw;
   setRequestLocale(locale);
   const t = await getTranslations('reservationRecap');
+  const sandboxError = typeof sp.error === 'string' && sp.error.length > 0 ? sp.error : undefined;
 
   const draftId = await getDraftId();
   if (draftId === undefined) {
@@ -132,6 +186,8 @@ export default async function ReservationRecapPage({
   }
 
   const { offer, guest } = persisted.draft;
+  const tpReservation =
+    offer.provider === 'travelport' ? await loadTravelportReservation(draftId) : null;
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
@@ -185,21 +241,112 @@ export default async function ReservationRecapPage({
       </section>
 
       {offer.provider === 'travelport' ? (
-        <section
-          className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
-          aria-label={locale === 'en' ? 'Travelport sandbox notice' : 'Note sandbox Travelport'}
-        >
-          <p className="text-fg text-sm font-medium">
-            {locale === 'en'
-              ? 'Travelport sandbox — booking disabled at this step'
-              : 'Sandbox Travelport — réservation désactivée à cette étape'}
-          </p>
-          <p className="text-muted mt-2 text-xs">
-            {locale === 'en'
-              ? 'This recap shows a live preprod offer (price + cancellation policy). Payment and reservation are intentionally not wired in this iteration.'
-              : 'Ce récapitulatif affiche une offre preprod réelle (prix + conditions d’annulation). Le paiement et la réservation ne sont volontairement pas câblés dans cette itération.'}
-          </p>
-        </section>
+        tpReservation !== null ? (
+          <section
+            className="border-border bg-bg rounded-lg border p-4 sm:p-5"
+            aria-label={
+              locale === 'en' ? 'Travelport sandbox reservation' : 'Réservation sandbox Travelport'
+            }
+          >
+            <p className="text-fg text-sm font-medium">
+              {tpReservation.phase === 'cancelled'
+                ? locale === 'en'
+                  ? 'Sandbox reservation cancelled'
+                  : 'Réservation sandbox annulée'
+                : locale === 'en'
+                  ? 'Sandbox reservation confirmed'
+                  : 'Réservation sandbox confirmée'}
+            </p>
+            <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
+              <div>
+                <dt className="text-muted text-xs uppercase tracking-wide">
+                  {locale === 'en' ? 'Status' : 'Statut'}
+                </dt>
+                <dd className="text-fg text-sm">{tpReservation.status}</dd>
+              </div>
+              {tpReservation.supplierConfirmation !== undefined ? (
+                <div>
+                  <dt className="text-muted text-xs uppercase tracking-wide">
+                    {locale === 'en' ? 'Hotel confirmation' : 'Confirmation hôtel'}
+                  </dt>
+                  <dd className="text-fg font-mono text-sm">
+                    {tpReservation.supplierConfirmation}
+                  </dd>
+                </div>
+              ) : null}
+              {tpReservation.aggregatorLocator !== undefined ? (
+                <div>
+                  <dt className="text-muted text-xs uppercase tracking-wide">
+                    {locale === 'en' ? 'Travelport locator' : 'Locator Travelport'}
+                  </dt>
+                  <dd className="text-fg font-mono text-sm">{tpReservation.aggregatorLocator}</dd>
+                </div>
+              ) : null}
+              {tpReservation.agencyLocator !== undefined ? (
+                <div>
+                  <dt className="text-muted text-xs uppercase tracking-wide">
+                    {locale === 'en' ? 'Agency locator' : 'Locator agence'}
+                  </dt>
+                  <dd className="text-fg font-mono text-sm">{tpReservation.agencyLocator}</dd>
+                </div>
+              ) : null}
+            </dl>
+            {tpReservation.phase === 'cancelled' ? (
+              <p className="text-muted mt-4 text-xs">
+                {locale === 'en'
+                  ? 'This sandbox reservation has been cancelled with the supplier.'
+                  : 'Cette réservation sandbox a été annulée auprès du fournisseur.'}
+              </p>
+            ) : (
+              <form action={cancelTravelportSandboxAction} className="mt-4">
+                <button
+                  type="submit"
+                  className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+                >
+                  {locale === 'en'
+                    ? 'Cancel sandbox reservation'
+                    : 'Annuler la réservation sandbox'}
+                </button>
+              </form>
+            )}
+          </section>
+        ) : (
+          <section
+            className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
+            aria-label={locale === 'en' ? 'Travelport sandbox' : 'Sandbox Travelport'}
+          >
+            <p className="text-fg text-sm font-medium">
+              {locale === 'en'
+                ? 'Travelport sandbox — preprod reservation'
+                : 'Sandbox Travelport — réservation preprod'}
+            </p>
+            <p className="text-muted mt-2 text-xs">
+              {locale === 'en'
+                ? 'Confirming creates a real reservation in the Travelport preprod sandbox using a test guarantee card. No real payment is taken; you can cancel it right after.'
+                : 'Confirmer crée une réservation réelle dans le sandbox preprod Travelport avec une carte de garantie de test. Aucun paiement réel n’est prélevé ; vous pourrez l’annuler juste après.'}
+            </p>
+            <form action={confirmTravelportSandboxAction} className="mt-4">
+              <button
+                type="submit"
+                className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+              >
+                {locale === 'en'
+                  ? 'Confirm sandbox reservation'
+                  : 'Confirmer la réservation sandbox'}
+              </button>
+            </form>
+            {sandboxError !== undefined ? (
+              <p
+                role="alert"
+                className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
+              >
+                {locale === 'en'
+                  ? 'The reservation could not be created in the sandbox. Please retry or relaunch a search.'
+                  : 'La réservation n’a pas pu être créée dans le sandbox. Réessayez ou relancez une recherche.'}
+              </p>
+            ) : null}
+          </section>
+        )
       ) : (
         <form action={continueToPaymentAction}>
           <button
