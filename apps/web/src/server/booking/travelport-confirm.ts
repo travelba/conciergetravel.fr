@@ -1,5 +1,8 @@
 import 'server-only';
 
+import { BookingConfirmationGuest, renderEmailHtml, renderEmailText } from '@mch/emails';
+import { generateBookingRef, type BookingDraft } from '@mch/domain/booking';
+import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
 import {
   cancelReservation,
   createReservation,
@@ -7,14 +10,20 @@ import {
   type ReservationConfirmation,
   type ReservationGuestInput,
 } from '@mch/integrations/travelport';
+import { getTranslations } from 'next-intl/server';
 
+import { intlLocaleTag } from '@/i18n/runtime';
+import { env } from '@/lib/env';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import {
   getTravelportCredentials,
   getTravelportTestCard,
   isTravelportSandboxEnabled,
 } from '@/lib/travelport';
+import { getOptionalUser } from '@/server/auth/session';
 
-import { loadDraft } from './draft-store';
+import { loadDraft, type DraftHotelSnapshot } from './draft-store';
+import { serverClock, webCryptoRandomSource } from './ports';
 import {
   loadTravelportContext,
   loadTravelportReservation,
@@ -24,11 +33,15 @@ import {
 
 /**
  * Confirmation + annulation **réelles** d'une réservation Travelport (sandbox
- * preprod) depuis le tunnel — Étape B du câblage. Tout est gated derrière
- * `TRAVELPORT_SANDBOX_ENABLED` ; la carte de garantie est une carte de test
- * (env `TRAVELPORT_TEST_CARD_*` ou, à défaut, la carte DevKit). Aucune carte
- * réelle ne transite par ce chemin, et rien n'est écrit en base `bookings` :
- * le résultat (locators + statut) vit dans le store latéral Redis du draft.
+ * preprod) depuis le tunnel. Tout est gated derrière `TRAVELPORT_SANDBOX_ENABLED` ;
+ * la carte de garantie est une carte de test (env `TRAVELPORT_TEST_CARD_*` ou, à
+ * défaut, la carte DevKit). Aucune carte réelle ne transite par ce chemin.
+ *
+ * Étape C — la réservation confirmée est désormais persistée en base `bookings`
+ * (canal `travelport`, locators dédiés) et déclenche l'e-mail de confirmation
+ * Brevo. La persistance + l'e-mail sont *best-effort* : la réservation amont est
+ * déjà créée, on ne la perd jamais (le store latéral Redis garde les locators
+ * nécessaires à l'annulation même si l'écriture DB échoue).
  */
 
 export type TravelportConfirmResult =
@@ -76,6 +89,142 @@ function recordFromConfirmation(c: ReservationConfirmation): TravelportReservati
     ...(c.totalPrice !== undefined ? { totalPrice: c.totalPrice } : {}),
     bookedAt: new Date().toISOString(),
   };
+}
+
+const isoDateOnly = (s: string): string => s.slice(0, 10);
+
+function nightCount(checkIn: string, checkOut: string): number {
+  const inMs = Date.parse(`${isoDateOnly(checkIn)}T00:00:00Z`);
+  const outMs = Date.parse(`${isoDateOnly(checkOut)}T00:00:00Z`);
+  if (!Number.isFinite(inMs) || !Number.isFinite(outMs)) return 1;
+  const diff = Math.round((outMs - inMs) / 86_400_000);
+  return diff > 0 ? diff : 1;
+}
+
+const fmtEur = (amountMinor: number, locale: 'fr' | 'en'): string =>
+  new Intl.NumberFormat(intlLocaleTag(locale), {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+  }).format(amountMinor / 100);
+
+/**
+ * Persiste la réservation Travelport en base `bookings` (service-role, canal
+ * `travelport`). Best-effort : renvoie la `booking_ref` créée, ou `null` si
+ * l'écriture échoue (la réservation amont reste valide et annulable via Redis).
+ */
+async function persistTravelportBooking(input: {
+  readonly draft: BookingDraft;
+  readonly hotel: DraftHotelSnapshot;
+  readonly record: TravelportReservationRecord;
+  readonly userId: string | null;
+}): Promise<string | null> {
+  const { draft, hotel, record, userId } = input;
+  if (draft.offer === undefined || draft.guest === undefined) return null;
+
+  const refResult = generateBookingRef(serverClock, webCryptoRandomSource);
+  if (!refResult.ok) return null;
+  const bookingRef = refResult.value;
+
+  const totalEur = draft.offer.totalPrice.amountMinor / 100;
+  const nights = nightCount(draft.offer.stay.checkIn, draft.offer.stay.checkOut);
+  const pricePerNight = Number((totalEur / nights).toFixed(2));
+
+  try {
+    const supabase = getSupabaseAdminClient();
+    const insert = await supabase
+      .from('bookings')
+      .insert({
+        booking_ref: bookingRef,
+        hotel_id: hotel.id,
+        user_id: userId,
+        guest_firstname: draft.guest.firstName,
+        guest_lastname: draft.guest.lastName,
+        guest_email: draft.guest.email,
+        guest_phone: draft.guest.phone,
+        checkin_date: isoDateOnly(draft.offer.stay.checkIn),
+        checkout_date: isoDateOnly(draft.offer.stay.checkOut),
+        adults: draft.offer.guests.adults,
+        children: draft.offer.guests.children,
+        rate_code: draft.offer.roomCode,
+        price_per_night: pricePerNight,
+        total_price: totalEur,
+        currency: draft.offer.totalPrice.currency,
+        cancellation_policy: { rawText: draft.offer.cancellationPolicyText },
+        // Garantie sandbox : montant garanti, jamais capturé.
+        payment_status: 'authorized',
+        status: 'confirmed',
+        booking_channel: 'travelport',
+        ...(record.supplierConfirmation !== undefined
+          ? { travelport_supplier_locator: record.supplierConfirmation }
+          : {}),
+        ...(record.aggregatorLocator !== undefined
+          ? { travelport_aggregator_locator: record.aggregatorLocator }
+          : {}),
+        ...(record.agencyLocator !== undefined
+          ? { travelport_agency_locator: record.agencyLocator }
+          : {}),
+      })
+      .select('id')
+      .single();
+
+    if (insert.error) {
+      console.error('[travelport] bookings insert failed', insert.error.message);
+      return null;
+    }
+    return bookingRef;
+  } catch (e) {
+    console.error('[travelport] bookings insert threw', e);
+    return null;
+  }
+}
+
+/**
+ * Envoie l'e-mail de confirmation Brevo. Best-effort : toute erreur (clé Brevo
+ * absente en dev local, panne SMTP…) est avalée pour ne pas casser le tunnel.
+ */
+async function sendTravelportConfirmationEmail(input: {
+  readonly draft: BookingDraft;
+  readonly hotel: DraftHotelSnapshot;
+  readonly locale: 'fr' | 'en';
+  readonly bookingRef: string;
+}): Promise<void> {
+  const { draft, hotel, locale, bookingRef } = input;
+  if (draft.offer === undefined || draft.guest === undefined) return;
+  // `SKIP_ENV_VALIDATION=true` (dev local) laisse passer une clé absente bien que
+  // le type soit `string` — on élargit pour garder le guard honnête.
+  const apiKey: string | undefined = env.BREVO_API_KEY;
+  if (apiKey === undefined || apiKey.length === 0) return;
+
+  try {
+    const element = BookingConfirmationGuest({
+      locale,
+      guestFirstName: draft.guest.firstName,
+      hotelName: hotel.name,
+      hotelLocation: `${hotel.city}, ${hotel.region}`,
+      checkIn: draft.offer.stay.checkIn,
+      checkOut: draft.offer.stay.checkOut,
+      totalLabel: fmtEur(draft.offer.totalPrice.amountMinor, locale),
+      bookingRef,
+      cancellationPolicyText: draft.offer.cancellationPolicyText,
+    });
+    const [html, text] = await Promise.all([renderEmailHtml(element), renderEmailText(element)]);
+    const t = await getTranslations({ locale, namespace: 'emails' });
+    const subject = t('bookingConfirmedSubject', { hotelName: hotel.name, bookingRef });
+
+    await sendBrevoTransactionalEmail(
+      { apiKey },
+      {
+        sender: { email: env.BREVO_SENDER_EMAIL, name: env.BREVO_SENDER_NAME },
+        to: [{ email: draft.guest.email }],
+        subject,
+        htmlContent: html,
+        ...(text.length > 0 ? { textContent: text } : {}),
+      },
+    );
+  } catch (e) {
+    console.error('[travelport] confirmation email failed', e);
+  }
 }
 
 /**
@@ -137,8 +286,31 @@ export async function confirmTravelportSandboxReservation(
 
   if (!result.ok) return { ok: false, reason: 'upstream' };
 
-  const record = recordFromConfirmation(result.value);
+  const baseRecord = recordFromConfirmation(result.value);
+
+  // Persistance `bookings` + e-mail (best-effort, jamais bloquant).
+  const sessionUser = await getOptionalUser();
+  const userId = sessionUser !== null ? sessionUser.id : null;
+  const bookingRef = await persistTravelportBooking({
+    draft: persisted.draft,
+    hotel: persisted.hotel,
+    record: baseRecord,
+    userId,
+  });
+
+  const record: TravelportReservationRecord =
+    bookingRef !== null ? { ...baseRecord, bookingRef } : baseRecord;
   await saveTravelportReservation(draftId, record);
+
+  if (bookingRef !== null) {
+    await sendTravelportConfirmationEmail({
+      draft: persisted.draft,
+      hotel: persisted.hotel,
+      locale: persisted.locale,
+      bookingRef,
+    });
+  }
+
   return { ok: true, reservation: record };
 }
 
@@ -166,6 +338,22 @@ export async function cancelTravelportSandboxReservation(
     supplierLocator: existing.supplierConfirmation,
   });
   if (!cancelled.ok) return { ok: false, reason: 'upstream' };
+
+  // Reflète l'annulation en base si la ligne `bookings` a été créée (best-effort).
+  if (existing.bookingRef !== undefined) {
+    try {
+      const supabase = getSupabaseAdminClient();
+      const update = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled', payment_status: 'cancelled' })
+        .eq('booking_ref', existing.bookingRef);
+      if (update.error) {
+        console.error('[travelport] bookings cancel update failed', update.error.message);
+      }
+    } catch (e) {
+      console.error('[travelport] bookings cancel update threw', e);
+    }
+  }
 
   const record: TravelportReservationRecord = {
     ...existing,

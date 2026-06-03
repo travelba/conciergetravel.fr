@@ -38,6 +38,8 @@ export interface TravelportReservationRecord {
   readonly aggregatorLocator?: string;
   readonly agencyLocator?: string;
   readonly totalPrice?: { readonly amount: number; readonly currency: string };
+  /** Référence booking domaine (CT-…) une fois la ligne `bookings` créée. */
+  readonly bookingRef?: string;
   /** ISO timestamp de la réservation. */
   readonly bookedAt: string;
   /** ISO timestamp de l'annulation, si annulée depuis le tunnel. */

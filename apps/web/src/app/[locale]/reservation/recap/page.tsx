@@ -258,6 +258,14 @@ export default async function ReservationRecapPage({
                   : 'Réservation sandbox confirmée'}
             </p>
             <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
+              {tpReservation.bookingRef !== undefined ? (
+                <div>
+                  <dt className="text-muted text-xs uppercase tracking-wide">
+                    {locale === 'en' ? 'Booking reference' : 'Référence réservation'}
+                  </dt>
+                  <dd className="text-fg font-mono text-sm">{tpReservation.bookingRef}</dd>
+                </div>
+              ) : null}
               <div>
                 <dt className="text-muted text-xs uppercase tracking-wide">
                   {locale === 'en' ? 'Status' : 'Statut'}
