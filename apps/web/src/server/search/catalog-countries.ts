@@ -4,7 +4,7 @@ import { unstable_cache } from 'next/cache';
 
 import { pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import { countrySlug } from '@/server/annuaire/country-slugs';
-import { listPublishedHotelsForGrouping } from '@/server/destinations/cities';
+import { citySlug, listPublishedHotelsForGrouping } from '@/server/destinations/cities';
 
 /**
  * Country search source for the destination/hotel autocomplete and the
@@ -48,10 +48,7 @@ function fold(value: string): string {
 
 async function buildAggregate(): Promise<readonly CountryAggregate[]> {
   const rows = await listPublishedHotelsForGrouping();
-  const map = new Map<
-    string,
-    { labelFr: string | null; labelEn: string | null; count: number }
-  >();
+  const map = new Map<string, { labelFr: string | null; labelEn: string | null; count: number }>();
   for (const r of rows) {
     const existing = map.get(r.country_code);
     if (existing === undefined) {
@@ -119,8 +116,7 @@ export async function searchCatalogCountries(
     const en = entry.labelEn === null ? '' : fold(entry.labelEn);
     const slugFolded = fold(entry.slug.replace(/-/g, ' '));
     const startsWith = fr.startsWith(needle) || en.startsWith(needle);
-    const contains =
-      fr.includes(needle) || en.includes(needle) || slugFolded.includes(needle);
+    const contains = fr.includes(needle) || en.includes(needle) || slugFolded.includes(needle);
     if (!contains) continue;
     scored.push({ entry, rank: startsWith ? 0 : 1 });
   }
@@ -154,4 +150,90 @@ export async function getCountryNameByCode(
     out[entry.code] = pickLocalizedText(locale, entry.labelFr, entry.labelEn) ?? entry.code;
   }
   return out;
+}
+
+/**
+ * Annuaire deep-link index (ADR-0026). Maps every ISO `country_code` to
+ * its derived country slug and records every `(country_code, citySlug)`
+ * pair that actually has a published hotel — so a city suggestion can be
+ * deep-linked to `/hotels/<pays>/<ville>` **only when that page exists**,
+ * never producing a 404. The `(code, citySlug)` predicate mirrors exactly
+ * the filter in `getCityDirectory` (`country_code === code &&
+ * citySlug(city) === ville`). Built from the same hourly aggregate.
+ */
+interface CityDirectoryIndex {
+  readonly countrySlugByCode: Readonly<Record<string, string>>;
+  /** `${country_code}::${citySlug}` for every published (country, city). */
+  readonly validPairs: ReadonlySet<string>;
+}
+
+function cityPairKey(countryCode: string, villeSlug: string): string {
+  return `${countryCode}::${villeSlug}`;
+}
+
+async function buildCityDirectoryIndex(): Promise<CityDirectoryIndex> {
+  const rows = await listPublishedHotelsForGrouping();
+  const labels = new Map<string, { labelFr: string | null; labelEn: string | null }>();
+  const validPairs = new Set<string>();
+  for (const r of rows) {
+    const existing = labels.get(r.country_code);
+    if (existing === undefined) {
+      labels.set(r.country_code, { labelFr: r.country_label_fr, labelEn: r.country_label_en });
+    } else {
+      if (existing.labelFr === null && r.country_label_fr !== null) {
+        existing.labelFr = r.country_label_fr;
+      }
+      if (existing.labelEn === null && r.country_label_en !== null) {
+        existing.labelEn = r.country_label_en;
+      }
+    }
+    validPairs.add(cityPairKey(r.country_code, citySlug(r.city)));
+  }
+
+  const countrySlugByCode: Record<string, string> = {};
+  for (const [code, l] of labels) {
+    countrySlugByCode[code] = countrySlug(l.labelFr, l.labelEn, code);
+  }
+  return { countrySlugByCode, validPairs };
+}
+
+const cachedCityDirectoryIndex = unstable_cache(
+  buildCityDirectoryIndex,
+  ['catalog-city-directory-index-v1'],
+  { revalidate: 3600, tags: ['intl-destinations'] },
+);
+
+/** Locale-invariant annuaire slugs for a city (ADR-0008). */
+export interface CityDirectorySlugs {
+  readonly pays: string;
+  readonly ville: string;
+}
+
+/**
+ * Synchronous resolver that turns a `(cityName, countryCode)` pair into
+ * the `/hotels/<pays>/<ville>` annuaire slugs — or `null` when the pair
+ * has no published hotel (caller then falls back to `/destination`).
+ * Fetch it once per request via `getCityDirectoryResolver`, then resolve
+ * each city hit without further awaits.
+ */
+export interface CityDirectoryResolver {
+  resolve(cityName: string, countryCode: string): CityDirectorySlugs | null;
+}
+
+export async function getCityDirectoryResolver(): Promise<CityDirectoryResolver> {
+  let index: CityDirectoryIndex;
+  try {
+    index = await cachedCityDirectoryIndex();
+  } catch {
+    return { resolve: () => null };
+  }
+  return {
+    resolve(cityName: string, countryCode: string): CityDirectorySlugs | null {
+      const pays = index.countrySlugByCode[countryCode];
+      if (pays === undefined) return null;
+      const ville = citySlug(cityName);
+      if (ville.length === 0) return null;
+      return index.validPairs.has(cityPairKey(countryCode, ville)) ? { pays, ville } : null;
+    },
+  };
 }

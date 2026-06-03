@@ -9,6 +9,7 @@ import { searchCitiesCatalogOnServer } from '@/lib/search/cities-catalog';
 import { searchHotelsCatalogOnServer } from '@/lib/search/hotels-catalog';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import {
+  getCityDirectoryResolver,
   getCountryNameByCode,
   searchCatalogCountries,
 } from '@/server/search/catalog-countries';
@@ -131,19 +132,35 @@ export default async function RecherchePage({
   // `code → country name` map enriches city hits (the city index only
   // stores `country_code`). Both are cached, so they cost nothing on the
   // request path.
-  const [hits, cityHits, countryHits, countryNames] = await Promise.all([
+  const [hits, cityHits, countryHits, countryNames, cityResolver] = await Promise.all([
     searchHotelsCatalogOnServer(locale, q, HITS_PER_PAGE),
     searchCitiesCatalogOnServer(locale, q, q.length === 0 ? POPULAR_CITIES : CITY_HITS_FOR_QUERY),
     q.length === 0
       ? Promise.resolve([])
       : searchCatalogCountries(locale, q, COUNTRY_HITS_FOR_QUERY),
     getCountryNameByCode(locale),
+    getCityDirectoryResolver(),
   ]);
 
   const cityLocation = (city: { region: string; country_code: string }): string =>
-    [city.region, countryNames[city.country_code] ?? '']
-      .filter((s) => s.length > 0)
-      .join(' · ');
+    [city.region, countryNames[city.country_code] ?? ''].filter((s) => s.length > 0).join(' · ');
+
+  // A city search lands on the country-scoped annuaire directory
+  // `/hotels/<pays>/<ville>` (ADR-0026) when that page exists; otherwise
+  // it falls back to the legacy `/destination/<slug>` hub so the link is
+  // never a 404.
+  const cityLinkHref = (city: {
+    slug: string;
+    name: string;
+    country_code: string;
+  }):
+    | { pathname: '/hotels/[pays]/[ville]'; params: { pays: string; ville: string } }
+    | { pathname: '/destination/[citySlug]'; params: { citySlug: string } } => {
+    const dir = cityResolver.resolve(city.name, city.country_code);
+    return dir !== null
+      ? { pathname: '/hotels/[pays]/[ville]', params: { pays: dir.pays, ville: dir.ville } }
+      : { pathname: '/destination/[citySlug]', params: { citySlug: city.slug } };
+  };
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
@@ -247,8 +264,8 @@ export default async function RecherchePage({
             {cityHits.map((city) => (
               <li key={city.objectID}>
                 <Link
-                  href={{ pathname: '/destination/[citySlug]', params: { citySlug: city.slug } }}
-                  className="border-border bg-bg hover:border-amber-400 focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                  href={cityLinkHref(city)}
+                  className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
                 >
                   <span className="min-w-0">
                     <span className="text-fg block truncate font-medium">{city.name}</span>
@@ -280,8 +297,8 @@ export default async function RecherchePage({
               {cityHits.map((city) => (
                 <li key={city.objectID}>
                   <Link
-                    href={{ pathname: '/destination/[citySlug]', params: { citySlug: city.slug } }}
-                    className="border-border bg-bg hover:border-amber-400 focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                    href={cityLinkHref(city)}
+                    className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
                   >
                     <span className="min-w-0">
                       <span className="text-fg block truncate font-medium">{city.name}</span>
@@ -313,7 +330,7 @@ export default async function RecherchePage({
                 <li key={country.code}>
                   <Link
                     href={{ pathname: '/hotels/[pays]', params: { pays: country.slug } }}
-                    className="border-border bg-bg hover:border-amber-400 focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
+                    className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
                   >
                     <span className="text-fg min-w-0 truncate font-medium">{country.name}</span>
                     {country.hotelsCount > 0 ? (

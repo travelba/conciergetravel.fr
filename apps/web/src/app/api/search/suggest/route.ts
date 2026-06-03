@@ -6,6 +6,7 @@ import { searchCitiesCatalogOnServer } from '@/lib/search/cities-catalog';
 import { searchHotelsCatalogOnServer } from '@/lib/search/hotels-catalog';
 import { readClientIp } from '@/server/agent/rate-limit';
 import {
+  getCityDirectoryResolver,
   getCountryNameByCode,
   searchCatalogCountries,
 } from '@/server/search/catalog-countries';
@@ -41,6 +42,18 @@ function hotelHref(locale: Locale, slug: string): string {
 
 function cityHref(locale: Locale, slug: string): string {
   return `${localePrefix(locale)}/destination/${slug}`;
+}
+
+/**
+ * City suggestions deep-link to the annuaire city directory
+ * `/hotels/<pays>/<ville>` (ADR-0026) when that page exists — a search by
+ * city name lands on the exhaustive, country-scoped hotel list. Both
+ * segments are identical across locales (ADR-0008), only the prefix
+ * varies. Falls back to `/destination/<slug>` when the (country, city)
+ * pair is not resolvable (see `getCityDirectoryResolver`).
+ */
+function cityDirectoryHref(locale: Locale, pays: string, ville: string): string {
+  return `${localePrefix(locale)}/hotels/${pays}/${ville}`;
 }
 
 /**
@@ -91,21 +104,18 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const {
-    q,
-    locale,
-    hotels: hLimit,
-    cities: cLimit,
-    countries: countryLimit,
-  } = parsed.data;
+  const { q, locale, hotels: hLimit, cities: cLimit, countries: countryLimit } = parsed.data;
 
-  const [hotels, cities, countries, countryNames] = await Promise.all([
+  const [hotels, cities, countries, countryNames, cityDir] = await Promise.all([
     searchHotelsCatalogOnServer(locale, q, hLimit),
     searchCitiesCatalogOnServer(locale, q, cLimit),
     countryLimit > 0 ? searchCatalogCountries(locale, q, countryLimit) : Promise.resolve([]),
     // Used to enrich city/hotel lines with the country name (the city
     // index only stores `country_code`). Cached, so this is free.
     getCountryNameByCode(locale),
+    // Bridges each city hit to its `/hotels/<pays>/<ville>` annuaire page
+    // (ADR-0026) when published; cached hourly aggregate, so it's free.
+    getCityDirectoryResolver(),
   ]);
 
   return NextResponse.json(
@@ -124,16 +134,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         is_palace: h.is_palace,
         stars: h.stars,
       })),
-      cities: cities.map((c) => ({
-        objectID: c.objectID,
-        name: c.name,
-        region: c.region,
-        country: countryNames[c.country_code] ?? null,
-        slug: c.slug,
-        href: cityHref(locale, c.slug),
-        hotels_count: c.hotels_count,
-        is_popular: c.is_popular,
-      })),
+      cities: cities.map((c) => {
+        const dir = cityDir.resolve(c.name, c.country_code);
+        return {
+          objectID: c.objectID,
+          name: c.name,
+          region: c.region,
+          country: countryNames[c.country_code] ?? null,
+          slug: c.slug,
+          href:
+            dir !== null
+              ? cityDirectoryHref(locale, dir.pays, dir.ville)
+              : cityHref(locale, c.slug),
+          hotels_count: c.hotels_count,
+          is_popular: c.is_popular,
+        };
+      }),
       countries: countries.map((c) => ({
         code: c.code,
         name: c.name,

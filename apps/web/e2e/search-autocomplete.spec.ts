@@ -67,7 +67,10 @@ function mockBody(locale: 'fr' | 'en'): SuggestBody {
         region: 'Île-de-France',
         country: 'France',
         slug: 'paris',
-        href: `${prefix}/destination/paris`,
+        // A city search now deep-links to the country-scoped annuaire
+        // directory `/hotels/<pays>/<ville>` (ADR-0026), not the legacy
+        // `/destination/<slug>` hub.
+        href: `${prefix}/hotels/france/paris`,
         hotels_count: 42,
         is_popular: true,
       },
@@ -219,6 +222,23 @@ test.describe('search autocomplete (hero + header)', () => {
     await expect(countryOption).toContainText('France');
     await countryOption.click();
     await expect(page).toHaveURL(/\/hotels\/france$/);
+  });
+
+  test('FR — city option deep-links to the annuaire city directory', async ({ page }) => {
+    await page.route(SUGGEST_GLOB, (route) => fulfilSuggest(route, 'fr'));
+    await page.goto('/');
+
+    const combobox = page.locator('#home-hero-search-destination');
+    await combobox.fill('par');
+    await expect(page.getByRole('listbox')).toBeVisible();
+
+    // The Paris city line (matched on its region label so it doesn't
+    // collide with the hotel option "… · Paris") now lands on the
+    // country-scoped annuaire `/hotels/<pays>/<ville>` (ADR-0026).
+    const cityOption = page.getByRole('option', { name: /Île-de-France/ });
+    await expect(cityOption).toBeVisible();
+    await cityOption.click();
+    await expect(page).toHaveURL(/\/hotels\/france\/paris$/);
   });
 
   test('EN — hero combobox deep-links to the localized hotel path', async ({ page }) => {
