@@ -611,10 +611,18 @@ async function renderHotelPage(
     ...(amenities.length > 0 ? { amenityFeatures: amenities } : {}),
     ...(jsonLdAwards.length > 0 ? { awards: jsonLdAwards } : {}),
     ...(affiliationBrand !== null ? { brand: affiliationBrand } : {}),
-    // Telephone (Phase 10.29 / CDC §2.15). E.164 format only — `readPhoneE164`
+    // Telephone (Phase 10.29 / CDC §2.15). E.164 by default — `readPhoneE164`
     // refuses loose / partial entries so the JSON-LD never carries a half-typed
-    // number. Google Hotels uses this for both the SERP card and click-to-call.
-    ...(phoneE164 !== null ? { telephone: phoneE164 } : {}),
+    // number, and Google Hotels uses it for the SERP card + click-to-call.
+    // Airelles exception: surface the spaced human-readable display form from
+    // the `telephone` column (e.g. "+33 4 90 72 12 12") — still valid for
+    // schema.org `telephone`, with the E.164 value as fallback.
+    ...((): { telephone?: string } => {
+      const display =
+        isAirellesFiche && typeof row.telephone === 'string' ? row.telephone.trim() : '';
+      const tel = display.length > 0 ? display : phoneE164;
+      return tel !== null ? { telephone: tel } : {};
+    })(),
     // Inventory counts (Phase 10.8 / CDC §2.15). `numberOfRooms` is
     // omitted when null — Google's rich-result test prefers an absent
     // property to a `null`/0 one.

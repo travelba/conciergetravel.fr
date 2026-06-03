@@ -34,6 +34,7 @@ const BLOCKS: Record<Locale, readonly GeoBlock[]> = {
       paragraphs: [
         'Airelles Gordes, La Bastide est le seul Palace de Gordes, distinction officielle d’Atout France.',
         'Cette bastide du XVIIIᵉ siècle domine le village perché et la vallée du Luberon, avec 34 chambres et 6 suites.',
+        'Gordes, classé parmi les Plus Beaux Villages de France, place l’hôtel au cœur d’un paysage de pierres sèches et de lavande.',
       ],
     },
     {
@@ -51,6 +52,7 @@ const BLOCKS: Record<Locale, readonly GeoBlock[]> = {
       paragraphs: [
         'Les nuitées à La Bastide démarrent autour de 649 € la nuit, selon la saison et la catégorie de chambre.',
         'L’établissement est saisonnier ; la conciergerie organise réservations, tables et soins au +33 4 90 72 12 12.',
+        'Positionné sur la gamme la plus haute (€€€€), l’hôtel conseille de réserver tôt : les disponibilités estivales partent vite.',
       ],
     },
   ],
@@ -61,6 +63,7 @@ const BLOCKS: Record<Locale, readonly GeoBlock[]> = {
       paragraphs: [
         'Airelles Gordes, La Bastide is the only Palace in Gordes, an official Atout France distinction.',
         'This 18th-century bastide overlooks the hilltop village and the Luberon valley, with 34 rooms and 6 suites.',
+        'Gordes, listed among France’s Most Beautiful Villages, sets the hotel amid dry-stone landscapes and lavender fields.',
       ],
     },
     {
@@ -78,6 +81,7 @@ const BLOCKS: Record<Locale, readonly GeoBlock[]> = {
       paragraphs: [
         'Nights at La Bastide start at around €649, depending on the season and the room category.',
         'The property is seasonal; the concierge arranges rooms, tables and treatments at +33 4 90 72 12 12.',
+        'Positioned at the top €€€€ tier, the hotel recommends booking early, as summer availability goes quickly.',
       ],
     },
   ],
