@@ -74,7 +74,7 @@ describe('buildLlmsFullHotelPages', () => {
       'https://example.com/',
     );
     expect(out).toHaveLength(2);
-    expect(out[0]?.url).toBe('https://example.com/hotel/le-bristol-paris/');
+    expect(out[0]?.url).toBe('https://example.com/fr/hotel/le-bristol-paris/');
     expect(out[0]?.title).toBe('Hôtel Le Bristol — Paris');
     expect(out[0]?.summary).toContain('Palace 5★');
     expect(out[0]?.keyFacts).toContain('Classement : 5★ Palace (Atout France)');
