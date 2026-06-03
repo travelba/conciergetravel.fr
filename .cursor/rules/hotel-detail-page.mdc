@@ -58,6 +58,26 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 14. **`reviewRating` fabriqué** : note (ex. 5/5) posée sur une citation éditoriale sans note réelle → refus (EEAT).
 15. **Wrapper JSON-LD** : tous les blocs passent par `<SeoJsonLd>` (ou le primitif `<JsonLdScript>`) avec le nonce CSP ; jamais de `<script>` JSON-LD brut.
 
+## Golden template & audit catalogue
+
+La fiche **`les-airelles-gordes`** est la fiche **exemplaire** de référence (« golden template »). Au-delà des 15 blocs CDC, l'exemplarité ajoute deux dimensions, mesurées sur **tout le catalogue** par l'audit :
+
+- **Golden template** (dimension `golden`) — le « handoff concierge » : chaque restaurant/POI cité porte de quoi réserver (contact : `website`/`reservation_url`/`phone`) **et** un `tip_fr`/`tip_en` (l'info qu'un concierge enverrait au client) ; les POI sont rangés en 3 buckets `visit` / `do` / `shop` ; dossier spa complet (description + horaires + contact + tip) ; `upcoming_events` avec `image_url` ; `instagram` (1-3 posts mirrorés Cloudinary) ; `concierge_pick` (suite recommandée) ; `concierge_hook` (accroche héro voix concierge ≤ 25 mots).
+- **Restructuration** (dimension `structure`) — anti-cannibalisation : une section long-read ne « cannibalise » un bloc que si **le bloc structuré correspondant est réellement peuplé** (resto `restaurant_info.venues`, spa `spa_info.description`, lieu = POIs avec handoff complet). Sur une fiche nue (blocs vides), la section « Restauration/Spa/À deux pas » est le **seul** porteur du contenu → la supprimer = perte de contenu, pas du dédoublonnage. Le dédoublonnage est donc un nettoyage **post-Golden** (`dropCannibalizingSections`), pas une passe de masse. Idem distinction fabriquée : une étoile Michelin sans award `verified` est flaggée, mais ~94 % de ces cas sont des claims **sourcés légitimes** dont l'award n'a jamais été structuré → la remédiation est de **structurer + vérifier l'award** (`extract:michelin-awards`), **jamais** d'effacer la phrase.
+
+**Couverture skills → checks** (l'audit mesure chaque skill ; les angles morts comblés 2026-06-03) : `structured-data-schema-org` → `jsonld.breadcrumb` (city+country), `jsonld.hotel_core` (starRating + amenityFeature + checkin/out), `jsonld.event` (name+startDate+location si `upcoming_events`), `jsonld.review` (author+body+source si `featured_reviews`), `jsonld.place`/`faqpage`/`aggregate_rating`/`image_provenance`/`google_rating_scale`/`contained_in_place` ; `content-enrichment-pipeline` (EEAT) → `maille.eeat_sources` (≥ 2 faits sourcés `external_sources`) ; `seo-technical` → `seo.hreflang_pair` (name_en+slug_en+meta_en). L'**accessibilité** (`@axe-core/playwright`) et la **performance** (`lhci`) restent hors de cet audit de contenu, couvertes par des gates séparés.
+
+**Prédicats partagés** (source unique) : `@mch/domain/editorial` — `golden-template.ts` (`evaluateVenueHandoff`, `evaluatePoiBuckets`, `evaluateSpaDossier`, `dropDuplicateCategorySections` [override Airelles], `resolvePopulatedBlocks`/`countCannibalizingSections`/`dropCannibalizingSections` [audit + dédup conditionnel], `detectFabricatedStarClaim`, `hasVerifiedMichelinAward`) et `airelles-golden.ts` (contenu golden Airelles + `buildAirellesGoldenFields`/transforms). Consommés à la fois par l'override (`apps/web/.../dev-override-airelles.ts`), le script de promotion (`promote:airelles-golden`) et l'audit.
+
+**Outillage** (`scripts/editorial-pilot/`) :
+- `audit:hotel-fiches-cdc` → `runs/hotel-fiche-cdc-audit-*.json` + `-backlog-*.csv` + `-summary-*.txt` (8 dims CDC + `golden` + `structure`).
+- `report:hotel-fiches-cdc` → `runs/hotel-fiche-cdc-report-*.md` (synthèse, fiche de référence, cohortes, contenu à ajouter, à restructurer, tracks de remédiation, backlog).
+- `report:hotel-fiches-cdc:full` enchaîne audit + rapport.
+- `dedup:longread[:dry]` → retire les sections long-read qui cannibalisent un bloc **peuplé** (`dropCannibalizingSections`, conditionnel — sûr/idempotent).
+- `extract:michelin-awards[:dry]` → extraction LLM (gpt-4o-mini, temp 0, `evidence_quote`) des distinctions Michelin citées dans le narratif de la fiche → award `verified: true` (issuer Guide MICHELIN). Pré-filtre `detectFabricatedStarClaim` (aucun appel LLM sur les fiches propres) ; les claims sans source Guide Michelin / sans nombre d'étoiles explicite sont **laissés en revue manuelle** (jamais auto-vérifiés).
+
+**Champs DB** (migration `0068`) : `instagram`, `concierge_pick`, `concierge_hook` (jsonb, nullable) sur `public.hotels` ; lus par `HOTEL_COLUMNS` dans `get-hotel-by-slug.ts` ; mirroir Payload `apps/admin/src/collections/hotels.ts`. Le contenu golden de la fiche de référence est **promu en base** (`promote:airelles-golden`) ; la page lit le pick/hook/hero golden depuis la ligne via `readConciergePick`/`readConciergeHook`/`hasGoldenHero` (plus de dépendance aux constantes Airelles).
+
 ## Composition graphe (target)
 
 ```mermaid

@@ -69,18 +69,59 @@ function baseCdcRow(overrides: Partial<CdcHotelAuditRow> = {}): CdcHotelAuditRow
     long_description_sections: [
       { anchor: 'a', title_fr: 'Histoire', body_fr: buildWords(220) },
       { anchor: 'b', title_fr: 'Chambres', body_fr: buildWords(220) },
-      { anchor: 'c', title_fr: 'Gastronomie', body_fr: buildWords(220) },
+      { anchor: 'c', title_fr: "L'art de vivre", body_fr: buildWords(220) },
     ],
     highlights: [{ label_fr: 'A' }, { label_fr: 'B' }, { label_fr: 'C' }],
     amenities: Array.from({ length: 80 }, (_, i) => ({ key: `amenity-${i}`, label_fr: `A${i}` })),
     points_of_interest: [
-      { name_fr: 'Louvre', distance_meters: 200 },
-      { name_fr: 'Tuileries', distance_meters: 50 },
-      { name_fr: 'Vendôme', distance_meters: 800 },
+      {
+        name_fr: 'Louvre',
+        bucket: 'visit',
+        distance_meters: 200,
+        description_fr: buildWords(20),
+        website: 'https://www.louvre.fr',
+        tip_fr: 'Mon conseil : tôt le matin.',
+      },
+      {
+        name_fr: 'Atelier parfum',
+        bucket: 'do',
+        distance_meters: 300,
+        description_fr: buildWords(20),
+        phone: '+33 1 00 00 00 00',
+        tip_fr: 'Mon conseil : sur réservation.',
+      },
+      {
+        name_fr: 'Épicerie fine',
+        bucket: 'shop',
+        distance_meters: 120,
+        description_fr: buildWords(20),
+        address: 'Rue de Rivoli',
+        tip_fr: 'Mon conseil : avant le déjeuner.',
+      },
     ],
     transports: [{ mode: 'metro' }],
-    restaurant_info: { count: 2 },
-    spa_info: { name: 'Carita' },
+    restaurant_info: {
+      count: 2,
+      venues: [
+        {
+          name: 'Le Dalí',
+          website: 'https://example.com/dali',
+          tip_fr: 'Mon conseil : la table sous la verrière.',
+        },
+        {
+          name: 'Restaurant le Meurice Alain Ducasse',
+          reservation_url: 'https://example.com/ducasse',
+          tip_fr: 'Mon conseil : le menu déjeuner.',
+        },
+      ],
+    },
+    spa_info: {
+      name: 'Spa Valmont',
+      description_fr: buildWords(40),
+      hours_fr: '9h-20h',
+      phone: '+33 1 44 58 50 50',
+      tip_fr: 'Mon conseil : réservez en fin de journée.',
+    },
     policies: {
       check_in: { time_fr: '15:00' },
       check_out: { time_fr: '12:00' },
@@ -105,10 +146,57 @@ function baseCdcRow(overrides: Partial<CdcHotelAuditRow> = {}): CdcHotelAuditRow
     virtual_tour_url: 'https://example.com/tour',
     google_rating: 4.8,
     google_reviews_count: 1200,
-    featured_reviews: [{ source: 'Forbes' }],
+    featured_reviews: [
+      {
+        source: 'Forbes',
+        source_url: 'https://www.forbes.com/le-meurice',
+        author: 'Jane Doe',
+        quote_fr: 'Un palace intemporel.',
+        quote_en: 'A timeless palace.',
+        rating: 5,
+        max_rating: 5,
+        date_iso: '2025-03-01',
+      },
+    ],
     mice_info: { capacity: 200 },
     booking_mode: 'display_only',
-    upcoming_events: null,
+    upcoming_events: [
+      {
+        title_fr: 'Concert',
+        start_date: '2026-07-01',
+        location: 'Salon Pompadour',
+        image_url: 'https://example.com/e.jpg',
+      },
+    ],
+    instagram: {
+      handle: 'lemeurice',
+      posts: [
+        { permalink: 'https://instagram.com/p/1', image_public_id: 'cct/hotels/le-meurice/ig-1' },
+        { permalink: 'https://instagram.com/p/2', image_public_id: 'cct/hotels/le-meurice/ig-2' },
+        { permalink: 'https://instagram.com/p/3', image_public_id: 'cct/hotels/le-meurice/ig-3' },
+      ],
+    },
+    concierge_pick: 'suite-belle-etoile',
+    concierge_hook: {
+      fr: 'Le palais qui regarde les Tuileries.',
+      en: 'The palace facing the Tuileries.',
+    },
+    external_sources: [
+      {
+        field: 'opened_at',
+        value: '1835',
+        source: 'Wikipedia',
+        source_url: 'https://fr.wikipedia.org/wiki/Le_Meurice',
+        confidence: 'high',
+      },
+      {
+        field: 'awards',
+        value: 'Palace',
+        source: 'Atout France',
+        source_url: 'https://palace.atout-france.fr',
+        confidence: 'high',
+      },
+    ],
     updated_at: '2026-05-28T00:00:00Z',
   };
   return { ...row, ...overrides };
@@ -133,6 +221,7 @@ function REQUIRED_GALLERY(): Array<Record<string, string>> {
       category,
       alt_fr: `Vue ${category} Hôtel Le Meurice Paris`,
       alt_en: `${category} view Le Meurice Hotel Paris`,
+      credit: 'Le Meurice',
     })),
   );
 }

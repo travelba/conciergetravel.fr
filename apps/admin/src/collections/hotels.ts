@@ -465,6 +465,33 @@ export const Hotels: CollectionConfig = {
           validate: validateConciergeAdvice,
         },
         // ---------------------------------------------------------------
+        // Golden-template Concierge blocks (migration 0068)
+        // ---------------------------------------------------------------
+        {
+          name: 'concierge_pick',
+          type: 'json',
+          admin: {
+            description:
+              'Golden-template Concierge room recommendation. Object: { slug, note: { fr, en } }. Frames the recommended suite at the top of the rooms grid.',
+          },
+        },
+        {
+          name: 'concierge_hook',
+          type: 'json',
+          admin: {
+            description:
+              'Golden-template hero accroche (Concierge voice, <= 25 words). Object: { fr, en }. Rendered under the H1; the CDC factual summary stays sr-only for the GEO/JSON-LD contracts.',
+          },
+        },
+        {
+          name: 'instagram',
+          type: 'json',
+          admin: {
+            description:
+              'Golden-template social feed teaser. Object: { handle, profile_url, followers?, posts:[{permalink, image_public_id, caption_fr?, caption_en?, posted_at?}] } (1-3 posts). Imagery must be mirrored to Cloudinary — never hotlink scontent.cdninstagram.',
+          },
+        },
+        // ---------------------------------------------------------------
         // Premium Concierge sections (Le Concierge Club — migration 0057)
         // The 4 LLM-generated jsonb blobs ({ fr: { body }, en: { body },
         // _editorial_review_status, _generated_at, _llm_model }).

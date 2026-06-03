@@ -45,6 +45,7 @@ export interface HotelRow {
   readonly spa_info: unknown;
   readonly amenities: unknown;
   readonly signature_experiences: unknown;
+  readonly long_description_sections: unknown;
   readonly awards: unknown;
   readonly policies: unknown;
   readonly official_url: string | null;
@@ -83,6 +84,7 @@ const HOTEL_SELECT_COLUMNS = [
   'spa_info',
   'amenities',
   'signature_experiences',
+  'long_description_sections',
   'awards',
   'policies',
   'official_url',
@@ -299,6 +301,32 @@ export async function listHotels(
   }
 
   return [...bySlug.values()];
+}
+
+/**
+ * Anti-cannibalisation write — replace `long_description_sections` with the
+ * deduped array (sections that duplicate a populated structured block removed).
+ * Only called when the deduped array is strictly shorter than the original.
+ */
+export async function updateHotelLongDescriptionSections(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  sections: readonly unknown[],
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { long_description_sections: sections });
+}
+
+/**
+ * EEAT award write — replace `awards[]` with the merged set (existing entries
+ * stamped `verified: true` + newly-structured Michelin distinctions). Used by
+ * the Michelin extraction pipeline (Hard Rule 7 — no fabricated distinction).
+ */
+export async function updateHotelAwards(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  awards: readonly unknown[],
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { awards });
 }
 
 export interface FactualSummaryUpdate {

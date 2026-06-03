@@ -89,6 +89,11 @@ export const HotelDetailRowSchema = z.object({
   affiliations: z.unknown().nullable().optional(),
   signature_experiences: z.unknown().nullable().optional(),
   concierge_advice: z.unknown().nullable().optional(),
+  // Golden-template Concierge room pick + hero accroche (migration 0068 jsonb
+  // columns). Optional — absent rows parse to undefined; the override injects
+  // them locally and production hydrates from the row when populated.
+  concierge_pick: z.unknown().nullable().optional(),
+  concierge_hook: z.unknown().nullable().optional(),
   featured_reviews: z.unknown().nullable().optional(),
   hero_image: stringOrEmpty,
   gallery_images: z.unknown().nullable().optional(),
@@ -173,7 +178,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -1312,6 +1317,60 @@ export function readInstagram(
       postedAtIso: p.posted_at ?? null,
     })),
   };
+}
+
+// ---------------------------------------------------------------------------
+// concierge_pick / concierge_hook — golden-template editorial blocks
+// (hotels.concierge_pick / concierge_hook jsonb, migration 0068). Both
+// optional: absent rows parse to null and the page falls back to the classic
+// hero / un-framed rooms grid.
+// ---------------------------------------------------------------------------
+
+const ConciergePickSchema = z.object({
+  slug: z.string().min(1),
+  note: z.object({
+    fr: z.string().min(1),
+    en: z.string().min(1),
+  }),
+});
+
+export interface LocalisedConciergePick {
+  readonly slug: string;
+  readonly note: string;
+}
+
+export function readConciergePick(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): LocalisedConciergePick | null {
+  const parsed = ConciergePickSchema.safeParse(row.concierge_pick);
+  if (!parsed.success) return null;
+  return {
+    slug: parsed.data.slug,
+    note: locale === 'en' ? parsed.data.note.en : parsed.data.note.fr,
+  };
+}
+
+const ConciergeHookSchema = z.object({
+  fr: z.string().min(1),
+  en: z.string().min(1),
+});
+
+/** Hero accroche (Concierge voice, ≤ 25 words). Null when the row carries none. */
+export function readConciergeHook(row: HotelDetailRow, locale: SupportedLocale): string | null {
+  const parsed = ConciergeHookSchema.safeParse(row.concierge_hook);
+  if (!parsed.success) return null;
+  return locale === 'en' ? parsed.data.en : parsed.data.fr;
+}
+
+/**
+ * True when the fiche carries the golden-template hero accroche
+ * (`concierge_hook`). Drives the full-bleed overlay hero — any promoted golden
+ * fiche opts in automatically, no per-slug flag. Replaces the Airelles-only
+ * `isAirellesGoldenTemplate` sandbox gate.
+ */
+export function hasGoldenHero(row: HotelDetailRow): boolean {
+  return ConciergeHookSchema.safeParse(row.concierge_hook).success;
 }
 
 // ---------------------------------------------------------------------------

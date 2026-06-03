@@ -42,7 +42,7 @@ loadDotenv({ path: resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: resolve(__dirname, '../../../../.env') });
 
 const CDC_HOTEL_COLUMNS =
-  'id,slug,slug_en,name,name_en,is_published,luxury_tier,country_code,priority,updated_at,stars,is_palace,city,district,address,postal_code,latitude,longitude,phone_e164,email_reservations,description_fr,description_en,meta_title_fr,meta_title_en,meta_desc_fr,meta_desc_en,factual_summary_fr,factual_summary_en,concierge_advice,faq_content,long_description_sections,highlights,amenities,points_of_interest,transports,restaurant_info,spa_info,policies,awards,affiliations,signature_experiences,number_of_rooms,number_of_suites,opened_at,official_url,wikidata_id,wikipedia_url_fr,wikipedia_url_en,external_sameas,hero_image,gallery_images,hero_video,virtual_tour_url,google_rating,google_reviews_count,featured_reviews,mice_info,booking_mode,upcoming_events';
+  'id,slug,slug_en,name,name_en,is_published,luxury_tier,country_code,priority,updated_at,stars,is_palace,city,district,address,postal_code,latitude,longitude,phone_e164,email_reservations,description_fr,description_en,meta_title_fr,meta_title_en,meta_desc_fr,meta_desc_en,factual_summary_fr,factual_summary_en,concierge_advice,faq_content,long_description_sections,highlights,amenities,points_of_interest,transports,restaurant_info,spa_info,policies,awards,affiliations,signature_experiences,number_of_rooms,number_of_suites,opened_at,official_url,wikidata_id,wikipedia_url_fr,wikipedia_url_en,external_sameas,hero_image,gallery_images,hero_video,virtual_tour_url,google_rating,google_reviews_count,featured_reviews,mice_info,booking_mode,upcoming_events,instagram,concierge_pick,concierge_hook,external_sources';
 
 interface PostgrestEnv {
   readonly restBase: string;
@@ -257,13 +257,40 @@ function emptyRoomStats(): RoomAuditStats {
   return { total: 0, withSlug: 0, indexable: 0 };
 }
 
+/**
+ * Postgres `numeric` columns (latitude/longitude/google_rating) come back as
+ * STRINGS from both node-pg and PostgREST. The audit checks test
+ * `typeof === 'number'`, so without coercion every fiche falsely failed
+ * `cdc.07.gps` / `jsonld.place` / `jsonld.google_rating_scale`. Normalise here,
+ * the single choke point feeding `evaluateCdcHotelFiche`.
+ */
+function toNumberOrNull(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function normalizeNumericFields(row: CdcHotelAuditRow): CdcHotelAuditRow {
+  return {
+    ...row,
+    latitude: toNumberOrNull(row.latitude),
+    longitude: toNumberOrNull(row.longitude),
+    google_rating: toNumberOrNull(row.google_rating),
+    google_reviews_count: toNumberOrNull(row.google_reviews_count),
+  };
+}
+
 function evaluateAll(
   rows: readonly CdcHotelAuditRow[],
   guideSlugs: ReadonlySet<string>,
   roomStats: ReadonlyMap<string, RoomAuditStats>,
 ): CdcHotelAuditResult[] {
   const cityToGuide = buildCityToGuideSlugMap(guideSlugs);
-  return rows.map((row) => {
+  return rows.map((raw) => {
+    const row = normalizeNumericFields(raw);
     const ctx: CdcAuditContext = {
       roomStats: roomStats.get(row.slug) ?? emptyRoomStats(),
       guideSlug: resolveGuideSlugForHotel(row.city, guideSlugs, cityToGuide),
@@ -301,6 +328,8 @@ function writeCsv(path: string, results: readonly CdcHotelAuditResult[]): void {
     'score_maille',
     'score_photo',
     'score_jsonld',
+    'score_golden',
+    'score_structure',
     'score_agent',
     'score_t3',
     'indexable',
@@ -330,6 +359,8 @@ function writeCsv(path: string, results: readonly CdcHotelAuditResult[]): void {
         String(r.score_maille),
         String(r.score_photo),
         String(r.score_jsonld),
+        String(r.score_golden),
+        String(r.score_structure),
         String(r.score_agent),
         String(r.score_t3),
         String(r.indexable),
@@ -406,6 +437,8 @@ export function buildCdcSummary(results: readonly CdcHotelAuditResult[]): string
   lines.push(`  Maillage / EEAT   : ${avgScore(pub, (r) => r.score_maille)}%`);
   lines.push(`  Photos            : ${avgScore(pub, (r) => r.score_photo)}%`);
   lines.push(`  JSON-LD prereqs   : ${avgScore(pub, (r) => r.score_jsonld)}%`);
+  lines.push(`  Golden template   : ${avgScore(pub, (r) => r.score_golden)}%`);
+  lines.push(`  Restructuration   : ${avgScore(pub, (r) => r.score_structure)}%`);
   lines.push(`  Agentique         : ${avgScore(pub, (r) => r.score_agent)}%`);
   lines.push(`  T3 editorial      : ${avgScore(pub, (r) => r.score_t3)}%`);
   lines.push('');

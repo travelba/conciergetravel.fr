@@ -7,6 +7,15 @@
  */
 
 import {
+  countCannibalizingSections,
+  countCompleteVenues,
+  detectFabricatedStarClaim,
+  evaluatePoiBuckets,
+  evaluateSpaDossier,
+  resolvePopulatedBlocks,
+} from '@mch/domain/editorial';
+
+import {
   gateFactualSummaryFormat,
   FACTUAL_SUMMARY_MAX_CHARS,
   FACTUAL_SUMMARY_MIN_CHARS,
@@ -58,6 +67,11 @@ export const ALT_TEXT_MAX_CHARS = 100;
 export const CDC_COMPLETE_THRESHOLD = 95;
 export const CDC_PARTIAL_THRESHOLD = 70;
 
+/* ── Golden-template thresholds (Airelles reference) ── */
+export const GOLDEN_POI_HANDOFF_MIN = 3;
+export const GOLDEN_INSTAGRAM_POSTS_MIN = 3;
+export const GOOGLE_RATING_MAX = 5;
+
 export const REQUIRED_PHOTO_CATEGORIES = [
   'exterior',
   'lobby',
@@ -73,7 +87,17 @@ export const REQUIRED_PHOTO_CATEGORIES = [
 
 export type CdcPhase = 'phase1' | 'cdc_target' | 'phase6_deferred';
 
-export type CdcDimension = 'cdc' | 'seo' | 'geo' | 'agent' | 'faq' | 'maille' | 'photo' | 'jsonld';
+export type CdcDimension =
+  | 'cdc'
+  | 'seo'
+  | 'geo'
+  | 'agent'
+  | 'faq'
+  | 'maille'
+  | 'photo'
+  | 'jsonld'
+  | 'golden'
+  | 'structure';
 
 export interface CdcCheck {
   readonly id: string;
@@ -115,6 +139,10 @@ export interface CdcHotelAuditRow extends HotelAuditRow {
   readonly wikipedia_url_en: string | null;
   readonly external_sameas: unknown;
   readonly upcoming_events: unknown;
+  readonly instagram: unknown;
+  readonly concierge_pick: unknown;
+  readonly concierge_hook: unknown;
+  readonly external_sources: unknown;
 }
 
 export interface CdcAuditContext {
@@ -146,6 +174,8 @@ export interface CdcHotelAuditResult extends HotelAuditResult {
   readonly score_maille: number;
   readonly score_photo: number;
   readonly score_jsonld: number;
+  readonly score_golden: number;
+  readonly score_structure: number;
   readonly score_global: number;
   readonly status_cdc: ReturnType<typeof deriveStatus>;
   readonly blocks: readonly BlockScore[];
@@ -179,6 +209,8 @@ const BLOCK_LABELS: Readonly<Record<string, string>> = {
   maille: 'Maillage interne / EEAT',
   photo: 'Photos Phase 1 + CDC',
   jsonld: 'Prérequis JSON-LD',
+  gold: 'Golden template (handoff)',
+  struct: 'Restructuration',
 };
 
 function jsonLen(v: unknown): number {
@@ -391,6 +423,153 @@ function sameAsCount(row: CdcHotelAuditRow): number {
   if (Array.isArray(row.external_sameas)) return row.external_sameas.length;
   if (isRecord(row.external_sameas)) return Object.keys(row.external_sameas).length;
   return 0;
+}
+
+/* ── Golden-template helpers ── */
+
+function nonEmptyStr(v: unknown): v is string {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
+/** Narrative strings used by the fabricated-distinction sentinel. */
+function narrativeTexts(row: CdcHotelAuditRow): string[] {
+  const out: string[] = [];
+  if (nonEmptyStr(row.description_fr)) out.push(row.description_fr);
+  if (nonEmptyStr(row.description_en)) out.push(row.description_en);
+  for (const s of row.long_description_sections ?? []) {
+    if (nonEmptyStr(s.title_fr)) out.push(s.title_fr);
+    if (nonEmptyStr(s.title_en)) out.push(s.title_en);
+    if (nonEmptyStr(s.body_fr)) out.push(s.body_fr);
+    if (nonEmptyStr(s.body_en)) out.push(s.body_en);
+  }
+  if (Array.isArray(row.signature_experiences)) {
+    out.push(JSON.stringify(row.signature_experiences));
+  }
+  return out;
+}
+
+interface EventsAnalysis {
+  readonly count: number;
+  readonly withImage: number;
+}
+
+function analyzeEvents(row: CdcHotelAuditRow): EventsAnalysis {
+  const items = Array.isArray(row.upcoming_events) ? row.upcoming_events : [];
+  let withImage = 0;
+  for (const e of items) {
+    if (isRecord(e) && (nonEmptyStr(e['image_url']) || nonEmptyStr(e['imageUrl']))) withImage += 1;
+  }
+  return { count: items.length, withImage };
+}
+
+/** Gallery items carrying provenance metadata (credit → ImageObject creditText). */
+function galleryWithCredit(row: CdcHotelAuditRow): number {
+  const items = Array.isArray(row.gallery_images) ? row.gallery_images : [];
+  return items.filter((it) => isRecord(it) && nonEmptyStr(it['credit'])).length;
+}
+
+function instagramPostCount(row: CdcHotelAuditRow): number {
+  const ig = isRecord(row.instagram) ? row.instagram : null;
+  if (ig === null) return 0;
+  return Array.isArray(ig['posts']) ? (ig['posts'] as unknown[]).length : 0;
+}
+
+function hasConciergeField(value: unknown): boolean {
+  if (nonEmptyStr(value)) return true;
+  if (isRecord(value)) {
+    return Object.values(value).some((v) => nonEmptyStr(v));
+  }
+  return false;
+}
+
+function googleRatingScaleOk(row: CdcHotelAuditRow): boolean {
+  const r = row.google_rating;
+  if (typeof r !== 'number' || r <= 0) return true; // absent → not a scale error
+  return r <= GOOGLE_RATING_MAX;
+}
+
+/** Minimum EEAT external sources for a citable provenance footer (CDC §2 bloc 13bis). */
+export const EEAT_SOURCES_MIN = 2;
+
+/** A jsonb value is "present" — non-empty string, or any non-null object/number. */
+function presentValue(v: unknown): boolean {
+  if (typeof v === 'string') return v.trim().length > 0;
+  if (typeof v === 'number') return Number.isFinite(v);
+  return v !== null && v !== undefined && typeof v === 'object';
+}
+
+/** BreadcrumbList JSON-LD trail prereqs (Home › Country › City › Hotel). */
+function hasBreadcrumbTrail(row: CdcHotelAuditRow): boolean {
+  return (
+    typeof row.city === 'string' &&
+    row.city.trim().length > 0 &&
+    typeof row.country_code === 'string' &&
+    row.country_code.trim().length > 0
+  );
+}
+
+/**
+ * Hotel / LodgingBusiness core node completeness: starRating + amenityFeature
+ * + checkinTime/checkoutTime (from policies). Drives a non-thin Hotel JSON-LD.
+ */
+function hasHotelCoreNode(row: CdcHotelAuditRow): boolean {
+  if (typeof row.stars !== 'number') return false;
+  if (countAmenities(row) === 0) return false;
+  if (row.policies === null) return false;
+  return ['check_in', 'check_out'].every((k) => {
+    const block = row.policies?.[k];
+    return block !== null && block !== undefined && typeof block === 'object';
+  });
+}
+
+/**
+ * Event JSON-LD validity — only meaningful when `upcoming_events` is present.
+ * Each event needs a name, a start date and a location (absence of events is a
+ * separate `gold.events` info check, not a JSON-LD error).
+ */
+function eventsJsonLdOk(row: CdcHotelAuditRow): boolean {
+  const items = Array.isArray(row.upcoming_events) ? row.upcoming_events : [];
+  if (items.length === 0) return true;
+  return items.every((e) => {
+    if (!isRecord(e)) return false;
+    const name =
+      e['name_fr'] ?? e['name_en'] ?? e['title_fr'] ?? e['title_en'] ?? e['name'] ?? e['title'];
+    const start =
+      e['start_date'] ?? e['startDate'] ?? e['date'] ?? e['date_start'] ?? e['date_iso'];
+    const loc = e['location'] ?? e['venue'] ?? e['place'] ?? e['address'] ?? e['venue_name'];
+    return presentValue(name) && presentValue(start) && presentValue(loc);
+  });
+}
+
+/**
+ * Review JSON-LD validity — only meaningful when `featured_reviews` is present.
+ * Each review needs an author, a review body (FR or EN quote) and a source.
+ */
+function reviewsJsonLdOk(row: CdcHotelAuditRow): boolean {
+  const items = Array.isArray(row.featured_reviews) ? row.featured_reviews : [];
+  if (items.length === 0) return true;
+  return items.every((r) => {
+    if (!isRecord(r)) return false;
+    const author = r['author'];
+    const quote = r['quote_fr'] ?? r['quote_en'] ?? r['body_fr'] ?? r['body_en'];
+    const source = r['source'] ?? r['source_name'];
+    return presentValue(author) && presentValue(quote) && presentValue(source);
+  });
+}
+
+/** Count EEAT external-source entries carrying a field + a source label. */
+function countEeatSources(row: CdcHotelAuditRow): number {
+  if (!Array.isArray(row.external_sources)) return 0;
+  return row.external_sources.filter(
+    (s) => isRecord(s) && presentValue(s['field']) && presentValue(s['source']),
+  ).length;
+}
+
+/** EN hreflang alternate is complete (name + slug + meta title + meta desc). */
+function hreflangPairComplete(row: CdcHotelAuditRow): boolean {
+  return [row.name_en, row.slug_en, row.meta_title_en, row.meta_desc_en].every(
+    (v) => typeof v === 'string' && v.trim().length > 0,
+  );
 }
 
 interface CheckBuilder {
@@ -1398,6 +1577,270 @@ export function evaluateCdcHotelFiche(
     pipeline: 'Google Places / Phase 6 sentiments',
   });
 
+  /* ── Structured-data récent (provenance / rating /5 / containedInPlace) ── */
+  const galleryCredited = galleryWithCredit(row);
+  addCdcCheck(b, {
+    id: 'jsonld.image_provenance',
+    block: '02',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: gallery.count === 0 || galleryCredited === gallery.count,
+    severity: 'info',
+    field: 'gallery_images.credit',
+    message: `${gallery.count - galleryCredited}/${gallery.count} gallery images without credit (ImageObject provenance/Licensable)`,
+    pipeline: 'photos:sync — credit/licence',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.google_rating_scale',
+    block: '10',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: googleRatingScaleOk(row),
+    severity: 'blocker',
+    field: 'google_rating',
+    message: 'google_rating out of /5 scale (AggregateRating bestRating must be 5)',
+    pipeline: 'Google Places — rating normalisation',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.contained_in_place',
+    block: '07',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: typeof row.city === 'string' && row.city.length > 0 && ctx.guideSlug !== null,
+    severity: 'info',
+    field: 'containedInPlace',
+    message: 'containedInPlace City node has no destination hub (needs city + published guide)',
+    pipeline: 'editorial_guides + city',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.breadcrumb',
+    block: 'jsonld',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: hasBreadcrumbTrail(row),
+    severity: 'warn',
+    field: 'BreadcrumbList',
+    message: 'BreadcrumbList JSON-LD trail incomplete (needs city + country_code)',
+    pipeline: 'geocode:hotels / seed-tier1',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.hotel_core',
+    block: 'jsonld',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: hasHotelCoreNode(row),
+    severity: 'warn',
+    field: 'Hotel|LodgingBusiness',
+    message: 'Hotel JSON-LD core thin (needs starRating + amenityFeature + checkin/out times)',
+    pipeline: 'amenities enrichment + policies builder',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.event',
+    block: 'jsonld',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: eventsJsonLdOk(row),
+    severity: 'warn',
+    field: 'Event[]',
+    message: 'upcoming_events missing Event JSON-LD fields (name + startDate + location)',
+    pipeline: 'events:sync',
+  });
+  addCdcCheck(b, {
+    id: 'jsonld.review',
+    block: 'jsonld',
+    dimension: 'jsonld',
+    phase: 'cdc_target',
+    passed: reviewsJsonLdOk(row),
+    severity: 'info',
+    field: 'Review[]',
+    message: 'featured_reviews missing Review JSON-LD fields (author + body + source)',
+    pipeline: 'seed-featured-reviews.ts',
+  });
+  addCdcCheck(b, {
+    id: 'maille.eeat_sources',
+    block: 'maille',
+    dimension: 'maille',
+    phase: 'cdc_target',
+    passed: countEeatSources(row) >= EEAT_SOURCES_MIN,
+    severity: 'info',
+    field: 'external_sources',
+    message: `external_sources thin (need ≥ ${EEAT_SOURCES_MIN} cited facts for the EEAT footer)`,
+    pipeline: 'enrichment pipeline (DATAtourisme / Wikidata / Wikipedia / Tavily)',
+  });
+  addCdcCheck(b, {
+    id: 'seo.hreflang_pair',
+    block: '01',
+    dimension: 'seo',
+    phase: 'cdc_target',
+    passed: hreflangPairComplete(row),
+    severity: 'warn',
+    field: 'hreflang(en)',
+    message:
+      'EN hreflang alternate incomplete (needs name_en + slug_en + meta_title_en + meta_desc_en)',
+    pipeline: 'manual SEO / translation',
+  });
+
+  /* ── Golden template — concierge handoff richness ── */
+  const venues = countCompleteVenues(row.restaurant_info);
+  const poiBuckets = evaluatePoiBuckets(row.points_of_interest);
+  const spa = evaluateSpaDossier(row.spa_info);
+  const events = analyzeEvents(row);
+  const igPosts = instagramPostCount(row);
+
+  if (venues.total >= 1) {
+    addCdcCheck(b, {
+      id: 'gold.venues_handoff',
+      block: 'gold',
+      dimension: 'golden',
+      phase: 'cdc_target',
+      passed: venues.complete >= 1,
+      severity: 'warn',
+      field: 'restaurant_info.venues',
+      message: `${venues.complete}/${venues.total} venues with concierge handoff (contact + tip)`,
+      pipeline: 'enrichment — restaurant handoff',
+    });
+    addCdcCheck(b, {
+      id: 'gold.venues_all_handoff',
+      block: 'gold',
+      dimension: 'golden',
+      phase: 'cdc_target',
+      passed: venues.complete === venues.total,
+      severity: 'info',
+      field: 'restaurant_info.venues',
+      message: `${venues.total - venues.complete} venues missing full handoff`,
+      pipeline: 'enrichment — restaurant handoff',
+    });
+  }
+
+  addCdcCheck(b, {
+    id: 'gold.poi_buckets',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: poiBuckets.allBucketsCovered,
+    severity: 'warn',
+    field: 'points_of_interest.bucket',
+    message: `POI buckets not all covered (visit ${poiBuckets.buckets.visit}, do ${poiBuckets.buckets.do}, shop ${poiBuckets.buckets.shop})`,
+    pipeline: 'pois:sync — golden buckets',
+  });
+  addCdcCheck(b, {
+    id: 'gold.poi_handoff',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: poiBuckets.complete >= GOLDEN_POI_HANDOFF_MIN,
+    severity: 'warn',
+    field: 'points_of_interest',
+    message: `${poiBuckets.complete} POIs with full handoff (need ≥ ${GOLDEN_POI_HANDOFF_MIN})`,
+    pipeline: 'pois:sync + concierge:humanize:pois',
+  });
+
+  if (isRecord(row.spa_info)) {
+    addCdcCheck(b, {
+      id: 'gold.spa_dossier',
+      block: 'gold',
+      dimension: 'golden',
+      phase: 'cdc_target',
+      passed: spa.complete,
+      severity: 'warn',
+      field: 'spa_info',
+      message: 'spa_info dossier incomplete (need description + hours + contact + tip)',
+      pipeline: 'enrichment — spa dossier',
+    });
+  }
+
+  addCdcCheck(b, {
+    id: 'gold.instagram',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: igPosts >= GOLDEN_INSTAGRAM_POSTS_MIN,
+    severity: 'info',
+    field: 'instagram',
+    message: `${igPosts} Instagram posts (need ≥ ${GOLDEN_INSTAGRAM_POSTS_MIN})`,
+    pipeline: 'instagram sync → Cloudinary',
+  });
+  addCdcCheck(b, {
+    id: 'gold.concierge_pick',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: hasConciergeField(row.concierge_pick),
+    severity: 'info',
+    field: 'concierge_pick',
+    message: 'concierge_pick missing (Concierge room recommendation)',
+    pipeline: 'editorial — concierge pick',
+  });
+  addCdcCheck(b, {
+    id: 'gold.concierge_hook',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: hasConciergeField(row.concierge_hook),
+    severity: 'info',
+    field: 'concierge_hook',
+    message: 'concierge_hook missing (hero accroche, Concierge voice)',
+    pipeline: 'editorial — concierge hook',
+  });
+  addCdcCheck(b, {
+    id: 'gold.events',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: events.count >= 1,
+    severity: 'info',
+    field: 'upcoming_events',
+    message: 'no upcoming_events (Event JSON-LD + "à proximité")',
+    pipeline: 'events:sync',
+  });
+  if (events.count >= 1) {
+    addCdcCheck(b, {
+      id: 'gold.events_image',
+      block: 'gold',
+      dimension: 'golden',
+      phase: 'cdc_target',
+      passed: events.withImage === events.count,
+      severity: 'info',
+      field: 'upcoming_events.image_url',
+      message: `${events.count - events.withImage}/${events.count} events without image (Event.image)`,
+      pipeline: 'events:sync — image_url',
+    });
+  }
+
+  /* ── Restructuration (anti-cannibalisation + fabricated distinction) ──
+   * A category section only cannibalises a block that is genuinely populated
+   * (rich restaurant_info / spa_info / POI handoff). On bare catalogue fiches
+   * the "Restauration"/"Spa"/"À deux pas" narrative is the SOLE carrier of that
+   * content, so it is NOT a duplicate — dropping it would be content loss. */
+  const populatedBlocks = resolvePopulatedBlocks({
+    restaurantInfo: row.restaurant_info,
+    spaInfo: row.spa_info,
+    pointsOfInterest: row.points_of_interest,
+  });
+  const dupSections = countCannibalizingSections(row.long_description_sections, populatedBlocks);
+  addCdcCheck(b, {
+    id: 'struct.no_duplicate_sections',
+    block: 'struct',
+    dimension: 'structure',
+    phase: 'cdc_target',
+    passed: dupSections === 0,
+    severity: 'warn',
+    field: 'long_description_sections',
+    message: `${dupSections} long-read sections cannibalise a populated block (anti-cannibalisation)`,
+    pipeline: 'editorial restructure — dropCannibalizingSections (post-Golden)',
+  });
+  addCdcCheck(b, {
+    id: 'struct.no_fabricated_star',
+    block: 'struct',
+    dimension: 'structure',
+    phase: 'cdc_target',
+    passed: !detectFabricatedStarClaim(narrativeTexts(row), row.awards),
+    severity: 'blocker',
+    field: 'description|signature_experiences',
+    message: 'narrative claims a Michelin star with no verified award (Hard Rule 7)',
+    pipeline: 'editorial sanitiser',
+  });
+
   const activeCheck = (c: CdcCheck): boolean => c.phase !== 'phase6_deferred';
 
   const dimensions: Record<CdcDimension, DimensionScore> = {
@@ -1409,6 +1852,8 @@ export function evaluateCdcHotelFiche(
     maille: scoreChecks(b.checks, (c) => c.dimension === 'maille' && activeCheck(c)),
     photo: scoreChecks(b.checks, (c) => c.dimension === 'photo' && activeCheck(c)),
     jsonld: scoreChecks(b.checks, (c) => c.dimension === 'jsonld' && activeCheck(c)),
+    golden: scoreChecks(b.checks, (c) => c.dimension === 'golden' && activeCheck(c)),
+    structure: scoreChecks(b.checks, (c) => c.dimension === 'structure' && activeCheck(c)),
   };
 
   const scoreCdcTarget = scoreChecks(
@@ -1429,6 +1874,8 @@ export function evaluateCdcHotelFiche(
     dimensions.photo.score,
     dimensions.jsonld.score,
     dimensions.agent.score,
+    dimensions.golden.score,
+    dimensions.structure.score,
   ];
   const scoreGlobal = Math.round(globalDims.reduce((a, v) => a + v, 0) / globalDims.length);
 
@@ -1446,6 +1893,8 @@ export function evaluateCdcHotelFiche(
     score_maille: dimensions.maille.score,
     score_photo: dimensions.photo.score,
     score_jsonld: dimensions.jsonld.score,
+    score_golden: dimensions.golden.score,
+    score_structure: dimensions.structure.score,
     score_global: scoreGlobal,
     status_cdc: statusCdc,
     blocks: buildBlockScores(b.checks),

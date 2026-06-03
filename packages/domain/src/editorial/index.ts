@@ -25,3 +25,6 @@ export const isAeoBlockValid = (text: string): boolean => {
   const n = wordCount(text);
   return n >= AEO_MIN_WORDS && n <= AEO_MAX_WORDS;
 };
+
+export * from './golden-template';
+export * from './airelles-golden';

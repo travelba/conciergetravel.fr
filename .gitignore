@@ -130,3 +130,5 @@ apps/web/.env.*.local
 .tavily-key
 
 tmp-tavily/
+
+.env*

@@ -52,12 +52,6 @@ import {
   getAmadeusHotelSentiment,
   type AmadeusHotelSentiment,
 } from '@/server/hotels/get-amadeus-sentiment';
-import {
-  isAirellesGoldenTemplate,
-  AIRELLES_CONCIERGE_PICK_SLUG,
-  AIRELLES_CONCIERGE_PICK_NOTE,
-  AIRELLES_CONCIERGE_HOOK,
-} from '@/server/hotels/dev-override-airelles';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
   getHotelBySlug,
@@ -92,6 +86,9 @@ import {
   readSignatureExperiences,
   readSpa,
   readInstagram,
+  readConciergePick,
+  readConciergeHook,
+  hasGoldenHero,
   readVirtualTour,
   type GalleryLicence,
   type HotelDetail,
@@ -486,7 +483,9 @@ async function renderHotelPage(
   // same shot as its big tile. Promote the first remaining gallery photo to
   // be the mosaic hero and shift the rest into the grid — keeping every
   // image unique. Falls back to the standard descriptor when no tile exists.
-  const goldenTemplate = isAirellesGoldenTemplate(row.slug);
+  const goldenTemplate = hasGoldenHero(row);
+  const conciergePick = readConciergePick(row, locale);
+  const conciergeHook = readConciergeHook(row, locale);
   const firstGalleryTile = galleryTiles[0];
   const galleryHero =
     goldenTemplate && firstGalleryTile !== undefined
@@ -512,7 +511,7 @@ async function renderHotelPage(
         const tile =
           galleryTiles.length > 0 ? galleryTiles[index % galleryTiles.length] : undefined;
         const roomName = room.name ?? room.room_code;
-        const isConciergePick = room.slug === AIRELLES_CONCIERGE_PICK_SLUG;
+        const isConciergePick = conciergePick !== null && room.slug === conciergePick.slug;
         return {
           id: room.id,
           slug: room.slug,
@@ -520,11 +519,7 @@ async function renderHotelPage(
           description: room.description,
           isSignature: room.isSignature,
           isConciergePick,
-          conciergeNote: isConciergePick
-            ? locale === 'en'
-              ? AIRELLES_CONCIERGE_PICK_NOTE.en
-              : AIRELLES_CONCIERGE_PICK_NOTE.fr
-            : null,
+          conciergeNote: isConciergePick ? conciergePick.note : null,
           occupancy:
             room.max_occupancy !== null
               ? t('rooms.occupancy', { count: room.max_occupancy })
@@ -1302,7 +1297,7 @@ async function renderHotelPage(
           <figure className="mb-12 mt-6 border-l-2 border-amber-400/80 pl-5 sm:mb-16 sm:pl-7">
             <blockquote className="text-fg font-serif text-2xl italic leading-snug sm:text-[1.7rem] sm:leading-snug">
               {locale === 'fr' ? '«\u00A0' : '\u201C'}
-              {AIRELLES_CONCIERGE_HOOK[locale]}
+              {conciergeHook}
               {locale === 'fr' ? '\u00A0»' : '\u201D'}
             </blockquote>
             <figcaption className="text-muted mt-4 text-xs font-semibold uppercase tracking-[0.22em]">

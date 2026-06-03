@@ -26,6 +26,11 @@ Invoke when:
 - **Description courte / résumé factuel (CDC §2.3)**: strict format `[Type] [étoiles] situé [quartier/ville], à [distance] de [POI majeur], avec [3 USP].`. Validation: 130–150 chars, unique per hotel.
 - Validation: `slug` unique, lowercase kebab-case, 60 chars max; coords within FR bounds (lat 41–52, lng -5–10).
 - **Awards relation**: many-to-one with the `Awards` collection (CDC §2.13).
+- **Golden-template fields (migration `0068`, jsonb, nullable)** — the exemplary fiche standard (`les-airelles-gordes`), audited catalogue-wide via `audit:hotel-fiches-cdc` + `report:hotel-fiches-cdc`:
+  - `instagram` = `{ handle, profile_url, followers?, posts:[{permalink, image_public_id, caption_fr?, caption_en?, posted_at?}] }` (1–3 posts; imagery mirrored to Cloudinary, never hotlinked).
+  - `concierge_pick` = `{ slug, note:{fr,en} }` — recommended suite framed atop the rooms grid.
+  - `concierge_hook` = `{ fr, en }` — hero accroche, Concierge voice, ≤ 25 words (factual summary stays sr-only).
+  - "Concierge handoff" enrichment of existing jsonb: each `restaurant_info.venues[]` / `points_of_interest[]` carries a contact path + `tip_fr`/`tip_en`; POIs bucketed `visit`/`do`/`shop`; `spa_info` full dossier; `upcoming_events[].image_url`. Shared predicates: `@mch/domain/editorial` (`golden-template.ts`). See `hotel-detail-page.mdc` § "Golden template & audit catalogue".
 
 ### `EditorialPages`
 

@@ -164,26 +164,46 @@ export async function geocodeHotelQuery(
 ): Promise<Result<GeocodeMatch, GooglePlacesError>> {
   const country = options.country ?? 'France';
   const query = `${hotelName}, ${city}, ${country}`;
-  const res = await retryingJsonRequest({
-    url: `${cfg.apiBase}/places:searchText`,
-    method: 'POST',
-    headers: {
-      'X-Goog-Api-Key': cfg.apiKey,
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
-      Accept: 'application/json',
-    },
-    body: {
-      kind: 'json',
-      value: {
-        textQuery: query,
-        languageCode: 'fr',
-        // Bias toward hotel-like results — cuts the false-positive rate
-        // on common hotel names ("Le Provençal" returns 30+ restaurants
-        // otherwise).
-        includedType: 'lodging',
+
+  // First pass biases toward lodging — cuts the false-positive rate on
+  // common hotel names ("Le Provençal" returns 30+ restaurants otherwise).
+  // But `includedType: lodging` is strict: branded/villa names and
+  // French-localised cities ("Londres", "Vienne") sometimes return ZERO
+  // places. When that happens we retry once WITHOUT the type filter — the
+  // name-match heuristic below still guards against junk hits.
+  async function search(withLodgingFilter: boolean) {
+    return retryingJsonRequest({
+      url: `${cfg.apiBase}/places:searchText`,
+      method: 'POST',
+      headers: {
+        'X-Goog-Api-Key': cfg.apiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
+        Accept: 'application/json',
       },
-    },
-  });
+      body: {
+        kind: 'json',
+        value: withLodgingFilter
+          ? { textQuery: query, languageCode: 'fr', includedType: 'lodging' }
+          : { textQuery: query, languageCode: 'fr' },
+      },
+    });
+  }
+
+  function parsePlaces(json: unknown): Result<readonly PlaceSearchResult[], GooglePlacesError> {
+    const parsed = TextSearchResponseSchema.safeParse(json);
+    if (!parsed.success) {
+      return err({
+        kind: 'parse_failure',
+        details: `geocode schema mismatch: ${parsed.error.issues
+          .slice(0, 3)
+          .map((i) => `${i.path.join('.')}: ${i.message}`)
+          .join(' | ')}`,
+      });
+    }
+    return ok(parsed.data.places);
+  }
+
+  const res = await search(true);
   if (!res.ok) {
     if (res.error.kind === 'auth_failed') return err({ kind: 'auth_failed' });
     if (res.error.kind === 'rate_limited') return err({ kind: 'quota_exceeded' });
@@ -191,25 +211,30 @@ export async function geocodeHotelQuery(
   }
   if (res.value.json === undefined) return err({ kind: 'no_match', query });
 
-  const parsed = TextSearchResponseSchema.safeParse(res.value.json);
-  if (!parsed.success) {
-    return err({
-      kind: 'parse_failure',
-      details: `geocode schema mismatch: ${parsed.error.issues
-        .slice(0, 3)
-        .map((i) => `${i.path.join('.')}: ${i.message}`)
-        .join(' | ')}`,
-    });
-  }
-  if (parsed.data.places.length === 0) return err({ kind: 'no_match', query });
+  const firstParse = parsePlaces(res.value.json);
+  if (!firstParse.ok) return err(firstParse.error);
 
-  // Prefer a fuzzy-name match. Otherwise fall back to the top-1 — the
-  // `includedType: lodging` already filtered out non-hotel results.
-  const ranked = parsed.data.places.map((p) => ({
+  let places = firstParse.value;
+  if (places.length === 0) {
+    const retry = await search(false);
+    if (!retry.ok) {
+      if (retry.error.kind === 'auth_failed') return err({ kind: 'auth_failed' });
+      if (retry.error.kind === 'rate_limited') return err({ kind: 'quota_exceeded' });
+      return err({ kind: 'http', error: retry.error });
+    }
+    if (retry.value.json === undefined) return err({ kind: 'no_match', query });
+    const retryParse = parsePlaces(retry.value.json);
+    if (!retryParse.ok) return err(retryParse.error);
+    places = retryParse.value;
+  }
+  if (places.length === 0) return err({ kind: 'no_match', query });
+
+  // Prefer a fuzzy-name match. Otherwise fall back to the top-1.
+  const ranked = places.map((p) => ({
     place: p,
     matched: looksLikeMatch(hotelName, p.displayName?.text ?? ''),
   }));
-  const winner = ranked.find((r) => r.matched)?.place ?? parsed.data.places[0];
+  const winner = ranked.find((r) => r.matched)?.place ?? places[0];
   if (winner === undefined || winner.location === undefined) {
     return err({ kind: 'no_match', query });
   }
