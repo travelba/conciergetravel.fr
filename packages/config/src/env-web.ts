@@ -85,14 +85,15 @@ export const env = createEnv({
     process.env['SKIP_ENV_VALIDATION'] === 'true' ||
     process.env['NEXT_PUBLIC_SKIP_ENV_VALIDATION'] === 'true',
   emptyStringAsUndefined: true,
-  onValidationError: (error) => {
-    // Default behaviour throws "Invalid environment variables" with `[object Object]`.
-    // Surface the actual Zod issues so we can act on them in dev + CI.
-    const formatted = JSON.stringify(error.flatten().fieldErrors, null, 2);
+  onValidationError: (issues) => {
+    // `@t3-oss/env` hands us the Standard-Schema issue array (not a ZodError),
+    // so we format it directly. Default behaviour throws "Invalid environment
+    // variables" with `[object Object]`; we surface the actual issues so we
+    // can act on them in dev + CI.
     // eslint-disable-next-line no-console
-    console.error('[env-web] Environment validation failed:\n' + formatted);
+    console.error('[env-web] Environment validation failed:\n' + JSON.stringify(issues, null, 2));
     throw new Error(
-      `Invalid environment variables: ${Object.keys(error.flatten().fieldErrors).join(', ')}`,
+      `Invalid environment variables: ${issues.map((issue) => issue.message).join('; ')}`,
     );
   },
 });
