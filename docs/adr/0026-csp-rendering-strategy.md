@@ -1,11 +1,17 @@
 # ADR-0026 — CSP × Rendering Strategy for Hotel Pages
 
-- Status: Proposed
-- Date: 2026-06-02
-- Deciders: TBD (architecture review)
+- Status: Rejected (2026-06-03 — voir ADR-0027)
+- Date: 2026-06-02 (clôturée 2026-06-03)
+- Deciders: PO (travelba) — via la décision ADR-0027 (CSP-α)
 - Supersedes: —
-- Superseded by: —
-- Related: ADR-0007 (ISR target), ADR-0013 (CSP strategy), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking), ADR-0027 (CSP model evolution — préalable amont)
+- Superseded by: ADR-0027 (CSP model evolution — tranche le modèle CSP en amont)
+- Related: ADR-0007 (ISR target — amendée), ADR-0013 (CSP strategy), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking), ADR-0027 (CSP model evolution — préalable amont, décide CSP-α)
+
+> **Rejetée le 2026-06-03.** ADR-0027 (préalable amont) a tranché le modèle CSP
+> en faveur de **CSP-α (nonce par-requête maintenu)**. Sous CSP-α, la prémisse
+> de cette ADR (« quelle stratégie de rendu débloque l'ISR ? ») est sans objet :
+> le rendu reste `force-dynamic` permanent. La décision de rendu vit dans
+> ADR-0027 + ADR-0007 amendée. Sections conservées comme trace d'analyse.
 
 > **Note de numérotation** : cette ADR a été désignée « ADR-0018 » dans
 > ADR-0013 §C et dans l'inventaire `docs/audits/2026-06-02-vague-g1-inline-inventory.md`.
@@ -112,10 +118,20 @@ Compute, JSON-LD edge-cached, transform photo ADR-0024 sur Vercel Image.
 
 ## Decision
 
-**TBD** — cette ADR est en statut `Proposed`. La décision sera tranchée lors de
-la revue d'architecture après évaluation chiffrée des trois options.
+**Rejected (2026-06-03).** Le spike G-1bis a montré que les trois options de
+rendu ci-dessous sont **subordonnées au modèle CSP**, et non l'inverse. ADR-0027
+(préalable amont) a tranché le modèle CSP en faveur de **CSP-α (nonce
+par-requête maintenu)**. Sous CSP-α, aucune des options α/β de cette ADR ne
+débloque l'ISR runtime, et la prémisse même de cette ADR devient sans objet.
 
-### Critères de tranche (à valider en revue)
+Le rendu retenu est `force-dynamic` permanent (ce qui correspond à l'option γ
+ci-dessous, mais **assumée comme conséquence de la contrainte CSP**, pas comme
+stratégie d'optimisation ISR). La décision de rendu vit désormais dans
+**ADR-0027** + **ADR-0007 amendée** (ISR runtime non poursuivi sur les pages
+porteuses de nonce ; pas de cache CDN du document HTML). Les options α/β sont
+**caduques** ; les sections sont conservées comme trace de l'analyse.
+
+### Critères de tranche (matrice ayant informé l'analyse)
 
 | Critère                   | α PPR          | β script-src-attr  | γ force-dynamic opt. |
 | ------------------------- | -------------- | ------------------ | -------------------- |

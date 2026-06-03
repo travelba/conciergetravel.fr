@@ -1,17 +1,19 @@
 # ADR-0027 — CSP Model Evolution
 
-- Status: Proposed
-- Date: 2026-06-02
-- Deciders: TBD (architecture + security review)
+- Status: Accepted
+- Date: 2026-06-02 (décidée 2026-06-03)
+- Deciders: PO (travelba) — arbitrage délégué ; reco agent CSP-α adoptée
 - Supersedes: —
 - Superseded by: —
-- Related: ADR-0007 (ISR target), ADR-0013 (CSP × ISR debt), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking), ADR-0026 (rendering strategy — Proposed, conditionnée par cette ADR)
+- Related: ADR-0007 (ISR target — amendée par cette décision), ADR-0013 (CSP × ISR debt), ADR-0024 (photo transform), ADR-0025 (editorial-first / gel booking), ADR-0026 (rendering strategy — Rejected suite à cette décision)
 
 > **Préalable amont d'ADR-0026.** Le spike Vague G-1bis a montré que les trois
 > options de _rendu_ d'ADR-0026 (α PPR / β script-src-attr / γ force-dynamic)
 > sont en réalité **conditionnées par le modèle CSP**. Cette ADR tranche le
-> modèle CSP en premier ; ADR-0026 en découle mécaniquement. Tant que cette ADR
-> reste `Proposed`, ADR-0026 ne peut pas passer en `Accepted`.
+> modèle CSP en premier ; ADR-0026 en découle mécaniquement.
+>
+> **Décision 2026-06-03 : CSP-α retenue** → ADR-0026 passe en `Rejected` (le
+> rendu reste `force-dynamic` permanent, acté ici + dans ADR-0007 amendée).
 
 ## Context
 
@@ -131,12 +133,55 @@ dédiée (`<script src="…/jsonld">` ou endpoint paramétré), aucun handler in
 
 ## Decision
 
-**TBD** — cette ADR est en statut `Proposed`. Le modèle CSP sera tranché lors de
-la revue d'architecture **+ sécurité** (le choix engage la posture XSS du site),
-après chiffrage des trois familles. ADR-0026 (rendu) reste bloquée en `Proposed`
-jusqu'à cette décision.
+**CSP-α retenue** — on **maintient le `nonce` par-requête** (`script-src 'self'
+'nonce-{n}' 'strict-dynamic'`, jamais `'unsafe-inline'`). Décidée le 2026-06-03
+(arbitrage PO délégué, sur reco agent).
 
-### Critères de tranche (à valider en revue)
+### Rationale
+
+Le choix réel se réduisait à **α vs β** (γ écartée par l'inventaire G-1 + le
+spike G-1bis : le bootstrap inline Next.js `self.__next_f.push` n'est pas
+externalisable sans patcher le framework). Entre α et β, le seul avantage de β
+est l'ISR/PPR runtime + un coût infra moindre. Cet avantage ne justifie pas le
+coût de β dans le contexte actuel :
+
+- **Sécurité non négociable** — MyConciergeHotel est une OTA accréditée IATA qui
+  traitera paiement + PII en Phase 6. `'unsafe-hashes'` (β) autorise les event
+  handlers inline et élargit la surface XSS (D2/D6) ; la hard rule
+  `security-csp.mdc` refuse cet affaiblissement.
+- **Le gain de β n'est pas chiffré** — le coût Fluid Compute de α est aujourd'hui
+  TBD (decision aid §3, aucune baseline de trafic). On ne dégrade pas la posture
+  XSS pour une économie non mesurée.
+- **Coût de α absorbable maintenant** — booking gelé jusqu'en Phase 6 (ADR-0025),
+  site éditorial-only, priorité « contenu d'abord » (AGENTS.md §4bis). Le trafic
+  réel n'existe pas encore : décider sur données, pas sur spéculation.
+- **β enchaîne aux internals de Next** — le hash du bootstrap change à chaque
+  release (D4) ; fragilité récurrente pour un gain ponctuel, non aligné
+  écosystème (D8).
+- **α = zéro refactor, stable, maximalement réversible** (D7).
+
+### Contrainte technique actée (piège nonce × cache)
+
+Le `nonce` par-requête est **incompatible avec un cache du document HTML**
+(runtime statique **ou** CDN `s-maxage`) : un HTML caché fige le nonce — soit il
+diverge du header CSP (→ bug PR #57), soit il devient un secret partagé sur la
+fenêtre de cache (→ sécurité dégradée). Donc :
+
+- `force-dynamic` est **permanent et justifié** sur les pages porteuses de nonce
+  (fiches hôtels, pages SEO à JSON-LD), **pas** « transitoire ».
+- **Pas de cache CDN du document HTML** ; seuls les assets statiques (JS/CSS /
+  images Cloudinary) sont cachés au CDN.
+- L'objectif ISR runtime d'ADR-0007 n'est **pas** poursuivi sur ces pages (voir
+  ADR-0007 amendée).
+
+### Réévaluation future (porte de sortie β)
+
+CSP-β reste ré-ouvrable **si et seulement si** : (1) un coût Fluid Compute
+_mesuré_ au trafic réel (post-Phase 6) s'avère prohibitif **ET** (2) une revue
+sécu valide explicitement `'unsafe-hashes'` + un outillage `csp-hash-check` auto
+au build. Tant que ces deux conditions ne sont pas réunies, α tient.
+
+### Critères de tranche (matrice ayant informé la décision)
 
 | Critère                             | CSP-α nonce (statu quo) | CSP-β unsafe-hashes      | CSP-γ strict-dynamic no-inline |
 | ----------------------------------- | ----------------------- | ------------------------ | ------------------------------ |
@@ -152,12 +197,12 @@ jusqu'à cette décision.
 
 ## Consequences
 
-### Si CSP-α retenue (maintenir le nonce)
+### Si CSP-α retenue (maintenir le nonce) — ✅ DÉCISION RETENUE (2026-06-03)
 
-- ADR-0026 se résout sur **γ** (force-dynamic) — les options α/β d'ADR-0026 deviennent caduques.
-- ADR-0007 **amendée** : « ISR effectif via cache CDN, pas via runtime statique Next.js », avec la contrainte « pas de nonce réémis sur les hits CDN ».
+- ADR-0026 → **Rejected** : le rendu reste `force-dynamic` permanent (la question « quelle stratégie de rendu débloque l'ISR » devient sans objet sous nonce). La décision de rendu vit dans cette ADR + ADR-0007 amendée.
+- ADR-0007 **amendée** : l'ISR runtime n'est **pas** poursuivi sur les pages porteuses de nonce ; **pas de cache CDN du document HTML** (un nonce figé rouvre PR #57 ou dégrade la sécu). Seuls les assets statiques (JS/CSS / Cloudinary) sont cachés au CDN.
 - Vague G clôturée sans G-2/G-3 ; Vague F-bis (doc) requalifie `force-dynamic` de « transitoire » à « permanent justifié ».
-- Runbook : audit coût Fluid Compute mensuel.
+- Runbook : audit coût Fluid Compute mensuel (réévaluation β uniquement si prohibitif + revue sécu validant `'unsafe-hashes'`).
 
 ### Si CSP-β retenue (unsafe-hashes)
 
