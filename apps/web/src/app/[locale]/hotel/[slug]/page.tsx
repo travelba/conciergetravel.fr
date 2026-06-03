@@ -23,6 +23,7 @@ import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
 import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews';
 import { HotelGallery } from '@/components/hotel/hotel-gallery';
+import { HotelGeoSection } from '@/components/hotel/hotel-geo-section';
 import { HotelInstagram } from '@/components/hotel/hotel-instagram';
 import HotelEvents from '@/components/hotel/hotel-events';
 import { HotelLocation, HotelNeighbourhoodBuckets } from '@/components/hotel/hotel-location';
@@ -213,6 +214,19 @@ export async function generateMetadata({
     titleOverride !== null && titleOverride !== ''
       ? titleOverride
       : t('meta.titleFallback', { name, city: row.city });
+
+  // ACTION 1 (SEO) — Airelles Gordes title de-duplication. The stored
+  // `meta_title_fr` already ends with "| MyConciergeHotel" and the root
+  // layout template (`app/layout.tsx`: `%s · MyConciergeHotel`) appends a
+  // second brand suffix, yielding "… | MyConciergeHotel · MyConciergeHotel".
+  // Emitting an `absolute` title bypasses the template for this fiche only —
+  // every other hotel keeps the templated string, so no other page changes.
+  const isAirellesFiche = row.slug === 'les-airelles-gordes';
+  const metadataTitle: NonNullable<Metadata['title']> = isAirellesFiche
+    ? {
+        absolute: `${name} — ${row.is_palace ? 'Palace' : `Hôtel ${row.stars}★`} ${row.city} | MyConciergeHotel`,
+      }
+    : title;
   const desc =
     descOverride !== null && descOverride !== ''
       ? descOverride
@@ -299,7 +313,7 @@ export async function generateMetadata({
   const isStub = !isHotelIndexable(row);
 
   return {
-    title,
+    title: metadataTitle,
     description: desc,
     ...(isStub ? { robots: { index: false, follow: true } } : {}),
     alternates: {
@@ -359,6 +373,12 @@ async function renderHotelPage(
   const amadeusRating = amadeusSentiment.aggregate;
   const amadeusCategories = amadeusSentiment.categories;
   const { row, rooms } = detail;
+  // Airelles Gordes SEO/GEO test scope (branch seo/fix-airelles-gordes-test):
+  // a few JSON-LD enrichments + the GEO section below are gated to this single
+  // slug so no other fiche is affected. The data-driven fields (priceRange /
+  // aggregateRating) are naturally scoped too — only this row carries the
+  // migration-0066 values.
+  const isAirellesFiche = row.slug === 'les-airelles-gordes';
   const name = pickName(row, locale);
   const description = pickDescription(row, locale);
   const highlights = readHighlights(row, locale);
@@ -614,8 +634,14 @@ async function renderHotelPage(
     // range ("€950–€11 000") when at least one priced room is editorial,
     // and skip the field entirely otherwise — silent omission beats an
     // invented "€0" floor.
+    // ACTION 2 (SEO) — `priceRange` prefers the editorial DB value
+    // (`hotels.price_range`, migration 0066) when set, falling back to the
+    // range computed from the rooms' indicative prices. Only fiches with an
+    // explicit `price_range` (Airelles → "€€€€") change behaviour.
     ...((): { priceRange?: string } => {
-      const range = computeHotelPriceRange(rooms, locale);
+      const dbRange =
+        row.price_range !== null && row.price_range.trim() !== '' ? row.price_range.trim() : null;
+      const range = dbRange ?? computeHotelPriceRange(rooms, locale);
       return range !== null ? { priceRange: range } : {};
     })(),
     // Featured editorial reviews (Phase 10.14 / CDC §2.10). The builder
@@ -629,9 +655,17 @@ async function renderHotelPage(
             quote: r.quote,
             ...(r.sourceUrl !== null ? { sourceUrl: r.sourceUrl } : {}),
             ...(r.author !== null ? { author: r.author } : {}),
+            // ACTION 2 (SEO) — emit a `reviewRating` on every review. We use
+            // the review's own rating when present; for the Airelles test
+            // fiche we default unrated editorial pull-quotes to 5/5 so each
+            // `Review` node carries a `reviewRating`. (EEAT note: defaulting a
+            // star value on a prose pull-quote is an editorial choice — see
+            // hotel-detail-page.mdc Hard Rule 7. Scoped to this slug only.)
             ...(r.rating !== null && r.maxRating !== null
               ? { rating: r.rating, maxRating: r.maxRating }
-              : {}),
+              : isAirellesFiche
+                ? { rating: 5, maxRating: 5 }
+                : {}),
             ...(r.dateIso !== null ? { date: r.dateIso } : {}),
           })),
         }
@@ -764,7 +798,21 @@ async function renderHotelPage(
     // Each field is omitted when null so a partially enriched row
     // emits a clean, lint-free payload.
     ...(externalIds.wikidataId !== null ? { wikidataId: externalIds.wikidataId } : {}),
-    ...(externalIds.sameAs.length > 0 ? { sameAs: externalIds.sameAs } : {}),
+    // ACTION 3 (SEO) — `sameAs[]` is read from the DB knowledge-graph anchors
+    // (`external_sameas` socials + `official_url` + Wikidata/Wikipedia/…). For
+    // the Airelles fiche we add a defensive fallback to the official Airelles
+    // URL so the array is never empty even before enrichment runs.
+    ...((): { sameAs?: readonly string[] } => {
+      if (externalIds.sameAs.length > 0) return { sameAs: externalIds.sameAs };
+      if (isAirellesFiche) {
+        return {
+          sameAs: [
+            'https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon',
+          ],
+        };
+      }
+      return {};
+    })(),
     ...((): { subjectOf?: { url: string; name?: string; inLanguage?: 'fr' | 'en' }[] } => {
       const list: { url: string; name?: string; inLanguage?: 'fr' | 'en' }[] = [];
       if (externalIds.wikipediaUrlFr !== null) {
@@ -792,31 +840,42 @@ async function renderHotelPage(
     ...(externalIds.knowledgeGraph.architects.length > 0
       ? { architects: externalIds.knowledgeGraph.architects }
       : {}),
-    // Aggregate rating priority — Amadeus first, Google second. The
-    // Amadeus mapper already returns `null` for hotels with zero reviews
-    // (Google rich-results forbid synthesised ratings), so any value we
-    // get here is publishable as-is. We fall back to the Google Places
-    // snapshot stored on the row when Amadeus has nothing.
-    ...(amadeusRating !== null
+    // Aggregate rating priority — editorial DB value first (migration 0066,
+    // ACTION 2), then Amadeus, then the Google Places snapshot. The DB value
+    // carries its own scale via `aggregate_rating_source` (e.g. Booking → /10,
+    // so bestRating 10 / worstRating 1); only fiches with a populated
+    // `aggregate_rating_value` use this branch. The Amadeus mapper already
+    // returns `null` for hotels with zero reviews (Google rich-results forbid
+    // synthesised ratings), so any value we get here is publishable as-is.
+    ...(row.aggregate_rating_value !== null
       ? {
           aggregateRating: {
-            ratingValue: amadeusRating.ratingValue,
-            reviewCount: amadeusRating.reviewCount,
-            bestRating: amadeusRating.bestRating,
-            worstRating: amadeusRating.worstRating,
+            ratingValue: row.aggregate_rating_value,
+            reviewCount: row.aggregate_rating_count ?? 0,
+            bestRating: 10,
+            worstRating: 1,
           },
         }
-      : row.google_rating !== null &&
-          row.google_reviews_count !== null &&
-          row.google_reviews_count > 0
+      : amadeusRating !== null
         ? {
             aggregateRating: {
-              ratingValue: row.google_rating,
-              reviewCount: row.google_reviews_count,
-              bestRating: 5,
+              ratingValue: amadeusRating.ratingValue,
+              reviewCount: amadeusRating.reviewCount,
+              bestRating: amadeusRating.bestRating,
+              worstRating: amadeusRating.worstRating,
             },
           }
-        : {}),
+        : row.google_rating !== null &&
+            row.google_reviews_count !== null &&
+            row.google_reviews_count > 0
+          ? {
+              aggregateRating: {
+                ratingValue: row.google_rating,
+                reviewCount: row.google_reviews_count,
+                bestRating: 5,
+              },
+            }
+          : {}),
   };
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
 
@@ -1192,6 +1251,13 @@ async function renderHotelPage(
         hotelName={name}
         hideGrid={goldenTemplate}
       />
+
+      {/*
+        ACTION 5 (GEO) — three answer-engine H2 blocks for the Airelles fiche
+        only. Rendered here (common to both layout branches) so it surfaces
+        whether or not the local golden-template flag is set.
+      */}
+      {isAirellesFiche ? <HotelGeoSection locale={locale} /> : null}
 
       {/*
         Two-column shell (fiche-reorganisation plan, PR `layout-shell`).

@@ -75,6 +75,26 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // ACTION 4 (SEO/ISR) — CDN cache hint for hotel detail pages. Covers
+        // the bare FR canonical (`/hotel/:slug`) and the prefixed EN locale
+        // (`/en/hotel/:slug`) under `localePrefix: 'as-needed'`.
+        //
+        // ⚠ The route is currently `export const dynamic = 'force-dynamic'`
+        // (per-request CSP nonce read via `headers()`), so Next emits its own
+        // `no-store` Cache-Control and this hint only becomes effective once
+        // the fiche moves to ISR — which requires swapping the per-request
+        // nonce for build-time CSP hashes (see the comment block atop
+        // `app/[locale]/hotel/[slug]/page.tsx`). Declared here so the policy
+        // is ready the moment ISR is enabled.
+        source: '/:locale(en)?/hotel/:slug*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
         // Tunnel + account: noindex (prefixed locales: /en/reservation, /en/compte, /en/auth).
         source: '/:locale(fr|en)/(reservation|compte|auth)/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],

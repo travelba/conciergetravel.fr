@@ -133,6 +133,12 @@ function buildRow(_locale: SupportedLocale): HotelDetailRow {
     google_rating: 4.7,
     google_reviews_count: 312,
     phone_e164: '+33199990000',
+    telephone: null,
+    price_range: null,
+    price_from: null,
+    aggregate_rating_value: null,
+    aggregate_rating_count: null,
+    aggregate_rating_source: null,
     // Editorial history (Phase 11.2). The synthetic E2E hotel inherits a
     // deterministic 2010 opening — old enough to populate the JSON-LD
     // `foundingDate` field but not so old it tempts smoke tests into
