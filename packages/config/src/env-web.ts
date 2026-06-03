@@ -85,20 +85,19 @@ export const env = createEnv({
     process.env['SKIP_ENV_VALIDATION'] === 'true' ||
     process.env['NEXT_PUBLIC_SKIP_ENV_VALIDATION'] === 'true',
   emptyStringAsUndefined: true,
-  onValidationError: (issues) => {
-    // Since @t3-oss/env-nextjs v0.12 (Standard Schema migration) the callback
-    // receives a readonly array of issues instead of a ZodError — so the old
-    // `error.flatten()` no longer exists. Surface the offending field keys so
-    // we can act on them in dev + CI instead of the default `[object Object]`.
+  onValidationError: (error) => {
+    // The installed @t3-oss/env-core (0.11.1) types this callback as
+    // `(error: ZodError) => never`, so we read `error.issues` rather than a
+    // bare array. Surface the offending field keys for local dev diagnostics
+    // instead of the default `[object Object]`. This branch never runs in
+    // prod / CI where `skipValidation` is true — it only aids local debugging.
     // eslint-disable-next-line no-console
-    console.error('[env-web] Environment validation failed:\n' + JSON.stringify(issues, null, 2));
+    console.error('[env-web] Environment validation failed:\n' + JSON.stringify(error, null, 2));
     const fields = Array.from(
       new Set(
-        issues.flatMap((issue) => {
-          const segment = issue.path?.[0];
-          if (segment === undefined) return [];
-          return [typeof segment === 'object' ? String(segment.key) : String(segment)];
-        }),
+        error.issues
+          .map((issue) => String(issue.path[0] ?? ''))
+          .filter((segment) => segment.length > 0),
       ),
     );
     throw new Error(`Invalid environment variables: ${fields.join(', ')}`);
