@@ -82,11 +82,21 @@ export async function GET(): Promise<NextResponse> {
         alternates: buildSitemapAlternates(subhubHrefForLocale),
       });
     };
+    // The set pushed here MUST mirror the indexable sub-hub surface
+    // enumerated by the page's `generateStaticParams` (and gated by its
+    // `matchCount === 0 → noindex` rule). Because each value is sourced
+    // from a published ranking's own axes payload, every sub-hub here has
+    // ≥ 1 matching ranking by construction — so no empty/noindex URL can
+    // leak in. `saison` was previously missing from the sitemap despite
+    // being an indexable axis (SE-2): added below for lockstep.
     for (const r of rankings) {
       for (const ty of r.axes.types) pushSubhub('type', ty);
       for (const th of r.axes.themes) pushSubhub('theme', th);
       for (const o of r.axes.occasions) pushSubhub('occasion', o);
       if (r.axes.lieu !== undefined) pushSubhub('lieu', r.axes.lieu.slug);
+      if (r.axes.saison !== undefined && r.axes.saison.length > 0) {
+        pushSubhub('saison', r.axes.saison);
+      }
     }
   } catch {
     entries = [];
