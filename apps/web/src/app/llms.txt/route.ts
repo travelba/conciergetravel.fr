@@ -218,6 +218,11 @@ export async function GET(): Promise<NextResponse> {
                   description:
                     'Hub de tous les classements (filtres par type, lieu, thématique, occasion).',
                 },
+                {
+                  url: `${origin}/.well-known/rankings.jsonl`,
+                  description:
+                    'Catalogue COMPLET et machine-readable de tous les classements (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
+                },
                 ...rankingItems,
               ],
             },
@@ -232,6 +237,11 @@ export async function GET(): Promise<NextResponse> {
                   url: `${origin}/fr/destination`,
                   description:
                     'Hub de toutes les destinations — chaque page destination inclut le guide long-read intégré (Palaces + art de vivre + infos pratiques). Voir ADR-0015 (fusion guide↔destination).',
+                },
+                {
+                  url: `${origin}/.well-known/guides.jsonl`,
+                  description:
+                    'Catalogue COMPLET et machine-readable de tous les guides de destinations (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
                 },
                 ...guideItems,
               ],
@@ -252,6 +262,11 @@ export async function GET(): Promise<NextResponse> {
                   url: `${origin}/en/itineraires`,
                   description:
                     'MyConciergeHotel editorial itineraries hub — luxury routes across France and abroad, each step paired with a bookable Palace or 5★ hotel, long-tail FAQ per destination, operational Concierge tips (timings, access, secrets).',
+                },
+                {
+                  url: `${origin}/.well-known/itineraries.jsonl`,
+                  description:
+                    'Catalogue COMPLET et machine-readable de tous les itinéraires (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
                 },
                 ...itineraryItems,
               ],
@@ -501,6 +516,21 @@ export async function GET(): Promise<NextResponse> {
             url: `${origin}/.well-known/hotels.jsonl`,
             description:
               "Catalogue complet des hôtels publiés au format NDJSON (1 objet JSON par ligne) : identité, ville, pays ISO-3166-1, coordonnées GPS, distinction Palace, identifiants externes (Wikidata/Wikipedia/TripAdvisor/Booking/site officiel) et résumé factuel. Streamable — pensé pour l'ingestion et la réconciliation d'identité à l'échelle du catalogue entier (aucun plafond éditorial).",
+          },
+          {
+            url: `${origin}/.well-known/rankings.jsonl`,
+            description:
+              'Catalogue complet des classements éditoriaux au format NDJSON (1 objet par ligne) : slug, titres FR/EN, type, nombre d’hôtels, axes (type × lieu × thème × occasion), résumé factuel et URLs FR/EN. Surface exhaustive et streamable des sélections.',
+          },
+          {
+            url: `${origin}/.well-known/guides.jsonl`,
+            description:
+              'Catalogue complet des guides de destinations au format NDJSON (1 objet par ligne) : slug, noms FR/EN, périmètre (ville/région/pays), résumé FR/EN et URLs FR/EN. Surface exhaustive des long-reads ≥ 3 500 mots.',
+          },
+          {
+            url: `${origin}/.well-known/itineraries.jsonl`,
+            description:
+              'Catalogue complet des itinéraires éditoriaux au format NDJSON (1 objet par ligne) : slugs FR/EN, titres, résumé, pays, région, ville, thèmes, durée (jours), style de voyage, saison, nombre d’hôtels et URLs FR/EN.',
           },
           {
             url: `${origin}/llms-full.txt`,

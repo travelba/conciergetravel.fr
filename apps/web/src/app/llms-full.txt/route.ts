@@ -4,7 +4,9 @@ import { buildLlmsFullHotelPages, buildLlmsFullTxt, type LlmsFullTxtPage } from 
 
 import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
+import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { listIndexableHotelsForLlms } from '@/server/hotels/list-indexable-for-llms';
+import { listItineraries } from '@/server/itineraries/list-itineraries';
 
 /**
  * /llms-full.txt — verbose LLM ingestion file (skill: geo-llm-optimization).
@@ -14,6 +16,12 @@ import { listIndexableHotelsForLlms } from '@/server/hotels/list-indexable-for-l
  * section per hotel (canonical URL, factual summary, key facts). The
  * editorial preamble (`Le Concierge`, mentions légales) stays in code
  * so the corpus reads coherently even when the DB is empty.
+ *
+ * GE-4: also emits one section per destination guide and per itinerary
+ * (FR + EN) so the verbose corpus covers the high-value editorial
+ * long-reads, not just hotels. The 602 rankings are referenced via a
+ * single pointer to the complete `/.well-known/rankings.jsonl` feed
+ * (inlining them all would bloat the corpus; llms.txt lists them).
  *
  * Caching: `force-static` + `revalidate = 3600`. Cold start hits
  * Supabase once per hour; warm revalidations are served from the
@@ -84,6 +92,91 @@ export async function GET(): Promise<NextResponse> {
     }
   }
 
+  // GE-4 — editorial long-reads: destination guides + itineraries.
+  // Defensive `[]` so a Supabase outage never crashes the build.
+  const [guides, itineraries] = await Promise.all([
+    listPublishedGuides().catch(() => []),
+    listItineraries({ limit: 100 }).catch(() => []),
+  ]);
+
+  const guidePages: LlmsFullTxtPage[] = [];
+  for (const g of guides) {
+    guidePages.push({
+      url: `${origin}/fr/destination/${g.slug}`,
+      title: `Destination ${g.nameFr}`,
+      summary: g.summaryFr,
+      keyFacts: [
+        `Périmètre : ${g.scope}`,
+        'Guide long-read ≥ 3 500 mots (Palaces, art de vivre, infos pratiques)',
+      ],
+      ...(g.updatedAt !== null ? { updatedAt: g.updatedAt } : {}),
+    });
+    if (g.summaryEn !== null && g.summaryEn.length > 0) {
+      guidePages.push({
+        url: `${origin}/en/destination/${g.slug}`,
+        title: `${g.nameEn ?? g.nameFr} — destination guide`,
+        summary: g.summaryEn,
+        keyFacts: [
+          `Scope: ${g.scope}`,
+          'Long-read guide ≥ 3,500 words (Palaces, lifestyle, practical info)',
+        ],
+        ...(g.updatedAt !== null ? { updatedAt: g.updatedAt } : {}),
+      });
+    }
+  }
+
+  const itineraryPages: LlmsFullTxtPage[] = [];
+  for (const it of itineraries) {
+    const placeFr = it.destinationCity ?? it.destinationRegion ?? it.countryCode ?? 'International';
+    const durFr =
+      it.durationMaxDays !== null && it.durationMaxDays !== it.durationMinDays
+        ? `Durée : ${it.durationMinDays}-${it.durationMaxDays} jours`
+        : `Durée : ${it.durationMinDays} jour${it.durationMinDays === 1 ? '' : 's'}`;
+    if (it.metaDescFr !== null && it.metaDescFr.length > 0) {
+      itineraryPages.push({
+        url: `${origin}/fr/itineraire/${it.slugFr}`,
+        title: `Itinéraire — ${it.titleFr}`,
+        summary: it.metaDescFr,
+        keyFacts: [
+          durFr,
+          `Destination : ${placeFr}`,
+          `${it.hotelCount} hôtel${it.hotelCount === 1 ? '' : 's'} associé${it.hotelCount === 1 ? '' : 's'}`,
+        ],
+        ...(it.lastUpdated.length > 0 ? { updatedAt: it.lastUpdated } : {}),
+      });
+    }
+    if (it.metaDescEn !== null && it.metaDescEn.length > 0) {
+      itineraryPages.push({
+        url: `${origin}/en/itineraire/${it.slugEn ?? it.slugFr}`,
+        title: `Itinerary — ${it.titleEn ?? it.titleFr}`,
+        summary: it.metaDescEn,
+        keyFacts: [
+          `Duration: ${it.durationMinDays} day${it.durationMinDays === 1 ? '' : 's'}`,
+          `Destination: ${placeFr}`,
+          `${it.hotelCount} paired hotel${it.hotelCount === 1 ? '' : 's'}`,
+        ],
+        ...(it.lastUpdated.length > 0 ? { updatedAt: it.lastUpdated } : {}),
+      });
+    }
+  }
+
+  // Rankings are not inlined (602 sections would bloat the corpus and
+  // llms.txt already lists them); a single pointer routes agents to the
+  // complete machine-readable feed.
+  const collectionPages: LlmsFullTxtPage[] = [
+    {
+      url: `${origin}/fr/classements`,
+      title: 'Classements éditoriaux — index',
+      summary:
+        'Sélections thématiques du Concierge (par type, lieu, thème, occasion). ' +
+        `Catalogue COMPLET machine-readable : ${origin}/.well-known/rankings.jsonl — chaque classement expose titres FR/EN, axes, nombre d'hôtels et résumé factuel.`,
+      keyFacts: [
+        `Feed complet : ${origin}/.well-known/rankings.jsonl`,
+        'Filtres : type × lieu × thème × occasion',
+      ],
+    },
+  ];
+
   const body = buildLlmsFullTxt({
     siteName: 'MyConciergeHotel.com',
     tagline: "La sélection du Concierge — hôtels d'exception dans le monde",
@@ -92,7 +185,7 @@ export async function GET(): Promise<NextResponse> {
       `MyConciergeHotel.com est la sélection éditoriale du Concierge : ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays — Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. ` +
       'Conciergerie IATA accréditée. Conseil du Concierge opérationnel sur chaque fiche.',
     lastUpdatedDate: new Date().toISOString(),
-    pages: [...editorialPages, ...hotelPages],
+    pages: [...editorialPages, ...collectionPages, ...guidePages, ...itineraryPages, ...hotelPages],
   });
 
   return new NextResponse(body, {
