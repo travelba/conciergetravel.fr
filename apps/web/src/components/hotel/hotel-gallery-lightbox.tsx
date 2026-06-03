@@ -447,10 +447,7 @@ export function HotelGalleryLightbox({
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
               <ul className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3">
                 {allImages.map((img, index) => (
-                  <li
-                    key={img.publicId}
-                    className={index === 0 ? 'col-span-2 md:col-span-3' : ''}
-                  >
+                  <li key={img.publicId} className={index === 0 ? 'col-span-2 md:col-span-3' : ''}>
                     <button
                       type="button"
                       onClick={() => openAt(index)}

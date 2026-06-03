@@ -90,11 +90,7 @@ export async function HotelTrustSignals({
               {t('brand')}
             </dt>
             <dd className="flex items-start gap-2.5">
-              <DistinctionEmblem
-                label={sections.brand.display_name}
-                forceKind="brand"
-                size="sm"
-              />
+              <DistinctionEmblem label={sections.brand.display_name} forceKind="brand" size="sm" />
               <div className="flex min-w-0 flex-col gap-0.5">
                 {(() => {
                   const slug = brandHrefSlug(sections.brand);

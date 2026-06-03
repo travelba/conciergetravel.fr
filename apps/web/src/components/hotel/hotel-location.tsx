@@ -581,10 +581,39 @@ const SHOP_KIND_KEYWORDS: readonly (readonly [ShopKind, readonly string[]])[] = 
   ['market', ['marché', 'marche', 'market', 'halle']],
   ['bank', ['banque', 'bank', 'atm', 'distributeur', 'bureau de change', 'post_office', 'poste']],
   ['beauty', ['coiff', 'beaut', 'beauty', 'hairdress', 'spa', 'esthét', 'esthet', 'parfum']],
-  ['fashion', ['mode', 'vêtement', 'vetement', 'clothes', 'fashion', 'boutique', 'concept store', 'maroquin', 'chauss', 'bijou', 'jewel']],
+  [
+    'fashion',
+    [
+      'mode',
+      'vêtement',
+      'vetement',
+      'clothes',
+      'fashion',
+      'boutique',
+      'concept store',
+      'maroquin',
+      'chauss',
+      'bijou',
+      'jewel',
+    ],
+  ],
   [
     'grocery',
-    ['épicer', 'epicer', 'grocery', 'deli', 'supermarket', 'supermarché', 'convenience', 'alimentation', 'gourmet', 'delicatessen', 'food', 'store', 'shop'],
+    [
+      'épicer',
+      'epicer',
+      'grocery',
+      'deli',
+      'supermarket',
+      'supermarché',
+      'convenience',
+      'alimentation',
+      'gourmet',
+      'delicatessen',
+      'food',
+      'store',
+      'shop',
+    ],
   ],
 ];
 
@@ -602,7 +631,9 @@ function resolveShopKind(
 
 const SHOP_ICON_PATHS: Record<ShopKind, React.ReactNode> = {
   // Baguette / loaf.
-  bakery: <path d="M4 14c-1.5-1.5-1.5-4 0-5.5l9-4.5c2-1 4.5 0 5.5 2s0 4.5-2 5.5l-9 4.5c-1.2.6-2.6.4-3.5-.5zM8 9l8-4M10 12l8-4" />,
+  bakery: (
+    <path d="M4 14c-1.5-1.5-1.5-4 0-5.5l9-4.5c2-1 4.5 0 5.5 2s0 4.5-2 5.5l-9 4.5c-1.2.6-2.6.4-3.5-.5zM8 9l8-4M10 12l8-4" />
+  ),
   // Mortar & pestle / cross — pharmacy.
   pharmacy: (
     <>
@@ -740,16 +771,95 @@ const VISIT_KIND_KEYWORDS: readonly (readonly [VisitKind, readonly string[]])[] 
   ['castle', ['castle', 'château', 'chateau', 'fort', 'citadelle', 'palais', 'palace']],
   [
     'religious',
-    ['monaster', 'monastère', 'abbey', 'abbaye', 'church', 'église', 'eglise', 'cathedral', 'cathédrale', 'chapel', 'chapelle', 'basilique', 'religious', 'couvent', 'prieuré', 'prieure', 'cloître', 'cloitre'],
+    [
+      'monaster',
+      'monastère',
+      'abbey',
+      'abbaye',
+      'church',
+      'église',
+      'eglise',
+      'cathedral',
+      'cathédrale',
+      'chapel',
+      'chapelle',
+      'basilique',
+      'religious',
+      'couvent',
+      'prieuré',
+      'prieure',
+      'cloître',
+      'cloitre',
+    ],
   ],
-  ['museum', ['museum', 'musée', 'musee', 'gallery', 'galerie', 'exhibition', 'exposition', 'écomusée', 'ecomusee']],
+  [
+    'museum',
+    [
+      'museum',
+      'musée',
+      'musee',
+      'gallery',
+      'galerie',
+      'exhibition',
+      'exposition',
+      'écomusée',
+      'ecomusee',
+    ],
+  ],
   ['garden', ['garden', 'jardin', 'park', 'parc', 'botaniqu', 'arboretum']],
-  ['viewpoint', ['viewpoint', 'belvédère', 'belvedere', 'panorama', 'point de vue', 'observatoire']],
-  ['water', ['beach', 'plage', 'lake', 'lac', 'rivière', 'riviere', 'fontaine', 'source', 'cascade', 'gorge']],
-  ['nature', ['nature', 'mountain', 'montagne', 'forest', 'forêt', 'foret', 'massif', 'réserve', 'reserve', 'site naturel']],
+  [
+    'viewpoint',
+    ['viewpoint', 'belvédère', 'belvedere', 'panorama', 'point de vue', 'observatoire'],
+  ],
+  [
+    'water',
+    [
+      'beach',
+      'plage',
+      'lake',
+      'lac',
+      'rivière',
+      'riviere',
+      'fontaine',
+      'source',
+      'cascade',
+      'gorge',
+    ],
+  ],
+  [
+    'nature',
+    [
+      'nature',
+      'mountain',
+      'montagne',
+      'forest',
+      'forêt',
+      'foret',
+      'massif',
+      'réserve',
+      'reserve',
+      'site naturel',
+    ],
+  ],
   [
     'monument',
-    ['monument', 'heritage', 'patrimoine', 'memorial', 'mémorial', 'ruins', 'ruine', 'vestige', 'troglo', 'site', 'arc', 'pont', 'bridge', 'remparts', 'tour'],
+    [
+      'monument',
+      'heritage',
+      'patrimoine',
+      'memorial',
+      'mémorial',
+      'ruins',
+      'ruine',
+      'vestige',
+      'troglo',
+      'site',
+      'arc',
+      'pont',
+      'bridge',
+      'remparts',
+      'tour',
+    ],
   ],
 ];
 
@@ -763,9 +873,7 @@ function resolveVisitKind(rawType: string, category: string | null, name: string
 
 const VISIT_ICON_PATHS: Record<VisitKind, React.ReactNode> = {
   // Crenellated castle.
-  castle: (
-    <path d="M4 21V9l2 1V7l2 1V7l2-1v3l2-1V7l2 1V7l2-1v3l2-1v12M4 21h16M9 21v-4h6v4" />
-  ),
+  castle: <path d="M4 21V9l2 1V7l2 1V7l2-1v3l2-1V7l2 1V7l2-1v3l2-1v12M4 21h16M9 21v-4h6v4" />,
   // Bell tower / abbey with a cross.
   religious: (
     <>
@@ -836,16 +944,60 @@ const DO_KIND_KEYWORDS: readonly (readonly [DoKind, readonly string[]])[] = [
   ['cycling', ['vélo', 'velo', 'bike', 'cycl', 'vtt', 'e-bike', 'bicycl']],
   [
     'tasting',
-    ['winery', 'wine', 'vin', 'dégustation', 'degustation', 'domaine', 'vignoble', 'œnolog', 'oenolog', 'cellar', 'cave'],
+    [
+      'winery',
+      'wine',
+      'vin',
+      'dégustation',
+      'degustation',
+      'domaine',
+      'vignoble',
+      'œnolog',
+      'oenolog',
+      'cellar',
+      'cave',
+    ],
   ],
-  ['hiking', ['hike', 'rando', 'trail', 'sentier', 'trek', 'col ', 'summit', 'gr ', 'marche', 'balade']],
+  [
+    'hiking',
+    ['hike', 'rando', 'trail', 'sentier', 'trek', 'col ', 'summit', 'gr ', 'marche', 'balade'],
+  ],
   ['market', ['market', 'marché', 'marche', 'halle', 'brocante']],
   [
     'swimming',
-    ['kayak', 'canoë', 'canoe', 'paddle', 'rafting', 'baignade', 'swim', 'nautique', 'plonge', 'voile', 'sailing', 'water'],
+    [
+      'kayak',
+      'canoë',
+      'canoe',
+      'paddle',
+      'rafting',
+      'baignade',
+      'swim',
+      'nautique',
+      'plonge',
+      'voile',
+      'sailing',
+      'water',
+    ],
   ],
-  ['sport', ['golf', 'tennis', 'equestr', 'équestr', 'cheval', 'ski', 'escalade', 'climb', 'sport', 'yoga']],
-  ['dining', ['restaurant', 'bistro', 'bistrot', 'table', 'brasserie', 'dining', 'gastronom', 'trattoria', 'guinguette']],
+  [
+    'sport',
+    ['golf', 'tennis', 'equestr', 'équestr', 'cheval', 'ski', 'escalade', 'climb', 'sport', 'yoga'],
+  ],
+  [
+    'dining',
+    [
+      'restaurant',
+      'bistro',
+      'bistrot',
+      'table',
+      'brasserie',
+      'dining',
+      'gastronom',
+      'trattoria',
+      'guinguette',
+    ],
+  ],
 ];
 
 function resolveDoKind(rawType: string, category: string | null, name: string): DoKind {
@@ -921,7 +1073,8 @@ const DO_ICON_PATHS: Record<DoKind, React.ReactNode> = {
  * château, an abbey, a hot-air balloon and a bakery each read at a glance.
  */
 function resolvePoiIcon(bucket: PoiBucket, poi: LocalisedPointOfInterest): React.ReactNode {
-  if (bucket === 'visit') return VISIT_ICON_PATHS[resolveVisitKind(poi.type, poi.category, poi.name)];
+  if (bucket === 'visit')
+    return VISIT_ICON_PATHS[resolveVisitKind(poi.type, poi.category, poi.name)];
   if (bucket === 'do') return DO_ICON_PATHS[resolveDoKind(poi.type, poi.category, poi.name)];
   return SHOP_ICON_PATHS[resolveShopKind(poi.type, poi.category, poi.name)];
 }

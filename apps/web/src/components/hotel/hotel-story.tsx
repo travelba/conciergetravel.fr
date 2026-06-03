@@ -75,9 +75,7 @@ export async function HotelStory({
         aria-label={t('story.tocLabel')}
         className="border-border bg-bg rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start"
       >
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
-          {t('story.tocTitle')}
-        </p>
+        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('story.tocTitle')}</p>
         <ol className="flex flex-col gap-1.5 text-sm">
           {sections.map((section, idx) => (
             <li key={section.anchor}>
@@ -97,11 +95,7 @@ export async function HotelStory({
 
       <article className="prose text-fg/90 max-w-prose text-base">
         {sections.map((section) => (
-          <section
-            key={section.anchor}
-            aria-labelledby={section.anchor}
-            className="mb-8 last:mb-0"
-          >
+          <section key={section.anchor} aria-labelledby={section.anchor} className="mb-8 last:mb-0">
             <h3 id={section.anchor} className="text-fg mb-3 mt-0 scroll-mt-24 font-serif text-xl">
               {section.title}
             </h3>

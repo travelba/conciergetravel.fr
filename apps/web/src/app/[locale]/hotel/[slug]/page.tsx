@@ -1157,7 +1157,7 @@ async function renderHotelPage(
             block so the JSON-LD `speakable`, `data-aeo` and `Hotel.description`
             GEO contracts are untouched.
           */}
-          <figure className="mt-6 mb-12 border-l-2 border-amber-400/80 pl-5 sm:mb-16 sm:pl-7">
+          <figure className="mb-12 mt-6 border-l-2 border-amber-400/80 pl-5 sm:mb-16 sm:pl-7">
             <blockquote className="text-fg font-serif text-2xl italic leading-snug sm:text-[1.7rem] sm:leading-snug">
               {locale === 'fr' ? '«\u00A0' : '\u201C'}
               {AIRELLES_CONCIERGE_HOOK[locale]}

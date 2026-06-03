@@ -201,7 +201,7 @@ export function MobileNav(): ReactElement {
                 action={getPathname({ locale, href: '/recherche' })}
                 method="get"
                 aria-label={t('search.label')}
-                className="border-border bg-bg focus-within:border-amber-400 focus-within:ring-amber-500 mb-3 flex h-10 items-center rounded-md border focus-within:ring-2"
+                className="border-border bg-bg mb-3 flex h-10 items-center rounded-md border focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500"
               >
                 <label className="sr-only" htmlFor="mobile-search-destination">
                   {t('search.label')}

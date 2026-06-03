@@ -32,18 +32,87 @@ export type DistinctionKind =
  */
 const DISTINCTION_KEYWORDS: readonly (readonly [DistinctionKind, readonly string[]])[] = [
   ['palace', ['palace', 'atout france']],
-  ['key', ['michelin key', 'clé michelin', 'cle michelin', 'michelin keys', 'clés michelin', 'cles michelin']],
+  [
+    'key',
+    [
+      'michelin key',
+      'clé michelin',
+      'cle michelin',
+      'michelin keys',
+      'clés michelin',
+      'cles michelin',
+    ],
+  ],
   [
     'green',
-    ['green key', 'clef verte', 'clé verte', 'cle verte', 'leed', 'green globe', 'écolabel', 'ecolabel', 'breeam', 'green star', 'earthcheck'],
+    [
+      'green key',
+      'clef verte',
+      'clé verte',
+      'cle verte',
+      'leed',
+      'green globe',
+      'écolabel',
+      'ecolabel',
+      'breeam',
+      'green star',
+      'earthcheck',
+    ],
   ],
-  ['relais', ['relais & châteaux', 'relais et châteaux', 'relais & chateaux', 'relais and chateaux', 'relais&châteaux']],
-  ['leading', ['leading hotels', 'lhw', 'small luxury hotels', 'slh', 'virtuoso', 'preferred hotels', 'design hotels']],
+  [
+    'relais',
+    [
+      'relais & châteaux',
+      'relais et châteaux',
+      'relais & chateaux',
+      'relais and chateaux',
+      'relais&châteaux',
+    ],
+  ],
+  [
+    'leading',
+    [
+      'leading hotels',
+      'lhw',
+      'small luxury hotels',
+      'slh',
+      'virtuoso',
+      'preferred hotels',
+      'design hotels',
+    ],
+  ],
   [
     'trophy',
-    ['world travel awards', "world's 50 best", 'worlds 50 best', '50 best', 'condé nast', 'conde nast', 'readers', 'travel + leisure', 'travel and leisure', "travellers' choice", 'best hotel', 'gold list', 'hot list'],
+    [
+      'world travel awards',
+      "world's 50 best",
+      'worlds 50 best',
+      '50 best',
+      'condé nast',
+      'conde nast',
+      'readers',
+      'travel + leisure',
+      'travel and leisure',
+      "travellers' choice",
+      'best hotel',
+      'gold list',
+      'hot list',
+    ],
   ],
-  ['stars', ['forbes', 'five star', 'five-star', '5 star', '5-star', 'cinq étoiles', 'cinq etoiles', '5 étoiles', '5 etoiles']],
+  [
+    'stars',
+    [
+      'forbes',
+      'five star',
+      'five-star',
+      '5 star',
+      '5-star',
+      'cinq étoiles',
+      'cinq etoiles',
+      '5 étoiles',
+      '5 etoiles',
+    ],
+  ],
   ['guide', ['michelin', 'gault', 'tablet', 'guide', 'star']],
 ];
 
@@ -101,7 +170,9 @@ const DISTINCTION_ICON_PATHS: Record<DistinctionKind, React.ReactNode> = {
     </>
   ),
   // Open book — guides (Michelin star, Gault&Millau, Tablet).
-  guide: <path d="M12 6c-2-1.2-4.5-1.5-7-1v13c2.5-.5 5-.2 7 1 2-1.2 4.5-1.5 7-1V5c-2.5-.5-5-.2-7 1zM12 6v13" />,
+  guide: (
+    <path d="M12 6c-2-1.2-4.5-1.5-7-1v13c2.5-.5 5-.2 7 1 2-1.2 4.5-1.5 7-1V5c-2.5-.5-5-.2-7 1zM12 6v13" />
+  ),
   // Building crest — hotel group / brand.
   brand: (
     <>

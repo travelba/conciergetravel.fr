@@ -62,8 +62,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'exterior',
     altFr: 'Vue aérienne de la bastide Airelles Gordes et de ses jardins, Gordes',
     altEn: 'Aerial view of the Airelles Gordes bastide and its gardens, Gordes',
-    captionFr: 'La bastide du XVIIIe siècle et ses jardins en terrasses dominent le village perché de Gordes, dans le Luberon.',
-    captionEn: 'The 18th-century bastide and its terraced gardens overlook the hilltop village of Gordes, in the Luberon.',
+    captionFr:
+      'La bastide du XVIIIe siècle et ses jardins en terrasses dominent le village perché de Gordes, dans le Luberon.',
+    captionEn:
+      'The 18th-century bastide and its terraced gardens overlook the hilltop village of Gordes, in the Luberon.',
     credit: 'HiddenCliff',
     isHero: true,
   },
@@ -72,8 +74,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'exterior',
     altFr: 'Entrée en pierre de la bastide Airelles Gordes, Gordes',
     altEn: 'Stone entrance of the Airelles Gordes bastide, Gordes',
-    captionFr: 'L’entrée en pierre dorée de La Bastide, restaurée par 150 artisans lors de la réouverture de 2015.',
-    captionEn: 'The golden-stone entrance of La Bastide, restored by 150 craftspeople for its 2015 reopening.',
+    captionFr:
+      'L’entrée en pierre dorée de La Bastide, restaurée par 150 artisans lors de la réouverture de 2015.',
+    captionEn:
+      'The golden-stone entrance of La Bastide, restored by 150 craftspeople for its 2015 reopening.',
     credit: 'HiddenCliff',
   },
   {
@@ -81,8 +85,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'lobby',
     altFr: 'Salon de réception provençal de l’Airelles Gordes, Gordes',
     altEn: 'Provençal reception lounge at Airelles Gordes, Gordes',
-    captionFr: 'Le salon de réception mêle mobilier d’époque et lumière de Provence sous les voûtes de La Bastide.',
-    captionEn: 'The reception lounge blends period furniture with Provençal light beneath the vaults of La Bastide.',
+    captionFr:
+      'Le salon de réception mêle mobilier d’époque et lumière de Provence sous les voûtes de La Bastide.',
+    captionEn:
+      'The reception lounge blends period furniture with Provençal light beneath the vaults of La Bastide.',
     credit: 'Airelles',
   },
   {
@@ -90,8 +96,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'view',
     altFr: 'Balade à vélo vers le village perché de Gordes depuis l’Airelles Gordes',
     altEn: 'Cycling toward the hilltop village of Gordes from Airelles Gordes',
-    captionFr: 'Le village perché de Gordes, à dix minutes de La Bastide, classé parmi les plus beaux villages de France.',
-    captionEn: 'The hilltop village of Gordes, ten minutes from La Bastide, ranks among France’s most beautiful villages.',
+    captionFr:
+      'Le village perché de Gordes, à dix minutes de La Bastide, classé parmi les plus beaux villages de France.',
+    captionEn:
+      'The hilltop village of Gordes, ten minutes from La Bastide, ranks among France’s most beautiful villages.',
     credit: 'HiddenCliff',
   },
   {
@@ -99,8 +107,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'pool',
     altFr: 'Piscine en terrasse bordée d’oliviers de l’Airelles Gordes, Gordes',
     altEn: 'Olive-lined terrace pool at Airelles Gordes, Gordes',
-    captionFr: 'La piscine en terrasse, entourée d’oliviers et de cyprès centenaires, ouvre sur la vallée du Luberon.',
-    captionEn: 'The terrace pool, framed by olive trees and ancient cypresses, opens onto the Luberon valley.',
+    captionFr:
+      'La piscine en terrasse, entourée d’oliviers et de cyprès centenaires, ouvre sur la vallée du Luberon.',
+    captionEn:
+      'The terrace pool, framed by olive trees and ancient cypresses, opens onto the Luberon valley.',
     credit: 'HiddenCliff',
   },
   {
@@ -108,8 +118,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'room',
     altFr: 'Chambre Supérieure Village de l’Airelles Gordes, Gordes',
     altEn: 'Superior Village bedroom at Airelles Gordes, Gordes',
-    captionFr: 'Les chambres Supérieures Village marient pierre, lin et bois patiné dans l’esprit des bastides provençales.',
-    captionEn: 'Superior Village rooms pair stone, linen and aged wood in the spirit of Provençal bastides.',
+    captionFr:
+      'Les chambres Supérieures Village marient pierre, lin et bois patiné dans l’esprit des bastides provençales.',
+    captionEn:
+      'Superior Village rooms pair stone, linen and aged wood in the spirit of Provençal bastides.',
     credit: 'Airelles',
   },
   {
@@ -117,8 +129,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'suite',
     altFr: 'Chambre de la Suite Baron de Simiane, Airelles Gordes, Gordes',
     altEn: 'Bedroom of the Baron de Simiane Suite, Airelles Gordes, Gordes',
-    captionFr: 'La Suite Baron de Simiane, choix du Concierge, ouvre sur les toits de Gordes et la vallée.',
-    captionEn: 'The Baron de Simiane Suite, the Concierge’s pick, opens onto the rooftops of Gordes and the valley.',
+    captionFr:
+      'La Suite Baron de Simiane, choix du Concierge, ouvre sur les toits de Gordes et la vallée.',
+    captionEn:
+      'The Baron de Simiane Suite, the Concierge’s pick, opens onto the rooftops of Gordes and the valley.',
     credit: 'Vincent Leroux',
   },
   {
@@ -126,8 +140,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'suite',
     altFr: 'Salon de la Suite Duc de Soubise, Airelles Gordes, Gordes',
     altEn: 'Living room of the Duc de Soubise Suite, Airelles Gordes, Gordes',
-    captionFr: 'Le salon de la Suite Duc de Soubise réunit boiseries, cheminée et tissus chinés dans 430 m².',
-    captionEn: 'The Duc de Soubise Suite living room gathers panelling, a fireplace and curated fabrics across 430 m².',
+    captionFr:
+      'Le salon de la Suite Duc de Soubise réunit boiseries, cheminée et tissus chinés dans 430 m².',
+    captionEn:
+      'The Duc de Soubise Suite living room gathers panelling, a fireplace and curated fabrics across 430 m².',
     credit: 'Vincent Leroux',
   },
   {
@@ -135,8 +151,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'detail',
     altFr: 'Salle de bain en pierre d’une chambre Deluxe Village, Airelles Gordes',
     altEn: 'Stone bathroom of a Deluxe Village room, Airelles Gordes',
-    captionFr: 'Les salles de bain en pierre des chambres Deluxe Village prolongent l’architecture d’origine de la bastide.',
-    captionEn: 'The stone bathrooms of Deluxe Village rooms extend the bastide’s original architecture.',
+    captionFr:
+      'Les salles de bain en pierre des chambres Deluxe Village prolongent l’architecture d’origine de la bastide.',
+    captionEn:
+      'The stone bathrooms of Deluxe Village rooms extend the bastide’s original architecture.',
     credit: 'Mark Luscombe-Whyte',
   },
   {
@@ -144,8 +162,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'dining',
     altFr: 'Terrasse du restaurant La Table de La Bastide, Airelles Gordes, Gordes',
     altEn: 'Terrace of La Table de La Bastide restaurant, Airelles Gordes, Gordes',
-    captionFr: 'La terrasse de La Table de La Bastide sert une cuisine de terroir face à la vallée du Luberon.',
-    captionEn: 'The terrace of La Table de La Bastide serves terroir-driven cuisine facing the Luberon valley.',
+    captionFr:
+      'La terrasse de La Table de La Bastide sert une cuisine de terroir face à la vallée du Luberon.',
+    captionEn:
+      'The terrace of La Table de La Bastide serves terroir-driven cuisine facing the Luberon valley.',
     credit: 'Vincent Leroux',
   },
   {
@@ -153,8 +173,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'dining',
     altFr: 'Terrasse panoramique du Clover Gordes par Jean-François Piège, Airelles Gordes',
     altEn: 'Panoramic terrace of Clover Gordes by Jean-François Piège, Airelles Gordes',
-    captionFr: 'La terrasse du Clover Gordes, table signée Jean-François Piège, surplombe les toits du village.',
-    captionEn: 'The Clover Gordes terrace, a table by Jean-François Piège, overlooks the village rooftops.',
+    captionFr:
+      'La terrasse du Clover Gordes, table signée Jean-François Piège, surplombe les toits du village.',
+    captionEn:
+      'The Clover Gordes terrace, a table by Jean-François Piège, overlooks the village rooftops.',
     credit: 'Airelles',
   },
   {
@@ -162,8 +184,10 @@ const CURATED: readonly CuratedImage[] = [
     category: 'spa',
     altFr: 'Spa voûté Airelles par Guerlain, Airelles Gordes, Gordes',
     altEn: 'Vaulted Airelles Spa by Guerlain, Airelles Gordes, Gordes',
-    captionFr: 'Le Spa Airelles par Guerlain occupe des salles voûtées en pierre, inspirées de l’abbaye de Sénanque.',
-    captionEn: 'The Airelles Spa by Guerlain unfolds across vaulted stone rooms inspired by Sénanque Abbey.',
+    captionFr:
+      'Le Spa Airelles par Guerlain occupe des salles voûtées en pierre, inspirées de l’abbaye de Sénanque.',
+    captionEn:
+      'The Airelles Spa by Guerlain unfolds across vaulted stone rooms inspired by Sénanque Abbey.',
     credit: 'Vincent Leroux',
   },
 ];
@@ -213,7 +237,9 @@ async function main(): Promise<void> {
     serviceRoleKey: photoEnv.SUPABASE_SERVICE_ROLE_KEY,
   };
 
-  console.log(`[resource-airelles] ${CURATED.length} curated images — dry-run: ${dryRun ? 'YES' : 'NO'}`);
+  console.log(
+    `[resource-airelles] ${CURATED.length} curated images — dry-run: ${dryRun ? 'YES' : 'NO'}`,
+  );
 
   const gallery: GalleryRow[] = [];
   let heroPublicId: string | null = null;
@@ -250,8 +276,12 @@ async function main(): Promise<void> {
     });
 
     if (!result.ok) {
-      console.error(`  [${index}] UPLOAD FAILED (${img.category}): ${JSON.stringify(result.error)}`);
-      throw new Error(`[resource-airelles] upload failed at index ${index}; aborting before DB patch`);
+      console.error(
+        `  [${index}] UPLOAD FAILED (${img.category}): ${JSON.stringify(result.error)}`,
+      );
+      throw new Error(
+        `[resource-airelles] upload failed at index ${index}; aborting before DB patch`,
+      );
     }
 
     const publicId = result.value.public_id;

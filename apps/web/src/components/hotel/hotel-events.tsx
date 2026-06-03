@@ -177,7 +177,7 @@ function DateChip({
         <CategoryIcon category={category} className="text-accent h-7 w-7" strokeWidth={1.5} />
       ) : (
         <>
-          <span className="text-fg text-lg font-semibold leading-none tabular-nums">
+          <span className="text-fg text-lg font-semibold tabular-nums leading-none">
             {parts.day}
           </span>
           <span className="text-muted mt-1 text-[10px] font-medium uppercase tracking-wide">
@@ -232,9 +232,7 @@ const CATEGORY_ICON_PATHS: Record<EventCategory, React.ReactNode> = {
     </>
   ),
   // Sparkle/star burst — festivals (music, arts, gastronomy).
-  festival: (
-    <path d="M12 2.5 14 9l6.5 2L14 13l-2 6.5L10 13l-6.5-2L10 9z" />
-  ),
+  festival: <path d="M12 2.5 14 9l6.5 2L14 13l-2 6.5L10 13l-6.5-2L10 9z" />,
   // Trophy — sporting fixtures (marathons, regattas, tennis).
   sport: (
     <>

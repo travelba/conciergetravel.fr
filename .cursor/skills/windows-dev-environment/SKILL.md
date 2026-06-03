@@ -479,7 +479,7 @@ Two compounding causes, both environmental:
    A previous session had exported `PLAYWRIGHT_BASE_URL=http://localhost:3055`.
    Playwright still **built and started its own production server** on the
    configured `PORT` (so `next build` ran, supabase errors scrolled past,
-   everything *looked* right), but the browser navigated to
+   everything _looked_ right), but the browser navigated to
    `localhost:3055` — a **dev server** — instead. Tell-tale signs in the
    page's console: `[HMR] connected` and `Download the React DevTools…`
    (both are **development-only**; a real `next start` never prints them).
