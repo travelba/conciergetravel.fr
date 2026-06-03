@@ -1,7 +1,7 @@
 ---
 description: Next.js 15 App Router conventions for MyConciergeHotel.com (Server Components, dynamic, ISR, metadata, middleware, nonce).
 globs: "apps/web/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Next.js App Router — MyConciergeHotel.com

@@ -1,7 +1,7 @@
 ---
 description: Vendor API integration patterns for MyConciergeHotel.com (HTTP client, Zod, retries, Redis cache, idempotency, error mapping).
 globs: "packages/integrations/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # API integrations — MyConciergeHotel.com

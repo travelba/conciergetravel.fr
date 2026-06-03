@@ -1,7 +1,7 @@
 ---
 description: SEO + GEO + AEO conventions for MyConciergeHotel.com (metadata, JSON-LD, robots.txt, llms.txt, agent-skills, AEO blocks).
 globs: "{packages/seo,apps/web/src/app}/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # SEO / GEO / AEO — MyConciergeHotel.com

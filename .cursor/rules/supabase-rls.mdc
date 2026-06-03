@@ -1,7 +1,7 @@
 ---
 description: Supabase PostgreSQL migrations, RLS and performance rules for MyConciergeHotel.com.
 globs: "{packages/db,apps/admin}/**/*.{sql,ts}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Supabase + PostgreSQL — MyConciergeHotel.com
