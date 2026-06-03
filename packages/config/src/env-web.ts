@@ -85,14 +85,22 @@ export const env = createEnv({
     process.env['SKIP_ENV_VALIDATION'] === 'true' ||
     process.env['NEXT_PUBLIC_SKIP_ENV_VALIDATION'] === 'true',
   emptyStringAsUndefined: true,
-  onValidationError: (error) => {
-    // Default behaviour throws "Invalid environment variables" with `[object Object]`.
-    // Surface the actual Zod issues so we can act on them in dev + CI.
-    const formatted = JSON.stringify(error.flatten().fieldErrors, null, 2);
+  onValidationError: (issues) => {
+    // Since @t3-oss/env-nextjs v0.12 (Standard Schema migration) the callback
+    // receives a readonly array of issues instead of a ZodError — so the old
+    // `error.flatten()` no longer exists. Surface the offending field keys so
+    // we can act on them in dev + CI instead of the default `[object Object]`.
     // eslint-disable-next-line no-console
-    console.error('[env-web] Environment validation failed:\n' + formatted);
-    throw new Error(
-      `Invalid environment variables: ${Object.keys(error.flatten().fieldErrors).join(', ')}`,
+    console.error('[env-web] Environment validation failed:\n' + JSON.stringify(issues, null, 2));
+    const fields = Array.from(
+      new Set(
+        issues.flatMap((issue) => {
+          const segment = issue.path?.[0];
+          if (segment === undefined) return [];
+          return [typeof segment === 'object' ? String(segment.key) : String(segment)];
+        }),
+      ),
     );
+    throw new Error(`Invalid environment variables: ${fields.join(', ')}`);
   },
 });

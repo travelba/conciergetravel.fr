@@ -30,7 +30,7 @@
     "@sentry/nextjs": "catalog:",
     "@supabase/ssr": "catalog:",
     "@supabase/supabase-js": "catalog:",
-    "@t3-oss/env-nextjs": "^0.11.1",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@upstash/ratelimit": "catalog:",
     "@upstash/redis": "catalog:",
     "@vercel/analytics": "^2.0.1",
