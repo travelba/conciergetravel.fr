@@ -37,6 +37,14 @@ export const AgentSkillZod = z.object({
    * deep-linking the user to the human UI. See ADR-0017.
    */
   endpoint: AgentSkillEndpointZod.optional(),
+  /**
+   * When `true`, the skill's pricing/availability/booking semantics are
+   * frozen until Phase 6 (booking APIs wired — AGENTS.md §4ter). The
+   * endpoint still responds, but live pricing fields are omitted and a
+   * `{ available: false, reason: 'phase_6_frozen' }` shape is returned for
+   * comparator-style skills. Agents should not expect live rates.
+   */
+  phase6Frozen: z.boolean().optional(),
 });
 
 export const AgentSkillsDocumentZod = z.object({
@@ -71,6 +79,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         required: ['destination'],
       },
       endpoint: { method: 'POST', path: '/api/agent/search' },
+      phase6Frozen: true,
     },
     {
       name: 'list-cities',
@@ -193,6 +202,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         required: ['hotelSlug', 'checkin', 'checkout'],
       },
       endpoint: { method: 'POST', path: '/api/agent/compare-prices' },
+      phase6Frozen: true,
     },
     {
       name: 'booking',

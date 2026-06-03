@@ -98,11 +98,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Best-offer fetch (live Amadeus, Redis-cached 5 min). Only fires
   // when the agent supplied a stay window — otherwise we ship just
   // the catalogue cards.
+  //
+  // Phase 6 freeze (AGENTS.md §4ter, rule 31-hotel-page-blueprint): the
+  // freeze is DATA-driven, not code-disabled. A hotel only exposes live
+  // Amadeus rates when its `booking_mode` is `amadeus`/`little`. In the
+  // editorial phase every row is `display_only`/`email`, so no live offer
+  // call fires; the path auto-activates in Phase 6 when adapters are wired
+  // and rows flip to a bookable mode (no flag to re-toggle).
   const wantsOffers =
     body.checkIn !== undefined && body.checkOut !== undefined && body.adults !== undefined;
   const offers = wantsOffers
     ? await Promise.all(
         resolved.map(async ({ row }) => {
+          if (row.booking_mode !== 'amadeus' && row.booking_mode !== 'little') return null;
           const result = await getBestOfferForHotel({
             hotelId: row.id,
             amadeusHotelId:
