@@ -416,6 +416,65 @@ export async function updateHotelPremiumSection(
   await patchHotel(cfg, hotelId, { [column]: payload });
 }
 
+/**
+ * Featured press reviews payload (CDC §2.10 — editorial pull-quotes).
+ * Each entry mirrors the web `FeaturedReviewSchema`
+ * (`apps/web/src/server/hotels/get-hotel-by-slug.ts`). The seed ingestion
+ * CLI makes `source_url` mandatory so every quote carries provenance — we
+ * never ship a press quote without a citable URL.
+ */
+export interface FeaturedReviewPayload {
+  readonly source: string;
+  readonly source_url: string;
+  readonly author?: string;
+  readonly quote_fr?: string;
+  readonly quote_en?: string;
+  readonly rating?: number;
+  readonly max_rating?: number;
+  readonly date_iso?: string;
+}
+
+export async function updateHotelFeaturedReviews(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  reviews: readonly FeaturedReviewPayload[],
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { featured_reviews: reviews });
+}
+
+/**
+ * Resolve a hotel `id` from its `slug` (or `slug_en`). Returns null when
+ * no row matches — the seed ingestion CLI reports the miss instead of
+ * silently skipping. Includes draft rows (no `is_published` filter) so an
+ * editor can stage reviews on a not-yet-published fiche.
+ */
+export async function findHotelIdBySlug(
+  cfg: SupabaseRestConfig,
+  slug: string,
+): Promise<{ readonly id: string; readonly name: string } | null> {
+  const params = new URLSearchParams();
+  params.set('select', 'id,name');
+  params.set('or', `(slug.eq.${slug},slug_en.eq.${slug})`);
+  params.set('limit', '1');
+  const url = `${cfg.url}/rest/v1/hotels?${params.toString()}`;
+  const res = await fetch(url, {
+    headers: {
+      apikey: cfg.serviceRoleKey,
+      Authorization: `Bearer ${cfg.serviceRoleKey}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`[supabase-hotels] slug lookup failed (${res.status}): ${body.slice(0, 300)}`);
+  }
+  const json: unknown = await res.json();
+  if (!Array.isArray(json) || json.length === 0) return null;
+  const first = json[0] as { id?: unknown; name?: unknown };
+  if (typeof first.id !== 'string' || typeof first.name !== 'string') return null;
+  return { id: first.id, name: first.name };
+}
+
 async function patchHotel(
   cfg: SupabaseRestConfig,
   hotelId: string,

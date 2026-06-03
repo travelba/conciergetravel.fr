@@ -1,0 +1,28 @@
+{
+  "_doc": "Real, verified featured_reviews to ingest into hotels.featured_reviews (CDC §2.10). Each review MUST carry an https source_url for provenance and a quote that is verbatim (or a faithful translation) of the text published at that URL. Fill this file from an editorial sourcing pass, then run: pnpm exec tsx src/hotels/seed-featured-reviews.ts --dry-run  (then without --dry-run to write). See seed.example.json for the shape.",
+  "hotels": [
+    {
+      "slug": "les-airelles-gordes",
+      "reviews": [
+        {
+          "source": "MICHELIN Guide",
+          "source_url": "https://guide.michelin.com/en/hotels-stays/gordes/airelles-gordes-la-bastide-6874",
+          "quote_fr": "Le village provençal perché de Gordes offre un cadre spectaculaire à l'un des hôtels les plus extraordinaires de la région — une distinction de taille, vu la concurrence.",
+          "quote_en": "The Provençal hilltop village of Gordes provides the spectacular setting for one of the region's most extraordinary hotels — no small distinction, given the competition."
+        },
+        {
+          "source": "Forbes Travel Guide",
+          "source_url": "https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide",
+          "quote_fr": "Accrochée aux abords du village de Gordes, avec une vue à couper le souffle sur la vallée du Luberon balayée par le mistral, Airelles Gordes, La Bastide semble tout droit sortie d'un conte de fées médiéval français.",
+          "quote_en": "Clinging to the fringes of the town of Gordes with pinch-me views over Provence's mistral-wind-whipped Luberon valley, Airelles Gordes, La Bastide looks like something out of a medieval French fairytale."
+        },
+        {
+          "source": "The Hotel Journal",
+          "source_url": "https://thehoteljournal.com/airelles-gordes-la-bastide-review/",
+          "quote_fr": "Avec une adresse de premier choix au cœur de Gordes – « le plus beau village du monde » dominant les champs de lavande de Provence depuis sa colline, Airelles Gordes, La Bastide est à la hauteur de son cadre pittoresque.",
+          "quote_en": "Claiming a prime address at the heart of Gordes – 'the most beautiful village in the world' overlooking the lavender fields of Provence from a hilltop, Airelles Gordes, La Bastide lives up to its picturesque surroundings."
+        }
+      ]
+    }
+  ]
+}
