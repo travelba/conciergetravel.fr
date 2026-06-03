@@ -1,7 +1,7 @@
 ---
 description: Playwright E2E + test seam conventions for MyConciergeHotel.com (dev-fake modules, env flags, CI bypass).
 globs: "apps/web/{e2e,src/server}/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # E2E testing — MyConciergeHotel.com

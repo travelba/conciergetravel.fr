@@ -255,21 +255,43 @@ Cas particuliers à documenter :
 
 ## 7. Trajectoire post-audit
 
-| Prio   | Action                                                                                                                                | Vague                                 | Type                 |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------- |
-| **P1** | — (aucun)                                                                                                                             | —                                     | —                    |
-| **P2** | Corriger `31-hotel-page-blueprint.mdc` L82 `(ADR-0024)` → `(ADR-0025)`                                                                | **Vague F-bis SÉPARÉE** (modifie MDC) | correction immédiate |
-| **P2** | Arbitrer l'overlap globs : restreindre les globs des numérotées 10/12/30/40/41, OU les passer manuelles (pas de globs) comme 01/14/20 | prochaine vague (décision archi)      | backlog              |
-| **P3** | Corriger chemin `cloudinary.ts` → `cloudinary-presets.ts` dans `photo-quality.mdc`                                                    | Vague F-bis                           | correction           |
-| **P3** | Corriger / retirer le pointeur ADR-0004 dans `nextjs-app-router.mdc` L70                                                              | Vague F-bis                           | correction           |
-| **P3** | Nettoyer trailing whitespace (10-seo-foundations, itinerary-page, seo-geo)                                                            | Vague F-bis                           | hygiène              |
-| **P3** | Exécuter réellement les 26 scénarios N2 (run manuel ou agent de test)                                                                 | prochaine vague                       | validation           |
+| Prio   | Action                                                                                                                                                                                                                                                                                                    | Vague                                   | Type                 |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------- |
+| **P1** | — (aucun)                                                                                                                                                                                                                                                                                                 | —                                       | —                    |
+| **P2** | Corriger `31-hotel-page-blueprint.mdc` L82 `(ADR-0024)` → `(ADR-0025)`                                                                                                                                                                                                                                    | **Vague F-bis SÉPARÉE** (modifie MDC)   | correction immédiate |
+| **P2** | ✅ **Résolu (ADR-0028, option γ)** : flip `alwaysApply: true → false` sur 7 règles à glob étroit (`hotel-detail-page`, `photo-quality`, `e2e-testing`, `integrations-api`, `supabase-rls`, `nextjs-app-router`, `seo-geo`) → leur glob reprend la main ; 7 guardrails restent always-on (baseline 14 → 7) | PR `chore/mdc-globs-overlap-fix` (#128) | ✅ appliqué          |
+| **P3** | Corriger chemin `cloudinary.ts` → `cloudinary-presets.ts` dans `photo-quality.mdc`                                                                                                                                                                                                                        | Vague F-bis                             | correction           |
+| **P3** | Corriger / retirer le pointeur ADR-0004 dans `nextjs-app-router.mdc` L70                                                                                                                                                                                                                                  | Vague F-bis                             | correction           |
+| **P3** | Nettoyer trailing whitespace (10-seo-foundations, itinerary-page, seo-geo)                                                                                                                                                                                                                                | Vague F-bis                             | hygiène              |
+| **P3** | Exécuter réellement les 26 scénarios N2 (run manuel ou agent de test)                                                                                                                                                                                                                                     | prochaine vague                         | validation           |
 
-**Dette consciente assumée** : l'overlap de globs (P2 #2) est un choix de gouvernance (rules transverses
-larges). Tant qu'il n'est pas arbitré, il reste documenté ici comme dette, pas comme bug.
+**Overlap de globs (P2 #2) — ✅ résolu le 2026-06-03 par ADR-0028 (option γ).** Le
+diagnostic d'origine (« choix de gouvernance, rules transverses larges ») a été
+affiné : le vrai moteur du sur-déclenchement était **7 règles à glob étroit
+forcées en `alwaysApply: true`** (le flag écrase le glob). Le flip en `false`
+laisse leur glob scoper le chargement ; la baseline always-on passe de **14 à 7**.
+Voir `docs/adr/0028-mdc-glob-overlap.md` + validation N2 ciblée ci-dessous.
 
-> **Séparation détection / correction** : cette PR **ne corrige rien**. Les P2/P3 ci-dessus seront traités
-> dans une **Vague F-bis distincte** (qui, elle, modifiera les `.mdc` — donc lèvera le gel détection-only).
+> **Séparation détection / correction** : l'audit d'origine **ne corrigeait rien**.
+> Les P2/P3 mécaniques ont été traités en **Vague F-bis** (#127) ; l'overlap globs
+> (décision archi) a été tranché en **ADR-0028** (#130) et appliqué par
+> `chore/mdc-globs-overlap-fix` (#128).
+
+### Validation N2 ciblée (post-flip, 2026-06-03)
+
+Vérification déterministe du matching de glob après flip (l'attachement
+auto-attach est piloté par le glob, donc statiquement vérifiable) :
+
+| Surface éditée                                    | Avant (14 always-on)                                                                           | Après flip (glob reprend)                                                                              | Couverture       |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` | les 14 always-on, dont les 7 playbooks                                                         | `hotel-detail-page` ✓, `photo-quality` ✓, `nextjs-app-router` ✓, `seo-geo` ✓ (via glob) + 7 guardrails | ✅ préservée     |
+| `packages/domain/loyalty/tier.ts`                 | 14 always-on (dont `hotel-detail-page`, `photo-quality`, `e2e-testing`, `seo-geo`… hors-sujet) | aucun des 7 playbooks (globs ne matchent pas) + guardrails universels seulement                        | ✅ bruit éliminé |
+| `packages/integrations/amadeus/client.ts`         | 14 always-on (dont `hotel-detail-page`, `supabase-rls`… hors-sujet)                            | `integrations-api` ✓ (via glob) + guardrails ; playbooks hors-sujet partis                             | ✅ ciblé         |
+| `packages/db/migrations/00NN.sql`                 | 14 always-on (dont playbooks web hors-sujet)                                                   | `supabase-rls` ✓ (via glob `{packages/db,apps/admin}/**`) + guardrails                                 | ✅ ciblé         |
+
+Aucune perte de couverture sur les surfaces pertinentes ; le bruit hors-surface
+disparaît. Cible indicative #128 (aucun chemin hors-surface ne déclenche la pile
+complète des playbooks) **atteinte**.
 
 ---
 

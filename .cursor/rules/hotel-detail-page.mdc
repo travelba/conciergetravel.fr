@@ -1,7 +1,7 @@
 ---
 description: Mandatory 15-block architecture for the hotel detail page (CDC v3.0 §2). Checklist for PR review and component composition.
 globs: "apps/web/src/app/[locale]/hotel/[slug]/**/*.{ts,tsx}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Hotel detail page — CDC §2 architecture (15 blocs)

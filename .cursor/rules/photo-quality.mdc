@@ -1,7 +1,7 @@
 ---
 description: Hard rules qualité photo pour MyConciergeHotel.com — quotas, formats, alt text bilingue, JSON-LD ImageObject, LCP, agentique. PR bloquée si non respecté.
 globs: "{apps/web/src/components/hotel/hotel-gallery.tsx,apps/web/src/components/hotel/hotel-hero.tsx,apps/web/src/app/**/hotel/**/*.{ts,tsx},scripts/photos/**/*.ts,packages/ui/src/cloudinary-presets.ts,packages/ui/src/components/hotel-image.tsx,packages/seo/src/jsonld/hotel.ts}"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Photo Quality — Hard Rules (PR gate)
