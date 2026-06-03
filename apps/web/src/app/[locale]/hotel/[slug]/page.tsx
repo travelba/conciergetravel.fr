@@ -55,6 +55,7 @@ import {
   isAirellesGoldenTemplate,
   AIRELLES_CONCIERGE_PICK_SLUG,
   AIRELLES_CONCIERGE_PICK_NOTE,
+  AIRELLES_CONCIERGE_HOOK,
 } from '@/server/hotels/dev-override-airelles';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
@@ -399,7 +400,13 @@ async function renderHotelPage(
   const heroGalleryMatch =
     heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
   const heroDescriptor =
-    heroPublicId !== null ? { publicId: heroPublicId, alt: heroGalleryMatch?.alt ?? name } : null;
+    heroPublicId !== null
+      ? {
+          publicId: heroPublicId,
+          alt: heroGalleryMatch?.alt ?? name,
+          caption: heroGalleryMatch?.caption ?? null,
+        }
+      : null;
 
   // The curation pass (`curate-top-photos.ts`) keeps the hero as
   // `gallery_images[0]` so its alt/caption metadata survives and re-curation
@@ -420,10 +427,18 @@ async function renderHotelPage(
   const firstGalleryTile = galleryTiles[0];
   const galleryHero =
     goldenTemplate && firstGalleryTile !== undefined
-      ? { publicId: firstGalleryTile.publicId, alt: firstGalleryTile.alt }
+      ? {
+          publicId: firstGalleryTile.publicId,
+          alt: firstGalleryTile.alt,
+          caption: firstGalleryTile.caption,
+        }
       : heroDescriptor;
   const galleryGridTiles =
     goldenTemplate && firstGalleryTile !== undefined ? galleryTiles.slice(1) : galleryTiles;
+
+  // Total photos the lightbox cycles through (mirrors `<HotelGallery>` → hero
+  // + grid tiles) — surfaced as the "Voir les photos (N)" hero header action.
+  const galleryPhotoCount = (galleryHero !== null ? 1 : 0) + galleryGridTiles.length;
 
   // Golden-template rooms showcase: a 3-up card grid (photo + name +
   // description + CTA). The rooms table carries no per-room photo yet
@@ -465,13 +480,15 @@ async function renderHotelPage(
       })
     : [];
 
-  // Surface the Concierge's recommended suite first so it leads the section,
-  // then keep only three rooms on a single row (editorial showcase, not an
-  // exhaustive catalogue — the full list lives on the room sub-pages).
+  // Surface the Concierge's recommended suite first so it leads the section.
+  // The full catalogue is passed to the grid: the first row (3 cards) shows
+  // by default and a "Voir toutes les chambres (N)" toggle reveals the rest,
+  // so every room stays reachable in-page (each card also links to its
+  // indexable sub-page).
   const orderedRoomCards: readonly HotelRoomCardVM[] = [
     ...goldenRoomCards.filter((card) => card.isConciergePick),
     ...goldenRoomCards.filter((card) => !card.isConciergePick),
-  ].slice(0, 3);
+  ];
 
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
@@ -1003,7 +1020,6 @@ async function renderHotelPage(
   // the historical order + the Phase-6 booking anchor.
   const tocItems: HotelTocItem[] = goldenTemplate
     ? [
-        { anchor: 'en-bref', label: t('toc.enBref') },
         { anchor: 'recit', label: t('toc.recit') },
         { anchor: 'chambres', label: t('toc.chambres') },
         { anchor: 'services', label: t('toc.services') },
@@ -1011,6 +1027,7 @@ async function renderHotelPage(
         { anchor: 'lieu', label: t('toc.lieu') },
         ...conseilAnchor,
         { anchor: 'faq', label: t('toc.faq') },
+        { anchor: 'en-bref', label: t('toc.enBref') },
       ]
     : [
         { anchor: 'recit', label: t('toc.recit') },
@@ -1064,6 +1081,7 @@ async function renderHotelPage(
           heroAlt={heroDescriptor?.alt ?? name}
           countryLabel={countryLabel}
           cityHubSlug={cityHubSlug}
+          photoCount={galleryPhotoCount}
         />
       ) : (
         <>
@@ -1130,12 +1148,41 @@ async function renderHotelPage(
         <HotelBookingBar locale={locale} name={name} city={row.city} countryLabel={countryLabel} />
       ) : null}
 
-      <FactualSummary
-        summary={factualSummary}
-        fallback={
-          description !== null && description.length > 0 ? truncate(description, 280) : null
-        }
-      />
+      {goldenTemplate ? (
+        <>
+          {/*
+            Golden template (PO request 2026-06-02): a single Concierge-voice
+            selling accroche replaces the visible factual summary. The CDC
+            §2.3 factual summary is kept in the DOM as an sr-only `heritage`
+            block so the JSON-LD `speakable`, `data-aeo` and `Hotel.description`
+            GEO contracts are untouched.
+          */}
+          <figure className="mt-6 mb-12 border-l-2 border-amber-400/80 pl-5 sm:mb-16 sm:pl-7">
+            <blockquote className="text-fg font-serif text-2xl italic leading-snug sm:text-[1.7rem] sm:leading-snug">
+              {locale === 'fr' ? '«\u00A0' : '\u201C'}
+              {AIRELLES_CONCIERGE_HOOK[locale]}
+              {locale === 'fr' ? '\u00A0»' : '\u201D'}
+            </blockquote>
+            <figcaption className="text-muted mt-4 text-xs font-semibold uppercase tracking-[0.22em]">
+              — {t('hero.conciergeSignature')}
+            </figcaption>
+          </figure>
+          <FactualSummary
+            summary={factualSummary}
+            fallback={
+              description !== null && description.length > 0 ? truncate(description, 280) : null
+            }
+            variant="heritage"
+          />
+        </>
+      ) : (
+        <FactualSummary
+          summary={factualSummary}
+          fallback={
+            description !== null && description.length > 0 ? truncate(description, 280) : null
+          }
+        />
+      )}
 
       <HotelGallery
         locale={locale}
@@ -1143,6 +1190,7 @@ async function renderHotelPage(
         hero={galleryHero}
         images={galleryGridTiles}
         hotelName={name}
+        hideGrid={goldenTemplate}
       />
 
       {/*
@@ -1174,38 +1222,12 @@ async function renderHotelPage(
                 Distinctions → Instagram → maillage interne.
               */}
 
-              {/* 1 — L'essentiel du Concierge (ex-"En bref", remonté en tête) */}
-              <HotelEnBref
-                locale={locale}
-                name={name}
-                city={row.city}
-                region={row.region}
-                isPalace={row.is_palace}
-                stars={row.stars as 1 | 2 | 3 | 4 | 5}
-                address={row.address}
-                postalCode={postalCode}
-                district={row.district}
-                latitude={row.latitude}
-                longitude={row.longitude}
-                totalRooms={inventory.totalRooms}
-                suites={inventory.suites}
-                checkInFrom={policies.checkIn !== null ? policies.checkIn.from : null}
-                checkOutUntil={policies.checkOut !== null ? policies.checkOut.until : null}
-                petsAllowed={policies.pets !== null ? policies.pets.allowed : null}
-                openedYear={historyDates.openedYear}
-                lastRenovatedYear={historyDates.lastRenovatedYear}
-                architects={externalIds.knowledgeGraph.architects}
-                lastUpdatedLabel={lastUpdated}
-                lastUpdatedIso={
-                  row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null
-                }
-              />
-
-              {/* 2 — À propos */}
+              {/* 1 — À propos */}
               <span id="recit" aria-hidden className="block scroll-mt-28" />
               <HotelStory
                 locale={locale}
                 sections={storySections}
+                collapsibleSections
                 heroParagraphs={
                   description !== null && description.length > 0
                     ? description
@@ -1236,7 +1258,7 @@ async function renderHotelPage(
                       signatureAria: t('rooms.signatureAria'),
                       conciergePick: t('rooms.conciergePick'),
                       showAll: t('rooms.showAll', {
-                        count: orderedRoomCards.length - 3,
+                        count: Math.max(0, orderedRoomCards.length - 3),
                       }),
                       showLess: t('rooms.showLess'),
                     }}
@@ -1410,6 +1432,40 @@ async function renderHotelPage(
                 bundle={relatedHotels}
                 currentRegion={row.region}
                 currentCity={row.city}
+              />
+
+              {/*
+                18 — L'essentiel du Concierge (fact-sheet AEO). Déplacé en fin de
+                fiche (demande PO 2026-06-02) : il clôt la page avec les faits
+                bruts (adresse, catégorie, coordonnées, badge fraîcheur) au lieu
+                de concurrencer le récit en tête. Toujours `data-aeo` +
+                `data-llm-summary`, toujours `#en-bref` (sélecteur speakable,
+                indépendant de la position — GEO/agentique intacts).
+              */}
+              <HotelEnBref
+                locale={locale}
+                name={name}
+                city={row.city}
+                region={row.region}
+                isPalace={row.is_palace}
+                stars={row.stars as 1 | 2 | 3 | 4 | 5}
+                address={row.address}
+                postalCode={postalCode}
+                district={row.district}
+                latitude={row.latitude}
+                longitude={row.longitude}
+                totalRooms={inventory.totalRooms}
+                suites={inventory.suites}
+                checkInFrom={policies.checkIn !== null ? policies.checkIn.from : null}
+                checkOutUntil={policies.checkOut !== null ? policies.checkOut.until : null}
+                petsAllowed={policies.pets !== null ? policies.pets.allowed : null}
+                openedYear={historyDates.openedYear}
+                lastRenovatedYear={historyDates.lastRenovatedYear}
+                architects={externalIds.knowledgeGraph.architects}
+                lastUpdatedLabel={lastUpdated}
+                lastUpdatedIso={
+                  row.updated_at !== null && row.updated_at !== '' ? row.updated_at : null
+                }
               />
             </>
           ) : (

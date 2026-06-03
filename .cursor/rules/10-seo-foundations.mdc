@@ -1,0 +1,157 @@
+---
+description: Règles SEO transverses du projet pour metadata, indexation, canonicals, linking interne, performance et cohérence de template.
+globs:
+  - "apps/web/**/*.{ts,tsx,md,mdx}"
+  - "packages/seo/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 10-seo-foundations
+
+## Objectif
+Cette rule définit les principes SEO transverses du projet.
+Elle complète les rules spécialisées déjà présentes et ne doit pas les dupliquer.
+Elle sert de cadre commun pour :
+- les pages éditoriales,
+- les pages programmatiques,
+- les pages hôtels,
+- les pages destinations,
+- les pages collections,
+- les pages comparatives,
+- les modules SEO du package `packages/seo`.
+
+## Sources à consulter avant toute modification SEO
+Toujours lire en priorité :
+- `AGENTS.md`
+- `EDITORIAL_VOICE.md`
+- `docs/04-seo-geo-aeo.md`
+- les rules SEO existantes dans `.cursor/rules/`
+- les builders et utilitaires du package `packages/seo`
+
+S'il existe déjà une logique SEO dans le repo, toujours l'étendre au lieu d'en créer une nouvelle.
+
+## Principe général
+Toute évolution SEO doit :
+1. respecter l’architecture existante,
+2. éviter la duplication,
+3. renforcer la lisibilité sémantique,
+4. préserver la performance,
+5. améliorer l’exploitabilité par les moteurs et les agents.
+
+Le SEO ne doit jamais être traité comme une simple couche de metadata.
+Chaque page doit être pensée comme une surface :
+- utile pour l’utilisateur,
+- cohérente pour le moteur,
+- structurée pour les agents.
+
+## Hiérarchie des surfaces SEO
+Les surfaces prioritaires du projet sont :
+1. pages hôtels,
+2. pages villes / destinations / quartiers,
+3. pages collections,
+4. pages rankings / comparatifs,
+5. guides éditoriaux,
+6. pages de recherche à fort potentiel SEO explicitement validées.
+
+Toute nouvelle surface doit préciser :
+- son objectif SEO,
+- sa cible de requêtes,
+- son statut d’indexation,
+- sa logique de linking interne,
+- ses données structurées attendues.
+
+## Titles et meta descriptions
+Les balises title doivent :
+- être uniques,
+- exprimer clairement l’intention de la page,
+- intégrer les entités importantes sans keyword stuffing,
+- respecter les patterns existants du projet.
+
+Les meta descriptions doivent :
+- être informatives,
+- éviter les variantes génériques répétitives,
+- refléter réellement la promesse de la page,
+- rester cohérentes avec le ton premium du projet.
+
+Ne jamais générer des titles ou descriptions en masse sans vérifier les conventions existantes par type de page.
+
+## Headings et structure sémantique
+Chaque page doit avoir :
+- un seul H1 clair,
+- des H2 et H3 hiérarchisés,
+- une structure qui reflète l’intention réelle de recherche,
+- des sections exploitables et non purement décoratives.
+
+Ne pas utiliser les headings seulement pour le design.
+Les headings doivent aider :
+- l’utilisateur à scanner,
+- les moteurs à comprendre,
+- les agents à extraire des blocs utiles.
+
+## Canonicals
+Chaque page indexable doit avoir une canonical claire.
+Toujours vérifier :
+- la version canonique par locale,
+- les variantes filtrées,
+- les pages paginées,
+- les versions enrichies ou dérivées,
+- les URLs générées dynamiquement.
+
+Ne jamais laisser plusieurs URLs concurrentes porter la même intention SEO sans décision explicite.
+
+## Indexation
+Avant de rendre une page indexable, toujours valider :
+- qu’elle a une valeur éditoriale réelle,
+- qu’elle n’est pas une simple duplication de listing,
+- qu’elle possède une structure utile,
+- qu’elle dispose d’un linking interne cohérent,
+- qu’elle ne crée pas de cannibalisation.
+
+Les pages suivantes ne doivent pas devenir indexables par défaut :
+- facettes filtrées,
+- résultats de recherche temporaires,
+- combinaisons de filtres sans stratégie SEO validée,
+- pages pauvres en contenu,
+- variantes quasi dupliquées.
+
+## Pagination et facettes
+La pagination et les facettes doivent être traitées comme des sujets SEO sensibles.
+Avant toute implémentation ou modification :
+- vérifier la stratégie actuelle du projet,
+- définir si la page doit être indexée ou non,
+- éviter les combinaisons de filtres indexables sans stratégie validée,
+- préserver la canonical de la page de référence,
+- ne pas diluer le maillage interne sur des variantes faibles.
+
+Ne jamais ouvrir l'indexation d'une facette ou d'une page paginée par simple défaut technique.
+
+## Linking interne
+Chaque surface SEO doit être reliée à un cluster cohérent.
+Toujours prévoir :
+- un lien vers le niveau supérieur (hub),
+- des liens vers les pages profondes pertinentes,
+- des liens latéraux utiles,
+- des ancres descriptives, jamais génériques.
+
+Ne pas créer de page orpheline sans entrée de découverte interne.
+
+## Performance
+Le SEO technique ne doit jamais dégrader les Core Web Vitals.
+Toujours respecter les règles de performance déjà en place dans le projet
+(images optimisées, rendu serveur par défaut, pas de waterfall client).
+
+## Priorité & sources
+En cas de conflit, les rules spécifiques priment sur cette rule transverse :
+- `seo-geo.mdc` est la source autoritaire SEO / GEO / AEO (décisions ADR, JSON-LD, robots, llms.txt, multilingue).
+- `nextjs-app-router.mdc` fait foi pour metadata, ISR et canonicals au niveau route.
+- `hotel-detail-page.mdc` fait foi pour la fiche hôtel.
+
+Phasage des locales (verrou `seo-geo.mdc`) : **V1 = `fr` + `en`**. Les locales V2 (`de`/`es`/`it`) et V3 (`ar`/`zh`/`ja`) ne sont pas routées tant que leur contenu natif n'est pas validé — ne pas émettre de `hreflang` ni de canonical vers une locale non routée.
+
+Toujours étendre la logique SEO existante (`packages/seo`) plutôt que d'en créer une parallèle.
+
+## Interdictions
+- Ne pas traiter le SEO comme une simple couche de metadata.
+- Ne pas ouvrir l'indexation de pages faibles ou quasi dupliquées.
+- Ne pas créer une logique SEO parallèle à `packages/seo`.
+- Ne pas contredire les décisions verrouillées dans `seo-geo.mdc`. 

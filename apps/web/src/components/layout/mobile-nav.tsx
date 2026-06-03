@@ -3,7 +3,8 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 
-import { Link, usePathname } from '@/i18n/navigation';
+import { SearchAutocomplete } from '@/components/search/search-autocomplete';
+import { Link, getPathname, usePathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 import { AuthArea } from './auth-area';
@@ -195,23 +196,42 @@ export function MobileNav(): ReactElement {
             </div>
 
             <>
-              <Link
-                href="/recherche"
-                className="border-border bg-muted/5 hover:bg-muted/10 mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+              <form
+                role="search"
+                action={getPathname({ locale, href: '/recherche' })}
+                method="get"
+                aria-label={t('search.label')}
+                className="border-border bg-bg focus-within:border-amber-400 focus-within:ring-amber-500 mb-3 flex h-10 items-center rounded-md border focus-within:ring-2"
               >
-                <svg
-                  aria-hidden
-                  viewBox="0 0 20 20"
-                  className="h-4 w-4 opacity-60"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
+                <label className="sr-only" htmlFor="mobile-search-destination">
+                  {t('search.label')}
+                </label>
+                <SearchAutocomplete
+                  locale={locale}
+                  inputId="mobile-search-destination"
+                  placeholder={t('search.destinationPlaceholder')}
+                  wrapperClassName="relative flex-1"
+                  inputClassName="text-fg placeholder:text-muted h-10 w-full rounded-l-md bg-transparent px-3 text-sm focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  aria-label={t('search.submitAria')}
+                  className="bg-fg text-bg inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium hover:bg-amber-700"
                 >
-                  <circle cx="9" cy="9" r="5.5" />
-                  <path d="M13.5 13.5l3 3" strokeLinecap="round" />
-                </svg>
-                <span>{t('primaryNav.search')}</span>
-              </Link>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 20 20"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                  >
+                    <circle cx="9" cy="9" r="5.5" />
+                    <path d="M13.5 13.5l3 3" strokeLinecap="round" />
+                  </svg>
+                  <span className="sr-only">{t('search.submit')}</span>
+                </button>
+              </form>
 
               <nav aria-label={t('primaryNav.label')} className="flex flex-col gap-0.5 text-base">
                 {/* 1 — Palaces & Hôtels */}
@@ -299,6 +319,13 @@ export function MobileNav(): ReactElement {
                     </ul>
                     <Link href="/hotels" className={`${subLinkClass} text-muted text-xs`}>
                       {t('primaryNav.hotelsBrowseAll')}
+                    </Link>
+                    {/* ADR-0026 — annuaire entry (country directory). */}
+                    <Link
+                      href={{ pathname: '/hotels/[pays]', params: { pays: 'france' } }}
+                      className={`${subLinkClass} text-muted text-xs`}
+                    >
+                      {t('primaryNav.directoryByCountry')}
                     </Link>
                   </div>
                 </details>

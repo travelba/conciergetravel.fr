@@ -4,6 +4,8 @@ import type { ReactElement } from 'react';
 import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
+import { SearchAutocomplete } from './search-autocomplete';
+
 /**
  * `<CatalogSearchForm>` — compact catalogue search form used by the
  * homepage hero and any other surface that needs a quick "find a stay"
@@ -57,13 +59,11 @@ export async function CatalogSearchForm({
         <label htmlFor={inputId} className="sr-only">
           {tHeader('label')}
         </label>
-        <input
-          id={inputId}
-          type="search"
-          name="destination"
+        <SearchAutocomplete
+          locale={locale}
+          inputId={inputId}
           placeholder={tHeader('destinationPlaceholder')}
-          autoComplete="off"
-          className="text-fg placeholder:text-muted w-full bg-transparent px-3 py-2.5 text-base focus:outline-none sm:text-sm"
+          inputClassName="text-fg placeholder:text-muted w-full bg-transparent px-3 py-2.5 text-base focus:outline-none sm:text-sm"
         />
       </div>
 

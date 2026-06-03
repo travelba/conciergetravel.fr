@@ -200,6 +200,41 @@ Notes for the next agent:
 - To re-run only the rows still missing a hero (skip the ~328 already
   hydrated), set `MCH_ONLY_MISSING_HERO=1` on `sync-hotel-photos.ts`.
 
+## Gotcha — Google Places caps at ~1600 px → soft hero on hi-DPI (2026-06-02)
+
+**Symptom**: "Pourquoi les photos sont floues ?" The hero looks fine at
+`dpr=1` but visibly soft on a Retina / `dpr=2` display.
+
+**Root cause**: photos hydrated from the Google Places Photo API top out
+around **1600 px** on the long side. The hero preset
+(`HERO_TRANSFORM = w_2400,h_1350,…` in `packages/ui/src/cloudinary-presets.ts`)
+then **upscales** the 1600 px source to 2400 px — Cloudinary cannot invent
+detail, so the result is mushy exactly when the device asks for 2× pixels.
+This silently violates the `photo-quality.mdc` Hard Rule (**originals ≥
+2400 px**). Confirm the diagnosis by emulating both DPRs:
+`browser_cdp Emulation.setDeviceMetricsOverride {deviceScaleFactor: 2}`,
+screenshot, compare to `deviceScaleFactor: 1`.
+
+**Fix — re-source genuine ≥ 2400 px from the official Imgix-style CDN.**
+Many luxury chains (Airelles `assets.airelles.com`, others on Imgix) serve
+press visuals through a CDN where the output width is a **query param**
+(`?auto=format%2Ccompress&w=2600`). The underlying originals are 2250–8000 px,
+so requesting `w=2600` returns a real high-res frame (not an upscale).
+Harvest the base Imgix URLs by scrolling the official category pages in the
+browser MCP (Story / Suites / Restaurants / Spa / Pools) — direct
+navigation to guessed sub-paths (`/pools`) often 404s; scroll the pages
+that exist and read the lazy-loaded `<img>` srcs. Then `uploadFromUrl()`
+(which already applies `c_limit, w_2400, h_2400` → caps without upscaling)
+and PATCH `hero_image` + `gallery_images`.
+
+**Reference one-shot**: `scripts/editorial-pilot/src/photos/resource-airelles-gordes.ts`
+— curated 12-image set (drone hero + 9 categories), `--dry-run` first,
+each upload prints real dims (all landed 2400×1349..1612, none upscaled).
+Filenames carry `©` / `–`: percent-encode with `encodeURIComponent` and
+verify each `?w=2600` URL loads before curating (some `Moyen-…` variants
+are fixed-size and 404 at 2600). Source = `press` (official media kit),
+photographer credit goes in a Cloudinary tag, not a gallery column.
+
 ## Pattern — Tavily press-kit discovery for flagship hotels (2026-05-31)
 
 When the in-place pipeline (`sync-hotel-photos.ts` Commons + Places)

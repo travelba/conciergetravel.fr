@@ -16,6 +16,8 @@ const HOTEL_RECORD_KEYS = [
   'city',
   'district',
   'region',
+  'country',
+  'country_code',
   'landmarks',
   'aliases',
   'description_excerpt',

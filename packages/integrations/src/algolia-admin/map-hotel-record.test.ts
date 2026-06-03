@@ -12,6 +12,9 @@ const baseRow: HotelSourceRow = {
   city: 'Paris',
   district: null,
   region: 'Île-de-France',
+  country_code: 'FR',
+  country_label_fr: 'France',
+  country_label_en: 'France',
   is_palace: true,
   stars: 5,
   amenities: [{ label: 'Spa' }, 'Piscine'],
@@ -60,5 +63,33 @@ describe('buildHotelAlgoliaRecord', () => {
     const withDistrict: HotelSourceRow = { ...baseRow, district: '8ᵉ arr.' };
     const r = buildHotelAlgoliaRecord('fr', withDistrict);
     expect(r.district).toBe('8ᵉ arr.');
+  });
+
+  it('maps country_code + localized country name (searchable by country)', () => {
+    const intl: HotelSourceRow = {
+      ...baseRow,
+      city: 'Tokyo',
+      region: '',
+      country_code: 'JP',
+      country_label_fr: 'Japon',
+      country_label_en: 'Japan',
+    };
+    const fr = buildHotelAlgoliaRecord('fr', intl);
+    expect(fr.country_code).toBe('JP');
+    expect(fr.country).toBe('Japon');
+    const en = buildHotelAlgoliaRecord('en', intl);
+    expect(en.country).toBe('Japan');
+  });
+
+  it('omits country name when both labels are null but keeps the code', () => {
+    const noLabels: HotelSourceRow = {
+      ...baseRow,
+      country_code: 'JP',
+      country_label_fr: null,
+      country_label_en: null,
+    };
+    const r = buildHotelAlgoliaRecord('fr', noLabels);
+    expect(r.country_code).toBe('JP');
+    expect('country' in r ? r.country : undefined).toBeUndefined();
   });
 });

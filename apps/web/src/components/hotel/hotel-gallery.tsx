@@ -9,9 +9,19 @@ import { HotelImagePlaceholder } from './hotel-image-placeholder';
 interface HotelGalleryProps {
   readonly locale: SupportedLocale;
   readonly cloudName: string;
-  readonly hero: { readonly publicId: string; readonly alt: string } | null;
+  readonly hero: {
+    readonly publicId: string;
+    readonly alt: string;
+    readonly caption?: string | null;
+  } | null;
   readonly images: readonly LocalisedGalleryImage[];
   readonly hotelName: string;
+  /**
+   * Golden-template fiche: hide the inline mosaic and keep only the lightbox
+   * (opened from the hero header "Voir les photos" trigger). See
+   * `<HotelGalleryLightbox>` `hideGrid`.
+   */
+  readonly hideGrid?: boolean;
 }
 
 /**
@@ -59,10 +69,14 @@ export async function HotelGallery({
   hero,
   images,
   hotelName,
+  hideGrid = false,
 }: HotelGalleryProps): Promise<React.ReactElement | null> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
 
   if (hero === null && images.length === 0) {
+    // Nothing to show and no lightbox content — render nothing (golden
+    // template never wants the placeholder mosaic).
+    if (hideGrid) return null;
     return (
       <section
         aria-label={t('gallery.thumbnailsLabel')}
@@ -91,12 +105,14 @@ export async function HotelGallery({
   // ≥ 30-photo corpus without forcing a 30-tile grid on initial load.
   const thumbnails: readonly GalleryLightboxImage[] = images
     .slice(0, MAX_THUMBNAILS)
-    .map((img) => ({ publicId: img.publicId, alt: img.alt }));
+    .map((img) => ({ publicId: img.publicId, alt: img.alt, caption: img.caption }));
   const allLightboxImages: readonly GalleryLightboxImage[] = images.map((img) => ({
     publicId: img.publicId,
     alt: img.alt,
+    caption: img.caption,
   }));
   const overflowCount = Math.max(0, images.length - MAX_THUMBNAILS);
+  const galleryTotal = (hero !== null ? 1 : 0) + allLightboxImages.length;
 
   return (
     <HotelGalleryLightbox
@@ -106,6 +122,7 @@ export async function HotelGallery({
       thumbnails={thumbnails}
       lightboxImages={allLightboxImages}
       overflowCount={overflowCount}
+      hideGrid={hideGrid}
       translations={{
         thumbnailsLabel: t('gallery.thumbnailsLabel'),
         openLightbox: t('gallery.openLightbox'),
@@ -113,6 +130,9 @@ export async function HotelGallery({
         previousImage: t('gallery.previousImage'),
         nextImage: t('gallery.nextImage'),
         closeLightbox: t('gallery.closeLightbox'),
+        mosaicEyebrow: t('gallery.mosaicEyebrow'),
+        mosaicCountLabel: t('gallery.mosaicCount', { count: galleryTotal }),
+        backToGallery: t('gallery.backToGallery'),
         // Pass the raw ICU template — interpolated client-side because a
         // closure cannot cross the RSC boundary (Next 15.3 throws
         // "Functions cannot be passed directly to Client Components").

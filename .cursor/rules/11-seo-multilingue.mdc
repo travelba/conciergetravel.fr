@@ -1,0 +1,116 @@
+---
+description: Règles SEO multilingues pour locales, hreflang, canonicals, slugs et anti-cannibalisation inter-langues.
+globs:
+  - "apps/web/**/*.{ts,tsx,md,mdx}"
+  - "packages/seo/**/*.{ts,tsx,md,mdx}"
+alwaysApply: false
+---
+
+# 11-seo-multilingue
+
+## Objectif
+Cette rule définit le cadre multilingue SEO du projet.
+Elle garantit la cohérence entre :
+- structure d’URL,
+- contenus localisés,
+- `hreflang`,
+- canonicals,
+- indexation,
+- anti-cannibalisation.
+
+## Priorité & sources
+En cas de conflit, `seo-geo.mdc` (§Rollout multilingue V2) et `nextjs-app-router.mdc` (§i18n) priment sur cette rule transverse.
+Phasage verrouillé : **locales V1 = `fr` + `en`** ; V2 = `de`/`es`/`it` (DE en premier) ; V3 = `ar`/`zh`/`ja`.
+Une locale V2/V3 ne s'active en routing qu'une fois son contenu natif validé — ne jamais activer une locale sur de la traduction machine brute.
+
+## Principe
+Chaque langue doit être pensée comme une vraie surface SEO, pas comme une simple traduction mécanique.
+Une page traduite doit :
+- respecter l’intention locale,
+- rester fidèle au positionnement premium,
+- conserver la cohérence entité / metadata / schema,
+- éviter la duplication faible.
+
+## Structure des locales
+Toujours respecter la convention de locales déjà présente dans le projet.
+Ne pas introduire une nouvelle structure d’URL multilingue sans validation explicite.
+
+Toute logique de routing international doit rester cohérente entre :
+- navigation,
+- SEO,
+- sitemaps,
+- canonicals,
+- liens internes.
+
+## Hreflang
+Toute page multilingue qui possède un équivalent réel doit exposer des `hreflang` cohérents.
+Toujours vérifier :
+- que la page existe réellement dans la langue cible,
+- que l’URL cible est canonique,
+- qu’il n’existe pas de faux équivalents,
+- que les liens alternates ne pointent pas vers des pages pauvres ou incomplètes.
+
+Ne pas lier artificiellement deux pages qui ne servent pas la même intention.
+
+## Canonicals multilingues
+Chaque langue doit canoniser vers sa propre version quand cette version est légitime.
+Ne jamais faire pointer toutes les langues vers une seule version par défaut si les pages sont réellement localisées.
+
+Toujours vérifier :
+- canonical locale,
+- relation avec `hreflang`,
+- risque de duplication inter-langues,
+- cohérence avec les slugs et templates.
+
+## Slugs
+Les slugs doivent suivre la convention existante du projet.
+Ne pas localiser ou délocaliser les slugs de manière opportuniste sans stratégie claire.
+
+Si des slugs localisés sont utilisés :
+- ils doivent être stables,
+- compréhensibles,
+- cohérents avec la langue,
+- compatibles avec les redirections et les sitemaps.
+
+## Contenus localisés
+Une localisation de qualité ne doit pas être une simple traduction littérale.
+Chaque version doit :
+- refléter la culture et l’intention de recherche locale,
+- garder la voix concierge,
+- conserver les preuves, entités et spécificités utiles,
+- éviter les formulations plates ou génériques.
+
+## Anti-cannibalisation inter-langues
+Avant de publier une nouvelle version localisée, vérifier :
+- qu’elle cible bien une audience et une requête locale,
+- qu’elle ne crée pas de conflit inutile avec une autre langue,
+- qu’elle apporte une vraie valeur,
+- qu’elle est suffisamment complète pour être indexée.
+
+Ne pas indexer des pages localisées faibles, vides ou mécaniques.
+
+## Sitemaps
+Les pages multilingues doivent être cohérentes avec la stratégie sitemap du projet.
+Toujours vérifier :
+- inclusion correcte,
+- dernière modification,
+- canonical réelle,
+- présence des variantes utiles.
+
+## Linking interne multilingue
+Les liens entre versions doivent aider la navigation réelle.
+Les liens inter-langues doivent :
+- être exacts,
+- pointer vers les bons équivalents,
+- ne pas envoyer vers des pages faibles ou génériques.
+
+## Données structurées
+Les données structurées doivent rester cohérentes avec la langue affichée.
+Le contenu visible, les metadata et les schémas doivent raconter la même chose dans chaque locale.
+
+## Interdictions
+- Ne pas publier une langue incomplète juste pour “couvrir un marché”.
+- Ne pas générer des `hreflang` automatiques non vérifiés.
+- Ne pas casser la canonical locale.
+- Ne pas dupliquer des pages sans vraie adaptation.
+- Ne pas introduire une stratégie multilingue parallèle à celle du repo.

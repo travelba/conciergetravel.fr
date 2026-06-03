@@ -3,9 +3,18 @@
 import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { GALLERY_OPEN_EVENT, type GalleryOpenDetail } from './hotel-gallery-trigger';
+
 export interface GalleryLightboxImage {
   readonly publicId: string;
   readonly alt: string;
+  /**
+   * Full-sentence editorial caption (localised, `caption_fr/_en`). When
+   * present it is burned onto the photo as a luxury overlay (gradient
+   * scrim + serif). Falls back to nothing — the `alt` stays on the `<img>`
+   * for accessibility regardless.
+   */
+  readonly caption?: string | null;
 }
 
 type GalleryLayout = 'default' | 'mosaic';
@@ -24,6 +33,14 @@ interface HotelGalleryLightboxProps {
    */
   readonly lightboxImages?: readonly GalleryLightboxImage[];
   readonly overflowCount: number;
+  /**
+   * When `true`, the visible mosaic/grid is NOT rendered — only the (closed)
+   * `<dialog>` + its window-event listener stay mounted. Used by the
+   * golden-template fiche where photos are reached exclusively through the
+   * hero header `<HotelGalleryTrigger>` ("Voir les photos"), so the redundant
+   * inline mosaic is dropped without losing the lightbox.
+   */
+  readonly hideGrid?: boolean;
   readonly translations: {
     readonly thumbnailsLabel: string;
     readonly openLightbox: string;
@@ -38,6 +55,12 @@ interface HotelGalleryLightboxProps {
     readonly previousImage: string;
     readonly nextImage: string;
     readonly closeLightbox: string;
+    /** Eyebrow shown atop the full-screen mosaic (e.g. "La galerie"). */
+    readonly mosaicEyebrow: string;
+    /** Pre-interpolated "N photos" label for the mosaic header. */
+    readonly mosaicCountLabel: string;
+    /** Back-to-mosaic affordance shown in single-photo view. */
+    readonly backToGallery: string;
   };
 }
 
@@ -78,8 +101,52 @@ interface HotelGalleryLightboxProps {
  */
 const MAX_DIALOG_TRANSFORMS = 'f_auto,q_auto:good,c_limit,w_1600,h_1067';
 
+/** Mosaic tile crop — square-ish 4:3 frame, smart-gravity centred. */
+const MOSAIC_TILE_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_auto,w_900,h_675';
+
 /** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
 const MOSAIC_SIDE_TILES = 4;
+
+/**
+ * Luxury caption overlay burned onto a gallery photo (CDC §2 bloc 2 polish
+ * + photo-quality-seo-geo-agentique — captions are LLM-citable AND a brand
+ * signal). A bottom-anchored gradient scrim keeps the serif text legible
+ * over any image; a hairline amber rule echoes the Concierge accent used
+ * across the fiche (`border-amber-400/80`). `pointer-events-none` so the
+ * overlay never blocks the underlying button/navigation.
+ *
+ * `reveal="always"` is used on focal photos (single view, mosaic lead);
+ * `reveal="hover"` fades the caption in on hover/focus for the smaller
+ * mosaic tiles so the grid stays calm at rest.
+ */
+function GalleryCaptionOverlay({
+  caption,
+  reveal,
+  size = 'md',
+}: {
+  readonly caption: string;
+  readonly reveal: 'always' | 'hover';
+  readonly size?: 'sm' | 'md' | 'lg';
+}): React.ReactElement {
+  const textSize =
+    size === 'lg'
+      ? 'text-[15px] sm:text-lg'
+      : size === 'sm'
+        ? 'text-[12px] sm:text-[13px]'
+        : 'text-[13px] sm:text-sm';
+  return (
+    <figcaption
+      className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pb-4 pt-14 sm:px-6 sm:pb-5 ${
+        reveal === 'hover'
+          ? 'opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100'
+          : ''
+      }`}
+    >
+      <span aria-hidden className="mb-2 block h-px w-8 bg-amber-400/80" />
+      <p className={`text-pretty font-serif leading-snug text-white/95 ${textSize}`}>{caption}</p>
+    </figcaption>
+  );
+}
 
 export function HotelGalleryLightbox({
   cloudName,
@@ -89,6 +156,7 @@ export function HotelGalleryLightbox({
   lightboxImages,
   overflowCount,
   translations,
+  hideGrid = false,
 }: HotelGalleryLightboxProps): React.ReactElement {
   // C4 — the lightbox cycles through the full set (≥ 30 when available),
   // while the visible grid stays capped. When `lightboxImages` is set,
@@ -101,6 +169,11 @@ export function HotelGalleryLightbox({
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  // 'grid' = full luxury mosaic of every photo; 'single' = one-photo
+  // lightbox with prev/next. The hero "Voir les photos" trigger opens
+  // 'grid'; clicking a mosaic tile (or an inline thumbnail) drills into
+  // 'single'.
+  const [viewMode, setViewMode] = useState<'grid' | 'single'>('grid');
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const titleId = useId();
 
@@ -110,10 +183,17 @@ export function HotelGalleryLightbox({
     (index: number): void => {
       if (index < 0 || index >= total) return;
       setCurrentIndex(index);
+      setViewMode('single');
       setIsOpen(true);
     },
     [total],
   );
+
+  const openGrid = useCallback((): void => {
+    if (total === 0) return;
+    setViewMode('grid');
+    setIsOpen(true);
+  }, [total]);
 
   const close = useCallback((): void => {
     setIsOpen(false);
@@ -141,9 +221,27 @@ export function HotelGalleryLightbox({
     }
   }, [isOpen]);
 
+  // Allow any page-level trigger (e.g. the golden-template hero header
+  // `<HotelGalleryTrigger>`) to open the lightbox via a window event,
+  // without prop-drilling a shared ref/store across the RSC boundary.
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<GalleryOpenDetail>).detail;
+      if (detail?.mode === 'single') {
+        const index = typeof detail.index === 'number' ? detail.index : 0;
+        openAt(index < total ? index : 0);
+        return;
+      }
+      // Default ("Voir les photos") → open the full mosaic.
+      openGrid();
+    };
+    window.addEventListener(GALLERY_OPEN_EVENT, handler);
+    return () => window.removeEventListener(GALLERY_OPEN_EVENT, handler);
+  }, [openAt, openGrid, total]);
+
   // Keyboard navigation while the dialog is mounted and open.
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || viewMode !== 'single') return;
     const handler = (event: KeyboardEvent): void => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
@@ -155,7 +253,7 @@ export function HotelGalleryLightbox({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [goNext, goPrev, isOpen]);
+  }, [goNext, goPrev, isOpen, viewMode]);
 
   // Close when the user clicks the backdrop. The native dialog reports
   // backdrop clicks as a click on the <dialog> element itself with the
@@ -222,12 +320,12 @@ export function HotelGalleryLightbox({
   );
 
   return (
-    <section aria-labelledby="gallery-title" className="mb-16">
+    <section aria-labelledby="gallery-title" className={hideGrid ? '' : 'mb-16'}>
       <h2 id="gallery-title" className="sr-only">
         {translations.lightboxLabel}
       </h2>
 
-      {layout === 'mosaic' && hero !== null ? (
+      {!hideGrid && layout === 'mosaic' && hero !== null ? (
         <div
           className="grid h-auto grid-cols-1 gap-1 md:h-[500px] md:grid-cols-4 md:grid-rows-2"
           data-gallery-layout="mosaic"
@@ -262,7 +360,9 @@ export function HotelGalleryLightbox({
         </div>
       ) : null}
 
-      {(layout === 'default' || (layout === 'mosaic' && hero === null)) && hero !== null ? (
+      {!hideGrid &&
+      (layout === 'default' || (layout === 'mosaic' && hero === null)) &&
+      hero !== null ? (
         <figure className="relative aspect-[16/9] overflow-hidden rounded-lg">
           {renderTileButton(hero, 0, {
             priority: true,
@@ -275,7 +375,9 @@ export function HotelGalleryLightbox({
         </figure>
       ) : null}
 
-      {(layout === 'default' || (layout === 'mosaic' && hero === null)) && thumbnails.length > 0 ? (
+      {!hideGrid &&
+      (layout === 'default' || (layout === 'mosaic' && hero === null)) &&
+      thumbnails.length > 0 ? (
         <ul
           aria-label={translations.thumbnailsLabel}
           className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6"
@@ -306,15 +408,103 @@ export function HotelGalleryLightbox({
         aria-modal="true"
         onClose={close}
         onClick={onBackdropClick}
-        className="w-full max-w-5xl rounded-lg bg-black/95 p-0 text-white backdrop:bg-black/80"
+        className={
+          viewMode === 'grid'
+            ? 'h-[92vh] w-[96vw] max-w-6xl overflow-hidden rounded-xl bg-neutral-950 p-0 text-white backdrop:bg-black/85'
+            : 'w-full max-w-5xl rounded-lg bg-black/95 p-0 text-white backdrop:bg-black/80'
+        }
       >
         <h2 id={titleId} className="sr-only">
           {translations.lightboxLabel}
         </h2>
 
-        {current !== undefined ? (
+        {viewMode === 'grid' ? (
+          <div className="flex h-full flex-col">
+            {/* Editorial mosaic header — eyebrow + title + photo count. */}
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">
+                  {translations.mosaicEyebrow}
+                </p>
+                <p className="mt-0.5 font-serif text-lg leading-tight sm:text-xl">
+                  {translations.lightboxLabel}
+                  <span className="ml-2 text-sm font-normal text-white/50">
+                    {translations.mosaicCountLabel}
+                  </span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={close}
+                className="focus-visible:ring-ring shrink-0 rounded-full border border-white/25 px-3 py-1.5 text-sm hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                aria-label={translations.closeLightbox}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable luxury mosaic — first photo spans full width. */}
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+              <ul className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3">
+                {allImages.map((img, index) => (
+                  <li
+                    key={img.publicId}
+                    className={index === 0 ? 'col-span-2 md:col-span-3' : ''}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => openAt(index)}
+                      aria-label={`${translations.openLightbox} : ${img.alt}`}
+                      className="focus-visible:ring-ring group relative block w-full overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2"
+                    >
+                      <div className={index === 0 ? 'aspect-[21/9]' : 'aspect-[4/3]'}>
+                        <HotelImage
+                          cloudName={cloudName}
+                          publicId={img.publicId}
+                          alt={img.alt}
+                          width={900}
+                          height={675}
+                          transforms={MOSAIC_TILE_TRANSFORMS}
+                          variant={index === 0 ? 'hero' : 'thumbnail'}
+                          priority={index === 0}
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        />
+                      </div>
+                      <GalleryCaptionOverlay
+                        caption={img.caption ?? img.alt}
+                        reveal={index === 0 ? 'always' : 'hover'}
+                        size={index === 0 ? 'md' : 'sm'}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : current !== undefined ? (
           <div className="relative">
-            <div className="relative aspect-[3/2] w-full">
+            {/* Single-photo top bar — back to mosaic + close. */}
+            <div className="flex items-center justify-between gap-3 px-4 pt-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className="focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+              >
+                <span aria-hidden>←</span>
+                {translations.backToGallery}
+              </button>
+              <button
+                type="button"
+                onClick={close}
+                className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                aria-label={translations.closeLightbox}
+              >
+                ✕
+              </button>
+            </div>
+
+            <figure className="relative mt-3 aspect-[3/2] w-full">
               <HotelImage
                 cloudName={cloudName}
                 publicId={current.publicId}
@@ -325,7 +515,12 @@ export function HotelGalleryLightbox({
                 sizes="(max-width: 768px) 100vw, 80vw"
                 className="h-full w-full object-contain"
               />
-            </div>
+              <GalleryCaptionOverlay
+                caption={current.caption ?? current.alt}
+                reveal="always"
+                size="lg"
+              />
+            </figure>
 
             <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
               <button
@@ -342,28 +537,16 @@ export function HotelGalleryLightbox({
                   .replace('{current}', String(currentIndex + 1))
                   .replace('{total}', String(total))}
               </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
-                  aria-label={translations.nextImage}
-                  disabled={total <= 1}
-                >
-                  →
-                </button>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
-                  aria-label={translations.closeLightbox}
-                >
-                  ✕
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                aria-label={translations.nextImage}
+                disabled={total <= 1}
+              >
+                →
+              </button>
             </div>
-
-            <p className="px-4 pb-4 text-sm text-white/70">{current.alt}</p>
           </div>
         ) : null}
       </dialog>

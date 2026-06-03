@@ -753,6 +753,19 @@ export const AIRELLES_CONCIERGE_PICK_NOTE = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Golden-template hero accroche — a single, Concierge-voice selling sentence
+// rendered visibly under the H1 in place of the factual summary (PO request,
+// 2026-06-02). The CDC §2.3 factual summary is preserved in the DOM as an
+// sr-only `heritage` block so the JSON-LD `speakable`, `data-aeo` and
+// `Hotel.description` GEO contracts stay intact. Concierge voice: insider,
+// evocative, ≤ 25 words, no banned superlatives (EDITORIAL_VOICE.md).
+// ---------------------------------------------------------------------------
+export const AIRELLES_CONCIERGE_HOOK = {
+  fr: 'La Provence dont on rêve sans le savoir : une bastide du XVIIIᵉ suspendue au-dessus de Gordes, trois piscines, spa voûté et la table de Jean-François Piège.',
+  en: 'The Provence you dream of without knowing it: an 18th-century bastide perched above Gordes, three pools, a vaulted spa and Jean-François Piège’s table.',
+} as const;
+
+// ---------------------------------------------------------------------------
 // Rooms — the 12 official categories (40 rooms & suites total).
 // Subpage links may 404 in the local sandbox (rooms not seeded); the
 // section is rendered to visualise the catalogue, not to navigate.

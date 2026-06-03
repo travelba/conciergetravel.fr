@@ -463,8 +463,85 @@ Other reserved automatics to avoid as param names: `$Input`, `$PSItem`,
 instantly with exit 0 and no output", suspect an automatic-variable
 collision or a heredoc/quoting issue before assuming the work is done.
 
+## Rule 13 — Playwright E2E: a stale `PLAYWRIGHT_BASE_URL` + zombie `next dev` servers will make EVERY spec fail with phantom symptoms
+
+The single most expensive debugging trap on this dev machine (≈ 10
+iterations wasted 2026-06-02). After editing a client island
+(`SearchAutocomplete`) the whole `search-autocomplete.spec.ts` suite
+failed — the dropdown never opened, the combobox sat in a loading
+state, and a build that passed `next build` cleanly still produced
+12/12 red. None of it was the code.
+
+Two compounding causes, both environmental:
+
+1. **A leftover `PLAYWRIGHT_BASE_URL` shell env var.** `playwright.config.ts`
+   resolves `const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? http://127.0.0.1:${PORT}`.
+   A previous session had exported `PLAYWRIGHT_BASE_URL=http://localhost:3055`.
+   Playwright still **built and started its own production server** on the
+   configured `PORT` (so `next build` ran, supabase errors scrolled past,
+   everything *looked* right), but the browser navigated to
+   `localhost:3055` — a **dev server** — instead. Tell-tale signs in the
+   page's console: `[HMR] connected` and `Download the React DevTools…`
+   (both are **development-only**; a real `next start` never prints them).
+   When that dev server was healthy the suite flaked green; when it was
+   down the suite went all-red with "combobox not visible".
+
+2. **Half a dozen zombie `next dev` servers** (ports 3000/3001/3010/3055/3100)
+   from past agent sessions, all sharing `apps/web/.next`. A live
+   `next dev` continuously rewrites `.next/dev/**`; if you `next build`
+   or delete `.next` while one is running, the production manifest and the
+   dev artefacts interleave and `next start` serves a corrupt/dev bundle.
+
+**Diagnosis checklist when an E2E suite fails wholesale and the symptoms
+don't match the diff:**
+
+```powershell
+# (a) Is BASE_URL hijacked? This is the #1 culprit.
+Get-ChildItem env: | Where-Object { $_.Name -match 'PLAYWRIGHT|BASE_URL' }
+
+# (b) What is ACTUALLY serving the configured port (and is it dev)?
+Get-NetTCPConnection -LocalPort 3100 -State Listen -EA SilentlyContinue |
+  ForEach-Object { (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.OwningProcess)").CommandLine }
+
+# (c) List every stray next dev/start under this repo (NOT editorial-pilot tsx).
+Get-CimInstance Win32_Process -Filter "Name='node.exe'" |
+  Where-Object { $_.CommandLine -match 'conciergetravel' -and $_.CommandLine -match 'next' `
+    -and ($_.CommandLine -match '\bdev\b' -or $_.CommandLine -match '\bstart\b') `
+    -and $_.CommandLine -notmatch 'editorial-pilot' } |
+  ForEach-Object { "$($_.ProcessId) :: $($_.CommandLine)" }
+```
+
+**The clean-room recipe** (isolates the run from all of the above):
+
+```powershell
+# 1. Drop the hijacking var.
+Remove-Item Env:\PLAYWRIGHT_BASE_URL -EA SilentlyContinue
+# 2. Kill stray next dev/start in THIS repo only (Rule 6a — never blanket-kill node;
+#    the editorial-pilot tsx pipelines must survive).
+#    (use the query in (c), pipe to Stop-Process -Id $_.ProcessId -Force)
+# 3. Run on a dedicated free port so reuseExistingServer can't grab a squatter.
+$env:PLAYWRIGHT_PORT='3211'
+Remove-Item -Recurse -Force .next -EA SilentlyContinue   # purge dev-polluted build
+pnpm exec playwright test search-autocomplete.spec.ts --reporter=list
+```
+
+A correct production run shows **no** `[HMR] connected`, the React error is
+the **minified** form (e.g. `Minified React error #418`), and the route log
+hits `http://127.0.0.1:<PORT>/…` — not some other host/port. A hydration
+mismatch (#418/#425) is logged but **recovers**; it is usually pre-existing
+and does not by itself break the dropdown.
+
+Fastest way to separate "code bug" from "env bug": a 10-line throwaway debug
+spec that registers `page.on('console')` + `page.on('pageerror')`, logs the
+intercepted suggest URL, and dumps `aria-expanded` + listbox count. If it
+reports `expanded=true listboxCount=1` the feature works and the suite
+failure is environmental. Delete the debug spec once diagnosed.
+
 ## Anti-patterns
 
+- ❌ Trusting a green/red Playwright result without checking `PLAYWRIGHT_BASE_URL` — a stale value silently points the browser at a different (dev) server while Playwright dutifully builds an unused production one.
+- ❌ Leaving `next dev` servers running across sessions — they share `apps/web/.next` and corrupt any concurrent `next build` / `next start`.
+- ❌ Deleting `.next` while a `next dev` watcher is alive (it instantly regenerates `.next/dev`, re-polluting the build).
 - ❌ Naming a PowerShell function/script parameter `$Args` (or other automatic vars) → silent empty splat.
 - ❌ `pnpm … --slug=a,b,c` without quotes → PowerShell mangles the args.
 - ❌ Piping through `head`, `tail`, `grep`, `wc` in a Shell tool call.

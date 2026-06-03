@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 
 import type { HotelAffiliation } from '@mch/db';
 
+import { DistinctionEmblem } from '@/components/hotel/distinction-emblem';
 import { Link } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 
@@ -66,9 +67,12 @@ export async function HotelTrustSignals({
   const renderEntry = (entry: HotelAffiliation): React.ReactElement => {
     const sinceLabel = renderSinceYear(entry.since_year);
     return (
-      <div key={`${entry.kind}-${entry.source}`} className="flex flex-col gap-0.5">
-        <span className="text-fg text-sm">{entry.display_name}</span>
-        {sinceLabel !== null ? <span className="text-muted text-xs">{sinceLabel}</span> : null}
+      <div key={`${entry.kind}-${entry.source}`} className="flex items-start gap-2.5">
+        <DistinctionEmblem label={entry.display_name} size="sm" />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-fg text-sm">{entry.display_name}</span>
+          {sinceLabel !== null ? <span className="text-muted text-xs">{sinceLabel}</span> : null}
+        </div>
       </div>
     );
   };
@@ -85,31 +89,38 @@ export async function HotelTrustSignals({
             <dt className="text-muted text-xs font-medium uppercase tracking-wider">
               {t('brand')}
             </dt>
-            <dd className="flex flex-col gap-0.5">
-              {(() => {
-                const slug = brandHrefSlug(sections.brand);
-                const sinceLabel = renderSinceYear(sections.brand.since_year);
-                return (
-                  <>
-                    {slug !== null ? (
-                      <Link
-                        href={{
-                          pathname: '/marque/[brandSlug]',
-                          params: { brandSlug: slug },
-                        }}
-                        className="text-fg text-sm underline decoration-dotted underline-offset-4 hover:decoration-solid"
-                      >
-                        {sections.brand.display_name}
-                      </Link>
-                    ) : (
-                      <span className="text-fg text-sm">{sections.brand.display_name}</span>
-                    )}
-                    {sinceLabel !== null ? (
-                      <span className="text-muted text-xs">{sinceLabel}</span>
-                    ) : null}
-                  </>
-                );
-              })()}
+            <dd className="flex items-start gap-2.5">
+              <DistinctionEmblem
+                label={sections.brand.display_name}
+                forceKind="brand"
+                size="sm"
+              />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                {(() => {
+                  const slug = brandHrefSlug(sections.brand);
+                  const sinceLabel = renderSinceYear(sections.brand.since_year);
+                  return (
+                    <>
+                      {slug !== null ? (
+                        <Link
+                          href={{
+                            pathname: '/marque/[brandSlug]',
+                            params: { brandSlug: slug },
+                          }}
+                          className="text-fg text-sm underline decoration-dotted underline-offset-4 hover:decoration-solid"
+                        >
+                          {sections.brand.display_name}
+                        </Link>
+                      ) : (
+                        <span className="text-fg text-sm">{sections.brand.display_name}</span>
+                      )}
+                      {sinceLabel !== null ? (
+                        <span className="text-muted text-xs">{sinceLabel}</span>
+                      ) : null}
+                    </>
+                  );
+                })()}
+              </div>
             </dd>
           </div>
         ) : null}

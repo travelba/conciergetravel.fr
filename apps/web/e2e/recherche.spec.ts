@@ -26,9 +26,11 @@ test.describe('search page (/recherche)', () => {
       page.getByRole('heading', { level: 1, name: 'Rechercher un hôtel' }),
     ).toBeVisible();
 
-    // The form is a `role="search"` landmark with a single text input
-    // and a submit button — same affordances used by the header search.
-    const form = page.getByRole('search');
+    // The page hosts two `role="search"` landmarks (the global header
+    // quick-search and this page form), so they carry distinct
+    // accessible names (WCAG 2.2 — skill `accessibility`). Target the
+    // page form by its label to stay unambiguous.
+    const form = page.getByRole('search', { name: 'Recherche dans le catalogue' });
     await expect(form).toBeVisible();
     await expect(form.getByLabel('Votre recherche')).toBeVisible();
     await expect(form.getByRole('button', { name: 'Rechercher' })).toBeVisible();
@@ -61,7 +63,11 @@ test.describe('search page (/recherche)', () => {
     expect(res?.status()).toBe(200);
     expect(await page.locator('html').getAttribute('lang')).toBe('en');
     await expect(page.getByRole('heading', { level: 1, name: 'Search for a hotel' })).toBeVisible();
-    await expect(page.getByRole('search').getByRole('button', { name: 'Search' })).toBeVisible();
+    await expect(
+      page
+        .getByRole('search', { name: 'Search the catalogue' })
+        .getByRole('button', { name: 'Search' }),
+    ).toBeVisible();
   });
 
   test('canonical + hreflang alternates point to /recherche', async ({ page }) => {
@@ -78,7 +84,9 @@ test.describe('search page (/recherche)', () => {
     });
     expect(meta.canonical).toMatch(/\/recherche$/);
     expect(meta.hreflangFr).toMatch(/\/recherche$/);
-    expect(meta.hreflangEn).toMatch(/\/en\/recherche$/);
+    // EN localises `/recherche` → `/search` (routing.ts §UI routes + SEO
+    // rule: natives expect `/en/search`, not a FR slug under `/en`).
+    expect(meta.hreflangEn).toMatch(/\/en\/search$/);
     expect(meta.hreflangDefault).toMatch(/\/recherche$/);
   });
 });

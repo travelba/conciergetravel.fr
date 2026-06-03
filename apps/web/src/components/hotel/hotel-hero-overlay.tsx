@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 
 import { HotelFavoriteButton } from './hotel-favorite-button';
+import { HotelGalleryTrigger } from './hotel-gallery-trigger';
 import { HotelShareButton } from './hotel-share-button';
 
 interface HotelHeroOverlayProps {
@@ -28,6 +29,8 @@ interface HotelHeroOverlayProps {
   readonly heroAlt: string;
   readonly countryLabel: string;
   readonly cityHubSlug: string;
+  /** Total gallery photos — surfaced as a "Voir les photos (N)" hero action. */
+  readonly photoCount: number;
 }
 
 const HERO_TRANSFORMS = 'f_auto,q_auto,c_fill,g_auto,w_2400,h_1350';
@@ -63,6 +66,7 @@ export async function HotelHeroOverlay({
   heroAlt,
   countryLabel,
   cityHubSlug,
+  photoCount,
 }: HotelHeroOverlayProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
 
@@ -126,7 +130,7 @@ export async function HotelHeroOverlay({
               </Link>
             </nav>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
               <HotelShareButton
                 hotelName={name}
                 shareText={description !== null ? description.slice(0, 160) : null}
@@ -170,6 +174,15 @@ export async function HotelHeroOverlay({
               </p>
             ) : null}
           </div>
+
+          {/* "Voir les photos" — bottom-right, just above the floating booking bar */}
+          {photoCount > 0 ? (
+            <HotelGalleryTrigger
+              label={t('hero.viewPhotos')}
+              count={photoCount}
+              className="absolute bottom-12 right-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white"
+            />
+          ) : null}
         </div>
       </div>
 

@@ -41,8 +41,16 @@ export async function searchCitiesCatalogOnServer(
   query: string,
   hitsPerPage: number,
 ): Promise<readonly AlgoliaCityRecord[]> {
-  const client = algoliasearch(env.NEXT_PUBLIC_ALGOLIA_APP_ID, env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY);
   try {
+    const appId = env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+    const searchKey = env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY;
+    // Degrade to an empty result set when Algolia isn't configured
+    // (CI smoke build, preview, local dev). The `algoliasearch()`
+    // constructor throws on an empty appId, so it MUST stay inside the
+    // try/catch — mirrors `hotels-catalog.ts`.
+    if (!appId || !searchKey) return [];
+
+    const client = algoliasearch(appId, searchKey);
     const res = await client.searchSingleIndex<Record<string, unknown>>({
       indexName: citiesIndexName(env.ALGOLIA_INDEX_PREFIX, locale),
       searchParams: {

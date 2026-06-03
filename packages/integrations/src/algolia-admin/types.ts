@@ -12,6 +12,13 @@ export const HotelSourceRowSchema = z.object({
   city: z.string(),
   district: z.string().nullable().optional(),
   region: z.string(),
+  // ISO 3166-1 alpha-2. Optional so legacy call sites that predate the
+  // international catalogue (migration 0033) still type-check; the bulk
+  // reindexer selects it. The localized labels feed the searchable
+  // `country` attribute (skill: search-engineering).
+  country_code: z.string().length(2).nullable().optional(),
+  country_label_fr: z.string().nullable().optional(),
+  country_label_en: z.string().nullable().optional(),
   is_palace: z.boolean(),
   stars: z.number().int().min(1).max(5),
   amenities: z.unknown().optional(),
@@ -37,6 +44,12 @@ export const AlgoliaHotelRecordSchema = z
     city: z.string(),
     district: z.string().optional(),
     region: z.string(),
+    // Localized country name + ISO code. Optional so records indexed
+    // before this field shipped still parse (the consumer reads them
+    // defensively until the next full re-index). Searchable — typing a
+    // country name returns its hotels.
+    country: z.string().optional(),
+    country_code: z.string().length(2).optional(),
     landmarks: optionalStringArray,
     aliases: optionalStringArray,
     description_excerpt: z.string(),

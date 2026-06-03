@@ -82,6 +82,15 @@ export function buildHotelAlgoliaRecord(
     row.district !== null && row.district !== undefined && row.district !== ''
       ? row.district
       : undefined;
+  // Localized country name (FR label, EN label, else raw ISO code). Feeds
+  // the searchable `country` attribute so a country query returns its
+  // hotels (skill: search-engineering).
+  const country =
+    locale === 'en'
+      ? (row.country_label_en ?? row.country_label_fr ?? undefined)
+      : (row.country_label_fr ?? row.country_label_en ?? undefined);
+  const countryCode =
+    row.country_code !== null && row.country_code !== undefined ? row.country_code : undefined;
   // Unlocalized path. The renderer (next-intl Link / metadata helpers) is
   // responsible for prepending `/en` when needed. Slug is locale-specific.
   const urlPath = `/hotel/${slug}`;
@@ -105,9 +114,12 @@ export function buildHotelAlgoliaRecord(
     google_reviews_count: row.google_reviews_count ?? undefined,
   };
 
-  if (district !== undefined) {
-    return { ...base, district };
+  let record = district !== undefined ? { ...base, district } : base;
+  if (countryCode !== undefined) {
+    record = { ...record, country_code: countryCode };
   }
-
-  return base;
+  if (country !== undefined && country !== '') {
+    record = { ...record, country };
+  }
+  return record;
 }
