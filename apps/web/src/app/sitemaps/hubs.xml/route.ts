@@ -13,8 +13,13 @@ import {
   listDirectoryCountries,
 } from '@/server/annuaire/list-directory-countries';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
-import { EDITORIAL_CATEGORIES } from '@/server/hotels/editorial-categories';
-import { KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
+import { EDITORIAL_CATEGORIES, filterCategory } from '@/server/hotels/editorial-categories';
+import {
+  listPublishedHotelsByAffiliation,
+  listPublishedHotelsForIndex,
+} from '@/server/hotels/get-hotel-by-slug';
+import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
+import { KNOWN_LABELS } from '@/server/hotels/known-labels';
 
 // ISR — fetches the destination directory at build, then revalidates hourly.
 export const revalidate = 3600;
@@ -189,6 +194,7 @@ export async function GET(): Promise<NextResponse> {
       href:
         | '/inspiration'
         | '/marques'
+        | '/le-concierge-club'
         | '/le-concierge'
         | '/le-concierge/methode-editoriale'
         | '/le-concierge/reserver'
@@ -214,6 +220,9 @@ export async function GET(): Promise<NextResponse> {
     }[] = [
       { href: '/inspiration', priority: 0.7 },
       { href: '/marques', priority: 0.6 },
+      // SE-9 — membership funnel landing (skill membership-program). It was
+      // missing from the sitemap despite being an indexable static hub.
+      { href: '/le-concierge-club', priority: 0.7 },
       { href: '/le-concierge', priority: 0.6 },
       // Vague-6 — all 8 international country guides indexable.
       // Priority 0.7 alongside top-funnel editorial pages because
@@ -255,8 +264,24 @@ export async function GET(): Promise<NextResponse> {
       });
     }
 
+    // Shared catalogue read for the category + brand emptiness guards
+    // below (SE-6). A category/brand page renders `noindex, follow` when
+    // it has zero matching published hotels, so the sitemap must not
+    // advertise those URLs. On a Supabase blip we fall back to `null` →
+    // emit every hub (current behaviour) rather than dropping the whole
+    // sitemap — a stale-but-complete sitemap beats an empty one.
+    let indexHotels: Awaited<ReturnType<typeof listPublishedHotelsForIndex>> | null = null;
+    try {
+      indexHotels = await listPublishedHotelsForIndex(2500);
+    } catch {
+      indexHotels = null;
+    }
+
     // ── Editorial categories (5 palace + 7 non-palace — ADR-0016) ────────
     for (const cat of EDITORIAL_CATEGORIES) {
+      // Skip categories with no published hotel — same predicate as the
+      // page's `categoryHasNoHotels` (filterCategory length === 0).
+      if (indexHotels !== null && filterCategory(indexHotels, cat).length === 0) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
@@ -271,7 +296,36 @@ export async function GET(): Promise<NextResponse> {
     }
 
     // ── Brand pages (one per `KNOWN_BRANDS` family) ──────────────────────
+    // SE-6 — brand emptiness guard. Mirrors the brand page's two-source
+    // union (verified `affiliations[].kind='brand'` ∪ legacy `detectBrand`
+    // name match): a brand hub with zero published hotels renders noindex,
+    // so the sitemap must not list it. `null` (Supabase blip) → emit all.
+    let nonEmptyBrandSlugs: Set<string> | null = null;
+    if (indexHotels !== null) {
+      const hotelsForBrands = indexHotels;
+      try {
+        const tallies = await Promise.all(
+          KNOWN_BRANDS.map(async (brand) => {
+            const affiliated = await listPublishedHotelsByAffiliation({
+              facetSlug: brand.slug,
+              kind: 'brand',
+            });
+            const slugs = new Set<string>();
+            for (const h of affiliated) slugs.add(h.slugFr);
+            for (const h of hotelsForBrands) {
+              if (detectBrand(h.nameFr)?.slug === brand.slug) slugs.add(h.slugFr);
+            }
+            return [brand.slug, slugs.size] as const;
+          }),
+        );
+        nonEmptyBrandSlugs = new Set(tallies.filter(([, n]) => n > 0).map(([slug]) => slug));
+      } catch {
+        nonEmptyBrandSlugs = null;
+      }
+    }
+
     for (const brand of KNOWN_BRANDS) {
+      if (nonEmptyBrandSlugs !== null && !nonEmptyBrandSlugs.has(brand.slug)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
@@ -285,17 +339,56 @@ export async function GET(): Promise<NextResponse> {
       });
     }
 
+    // ── Editorial label / ranking facets (`/label/[facetSlug]`) ──────────
+    // SE-8 — the `/label/*` collection pages were absent from the sitemap.
+    // Emit one entry per KNOWN_LABEL that has ≥ 1 published hotel — same
+    // predicate as the page (affiliation count === 0 → noindex). `null`
+    // (Supabase blip) → emit all rather than drop the section.
+    let nonEmptyLabelSlugs: Set<string> | null = null;
+    try {
+      const tallies = await Promise.all(
+        KNOWN_LABELS.map(async (label) => {
+          const matched = await listPublishedHotelsByAffiliation({
+            facetSlug: label.slug,
+            kind: label.kind,
+          });
+          return [label.slug, matched.length] as const;
+        }),
+      );
+      nonEmptyLabelSlugs = new Set(tallies.filter(([, n]) => n > 0).map(([slug]) => slug));
+    } catch {
+      nonEmptyLabelSlugs = null;
+    }
+    for (const label of KNOWN_LABELS) {
+      if (nonEmptyLabelSlugs !== null && !nonEmptyLabelSlugs.has(label.slug)) continue;
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({
+          locale: l,
+          href: { pathname: '/label/[facetSlug]', params: { facetSlug: label.slug } },
+        })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.6,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
     // ── Legal / institutional pages ──────────────────────────────────────
     // Authority pages (mentions légales, CGV, RGPD, cookies). They carry
     // EEAT signal (skill `geo-llm-optimization` §E-E-A-T) and must be
     // indexed even though they live outside the editorial flow. Until we
     // ship a dedicated `sitemap-institutionnel.xml`, the hub sitemap is
     // the right home — it already groups every static index/hub page.
+    // SE-7 — `/mentions-legales` is intentionally omitted: it currently
+    // renders `noindex, follow` while its corporate-identity fields are in
+    // legal-review draft (`IS_DRAFT = true` in its page). Re-add it here
+    // once that flag flips to `false` (the page comment lists the same
+    // checklist). The other three legal pages are indexable.
     const legalHrefs: {
-      href: '/mentions-legales' | '/confidentialite' | '/cgv' | '/cookies';
+      href: '/confidentialite' | '/cgv' | '/cookies';
       priority: number;
     }[] = [
-      { href: '/mentions-legales', priority: 0.4 },
       { href: '/confidentialite', priority: 0.4 },
       { href: '/cgv', priority: 0.4 },
       { href: '/cookies', priority: 0.3 },

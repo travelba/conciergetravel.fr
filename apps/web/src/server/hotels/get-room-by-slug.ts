@@ -363,6 +363,15 @@ export interface PublishedRoomSlug {
    * rooms sub-sitemap. Falls back to `null` for legacy rows.
    */
   readonly updatedAt: string | null;
+  /**
+   * Whether the room sub-page passes the `isRoomSubpageIndexable` guard
+   * (≥ 5 photos AND ≥ 200 words FR). The rooms sub-sitemap MUST only list
+   * indexable rooms — `generateMetadata` returns `noindex` otherwise, and a
+   * sitemap that advertises `noindex` URLs is a Search Console "Indexed,
+   * though blocked"/"Discovered – not indexed" smell. Computed on the FR
+   * primary locale (the sitemap `<loc>` is the FR URL).
+   */
+  readonly indexable: boolean;
 }
 
 /**
@@ -374,14 +383,24 @@ export async function listPublishedRoomSlugs(): Promise<readonly PublishedRoomSl
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotel_rooms')
-      .select('slug, updated_at, hotel:hotels!inner(slug, slug_en, is_published, updated_at)')
+      .select(
+        'slug, updated_at, images, hero_image, long_description_fr, description_fr, hotel:hotels!inner(slug, slug_en, is_published, updated_at)',
+      )
       .eq('hotel.is_published', true)
       .limit(2000);
     if (error || !Array.isArray(data)) return [];
 
     const out: PublishedRoomSlug[] = [];
     for (const raw of data) {
-      const rec = raw as { slug?: unknown; updated_at?: unknown; hotel?: unknown };
+      const rec = raw as {
+        slug?: unknown;
+        updated_at?: unknown;
+        images?: unknown;
+        hero_image?: unknown;
+        long_description_fr?: unknown;
+        description_fr?: unknown;
+        hotel?: unknown;
+      };
       const roomSlug = rec.slug;
       const hotel = rec.hotel as
         | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }
@@ -408,12 +427,24 @@ export async function listPublishedRoomSlugs(): Promise<readonly PublishedRoomSl
             ? roomUpdated
             : hotelUpdated
           : (roomUpdated ?? hotelUpdated);
+      // Mirror `isRoomSubpageIndexable` on the raw row (FR primary locale):
+      // ≥ 5 photos (gallery + hero) AND ≥ 200 words (long + short FR).
+      const gallerySize =
+        (Array.isArray(rec.images) ? rec.images.length : 0) +
+        (typeof rec.hero_image === 'string' && rec.hero_image.length > 0 ? 1 : 0);
+      const longWords =
+        typeof rec.long_description_fr === 'string' ? countWords(rec.long_description_fr) : 0;
+      const shortWords =
+        typeof rec.description_fr === 'string' ? countWords(rec.description_fr) : 0;
+      const indexable = gallerySize >= 5 && longWords + shortWords >= 200;
+
       out.push({
         hotelSlugFr: hotelSlug,
         hotelSlugEn:
           typeof hotelSlugEn === 'string' && isValidSlug(hotelSlugEn) ? hotelSlugEn : null,
         roomSlug,
         updatedAt,
+        indexable,
       });
     }
     return out;

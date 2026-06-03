@@ -11,7 +11,7 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
 /**
  * Sitemap index (skill: seo-technical). Sub-sitemaps are emitted by
- * `/sitemaps/{hotels,rooms,hubs,editorial,guides}.xml`.
+ * `/sitemaps/{hotels,rooms,hubs,guides,rankings,itineraries}.xml`.
  *
  * IMPORTANT: This route is `force-static`. Reading `new URL(request.url).origin`
  * here would bake the build-time origin (typically `http://localhost:3000`)
@@ -26,7 +26,6 @@ export function GET(): NextResponse {
     { loc: `${origin}/sitemaps/hotels.xml`, lastmod: now },
     { loc: `${origin}/sitemaps/rooms.xml`, lastmod: now },
     { loc: `${origin}/sitemaps/hubs.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/editorial.xml`, lastmod: now },
     { loc: `${origin}/sitemaps/guides.xml`, lastmod: now },
     { loc: `${origin}/sitemaps/rankings.xml`, lastmod: now },
     { loc: `${origin}/sitemaps/itineraries.xml`, lastmod: now },

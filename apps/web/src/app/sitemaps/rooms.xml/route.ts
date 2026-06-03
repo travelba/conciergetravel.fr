@@ -33,6 +33,10 @@ export async function GET(): Promise<NextResponse> {
   try {
     const rooms = await listPublishedRoomSlugs();
     for (const r of rooms) {
+      // Only list rooms whose sub-page is actually indexable — the page's
+      // `generateMetadata` returns noindex below the thin-content threshold,
+      // and a sitemap must never advertise noindex URLs (SE-1).
+      if (!r.indexable) continue;
       // Per-locale hotel-slug selection (data layer — Phase 1c).
       const hotelSlugForLocale = (l: Locale): string =>
         l === 'en' ? (r.hotelSlugEn ?? r.hotelSlugFr) : r.hotelSlugFr;
