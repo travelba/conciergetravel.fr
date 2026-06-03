@@ -20,6 +20,27 @@ export const env = createEnv({
     AMADEUS_PAYMENT_WEBHOOK_SECRET: z.string().min(1),
     LITTLE_HOTELIER_API_BASE: z.string().url(),
     LITTLE_HOTELIER_API_KEY: z.string().min(1),
+    // Travelport (Stays) — pilote sandbox Phase 6. Optionnel : l'app démarre
+    // sans ces variables tant que TRAVELPORT_SANDBOX_ENABLED est faux. La
+    // factory (apps/web/src/lib/travelport.ts) valide leur présence à l'usage.
+    TRAVELPORT_SANDBOX_ENABLED: z.coerce.boolean().default(false),
+    TRAVELPORT_AUTH_URL: z.string().url().optional(),
+    TRAVELPORT_API_BASE: z.string().url().optional(),
+    TRAVELPORT_USERNAME: z.string().optional(),
+    TRAVELPORT_PASSWORD: z.string().optional(),
+    TRAVELPORT_CLIENT_ID: z.string().optional(),
+    TRAVELPORT_CLIENT_SECRET: z.string().optional(),
+    TRAVELPORT_PCC: z.string().optional(),
+    TRAVELPORT_ACCESS_GROUP: z.string().optional(),
+    TRAVELPORT_CURRENCY: z.string().length(3).default('EUR'),
+    /** Allow-list de slugs hôtels éligibles au sandbox (séparés par virgule). */
+    TRAVELPORT_SAMPLE_SLUGS: z.string().optional(),
+    /** Carte de test sandbox pour la garantie/dépôt (jamais en production). */
+    TRAVELPORT_TEST_CARD_CODE: z.string().optional(),
+    TRAVELPORT_TEST_CARD_NUMBER: z.string().optional(),
+    TRAVELPORT_TEST_CARD_EXPIRE: z.string().optional(),
+    TRAVELPORT_TEST_CARD_CVV: z.string().optional(),
+    TRAVELPORT_TEST_CARD_HOLDER: z.string().optional(),
     MAKCORPS_API_BASE: z.string().url(),
     MAKCORPS_API_KEY: z.string().min(1),
     MAKCORPS_DAILY_QUOTA: z.coerce.number().int().positive().default(10000),

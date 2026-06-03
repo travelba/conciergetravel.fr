@@ -48,6 +48,18 @@ const SharedEnvSchema = z.object({
   LITTLE_HOTELIER_API_BASE: requiredUrl,
   LITTLE_HOTELIER_API_KEY: z.string().min(1),
 
+  // Travelport (Stays / TripServices)
+  TRAVELPORT_ENV: z.enum(['preprod', 'production']).default('preprod'),
+  TRAVELPORT_AUTH_URL: requiredUrl, // https://auth.pp.travelport.net/oauth/token
+  TRAVELPORT_API_BASE: requiredUrl, // https://api.pp.travelport.net
+  TRAVELPORT_USERNAME: z.string().min(1),
+  TRAVELPORT_PASSWORD: z.string().min(1),
+  TRAVELPORT_CLIENT_ID: z.string().min(1),
+  TRAVELPORT_CLIENT_SECRET: z.string().min(1),
+  TRAVELPORT_PCC: z.string().min(1),
+  TRAVELPORT_ACCESS_GROUP: z.string().min(1),
+  TRAVELPORT_CURRENCY: z.string().default('GBP'),
+
   // Makcorps + Apify
   MAKCORPS_API_BASE: requiredUrl,
   MAKCORPS_API_KEY: z.string().min(1),

@@ -4,6 +4,7 @@
  */
 export * as Http from './http';
 export * as Amadeus from './amadeus';
+export * as Travelport from './travelport';
 export * as LittleHotelier from './little-hotelier';
 export * as Makcorps from './makcorps';
 export * as Apify from './apify';

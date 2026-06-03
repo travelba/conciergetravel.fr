@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./amadeus": "./src/amadeus/index.ts",
+    "./travelport": "./src/travelport/index.ts",
     "./little-hotelier": "./src/little-hotelier/index.ts",
     "./makcorps": "./src/makcorps/index.ts",
     "./apify": "./src/apify/index.ts",
