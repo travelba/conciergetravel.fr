@@ -29,10 +29,12 @@ import {
   listPublishedRankings,
 } from '@/server/rankings/get-ranking-by-slug';
 
-// ADR-0007 — ISR via auth client island (1 hour). Drops the
-// `force-dynamic` we used while iterating, recovers Vercel CDN
-// caching, and keeps freshness via `revalidateTag` from Payload.
-export const revalidate = 3600;
+// Emits per-request nonce'd JSON-LD (json-ld.tsx CSP contract + ADR-0013).
+// Reading the nonce via headers() already forces dynamic rendering, so we
+// declare force-dynamic explicitly rather than leave a misleading
+// `revalidate` that implies nonce-broken ISR caching. Matches the hotel
+// page precedent until hash-based CSP (ADR-0027) allows ISR again.
+export const dynamic = 'force-dynamic';
 
 /**
  * Defensive `[]` per nextjs-app-router skill: never throws during

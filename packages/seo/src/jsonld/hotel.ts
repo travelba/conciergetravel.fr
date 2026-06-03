@@ -968,12 +968,15 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
       ...(review.date !== undefined && review.date.length > 0
         ? { datePublished: review.date }
         : {}),
-      ...(review.rating !== undefined && review.maxRating !== undefined
+      ...(review.rating !== undefined && review.maxRating !== undefined && review.maxRating > 0
         ? {
             reviewRating: {
               '@type': 'Rating',
-              ratingValue: review.rating,
-              bestRating: review.maxRating,
+              // Hard Rule 11: Google's Hotel rich result always renders /5,
+              // so we normalise any vendor scale (Forbes /100, /10, etc.) to
+              // 0-5 and pin bestRating to 5. Never advertise bestRating > 5.
+              ratingValue: Math.round((review.rating / review.maxRating) * 5 * 100) / 100,
+              bestRating: 5,
               worstRating: 0,
             },
           }

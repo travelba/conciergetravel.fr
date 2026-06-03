@@ -273,6 +273,19 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
     }),
   );
 
+  // Breadcrumb JSON-LD (Accueil › Hôtels) — BreadcrumbList was missing on
+  // this catalogue hub (audit 2026-06). Mirrors the pattern on the other
+  // hubs so Google can render the breadcrumb rich result.
+  const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
+    JsonLd.breadcrumbJsonLd([
+      {
+        name: locale === 'fr' ? 'Accueil' : 'Home',
+        url: `${origin}${getPathname({ locale, href: '/' })}`,
+      },
+      { name: title, url: `${origin}${getPathname({ locale, href: '/hotels' })}` },
+    ]),
+  );
+
   // Build the AEO answer with current month freshness signal — read by
   // LLM crawlers as a recency cue ("Mise à jour novembre 2026" per
   // skill `geo-llm-optimization` §AEO block). Today's date is
@@ -292,6 +305,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10 sm:py-14">
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
+      <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 
       <header className="mb-10 max-w-3xl">
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
@@ -300,7 +314,14 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
         <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
       </header>
 
-      <HubAeoSection question={t.aeoQ} answer={aeoAnswer} headingId="hotels-aeo-title" />
+      {/* emitJsonLd={false}: the canonical FAQPage is the multi-Q
+          <HubFaqSection> below (ADR-0011 C1 — one FAQPage per page). */}
+      <HubAeoSection
+        question={t.aeoQ}
+        answer={aeoAnswer}
+        headingId="hotels-aeo-title"
+        emitJsonLd={false}
+      />
 
       {/* Internal anchor strip — region jump-to (boosts maillage interne) */}
       {regionsOrdered.length > 0 ? (
