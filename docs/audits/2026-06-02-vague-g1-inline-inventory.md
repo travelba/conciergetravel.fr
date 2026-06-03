@@ -5,17 +5,25 @@ author: agent (Cursor)
 branch: feat/vague-g1-csp-hash-migration (base main @ 914b725)
 method: lecture seule (Grep + Read sur la worktree), aucune édition de code
 scope: apps/web (proxy.ts, lib/security/csp.ts, components/**, app/**), packages/**
-status: ÉTAPE 1 terminée — STOP avant Étape 2 (décision de stratégie requise)
+status: clos 2026-06-03 — décision rendue (ADR-0027, CSP-α) ; Vague G clôturée sans G-2/G-3
 ---
 
 # Vague G-1 — Inventaire inline scripts/styles
 
+> **✅ Clôturé le 2026-06-03.** La décision déférée par cet inventaire a été
+> tranchée : **[ADR-0027](../adr/0027-csp-model-evolution.md) retient CSP-α**
+> (nonce par-requête maintenu), **[ADR-0026](../adr/0026-csp-rendering-strategy.md)
+> est `Rejected`** (rendu = `force-dynamic` permanent), **[ADR-0007](../adr/0007-isr-via-auth-client-island.md)
+> est amendée**. La migration nonce → hash est **abandonnée** ; la **Vague G est
+> clôturée sans G-2/G-3**. Cet inventaire reste la pièce factuelle qui a fondé la
+> décision.
+>
 > **Objectif initial** : migrer la CSP de `nonce` (par requête) vers `hash` (statique)
 > pour autoriser l'ISR sur les fiches hôtels.
 >
 > **Résultat de l'inventaire** : 🚨 **la migration nonce → hash telle que formulée
 > n'est pas réalisable** sur cette app Next.js App Router. Détail + alternatives
-> ci-dessous. Décision requise avant toute implémentation (Étape 2).
+> ci-dessous.
 
 ---
 
