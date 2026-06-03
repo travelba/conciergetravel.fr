@@ -65,6 +65,11 @@ async function continueToPaymentAction(): Promise<void> {
   }
 
   let draft = persisted.draft;
+  // Garde sandbox (Étape A) : une offre Travelport ne passe jamais au paiement,
+  // même via un POST forgé. On renvoie au recap (lecture seule).
+  if (draft.offer?.provider === 'travelport') {
+    redirect({ href: '/reservation/recap', locale: persisted.locale });
+  }
   if (draft.state === 'guest_collected') {
     const r = moveToRecap(draft);
     if (!r.ok) {
@@ -179,15 +184,33 @@ export default async function ReservationRecapPage({
         <p className="text-muted mt-2 text-xs">{t('cancellation.verbatimNote')}</p>
       </section>
 
-      <form action={continueToPaymentAction}>
-        <button
-          type="submit"
-          className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+      {offer.provider === 'travelport' ? (
+        <section
+          className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
+          aria-label={locale === 'en' ? 'Travelport sandbox notice' : 'Note sandbox Travelport'}
         >
-          {t('continueToPayment')}
-        </button>
-        <p className="text-muted mt-3 text-xs">{t('paymentDisclaimer')}</p>
-      </form>
+          <p className="text-fg text-sm font-medium">
+            {locale === 'en'
+              ? 'Travelport sandbox — booking disabled at this step'
+              : 'Sandbox Travelport — réservation désactivée à cette étape'}
+          </p>
+          <p className="text-muted mt-2 text-xs">
+            {locale === 'en'
+              ? 'This recap shows a live preprod offer (price + cancellation policy). Payment and reservation are intentionally not wired in this iteration.'
+              : 'Ce récapitulatif affiche une offre preprod réelle (prix + conditions d’annulation). Le paiement et la réservation ne sont volontairement pas câblés dans cette itération.'}
+          </p>
+        </section>
+      ) : (
+        <form action={continueToPaymentAction}>
+          <button
+            type="submit"
+            className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+          >
+            {t('continueToPayment')}
+          </button>
+          <p className="text-muted mt-3 text-xs">{t('paymentDisclaimer')}</p>
+        </form>
+      )}
     </main>
   );
 }
