@@ -30,7 +30,7 @@ async function main(): Promise<void> {
   try {
     const r = await client.query(
       `select id, slug, slug_en, name, name_en, stars, is_palace, city, region, country_code,
-              description_fr, address, postal_code, latitude, longitude
+              description_fr, address, postal_code, latitude, longitude, luxury_tier
        from public.hotels
        where is_published = true
        order by is_palace desc, stars desc, name asc`,
@@ -51,6 +51,7 @@ async function main(): Promise<void> {
       postal_code: row.postal_code,
       latitude: row.latitude,
       longitude: row.longitude,
+      luxury_tier: row.luxury_tier,
     }));
     const outPath = path.join(__dirname, '../../out/hotels-catalog.json');
     await fs.mkdir(path.dirname(outPath), { recursive: true });

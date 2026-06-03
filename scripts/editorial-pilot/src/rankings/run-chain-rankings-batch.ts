@@ -49,12 +49,29 @@ const RUNLOG_PATH = path.resolve(CACHE_ROOT, '_chain-batch-runlog.jsonl');
 
 interface ChainSpec {
   readonly slug: string;
-  /** Case-insensitive regex matched against `hotels.name`. */
-  readonly nameRegex: RegExp;
+  /**
+   * Case-insensitive regex matched against `hotels.name`. Optional when a
+   * custom `match` predicate is supplied (e.g. tier + country association
+   * rankings that cannot be matched by hotel name).
+   */
+  readonly nameRegex?: RegExp;
+  /**
+   * Custom eligibility predicate. Takes precedence over `nameRegex` when
+   * present. Used by the association rankings (Relais & Châteaux, Small
+   * Luxury Hotels) which filter on `luxury_tier` + `country_code`.
+   */
+  readonly match?: (h: HotelCatalogRow) => boolean;
   readonly titleFr: string;
   readonly titleEn: string;
   readonly targetLength: number;
   readonly keywordsFr: readonly string[];
+}
+
+function eligibilityOf(spec: ChainSpec): (h: HotelCatalogRow) => boolean {
+  if (spec.match) return spec.match;
+  const re = spec.nameRegex;
+  if (re) return (h) => re.test(h.name);
+  throw new Error(`ChainSpec ${spec.slug} has neither nameRegex nor match.`);
 }
 
 export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
@@ -63,7 +80,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /ritz.?carlton/iu,
     titleFr: 'Top Ritz-Carlton — les adresses signature de la collection mondiale',
     titleEn: 'Top Ritz-Carlton — the signature addresses of the worldwide collection',
-    targetLength: 30,
+    targetLength: 45,
     keywordsFr: [
       'Ritz-Carlton — référence du service luxe Marriott, héritage César Ritz',
       'flagships urbains et resorts balnéaires : Half Moon Bay, Abama Tenerife, Kyoto, Bali',
@@ -77,7 +94,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /st\.? ?regis/iu,
     titleFr: 'Top St. Regis — héritage Astor et service majordome dans le monde',
     titleEn: 'Top St. Regis — Astor heritage and butler service worldwide',
-    targetLength: 25,
+    targetLength: 40,
     keywordsFr: [
       'St. Regis — fondé par John Jacob Astor IV, New York 1904',
       'Butler Service signature disponible 24h/24 dans chaque suite',
@@ -91,7 +108,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /anantara/iu,
     titleFr: "Top Anantara — l'art de vivre asiatique et les resorts immersifs",
     titleEn: 'Top Anantara — Asian art de vivre and immersive resorts',
-    targetLength: 20,
+    targetLength: 39,
     keywordsFr: [
       'Anantara — du sanskrit "sans fin", immersion culturelle et nature',
       'destinations signature : Thaïlande, Maldives, Oman (désert), Émirats, Italie',
@@ -105,7 +122,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /waldorf/iu,
     titleFr: 'Top Waldorf Astoria — le grand luxe Hilton héritier de New York',
     titleEn: "Top Waldorf Astoria — Hilton's grand luxury, New York heritage",
-    targetLength: 20,
+    targetLength: 31,
     keywordsFr: [
       'Waldorf Astoria — institution new-yorkaise née en 1893, fleuron Hilton',
       'adresses landmark : Beverly Hills, Amsterdam, Maldives Ithaafushi, Dubaï',
@@ -119,7 +136,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /jumeirah/iu,
     titleFr: 'Top Jumeirah — le luxe émirati et ses icônes architecturales',
     titleEn: 'Top Jumeirah — Emirati luxury and its architectural icons',
-    targetLength: 15,
+    targetLength: 21,
     keywordsFr: [
       'Jumeirah — groupe dubaïote, hospitalité arabe contemporaine',
       'icône mondiale : Burj Al Arab Jumeirah, la "voile" de Dubaï',
@@ -133,7 +150,7 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     nameRegex: /raffles/iu,
     titleFr: 'Top Raffles — légende coloniale et palaces intemporels (Accor)',
     titleEn: 'Top Raffles — colonial legend and timeless palaces (Accor)',
-    targetLength: 15,
+    targetLength: 19,
     keywordsFr: [
       'Raffles — né à Singapour en 1887, berceau du Singapore Sling',
       'service majordome Raffles signature, élégance intemporelle',
@@ -255,6 +272,350 @@ export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
     ],
   },
 ];
+
+// ─── Chain specs (wave 3) ────────────────────────────────────────────
+// Brands not yet covered by wave 1/2. Name regexes verified against the
+// 2219-row catalogue (2026-06-03). COMO is anchored `^como\b` to exclude
+// the geographic false-positives "Mandarin Oriental, Lago di Como",
+// "Passalacqua, Lake Como" and the EDITION hotel "The Lake Como EDITION".
+
+export const CHAIN_SPECS_WAVE3: readonly ChainSpec[] = [
+  {
+    slug: 'top-kempinski-hotels-monde',
+    nameRegex: /kempinski/iu,
+    titleFr: 'Top Kempinski — le grand luxe européen, plus vieille collection du continent',
+    titleEn: 'Top Kempinski — European grand luxury, the continent’s oldest collection',
+    targetLength: 30,
+    keywordsFr: [
+      'Kempinski — fondé en 1897, plus ancienne collection hôtelière de luxe européenne',
+      'adresses landmark : Berlin (Adlon), Genève, Saint-Moritz (Grand Hotel des Bains), Munich',
+      'resorts balnéaires et urbains : Émirats, Chine, Indonésie, Maldives, Égypte',
+      'spa, gastronomie, conciergerie Lady in Red signature',
+      "clientèle d'affaires premium, familles du Golfe, voyageurs européens fidèles",
+    ],
+  },
+  {
+    slug: 'top-fairmont-hotels-monde',
+    nameRegex: /fairmont/iu,
+    titleFr: 'Top Fairmont — les palaces historiques nord-américains (groupe Accor)',
+    titleEn: 'Top Fairmont — historic North American palaces (Accor group)',
+    targetLength: 30,
+    keywordsFr: [
+      'Fairmont — châteaux et palaces patrimoniaux, héritage canadien et impérial',
+      'icônes : Le Château Frontenac (Québec), The Savoy (Londres), Banff Springs, The Plaza',
+      'adresses balnéaires et urbaines : Monte-Carlo, Dubaï, Maldives, San Francisco',
+      'spa, gastronomie, architecture grand siècle restaurée',
+      'clientèle familiale aisée, MICE, voyageurs Accor Live Limitless élite',
+    ],
+  },
+  {
+    slug: 'top-como-hotels-monde',
+    nameRegex: /^como\b/iu,
+    titleFr: 'Top COMO Hotels — le luxe bien-être et la table santé signature',
+    titleEn: 'Top COMO Hotels — wellness luxury and signature healthy cuisine',
+    targetLength: 15,
+    keywordsFr: [
+      'COMO Hotels & Resorts — luxe discret, wellness COMO Shambhala signature',
+      'adresses : Maldives (Maalifushi, Cocoa Island), Bhoutan, Bali (Uma), Fidji (Laucala)',
+      'cuisine COMO Shambhala (santé, ayurveda), spa de destination, retraites yoga',
+      'urbains design : The Halkin et Metropolitan Londres, Metropolitan Bangkok',
+      'clientèle en quête de ressourcement, lunes de miel, voyageurs wellness',
+    ],
+  },
+  {
+    slug: 'top-viceroy-hotels-monde',
+    nameRegex: /\bviceroy\b/iu,
+    titleFr: 'Top Viceroy — le lifestyle luxe américain et ses resorts design',
+    titleEn: 'Top Viceroy — American lifestyle luxury and design resorts',
+    targetLength: 8,
+    keywordsFr: [
+      'Viceroy Hotels & Resorts — lifestyle luxe contemporain, design audacieux',
+      'adresses : Los Cabos, Riviera Maya, Bali, Sainte-Lucie (Sugar Beach), Santa Monica',
+      'plages, piscines design, gastronomie et mixologie soignées',
+      'urbains branchés : Chicago, New York, Snowmass (ski)',
+      'clientèle américaine lifestyle, couples, escapades design',
+    ],
+  },
+  {
+    slug: 'top-grecotel-resorts-grece',
+    nameRegex: /grecotel/iu,
+    titleFr: 'Top Grecotel — les resorts grecs face à la Méditerranée',
+    titleEn: 'Top Grecotel — Greek resorts facing the Mediterranean',
+    targetLength: 5,
+    keywordsFr: [
+      'Grecotel — plus grand groupe hôtelier de luxe grec, ancré dans son territoire',
+      'resorts balnéaires : Crète, Corfou, Péloponnèse, Mykonos',
+      'plages privées, tavernes gastronomiques, spa et villas avec piscine',
+      'art de vivre méditerranéen, hospitalité grecque, familles bienvenues',
+      'clientèle familiale et couples en quête de soleil égéen',
+    ],
+  },
+  {
+    slug: 'top-taj-hotels-monde',
+    nameRegex: /\btaj\b/iu,
+    titleFr: 'Top Taj — les palais indiens légendaires (groupe Tata)',
+    titleEn: 'Top Taj — legendary Indian palaces (Tata group)',
+    targetLength: 4,
+    keywordsFr: [
+      'Taj Hotels — hospitalité indienne d’exception, groupe Tata depuis 1903',
+      'palais iconiques : The Taj Mahal Palace (Mumbai), Taj Lake Palace (Udaipur)',
+      'service personnalisé d’anthologie, architecture moghole et coloniale',
+      'gastronomie indienne raffinée, spa Jiva, héritage maharaja',
+      'clientèle en quête d’Inde luxueuse, circuits palaces, lunes de miel',
+    ],
+  },
+  {
+    slug: 'top-edition-hotels-monde',
+    nameRegex: /\bedition\b/iu,
+    titleFr: 'Top EDITION — le luxe lifestyle signé Ian Schrager (Marriott)',
+    titleEn: 'Top EDITION — lifestyle luxury by Ian Schrager (Marriott)',
+    targetLength: 3,
+    keywordsFr: [
+      'EDITION — concept lifestyle d’Ian Schrager, design épuré et nightlife',
+      'adresses : Londres, Tokyo (Toranomon), Lac de Côme',
+      'restaurants et bars destination, ambiance feutrée et contemporaine',
+      'spa, fitness, service décontracté mais ultra-soigné',
+      'clientèle urbaine branchée, créatifs, voyageurs design',
+    ],
+  },
+  {
+    slug: 'top-regent-hotels-monde',
+    nameRegex: /\bregent\b/iu,
+    titleFr: 'Top Regent — le raffinement asiatique intemporel (groupe IHG)',
+    titleEn: 'Top Regent — timeless Asian refinement (IHG group)',
+    targetLength: 3,
+    keywordsFr: [
+      'Regent — luxe feutré d’inspiration asiatique, élégance discrète',
+      'adresses : Hong Kong (légendaire, rouvert), Pékin, Berlin',
+      'suites spacieuses, service attentionné, vues panoramiques',
+      'gastronomie raffinée, spa, art de recevoir asiatique',
+      'clientèle d’affaires haut de gamme, voyageurs IHG élite',
+    ],
+  },
+];
+
+// ─── Re-homed brands (wave 2-bis) — topN bump ────────────────────────
+// The first 8 chains shipped via `run-chain-ranking.ts` from stale
+// pre-dumped JSON with conservative caps. Re-homing the most saturated
+// ones here lets them regenerate from the fresh 2219-row catalogue with
+// authoritative `luxury_tier` matching and a higher topN, and auto-push
+// through the ratchet. These supersede the same slugs in
+// `run-chain-ranking.ts`.
+
+function byTier(tier: string): (h: HotelCatalogRow) => boolean {
+  return (h) => h.luxury_tier === tier;
+}
+
+export const CHAIN_SPECS_REHOMED: readonly ChainSpec[] = [
+  {
+    slug: 'top-four-seasons-palaces-monde',
+    match: byTier('four_seasons'),
+    titleFr: 'Top Four Seasons — les palaces et flagships de la collection mondiale',
+    titleEn: 'Top Four Seasons — palaces and flagships from the worldwide collection',
+    targetLength: 45,
+    keywordsFr: [
+      'Four Seasons — référence service luxe global depuis 1961',
+      'flagships et adresses palace : George V Paris, Cap-Ferrat, Firenze, Bora Bora',
+      'spa, restaurants étoilés Michelin, kids program, business amenities',
+      'Four Seasons Private Retreats — villas privées exceptionnelles',
+      "mariages, événements MICE, lunes de miel, voyages d'affaires premium",
+    ],
+  },
+  {
+    slug: 'top-mandarin-oriental-hotels-monde',
+    match: byTier('mandarin_oriental'),
+    titleFr: "Top Mandarin Oriental — la collection hôtelière asiatique d'exception",
+    titleEn: 'Top Mandarin Oriental — the finest hotels from the Asian luxury collection',
+    targetLength: 40,
+    keywordsFr: [
+      'Mandarin Oriental — hospitalité asiatique adaptée à chaque destination',
+      'flagships : Hong Kong, Bangkok, Tokyo, Paris, Londres, Genève',
+      'spa Mandarin Oriental signature, gastronomie étoilée Michelin',
+      'design intérieur signé Tony Chi, Adam D. Tihany, Christophe Pillet',
+      "clientèle internationale fortunée, lunes de miel, voyages d'affaires haut de gamme",
+    ],
+  },
+  {
+    slug: 'top-park-hyatt-hotels-monde',
+    match: byTier('park_hyatt'),
+    titleFr: 'Top Park Hyatt — le luxe contemporain Hyatt dans le monde',
+    titleEn: "Top Park Hyatt — Hyatt's contemporary luxury collection worldwide",
+    targetLength: 40,
+    keywordsFr: [
+      "Park Hyatt — flagship luxe du groupe Hyatt, design contemporain d'auteur",
+      'destinations urbaines : Tokyo, Paris-Vendôme, New York, Sydney, Vienne, Milan',
+      'Spas Park Hyatt — souvent rooftop ou centre-ville premium',
+      'Park Hyatt Niseko, Saint-Kitts, Maldives — escapades resort de la collection',
+      "clientèle business haut de gamme, voyageurs d'affaires premium, lunes de miel urbaines",
+    ],
+  },
+  {
+    slug: 'top-aman-hotels-monde',
+    match: byTier('aman'),
+    titleFr: 'Top Aman — les plus belles adresses de la collection dans le monde',
+    titleEn: 'Top Aman — the finest addresses in the worldwide collection',
+    targetLength: 39,
+    keywordsFr: [
+      'collection Aman — Adrian Zecha, philosophie discrétion + intimité',
+      'destinations signature : Bhoutan, Japon, Indonésie, Italie, Maroc',
+      'pavillons et villas privées, spa Aman, gastronomie locale revisitée',
+      'clientèle quête de retraite, lune de miel, voyage initiatique',
+      'service ratio personnel / chambre élevé, expériences sur-mesure',
+    ],
+  },
+  {
+    slug: 'top-rosewood-hotels-monde',
+    match: byTier('rosewood'),
+    titleFr: 'Top Rosewood — la collection ultra-luxe sino-américaine',
+    titleEn: 'Top Rosewood — the ultra-luxury Sino-American collection',
+    targetLength: 29,
+    keywordsFr: [
+      'Rosewood — philosophie "A Sense of Place", chaque hôtel reflète l\'esprit du lieu',
+      'flagships urbains : Mansion on Turtle Creek Dallas, Carlyle New York, Hong Kong',
+      'resorts signature : Mayakoba (Mexique), Phuket, Le Guanahani (Saint-Barth)',
+      'Asaya — programme wellness signature avec coachs experts',
+      'clientèle UHNWI internationale, événements privés, mariages exclusifs',
+    ],
+  },
+];
+
+// ─── Association rankings (wave 4) — Relais & Châteaux + SLH by country ─
+// Relais & Châteaux (435) and Small Luxury Hotels of the World (217) are
+// the two largest cohorts of unranked hotels. They cannot be matched by
+// name, so they are filtered on `luxury_tier` + `country_code`. Specs are
+// generated programmatically for every (tier, country) pair with enough
+// inventory. See `.cursor/skills/editorial-rankings-matrix/SKILL.md` Rule 8.
+
+interface CountryDef {
+  readonly cc: string;
+  readonly nameFr: string;
+  readonly nameEn: string;
+  /** French preposition: "en France", "au Japon", "aux États-Unis". */
+  readonly prep: string;
+  readonly slug: string;
+}
+
+const ASSOCIATION_COUNTRIES: readonly CountryDef[] = [
+  { cc: 'FR', nameFr: 'France', nameEn: 'France', prep: 'en', slug: 'france' },
+  { cc: 'US', nameFr: 'États-Unis', nameEn: 'the United States', prep: 'aux', slug: 'etats-unis' },
+  { cc: 'IT', nameFr: 'Italie', nameEn: 'Italy', prep: 'en', slug: 'italie' },
+  {
+    cc: 'GB',
+    nameFr: 'Royaume-Uni',
+    nameEn: 'the United Kingdom',
+    prep: 'au',
+    slug: 'royaume-uni',
+  },
+  { cc: 'ES', nameFr: 'Espagne', nameEn: 'Spain', prep: 'en', slug: 'espagne' },
+  { cc: 'CH', nameFr: 'Suisse', nameEn: 'Switzerland', prep: 'en', slug: 'suisse' },
+  { cc: 'DE', nameFr: 'Allemagne', nameEn: 'Germany', prep: 'en', slug: 'allemagne' },
+  { cc: 'JP', nameFr: 'Japon', nameEn: 'Japan', prep: 'au', slug: 'japon' },
+  { cc: 'PT', nameFr: 'Portugal', nameEn: 'Portugal', prep: 'au', slug: 'portugal' },
+  { cc: 'CA', nameFr: 'Canada', nameEn: 'Canada', prep: 'au', slug: 'canada' },
+  {
+    cc: 'ZA',
+    nameFr: 'Afrique du Sud',
+    nameEn: 'South Africa',
+    prep: 'en',
+    slug: 'afrique-du-sud',
+  },
+  { cc: 'AR', nameFr: 'Argentine', nameEn: 'Argentina', prep: 'en', slug: 'argentine' },
+  { cc: 'AT', nameFr: 'Autriche', nameEn: 'Austria', prep: 'en', slug: 'autriche' },
+  { cc: 'NL', nameFr: 'Pays-Bas', nameEn: 'the Netherlands', prep: 'aux', slug: 'pays-bas' },
+  { cc: 'GR', nameFr: 'Grèce', nameEn: 'Greece', prep: 'en', slug: 'grece' },
+  { cc: 'IE', nameFr: 'Irlande', nameEn: 'Ireland', prep: 'en', slug: 'irlande' },
+  { cc: 'MA', nameFr: 'Maroc', nameEn: 'Morocco', prep: 'au', slug: 'maroc' },
+  { cc: 'AU', nameFr: 'Australie', nameEn: 'Australia', prep: 'en', slug: 'australie' },
+  { cc: 'MY', nameFr: 'Malaisie', nameEn: 'Malaysia', prep: 'en', slug: 'malaisie' },
+];
+
+interface AssociationTier {
+  readonly tier: string;
+  readonly tierSlug: string;
+  readonly brandFr: string;
+  /** Countries (cc) to emit a ranking for — those with ≥ 5 unranked members. */
+  readonly countries: readonly string[];
+  readonly cap: number;
+}
+
+const ASSOCIATION_TIERS: readonly AssociationTier[] = [
+  {
+    tier: 'relais_chateaux',
+    tierSlug: 'relais-chateaux',
+    brandFr: 'Relais & Châteaux',
+    cap: 30,
+    countries: [
+      'FR',
+      'US',
+      'IT',
+      'GB',
+      'ES',
+      'CH',
+      'DE',
+      'JP',
+      'PT',
+      'CA',
+      'ZA',
+      'AR',
+      'AT',
+      'NL',
+      'GR',
+      'IE',
+      'MA',
+    ],
+  },
+  {
+    tier: 'small_luxury_hotels',
+    tierSlug: 'small-luxury-hotels',
+    brandFr: 'Small Luxury Hotels of the World',
+    cap: 30,
+    countries: ['GR', 'IT', 'GB', 'ES', 'PT', 'IE', 'US', 'AU', 'MY', 'AT'],
+  },
+];
+
+function buildAssociationSpecs(): ChainSpec[] {
+  const byCc = new Map(ASSOCIATION_COUNTRIES.map((c) => [c.cc, c]));
+  const specs: ChainSpec[] = [];
+  for (const t of ASSOCIATION_TIERS) {
+    for (const cc of t.countries) {
+      const c = byCc.get(cc);
+      if (!c) throw new Error(`Missing CountryDef for ${cc}`);
+      const isRC = t.tier === 'relais_chateaux';
+      const titleFr = isRC
+        ? `Top Relais & Châteaux ${c.prep} ${c.nameFr} — maisons d'exception et tables gastronomiques`
+        : `Top Small Luxury Hotels ${c.prep} ${c.nameFr} — adresses indépendantes de charme`;
+      const titleEn = isRC
+        ? `Top Relais & Châteaux in ${c.nameEn} — exceptional houses and gourmet tables`
+        : `Top Small Luxury Hotels in ${c.nameEn} — independent boutique addresses`;
+      const keywordsFr = isRC
+        ? [
+            "Relais & Châteaux — association de maisons indépendantes d'exception (gastronomie, art de vivre, patrimoine)",
+            `sélection ${c.nameFr} : demeures de caractère, tables gastronomiques, accueil familial`,
+            'cuisine de chefs, terroir local, cadres patrimoniaux et nature préservée',
+            `idéal escapades romantiques, séjours gastronomiques, week-ends de charme ${c.prep} ${c.nameFr}`,
+            'label qualité Relais & Châteaux, esprit maison, hospitalité personnalisée',
+          ]
+        : [
+            "Small Luxury Hotels of the World (SLH) — collection d'hôtels indépendants de charme et de caractère",
+            `sélection ${c.nameFr} : boutique-hôtels, demeures historiques, adresses confidentielles`,
+            'intimité, design singulier, service personnalisé, ancrage local',
+            `idéal city-breaks, escapades en couple, voyages indépendants ${c.prep} ${c.nameFr}`,
+            'label SLH, indépendance, expériences authentiques et soignées',
+          ];
+      specs.push({
+        slug: `top-${t.tierSlug}-${c.slug}`,
+        match: (h) => h.luxury_tier === t.tier && h.country_code === cc,
+        titleFr,
+        titleEn,
+        targetLength: t.cap,
+        keywordsFr,
+      });
+    }
+  }
+  return specs;
+}
+
+export const CHAIN_SPECS_ASSOCIATIONS: readonly ChainSpec[] = buildAssociationSpecs();
 
 // ─── Cache + runlog helpers ──────────────────────────────────────────
 
@@ -378,7 +739,7 @@ async function processChain(
   const tag = `[${index + 1}/${total} ${spec.slug}]`;
   const t0 = Date.now();
 
-  const eligible = catalog.filter((h) => spec.nameRegex.test(h.name));
+  const eligible = catalog.filter(eligibilityOf(spec));
   if (eligible.length < 3) {
     console.log(`${tag} ⤬ skipped: only ${eligible.length} eligible (need ≥ 3).`);
     await appendRunLog({
@@ -492,7 +853,12 @@ async function main(): Promise<void> {
   const catalog = await loadHotelsCatalog();
   console.log(`Loaded ${catalog.length} hotels from catalogue.`);
 
-  let specs: ChainSpec[] = [...CHAIN_SPECS_WAVE2];
+  let specs: ChainSpec[] = [
+    ...CHAIN_SPECS_WAVE2,
+    ...CHAIN_SPECS_WAVE3,
+    ...CHAIN_SPECS_REHOMED,
+    ...CHAIN_SPECS_ASSOCIATIONS,
+  ];
   if (args.only !== null) {
     const wanted = args.only;
     specs = specs.filter((s) => wanted.has(s.slug));

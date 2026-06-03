@@ -217,6 +217,7 @@ async function loadChainHotels(chainKey: string): Promise<HotelCatalogRow[]> {
     postal_code: h.postal_code ?? null,
     latitude: h.latitude ?? null,
     longitude: h.longitude ?? null,
+    luxury_tier: null,
   }));
 }
 

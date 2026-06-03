@@ -1055,12 +1055,27 @@ function postValidateRichBlocks(
  * 110-180 here (LLMs drift by a handful of chars) and log soft warnings.
  * EN is optional (V1 is FR-only).
  */
+/**
+ * Replace the first standalone 1-2 digit integer (the stated hotel count
+ * the LLM wrote in "Sélection éditoriale de N hôtels…") with the REAL
+ * resolved entry count. Pass 9 runs in parallel with entry generation, so
+ * the LLM guesses the count from `seed.targetLength` and drifts whenever
+ * the resolved entries differ (off-by-N, rounding to 10, etc.). The year
+ * (4 digits) and any trailing arrondissement number are left untouched
+ * because only the FIRST 1-2 digit match is rewritten.
+ */
+function correctSummaryCount(text: string, count: number): string {
+  if (text.length === 0) return text;
+  return text.replace(/\b\d{1,2}\b/u, String(count));
+}
+
 function postValidateFactualSummary(
   summary: { factual_summary_fr: string; factual_summary_en: string },
   slug: string,
+  entriesCount: number,
 ): { factual_summary_fr: string; factual_summary_en: string } {
-  const fr = summary.factual_summary_fr.trim();
-  const en = summary.factual_summary_en.trim();
+  const fr = correctSummaryCount(summary.factual_summary_fr.trim(), entriesCount);
+  const en = correctSummaryCount(summary.factual_summary_en.trim(), entriesCount);
   if (fr.length < 110 || fr.length > 180) {
     console.warn(`  ⚠ [${slug}] factual_summary_fr pass 9: ${fr.length} chars (target 130-150).`);
   }
@@ -1288,7 +1303,11 @@ export async function generateRankingV2(
   const cleanedFaq = postValidateFaq(callFaq.faq, seed.slug);
 
   // Pass 9 post-validation: log if outside 130-150 char band but don't fail.
-  const factualSummary = postValidateFactualSummary(callFactualSummary, seed.slug);
+  const factualSummary = postValidateFactualSummary(
+    callFactualSummary,
+    seed.slug,
+    cleanedEntries.length,
+  );
 
   // Drop sub-floor glossary entries to keep render quality high.
   const cleanedB = postValidateRichBlocks(callB, seed.slug);

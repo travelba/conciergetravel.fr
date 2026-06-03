@@ -22,6 +22,8 @@ const HotelRowSchema = z.object({
   postal_code: z.string().nullable(),
   latitude: z.union([z.string(), z.number()]).nullable(),
   longitude: z.union([z.string(), z.number()]).nullable(),
+  /** Luxury affiliation tier (relais_chateaux, small_luxury_hotels, …) — optional for back-compat with older catalog dumps. */
+  luxury_tier: z.string().nullable().optional().default(null),
 });
 
 export type HotelCatalogRow = z.infer<typeof HotelRowSchema>;
