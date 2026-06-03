@@ -10,9 +10,15 @@ let cachedCreds: TravelportCredentials | null | undefined;
 /**
  * Vrai uniquement si le pilote sandbox Travelport est explicitement activé.
  * Garde-fou principal : jamais actif en production sans cette variable.
+ *
+ * Tolère la valeur booléenne (validation Zod active en prod) comme la chaîne
+ * brute `"true"` / `"1"` (mode `SKIP_ENV_VALIDATION=true` du dev local, où les
+ * `.default()`/coercions Zod ne tournent pas). Reste strictement opt-in :
+ * toute autre valeur — y compris `undefined` — laisse le pilote désactivé.
  */
 export function isTravelportSandboxEnabled(): boolean {
-  return env.TRAVELPORT_SANDBOX_ENABLED === true;
+  const raw: unknown = env.TRAVELPORT_SANDBOX_ENABLED;
+  return raw === true || raw === 'true' || raw === '1';
 }
 
 /**
