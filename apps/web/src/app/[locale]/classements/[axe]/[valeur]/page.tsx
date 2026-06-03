@@ -25,7 +25,10 @@ import { env } from '@/lib/env';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 import { getRegionHubContent, hasLieuHubFallback } from '@/server/destinations/region-hubs';
 
-export const revalidate = 3600;
+// Emits per-request nonce'd JSON-LD (json-ld.tsx CSP contract + ADR-0013):
+// reading the nonce via headers() already forces dynamic rendering, so we
+// declare force-dynamic explicitly instead of a misleading `revalidate`.
+export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 function siteOrigin(): string {

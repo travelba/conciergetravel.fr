@@ -187,10 +187,21 @@ export default async function ConciergeClubLandingPage({
       ) as ReadonlyArray<FaqItem>)
     : [];
 
+  // FAQPage JSON-LD — mirrors the visible FAQ section below (each
+  // acceptedAnswer.text matches the rendered answer verbatim per the
+  // builder contract). Single FAQPage on the page (ADR-0011 C1).
+  const faqData =
+    faqItems.length > 0
+      ? JsonLd.withSchemaOrgContext(
+          JsonLd.faqPageJsonLd(faqItems.map((it) => ({ question: it.q, answer: it.a }))),
+        )
+      : null;
+
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={memberProgramData} nonce={nonce} />
       <JsonLdScript data={breadcrumbData} nonce={nonce} />
+      {faqData !== null ? <JsonLdScript data={faqData} nonce={nonce} /> : null}
 
       {/* ─── Hero ───────────────────────────────────────────────── */}
       <header className="mb-12">

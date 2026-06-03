@@ -44,7 +44,11 @@ import { listItineraries, type ItineraryCard } from '@/server/itineraries/list-i
  * @see .cursor/rules/seo-geo.mdc
  * @see docs/plan-itineraires-reprise.md §3.2.1
  */
-export const revalidate = 3600;
+// Emits per-request nonce'd JSON-LD (json-ld.tsx CSP contract + ADR-0013).
+// Reading the nonce via headers() already forces dynamic rendering;
+// declared explicitly here. Payload `revalidateTag('itineraries-hub')`
+// still drives data-cache freshness independently of the page mode.
+export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 

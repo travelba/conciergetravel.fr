@@ -20,9 +20,12 @@ import {
   type PublishedRankingCard,
 } from '@/server/rankings/get-ranking-by-slug';
 
-// ADR-0007 — ISR (auth client island handles per-user UI). Mirrors
-// detail page revalidation cadence.
-export const revalidate = 3600;
+// This page emits per-request nonce'd JSON-LD (json-ld.tsx CSP contract
+// + ADR-0013): reading the nonce via headers() already opts the route
+// out of ISR, so declare force-dynamic explicitly. Avoids the
+// contradictory `revalidate` that could mislead a future refactor into
+// re-enabling nonce-broken ISR caching (same rationale as the hotel page).
+export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 
@@ -397,7 +400,14 @@ export default async function RankingsIndexPage({
         <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
       </header>
 
-      <HubAeoSection question={t.aeoQ} answer={aeoAnswer} headingId="classements-aeo-title" />
+      {/* emitJsonLd={false}: the canonical FAQPage is the multi-Q
+          <HubFaqSection> below (ADR-0011 C1 — one FAQPage per page). */}
+      <HubAeoSection
+        question={t.aeoQ}
+        answer={aeoAnswer}
+        headingId="classements-aeo-title"
+        emitJsonLd={false}
+      />
 
       <RankingsFacets
         rankings={cards}

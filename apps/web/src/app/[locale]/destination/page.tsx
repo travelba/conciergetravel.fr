@@ -176,6 +176,21 @@ export default async function DestinationDirectoryPage({
     }),
   );
 
+  // Breadcrumb JSON-LD (Accueil › Destinations) — BreadcrumbList was
+  // missing on this directory hub (audit 2026-06). Mirrors the other hubs.
+  const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
+    JsonLd.breadcrumbJsonLd([
+      {
+        name: locale === 'fr' ? 'Accueil' : 'Home',
+        url: `${origin}${getPathname({ locale, href: '/' })}`,
+      },
+      {
+        name: t('directory.title'),
+        url: `${origin}${getPathname({ locale, href: '/destination' })}`,
+      },
+    ]),
+  );
+
   // Freshness signal for the AEO answer + the visible badge.
   const freshnessDate = new Intl.DateTimeFormat(intlLocaleTag(locale), {
     month: 'long',
@@ -194,6 +209,7 @@ export default async function DestinationDirectoryPage({
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
+      <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 
       <header className="mb-10">
         <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
@@ -208,6 +224,7 @@ export default async function DestinationDirectoryPage({
         question={t('directory.aeoQuestion')}
         answer={t('directory.aeoAnswer', { count: totalDestinations, date: freshnessDate })}
         headingId="destination-directory-aeo-title"
+        emitJsonLd={false}
       />
 
       {totalDestinations === 0 ? (

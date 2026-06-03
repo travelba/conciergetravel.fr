@@ -151,6 +151,7 @@ export default async function InspirationHubPage({
         question={t('aeoQuestion')}
         answer={t('aeoAnswer', { date: freshnessDate })}
         headingId="inspiration-aeo-title"
+        emitJsonLd={false}
       />
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
