@@ -81,34 +81,57 @@ function summarise(factual: string | null, description: string | null): string |
   return `${(lastSpace > 200 ? slice.slice(0, lastSpace) : slice).trimEnd()}…`;
 }
 
+const HOTEL_COLUMNS =
+  'id, slug, slug_en, name, name_en, stars, is_palace, city, region, ' +
+  'country_code, country_label_fr, country_label_en, ' +
+  'latitude, longitude, address, postal_code, hero_image, ' +
+  'factual_summary_fr, factual_summary_en, description_fr, description_en, ' +
+  'booking_mode, updated_at, ' +
+  'wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, ' +
+  'booking_com_hotel_id, official_url';
+
+// Supabase/PostgREST caps a single response at `db-max-rows` (1000 on
+// this project). The catalogue is > 2000 published hotels, so a single
+// unbounded SELECT silently truncates. We page through with `.range()`
+// in 1000-row windows until a short page signals the end — that way the
+// JSONL is the *complete* machine-readable catalogue, not a head slice.
+const PAGE_SIZE = 1000;
+
 export async function GET(): Promise<Response> {
   const origin = siteOrigin();
   const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from('hotels')
-    .select(
-      'id, slug, slug_en, name, name_en, stars, is_palace, city, region, ' +
-        'country_code, country_label_fr, country_label_en, ' +
-        'latitude, longitude, address, postal_code, hero_image, ' +
-        'factual_summary_fr, factual_summary_en, description_fr, description_en, ' +
-        'booking_mode, updated_at, ' +
-        'wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, ' +
-        'booking_com_hotel_id, official_url',
-    )
-    .eq('is_published', true)
-    .order('is_palace', { ascending: false })
-    .order('stars', { ascending: false })
-    .order('name', { ascending: true });
 
-  if (error !== null || data === null) {
-    return new Response('Error reading hotel catalog\n', {
-      status: 500,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
+  const rows: unknown[] = [];
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('hotels')
+      .select(HOTEL_COLUMNS)
+      .eq('is_published', true)
+      .order('is_palace', { ascending: false })
+      .order('stars', { ascending: false })
+      .order('name', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error !== null || data === null) {
+      // First page failing is a hard error; a later page failing means
+      // we already have a usable (if partial) corpus — serve it rather
+      // than 500 the whole catalogue.
+      if (offset === 0) {
+        return new Response('Error reading hotel catalog\n', {
+          status: 500,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      }
+      break;
+    }
+
+    rows.push(...data);
+    if (data.length < PAGE_SIZE) break;
   }
 
   const lines: string[] = [];
-  for (const row of data as unknown[]) {
+  for (const row of rows) {
     const r = row as Record<string, unknown>;
     const slug = safeString(r['slug']);
     const slugEn = safeString(r['slug_en']);
