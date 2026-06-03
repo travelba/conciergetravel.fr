@@ -351,9 +351,42 @@ describe('hotelJsonLd', () => {
       });
       // Museum without coords must not emit a geo node.
       expect(node.nearbyAttractions[1]).not.toHaveProperty('geo');
-      expect(node.nearbyAttractions[2]).toMatchObject({ '@type': 'ShoppingCenter' });
+      // A thin commerce POI (name only, no address/hours/price) maps to a
+      // LocalBusiness subtype (ShoppingCenter) but is downgraded to the
+      // neutral TouristAttraction Place subtype so it does not register as
+      // an incomplete LocalBusiness competing with the page's Hotel entity.
+      expect(node.nearbyAttractions[2]).toMatchObject({ '@type': 'TouristAttraction' });
+      expect(node.nearbyAttractions[2]).not.toHaveProperty('additionalType');
       // Unknown type → default to TouristAttraction.
       expect(node.nearbyAttractions[3]).toMatchObject({ '@type': 'TouristAttraction' });
+    }
+  });
+
+  it('keeps a LocalBusiness POI type when the POI carries business data', () => {
+    const node = hotelJsonLd({
+      name: 'Le Peninsula',
+      url: 'https://example.com/p',
+      nearbyAttractions: [
+        // Described restaurant (has address) → stays a Restaurant.
+        {
+          name: 'La Bastide de Capelongue',
+          type: 'restaurant',
+          address: { streetAddress: 'Les Claparèdes', addressLocality: 'Bonnieux' },
+        },
+        // Described store (has opening hours) → stays a Store.
+        {
+          name: 'Épicerie du Village',
+          type: 'store',
+          openingHours: 'Mo-Sa 08:00-19:00',
+        },
+        // Thin restaurant (name + geo only) → downgraded to TouristAttraction.
+        { name: 'Café Anonyme', type: 'restaurant', latitude: 43.9, longitude: 5.2 },
+      ],
+    });
+    if (Array.isArray(node.nearbyAttractions)) {
+      expect(node.nearbyAttractions[0]).toMatchObject({ '@type': 'Restaurant' });
+      expect(node.nearbyAttractions[1]).toMatchObject({ '@type': 'Store' });
+      expect(node.nearbyAttractions[2]).toMatchObject({ '@type': 'TouristAttraction' });
     }
   });
 

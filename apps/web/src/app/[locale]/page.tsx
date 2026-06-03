@@ -15,16 +15,16 @@ import { HomeHotelGrid } from '@/components/home/home-hotel-grid';
 import { HomeInspirationGrid } from '@/components/home/home-inspiration-grid';
 import { HomeOpeningsGrid } from '@/components/home/home-openings-grid';
 import { HomeTopRankings } from '@/components/home/home-top-rankings';
-import { JsonLdScript } from '@/components/seo/json-ld';
+import { SeoJsonLd } from '@/components/seo/json-ld';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
-import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
 import { getRecentOpenings } from '@/lib/home/recent-openings';
+import { buildWebsiteJsonLd } from '@/lib/jsonld/brand-organization';
 import { listPublishedCities } from '@/server/destinations/cities';
 import { listPublishedRankings } from '@/server/rankings/get-ranking-by-slug';
 
@@ -105,39 +105,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const agencyDescription =
-    locale === 'en'
-      ? `The Concierge's Selection — ${CATALOGUE_PUBLISHED} extraordinary hotels in ${CATALOGUE_COUNTRIES} countries (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels). Editorial picks, operational tips per hotel, GDS net rates via our IATA agency, secure Amadeus payment, loyalty from the first night.`
-      : `La sélection du Concierge — ${CATALOGUE_PUBLISHED} hôtels d'exception choisis dans ${CATALOGUE_COUNTRIES} pays (Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels). Sélection éditoriale, conseils opérationnels par fiche, tarifs nets GDS via notre agence IATA, paiement sécurisé Amadeus, fidélité dès la première nuit.`;
-  const agencyJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.travelAgencyJsonLd({
-      name: 'MyConciergeHotel',
-      url: `${siteUrl}${getPathname({ locale, href: '/' })}`,
-      description: agencyDescription,
-      iataCode: 'FR',
-    }),
-  );
+  // The brand TravelAgency (Organization) node is emitted site-wide from
+  // `[locale]/layout.tsx` (single source of truth, stable `@id`). The home
+  // no longer re-declares it — it only references it via `WebSite.publisher`.
 
-  // WebSite + SearchAction (Google sitelinks search box).
-  // Only emitted from the home page — Google requires the `WebSite` node
-  // at the site root, not on every page (ADR-0014 §2.2 + seo-geo.mdc).
-  const searchUrl = `${siteUrl}${getPathname({ locale, href: '/recherche' })}`;
-  const websiteSearchJsonLd = JsonLd.withSchemaOrgContext({
-    '@type': 'WebSite',
-    '@id': `${siteUrl}#website`,
-    name: 'MyConciergeHotel',
-    url: `${siteUrl}${getPathname({ locale, href: '/' })}`,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${searchUrl}?destination={search_term_string}`,
-      },
-      // `query-input` is required by Google for sitelinks search box.
-      // The literal string contract is fragile but mandated by schema.org.
-      'query-input': 'required name=search_term_string',
-    },
-  });
+  // WebSite + SearchAction (Google sitelinks search box). Built from the
+  // shared factory (alongside the brand Organization) and emitted ONLY here,
+  // from the site root — Google expects the `WebSite` node at the root, not on
+  // every page (ADR-0014 §2.2 + seo-geo.mdc). `publisher` references the global
+  // brand Organization by `@id` so the two root nodes form one connected graph.
+  const websiteJsonLd = buildWebsiteJsonLd(locale);
 
   // AEO entries (skill: geo-llm-optimization). The same list backs the
   // visible `<HomeAeoFaq>` block AND the `FAQPage` JSON-LD payload — DOM
@@ -207,15 +184,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <main className="bg-bg">
-      <JsonLdScript data={agencyJsonLd} nonce={nonce} />
-      <JsonLdScript data={websiteSearchJsonLd} nonce={nonce} />
-      <JsonLdScript data={homeFaqJsonLd} nonce={nonce} />
-      {openingsItemListJsonLd !== null ? (
-        <JsonLdScript data={openingsItemListJsonLd} nonce={nonce} />
-      ) : null}
-      {featuredItemListJsonLd !== null ? (
-        <JsonLdScript data={featuredItemListJsonLd} nonce={nonce} />
-      ) : null}
+      <SeoJsonLd
+        nonce={nonce}
+        nodes={[websiteJsonLd, homeFaqJsonLd, openingsItemListJsonLd, featuredItemListJsonLd]}
+      />
 
       {/* §1 — Hero éditorial : « MyConciergeHotel — Book like a
           concierge. » + H1 « Nous vous attendions » + chiffres

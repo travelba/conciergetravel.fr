@@ -71,6 +71,24 @@ export interface EventInput {
   /** DATAtourisme provenance URI — emitted as `sameAs`. */
   readonly sameAs?: string;
   readonly pricing?: EventPricingInput;
+  /**
+   * Locality (commune) of the venue. Strengthens `location.address` so
+   * Google's Events rich result + AI overviews resolve the place precisely.
+   * Emitted only when non-empty.
+   */
+  readonly addressLocality?: string;
+  /**
+   * Administrative region of the venue (e.g. "Provence-Alpes-Côte d'Azur").
+   * Emitted only when non-empty.
+   */
+  readonly addressRegion?: string;
+  /**
+   * Absolute HTTPS URL of an image representing the event (Google-recommended
+   * field for the Events rich result). The builder defensively requires an
+   * `https://` URL and silently drops anything else — never fabricate or reuse
+   * an unrelated photo (Google requires the image to depict the event itself).
+   */
+  readonly imageUrl?: string;
 }
 
 export type EventNode =
@@ -107,9 +125,11 @@ interface MutableEventNode {
   eventAttendanceMode: string;
   eventStatus: string;
   location: MutablePlaceNode;
+  image?: string;
   description?: string;
   url?: string;
   sameAs?: string;
+  isAccessibleForFree?: boolean;
   offers?: MutableOfferNode;
 }
 
@@ -119,7 +139,9 @@ interface MutablePlaceNode {
   geo: { '@type': 'GeoCoordinates'; latitude: number; longitude: number };
   address?: {
     '@type': 'PostalAddress';
-    streetAddress: string;
+    streetAddress?: string;
+    addressLocality?: string;
+    addressRegion?: string;
     addressCountry: 'FR';
   };
 }
@@ -145,10 +167,22 @@ export function eventJsonLd(input: EventInput): EventNode {
       longitude: input.longitude,
     },
   };
-  if (input.venueAddress !== null && input.venueAddress.length > 0) {
+  const streetAddress =
+    input.venueAddress !== null && input.venueAddress.length > 0 ? input.venueAddress : undefined;
+  const addressLocality =
+    input.addressLocality !== undefined && input.addressLocality.trim().length > 0
+      ? input.addressLocality.trim()
+      : undefined;
+  const addressRegion =
+    input.addressRegion !== undefined && input.addressRegion.trim().length > 0
+      ? input.addressRegion.trim()
+      : undefined;
+  if (streetAddress !== undefined || addressLocality !== undefined || addressRegion !== undefined) {
     location.address = {
       '@type': 'PostalAddress',
-      streetAddress: input.venueAddress,
+      ...(streetAddress !== undefined ? { streetAddress } : {}),
+      ...(addressLocality !== undefined ? { addressLocality } : {}),
+      ...(addressRegion !== undefined ? { addressRegion } : {}),
       addressCountry: 'FR',
     };
   }
@@ -164,6 +198,12 @@ export function eventJsonLd(input: EventInput): EventNode {
 
   if (input.endDate !== undefined && input.endDate.length > 0) {
     node.endDate = input.endDate;
+  }
+  // `image` — Google-recommended for the Events rich result. Defensively
+  // HTTPS-only; we never fabricate or borrow an unrelated photo (the image
+  // must depict the event itself).
+  if (input.imageUrl !== undefined && /^https:\/\/[^\s<>]+$/iu.test(input.imageUrl)) {
+    node.image = input.imageUrl;
   }
   if (input.description !== undefined) {
     const trimmed = input.description.trim();
@@ -188,6 +228,10 @@ export function eventJsonLd(input: EventInput): EventNode {
     };
     if (input.pricing.type === 'free') {
       offer.price = '0';
+      // `isAccessibleForFree: true` is the canonical Schema.org signal for a
+      // free public event (markets, open-air festivals). Google reads it
+      // alongside the price-0 offer to mark the event free in the rich result.
+      node.isAccessibleForFree = true;
     } else if (input.pricing.amountEur !== null) {
       offer.price = String(input.pricing.amountEur);
     }

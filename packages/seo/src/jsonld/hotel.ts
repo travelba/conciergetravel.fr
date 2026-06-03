@@ -604,6 +604,43 @@ function additionalTypeFor(input: NearbyAttractionInput, atTypeClass: string): s
 const PALACE_AWARD = 'Distinction Palace — Atout France';
 
 /**
+ * Schema.org classes that derive from `LocalBusiness` (and therefore from
+ * `Organization`). On a Hotel page, a nearby POI mapped to one of these but
+ * carrying only `name` + `geo` is an *incomplete* LocalBusiness in Google's
+ * Rich Results Test: it dilutes the page's primary-entity signal (the Hotel)
+ * and raises "missing recommended field" (address / openingHours / priceRange)
+ * warnings. Such thin POIs are downgraded to the neutral `TouristAttraction`
+ * Place subtype (see the `nearbyAttractions` builder below). Place subtypes
+ * that are NOT LocalBusiness (Museum, Park, LandmarksOrHistoricalBuildings,
+ * PlaceOfWorship, TouristAttraction, TrainStation…) are intentionally absent
+ * and keep their precise type even when thin.
+ */
+const LOCAL_BUSINESS_POI_TYPES: ReadonlySet<string> = new Set([
+  'Restaurant',
+  'CafeOrCoffeeShop',
+  'BarOrPub',
+  'NightClub',
+  'Winery',
+  'Store',
+  'ShoppingCenter',
+  'Pharmacy',
+  'BakeryShop',
+  'GroceryStore',
+  'ConvenienceStore',
+  'LiquorStore',
+  'BookStore',
+  'AutomatedTeller',
+  'BankOrCreditUnion',
+  'PostOffice',
+  'Hospital',
+  'MedicalClinic',
+  'Dentist',
+  'SportsActivityLocation',
+  'ExerciseGym',
+  'MovieTheater',
+]);
+
+/**
  * `Hotel` JSON-LD (skill: structured-data-schema-org).
  *
  * Legal note: the *Palace* distinction is regulated by Atout France. When
@@ -748,9 +785,9 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
     // ~12 in its rich-result test but the wider set still surfaces in
     // LLM ingestion pipelines (Bing, Perplexity, Anthropic crawlers).
     out.nearbyAttractions = input.nearbyAttractions.slice(0, 24).map((poi) => {
-      const atTypeClass = poiSchemaType(poi.type);
+      const mappedClass = poiSchemaType(poi.type);
       const node: NearbyAttractionNode = {
-        '@type': atTypeClass,
+        '@type': mappedClass,
         name: poi.name,
       };
       if (poi.latitude !== undefined && poi.longitude !== undefined) {
@@ -782,10 +819,6 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
       if (price !== null) {
         node.priceRange = price;
       }
-      const additional = additionalTypeFor(poi, atTypeClass);
-      if (additional !== undefined) {
-        node.additionalType = additional;
-      }
       if (poi.address !== undefined) {
         const street = poi.address.streetAddress?.trim();
         const locality = poi.address.addressLocality?.trim();
@@ -795,6 +828,27 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
             ...(street && street.length > 0 ? { streetAddress: street } : {}),
             ...(locality && locality.length > 0 ? { addressLocality: locality } : {}),
           };
+        }
+      }
+      // A nearby POI only *earns* a LocalBusiness type when it carries at
+      // least one business-identifying field (address / opening hours /
+      // price). A thin POI (name + geo only) mapped to a LocalBusiness
+      // subtype is an incomplete LocalBusiness that competes with the
+      // page's primary Hotel entity and triggers Google "missing
+      // recommended field" warnings — so we downgrade it to the neutral
+      // `TouristAttraction` Place subtype and drop its `additionalType`
+      // (which would otherwise re-inject the LocalBusiness type via URL).
+      const hasBusinessSignal =
+        node.address !== undefined ||
+        node.openingHoursSpecification !== undefined ||
+        node.priceRange !== undefined;
+      const downgraded = LOCAL_BUSINESS_POI_TYPES.has(mappedClass) && !hasBusinessSignal;
+      if (downgraded) {
+        node['@type'] = 'TouristAttraction';
+      } else {
+        const additional = additionalTypeFor(poi, mappedClass);
+        if (additional !== undefined) {
+          node.additionalType = additional;
         }
       }
       return node;

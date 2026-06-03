@@ -110,20 +110,9 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
 
   // ─── JSON-LD payloads ──────────────────────────────────────────────────
 
-  const travelAgencyJsonLd = JsonLd.withSchemaOrgContext(
-    JsonLd.travelAgencyJsonLd({
-      name: 'MyConciergeHotel',
-      url,
-      description: t('lede'),
-      iataCode: 'FR',
-      contactEmail: 'contact@myconciergehotel.com',
-      sameAs: [
-        // sameAs entries authenticate the agency across the open web;
-        // each URL here MUST be a profile we control. Empty for now
-        // — Phase 2 adds Linkedin/Crunchbase/Trustpilot.
-      ],
-    }),
-  );
+  // The brand TravelAgency (Organization) node is now emitted site-wide from
+  // `[locale]/layout.tsx` (single source of truth, stable `@id`). This page
+  // no longer re-declares it to avoid duplicate Organization entities.
 
   const faqJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.faqPageJsonLd(faqItems.map((item) => ({ question: item.q, answer: item.a }))),
@@ -140,7 +129,6 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-10 sm:py-14">
-      <JsonLdScript data={travelAgencyJsonLd} nonce={nonce} />
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 

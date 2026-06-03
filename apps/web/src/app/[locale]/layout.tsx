@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Inter, Noto_Serif } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
@@ -8,6 +9,7 @@ import { ConsentBanner } from '@/components/consent';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
+import { SiteSeoJsonLd } from '@/components/seo/site-json-ld';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
@@ -69,9 +71,18 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  // Site-wide brand Organization (OTA) JSON-LD — the single source of truth
+  // for the MyConciergeHotel entity, present on every page so search engines
+  // and LLMs can resolve the brand from any URL (it carries a stable `@id`).
+  // The CSP nonce is read here at the layout boundary (NOT inside a leaf RSC —
+  // see `components/seo/json-ld.tsx`); on the few `force-static` routes
+  // `headers()` yields no nonce, which is acceptable (low-priority legal pages).
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <html lang={locale} className={`${sans.variable} ${serif.variable}`}>
       <body className="flex min-h-dvh flex-col overflow-x-clip">
+        <SiteSeoJsonLd locale={locale} nonce={nonce} />
         <NextIntlClientProvider messages={messages}>
           <SiteHeader />
           {/*

@@ -3058,7 +3058,12 @@
     "rating": {
       "scoreOf": "{value} / {best}",
       "scoreAria": "Average rating of {value} out of {best}",
-      "reviewCount": "{count, plural, one {# verified review} other {# verified reviews}}"
+      "reviewCount": "{count, plural, one {# verified review} other {# verified reviews}}",
+      "reviewCountShort": "{count, plural, one {# review} other {# reviews}}",
+      "ratedBy": "{source} rating",
+      "sourceGoogle": "Google",
+      "sourceAmadeus": "Amadeus",
+      "sourceBooking": "Booking.com"
     },
     "sections": {
       "about": "About",

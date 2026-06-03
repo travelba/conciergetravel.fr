@@ -4,6 +4,14 @@ import type { TravelAgency } from 'schema-dts';
 export type TravelAgencyNode = Exclude<TravelAgency, string>;
 
 export interface TravelAgencyJsonLdInput {
+  /**
+   * Stable JSON-LD node identity (e.g. `https://site.tld#organization`).
+   * Emitting a canonical `@id` lets every page reference the SAME brand
+   * entity (WebSite.publisher, Article.publisher, BreadcrumbList…) instead
+   * of duplicating a fresh Organization node per page — the single source
+   * of truth for the OTA across the whole graph.
+   */
+  readonly id?: string;
   readonly name: string;
   readonly url: string;
   readonly logoUrl?: string;
@@ -19,11 +27,17 @@ export interface TravelAgencyJsonLdInput {
  * IATA accreditation is signalled via `award` (Google supports free-form text).
  */
 export const travelAgencyJsonLd = (input: TravelAgencyJsonLdInput): TravelAgencyNode => {
-  const out: TravelAgencyNode = {
+  // `@id` is a JSON-LD keyword schema-dts does not model on every node type;
+  // we widen locally so the property is assignable, then return as the
+  // schema-dts node (the optional `@id` is structurally compatible).
+  const out: TravelAgencyNode & { '@id'?: string } = {
     '@type': 'TravelAgency',
     name: input.name,
     url: input.url,
   };
+  if (input.id !== undefined) {
+    out['@id'] = input.id;
+  }
 
   if (input.logoUrl !== undefined) {
     out.logo = input.logoUrl;

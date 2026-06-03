@@ -65,3 +65,46 @@ export function JsonLdScript({ data, nonce }: JsonLdScriptProps): ReactElement {
     />
   );
 }
+
+/** A single Schema.org node — the typed objects returned by the `@mch/seo` builders. */
+export type SeoJsonLdNode = object;
+
+interface SeoJsonLdProps {
+  /**
+   * One node, or an array of nodes. `null` / `undefined` entries are skipped,
+   * so callers can pass conditional blocks inline (e.g. an optional video
+   * node) without pre-filtering:
+   *
+   * ```tsx
+   * <SeoJsonLd nonce={nonce} nodes={[hotelJsonLd, faqJsonLd, videoJsonLd, ...eventNodes]} />
+   * ```
+   */
+  readonly nodes: SeoJsonLdNode | ReadonlyArray<SeoJsonLdNode | null | undefined>;
+  /** Per-request CSP nonce, read once at the page boundary (see {@link JsonLdScript}). */
+  readonly nonce: string | undefined;
+}
+
+/**
+ * Dedicated, SSR-only component that emits every JSON-LD block of a page
+ * through a single, strongly-typed entry point. It renders one
+ * `<script type="application/ld+json">` per node (each self-contained with its
+ * own `@context`), forwarding the CSP nonce so the markup ships in the initial
+ * server HTML — present from the very first crawl/index.
+ *
+ * Common root nodes (Organization, WebSite) are factored into
+ * `components/seo/site-json-ld.tsx` + `lib/jsonld/brand-organization.ts`;
+ * page-specific nodes (Hotel/LocalBusiness, Event, FAQPage, ItemList, …) are
+ * passed in by the page that owns them.
+ */
+export function SeoJsonLd({ nodes, nonce }: SeoJsonLdProps): ReactElement {
+  const list = (Array.isArray(nodes) ? nodes : [nodes]).filter(
+    (node): node is SeoJsonLdNode => node !== null && node !== undefined,
+  );
+  return (
+    <>
+      {list.map((data, index) => (
+        <JsonLdScript key={index} data={data} nonce={nonce} />
+      ))}
+    </>
+  );
+}

@@ -10,6 +10,8 @@ export interface HotelHeroRating {
   readonly ratingValue: number;
   readonly reviewCount: number;
   readonly bestRating: number;
+  /** Provenance of the score — drives the visible attribution label. */
+  readonly source: 'google' | 'amadeus' | 'booking';
 }
 
 interface HotelHeroProps {
@@ -26,8 +28,15 @@ interface HotelHeroProps {
   readonly canonicalUrl: string;
   readonly localePath: string;
   readonly description: string | null;
-  readonly amadeusRating: HotelHeroRating | null;
+  readonly aggregateRating: HotelHeroRating | null;
 }
+
+/** Maps a rating provenance to its i18n source-label key. */
+const RATING_SOURCE_LABEL_KEY: Readonly<Record<HotelHeroRating['source'], string>> = {
+  google: 'rating.sourceGoogle',
+  amadeus: 'rating.sourceAmadeus',
+  booking: 'rating.sourceBooking',
+};
 
 /**
  * Hotel fiche header (CDC §2.1) — badge + optional rating, H1, address,
@@ -47,7 +56,7 @@ export async function HotelHero({
   canonicalUrl,
   localePath,
   description,
-  amadeusRating,
+  aggregateRating,
 }: HotelHeroProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
   void region;
@@ -68,21 +77,32 @@ export async function HotelHero({
                 {t('hero.stars', { count: stars })}
               </span>
             )}
-            {amadeusRating !== null ? (
+            {aggregateRating !== null ? (
               <p
-                className="text-fg inline-flex items-baseline"
+                className="text-fg inline-flex flex-wrap items-baseline gap-x-1"
                 data-testid="hotel-aggregate-rating"
               >
                 <span
                   className="font-serif text-2xl font-semibold"
                   aria-label={t('rating.scoreAria', {
-                    value: amadeusRating.ratingValue.toFixed(1),
-                    best: amadeusRating.bestRating,
+                    value: aggregateRating.ratingValue.toFixed(1),
+                    best: aggregateRating.bestRating,
                   })}
                 >
-                  {amadeusRating.ratingValue.toFixed(1)}
+                  {aggregateRating.ratingValue.toFixed(1)}
                 </span>
-                <span className="text-muted ml-1 text-base">/10</span>
+                <span className="text-muted text-base">/{aggregateRating.bestRating}</span>
+                {aggregateRating.reviewCount > 0 ? (
+                  <span className="text-muted ml-1 text-sm">
+                    · {t('rating.reviewCountShort', { count: aggregateRating.reviewCount })}
+                  </span>
+                ) : null}
+                <span className="text-muted ml-1 text-sm">
+                  ·{' '}
+                  {t('rating.ratedBy', {
+                    source: t(RATING_SOURCE_LABEL_KEY[aggregateRating.source]),
+                  })}
+                </span>
               </p>
             ) : null}
           </div>

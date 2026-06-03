@@ -39,7 +39,7 @@ import { HotelTrustSignals } from '@/components/hotel/hotel-trust-signals';
 import { HotelExternalSourcesFooter } from '@/components/hotel/hotel-external-sources-footer';
 import { HotelVirtualTour } from '@/components/hotel/hotel-virtual-tour';
 import { RelatedHotels } from '@/components/hotel/related-hotels';
-import { JsonLdScript } from '@/components/seo/json-ld';
+import { SeoJsonLd } from '@/components/seo/json-ld';
 import { getPathname, Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
@@ -373,6 +373,48 @@ async function renderHotelPage(
   const amadeusRating = amadeusSentiment.aggregate;
   const amadeusCategories = amadeusSentiment.categories;
   const { row, rooms } = detail;
+
+  // Single source of truth for the public score, on a /5 scale. Priority:
+  // Google Places (the operator's canonical public rating) → editorial DB
+  // value (normalised from its native scale, e.g. Booking /10 → /5) →
+  // Amadeus e-Reputation. The SAME object feeds the visible hero badge AND
+  // the JSON-LD `AggregateRating`, so what users see always matches the
+  // structured data (Google policy: no markup without an on-page counterpart).
+  const resolvedRating: {
+    readonly ratingValue: number;
+    readonly reviewCount: number;
+    readonly bestRating: 5;
+    readonly worstRating: 1;
+    readonly source: 'google' | 'amadeus' | 'booking';
+  } | null =
+    row.google_rating !== null && row.google_reviews_count !== null && row.google_reviews_count > 0
+      ? {
+          ratingValue: row.google_rating,
+          reviewCount: row.google_reviews_count,
+          bestRating: 5,
+          worstRating: 1,
+          source: 'google',
+        }
+      : row.aggregate_rating_value !== null
+        ? {
+            ratingValue:
+              row.aggregate_rating_value > 5
+                ? Math.round((row.aggregate_rating_value / 2) * 100) / 100
+                : row.aggregate_rating_value,
+            reviewCount: row.aggregate_rating_count ?? 0,
+            bestRating: 5,
+            worstRating: 1,
+            source: 'booking',
+          }
+        : amadeusRating !== null
+          ? {
+              ratingValue: amadeusRating.ratingValue,
+              reviewCount: amadeusRating.reviewCount,
+              bestRating: 5,
+              worstRating: 1,
+              source: 'amadeus',
+            }
+          : null;
   // Airelles Gordes SEO/GEO test scope (branch seo/fix-airelles-gordes-test):
   // a few JSON-LD enrichments + the GEO section below are gated to this single
   // slug so no other fiche is affected. The data-driven fields (priceRange /
@@ -663,17 +705,17 @@ async function renderHotelPage(
             quote: r.quote,
             ...(r.sourceUrl !== null ? { sourceUrl: r.sourceUrl } : {}),
             ...(r.author !== null ? { author: r.author } : {}),
-            // ACTION 2 (SEO) — emit a `reviewRating` on every review. We use
-            // the review's own rating when present; for the Airelles test
-            // fiche we default unrated editorial pull-quotes to 5/5 so each
-            // `Review` node carries a `reviewRating`. (EEAT note: defaulting a
-            // star value on a prose pull-quote is an editorial choice — see
-            // hotel-detail-page.mdc Hard Rule 7. Scoped to this slug only.)
+            // EEAT / Google review-snippet policy: emit `reviewRating` ONLY
+            // when the source genuinely published a score. Editorial press
+            // pull-quotes (MICHELIN Guide, Forbes, Condé Nast…) are prose
+            // mentions, not star ratings — fabricating a 5/5 here would be a
+            // non-transparent, auto-generated rating (forbidden). Such quotes
+            // surface as `Review` nodes with author/publisher/reviewBody but
+            // no `reviewRating`; the page's only star signal stays the real,
+            // attributed `AggregateRating` (Booking, /10 → /5).
             ...(r.rating !== null && r.maxRating !== null
               ? { rating: r.rating, maxRating: r.maxRating }
-              : isAirellesFiche
-                ? { rating: 5, maxRating: 5 }
-                : {}),
+              : {}),
             ...(r.dateIso !== null ? { date: r.dateIso } : {}),
           })),
         }
@@ -849,41 +891,27 @@ async function renderHotelPage(
       ? { architects: externalIds.knowledgeGraph.architects }
       : {}),
     // Aggregate rating priority — editorial DB value first (migration 0066,
-    // ACTION 2), then Amadeus, then the Google Places snapshot. The DB value
-    // carries its own scale via `aggregate_rating_source` (e.g. Booking → /10,
-    // so bestRating 10 / worstRating 1); only fiches with a populated
-    // `aggregate_rating_value` use this branch. The Amadeus mapper already
-    // returns `null` for hotels with zero reviews (Google rich-results forbid
-    // synthesised ratings), so any value we get here is publishable as-is.
-    ...(row.aggregate_rating_value !== null
+    // ACTION 2), then Amadeus, then the Google Places snapshot. Only fiches
+    // with a populated `aggregate_rating_value` use this branch. The Amadeus
+    // mapper already returns `null` for hotels with zero reviews (Google
+    // rich-results forbid synthesised ratings), so any value we get here is
+    // publishable as-is.
+    // Hard Rule 11 (AGENTS.md §4) + skill structured-data-schema-org: the
+    // `AggregateRating` mirrors the resolved public score (see `resolvedRating`
+    // above). It is always emitted on a /5 scale (`bestRating: 5`, `worstRating:
+    // 1`) — Google's hotel rich result renders /5 regardless of the source's
+    // native scale — and is sourced identically to the visible hero badge so
+    // markup and on-page rating can never diverge.
+    ...(resolvedRating !== null
       ? {
           aggregateRating: {
-            ratingValue: row.aggregate_rating_value,
-            reviewCount: row.aggregate_rating_count ?? 0,
-            bestRating: 10,
-            worstRating: 1,
+            ratingValue: resolvedRating.ratingValue,
+            reviewCount: resolvedRating.reviewCount,
+            bestRating: resolvedRating.bestRating,
+            worstRating: resolvedRating.worstRating,
           },
         }
-      : amadeusRating !== null
-        ? {
-            aggregateRating: {
-              ratingValue: amadeusRating.ratingValue,
-              reviewCount: amadeusRating.reviewCount,
-              bestRating: amadeusRating.bestRating,
-              worstRating: amadeusRating.worstRating,
-            },
-          }
-        : row.google_rating !== null &&
-            row.google_reviews_count !== null &&
-            row.google_reviews_count > 0
-          ? {
-              aggregateRating: {
-                ratingValue: row.google_rating,
-                reviewCount: row.google_reviews_count,
-                bestRating: 5,
-              },
-            }
-          : {}),
+      : {}),
   };
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
 
@@ -893,13 +921,26 @@ async function renderHotelPage(
     href: { pathname: '/destination/[citySlug]', params: { citySlug: cityHubSlug } },
   })}`;
 
+  // Country label for the breadcrumb — same source as the visible `<nav>`
+  // below (computed once here to avoid duplication). Falls back to "France"
+  // when the row carries no localised country label.
+  const countryLabel = pickByLocale(
+    locale,
+    row.country_label_fr !== null && row.country_label_fr !== '' ? row.country_label_fr : 'France',
+    row.country_label_en !== null && row.country_label_en !== '' ? row.country_label_en : 'France',
+  );
+
+  // BreadcrumbList JSON-LD — Accueil → Pays (destination index) → Ville (city
+  // hub) → fiche. Mirrors the on-page breadcrumb (`<nav>` further down) per
+  // Google's guideline that the structured breadcrumb match the visible one,
+  // and replaces the former `/recherche` "Hôtels" level that contradicted the
+  // visible nav. No "Région" level is emitted: the site exposes no region hub
+  // route (only `/destination` + `/destination/[citySlug]`), and a breadcrumb
+  // item must point at a real URL — never a 404.
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
-      {
-        name: t('breadcrumb.hotels'),
-        url: `${origin}${getPathname({ locale, href: '/recherche' })}`,
-      },
+      { name: countryLabel, url: `${origin}${getPathname({ locale, href: '/destination' })}` },
       { name: row.city, url: cityHubUrl },
       { name, url: canonicalUrl },
     ]),
@@ -982,6 +1023,11 @@ async function renderHotelPage(
         venueAddress: e.venueAddress,
         latitude: e.latitude,
         longitude: e.longitude,
+        // Strengthen `location.address` (Google-recommended). The commune is
+        // the event venue name; the region is the hotel's — events surface
+        // only when nearby, so they share the hotel's administrative region.
+        ...(e.venueName !== null && e.venueName !== '' ? { addressLocality: e.venueName } : {}),
+        ...(row.region !== '' ? { addressRegion: row.region } : {}),
         ...(e.description !== null ? { description: e.description } : {}),
         ...(e.url !== null ? { officialUrl: e.url } : {}),
         ...(e.dtUuid !== null ? { sameAs: `https://data.datatourisme.fr/poi/${e.dtUuid}` } : {}),
@@ -1065,12 +1111,6 @@ async function renderHotelPage(
 
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  const countryLabel = pickByLocale(
-    locale,
-    row.country_label_fr !== null && row.country_label_fr !== '' ? row.country_label_fr : 'France',
-    row.country_label_en !== null && row.country_label_en !== '' ? row.country_label_en : 'France',
-  );
-
   // Sticky table of contents (fiche-reorganisation plan, A1). Built
   // server-side so absent clusters (no reviews, no Concierge advice)
   // never produce a dead anchor. Anchors resolve against the lightweight
@@ -1110,23 +1150,17 @@ async function renderHotelPage(
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-10 sm:py-14">
-      <JsonLdScript data={hotelJsonLd} nonce={nonce} />
-      <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
-      <JsonLdScript data={faqJsonLd} nonce={nonce} />
-      {videoObjectJsonLd !== null ? <JsonLdScript data={videoObjectJsonLd} nonce={nonce} /> : null}
-      {eventJsonLdList.map((data, i) => (
-        <JsonLdScript
-          key={`event-${i}`}
-          data={data as unknown as Record<string, unknown>}
-          nonce={nonce}
-        />
-      ))}
-      {visitItemListJsonLd !== null ? (
-        <JsonLdScript
-          data={visitItemListJsonLd as unknown as Record<string, unknown>}
-          nonce={nonce}
-        />
-      ) : null}
+      <SeoJsonLd
+        nonce={nonce}
+        nodes={[
+          hotelJsonLd,
+          breadcrumbJsonLd,
+          faqJsonLd,
+          videoObjectJsonLd,
+          ...eventJsonLdList,
+          visitItemListJsonLd,
+        ]}
+      />
 
       {goldenTemplate ? (
         <HotelHeroOverlay
@@ -1193,12 +1227,13 @@ async function renderHotelPage(
             canonicalUrl={canonicalUrl}
             localePath={localePath}
             description={description}
-            amadeusRating={
-              amadeusRating !== null
+            aggregateRating={
+              resolvedRating !== null
                 ? {
-                    ratingValue: amadeusRating.ratingValue,
-                    reviewCount: amadeusRating.reviewCount,
-                    bestRating: amadeusRating.bestRating,
+                    ratingValue: resolvedRating.ratingValue,
+                    reviewCount: resolvedRating.reviewCount,
+                    bestRating: resolvedRating.bestRating,
+                    source: resolvedRating.source,
                   }
                 : null
             }
