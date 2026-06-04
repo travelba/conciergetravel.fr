@@ -3812,7 +3812,17 @@
       "lastName": "Last name",
       "email": "Email address",
       "phone": "Phone",
+      "specialRequests": "Special requests",
+      "specialRequestsHint": "Optional — high floor, double bed, late arrival… (subject to availability)",
+      "specialRequestsPlaceholder": "e.g. quiet room on a high floor, arriving around 10pm…",
+      "consent": "I accept the terms and conditions and the privacy policy.",
       "submit": "Continue"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "email": "Invalid email address.",
+      "phone": "Invalid phone number.",
+      "consent": "You must accept the terms to continue."
     },
     "errors": {
       "validation": "Some fields are invalid. Please review and try again.",
@@ -3841,6 +3851,10 @@
     "cancellation": {
       "title": "Cancellation policy",
       "verbatimNote": "Text provided by the hotelier — it applies as written."
+    },
+    "specialRequests": {
+      "title": "Your special requests",
+      "note": "Shared with the hotel — fulfilled subject to availability, not guaranteed."
     },
     "continueToPayment": "Continue to payment",
     "paymentDisclaimer": "You will be redirected to the secure Amadeus payment module. No card data is stored by MyConciergeHotel.",

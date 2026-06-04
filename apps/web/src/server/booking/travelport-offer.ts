@@ -61,6 +61,7 @@ interface TravelportHotelRow {
   readonly region: string;
   readonly latitude: number;
   readonly longitude: number;
+  readonly heroImage: string | null;
 }
 
 function addDaysIso(base: Date, days: number): string {
@@ -141,7 +142,7 @@ async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | 
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from('hotels')
-      .select('id, name, city, region, latitude, longitude, is_published')
+      .select('id, name, city, region, latitude, longitude, hero_image, is_published')
       .eq('slug', slug)
       .maybeSingle();
     if (error || !data) return null;
@@ -152,6 +153,7 @@ async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | 
       region: string | null;
       latitude: number | string | null;
       longitude: number | string | null;
+      hero_image: string | null;
       is_published: boolean;
     };
     if (!row.is_published) return null;
@@ -165,6 +167,8 @@ async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | 
       region: row.region ?? '',
       latitude: lat,
       longitude: lon,
+      heroImage:
+        typeof row.hero_image === 'string' && row.hero_image.length > 0 ? row.hero_image : null,
     };
   } catch {
     return null;
@@ -258,6 +262,7 @@ interface CachedOfferSet {
   readonly hotelName: string;
   readonly city: string;
   readonly region: string;
+  readonly heroImage: string | null;
   readonly chainCode: string;
   readonly propertyCode: string;
   readonly propertyName: string;
@@ -428,6 +433,7 @@ interface NormalizedSearch {
   readonly hotelName: string;
   readonly city: string;
   readonly region: string;
+  readonly heroImage: string | null;
   readonly chainCode: string;
   readonly propertyCode: string;
   readonly propertyName: string;
@@ -519,6 +525,7 @@ async function searchAndNormalize(input: {
     hotelName: hotel.name,
     city: hotel.city,
     region: hotel.region,
+    heroImage: hotel.heroImage,
     chainCode: item.chainCode,
     propertyCode: item.propertyCode,
     propertyName: item.name,
@@ -558,6 +565,7 @@ export async function listTravelportSandboxOffers(input: {
     hotelName: data.hotelName,
     city: data.city,
     region: data.region,
+    heroImage: data.heroImage,
     chainCode: data.chainCode,
     propertyCode: data.propertyCode,
     propertyName: data.propertyName,
@@ -633,6 +641,7 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     rateLabel: rate.rateLabel,
     refundable: rate.refundable,
     breakfastIncluded: rate.breakfastIncluded,
+    ...(set.heroImage !== null ? { heroPublicId: set.heroImage } : {}),
   };
   await saveDraft({ draft: locked, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
 

@@ -1,6 +1,8 @@
+import { HotelImage } from '@mch/ui';
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
+import { env } from '@/lib/env';
 import { intlLocaleTag } from '@/i18n/runtime';
 import type { Locale } from '@/i18n/routing';
 
@@ -14,6 +16,7 @@ interface OrderSummaryHotel {
   readonly rateLabel?: string | undefined;
   readonly refundable?: boolean | null | undefined;
   readonly breakfastIncluded?: boolean | null | undefined;
+  readonly heroPublicId?: string | undefined;
 }
 
 interface OrderSummaryOffer {
@@ -68,21 +71,48 @@ export async function OrderSummary({
   const nights = nightsBetween(offer.stay.checkIn, offer.stay.checkOut);
   const total = offer.totalPrice.amountMinor;
   const perNight = Math.round(total / nights);
+  const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const showPhoto = hotel.heroPublicId !== undefined && cloudName.length > 0;
 
   return (
     <aside
       aria-label={t('title')}
       className="border-border bg-bg shadow-card overflow-hidden rounded-2xl border lg:sticky lg:top-24"
     >
-      <div className="from-gold-50 to-bg border-border border-b bg-gradient-to-b px-5 py-4">
-        <p className="text-gold-700 text-[11px] font-medium uppercase tracking-[0.18em]">
-          {t('title')}
-        </p>
-        <p className="text-fg mt-1 font-serif text-lg leading-snug">{hotel.name}</p>
-        <p className="text-muted text-xs">
-          {hotel.city} · {hotel.region}
-        </p>
-      </div>
+      {showPhoto && hotel.heroPublicId !== undefined ? (
+        <div className="relative h-32 w-full overflow-hidden">
+          <HotelImage
+            cloudName={cloudName}
+            publicId={hotel.heroPublicId}
+            alt={hotel.name}
+            variant="card"
+            width={352}
+            height={128}
+            sizes="352px"
+            className="h-32 w-full"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/80">
+              {t('title')}
+            </p>
+            <p className="font-serif text-lg leading-snug text-white">{hotel.name}</p>
+            <p className="text-xs text-white/85">
+              {hotel.city} · {hotel.region}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="from-gold-50 to-bg border-border border-b bg-gradient-to-b px-5 py-4">
+          <p className="text-gold-700 text-[11px] font-medium uppercase tracking-[0.18em]">
+            {t('title')}
+          </p>
+          <p className="text-fg mt-1 font-serif text-lg leading-snug">{hotel.name}</p>
+          <p className="text-muted text-xs">
+            {hotel.city} · {hotel.region}
+          </p>
+        </div>
+      )}
 
       <div className="px-5 py-4">
         {hotel.roomLabel !== undefined || hotel.rateLabel !== undefined ? (

@@ -217,6 +217,16 @@ export default async function ReservationRecapPage({
             <p className="text-muted mt-3 text-xs">{t('cancellation.verbatimNote')}</p>
           </section>
 
+          {guest.specialRequests !== undefined && guest.specialRequests.length > 0 ? (
+            <section className="border-border bg-bg shadow-card rounded-2xl border p-5 sm:p-6">
+              <h2 className="text-fg font-serif text-lg">{t('specialRequests.title')}</h2>
+              <p className="text-fg mt-2 whitespace-pre-line text-sm leading-relaxed">
+                {guest.specialRequests}
+              </p>
+              <p className="text-muted mt-3 text-xs">{t('specialRequests.note')}</p>
+            </section>
+          ) : null}
+
           {offer.provider === 'travelport' ? (
             tpReservation !== null ? (
               <section

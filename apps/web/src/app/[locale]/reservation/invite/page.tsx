@@ -5,6 +5,7 @@ import { notFound, redirect as nextRedirect } from 'next/navigation';
 import { attachGuest, parseGuest } from '@mch/domain/booking';
 
 import { BookingProgress } from '@/components/booking/booking-progress';
+import { GuestForm } from '@/components/booking/guest-form';
 import { OrderSummary } from '@/components/booking/order-summary';
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -62,14 +63,25 @@ async function submitAction(formData: FormData): Promise<void> {
     redirectExpired('fr');
   }
 
+  const locale: Locale = persisted.locale;
+
+  // Consentement CGV obligatoire (le client le bloque déjà ; garde-fou serveur).
+  if (pickString(formData.get('consent')) === undefined) {
+    redirect({
+      href: { pathname: '/reservation/invite', query: { error: 'validation' } },
+      locale,
+    });
+  }
+
   const guestParsed = parseGuest({
     firstName: pickString(formData.get('firstName')) ?? '',
     lastName: pickString(formData.get('lastName')) ?? '',
     email: pickString(formData.get('email')) ?? '',
     phone: pickString(formData.get('phone')) ?? '',
+    ...(pickString(formData.get('specialRequests')) !== undefined
+      ? { specialRequests: pickString(formData.get('specialRequests')) }
+      : {}),
   });
-
-  const locale: Locale = persisted.locale;
 
   if (!guestParsed.ok) {
     redirect({
@@ -144,85 +156,35 @@ export default async function ReservationInvitePage({
             </p>
           </header>
 
-          <form
+          <GuestForm
             action={submitAction}
-            className="border-border bg-bg shadow-card flex flex-col gap-5 rounded-2xl border p-6"
-            noValidate
-          >
-            <fieldset className="flex flex-col gap-4">
-              <legend className="text-fg mb-1 font-serif text-lg">{t('form.legend')}</legend>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <label className="flex flex-col gap-1.5 text-sm">
-                  <span className="text-fg font-medium">{t('form.firstName')}</span>
-                  <input
-                    type="text"
-                    name="firstName"
-                    required
-                    autoComplete="given-name"
-                    maxLength={60}
-                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                  />
-                </label>
-                <label className="flex flex-col gap-1.5 text-sm">
-                  <span className="text-fg font-medium">{t('form.lastName')}</span>
-                  <input
-                    type="text"
-                    name="lastName"
-                    required
-                    autoComplete="family-name"
-                    maxLength={60}
-                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                  />
-                </label>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <label className="flex flex-col gap-1.5 text-sm">
-                  <span className="text-fg font-medium">{t('form.email')}</span>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    autoComplete="email"
-                    maxLength={254}
-                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                  />
-                </label>
-                <label className="flex flex-col gap-1.5 text-sm">
-                  <span className="text-fg font-medium">{t('form.phone')}</span>
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    autoComplete="tel"
-                    maxLength={30}
-                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-                  />
-                </label>
-              </div>
-            </fieldset>
-
-            {errorKind !== undefined ? (
-              <p
-                role="alert"
-                className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
-              >
-                {errorKind === 'validation'
-                  ? t('errors.validation')
-                  : errorKind === 'invalid_state'
-                    ? t('errors.invalidState')
-                    : t('errors.unknown')}
-              </p>
-            ) : null}
-
-            <button
-              type="submit"
-              className="bg-gold text-charcoal hover:bg-gold-600 focus-visible:ring-ring mt-1 self-start rounded-md px-6 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2"
-            >
-              {t('form.submit')}
-            </button>
-          </form>
+            messages={{
+              legend: t('form.legend'),
+              firstName: t('form.firstName'),
+              lastName: t('form.lastName'),
+              email: t('form.email'),
+              phone: t('form.phone'),
+              specialRequests: t('form.specialRequests'),
+              specialRequestsHint: t('form.specialRequestsHint'),
+              specialRequestsPlaceholder: t('form.specialRequestsPlaceholder'),
+              consent: t('form.consent'),
+              submit: t('form.submit'),
+              vRequired: t('validation.required'),
+              vEmail: t('validation.email'),
+              vPhone: t('validation.phone'),
+              vConsent: t('validation.consent'),
+            }}
+            {...(errorKind !== undefined
+              ? {
+                  serverError:
+                    errorKind === 'validation'
+                      ? t('errors.validation')
+                      : errorKind === 'invalid_state'
+                        ? t('errors.invalidState')
+                        : t('errors.unknown'),
+                }
+              : {})}
+          />
         </div>
 
         {offer !== undefined ? (

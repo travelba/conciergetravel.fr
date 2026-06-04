@@ -43,6 +43,11 @@ export interface DraftHotelSnapshot {
   readonly rateLabel?: string;
   readonly refundable?: boolean | null;
   readonly breakfastIncluded?: boolean | null;
+  /**
+   * Public_id Cloudinary (ou URL legacy) du hero de l'hôtel, capturé au lock
+   * pour la vignette de l'order-summary OTA. Purement présentationnel.
+   */
+  readonly heroPublicId?: string;
 }
 
 export interface PersistedDraft {
