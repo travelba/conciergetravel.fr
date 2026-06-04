@@ -8,6 +8,10 @@ import { JsonLd, buildAeoBlock } from '@mch/seo';
 import { buildCloudinarySrc } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
+import {
+  getTravelportLiveRoomList,
+  getTravelportLiveRoomPrices,
+} from '@/server/booking/travelport-offer';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
 import { HotelHero } from '@/components/hotel/hotel-hero';
@@ -551,6 +555,30 @@ async function renderHotelPage(
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
   const origin = siteOrigin();
+
+  // Étape C — prix « à partir de » live Travelport injectés sur les cartes
+  // chambres (best-effort, gated pilote ; `null` hors pilote ou en cas d'échec,
+  // les cartes restent éditoriales). Voir `getTravelportLiveRoomPrices`.
+  const travelportLiveRooms =
+    locale === 'fr' || locale === 'en'
+      ? await getTravelportLiveRoomPrices({ slug: row.slug, locale, rooms })
+      : null;
+  // Fiche sans chambres éditoriales (cas pilote) : on remplit la section avec
+  // les chambres live Travelport plutôt que « aucune chambre ». Best-effort.
+  const travelportLiveRoomList =
+    (locale === 'fr' || locale === 'en') && rooms.length === 0
+      ? await getTravelportLiveRoomList({ slug: row.slug, locale })
+      : [];
+  const travelportRoomsHref = {
+    pathname: '/reservation/sandbox/[slug]/chambres',
+    params: { slug: slugFr },
+  } as const;
+  const fmtLiveEur = (minor: number): string =>
+    new Intl.NumberFormat(intlLocaleTag(locale), {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(minor / 100);
   // Slug selection still locale-aware (data layer) — see ADR-0012.
   // V2 locales reuse the FR slug until `hotels.slug_<locale>` columns exist.
   const slugForLocale = pickByLocale(locale, slugFr, slugEn);
@@ -1734,16 +1762,81 @@ async function renderHotelPage(
                                   <span aria-hidden>→</span>
                                 </Link>
                               </p>
-                              {priceLabel !== null ? (
-                                <p className="text-muted text-xs" data-room-price>
-                                  {priceLabel}
-                                </p>
-                              ) : null}
+                              {(() => {
+                                const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(room.id);
+                                if (liveFromMinor !== undefined) {
+                                  return (
+                                    <span className="flex items-baseline gap-2 text-xs">
+                                      <span className="text-muted" data-room-price-live>
+                                        {locale === 'en'
+                                          ? `from ${fmtLiveEur(liveFromMinor)}`
+                                          : `dès ${fmtLiveEur(liveFromMinor)}`}
+                                      </span>
+                                      <Link
+                                        href={travelportRoomsHref}
+                                        className="text-fg font-medium underline-offset-2 hover:underline"
+                                      >
+                                        {locale === 'en' ? 'Book' : 'Réserver'}
+                                      </Link>
+                                    </span>
+                                  );
+                                }
+                                return priceLabel !== null ? (
+                                  <p className="text-muted text-xs" data-room-price>
+                                    {priceLabel}
+                                  </p>
+                                ) : null;
+                              })()}
                             </div>
                           </article>
                         </li>
                       );
                     })}
+                  </ul>
+                ) : travelportLiveRoomList.length > 0 ? (
+                  <ul className="flex flex-col gap-4" data-live-rooms="travelport">
+                    {travelportLiveRoomList.map((liveRoom) => (
+                      <li key={liveRoom.roomLabel}>
+                        <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
+                          <header className="flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 className="text-fg font-serif text-lg">{liveRoom.roomLabel}</h3>
+                            {liveRoom.maxOccupancy !== null ? (
+                              <p className="text-muted text-xs">
+                                {t('rooms.occupancy', { count: liveRoom.maxOccupancy })}
+                              </p>
+                            ) : null}
+                          </header>
+                          {liveRoom.breakfastIncluded === true || liveRoom.refundable === true ? (
+                            <ul className="mt-3 flex flex-wrap gap-1.5">
+                              {liveRoom.breakfastIncluded === true ? (
+                                <li className="border-border text-muted rounded-md border px-2 py-0.5 text-xs">
+                                  {locale === 'en' ? 'Breakfast included' : 'Petit-déjeuner inclus'}
+                                </li>
+                              ) : null}
+                              {liveRoom.refundable === true ? (
+                                <li className="border-border text-muted rounded-md border px-2 py-0.5 text-xs">
+                                  {locale === 'en' ? 'Free cancellation' : 'Annulation gratuite'}
+                                </li>
+                              ) : null}
+                            </ul>
+                          ) : null}
+                          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
+                            <span className="text-muted text-xs" data-room-price-live>
+                              {locale === 'en'
+                                ? `from ${fmtLiveEur(liveRoom.fromMinor)}`
+                                : `dès ${fmtLiveEur(liveRoom.fromMinor)}`}
+                            </span>
+                            <Link
+                              href={travelportRoomsHref}
+                              className="border-border text-fg hover:bg-fg hover:text-bg inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
+                            >
+                              {locale === 'en' ? 'Book' : 'Réserver'}
+                              <span aria-hidden>→</span>
+                            </Link>
+                          </div>
+                        </article>
+                      </li>
+                    ))}
                   </ul>
                 ) : (
                   <p className="text-muted text-sm">{t('noRooms')}</p>

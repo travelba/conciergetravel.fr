@@ -611,3 +611,101 @@ export async function lockTravelportSandboxSelectedOffer(input: {
 
   return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: set.hotelName };
 }
+
+// ---------------------------------------------------------------------------
+// Étape C — prix live « à partir de » injectés dans les cartes chambres
+// éditoriales. On rapproche chaque chambre éditoriale d'un `roomType`
+// Travelport par recouvrement de tokens (même heuristique que le matching
+// hôtel), et on retient le tarif le plus bas. Best-effort : toute erreur ⇒
+// `null` (les cartes restent éditoriales). Gardé derrière le flag + allow-list.
+// ---------------------------------------------------------------------------
+
+export interface TravelportLiveRoomPrices {
+  /** `id` de chambre éditoriale → prix « à partir de » (EUR minor) Travelport. */
+  readonly fromByRoomId: ReadonlyMap<string, number>;
+}
+
+export async function getTravelportLiveRoomPrices(input: {
+  readonly slug: string;
+  readonly locale: 'fr' | 'en';
+  readonly rooms: readonly { readonly id: string; readonly name: string | null; readonly room_code: string }[];
+}): Promise<TravelportLiveRoomPrices | null> {
+  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return null;
+  if (input.rooms.length === 0) return null;
+
+  let offers: TravelportSandboxOffersResult;
+  try {
+    offers = await listTravelportSandboxOffers({ slug: input.slug, locale: input.locale });
+  } catch {
+    return null;
+  }
+  if (!offers.ok) return null;
+
+  const fromByRoomId = new Map<string, number>();
+  for (const room of input.rooms) {
+    const wanted = normalizeName(room.name ?? room.room_code);
+    if (wanted.size === 0) continue;
+    let bestPrice: number | undefined;
+    let bestOverlap = 0;
+    for (const opt of offers.options) {
+      const overlap = [...normalizeName(opt.roomLabel)].filter((t) => wanted.has(t)).length;
+      if (overlap === 0) continue;
+      if (
+        overlap > bestOverlap ||
+        (overlap === bestOverlap && (bestPrice === undefined || opt.priceMinor < bestPrice))
+      ) {
+        bestOverlap = overlap;
+        bestPrice = opt.priceMinor;
+      }
+    }
+    if (bestPrice !== undefined) fromByRoomId.set(room.id, bestPrice);
+  }
+
+  if (fromByRoomId.size === 0) return null;
+  return { fromByRoomId };
+}
+
+/**
+ * Chambre Travelport « live » dédoublonnée par type, avec son tarif le plus bas.
+ * Sert à **remplir** la section Chambres d'une fiche dépourvue de chambres
+ * éditoriales (cas du pilote Prince de Galles) plutôt que d'afficher « aucune
+ * chambre ». Best-effort + gated.
+ */
+export interface TravelportLiveRoom {
+  readonly roomLabel: string;
+  readonly maxOccupancy: number | null;
+  readonly fromMinor: number;
+  readonly breakfastIncluded: boolean | null;
+  readonly refundable: boolean | null;
+}
+
+export async function getTravelportLiveRoomList(input: {
+  readonly slug: string;
+  readonly locale: 'fr' | 'en';
+}): Promise<readonly TravelportLiveRoom[]> {
+  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return [];
+
+  let offers: TravelportSandboxOffersResult;
+  try {
+    offers = await listTravelportSandboxOffers({ slug: input.slug, locale: input.locale });
+  } catch {
+    return [];
+  }
+  if (!offers.ok) return [];
+
+  // Dédoublonnage par libellé de chambre : on garde l'option la moins chère.
+  const byLabel = new Map<string, TravelportLiveRoom>();
+  for (const opt of offers.options) {
+    const existing = byLabel.get(opt.roomLabel);
+    if (existing === undefined || opt.priceMinor < existing.fromMinor) {
+      byLabel.set(opt.roomLabel, {
+        roomLabel: opt.roomLabel,
+        maxOccupancy: opt.maxOccupancy,
+        fromMinor: opt.priceMinor,
+        breakfastIncluded: opt.breakfastIncluded,
+        refundable: opt.refundable,
+      });
+    }
+  }
+  return [...byLabel.values()].sort((a, b) => a.fromMinor - b.fromMinor);
+}
