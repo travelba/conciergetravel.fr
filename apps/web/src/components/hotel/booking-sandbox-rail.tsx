@@ -37,7 +37,7 @@ export function BookingSandboxRail({
   const checkOut = addDaysIso(31);
   const action = getPathname({
     locale,
-    href: { pathname: '/reservation/sandbox/[slug]', params: { slug } },
+    href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },
   });
 
   const labels = {

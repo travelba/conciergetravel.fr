@@ -15,6 +15,8 @@ import {
   uniqueProperties,
   type PropertyItem,
   type SearchCompleteResponse,
+  type TravelportRateTerms,
+  type TravelportRoomType,
 } from '@mch/integrations/travelport';
 
 import {
@@ -24,6 +26,7 @@ import {
   isTravelportSandboxEnabled,
 } from '@/lib/travelport';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { redis } from '@/lib/redis';
 
 import { saveTravelportContext, type TravelportBookingContext } from './travelport-context';
 import { saveDraft, type DraftHotelSnapshot } from './draft-store';
@@ -296,4 +299,315 @@ export async function lockTravelportSandboxOffer(input: {
   await saveTravelportContext(atRecap.value.id, bookingCtx);
 
   return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: hotel.name };
+}
+
+// ---------------------------------------------------------------------------
+// Étape B+ — sélection de chambre / plan tarifaire (Travelport `roomTypes`)
+//
+// `SearchComplete` renvoie, par propriété, plusieurs `roomTypes` × `rates`
+// (prix, petit-déjeuner, remboursable, conditions, rateKey). On les normalise
+// et on **met en cache côté serveur** (Redis) l'ensemble tarifaire complet,
+// puis la page « chambres » n'expose qu'un `offerSetId` + des `rateKey`. Le
+// verrouillage relit le tarif choisi depuis le cache : le prix n'est jamais
+// repris depuis le client.
+// ---------------------------------------------------------------------------
+
+type TravelportRoomRate = NonNullable<TravelportRoomType['rates']>[number];
+
+const OFFERSET_PREFIX = 'booking:tp:offerset:';
+const OFFERSET_TTL_SEC = 15 * 60;
+
+interface CachedRate {
+  readonly rateKey: string;
+  readonly amount: number;
+  readonly currency: string;
+  readonly priceMinor: number;
+  readonly roomLabel: string;
+  readonly rateLabel: string;
+  readonly maxOccupancy: number | null;
+  readonly breakfastIncluded: boolean | null;
+  readonly refundable: boolean | null;
+  readonly cancellationText: string;
+  readonly guaranteeType?: string;
+}
+
+interface CachedOfferSet {
+  readonly hotelId: string;
+  readonly hotelName: string;
+  readonly city: string;
+  readonly region: string;
+  readonly chainCode: string;
+  readonly propertyCode: string;
+  readonly propertyName: string;
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly adults: number;
+  readonly children: number;
+  readonly rates: readonly CachedRate[];
+}
+
+/** Option de chambre/tarif exposée à l'UI (sans secret ni montant brut fournisseur). */
+export interface SandboxRoomOption {
+  readonly rateKey: string;
+  readonly roomLabel: string;
+  readonly rateLabel: string;
+  readonly maxOccupancy: number | null;
+  readonly priceMinor: number;
+  readonly breakfastIncluded: boolean | null;
+  readonly refundable: boolean | null;
+  readonly cancellationText: string;
+}
+
+export type TravelportSandboxOffersResult =
+  | {
+      readonly ok: true;
+      readonly offerSetId: string;
+      readonly hotelName: string;
+      readonly checkIn: string;
+      readonly checkOut: string;
+      readonly adults: number;
+      readonly children: number;
+      readonly options: readonly SandboxRoomOption[];
+    }
+  | {
+      readonly ok: false;
+      readonly reason:
+        | 'disabled'
+        | 'no_credentials'
+        | 'hotel_not_found'
+        | 'search_failed'
+        | 'no_match'
+        | 'no_rate';
+    };
+
+/** Politique d'annulation verbatim (mêmes `terms` que `map-offer`). */
+function cancellationFromTerms(terms: TravelportRateTerms | undefined): string {
+  if (terms === undefined) return '';
+  const parts: string[] = [];
+  for (const p of terms.cancelPenalties ?? []) {
+    if (typeof p.cancelShortDescription === 'string' && p.cancelShortDescription.length > 0) {
+      parts.push(p.cancelShortDescription);
+    }
+  }
+  if (parts.length === 0 && typeof terms.cancelNote === 'string' && terms.cancelNote.length > 0) {
+    parts.push(terms.cancelNote);
+  }
+  if (parts.length === 0 && terms.refundable === false) parts.push('Non remboursable.');
+  return parts.join(' ');
+}
+
+function normalizeRoomRate(rt: TravelportRoomType, rate: TravelportRoomRate): CachedRate | null {
+  const rateKey = rate.rateKey?.value;
+  const amount = rate.price?.totalPrice?.amount;
+  const currency = rate.price?.currencyCode;
+  if (rateKey === undefined || amount === undefined) return null;
+  // Contrainte domaine : EUR uniquement (MoneyAmount.currency).
+  if (currency !== undefined && currency.toUpperCase() !== 'EUR') return null;
+  const breakfast = rate.breakfastIncluded ?? null;
+  const refundable = rate.refundable ?? rate.terms?.refundable ?? null;
+  const roomLabel = rt.shortRoomDescription ?? rate.roomDescription ?? 'Chambre';
+  const rateLabel =
+    rate.rateDescription ?? (breakfast === true ? 'Petit-déjeuner inclus' : 'Tarif standard');
+  return {
+    rateKey,
+    amount,
+    currency: 'EUR',
+    priceMinor: Math.round(amount * 100),
+    roomLabel,
+    rateLabel,
+    maxOccupancy: typeof rt.maxOccupancy === 'number' ? rt.maxOccupancy : null,
+    breakfastIncluded: breakfast,
+    refundable,
+    cancellationText: cancellationFromTerms(rate.terms),
+    ...(rate.terms?.guaranteeType !== undefined ? { guaranteeType: rate.terms.guaranteeType } : {}),
+  };
+}
+
+/** Normalise tous les `roomTypes` × `rates` (EUR), dédoublonne par rateKey, trie par prix. */
+function buildRatesFromItem(item: PropertyItem): CachedRate[] {
+  const out: CachedRate[] = [];
+  const seen = new Set<string>();
+  for (const rt of item.roomTypes ?? []) {
+    for (const rate of rt.rates ?? []) {
+      const norm = normalizeRoomRate(rt, rate);
+      if (norm === null || seen.has(norm.rateKey)) continue;
+      seen.add(norm.rateKey);
+      out.push(norm);
+    }
+  }
+  out.sort((a, b) => a.priceMinor - b.priceMinor);
+  return out;
+}
+
+function isCachedOfferSet(value: unknown): value is CachedOfferSet {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v['hotelId'] === 'string' &&
+    typeof v['chainCode'] === 'string' &&
+    typeof v['propertyCode'] === 'string' &&
+    Array.isArray(v['rates'])
+  );
+}
+
+async function saveOfferSet(id: string, set: CachedOfferSet): Promise<void> {
+  await redis.set(`${OFFERSET_PREFIX}${id}`, JSON.stringify(set), { ex: OFFERSET_TTL_SEC });
+}
+
+async function loadOfferSet(id: string): Promise<CachedOfferSet | null> {
+  const raw = await redis.get<string | CachedOfferSet>(`${OFFERSET_PREFIX}${id}`);
+  if (raw === null || raw === undefined) return null;
+  let value: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  return isCachedOfferSet(value) ? value : null;
+}
+
+function toOption(r: CachedRate): SandboxRoomOption {
+  return {
+    rateKey: r.rateKey,
+    roomLabel: r.roomLabel,
+    rateLabel: r.rateLabel,
+    maxOccupancy: r.maxOccupancy,
+    priceMinor: r.priceMinor,
+    breakfastIncluded: r.breakfastIncluded,
+    refundable: r.refundable,
+    cancellationText: r.cancellationText,
+  };
+}
+
+/**
+ * Découvre les chambres/plans tarifaires Travelport (sandbox) pour un slug
+ * allow-listé et un séjour donné, met en cache l'ensemble tarifaire et renvoie
+ * la liste à afficher. Aucune réservation, aucun draft : c'est l'étape de choix.
+ */
+export async function listTravelportSandboxOffers(input: {
+  readonly slug: string;
+  readonly locale: 'fr' | 'en';
+  readonly stay?: TravelportSandboxStayInput;
+}): Promise<TravelportSandboxOffersResult> {
+  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) {
+    return { ok: false, reason: 'disabled' };
+  }
+  const creds = getTravelportCredentials();
+  if (creds === null) return { ok: false, reason: 'no_credentials' };
+
+  const hotel = await fetchTravelportHotel(input.slug);
+  if (hotel === null) return { ok: false, reason: 'hotel_not_found' };
+
+  const { checkIn, checkOut, adults, children } = resolveStay(input.stay);
+
+  const search = await searchByCoordinates(creds, {
+    latitude: hotel.latitude,
+    longitude: hotel.longitude,
+    radius: 1,
+    unit: 'mi',
+    checkInDate: checkIn,
+    checkOutDate: checkOut,
+    adults,
+    currency: getTravelportCurrency(),
+  });
+  if (!search.ok) return { ok: false, reason: 'search_failed' };
+
+  const item = bestMatch(hotel, search.value);
+  if (item === null) return { ok: false, reason: 'no_match' };
+
+  const rates = buildRatesFromItem(item);
+  if (rates.length === 0) return { ok: false, reason: 'no_rate' };
+
+  const offerSetId = crypto.randomUUID();
+  const set: CachedOfferSet = {
+    hotelId: hotel.id,
+    hotelName: hotel.name,
+    city: hotel.city,
+    region: hotel.region,
+    chainCode: item.chainCode,
+    propertyCode: item.propertyCode,
+    propertyName: item.name,
+    checkIn,
+    checkOut,
+    adults,
+    children,
+    rates,
+  };
+  await saveOfferSet(offerSetId, set);
+
+  return {
+    ok: true,
+    offerSetId,
+    hotelName: hotel.name,
+    checkIn,
+    checkOut,
+    adults,
+    children,
+    options: rates.map(toOption),
+  };
+}
+
+/**
+ * Verrouille le tarif **choisi** par le client (depuis l'ensemble mis en cache)
+ * et persiste un draft `recap` + le contexte Travelport pour la confirmation.
+ */
+export async function lockTravelportSandboxSelectedOffer(input: {
+  readonly offerSetId: string;
+  readonly rateKey: string;
+  readonly locale: 'fr' | 'en';
+}): Promise<TravelportSandboxLockResult> {
+  if (!isTravelportSandboxEnabled()) return { ok: false, reason: 'disabled' };
+
+  const set = await loadOfferSet(input.offerSetId);
+  if (set === null) return { ok: false, reason: 'search_failed' };
+  const rate = set.rates.find((r) => r.rateKey === input.rateKey);
+  if (rate === undefined) return { ok: false, reason: 'no_rate' };
+
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + OFFER_TTL_SEC * 1000).toISOString();
+  const offer: Offer = {
+    id: rate.rateKey,
+    provider: 'travelport',
+    hotelId: set.hotelId,
+    roomCode: `${set.chainCode}/${set.propertyCode}`,
+    stay: { checkIn: set.checkIn, checkOut: set.checkOut },
+    guests: { adults: set.adults, children: set.children },
+    totalPrice: { amountMinor: rate.priceMinor, currency: 'EUR' },
+    cancellationPolicyText: rate.cancellationText,
+    expiresAt,
+  };
+
+  const locked = startDraftFromOffer({ id: crypto.randomUUID(), mode: 'amadeus', offer });
+  const withGuest = attachGuest(locked, SANDBOX_GUEST);
+  if (!withGuest.ok) return { ok: false, reason: 'no_rate' };
+  const atRecap = moveToRecap(withGuest.value);
+  if (!atRecap.ok) return { ok: false, reason: 'no_rate' };
+
+  const snapshot: DraftHotelSnapshot = {
+    id: set.hotelId,
+    name: set.hotelName,
+    city: set.city,
+    region: set.region,
+  };
+  await saveDraft({ draft: atRecap.value, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
+
+  const bookingCtx: TravelportBookingContext = {
+    rateKey: rate.rateKey,
+    chainCode: set.chainCode,
+    propertyCode: set.propertyCode,
+    propertyName: set.propertyName,
+    amount: rate.amount,
+    currency: rate.currency,
+    ...(rate.guaranteeType !== undefined ? { guaranteeType: rate.guaranteeType } : {}),
+    checkIn: set.checkIn,
+    checkOut: set.checkOut,
+    adults: set.adults,
+    hotelId: set.hotelId,
+    hotelName: set.hotelName,
+  };
+  await saveTravelportContext(atRecap.value.id, bookingCtx);
+
+  return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: set.hotelName };
 }

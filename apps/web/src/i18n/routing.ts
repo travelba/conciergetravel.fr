@@ -184,6 +184,13 @@ export const routing = defineRouting({
       en: '/booking/sandbox/[slug]',
       // de: '/buchung/sandbox/[slug]', es: '/reserva/sandbox/[slug]', it: '/prenotazione/sandbox/[slug]',
     },
+    // Travelport sandbox pilot — room/rate selection step (Étape B). Same
+    // gating as the entry route; declared so the EN URL resolves.
+    '/reservation/sandbox/[slug]/chambres': {
+      fr: '/reservation/sandbox/[slug]/chambres',
+      en: '/booking/sandbox/[slug]/rooms',
+      // de: '/buchung/sandbox/[slug]/zimmer', es: '/reserva/sandbox/[slug]/habitaciones', it: '/prenotazione/sandbox/[slug]/camere',
+    },
 
     // Auth callback (system route — same name everywhere)
     '/auth/callback': '/auth/callback',
