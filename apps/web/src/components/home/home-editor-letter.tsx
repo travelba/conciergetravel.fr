@@ -27,33 +27,51 @@ export async function HomeEditorLetter({
   return (
     <section
       aria-labelledby="home-editor-letter-title"
-      className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
+      className="container mx-auto max-w-screen-xl px-4 py-14 sm:py-20"
     >
-      <div className="mx-auto max-w-3xl">
-        <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h2 id="home-editor-letter-title" className="text-fg mt-3 font-serif text-3xl sm:text-4xl">
-          {t('title')}
-        </h2>
-        <div className="text-fg/90 mt-6 space-y-5 font-serif text-lg leading-relaxed sm:text-xl">
-          <p>{t('paragraph1')}</p>
-          <p>{t('paragraph2')}</p>
-          <p>{t('paragraph3')}</p>
-        </div>
-        <div className="mt-8 flex items-center gap-3">
-          <span aria-hidden className="text-muted font-serif text-2xl italic">
-            —
-          </span>
-          <div>
-            <p className="text-fg font-medium">{t('signatureName')}</p>
-            <p className="text-muted text-xs">{t('signatureRole')}</p>
-          </div>
-        </div>
-        <Link
-          href="/le-concierge/methode-editoriale"
-          className="text-fg mt-6 inline-flex text-sm font-medium underline-offset-2 hover:underline"
+      <div className="border-gold-200/70 bg-gold-50/40 dark:border-gold-900/40 dark:bg-gold-900/10 relative mx-auto max-w-4xl overflow-hidden rounded-3xl border px-6 py-12 sm:px-14 sm:py-16">
+        {/* Decorative opening quote mark — sets the "editor's note as
+            pull-quote" tone without competing with the copy. */}
+        <span
+          aria-hidden
+          className="text-gold-300/70 dark:text-gold-700/50 pointer-events-none absolute -top-4 left-6 select-none font-serif text-[7rem] leading-none sm:text-[9rem]"
         >
-          {t('cta')} →
-        </Link>
+          &ldquo;
+        </span>
+
+        <div className="relative">
+          <p className="text-gold-700 dark:text-gold-400 text-xs uppercase tracking-[0.2em]">
+            {t('eyebrow')}
+          </p>
+          <h2
+            id="home-editor-letter-title"
+            className="text-fg mt-3 font-serif text-3xl sm:text-4xl"
+          >
+            {t('title')}
+          </h2>
+          <div className="text-fg/90 mt-6 space-y-5 font-serif text-lg leading-relaxed sm:text-xl">
+            <p>{t('paragraph1')}</p>
+            <p>{t('paragraph2')}</p>
+            <p>{t('paragraph3')}</p>
+          </div>
+
+          <div className="mt-10 flex items-center gap-4">
+            <span aria-hidden className="bg-gold/70 h-px w-12 shrink-0" />
+            <div>
+              <p className="text-fg font-serif text-xl italic">{t('signatureName')}</p>
+              <p className="text-muted mt-0.5 text-xs uppercase tracking-wider">
+                {t('signatureRole')}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/le-concierge/methode-editoriale"
+            className="text-gold-700 hover:text-gold-800 dark:text-gold-400 mt-8 inline-flex text-sm font-medium underline-offset-2 hover:underline"
+          >
+            {t('cta')} →
+          </Link>
+        </div>
       </div>
     </section>
   );
