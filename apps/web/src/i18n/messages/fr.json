@@ -246,6 +246,7 @@
       "countriesHeading": "Pays",
       "hotelsHeading": "Hôtels",
       "cityHotelsCount": "{count, plural, one {# hôtel} other {# hôtels}}",
+      "view": "Voir la fiche",
       "reserveTest": "Réserver (mode test)",
       "reserveTestHint": "Crée une offre fictive et déroule le tunnel complet sans appel Amadeus."
     },

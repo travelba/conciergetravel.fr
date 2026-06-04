@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
+import { SearchHotelCard } from '@/components/search/search-hotel-card';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates } from '@/i18n/runtime';
@@ -265,7 +266,7 @@ export default async function RecherchePage({
               <li key={city.objectID}>
                 <Link
                   href={cityLinkHref(city)}
-                  className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
+                  className="border-border bg-bg focus-visible:ring-ring hover:border-gold-300 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
                 >
                   <span className="min-w-0">
                     <span className="text-fg block truncate font-medium">{city.name}</span>
@@ -298,7 +299,7 @@ export default async function RecherchePage({
                 <li key={city.objectID}>
                   <Link
                     href={cityLinkHref(city)}
-                    className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
+                    className="border-border bg-bg focus-visible:ring-ring hover:border-gold-300 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
                   >
                     <span className="min-w-0">
                       <span className="text-fg block truncate font-medium">{city.name}</span>
@@ -330,7 +331,7 @@ export default async function RecherchePage({
                 <li key={country.code}>
                   <Link
                     href={{ pathname: '/hotels/[pays]', params: { pays: country.slug } }}
-                    className="border-border bg-bg focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
+                    className="border-border bg-bg focus-visible:ring-ring hover:border-gold-300 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2"
                   >
                     <span className="text-fg min-w-0 truncate font-medium">{country.name}</span>
                     {country.hotelsCount > 0 ? (
@@ -360,60 +361,40 @@ export default async function RecherchePage({
         </p>
 
         {hits.length > 0 ? (
-          <ul className="flex flex-col gap-4">
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {hits.map((hit) => {
               const hotelIsUuid = UUID_RE.test(hit.objectID);
+              const reserveForm =
+                fakeEnabled && hotelIsUuid ? (
+                  <form
+                    method="post"
+                    action={lockActionFor(locale, hit.objectID)}
+                    className="flex flex-wrap items-center gap-3"
+                  >
+                    <input type="hidden" name="hotelId" value={hit.objectID} />
+                    <input type="hidden" name="fake" value="1" />
+                    <input type="hidden" name="checkIn" value={checkIn} />
+                    <input type="hidden" name="checkOut" value={checkOut} />
+                    <input type="hidden" name="adults" value={String(adults)} />
+                    <input type="hidden" name="children" value={String(children)} />
+                    <button
+                      type="submit"
+                      className="border-gold-300 bg-gold-50 text-gold-900 focus-visible:ring-ring rounded-md border px-3 py-1.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+                    >
+                      {t('results.reserveTest')}
+                    </button>
+                    <span className="text-muted text-xs">{t('results.reserveTestHint')}</span>
+                  </form>
+                ) : null;
               return (
                 <li key={hit.objectID}>
-                  <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h2 className="text-fg font-serif text-lg">
-                        <Link
-                          href={{ pathname: '/hotel/[slug]', params: { slug: hit.slug } }}
-                          className="hover:underline"
-                        >
-                          {hit.name}
-                        </Link>
-                      </h2>
-                      <p className="text-muted text-xs">
-                        {hit.is_palace
-                          ? t('badges.palace')
-                          : t('badges.stars', { count: hit.stars })}
-                        {hit.city ? ` · ${hit.city}` : ''}
-                        {hit.region ? ` · ${hit.region}` : ''}
-                        {hit.country !== undefined && hit.country.length > 0
-                          ? ` · ${hit.country}`
-                          : ''}
-                      </p>
-                    </div>
-                    {hit.description_excerpt.length > 0 ? (
-                      <p className="text-muted mt-2 line-clamp-3 text-sm">
-                        {hit.description_excerpt}
-                      </p>
-                    ) : null}
-
-                    {fakeEnabled && hotelIsUuid ? (
-                      <form
-                        method="post"
-                        action={lockActionFor(locale, hit.objectID)}
-                        className="mt-4 flex flex-wrap items-center gap-3"
-                      >
-                        <input type="hidden" name="hotelId" value={hit.objectID} />
-                        <input type="hidden" name="fake" value="1" />
-                        <input type="hidden" name="checkIn" value={checkIn} />
-                        <input type="hidden" name="checkOut" value={checkOut} />
-                        <input type="hidden" name="adults" value={String(adults)} />
-                        <input type="hidden" name="children" value={String(children)} />
-                        <button
-                          type="submit"
-                          className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-900 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-                        >
-                          {t('results.reserveTest')}
-                        </button>
-                        <span className="text-muted text-xs">{t('results.reserveTestHint')}</span>
-                      </form>
-                    ) : null}
-                  </article>
+                  <SearchHotelCard
+                    hit={hit}
+                    palaceLabel={t('badges.palace')}
+                    starsSuffix="★"
+                    viewLabel={t('results.view')}
+                    footer={reserveForm}
+                  />
                 </li>
               );
             })}

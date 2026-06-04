@@ -246,6 +246,7 @@
       "countriesHeading": "Countries",
       "hotelsHeading": "Hotels",
       "cityHotelsCount": "{count, plural, one {# hotel} other {# hotels}}",
+      "view": "View hotel",
       "reserveTest": "Reserve (test mode)",
       "reserveTestHint": "Synthesises a fake offer and walks the full tunnel — no Amadeus call."
     },
