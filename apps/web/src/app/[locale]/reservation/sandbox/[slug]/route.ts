@@ -38,6 +38,9 @@ export async function GET(
     }
     const back = new URL(getPathname({ locale, href: '/recherche' }), req.nextUrl.origin);
     back.searchParams.set('error', `travelport_${result.reason}`);
+    // DIAG TEMPORAIRE (Phase 6) — propage la cause courte pour diagnostiquer
+    // `search_failed` sur Vercel sans logs runtime. À retirer ensuite.
+    if (result.detail !== undefined) back.searchParams.set('diag', result.detail);
     return NextResponse.redirect(back, 303);
   }
 

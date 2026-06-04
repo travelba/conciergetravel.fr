@@ -15,6 +15,7 @@ import {
   uniqueProperties,
   type PropertyItem,
   type SearchCompleteResponse,
+  type TravelportError,
 } from '@mch/integrations/travelport';
 
 import {
@@ -62,7 +63,21 @@ export type TravelportSandboxLockResult =
         | 'search_failed'
         | 'no_match'
         | 'no_rate';
+      // DIAG TEMPORAIRE (Phase 6) — code court de la cause Travelport, propagé
+      // à l'URL de redirect pour diagnostiquer `search_failed` sur Vercel sans
+      // dépendre des logs runtime. À retirer une fois la cause confirmée.
+      readonly detail?: string;
     };
+
+/** DIAG TEMPORAIRE — résumé court et non sensible d'une `TravelportError`. */
+function summarizeTravelportError(e: TravelportError): string {
+  if (e.kind === 'http') {
+    const h = e.error;
+    if (h.kind === 'upstream_4xx' || h.kind === 'upstream_5xx') return `http_${h.kind}_${h.status}`;
+    return `http_${h.kind}`;
+  }
+  return e.kind;
+}
 
 interface TravelportHotelRow {
   readonly id: string;
@@ -175,7 +190,9 @@ export async function lockTravelportSandboxOffer(input: {
     adults,
     currency: getTravelportCurrency(),
   });
-  if (!search.ok) return { ok: false, reason: 'search_failed' };
+  if (!search.ok) {
+    return { ok: false, reason: 'search_failed', detail: summarizeTravelportError(search.error) };
+  }
 
   const item = bestMatch(hotel, search.value);
   if (item === null) return { ok: false, reason: 'no_match' };
