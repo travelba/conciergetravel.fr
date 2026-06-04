@@ -69,11 +69,11 @@ export async function HotelHero({
         <div className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center gap-4">
             {isPalace ? (
-              <span className="inline-block rounded-full border border-amber-700/40 px-3 py-1 text-xs font-medium uppercase tracking-wider text-amber-800">
+              <span className="border-gold-700/40 text-gold-800 inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wider">
                 {t('hero.palaceBadge')}
               </span>
             ) : (
-              <span className="inline-block rounded-full border border-amber-700/40 px-3 py-1 text-xs font-medium uppercase tracking-wider text-amber-800">
+              <span className="border-gold-700/40 text-gold-800 inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wider">
                 {t('hero.stars', { count: stars })}
               </span>
             )}

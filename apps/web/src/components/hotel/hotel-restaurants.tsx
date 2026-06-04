@@ -54,7 +54,7 @@ export async function HotelRestaurants({
               </h3>
               <div className="flex flex-wrap items-center gap-1.5">
                 {venue.michelinStars !== null && venue.michelinStars > 0 ? (
-                  <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900">
+                  <span className="border-gold-200 bg-gold-50 text-gold-900 rounded-md border px-2 py-0.5 text-xs font-medium">
                     {t('restaurants.michelinBadge', { count: venue.michelinStars })}
                   </span>
                 ) : null}

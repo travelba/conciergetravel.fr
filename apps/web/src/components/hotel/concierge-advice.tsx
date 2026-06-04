@@ -43,12 +43,12 @@ export async function ConciergeAdvice({
       className="mb-12 scroll-mt-24"
     >
       <aside
-        className="border-l-4 border-l-amber-600/70 bg-amber-50/50 px-6 py-5 sm:rounded-r-lg dark:border-l-amber-500/70 dark:bg-amber-950/20"
+        className="border-l-gold-600/70 bg-gold-50/50 dark:border-l-gold-500/70 dark:bg-gold-900/20 border-l-4 px-6 py-5 sm:rounded-r-lg"
         role="note"
         aria-label={eyebrow}
       >
         <p className="text-fg/60 mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider">
-          <span aria-hidden className="text-amber-600 dark:text-amber-400">
+          <span aria-hidden className="text-gold-600 dark:text-gold-400">
             ★
           </span>
           {eyebrow}

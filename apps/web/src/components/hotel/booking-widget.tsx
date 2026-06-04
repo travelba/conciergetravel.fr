@@ -151,7 +151,7 @@ export async function BookingWidget({
 
       {limitedAvailability !== null ? (
         <p
-          className="mb-4 inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900"
+          className="border-gold-300 bg-gold-50 text-gold-900 mb-4 inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium"
           role="status"
           data-limited-availability
         >
@@ -325,7 +325,7 @@ function BookingWidgetForm({
           type="submit"
           className={
             fakeEnabled && isPaidTunnel
-              ? 'rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600'
+              ? 'border-gold-300 bg-gold-50 text-gold-900 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
               : 'bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
           }
         >

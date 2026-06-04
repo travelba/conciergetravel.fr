@@ -416,7 +416,7 @@ async function renderRoomPage(
           {room.isSignature ? (
             <span
               data-room-signature
-              className="inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-amber-900"
+              className="border-gold-200 bg-gold-50 text-gold-900 inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[0.65rem] font-medium uppercase tracking-[0.14em]"
               aria-label={t('facts.signatureAria')}
             >
               <svg

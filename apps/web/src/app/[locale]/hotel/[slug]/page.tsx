@@ -1326,7 +1326,7 @@ async function renderHotelPage(
             block so the JSON-LD `speakable`, `data-aeo` and `Hotel.description`
             GEO contracts are untouched.
           */}
-          <figure className="mb-12 mt-6 border-l-2 border-amber-400/80 pl-5 sm:mb-16 sm:pl-7">
+          <figure className="border-gold-400/80 mb-12 mt-6 border-l-2 pl-5 sm:mb-16 sm:pl-7">
             <blockquote className="text-fg font-serif text-2xl italic leading-snug sm:text-[1.7rem] sm:leading-snug">
               {locale === 'fr' ? '«\u00A0' : '\u201C'}
               {conciergeHook}
@@ -1722,7 +1722,7 @@ async function renderHotelPage(
                                 </Link>
                                 {room.isSignature ? (
                                   <span
-                                    className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em] text-amber-900"
+                                    className="border-gold-200 bg-gold-50 text-gold-900 rounded-md border px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em]"
                                     aria-label={t('rooms.signatureAria')}
                                   >
                                     {t('rooms.signatureBadge')}

@@ -55,7 +55,7 @@ export async function HotelFeaturedInRankings({
                     {title}
                   </span>
                   {badge !== null && badge !== undefined && badge !== '' ? (
-                    <span className="mt-1 inline-block rounded-full border border-amber-300/60 bg-amber-50/40 px-2 py-0.5 text-[10px] text-amber-800">
+                    <span className="border-gold-300/60 bg-gold-50/40 text-gold-800 mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px]">
                       {badge}
                     </span>
                   ) : null}

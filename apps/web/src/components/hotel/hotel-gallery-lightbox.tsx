@@ -112,7 +112,7 @@ const MOSAIC_SIDE_TILES = 4;
  * + photo-quality-seo-geo-agentique — captions are LLM-citable AND a brand
  * signal). A bottom-anchored gradient scrim keeps the serif text legible
  * over any image; a hairline amber rule echoes the Concierge accent used
- * across the fiche (`border-amber-400/80`). `pointer-events-none` so the
+ * across the fiche (`bg-gold-400/80`). `pointer-events-none` so the
  * overlay never blocks the underlying button/navigation.
  *
  * `reveal="always"` is used on focal photos (single view, mosaic lead);
@@ -142,7 +142,7 @@ function GalleryCaptionOverlay({
           : ''
       }`}
     >
-      <span aria-hidden className="mb-2 block h-px w-8 bg-amber-400/80" />
+      <span aria-hidden className="bg-gold-400/80 mb-2 block h-px w-8" />
       <p className={`text-pretty font-serif leading-snug text-white/95 ${textSize}`}>{caption}</p>
     </figcaption>
   );

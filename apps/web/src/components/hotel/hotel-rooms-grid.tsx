@@ -62,7 +62,7 @@ export function HotelRoomsGrid({ slug, rooms, labels, defaultVisible = 3 }: Hote
               <article
                 className={
                   room.isConciergePick
-                    ? 'bg-bg flex h-full flex-col overflow-hidden rounded-xl border border-amber-300 shadow-sm ring-2 ring-amber-200'
+                    ? 'bg-bg border-gold-300 ring-gold-200 flex h-full flex-col overflow-hidden rounded-xl border shadow-sm ring-2'
                     : 'border-border bg-bg flex h-full flex-col overflow-hidden rounded-xl border'
                 }
               >
@@ -86,7 +86,7 @@ export function HotelRoomsGrid({ slug, rooms, labels, defaultVisible = 3 }: Hote
                   )}
                   {room.isConciergePick ? (
                     <span
-                      className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-md bg-amber-500 px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-white shadow"
+                      className="bg-gold text-charcoal absolute left-3 top-3 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em] shadow"
                       aria-label={labels.conciergePick}
                     >
                       <span aria-hidden>★</span>
@@ -94,7 +94,7 @@ export function HotelRoomsGrid({ slug, rooms, labels, defaultVisible = 3 }: Hote
                     </span>
                   ) : room.isSignature ? (
                     <span
-                      className="absolute left-3 top-3 rounded-md border border-amber-200 bg-amber-50/95 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em] text-amber-900"
+                      className="border-gold-200 bg-gold-50/95 text-gold-900 absolute left-3 top-3 rounded-md border px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em]"
                       aria-label={labels.signatureAria}
                     >
                       {labels.signatureBadge}

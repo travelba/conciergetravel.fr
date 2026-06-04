@@ -138,22 +138,22 @@ export async function RelatedHotels({
                     <li key={row.slug}>
                       <Link
                         href={{ pathname: '/hotel/[slug]', params: { slug } }}
-                        className="group block h-full rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                        className="focus-visible:ring-ring group block h-full rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:shadow-md focus:outline-none focus-visible:ring-2"
                         prefetch={false}
                       >
                         <div className="mb-2 flex items-center justify-between gap-2">
-                          <span className="text-xs font-medium uppercase tracking-wide text-amber-700">
+                          <span className="text-gold-700 text-xs font-medium uppercase tracking-wide">
                             {row.is_palace ? t('palace') : t('starsBadge', { count: row.stars })}
                           </span>
                           <span className="text-xs text-neutral-500">{row.city}</span>
                         </div>
-                        <h4 className="mb-2 text-base font-semibold text-neutral-900 group-hover:text-amber-700 md:text-lg">
+                        <h4 className="group-hover:text-gold-700 mb-2 text-base font-semibold text-neutral-900 md:text-lg">
                           {name}
                         </h4>
                         {desc.length > 0 ? (
                           <p className="line-clamp-3 text-sm text-neutral-600">{desc}</p>
                         ) : null}
-                        <span className="mt-3 inline-block text-xs font-medium text-amber-700 underline-offset-2 group-hover:underline">
+                        <span className="text-gold-700 mt-3 inline-block text-xs font-medium underline-offset-2 group-hover:underline">
                           {t('seeFiche')} →
                         </span>
                       </Link>

@@ -85,7 +85,7 @@ export function HotelToc({
               onClick={variant === 'floating' ? () => setOpen(false) : undefined}
               className={`block border-l-2 py-1 pl-3 transition-colors ${
                 isActive
-                  ? 'text-fg border-l-amber-600 font-medium'
+                  ? 'text-fg border-l-gold-600 font-medium'
                   : 'text-muted hover:border-l-muted/40 hover:text-fg border-l-transparent'
               }`}
             >

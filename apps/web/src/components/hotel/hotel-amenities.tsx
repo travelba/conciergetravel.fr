@@ -100,7 +100,7 @@ export async function HotelAmenities({
                     key={entry.key}
                     className={
                       entry.isPremium
-                        ? 'rounded-md border border-amber-200 bg-amber-50/60 px-2.5 py-1 text-xs text-amber-900'
+                        ? 'border-gold-200 bg-gold-50/60 text-gold-900 rounded-md border px-2.5 py-1 text-xs'
                         : 'border-border bg-bg text-fg/90 rounded-md border px-2.5 py-1 text-xs'
                     }
                   >

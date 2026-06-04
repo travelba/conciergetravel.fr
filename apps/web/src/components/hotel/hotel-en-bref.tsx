@@ -241,7 +241,7 @@ export async function HotelEnBref({
             viewBox="0 0 16 16"
             width={12}
             height={12}
-            className="shrink-0 text-amber-600"
+            className="text-gold-600 shrink-0"
           >
             <path
               d="M5 1.5v1.25M11 1.5v1.25M2.5 5.75h11M3.5 3.25h9a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4.25a1 1 0 0 1 1-1Z"
