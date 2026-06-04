@@ -33,7 +33,10 @@ export const META_DESC_PUBLISH_MIN_CHARS = 100;
 export const META_DESC_PUBLISH_MAX_CHARS = 180;
 export const PUBLISH_CONCIERGE_MIN_WORDS = 30;
 export const FAQ_MIN_ITEMS = 10;
-export const FAQ_ANSWER_MIN_WORDS = 50;
+// GEO citation-density band per FAQ answer. Floor aligned to the golden
+// reference fiche, whose 10 answers span 30-57 words: a 50 floor made the
+// reference fail its own gate (5/10 in band), a uniform false-negative.
+export const FAQ_ANSWER_MIN_WORDS = 30;
 export const FAQ_ANSWER_MAX_WORDS = 100;
 export const LONG_SECTIONS_MIN_COUNT = 3;
 export const LONG_FORM_MIN_WORDS = 600;
@@ -41,6 +44,13 @@ export const HIGHLIGHTS_MIN_COUNT = 3;
 export const POIS_MIN_COUNT = 3;
 export const TRANSPORTS_MIN_COUNT = 1;
 export const FEATURED_FAQ_COUNT = 5;
+/**
+ * Minimum featured FAQ items carrying a `concierge_tip_fr`. The humanizer
+ * (`run-humanizer-faq.ts`, ADR-0011) is designed to emit 0-2 tips per hotel —
+ * 5 is unreachable. The golden reference fiche carries 2, so 2 is the parity
+ * bar. (Previously mis-set to FEATURED_FAQ_COUNT=5, a uniform false-negative.)
+ */
+export const FEATURED_FAQ_TIPS_MIN = 2;
 export const T3_COMPLETE_THRESHOLD = 95;
 export const T3_PARTIAL_THRESHOLD = 70;
 
@@ -608,11 +618,11 @@ export function evaluateHotelFiche(row: HotelAuditRow): HotelAuditResult {
   });
 
   const tipCount = countFeaturedFaqTips(row.faq_content);
-  const tipsOk = tipCount >= FEATURED_FAQ_COUNT;
+  const tipsOk = tipCount >= FEATURED_FAQ_TIPS_MIN;
   addCheck(checks, gaps, 't3.faq.concierge_tips', 't3', tipsOk, {
     field: 'faq_content.concierge_tip_fr',
     severity: 'warn',
-    message: `${tipCount} featured tips (need ${FEATURED_FAQ_COUNT})`,
+    message: `${tipCount} featured tips (need ${FEATURED_FAQ_TIPS_MIN})`,
     pipeline: 'run-humanizer-faq.ts',
   });
 

@@ -39,6 +39,7 @@ import {
   FAQ_ANSWER_MIN_WORDS,
   FAQ_MIN_ITEMS,
   FEATURED_FAQ_COUNT,
+  FEATURED_FAQ_TIPS_MIN,
   LONG_FORM_MIN_WORDS,
   LONG_SECTIONS_MIN_COUNT,
   META_TITLE_MAX_CHARS,
@@ -1195,10 +1196,10 @@ export function evaluateCdcHotelFiche(
     block: '11',
     dimension: 'faq',
     phase: 'cdc_target',
-    passed: countFeaturedFaqTips(row.faq_content) >= FEATURED_FAQ_COUNT,
+    passed: countFeaturedFaqTips(row.faq_content) >= FEATURED_FAQ_TIPS_MIN,
     severity: 'warn',
     field: 'faq_content.concierge_tip_fr',
-    message: `${countFeaturedFaqTips(row.faq_content)} featured concierge tips`,
+    message: `${countFeaturedFaqTips(row.faq_content)} featured concierge tips (need ${FEATURED_FAQ_TIPS_MIN})`,
     pipeline: 'run-humanizer-faq.ts',
   });
   addCdcCheck(b, {
