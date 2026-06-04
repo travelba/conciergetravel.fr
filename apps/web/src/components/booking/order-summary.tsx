@@ -22,6 +22,11 @@ interface OrderSummaryOffer {
   readonly totalPrice: { readonly amountMinor: number };
 }
 
+interface OrderSummaryLead {
+  readonly name: string;
+  readonly email: string;
+}
+
 interface OrderSummaryProps {
   readonly locale: Locale;
   readonly hotel: OrderSummaryHotel;
@@ -29,6 +34,8 @@ interface OrderSummaryProps {
   /** ISO expiry → drives the live hold countdown when provided. */
   readonly expiresAt?: string;
   readonly slug?: string;
+  /** Voyageur principal — affiché sur le récap (absent à la saisie). */
+  readonly lead?: OrderSummaryLead;
 }
 
 function nightsBetween(checkIn: string, checkOut: string): number {
@@ -50,6 +57,7 @@ export async function OrderSummary({
   offer,
   expiresAt,
   slug,
+  lead,
 }: OrderSummaryProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'orderSummary' });
   const nf = new Intl.NumberFormat(intlLocaleTag(locale), {
@@ -64,65 +72,87 @@ export async function OrderSummary({
   return (
     <aside
       aria-label={t('title')}
-      className="border-border bg-bg rounded-2xl border p-5 lg:sticky lg:top-24"
+      className="border-border bg-bg shadow-card overflow-hidden rounded-2xl border lg:sticky lg:top-24"
     >
-      <h2 className="text-fg font-serif text-lg">{t('title')}</h2>
-
-      <div className="mt-3">
-        <p className="text-fg text-sm font-medium">{hotel.name}</p>
+      <div className="from-gold-50 to-bg border-border border-b bg-gradient-to-b px-5 py-4">
+        <p className="text-gold-700 text-[11px] font-medium uppercase tracking-[0.18em]">
+          {t('title')}
+        </p>
+        <p className="text-fg mt-1 font-serif text-lg leading-snug">{hotel.name}</p>
         <p className="text-muted text-xs">
           {hotel.city} · {hotel.region}
         </p>
       </div>
 
-      {hotel.roomLabel !== undefined || hotel.rateLabel !== undefined ? (
+      <div className="px-5 py-4">
+        {hotel.roomLabel !== undefined || hotel.rateLabel !== undefined ? (
+          <div className="pb-4">
+            {hotel.roomLabel !== undefined ? (
+              <p className="text-fg text-sm font-medium">{hotel.roomLabel}</p>
+            ) : null}
+            {hotel.rateLabel !== undefined ? (
+              <p className="text-muted mt-0.5 text-xs">{hotel.rateLabel}</p>
+            ) : null}
+            <ul className="mt-2.5 flex flex-wrap gap-1.5">
+              {hotel.breakfastIncluded === true ? (
+                <li className="bg-gold-50 text-gold-800 border-gold-200 rounded-full border px-2.5 py-1 text-[11px] font-medium">
+                  {t('breakfastIncluded')}
+                </li>
+              ) : null}
+              {hotel.refundable === true ? (
+                <li className="bg-gold-50 text-gold-800 border-gold-200 rounded-full border px-2.5 py-1 text-[11px] font-medium">
+                  {t('refundable')}
+                </li>
+              ) : hotel.refundable === false ? (
+                <li className="text-muted border-border rounded-full border px-2.5 py-1 text-[11px]">
+                  {t('nonRefundable')}
+                </li>
+              ) : null}
+            </ul>
+          </div>
+        ) : null}
+
+        <dl className="border-border space-y-2.5 border-t pt-4 text-sm">
+          <div className="flex items-start justify-between gap-3">
+            <dt className="text-muted">{t('stay')}</dt>
+            <dd className="text-fg text-right">
+              {offer.stay.checkIn}
+              <br />→ {offer.stay.checkOut}
+              <span className="text-muted mt-0.5 block text-xs">{t('nights', { nights })}</span>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted">{t('guestsLabel')}</dt>
+            <dd className="text-fg text-right">
+              {t('guests', { adults: offer.guests.adults, children: offer.guests.children })}
+            </dd>
+          </div>
+          {lead !== undefined ? (
+            <div className="flex items-start justify-between gap-3">
+              <dt className="text-muted">{t('lead')}</dt>
+              <dd className="text-fg text-right">
+                {lead.name}
+                <span className="text-muted mt-0.5 block text-xs">{lead.email}</span>
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+
         <div className="border-border mt-4 border-t pt-4">
-          {hotel.roomLabel !== undefined ? (
-            <p className="text-fg text-sm">{hotel.roomLabel}</p>
-          ) : null}
-          {hotel.rateLabel !== undefined ? (
-            <p className="text-muted mt-0.5 text-xs">{hotel.rateLabel}</p>
-          ) : null}
-          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-            {hotel.breakfastIncluded === true ? (
-              <li className="text-gold-800">✓ {t('breakfastIncluded')}</li>
-            ) : null}
-            {hotel.refundable === true ? (
-              <li className="text-gold-800">✓ {t('refundable')}</li>
-            ) : hotel.refundable === false ? (
-              <li className="text-muted">{t('nonRefundable')}</li>
-            ) : null}
-          </ul>
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-fg text-sm font-medium">{t('total')}</span>
+            <span className="text-fg font-serif text-2xl">{nf.format(total / 100)}</span>
+          </div>
+          <p className="text-muted mt-1 text-right text-xs">
+            {t('perNight', { price: nf.format(perNight / 100) })}
+          </p>
+          <p className="text-muted/80 mt-2 text-xs">{t('taxesNote')}</p>
         </div>
-      ) : null}
 
-      <dl className="border-border mt-4 grid grid-cols-2 gap-y-2 border-t pt-4 text-sm">
-        <dt className="text-muted">{t('stay')}</dt>
-        <dd className="text-fg text-right">
-          {offer.stay.checkIn} → {offer.stay.checkOut}
-        </dd>
-        <dt className="text-muted" />
-        <dd className="text-muted text-right text-xs">{t('nights', { nights })}</dd>
-        <dt className="text-muted">{t('guestsLabel')}</dt>
-        <dd className="text-fg text-right">
-          {t('guests', { adults: offer.guests.adults, children: offer.guests.children })}
-        </dd>
-      </dl>
-
-      <div className="border-border mt-4 border-t pt-4">
-        <div className="flex items-baseline justify-between">
-          <span className="text-muted text-sm">{t('total')}</span>
-          <span className="text-fg font-serif text-2xl">{nf.format(total / 100)}</span>
-        </div>
-        <p className="text-muted mt-1 text-right text-xs">
-          {t('perNight', { price: nf.format(perNight / 100) })}
-        </p>
-        <p className="text-muted mt-1 text-xs">{t('taxesNote')}</p>
+        {expiresAt !== undefined ? (
+          <OfferExpiryNotice expiresAt={expiresAt} {...(slug !== undefined ? { slug } : {})} />
+        ) : null}
       </div>
-
-      {expiresAt !== undefined ? (
-        <OfferExpiryNotice expiresAt={expiresAt} {...(slug !== undefined ? { slug } : {})} />
-      ) : null}
     </aside>
   );
 }

@@ -139,11 +139,19 @@ export default async function TravelportSandboxRoomsPage({
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
       <BookingProgress locale={locale} current="rooms" />
-      <header className="mb-6">
-        <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
+      <header className="border-border from-gold-50 to-bg mb-8 rounded-2xl border bg-gradient-to-br px-6 py-7">
+        <p className="text-gold-700 text-xs font-medium uppercase tracking-[0.18em]">
+          {t('eyebrow')}
+        </p>
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{result.hotelName}</h1>
-        <p className="text-muted mt-2 text-sm">
-          {result.checkIn} → {result.checkOut} · {t('stayLine', { nights, adults: result.adults })}
+        <p className="text-muted mt-2 flex flex-wrap items-center gap-x-2 text-sm">
+          <span className="text-fg font-medium">
+            {result.checkIn} → {result.checkOut}
+          </span>
+          <span aria-hidden className="text-gold-400">
+            ·
+          </span>
+          {t('stayLine', { nights, adults: result.adults })}
         </p>
       </header>
 
@@ -185,6 +193,7 @@ export default async function TravelportSandboxRoomsPage({
         offerSetId={result.offerSetId}
         slug={slug}
         locale={locale}
+        nights={nights}
         selectAction={selectRoomAction}
       />
 

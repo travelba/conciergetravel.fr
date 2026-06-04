@@ -25,6 +25,7 @@ interface RoomsListProps {
   readonly offerSetId: string;
   readonly slug: string;
   readonly locale: Locale;
+  readonly nights: number;
   readonly selectAction: (formData: FormData) => Promise<void>;
 }
 
@@ -46,6 +47,7 @@ export function RoomsList({
   offerSetId,
   slug,
   locale,
+  nights,
   selectAction,
 }: RoomsListProps): ReactElement {
   const t = useTranslations('reservationRooms');
@@ -61,6 +63,8 @@ export function RoomsList({
     });
     return (minor: number): string => nf.format(minor / 100);
   }, [locale]);
+
+  const perNight = (minor: number): string => fmtPrice(Math.round(minor / Math.max(1, nights)));
 
   const groups = useMemo<readonly RoomGroup[]>(() => {
     const filtered = options.filter(
@@ -100,26 +104,42 @@ export function RoomsList({
 
   return (
     <div>
-      <fieldset className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2">
-        <legend className="text-muted mr-2 text-xs uppercase tracking-wide">
+      <fieldset className="mb-6 flex flex-wrap items-center gap-2">
+        <legend className="text-muted mr-1 inline text-xs uppercase tracking-wide">
           {t('filters.title')}
         </legend>
-        <label className="text-fg flex items-center gap-2 text-sm">
+        <label
+          className={[
+            'flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm transition-colors',
+            breakfastOnly
+              ? 'border-gold-400 bg-gold-50 text-gold-900'
+              : 'border-border text-fg hover:bg-muted/5',
+          ].join(' ')}
+        >
           <input
             type="checkbox"
             checked={breakfastOnly}
             onChange={(e) => setBreakfastOnly(e.target.checked)}
-            className="accent-fg h-4 w-4"
+            className="sr-only"
           />
+          <span aria-hidden>{breakfastOnly ? '✓' : '+'}</span>
           {t('filters.breakfast')}
         </label>
-        <label className="text-fg flex items-center gap-2 text-sm">
+        <label
+          className={[
+            'flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm transition-colors',
+            refundableOnly
+              ? 'border-gold-400 bg-gold-50 text-gold-900'
+              : 'border-border text-fg hover:bg-muted/5',
+          ].join(' ')}
+        >
           <input
             type="checkbox"
             checked={refundableOnly}
             onChange={(e) => setRefundableOnly(e.target.checked)}
-            className="accent-fg h-4 w-4"
+            className="sr-only"
           />
+          <span aria-hidden>{refundableOnly ? '✓' : '+'}</span>
           {t('filters.refundable')}
         </label>
       </fieldset>
@@ -129,7 +149,7 @@ export function RoomsList({
           {t('noMatch')}
         </p>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-5">
           {groups.map((group) => {
             const isExpanded = expanded.has(group.label);
             const visibleRates = isExpanded ? group.rates : group.rates.slice(0, 1);
@@ -137,52 +157,65 @@ export function RoomsList({
             return (
               <li
                 key={group.label}
-                className="border-border bg-bg rounded-lg border p-4 sm:p-5"
+                className="border-border bg-bg shadow-card overflow-hidden rounded-2xl border"
                 data-room-group
               >
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h2 className="text-fg font-serif text-lg leading-snug">{group.label}</h2>
-                  <div className="text-right">
-                    {cheapest !== undefined ? (
-                      <p className="text-muted text-xs">
-                        {t('from', { price: fmtPrice(cheapest.priceMinor) })}
-                      </p>
-                    ) : null}
+                <div className="border-border from-gold-50/60 to-bg flex flex-wrap items-baseline justify-between gap-2 border-b bg-gradient-to-r px-5 py-4">
+                  <div className="min-w-0">
+                    <h2 className="text-fg font-serif text-xl leading-snug">{group.label}</h2>
                     {group.maxOccupancy !== null ? (
-                      <p className="text-muted text-xs">
+                      <p className="text-muted mt-0.5 text-xs">
                         {t('upToGuests', { count: group.maxOccupancy })}
                       </p>
                     ) : null}
                   </div>
+                  {cheapest !== undefined ? (
+                    <p className="text-gold-700 shrink-0 text-xs font-medium">
+                      {t('from', { price: fmtPrice(cheapest.priceMinor) })}
+                    </p>
+                  ) : null}
                 </div>
 
-                <ul className="divide-border mt-3 flex flex-col divide-y">
+                <ul className="divide-border flex flex-col divide-y px-5">
                   {visibleRates.map((opt) => (
                     <li
                       key={opt.rateKey}
-                      className="flex flex-wrap items-start justify-between gap-4 py-3 first:pt-0"
+                      className="flex flex-wrap items-start justify-between gap-4 py-4"
                       data-room-option
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="text-fg text-sm font-medium">{opt.rateLabel}</p>
-                        <ul className="text-muted mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                        <ul className="mt-2 flex flex-wrap items-center gap-1.5">
                           {opt.breakfastIncluded === true ? (
-                            <li>{t('breakfastIncluded')}</li>
+                            <li className="bg-gold-50 text-gold-800 border-gold-200 rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
+                              {t('breakfastIncluded')}
+                            </li>
                           ) : null}
                           {opt.refundable === true ? (
-                            <li>{t('refundable')}</li>
+                            <li className="bg-gold-50 text-gold-800 border-gold-200 rounded-full border px-2.5 py-0.5 text-[11px] font-medium">
+                              {t('refundable')}
+                            </li>
                           ) : opt.refundable === false ? (
-                            <li>{t('nonRefundable')}</li>
+                            <li className="text-muted border-border rounded-full border px-2.5 py-0.5 text-[11px]">
+                              {t('nonRefundable')}
+                            </li>
                           ) : null}
                         </ul>
                         {opt.cancellationText !== '' ? (
-                          <p className="text-muted/80 mt-1 text-xs">{opt.cancellationText}</p>
+                          <p className="text-muted/80 mt-2 max-w-prose text-xs leading-relaxed">
+                            {opt.cancellationText}
+                          </p>
                         ) : null}
                       </div>
-                      <div className="flex shrink-0 flex-col items-end gap-2">
-                        <p className="text-fg font-serif text-xl">{fmtPrice(opt.priceMinor)}</p>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <p className="text-fg font-serif text-2xl leading-none">
+                          {fmtPrice(opt.priceMinor)}
+                        </p>
                         <p className="text-muted text-xs">{t('totalStay')}</p>
-                        <form action={selectAction}>
+                        <p className="text-muted/80 text-[11px]">
+                          {t('perNightFrom', { price: perNight(opt.priceMinor) })}
+                        </p>
+                        <form action={selectAction} className="mt-1.5">
                           <input type="hidden" name="offerSetId" value={offerSetId} />
                           <input type="hidden" name="rateKey" value={opt.rateKey} />
                           <input type="hidden" name="locale" value={locale} />
@@ -193,7 +226,7 @@ export function RoomsList({
                               room: group.label,
                               price: fmtPrice(opt.priceMinor),
                             })}
-                            className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
+                            className="bg-gold text-charcoal hover:bg-gold-600 focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
                           >
                             {t('select')}
                           </SubmitButton>
@@ -204,14 +237,16 @@ export function RoomsList({
                 </ul>
 
                 {group.rates.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleExpand(group.label)}
-                    aria-expanded={isExpanded}
-                    className="text-fg mt-2 text-sm font-medium underline-offset-2 hover:underline"
-                  >
-                    {isExpanded ? t('hideRates') : t('viewRates', { count: group.rates.length })}
-                  </button>
+                  <div className="px-5 pb-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(group.label)}
+                      aria-expanded={isExpanded}
+                      className="text-gold-700 hover:text-gold-800 text-sm font-medium underline-offset-2 hover:underline"
+                    >
+                      {isExpanded ? t('hideRates') : t('viewRates', { count: group.rates.length })}
+                    </button>
+                  </div>
                 ) : null}
               </li>
             );

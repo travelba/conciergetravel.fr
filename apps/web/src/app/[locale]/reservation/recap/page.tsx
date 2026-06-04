@@ -6,10 +6,10 @@ import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
 import { BookingProgress } from '@/components/booking/booking-progress';
 import { OfferExpiryNotice } from '@/components/booking/offer-expiry-notice';
+import { OrderSummary } from '@/components/booking/order-summary';
 import { SubmitButton } from '@/components/booking/submit-button';
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { intlLocaleTag } from '@/i18n/runtime';
 import { getDraftId } from '@/server/booking/draft-cookie';
 import { loadDraft, saveDraft } from '@/server/booking/draft-store';
 import {
@@ -40,6 +40,8 @@ function redirectToPayment(locale: Locale): never {
   redirect({ href: '/reservation/payment', locale });
 }
 
+const fullName = (firstName: string, lastName: string): string => `${firstName} ${lastName}`.trim();
+
 /**
  * Mirror of `invite/page.tsx#redirectExpired` — the expired-draft path
  * sends the user back to the localised search page with the expired
@@ -51,13 +53,6 @@ function redirectExpired(locale: Locale): never {
     locale,
   });
 }
-
-const fmtPrice = (locale: Locale, amountMinor: number): string =>
-  new Intl.NumberFormat(intlLocaleTag(locale), {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-  }).format(amountMinor / 100);
 
 async function continueToPaymentAction(): Promise<void> {
   'use server';
@@ -212,176 +207,155 @@ export default async function ReservationRecapPage({
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{t('title')}</h1>
       </header>
 
-      <section className="border-border bg-bg mb-6 rounded-lg border p-4 sm:p-5">
-        <h2 className="text-fg font-serif text-lg">{persisted.hotel.name}</h2>
-        <p className="text-muted mt-1 text-sm">
-          {persisted.hotel.city} · {persisted.hotel.region}
-        </p>
-        <dl className="mt-4 grid grid-cols-1 gap-y-3 sm:grid-cols-2">
-          <div>
-            <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.stay')}</dt>
-            <dd className="text-fg text-sm">
-              {offer.stay.checkIn} → {offer.stay.checkOut}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.guests')}</dt>
-            <dd className="text-fg text-sm">
-              {t('summary.guestsValue', {
-                adults: offer.guests.adults,
-                children: offer.guests.children,
-              })}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.lead')}</dt>
-            <dd className="text-fg text-sm">
-              {guest.firstName} {guest.lastName}
-              <br />
-              <span className="text-muted">{guest.email}</span>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.total')}</dt>
-            <dd className="text-fg font-serif text-2xl">
-              {fmtPrice(locale, offer.totalPrice.amountMinor)}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="border-border bg-bg mb-8 rounded-lg border p-4 sm:p-5">
-        <h2 className="text-fg font-serif text-lg">{t('cancellation.title')}</h2>
-        <p className="text-fg mt-2 whitespace-pre-line text-sm">{offer.cancellationPolicyText}</p>
-        <p className="text-muted mt-2 text-xs">{t('cancellation.verbatimNote')}</p>
-      </section>
-
-      {offer.provider === 'travelport' ? (
-        tpReservation !== null ? (
-          <section
-            className="border-border bg-bg rounded-lg border p-4 sm:p-5"
-            aria-label={t('sandbox.label')}
-          >
-            <p className="text-fg text-sm font-medium">
-              {tpReservation.phase === 'cancelled'
-                ? t('sandbox.cancelledTitle')
-                : t('sandbox.confirmedTitle')}
+      <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
+        <div className="flex flex-col gap-6">
+          <section className="border-border bg-bg shadow-card rounded-2xl border p-5 sm:p-6">
+            <h2 className="text-fg font-serif text-lg">{t('cancellation.title')}</h2>
+            <p className="text-fg mt-2 whitespace-pre-line text-sm leading-relaxed">
+              {offer.cancellationPolicyText}
             </p>
-            {tpReservation.phase !== 'cancelled' ? (
-              <p className="text-muted mt-1 text-sm">{t('sandbox.confirmedSummary')}</p>
-            ) : null}
+            <p className="text-muted mt-3 text-xs">{t('cancellation.verbatimNote')}</p>
+          </section>
 
-            <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
-              {tpReservation.bookingRef !== undefined ? (
-                <div>
-                  <dt className="text-muted text-xs uppercase tracking-wide">
-                    {t('sandbox.bookingRef')}
-                  </dt>
-                  <dd className="text-fg font-mono text-sm">{tpReservation.bookingRef}</dd>
-                </div>
-              ) : null}
-              <div>
-                <dt className="text-muted text-xs uppercase tracking-wide">
-                  {t('sandbox.status')}
-                </dt>
-                <dd className="text-fg text-sm">{tpReservation.status}</dd>
-              </div>
-              {tpReservation.supplierConfirmation !== undefined ? (
-                <div>
-                  <dt className="text-muted text-xs uppercase tracking-wide">
-                    {t('sandbox.hotelConfirmation')}
-                  </dt>
-                  <dd className="text-fg font-mono text-sm">
-                    {tpReservation.supplierConfirmation}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
+          {offer.provider === 'travelport' ? (
+            tpReservation !== null ? (
+              <section
+                className="border-border bg-bg rounded-lg border p-4 sm:p-5"
+                aria-label={t('sandbox.label')}
+              >
+                <p className="text-fg text-sm font-medium">
+                  {tpReservation.phase === 'cancelled'
+                    ? t('sandbox.cancelledTitle')
+                    : t('sandbox.confirmedTitle')}
+                </p>
+                {tpReservation.phase !== 'cancelled' ? (
+                  <p className="text-muted mt-1 text-sm">{t('sandbox.confirmedSummary')}</p>
+                ) : null}
 
-            {tpReservation.aggregatorLocator !== undefined ||
-            tpReservation.agencyLocator !== undefined ? (
-              <details className="mt-4">
-                <summary className="text-muted cursor-pointer text-xs uppercase tracking-wide">
-                  {t('sandbox.technicalDetails')}
-                </summary>
                 <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
-                  {tpReservation.aggregatorLocator !== undefined ? (
+                  {tpReservation.bookingRef !== undefined ? (
                     <div>
                       <dt className="text-muted text-xs uppercase tracking-wide">
-                        {t('sandbox.travelportLocator')}
+                        {t('sandbox.bookingRef')}
+                      </dt>
+                      <dd className="text-fg font-mono text-sm">{tpReservation.bookingRef}</dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt className="text-muted text-xs uppercase tracking-wide">
+                      {t('sandbox.status')}
+                    </dt>
+                    <dd className="text-fg text-sm">{tpReservation.status}</dd>
+                  </div>
+                  {tpReservation.supplierConfirmation !== undefined ? (
+                    <div>
+                      <dt className="text-muted text-xs uppercase tracking-wide">
+                        {t('sandbox.hotelConfirmation')}
                       </dt>
                       <dd className="text-fg font-mono text-sm">
-                        {tpReservation.aggregatorLocator}
+                        {tpReservation.supplierConfirmation}
                       </dd>
                     </div>
                   ) : null}
-                  {tpReservation.agencyLocator !== undefined ? (
-                    <div>
-                      <dt className="text-muted text-xs uppercase tracking-wide">
-                        {t('sandbox.agencyLocator')}
-                      </dt>
-                      <dd className="text-fg font-mono text-sm">{tpReservation.agencyLocator}</dd>
-                    </div>
-                  ) : null}
                 </dl>
-              </details>
-            ) : null}
 
-            {tpReservation.phase === 'cancelled' ? (
-              <p className="text-muted mt-4 text-xs">{t('sandbox.cancelledNote')}</p>
+                {tpReservation.aggregatorLocator !== undefined ||
+                tpReservation.agencyLocator !== undefined ? (
+                  <details className="mt-4">
+                    <summary className="text-muted cursor-pointer text-xs uppercase tracking-wide">
+                      {t('sandbox.technicalDetails')}
+                    </summary>
+                    <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
+                      {tpReservation.aggregatorLocator !== undefined ? (
+                        <div>
+                          <dt className="text-muted text-xs uppercase tracking-wide">
+                            {t('sandbox.travelportLocator')}
+                          </dt>
+                          <dd className="text-fg font-mono text-sm">
+                            {tpReservation.aggregatorLocator}
+                          </dd>
+                        </div>
+                      ) : null}
+                      {tpReservation.agencyLocator !== undefined ? (
+                        <div>
+                          <dt className="text-muted text-xs uppercase tracking-wide">
+                            {t('sandbox.agencyLocator')}
+                          </dt>
+                          <dd className="text-fg font-mono text-sm">
+                            {tpReservation.agencyLocator}
+                          </dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  </details>
+                ) : null}
+
+                {tpReservation.phase === 'cancelled' ? (
+                  <p className="text-muted mt-4 text-xs">{t('sandbox.cancelledNote')}</p>
+                ) : (
+                  <form action={cancelTravelportSandboxAction} className="mt-4">
+                    <SubmitButton
+                      pendingLabel={t('sandbox.cancelling')}
+                      className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
+                    >
+                      {t('sandbox.cancelCta')}
+                    </SubmitButton>
+                  </form>
+                )}
+              </section>
             ) : (
-              <form action={cancelTravelportSandboxAction} className="mt-4">
-                <SubmitButton
-                  pendingLabel={t('sandbox.cancelling')}
-                  className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
-                >
-                  {t('sandbox.cancelCta')}
-                </SubmitButton>
-              </form>
-            )}
-          </section>
-        ) : (
-          <section
-            className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
-            aria-label={t('sandbox.label')}
-          >
-            <p className="text-fg text-sm font-medium">{t('sandbox.preprodTitle')}</p>
-            <p className="text-muted mt-2 text-xs">{t('sandbox.intro')}</p>
-
-            <OfferExpiryNotice
-              expiresAt={offer.expiresAt}
-              {...(persisted.hotel.slug !== undefined ? { slug: persisted.hotel.slug } : {})}
-            />
-
-            <form action={confirmTravelportSandboxAction} className="mt-4">
-              <SubmitButton
-                pendingLabel={t('sandbox.confirming')}
-                className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
+              <section
+                className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
+                aria-label={t('sandbox.label')}
               >
-                {t('sandbox.confirmCta')}
-              </SubmitButton>
+                <p className="text-fg text-sm font-medium">{t('sandbox.preprodTitle')}</p>
+                <p className="text-muted mt-2 text-xs">{t('sandbox.intro')}</p>
+
+                <OfferExpiryNotice
+                  expiresAt={offer.expiresAt}
+                  {...(persisted.hotel.slug !== undefined ? { slug: persisted.hotel.slug } : {})}
+                />
+
+                <form action={confirmTravelportSandboxAction} className="mt-4">
+                  <SubmitButton
+                    pendingLabel={t('sandbox.confirming')}
+                    className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
+                  >
+                    {t('sandbox.confirmCta')}
+                  </SubmitButton>
+                </form>
+                {sandboxError !== undefined ? (
+                  <p
+                    role="alert"
+                    className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
+                  >
+                    {t('sandbox.error')}
+                  </p>
+                ) : null}
+              </section>
+            )
+          ) : (
+            <form action={continueToPaymentAction}>
+              <button
+                type="submit"
+                className="bg-gold text-charcoal hover:bg-gold-600 focus-visible:ring-ring rounded-md px-6 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2"
+              >
+                {t('continueToPayment')}
+              </button>
+              <p className="text-muted mt-3 text-xs">{t('paymentDisclaimer')}</p>
             </form>
-            {sandboxError !== undefined ? (
-              <p
-                role="alert"
-                className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
-              >
-                {t('sandbox.error')}
-              </p>
-            ) : null}
-          </section>
-        )
-      ) : (
-        <form action={continueToPaymentAction}>
-          <button
-            type="submit"
-            className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
-          >
-            {t('continueToPayment')}
-          </button>
-          <p className="text-muted mt-3 text-xs">{t('paymentDisclaimer')}</p>
-        </form>
-      )}
+          )}
+        </div>
+
+        <OrderSummary
+          locale={locale}
+          hotel={persisted.hotel}
+          offer={offer}
+          lead={{ name: fullName(guest.firstName, guest.lastName), email: guest.email }}
+          {...(progressStep === 'recap' ? { expiresAt: offer.expiresAt } : {})}
+          {...(persisted.hotel.slug !== undefined ? { slug: persisted.hotel.slug } : {})}
+        />
+      </div>
     </main>
   );
 }

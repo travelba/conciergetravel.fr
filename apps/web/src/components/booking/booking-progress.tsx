@@ -28,28 +28,31 @@ export async function BookingProgress({
 }: BookingProgressProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'bookingProgress' });
   const currentIndex = ORDER.indexOf(current);
-  const total = ORDER.length;
 
   return (
-    <nav aria-label={t('aria')} className="mb-8">
-      <ol className="flex items-center gap-2 sm:gap-3">
+    <nav aria-label={t('aria')} className="mb-10">
+      <ol className="flex items-center">
         {ORDER.map((step, index) => {
           const isCurrent = index === currentIndex;
           const isDone = index < currentIndex;
           const label = t(step);
           const statusLabel = isDone ? t('completed') : isCurrent ? t('current') : '';
+          const isLast = index === ORDER.length - 1;
           return (
-            <li key={step} className="flex flex-1 items-center gap-2 sm:gap-3">
-              <div className="flex min-w-0 items-center gap-2">
+            <li
+              key={step}
+              className={isLast ? 'flex shrink-0 items-center' : 'flex flex-1 items-center'}
+            >
+              <div className="flex shrink-0 flex-col items-center gap-2">
                 <span
                   aria-hidden
                   className={[
-                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-colors',
+                    'flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
                     isDone
-                      ? 'bg-gold-600 text-white'
+                      ? 'bg-gold-600 shadow-xs text-white'
                       : isCurrent
-                        ? 'bg-fg text-bg ring-gold-300 ring-2 ring-offset-2'
-                        : 'border-border text-muted border',
+                        ? 'bg-charcoal ring-gold-400 text-white ring-2 ring-offset-2'
+                        : 'border-border text-muted border bg-transparent',
                   ].join(' ')}
                 >
                   {isDone ? '✓' : index + 1}
@@ -57,20 +60,19 @@ export async function BookingProgress({
                 <span
                   {...(isCurrent ? { 'aria-current': 'step' as const } : {})}
                   className={[
-                    'truncate text-xs sm:text-sm',
-                    isCurrent ? 'text-fg font-medium' : isDone ? 'text-fg' : 'text-muted',
+                    'text-center text-[11px] leading-tight tracking-wide sm:text-xs',
+                    isCurrent ? 'text-fg font-semibold' : isDone ? 'text-fg/70' : 'text-muted/70',
                   ].join(' ')}
                 >
-                  <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden">{index + 1}</span>
+                  {label}
                   {statusLabel !== '' ? <span className="sr-only"> — {statusLabel}</span> : null}
                 </span>
               </div>
-              {index < total - 1 ? (
+              {!isLast ? (
                 <span
                   aria-hidden
                   className={[
-                    'h-px flex-1',
+                    'mx-2 -mt-6 h-0.5 flex-1 rounded-full sm:mx-3',
                     index < currentIndex ? 'bg-gold-400' : 'bg-border',
                   ].join(' ')}
                 />

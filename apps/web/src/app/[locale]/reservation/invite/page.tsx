@@ -144,9 +144,13 @@ export default async function ReservationInvitePage({
             </p>
           </header>
 
-          <form action={submitAction} className="flex flex-col gap-5" noValidate>
+          <form
+            action={submitAction}
+            className="border-border bg-bg shadow-card flex flex-col gap-5 rounded-2xl border p-6"
+            noValidate
+          >
             <fieldset className="flex flex-col gap-4">
-              <legend className="text-fg font-serif text-lg">{t('form.legend')}</legend>
+              <legend className="text-fg mb-1 font-serif text-lg">{t('form.legend')}</legend>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5 text-sm">
@@ -214,7 +218,7 @@ export default async function ReservationInvitePage({
 
             <button
               type="submit"
-              className="bg-fg text-bg focus-visible:ring-ring self-start rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+              className="bg-gold text-charcoal hover:bg-gold-600 focus-visible:ring-ring mt-1 self-start rounded-md px-6 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2"
             >
               {t('form.submit')}
             </button>

@@ -3742,6 +3742,7 @@
     "nights": "{nights, plural, one {# night} other {# nights}}",
     "guestsLabel": "Guests",
     "guests": "{adults, plural, one {# adult} other {# adults}}{children, plural, =0 {} one {, # child} other {, # children}}",
+    "lead": "Lead guest",
     "perNight": "i.e. {price} / night",
     "total": "Total incl. tax",
     "breakfastIncluded": "Breakfast included",
@@ -3899,6 +3900,7 @@
     "refundable": "Refundable",
     "nonRefundable": "Non-refundable",
     "totalStay": "total stay",
+    "perNightFrom": "i.e. {price} / night",
     "from": "From {price}",
     "filters": {
       "title": "Filter",
@@ -3970,6 +3972,9 @@
     "eyebrow": "Confirmation",
     "title": "Your enquiry was received",
     "greeting": "Hello {name}, thank you for reaching out.",
+    "row": {
+      "stay": "Stay"
+    },
     "summary": {
       "body": "We forwarded your interest in {hotel} for the period {checkIn} → {checkOut} to our concierge team.",
       "bodyNoHotel": "We recorded your enquiry for the period {checkIn} → {checkOut}."

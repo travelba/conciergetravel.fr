@@ -3742,6 +3742,7 @@
     "nights": "{nights, plural, one {# nuit} other {# nuits}}",
     "guestsLabel": "Voyageurs",
     "guests": "{adults, plural, one {# adulte} other {# adultes}}{children, plural, =0 {} one {, # enfant} other {, # enfants}}",
+    "lead": "Voyageur principal",
     "perNight": "soit {price} / nuit",
     "total": "Total TTC",
     "breakfastIncluded": "Petit-déjeuner inclus",
@@ -3796,6 +3797,9 @@
     "eyebrow": "Confirmation",
     "title": "Votre demande a bien été reçue",
     "greeting": "Bonjour {name}, merci pour votre demande.",
+    "row": {
+      "stay": "Séjour"
+    },
     "summary": {
       "body": "Nous avons transmis votre intérêt pour {hotel} pour la période du {checkIn} au {checkOut} à notre équipe conciergerie.",
       "bodyNoHotel": "Nous avons enregistré votre demande pour la période du {checkIn} au {checkOut}."
@@ -3928,6 +3932,7 @@
     "refundable": "Remboursable",
     "nonRefundable": "Non remboursable",
     "totalStay": "séjour total",
+    "perNightFrom": "soit {price} / nuit",
     "from": "À partir de {price}",
     "filters": {
       "title": "Filtrer",
