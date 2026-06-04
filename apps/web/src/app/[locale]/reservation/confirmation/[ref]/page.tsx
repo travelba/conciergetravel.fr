@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
+import { BookingProgress } from '@/components/booking/booking-progress';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -166,6 +167,7 @@ export default async function ReservationConfirmationPage({
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
+      {isPaid ? <BookingProgress locale={locale} current="confirmation" /> : null}
       <p className="text-muted text-xs uppercase tracking-[0.18em]">
         {isPaid ? t('paid.eyebrow') : t('eyebrow')}
       </p>

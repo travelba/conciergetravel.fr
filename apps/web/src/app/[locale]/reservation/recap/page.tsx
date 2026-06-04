@@ -130,6 +130,16 @@ async function confirmTravelportSandboxAction(): Promise<void> {
       locale: persisted.locale,
     });
   }
+  // Parcours OTA : on emmène le client sur la page de confirmation dédiée dès
+  // que la résa est persistée (booking_ref). Le cookie draft est conservé : un
+  // retour sur le recap reste possible pour annuler la réservation sandbox.
+  const ref = result.reservation.bookingRef;
+  if (ref !== undefined) {
+    redirect({
+      href: { pathname: '/reservation/confirmation/[ref]', params: { ref } },
+      locale: persisted.locale,
+    });
+  }
   redirect({ href: '/reservation/recap', locale: persisted.locale });
 }
 
