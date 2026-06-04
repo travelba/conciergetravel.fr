@@ -301,6 +301,8 @@ function buildRooms(): readonly HotelRoomRow[] {
       isSignature: false,
       indicativePrice: { fromMinor: 95000, toMinor: 130000, currency: 'EUR' },
       displayOrder: 20,
+      cardImagePublicId: null,
+      cardImageAlt: null,
     },
     {
       id: '33333333-3333-4333-8333-333333333333',
@@ -315,6 +317,8 @@ function buildRooms(): readonly HotelRoomRow[] {
       isSignature: true,
       indicativePrice: { fromMinor: 220000, toMinor: null, currency: 'EUR' },
       displayOrder: 10,
+      cardImagePublicId: null,
+      cardImageAlt: null,
     },
   ];
 }

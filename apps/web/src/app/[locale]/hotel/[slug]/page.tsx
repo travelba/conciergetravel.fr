@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 import { JsonLd, buildAeoBlock } from '@mch/seo';
 
-import { buildCloudinarySrc } from '@mch/ui';
+import { buildCloudinarySrc, HotelImage } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
 import { TravelportLiveRooms } from '@/components/hotel/travelport-live-rooms';
@@ -1705,7 +1705,7 @@ async function renderHotelPage(
                   {t('sections.rooms')}
                 </h2>
                 {rooms.length > 0 ? (
-                  <ul className="flex flex-col gap-4">
+                  <ul className="flex flex-col gap-5">
                     {rooms.map((room) => {
                       const roomHref = {
                         pathname: '/hotel/[slug]/chambres/[roomSlug]',
@@ -1714,88 +1714,110 @@ async function renderHotelPage(
                       const priceLabel = formatIndicativePrice(room.indicativePrice, locale, t);
                       return (
                         <li key={room.id}>
-                          <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
-                            <header className="flex flex-wrap items-baseline justify-between gap-2">
-                              <h3 className="text-fg flex items-center gap-2 font-serif text-lg">
-                                <Link href={roomHref} className="hover:underline">
-                                  {room.name ?? room.room_code}
-                                </Link>
-                                {room.isSignature ? (
-                                  <span
-                                    className="border-gold-200 bg-gold-50 text-gold-900 rounded-md border px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em]"
-                                    aria-label={t('rooms.signatureAria')}
-                                  >
-                                    {t('rooms.signatureBadge')}
-                                  </span>
-                                ) : null}
-                              </h3>
-                              <p className="text-muted text-xs">
-                                {room.max_occupancy !== null
-                                  ? t('rooms.occupancy', { count: room.max_occupancy })
-                                  : null}
-                                {room.size_sqm !== null
-                                  ? ` · ${t('rooms.size', { count: room.size_sqm })}`
-                                  : ''}
-                                {room.bed_type !== null && room.bed_type !== ''
-                                  ? ` · ${room.bed_type}`
-                                  : ''}
-                              </p>
-                            </header>
-                            {room.description !== null && room.description !== '' ? (
-                              <p className="text-muted mt-2 text-sm">{room.description}</p>
+                          <article className="border-border bg-bg shadow-card overflow-hidden rounded-2xl border sm:flex sm:items-stretch">
+                            {room.cardImagePublicId !== null ? (
+                              <Link
+                                href={roomHref}
+                                className="focus-visible:outline-ring relative block aspect-[16/10] shrink-0 overflow-hidden sm:aspect-auto sm:w-64 lg:w-72"
+                                aria-label={room.name ?? room.room_code}
+                              >
+                                <HotelImage
+                                  cloudName={cloudName}
+                                  publicId={room.cardImagePublicId}
+                                  alt={room.cardImageAlt ?? room.name ?? room.room_code}
+                                  variant="card"
+                                  width={576}
+                                  height={384}
+                                  sizes="(max-width: 640px) 100vw, 18rem"
+                                  className="h-full w-full transition-transform duration-500 hover:scale-[1.03]"
+                                />
+                              </Link>
                             ) : null}
-                            {room.amenities.length > 0 ? (
-                              <ul className="mt-3 flex flex-wrap gap-1.5">
-                                {room.amenities.map((amenity) => (
-                                  <li
-                                    key={amenity}
-                                    className="border-border text-muted rounded-md border px-2 py-0.5 text-xs"
-                                  >
-                                    {amenity}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                            <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
-                              <p className="text-sm">
-                                <Link
-                                  href={roomHref}
-                                  className="text-fg hover:text-fg/80 inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
-                                >
-                                  {t('rooms.viewDetail')}
-                                  <span aria-hidden>→</span>
-                                </Link>
-                              </p>
-                              {(() => {
-                                const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(
-                                  room.id,
-                                );
-                                if (liveFromMinor !== undefined && tCard !== null) {
-                                  const priceText = fmtLiveEur(liveFromMinor);
-                                  return (
-                                    <span className="flex items-baseline gap-2 text-xs">
-                                      <span className="text-muted" data-room-price-live>
-                                        {tCard('from', { price: priceText })}
-                                      </span>
-                                      <Link
-                                        href={travelportRoomsHref}
-                                        aria-label={tCard('bookAria', {
-                                          room: room.name ?? room.room_code,
-                                          price: priceText,
-                                        })}
-                                        className="text-fg font-medium underline-offset-2 hover:underline"
-                                      >
-                                        {tCard('book')}
-                                      </Link>
+                            <div className="flex min-w-0 flex-1 flex-col p-5">
+                              <header className="flex flex-wrap items-baseline justify-between gap-2">
+                                <h3 className="text-fg flex items-center gap-2 font-serif text-lg">
+                                  <Link href={roomHref} className="hover:underline">
+                                    {room.name ?? room.room_code}
+                                  </Link>
+                                  {room.isSignature ? (
+                                    <span
+                                      className="border-gold-200 bg-gold-50 text-gold-900 rounded-md border px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.12em]"
+                                      aria-label={t('rooms.signatureAria')}
+                                    >
+                                      {t('rooms.signatureBadge')}
                                     </span>
+                                  ) : null}
+                                </h3>
+                                <p className="text-muted text-xs">
+                                  {room.max_occupancy !== null
+                                    ? t('rooms.occupancy', { count: room.max_occupancy })
+                                    : null}
+                                  {room.size_sqm !== null
+                                    ? ` · ${t('rooms.size', { count: room.size_sqm })}`
+                                    : ''}
+                                  {room.bed_type !== null && room.bed_type !== ''
+                                    ? ` · ${room.bed_type}`
+                                    : ''}
+                                </p>
+                              </header>
+                              {room.description !== null && room.description !== '' ? (
+                                <p className="text-muted mt-2 text-sm leading-relaxed">
+                                  {room.description}
+                                </p>
+                              ) : null}
+                              {room.amenities.length > 0 ? (
+                                <ul className="mt-3 flex flex-wrap gap-1.5">
+                                  {room.amenities.map((amenity) => (
+                                    <li
+                                      key={amenity}
+                                      className="border-border text-muted rounded-md border px-2 py-0.5 text-xs"
+                                    >
+                                      {amenity}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                              <div className="border-border mt-auto flex flex-wrap items-end justify-between gap-2 border-t pt-3 sm:pt-4">
+                                <p className="text-sm">
+                                  <Link
+                                    href={roomHref}
+                                    className="text-gold-700 hover:text-gold-800 inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
+                                  >
+                                    {t('rooms.viewDetail')}
+                                    <span aria-hidden>→</span>
+                                  </Link>
+                                </p>
+                                {(() => {
+                                  const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(
+                                    room.id,
                                   );
-                                }
-                                return priceLabel !== null ? (
-                                  <p className="text-muted text-xs" data-room-price>
-                                    {priceLabel}
-                                  </p>
-                                ) : null;
-                              })()}
+                                  if (liveFromMinor !== undefined && tCard !== null) {
+                                    const priceText = fmtLiveEur(liveFromMinor);
+                                    return (
+                                      <span className="flex items-baseline gap-2 text-xs">
+                                        <span className="text-muted" data-room-price-live>
+                                          {tCard('from', { price: priceText })}
+                                        </span>
+                                        <Link
+                                          href={travelportRoomsHref}
+                                          aria-label={tCard('bookAria', {
+                                            room: room.name ?? room.room_code,
+                                            price: priceText,
+                                          })}
+                                          className="bg-gold text-charcoal hover:bg-gold-600 rounded-md px-3 py-1.5 font-semibold transition-colors"
+                                        >
+                                          {tCard('book')}
+                                        </Link>
+                                      </span>
+                                    );
+                                  }
+                                  return priceLabel !== null ? (
+                                    <p className="text-fg text-sm font-medium" data-room-price>
+                                      {priceLabel}
+                                    </p>
+                                  ) : null;
+                                })()}
+                              </div>
                             </div>
                           </article>
                         </li>

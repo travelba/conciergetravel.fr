@@ -2977,6 +2977,13 @@ export interface HotelRoomRow {
   readonly isSignature: boolean;
   readonly indicativePrice: LocalisedIndicativePrice | null;
   readonly displayOrder: number | null;
+  /**
+   * Image de carte (liste chambres fiche) : `hero_image` si présent, sinon
+   * première image de la galerie `images[]`. `null` quand aucune photo n'est
+   * renseignée (la carte retombe alors sur un placeholder sobre).
+   */
+  readonly cardImagePublicId: string | null;
+  readonly cardImageAlt: string | null;
 }
 
 const HotelRoomDbRowSchema = z.object({
@@ -2994,10 +3001,12 @@ const HotelRoomDbRowSchema = z.object({
   is_signature: z.boolean().nullable().optional(),
   indicative_price_minor: z.unknown().nullable().optional(),
   display_order: z.number().int().nullable().optional(),
+  hero_image: stringOrEmpty,
+  images: z.unknown().nullable().optional(),
 });
 
 const ROOM_LIST_COLUMNS =
-  'id, slug, room_code, name_fr, name_en, description_fr, description_en, max_occupancy, bed_type, size_sqm, amenities, is_signature, indicative_price_minor, display_order';
+  'id, slug, room_code, name_fr, name_en, description_fr, description_en, max_occupancy, bed_type, size_sqm, amenities, is_signature, indicative_price_minor, display_order, hero_image, images';
 
 function readIndicativePrice(raw: unknown): LocalisedIndicativePrice | null {
   const parsed = IndicativePriceMinorSchema.safeParse(raw);
@@ -3007,6 +3016,30 @@ function readIndicativePrice(raw: unknown): LocalisedIndicativePrice | null {
     toMinor: parsed.data.to ?? null,
     currency: parsed.data.currency,
   };
+}
+
+/**
+ * Résout l'image de carte d'une chambre pour la liste de la fiche : priorité au
+ * `hero_image` (public_id Cloudinary), repli sur la première image de galerie.
+ * Réutilise `GalleryImageSchema` (même forme `{public_id, alt_fr, alt_en}` que
+ * les images chambre). Renvoie `null` si rien d'exploitable.
+ */
+function readRoomCardImage(
+  row: z.infer<typeof HotelRoomDbRowSchema>,
+  locale: SupportedLocale,
+  fallbackAlt: string,
+): { readonly publicId: string; readonly alt: string } | null {
+  const hero = CloudinaryPublicIdSchema.safeParse(row.hero_image);
+  if (hero.success) return { publicId: hero.data, alt: fallbackAlt };
+  const gallery = GalleryImagesSchema.safeParse(row.images);
+  const first = gallery.success ? gallery.data[0] : undefined;
+  if (first !== undefined) {
+    return {
+      publicId: first.public_id,
+      alt: pickLocalizedText(locale, first.alt_fr, first.alt_en) ?? fallbackAlt,
+    };
+  }
+  return null;
 }
 
 /** Slug shape: `^[a-z0-9]+(?:-[a-z0-9]+)*$` (matches `hotels_slug_ck`). */
@@ -3097,11 +3130,13 @@ export async function getHotelBySlug(
       for (const raw of roomsRes.data) {
         const r = HotelRoomDbRowSchema.safeParse(raw);
         if (!r.success) continue;
+        const roomName = pickLocalizedText(locale, r.data.name_fr, r.data.name_en);
+        const cardImage = readRoomCardImage(r.data, locale, roomName ?? r.data.room_code);
         rooms.push({
           id: r.data.id,
           slug: r.data.slug ?? r.data.room_code,
           room_code: r.data.room_code,
-          name: pickLocalizedText(locale, r.data.name_fr, r.data.name_en),
+          name: roomName,
           description: pickLocalizedText(locale, r.data.description_fr, r.data.description_en),
           max_occupancy: r.data.max_occupancy,
           bed_type: r.data.bed_type,
@@ -3110,6 +3145,8 @@ export async function getHotelBySlug(
           isSignature: r.data.is_signature === true,
           indicativePrice: readIndicativePrice(r.data.indicative_price_minor),
           displayOrder: r.data.display_order ?? null,
+          cardImagePublicId: cardImage?.publicId ?? null,
+          cardImageAlt: cardImage?.alt ?? null,
         });
       }
     }

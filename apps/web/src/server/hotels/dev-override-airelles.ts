@@ -240,6 +240,8 @@ function buildRooms(locale: SupportedLocale): HotelRoomRow[] {
     isSignature: seed.signature === true,
     indicativePrice: null,
     displayOrder: index,
+    cardImagePublicId: null,
+    cardImageAlt: null,
   }));
 }
 
