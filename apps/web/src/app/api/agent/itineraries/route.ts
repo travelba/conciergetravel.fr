@@ -2,22 +2,15 @@ import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
 import { agentJson, gateAgentRequest } from '@/server/agent/respond';
-import { listItineraries } from '@/server/itineraries/list-itineraries';
+import { buildItinerariesListResult } from '@/server/mcp/builders/editorial';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/agent/itineraries — list published itineraries with optional
- * filters by destination, travel style, theme or duration.
- *
- * Mirror of `list-itineraries` skill (CDC §6.1, ADR-0017). Returns one
- * compact card per itinerary so an LLM can pick the most relevant
- * itinerary to cite or follow up on with a `get-itinerary` call.
- *
- * The detail payload (sections, FAQ, hero, related links) is exposed by
- * the sibling `/api/agent/itinerary/[slug]` endpoint to keep this list
- * response small even with the full catalogue.
+ * filters. Thin shell over `buildItinerariesListResult` (Lot 4,
+ * ADR-0029). Mirror of the `list-itineraries` skill.
  */
 const QuerySchema = z.object({
   country_code: z
@@ -66,45 +59,17 @@ export async function GET(req: NextRequest) {
       { status: 400, cacheControl: 'no-store' },
     );
   }
-  const { theme, locale, ...rest } = parsed.data;
+  const d = parsed.data;
 
-  const cards = await listItineraries({
-    ...rest,
-    ...(theme !== undefined ? { themes: [theme] } : {}),
-  }).catch(() => []);
-
-  return agentJson(
-    {
-      ok: true,
-      filter: {
-        countryCode: parsed.data.country_code ?? null,
-        destinationRegion: parsed.data.destination_region ?? null,
-        destinationCity: parsed.data.destination_city ?? null,
-        theme: theme ?? null,
-        travelStyle: parsed.data.travel_style ?? null,
-        durationMinDays: parsed.data.duration_min_days ?? null,
-        durationMaxDays: parsed.data.duration_max_days ?? null,
-      },
-      count: cards.length,
-      itineraries: cards.map((c) => ({
-        slug: c.slugFr,
-        title: locale === 'en' && c.titleEn !== null ? c.titleEn : c.titleFr,
-        metaDescription: locale === 'en' && c.metaDescEn !== null ? c.metaDescEn : c.metaDescFr,
-        countryCode: c.countryCode,
-        destinationRegion: c.destinationRegion,
-        destinationCity: c.destinationCity,
-        themes: c.themes,
-        travelStyle: c.travelStyle,
-        season: c.season,
-        durationMinDays: c.durationMinDays,
-        durationMaxDays: c.durationMaxDays,
-        hotelCount: c.hotelCount,
-        priority: c.priority,
-        lastUpdated: c.lastUpdated,
-        canonicalUrl:
-          locale === 'en' ? `/en/itineraire/${c.slugEn ?? c.slugFr}` : `/fr/itineraire/${c.slugFr}`,
-      })),
-    },
-    { cacheControl: 'public, max-age=600, s-maxage=3600' },
-  );
+  const result = await buildItinerariesListResult({
+    locale: d.locale,
+    ...(d.country_code !== undefined ? { country_code: d.country_code } : {}),
+    ...(d.destination_region !== undefined ? { destination_region: d.destination_region } : {}),
+    ...(d.destination_city !== undefined ? { destination_city: d.destination_city } : {}),
+    ...(d.theme !== undefined ? { theme: d.theme } : {}),
+    ...(d.travel_style !== undefined ? { travel_style: d.travel_style } : {}),
+    ...(d.duration_min_days !== undefined ? { duration_min_days: d.duration_min_days } : {}),
+    ...(d.duration_max_days !== undefined ? { duration_max_days: d.duration_max_days } : {}),
+  });
+  return agentJson(result.body, { status: result.status, cacheControl: result.cacheControl });
 }

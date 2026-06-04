@@ -83,6 +83,11 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     '</.well-known/agent-skills.json>; rel="agent-skills"; type="application/json"',
   );
 
+  // WebMCP discovery (Lot 4, ADR-0029) — advertise the MCP server
+  // transport alongside the agent-skills catalog so MCP clients can
+  // auto-discover the action surface from any HTML response.
+  finalResponse.headers.append('Link', '</api/mcp>; rel="mcp"');
+
   return finalResponse;
 }
 

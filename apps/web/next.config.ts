@@ -72,6 +72,12 @@ const nextConfig: NextConfig = {
             key: 'Link',
             value: '</.well-known/agent-skills.json>; rel="agent-skills"',
           },
+          // RFC 8288 + WebMCP: announce the MCP server transport so MCP
+          // clients can auto-discover it (Lot 4, ADR-0029).
+          {
+            key: 'Link',
+            value: '</api/mcp>; rel="mcp"',
+          },
         ],
       },
       {
