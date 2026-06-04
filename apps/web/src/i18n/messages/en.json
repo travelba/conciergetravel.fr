@@ -3727,6 +3727,15 @@
     "errorDescription": "Our team has been notified. Please try again shortly.",
     "tryAgain": "Try again"
   },
+  "bookingProgress": {
+    "aria": "Booking progress",
+    "rooms": "Room",
+    "guest": "Guest",
+    "recap": "Review",
+    "confirmation": "Confirmation",
+    "completed": "completed",
+    "current": "current step"
+  },
   "reservationStart": {
     "meta": {
       "title": "Booking enquiry",

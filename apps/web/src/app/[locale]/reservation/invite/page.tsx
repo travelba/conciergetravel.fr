@@ -4,6 +4,7 @@ import { notFound, redirect as nextRedirect } from 'next/navigation';
 
 import { attachGuest, parseGuest } from '@mch/domain/booking';
 
+import { BookingProgress } from '@/components/booking/booking-progress';
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { getDraftId } from '@/server/booking/draft-cookie';
@@ -131,6 +132,7 @@ export default async function ReservationInvitePage({
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
+      <BookingProgress locale={locale} current="guest" />
       <header className="mb-8">
         <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{persisted.hotel.name}</h1>

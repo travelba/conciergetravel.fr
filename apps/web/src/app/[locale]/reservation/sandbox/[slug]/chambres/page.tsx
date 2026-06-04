@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
+import { BookingProgress } from '@/components/booking/booking-progress';
 import { SubmitButton } from '@/components/booking/submit-button';
 import { BookingSandboxDateFields } from '@/components/hotel/booking-sandbox-date-fields';
 import { Link, getPathname, redirect } from '@/i18n/navigation';
@@ -137,6 +138,7 @@ export default async function TravelportSandboxRoomsPage({
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
+      <BookingProgress locale={locale} current="rooms" />
       <header className="mb-6">
         <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{result.hotelName}</h1>

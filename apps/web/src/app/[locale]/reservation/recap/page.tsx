@@ -4,6 +4,7 @@ import { notFound, redirect as nextRedirect } from 'next/navigation';
 
 import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
+import { BookingProgress } from '@/components/booking/booking-progress';
 import { OfferExpiryNotice } from '@/components/booking/offer-expiry-notice';
 import { SubmitButton } from '@/components/booking/submit-button';
 import { redirect } from '@/i18n/navigation';
@@ -190,9 +191,12 @@ export default async function ReservationRecapPage({
   const { offer, guest } = persisted.draft;
   const tpReservation =
     offer.provider === 'travelport' ? await loadTravelportReservation(draftId) : null;
+  const progressStep =
+    tpReservation !== null && tpReservation.phase === 'confirmed' ? 'confirmation' : 'recap';
 
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
+      <BookingProgress locale={locale} current={progressStep} />
       <header className="mb-8">
         <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{t('title')}</h1>

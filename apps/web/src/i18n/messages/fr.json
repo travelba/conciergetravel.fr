@@ -3727,6 +3727,15 @@
       "removeConfirmation": "{name} a été retiré de vos favoris."
     }
   },
+  "bookingProgress": {
+    "aria": "Progression de la réservation",
+    "rooms": "Chambre",
+    "guest": "Voyageur",
+    "recap": "Récapitulatif",
+    "confirmation": "Confirmation",
+    "completed": "terminé",
+    "current": "étape en cours"
+  },
   "reservationStart": {
     "meta": {
       "title": "Demande de réservation",
