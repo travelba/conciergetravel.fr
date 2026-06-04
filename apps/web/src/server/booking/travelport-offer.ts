@@ -41,7 +41,7 @@ const OFFER_TTL_SEC = 10 * 60;
 const SANDBOX_GUEST: Guest = {
   firstName: 'Sandbox',
   lastName: 'Concierge',
-  email: 'sandbox@myconciergehotel.com',
+  email: 'benjamin@travelba.fr',
   phone: '+33100000000',
 };
 
