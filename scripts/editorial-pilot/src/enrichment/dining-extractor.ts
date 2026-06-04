@@ -51,7 +51,21 @@ const OutletZ = z.object({
   chef: z.string().nullable(),
   michelin_stars: z.number().int().min(0).max(3).nullable(),
   cuisine: z.string().nullable(),
-  price_category: z.enum(['€', '€€', '€€€', '€€€€']).nullable(),
+  // Michelin localises the price tier per currency (£, $, ¥, CHF…). We only
+  // care about the *tier* (1–4), so we coerce any currency-symbol run to the
+  // equivalent count of € rather than dropping the whole outlet (Hard Rule:
+  // UK/US palaces must not lose their richest source over a currency glyph).
+  price_category: z
+    .preprocess(
+      (v) => {
+        if (typeof v !== 'string') return v;
+        const symbols = (v.match(/[€£$¥]/gu) ?? []).length;
+        if (symbols < 1) return null;
+        return '€'.repeat(Math.min(symbols, 4));
+      },
+      z.enum(['€', '€€', '€€€', '€€€€']).nullable(),
+    )
+    .nullable(),
   signature: z.string().nullable(),
   evidence_quote: z.string().nullable(),
 });
