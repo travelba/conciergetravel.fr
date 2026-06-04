@@ -201,6 +201,72 @@ async function fetchPublishedGuideSlugsPostgrest(): Promise<Set<string>> {
   return new Set(data.map((d) => d.slug));
 }
 
+/**
+ * Room stats via PostgREST (parity with `fetchRoomStatsPg`). The direct PG
+ * host is unreachable from some dev boxes, so the audit must be able to compute
+ * room indexability over REST. We page `hotel_rooms`, aggregate per `hotel_id`,
+ * then re-key by hotel slug using the id→slug map of the fetched hotels.
+ *
+ * `indexable` mirrors the SQL gate: slug present + long_description_fr ≥ 800
+ * chars + ≥ 5 images.
+ */
+interface RoomRestRow {
+  readonly hotel_id: string;
+  readonly slug: string | null;
+  readonly long_description_fr: string | null;
+  readonly images: unknown;
+}
+
+async function fetchRoomStatsPostgrest(
+  env: PostgrestEnv,
+  idToSlug: ReadonlyMap<string, string>,
+): Promise<Map<string, RoomAuditStats>> {
+  interface MutableRoomStats {
+    total: number;
+    withSlug: number;
+    indexable: number;
+  }
+  const byId = new Map<string, MutableRoomStats>();
+  const PAGE = 1000;
+  let from = 0;
+  while (true) {
+    const url = `${env.restBase}/hotel_rooms?select=hotel_id,slug,long_description_fr,images&order=hotel_id.asc`;
+    const r = await fetch(url, {
+      headers: pgHeaders(env, { Range: `${from}-${from + PAGE - 1}`, 'Range-Unit': 'items' }),
+    });
+    if (!r.ok) {
+      throw new Error(
+        `PostgREST GET hotel_rooms failed: ${r.status} ${(await r.text()).slice(0, 200)}`,
+      );
+    }
+    const batch = (await r.json()) as RoomRestRow[];
+    for (const room of batch) {
+      const cur: MutableRoomStats = byId.get(room.hotel_id) ?? {
+        total: 0,
+        withSlug: 0,
+        indexable: 0,
+      };
+      cur.total += 1;
+      const hasSlug = typeof room.slug === 'string' && room.slug.length > 0;
+      if (hasSlug) cur.withSlug += 1;
+      const longEnough =
+        typeof room.long_description_fr === 'string' && room.long_description_fr.length >= 800;
+      const imageCount = Array.isArray(room.images) ? room.images.length : 0;
+      if (hasSlug && longEnough && imageCount >= 5) cur.indexable += 1;
+      byId.set(room.hotel_id, cur);
+    }
+    if (batch.length < PAGE) break;
+    from += PAGE;
+  }
+
+  const bySlug = new Map<string, RoomAuditStats>();
+  for (const [id, slug] of idToSlug) {
+    const stats = byId.get(id);
+    if (stats) bySlug.set(slug, stats);
+  }
+  return bySlug;
+}
+
 async function fetchHotelsViaPostgrest(args: CliArgs): Promise<{
   rows: CdcHotelAuditRow[];
   guideSlugs: Set<string>;
@@ -232,12 +298,18 @@ async function fetchHotelsViaPostgrest(args: CliArgs): Promise<{
     from += PAGE;
   }
 
-  const guideSlugs = await fetchPublishedGuideSlugsPostgrest();
-  return {
-    rows: args.limit !== null ? all.slice(0, args.limit) : all,
-    guideSlugs,
-    roomStats: new Map(),
-  };
+  const rows = args.limit !== null ? all.slice(0, args.limit) : all;
+  const idToSlug = new Map<string, string>();
+  for (const row of rows) {
+    const id = (row as unknown as { id?: unknown }).id;
+    if (typeof id === 'string') idToSlug.set(id, row.slug);
+  }
+
+  const [guideSlugs, roomStats] = await Promise.all([
+    fetchPublishedGuideSlugsPostgrest(),
+    fetchRoomStatsPostgrest(env, idToSlug),
+  ]);
+  return { rows, guideSlugs, roomStats };
 }
 
 async function fetchCatalogue(args: CliArgs): Promise<{
@@ -245,11 +317,15 @@ async function fetchCatalogue(args: CliArgs): Promise<{
   guideSlugs: Set<string>;
   roomStats: Map<string, RoomAuditStats>;
 }> {
+  // The direct Postgres host (db.*.supabase.co) is unreachable from some dev
+  // machines (Windows SSL/DNS — see windows-dev-environment skill). Allow
+  // forcing the PostgREST path, which only needs NEXT_PUBLIC_SUPABASE_URL.
+  const forceRest = (process.env['MCH_AUDIT_FORCE_REST'] ?? '') !== '';
   const conn =
     process.env['DATABASE_URL'] ??
     process.env['SUPABASE_DB_POOLER_URL'] ??
     process.env['SUPABASE_DB_URL'];
-  if (conn) return fetchHotelsViaPg(args);
+  if (conn && !forceRest) return fetchHotelsViaPg(args);
   return fetchHotelsViaPostgrest(args);
 }
 

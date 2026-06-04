@@ -86,7 +86,13 @@ export function isFaqCanonicalSet(
   hotelName: string,
 ): boolean {
   const faq = items ?? [];
-  if (faq.length !== CANONICAL_FAQ_QUESTIONS.length) return false;
+  // The CDC FAQ band is 10-15 items: a fiche may legitimately carry the 10
+  // canonical questions PLUS hotel-specific extras (e.g. les-airelles-gordes
+  // has 12). Require the canonical set to be PRESENT (subset), not that the
+  // list length equals exactly 10 — the old exact-length check produced a
+  // false "not canonical" on every extended FAQ and would have let the
+  // pipeline overwrite good extras.
+  if (faq.length < CANONICAL_FAQ_QUESTIONS.length) return false;
   const haystack = new Set(
     faq.map((it) => normaliseFaqQuestion(it.question_fr ?? it.question ?? '')),
   );
