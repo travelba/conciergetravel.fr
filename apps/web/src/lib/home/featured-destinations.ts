@@ -1,7 +1,10 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
+
 import type { HomeDestinationCardData } from '@/components/home/home-destination-grid';
 import type { Locale } from '@/i18n/routing';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Curated 8 destinations strip on the home grid — « Là où le Concierge
@@ -33,6 +36,8 @@ interface CityDef {
   readonly citySlug: string;
   readonly labelFr: string;
   readonly labelEn: string;
+  /** Catalogue `city` value used to source a representative hero photo. */
+  readonly cityName: string;
 }
 
 interface CountryDef {
@@ -41,6 +46,8 @@ interface CountryDef {
   readonly href: '/guide/italie' | '/guide/japon' | '/guide/maroc' | '/guide/etats-unis';
   readonly labelFr: string;
   readonly labelEn: string;
+  /** ISO-3166-1 alpha-2 used to source a representative hero photo. */
+  readonly countryCode: string;
 }
 
 interface RankingDef {
@@ -49,6 +56,8 @@ interface RankingDef {
   readonly rankingSlug: string;
   readonly labelFr: string;
   readonly labelEn: string;
+  /** ISO-3166-1 alpha-2 used to source a representative hero photo. */
+  readonly countryCode: string;
 }
 
 type DestinationDef = CityDef | CountryDef | RankingDef;
@@ -68,6 +77,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     citySlug: 'paris',
     labelFr: 'Paris',
     labelEn: 'Paris',
+    cityName: 'Paris',
   },
   {
     variant: 'city',
@@ -75,6 +85,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     citySlug: 'cannes',
     labelFr: "Côte d'Azur",
     labelEn: 'French Riviera',
+    cityName: 'Cannes',
   },
   {
     variant: 'country',
@@ -82,6 +93,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     href: '/guide/italie',
     labelFr: 'Italie',
     labelEn: 'Italy',
+    countryCode: 'IT',
   },
   {
     variant: 'ranking',
@@ -89,6 +101,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     rankingSlug: 'meilleurs-hotels-grece',
     labelFr: 'Grèce',
     labelEn: 'Greece',
+    countryCode: 'GR',
   },
   {
     variant: 'country',
@@ -96,6 +109,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     href: '/guide/japon',
     labelFr: 'Japon',
     labelEn: 'Japan',
+    countryCode: 'JP',
   },
   {
     variant: 'country',
@@ -103,6 +117,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     href: '/guide/maroc',
     labelFr: 'Maroc',
     labelEn: 'Morocco',
+    countryCode: 'MA',
   },
   {
     variant: 'country',
@@ -110,6 +125,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     href: '/guide/etats-unis',
     labelFr: 'États-Unis',
     labelEn: 'United States',
+    countryCode: 'US',
   },
   {
     variant: 'ranking',
@@ -117,6 +133,7 @@ const HOME_DESTINATIONS: readonly DestinationDef[] = [
     rankingSlug: 'meilleurs-hotels-royaume-uni',
     labelFr: 'Royaume-Uni',
     labelEn: 'United Kingdom',
+    countryCode: 'GB',
   },
 ];
 
@@ -134,12 +151,14 @@ export function pickHomeDestinations(
   cityCounts: ReadonlyMap<string, number>,
   locale: Locale,
   hotelCountLabel: (count: number) => string,
+  heroImages: Readonly<Record<string, string>> = {},
 ): readonly HomeDestinationCardData[] {
   const isEn = locale === 'en';
   const out: HomeDestinationCardData[] = [];
 
   for (const def of HOME_DESTINATIONS) {
     const label = isEn ? def.labelEn : def.labelFr;
+    const imagePublicId = heroImages[def.key] ?? null;
     if (def.variant === 'city') {
       const count = cityCounts.get(def.citySlug) ?? 0;
       out.push({
@@ -148,6 +167,7 @@ export function pickHomeDestinations(
         variant: 'city',
         citySlug: def.citySlug,
         hint: count > 0 ? hotelCountLabel(count) : '',
+        imagePublicId,
       });
     } else if (def.variant === 'country') {
       out.push({
@@ -155,6 +175,7 @@ export function pickHomeDestinations(
         label,
         variant: 'country',
         href: def.href,
+        imagePublicId,
       });
     } else {
       out.push({
@@ -162,8 +183,53 @@ export function pickHomeDestinations(
         label,
         variant: 'ranking',
         rankingSlug: def.rankingSlug,
+        imagePublicId,
       });
     }
   }
   return out;
 }
+
+/**
+ * Source one representative hotel hero (Cloudinary public id) per
+ * destination from the catalogue — by `city` for city tiles, by
+ * `country_code` for country / ranking tiles. Highest editorial priority
+ * wins. Degrades to an empty map (→ charcoal fallback tiles) on any
+ * Supabase outage. Cached 1h (the catalogue moves slowly).
+ */
+async function fetchDestinationHeroImages(): Promise<Record<string, string>> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const entries = await Promise.all(
+      HOME_DESTINATIONS.map(async (def) => {
+        const base = supabase
+          .from('hotels')
+          .select('hero_image')
+          .eq('is_published', true)
+          .not('hero_image', 'is', null);
+        const scoped =
+          def.variant === 'city'
+            ? base.ilike('city', def.cityName)
+            : base.eq('country_code', def.countryCode);
+        const { data, error } = await scoped.order('priority', { ascending: true }).limit(1);
+        if (error !== null || !Array.isArray(data) || data.length === 0) return null;
+        const hero = (data[0] as { hero_image?: unknown } | undefined)?.hero_image;
+        return typeof hero === 'string' && hero.length > 0 ? ([def.key, hero] as const) : null;
+      }),
+    );
+
+    const out: Record<string, string> = {};
+    for (const entry of entries) {
+      if (entry !== null) out[entry[0]] = entry[1];
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export const getDestinationHeroImages = unstable_cache(
+  fetchDestinationHeroImages,
+  ['home-destination-hero-images-v1'],
+  { revalidate: 3600 },
+);

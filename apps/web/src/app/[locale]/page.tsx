@@ -21,7 +21,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
-import { pickHomeDestinations } from '@/lib/home/featured-destinations';
+import { getDestinationHeroImages, pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
 import { getRecentOpenings } from '@/lib/home/recent-openings';
 import { buildWebsiteJsonLd } from '@/lib/jsonld/brand-organization';
@@ -95,11 +95,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // AEO entries + the Concierge advice picks load separately
   // downstream (no DB call for AEO; the advice carousel performs its
   // own cached fetch inside its RSC).
-  const [openings, featuredHotels, cities, rankings] = await Promise.all([
+  const [openings, featuredHotels, cities, rankings, destinationHeroImages] = await Promise.all([
     getRecentOpenings(OPENINGS_COUNT),
     getHomeFeaturedHotels(FEATURED_HOTELS_COUNT),
     listPublishedCities(),
     listPublishedRankings(),
+    getDestinationHeroImages(),
   ]);
   const cityCounts = new Map(cities.map((c) => [c.slug, c.count] as const));
 
@@ -217,8 +218,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           Japon, Maroc, États-Unis, Royaume-Uni) */}
       <HomeDestinationGrid
         locale={locale}
-        destinations={pickHomeDestinations(cityCounts, locale, (count) =>
-          t('featuredDestinations.countLabel', { count }),
+        cloudName={cloudName}
+        destinations={pickHomeDestinations(
+          cityCounts,
+          locale,
+          (count) => t('featuredDestinations.countLabel', { count }),
+          destinationHeroImages,
         )}
       />
 
