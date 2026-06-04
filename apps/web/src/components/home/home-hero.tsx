@@ -52,7 +52,7 @@ export async function HomeHero({
   return (
     <section
       aria-labelledby="home-hero-title"
-      className="relative isolate overflow-hidden bg-[#0e0e10] text-white"
+      className="relative isolate flex min-h-[640px] items-center overflow-hidden bg-[#0e0e10] text-white lg:min-h-[80vh]"
     >
       {/* Background layer — video if Cloudinary configured, sober
           gradient otherwise. Both layers carry `aria-hidden` because
@@ -70,18 +70,30 @@ export async function HomeHero({
             className="absolute inset-0 bg-gradient-to-br from-[#1c1c20] via-[#0e0e10] to-[#000000]"
           />
         )}
-        {/* Dark overlay for legibility on top of the video. */}
-        <div aria-hidden className="absolute inset-0 bg-black/45" />
+        {/* Directional overlay: darker at the bottom (legibility under the
+            copy + search form), lighter at the top — more cinematic than a
+            flat scrim. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/25"
+        />
+        {/* Elegant fade into the page background so the dark hero doesn't
+            cut off with a hard edge. */}
+        <div
+          aria-hidden
+          className="from-bg absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t to-transparent"
+        />
       </div>
 
-      <div className="container mx-auto max-w-screen-xl px-4 py-20 sm:py-28 lg:py-36">
+      <div className="container mx-auto max-w-screen-xl px-4 py-20 sm:py-28 lg:py-32">
         <div className="flex max-w-3xl flex-col gap-6">
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-white/70">
+          <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.22em] text-white/70">
+            <span aria-hidden className="bg-gold h-px w-8" />
             {t('eyebrow')}
           </p>
           <h1
             id="home-hero-title"
-            className="font-serif text-4xl text-white sm:text-5xl md:text-6xl"
+            className="font-serif text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl"
           >
             {t('title')}
           </h1>
@@ -97,14 +109,14 @@ export async function HomeHero({
             {t('subtitleSecondary')}
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/70">
-            <span className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5">
+          <div className="mt-2 flex flex-wrap items-center gap-2.5 text-xs text-white/75">
+            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
               {t('trust.iata')}
             </span>
-            <span className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5">
+            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
               {t('trust.aspst')}
             </span>
-            <span className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5">
+            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
               {t('trust.amadeus')}
             </span>
           </div>
