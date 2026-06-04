@@ -93,9 +93,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'A roughly 26 m² room with a confident Art Deco signature: geometric patterns, a mirrored headboard and a marble mosaic bathroom.',
     longFr:
-      'La Chambre Art Déco Deluxe incarne l’ADN du Prince de Galles, à deux pas des Champs-Élysées et de l’avenue Montaigne. Les lignes géométriques, les photographies en noir et blanc et la tête de lit miroitée signent le décor des 116 chambres de la maison.\n\nLa salle de bain en marbre marie douche et baignoire séparées, mosaïque d’inspiration Art déco et produits Lalique. Eau minérale et choix de presse quotidienne complètent l’accueil.',
+      'La Chambre Art Déco Deluxe incarne l’esprit du Prince de Galles, palace du Triangle d’Or né dans la grande tradition Art déco. Elle se situe avenue George V, à quelques pas des Champs-Élysées, de l’avenue Montaigne et de la Seine. Les lignes géométriques, les photographies en noir et blanc et la tête de lit miroitée signent le décor des 116 chambres de la maison.\n\nLa palette, sobre et lumineuse, met en valeur les volumes et la hauteur sous plafond. Le lit king size, habillé de linge fin, invite au repos après une journée dans Paris. La salle de bain en marbre marie douche et baignoire séparées, mosaïque d’inspiration Art déco et produits de la collection Lalique. Peignoirs en éponge et chaussons complètent l’équipement.\n\nChaque séjour s’accompagne d’attentions discrètes : eau minérale offerte et choix quotidien de presse parisienne ou internationale. La climatisation, le coffre-fort et une connexion Wi-Fi rapide servent aussi bien le voyage d’affaires que le week-end. L’équipe de conciergerie organise sur demande une table, une voiture ou des billets de dernière minute, de jour comme de nuit. C’est l’entrée idéale dans l’univers feutré du Prince de Galles.',
     longEn:
-      'The Art Deco Deluxe Room captures the DNA of Prince de Galles, steps from the Champs-Élysées and Avenue Montaigne. Geometric lines, black-and-white photography and a mirrored headboard define the décor across the hotel’s 116 rooms.\n\nThe marble bathroom pairs a separate shower and bath, Art Deco-inspired mosaic and Lalique toiletries. Bottled mineral water and a daily choice of newspapers complete the welcome.',
+      'The Art Deco Deluxe Room captures the spirit of Prince de Galles, a Golden Triangle palace born in the great Art Deco tradition. It sits on Avenue George V, steps from the Champs-Élysées, Avenue Montaigne and the Seine. Geometric lines, black-and-white photography and a mirrored headboard define the décor across the hotel’s 116 rooms.\n\nThe palette stays sober and bright, underlining the volumes and the ceiling height. The king-size bed, dressed in fine linen, invites rest after a day across Paris. The marble bathroom pairs a separate shower and bath, Art Deco-inspired mosaic and toiletries from the Lalique collection. Terry robes and slippers complete the fittings.\n\nEvery stay comes with quiet attentions: complimentary mineral water and a daily choice of Parisian or international newspapers. Air conditioning, an in-room safe and fast Wi-Fi serve a business trip as well as a weekend. The concierge team can arrange a table, a car or last-minute tickets, by day or by night. It is the ideal way into the hushed world of Prince de Galles.',
     maxOccupancy: 2,
     bedType: 'King size',
     sizeSqm: 26,
@@ -118,10 +118,28 @@ const ROOMS: readonly RoomSeed[] = [
         altEn: 'Art Deco Deluxe Room at Prince de Galles Paris with a mirrored headboard',
       },
       {
+        file: 'parlc-art-deco-1137-hor-wide',
+        category: 'room',
+        altFr: 'Chambre Art Déco Deluxe aux lignes géométriques, Prince de Galles Paris',
+        altEn: 'Art Deco Deluxe Room with geometric lines, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-art-deco-6033-hor-wide',
+        category: 'room',
+        altFr: 'Coin nuit d’une chambre Art déco, lit king size, Prince de Galles Paris',
+        altEn: 'Sleeping area of an Art Deco room with a king bed, Prince de Galles Paris',
+      },
+      {
         file: 'parlc-art-deco-0642-hor-wide',
         category: 'detail',
         altFr: 'Salle de bain en marbre et mosaïque Art déco, Prince de Galles Paris',
         altEn: 'Marble and Art Deco mosaic bathroom, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-art-deco-0643-hor-wide',
+        category: 'detail',
+        altFr: 'Détail de mosaïque Art déco de la salle de bain, Prince de Galles Paris',
+        altEn: 'Art Deco mosaic bathroom detail, Prince de Galles Paris',
       },
     ],
     conciergeFr: {
@@ -145,9 +163,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'The same Art Deco elegance, extended by a private balcony opening onto the courtyard or Avenue George V.',
     longFr:
-      'Vingt-six chambres et suites du Prince de Galles disposent d’un balcon ou d’une terrasse sur la ville ou sur le Patio, la cour intérieure emblématique de la maison. Cette catégorie en fait partie : un espace extérieur privatif prolonge la chambre Art déco.\n\nLe décor reste fidèle à la signature de l’hôtel — marbre, mosaïque, produits Lalique — avec, en prime, l’air de Paris au réveil.',
+      'Vingt-six chambres et suites du Prince de Galles disposent d’un balcon ou d’une terrasse, sur la ville ou sur Le Patio, la cour intérieure emblématique de la maison. Cette catégorie en fait partie : un espace extérieur privatif prolonge la chambre Art déco. C’est une rareté pour un palace parisien.\n\nLe décor reste fidèle à la signature de l’hôtel. On retrouve les lignes géométriques, la tête de lit miroitée et les photographies en noir et blanc. La salle de bain en marbre associe mosaïque d’inspiration Art déco et produits de la collection Lalique. Peignoirs, chaussons et eau minérale offerte font partie de l’accueil.\n\nCôté cour, le balcon offre le calme rare d’un cœur d’îlot, à l’écart de l’agitation. Côté avenue, il attrape la lumière et l’animation du Triangle d’Or au réveil. Le lit king size et la climatisation assurent un repos parfait. La connexion Wi-Fi rapide et le coffre-fort accompagnent les séjours d’affaires comme les escapades. Au printemps et en été, ce balcon devient le meilleur endroit pour un café matinal au-dessus de Paris.',
     longEn:
-      'Twenty-six rooms and suites at Prince de Galles offer a balcony or terrace over the city or Le Patio, the hotel’s emblematic inner courtyard. This category is one of them: a private outdoor space extends the Art Deco room.\n\nThe décor stays faithful to the hotel’s signature — marble, mosaic, Lalique amenities — with, as a bonus, the Paris air at wake-up.',
+      'Twenty-six rooms and suites at Prince de Galles offer a balcony or terrace, over the city or Le Patio, the hotel’s emblematic inner courtyard. This category is one of them: a private outdoor space extends the Art Deco room. It is a rarity for a Parisian palace.\n\nThe décor stays faithful to the hotel’s signature. You find the geometric lines, the mirrored headboard and the black-and-white photography. The marble bathroom blends Art Deco-inspired mosaic and toiletries from the Lalique collection. Robes, slippers and complimentary mineral water are part of the welcome.\n\nOn the courtyard side, the balcony offers the rare quiet of an inner block, away from the bustle. On the avenue side, it catches the light and the energy of the Golden Triangle at wake-up. The king-size bed and air conditioning ensure perfect rest. Fast Wi-Fi and an in-room safe suit business trips as much as escapes. In spring and summer, this balcony becomes the best spot for a morning coffee above Paris. Tell the concierge your preferred side at booking, courtyard or avenue, and the team will do its best to honour it.',
     maxOccupancy: 2,
     bedType: 'King size',
     sizeSqm: 26,
@@ -164,16 +182,34 @@ const ROOMS: readonly RoomSeed[] = [
     source: 'art-deco-balcon',
     images: [
       {
-        file: 'parlc-courtyardview-guestroom-0592-hor-feat',
+        file: 'parlc-courtyardview-guestroom-0592-hor-wide',
         category: 'room',
         altFr: 'Chambre Art Déco Deluxe avec balcon sur cour, Prince de Galles Paris',
         altEn: 'Art Deco Deluxe Balcony courtyard-view room, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-courtyardview-guestroom-0594-hor-wide',
+        category: 'room',
+        altFr: 'Chambre avec vue sur la cour intérieure, Prince de Galles Paris',
+        altEn: 'Courtyard-view guest room, Prince de Galles Paris',
       },
       {
         file: 'parlc-art-deco-4808-hor-wide',
         category: 'view',
         altFr: 'Balcon privatif d’une chambre Art déco, Prince de Galles Paris',
         altEn: 'Private balcony of an Art Deco room, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-george-view-2593-hor-wide',
+        category: 'view',
+        altFr: 'Vue sur l’avenue George V depuis une chambre, Prince de Galles Paris',
+        altEn: 'View over Avenue George V from a guest room, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-street-view-2603-hor-wide',
+        category: 'view',
+        altFr: 'Vue sur l’avenue depuis une chambre, Prince de Galles Paris',
+        altEn: 'Avenue view from a guest room, Prince de Galles Paris',
       },
     ],
     conciergeFr: {
@@ -197,9 +233,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'A 48 m² suite with a separate living room and a bathroom dressed in a colourful mosaic, the décor’s guiding thread.',
     longFr:
-      'La Suite Mosaïque déploie 48 m² entre une chambre et un salon distinct, idéale pour un séjour à deux qui veut de l’espace. Son nom vient de la salle de bain, ornée d’une mosaïque de céramique aux couleurs inspirées de l’époque Art déco.\n\nComme partout dans la maison, l’accueil comprend produits Lalique, peignoirs et eau minérale ; la décoration mêle motifs géométriques et photographies en noir et blanc.',
+      'La Suite Mosaïque déploie 48 m² entre une chambre et un salon distinct. C’est un format idéal pour un séjour à deux qui réclame de l’espace, ou pour un voyageur qui aime travailler et recevoir. Son nom vient de la salle de bain, ornée d’une mosaïque de céramique aux couleurs inspirées de l’époque Art déco.\n\nLe salon séparé crée une vraie pièce de vie, avec assises confortables et lumière du jour. La chambre, habillée d’un lit king size, conserve les codes de la maison : lignes géométriques, tête de lit miroitée et photographies en noir et blanc. Certaines configurations s’ouvrent côté Patio, la cour intérieure au calme.\n\nComme partout dans l’hôtel, l’accueil comprend les produits de la collection Lalique, des peignoirs, des chaussons et l’eau minérale offerte. Le choix quotidien de presse, la climatisation, le coffre-fort et une connexion Wi-Fi rapide complètent l’équipement. La salle de bain en marbre, douche et baignoire séparées, reste l’une des plus photogéniques de la maison. C’est une suite parisienne pensée pour qu’on s’y attarde.',
     longEn:
-      'The Mosaic Suite unfolds across 48 m² between a bedroom and a separate living room, ideal for a couple who wants space. Its name comes from the bathroom, dressed with ceramic mosaic in colours inspired by the Art Deco era.\n\nAs everywhere in the house, the welcome includes Lalique toiletries, robes and bottled water; the décor blends geometric patterns and black-and-white photography.',
+      'The Mosaic Suite unfolds across 48 m² between a bedroom and a separate living room. It is an ideal format for a couple who wants space, or for a traveller who likes to work and host. Its name comes from the bathroom, dressed with ceramic mosaic in colours inspired by the Art Deco era.\n\nThe separate living room creates a genuine day space, with comfortable seating and natural light. The bedroom, dressed with a king-size bed, keeps the house codes: geometric lines, a mirrored headboard and black-and-white photography. Some layouts open onto Le Patio, the quiet inner courtyard.\n\nAs everywhere in the house, the welcome includes toiletries from the Lalique collection, robes, slippers and complimentary mineral water. The daily choice of newspapers, air conditioning, an in-room safe and fast Wi-Fi complete the fittings. The marble bathroom, with separate shower and bath, remains one of the most photogenic in the house. Families appreciate the separate living room, where a sofa keeps the bedroom calm for the night. The concierge can set up a light in-room dinner on request. It is a Parisian suite designed for lingering.',
     maxOccupancy: 3,
     bedType: 'King size',
     sizeSqm: 48,
@@ -227,6 +263,24 @@ const ROOMS: readonly RoomSeed[] = [
         altFr: 'Salon séparé de la Suite Mosaïque, Prince de Galles Paris',
         altEn: 'Separate living room of the Mosaic Suite, Prince de Galles Paris',
       },
+      {
+        file: 'parlc-mosaic-suite-4800-hor-wide',
+        category: 'suite',
+        altFr: 'Salon de la Suite Mosaïque, ambiance Art déco, Prince de Galles Paris',
+        altEn: 'Living room of the Mosaic Suite, Art Deco mood, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-mosaic-suite-4801-hor-wide',
+        category: 'suite',
+        altFr: 'Coin salon et lumière du jour de la Suite Mosaïque, Prince de Galles Paris',
+        altEn: 'Seating area and daylight of the Mosaic Suite, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-mosaic-suite-6020-hor-wide',
+        category: 'detail',
+        altFr: 'Salle de bain à mosaïque colorée de la Suite Mosaïque, Prince de Galles Paris',
+        altEn: 'Colourful mosaic bathroom of the Mosaic Suite, Prince de Galles Paris',
+      },
     ],
     conciergeFr: {
       title: 'Le conseil du Concierge',
@@ -249,9 +303,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'A warm Macassar-wood suite with a separate bedroom and living room, some with a terrace over Paris.',
     longFr:
-      'La Suite Macassar tire son nom de l’ébène de Macassar qui réchauffe son décor Art déco. Elle s’organise autour d’une chambre et d’un salon séparés ; certaines configurations s’ouvrent sur une terrasse privée.\n\nLa salle de bain en marbre et la signature Lalique prolongent l’élégance maison. Un cocon idéal pour un séjour parisien sans compromis sur l’espace.',
+      'La Suite Macassar tire son nom de l’ébène de Macassar qui réchauffe son décor Art déco. Ce bois précieux, veiné de brun et de noir, donne à la suite une atmosphère feutrée et chaleureuse. Elle s’organise autour d’une chambre et d’un salon séparés, pour vivre la maison plutôt que seulement y dormir.\n\nLe salon, avec ses assises et sa table, sert aussi bien à travailler qu’à recevoir un verre en fin de journée. Certaines configurations s’ouvrent sur une terrasse privée, perchée sur la ville ou sur Le Patio. La chambre, dotée d’un lit king size, prolonge la signature géométrique de l’hôtel.\n\nLa salle de bain en marbre associe mosaïque d’inspiration Art déco et produits de la collection Lalique. Peignoirs, chaussons, eau minérale offerte et choix quotidien de presse font partie de l’accueil. La climatisation, le coffre-fort et une connexion Wi-Fi rapide accompagnent chaque séjour. C’est un cocon idéal pour une escapade parisienne sans compromis sur l’espace, en couple comme en petite famille. L’hiver, le bois sombre rend l’atmosphère particulièrement enveloppante.',
     longEn:
-      'The Macassar Suite takes its name from the Macassar ebony that warms its Art Deco décor. It is built around a separate bedroom and living room; some layouts open onto a private terrace.\n\nThe marble bathroom and the Lalique signature extend the house elegance. An ideal cocoon for a Parisian stay with no compromise on space.',
+      'The Macassar Suite takes its name from the Macassar ebony that warms its Art Deco décor. This precious wood, veined in brown and black, gives the suite a hushed and warm atmosphere. It is built around a separate bedroom and living room, to live the house rather than only sleep in it.\n\nThe living room, with its seating and table, works as well for a day of emails as for an evening drink. Some layouts open onto a private terrace, perched over the city or Le Patio. The bedroom, with a king-size bed, extends the hotel’s geometric signature.\n\nThe marble bathroom blends Art Deco-inspired mosaic and toiletries from the Lalique collection. Robes, slippers, complimentary mineral water and a daily choice of newspapers are part of the welcome. Air conditioning, an in-room safe and fast Wi-Fi accompany every stay. It is an ideal cocoon for a Parisian escape with no compromise on space, for a couple or a small family. In winter, the dark wood makes the atmosphere especially enveloping. Tell the concierge if a terrace matters to you, as only some Macassar layouts include one.',
     maxOccupancy: 3,
     bedType: 'King size',
     sizeSqm: null,
@@ -279,6 +333,24 @@ const ROOMS: readonly RoomSeed[] = [
         altFr: 'Salon de la Suite Macassar, Prince de Galles Paris',
         altEn: 'Living room of the Macassar Suite, Prince de Galles Paris',
       },
+      {
+        file: 'parlc-makassar-suite-6029-hor-wide',
+        category: 'suite',
+        altFr: 'Salon en ébène de Macassar, ambiance feutrée, Prince de Galles Paris',
+        altEn: 'Macassar ebony living room, hushed mood, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-makassar-suite-6031-hor-wide',
+        category: 'suite',
+        altFr: 'Coin salon de la Suite Macassar, Prince de Galles Paris',
+        altEn: 'Seating area of the Macassar Suite, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-makassar-suite-6032-hor-wide',
+        category: 'suite',
+        altFr: 'Chambre de la Suite Macassar, bois sombre et lit king size, Prince de Galles Paris',
+        altEn: 'Macassar Suite bedroom, dark wood and king bed, Prince de Galles Paris',
+      },
     ],
     conciergeFr: {
       title: 'Le conseil du Concierge',
@@ -301,9 +373,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'A refined suite — bedroom, living room and terrace — with sapphire-blue accents, over the Paris rooftops.',
     longFr:
-      'La Suite Saphir joue la carte d’un bleu profond qui réchauffe l’Art déco de la maison. Elle réunit une chambre, un salon et une terrasse ouverte sur la ville, pour un séjour qui prend de la hauteur.\n\nLa salle de bain en marbre, les peignoirs et les produits Lalique signent l’expérience Prince de Galles. Idéale pour qui cherche l’espace d’une suite avec un extérieur privatif.',
+      'La Suite Saphir doit son nom à un bleu profond qui réchauffe l’Art déco de la maison. Elle réunit une chambre, un salon et une terrasse ouverte sur la ville, pour un séjour qui prend de la hauteur. C’est une option précieuse pour qui veut l’espace d’une suite avec un extérieur privatif.\n\nLe salon, lumineux et confortable, sépare nettement les temps de la journée. On y travaille, on y reçoit, on s’y détend avant de rejoindre la terrasse. La chambre, équipée d’un lit king size, garde les codes du Prince de Galles : lignes géométriques et matières soignées.\n\nLa salle de bain en marbre associe douche et baignoire, mosaïque d’inspiration Art déco et produits de la collection Lalique. Peignoirs, chaussons, eau minérale offerte et choix quotidien de presse complètent l’accueil. La climatisation, le coffre-fort et une connexion Wi-Fi rapide servent tous les voyages. La terrasse, enfin, devient le meilleur salon de la suite à l’heure dorée, au-dessus des toits parisiens. Les suites à terrasse restent peu nombreuses dans la maison.',
     longEn:
-      'The Saphir Suite plays a deep blue that warms the house’s Art Deco. It brings together a bedroom, a living room and a terrace open to the city, for a stay that rises above the street.\n\nThe marble bathroom, robes and Lalique toiletries sign the Prince de Galles experience. Ideal for those seeking the space of a suite with a private outdoor area.',
+      'The Saphir Suite owes its name to a deep blue that warms the house’s Art Deco. It brings together a bedroom, a living room and a terrace open to the city, for a stay that rises above the street. It is a precious option for those who want the space of a suite with a private outdoor area.\n\nThe living room, bright and comfortable, clearly separates the moments of the day. You work there, you host, you unwind before stepping out to the terrace. The bedroom, with a king-size bed, keeps the Prince de Galles codes: geometric lines and carefully chosen materials.\n\nThe marble bathroom pairs a shower and bath, Art Deco-inspired mosaic and toiletries from the Lalique collection. Robes, slippers, complimentary mineral water and a daily choice of newspapers complete the welcome. Air conditioning, an in-room safe and fast Wi-Fi serve every kind of trip. The terrace, finally, becomes the best lounge of the suite at golden hour, above the Paris rooftops. Terrace suites remain few in the house. Book early and share your flight times, so the team can set arrival and departure around the terrace.',
     maxOccupancy: 3,
     bedType: 'King size',
     sizeSqm: null,
@@ -331,6 +403,24 @@ const ROOMS: readonly RoomSeed[] = [
         altFr: 'Salon de la Suite Saphir, Prince de Galles Paris',
         altEn: 'Living room of the Saphir Suite, Prince de Galles Paris',
       },
+      {
+        file: 'parlc-prince-9090-hor-wide',
+        category: 'suite',
+        altFr: 'Chambre d’une suite du Prince de Galles, décor Art déco, Paris',
+        altEn: 'Bedroom of a Prince de Galles suite, Art Deco décor, Paris',
+      },
+      {
+        file: 'parlc-prince-9091-hor-wide',
+        category: 'suite',
+        altFr: 'Coin salon d’une suite du Prince de Galles, Paris',
+        altEn: 'Seating area of a Prince de Galles suite, Paris',
+      },
+      {
+        file: 'parlc-suite-bathroom-2591-hor-wide',
+        category: 'detail',
+        altFr: 'Salle de bain en marbre d’une suite, Prince de Galles Paris',
+        altEn: 'Marble bathroom of a suite, Prince de Galles Paris',
+      },
     ],
     conciergeFr: {
       title: 'Le conseil du Concierge',
@@ -353,9 +443,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'A 97 m² signature suite with gilded touches, a double living room and a terrace over Avenue George V.',
     longFr:
-      'La Suite Or s’étend sur 97 m² ornés de touches dorées, avec un double salon spacieux et une terrasse ouverte sur l’avenue George V. Son charme Art déco intemporel culmine dans une salle de bain à la mosaïque dorée et noire.\n\nC’est l’une des adresses signatures de la maison : un appartement parisien pour qui veut recevoir, s’installer et vivre l’hôtel en grand.',
+      'La Suite Or s’étend sur 97 m² ornés de touches dorées, dans l’esprit des grandes réceptions à la française. Elle déploie un double salon spacieux et une terrasse ouverte sur l’avenue George V. Son charme Art déco intemporel culmine dans une salle de bain à la mosaïque dorée et noire.\n\nC’est l’une des adresses signatures de la maison, pensée comme un véritable appartement parisien. Le double salon permet de recevoir, de dîner et de se retirer sans jamais se sentir à l’étroit. La chambre, dotée d’un lit king size, conserve les lignes géométriques et la lumière chères au Prince de Galles.\n\nL’accueil reprend la signature de l’hôtel : produits de la collection Lalique, peignoirs, chaussons, eau minérale offerte et choix quotidien de presse. La climatisation, le coffre-fort et une connexion Wi-Fi rapide accompagnent les longs séjours comme les célébrations. La terrasse, surplombant l’une des plus belles avenues du Triangle d’Or, offre un cadre rare pour un apéritif au coucher du soleil. On y vient pour s’installer, recevoir et vivre l’hôtel en grand, le temps d’une occasion mémorable.',
     longEn:
-      'Suite Or spans 97 m² adorned with gilded touches, with a spacious double living room and a terrace open to Avenue George V. Its timeless Art Deco charm culminates in a golden-and-black mosaic bathroom.\n\nIt is one of the house signatures: a Parisian apartment for those who want to host, settle in and live the hotel on a grand scale.',
+      'Suite Or spans 97 m² adorned with gilded touches, in the spirit of grand French celebrations. It unfolds a spacious double living room and a terrace open to Avenue George V. Its timeless Art Deco charm culminates in a golden-and-black mosaic bathroom.\n\nIt is one of the house signatures, conceived as a true Parisian apartment. The double living room lets you host, dine and withdraw without ever feeling cramped. The bedroom, with a king-size bed, keeps the geometric lines and the light dear to Prince de Galles.\n\nThe welcome echoes the hotel signature: toiletries from the Lalique collection, robes, slippers, complimentary mineral water and a daily choice of newspapers. Air conditioning, an in-room safe and fast Wi-Fi accompany long stays as much as celebrations. The terrace, overlooking one of the finest avenues of the Golden Triangle, offers a rare setting for an aperitif at sunset. You come here to settle in, host and live the hotel on a grand scale, for a memorable occasion. Tell the concierge about any celebration in advance, and flowers, champagne or a restaurant table can be arranged beforehand.',
     maxOccupancy: 4,
     bedType: 'King size',
     sizeSqm: 97,
@@ -383,6 +473,24 @@ const ROOMS: readonly RoomSeed[] = [
         altFr: 'Double salon de la Suite Or, Prince de Galles Paris',
         altEn: 'Double living room of the Suite Or, Prince de Galles Paris',
       },
+      {
+        file: 'parlc-prince-5629-hor-wide',
+        category: 'suite',
+        altFr: 'Salon de la Suite Or, touches dorées Art déco, Prince de Galles Paris',
+        altEn: 'Living room of the Suite Or, gilded Art Deco touches, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-prince-5632-hor-wide',
+        category: 'suite',
+        altFr: 'Espace de réception de la Suite Or, Prince de Galles Paris',
+        altEn: 'Reception space of the Suite Or, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-suite-bathroom-0856-hor-wide',
+        category: 'detail',
+        altFr: 'Salle de bain en marbre d’une suite signature, Prince de Galles Paris',
+        altEn: 'Marble bathroom of a signature suite, Prince de Galles Paris',
+      },
     ],
     conciergeFr: {
       title: 'Le conseil du Concierge',
@@ -405,9 +513,9 @@ const ROOMS: readonly RoomSeed[] = [
     descEn:
       'The signature suite: a 180 m² duplex on the 8th and 9th floors, born of a collaboration with crystal maker Lalique.',
     longFr:
-      'Nichée aux 8e et 9e étages, la Suite Lalique est un duplex de 180 m² imaginé avec la Maison Lalique et le designer Patrick Hellmann. Œuvres en cristal, salle de bain en marbre et terrasse composent un appartement unique à Paris.\n\nDévoilée pour les 90 ans de l’hôtel, elle relit les lignes Art déco d’origine dans un esprit contemporain. C’est la suite la plus exclusive de la maison.',
+      'Nichée aux 8e et 9e étages, la Suite Lalique est un duplex de 180 m² imaginé avec la Maison Lalique et le designer Patrick Hellmann. Œuvres en cristal, salle de bain en marbre et terrasse composent un appartement unique à Paris. C’est la suite la plus exclusive du Prince de Galles.\n\nLe cristal Lalique habite chaque pièce, du salon aux détails de décoration, dans un dialogue avec les lignes Art déco d’origine. Patrick Hellmann en propose une relecture contemporaine, plus chaleureuse, sans rien renier de l’esprit de la maison. Le duplex articule espaces de réception, chambre et coin bureau sur deux niveaux.\n\nLa terrasse privée ouvre une vue rare sur les toits parisiens, idéale pour une célébration. La salle de bain en marbre et les produits de la collection Lalique prolongent l’expérience. Climatisation, coffre-fort et connexion Wi-Fi rapide équipent naturellement la suite. Dévoilée autour des 90 ans de l’hôtel, elle s’adresse aux voyageurs en quête d’une adresse d’exception. On y vient pour une demande en mariage, un anniversaire marquant ou un séjour que l’on veut garder en mémoire longtemps.',
     longEn:
-      'Nestled on the 8th and 9th floors, the Lalique Suite is a 180 m² duplex conceived with Maison Lalique and designer Patrick Hellmann. Crystal artworks, a marble bathroom and a terrace make up an apartment unlike any other in Paris.\n\nUnveiled for the hotel’s 90th anniversary, it rereads the original Art Deco lines in a contemporary spirit. It is the most exclusive suite in the house.',
+      'Nestled on the 8th and 9th floors, the Lalique Suite is a 180 m² duplex conceived with Maison Lalique and designer Patrick Hellmann. Crystal artworks, a marble bathroom and a terrace make up an apartment unlike any other in Paris. It is the most exclusive suite at Prince de Galles.\n\nLalique crystal inhabits every room, from the lounge to the decorative details, in dialogue with the original Art Deco lines. Patrick Hellmann offers a contemporary, warmer rereading, without betraying the spirit of the house. The duplex arranges reception spaces, a bedroom and a study corner across two levels.\n\nThe private terrace opens a rare view over the Paris rooftops, ideal for a celebration. The marble bathroom and toiletries from the Lalique collection extend the experience. Air conditioning, an in-room safe and fast Wi-Fi naturally equip the suite. Unveiled around the hotel’s 90th anniversary, it is made for travellers seeking an exceptional address. Guests come here for a marriage proposal, a milestone anniversary or a stay they want to remember for a long time. Book well ahead, as this duplex is one of a kind in Paris.',
     maxOccupancy: 4,
     bedType: 'King size',
     sizeSqm: 180,
@@ -440,6 +548,20 @@ const ROOMS: readonly RoomSeed[] = [
         category: 'view',
         altFr: 'Terrasse de la Suite Lalique en duplex, Prince de Galles Paris',
         altEn: 'Terrace of the duplex Lalique Suite, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-suite-patrick-hellmann-0851-hor-wide',
+        category: 'suite',
+        altFr:
+          'Espace de réception de la Suite Lalique, cristal et Art déco, Prince de Galles Paris',
+        altEn: 'Reception space of the Lalique Suite, crystal and Art Deco, Prince de Galles Paris',
+      },
+      {
+        file: 'parlc-suite-patrick-hellmann-0855-hor-clsc',
+        category: 'suite',
+        altFr:
+          'Détail de décoration en cristal Lalique de la suite signature, Prince de Galles Paris',
+        altEn: 'Lalique crystal decorative detail of the signature suite, Prince de Galles Paris',
       },
     ],
     conciergeFr: {
