@@ -64,7 +64,7 @@ export async function HomeOpeningsGrid({
         `.cursor/skills/responsive-ui-architecture/SKILL.md` §"Snap
         carousels" pour la justification du pattern.
       */}
-      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
+      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
         {openings.map((h) => {
           const slug = pickByLocale(locale, h.slug, h.slugEn ?? h.slug);
           const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
@@ -73,39 +73,41 @@ export async function HomeOpeningsGrid({
             h.countryLabelFr,
             h.countryLabelEn !== '' ? h.countryLabelEn : h.countryLabelFr,
           );
+          const location = countryLabel.length > 0 ? `${h.city} · ${countryLabel}` : h.city;
           return (
-            <li key={h.slug} className="shrink-0 basis-[82%] snap-start sm:basis-auto">
-              <article className="border-border bg-bg group h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
-                <Link
-                  href={{ pathname: '/hotel/[slug]', params: { slug } }}
-                  className="block focus-visible:outline-none"
-                >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden">
-                    <HotelImage
-                      cloudName={cloudName}
-                      publicId={h.heroPublicId}
-                      alt={name}
-                      width={480}
-                      height={360}
-                      transforms="f_auto,q_auto:good,c_fill,g_auto,w_480,h_360"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="text-muted flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
-                      <span className="border-border bg-bg rounded-md border px-2 py-0.5">
-                        {h.isPalace ? 'Palace' : `${'★'.repeat(h.stars)}`}
-                      </span>
-                      <span>
-                        {countryLabel.length > 0 ? `${h.city} · ${countryLabel}` : h.city}
-                      </span>
-                    </div>
-                    <h3 className="text-fg mt-3 font-serif text-base leading-snug">{name}</h3>
-                    <p className="text-muted mt-3 inline-flex items-center text-xs underline-offset-2 group-hover:underline">
-                      {t('viewFiche')} →
-                    </p>
-                  </div>
-                </Link>
-              </article>
+            <li
+              key={h.slug}
+              className="group relative aspect-[3/2] shrink-0 basis-[82%] snap-start overflow-hidden rounded-2xl sm:basis-auto"
+            >
+              <Link
+                href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                aria-label={name}
+                className="focus-visible:ring-ring block h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              >
+                <HotelImage
+                  cloudName={cloudName}
+                  publicId={h.heroPublicId}
+                  alt={name}
+                  width={640}
+                  height={428}
+                  transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_428"
+                  sizes="(max-width: 640px) 82vw, (max-width: 1024px) 50vw, 25vw"
+                  className="ease-editorial absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-[1.05] motion-reduce:transition-none"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+                />
+                <span className="bg-gold/95 text-charcoal absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
+                  {h.isPalace ? 'Palace' : `${'★'.repeat(h.stars)}`}
+                </span>
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <p className="text-gold-200 text-[11px] uppercase tracking-[0.18em]">
+                    {location}
+                  </p>
+                  <h3 className="mt-1 font-serif text-lg leading-snug text-white">{name}</h3>
+                </div>
+              </Link>
             </li>
           );
         })}
