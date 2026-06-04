@@ -76,6 +76,12 @@ function summarizeTravelportError(e: TravelportError): string {
     if (h.kind === 'upstream_4xx' || h.kind === 'upstream_5xx') return `http_${h.kind}_${h.status}`;
     return `http_${h.kind}`;
   }
+  if (e.kind === 'oauth_rejected' || e.kind === 'authorization_error') {
+    return e.details !== undefined ? `${e.kind}:${e.details}` : e.kind;
+  }
+  if (e.kind === 'parse_failure' || e.kind === 'mapping_failure') {
+    return `${e.kind}:${e.details}`;
+  }
   return e.kind;
 }
 
