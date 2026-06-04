@@ -169,11 +169,32 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/** Retry budget for transient Tavily failures (429 / 5xx / network). */
+const MAX_ATTEMPTS = 6;
+/** Base backoff; doubles each attempt, capped, with jitter. */
+const BACKOFF_BASE_MS = 1500;
+const BACKOFF_CAP_MS = 30_000;
+
+function backoffDelayMs(attempt: number, retryAfterSec: number | null): number {
+  if (retryAfterSec !== null && Number.isFinite(retryAfterSec) && retryAfterSec > 0) {
+    return Math.min(retryAfterSec * 1000, BACKOFF_CAP_MS);
+  }
+  const expo = Math.min(BACKOFF_BASE_MS * 2 ** (attempt - 1), BACKOFF_CAP_MS);
+  return expo + Math.floor(Math.random() * 500); // jitter to de-sync workers
+}
+
+function parseRetryAfter(res: Response): number | null {
+  const h = res.headers.get('retry-after');
+  if (h === null) return null;
+  const n = Number(h);
+  return Number.isFinite(n) ? n : null;
+}
+
 async function tavilyRequest<T>(endpoint: '/search' | '/extract', body: unknown): Promise<T> {
   const key = requireKey();
   const url = `${BASE_URL}${endpoint}`;
   let lastError: Error | null = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -186,17 +207,17 @@ async function tavilyRequest<T>(endpoint: '/search' | '/extract', body: unknown)
       if (res.ok) {
         return (await res.json()) as T;
       }
-      // 429 / 5xx → retry. 4xx → fail fast (likely bad key or quota).
+      // 429 / 5xx → retry with backoff (honour Retry-After). 4xx → fail fast.
       const errBody = await res.text();
       if (res.status >= 500 || res.status === 429) {
         lastError = new Error(`Tavily ${res.status} on ${endpoint}: ${errBody.slice(0, 200)}`);
-        await sleep(800 * attempt);
+        if (attempt < MAX_ATTEMPTS) await sleep(backoffDelayMs(attempt, parseRetryAfter(res)));
         continue;
       }
       throw new Error(`Tavily ${res.status} on ${endpoint}: ${errBody.slice(0, 500)}`);
     } catch (e) {
       lastError = e as Error;
-      if (attempt < 3) await sleep(800 * attempt);
+      if (attempt < MAX_ATTEMPTS) await sleep(backoffDelayMs(attempt, null));
     }
   }
   throw lastError ?? new Error('[tavily] unknown error');
