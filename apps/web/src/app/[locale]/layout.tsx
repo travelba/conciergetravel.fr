@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { Inter, Noto_Serif } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
@@ -24,9 +24,10 @@ const sans = Inter({
 });
 
 // Editorial / headline font — DESIGN.md §3 (literary, authoritative).
-// Noto Serif replaces Playfair Display (2026-05-21) to align with the canonical
-// "Concierge Travel Visual Language" Stitch DS.
-const serif = Noto_Serif({
+// Playfair Display — high-contrast display serif for the "luxury editorial"
+// direction (Option A, validated 2026-06-04). Headings only; Inter stays the
+// body workhorse.
+const serif = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-serif',

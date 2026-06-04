@@ -18,7 +18,10 @@
    * 2. Colors — brand palette
    * ======================================================================= */
   --color-charcoal: #1a1a1a;
-  --color-off-white: #fafaf8;
+  /* Warm editorial cream (Option A, 2026-06-04) — replaces the cooler
+     #fafaf8 so the off-white base reads "magazine paper" rather than
+     clinical white. Drives --color-bg site-wide. */
+  --color-off-white: #faf8f4;
   --color-gold: #c9a96e;
   --color-sage: #8c9681;
   /* Stitch "L'Héritage Editorial" primary — forest green wordmark & CTAs */
@@ -80,11 +83,11 @@
   --color-border: var(--color-outline-variant);
 
   /* =========================================================================
-   * 3. Typography — Noto Serif × Inter
+   * 3. Typography — Playfair Display × Inter
    * Loaded by `next/font/google` in apps/web/src/app/[locale]/layout.tsx
    * which sets the actual --font-* values on <html>.
    * ======================================================================= */
-  --font-serif: 'Noto Serif', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* =========================================================================

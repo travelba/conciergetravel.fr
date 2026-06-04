@@ -45,9 +45,9 @@
     min-height: 100dvh;
   }
 
-  /* Headlines use Noto Serif at weight 400 — literary, authoritative,
-     breathable. Tighter line-height + slight negative letter-spacing for
-     the editorial feel. */
+  /* Headlines use Playfair Display at weight 400 — high-contrast display
+     serif, literary and authoritative. Tighter line-height + slight
+     negative letter-spacing for the luxury editorial feel. */
   h1,
   h2,
   h3 {
