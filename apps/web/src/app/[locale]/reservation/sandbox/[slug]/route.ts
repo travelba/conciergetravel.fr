@@ -28,7 +28,17 @@ export async function GET(
   const locale: Locale = isRoutingLocale(rawLocale) ? rawLocale : 'fr';
   const slug = decodeURIComponent(rawSlug ?? '');
 
-  const result = await lockTravelportSandboxOffer({ slug, locale });
+  // Dates / occupants choisis par le client sur la fiche (form GET). Validés et
+  // normalisés dans `lockTravelportSandboxOffer` (fallback sûr si invalides).
+  const sp = req.nextUrl.searchParams;
+  const stay = {
+    checkIn: sp.get('checkIn') ?? undefined,
+    checkOut: sp.get('checkOut') ?? undefined,
+    adults: sp.get('adults') ?? undefined,
+    children: sp.get('children') ?? undefined,
+  };
+
+  const result = await lockTravelportSandboxOffer({ slug, locale, stay });
   if (!result.ok) {
     // 404 quand le pilote est désactivé / slug non allow-listé : la route ne
     // doit pas exister publiquement. Les autres échecs (pas de tarif, pas de

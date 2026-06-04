@@ -1,6 +1,8 @@
 import type { SupportedLocale } from '@/i18n/supported-locale';
+import { isTravelportSampleSlug, isTravelportSandboxEnabled } from '@/lib/travelport';
 
 import { BookingComingSoon } from './booking-coming-soon';
+import { BookingSandboxRail } from './booking-sandbox-rail';
 
 /**
  * Surfaces where a booking affordance can render on the hotel fiche:
@@ -13,6 +15,12 @@ interface BookingSlotProps {
   readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly surface: BookingSurface;
+  /**
+   * Slug de la fiche — requis pour router l'hôtel pilote Travelport vers le
+   * formulaire live (`<BookingSandboxRail>`). Absent / non allow-listé ⇒
+   * placeholder `<BookingComingSoon>` inchangé.
+   */
+  readonly slug?: string;
 }
 
 /**
@@ -35,10 +43,23 @@ export function BookingSlot({
   locale,
   hotelName,
   surface,
+  slug,
 }: BookingSlotProps): React.ReactElement | null {
   if (surface === 'mobilebar') {
     // Reserved for the Phase 6 fixed bottom bar. Inert until then.
     return null;
+  }
+
+  // Pilote Travelport (Phase 6) : seul l'hôtel allow-listé, sandbox activé et
+  // locale V1 (fr/en) bascule sur le formulaire live ; tout le reste conserve
+  // le placeholder éditorial.
+  if (
+    slug !== undefined &&
+    (locale === 'fr' || locale === 'en') &&
+    isTravelportSandboxEnabled() &&
+    isTravelportSampleSlug(slug)
+  ) {
+    return <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />;
   }
 
   return <BookingComingSoon locale={locale} hotelName={hotelName} />;

@@ -77,6 +77,64 @@ function addDaysIso(base: Date, days: number): string {
   return new Date(base.getTime() + days * 86_400_000).toISOString().slice(0, 10);
 }
 
+/** Séjour demandé par le client (depuis le widget fiche), avant validation. */
+export interface TravelportSandboxStayInput {
+  readonly checkIn?: string | undefined;
+  readonly checkOut?: string | undefined;
+  readonly adults?: string | undefined;
+  readonly children?: string | undefined;
+}
+
+interface ResolvedStay {
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly adults: number;
+  readonly children: number;
+}
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function parseIntInRange(raw: string | undefined, min: number, max: number): number | null {
+  if (raw === undefined) return null;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isInteger(n) || n < min || n > max) return null;
+  return n;
+}
+
+/**
+ * Valide et normalise le séjour saisi par le client. Tout champ invalide ou
+ * manquant retombe sur des valeurs par défaut sûres (J+30 → J+31, 1 adulte) :
+ * le pilote sandbox ne doit jamais échouer à cause d'une saisie partielle.
+ */
+function resolveStay(input: TravelportSandboxStayInput | undefined): ResolvedStay {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const fallback: ResolvedStay = {
+    checkIn: addDaysIso(now, 30),
+    checkOut: addDaysIso(now, 31),
+    adults: 1,
+    children: 0,
+  };
+  if (input === undefined) return fallback;
+
+  const { checkIn, checkOut } = input;
+  const datesValid =
+    checkIn !== undefined &&
+    checkOut !== undefined &&
+    ISO_DATE_RE.test(checkIn) &&
+    ISO_DATE_RE.test(checkOut) &&
+    checkIn >= today &&
+    checkOut > checkIn;
+
+  const adults = parseIntInRange(input.adults, 1, 9) ?? fallback.adults;
+  const children = parseIntInRange(input.children, 0, 9) ?? fallback.children;
+
+  if (!datesValid) {
+    return { checkIn: fallback.checkIn, checkOut: fallback.checkOut, adults, children };
+  }
+  return { checkIn, checkOut, adults, children };
+}
+
 async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | null> {
   try {
     const supabase = getSupabaseAdminClient();
@@ -149,6 +207,7 @@ function bestMatch(hotel: TravelportHotelRow, resp: SearchCompleteResponse): Pro
 export async function lockTravelportSandboxOffer(input: {
   readonly slug: string;
   readonly locale: 'fr' | 'en';
+  readonly stay?: TravelportSandboxStayInput;
 }): Promise<TravelportSandboxLockResult> {
   if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) {
     return { ok: false, reason: 'disabled' };
@@ -160,10 +219,7 @@ export async function lockTravelportSandboxOffer(input: {
   if (hotel === null) return { ok: false, reason: 'hotel_not_found' };
 
   const now = new Date();
-  const checkIn = addDaysIso(now, 30);
-  const checkOut = addDaysIso(now, 31);
-  const adults = 1;
-  const children = 0;
+  const { checkIn, checkOut, adults, children } = resolveStay(input.stay);
 
   const search = await searchByCoordinates(creds, {
     latitude: hotel.latitude,

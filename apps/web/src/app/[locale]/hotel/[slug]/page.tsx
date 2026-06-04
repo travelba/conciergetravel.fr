@@ -1946,7 +1946,7 @@ async function renderHotelPage(
           <aside aria-label={t('sections.booking')} className="mt-12 lg:mt-0">
             <div className="flex flex-col gap-6 lg:sticky lg:top-[100px]">
               <HotelToc heading={t('toc.heading')} items={tocItems} />
-              <BookingSlot locale={locale} hotelName={name} surface="rail" />
+              <BookingSlot locale={locale} hotelName={name} surface="rail" slug={row.slug} />
             </div>
           </aside>
         )}
