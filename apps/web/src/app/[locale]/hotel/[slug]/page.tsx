@@ -2,16 +2,15 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { JsonLd, buildAeoBlock } from '@mch/seo';
 
 import { buildCloudinarySrc } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
-import {
-  getTravelportLiveRoomList,
-  getTravelportLiveRoomPrices,
-} from '@/server/booking/travelport-offer';
+import { TravelportLiveRooms } from '@/components/hotel/travelport-live-rooms';
+import { getTravelportLiveRoomPrices } from '@/server/booking/travelport-offer';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
 import { HotelHero } from '@/components/hotel/hotel-hero';
@@ -563,15 +562,20 @@ async function renderHotelPage(
     locale === 'fr' || locale === 'en'
       ? await getTravelportLiveRoomPrices({ slug: row.slug, locale, rooms })
       : null;
-  // Fiche sans chambres éditoriales (cas pilote) : on remplit la section avec
-  // les chambres live Travelport plutôt que « aucune chambre ». Best-effort.
-  const travelportLiveRoomList =
-    (locale === 'fr' || locale === 'en') && rooms.length === 0
-      ? await getTravelportLiveRoomList({ slug: row.slug, locale })
-      : [];
+  const tCard =
+    locale === 'fr' || locale === 'en'
+      ? await getTranslations({ locale, namespace: 'reservationRooms.card' })
+      : null;
+  // Entrée unifiée : la carte « Réserver » transporte des dates par défaut
+  // cohérentes avec le rail (J+30 → J+31, 1 adulte) ; `/chambres` les réutilise.
   const travelportRoomsHref = {
     pathname: '/reservation/sandbox/[slug]/chambres',
     params: { slug: slugFr },
+    query: {
+      checkIn: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10),
+      checkOut: new Date(Date.now() + 31 * 86_400_000).toISOString().slice(0, 10),
+      adults: '1',
+    },
   } as const;
   const fmtLiveEur = (minor: number): string =>
     new Intl.NumberFormat(intlLocaleTag(locale), {
@@ -1763,20 +1767,25 @@ async function renderHotelPage(
                                 </Link>
                               </p>
                               {(() => {
-                                const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(room.id);
-                                if (liveFromMinor !== undefined) {
+                                const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(
+                                  room.id,
+                                );
+                                if (liveFromMinor !== undefined && tCard !== null) {
+                                  const priceText = fmtLiveEur(liveFromMinor);
                                   return (
                                     <span className="flex items-baseline gap-2 text-xs">
                                       <span className="text-muted" data-room-price-live>
-                                        {locale === 'en'
-                                          ? `from ${fmtLiveEur(liveFromMinor)}`
-                                          : `dès ${fmtLiveEur(liveFromMinor)}`}
+                                        {tCard('from', { price: priceText })}
                                       </span>
                                       <Link
                                         href={travelportRoomsHref}
+                                        aria-label={tCard('bookAria', {
+                                          room: room.name ?? room.room_code,
+                                          price: priceText,
+                                        })}
                                         className="text-fg font-medium underline-offset-2 hover:underline"
                                       >
-                                        {locale === 'en' ? 'Book' : 'Réserver'}
+                                        {tCard('book')}
                                       </Link>
                                     </span>
                                   );
@@ -1793,51 +1802,24 @@ async function renderHotelPage(
                       );
                     })}
                   </ul>
-                ) : travelportLiveRoomList.length > 0 ? (
-                  <ul className="flex flex-col gap-4" data-live-rooms="travelport">
-                    {travelportLiveRoomList.map((liveRoom) => (
-                      <li key={liveRoom.roomLabel}>
-                        <article className="border-border bg-bg rounded-lg border p-4 sm:p-5">
-                          <header className="flex flex-wrap items-baseline justify-between gap-2">
-                            <h3 className="text-fg font-serif text-lg">{liveRoom.roomLabel}</h3>
-                            {liveRoom.maxOccupancy !== null ? (
-                              <p className="text-muted text-xs">
-                                {t('rooms.occupancy', { count: liveRoom.maxOccupancy })}
-                              </p>
-                            ) : null}
-                          </header>
-                          {liveRoom.breakfastIncluded === true || liveRoom.refundable === true ? (
-                            <ul className="mt-3 flex flex-wrap gap-1.5">
-                              {liveRoom.breakfastIncluded === true ? (
-                                <li className="border-border text-muted rounded-md border px-2 py-0.5 text-xs">
-                                  {locale === 'en' ? 'Breakfast included' : 'Petit-déjeuner inclus'}
-                                </li>
-                              ) : null}
-                              {liveRoom.refundable === true ? (
-                                <li className="border-border text-muted rounded-md border px-2 py-0.5 text-xs">
-                                  {locale === 'en' ? 'Free cancellation' : 'Annulation gratuite'}
-                                </li>
-                              ) : null}
-                            </ul>
-                          ) : null}
-                          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
-                            <span className="text-muted text-xs" data-room-price-live>
-                              {locale === 'en'
-                                ? `from ${fmtLiveEur(liveRoom.fromMinor)}`
-                                : `dès ${fmtLiveEur(liveRoom.fromMinor)}`}
-                            </span>
-                            <Link
-                              href={travelportRoomsHref}
-                              className="border-border text-fg hover:bg-fg hover:text-bg inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
-                            >
-                              {locale === 'en' ? 'Book' : 'Réserver'}
-                              <span aria-hidden>→</span>
-                            </Link>
-                          </div>
-                        </article>
-                      </li>
-                    ))}
-                  </ul>
+                ) : locale === 'fr' || locale === 'en' ? (
+                  // Fiche sans chambres éditoriales (cas pilote) : la liste live
+                  // Travelport est récupérée dans une frontière Suspense pour ne
+                  // pas bloquer le rendu de la fiche sur l'appel amont.
+                  <Suspense
+                    fallback={
+                      <ul className="flex flex-col gap-4" aria-hidden>
+                        {[0, 1, 2].map((i) => (
+                          <li
+                            key={i}
+                            className="border-border bg-bg h-28 animate-pulse rounded-lg border"
+                          />
+                        ))}
+                      </ul>
+                    }
+                  >
+                    <TravelportLiveRooms slug={row.slug} locale={locale} />
+                  </Suspense>
                 ) : (
                   <p className="text-muted text-sm">{t('noRooms')}</p>
                 )}

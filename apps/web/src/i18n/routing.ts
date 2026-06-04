@@ -176,16 +176,11 @@ export const routing = defineRouting({
       en: '/booking/offer/[offerId]/lock',
       // de: '/buchung/angebot/[offerId]/sperren', es: '/reserva/oferta/[offerId]/bloquear', it: '/prenotazione/offerta/[offerId]/blocca',
     },
-    // Travelport sandbox pilot entry (Phase 6) — gated route handler; declared
-    // so the localized URL resolves in every locale (otherwise `/en/booking/
-    // sandbox/[slug]` 404s while `/reservation/sandbox/[slug]` works in FR).
-    '/reservation/sandbox/[slug]': {
-      fr: '/reservation/sandbox/[slug]',
-      en: '/booking/sandbox/[slug]',
-      // de: '/buchung/sandbox/[slug]', es: '/reserva/sandbox/[slug]', it: '/prenotazione/sandbox/[slug]',
-    },
-    // Travelport sandbox pilot — room/rate selection step (Étape B). Same
-    // gating as the entry route; declared so the EN URL resolves.
+    // Travelport sandbox pilot — room/rate selection step (Phase 6). Gated
+    // page (404 unless allow-listed) ; declared so the EN URL resolves
+    // (otherwise `/en/booking/sandbox/[slug]/rooms` 404s while the FR path
+    // works). This is the funnel entry point (the legacy parent route handler
+    // was removed; the rail + fiche links point straight here).
     '/reservation/sandbox/[slug]/chambres': {
       fr: '/reservation/sandbox/[slug]/chambres',
       en: '/booking/sandbox/[slug]/rooms',

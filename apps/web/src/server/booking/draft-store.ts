@@ -28,6 +28,12 @@ export interface DraftHotelSnapshot {
   readonly name: string;
   readonly city: string;
   readonly region: string;
+  /**
+   * Slug de la fiche, optionnel (présent pour les drafts Travelport sandbox).
+   * Permet au recap de proposer un CTA « relancer une recherche » qui renvoie
+   * vers la bonne fiche plutôt que vers la recherche legacy.
+   */
+  readonly slug?: string;
 }
 
 export interface PersistedDraft {

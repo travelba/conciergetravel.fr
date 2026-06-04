@@ -11,7 +11,6 @@ import {
   haversineMeters,
   normalizeName,
   searchByCoordinates,
-  travelportOfferToDomain,
   uniqueProperties,
   type PropertyItem,
   type SearchCompleteResponse,
@@ -35,9 +34,9 @@ import { saveDraft, type DraftHotelSnapshot } from './draft-store';
  * Pilote sandbox Travelport — Étape A du câblage tunnel (découverte d'offre →
  * lock → recap), **sans réservation réelle**. Tout est gated derrière
  * `TRAVELPORT_SANDBOX_ENABLED` + une allow-list de slugs : la fiche publique
- * et le gel Phase 6 (`booking_mode`) restent intacts. Aucune offre Travelport
- * n'est surfacée sur les pages publiques ; l'unique point d'entrée est la
- * route gated `/[locale]/reservation/sandbox/[slug]`.
+ * et le gel Phase 6 (`booking_mode`) restent intacts. Le point d'entrée du
+ * parcours est la page gated `/[locale]/reservation/sandbox/[slug]/chambres`
+ * (sélection chambre/tarif) → recap.
  */
 
 const OFFER_TTL_SEC = 10 * 60;
@@ -95,6 +94,12 @@ interface ResolvedStay {
   readonly children: number;
 }
 
+interface ResolvedStayResult {
+  readonly stay: ResolvedStay;
+  /** `true` quand des dates ont été fournies mais invalides → repli J+30/J+31. */
+  readonly datesAdjusted: boolean;
+}
+
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function parseIntInRange(raw: string | undefined, min: number, max: number): number | null {
@@ -109,7 +114,7 @@ function parseIntInRange(raw: string | undefined, min: number, max: number): num
  * manquant retombe sur des valeurs par défaut sûres (J+30 → J+31, 1 adulte) :
  * le pilote sandbox ne doit jamais échouer à cause d'une saisie partielle.
  */
-function resolveStay(input: TravelportSandboxStayInput | undefined): ResolvedStay {
+function resolveStay(input: TravelportSandboxStayInput | undefined): ResolvedStayResult {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const fallback: ResolvedStay = {
@@ -118,9 +123,10 @@ function resolveStay(input: TravelportSandboxStayInput | undefined): ResolvedSta
     adults: 1,
     children: 0,
   };
-  if (input === undefined) return fallback;
+  if (input === undefined) return { stay: fallback, datesAdjusted: false };
 
   const { checkIn, checkOut } = input;
+  const datesProvided = checkIn !== undefined || checkOut !== undefined;
   const datesValid =
     checkIn !== undefined &&
     checkOut !== undefined &&
@@ -133,9 +139,13 @@ function resolveStay(input: TravelportSandboxStayInput | undefined): ResolvedSta
   const children = parseIntInRange(input.children, 0, 9) ?? fallback.children;
 
   if (!datesValid) {
-    return { checkIn: fallback.checkIn, checkOut: fallback.checkOut, adults, children };
+    return {
+      stay: { checkIn: fallback.checkIn, checkOut: fallback.checkOut, adults, children },
+      // N'avertit que si l'utilisateur avait réellement saisi des dates.
+      datesAdjusted: datesProvided,
+    };
   }
-  return { checkIn, checkOut, adults, children };
+  return { stay: { checkIn, checkOut, adults, children }, datesAdjusted: false };
 }
 
 async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | null> {
@@ -201,106 +211,6 @@ function bestMatch(hotel: TravelportHotelRow, resp: SearchCompleteResponse): Pro
   return best ?? null;
 }
 
-/**
- * Verrouille une offre Travelport (sandbox) pour un slug allow-listé et
- * persiste un draft directement en état `recap` (invité sandbox pré-rempli),
- * de sorte que la page recap existante affiche prix + dates + politique
- * d'annulation **verbatim**. Renvoie `draftId` à poser en cookie.
- */
-export async function lockTravelportSandboxOffer(input: {
-  readonly slug: string;
-  readonly locale: 'fr' | 'en';
-  readonly stay?: TravelportSandboxStayInput;
-}): Promise<TravelportSandboxLockResult> {
-  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) {
-    return { ok: false, reason: 'disabled' };
-  }
-  const creds = getTravelportCredentials();
-  if (creds === null) return { ok: false, reason: 'no_credentials' };
-
-  const hotel = await fetchTravelportHotel(input.slug);
-  if (hotel === null) return { ok: false, reason: 'hotel_not_found' };
-
-  const now = new Date();
-  const { checkIn, checkOut, adults, children } = resolveStay(input.stay);
-
-  const search = await searchByCoordinates(creds, {
-    latitude: hotel.latitude,
-    longitude: hotel.longitude,
-    radius: 1,
-    unit: 'mi',
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
-    adults,
-    currency: getTravelportCurrency(),
-  });
-  if (!search.ok) return { ok: false, reason: 'search_failed' };
-
-  const item = bestMatch(hotel, search.value);
-  if (item === null) return { ok: false, reason: 'no_match' };
-
-  // Contexte de booking Travelport (rateKey + garantie + prix amont) : requis
-  // pour `createReservation` à l'étape de confirmation sandbox, perdu à la
-  // projection domaine. Sans rateKey/prix exploitables → pas de tarif.
-  const rate = item.lowestPublicAvailableRate;
-  const rateKey = rate?.rateKey?.value;
-  const rateAmount = rate?.totalPrice?.amount ?? rate?.total?.amount;
-  const rateCurrency = rate?.currencyCode ?? rate?.total?.currency ?? getTravelportCurrency();
-  if (rateKey === undefined || rateAmount === undefined) {
-    return { ok: false, reason: 'no_rate' };
-  }
-
-  const expiresAt = new Date(now.getTime() + OFFER_TTL_SEC * 1000).toISOString();
-  const mapped = travelportOfferToDomain({
-    item,
-    hotelId: hotel.id,
-    checkIn,
-    checkOut,
-    adults,
-    children,
-    expiresAt,
-  });
-  // `mapping_failure` couvre notamment une devise non-EUR (ex. hôtels hors
-  // zone euro) : on retombe proprement sur "pas de tarif" plutôt que d'afficher
-  // un montant trompeur (la contrainte domaine impose EUR).
-  if (!mapped.ok) return { ok: false, reason: 'no_rate' };
-  const offer: Offer = mapped.value;
-
-  const locked = startDraftFromOffer({ id: crypto.randomUUID(), mode: 'amadeus', offer });
-  const withGuest = attachGuest(locked, SANDBOX_GUEST);
-  if (!withGuest.ok) return { ok: false, reason: 'no_rate' };
-  const atRecap = moveToRecap(withGuest.value);
-  if (!atRecap.ok) return { ok: false, reason: 'no_rate' };
-
-  const snapshot: DraftHotelSnapshot = {
-    id: hotel.id,
-    name: hotel.name,
-    city: hotel.city,
-    region: hotel.region,
-  };
-  await saveDraft({ draft: atRecap.value, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
-
-  const bookingCtx: TravelportBookingContext = {
-    rateKey,
-    chainCode: item.chainCode,
-    propertyCode: item.propertyCode,
-    propertyName: item.name,
-    amount: rateAmount,
-    currency: rateCurrency,
-    ...(rate?.terms?.guaranteeType !== undefined
-      ? { guaranteeType: rate.terms.guaranteeType }
-      : {}),
-    checkIn,
-    checkOut,
-    adults,
-    hotelId: hotel.id,
-    hotelName: hotel.name,
-  };
-  await saveTravelportContext(atRecap.value.id, bookingCtx);
-
-  return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: hotel.name };
-}
-
 // ---------------------------------------------------------------------------
 // Étape B+ — sélection de chambre / plan tarifaire (Travelport `roomTypes`)
 //
@@ -332,6 +242,7 @@ interface CachedRate {
 }
 
 interface CachedOfferSet {
+  readonly slug: string;
   readonly hotelId: string;
   readonly hotelName: string;
   readonly city: string;
@@ -362,11 +273,14 @@ export type TravelportSandboxOffersResult =
   | {
       readonly ok: true;
       readonly offerSetId: string;
+      readonly slug: string;
       readonly hotelName: string;
       readonly checkIn: string;
       readonly checkOut: string;
       readonly adults: number;
       readonly children: number;
+      /** `true` si les dates demandées étaient invalides et ont été corrigées. */
+      readonly datesAdjusted: boolean;
       readonly options: readonly SandboxRoomOption[];
     }
   | {
@@ -481,6 +395,132 @@ function toOption(r: CachedRate): SandboxRoomOption {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Recherche « display-only » mutualisée + cache Redis
+//
+// La fiche publique (force-dynamic, indexable) ET la page de sélection
+// `/chambres` ont besoin du même résultat normalisé pour un couple
+// (hôtel, séjour). On factorise la recherche + matching + normalisation et on
+// met en cache l'ensemble **normalisé** par `slug:checkIn:checkOut:adults`
+// (TTL court). La fiche lit le cache sans persister d'`offerSet` (display) ;
+// `/chambres` lit le même cache puis persiste un `offerSet` jetable pour la
+// sélection. On évite ainsi un appel Travelport + une écriture Redis à chaque
+// rendu de fiche (y compris par les crawlers).
+// ---------------------------------------------------------------------------
+
+const SEARCH_PREFIX = 'booking:tp:search:';
+const SEARCH_TTL_SEC = 8 * 60;
+
+interface NormalizedSearch {
+  readonly slug: string;
+  readonly hotelId: string;
+  readonly hotelName: string;
+  readonly city: string;
+  readonly region: string;
+  readonly chainCode: string;
+  readonly propertyCode: string;
+  readonly propertyName: string;
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly adults: number;
+  readonly children: number;
+  readonly rates: readonly CachedRate[];
+}
+
+type SearchReason = 'no_credentials' | 'hotel_not_found' | 'search_failed' | 'no_match' | 'no_rate';
+
+function isNormalizedSearch(value: unknown): value is NormalizedSearch {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v['slug'] === 'string' &&
+    typeof v['hotelId'] === 'string' &&
+    typeof v['chainCode'] === 'string' &&
+    typeof v['propertyCode'] === 'string' &&
+    Array.isArray(v['rates'])
+  );
+}
+
+function searchCacheKey(slug: string, stay: ResolvedStay): string {
+  return `${SEARCH_PREFIX}${slug}:${stay.checkIn}:${stay.checkOut}:${stay.adults}`;
+}
+
+async function loadNormalizedSearch(key: string): Promise<NormalizedSearch | null> {
+  const raw = await redis.get<string | NormalizedSearch>(key);
+  if (raw === null || raw === undefined) return null;
+  let value: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  return isNormalizedSearch(value) ? value : null;
+}
+
+/**
+ * Recherche Travelport + matching + normalisation tarifaire, **mise en cache**.
+ * Partagée par la fiche (display) et `/chambres` (sélection). Ne persiste aucun
+ * `offerSet` : c'est au seul chemin de sélection de le faire.
+ */
+async function searchAndNormalize(input: {
+  readonly slug: string;
+  readonly stay: ResolvedStay;
+}): Promise<
+  | { readonly ok: true; readonly data: NormalizedSearch }
+  | {
+      readonly ok: false;
+      readonly reason: SearchReason;
+    }
+> {
+  const hotel = await fetchTravelportHotel(input.slug);
+  if (hotel === null) return { ok: false, reason: 'hotel_not_found' };
+
+  const cacheKey = searchCacheKey(input.slug, input.stay);
+  const cached = await loadNormalizedSearch(cacheKey);
+  if (cached !== null) return { ok: true, data: cached };
+
+  const creds = getTravelportCredentials();
+  if (creds === null) return { ok: false, reason: 'no_credentials' };
+
+  const search = await searchByCoordinates(creds, {
+    latitude: hotel.latitude,
+    longitude: hotel.longitude,
+    radius: 1,
+    unit: 'mi',
+    checkInDate: input.stay.checkIn,
+    checkOutDate: input.stay.checkOut,
+    adults: input.stay.adults,
+    currency: getTravelportCurrency(),
+  });
+  if (!search.ok) return { ok: false, reason: 'search_failed' };
+
+  const item = bestMatch(hotel, search.value);
+  if (item === null) return { ok: false, reason: 'no_match' };
+
+  const rates = buildRatesFromItem(item);
+  if (rates.length === 0) return { ok: false, reason: 'no_rate' };
+
+  const data: NormalizedSearch = {
+    slug: input.slug,
+    hotelId: hotel.id,
+    hotelName: hotel.name,
+    city: hotel.city,
+    region: hotel.region,
+    chainCode: item.chainCode,
+    propertyCode: item.propertyCode,
+    propertyName: item.name,
+    checkIn: input.stay.checkIn,
+    checkOut: input.stay.checkOut,
+    adults: input.stay.adults,
+    children: input.stay.children,
+    rates,
+  };
+  await redis.set(cacheKey, JSON.stringify(data), { ex: SEARCH_TTL_SEC });
+  return { ok: true, data };
+}
+
 /**
  * Découvre les chambres/plans tarifaires Travelport (sandbox) pour un slug
  * allow-listé et un séjour donné, met en cache l'ensemble tarifaire et renvoie
@@ -494,58 +534,41 @@ export async function listTravelportSandboxOffers(input: {
   if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) {
     return { ok: false, reason: 'disabled' };
   }
-  const creds = getTravelportCredentials();
-  if (creds === null) return { ok: false, reason: 'no_credentials' };
 
-  const hotel = await fetchTravelportHotel(input.slug);
-  if (hotel === null) return { ok: false, reason: 'hotel_not_found' };
-
-  const { checkIn, checkOut, adults, children } = resolveStay(input.stay);
-
-  const search = await searchByCoordinates(creds, {
-    latitude: hotel.latitude,
-    longitude: hotel.longitude,
-    radius: 1,
-    unit: 'mi',
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
-    adults,
-    currency: getTravelportCurrency(),
-  });
-  if (!search.ok) return { ok: false, reason: 'search_failed' };
-
-  const item = bestMatch(hotel, search.value);
-  if (item === null) return { ok: false, reason: 'no_match' };
-
-  const rates = buildRatesFromItem(item);
-  if (rates.length === 0) return { ok: false, reason: 'no_rate' };
+  const { stay, datesAdjusted } = resolveStay(input.stay);
+  const res = await searchAndNormalize({ slug: input.slug, stay });
+  if (!res.ok) return { ok: false, reason: res.reason };
+  const data = res.data;
 
   const offerSetId = crypto.randomUUID();
   const set: CachedOfferSet = {
-    hotelId: hotel.id,
-    hotelName: hotel.name,
-    city: hotel.city,
-    region: hotel.region,
-    chainCode: item.chainCode,
-    propertyCode: item.propertyCode,
-    propertyName: item.name,
-    checkIn,
-    checkOut,
-    adults,
-    children,
-    rates,
+    slug: data.slug,
+    hotelId: data.hotelId,
+    hotelName: data.hotelName,
+    city: data.city,
+    region: data.region,
+    chainCode: data.chainCode,
+    propertyCode: data.propertyCode,
+    propertyName: data.propertyName,
+    checkIn: data.checkIn,
+    checkOut: data.checkOut,
+    adults: data.adults,
+    children: data.children,
+    rates: data.rates,
   };
   await saveOfferSet(offerSetId, set);
 
   return {
     ok: true,
     offerSetId,
-    hotelName: hotel.name,
-    checkIn,
-    checkOut,
-    adults,
-    children,
-    options: rates.map(toOption),
+    slug: data.slug,
+    hotelName: data.hotelName,
+    checkIn: data.checkIn,
+    checkOut: data.checkOut,
+    adults: data.adults,
+    children: data.children,
+    datesAdjusted,
+    options: data.rates.map(toOption),
   };
 }
 
@@ -590,6 +613,7 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     name: set.hotelName,
     city: set.city,
     region: set.region,
+    slug: set.slug,
   };
   await saveDraft({ draft: atRecap.value, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
 
@@ -628,18 +652,23 @@ export interface TravelportLiveRoomPrices {
 export async function getTravelportLiveRoomPrices(input: {
   readonly slug: string;
   readonly locale: 'fr' | 'en';
-  readonly rooms: readonly { readonly id: string; readonly name: string | null; readonly room_code: string }[];
+  readonly rooms: readonly {
+    readonly id: string;
+    readonly name: string | null;
+    readonly room_code: string;
+  }[];
 }): Promise<TravelportLiveRoomPrices | null> {
   if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return null;
   if (input.rooms.length === 0) return null;
 
-  let offers: TravelportSandboxOffersResult;
+  let res: Awaited<ReturnType<typeof searchAndNormalize>>;
   try {
-    offers = await listTravelportSandboxOffers({ slug: input.slug, locale: input.locale });
+    const { stay } = resolveStay(undefined);
+    res = await searchAndNormalize({ slug: input.slug, stay });
   } catch {
     return null;
   }
-  if (!offers.ok) return null;
+  if (!res.ok) return null;
 
   const fromByRoomId = new Map<string, number>();
   for (const room of input.rooms) {
@@ -647,7 +676,7 @@ export async function getTravelportLiveRoomPrices(input: {
     if (wanted.size === 0) continue;
     let bestPrice: number | undefined;
     let bestOverlap = 0;
-    for (const opt of offers.options) {
+    for (const opt of res.data.rates) {
       const overlap = [...normalizeName(opt.roomLabel)].filter((t) => wanted.has(t)).length;
       if (overlap === 0) continue;
       if (
@@ -685,17 +714,18 @@ export async function getTravelportLiveRoomList(input: {
 }): Promise<readonly TravelportLiveRoom[]> {
   if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return [];
 
-  let offers: TravelportSandboxOffersResult;
+  let res: Awaited<ReturnType<typeof searchAndNormalize>>;
   try {
-    offers = await listTravelportSandboxOffers({ slug: input.slug, locale: input.locale });
+    const { stay } = resolveStay(undefined);
+    res = await searchAndNormalize({ slug: input.slug, stay });
   } catch {
     return [];
   }
-  if (!offers.ok) return [];
+  if (!res.ok) return [];
 
   // Dédoublonnage par libellé de chambre : on garde l'option la moins chère.
   const byLabel = new Map<string, TravelportLiveRoom>();
-  for (const opt of offers.options) {
+  for (const opt of res.data.rates) {
     const existing = byLabel.get(opt.roomLabel);
     if (existing === undefined || opt.priceMinor < existing.fromMinor) {
       byLabel.set(opt.roomLabel, {

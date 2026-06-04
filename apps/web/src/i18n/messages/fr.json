@@ -3848,7 +3848,95 @@
       "verbatimNote": "Texte fourni par l'hôtelier — il s'applique tel quel."
     },
     "continueToPayment": "Continuer vers le paiement",
-    "paymentDisclaimer": "Vous serez redirigé vers le module de paiement sécurisé Amadeus. Aucune donnée de carte n'est stockée par MyConciergeHotel."
+    "paymentDisclaimer": "Vous serez redirigé vers le module de paiement sécurisé Amadeus. Aucune donnée de carte n'est stockée par MyConciergeHotel.",
+    "researchCta": "Relancer une recherche",
+    "expiry": {
+      "expiresIn": "Cette offre est garantie encore {minutes} min.",
+      "expiringSoon": "Cette offre expire dans moins d'une minute.",
+      "expired": "Cette offre a expiré. Relancez une recherche pour obtenir un tarif à jour."
+    },
+    "sandbox": {
+      "label": "Réservation sandbox Travelport",
+      "confirmedTitle": "Réservation confirmée",
+      "cancelledTitle": "Réservation annulée",
+      "confirmedSummary": "Votre réservation sandbox est confirmée. Conservez la référence ci-dessous.",
+      "preprodTitle": "Sandbox Travelport — réservation preprod",
+      "intro": "Confirmer crée une réservation réelle dans le sandbox preprod Travelport avec une carte de garantie de test. Aucun paiement réel n'est prélevé ; vous pourrez l'annuler juste après.",
+      "confirmCta": "Confirmer la réservation sandbox",
+      "confirming": "Confirmation en cours…",
+      "cancelCta": "Annuler la réservation sandbox",
+      "cancelling": "Annulation en cours…",
+      "cancelledNote": "Cette réservation sandbox a été annulée auprès du fournisseur.",
+      "error": "La réservation n'a pas pu être créée dans le sandbox. Réessayez ou relancez une recherche.",
+      "bookingRef": "Référence réservation",
+      "status": "Statut",
+      "hotelConfirmation": "Confirmation hôtel",
+      "technicalDetails": "Détails techniques",
+      "travelportLocator": "Locator Travelport",
+      "agencyLocator": "Locator agence"
+    }
+  },
+  "reservationRooms": {
+    "meta": {
+      "title": "Choisissez votre chambre",
+      "description": "Disponibilités et tarifs en temps réel."
+    },
+    "eyebrow": "Choisissez votre chambre",
+    "stayLine": "{nights, plural, one {# nuit} other {# nuits}}, {adults, plural, one {# adulte} other {# adultes}}",
+    "noAvailability": {
+      "title": "Aucune disponibilité",
+      "description": "Aucune chambre disponible pour ces dates. Essayez d'autres dates.",
+      "back": "Retour à la fiche"
+    },
+    "datesAdjusted": "Les dates saisies n'étaient pas valides : voici les disponibilités pour {checkIn} → {checkOut}.",
+    "tooManyRequests": {
+      "title": "Trop de requêtes",
+      "description": "Vous avez lancé trop de recherches. Patientez un instant avant de réessayer."
+    },
+    "dates": {
+      "checkIn": "Arrivée",
+      "checkOut": "Départ",
+      "adults": "Adultes",
+      "update": "Mettre à jour",
+      "updating": "Mise à jour…"
+    },
+    "upToGuests": "Jusqu'à {count} pers.",
+    "breakfastIncluded": "Petit-déjeuner inclus",
+    "refundable": "Remboursable",
+    "nonRefundable": "Non remboursable",
+    "totalStay": "séjour total",
+    "from": "À partir de {price}",
+    "filters": {
+      "title": "Filtrer",
+      "all": "Tous les tarifs",
+      "breakfast": "Petit-déjeuner inclus",
+      "refundable": "Remboursable"
+    },
+    "viewRates": "Voir les {count} tarifs",
+    "hideRates": "Masquer les tarifs",
+    "noMatch": "Aucun tarif ne correspond à ces filtres.",
+    "select": "Choisir",
+    "selecting": "Sélection…",
+    "selectAria": "Choisir {room} — {price}",
+    "preprodNote": "Pilote preprod — aucun paiement n'est prélevé à ce stade.",
+    "rail": {
+      "eyebrow": "Disponibilité en temps réel",
+      "headline": "Réserver {hotel}",
+      "intro": "Choisissez vos dates pour voir les disponibilités et tarifs en direct.",
+      "checkIn": "Arrivée",
+      "checkOut": "Départ",
+      "adults": "Adultes",
+      "submit": "Voir les disponibilités",
+      "submitting": "Recherche…",
+      "note": "Pilote preprod — aucun paiement n'est prélevé à ce stade."
+    },
+    "card": {
+      "book": "Réserver",
+      "from": "dès {price}",
+      "breakfastIncluded": "Petit-déjeuner inclus",
+      "freeCancellation": "Annulation gratuite",
+      "bookAria": "Réserver {room} — dès {price}"
+    }
   },
   "reservationPayment": {
     "meta": {

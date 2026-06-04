@@ -34,10 +34,11 @@ interface BookingSlotProps {
  * yet — a permanent "bientôt disponible" sticky bar would be UX clutter
  * and borderline dark-pattern).
  *
- * Phase 6 (booking APIs wired): swap the `rail` branch for the live
- * `<BookingWidget>` and the `mobilebar` branch for `<BookingWidgetMobileBar>`.
- * The page layout, anchors (`#booking`) and table-of-contents entry stay
- * untouched — the funnel re-lands in the exact same slot.
+ * Phase 6 (booking APIs wired): the `rail` branch already swaps to the live
+ * Travelport funnel (`<BookingSandboxRail>`) for allow-listed pilot hotels; a
+ * future mobile bottom-bar will fill the `mobilebar` branch. The page layout,
+ * anchors (`#booking`) and table-of-contents entry stay untouched — the funnel
+ * re-lands in the exact same slot.
  */
 export function BookingSlot({
   locale,

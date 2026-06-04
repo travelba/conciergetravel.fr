@@ -29,6 +29,19 @@ export const emailRequestByEmailRateLimit = new Ratelimit({
   analytics: true,
 });
 
+/**
+ * Travelport sandbox availability search — each render of `/chambres` (and the
+ * select action) can trigger a multi-second upstream call. 30 / min / IP is
+ * generous for a human exploring rooms while throttling scripted abuse of the
+ * gated pilot. Kept separate from the email limiter so quotas don't interfere.
+ */
+export const travelportSearchByIpRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, '1 m'),
+  prefix: 'ratelimit:booking-tp-search:ip',
+  analytics: true,
+});
+
 export interface RateLimitVerdict {
   readonly ok: boolean;
   readonly retryAfterSec: number;
@@ -61,5 +74,11 @@ export async function gateByIp(ip: string): Promise<RateLimitVerdict> {
 export async function gateByEmail(email: string): Promise<RateLimitVerdict> {
   if (isE2EBypass()) return E2E_ALLOW;
   const r = await emailRequestByEmailRateLimit.limit(email.trim().toLowerCase());
+  return verdictFromLimit(r);
+}
+
+export async function gateTravelportSearchByIp(ip: string): Promise<RateLimitVerdict> {
+  if (isE2EBypass()) return E2E_ALLOW;
+  const r = await travelportSearchByIpRateLimit.limit(ip);
   return verdictFromLimit(r);
 }

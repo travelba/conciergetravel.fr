@@ -1,6 +1,10 @@
 import type { ReactElement } from 'react';
+import { getTranslations } from 'next-intl/server';
 
+import { SubmitButton } from '@/components/booking/submit-button';
 import { getPathname } from '@/i18n/navigation';
+
+import { BookingSandboxDateFields } from './booking-sandbox-date-fields';
 
 interface BookingSandboxRailProps {
   readonly locale: 'fr' | 'en';
@@ -14,24 +18,21 @@ function addDaysIso(days: number): string {
 
 /**
  * Pilote Travelport (Phase 6) — variante **live** du seam `<BookingSlot>` pour
- * l'hôtel allow-listé. Rend un vrai formulaire de réservation (dates + occupants
- * choisis par le client) qui pointe vers la route gated
- * `/[locale]/reservation/sandbox/[slug]` : recherche Travelport temps réel →
- * draft `recap` → confirmation/annulation de la réservation sandbox.
+ * l'hôtel allow-listé. Rend un vrai formulaire de réservation (dates +
+ * occupants) qui pointe vers la page gated
+ * `/[locale]/reservation/sandbox/[slug]/chambres` : sélection chambre/tarif →
+ * recap → confirmation/annulation de la réservation sandbox.
  *
- * Aucun paiement à ce stade (preprod) : le récap confirme/annule directement la
- * réservation sandbox. Reste strictement opt-in (gating dans `<BookingSlot>`) ;
- * les autres fiches conservent le placeholder `<BookingComingSoon>`.
- *
- * Copie inline FR/EN (comme le recap Travelport) pour ne pas dépendre de
- * nouvelles clés i18n sur un parcours encore en pilote.
+ * Aucun paiement à ce stade (preprod). Reste strictement opt-in (gating dans
+ * `<BookingSlot>`) ; les autres fiches conservent le placeholder
+ * `<BookingComingSoon>`.
  */
-export function BookingSandboxRail({
+export async function BookingSandboxRail({
   locale,
   hotelName,
   slug,
-}: BookingSandboxRailProps): ReactElement {
-  const en = locale === 'en';
+}: BookingSandboxRailProps): Promise<ReactElement> {
+  const t = await getTranslations({ locale, namespace: 'reservationRooms.rail' });
   const today = addDaysIso(0);
   const checkIn = addDaysIso(30);
   const checkOut = addDaysIso(31);
@@ -39,25 +40,6 @@ export function BookingSandboxRail({
     locale,
     href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },
   });
-
-  const labels = {
-    eyebrow: en ? 'Real-time availability' : 'Disponibilité en temps réel',
-    headline: en ? `Book ${hotelName}` : `Réserver ${hotelName}`,
-    intro: en
-      ? 'Choose your dates to check live availability and rates.'
-      : 'Choisissez vos dates pour voir les disponibilités et tarifs en direct.',
-    checkIn: en ? 'Check-in' : 'Arrivée',
-    checkOut: en ? 'Check-out' : 'Départ',
-    adults: en ? 'Adults' : 'Adultes',
-    children: en ? 'Children' : 'Enfants',
-    submit: en ? 'Check availability' : 'Voir les disponibilités',
-    note: en
-      ? 'Preprod pilot — no payment is taken at this stage.'
-      : 'Pilote preprod — aucun paiement n’est prélevé à ce stade.',
-  };
-
-  const fieldClass =
-    'border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2';
 
   return (
     <section
@@ -67,71 +49,28 @@ export function BookingSandboxRail({
       className="border-border bg-bg scroll-mt-24 rounded-lg border p-6"
     >
       <p className="text-accent mb-2 text-xs font-medium uppercase tracking-wider">
-        {labels.eyebrow}
+        {t('eyebrow')}
       </p>
       <h2 id="booking-sandbox-title" className="text-fg font-serif text-xl leading-tight">
-        {labels.headline}
+        {t('headline', { hotel: hotelName })}
       </h2>
-      <p className="text-muted mt-3 text-sm leading-relaxed">{labels.intro}</p>
+      <p className="text-muted mt-3 text-sm leading-relaxed">{t('intro')}</p>
 
       <form method="get" action={action} className="mt-4 flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{labels.checkIn}</span>
-            <input
-              type="date"
-              name="checkIn"
-              defaultValue={checkIn}
-              min={today}
-              required
-              className={fieldClass}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{labels.checkOut}</span>
-            <input
-              type="date"
-              name="checkOut"
-              defaultValue={checkOut}
-              min={today}
-              required
-              className={fieldClass}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{labels.adults}</span>
-            <input
-              type="number"
-              name="adults"
-              min={1}
-              max={9}
-              defaultValue={1}
-              required
-              className={fieldClass}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{labels.children}</span>
-            <input
-              type="number"
-              name="children"
-              min={0}
-              max={9}
-              defaultValue={0}
-              className={fieldClass}
-            />
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+        <BookingSandboxDateFields
+          labels={{ checkIn: t('checkIn'), checkOut: t('checkOut'), adults: t('adults') }}
+          defaults={{ checkIn, checkOut, adults: 1 }}
+          today={today}
+        />
+        <SubmitButton
+          pendingLabel={t('submitting')}
+          className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
         >
-          {labels.submit}
-        </button>
+          {t('submit')}
+        </SubmitButton>
       </form>
 
-      <p className="text-muted/80 mt-4 text-xs">{labels.note}</p>
+      <p className="text-muted/80 mt-4 text-xs">{t('note')}</p>
     </section>
   );
 }

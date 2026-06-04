@@ -3819,7 +3819,95 @@
       "verbatimNote": "Text provided by the hotelier — it applies as written."
     },
     "continueToPayment": "Continue to payment",
-    "paymentDisclaimer": "You will be redirected to the secure Amadeus payment module. No card data is stored by MyConciergeHotel."
+    "paymentDisclaimer": "You will be redirected to the secure Amadeus payment module. No card data is stored by MyConciergeHotel.",
+    "researchCta": "Start a new search",
+    "expiry": {
+      "expiresIn": "This offer is held for {minutes} more min.",
+      "expiringSoon": "This offer expires in less than a minute.",
+      "expired": "This offer has expired. Start a new search to get an up-to-date rate."
+    },
+    "sandbox": {
+      "label": "Travelport sandbox reservation",
+      "confirmedTitle": "Reservation confirmed",
+      "cancelledTitle": "Reservation cancelled",
+      "confirmedSummary": "Your sandbox reservation is confirmed. Keep the reference below.",
+      "preprodTitle": "Travelport sandbox — preprod reservation",
+      "intro": "Confirming creates a real reservation in the Travelport preprod sandbox using a test guarantee card. No real payment is taken; you can cancel it right after.",
+      "confirmCta": "Confirm sandbox reservation",
+      "confirming": "Confirming…",
+      "cancelCta": "Cancel sandbox reservation",
+      "cancelling": "Cancelling…",
+      "cancelledNote": "This sandbox reservation has been cancelled with the supplier.",
+      "error": "The reservation could not be created in the sandbox. Please retry or start a new search.",
+      "bookingRef": "Booking reference",
+      "status": "Status",
+      "hotelConfirmation": "Hotel confirmation",
+      "technicalDetails": "Technical details",
+      "travelportLocator": "Travelport locator",
+      "agencyLocator": "Agency locator"
+    }
+  },
+  "reservationRooms": {
+    "meta": {
+      "title": "Choose your room",
+      "description": "Real-time availability and rates."
+    },
+    "eyebrow": "Choose your room",
+    "stayLine": "{nights, plural, one {# night} other {# nights}}, {adults, plural, one {# adult} other {# adults}}",
+    "noAvailability": {
+      "title": "No availability",
+      "description": "No rooms were returned for these dates. Please try other dates.",
+      "back": "Back to the hotel"
+    },
+    "datesAdjusted": "The dates you entered were not valid: showing availability for {checkIn} → {checkOut}.",
+    "tooManyRequests": {
+      "title": "Too many requests",
+      "description": "You've run too many searches. Please wait a moment before trying again."
+    },
+    "dates": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "adults": "Adults",
+      "update": "Update",
+      "updating": "Updating…"
+    },
+    "upToGuests": "Up to {count} guests",
+    "breakfastIncluded": "Breakfast included",
+    "refundable": "Refundable",
+    "nonRefundable": "Non-refundable",
+    "totalStay": "total stay",
+    "from": "From {price}",
+    "filters": {
+      "title": "Filter",
+      "all": "All rates",
+      "breakfast": "Breakfast included",
+      "refundable": "Refundable"
+    },
+    "viewRates": "View {count} rates",
+    "hideRates": "Hide rates",
+    "noMatch": "No rate matches these filters.",
+    "select": "Select",
+    "selecting": "Selecting…",
+    "selectAria": "Select {room} — {price}",
+    "preprodNote": "Preprod pilot — no payment is taken at this stage.",
+    "rail": {
+      "eyebrow": "Real-time availability",
+      "headline": "Book {hotel}",
+      "intro": "Choose your dates to check live availability and rates.",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "adults": "Adults",
+      "submit": "Check availability",
+      "submitting": "Searching…",
+      "note": "Preprod pilot — no payment is taken at this stage."
+    },
+    "card": {
+      "book": "Book",
+      "from": "from {price}",
+      "breakfastIncluded": "Breakfast included",
+      "freeCancellation": "Free cancellation",
+      "bookAria": "Book {room} — from {price}"
+    }
   },
   "reservationPayment": {
     "meta": {

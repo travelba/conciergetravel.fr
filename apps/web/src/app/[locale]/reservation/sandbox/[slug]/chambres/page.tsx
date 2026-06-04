@@ -1,30 +1,44 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
-import { redirect } from '@/i18n/navigation';
+import { SubmitButton } from '@/components/booking/submit-button';
+import { BookingSandboxDateFields } from '@/components/hotel/booking-sandbox-date-fields';
+import { Link, getPathname, redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
-import { intlLocaleTag } from '@/i18n/runtime';
 import { setDraftCookie } from '@/server/booking/draft-cookie';
+import { gateTravelportSearchByIp } from '@/server/booking/rate-limit';
 import {
   listTravelportSandboxOffers,
   lockTravelportSandboxSelectedOffer,
 } from '@/server/booking/travelport-offer';
+
+import { RoomsList } from './rooms-list';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-const fmtPrice = (locale: Locale, amountMinor: number): string =>
-  new Intl.NumberFormat(intlLocaleTag(locale), {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-  }).format(amountMinor / 100);
+function clientIp(h: { get(name: string): string | null }): string {
+  const xff = h.get('x-forwarded-for');
+  if (xff !== null && xff.length > 0) {
+    const first = xff.split(',')[0]?.trim();
+    if (first !== undefined && first.length > 0) return first;
+  }
+  return h.get('x-real-ip') ?? '0.0.0.0';
+}
+
+function addDaysIso(days: number): string {
+  return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+}
 
 /**
  * Verrouille le tarif choisi (offerSetId + rateKey relus côté serveur depuis le
  * cache Redis — jamais le prix client) puis redirige vers le recap existant.
+ * En cas d'échec, retour sur la **fiche pilote** (état lisible) plutôt que vers
+ * la recherche legacy qui n'exploite pas ce drapeau.
  */
 async function selectRoomAction(formData: FormData): Promise<void> {
   'use server';
@@ -32,19 +46,22 @@ async function selectRoomAction(formData: FormData): Promise<void> {
   const offerSetId = formData.get('offerSetId');
   const rateKey = formData.get('rateKey');
   const rawLocale = formData.get('locale');
+  const rawSlug = formData.get('slug');
   const locale: Locale =
     typeof rawLocale === 'string' && isRoutingLocale(rawLocale) ? rawLocale : 'fr';
+  const slug = typeof rawSlug === 'string' ? rawSlug : '';
+
+  // Erreur lisible côté fiche pilote (jamais la recherche legacy).
+  const backHref =
+    slug !== '' ? ({ pathname: '/hotel/[slug]', params: { slug } } as const) : ('/' as const);
 
   if (typeof offerSetId !== 'string' || typeof rateKey !== 'string') {
-    redirect({ href: '/recherche', locale });
+    redirect({ href: backHref, locale });
   }
 
   const result = await lockTravelportSandboxSelectedOffer({ offerSetId, rateKey, locale });
   if (!result.ok) {
-    redirect({
-      href: { pathname: '/recherche', query: { error: `travelport_${result.reason}` } },
-      locale,
-    });
+    redirect({ href: backHref, locale });
   }
 
   await setDraftCookie(result.draftId, result.ttlSec);
@@ -60,24 +77,29 @@ export default async function TravelportSandboxRoomsPage({
     checkIn?: string;
     checkOut?: string;
     adults?: string;
-    children?: string;
   }>;
 }) {
   const [{ locale: rawLocale, slug: rawSlug }, sp] = await Promise.all([params, searchParams]);
   if (!isRoutingLocale(rawLocale)) notFound();
   const locale = rawLocale;
-  const en = locale === 'en';
   const slug = decodeURIComponent(rawSlug ?? '');
+  const t = await getTranslations({ locale, namespace: 'reservationRooms' });
+
+  // Rate-limit la recherche temps réel (appel Travelport pluri-seconde).
+  const verdict = await gateTravelportSearchByIp(clientIp(await headers()));
+  if (!verdict.ok) {
+    return (
+      <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
+        <h1 className="text-fg font-serif text-3xl sm:text-4xl">{t('tooManyRequests.title')}</h1>
+        <p className="text-muted mt-3 max-w-prose">{t('tooManyRequests.description')}</p>
+      </main>
+    );
+  }
 
   const result = await listTravelportSandboxOffers({
     slug,
     locale,
-    stay: {
-      checkIn: sp.checkIn,
-      checkOut: sp.checkOut,
-      adults: sp.adults,
-      children: sp.children,
-    },
+    stay: { checkIn: sp.checkIn, checkOut: sp.checkOut, adults: sp.adults },
   });
 
   // Pilote désactivé / slug non allow-listé : la route ne doit pas exister.
@@ -86,13 +108,15 @@ export default async function TravelportSandboxRoomsPage({
   if (!result.ok) {
     return (
       <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl">
-          {en ? 'No availability' : 'Aucune disponibilité'}
-        </h1>
-        <p className="text-muted mt-3 max-w-prose">
-          {en
-            ? 'No rooms were returned for these dates. Please try other dates.'
-            : 'Aucune chambre disponible pour ces dates. Essayez d’autres dates.'}
+        <h1 className="text-fg font-serif text-3xl sm:text-4xl">{t('noAvailability.title')}</h1>
+        <p className="text-muted mt-3 max-w-prose">{t('noAvailability.description')}</p>
+        <p className="mt-6">
+          <Link
+            href={{ pathname: '/hotel/[slug]', params: { slug } }}
+            className="text-fg font-medium underline-offset-2 hover:underline"
+          >
+            {t('noAvailability.back')} <span aria-hidden>→</span>
+          </Link>
         </p>
       </main>
     );
@@ -105,79 +129,63 @@ export default async function TravelportSandboxRoomsPage({
     return Math.round((b - a) / 86_400_000);
   })();
 
+  const dateFormAction = getPathname({
+    locale,
+    href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },
+  });
+
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
-      <header className="mb-8">
-        <p className="text-muted text-xs uppercase tracking-[0.18em]">
-          {en ? 'Choose your room' : 'Choisissez votre chambre'}
-        </p>
+      <header className="mb-6">
+        <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
         <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{result.hotelName}</h1>
         <p className="text-muted mt-2 text-sm">
-          {result.checkIn} → {result.checkOut} ·{' '}
-          {en
-            ? `${nights} night${nights > 1 ? 's' : ''}, ${result.adults} adult${result.adults > 1 ? 's' : ''}`
-            : `${nights} nuit${nights > 1 ? 's' : ''}, ${result.adults} adulte${result.adults > 1 ? 's' : ''}`}
+          {result.checkIn} → {result.checkOut} · {t('stayLine', { nights, adults: result.adults })}
         </p>
       </header>
 
-      <ul className="flex flex-col gap-4">
-        {result.options.map((opt) => (
-          <li
-            key={opt.rateKey}
-            className="border-border bg-bg rounded-lg border p-4 sm:p-5"
-            data-room-option
-          >
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="text-fg font-serif text-lg leading-snug">{opt.roomLabel}</h2>
-                <p className="text-muted mt-1 text-sm">{opt.rateLabel}</p>
-                <ul className="text-muted mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                  {opt.maxOccupancy !== null ? (
-                    <li>
-                      {en
-                        ? `Up to ${opt.maxOccupancy} guests`
-                        : `Jusqu’à ${opt.maxOccupancy} pers.`}
-                    </li>
-                  ) : null}
-                  {opt.breakfastIncluded === true ? (
-                    <li>{en ? 'Breakfast included' : 'Petit-déjeuner inclus'}</li>
-                  ) : null}
-                  {opt.refundable === true ? (
-                    <li>{en ? 'Refundable' : 'Remboursable'}</li>
-                  ) : opt.refundable === false ? (
-                    <li>{en ? 'Non-refundable' : 'Non remboursable'}</li>
-                  ) : null}
-                </ul>
-                {opt.cancellationText !== '' ? (
-                  <p className="text-muted/80 mt-2 text-xs">{opt.cancellationText}</p>
-                ) : null}
-              </div>
+      {result.datesAdjusted ? (
+        <p
+          role="status"
+          className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+        >
+          {t('datesAdjusted', { checkIn: result.checkIn, checkOut: result.checkOut })}
+        </p>
+      ) : null}
 
-              <div className="flex shrink-0 flex-col items-end gap-2">
-                <p className="text-fg font-serif text-2xl">{fmtPrice(locale, opt.priceMinor)}</p>
-                <p className="text-muted text-xs">{en ? 'total stay' : 'séjour total'}</p>
-                <form action={selectRoomAction}>
-                  <input type="hidden" name="offerSetId" value={result.offerSetId} />
-                  <input type="hidden" name="rateKey" value={opt.rateKey} />
-                  <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
-                    className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
-                  >
-                    {en ? 'Select' : 'Choisir'}
-                  </button>
-                </form>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <form
+        method="get"
+        action={dateFormAction}
+        className="border-border bg-bg mb-8 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-end"
+      >
+        <div className="flex-1">
+          <BookingSandboxDateFields
+            labels={{
+              checkIn: t('dates.checkIn'),
+              checkOut: t('dates.checkOut'),
+              adults: t('dates.adults'),
+            }}
+            defaults={{ checkIn: result.checkIn, checkOut: result.checkOut, adults: result.adults }}
+            today={addDaysIso(0)}
+          />
+        </div>
+        <SubmitButton
+          pendingLabel={t('dates.updating')}
+          className="bg-fg text-bg focus-visible:ring-ring shrink-0 rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
+        >
+          {t('dates.update')}
+        </SubmitButton>
+      </form>
 
-      <p className="text-muted/80 mt-6 text-xs">
-        {en
-          ? 'Preprod pilot — no payment is taken at this stage.'
-          : 'Pilote preprod — aucun paiement n’est prélevé à ce stade.'}
-      </p>
+      <RoomsList
+        options={result.options}
+        offerSetId={result.offerSetId}
+        slug={slug}
+        locale={locale}
+        selectAction={selectRoomAction}
+      />
+
+      <p className="text-muted/80 mt-6 text-xs">{t('preprodNote')}</p>
     </main>
   );
 }

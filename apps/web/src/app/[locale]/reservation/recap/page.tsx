@@ -4,6 +4,8 @@ import { notFound, redirect as nextRedirect } from 'next/navigation';
 
 import { beginPayment, moveToRecap } from '@mch/domain/booking';
 
+import { OfferExpiryNotice } from '@/components/booking/offer-expiry-notice';
+import { SubmitButton } from '@/components/booking/submit-button';
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
@@ -244,113 +246,113 @@ export default async function ReservationRecapPage({
         tpReservation !== null ? (
           <section
             className="border-border bg-bg rounded-lg border p-4 sm:p-5"
-            aria-label={
-              locale === 'en' ? 'Travelport sandbox reservation' : 'Réservation sandbox Travelport'
-            }
+            aria-label={t('sandbox.label')}
           >
             <p className="text-fg text-sm font-medium">
               {tpReservation.phase === 'cancelled'
-                ? locale === 'en'
-                  ? 'Sandbox reservation cancelled'
-                  : 'Réservation sandbox annulée'
-                : locale === 'en'
-                  ? 'Sandbox reservation confirmed'
-                  : 'Réservation sandbox confirmée'}
+                ? t('sandbox.cancelledTitle')
+                : t('sandbox.confirmedTitle')}
             </p>
+            {tpReservation.phase !== 'cancelled' ? (
+              <p className="text-muted mt-1 text-sm">{t('sandbox.confirmedSummary')}</p>
+            ) : null}
+
             <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
               {tpReservation.bookingRef !== undefined ? (
                 <div>
                   <dt className="text-muted text-xs uppercase tracking-wide">
-                    {locale === 'en' ? 'Booking reference' : 'Référence réservation'}
+                    {t('sandbox.bookingRef')}
                   </dt>
                   <dd className="text-fg font-mono text-sm">{tpReservation.bookingRef}</dd>
                 </div>
               ) : null}
               <div>
                 <dt className="text-muted text-xs uppercase tracking-wide">
-                  {locale === 'en' ? 'Status' : 'Statut'}
+                  {t('sandbox.status')}
                 </dt>
                 <dd className="text-fg text-sm">{tpReservation.status}</dd>
               </div>
               {tpReservation.supplierConfirmation !== undefined ? (
                 <div>
                   <dt className="text-muted text-xs uppercase tracking-wide">
-                    {locale === 'en' ? 'Hotel confirmation' : 'Confirmation hôtel'}
+                    {t('sandbox.hotelConfirmation')}
                   </dt>
                   <dd className="text-fg font-mono text-sm">
                     {tpReservation.supplierConfirmation}
                   </dd>
                 </div>
               ) : null}
-              {tpReservation.aggregatorLocator !== undefined ? (
-                <div>
-                  <dt className="text-muted text-xs uppercase tracking-wide">
-                    {locale === 'en' ? 'Travelport locator' : 'Locator Travelport'}
-                  </dt>
-                  <dd className="text-fg font-mono text-sm">{tpReservation.aggregatorLocator}</dd>
-                </div>
-              ) : null}
-              {tpReservation.agencyLocator !== undefined ? (
-                <div>
-                  <dt className="text-muted text-xs uppercase tracking-wide">
-                    {locale === 'en' ? 'Agency locator' : 'Locator agence'}
-                  </dt>
-                  <dd className="text-fg font-mono text-sm">{tpReservation.agencyLocator}</dd>
-                </div>
-              ) : null}
             </dl>
+
+            {tpReservation.aggregatorLocator !== undefined ||
+            tpReservation.agencyLocator !== undefined ? (
+              <details className="mt-4">
+                <summary className="text-muted cursor-pointer text-xs uppercase tracking-wide">
+                  {t('sandbox.technicalDetails')}
+                </summary>
+                <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
+                  {tpReservation.aggregatorLocator !== undefined ? (
+                    <div>
+                      <dt className="text-muted text-xs uppercase tracking-wide">
+                        {t('sandbox.travelportLocator')}
+                      </dt>
+                      <dd className="text-fg font-mono text-sm">
+                        {tpReservation.aggregatorLocator}
+                      </dd>
+                    </div>
+                  ) : null}
+                  {tpReservation.agencyLocator !== undefined ? (
+                    <div>
+                      <dt className="text-muted text-xs uppercase tracking-wide">
+                        {t('sandbox.agencyLocator')}
+                      </dt>
+                      <dd className="text-fg font-mono text-sm">{tpReservation.agencyLocator}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </details>
+            ) : null}
+
             {tpReservation.phase === 'cancelled' ? (
-              <p className="text-muted mt-4 text-xs">
-                {locale === 'en'
-                  ? 'This sandbox reservation has been cancelled with the supplier.'
-                  : 'Cette réservation sandbox a été annulée auprès du fournisseur.'}
-              </p>
+              <p className="text-muted mt-4 text-xs">{t('sandbox.cancelledNote')}</p>
             ) : (
               <form action={cancelTravelportSandboxAction} className="mt-4">
-                <button
-                  type="submit"
-                  className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+                <SubmitButton
+                  pendingLabel={t('sandbox.cancelling')}
+                  className="border-border text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
                 >
-                  {locale === 'en'
-                    ? 'Cancel sandbox reservation'
-                    : 'Annuler la réservation sandbox'}
-                </button>
+                  {t('sandbox.cancelCta')}
+                </SubmitButton>
               </form>
             )}
           </section>
         ) : (
           <section
             className="border-border bg-bg rounded-lg border border-dashed p-4 sm:p-5"
-            aria-label={locale === 'en' ? 'Travelport sandbox' : 'Sandbox Travelport'}
+            aria-label={t('sandbox.label')}
           >
-            <p className="text-fg text-sm font-medium">
-              {locale === 'en'
-                ? 'Travelport sandbox — preprod reservation'
-                : 'Sandbox Travelport — réservation preprod'}
-            </p>
-            <p className="text-muted mt-2 text-xs">
-              {locale === 'en'
-                ? 'Confirming creates a real reservation in the Travelport preprod sandbox using a test guarantee card. No real payment is taken; you can cancel it right after.'
-                : 'Confirmer crée une réservation réelle dans le sandbox preprod Travelport avec une carte de garantie de test. Aucun paiement réel n’est prélevé ; vous pourrez l’annuler juste après.'}
-            </p>
+            <p className="text-fg text-sm font-medium">{t('sandbox.preprodTitle')}</p>
+            <p className="text-muted mt-2 text-xs">{t('sandbox.intro')}</p>
+
+            <OfferExpiryNotice
+              expiresAt={offer.expiresAt}
+              {...(persisted.hotel.slug !== undefined ? { slug: persisted.hotel.slug } : {})}
+            />
+
             <form action={confirmTravelportSandboxAction} className="mt-4">
-              <button
-                type="submit"
-                className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+              <SubmitButton
+                pendingLabel={t('sandbox.confirming')}
+                className="bg-fg text-bg focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
               >
-                {locale === 'en'
-                  ? 'Confirm sandbox reservation'
-                  : 'Confirmer la réservation sandbox'}
-              </button>
+                {t('sandbox.confirmCta')}
+              </SubmitButton>
             </form>
             {sandboxError !== undefined ? (
               <p
                 role="alert"
                 className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
               >
-                {locale === 'en'
-                  ? 'The reservation could not be created in the sandbox. Please retry or relaunch a search.'
-                  : 'La réservation n’a pas pu être créée dans le sandbox. Réessayez ou relancez une recherche.'}
+                {t('sandbox.error')}
               </p>
             ) : null}
           </section>
