@@ -10,6 +10,7 @@ import { Breadcrumb } from '@/components/layout/breadcrumb';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteSeoJsonLd } from '@/components/seo/site-json-ld';
+import { Toaster } from '@mch/ui';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
@@ -101,6 +102,8 @@ export default async function LocaleLayout({
           </div>
           <SiteFooter />
           <ConsentBanner />
+          {/* Global toast surface (sober-luxe styled) — see @mch/ui Toaster. */}
+          <Toaster />
           {/*
             Consent-gated analytics — Vercel Analytics + Speed Insights
             only mount when `analytics === true` in the cookie. See

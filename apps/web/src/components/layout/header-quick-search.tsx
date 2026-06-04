@@ -39,7 +39,7 @@ export async function HeaderQuickSearch({
       role="search"
       action={action}
       method="get"
-      className="border-border bg-bg ml-3 hidden h-9 items-center rounded-md border focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500 lg:flex"
+      className="border-border bg-bg focus-within:border-gold-400 focus-within:ring-ring ml-3 hidden h-9 items-center rounded-md border focus-within:ring-2 md:flex"
       aria-label={t('label')}
     >
       <label className="sr-only" htmlFor="header-quick-search-destination">
@@ -55,7 +55,7 @@ export async function HeaderQuickSearch({
       <button
         type="submit"
         aria-label={t('submitAria')}
-        className="bg-fg text-bg inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium hover:bg-amber-700"
+        className="bg-fg text-bg hover:bg-fg/90 inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium"
       >
         <svg
           aria-hidden

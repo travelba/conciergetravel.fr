@@ -41,9 +41,25 @@ const preset = {
         /* ---------------------------------------------------------------- */
         charcoal: 'var(--color-charcoal)',
         'off-white': 'var(--color-off-white)',
-        gold: 'var(--color-gold)',
+        gold: {
+          DEFAULT: 'var(--color-gold)',
+          50: 'var(--color-gold-50)',
+          100: 'var(--color-gold-100)',
+          200: 'var(--color-gold-200)',
+          300: 'var(--color-gold-300)',
+          400: 'var(--color-gold-400)',
+          500: 'var(--color-gold-500)',
+          600: 'var(--color-gold-600)',
+          700: 'var(--color-gold-700)',
+          800: 'var(--color-gold-800)',
+          900: 'var(--color-gold-900)',
+        },
         sage: 'var(--color-sage)',
         'primary-heritage': 'var(--color-primary-heritage)',
+        ring: 'var(--color-ring)',
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        danger: 'var(--color-danger)',
 
         /* ---------------------------------------------------------------- */
         /* Material Design 3 named tokens                                   */
@@ -117,7 +133,22 @@ const preset = {
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
         xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
         full: 'var(--radius-full)',
+      },
+
+      /* ----------------------------------------------------------------- */
+      /* Elevation — token-driven soft shadows                             */
+      /* ----------------------------------------------------------------- */
+      boxShadow: {
+        xs: 'var(--shadow-xs)',
+        card: 'var(--shadow-card)',
+        'card-hover': 'var(--shadow-card-hover)',
+        overlay: 'var(--shadow-overlay)',
+      },
+
+      ringColor: {
+        DEFAULT: 'var(--color-ring)',
       },
 
       /* ----------------------------------------------------------------- */
@@ -151,6 +182,14 @@ const preset = {
 
       transitionTimingFunction: {
         'editorial-out': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        editorial: 'var(--ease-editorial)',
+        standard: 'var(--ease-standard)',
+      },
+
+      transitionDuration: {
+        fast: 'var(--motion-fast)',
+        base: 'var(--motion-base)',
+        slow: 'var(--motion-slow)',
       },
 
       /* ----------------------------------------------------------------- */

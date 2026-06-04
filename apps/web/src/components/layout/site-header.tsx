@@ -95,7 +95,7 @@ export async function SiteHeader(): Promise<ReactElement> {
             <Link
               href="/recherche"
               aria-label={t('primaryNav.search')}
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 lg:hidden"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 md:hidden"
             >
               <svg
                 aria-hidden
@@ -314,7 +314,7 @@ function PalacesHotelsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
                 pathname: '/label/[facetSlug]',
                 params: { facetSlug: entry.slug },
               }}
-              className="border-border text-muted hover:text-fg focus-visible:ring-ring rounded-full border bg-transparent px-2.5 py-1 text-[11px] transition hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2"
+              className="border-border text-muted hover:text-fg focus-visible:ring-ring hover:border-gold-300 rounded-full border bg-transparent px-2.5 py-1 text-[11px] transition focus-visible:outline-none focus-visible:ring-2"
             >
               {pickEntryLabel(entry, locale)}
             </Link>

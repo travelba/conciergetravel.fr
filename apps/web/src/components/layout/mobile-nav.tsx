@@ -81,13 +81,35 @@ export function MobileNav(): ReactElement {
     setOpen(false);
   }
 
-  // Body scroll lock + Esc handler.
+  // Body scroll lock + Esc + focus-trap (Tab containment) handler.
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKey = (ev: KeyboardEvent): void => {
-      if (ev.key === 'Escape') setOpen(false);
+      if (ev.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      if (ev.key !== 'Tab') return;
+      const panel = panelRef.current;
+      if (panel === null) return;
+      const focusables = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (first === undefined || last === undefined) return;
+      const active = document.activeElement;
+      if (ev.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          ev.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        ev.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => {
@@ -201,7 +223,7 @@ export function MobileNav(): ReactElement {
                 action={getPathname({ locale, href: '/recherche' })}
                 method="get"
                 aria-label={t('search.label')}
-                className="border-border bg-bg mb-3 flex h-10 items-center rounded-md border focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500"
+                className="border-border bg-bg focus-within:border-gold-400 focus-within:ring-ring mb-3 flex h-10 items-center rounded-md border focus-within:ring-2"
               >
                 <label className="sr-only" htmlFor="mobile-search-destination">
                   {t('search.label')}
@@ -216,7 +238,7 @@ export function MobileNav(): ReactElement {
                 <button
                   type="submit"
                   aria-label={t('search.submitAria')}
-                  className="bg-fg text-bg inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium hover:bg-amber-700"
+                  className="bg-fg text-bg hover:bg-fg/90 inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium"
                 >
                   <svg
                     aria-hidden

@@ -87,19 +87,19 @@ export async function SiteFooter(): Promise<ReactElement> {
             <p className="text-muted mt-2 text-sm">{t('tagline')}</p>
             <ul className="mt-4 flex flex-col gap-1.5 text-xs">
               <li className="text-muted flex items-start gap-1.5">
-                <span aria-hidden className="text-amber-700">
+                <span aria-hidden className="text-gold-700">
                   ★
                 </span>
                 <span>{t('trust.iata')}</span>
               </li>
               <li className="text-muted flex items-start gap-1.5">
-                <span aria-hidden className="text-amber-700">
+                <span aria-hidden className="text-gold-700">
                   ★
                 </span>
                 <span>{t('trust.concierge')}</span>
               </li>
               <li className="text-muted flex items-start gap-1.5">
-                <span aria-hidden className="text-amber-700">
+                <span aria-hidden className="text-gold-700">
                   ★
                 </span>
                 <span>{t('trust.loyalty')}</span>

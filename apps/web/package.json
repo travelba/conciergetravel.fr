@@ -18,7 +18,6 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@hookform/resolvers": "catalog:",
     "@mch/config": "workspace:*",
     "@mch/db": "workspace:*",
     "@mch/domain": "workspace:*",
@@ -45,8 +44,6 @@
     "next-intl": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "^7.76.0",
-    "react-instantsearch": "^7.33.0",
     "schema-dts": "^2.0.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",

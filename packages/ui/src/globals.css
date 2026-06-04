@@ -72,9 +72,10 @@
     line-height: 1.3;
   }
 
-  /* Always-visible focus ring per accessibility skill */
+  /* Always-visible focus ring per accessibility skill.
+     Single source of truth: --color-ring (see tokens.css §2). */
   :focus-visible {
-    outline: 2px solid var(--color-accent-gold);
+    outline: 2px solid var(--color-ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }

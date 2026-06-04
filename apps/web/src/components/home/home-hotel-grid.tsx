@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import { HotelImage } from '@mch/ui';
 
 import { HotelImagePlaceholder } from '@/components/hotel/hotel-image-placeholder';
+import { HotelCard } from '@/components/shared/hotel-card';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale } from '@/i18n/supported-locale';
@@ -64,51 +65,29 @@ export async function HomeHotelGrid({
             h.countryLabelEn !== '' ? h.countryLabelEn : h.countryLabelFr,
           );
           const tierBadge = pickTierBadge(h, t);
+          const location = countryLabel.length > 0 ? `${h.city} · ${countryLabel}` : h.city;
           return (
             <li key={h.slug}>
-              <article className="border-border bg-bg group h-full overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
-                <Link
-                  href={{ pathname: '/hotel/[slug]', params: { slug } }}
-                  className="block focus-visible:outline-none"
-                >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden">
-                    <HotelImage
-                      cloudName={cloudName}
-                      publicId={h.heroPublicId}
-                      alt={name}
-                      width={640}
-                      height={480}
-                      transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_480"
-                    />
-                  </div>
-                  <div className="p-4 sm:p-5">
-                    <div className="text-muted flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em]">
-                      {tierBadge !== null ? (
-                        <span
-                          className={
-                            h.isPalace
-                              ? 'rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-900'
-                              : 'border-border bg-bg rounded-md border px-2 py-0.5'
-                          }
-                        >
-                          {tierBadge}
-                        </span>
-                      ) : (
-                        <span className="border-border bg-bg rounded-md border px-2 py-0.5">
-                          {'★'.repeat(h.stars)}
-                        </span>
-                      )}
-                      <span>
-                        {countryLabel.length > 0 ? `${h.city} · ${countryLabel}` : h.city}
-                      </span>
-                    </div>
-                    <h3 className="text-fg mt-3 font-serif text-lg leading-snug">{name}</h3>
-                    <p className="text-muted mt-3 inline-flex items-center text-xs underline-offset-2 group-hover:underline">
-                      {t('viewFiche')} →
-                    </p>
-                  </div>
-                </Link>
-              </article>
+              <HotelCard
+                href={{ pathname: '/hotel/[slug]', params: { slug } }}
+                variant="grid"
+                name={name}
+                location={location}
+                distinction={{
+                  label: tierBadge ?? '★'.repeat(h.stars),
+                  isPalace: h.isPalace,
+                }}
+                media={
+                  <HotelImage
+                    cloudName={cloudName}
+                    publicId={h.heroPublicId}
+                    alt={name}
+                    width={640}
+                    height={480}
+                    transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_480"
+                  />
+                }
+              />
             </li>
           );
         })}
