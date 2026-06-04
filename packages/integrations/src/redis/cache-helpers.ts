@@ -47,7 +47,16 @@ export async function redisSetStringWithTtl(
 }
 
 export async function redisGetString(redis: IntegrationRedis, key: string): Promise<string | null> {
-  const v = await redis.get(key);
+  const v: unknown = await redis.get(key);
+  if (v === null || v === undefined) return null;
   if (typeof v === 'string') return v;
+  // `@upstash/redis` automatically JSON-deserializes values on GET, so a value
+  // stored as a JSON string (e.g. an OAuth token envelope) comes back as an
+  // object/number/boolean instead of a string. Re-serialize it so callers that
+  // expect the original string (and then `JSON.parse` it) keep working. The
+  // in-memory test double returns raw strings, which is why this path is only
+  // exercised against a real Upstash client.
+  if (typeof v === 'object') return JSON.stringify(v);
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
   return null;
 }
