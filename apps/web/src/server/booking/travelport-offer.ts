@@ -629,6 +629,10 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     city: set.city,
     region: set.region,
     slug: set.slug,
+    roomLabel: rate.roomLabel,
+    rateLabel: rate.rateLabel,
+    refundable: rate.refundable,
+    breakfastIncluded: rate.breakfastIncluded,
   };
   await saveDraft({ draft: locked, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
 

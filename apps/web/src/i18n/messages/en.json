@@ -3736,6 +3736,19 @@
     "completed": "completed",
     "current": "current step"
   },
+  "orderSummary": {
+    "title": "Your selection",
+    "stay": "Stay",
+    "nights": "{nights, plural, one {# night} other {# nights}}",
+    "guestsLabel": "Guests",
+    "guests": "{adults, plural, one {# adult} other {# adults}}{children, plural, =0 {} one {, # child} other {, # children}}",
+    "perNight": "i.e. {price} / night",
+    "total": "Total incl. tax",
+    "breakfastIncluded": "Breakfast included",
+    "refundable": "Free cancellation",
+    "nonRefundable": "Non-refundable",
+    "taxesNote": "Taxes and fees included."
+  },
   "reservationStart": {
     "meta": {
       "title": "Booking enquiry",

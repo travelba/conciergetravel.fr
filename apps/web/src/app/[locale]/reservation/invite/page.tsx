@@ -5,6 +5,7 @@ import { notFound, redirect as nextRedirect } from 'next/navigation';
 import { attachGuest, parseGuest } from '@mch/domain/booking';
 
 import { BookingProgress } from '@/components/booking/booking-progress';
+import { OrderSummary } from '@/components/booking/order-summary';
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { getDraftId } from '@/server/booking/draft-cookie';
@@ -133,113 +134,103 @@ export default async function ReservationInvitePage({
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
       <BookingProgress locale={locale} current="guest" />
-      <header className="mb-8">
-        <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{persisted.hotel.name}</h1>
-        <p className="text-muted mt-2 text-sm">
-          {persisted.hotel.city} · {persisted.hotel.region}
-        </p>
-      </header>
+      <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
+        <div>
+          <header className="mb-8">
+            <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
+            <h1 className="text-fg mt-2 font-serif text-3xl sm:text-4xl">{persisted.hotel.name}</h1>
+            <p className="text-muted mt-2 text-sm">
+              {persisted.hotel.city} · {persisted.hotel.region}
+            </p>
+          </header>
 
-      {offer !== undefined ? (
-        <section className="border-border bg-bg mb-8 rounded-lg border p-4 sm:p-5">
-          <h2 className="text-fg font-serif text-lg">{t('summary.title')}</h2>
-          <dl className="mt-3 grid grid-cols-1 gap-y-2 sm:grid-cols-2">
-            <div>
-              <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.stay')}</dt>
-              <dd className="text-fg text-sm">
-                {offer.stay.checkIn} → {offer.stay.checkOut}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.guests')}</dt>
-              <dd className="text-fg text-sm">
-                {t('summary.guestsValue', {
-                  adults: offer.guests.adults,
-                  children: offer.guests.children,
-                })}
-              </dd>
-            </div>
-          </dl>
-          <p className="text-muted mt-3 text-xs">{t('summary.lockNote')}</p>
-        </section>
-      ) : null}
+          <form action={submitAction} className="flex flex-col gap-5" noValidate>
+            <fieldset className="flex flex-col gap-4">
+              <legend className="text-fg font-serif text-lg">{t('form.legend')}</legend>
 
-      <form action={submitAction} className="flex flex-col gap-5" noValidate>
-        <fieldset className="flex flex-col gap-4">
-          <legend className="text-fg font-serif text-lg">{t('form.legend')}</legend>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5 text-sm">
+                  <span className="text-fg font-medium">{t('form.firstName')}</span>
+                  <input
+                    type="text"
+                    name="firstName"
+                    required
+                    autoComplete="given-name"
+                    maxLength={60}
+                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5 text-sm">
+                  <span className="text-fg font-medium">{t('form.lastName')}</span>
+                  <input
+                    type="text"
+                    name="lastName"
+                    required
+                    autoComplete="family-name"
+                    maxLength={60}
+                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
+                  />
+                </label>
+              </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-fg font-medium">{t('form.firstName')}</span>
-              <input
-                type="text"
-                name="firstName"
-                required
-                autoComplete="given-name"
-                maxLength={60}
-                className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-fg font-medium">{t('form.lastName')}</span>
-              <input
-                type="text"
-                name="lastName"
-                required
-                autoComplete="family-name"
-                maxLength={60}
-                className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-              />
-            </label>
-          </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5 text-sm">
+                  <span className="text-fg font-medium">{t('form.email')}</span>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    autoComplete="email"
+                    maxLength={254}
+                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5 text-sm">
+                  <span className="text-fg font-medium">{t('form.phone')}</span>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    autoComplete="tel"
+                    maxLength={30}
+                    className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
+                  />
+                </label>
+              </div>
+            </fieldset>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-fg font-medium">{t('form.email')}</span>
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                maxLength={254}
-                className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-fg font-medium">{t('form.phone')}</span>
-              <input
-                type="tel"
-                name="phone"
-                required
-                autoComplete="tel"
-                maxLength={30}
-                className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-              />
-            </label>
-          </div>
-        </fieldset>
+            {errorKind !== undefined ? (
+              <p
+                role="alert"
+                className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
+              >
+                {errorKind === 'validation'
+                  ? t('errors.validation')
+                  : errorKind === 'invalid_state'
+                    ? t('errors.invalidState')
+                    : t('errors.unknown')}
+              </p>
+            ) : null}
 
-        {errorKind !== undefined ? (
-          <p
-            role="alert"
-            className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900"
-          >
-            {errorKind === 'validation'
-              ? t('errors.validation')
-              : errorKind === 'invalid_state'
-                ? t('errors.invalidState')
-                : t('errors.unknown')}
-          </p>
+            <button
+              type="submit"
+              className="bg-fg text-bg focus-visible:ring-ring self-start rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+            >
+              {t('form.submit')}
+            </button>
+          </form>
+        </div>
+
+        {offer !== undefined ? (
+          <OrderSummary
+            locale={locale}
+            hotel={persisted.hotel}
+            offer={offer}
+            expiresAt={offer.expiresAt}
+            {...(persisted.hotel.slug !== undefined ? { slug: persisted.hotel.slug } : {})}
+          />
         ) : null}
-
-        <button
-          type="submit"
-          className="bg-fg text-bg focus-visible:ring-ring self-start rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
-        >
-          {t('form.submit')}
-        </button>
-      </form>
+      </div>
     </main>
   );
 }

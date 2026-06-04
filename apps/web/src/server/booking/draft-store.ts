@@ -34,6 +34,15 @@ export interface DraftHotelSnapshot {
    * vers la bonne fiche plutôt que vers la recherche legacy.
    */
   readonly slug?: string;
+  /**
+   * Libellés lisibles du tarif sélectionné, capturés au lock pour l'affichage
+   * (order-summary OTA). Le domaine `Offer` ne garde qu'un `roomCode` opaque ;
+   * ces champs sont purement présentationnels.
+   */
+  readonly roomLabel?: string;
+  readonly rateLabel?: string;
+  readonly refundable?: boolean | null;
+  readonly breakfastIncluded?: boolean | null;
 }
 
 export interface PersistedDraft {

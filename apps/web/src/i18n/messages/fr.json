@@ -3736,6 +3736,19 @@
     "completed": "terminé",
     "current": "étape en cours"
   },
+  "orderSummary": {
+    "title": "Votre sélection",
+    "stay": "Séjour",
+    "nights": "{nights, plural, one {# nuit} other {# nuits}}",
+    "guestsLabel": "Voyageurs",
+    "guests": "{adults, plural, one {# adulte} other {# adultes}}{children, plural, =0 {} one {, # enfant} other {, # enfants}}",
+    "perNight": "soit {price} / nuit",
+    "total": "Total TTC",
+    "breakfastIncluded": "Petit-déjeuner inclus",
+    "refundable": "Annulation gratuite",
+    "nonRefundable": "Non remboursable",
+    "taxesNote": "Taxes et frais inclus."
+  },
   "reservationStart": {
     "meta": {
       "title": "Demande de réservation",
