@@ -176,6 +176,14 @@ export const routing = defineRouting({
       en: '/booking/offer/[offerId]/lock',
       // de: '/buchung/angebot/[offerId]/sperren', es: '/reserva/oferta/[offerId]/bloquear', it: '/prenotazione/offerta/[offerId]/blocca',
     },
+    // Travelport sandbox pilot entry (Phase 6) — gated route handler; declared
+    // so the localized URL resolves in every locale (otherwise `/en/booking/
+    // sandbox/[slug]` 404s while `/reservation/sandbox/[slug]` works in FR).
+    '/reservation/sandbox/[slug]': {
+      fr: '/reservation/sandbox/[slug]',
+      en: '/booking/sandbox/[slug]',
+      // de: '/buchung/sandbox/[slug]', es: '/reserva/sandbox/[slug]', it: '/prenotazione/sandbox/[slug]',
+    },
 
     // Auth callback (system route — same name everywhere)
     '/auth/callback': '/auth/callback',
