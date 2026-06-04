@@ -25,12 +25,21 @@ export function OfferExpiryNotice({ expiresAt, slug }: OfferExpiryNoticeProps): 
   const [now, setNow] = useState<number>(() => Date.now());
   // Avoid a server/client clock hydration mismatch: keep the structure stable
   // (non-expired branch) until mounted, then let the interval drive expiry.
+  // The mount flag is flipped from a timer callback (not synchronously in the
+  // effect body) so React's set-state-in-effect rule stays satisfied.
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const mark = (): void => {
+      setMounted(true);
+      setNow(Date.now());
+    };
+    const first = setTimeout(mark, 0);
     const id = setInterval(() => setNow(Date.now()), 15_000);
-    return () => clearInterval(id);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
   }, []);
 
   const expMs = Date.parse(expiresAt);

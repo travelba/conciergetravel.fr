@@ -1,5 +1,7 @@
+import type { BookingMode } from '@mch/domain/hotels';
+
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import { isTravelportSampleSlug, isTravelportSandboxEnabled } from '@/lib/travelport';
+import { isTravelportSandboxEnabled } from '@/lib/travelport';
 
 import { BookingComingSoon } from './booking-coming-soon';
 import { BookingSandboxRail } from './booking-sandbox-rail';
@@ -17,10 +19,14 @@ interface BookingSlotProps {
   readonly surface: BookingSurface;
   /**
    * Slug de la fiche — requis pour router l'hôtel pilote Travelport vers le
-   * formulaire live (`<BookingSandboxRail>`). Absent / non allow-listé ⇒
-   * placeholder `<BookingComingSoon>` inchangé.
+   * formulaire live (`<BookingSandboxRail>`).
    */
   readonly slug?: string;
+  /**
+   * `booking_mode` de l'hôtel : seul `'travelport'` (avec le kill-switch env)
+   * bascule sur le formulaire live. Toute autre valeur ⇒ placeholder éditorial.
+   */
+  readonly bookingMode?: BookingMode;
 }
 
 /**
@@ -45,20 +51,21 @@ export function BookingSlot({
   hotelName,
   surface,
   slug,
+  bookingMode,
 }: BookingSlotProps): React.ReactElement | null {
   if (surface === 'mobilebar') {
     // Reserved for the Phase 6 fixed bottom bar. Inert until then.
     return null;
   }
 
-  // Pilote Travelport (Phase 6) : seul l'hôtel allow-listé, sandbox activé et
-  // locale V1 (fr/en) bascule sur le formulaire live ; tout le reste conserve
-  // le placeholder éditorial.
+  // Pilote Travelport (Phase 6) : seul l'hôtel en `booking_mode = 'travelport'`,
+  // sandbox activé (kill-switch env) et locale V1 (fr/en) bascule sur le
+  // formulaire live ; tout le reste conserve le placeholder éditorial.
   if (
     slug !== undefined &&
+    bookingMode === 'travelport' &&
     (locale === 'fr' || locale === 'en') &&
-    isTravelportSandboxEnabled() &&
-    isTravelportSampleSlug(slug)
+    isTravelportSandboxEnabled()
   ) {
     return <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />;
   }

@@ -30,6 +30,7 @@ const PRIORITY_OPTIONS = [
 const BOOKING_MODE_OPTIONS = [
   { label: 'Amadeus GDS (online booking)', value: 'amadeus' },
   { label: 'Little Hotelier (online booking)', value: 'little' },
+  { label: 'Travelport (online booking — pilote)', value: 'travelport' },
   { label: 'Email request (concierge)', value: 'email' },
   { label: 'Display only (vitrine)', value: 'display_only' },
 ] as const;

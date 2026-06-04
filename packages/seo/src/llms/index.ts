@@ -116,7 +116,7 @@ export interface LlmsFullHotelInput {
   readonly factualSummaryEn: string | null;
   readonly descriptionFr: string | null;
   readonly descriptionEn: string | null;
-  readonly bookingMode: 'amadeus' | 'little' | 'email' | 'display_only';
+  readonly bookingMode: 'amadeus' | 'little' | 'travelport' | 'email' | 'display_only';
   readonly updatedAt: string | null;
 }
 
@@ -167,11 +167,15 @@ export const buildLlmsFullHotelPages = (
   const bookingLabel =
     hotel.bookingMode === 'amadeus' || hotel.bookingMode === 'little'
       ? 'Réservation directe (paiement sécurisé Amadeus 3DS2)'
-      : 'Réservation via concierge (e-mail)';
+      : hotel.bookingMode === 'travelport'
+        ? 'Réservation directe (paiement sécurisé)'
+        : 'Réservation via concierge (e-mail)';
   const bookingLabelEn =
     hotel.bookingMode === 'amadeus' || hotel.bookingMode === 'little'
       ? 'Direct booking (secure Amadeus 3DS2 payment)'
-      : 'Concierge booking (email)';
+      : hotel.bookingMode === 'travelport'
+        ? 'Direct booking (secure payment)'
+        : 'Concierge booking (email)';
 
   if (summaryFr !== null) {
     out.push({

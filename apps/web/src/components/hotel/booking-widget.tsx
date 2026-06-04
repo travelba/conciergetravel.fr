@@ -11,7 +11,7 @@ import {
 
 import { BookingWidgetSubmitTracker } from './booking-widget-tracker';
 
-export type BookingMode = 'amadeus' | 'little' | 'email' | 'display_only';
+export type BookingMode = 'amadeus' | 'little' | 'travelport' | 'email' | 'display_only';
 
 /**
  * Live "starting at" price emitted by the server-side best-offer fetch

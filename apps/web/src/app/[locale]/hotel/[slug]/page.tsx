@@ -559,7 +559,7 @@ async function renderHotelPage(
   // chambres (best-effort, gated pilote ; `null` hors pilote ou en cas d'échec,
   // les cartes restent éditoriales). Voir `getTravelportLiveRoomPrices`.
   const travelportLiveRooms =
-    locale === 'fr' || locale === 'en'
+    (locale === 'fr' || locale === 'en') && row.booking_mode === 'travelport'
       ? await getTravelportLiveRoomPrices({ slug: row.slug, locale, rooms })
       : null;
   const tCard =
@@ -1802,7 +1802,7 @@ async function renderHotelPage(
                       );
                     })}
                   </ul>
-                ) : locale === 'fr' || locale === 'en' ? (
+                ) : (locale === 'fr' || locale === 'en') && row.booking_mode === 'travelport' ? (
                   // Fiche sans chambres éditoriales (cas pilote) : la liste live
                   // Travelport est récupérée dans une frontière Suspense pour ne
                   // pas bloquer le rendu de la fiche sur l'appel amont.
@@ -2021,7 +2021,13 @@ async function renderHotelPage(
           <aside aria-label={t('sections.booking')} className="mt-12 lg:mt-0">
             <div className="flex flex-col gap-6 lg:sticky lg:top-[100px]">
               <HotelToc heading={t('toc.heading')} items={tocItems} />
-              <BookingSlot locale={locale} hotelName={name} surface="rail" slug={row.slug} />
+              <BookingSlot
+                locale={locale}
+                hotelName={name}
+                surface="rail"
+                slug={row.slug}
+                bookingMode={row.booking_mode}
+              />
             </div>
           </aside>
         )}

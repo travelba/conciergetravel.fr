@@ -23,7 +23,7 @@ import { isHotelIndexable } from '@/server/hotels/indexability';
 
 export type { SupportedLocale };
 
-const BookingModeSchema = z.enum(['amadeus', 'little', 'email', 'display_only']);
+const BookingModeSchema = z.enum(['amadeus', 'little', 'travelport', 'email', 'display_only']);
 const PrioritySchema = z.enum(['P0', 'P1', 'P2']);
 
 const stringOrEmpty = z

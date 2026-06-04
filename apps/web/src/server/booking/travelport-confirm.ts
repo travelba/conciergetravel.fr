@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { BookingConfirmationGuest, renderEmailHtml, renderEmailText } from '@mch/emails';
-import { generateBookingRef, type BookingDraft } from '@mch/domain/booking';
+import { generateBookingRef, type BookingDraft, type Guest } from '@mch/domain/booking';
 import { sendBrevoTransactionalEmail } from '@mch/integrations/brevo';
 import {
   cancelReservation,
@@ -61,18 +61,53 @@ const DEVKIT_TEST_CARD: ReservationCardInput = {
   seriesCode: '343',
 };
 
-function toReservationGuest(
-  firstName: string,
-  lastName: string,
-  email: string,
-): ReservationGuestInput {
+/** Repli si le numéro saisi est inexploitable (jamais bloquant côté sandbox). */
+const FALLBACK_PHONE: ReservationGuestInput['phone'] = {
+  countryAccessCode: '33',
+  areaCityCode: '01',
+  number: '40000000',
+};
+
+/**
+ * Découpe le numéro saisi par le client (E.164 ou national) vers la structure
+ * Travelport `{ countryAccessCode?, areaCityCode, number }`. Best-effort : le
+ * sandbox ne valide pas finement le découpage, mais on transmet désormais le
+ * **vrai** numéro du voyageur plutôt qu'un numéro fixe.
+ */
+function parsePhone(raw: string): ReservationGuestInput['phone'] {
+  const trimmed = raw.trim();
+  const hasPlus = trimmed.startsWith('+');
+  let digits = trimmed.replace(/\D/g, '');
+  if (digits.length === 0) return FALLBACK_PHONE;
+
+  let countryAccessCode: string | undefined;
+  if (hasPlus) {
+    // Indicatif pays : on isole le cas FR (33) fréquent, sinon 2 chiffres.
+    if (digits.startsWith('33')) {
+      countryAccessCode = '33';
+      digits = digits.slice(2);
+    } else {
+      countryAccessCode = digits.slice(0, 2);
+      digits = digits.slice(2);
+    }
+  }
+  // Numéro national : retire un éventuel 0 de préfixe (FR) puis découpe un
+  // indicatif de zone court + le reste.
+  digits = digits.replace(/^0/, '');
+  if (digits.length < 2) return FALLBACK_PHONE;
+  const areaCityCode = digits.slice(0, 1);
+  const number = digits.slice(1);
+  return countryAccessCode !== undefined
+    ? { countryAccessCode, areaCityCode, number }
+    : { areaCityCode, number };
+}
+
+function toReservationGuest(guest: Guest): ReservationGuestInput {
   return {
-    given: firstName,
-    surname: lastName,
-    email,
-    // Téléphone sandbox fixe (format Travelport) — le draft ne porte qu'une
-    // chaîne E.164 non découpée ; inutile de la parser pour le pilote.
-    phone: { countryAccessCode: '33', areaCityCode: '01', number: '40000000' },
+    given: guest.firstName,
+    surname: guest.lastName,
+    email: guest.email,
+    phone: parsePhone(guest.phone),
   };
 }
 
@@ -253,7 +288,7 @@ export async function confirmTravelportSandboxReservation(
   const creds = getTravelportCredentials();
   if (creds === null) return { ok: false, reason: 'disabled' };
 
-  const reservationGuest = toReservationGuest(guest.firstName, guest.lastName, guest.email);
+  const reservationGuest = toReservationGuest(guest);
   const card = getTravelportTestCard() ?? DEVKIT_TEST_CARD;
 
   const baseInput = {

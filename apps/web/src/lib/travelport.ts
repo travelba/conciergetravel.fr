@@ -76,21 +76,12 @@ export function getTravelportCurrency(): string {
 }
 
 /**
- * Allow-list des slugs hôtels éligibles au pilote. Vide ⇒ aucun hôtel n'est
- * routé vers Travelport (sécurité : opt-in explicite par slug).
+ * L'éligibilité d'un hôtel au pilote Travelport est désormais pilotée par la
+ * donnée (`hotels.booking_mode = 'travelport'`, cf.
+ * `server/booking/travelport-offer.ts#isTravelportBookingSlug`) plutôt que par
+ * une allow-list d'env. `isTravelportSandboxEnabled()` reste le kill-switch
+ * global.
  */
-export function getTravelportSampleSlugs(): readonly string[] {
-  const raw = env.TRAVELPORT_SAMPLE_SLUGS;
-  if (raw === undefined) return [];
-  return raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-}
-
-export function isTravelportSampleSlug(slug: string): boolean {
-  return getTravelportSampleSlugs().includes(slug);
-}
 
 /**
  * Carte de test sandbox pour la garantie/dépôt. Renvoie `null` si non

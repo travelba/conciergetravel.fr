@@ -31,7 +31,7 @@ export interface LlmIndexableHotel {
   readonly factualSummaryEn: string | null;
   readonly descriptionFr: string | null;
   readonly descriptionEn: string | null;
-  readonly bookingMode: 'amadeus' | 'little' | 'email' | 'display_only';
+  readonly bookingMode: 'amadeus' | 'little' | 'travelport' | 'email' | 'display_only';
   readonly updatedAt: string | null;
 }
 
@@ -43,7 +43,9 @@ function stringOrNull(v: unknown): string | null {
 }
 
 function isBookingMode(v: unknown): v is LlmIndexableHotel['bookingMode'] {
-  return v === 'amadeus' || v === 'little' || v === 'email' || v === 'display_only';
+  return (
+    v === 'amadeus' || v === 'little' || v === 'travelport' || v === 'email' || v === 'display_only'
+  );
 }
 
 /**

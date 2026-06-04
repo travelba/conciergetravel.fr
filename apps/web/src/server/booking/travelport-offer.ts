@@ -1,12 +1,6 @@
 import 'server-only';
 
-import {
-  attachGuest,
-  moveToRecap,
-  startDraftFromOffer,
-  type Guest,
-  type Offer,
-} from '@mch/domain/booking';
+import { startDraftFromOffer, type Offer } from '@mch/domain/booking';
 import {
   haversineMeters,
   normalizeName,
@@ -21,7 +15,6 @@ import {
 import {
   getTravelportCredentials,
   getTravelportCurrency,
-  isTravelportSampleSlug,
   isTravelportSandboxEnabled,
 } from '@/lib/travelport';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -31,21 +24,16 @@ import { saveTravelportContext, type TravelportBookingContext } from './travelpo
 import { saveDraft, type DraftHotelSnapshot } from './draft-store';
 
 /**
- * Pilote sandbox Travelport — Étape A du câblage tunnel (découverte d'offre →
- * lock → recap), **sans réservation réelle**. Tout est gated derrière
- * `TRAVELPORT_SANDBOX_ENABLED` + une allow-list de slugs : la fiche publique
- * et le gel Phase 6 (`booking_mode`) restent intacts. Le point d'entrée du
- * parcours est la page gated `/[locale]/reservation/sandbox/[slug]/chambres`
- * (sélection chambre/tarif) → recap.
+ * Pilote Travelport — câblage tunnel (découverte d'offre → lock → saisie
+ * voyageur → recap). L'éligibilité d'un hôtel est désormais pilotée **par la
+ * donnée** : `hotels.booking_mode = 'travelport'`, avec
+ * `TRAVELPORT_SANDBOX_ENABLED` conservé comme kill-switch global. Le point
+ * d'entrée du parcours est la page gated
+ * `/[locale]/reservation/sandbox/[slug]/chambres` (sélection chambre/tarif) →
+ * saisie voyageur (`/reservation/invite`) → recap.
  */
 
 const OFFER_TTL_SEC = 10 * 60;
-const SANDBOX_GUEST: Guest = {
-  firstName: 'Sandbox',
-  lastName: 'Concierge',
-  email: 'benjamin@travelba.fr',
-  phone: '+33100000000',
-};
 
 export type TravelportSandboxLockResult =
   | {
@@ -180,6 +168,29 @@ async function fetchTravelportHotel(slug: string): Promise<TravelportHotelRow | 
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Source de vérité de l'éligibilité pilote : `true` ssi l'hôtel (slug) est
+ * publié **et** en `booking_mode = 'travelport'`. Remplace l'ancienne allow-list
+ * env. À combiner avec `isTravelportSandboxEnabled()` (kill-switch global) chez
+ * l'appelant pour éviter toute lecture DB quand le pilote est globalement coupé.
+ */
+async function isTravelportBookingSlug(slug: string): Promise<boolean> {
+  if (slug.length === 0) return false;
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('hotels')
+      .select('booking_mode, is_published')
+      .eq('slug', slug)
+      .maybeSingle();
+    if (error || !data) return false;
+    const row = data as { booking_mode: string | null; is_published: boolean | null };
+    return row.is_published === true && row.booking_mode === 'travelport';
+  } catch {
+    return false;
   }
 }
 
@@ -531,7 +542,7 @@ export async function listTravelportSandboxOffers(input: {
   readonly locale: 'fr' | 'en';
   readonly stay?: TravelportSandboxStayInput;
 }): Promise<TravelportSandboxOffersResult> {
-  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) {
+  if (!isTravelportSandboxEnabled() || !(await isTravelportBookingSlug(input.slug))) {
     return { ok: false, reason: 'disabled' };
   }
 
@@ -574,7 +585,9 @@ export async function listTravelportSandboxOffers(input: {
 
 /**
  * Verrouille le tarif **choisi** par le client (depuis l'ensemble mis en cache)
- * et persiste un draft `recap` + le contexte Travelport pour la confirmation.
+ * et persiste un draft `offer_locked` + le contexte Travelport. Le voyageur
+ * réel est collecté ensuite sur `/reservation/invite` (plus de voyageur
+ * sandbox codé en dur) avant le recap et la confirmation.
  */
 export async function lockTravelportSandboxSelectedOffer(input: {
   readonly offerSetId: string;
@@ -585,6 +598,10 @@ export async function lockTravelportSandboxSelectedOffer(input: {
 
   const set = await loadOfferSet(input.offerSetId);
   if (set === null) return { ok: false, reason: 'search_failed' };
+  // Re-valide l'éligibilité de l'hôtel au moment du lock (l'offerSet vient du
+  // cache : on ne fait jamais confiance au seul `offerSetId`). Couvre le cas
+  // d'un hôtel dé-listé (booking_mode changé) entre la recherche et le lock.
+  if (!(await isTravelportBookingSlug(set.slug))) return { ok: false, reason: 'hotel_not_found' };
   const rate = set.rates.find((r) => r.rateKey === input.rateKey);
   if (rate === undefined) return { ok: false, reason: 'no_rate' };
 
@@ -602,11 +619,9 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     expiresAt,
   };
 
+  // Draft laissé en `offer_locked` : `/reservation/invite` attache ensuite le
+  // vrai voyageur saisi par le client, puis passe au recap.
   const locked = startDraftFromOffer({ id: crypto.randomUUID(), mode: 'amadeus', offer });
-  const withGuest = attachGuest(locked, SANDBOX_GUEST);
-  if (!withGuest.ok) return { ok: false, reason: 'no_rate' };
-  const atRecap = moveToRecap(withGuest.value);
-  if (!atRecap.ok) return { ok: false, reason: 'no_rate' };
 
   const snapshot: DraftHotelSnapshot = {
     id: set.hotelId,
@@ -615,7 +630,7 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     region: set.region,
     slug: set.slug,
   };
-  await saveDraft({ draft: atRecap.value, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
+  await saveDraft({ draft: locked, hotel: snapshot, locale: input.locale }, OFFER_TTL_SEC);
 
   const bookingCtx: TravelportBookingContext = {
     rateKey: rate.rateKey,
@@ -631,9 +646,9 @@ export async function lockTravelportSandboxSelectedOffer(input: {
     hotelId: set.hotelId,
     hotelName: set.hotelName,
   };
-  await saveTravelportContext(atRecap.value.id, bookingCtx);
+  await saveTravelportContext(locked.id, bookingCtx);
 
-  return { ok: true, draftId: atRecap.value.id, ttlSec: OFFER_TTL_SEC, hotelName: set.hotelName };
+  return { ok: true, draftId: locked.id, ttlSec: OFFER_TTL_SEC, hotelName: set.hotelName };
 }
 
 // ---------------------------------------------------------------------------
@@ -658,7 +673,7 @@ export async function getTravelportLiveRoomPrices(input: {
     readonly room_code: string;
   }[];
 }): Promise<TravelportLiveRoomPrices | null> {
-  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return null;
+  if (!isTravelportSandboxEnabled() || !(await isTravelportBookingSlug(input.slug))) return null;
   if (input.rooms.length === 0) return null;
 
   let res: Awaited<ReturnType<typeof searchAndNormalize>>;
@@ -712,7 +727,7 @@ export async function getTravelportLiveRoomList(input: {
   readonly slug: string;
   readonly locale: 'fr' | 'en';
 }): Promise<readonly TravelportLiveRoom[]> {
-  if (!isTravelportSandboxEnabled() || !isTravelportSampleSlug(input.slug)) return [];
+  if (!isTravelportSandboxEnabled() || !(await isTravelportBookingSlug(input.slug))) return [];
 
   let res: Awaited<ReturnType<typeof searchAndNormalize>>;
   try {

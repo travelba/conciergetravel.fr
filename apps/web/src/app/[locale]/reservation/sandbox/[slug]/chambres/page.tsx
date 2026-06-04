@@ -36,9 +36,10 @@ function addDaysIso(days: number): string {
 
 /**
  * Verrouille le tarif choisi (offerSetId + rateKey relus côté serveur depuis le
- * cache Redis — jamais le prix client) puis redirige vers le recap existant.
- * En cas d'échec, retour sur la **fiche pilote** (état lisible) plutôt que vers
- * la recherche legacy qui n'exploite pas ce drapeau.
+ * cache Redis — jamais le prix client) puis redirige vers la saisie voyageur
+ * (`/reservation/invite`) où le client renseigne sa vraie identité. En cas
+ * d'échec, retour sur la **fiche pilote** (état lisible) plutôt que vers la
+ * recherche legacy qui n'exploite pas ce drapeau.
  */
 async function selectRoomAction(formData: FormData): Promise<void> {
   'use server';
@@ -65,7 +66,7 @@ async function selectRoomAction(formData: FormData): Promise<void> {
   }
 
   await setDraftCookie(result.draftId, result.ttlSec);
-  redirect({ href: '/reservation/recap', locale });
+  redirect({ href: '/reservation/invite', locale });
 }
 
 export default async function TravelportSandboxRoomsPage({
