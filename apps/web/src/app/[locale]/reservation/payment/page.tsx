@@ -117,18 +117,18 @@ export default async function ReservationPaymentPage({
 
       {provider.mode === 'stub' ? (
         <section
-          className="mb-8 rounded-lg border border-amber-300 bg-amber-50 p-5"
+          className="border-gold-300 bg-gold-50 mb-8 rounded-lg border p-5"
           aria-labelledby="stub-banner"
         >
-          <h2 id="stub-banner" className="font-serif text-lg text-amber-900">
+          <h2 id="stub-banner" className="text-gold-900 font-serif text-lg">
             {t('stub.title')}
           </h2>
-          <p className="mt-2 text-sm text-amber-900">{t('stub.description')}</p>
+          <p className="text-gold-900 mt-2 text-sm">{t('stub.description')}</p>
 
           <form action={confirmStubAction} className="mt-4">
             <button
               type="submit"
-              className="rounded-md bg-amber-900 px-5 py-2.5 text-sm font-medium text-amber-50 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700"
+              className="bg-gold-900 text-gold-50 focus-visible:ring-ring rounded-md px-5 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
             >
               {t('stub.confirmCta')}
             </button>

@@ -148,7 +148,7 @@ export default async function TravelportSandboxRoomsPage({
       {result.datesAdjusted ? (
         <p
           role="status"
-          className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+          className="border-gold-200 bg-gold-50 text-gold-900 mb-6 rounded-md border px-3 py-2 text-sm"
         >
           {t('datesAdjusted', { checkIn: result.checkIn, checkOut: result.checkOut })}
         </p>
