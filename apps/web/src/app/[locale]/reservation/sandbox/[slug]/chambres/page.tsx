@@ -19,7 +19,7 @@ const fmtPrice = (locale: Locale, amountMinor: number): string =>
   new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
     currency: 'EUR',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
   }).format(amountMinor / 100);
 
 /**
