@@ -123,6 +123,8 @@
     "dedup:longread:dry": "tsx src/hotels/dedup-longread-sections.ts --dry-run",
     "extract:michelin-awards": "tsx src/hotels/extract-michelin-awards.ts",
     "extract:michelin-awards:dry": "tsx src/hotels/extract-michelin-awards.ts --dry-run",
+    "descaffold:sections": "tsx src/hotels/descaffold-sections.ts",
+    "descaffold:sections:dry": "tsx src/hotels/descaffold-sections.ts --dry-run",
     "travelport:probe": "tsx src/booking/probe-travelport.ts",
     "travelport:book": "tsx src/booking/book-travelport.ts",
     "cohort:select": "tsx src/hotels/select-pilot-cohort.ts",
