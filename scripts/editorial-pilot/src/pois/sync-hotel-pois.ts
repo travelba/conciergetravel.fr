@@ -79,6 +79,8 @@ interface CliArgs {
   readonly dryRun: boolean;
   readonly noGoogle: boolean;
   readonly noOsm: boolean;
+  /** Only process fiches whose points_of_interest is still empty (never clobber). */
+  readonly missingOnly: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -90,11 +92,13 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let dryRun = false;
   let noGoogle = false;
   let noOsm = false;
+  let missingOnly = false;
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true;
     else if (arg === '--no-llm') noLlm = true;
     else if (arg === '--no-google') noGoogle = true;
     else if (arg === '--no-osm') noOsm = true;
+    else if (arg === '--missing-only') missingOnly = true;
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
     else if (arg.startsWith('--bucket=')) {
       const v = arg.slice('--bucket='.length);
@@ -115,7 +119,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     throw new Error('Either --slug=<hotel-slug> or --bucket=<name> is required. See --help.');
   }
   if (!Number.isFinite(limit) || limit <= 0) throw new Error('--limit must be a positive integer');
-  return { slug, bucket, limit, concurrency, noLlm, dryRun, noGoogle, noOsm };
+  return { slug, bucket, limit, concurrency, noLlm, dryRun, noGoogle, noOsm, missingOnly };
 }
 
 function printHelp(): void {
@@ -130,6 +134,7 @@ Options
   --no-llm              Skip LLM descriptions (free, fast)
   --no-google           Skip the Google Places worldwide POI fallback
   --no-osm              Skip Overpass (use when overpass-api.de is down)
+  --missing-only        Only fiches with empty points_of_interest (never clobber)
   --dry-run             Skip UPDATE + print preview
   --help                Show this message
 
@@ -201,10 +206,16 @@ interface HotelRow {
   readonly latitude: number | null;
   readonly longitude: number | null;
   readonly long_description_sections: unknown;
+  readonly points_of_interest: unknown;
 }
 
 const HOTEL_COLS =
-  'id, slug, name, city, is_palace, stars, latitude, longitude, long_description_sections';
+  'id, slug, name, city, is_palace, stars, latitude, longitude, long_description_sections, points_of_interest';
+
+/** A populated points_of_interest array already present → nothing to source. */
+function hasPois(pois: unknown): boolean {
+  return Array.isArray(pois) && pois.length > 0;
+}
 
 async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<HotelRow[]> {
   if (args.slug !== null) {
@@ -229,6 +240,8 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
   const filters: string[] = ['latitude=not.is.null', 'longitude=not.is.null'];
+  // Never clobber an already-populated fiche (protects the golden references).
+  if (args.missingOnly) filters.push('points_of_interest=is.null');
   if (draftsOnly) filters.push('is_published=eq.false');
   else if (!includeDrafts) filters.push('is_published=eq.true');
   if (args.bucket === 'palaces') {
@@ -330,6 +343,22 @@ async function processHotel(
   placesCfg: GooglePlacesClientConfig | null,
 ): Promise<HotelOutcome> {
   console.log(`\n→ ${hotel.slug} (${hotel.name}, ${hotel.city})`);
+
+  if (args.missingOnly && hasPois(hotel.points_of_interest)) {
+    return {
+      slug: hotel.slug,
+      outcome: 'skip',
+      urban: false,
+      dtCount: 0,
+      osmCount: 0,
+      transitCount: 0,
+      googleCount: 0,
+      mergedCount: 0,
+      llmDescribed: 0,
+      llmFailed: 0,
+      reason: 'already has POIs',
+    };
+  }
 
   if (hotel.latitude === null || hotel.longitude === null) {
     return {
