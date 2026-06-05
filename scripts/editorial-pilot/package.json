@@ -131,6 +131,8 @@
     "ratehawk:ingest": "tsx src/booking/ingest-ratehawk-content.ts",
     "ratehawk:ingest:dry": "tsx src/booking/ingest-ratehawk-content.ts --dry-run",
     "travelport:bootstrap": "tsx src/booking/bootstrap-travelport-mappings.ts",
+    "travelport:bootstrap:all": "tsx src/booking/run-travelport-bootstrap-all.ts",
+    "travelport:bootstrap:all:dry": "tsx src/booking/run-travelport-bootstrap-all.ts --dry-run",
     "cohort:select": "tsx src/hotels/select-pilot-cohort.ts",
     "fiches:waves": "tsx src/hotels/run-fiche-content-waves.ts",
     "fiches:waves:plan": "tsx src/hotels/run-fiche-content-waves.ts --plan",
