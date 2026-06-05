@@ -485,6 +485,14 @@ export const Hotels: CollectionConfig = {
           },
         },
         {
+          name: 'geo_qa',
+          type: 'json',
+          admin: {
+            description:
+              'Data-driven GEO/AEO answer-engine blocks (migration 0072). Array: [{ id, question_fr, question_en, paragraphs_fr:[], paragraphs_en:[] }]. Rendered by <HotelGeoSection> (self-elides when empty). Each answer 2-3 sentences <= 25 words, Concierge voice — factually sourced, no fabricated distinction.',
+          },
+        },
+        {
           name: 'instagram',
           type: 'json',
           admin: {
