@@ -745,28 +745,61 @@ export function matchEditorialRoomImages(input: {
   }[];
 }): ReadonlyMap<string, RoomImageRef> {
   const out = new Map<string, RoomImageRef>();
-  const candidates = input.rooms.filter((r) => r.cardImagePublicId !== null);
+
+  interface Candidate {
+    readonly publicId: string;
+    readonly alt: string;
+    readonly tokens: ReadonlySet<string>;
+  }
+  const candidates: Candidate[] = [];
+  for (const r of input.rooms) {
+    const publicId = r.cardImagePublicId;
+    if (publicId === null || publicId === '') continue;
+    candidates.push({
+      publicId,
+      alt: r.cardImageAlt ?? r.name ?? r.room_code,
+      tokens: normalizeName(r.name ?? r.room_code),
+    });
+  }
   if (candidates.length === 0) return out;
+
+  interface Pair {
+    readonly label: string;
+    readonly candidateIdx: number;
+    readonly overlap: number;
+  }
+  const pairs: Pair[] = [];
   for (const label of new Set(input.roomLabels)) {
     const wanted = normalizeName(label);
     if (wanted.size === 0) continue;
-    let best: (typeof candidates)[number] | undefined;
-    let bestOverlap = 0;
-    for (const room of candidates) {
-      const overlap = [...normalizeName(room.name ?? room.room_code)].filter((token) =>
-        wanted.has(token),
-      ).length;
-      if (overlap > bestOverlap) {
-        bestOverlap = overlap;
-        best = room;
-      }
-    }
-    if (best?.cardImagePublicId != null && best.cardImagePublicId !== '') {
-      out.set(label, {
-        publicId: best.cardImagePublicId,
-        alt: best.cardImageAlt ?? best.name ?? label,
-      });
-    }
+    candidates.forEach((cand, idx) => {
+      let overlap = 0;
+      for (const token of cand.tokens) if (wanted.has(token)) overlap += 1;
+      if (overlap > 0) pairs.push({ label, candidateIdx: idx, overlap });
+    });
+  }
+  // Tri par recouvrement décroissant (le tri V8 est stable ⇒ ordre des libellés
+  // puis des chambres conservé à égalité de score).
+  pairs.sort((a, b) => b.overlap - a.overlap);
+
+  const usedCandidate = new Set<number>();
+  // Passe 1 — on étale : on prend la meilleure correspondance dont la photo
+  // n'a pas déjà été attribuée, pour varier les visuels entre groupes proches
+  // (libellés Travelport génériques type « Junior Suite » / « Presidential Suite »).
+  for (const p of pairs) {
+    if (out.has(p.label) || usedCandidate.has(p.candidateIdx)) continue;
+    const cand = candidates[p.candidateIdx];
+    if (cand === undefined) continue;
+    out.set(p.label, { publicId: cand.publicId, alt: cand.alt });
+    usedCandidate.add(p.candidateIdx);
+  }
+  // Passe 2 — on comble les libellés encore sans photo par meilleur
+  // recouvrement, réutilisation permise (plus de photos uniques disponibles).
+  for (const p of pairs) {
+    if (out.has(p.label)) continue;
+    const cand = candidates[p.candidateIdx];
+    if (cand === undefined) continue;
+    out.set(p.label, { publicId: cand.publicId, alt: cand.alt });
   }
   return out;
 }
