@@ -92,6 +92,7 @@ import {
   readInstagram,
   readConciergePick,
   readConciergeHook,
+  readGeoQa,
   hasGoldenHero,
   readVirtualTour,
   type GalleryLicence,
@@ -490,6 +491,7 @@ async function renderHotelPage(
   const goldenTemplate = hasGoldenHero(row);
   const conciergePick = readConciergePick(row, locale);
   const conciergeHook = readConciergeHook(row, locale);
+  const geoBlocks = readGeoQa(row, locale);
   const firstGalleryTile = galleryTiles[0];
   const galleryHero =
     goldenTemplate && firstGalleryTile !== undefined
@@ -1379,11 +1381,14 @@ async function renderHotelPage(
       />
 
       {/*
-        ACTION 5 (GEO) — three answer-engine H2 blocks for the Airelles fiche
-        only. Rendered here (common to both layout branches) so it surfaces
-        whether or not the local golden-template flag is set.
+        GEO/AEO — answer-engine H2 blocks, data-driven from `hotels.geo_qa`
+        (migration 0072). Rendered here (common to both layout branches) for any
+        fiche carrying Q&A; self-elides when the array is empty. Replaces the
+        former Airelles-only hard-coded gate.
       */}
-      {isAirellesFiche ? <HotelGeoSection locale={locale} /> : null}
+      {geoBlocks.length > 0 ? (
+        <HotelGeoSection locale={locale} hotelName={name} blocks={geoBlocks} />
+      ) : null}
 
       {/*
         Two-column shell (fiche-reorganisation plan, PR `layout-shell`).

@@ -94,6 +94,9 @@ export const HotelDetailRowSchema = z.object({
   // them locally and production hydrates from the row when populated.
   concierge_pick: z.unknown().nullable().optional(),
   concierge_hook: z.unknown().nullable().optional(),
+  // Data-driven GEO/AEO answer-engine blocks (migration 0072 jsonb array).
+  // Optional — absent rows parse to undefined and `<HotelGeoSection>` self-elides.
+  geo_qa: z.unknown().nullable().optional(),
   featured_reviews: z.unknown().nullable().optional(),
   hero_image: stringOrEmpty,
   gallery_images: z.unknown().nullable().optional(),
@@ -178,7 +181,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -1371,6 +1374,42 @@ export function readConciergeHook(row: HotelDetailRow, locale: SupportedLocale):
  */
 export function hasGoldenHero(row: HotelDetailRow): boolean {
   return ConciergeHookSchema.safeParse(row.concierge_hook).success;
+}
+
+// ---------------------------------------------------------------------------
+// geo_qa — data-driven GEO/AEO answer-engine blocks (migration 0072 jsonb
+// array). Replaces the Airelles-only hard-coded `<HotelGeoSection>` gate: any
+// fiche carrying a valid `geo_qa` array surfaces its own answer-engine block.
+// ---------------------------------------------------------------------------
+
+const GeoQaEntrySchema = z.object({
+  id: z.string().min(1),
+  question_fr: z.string().min(1),
+  question_en: z.string().min(1),
+  paragraphs_fr: z.array(z.string().min(1)).min(1),
+  paragraphs_en: z.array(z.string().min(1)).min(1),
+});
+
+const GeoQaSchema = z.array(GeoQaEntrySchema);
+
+export interface GeoQaBlock {
+  readonly id: string;
+  readonly question: string;
+  readonly paragraphs: readonly string[];
+}
+
+/**
+ * Localised GEO/AEO blocks for the fiche. Returns [] when the row carries no
+ * (or an invalid) `geo_qa` payload — the caller then skips `<HotelGeoSection>`.
+ */
+export function readGeoQa(row: HotelDetailRow, locale: SupportedLocale): readonly GeoQaBlock[] {
+  const parsed = GeoQaSchema.safeParse(row.geo_qa);
+  if (!parsed.success) return [];
+  return parsed.data.map((entry) => ({
+    id: entry.id,
+    question: locale === 'en' ? entry.question_en : entry.question_fr,
+    paragraphs: locale === 'en' ? entry.paragraphs_en : entry.paragraphs_fr,
+  }));
 }
 
 // ---------------------------------------------------------------------------
