@@ -31,6 +31,8 @@ export interface WellnessFacts {
   readonly numberOfTreatmentRooms: number | null;
   /** Verbatim names of signature treatments listed. */
   readonly signatureTreatments: readonly string[];
+  /** Literal opening hours when explicitly stated on the page (e.g. "Daily 9am–9pm"); null otherwise. */
+  readonly hours: string | null;
   readonly evidenceQuote: string;
   readonly sourceUrl: string;
 }
@@ -53,6 +55,7 @@ const WellnessZ = z.object({
   has_sauna: z.boolean().nullable(),
   number_of_treatment_rooms: z.number().int().min(1).max(50).nullable(),
   signature_treatments: z.array(z.string()).default([]),
+  hours: z.string().max(200).nullable(),
   evidence_quote: z.string().nullable(),
 });
 
@@ -68,9 +71,11 @@ const SCHEMA_DESCRIPTION = `
   "has_sauna": true|false|null,
   "number_of_treatment_rooms": number|null,
   "signature_treatments": [string],     // verbatim names of named treatments, empty array if none
+  "hours": string|null,                 // literal opening hours ONLY if explicitly stated (e.g. "Tous les jours 9h–21h", "Daily 9am–9pm"). If silent → null. NEVER invent.
   "evidence_quote": string|null         // 1-2 sentences backing the entry (verbatim, max 400 chars)
 }
 DO NOT infer "has_pool=false" just because a pool isn't mentioned. If silent → null.
+DO NOT invent opening hours: only fill "hours" when the page literally states them.
 `;
 
 // ─── Public API ────────────────────────────────────────────────────────────
@@ -128,6 +133,7 @@ export async function extractWellness(
       signatureTreatments: d.signature_treatments
         .map((t) => t.trim())
         .filter((t) => t.length > 0 && t.length < 120),
+      hours: d.hours && d.hours.trim().length > 0 ? d.hours.trim() : null,
       evidenceQuote:
         d.evidence_quote && d.evidence_quote.trim().length > 0
           ? d.evidence_quote.trim().slice(0, 400)
@@ -159,5 +165,6 @@ function countSignal(w: WellnessFacts): number {
   if (w.hasSauna !== null) n++;
   if (w.numberOfTreatmentRooms !== null) n++;
   if (w.signatureTreatments.length > 0) n++;
+  if (w.hours) n++;
   return n;
 }
