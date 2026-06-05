@@ -255,13 +255,35 @@ function requireKey(): string {
   return API_KEY;
 }
 
+// Rate-limit resilience: DATAtourisme throttles hard under sustained load
+// (HTTP 429). A handful of short retries can't recover once the quota window
+// trips, so we use exponential backoff with jitter, honour `Retry-After`, and
+// allow more attempts. Pair with low concurrency on bulk runs.
+const DT_MAX_ATTEMPTS = 6;
+const DT_BACKOFF_BASE_MS = 2_000;
+const DT_BACKOFF_CAP_MS = 60_000;
+
+function parseRetryAfter(header: string | null): number | null {
+  if (header === null) return null;
+  const secs = Number(header);
+  if (Number.isFinite(secs) && secs >= 0) return Math.min(secs * 1000, DT_BACKOFF_CAP_MS);
+  const when = Date.parse(header);
+  if (!Number.isNaN(when)) return Math.min(Math.max(when - Date.now(), 0), DT_BACKOFF_CAP_MS);
+  return null;
+}
+
+function backoffDelayMs(attempt: number): number {
+  const expo = Math.min(DT_BACKOFF_BASE_MS * 2 ** (attempt - 1), DT_BACKOFF_CAP_MS);
+  return Math.round(expo / 2 + Math.random() * (expo / 2));
+}
+
 async function dtFetch(path: string, params: Record<string, string>): Promise<unknown> {
   const key = requireKey();
   const url = new URL(`${API_BASE}${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
   let lastError: Error | null = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= DT_MAX_ATTEMPTS; attempt++) {
     try {
       const res = await fetch(url, {
         headers: { 'X-API-Key': key, Accept: 'application/json' },
@@ -273,14 +295,17 @@ async function dtFetch(path: string, params: Record<string, string>): Promise<un
         lastError = new Error(
           `DATAtourisme ${res.status} on ${url.pathname}: ${body.slice(0, 200)}`,
         );
-        await sleep(500 * attempt);
+        if (attempt < DT_MAX_ATTEMPTS) {
+          const retryAfter = parseRetryAfter(res.headers.get('retry-after'));
+          await sleep(retryAfter ?? backoffDelayMs(attempt));
+        }
         continue;
       }
       const body = await res.text();
       throw new Error(`DATAtourisme ${res.status} on ${url.pathname}: ${body.slice(0, 500)}`);
     } catch (e) {
       lastError = e as Error;
-      if (attempt < 3) await sleep(500 * attempt);
+      if (attempt < DT_MAX_ATTEMPTS) await sleep(backoffDelayMs(attempt));
     }
   }
   throw lastError ?? new Error('DATAtourisme: unknown error');
