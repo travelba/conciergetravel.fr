@@ -8,7 +8,7 @@ import { offerExpiredError, type BookingError } from './errors';
  * `hotel-offers` step or Little Hotelier equivalent. Once locked it has a
  * vendor-side TTL and **must not** be mutated; we re-fetch instead.
  */
-export type OfferProvider = 'amadeus' | 'little' | 'travelport';
+export type OfferProvider = 'amadeus' | 'little' | 'travelport' | 'ratehawk';
 
 export interface MoneyAmount {
   /** Integer minor units (cents) to avoid float drift. */

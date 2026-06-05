@@ -7,6 +7,7 @@ import { buildConfig } from 'payload';
 
 import { ClubEligibility } from './collections/club-eligibility';
 import { HotelMemberBenefits } from './collections/hotel-member-benefits';
+import { HotelRooms } from './collections/hotel-rooms';
 import { Hotels } from './collections/hotels';
 import { Users } from './collections/users';
 
@@ -38,7 +39,7 @@ export default buildConfig({
     },
   },
   editor: lexicalEditor({}),
-  collections: [Users, Hotels, HotelMemberBenefits, ClubEligibility],
+  collections: [Users, Hotels, HotelRooms, HotelMemberBenefits, ClubEligibility],
   db: postgresAdapter({
     schemaName: 'cms',
     disableCreateDatabase: true,

@@ -60,6 +60,22 @@ const SharedEnvSchema = z.object({
   TRAVELPORT_ACCESS_GROUP: z.string().min(1),
   TRAVELPORT_CURRENCY: z.string().default('GBP'),
 
+  // RateHawk (Emerging Travel Group / worldota) — optional: only set once the
+  // connector is enabled for a hotel. HTTP Basic auth (KEY_ID:API_KEY).
+  RATEHAWK_ENABLED: z.coerce.boolean().default(false),
+  RATEHAWK_API_BASE: optionalUrl, // host root, e.g. https://api-sandbox.worldota.net
+  RATEHAWK_KEY_ID: z.string().optional(),
+  RATEHAWK_API_KEY: z.string().optional(),
+
+  // Little Emperors — private members club, NO public B2B API as of 2026-06.
+  // Kept optional/disabled; the connector degrades to concierge/email mode.
+  LITTLE_EMPERORS_ENABLED: z.coerce.boolean().default(false),
+  LITTLE_EMPERORS_API_BASE: optionalUrl,
+  LITTLE_EMPERORS_API_KEY: z.string().optional(),
+
+  // Multi-supplier rate-shopping orchestrator kill-switch (fiche/tunnel).
+  MULTI_SUPPLIER_RATESHOPPING_ENABLED: z.coerce.boolean().default(false),
+
   // Makcorps + Apify
   MAKCORPS_API_BASE: requiredUrl,
   MAKCORPS_API_KEY: z.string().min(1),

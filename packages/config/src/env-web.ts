@@ -35,6 +35,19 @@ export const env = createEnv({
     TRAVELPORT_CURRENCY: z.string().length(3).default('EUR'),
     /** Allow-list de slugs hôtels éligibles au sandbox (séparés par virgule). */
     TRAVELPORT_SAMPLE_SLUGS: z.string().optional(),
+    // RateHawk (ETG/worldota) — optionnel ; orchestrateur multi-fournisseurs.
+    RATEHAWK_ENABLED: z.coerce.boolean().default(false),
+    RATEHAWK_API_BASE: z.string().url().optional(),
+    RATEHAWK_KEY_ID: z.string().optional(),
+    RATEHAWK_API_KEY: z.string().optional(),
+    // Little Emperors — pas d'API publique ; mode concierge/email.
+    LITTLE_EMPERORS_ENABLED: z.coerce.boolean().default(false),
+    LITTLE_EMPERORS_API_BASE: z.string().url().optional(),
+    LITTLE_EMPERORS_API_KEY: z.string().optional(),
+    // Kill-switch de l'orchestrateur rate-shopping multi-fournisseurs sur la
+    // fiche/tunnel. OFF par défaut : aucune requête DB supplémentaire sur les
+    // ~2200 fiches tant que des connexions fournisseurs ne sont pas seedées.
+    MULTI_SUPPLIER_RATESHOPPING_ENABLED: z.coerce.boolean().default(false),
     /** Carte de test sandbox pour la garantie/dépôt (jamais en production). */
     TRAVELPORT_TEST_CARD_CODE: z.string().optional(),
     TRAVELPORT_TEST_CARD_NUMBER: z.string().optional(),

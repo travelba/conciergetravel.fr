@@ -10,6 +10,7 @@ import { buildCloudinarySrc, HotelImage } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
 import { TravelportLiveRooms } from '@/components/hotel/travelport-live-rooms';
+import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
 import { getTravelportLiveRoomPrices } from '@/server/booking/travelport-offer';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
@@ -561,6 +562,21 @@ async function renderHotelPage(
   const travelportLiveRooms =
     (locale === 'fr' || locale === 'en') && row.booking_mode === 'travelport'
       ? await getTravelportLiveRoomPrices({ slug: row.slug, locale, rooms })
+      : null;
+  // Multi-supplier deterministic prices (Phase 3/4). Inert unless the
+  // kill-switch is on AND supplier connections are seeded for this hotel;
+  // when active, these `roomId -> best EUR` prices take precedence over the
+  // legacy fuzzy Travelport overlay. See `getAggregatedRoomPrices`.
+  const aggregatedRoomPrices =
+    locale === 'fr' || locale === 'en'
+      ? await getAggregatedRoomPrices({
+          hotelId: row.id,
+          stay: {
+            checkIn: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10),
+            checkOut: new Date(Date.now() + 31 * 86_400_000).toISOString().slice(0, 10),
+            adults: 1,
+          },
+        })
       : null;
   const tCard =
     locale === 'fr' || locale === 'en'
@@ -1788,9 +1804,9 @@ async function renderHotelPage(
                                   </Link>
                                 </p>
                                 {(() => {
-                                  const liveFromMinor = travelportLiveRooms?.fromByRoomId.get(
-                                    room.id,
-                                  );
+                                  const liveFromMinor =
+                                    aggregatedRoomPrices?.fromByRoomId.get(room.id) ??
+                                    travelportLiveRooms?.fromByRoomId.get(room.id);
                                   if (liveFromMinor !== undefined && tCard !== null) {
                                     const priceText = fmtLiveEur(liveFromMinor);
                                     return (

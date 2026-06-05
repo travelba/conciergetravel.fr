@@ -5,6 +5,9 @@
 export * as Http from './http';
 export * as Amadeus from './amadeus';
 export * as Travelport from './travelport';
+export * as RateHawk from './ratehawk';
+export * as LittleEmperors from './little-emperors';
+export * as Supplier from './supplier';
 export * as LittleHotelier from './little-hotelier';
 export * as Makcorps from './makcorps';
 export * as Apify from './apify';
