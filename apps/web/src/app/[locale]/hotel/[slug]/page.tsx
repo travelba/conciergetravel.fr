@@ -218,14 +218,15 @@ export async function generateMetadata({
       ? titleOverride
       : t('meta.titleFallback', { name, city: row.city });
 
-  // ACTION 1 (SEO) — Airelles Gordes title de-duplication. The stored
-  // `meta_title_fr` already ends with "| MyConciergeHotel" and the root
-  // layout template (`app/layout.tsx`: `%s · MyConciergeHotel`) appends a
-  // second brand suffix, yielding "… | MyConciergeHotel · MyConciergeHotel".
-  // Emitting an `absolute` title bypasses the template for this fiche only —
-  // every other hotel keeps the templated string, so no other page changes.
-  const isAirellesFiche = row.slug === 'les-airelles-gordes';
-  const metadataTitle: NonNullable<Metadata['title']> = isAirellesFiche
+  // SEO — golden-fiche title de-duplication. The stored `meta_title_*`
+  // already ends with "| MyConciergeHotel" and the root layout template
+  // (`app/layout.tsx`: `%s · MyConciergeHotel`) appends a second brand
+  // suffix, yielding "… | MyConciergeHotel · MyConciergeHotel". Golden fiches
+  // (the curated reference set: Airelles Gordes, Prince de Galles, …) emit a
+  // clean `absolute` title that bypasses the template; every other hotel keeps
+  // the templated string, so no non-golden page changes. Data-driven via
+  // `hasGoldenHero` — no per-slug flag.
+  const metadataTitle: NonNullable<Metadata['title']> = hasGoldenHero(row)
     ? {
         absolute: `${name} — ${row.is_palace ? 'Palace' : `Hôtel ${row.stars}★`} ${row.city} | MyConciergeHotel`,
       }
@@ -418,12 +419,10 @@ async function renderHotelPage(
               source: 'amadeus',
             }
           : null;
-  // Airelles Gordes SEO/GEO test scope (branch seo/fix-airelles-gordes-test):
-  // a few JSON-LD enrichments + the GEO section below are gated to this single
-  // slug so no other fiche is affected. The data-driven fields (priceRange /
-  // aggregateRating) are naturally scoped too — only this row carries the
-  // migration-0066 values.
-  const isAirellesFiche = row.slug === 'les-airelles-gordes';
+  // JSON-LD enrichments + the GEO section below are fully data-driven: the
+  // golden layout opts in via `hasGoldenHero` (concierge_hook) and the
+  // priceRange / aggregateRating fields are naturally scoped to rows that
+  // carry the migration-0066 values — no per-slug flag.
   const name = pickName(row, locale);
   const description = pickDescription(row, locale);
   const highlights = readHighlights(row, locale);
@@ -739,12 +738,11 @@ async function renderHotelPage(
     // Telephone (Phase 10.29 / CDC §2.15). E.164 by default — `readPhoneE164`
     // refuses loose / partial entries so the JSON-LD never carries a half-typed
     // number, and Google Hotels uses it for the SERP card + click-to-call.
-    // Airelles exception: surface the spaced human-readable display form from
-    // the `telephone` column (e.g. "+33 4 90 72 12 12") — still valid for
-    // schema.org `telephone`, with the E.164 value as fallback.
+    // When the row carries a spaced human-readable `telephone` (e.g.
+    // "+33 4 90 72 12 12") we surface it — still valid for schema.org
+    // `telephone` — with the E.164 value as fallback. Applies to every fiche.
     ...((): { telephone?: string } => {
-      const display =
-        isAirellesFiche && typeof row.telephone === 'string' ? row.telephone.trim() : '';
+      const display = typeof row.telephone === 'string' ? row.telephone.trim() : '';
       const tel = display.length > 0 ? display : phoneE164;
       return tel !== null ? { telephone: tel } : {};
     })(),
@@ -936,17 +934,14 @@ async function renderHotelPage(
     // emits a clean, lint-free payload.
     ...(externalIds.wikidataId !== null ? { wikidataId: externalIds.wikidataId } : {}),
     // ACTION 3 (SEO) — `sameAs[]` is read from the DB knowledge-graph anchors
-    // (`external_sameas` socials + `official_url` + Wikidata/Wikipedia/…). For
-    // the Airelles fiche we add a defensive fallback to the official Airelles
-    // URL so the array is never empty even before enrichment runs.
+    // (`external_sameas` socials + `official_url` + Wikidata/Wikipedia/…). When
+    // enrichment hasn't run yet we fall back to the row's own `official_url`
+    // (generic, no hard-coded per-fiche URL) so the array is never empty.
     ...((): { sameAs?: readonly string[] } => {
       if (externalIds.sameAs.length > 0) return { sameAs: externalIds.sameAs };
-      if (isAirellesFiche) {
-        return {
-          sameAs: [
-            'https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon',
-          ],
-        };
+      const fallbackOfficial = typeof row.official_url === 'string' ? row.official_url.trim() : '';
+      if (fallbackOfficial.startsWith('https://')) {
+        return { sameAs: [fallbackOfficial] };
       }
       return {};
     })(),
