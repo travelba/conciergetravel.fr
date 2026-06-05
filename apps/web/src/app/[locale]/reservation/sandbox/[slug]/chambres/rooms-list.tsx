@@ -1,5 +1,6 @@
 'use client';
 
+import { HotelImage } from '@mch/ui';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
@@ -26,6 +27,12 @@ interface RoomsListProps {
   readonly slug: string;
   readonly locale: Locale;
   readonly nights: number;
+  /** Cloudinary cloud name forwarded by the server page for `<HotelImage>`. */
+  readonly cloudName: string;
+  /** Photo éditoriale (hero) par libellé de chambre Travelport, si rapprochée. */
+  readonly imagesByLabel: Readonly<
+    Record<string, { readonly publicId: string; readonly alt: string }>
+  >;
   readonly selectAction: (formData: FormData) => Promise<void>;
 }
 
@@ -48,6 +55,8 @@ export function RoomsList({
   slug,
   locale,
   nights,
+  cloudName,
+  imagesByLabel,
   selectAction,
 }: RoomsListProps): ReactElement {
   const t = useTranslations('reservationRooms');
@@ -154,12 +163,27 @@ export function RoomsList({
             const isExpanded = expanded.has(group.label);
             const visibleRates = isExpanded ? group.rates : group.rates.slice(0, 1);
             const cheapest = group.rates[0];
+            const image = imagesByLabel[group.label];
             return (
               <li
                 key={group.label}
                 className="border-border bg-bg shadow-card overflow-hidden rounded-2xl border"
                 data-room-group
               >
+                {image !== undefined ? (
+                  <div className="relative aspect-[21/9] w-full overflow-hidden">
+                    <HotelImage
+                      cloudName={cloudName}
+                      publicId={image.publicId}
+                      alt={image.alt}
+                      variant="card"
+                      width={768}
+                      height={329}
+                      sizes="(max-width: 768px) 100vw, 640px"
+                      className="h-full w-full"
+                    />
+                  </div>
+                ) : null}
                 <div className="border-border from-gold-50/60 to-bg flex flex-wrap items-baseline justify-between gap-2 border-b bg-gradient-to-r px-5 py-4">
                   <div className="min-w-0">
                     <h2 className="text-fg font-serif text-xl leading-snug">{group.label}</h2>

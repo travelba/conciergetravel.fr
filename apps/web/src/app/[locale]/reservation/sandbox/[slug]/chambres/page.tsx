@@ -8,12 +8,15 @@ import { SubmitButton } from '@/components/booking/submit-button';
 import { BookingSandboxDateFields } from '@/components/hotel/booking-sandbox-date-fields';
 import { Link, getPathname, redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { env } from '@/lib/env';
 import { setDraftCookie } from '@/server/booking/draft-cookie';
 import { gateTravelportSearchByIp } from '@/server/booking/rate-limit';
 import {
   listTravelportSandboxOffers,
   lockTravelportSandboxSelectedOffer,
+  matchEditorialRoomImages,
 } from '@/server/booking/travelport-offer';
+import { getHotelBySlug } from '@/server/hotels/get-hotel-by-slug';
 
 import { RoomsList } from './rooms-list';
 
@@ -136,6 +139,19 @@ export default async function TravelportSandboxRoomsPage({
     href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },
   });
 
+  // Photo éditoriale par libellé de chambre Travelport — on réutilise les
+  // chambres éditoriales de la fiche (mêmes hero images que les cartes) et on
+  // les rapproche par recouvrement de tokens. Best-effort : sans correspondance
+  // la carte reste sans photo (jamais cassée). Lecture DB supplémentaire
+  // acceptable sur une page déjà `force-dynamic`.
+  const editorialHotel = await getHotelBySlug(slug, locale);
+  const roomImageMatches = matchEditorialRoomImages({
+    roomLabels: result.options.map((o) => o.roomLabel),
+    rooms: editorialHotel?.rooms ?? [],
+  });
+  const imagesByLabel: Record<string, { readonly publicId: string; readonly alt: string }> = {};
+  for (const [label, ref] of roomImageMatches) imagesByLabel[label] = ref;
+
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
       <BookingProgress locale={locale} current="rooms" />
@@ -194,6 +210,8 @@ export default async function TravelportSandboxRoomsPage({
         slug={slug}
         locale={locale}
         nights={nights}
+        cloudName={env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}
+        imagesByLabel={imagesByLabel}
         selectAction={selectRoomAction}
       />
 

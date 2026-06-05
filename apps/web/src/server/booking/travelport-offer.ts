@@ -722,6 +722,55 @@ export async function getTravelportLiveRoomPrices(input: {
   return { fromByRoomId };
 }
 
+// ---------------------------------------------------------------------------
+// Étape « choix de la chambre » (tunnel) — photo éditoriale par libellé
+// Travelport. On rapproche chaque libellé de chambre live d'une chambre
+// éditoriale (même heuristique de recouvrement de tokens que ci-dessus) et on
+// renvoie sa photo (hero). Pur + best-effort : un libellé sans correspondance
+// est simplement absent de la map (la carte reste sans photo, jamais cassée).
+// ---------------------------------------------------------------------------
+
+export interface RoomImageRef {
+  readonly publicId: string;
+  readonly alt: string;
+}
+
+export function matchEditorialRoomImages(input: {
+  readonly roomLabels: readonly string[];
+  readonly rooms: readonly {
+    readonly name: string | null;
+    readonly room_code: string;
+    readonly cardImagePublicId: string | null;
+    readonly cardImageAlt: string | null;
+  }[];
+}): ReadonlyMap<string, RoomImageRef> {
+  const out = new Map<string, RoomImageRef>();
+  const candidates = input.rooms.filter((r) => r.cardImagePublicId !== null);
+  if (candidates.length === 0) return out;
+  for (const label of new Set(input.roomLabels)) {
+    const wanted = normalizeName(label);
+    if (wanted.size === 0) continue;
+    let best: (typeof candidates)[number] | undefined;
+    let bestOverlap = 0;
+    for (const room of candidates) {
+      const overlap = [...normalizeName(room.name ?? room.room_code)].filter((token) =>
+        wanted.has(token),
+      ).length;
+      if (overlap > bestOverlap) {
+        bestOverlap = overlap;
+        best = room;
+      }
+    }
+    if (best?.cardImagePublicId != null && best.cardImagePublicId !== '') {
+      out.set(label, {
+        publicId: best.cardImagePublicId,
+        alt: best.cardImageAlt ?? best.name ?? label,
+      });
+    }
+  }
+  return out;
+}
+
 /**
  * Chambre Travelport « live » dédoublonnée par type, avec son tarif le plus bas.
  * Sert à **remplir** la section Chambres d'une fiche dépourvue de chambres
