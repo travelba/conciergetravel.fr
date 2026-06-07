@@ -1,102 +1,42 @@
 import type { ReactElement } from 'react';
 
 import type { Locale } from '@/i18n/routing';
+import type { GeoQaBlock } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelGeoSectionProps {
   readonly locale: Locale;
-}
-
-interface GeoBlock {
-  readonly id: string;
-  readonly question: string;
-  readonly paragraphs: readonly string[];
+  readonly hotelName: string;
+  /** Localised GEO/AEO blocks (from `readGeoQa`). The caller renders this
+   * component only when the array is non-empty. */
+  readonly blocks: readonly GeoQaBlock[];
 }
 
 /**
- * GEO / AEO question blocks for the Airelles Gordes fiche (ACTION 5,
- * branch `seo/fix-airelles-gordes-test`). Three short H2-led answers built
- * for AI Overviews / answer engines: each question mirrors a real long-tail
- * query and is answered in 2-3 ≤ 25-word sentences (concierge-voice skill).
+ * GEO / AEO question blocks — data-driven (migration 0072 `hotels.geo_qa`).
+ * Three short H2-led answers built for AI Overviews / answer engines: each
+ * question mirrors a real long-tail query and is answered in 2-3 ≤ 25-word
+ * sentences (concierge-voice skill).
  *
- * Factual integrity: the hotel holds the regulated Atout France *Palace*
- * distinction, **not** a Michelin star — Clover Gordes is the Provençal table
- * of multi-starred chef Jean-François Piège but the restaurant itself is not
- * starred (see `dev-override-airelles.ts` + hotel-detail-page.mdc Hard Rule 7).
- * The copy therefore avoids the "restaurant étoilé" wording.
+ * Factual integrity is the authoring concern (no fabricated distinction): the
+ * copy lives in the DB column, sourced + validated per fiche, not in this
+ * component. Originally hard-coded for the Airelles Gordes fiche (ACTION 5,
+ * branch `seo/fix-airelles-gordes-test`); generalised so any golden fiche
+ * (Prince de Galles, …) surfaces its own block.
  *
- * Pure RSC, no client JS. Gated to the single slug at the call site.
+ * Pure RSC, no client JS. Self-elides via the caller when no blocks exist.
  */
-const BLOCKS: Record<Locale, readonly GeoBlock[]> = {
-  fr: [
-    {
-      id: 'geo-meilleur-palace-gordes',
-      question: 'Quel est le meilleur hôtel Palace à Gordes ?',
-      paragraphs: [
-        'Airelles Gordes, La Bastide est le seul Palace de Gordes, distinction officielle d’Atout France.',
-        'Cette bastide du XVIIIᵉ siècle domine le village perché et la vallée du Luberon, avec 34 chambres et 6 suites.',
-        'Gordes, classé parmi les Plus Beaux Villages de France, place l’hôtel au cœur d’un paysage de pierres sèches et de lavande.',
-      ],
-    },
-    {
-      id: 'geo-palace-luberon-spa',
-      question: 'Hôtel Palace Luberon avec spa et table de chef',
-      paragraphs: [
-        'Le Spa Airelles by Guerlain s’étend sous des voûtes en pierre, avec piscine intérieure, hammam et sauna.',
-        'La table provençale de Clover Gordes est signée du chef multi-étoilé Jean-François Piège.',
-        'L’hôtel compte trois piscines, dont un bassin en terrasse panoramique face à la vallée.',
-      ],
-    },
-    {
-      id: 'geo-prix-airelles-gordes',
-      question: 'Prix et disponibilités — Airelles Gordes',
-      paragraphs: [
-        'Les nuitées à La Bastide démarrent autour de 649 € la nuit, selon la saison et la catégorie de chambre.',
-        'L’établissement est saisonnier ; la conciergerie organise réservations, tables et soins au +33 4 90 72 12 12.',
-        'Positionné sur la gamme la plus haute (€€€€), l’hôtel conseille de réserver tôt : les disponibilités estivales partent vite.',
-      ],
-    },
-  ],
-  en: [
-    {
-      id: 'geo-meilleur-palace-gordes',
-      question: 'What is the best Palace hotel in Gordes?',
-      paragraphs: [
-        'Airelles Gordes, La Bastide is the only Palace in Gordes, an official Atout France distinction.',
-        'This 18th-century bastide overlooks the hilltop village and the Luberon valley, with 34 rooms and 6 suites.',
-        'Gordes, listed among France’s Most Beautiful Villages, sets the hotel amid dry-stone landscapes and lavender fields.',
-      ],
-    },
-    {
-      id: 'geo-palace-luberon-spa',
-      question: 'Luberon Palace hotel with a spa and a chef’s table',
-      paragraphs: [
-        'The Airelles Spa by Guerlain unfolds under stone vaults, with an indoor pool, a hammam and a sauna.',
-        'The Provençal table at Clover Gordes is run by multi-Michelin-starred chef Jean-François Piège.',
-        'The hotel has three pools, including a panoramic terrace pool facing the valley.',
-      ],
-    },
-    {
-      id: 'geo-prix-airelles-gordes',
-      question: 'Prices and availability — Airelles Gordes',
-      paragraphs: [
-        'Nights at La Bastide start at around €649, depending on the season and the room category.',
-        'The property is seasonal; the concierge arranges rooms, tables and treatments at +33 4 90 72 12 12.',
-        'Positioned at the top €€€€ tier, the hotel recommends booking early, as summer availability goes quickly.',
-      ],
-    },
-  ],
-};
-
-export function HotelGeoSection({ locale }: HotelGeoSectionProps): ReactElement {
-  const blocks = BLOCKS[locale] ?? BLOCKS.fr;
+export function HotelGeoSection({
+  locale,
+  hotelName,
+  blocks,
+}: HotelGeoSectionProps): ReactElement | null {
+  if (blocks.length === 0) return null;
   return (
     <section
       aria-label={
-        locale === 'en'
-          ? 'Key questions about Airelles Gordes'
-          : 'Questions clés sur Airelles Gordes'
+        locale === 'en' ? `Key questions about ${hotelName}` : `Questions clés sur ${hotelName}`
       }
-      data-geo="airelles-gordes"
+      data-geo="hotel-qa"
       className="mb-12 flex flex-col gap-8"
     >
       {blocks.map((block) => (
