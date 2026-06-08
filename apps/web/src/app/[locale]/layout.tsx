@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Outfit, EB_Garamond } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
@@ -16,22 +16,23 @@ import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import '@/styles/globals.css';
 
-// Body / UI font — DESIGN.md §3 (functional workhorse, clarity workhorse).
-const sans = Inter({
+// Body / UI font — validated brand dossier (DA crème/taupe): Outfit (sans).
+const sans = Outfit({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
+  weight: ['300', '400', '500'],
 });
 
-// Editorial / headline font — DESIGN.md §3 (literary, authoritative).
-// Playfair Display — high-contrast display serif for the "luxury editorial"
-// direction (Option A, validated 2026-06-04). Headings only; Inter stays the
-// body workhorse.
-const serif = Playfair_Display({
+// Editorial / headline font — validated brand dossier (DA crème/taupe).
+// EB Garamond — timeless editorial serif (titles, quotes, prices). Headings
+// only; Outfit stays the body workhorse. No yellow gold, no trend-driven type.
+const serif = EB_Garamond({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-serif',
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500'],
+  style: ['normal', 'italic'],
 });
 
 export function generateStaticParams() {

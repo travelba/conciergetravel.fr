@@ -2,10 +2,11 @@
  * Design tokens — the entire visual identity is driven by these CSS custom
  * properties. Restyling the product = override this file in apps/web/src/styles.
  *
- * Aligned with CDC §10.1 (visual identity — sober editorial luxe).
+ * Aligned with the validated brand dossier (DA crème/taupe — June 2026).
  *
- * Philosophy: "Sober Luxury" — quality whispered through white space and
- * precise typography rather than shouted through ornamentation.
+ * Philosophy: "Sober Editorial Luxe" — confidential, timeless, the opposite of
+ * tape-à-l'œil. A warm cream paper base, a single muted taupe accent, real
+ * luxury photography. No yellow gold, no dark backgrounds.
  *
  * Token sections:
  *   2. Colors (brand palette + Material Design 3 named tokens)
@@ -15,32 +16,32 @@
  */
 :root {
   /* =========================================================================
-   * 2. Colors — brand palette
+   * 2. Colors — brand palette (DA crème/taupe)
    * ======================================================================= */
-  --color-charcoal: #1a1a1a;
-  /* Warm editorial cream (Option A, 2026-06-04) — replaces the cooler
-     #fafaf8 so the off-white base reads "magazine paper" rather than
-     clinical white. Drives --color-bg site-wide. */
-  --color-off-white: #faf8f4;
-  --color-gold: #c9a96e;
+  /* Warm taupe-charcoal — titles, full buttons (--noir in the dossier). */
+  --color-charcoal: #3a352d;
+  /* Cream paper base — drives --color-bg site-wide (--creme in the dossier). */
+  --color-off-white: #f6f1e7;
+  /* Muted taupe — THE single accent (eyebrow, links, stars, rules). Replaces
+     the cooler gold #c9a96e. (--or / --accent in the dossier.) */
+  --color-gold: #8c7b5a;
   --color-sage: #8c9681;
-  /* Stitch "L'Héritage Editorial" primary — forest green wordmark & CTAs */
-  --color-primary-heritage: #052419;
+  /* Heritage primary kept as the deep taupe-charcoal for wordmark & CTAs. */
+  --color-primary-heritage: #3a352d;
 
-  /* Accent ramp — single tonal scale derived from --color-gold (#c9a96e).
-     Use these instead of ad-hoc amber utilities or raw hex so the accent
-     stays one family. 50/100 = washes & hovers; 500 = brand gold;
-     700+ = text-on-light / borders. */
-  --color-gold-50: #faf6ee;
-  --color-gold-100: #f3ead6;
-  --color-gold-200: #e7d4ad;
-  --color-gold-300: #dcc08a;
-  --color-gold-400: #d2b27c;
-  --color-gold-500: var(--color-gold); /* #c9a96e — brand */
-  --color-gold-600: #b9914f;
-  --color-gold-700: #99753c;
-  --color-gold-800: #785a30;
-  --color-gold-900: #5c4527;
+  /* Accent ramp — single tonal scale derived from the taupe accent (#8c7b5a).
+     Use these instead of ad-hoc utilities or raw hex so the accent stays one
+     family. 50/100 = washes & hovers; 500 = brand taupe; 700+ = borders. */
+  --color-gold-50: #f6f3ec;
+  --color-gold-100: #ece6d8;
+  --color-gold-200: #ddd2ba;
+  --color-gold-300: #cabf9d;
+  --color-gold-400: #b3a37c;
+  --color-gold-500: var(--color-gold); /* #8c7b5a — brand taupe */
+  --color-gold-600: #7d6e50;
+  --color-gold-700: #685b42;
+  --color-gold-800: #524736;
+  --color-gold-900: #3d362a;
 
   /* Focus ring — single source of truth (cf. globals.css :focus-visible). */
   --color-ring: var(--color-gold-600);
@@ -57,38 +58,38 @@
   --color-danger: #ba1a1a; /* aligned with DS `error` */
 
   /* =========================================================================
-   * 2b. Material Design 3 named tokens — for advanced surface/interaction work
+   * 2b. Material Design 3 named tokens — warm cream surfaces (taupe-tinted)
    * ======================================================================= */
-  --color-surface: #fdf8f8;
-  --color-surface-bright: #fdf8f8;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f7f3f2;
-  --color-surface-container: #f1edec;
-  --color-surface-container-high: #ebe7e6;
-  --color-surface-container-highest: #e5e2e1;
-  --color-surface-dim: #ddd9d8;
-  --color-surface-tint: #5f5e5e;
-  --color-surface-variant: #e5e2e1;
+  --color-surface: #f6f1e7;          /* --creme  */
+  --color-surface-bright: #fffefb;
+  --color-surface-container-lowest: #ffffff; /* --blanc — cards */
+  --color-surface-container-low: #efe8da;    /* --creme-2 — alternate section */
+  --color-surface-container: #efe8da;
+  --color-surface-container-high: #e8e0d0;   /* --creme-3 — footer, bandeaux */
+  --color-surface-container-highest: #e1d8c4;
+  --color-surface-dim: #ddd3bd;
+  --color-surface-tint: #6f675b;
+  --color-surface-variant: #e8e0d0;
 
-  --color-on-surface: #1c1b1b;
-  --color-on-surface-variant: #444748;
-  --color-inverse-surface: #313030;
-  --color-inverse-on-surface: #f4f0ef;
+  --color-on-surface: #2b2722;       /* --texte */
+  --color-on-surface-variant: #6f675b; /* --texte-doux */
+  --color-inverse-surface: #3a352d;
+  --color-inverse-on-surface: #f6f1e7;
 
-  --color-outline: #747878;
-  --color-outline-variant: #c4c7c7;
+  --color-outline: #6f675b;
+  --color-outline-variant: #d8cfbc;  /* --ligne (opaque equivalent) */
 
   /* Legacy `muted` and `border` mapped to nearest M3 tokens */
   --color-muted: var(--color-on-surface-variant);
   --color-border: var(--color-outline-variant);
 
   /* =========================================================================
-   * 3. Typography — Playfair Display × Inter
+   * 3. Typography — EB Garamond × Outfit
    * Loaded by `next/font/google` in apps/web/src/app/[locale]/layout.tsx
    * which sets the actual --font-* values on <html>.
    * ======================================================================= */
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* =========================================================================
    * 4. Layout & spacing
@@ -111,35 +112,37 @@
    * 5. Shape language — soft, slightly rounded
    * DEFAULT = 0.25rem (4px)
    * ======================================================================= */
-  --radius-xs: 0.125rem; /* 2px  — subtle inputs */
-  --radius-sm: 0.25rem; /* 4px  — buttons, cards */
-  --radius-md: 0.375rem; /* 6px */
-  --radius-lg: 0.5rem; /* 8px */
+  --radius-xs: 0.125rem; /* 2px  — subtle inputs / buttons (dossier: bouton 2px) */
+  --radius-sm: 0.25rem; /* 4px  — small cards */
+  --radius-md: 0.5rem; /* 8px  — cards (dossier: carte 8px) */
+  --radius-lg: 0.875rem; /* 14px — large cards (dossier: carte large 14px) */
   --radius-xl: 0.75rem; /* 12px — badges, chips */
   --radius-2xl: 1rem; /* 16px — large cards, gallery tiles, overlays */
-  --radius-full: 9999px; /* circular avatars */
+  --radius-full: 9999px; /* pill / circular avatars */
 
   /* =========================================================================
    * 6. Elevation — soft, warm, low-contrast shadows (sober luxe)
-   * Tuned on the off-white base; avoid hard black drop-shadows.
+   * Tuned on the cream base; avoid hard black drop-shadows.
+   * Dossier: --shadow-soft 0 10px 30px rgba(22,20,15,.10);
+   *          --shadow      0 18px 50px rgba(22,20,15,.18).
    * ======================================================================= */
-  --shadow-xs: 0 1px 2px rgba(26, 26, 26, 0.04);
-  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 8px 24px rgba(26, 26, 26, 0.06);
-  --shadow-card-hover: 0 2px 4px rgba(26, 26, 26, 0.06), 0 16px 40px rgba(26, 26, 26, 0.1);
-  --shadow-overlay: 0 8px 16px rgba(26, 26, 26, 0.08), 0 24px 64px rgba(26, 26, 26, 0.16);
+  --shadow-xs: 0 1px 2px rgba(22, 20, 15, 0.05);
+  --shadow-card: 0 1px 2px rgba(22, 20, 15, 0.05), 0 10px 30px rgba(22, 20, 15, 0.1);
+  --shadow-card-hover: 0 2px 4px rgba(22, 20, 15, 0.07), 0 18px 50px rgba(22, 20, 15, 0.18);
+  --shadow-overlay: 0 8px 16px rgba(22, 20, 15, 0.1), 0 24px 64px rgba(22, 20, 15, 0.2);
 
   /* =========================================================================
    * 7. Motion — durations + easing (micro-interactions, reduced-motion safe)
+   * Dossier: photo zoom .7s cubic-bezier(.2,.7,.2,1); UI .28s ease.
    * ======================================================================= */
   --motion-fast: 120ms;
-  --motion-base: 200ms;
-  --motion-slow: 320ms;
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1); /* decelerate, premium */
+  --motion-base: 280ms;
+  --motion-slow: 700ms;
+  --ease-standard: ease;
+  --ease-editorial: cubic-bezier(0.2, 0.7, 0.2, 1); /* decelerate, premium */
 }
 
 @media (prefers-color-scheme: dark) {
-  /* Dark palette deferred — the DS philosophy mandates a sober light base.
-     Dark mode would require a parallel Material Design 3 token sheet
-     (surface-dim → on-surface inverse). Tracked in a future ADR. */
+  /* Dark palette deferred — the DA mandates a sober cream light base.
+     "Aucun fond sombre" is a non-negotiable brand rule (dossier §13.2). */
 }

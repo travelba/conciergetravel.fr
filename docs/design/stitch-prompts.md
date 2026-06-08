@@ -1,5 +1,33 @@
 # Stitch prompts — MyConciergeHotel.com
 
+> ⚠️ **MISE À JOUR DA — Juin 2026 : la direction visuelle officielle est
+> désormais « Sober Editorial Luxe » (palette crème/taupe).** Source de
+> vérité = les tokens du code : `packages/ui/src/tokens.css`
+> (`--color-off-white: #f6f1e7`, accent taupe `--color-gold: #8c7b5a`,
+> typographie **EB Garamond × Outfit**). Cette DA remplace la direction
+> « Palace Editorial Vintage » (cream ivoire / bordeaux / laiton / Noto
+> Serif) décrite historiquement ci-dessous.
+>
+> Le **prompt système §1 (FR et EN)** a été réaligné sur la nouvelle DA.
+> Les **prompts par page (§2.x)** conservent encore des références
+> bordeaux/laiton/aquarelle : les lire en appliquant la table de
+> correspondance ci-dessous jusqu'à leur réécriture complète.
+>
+> | Ancien (vintage) | Nouveau (crème/taupe) |
+> | --- | --- |
+> | Cream ivoire `#f5ebd4` (fond) | Crème `#f6f1e7` (fond) |
+> | Bordeaux `#6b2331` (accent fort, boutons) | Taupe `#8c7b5a` / noir taupe `#3a352d` (boutons pleins) |
+> | Laiton `#b88a4d` (filets, focus) | Taupe `#8c7b5a` (filets, focus, étoiles) |
+> | Marbre `#ece5d9` (surfaces) | Crème-2 `#efe8da` / crème-3 `#e8e0d0` |
+> | Noto Serif (titres) | EB Garamond (titres) |
+> | Inter (corps) | Outfit (corps) |
+> | Illustrations aquarelle Concierge | **Vraies photos de luxe** (pas d'illustration de remplissage) |
+> | Charcoal `#1a1a1a` (texte) | Texte `#2b2722`, titres `#3a352d` |
+>
+> **Règle d'or inchangée** : SEO/GEO priment toujours sur le graphique.
+> Pas de fond sombre, pas d'or jaune, un seul accent.
+
+
 > Prompts prêts à coller dans **Stitch (Google Labs)** pour générer
 > les maquettes graphiques des pages stratégiques de
 > MyConciergeHotel.com.
@@ -82,61 +110,48 @@ voyage en ligne accréditée IATA spécialisée dans les Palaces 5★
 de France. La voix de marque s'appelle « Le Concierge » — un
 expert complice qui parle à ses clients comme un ami de confiance.
 
-DIRECTION VISUELLE UNIQUE — « Palace Editorial Vintage »
+DIRECTION VISUELLE UNIQUE — « Sober Editorial Luxe » (crème/taupe)
 
-Imagine la papèterie d'un palace haussmannien retranscrite sur le
-web. Cream paper, encre bordeaux, accents laiton, illustrations
-peintes à l'aquarelle dans le style Wes Anderson × Tomer Hanuka ×
-illustration mode années 50-60 (René Gruau). Pas minimaliste
-Booking. Pas brutaliste tech. Pas SAAS scandinave. Un monde tenu,
-chaud, narratif.
+Imagine le carnet d'adresses confidentiel d'un Concierge de palace :
+papier crème feutré, un unique accent taupe, vraies photos de luxe,
+beaucoup de blanc tournant. Luxe discret, éditorial, intemporel —
+l'opposé du tape-à-l'œil. Pas minimaliste Booking. Pas brutaliste tech.
+Pas SAAS scandinave. Pas d'aquarelle ni d'illustration de remplissage :
+la photographie de luxe porte l'émotion.
 
-Références mentales : Le Bristol's own brand book, vintage Pullman
-menu, Cunard White Star Line, Hermès editorial, Wes Anderson
-(Grand Budapest Hotel), papèterie de Smythson.
+Références mentales : Aman brand book, Relais & Châteaux, Tablet Hotels,
+Kinfolk, Cereal magazine, papèterie crème gravée.
 
-PALETTE — la palette UI EST celle du monde vintage (pas de
-séparation entre « palette UI » et « palette illustration »)
+PALETTE — chaude et feutrée, un seul accent (aucun or jaune, aucun fond
+sombre)
 
-- Cream ivoire #f5ebd4 — FOND DOMINANT de toute l'interface
-  (remplace l'off-white blanc cassé). C'est la couleur du papier.
-- Charcoal #1a1a1a — texte principal (corps, headings)
-- Bordeaux Concierge #6b2331 — couleur d'accent FORTE : boutons
-  primary, liens hover, badges importants, sceaux narratifs. Penser
-  à l'encre d'un stylo plume.
-- Laiton chaud #b88a4d — accents fins partout : filets séparateurs,
-  bordures de cartes, focus ring, étoiles, ornements, dates,
-  numéros de rang. Remplace l'or froid #c9a96e.
-- Marbre veiné #ece5d9 — surface secondaire (cards background,
-  containers, fonds de section discrets). Penser au comptoir de
-  réception.
-- Powder pink #f4c6c1 — accent doux très rare (badge favori,
-  highlights AEO)
-- Sage feuillage #8c9681 — couleur tertiaire pour callouts calmes
-  (FAQ accordéon active, side notes)
-- Walnut #6e4a2e — accent profond très rare (footer ?
-  navigation ?)
-- Statuts : success #2f7a3d, warning #b07d2e, danger #ba1a1a
-- Surface inputs : #fffaf0 (cream très clair, légèrement plus pâle
-  que le fond)
-- Pas de gradient, pas de néon, pas de glassmorphism. Pas de blanc
-  pur.
+- Crème #f6f1e7 — FOND DOMINANT de toute l'interface (couleur du papier).
+- Crème-2 #efe8da — section alternée ; Crème-3 #e8e0d0 — footer, bandeaux.
+- Blanc #ffffff — cartes.
+- Texte #2b2722 — corps ; Texte-doux #6f675b — secondaire, légendes.
+- Noir taupe #3a352d — titres, boutons pleins ; hover #4a4439.
+- Taupe #8c7b5a — L'UNIQUE accent : eyebrow, liens, étoiles, filets,
+  focus ring, bordures de cartes. Remplace l'or froid #c9a96e et le
+  bordeaux/laiton vintage. Taupe clair #a89671 sur fond photo/sombre.
+- Sage feuillage #8c9681 — tertiaire rare pour callouts calmes (FAQ).
+- Statuts : success #2f7a3d, warning #b07d2e, danger #ba1a1a.
+- Filets/bordures : rgba(140,123,90,.28). Surface inputs : #fffefb.
+- Pas de gradient, pas de néon, pas de glassmorphism, pas de fond sombre.
 
-TYPOGRAPHIE — éditoriale, légèrement vintage
+TYPOGRAPHIE — éditoriale, intemporelle (jamais plus de deux polices)
 
-- Noto Serif pour H1/H2/H3/H4, weight 400, letter-spacing -0.01em
-  à -0.02em. Jamais bold gras. Penser à un en-tête de menu de
-  palace gravé.
-- Italic serif autorisé et encouragé pour citations, conseils
-  Concierge, sous-titres narratifs.
-- Inter pour le corps de texte, nav, boutons, formulaires, chiffres.
+- EB Garamond (serif) pour H1/H2/H3/H4, weight 400/500, italique
+  autorisé et encouragé (citations, conseils Concierge, sous-titres).
+  Jamais bold gras. letter-spacing -0.01em à -0.02em.
+- Outfit (sans) pour le corps, nav, boutons, formulaires, chiffres
+  (weight 300/400/500).
 - H1 : clamp(2rem, 4vw + 1rem, 3rem), line-height 1.1
 - H2 : clamp(1.5rem, 2vw + 1rem, 2rem), line-height 1.2
 - H3 : clamp(1.25rem, 1.5vw + 0.5rem, 1.5rem)
-- Body : 16px, line-height 1.65 (plus aéré que la version sober)
-- Label-caps : 12px, letter-spacing 0.12em (un peu plus que sober),
-  uppercase, weight 600, COULEUR LAITON par défaut (pas charcoal)
-- Petites annotations : Inter italique 13px charcoal opacity 65%
+- Body : 16px, line-height 1.5
+- Eyebrow / label-caps : 12px, letter-spacing 0.34em, uppercase,
+  COULEUR TAUPE par défaut (pas charcoal).
+- Petites annotations : Outfit italique 13px texte-doux.
 
 LAYOUT — éditorial respirant
 
@@ -253,58 +268,48 @@ accredited online travel agency specialising in 5-star Palaces in
 France. The brand voice is called "The Concierge" — a knowing
 expert who speaks to clients like a trusted friend.
 
-SINGLE VISUAL DIRECTION — "Palace Editorial Vintage"
+SINGLE VISUAL DIRECTION — "Sober Editorial Luxe" (cream/taupe)
 
-Imagine a Haussmann palace's stationery transcribed onto the web.
-Cream paper, burgundy ink, brass accents, watercolour-painted
-illustrations in the style of Wes Anderson × Tomer Hanuka × 1950-
-60s French fashion illustration (René Gruau). Not Booking minimal.
-Not brutalist tech. Not Scandinavian SAAS. A held, warm, narrative
-world.
+Imagine a palace Concierge's confidential address book: muted cream
+paper, a single taupe accent, real luxury photography, generous white
+space. Discreet, editorial, timeless luxury — the opposite of flashy.
+Not Booking minimal. Not brutalist tech. Not Scandinavian SAAS. No
+watercolour, no filler illustration: luxury photography carries the
+emotion.
 
-Mental references: Le Bristol's own brand book, vintage Pullman
-menu, Cunard White Star Line, Hermès editorial, Wes Anderson
-(Grand Budapest Hotel), Smythson stationery.
+Mental references: Aman brand book, Relais & Châteaux, Tablet Hotels,
+Kinfolk, Cereal magazine, engraved cream stationery.
 
-PALETTE — the UI palette IS the vintage world palette (no
-separation between "UI palette" and "illustration palette")
+PALETTE — warm and muted, a single accent (no yellow gold, no dark
+background)
 
-- Ivory cream #f5ebd4 — DOMINANT FILL for the entire interface
-  (replaces the broken white off-white). This is the paper colour.
-- Charcoal #1a1a1a — primary text (body, headings)
-- Concierge burgundy #6b2331 — STRONG accent colour: primary
-  buttons, hover links, important badges, narrative seals. Think
-  fountain pen ink.
-- Warm brass #b88a4d — fine accents everywhere: separator rules,
-  card borders, focus ring, stars, ornaments, dates, rank numbers.
-  Replaces the cold gold #c9a96e.
-- Veined marble #ece5d9 — secondary surface (card backgrounds,
-  containers, discreet section fills). Think reception desk.
-- Powder pink #f4c6c1 — very rare soft accent (favourite badge,
-  AEO highlights)
-- Sage foliage #8c9681 — tertiary colour for calm callouts (FAQ
-  open accordion, side notes)
-- Walnut #6e4a2e — very rare deep accent (footer? nav?)
-- Status: success #2f7a3d, warning #b07d2e, danger #ba1a1a
-- Input surface: #fffaf0 (very light cream, slightly paler than the
-  background)
-- No gradients, no neon, no glassmorphism. No pure white.
+- Cream #f6f1e7 — DOMINANT FILL for the entire interface (paper colour).
+- Cream-2 #efe8da — alternate section; Cream-3 #e8e0d0 — footer, bands.
+- White #ffffff — cards.
+- Text #2b2722 — body; soft text #6f675b — secondary, captions.
+- Taupe-charcoal #3a352d — headings, full buttons; hover #4a4439.
+- Taupe #8c7b5a — THE single accent: eyebrow, links, stars, rules,
+  focus ring, card borders. Replaces the cold gold #c9a96e and the
+  vintage burgundy/brass. Light taupe #a89671 on photo/dark fills.
+- Sage foliage #8c9681 — rare tertiary for calm callouts (FAQ).
+- Status: success #2f7a3d, warning #b07d2e, danger #ba1a1a.
+- Rules/borders: rgba(140,123,90,.28). Input surface: #fffefb.
+- No gradients, no neon, no glassmorphism, no dark background.
 
-TYPOGRAPHY — editorial, slightly vintage
+TYPOGRAPHY — editorial, timeless (never more than two typefaces)
 
-- Noto Serif for H1/H2/H3/H4, weight 400, letter-spacing -0.01em
-  to -0.02em. Never bold. Think an engraved palace menu heading.
-- Italic serif allowed and encouraged for quotes, Concierge tips,
-  narrative subtitles.
-- Inter for body, nav, buttons, forms, numbers.
+- EB Garamond (serif) for H1/H2/H3/H4, weight 400/500, italic allowed
+  and encouraged (quotes, Concierge tips, subtitles). Never bold.
+  letter-spacing -0.01em to -0.02em.
+- Outfit (sans) for body, nav, buttons, forms, numbers (weight
+  300/400/500).
 - H1: clamp(2rem, 4vw + 1rem, 3rem), line-height 1.1
 - H2: clamp(1.5rem, 2vw + 1rem, 2rem), line-height 1.2
 - H3: clamp(1.25rem, 1.5vw + 0.5rem, 1.5rem)
-- Body: 16px, line-height 1.65 (more airy than the sober version)
-- Label-caps: 12px, letter-spacing 0.12em (slightly more than
-  sober), uppercase, weight 600, BRASS COLOUR by default (not
-  charcoal)
-- Small notes: italic Inter 13px charcoal at 65% opacity
+- Body: 16px, line-height 1.5
+- Eyebrow / label-caps: 12px, letter-spacing 0.34em, uppercase, TAUPE
+  COLOUR by default (not charcoal).
+- Small notes: italic Outfit 13px soft text.
 
 LAYOUT — editorial, breathing
 

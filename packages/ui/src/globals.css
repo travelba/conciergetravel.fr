@@ -45,9 +45,9 @@
     min-height: 100dvh;
   }
 
-  /* Headlines use Playfair Display at weight 400 — high-contrast display
-     serif, literary and authoritative. Tighter line-height + slight
-     negative letter-spacing for the luxury editorial feel. */
+  /* Headlines use EB Garamond at weight 400 — timeless editorial serif,
+     literary and authoritative. Tighter line-height + slight negative
+     letter-spacing for the sober luxury editorial feel (DA crème/taupe). */
   h1,
   h2,
   h3 {
