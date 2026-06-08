@@ -156,11 +156,75 @@ const RoomRateSchema = z
   })
   .passthrough();
 
+/**
+ * Média hôtel/chambre Travelport (source : Leonardo Content Cloud). Présent dans
+ * la réponse `SearchComplete` v12 sous `imageURLs` (propriété) et `roomImageURLs`
+ * (par `roomType`). Usage **funnel-only / non indexé** — droits Leonardo non
+ * confirmés pour le SEO (cf. migration 0071, même posture que RateHawk).
+ */
+const ImageDimensionsSchema = z
+  .object({ width: z.number().optional(), height: z.number().optional() })
+  .passthrough();
+
+const TravelportImageSchema = z
+  .object({
+    url: z.string(),
+    caption: z.string().optional(),
+    imageSize: z.string().optional(),
+    curatedImage: z.boolean().optional(),
+    curatedImageCategory: z.string().optional(),
+    curatedImageTier: z.number().optional(),
+    pictureCategory: z.number().optional(),
+    dimensions: ImageDimensionsSchema.optional(),
+  })
+  .passthrough();
+export type TravelportImage = z.infer<typeof TravelportImageSchema>;
+
+const TravelportAmenitySchema = z
+  .object({
+    description: z.string().optional(),
+    code: z.number().optional(),
+    category: z.string().optional(),
+  })
+  .passthrough();
+export type TravelportAmenity = z.infer<typeof TravelportAmenitySchema>;
+
+const TravelportRatingSchema = z
+  .object({ value: z.number().optional(), provider: z.string().optional() })
+  .passthrough();
+export type TravelportRating = z.infer<typeof TravelportRatingSchema>;
+
+const CodeDescriptionSchema = z
+  .object({ code: z.number().optional(), description: z.string().optional() })
+  .passthrough();
+
+const BedTypeSchema = z
+  .object({
+    bedType: z.string().optional(),
+    quantity: z.number().optional(),
+    size: z.string().optional(),
+  })
+  .passthrough();
+
+const RoomCharacteristicsSchema = z
+  .object({
+    category: CodeDescriptionSchema.optional(),
+    class: CodeDescriptionSchema.optional(),
+    bedTypes: z.array(BedTypeSchema).optional(),
+    balconyType: CodeDescriptionSchema.optional(),
+    maxOccupancy: z.number().optional(),
+  })
+  .passthrough();
+export type TravelportRoomCharacteristics = z.infer<typeof RoomCharacteristicsSchema>;
+
 const RoomTypeSchema = z
   .object({
     shortRoomDescription: z.string().optional(),
     maxOccupancy: z.number().optional(),
     rates: z.array(RoomRateSchema).optional(),
+    roomImageURLs: z.array(TravelportImageSchema).optional(),
+    characteristics: RoomCharacteristicsSchema.optional(),
+    bedTypes: z.array(BedTypeSchema).optional(),
   })
   .passthrough();
 export type TravelportRoomType = z.infer<typeof RoomTypeSchema>;
@@ -178,6 +242,9 @@ export interface PropertyItem {
   readonly propertyInfo?: z.infer<typeof PropertyInfoSchema> | undefined;
   readonly lowestPublicAvailableRate?: TravelportAvailableRate | undefined;
   readonly roomTypes?: readonly TravelportRoomType[] | undefined;
+  readonly imageURLs?: readonly TravelportImage[] | undefined;
+  readonly amenities?: readonly TravelportAmenity[] | undefined;
+  readonly ratings?: readonly TravelportRating[] | undefined;
 }
 
 export const PropertyItemSchema: z.ZodType<PropertyItem> = z
@@ -190,6 +257,9 @@ export const PropertyItemSchema: z.ZodType<PropertyItem> = z
     propertyInfo: PropertyInfoSchema.optional(),
     lowestPublicAvailableRate: AvailableRateSchema.optional(),
     roomTypes: z.array(RoomTypeSchema).optional(),
+    imageURLs: z.array(TravelportImageSchema).optional(),
+    amenities: z.array(TravelportAmenitySchema).optional(),
+    ratings: z.array(TravelportRatingSchema).optional(),
   })
   .passthrough();
 

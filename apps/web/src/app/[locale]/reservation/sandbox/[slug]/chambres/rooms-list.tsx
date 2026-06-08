@@ -33,6 +33,11 @@ interface RoomsListProps {
   readonly imagesByLabel: Readonly<
     Record<string, { readonly publicId: string; readonly alt: string }>
   >;
+  /**
+   * Repli photo fournisseur (Travelport / Leonardo) par libellé, utilisé
+   * uniquement quand aucune photo éditoriale n'est rapprochée. NON INDEXÉ.
+   */
+  readonly fallbackImagesByLabel?: Readonly<Record<string, string>>;
   readonly selectAction: (formData: FormData) => Promise<void>;
 }
 
@@ -57,6 +62,7 @@ export function RoomsList({
   nights,
   cloudName,
   imagesByLabel,
+  fallbackImagesByLabel,
   selectAction,
 }: RoomsListProps): ReactElement {
   const t = useTranslations('reservationRooms');
@@ -164,6 +170,8 @@ export function RoomsList({
             const visibleRates = isExpanded ? group.rates : group.rates.slice(0, 1);
             const cheapest = group.rates[0];
             const image = imagesByLabel[group.label];
+            const fallbackImage =
+              image === undefined ? fallbackImagesByLabel?.[group.label] : undefined;
             return (
               <li
                 key={group.label}
@@ -181,6 +189,16 @@ export function RoomsList({
                       height={329}
                       sizes="(max-width: 768px) 100vw, 640px"
                       className="h-full w-full"
+                    />
+                  </div>
+                ) : fallbackImage !== undefined ? (
+                  <div className="relative aspect-[21/9] w-full overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- repli fournisseur non indexé (URL externe Leonardo), pas de Cloudinary public_id. */}
+                    <img
+                      src={fallbackImage}
+                      alt={group.label}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 ) : null}

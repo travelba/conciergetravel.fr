@@ -11,6 +11,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { env } from '@/lib/env';
 import { setDraftCookie } from '@/server/booking/draft-cookie';
 import { gateTravelportSearchByIp } from '@/server/booking/rate-limit';
+import { getSupplierRoomImagesByLabel } from '@/server/booking/supplier-room-catalog';
 import {
   listTravelportSandboxOffers,
   lockTravelportSandboxSelectedOffer,
@@ -152,6 +153,24 @@ export default async function TravelportSandboxRoomsPage({
   const imagesByLabel: Record<string, { readonly publicId: string; readonly alt: string }> = {};
   for (const [label, ref] of roomImageMatches) imagesByLabel[label] = ref;
 
+  // Repli photo NON INDEXÉ : pour les libellés Travelport sans photo éditoriale
+  // Cloudinary rapprochée, on retombe sur l'image fournisseur cachée dans
+  // `supplier_room_catalog` (Travelport / Leonardo). Droits non confirmés pour le
+  // SEO → strictement réservé au tunnel (cette page est `index:false`).
+  const supplierImagesByLabel: Record<string, string> =
+    editorialHotel !== null
+      ? await getSupplierRoomImagesByLabel({
+          hotelId: editorialHotel.row.id,
+          supplier: 'travelport',
+        })
+      : {};
+  const fallbackImagesByLabel: Record<string, string> = {};
+  for (const o of result.options) {
+    if (imagesByLabel[o.roomLabel] !== undefined) continue;
+    const url = supplierImagesByLabel[o.roomLabel];
+    if (url !== undefined) fallbackImagesByLabel[o.roomLabel] = url;
+  }
+
   return (
     <main className="max-w-editorial container mx-auto px-4 py-12 sm:py-16">
       <BookingProgress locale={locale} current="rooms" />
@@ -212,6 +231,7 @@ export default async function TravelportSandboxRoomsPage({
         nights={nights}
         cloudName={env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}
         imagesByLabel={imagesByLabel}
+        fallbackImagesByLabel={fallbackImagesByLabel}
         selectAction={selectRoomAction}
       />
 

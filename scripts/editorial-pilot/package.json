@@ -126,6 +126,8 @@
     "descaffold:sections": "tsx src/hotels/descaffold-sections.ts",
     "descaffold:sections:dry": "tsx src/hotels/descaffold-sections.ts --dry-run",
     "travelport:probe": "tsx src/booking/probe-travelport.ts",
+    "travelport:ingest": "tsx src/booking/ingest-travelport-content.ts",
+    "travelport:ingest:dry": "tsx src/booking/ingest-travelport-content.ts --dry-run",
     "travelport:book": "tsx src/booking/book-travelport.ts",
     "ratehawk:probe": "tsx src/booking/probe-ratehawk.ts",
     "ratehawk:ingest": "tsx src/booking/ingest-ratehawk-content.ts",
