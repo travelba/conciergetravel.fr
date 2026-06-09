@@ -23,6 +23,12 @@ import {
   resolveGuideSlugForHotel,
 } from '../guides/guide-hotel-city-keys.js';
 import {
+  auditForcePostgrest,
+  hasPgConnectionString,
+  isDirectPgUnreachable,
+  warnPgFallback,
+} from './audit-pg-fallback.js';
+import {
   aggregateBlockFailCounts,
   aggregateCdcGapCounts,
   evaluateCdcHotelFiche,
@@ -317,16 +323,16 @@ async function fetchCatalogue(args: CliArgs): Promise<{
   guideSlugs: Set<string>;
   roomStats: Map<string, RoomAuditStats>;
 }> {
-  // The direct Postgres host (db.*.supabase.co) is unreachable from some dev
-  // machines (Windows SSL/DNS — see windows-dev-environment skill). Allow
-  // forcing the PostgREST path, which only needs NEXT_PUBLIC_SUPABASE_URL.
-  const forceRest = (process.env['MCH_AUDIT_FORCE_REST'] ?? '') !== '';
-  const conn =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'];
-  if (conn && !forceRest) return fetchHotelsViaPg(args);
-  return fetchHotelsViaPostgrest(args);
+  if (auditForcePostgrest() || !hasPgConnectionString()) {
+    return fetchHotelsViaPostgrest(args);
+  }
+  try {
+    return await fetchHotelsViaPg(args);
+  } catch (err) {
+    if (!isDirectPgUnreachable(err)) throw err;
+    warnPgFallback('audit:hotel-fiches-cdc', err);
+    return fetchHotelsViaPostgrest(args);
+  }
 }
 
 function emptyRoomStats(): RoomAuditStats {

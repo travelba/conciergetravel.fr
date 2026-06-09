@@ -20,6 +20,12 @@ import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 
 import {
+  auditForcePostgrest,
+  hasPgConnectionString,
+  isDirectPgUnreachable,
+  warnPgFallback,
+} from './audit-pg-fallback.js';
+import {
   aggregateGapCounts,
   evaluateHotelFiche,
   type HotelAuditResult,
@@ -165,12 +171,16 @@ async function fetchHotelsViaPg(args: CliArgs): Promise<HotelAuditRow[]> {
 }
 
 async function fetchHotels(args: CliArgs): Promise<HotelAuditRow[]> {
-  const conn =
-    process.env['DATABASE_URL'] ??
-    process.env['SUPABASE_DB_POOLER_URL'] ??
-    process.env['SUPABASE_DB_URL'];
-  if (conn) return fetchHotelsViaPg(args);
-  return fetchHotelsViaPostgrest(args);
+  if (auditForcePostgrest() || !hasPgConnectionString()) {
+    return fetchHotelsViaPostgrest(args);
+  }
+  try {
+    return await fetchHotelsViaPg(args);
+  } catch (err) {
+    if (!isDirectPgUnreachable(err)) throw err;
+    warnPgFallback('audit:hotel-fiches', err);
+    return fetchHotelsViaPostgrest(args);
+  }
 }
 
 function todayStamp(): string {
