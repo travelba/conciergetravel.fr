@@ -307,11 +307,15 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 
-      <header className="mb-10 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{title}</h1>
-        <p className="text-muted mt-3 text-sm md:text-base">{subtitle}</p>
-        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+      <header className="mch-kit mb-10">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t.eyebrow}</span>
+          <h1>{title}</h1>
+          <p className="rk-lede">{subtitle}</p>
+          <div className="rk-meta">
+            <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+          </div>
+        </div>
       </header>
 
       {/* emitJsonLd={false}: the canonical FAQPage is the multi-Q

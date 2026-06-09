@@ -204,10 +204,12 @@ export default async function ConciergeClubLandingPage({
       {faqData !== null ? <JsonLdScript data={faqData} nonce={nonce} /> : null}
 
       {/* ─── Hero ───────────────────────────────────────────────── */}
-      <header className="mb-12">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl">{t('title')}</h1>
-        <p className="text-muted mt-3 max-w-2xl leading-relaxed">{t('lede')}</p>
+      <header className="mch-kit mb-12">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t('eyebrow')}</span>
+          <h1>{t('title')}</h1>
+          <p className="rk-lede">{t('lede')}</p>
+        </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link

@@ -132,25 +132,15 @@ export default async function ConciergePage({ params }: { params: Promise<{ loca
       <JsonLdScript data={faqJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 
-      <nav aria-label="breadcrumb" className="text-muted mb-6 text-xs">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="hover:underline">
-              {tStatic.breadcrumbHome}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li className="text-fg" aria-current="page">
-            {t('title')}
-          </li>
-        </ol>
-      </nav>
-
-      <header className="mb-12 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
-        <p className="text-muted mt-4 text-base md:text-lg">{t('lede')}</p>
-        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+      <header className="mch-kit mb-12">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t('eyebrow')}</span>
+          <h1>{t('title')}</h1>
+          <p className="rk-lede">{t('lede')}</p>
+          <div className="rk-meta">
+            <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+          </div>
+        </div>
       </header>
 
       {/*

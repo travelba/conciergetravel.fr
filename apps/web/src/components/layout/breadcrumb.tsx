@@ -115,46 +115,43 @@ export async function Breadcrumb(): Promise<ReactElement | null> {
   const isDeep = segments.length > 1;
 
   return (
-    <nav aria-label={t('label')} className="container mx-auto max-w-screen-xl px-4 pt-3 text-xs">
-      <ol className="text-muted flex flex-wrap items-center gap-1.5">
+    <nav aria-label={t('label')} className="mch-kit container mx-auto max-w-screen-xl px-4 pt-3">
+      <ol className="breadcrumb">
         <li>
-          <Link href="/" className="hover:underline">
-            {t('home')}
-          </Link>
+          <Link href="/">{t('home')}</Link>
         </li>
-        <li aria-hidden>›</li>
+        <li className="sep" aria-hidden>
+          ›
+        </li>
         {isDeep ? (
-          <>
-            <li>
-              {/*
-                The href is a known route from the typed `pathnames`
-                map — the lookup is exhaustive across the values of
-                TOP_LEVEL_LABEL. We assert it via the cast on hardcoded
-                strings (the map is in-source).
-              */}
-              <Link
-                href={
-                  topLevel.href as
-                    | '/hotels'
-                    | '/destination'
-                    | '/inspiration'
-                    | '/classements'
-                    | '/le-concierge'
-                    | '/marques'
-                    | '/recherche'
-                    | '/compte'
-                    | '/mentions-legales'
-                }
-                className="hover:underline"
-              >
-                {topLevel.label}
-              </Link>
-            </li>
+          <li>
+            {/*
+              The href is a known route from the typed `pathnames`
+              map — the lookup is exhaustive across the values of
+              TOP_LEVEL_LABEL. We assert it via the cast on hardcoded
+              strings (the map is in-source).
+            */}
+            <Link
+              href={
+                topLevel.href as
+                  | '/hotels'
+                  | '/destination'
+                  | '/inspiration'
+                  | '/classements'
+                  | '/le-concierge'
+                  | '/marques'
+                  | '/recherche'
+                  | '/compte'
+                  | '/mentions-legales'
+              }
+            >
+              {topLevel.label}
+            </Link>
             {/* Deeper label (slug, city, axe…) is rendered by the
                 page-specific breadcrumb, not here. */}
-          </>
+          </li>
         ) : (
-          <li className="text-fg" aria-current="page">
+          <li className="bc-current" aria-current="page">
             {topLevel.label}
           </li>
         )}

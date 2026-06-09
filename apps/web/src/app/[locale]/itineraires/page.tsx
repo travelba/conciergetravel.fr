@@ -143,24 +143,12 @@ export default async function ItinerairesHubPage({
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       {itemListJsonLd !== null ? <JsonLdScript data={itemListJsonLd} nonce={nonce} /> : null}
 
-      <nav aria-label="breadcrumb" className="text-muted mb-6 text-xs">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="hover:underline">
-              {t('breadcrumbHome')}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li className="text-fg" aria-current="page">
-            {t('breadcrumbHub')}
-          </li>
-        </ol>
-      </nav>
-
-      <header className="mb-10 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
-        <p className="text-muted mt-3 text-base md:text-lg">{t('lede')}</p>
+      <header className="mch-kit mb-10">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t('eyebrow')}</span>
+          <h1>{t('title')}</h1>
+          <p className="rk-lede">{t('lede')}</p>
+        </div>
       </header>
 
       <HubAeoSection

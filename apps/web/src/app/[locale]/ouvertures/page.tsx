@@ -139,25 +139,15 @@ export default async function OuverturesPage({ params }: { params: Promise<{ loc
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       {itemListJsonLd !== null ? <JsonLdScript data={itemListJsonLd} nonce={nonce} /> : null}
 
-      <nav aria-label="breadcrumb" className="text-muted mb-6 text-xs">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="hover:underline">
-              {t('backToHome')}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li className="text-fg" aria-current="page">
-            {t('title')}
-          </li>
-        </ol>
-      </nav>
-
-      <header className="mb-8 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t('title')}</h1>
-        <p className="text-muted mt-3 text-base md:text-lg">{t('lead')}</p>
-        <LastUpdatedBadge isoDate={maxUpdatedAt} locale={locale} variant="inline" />
+      <header className="mch-kit mb-8">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t('eyebrow')}</span>
+          <h1>{t('title')}</h1>
+          <p className="rk-lede">{t('lead')}</p>
+          <div className="rk-meta">
+            <LastUpdatedBadge isoDate={maxUpdatedAt} locale={locale} variant="inline" />
+          </div>
+        </div>
       </header>
 
       {/* AEO block — single Q&A, 40-80 mots, citable LLM. The FAQPage

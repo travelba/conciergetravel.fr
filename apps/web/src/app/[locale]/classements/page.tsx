@@ -393,11 +393,15 @@ export default async function RankingsIndexPage({
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
       <JsonLdScript data={collectionJsonLd} nonce={nonce} />
 
-      <header className="mb-8 max-w-3xl">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t.eyebrow}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{t.title}</h1>
-        <p className="text-muted mt-3 text-sm md:text-base">{t.subtitle(rankings.length)}</p>
-        <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
+      <header className="mch-kit mb-8">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t.eyebrow}</span>
+          <h1>{t.title}</h1>
+          <p className="rk-lede">{t.subtitle(rankings.length)}</p>
+          <div className="rk-meta">
+            <LastUpdatedBadge isoDate={latestUpdate} locale={locale} variant="inline" />
+          </div>
+        </div>
       </header>
 
       {/* emitJsonLd={false}: the canonical FAQPage is the multi-Q

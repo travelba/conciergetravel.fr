@@ -211,13 +211,15 @@ export default async function DestinationDirectoryPage({
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
       <JsonLdScript data={breadcrumbJsonLd} nonce={nonce} />
 
-      <header className="mb-10">
-        <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-        <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">
-          {t('directory.title')}
-        </h1>
-        <p className="text-muted mt-3">{t('directory.subtitle', { count: totalDestinations })}</p>
-        <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+      <header className="mch-kit mb-10">
+        <div className="rk-page-head">
+          <span className="eyebrow left">{t('eyebrow')}</span>
+          <h1>{t('directory.title')}</h1>
+          <p className="rk-lede">{t('directory.subtitle', { count: totalDestinations })}</p>
+          <div className="rk-meta">
+            <LastUpdatedBadge isoDate={todayIso} locale={locale} variant="inline" />
+          </div>
+        </div>
       </header>
 
       <HubAeoSection
