@@ -156,7 +156,39 @@ type MeetingRoomNode = {
   description?: string;
 };
 
-type ContainedPlaceNode = ContainedRoomNode | MeetingRoomNode;
+/**
+ * On-site `Restaurant` exposed under the parent hotel's `containsPlace`
+ * (Schema.org: `Restaurant` is a `FoodEstablishment`, itself a `Place` +
+ * `LocalBusiness`). Mirrors the visible « L'hôtel en bref » restaurants
+ * cluster so search engines + LLM pipelines can answer "Michelin-starred
+ * restaurant at X?" / "What cuisine does X serve?".
+ *
+ *   - `servesCuisine` — the editorial venue type ("Gastronomique", "Bistrot
+ *     provençal"…).
+ *   - `starRating` — Michelin stars, expressed as a `Rating` authored by the
+ *     « Guide MICHELIN » (`bestRating: 3`). This is the canonical, locale-
+ *     agnostic way to carry the distinction; we never inflate the hotel's own
+ *     `starRating` with it.
+ *   - `url` / `telephone` / `priceRange` / `description` — optional, emitted
+ *     only when present and (for `url`) HTTPS-validated by the builder.
+ */
+type RestaurantNode = {
+  '@type': 'Restaurant';
+  name: string;
+  servesCuisine?: string;
+  starRating?: {
+    '@type': 'Rating';
+    ratingValue: number;
+    bestRating: 3;
+    author: { '@type': 'Organization'; name: 'Guide MICHELIN' };
+  };
+  url?: string;
+  telephone?: string;
+  priceRange?: string;
+  description?: string;
+};
+
+type ContainedPlaceNode = ContainedRoomNode | MeetingRoomNode | RestaurantNode;
 
 /**
  * `Place` subtype emitted under `nearbyAttractions`. We keep it as
@@ -466,6 +498,14 @@ export interface HotelJsonLdInput {
    */
   readonly eventSpaces?: readonly MeetingRoomInput[];
   /**
+   * On-site restaurants exposed as Schema.org `Hotel.containsPlace`
+   * entries with `@type: Restaurant`. Mirrors the visible restaurants
+   * cluster (« L'hôtel en bref ») so search engines + LLM ingestion
+   * pipelines can answer "Michelin-starred restaurant at X?" and
+   * "What cuisine does X serve?". Capped at 10 entries in the builder.
+   */
+  readonly restaurants?: readonly RestaurantInput[];
+  /**
    * Knowledge-graph anchor — Wikidata QID. When set, surfaces as
    * `additionalType: "https://www.wikidata.org/wiki/<QID>"` (Schema.org
    * recommended pattern for entity disambiguation) AND is automatically
@@ -560,6 +600,25 @@ export interface MeetingRoomInput {
   readonly surfaceSqm: number;
   readonly maxSeated: number;
   /** Optional editorial note (localised at the call site). */
+  readonly description?: string;
+}
+
+/**
+ * On-site restaurant input for the hotel JSON-LD builder. Matches the
+ * fields of `LocalisedRestaurantVenue` (`readRestaurants()` in
+ * `apps/web/src/server/hotels/get-hotel-by-slug.ts`). All fields except
+ * `name` are optional; the builder emits only what is present.
+ */
+export interface RestaurantInput {
+  readonly name: string;
+  /** Editorial cuisine / venue type → Schema.org `servesCuisine`. */
+  readonly servesCuisine?: string;
+  /** Michelin stars (1–3) → `starRating` Rating authored by Guide MICHELIN. */
+  readonly michelinStars?: number;
+  /** Official site / reservation URL → `url` (HTTPS-validated). */
+  readonly url?: string;
+  readonly telephone?: string;
+  readonly priceRange?: string;
   readonly description?: string;
 }
 
@@ -967,6 +1026,40 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
         name: room.name,
         url: room.url,
       });
+    }
+  }
+  if (input.restaurants !== undefined && input.restaurants.length > 0) {
+    for (const venue of input.restaurants.slice(0, 10)) {
+      const trimmedName = venue.name.trim();
+      if (trimmedName.length === 0) continue;
+      const node: RestaurantNode = { '@type': 'Restaurant', name: trimmedName };
+      if (venue.servesCuisine !== undefined && venue.servesCuisine.trim().length > 0) {
+        node.servesCuisine = venue.servesCuisine.trim();
+      }
+      if (
+        venue.michelinStars !== undefined &&
+        Number.isFinite(venue.michelinStars) &&
+        venue.michelinStars >= 1 &&
+        venue.michelinStars <= 3
+      ) {
+        node.starRating = {
+          '@type': 'Rating',
+          ratingValue: Math.trunc(venue.michelinStars),
+          bestRating: 3,
+          author: { '@type': 'Organization', name: 'Guide MICHELIN' },
+        };
+      }
+      if (isHttpsUrl(venue.url)) node.url = venue.url;
+      if (venue.telephone !== undefined && venue.telephone.trim().length > 0) {
+        node.telephone = venue.telephone.trim();
+      }
+      if (venue.priceRange !== undefined && venue.priceRange.trim().length > 0) {
+        node.priceRange = venue.priceRange.trim();
+      }
+      if (venue.description !== undefined && venue.description.trim().length > 0) {
+        node.description = venue.description.trim();
+      }
+      containedPlaces.push(node);
     }
   }
   if (input.eventSpaces !== undefined && input.eventSpaces.length > 0) {

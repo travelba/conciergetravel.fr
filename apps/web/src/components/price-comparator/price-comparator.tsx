@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { Suspense, type ReactElement } from 'react';
 import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@/i18n/routing';
@@ -8,10 +8,12 @@ import { PriceComparatorClient } from './price-comparator-client';
 export interface PriceComparatorProps {
   readonly locale: Locale;
   readonly hotelId: string;
-  /** YYYY-MM-DD — required: widget is hidden when stay isn't selected. */
-  readonly checkIn: string | null;
-  readonly checkOut: string | null;
-  readonly adults: number;
+  /**
+   * Default party size used when the URL carries no `adults` param. The
+   * live stay dates are read **client-side** from the URL search params
+   * (`?checkIn=…&checkOut=…`) so the host page stays static / ISR.
+   */
+  readonly adultsDefault?: number;
   /**
    * Live MyConciergeHotel price (EUR cents, TTC). When `null` the widget
    * still renders the competitor list but skips the scenario verdict
@@ -28,21 +30,23 @@ export interface PriceComparatorProps {
  *  - never block LCP: data is fetched **client-side** after hydration.
  *  - never link out to a competitor (CDC v3.2).
  *  - never display competitor logos (CDC v3.2).
- *  - hide when no stay dates are selected — the comparator is meaningless
- *    without a check-in / check-out range.
+ *  - never fabricate competitor prices — without selected stay dates the
+ *    island shows a sober "select your dates" prompt instead of figures.
  *
- * The client island is what actually contacts `/api/price-comparison`
- * and renders the rows. The server shell only carries the labels.
+ * The shell always renders (so the aside keeps the kit `.resa-compare`
+ * card) but the client island reads the stay dates from the URL and only
+ * contacts `/api/price-comparison` once a check-in / check-out range is
+ * present. The island is wrapped in `<Suspense>` because `useSearchParams`
+ * would otherwise opt the whole route out of static rendering.
  */
-export async function PriceComparator(props: PriceComparatorProps): Promise<ReactElement | null> {
-  if (props.checkIn === null || props.checkOut === null) return null;
-
+export async function PriceComparator(props: PriceComparatorProps): Promise<ReactElement> {
   const t = await getTranslations('priceComparator');
 
   const labels = {
     title: t('title'),
     subtitle: t('subtitle'),
     loading: t('loading'),
+    selectDates: t('selectDates'),
     legal: t('legal'),
     cachedNotice: t('cachedNotice'),
     providerLabel: {
@@ -75,15 +79,15 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
         <p className="text-muted mt-1 text-xs">{labels.subtitle}</p>
       </header>
 
-      <PriceComparatorClient
-        locale={props.locale}
-        hotelId={props.hotelId}
-        checkIn={props.checkIn}
-        checkOut={props.checkOut}
-        adults={props.adults}
-        priceConciergeMinor={props.priceConciergeMinor}
-        labels={labels}
-      />
+      <Suspense fallback={<p className="text-muted text-sm">{labels.loading}</p>}>
+        <PriceComparatorClient
+          locale={props.locale}
+          hotelId={props.hotelId}
+          adultsDefault={props.adultsDefault ?? 2}
+          priceConciergeMinor={props.priceConciergeMinor}
+          labels={labels}
+        />
+      </Suspense>
     </section>
   );
 }

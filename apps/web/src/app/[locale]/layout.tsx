@@ -22,7 +22,10 @@ const sans = Outfit({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
-  weight: ['300', '400', '500'],
+  // 600 matches the kit's canonical Google Fonts link (DA dossier §font link):
+  // table headers / strong emphasis use semibold — without it the browser
+  // would synthesise a faux-bold on raw <strong> in editorial prose.
+  weight: ['300', '400', '500', '600'],
 });
 
 // Editorial / headline font — validated brand dossier (DA crème/taupe).
@@ -32,7 +35,8 @@ const serif = EB_Garamond({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-serif',
-  weight: ['400', '500'],
+  // 600 matches the kit's canonical font link (rooms-cat titles/headers).
+  weight: ['400', '500', '600'],
   style: ['normal', 'italic'],
 });
 

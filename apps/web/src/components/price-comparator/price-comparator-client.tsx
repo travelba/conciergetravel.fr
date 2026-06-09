@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactElement } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import {
   computeScenario,
@@ -17,6 +18,7 @@ export interface PriceComparatorLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly loading: string;
+  readonly selectDates: string;
   readonly legal: string;
   readonly cachedNotice: string;
   readonly providerLabel: Record<CompetitorProvider, string>;
@@ -52,9 +54,8 @@ type ApiResponse = ApiResponseAvailable | ApiResponseUnavailable;
 export interface PriceComparatorClientProps {
   readonly locale: Locale;
   readonly hotelId: string;
-  readonly checkIn: string;
-  readonly checkOut: string;
-  readonly adults: number;
+  /** Party size used when the URL carries no `adults` param. */
+  readonly adultsDefault: number;
   readonly priceConciergeMinor: number | null;
   readonly labels: PriceComparatorLabels;
 }
@@ -77,29 +78,41 @@ function scenarioHeadline(scenario: ComparisonScenario, labels: PriceComparatorL
   return map[scenario.kind];
 }
 
-function makePropsKey(props: PriceComparatorClientProps): string {
-  return `${props.hotelId}|${props.checkIn}|${props.checkOut}|${props.adults}`;
-}
-
 export function PriceComparatorClient(props: PriceComparatorClientProps): ReactElement | null {
+  // Stay dates are the single source of truth for the comparator: they
+  // live in the URL (`?checkIn=…&checkOut=…&adults=…`, filled by the
+  // booking-widget hydrator). Reading them via `useSearchParams` keeps the
+  // host fiche static/ISR (the island is wrapped in <Suspense> upstream).
+  const searchParams = useSearchParams();
+  const checkIn = searchParams.get('checkIn');
+  const checkOut = searchParams.get('checkOut');
+  const adultsParam = Number(searchParams.get('adults') ?? '');
+  const adults =
+    Number.isFinite(adultsParam) && adultsParam > 0 ? adultsParam : props.adultsDefault;
+  const hasDates = checkIn !== null && checkIn !== '' && checkOut !== null && checkOut !== '';
+
   const [state, setState] = useState<
+    | { readonly status: 'idle' }
     | { readonly status: 'loading' }
     | { readonly status: 'unavailable' }
     | { readonly status: 'available'; readonly data: ApiResponseAvailable }
-  >({ status: 'loading' });
+  >(hasDates ? { status: 'loading' } : { status: 'idle' });
 
-  // Reset to `loading` when the underlying request changes, using the
-  // React 19 "track previous value" pattern so the transition happens
-  // during render and complies with `react-hooks/set-state-in-effect`.
+  // Reset state when the underlying request changes, using the React 19
+  // "track previous value" pattern so the transition happens during render
+  // and complies with `react-hooks/set-state-in-effect`.
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  const propsKey = makePropsKey(props);
-  const [previousPropsKey, setPreviousPropsKey] = useState(propsKey);
-  if (previousPropsKey !== propsKey) {
-    setPreviousPropsKey(propsKey);
-    setState({ status: 'loading' });
+  const requestKey = `${props.hotelId}|${checkIn ?? ''}|${checkOut ?? ''}|${adults}`;
+  const [previousRequestKey, setPreviousRequestKey] = useState(requestKey);
+  if (previousRequestKey !== requestKey) {
+    setPreviousRequestKey(requestKey);
+    setState(hasDates ? { status: 'loading' } : { status: 'idle' });
   }
 
   useEffect(() => {
+    // No stay selected → nothing to fetch (the idle prompt is shown).
+    if (!hasDates || checkIn === null || checkOut === null) return;
+
     // Fetch *after* mount + after first paint: deferred via `requestIdleCallback`
     // when available, falls back to a 200 ms timeout. The comparator must
     // never delay LCP per skill performance guardrail.
@@ -109,9 +122,9 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
       if (cancelled) return;
       const params = new URLSearchParams({
         hotelId: props.hotelId,
-        checkIn: props.checkIn,
-        checkOut: props.checkOut,
-        adults: String(props.adults),
+        checkIn,
+        checkOut,
+        adults: String(adults),
       });
       fetch(`/api/price-comparison?${params.toString()}`, {
         method: 'GET',
@@ -154,7 +167,19 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
       if (typeof rIC === 'function' && typeof cIC === 'function') cIC(handle);
       else window.clearTimeout(handle as number);
     };
-  }, [props.hotelId, props.checkIn, props.checkOut, props.adults]);
+  }, [props.hotelId, checkIn, checkOut, adults, hasDates]);
+
+  // No stay dates yet → sober prompt + the legal mention (never fabricate
+  // competitor figures). The prompt invites the user to pick dates in the
+  // booking widget above.
+  if (state.status === 'idle') {
+    return (
+      <div>
+        <p className="text-muted text-sm">{props.labels.selectDates}</p>
+        <p className="text-muted mt-4 text-[11px] leading-snug">{props.labels.legal}</p>
+      </div>
+    );
+  }
 
   if (state.status === 'loading') {
     return (

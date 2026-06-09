@@ -2840,6 +2840,7 @@
     "title": "The Concierge's price check",
     "subtitle": "Rates observed on other platforms for this stay — for information only, no affiliate links.",
     "loading": "Loading prices…",
+    "selectDates": "Select your dates to compare the rates for this stay.",
     "providerLabel": {
       "booking_com": "Booking.com",
       "expedia": "Expedia",
@@ -3153,6 +3154,11 @@
       "spa": "Spa & wellness",
       "gallery": "Photo gallery",
       "location": "Location & access",
+      "conciergeWord": "{hotel} through the Concierge's eyes",
+      "briefHotel": "The hotel at a glance",
+      "press": "In the press",
+      "around": "Around the hotel",
+      "nearby": "Hotels nearby",
       "policies": "Stay policies",
       "awards": "Awards & recognitions",
       "trustSignals": "Distinctions & affiliations",
@@ -3212,7 +3218,9 @@
     "featuredReviews": {
       "intro": "Curated pull-quotes from independent travel media and professional rankings — editorial selection, no compensation.",
       "listAria": "Editorial pull-quotes for this property",
-      "ratingAria": "Score {value} out of {max}"
+      "ratingAria": "Score {value} out of {max}",
+      "pressHeading": "Press & professional rankings",
+      "reviewsHeading": "Guest reviews"
     },
     "conciergeAdvice": {
       "eyebrow": "The Concierge's tip",
@@ -3250,6 +3258,7 @@
       "eyebrow": "Booking",
       "headline": "Booking coming soon",
       "body": "Online booking for {name} is coming soon. In the meantime, explore the full profile and the Concierge's tip to plan your stay.",
+      "cta": "Booking soon",
       "note": "Live net rates and availability coming soon."
     },
     "displayOnly": {
@@ -3321,10 +3330,14 @@
       "recit": "The story",
       "services": "Services & amenities",
       "chambres": "Rooms",
+      "brefHotel": "The hotel at a glance",
+      "presse": "In the press",
       "lieu": "Location & access",
       "avis": "Reviews & awards",
+      "autour": "Around the hotel",
       "conseil": "The Concierge's tip",
       "faq": "FAQ",
+      "proximite": "Hotels nearby",
       "booking": "Booking",
       "expand": "Show page contents",
       "collapse": "Hide contents"
@@ -3435,6 +3448,9 @@
       "conciergePick": "The Concierge’s pick",
       "showAll": "View the {count} other rooms",
       "showLess": "Show fewer",
+      "prevRoom": "Previous room",
+      "nextRoom": "Next room",
+      "seeAll": "View all {count} rooms & suites",
       "indicativePriceFrom": "From {from} / night",
       "indicativePriceRange": "{from} – {to} / night"
     },
@@ -3511,6 +3527,12 @@
           "lead": "What I book for them when they have a free half-day.",
           "tipFallback": "My tip: book the day before — the best tables close fast.",
           "empty": "No activity recorded within walking distance yet."
+        },
+        "eat": {
+          "title": "Where to eat nearby",
+          "lead": "The tables in the village and around that I recommend, from bistro to Michelin-starred.",
+          "tipFallback": "My tip: book the day before — the best tables fill up fast.",
+          "empty": "No dining spot recorded within walking distance yet."
         },
         "shop": {
           "title": "Shops nearby",

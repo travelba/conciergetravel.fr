@@ -303,6 +303,7 @@ function buildRooms(): readonly HotelRoomRow[] {
       displayOrder: 20,
       cardImagePublicId: null,
       cardImageAlt: null,
+      galleryImages: [],
     },
     {
       id: '33333333-3333-4333-8333-333333333333',
@@ -319,6 +320,7 @@ function buildRooms(): readonly HotelRoomRow[] {
       displayOrder: 10,
       cardImagePublicId: null,
       cardImageAlt: null,
+      galleryImages: [],
     },
   ];
 }

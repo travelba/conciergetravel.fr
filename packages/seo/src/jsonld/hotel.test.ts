@@ -596,6 +596,58 @@ describe('hotelJsonLd', () => {
     }
   });
 
+  it('emits restaurants as Restaurant nodes with servesCuisine and Michelin starRating', () => {
+    const node = hotelJsonLd({
+      name: 'Palace',
+      url: 'https://example.com/p',
+      restaurants: [
+        {
+          name: 'Le Gastronomique',
+          servesCuisine: 'Cuisine provençale',
+          michelinStars: 2,
+          url: 'https://example.com/resto',
+          telephone: '+33 4 90 00 00 00',
+          description: 'Table signature du chef.',
+        },
+      ],
+    });
+    if (Array.isArray(node.containsPlace)) {
+      expect(node.containsPlace).toHaveLength(1);
+      expect(node.containsPlace[0]).toEqual({
+        '@type': 'Restaurant',
+        name: 'Le Gastronomique',
+        servesCuisine: 'Cuisine provençale',
+        starRating: {
+          '@type': 'Rating',
+          ratingValue: 2,
+          bestRating: 3,
+          author: { '@type': 'Organization', name: 'Guide MICHELIN' },
+        },
+        url: 'https://example.com/resto',
+        telephone: '+33 4 90 00 00 00',
+        description: 'Table signature du chef.',
+      });
+    }
+  });
+
+  it('omits restaurant starRating for 0 / out-of-range stars and drops non-HTTPS url', () => {
+    const node = hotelJsonLd({
+      name: 'Palace',
+      url: 'https://example.com/p',
+      restaurants: [
+        { name: 'Bistrot', michelinStars: 0, url: 'http://insecure.example.com' },
+        { name: 'Brasserie', michelinStars: 5 },
+      ],
+    });
+    if (Array.isArray(node.containsPlace)) {
+      expect(node.containsPlace).toHaveLength(2);
+      for (const n of node.containsPlace) {
+        expect(n).not.toHaveProperty('starRating');
+        expect(n).not.toHaveProperty('url');
+      }
+    }
+  });
+
   it('caps eventSpaces to 30 entries', () => {
     const spaces = Array.from({ length: 50 }, (_, i) => ({
       name: `Salon ${String(i + 1)}`,

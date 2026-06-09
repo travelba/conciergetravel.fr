@@ -60,11 +60,15 @@ export async function HotelSignatureExperiences({
   cloudName,
   experiences,
 }: HotelSignatureExperiencesProps): Promise<React.ReactElement | null> {
-  if (experiences.length === 0) return null;
+  // `kid_club` entries are surfaced separately as a dedicated `.feature-block`
+  // (kit `template-hotel.html`, D4) via <HotelKidClub>; keep them out of the
+  // generic signature grid here.
+  const generic = experiences.filter((e) => e.kind !== 'kid_club');
+  if (generic.length === 0) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
 
-  const visible = experiences.slice(0, MAX_EXPERIENCES);
+  const visible = generic.slice(0, MAX_EXPERIENCES);
 
   return (
     <section aria-labelledby="signature-experiences-title" className="mb-12">

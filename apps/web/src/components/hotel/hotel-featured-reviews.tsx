@@ -1,13 +1,20 @@
 import { getTranslations } from 'next-intl/server';
 
-import { DistinctionEmblem } from '@/components/hotel/distinction-emblem';
-import { intlLocaleTag } from '@/i18n/runtime';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedFeaturedReview } from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelFeaturedReviewsProps {
   readonly locale: SupportedLocale;
   readonly reviews: readonly LocalisedFeaturedReview[];
+  /**
+   * Which slice to render (kit `template-hotel.html` split):
+   *   - `press`   → reviews **without** a numeric rating, as `.press-card`
+   *     pull-quotes under « Ils en parlent » (section #presse, H3).
+   *   - `reviews` → reviews **with** a numeric rating, as scored `.review`
+   *     cards under « Emplacement & accès » (section #acces, H3).
+   * The block self-elides when its slice is empty. Defaults to `press`.
+   */
+  readonly variant?: 'press' | 'reviews';
 }
 
 /**
@@ -51,101 +58,75 @@ const MAX_VISIBLE = 3;
 export async function HotelFeaturedReviews({
   locale,
   reviews,
+  variant = 'press',
 }: HotelFeaturedReviewsProps): Promise<React.ReactElement | null> {
-  if (reviews.length === 0) return null;
+  // Split by presence of a numeric rating: press extracts carry no score,
+  // guest reviews do. Each variant self-elides when its slice is empty so an
+  // all-press fiche (e.g. Airelles) shows only the press block.
+  const slice = reviews.filter((r) =>
+    variant === 'reviews' ? r.rating !== null : r.rating === null,
+  );
+  if (slice.length === 0) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
-  const visible = reviews.slice(0, MAX_VISIBLE);
+  const visible = slice.slice(0, MAX_VISIBLE);
 
-  const dateFormatter = new Intl.DateTimeFormat(intlLocaleTag(locale), {
-    year: 'numeric',
-    month: 'long',
-  });
+  if (variant === 'reviews') {
+    return (
+      <div className="mch-kit bref-sub">
+        <h3>{t('featuredReviews.reviewsHeading')}</h3>
+        <div className="review-grid" aria-label={t('featuredReviews.listAria')}>
+          {visible.map((review, idx) => {
+            const scoreLabel =
+              review.rating !== null && review.maxRating !== null
+                ? `${review.rating}/${review.maxRating}`
+                : review.rating !== null
+                  ? String(review.rating)
+                  : null;
+            return (
+              <blockquote
+                key={`${review.source}-${idx}`}
+                className="review"
+                cite={review.sourceUrl ?? undefined}
+              >
+                <div className="rv-top">
+                  {scoreLabel !== null ? (
+                    <span
+                      className="rv-score"
+                      aria-label={t('featuredReviews.ratingAria', {
+                        value: review.rating ?? 0,
+                        max: review.maxRating ?? 0,
+                      })}
+                    >
+                      {scoreLabel}
+                    </span>
+                  ) : null}
+                  <span className="rv-name">{review.source}</span>
+                </div>
+                <p>{review.quote}</p>
+              </blockquote>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section aria-labelledby="featured-reviews-title" className="mb-12">
-      <h2 id="featured-reviews-title" className="text-fg mb-3 font-serif text-2xl">
-        {t('sections.featuredReviews')}
-      </h2>
-      <p className="text-muted mb-6 max-w-prose text-sm">{t('featuredReviews.intro')}</p>
-
-      <ul
-        aria-label={t('featuredReviews.listAria')}
-        className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
-      >
-        {visible.map((review, idx) => {
-          const ratingLabel =
-            review.rating !== null && review.maxRating !== null
-              ? // 5-point scales: display as "5/5"; >5 scales (e.g.
-                // Travel + Leisure's "100"): display as "98/100" without
-                // implying a star.
-                `${review.rating}/${review.maxRating}`
-              : null;
-          let monthLabel: string | null = null;
-          if (review.dateIso !== null) {
-            const d = new Date(`${review.dateIso}T00:00:00Z`);
-            if (!Number.isNaN(d.getTime())) {
-              monthLabel = dateFormatter.format(d);
-            }
-          }
-
-          return (
-            <li key={`${review.source}-${idx}`} className="flex">
-              <figure className="border-border bg-bg flex flex-1 flex-col rounded-lg border p-5">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <DistinctionEmblem label={review.source} size="sm" />
-                  <span
-                    aria-hidden
-                    className="text-accent/25 -mt-2 select-none font-serif text-5xl leading-none"
-                  >
-                    ”
-                  </span>
-                </div>
-                <blockquote
-                  cite={review.sourceUrl ?? undefined}
-                  className="text-fg/90 mb-4 flex-1 text-sm leading-relaxed"
-                >
-                  {review.quote}
-                </blockquote>
-
-                <figcaption className="border-border flex flex-col gap-1 border-t pt-3 text-xs">
-                  <cite className="text-fg not-italic">
-                    {review.sourceUrl !== null ? (
-                      <a
-                        href={review.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium underline-offset-2 hover:underline"
-                      >
-                        {review.source}
-                      </a>
-                    ) : (
-                      <span className="font-medium">{review.source}</span>
-                    )}
-                    {review.author !== null ? (
-                      <span className="text-muted"> · {review.author}</span>
-                    ) : null}
-                  </cite>
-                  <div className="text-muted flex flex-wrap items-center gap-x-3 gap-y-1">
-                    {ratingLabel !== null ? (
-                      <span
-                        aria-label={t('featuredReviews.ratingAria', {
-                          value: review.rating ?? 0,
-                          max: review.maxRating ?? 0,
-                        })}
-                        className="border-border text-fg/80 inline-flex items-center rounded-full border px-2 py-0.5 font-medium"
-                      >
-                        {ratingLabel}
-                      </span>
-                    ) : null}
-                    {monthLabel !== null ? <span>{monthLabel}</span> : null}
-                  </div>
-                </figcaption>
-              </figure>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+    <div className="mch-kit bref-sub">
+      <h3>{t('featuredReviews.pressHeading')}</h3>
+      <div className="press-grid" aria-label={t('featuredReviews.listAria')}>
+        {visible.map((review, idx) => (
+          <blockquote
+            key={`${review.source}-${idx}`}
+            className="press-card"
+            cite={review.sourceUrl ?? undefined}
+          >
+            <span className="press-src">{review.source}</span>
+            <p>{review.quote}</p>
+          </blockquote>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -2840,6 +2840,7 @@
     "title": "Le comparatif du Concierge",
     "subtitle": "Tarifs observés sur d'autres plateformes pour ce séjour — à titre informatif, sans lien d'affiliation.",
     "loading": "Chargement des prix…",
+    "selectDates": "Sélectionnez vos dates pour comparer les tarifs de ce séjour.",
     "providerLabel": {
       "booking_com": "Booking.com",
       "expedia": "Expedia",
@@ -3153,6 +3154,11 @@
       "spa": "Spa & bien-être",
       "gallery": "Galerie photos",
       "location": "Emplacement & accès",
+      "conciergeWord": "{hotel} vu par le Concierge",
+      "briefHotel": "L'hôtel en bref",
+      "press": "Ils en parlent",
+      "around": "Autour de l'hôtel",
+      "nearby": "Les hôtes à proximité",
       "policies": "Conditions de séjour",
       "awards": "Distinctions & reconnaissances",
       "trustSignals": "Distinctions & affiliations",
@@ -3212,7 +3218,9 @@
     "featuredReviews": {
       "intro": "Extraits de presse spécialisée et de classements professionnels — sélection éditoriale, sans rémunération.",
       "listAria": "Citations éditoriales sur l'établissement",
-      "ratingAria": "Note {value} sur {max}"
+      "ratingAria": "Note {value} sur {max}",
+      "pressHeading": "Extraits de presse & classements professionnels",
+      "reviewsHeading": "Avis des voyageurs"
     },
     "conciergeAdvice": {
       "eyebrow": "Le conseil du Concierge",
@@ -3250,6 +3258,7 @@
       "eyebrow": "Réservation",
       "headline": "Réservation bientôt disponible",
       "body": "La réservation en ligne de {name} arrive prochainement. En attendant, parcourez la fiche complète et le Conseil du Concierge pour préparer votre séjour.",
+      "cta": "Réservation bientôt",
       "note": "Tarifs nets et disponibilités en temps réel à venir."
     },
     "displayOnly": {
@@ -3321,10 +3330,14 @@
       "recit": "Le récit",
       "services": "Services & équipements",
       "chambres": "Chambres",
+      "brefHotel": "L'hôtel en bref",
+      "presse": "Ils en parlent",
       "lieu": "Emplacement & accès",
       "avis": "Avis & distinctions",
+      "autour": "Autour de l'hôtel",
       "conseil": "Le Conseil du Concierge",
       "faq": "Questions fréquentes",
+      "proximite": "Les hôtes à proximité",
       "booking": "Réservation",
       "expand": "Afficher le sommaire de la page",
       "collapse": "Masquer le sommaire"
@@ -3435,6 +3448,9 @@
       "conciergePick": "Le choix du Concierge",
       "showAll": "Voir les {count} autres chambres",
       "showLess": "Réduire l’affichage",
+      "prevRoom": "Chambre précédente",
+      "nextRoom": "Chambre suivante",
+      "seeAll": "Voir les {count} chambres & suites",
       "indicativePriceFrom": "À partir de {from} / nuit",
       "indicativePriceRange": "{from} – {to} / nuit"
     },
@@ -3511,6 +3527,12 @@
           "lead": "Ce que je réserve pour eux quand ils ont une demi-journée libre.",
           "tipFallback": "Mon conseil : réservez la veille — les meilleures tables ferment vite.",
           "empty": "Aucune activité référencée à proximité immédiate."
+        },
+        "eat": {
+          "title": "Où manger autour",
+          "lead": "Les tables du village et des environs que je recommande, du bistrot à l’étoilé.",
+          "tipFallback": "Mon conseil : réservez la veille — les meilleures tables affichent vite complet.",
+          "empty": "Aucune table référencée à proximité immédiate."
         },
         "shop": {
           "title": "Commerces à proximité",

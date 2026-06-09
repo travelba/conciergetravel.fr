@@ -1508,16 +1508,19 @@ export function readGallery(
 
 /**
  * Editorial bucket — used to split the "Around the hotel" section into
- * three sub-blocks on the public fiche:
+ * sub-blocks on the public fiche (kit `template-hotel.html`, « Autour »):
  *   - `visit` — patrimony + culture + nature (museum, castle, park, beach, …)
- *   - `do` — activities + experiential (restaurants, wineries, sports, trails, …)
+ *   - `do` — activities + experiential (wineries, sports, trails, …)
+ *   - `eat` — dining around the hotel (restaurants, bistros, cafés, …)
  *   - `shop` — daily-life utilities (pharmacy, bakery, supermarket, ATM, …)
  *
- * Legacy rows (pre-WS3) may omit the field; reader defaults to `visit`
- * for cultural-looking `type` values and `do` otherwise so the UI never
- * crashes.
+ * Stored inside the `points_of_interest` JSONB array (no DB CHECK — the
+ * enum is enforced here, in Zod). Legacy rows (pre-WS3) may omit the
+ * field; the reader infers a sane bucket from `type` so the UI never
+ * crashes. `eat` is always explicit (editorial) — inference keeps
+ * routing generic dining to `do` for back-compat.
  */
-export const POI_BUCKETS = ['visit', 'do', 'shop'] as const;
+export const POI_BUCKETS = ['visit', 'do', 'eat', 'shop'] as const;
 export type PoiBucket = (typeof POI_BUCKETS)[number];
 const PoiBucketSchema = z.enum(POI_BUCKETS);
 
@@ -1725,6 +1728,7 @@ export interface LocalisedLocation {
 export interface LocalisedLocationByBucket {
   readonly visit: readonly LocalisedPointOfInterest[];
   readonly do: readonly LocalisedPointOfInterest[];
+  readonly eat: readonly LocalisedPointOfInterest[];
   readonly shop: readonly LocalisedPointOfInterest[];
   readonly transports: readonly LocalisedTransport[];
 }
@@ -1856,6 +1860,7 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
   const bucketTips: Record<PoiBucket, string | null> = {
     visit: null,
     do: null,
+    eat: null,
     shop: null,
   };
   if (poisRaw.success) {
@@ -1890,6 +1895,7 @@ export function readLocationByBucket(
   const buckets: Record<PoiBucket, LocalisedPointOfInterest[]> = {
     visit: [],
     do: [],
+    eat: [],
     shop: [],
   };
   for (const p of pointsOfInterest) {
@@ -1904,6 +1910,7 @@ export function readLocationByBucket(
   return {
     visit: buckets.visit.sort(byDistance),
     do: buckets.do.sort(byDistance),
+    eat: buckets.eat.sort(byDistance),
     shop: buckets.shop.sort(byDistance),
     transports,
   };
@@ -2628,6 +2635,13 @@ const SignatureExperienceSchema = z.object({
   key: z.string().regex(EXPERIENCE_KEY_REGEX, {
     message: 'expected lowercase kebab key (2-48 chars)',
   }),
+  /**
+   * Discriminator (kit `template-hotel.html`, D4). `experience` (default)
+   * renders in the generic signature grid; `kid_club` is surfaced as a
+   * dedicated `.feature-block` (image + meta + footer) under « L'hôtel en
+   * bref ». Absent on legacy rows → treated as `experience`.
+   */
+  kind: z.enum(['experience', 'kid_club']).optional(),
   title_fr: z.string().min(1),
   title_en: z.string().min(1),
   description_fr: z.string().min(1).max(500),
@@ -2647,6 +2661,7 @@ const SignatureExperiencesSchema = z.array(SignatureExperienceSchema);
 
 export interface LocalisedSignatureExperience {
   readonly key: string;
+  readonly kind: 'experience' | 'kid_club';
   readonly title: string;
   readonly description: string;
   readonly badge: string | null;
@@ -2673,6 +2688,7 @@ export function readSignatureExperiences(
 
   return parsed.data.map((e) => ({
     key: e.key,
+    kind: e.kind ?? 'experience',
     title: pickByLocale(locale, e.title_fr, e.title_en),
     description: pickByLocale(locale, e.description_fr, e.description_en),
     badge: pickLocalizedText(locale, e.badge_fr, e.badge_en),
@@ -3023,6 +3039,12 @@ export interface HotelRoomRow {
    */
   readonly cardImagePublicId: string | null;
   readonly cardImageAlt: string | null;
+  /**
+   * Per-room mini-gallery (kit `.mini-gallery`) : `hero_image` (en tête) +
+   * toutes les entrées `images[]`, dédupliquées. Vide quand la chambre n'a
+   * aucune photo — la carte retombe alors sur l'image de carte ou un repli.
+   */
+  readonly galleryImages: readonly { readonly publicId: string; readonly alt: string }[];
 }
 
 const HotelRoomDbRowSchema = z.object({
@@ -3079,6 +3101,37 @@ function readRoomCardImage(
     };
   }
   return null;
+}
+
+/**
+ * Mini-galerie d'une chambre (kit `.mini-gallery`) : `hero_image` en tête, puis
+ * toutes les images de `images[]`, dédupliquées par `public_id`. Renvoie un
+ * tableau vide quand aucune photo n'est exploitable.
+ */
+function readRoomGallery(
+  row: z.infer<typeof HotelRoomDbRowSchema>,
+  locale: SupportedLocale,
+  fallbackAlt: string,
+): readonly { readonly publicId: string; readonly alt: string }[] {
+  const out: { publicId: string; alt: string }[] = [];
+  const seen = new Set<string>();
+  const hero = CloudinaryPublicIdSchema.safeParse(row.hero_image);
+  if (hero.success) {
+    out.push({ publicId: hero.data, alt: fallbackAlt });
+    seen.add(hero.data);
+  }
+  const gallery = GalleryImagesSchema.safeParse(row.images);
+  if (gallery.success) {
+    for (const img of gallery.data) {
+      if (seen.has(img.public_id)) continue;
+      seen.add(img.public_id);
+      out.push({
+        publicId: img.public_id,
+        alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackAlt,
+      });
+    }
+  }
+  return out;
 }
 
 /** Slug shape: `^[a-z0-9]+(?:-[a-z0-9]+)*$` (matches `hotels_slug_ck`). */
@@ -3186,6 +3239,7 @@ export async function getHotelBySlug(
           displayOrder: r.data.display_order ?? null,
           cardImagePublicId: cardImage?.publicId ?? null,
           cardImageAlt: cardImage?.alt ?? null,
+          galleryImages: readRoomGallery(r.data, locale, roomName ?? r.data.room_code),
         });
       }
     }

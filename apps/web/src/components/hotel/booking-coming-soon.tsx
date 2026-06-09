@@ -5,6 +5,14 @@ import type { SupportedLocale } from '@/i18n/supported-locale';
 interface BookingComingSoonProps {
   readonly locale: SupportedLocale;
   readonly hotelName: string;
+  /**
+   * Indicative "from" price (already locale-formatted, e.g. "690 €"). When
+   * present it anchors the widget with the kit `.resa-price` block ("À partir
+   * de …"); when null the card falls back to the eyebrow + headline only. This
+   * is the editorial indicative price (cheapest room), NOT a bookable rate —
+   * the rail stays inert until the funnel lands (Phase 6).
+   */
+  readonly priceFrom?: string | null;
 }
 
 /**
@@ -16,17 +24,26 @@ interface BookingComingSoonProps {
  * rail on desktop) so the future `<BookingWidget>` lands in the exact
  * same, highest-converting location with zero relayout.
  *
- * Deliberately inert: no CTA, no form, no link — a sober "bientôt
- * disponible" card. The stable `id="booking"` anchor is preserved so the
- * sticky table of contents and deep-links keep resolving. When the funnel
- * returns, `<BookingSlot surface="rail">` swaps this component for the
- * live widget without touching the page layout.
+ * Visual parity with the kit (`template-hotel.html` `.resa-card`)
+ * ---------------------------------------------------------------
+ * The card now mirrors the template reservation widget — indicative price
+ * anchor, the three date/guest fields and the trust checklist — but every
+ * interactive affordance is rendered in a **disabled** state (no form, no
+ * link, no live rate). The date fields are decorative (`aria-hidden`) and
+ * the CTA is `disabled`, so the card reads as the future widget without
+ * faking a working funnel (anti-dark-pattern — AGENTS.md §4ter). The
+ * stable `id="booking"` anchor is preserved so the sticky table of contents
+ * and deep-links keep resolving. When the funnel returns,
+ * `<BookingSlot surface="rail">` swaps this component for the live widget
+ * without touching the page layout.
  */
 export async function BookingComingSoon({
   locale,
   hotelName,
+  priceFrom = null,
 }: BookingComingSoonProps): Promise<React.ReactElement> {
-  const t = await getTranslations({ locale, namespace: 'hotelPage.bookingComingSoon' });
+  const t = await getTranslations({ locale, namespace: 'hotelPage' });
+  const hasPrice = priceFrom !== null && priceFrom !== '';
 
   return (
     <section
@@ -36,18 +53,77 @@ export async function BookingComingSoon({
       className="mch-kit scroll-mt-24"
     >
       <div className="resa-card">
-        <p className="rp-from">{t('eyebrow')}</p>
+        {hasPrice ? (
+          <div className="resa-price">
+            <span className="rp-from">{t('widget.priceFromLabel')}</span>
+            <span className="rp-amount">{priceFrom}</span>
+            <span className="rp-unit">{t('widget.priceFromUnit')}</span>
+          </div>
+        ) : (
+          <p className="rp-from">{t('bookingComingSoon.eyebrow')}</p>
+        )}
+
         <h2
           id="booking-coming-soon-title"
-          className="mt-1 font-serif text-xl leading-tight text-[color:var(--noir)]"
+          className="mt-3 font-serif text-xl leading-tight text-[color:var(--noir)]"
         >
-          {t('headline')}
+          {t('bookingComingSoon.headline')}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[color:var(--texte-doux)]">
-          {t('body', { name: hotelName })}
+          {t('bookingComingSoon.body', { name: hotelName })}
         </p>
-        <p className="resa-iata mt-4 text-left">{t('note')}</p>
+
+        {/* Decorative date/guest fields — kit `.resa-form` frame, inert.
+            `aria-hidden` so assistive tech is never offered a fake form. */}
+        <div className="resa-form" aria-hidden="true">
+          <span className="rf-field">
+            <span>{t('displayOnly.checkIn')}</span>
+            <span className="rf-val text-[color:var(--texte-doux)]">—</span>
+          </span>
+          <span className="rf-field">
+            <span>{t('displayOnly.checkOut')}</span>
+            <span className="rf-val text-[color:var(--texte-doux)]">—</span>
+          </span>
+          <span className="rf-field">
+            <span>{t('displayOnly.adults')}</span>
+            <span className="rf-val text-[color:var(--texte-doux)]">—</span>
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-or resa-go cursor-not-allowed opacity-60"
+          disabled
+          aria-disabled="true"
+        >
+          {t('bookingComingSoon.cta')}
+        </button>
+
+        <ul className="resa-trust" aria-label={t('widget.trust.listAria')}>
+          <li>
+            <CheckIcon />
+            {t('widget.trust.iata')}
+          </li>
+          <li>
+            <CheckIcon />
+            {t('widget.trust.cancellation')}
+          </li>
+          <li>
+            <CheckIcon />
+            {t('widget.trust.noCard')}
+          </li>
+        </ul>
+
+        <p className="resa-iata mt-4 text-center">{t('bookingComingSoon.note')}</p>
       </div>
     </section>
+  );
+}
+
+function CheckIcon(): React.ReactElement {
+  return (
+    <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+      <path d="M5 13l4 4L19 7" />
+    </svg>
   );
 }

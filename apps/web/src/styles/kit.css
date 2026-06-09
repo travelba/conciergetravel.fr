@@ -2108,3 +2108,1099 @@
     padding: 0 18px 30px;
   }
 }
+
+/* ============================================================
+   FICHE HÔTEL — REFONTE GABARIT (les-airelles-gordes.html)
+   Composants : badge Concierge, prose dépliable, citation,
+   carrousels, chambres v2, "en bref" sous-sections, expériences,
+   restaurants, spa/kid feature-block, presse, autour, FAQ groupée,
+   hôtes à proximité, comparateur. Source : design/html-kit/assets/style.css.
+   ============================================================ */
+
+/* --- Badge "Sélection du Concierge" --- */
+.mch-kit .cc-pick {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(58, 53, 45, 0.92);
+  color: var(--creme);
+  font-family: var(--kit-sans);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400;
+  padding: 7px 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(168, 150, 113, 0.55);
+  box-shadow: 0 6px 18px rgba(22, 20, 15, 0.22);
+  backdrop-filter: blur(3px);
+}
+.mch-kit .cc-pick svg {
+  width: 13px;
+  height: 13px;
+  stroke: var(--or-clair);
+  fill: none;
+  stroke-width: 1.6;
+  flex: none;
+}
+.mch-kit .cc-pick.inline {
+  position: static;
+  box-shadow: none;
+}
+
+/* --- Justification concierge réutilisable --- */
+.mch-kit .cc-why {
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+  font-family: var(--kit-serif);
+  font-style: italic;
+  color: var(--texte);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 10px 0;
+}
+.mch-kit .cc-why-sm {
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+/* --- Prose dépliable (lire la suite) --- */
+.mch-kit .read-more {
+  position: relative;
+}
+.mch-kit .read-more .rm-clip {
+  max-height: 340px;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+  position: relative;
+}
+.mch-kit .read-more .rm-clip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  background: linear-gradient(180deg, rgba(246, 241, 231, 0), var(--creme));
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.mch-kit .read-more.open .rm-clip {
+  max-height: 6000px;
+}
+.mch-kit .read-more.open .rm-clip::after {
+  opacity: 0;
+}
+.mch-kit .rm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  cursor: pointer;
+  font-family: var(--kit-sans);
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--ligne);
+  border-radius: 999px;
+  padding: 11px 22px;
+  transition: 0.25s;
+}
+.mch-kit .rm-toggle:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.mch-kit .rm-toggle svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  transition: transform 0.3s;
+}
+.mch-kit .read-more.open .rm-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* --- Citation Concierge (le mot du concierge) --- */
+.mch-kit .concierge-quote {
+  background: linear-gradient(135deg, var(--creme-2), var(--creme));
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 30px 34px;
+  margin: 0 0 30px;
+}
+.mch-kit .cq-mark {
+  font-family: var(--kit-serif);
+  font-size: 58px;
+  line-height: 0.3;
+  color: var(--or);
+  opacity: 0.5;
+  display: block;
+}
+.mch-kit .cq-text {
+  font-family: var(--kit-serif);
+  font-style: italic;
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--anthracite);
+  margin: 6px 0 16px;
+  max-width: 660px;
+}
+.mch-kit .cq-sign {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mch-kit .cq-sign .cq-name {
+  font-family: var(--kit-serif);
+  font-size: 18px;
+  color: var(--noir);
+}
+.mch-kit .cq-sign .cq-role {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--or);
+}
+
+/* --- Carrousel scroll-snap --- */
+.mch-kit .carousel {
+  position: relative;
+}
+.mch-kit .carousel-track {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 4px 2px 14px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ligne) transparent;
+}
+.mch-kit .carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+.mch-kit .carousel-track::-webkit-scrollbar-thumb {
+  background: var(--ligne);
+  border-radius: 3px;
+}
+.mch-kit .carousel-track > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+.mch-kit .carousel-nav {
+  position: absolute;
+  top: 38%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--ligne);
+  background: rgba(255, 255, 255, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: 0.25s;
+  z-index: 4;
+}
+.mch-kit .carousel-nav:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.mch-kit .carousel-nav:hover svg {
+  stroke: #fff;
+}
+.mch-kit .carousel-nav svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--noir);
+  fill: none;
+  stroke-width: 1.8;
+}
+.mch-kit .carousel-nav.prev {
+  left: -14px;
+}
+.mch-kit .carousel-nav.next {
+  right: -14px;
+}
+@media (max-width: 680px) {
+  .mch-kit .carousel-nav {
+    display: none;
+  }
+}
+
+/* --- Mini-galerie intégrée (scroll-snap) --- */
+.mch-kit .mini-gallery {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+}
+.mch-kit .mini-gallery .mg-track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.mch-kit .mini-gallery .mg-track::-webkit-scrollbar {
+  display: none;
+}
+.mch-kit .mini-gallery img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scroll-snap-align: center;
+}
+.mch-kit .mini-gallery .mg-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 2;
+}
+.mch-kit .mini-gallery .mg-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.mch-kit .mini-gallery .mg-dots span.on {
+  background: #fff;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* --- Chambres v2 (carrousel + grille luxe) --- */
+.mch-kit .rooms-carousel .room-v2 {
+  width: 340px;
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .rooms-carousel .room-v2:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+}
+.mch-kit .rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.mch-kit .rooms-grid .room-v2 {
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .rooms-grid .room-v2:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+}
+.mch-kit .rooms-grid .room-v2.room-concierge {
+  background: #f7f4ee;
+  border-color: var(--accent);
+}
+.mch-kit .rv2-img {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+.mch-kit .rv2-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: 0.4s;
+}
+.mch-kit .rv2-img .cc-pick {
+  top: 12px;
+  left: 12px;
+}
+.mch-kit .rooms-grid .room-v2:hover .rv2-img img {
+  transform: scale(1.04);
+}
+.mch-kit .rv2-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.mch-kit .rv2-body h3 {
+  font-size: 20px;
+  color: var(--noir);
+  margin-bottom: 6px;
+}
+.mch-kit .rv2-desc {
+  font-size: 13px;
+  color: var(--texte-doux);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  flex: 1;
+}
+.mch-kit .rv2-facts {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ligne);
+}
+.mch-kit .rv2-facts li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--texte);
+}
+.mch-kit .rv2-facts .icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--accent);
+  flex: none;
+}
+.mch-kit .rv2-cta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+.mch-kit .rv2-price {
+  font-family: var(--kit-serif);
+  font-size: 22px;
+  color: var(--noir);
+  line-height: 1.1;
+}
+.mch-kit .rv2-price small {
+  display: block;
+  font-family: var(--kit-sans);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+.mch-kit .rv2-cta .btn {
+  padding: 11px 20px;
+  font-size: 11.5px;
+}
+.mch-kit .rooms-more {
+  text-align: center;
+  margin-top: 8px;
+}
+@media (max-width: 900px) {
+  .mch-kit .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 580px) {
+  .mch-kit .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- L'hôtel en bref : sous-sections --- */
+.mch-kit .bref-sub {
+  padding: 30px 0;
+  border-top: 1px dashed var(--ligne);
+}
+.mch-kit .bref-sub:first-child {
+  border-top: none;
+  padding-top: 8px;
+}
+.mch-kit .bref-sub h3 {
+  font-family: var(--kit-serif);
+  font-size: 25px;
+  color: var(--noir);
+  margin-bottom: 6px;
+}
+.mch-kit .bref-sub .sub-lede {
+  color: var(--texte-doux);
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+/* --- Expériences signature --- */
+.mch-kit .exp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.mch-kit .exp-more-wrap {
+  text-align: center;
+  margin-top: 16px;
+}
+.mch-kit .exp-list.is-collapsed .more-hidden {
+  display: none;
+}
+.mch-kit .exp-card {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: 0.3s;
+}
+.mch-kit .exp-card.exp-concierge {
+  border-color: var(--accent);
+  background: #f7f4ee;
+}
+.mch-kit .exp-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+.mch-kit .exp-img {
+  position: relative;
+  overflow: hidden;
+}
+.mch-kit .exp-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 180px;
+}
+.mch-kit .exp-tx {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .exp-tx h4 {
+  font-family: var(--kit-serif);
+  font-size: 21px;
+  color: var(--noir);
+  margin-bottom: 8px;
+}
+.mch-kit .exp-tx p {
+  font-size: 14px;
+  color: var(--texte-doux);
+  line-height: 1.6;
+  margin-bottom: 14px;
+  flex: 1;
+}
+.mch-kit .exp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.mch-kit .exp-price {
+  font-family: var(--kit-serif);
+  font-size: 19px;
+  color: var(--noir);
+}
+.mch-kit .exp-price small {
+  font-family: var(--kit-sans);
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+/* --- Restaurants (carrousel + grille luxe) --- */
+.mch-kit .resto-carousel .resto-card {
+  width: 320px;
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .resto-carousel .resto-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+}
+.mch-kit .resto-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.mch-kit .resto-grid .resto-card {
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .resto-grid .resto-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+}
+.mch-kit .resto-grid .resto-card.resto-concierge {
+  background: #f7f4ee;
+  border-color: var(--accent);
+}
+.mch-kit .resto-img {
+  position: relative;
+  height: 170px;
+  overflow: hidden;
+}
+.mch-kit .resto-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: 0.4s;
+}
+.mch-kit .resto-img .cc-pick {
+  top: 12px;
+  left: 12px;
+}
+.mch-kit .resto-grid .resto-card:hover .resto-img img {
+  transform: scale(1.04);
+}
+.mch-kit .resto-body {
+  padding: 16px 19px 19px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.mch-kit .resto-body h4 {
+  font-family: var(--kit-serif);
+  font-size: 20px;
+  color: var(--noir);
+  margin-bottom: 5px;
+}
+.mch-kit .resto-kind {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.mch-kit .resto-body p {
+  font-size: 13px;
+  color: var(--texte-doux);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  flex: 1;
+}
+.mch-kit .resto-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ligne);
+}
+.mch-kit .resto-price {
+  font-family: var(--kit-serif);
+  font-size: 18px;
+  color: var(--noir);
+}
+.mch-kit .resto-price small {
+  font-family: var(--kit-sans);
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+@media (max-width: 900px) {
+  .mch-kit .resto-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 580px) {
+  .mch-kit .resto-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Feature-block (spa / kid) --- */
+.mch-kit .feature-block {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.mch-kit .feature-block.reverse {
+  grid-template-columns: 1fr 1.1fr;
+}
+.mch-kit .feature-block.reverse .fb-media {
+  order: 2;
+}
+.mch-kit .fb-media {
+  position: relative;
+  min-height: 280px;
+  height: 100%;
+}
+.mch-kit .feature-block .fb-media .mg-track {
+  height: 100%;
+}
+.mch-kit .feature-block .fb-media .mg-track img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mch-kit .feature-block .fb-media-solo {
+  height: 100%;
+  min-height: 280px;
+  overflow: hidden;
+}
+.mch-kit .feature-block .fb-media-solo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mch-kit .fb-tx {
+  padding: 30px 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.mch-kit .fb-tx h4,
+.mch-kit .fb-tx h3 {
+  font-family: var(--kit-serif);
+  font-size: 26px;
+  color: var(--noir);
+  margin-bottom: 10px;
+}
+.mch-kit .fb-tx > p {
+  font-size: 14.5px;
+  color: var(--texte-doux);
+  line-height: 1.65;
+  margin-bottom: 18px;
+}
+.mch-kit .fb-meta {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+.mch-kit .fb-meta li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 13.5px;
+  color: var(--texte);
+}
+.mch-kit .fb-meta .icon {
+  width: 18px;
+  height: 18px;
+  stroke: var(--accent);
+  flex: none;
+  margin-top: 1px;
+}
+.mch-kit .fb-meta li b {
+  font-weight: 500;
+  color: var(--noir);
+}
+.mch-kit .fb-price {
+  font-family: var(--kit-serif);
+  font-size: 18px;
+  color: var(--noir);
+  padding-top: 14px;
+  border-top: 1px solid var(--ligne);
+}
+.mch-kit .fb-price small {
+  font-family: var(--kit-sans);
+  font-size: 11.5px;
+  color: var(--texte-doux);
+}
+
+/* --- Ils en parlent : presse, distinctions, instagram --- */
+.mch-kit .press-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.mch-kit .press-card {
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+}
+.mch-kit .press-src {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.mch-kit .press-card p {
+  font-family: var(--kit-serif);
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--anthracite);
+}
+.mch-kit .distinctions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.mch-kit .distinction {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--creme-2);
+  border: 1px solid var(--ligne);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--noir);
+}
+.mch-kit .distinction .icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--accent);
+  flex: none;
+}
+.mch-kit .insta-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+.mch-kit .insta-strip a {
+  position: relative;
+  aspect-ratio: 1/1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mch-kit .insta-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+.mch-kit .insta-strip a:hover img {
+  transform: scale(1.08);
+}
+.mch-kit .affil-line {
+  margin-top: 22px;
+  font-size: 14px;
+  color: var(--texte-doux);
+}
+.mch-kit .affil-line a {
+  color: var(--accent);
+  border-bottom: 1px solid var(--ligne);
+}
+.mch-kit .ranking-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--creme-2);
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin-top: 22px;
+}
+.mch-kit .ranking-callout p {
+  font-size: 15px;
+  color: var(--noir);
+  margin: 0;
+}
+.mch-kit .ranking-callout p b {
+  font-weight: 500;
+}
+
+/* --- Emplacement & accès --- */
+.mch-kit .access-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.mch-kit .access-card {
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-soft);
+}
+.mch-kit .access-card h4 {
+  font-family: var(--kit-sans);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.mch-kit .access-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mch-kit .access-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--texte);
+  line-height: 1.5;
+}
+.mch-kit .access-card .icon {
+  width: 17px;
+  height: 17px;
+  stroke: var(--accent);
+  flex: none;
+  margin-top: 2px;
+}
+
+/* --- Autour de l'hôtel --- */
+.mch-kit .around-sub {
+  padding: 26px 0;
+  border-top: 1px dashed var(--ligne);
+}
+.mch-kit .around-sub:first-child {
+  border-top: none;
+  padding-top: 6px;
+}
+.mch-kit .around-sub h3 {
+  font-family: var(--kit-serif);
+  font-size: 23px;
+  color: var(--noir);
+  margin-bottom: 16px;
+}
+.mch-kit .around-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.mch-kit .around-list.is-collapsed .more-hidden {
+  display: none;
+}
+.mch-kit .around-item {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 10px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft);
+}
+.mch-kit .around-item h5 {
+  font-family: var(--kit-serif);
+  font-size: 17px;
+  color: var(--noir);
+  margin-bottom: 6px;
+  padding-right: 90px;
+}
+.mch-kit .around-item p {
+  font-size: 12.5px;
+  color: var(--texte-doux);
+  line-height: 1.5;
+  margin: 0;
+}
+.mch-kit .around-item .cc-pick {
+  top: 14px;
+  right: 14px;
+  left: auto;
+}
+
+/* --- FAQ groupée --- */
+.mch-kit .faq-group {
+  margin-bottom: 14px;
+}
+.mch-kit .faq-group > h3 {
+  font-family: var(--kit-sans);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 24px 0 6px;
+  font-weight: 500;
+}
+.mch-kit .faq-item {
+  border-bottom: 1px solid var(--ligne);
+  padding: 6px 0;
+}
+.mch-kit .faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 0;
+  font-size: 16px;
+  color: var(--noir);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mch-kit .faq-item summary::after {
+  content: '+';
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 300;
+}
+.mch-kit .faq-item[open] summary::after {
+  content: '–';
+}
+.mch-kit .faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.mch-kit .faq-item p {
+  font-size: 14.5px;
+  color: var(--texte-doux);
+  line-height: 1.65;
+  padding: 0 0 16px;
+  max-width: 640px;
+}
+
+/* --- Hôtes à proximité --- */
+.mch-kit .nearby-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.mch-kit .nearby-region {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* --- Comparateur compact (sous le widget réservation) --- */
+.mch-kit .resa-compare {
+  background: #fff;
+  border: 1px solid var(--ligne);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft);
+  margin-top: 18px;
+}
+.mch-kit .resa-compare .rc-title {
+  font-family: var(--kit-sans);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.mch-kit .rc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--ligne);
+  font-size: 13.5px;
+}
+.mch-kit .rc-row:last-of-type {
+  border-bottom: none;
+}
+.mch-kit .rc-row .rc-name {
+  color: var(--texte);
+}
+.mch-kit .rc-row .rc-amt {
+  font-family: var(--kit-serif);
+  font-size: 17px;
+  color: var(--noir);
+}
+.mch-kit .rc-row.rc-best {
+  background: var(--creme-2);
+  margin: 0 -20px;
+  padding: 11px 20px;
+  border-radius: 6px;
+  border-bottom: none;
+}
+.mch-kit .rc-row.rc-best .rc-name {
+  font-weight: 500;
+  color: var(--noir);
+}
+.mch-kit .rc-row.rc-best .rc-amt {
+  color: var(--accent);
+  font-weight: 500;
+}
+.mch-kit .rc-foot {
+  font-size: 10.5px;
+  color: var(--texte-doux);
+  line-height: 1.5;
+  padding-top: 12px;
+}
+
+/* --- Responsive fiche hôtel --- */
+@media (max-width: 1000px) {
+  .mch-kit .press-grid {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .access-grid {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .around-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mch-kit .nearby-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .mch-kit .exp-card {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .feature-block,
+  .mch-kit .feature-block.reverse {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .feature-block.reverse .fb-media {
+    order: 0;
+  }
+  .mch-kit .fb-media {
+    min-height: 220px;
+  }
+  .mch-kit .around-list {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .nearby-grid {
+    grid-template-columns: 1fr;
+  }
+  .mch-kit .insta-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mch-kit .ranking-callout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+@media (max-width: 768px) {
+  .mch-kit .feature-block .fb-media-solo {
+    min-height: 220px;
+  }
+}

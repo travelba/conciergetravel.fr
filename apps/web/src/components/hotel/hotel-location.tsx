@@ -59,14 +59,15 @@ const TRANSPORT_MODE_ORDER: readonly TransportMode[] = [
 /**
  * Bucket render order on the hotel page — `visit` first (anchor
  * destination signal — what the city is famous for), then `do`
- * (experiential — what the traveller will actually do), then `shop`
- * (utilitarian — what they'll be glad to know).
+ * (experiential — what the traveller will actually do), then `eat`
+ * (dining around the hotel), then `shop` (utilitarian — what they'll
+ * be glad to know).
  *
  * Each bucket renders its own `<section>` with an `aria-labelledby` so
  * screen readers and the table of contents can jump straight to the
  * sub-section.
  */
-const BUCKET_ORDER: readonly PoiBucket[] = ['visit', 'do', 'shop'];
+const BUCKET_ORDER: readonly PoiBucket[] = ['visit', 'do', 'eat', 'shop'];
 
 function sortByWalk(
   pois: readonly LocalisedPointOfInterest[],
@@ -97,11 +98,17 @@ function sortTransports(transports: readonly LocalisedTransport[]): readonly Loc
 function groupByBucket(
   pois: readonly LocalisedPointOfInterest[],
 ): Record<PoiBucket, readonly LocalisedPointOfInterest[]> {
-  const out: Record<PoiBucket, LocalisedPointOfInterest[]> = { visit: [], do: [], shop: [] };
+  const out: Record<PoiBucket, LocalisedPointOfInterest[]> = {
+    visit: [],
+    do: [],
+    eat: [],
+    shop: [],
+  };
   for (const p of pois) out[p.bucket].push(p);
   return {
     visit: sortByWalk(out.visit),
     do: sortByWalk(out.do),
+    eat: sortByWalk(out.eat),
     shop: sortByWalk(out.shop),
   };
 }
@@ -1066,15 +1073,26 @@ const DO_ICON_PATHS: Record<DoKind, React.ReactNode> = {
   ),
 };
 
+// "Où manger" (eat bucket) — fork & knife medallion, shared by every
+// dining POI (restaurant, bistro, café, table d'hôtes).
+const EAT_ICON: React.ReactNode = (
+  <>
+    <path d="M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10" />
+    <path d="M17 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4 2.5-1 2.5-4-1-5-2.5-5zM17 12v9" />
+  </>
+);
+
 /**
  * Resolves the medallion glyph for a POI from its bucket + raw OSM type +
  * localised category + name. Each bucket owns a bespoke icon family
- * (heritage for `visit`, experiences for `do`, trades for `shop`) so a
- * château, an abbey, a hot-air balloon and a bakery each read at a glance.
+ * (heritage for `visit`, experiences for `do`, dining for `eat`, trades
+ * for `shop`) so a château, an abbey, a restaurant and a bakery each read
+ * at a glance.
  */
 function resolvePoiIcon(bucket: PoiBucket, poi: LocalisedPointOfInterest): React.ReactNode {
   if (bucket === 'visit')
     return VISIT_ICON_PATHS[resolveVisitKind(poi.type, poi.category, poi.name)];
   if (bucket === 'do') return DO_ICON_PATHS[resolveDoKind(poi.type, poi.category, poi.name)];
+  if (bucket === 'eat') return EAT_ICON;
   return SHOP_ICON_PATHS[resolveShopKind(poi.type, poi.category, poi.name)];
 }

@@ -4,6 +4,7 @@ import {
   dropDuplicateCategorySections,
   sanitizeAirellesText,
   sanitizeAirellesJsonb,
+  withAirellesKidClub,
   patchAirellesAwards,
   patchAirellesAmenities,
   patchAirellesSpa,
@@ -85,6 +86,14 @@ interface RoomSeed {
   readonly descEn: string;
   readonly maxOccupancy: number;
   readonly signature?: boolean;
+  /**
+   * Indicative "from" nightly rate in EUR **minor units** (cents), low-season
+   * editorial anchor — NOT a bookable rate (the rail stays inert until the
+   * funnel lands, Phase 6 / ADR-0025). Drives the kit `.resa-price`
+   * « À partir de … » on the fiche and the per-room card price. `undefined`
+   * leaves the room without a price tag.
+   */
+  readonly priceFromMinor?: number;
 }
 
 const ROOM_SEEDS: readonly RoomSeed[] = [
@@ -98,6 +107,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'An elegant room overlooking the village of Gordes, herringbone parquet, king-size bed and a stone bathroom.',
     maxOccupancy: 2,
+    priceFromMinor: 54000,
   },
   {
     code: 'deluxe-village',
@@ -109,6 +119,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A more spacious Deluxe room with village views, refined Provençal décor and antique furniture.',
     maxOccupancy: 2,
+    priceFromMinor: 79000,
   },
   {
     code: 'superieure-vallee',
@@ -120,6 +131,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A Superior room opening onto the Luberon valley, morning light and a panorama over the olive-clad hills.',
     maxOccupancy: 2,
+    priceFromMinor: 85000,
   },
   {
     code: 'deluxe-vallee',
@@ -130,6 +142,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
       'Chambre Deluxe avec vue dégagée sur la vallée, espace généreux et salle de bain habillée de pierre.',
     descEn: 'A Deluxe room with open valley views, generous space and a stone-clad bathroom.',
     maxOccupancy: 2,
+    priceFromMinor: 95000,
   },
   {
     code: 'junior-suite',
@@ -141,6 +154,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A Junior Suite with an open sitting area, blending suite comfort with the intimacy of a room, in a revisited 18th-century décor.',
     maxOccupancy: 2,
+    priceFromMinor: 120000,
   },
   {
     code: 'junior-suite-prestige',
@@ -152,6 +166,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A larger Prestige Junior Suite, valley view, with living and sleeping areas arranged around a Provençal terrace.',
     maxOccupancy: 3,
+    priceFromMinor: 145000,
   },
   {
     code: 'suite-une-chambre',
@@ -163,6 +178,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A suite with separate bedroom and living room, ideal for a longer stay, in the quiet of La Bastide.',
     maxOccupancy: 3,
+    priceFromMinor: 170000,
   },
   {
     code: 'suite-une-chambre-terrasse',
@@ -174,6 +190,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
     descEn:
       'A one-bedroom suite extended by a private terrace facing the valley, for breakfasts in the sun.',
     maxOccupancy: 3,
+    priceFromMinor: 195000,
   },
   {
     code: 'suite-vasarely',
@@ -186,6 +203,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
       'A prestige suite with a separate living room and period style, set apart by its breathtaking valley view, like a Provençal painting.',
     maxOccupancy: 3,
     signature: true,
+    priceFromMinor: 240000,
   },
   {
     code: 'suite-baron-de-simiane',
@@ -198,6 +216,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
       'A suite named after one of Provence’s most illustrious families: original finishes, 18th-century furniture and a private terrace with panoramic views.',
     maxOccupancy: 3,
     signature: true,
+    priceFromMinor: 260000,
   },
   {
     code: 'suite-duc-de-soubise',
@@ -210,6 +229,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
       'A vast prestige suite with a small sitting room, bedroom and terrace, in the aristocratic spirit of La Bastide.',
     maxOccupancy: 3,
     signature: true,
+    priceFromMinor: 290000,
   },
   {
     code: 'maison-de-constance',
@@ -222,6 +242,7 @@ const ROOM_SEEDS: readonly RoomSeed[] = [
       'A private four-bedroom villa with its own pool and direct access to Gordes village — the greatest privacy at La Bastide, for families and groups of friends.',
     maxOccupancy: 8,
     signature: true,
+    priceFromMinor: 650000,
   },
 ];
 
@@ -238,10 +259,14 @@ function buildRooms(locale: SupportedLocale): HotelRoomRow[] {
     size_sqm: null,
     amenities: [],
     isSignature: seed.signature === true,
-    indicativePrice: null,
+    indicativePrice:
+      typeof seed.priceFromMinor === 'number'
+        ? { fromMinor: seed.priceFromMinor, toMinor: null, currency: 'EUR' }
+        : null,
     displayOrder: index,
     cardImagePublicId: null,
     cardImageAlt: null,
+    galleryImages: [],
   }));
 }
 
@@ -280,7 +305,9 @@ export function applyAirellesLocalOverride(
     long_description_sections: sanitizeAirellesJsonb(
       dropDuplicateCategorySections(detail.row.long_description_sections),
     ),
-    signature_experiences: sanitizeAirellesJsonb(detail.row.signature_experiences),
+    signature_experiences: sanitizeAirellesJsonb(
+      withAirellesKidClub(detail.row.signature_experiences),
+    ),
     factual_summary_fr: AIRELLES_FACTUAL_SUMMARY_FR,
     factual_summary_en: AIRELLES_FACTUAL_SUMMARY_EN,
     meta_desc_fr: AIRELLES_META_DESC_FR,

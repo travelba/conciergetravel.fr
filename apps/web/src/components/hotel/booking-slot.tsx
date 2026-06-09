@@ -27,6 +27,12 @@ interface BookingSlotProps {
    * bascule sur le formulaire live. Toute autre valeur ⇒ placeholder éditorial.
    */
   readonly bookingMode?: BookingMode;
+  /**
+   * Prix indicatif « à partir de » (déjà formaté locale, ex. « 690 € »).
+   * Affiché par le placeholder éditorial (`<BookingComingSoon>`) pour ancrer
+   * le widget kit. Ignoré par le rail live Travelport (qui a son propre prix).
+   */
+  readonly priceFrom?: string | null;
 }
 
 /**
@@ -52,6 +58,7 @@ export function BookingSlot({
   surface,
   slug,
   bookingMode,
+  priceFrom = null,
 }: BookingSlotProps): React.ReactElement | null {
   if (surface === 'mobilebar') {
     // Reserved for the Phase 6 fixed bottom bar. Inert until then.
@@ -70,5 +77,5 @@ export function BookingSlot({
     return <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />;
   }
 
-  return <BookingComingSoon locale={locale} hotelName={hotelName} />;
+  return <BookingComingSoon locale={locale} hotelName={hotelName} priceFrom={priceFrom} />;
 }

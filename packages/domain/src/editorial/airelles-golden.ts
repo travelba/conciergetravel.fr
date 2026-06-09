@@ -123,8 +123,9 @@ export const AIRELLES_RESTAURANT_INFO = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// points_of_interest — 3 sous-sections (visit / do / shop). Distances/coords
-// approx. depuis le centre de Gordes (~43.911, 5.200). Sourcé Tavily 2026-06-02.
+// points_of_interest — 4 sous-sections (visit / do / eat / shop). Distances/
+// coords approx. depuis le centre de Gordes (~43.911, 5.200). Sourcé Tavily
+// (2026-06-02 ; tables « eat » ajoutées 2026-06-09, statut MICHELIN vérifié).
 // ---------------------------------------------------------------------------
 
 export const AIRELLES_POINTS_OF_INTEREST = [
@@ -522,6 +523,69 @@ export const AIRELLES_POINTS_OF_INTEREST = [
       'Mon conseil : 4 minutes à pied. En été, pensez à l’anti-moustiques et à la crème indice 50 — le soleil du Luberon ne pardonne pas en terrasse.',
     tip_en:
       'My tip: a 4-minute walk. In summer, remember insect repellent and SPF 50 — the Luberon sun is merciless on the terrace.',
+  },
+  // ── eat — tables autour de l'hôtel (hors restaurants de La Bastide).
+  //    Statut MICHELIN + cuisine vérifiés via le Guide MICHELIN (Tavily
+  //    2026-06-09). Coords/distances approximatives au niveau du village.
+  {
+    name: 'Les Bories',
+    name_en: 'Les Bories',
+    type: 'restaurant',
+    category_fr: 'Restaurant gastronomique · 1 étoile MICHELIN',
+    category_en: 'Gourmet restaurant · 1 MICHELIN star',
+    distance_meters: 1800,
+    latitude: 43.918,
+    longitude: 5.187,
+    bucket: 'eat',
+    description_fr:
+      'Restaurant gastronomique étoilé au Guide MICHELIN, au sein de l’hôtel Les Bories & Spa sur la route de Sénanque. Cuisine provençale contemporaine et terrasse face au Luberon, à quelques minutes de Gordes.',
+    description_en:
+      'MICHELIN-starred gourmet restaurant within the Les Bories & Spa hotel on the Sénanque road. Contemporary Provençal cuisine and a terrace facing the Luberon, minutes from Gordes village.',
+    bucket_tip_fr:
+      'Autour de Gordes, deux tables étoilées et un bistrot de village : de quoi varier les plaisirs selon l’envie du soir.',
+    bucket_tip_en:
+      'Around Gordes, two starred tables and a village bistro — enough to vary the mood from one evening to the next.',
+    tip_fr:
+      'Mon conseil : réservez la terrasse au coucher du soleil — la vue sur le Luberon vaut autant le détour que l’assiette.',
+    tip_en: 'My tip: book the terrace at sunset — the Luberon view is as memorable as the plate.',
+  },
+  {
+    name: 'La Table de Xavier Mathieu — Le Phébus',
+    name_en: 'La Table de Xavier Mathieu — Le Phébus',
+    type: 'restaurant',
+    category_fr: 'Restaurant gastronomique · étoilé MICHELIN',
+    category_en: 'Gourmet restaurant · MICHELIN-starred',
+    distance_meters: 5500,
+    latitude: 43.926,
+    longitude: 5.234,
+    bucket: 'eat',
+    description_fr:
+      'Table étoilée du chef Xavier Mathieu, à l’hôtel Le Phébus & Spa à Joucas. Cuisine provençale créative et vue sur le massif du Luberon, à une dizaine de minutes en voiture de Gordes.',
+    description_en:
+      'Chef Xavier Mathieu’s MICHELIN-starred table at Le Phébus & Spa in Joucas. Creative Provençal cuisine with views over the Luberon massif, about ten minutes’ drive from Gordes.',
+    website: 'https://www.lephebus.com',
+    tip_fr:
+      'Mon conseil : prévoyez la voiture et réservez tôt — la table de Xavier Mathieu affiche vite complet en saison.',
+    tip_en:
+      'My tip: plan to drive and book early — Xavier Mathieu’s table fills up fast in season.',
+  },
+  {
+    name: 'La Bartavelle',
+    name_en: 'La Bartavelle',
+    type: 'restaurant',
+    category_fr: 'Bistrot de village',
+    category_en: 'Village bistro',
+    distance_meters: 9000,
+    latitude: 43.864,
+    longitude: 5.252,
+    bucket: 'eat',
+    description_fr:
+      'Bistrot intime du village de Goult, salué par les amateurs de la région pour sa cuisine de saison à prix doux. Une adresse conviviale à une vingtaine de minutes de Gordes.',
+    description_en:
+      'Intimate bistro in the village of Goult, praised by regional food lovers for its gently-priced seasonal cooking. A convivial address about twenty minutes from Gordes.',
+    tip_fr:
+      'Mon conseil : parfait pour un déjeuner sans chichi entre deux villages perchés ; pensez à réserver le week-end.',
+    tip_en: 'My tip: ideal for a relaxed lunch between hilltop villages; do book on weekends.',
   },
 ] as const;
 
@@ -923,6 +987,46 @@ export function patchAirellesPolicies(existing: unknown): Record<string, unknown
 }
 
 // ---------------------------------------------------------------------------
+// signature_experiences — Kid Club (kit `template-hotel.html` § « L'hôtel en
+// bref », D4). Typed `kind: 'kid_club'` so the fiche surfaces it as a dedicated
+// `.feature-block` rather than in the generic signature grid. Sourced from the
+// official site (airelles.com — « Airelles Summer Camp » / children activities,
+// Tavily 2026-06-09). The other 6 signature experiences stay row-driven; this
+// entry is merged in (idempotent by `key`) by {@link withAirellesKidClub}.
+// ---------------------------------------------------------------------------
+
+export const AIRELLES_KID_CLUB = {
+  key: 'airelles-summer-camp',
+  kind: 'kid_club',
+  title_fr: 'Airelles Summer Camp — le club enfants',
+  title_en: "Airelles Summer Camp — the kids' club",
+  description_fr:
+    'Le club enfants de La Bastide : piscine réservée aux petits, salle de jeux intérieure et extérieure, chasses au trésor, cinéma en plein air dans les jardins, ateliers cuisine et passages de magiciens. Pensé pour les enfants comme pour les ados.',
+  description_en:
+    "La Bastide's kids' club: a children-only swimming pool, indoor and outdoor games room, treasure hunts, an open-air cinema in the gardens, cookery workshops and visiting magicians. Designed for children and teens alike.",
+  badge_fr: 'Pour les familles',
+  badge_en: 'For families',
+  booking_required: false,
+} as const;
+
+/**
+ * Merges the golden Kid Club entry into the row's `signature_experiences`,
+ * idempotently (matched on `key`). Accepts the unknown DB value: when it is
+ * not an array, returns a single-element array with the Kid Club. Used by both
+ * the promotion script and the apps/web local override so the entry is present
+ * in prod and in the local sandbox.
+ */
+export function withAirellesKidClub(current: unknown): unknown[] {
+  const base = Array.isArray(current) ? [...current] : [];
+  const already = base.some(
+    (e) =>
+      typeof e === 'object' && e !== null && (e as { key?: unknown }).key === AIRELLES_KID_CLUB.key,
+  );
+  if (!already) base.push(AIRELLES_KID_CLUB);
+  return base;
+}
+
+// ---------------------------------------------------------------------------
 // buildAirellesGoldenFields — the full set of `public.hotels` columns to write
 // when promoting the golden template into the DB. Transforms that depend on the
 // existing row (sanitise / patch / dedup) take the current values as input.
@@ -964,7 +1068,9 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     long_description_sections: sanitizeAirellesJsonb(
       dropDuplicateCategorySections(current.long_description_sections),
     ),
-    signature_experiences: sanitizeAirellesJsonb(current.signature_experiences),
+    signature_experiences: sanitizeAirellesJsonb(
+      withAirellesKidClub(current.signature_experiences),
+    ),
     factual_summary_fr: AIRELLES_FACTUAL_SUMMARY_FR,
     factual_summary_en: AIRELLES_FACTUAL_SUMMARY_EN,
     meta_desc_fr: AIRELLES_META_DESC_FR,

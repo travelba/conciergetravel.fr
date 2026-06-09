@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactElement } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { acceptAll, customize, rejectAll, type ConsentState } from '@mch/domain/consent';
@@ -40,13 +40,27 @@ export function ConsentBanner(): ReactElement | null {
   const [initDone, setInitDone] = useState<boolean>(false);
   const firstActionRef = useRef<HTMLButtonElement | null>(null);
 
-  // First-paint reconciliation with the persisted cookie. Performed
-  // during render (post-hydration, gated by `initDone`) rather than
-  // inside an effect so `react-hooks/set-state-in-effect` is satisfied.
-  // React batches the four setters into a single follow-up render.
-  // SSR renders `view = 'closed'`; the client catches up on the first
-  // render where `document` is defined.
-  if (!initDone && typeof document !== 'undefined') {
+  // Hydration gate. Returns `false` on the server AND on the very first
+  // client render, then `true` once hydrated. This keeps SSR markup ===
+  // first-client markup (both render `null` below), so React never hits a
+  // hydration mismatch. Reading the persisted cookie any earlier would make
+  // the client render the dialog while the server rendered nothing → React
+  // would re-render the whole subtree on the client (which previously
+  // surfaced as a misleading `NextIntlClientProvider not found` error on the
+  // first downstream client island). No `setState` in an effect, so the
+  // `react-hooks/set-state-in-effect` rule stays satisfied.
+  const isHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  // First-paint reconciliation with the persisted cookie. Performed during
+  // render (post-hydration, gated by `isHydrated` + `initDone`) rather than
+  // inside an effect. React batches the setters into a single follow-up
+  // render. SSR renders `view = 'closed'` → `null`; the client catches up on
+  // the first post-hydration render.
+  if (isHydrated && !initDone) {
     setInitDone(true);
     const current = readConsentClient();
     setHasDecision(current !== null);
