@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
+import { buildCloudinarySrc } from '@mch/ui';
 
 import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
 import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
@@ -165,6 +166,7 @@ export default async function RankingPage({
 
   const t = T[locale];
   const origin = siteOrigin();
+  const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const canonical = `${origin}${getPathname({
     locale,
     href: { pathname: '/classement/[slug]', params: { slug } },
@@ -307,52 +309,49 @@ export default async function RankingPage({
       <JsonLdScript data={itemListJsonLd} nonce={nonce} />
       {faqJsonLd !== null ? <JsonLdScript data={faqJsonLd} nonce={nonce} /> : null}
 
-      {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="text-muted mb-6 text-xs">
-        <ol className="flex flex-wrap items-center gap-1">
-          <li>
-            <Link href="/" className="hover:underline">
-              {t.home}
-            </Link>
-          </li>
-          <li aria-hidden="true">›</li>
-          <li>
-            <Link href="/classements" className="hover:underline">
-              {t.rankings}
-            </Link>
-          </li>
-          <li aria-hidden="true">›</li>
-          <li className="text-fg font-medium">{title}</li>
-        </ol>
+      {/* Breadcrumb — kit `.breadcrumb` */}
+      <nav aria-label="Breadcrumb" className="mch-kit">
+        <div className="breadcrumb">
+          <Link href="/">{t.home}</Link>
+          <span className="sep" aria-hidden="true">
+            ›
+          </span>
+          <Link href="/classements">{t.rankings}</Link>
+          <span className="sep" aria-hidden="true">
+            ›
+          </span>
+          <span className="bc-current">{title}</span>
+        </div>
       </nav>
 
       <div className="lg:grid lg:grid-cols-[1fr_240px] lg:gap-10">
         <div className="min-w-0 max-w-4xl">
-          {/* Hero */}
-          <header className="mb-10">
-            <p className="text-muted mb-2 text-xs uppercase tracking-[0.18em]">
-              {/* TODO i18n Phase 1c-β: migrate hardcoded UI labels to next-intl messages. */}
-              {pickByLocale(locale, 'Classement éditorial', 'Editorial ranking')}
-            </p>
-            <h1 className="text-fg font-serif text-3xl sm:text-4xl md:text-5xl">{title}</h1>
-            {/* CDC §2.3 — IA-ready factual summary (AEO surface). */}
-            {factualSummary !== null && factualSummary.length > 0 ? (
-              <p
-                data-aeo="factual-summary"
-                className="text-fg/85 mt-4 max-w-3xl border-l-2 border-amber-300/60 pl-4 text-sm md:text-base"
-              >
-                {factualSummary}
-              </p>
-            ) : null}
-            <LastUpdatedBadge
-              isoDate={ranking.updated_at ?? ranking.reviewed_at}
-              locale={locale}
-              variant="inline"
-            />
-            {/* Keep legacy "Classement révisé le …" for assistive context when distinct. */}
-            {reviewedDate !== null && ranking.reviewed_at !== ranking.updated_at ? (
-              <p className="text-muted/70 mt-1 text-xs">{t.updatedOn(reviewedDate)}</p>
-            ) : null}
+          {/* Hero — kit `.rk-page-head` */}
+          <header className="mch-kit mb-10">
+            <div className="rk-page-head">
+              <span className="eyebrow left">
+                {/* TODO i18n Phase 1c-β: migrate hardcoded UI labels to next-intl messages. */}
+                {pickByLocale(locale, 'Classement éditorial', 'Editorial ranking')}
+              </span>
+              <h1>{title}</h1>
+              {/* CDC §2.3 — IA-ready factual summary (AEO surface). */}
+              {factualSummary !== null && factualSummary.length > 0 ? (
+                <p data-aeo="factual-summary" className="rk-summary">
+                  {factualSummary}
+                </p>
+              ) : null}
+              <div className="rk-meta">
+                <LastUpdatedBadge
+                  isoDate={ranking.updated_at ?? ranking.reviewed_at}
+                  locale={locale}
+                  variant="inline"
+                />
+                {/* Keep legacy "Classement révisé le …" for assistive context when distinct. */}
+                {reviewedDate !== null && ranking.reviewed_at !== ranking.updated_at ? (
+                  <span>{t.updatedOn(reviewedDate)}</span>
+                ) : null}
+              </div>
+            </div>
           </header>
 
           {/* Intro (méthodologie) — long-form, auto-linked entities */}
@@ -430,10 +429,12 @@ export default async function RankingPage({
             </section>
           ) : null}
 
-          {/* Entries (TOP X) — ordered list with editorial justifications */}
-          <section id="ranking" className="mt-14 scroll-mt-24">
-            <h2 className="text-fg mb-6 font-serif text-2xl md:text-3xl">{t.rankingHeading}</h2>
-            <ol className="space-y-6">
+          {/* Entries (TOP X) — kit `.crank` ranked cards with editorial justifications */}
+          <section id="ranking" className="mch-kit mt-14 scroll-mt-24">
+            <h2 className="mb-6 font-serif text-2xl text-[color:var(--noir)] md:text-3xl">
+              {t.rankingHeading}
+            </h2>
+            <ol className="rk-list">
               {entries.map((e) => {
                 // Hotel slug/name/justification/badge selection stays locale-aware (data layer) — see ADR-0012.
                 // V2 locales fall back to FR until migration 0034.
@@ -449,50 +450,71 @@ export default async function RankingPage({
                   e.justification_en ?? e.justification_fr,
                 );
                 const badge = pickByLocale(locale, e.badge_fr, e.badge_en ?? e.badge_fr);
+                const hotelHref = {
+                  pathname: '/hotel/[slug]',
+                  params: { slug: linkSlug },
+                } as const;
+                const photoSrc =
+                  e.hotel_hero_image !== null && e.hotel_hero_image !== ''
+                    ? buildCloudinarySrc({
+                        cloudName,
+                        publicId: e.hotel_hero_image,
+                        transforms: 'f_auto,q_auto,c_fill,g_auto,w_680,h_510',
+                      })
+                    : null;
+                const starLabel = e.hotel_is_palace
+                  ? t.palace
+                  : '★'.repeat(Math.max(0, Math.min(5, e.hotel_stars)));
                 return (
                   <li
                     key={`${e.rank}-${e.hotel_slug}`}
                     id={`rank-${e.rank}`}
-                    className="border-border bg-bg/60 scroll-mt-24 rounded-lg border p-6"
+                    className="scroll-mt-24"
                   >
-                    <div className="mb-3 flex items-baseline gap-3">
-                      <span className="text-fg font-serif text-3xl font-light">
-                        {t.rankLabel(e.rank)}
-                      </span>
-                      <h3 className="text-fg font-medium md:text-lg">
-                        <Link
-                          href={{ pathname: '/hotel/[slug]', params: { slug: linkSlug } }}
-                          className="hover:underline"
-                        >
-                          {name}
+                    <article className="crank">
+                      <div className="cr-num" aria-hidden="true">
+                        {e.rank}
+                      </div>
+                      {photoSrc !== null ? (
+                        <Link href={hotelHref} className="cr-photo" aria-label={name}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={photoSrc} alt={name} loading="lazy" />
                         </Link>
-                      </h3>
-                    </div>
-                    <p className="text-muted mb-3 text-xs uppercase tracking-wide">
-                      {e.hotel_is_palace ? t.palace : `${e.hotel_stars} ${t.stars}`}
-                      {' · '}
-                      {e.hotel_city}
-                      {' · '}
-                      {e.hotel_region}
-                    </p>
-                    {badge !== null && badge !== undefined && badge !== '' ? (
-                      <p className="mb-3 inline-block rounded-full border border-amber-300/60 bg-amber-50/40 px-3 py-1 text-xs text-amber-800">
-                        {badge}
-                      </p>
-                    ) : null}
-                    {/* Auto-linked justification — neighbouring Palaces, cities, etc. */}
-                    <EnrichedText
-                      body={justification}
-                      locale={locale}
-                      linkMap={linkMapAsMap}
-                      maxLinksPerParagraph={2}
-                    />
-                    <Link
-                      href={{ pathname: '/hotel/[slug]', params: { slug: linkSlug } }}
-                      className="text-fg/70 mt-3 inline-block text-xs underline hover:no-underline"
-                    >
-                      {t.seePage} →
-                    </Link>
+                      ) : (
+                        <span className="cr-photo" aria-hidden="true" />
+                      )}
+                      <div className="cr-body">
+                        <div className="cr-stars" aria-hidden="true">
+                          {starLabel}
+                        </div>
+                        <h3>
+                          <Link href={hotelHref}>
+                            <span className="sr-only">{t.rankLabel(e.rank)} — </span>
+                            {name}
+                          </Link>
+                        </h3>
+                        <span className="loc">
+                          {e.hotel_city}
+                          {' · '}
+                          {e.hotel_region}
+                        </span>
+                        {badge !== null && badge !== undefined && badge !== '' ? (
+                          <span className="cr-badge">{badge}</span>
+                        ) : null}
+                        {/* Auto-linked justification — neighbouring Palaces, cities, etc. */}
+                        <EnrichedText
+                          body={justification}
+                          locale={locale}
+                          linkMap={linkMapAsMap}
+                          maxLinksPerParagraph={2}
+                        />
+                        <div className="cr-foot">
+                          <Link href={hotelHref} className="cr-link">
+                            {t.seePage} <span aria-hidden="true">→</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
                   </li>
                 );
               })}
