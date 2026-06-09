@@ -1,12 +1,14 @@
 import 'server-only';
 
 import {
-  buildAirellesGoldenFields,
   AIRELLES_CONCIERGE_HOOK,
   AIRELLES_CONCIERGE_PICK_NOTE,
   AIRELLES_CONCIERGE_PICK_SLUG,
+  AIRELLES_ROOM_CATALOG,
+  buildAirellesGoldenFields,
 } from '@mch/domain/editorial';
 
+import { enrichAirellesRoomRow } from '@/server/hotels/enrich-airelles-rooms';
 import type { HotelDetail, HotelRoomRow, SupportedLocale } from '@/server/hotels/get-hotel-by-slug';
 
 /**
@@ -56,197 +58,58 @@ export function isAirellesGoldenTemplate(slug: string): boolean {
 // is rendered to visualise the catalogue, not to navigate.
 // ---------------------------------------------------------------------------
 
-interface RoomSeed {
-  readonly code: string;
-  readonly slug: string;
-  readonly nameFr: string;
-  readonly nameEn: string;
-  readonly descFr: string;
-  readonly descEn: string;
-  readonly maxOccupancy: number;
-  readonly signature?: boolean;
-  /**
-   * Indicative "from" nightly rate in EUR **minor units** (cents), low-season
-   * editorial anchor — NOT a bookable rate (the rail stays inert until the
-   * funnel lands, Phase 6 / ADR-0025). Drives the kit `.resa-price`
-   * « À partir de … » on the fiche and the per-room card price. `undefined`
-   * leaves the room without a price tag.
-   */
-  readonly priceFromMinor?: number;
-}
-
-const ROOM_SEEDS: readonly RoomSeed[] = [
-  {
-    code: 'superieure-village',
-    slug: 'chambre-superieure-village',
-    nameFr: 'Chambre Supérieure Village',
-    nameEn: 'Superior Village Room',
-    descFr:
-      'Chambre élégante donnant sur le village de Gordes, parquet point de Hongrie, lit king-size et salle de bain en pierre.',
-    descEn:
-      'An elegant room overlooking the village of Gordes, herringbone parquet, king-size bed and a stone bathroom.',
-    maxOccupancy: 2,
-    priceFromMinor: 54000,
-  },
-  {
-    code: 'deluxe-village',
-    slug: 'chambre-deluxe-village',
-    nameFr: 'Chambre Deluxe Village',
-    nameEn: 'Deluxe Village Room',
-    descFr:
-      'Chambre Deluxe avec vue sur le village, plus spacieuse, au décor provençal raffiné et au mobilier chiné.',
-    descEn:
-      'A more spacious Deluxe room with village views, refined Provençal décor and antique furniture.',
-    maxOccupancy: 2,
-    priceFromMinor: 79000,
-  },
-  {
-    code: 'superieure-vallee',
-    slug: 'chambre-superieure-vallee',
-    nameFr: 'Chambre Supérieure Vallée',
-    nameEn: 'Superior Valley Room',
-    descFr:
-      'Chambre Supérieure ouvrant sur la vallée du Luberon, lumière du matin et panorama sur les collines d’oliviers.',
-    descEn:
-      'A Superior room opening onto the Luberon valley, morning light and a panorama over the olive-clad hills.',
-    maxOccupancy: 2,
-    priceFromMinor: 85000,
-  },
-  {
-    code: 'deluxe-vallee',
-    slug: 'chambre-deluxe-vallee',
-    nameFr: 'Chambre Deluxe Vallée',
-    nameEn: 'Deluxe Valley Room',
-    descFr:
-      'Chambre Deluxe avec vue dégagée sur la vallée, espace généreux et salle de bain habillée de pierre.',
-    descEn: 'A Deluxe room with open valley views, generous space and a stone-clad bathroom.',
-    maxOccupancy: 2,
-    priceFromMinor: 95000,
-  },
-  {
-    code: 'junior-suite',
-    slug: 'junior-suite',
-    nameFr: 'Junior Suite',
-    nameEn: 'Junior Suite',
-    descFr:
-      'Junior Suite au coin salon ouvert, alliant le confort d’une suite à l’intimité d’une chambre, décor 18e revisité.',
-    descEn:
-      'A Junior Suite with an open sitting area, blending suite comfort with the intimacy of a room, in a revisited 18th-century décor.',
-    maxOccupancy: 2,
-    priceFromMinor: 120000,
-  },
-  {
-    code: 'junior-suite-prestige',
-    slug: 'junior-suite-prestige',
-    nameFr: 'Junior Suite Prestige',
-    nameEn: 'Prestige Junior Suite',
-    descFr:
-      'Junior Suite Prestige plus vaste, vue vallée, salon et chambre articulés autour d’une terrasse provençale.',
-    descEn:
-      'A larger Prestige Junior Suite, valley view, with living and sleeping areas arranged around a Provençal terrace.',
-    maxOccupancy: 3,
-    priceFromMinor: 145000,
-  },
-  {
-    code: 'suite-une-chambre',
-    slug: 'suite-a-une-chambre',
-    nameFr: 'Suite à une Chambre',
-    nameEn: 'One-Bedroom Suite',
-    descFr:
-      'Suite avec chambre et salon séparés, idéale pour un séjour prolongé, dans le calme de La Bastide.',
-    descEn:
-      'A suite with separate bedroom and living room, ideal for a longer stay, in the quiet of La Bastide.',
-    maxOccupancy: 3,
-    priceFromMinor: 170000,
-  },
-  {
-    code: 'suite-une-chambre-terrasse',
-    slug: 'suite-a-une-chambre-terrasse',
-    nameFr: 'Suite à une Chambre Terrasse',
-    nameEn: 'One-Bedroom Terrace Suite',
-    descFr:
-      'Suite à une chambre prolongée d’une terrasse privée face à la vallée, pour les petits-déjeuners au soleil.',
-    descEn:
-      'A one-bedroom suite extended by a private terrace facing the valley, for breakfasts in the sun.',
-    maxOccupancy: 3,
-    priceFromMinor: 195000,
-  },
-  {
-    code: 'suite-vasarely',
-    slug: 'suite-vasarely',
-    nameFr: 'Suite Vasarely',
-    nameEn: 'Vasarely Suite',
-    descFr:
-      'Suite de prestige au salon séparé et au style d’époque, distinguée par sa vue époustouflante sur la vallée, tel un tableau provençal.',
-    descEn:
-      'A prestige suite with a separate living room and period style, set apart by its breathtaking valley view, like a Provençal painting.',
-    maxOccupancy: 3,
-    signature: true,
-    priceFromMinor: 240000,
-  },
-  {
-    code: 'suite-baron-de-simiane',
-    slug: 'suite-baron-de-simiane',
-    nameFr: 'Suite Baron de Simiane',
-    nameEn: 'Baron de Simiane Suite',
-    descFr:
-      'Suite empruntant son nom à l’une des plus illustres familles de Provence : finitions originales, mobilier du XVIIIe siècle et terrasse privée à la vue panoramique.',
-    descEn:
-      'A suite named after one of Provence’s most illustrious families: original finishes, 18th-century furniture and a private terrace with panoramic views.',
-    maxOccupancy: 3,
-    signature: true,
-    priceFromMinor: 260000,
-  },
-  {
-    code: 'suite-duc-de-soubise',
-    slug: 'suite-duc-de-soubise',
-    nameFr: 'Suite Duc de Soubise',
-    nameEn: 'Duc de Soubise Suite',
-    descFr:
-      'Vaste suite de prestige avec petit salon, chambre et terrasse, dans l’esprit aristocratique de La Bastide.',
-    descEn:
-      'A vast prestige suite with a small sitting room, bedroom and terrace, in the aristocratic spirit of La Bastide.',
-    maxOccupancy: 3,
-    signature: true,
-    priceFromMinor: 290000,
-  },
-  {
-    code: 'maison-de-constance',
-    slug: 'maison-de-constance',
-    nameFr: 'Maison de Constance (villa privée)',
-    nameEn: 'Maison de Constance (private villa)',
-    descFr:
-      'Villa privée de quatre chambres avec piscine privée et accès direct au village de Gordes — la plus grande intimité de La Bastide, pour les familles et les groupes d’amis.',
-    descEn:
-      'A private four-bedroom villa with its own pool and direct access to Gordes village — the greatest privacy at La Bastide, for families and groups of friends.',
-    maxOccupancy: 8,
-    signature: true,
-    priceFromMinor: 650000,
-  },
-];
+/** Indicative nightly anchors (EUR minor units) for the local sandbox rail. */
+const LOCAL_PRICE_BY_CODE: Readonly<Record<string, number>> = {
+  'superieure-village': 54000,
+  'deluxe-village': 79000,
+  'superieure-vallee': 85000,
+  'deluxe-vallee': 95000,
+  'junior-suite': 120000,
+  'junior-suite-prestige': 145000,
+  'suite-une-chambre': 170000,
+  'suite-une-chambre-terrasse': 195000,
+  'vasarely-suite': 240000,
+  'suite-baron-de-simiane': 260000,
+  'suite-duc-de-soubise': 290000,
+  'maison-de-constance': 650000,
+};
 
 function buildRooms(locale: SupportedLocale): HotelRoomRow[] {
   const isFr = locale === 'fr';
-  return ROOM_SEEDS.map((seed, index) => ({
-    id: `airelles-${seed.code}`,
-    slug: seed.slug,
-    room_code: seed.code,
-    name: isFr ? seed.nameFr : seed.nameEn,
-    description: isFr ? seed.descFr : seed.descEn,
-    max_occupancy: seed.maxOccupancy,
-    bed_type: null,
-    size_sqm: null,
-    amenities: [],
-    isSignature: seed.signature === true,
-    indicativePrice:
-      typeof seed.priceFromMinor === 'number'
-        ? { fromMinor: seed.priceFromMinor, toMinor: null, currency: 'EUR' }
-        : null,
-    displayOrder: index,
-    cardImagePublicId: null,
-    cardImageAlt: null,
-    galleryImages: [],
-  }));
+  return AIRELLES_ROOM_CATALOG.map((entry, index) =>
+    enrichAirellesRoomRow(
+      {
+        id: `airelles-${entry.room_code}`,
+        slug: entry.slug,
+        room_code: entry.room_code,
+        name: isFr ? entry.name_fr : entry.name_en,
+        description: isFr ? entry.description_fr : entry.description_en,
+        max_occupancy: entry.max_occupancy,
+        bed_type: isFr ? entry.bed_type_fr : entry.bed_type_en,
+        size_sqm: entry.size_sqm,
+        amenities: [],
+        isSignature: entry.is_signature === true,
+        indicativePrice:
+          LOCAL_PRICE_BY_CODE[entry.room_code] !== undefined
+            ? {
+                fromMinor: LOCAL_PRICE_BY_CODE[entry.room_code] as number,
+                toMinor: null,
+                currency: 'EUR',
+              }
+            : null,
+        displayOrder: entry.display_order ?? index,
+        cardImagePublicId: entry.hero_image,
+        cardImageAlt: isFr ? entry.hero_alt_fr : entry.hero_alt_en,
+        galleryImages: [
+          {
+            publicId: entry.hero_image,
+            alt: isFr ? entry.hero_alt_fr : entry.hero_alt_en,
+          },
+        ],
+      },
+      locale,
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------

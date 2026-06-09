@@ -599,7 +599,7 @@ async function renderHotelPage(
     // visual without fabricating a fake "room" set. Phase 3 sources the real
     // per-room photos (skill: photo-pipeline).
     const ROOM_IMG_TRANSFORMS = 'f_auto,q_auto,c_fill,g_auto,w_700,h_525';
-    const roomImages: readonly { readonly src: string; readonly alt: string }[] =
+    const roomImages: readonly { readonly src: string; readonly alt: string }[] = (
       room.galleryImages.length > 0
         ? room.galleryImages.map((g) => ({
             src: buildCloudinarySrc({
@@ -620,7 +620,8 @@ async function renderHotelPage(
                 alt: fallbackTile.alt,
               },
             ]
-          : [];
+          : []
+    ).slice(0, 1);
     const facts: string[] = [];
     if (room.size_sqm !== null) facts.push(t('rooms.size', { count: room.size_sqm }));
     if (room.bed_type !== null && room.bed_type !== '') facts.push(room.bed_type);

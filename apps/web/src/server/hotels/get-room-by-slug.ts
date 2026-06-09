@@ -6,6 +6,10 @@ import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { mergeRoomGalleryImages } from '@/lib/hotel/sort-room-display-images';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import {
+  enrichAirellesRoomDetail,
+  isAirellesHotelSlug,
+} from '@/server/hotels/enrich-airelles-rooms';
 import { getFakeRoomBySlug } from '@/server/hotels/dev-fake-room-detail';
 import {
   getHotelBySlug,
@@ -357,7 +361,11 @@ export async function getRoomBySlug(
       }
       return null;
     }
-    return { hotel, room: rowToDetail(parsed.data, locale) };
+    const room = rowToDetail(parsed.data, locale);
+    const enrichedRoom = isAirellesHotelSlug(hotel.row.slug, hotel.row.slug_en)
+      ? enrichAirellesRoomDetail(room, locale)
+      : room;
+    return { hotel, room: enrichedRoom };
   } catch (e) {
     if (process.env['NODE_ENV'] !== 'production') {
       console.warn('[getRoomBySlug] failed:', e);

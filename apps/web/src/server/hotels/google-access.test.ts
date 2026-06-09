@@ -149,6 +149,7 @@ describe('readGoogleReviews', () => {
     expect(reviews[0]?.author).toBe('Marie L.');
     expect(reviews[0]?.rating).toBe(5);
     expect(reviews[0]?.text).toContain('séjour');
+    expect(reviews[0]?.publishTime).toBe('2026-01-10T12:00:00Z');
   });
 
   it('drops invalid entries', () => {

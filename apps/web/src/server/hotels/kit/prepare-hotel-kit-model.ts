@@ -241,6 +241,9 @@ export interface HotelKitModel {
     readonly travelerReviewsTitle: string;
     readonly officialWebsite: string;
     readonly googleListing: string;
+    readonly staticMapAlt: string;
+    readonly staticMapAria: string;
+    readonly mapAttributionHtml: string;
     readonly enBrefSectionTitle: string;
     readonly navHeading: string;
   };
@@ -266,14 +269,13 @@ function buildCloudinaryRoomImage(
   };
 }
 
-/** Kit `.mini-gallery` — ≥2 Cloudinary tiles when sources allow (audit §2.4). */
+/** Kit room card — one official hero photo per category (no carousel on the grid). */
 function buildKitRoomImages(
   room: {
     readonly slug: string;
     readonly room_code: string;
     readonly galleryImages: readonly { readonly publicId: string; readonly alt: string }[];
   },
-  index: number,
   cloudName: string,
   hotelGallery: readonly LocalisedGalleryImage[],
   roomName: string,
@@ -301,41 +303,16 @@ function buildKitRoomImages(
     return out;
   };
 
-  const pickSecondFromHotelGallery = (
-    exclude: readonly string[],
-  ): LocalisedGalleryImage | undefined => {
-    const excluded = new Set(exclude);
-    const alternate = hotelGallery.find((g) => !excluded.has(g.publicId));
-    if (alternate !== undefined) return alternate;
-    const rotated = hotelGallery[(index + 1) % Math.max(1, hotelGallery.length)];
-    return rotated !== undefined && !excluded.has(rotated.publicId) ? rotated : undefined;
-  };
-
   if (curated !== undefined) {
     const entries: { publicId: string; alt: string }[] = [
       { publicId: curated.hero, alt: altForPublicId(curated.hero) },
     ];
-    if (curated.second !== undefined && curated.second !== curated.hero) {
-      entries.push({ publicId: curated.second, alt: altForPublicId(curated.second) });
-    } else {
-      const fromRoomGallery = room.galleryImages.find(
-        (g) => g.publicId !== curated.hero && g.publicId !== curated.second,
-      );
-      if (fromRoomGallery !== undefined) {
-        entries.push(fromRoomGallery);
-      }
-    }
     return toImages(dedupeByPublicId(entries));
   }
 
   if (room.galleryImages.length > 0) {
     const entries = dedupeByPublicId(room.galleryImages);
-    if (entries.length >= 2) return toImages(entries);
-    const second = pickSecondFromHotelGallery([entries[0]?.publicId ?? '']);
-    if (second !== undefined && entries[0] !== undefined) {
-      return toImages([entries[0], { publicId: second.publicId, alt: second.alt }]);
-    }
-    return toImages(entries);
+    return toImages(entries.slice(0, 1));
   }
 
   return [];
@@ -502,7 +479,7 @@ export async function prepareHotelKitModel(
       livePriceText = tCard('from', { price: priceText });
       bookAria = tCard('bookAria', { room: roomName, price: priceText });
     }
-    const roomImages = buildKitRoomImages(room, index, cloudName, galleryImages, roomName);
+    const roomImages = buildKitRoomImages(room, cloudName, galleryImages, roomName);
     const facts: string[] = [];
     if (room.size_sqm !== null) facts.push(t('rooms.size', { count: room.size_sqm }));
     if (room.bed_type !== null && room.bed_type !== '') facts.push(room.bed_type);
@@ -812,6 +789,12 @@ export async function prepareHotelKitModel(
       travelerReviewsTitle: kitLocale === 'en' ? 'Guest reviews' : 'Avis des voyageurs',
       officialWebsite: t('location.officialWebsite'),
       googleListing: t('location.googleListing'),
+      staticMapAlt: t('location.staticMapAlt', { hotelName: name }),
+      staticMapAria: t('location.staticMapAria', { hotelName: name }),
+      mapAttributionHtml:
+        kitLocale === 'en'
+          ? 'Map data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · Tiles <a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use" target="_blank" rel="noopener noreferrer">courtesy of the Wikimedia Foundation</a>'
+          : 'Données <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© contributeurs OpenStreetMap</a> · Tuiles <a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use" target="_blank" rel="noopener noreferrer">fournies par la Wikimedia Foundation</a>',
       enBrefSectionTitle: t('toc.enBref'),
       navHeading: t('toc.heading'),
       faqCategoryBefore: t('faq.categoryBefore'),

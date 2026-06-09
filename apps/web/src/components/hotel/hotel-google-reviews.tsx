@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
+import { GoogleReviewQuote } from '@/components/hotel/google-review-quote';
+import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedGoogleReview } from '@/server/hotels/get-hotel-by-slug';
 
@@ -37,6 +39,11 @@ export async function HotelGoogleReviews({
       ? aggregateRating.toFixed(1)
       : aggregateRating.toFixed(1).replace('.', ',')
     : null;
+  const kitLocale = locale === 'en' ? 'en' : 'fr';
+  const quoteLabels = {
+    seeMore: t('googleReviews.seeMore'),
+    seeLess: t('googleReviews.seeLess'),
+  };
 
   return (
     <div className="mch-kit bref-sub">
@@ -73,7 +80,11 @@ export async function HotelGoogleReviews({
                 </span>
                 <span className="rv-name">{review.author}</span>
               </div>
-              <p>{review.text}</p>
+              <GoogleReviewQuote
+                text={review.text}
+                publishDate={formatGoogleReviewDate(review.publishTime, kitLocale)}
+                labels={quoteLabels}
+              />
             </blockquote>
           ))}
         </div>

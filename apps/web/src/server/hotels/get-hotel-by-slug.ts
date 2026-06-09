@@ -20,6 +20,7 @@ import {
   applyAirellesLocalOverride,
   isAirellesLocalOverrideEnabled,
 } from '@/server/hotels/dev-override-airelles';
+import { enrichAirellesRooms, isAirellesHotelSlug } from '@/server/hotels/enrich-airelles-rooms';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 
 export type { SupportedLocale };
@@ -3457,16 +3458,20 @@ export async function getHotelBySlug(
       }
     }
 
+    const roomsForRender = isAirellesHotelSlug(parsed.data.slug, parsed.data.slug_en)
+      ? enrichAirellesRooms(rooms, locale)
+      : rooms;
+
     // LOCAL-ONLY editorial sandbox. When `MCH_LOCAL_FIXTURE` is set, the
     // Airelles Gordes fiche is patched in-memory with the curated
     // "golden template" content (never persisted). No-op for every
     // other slug and in production (flag unset). See
     // `dev-override-airelles.ts`.
     if (isAirellesLocalOverrideEnabled()) {
-      return applyAirellesLocalOverride({ row: parsed.data, rooms }, locale);
+      return applyAirellesLocalOverride({ row: parsed.data, rooms: roomsForRender }, locale);
     }
 
-    return { row: parsed.data, rooms };
+    return { row: parsed.data, rooms: roomsForRender };
   } catch (e) {
     // Degraded env (CI smoke, preview without Supabase) — render 404
     // instead of crashing the route.

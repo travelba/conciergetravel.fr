@@ -3232,7 +3232,9 @@
       "listAria": "Avis Google Maps sur l'établissement",
       "aggregateAria": "Note {rating} sur 5 — {count} avis Google",
       "attribution": "Avis fournis par Google Maps.",
-      "viewOnGoogle": "Voir sur Google"
+      "viewOnGoogle": "Voir sur Google",
+      "seeMore": "Voir plus",
+      "seeLess": "Voir moins"
     },
     "conciergeAdvice": {
       "eyebrow": "Le conseil du Concierge",

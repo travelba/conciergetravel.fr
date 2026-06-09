@@ -1,6 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
+import {
+  buildOpenStreetMapHotelHref,
+  buildWikimediaStaticMapTileUrl,
+} from '@/lib/maps/wikimedia-static-map';
 
 interface HotelStaticMapProps {
   readonly locale: SupportedLocale;
@@ -57,13 +61,8 @@ export async function HotelStaticMap({
 }: HotelStaticMapProps): Promise<React.ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage.location' });
 
-  // Coordinates are formatted to 5 decimal places (~1 m of precision)
-  // to keep the tile URL stable across renders without leaking
-  // sub-meter accuracy that isn't ours to confirm.
-  const lat = latitude.toFixed(5);
-  const lon = longitude.toFixed(5);
-  const tileUrl = `https://maps.wikimedia.org/img/osm-intl,${zoom},${lat},${lon},${width}x${height}@2x.png`;
-  const osmHref = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=${zoom}`;
+  const tileUrl = buildWikimediaStaticMapTileUrl({ latitude, longitude, zoom, width, height });
+  const osmHref = buildOpenStreetMapHotelHref(latitude, longitude, zoom);
 
   return (
     <figure className="border-border bg-bg mt-4 overflow-hidden rounded-lg border">

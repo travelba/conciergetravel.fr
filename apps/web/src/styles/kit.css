@@ -1928,6 +1928,57 @@
   color: var(--texte-doux);
   font-size: 14px;
 }
+.mch-kit .kit-static-map {
+  margin: 22px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--ligne);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+.mch-kit .kit-static-map__link {
+  position: relative;
+  display: block;
+  aspect-ratio: 20 / 9;
+  width: 100%;
+  overflow: hidden;
+}
+.mch-kit .kit-static-map__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.mch-kit .kit-static-map__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mch-kit .kit-static-map__pin {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -100%);
+}
+.mch-kit .kit-static-map__pin-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+.mch-kit .kit-static-map__attr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 10px 14px;
+  font-size: 0.7rem;
+  color: var(--texte-doux);
+  border-top: 1px solid var(--ligne);
+}
+.mch-kit .kit-static-map__attr a {
+  color: inherit;
+  text-decoration: underline;
+}
+.mch-kit .kit-static-map__attr a:hover {
+  color: var(--noir);
+}
 .mch-kit .map-placeholder .icon {
   width: 22px;
   height: 22px;
@@ -1963,6 +2014,25 @@
 .mch-kit .rv-name {
   font-size: 12.5px;
   color: var(--texte-doux);
+}
+.mch-kit .rv-date {
+  display: block;
+  font-size: 11.5px;
+  color: var(--texte-doux);
+  margin-bottom: 10px;
+}
+.mch-kit .review-text.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.mch-kit .review-toggle {
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 .mch-kit .review p {
   font-family: var(--kit-serif);
@@ -3560,6 +3630,10 @@ body.booking-mobile-sheet-open {
   border-radius: 10px;
   padding: 18px 20px;
   box-shadow: var(--shadow-soft);
+}
+.mch-kit .around-item.around-concierge {
+  background: #f7f4ee;
+  border-color: var(--accent);
 }
 .mch-kit .around-item.has-img {
   padding: 0;

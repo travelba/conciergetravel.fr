@@ -3232,7 +3232,9 @@
       "listAria": "Google Maps reviews for this property",
       "aggregateAria": "Rating {rating} out of 5 — {count} Google reviews",
       "attribution": "Reviews provided by Google Maps.",
-      "viewOnGoogle": "View on Google"
+      "viewOnGoogle": "View on Google",
+      "seeMore": "See more",
+      "seeLess": "See less"
     },
     "conciergeAdvice": {
       "eyebrow": "The Concierge's tip",

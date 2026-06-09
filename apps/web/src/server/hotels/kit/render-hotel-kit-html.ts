@@ -7,6 +7,11 @@ import type { FaqCategory } from '@/server/hotels/get-hotel-by-slug';
 import { pickProximityCards } from '@/server/hotels/get-related-hotels';
 
 import { getPathname } from '@/i18n/navigation';
+import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
+import {
+  buildOpenStreetMapHotelHref,
+  buildWikimediaStaticMapTileUrl,
+} from '@/lib/maps/wikimedia-static-map';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 import {
@@ -37,6 +42,37 @@ import type {
   LocalisedPointOfInterest,
   LocalisedRestaurantVenue,
 } from '@/server/hotels/get-hotel-by-slug';
+
+const REVIEW_CLAMP_CHARS = 220;
+
+function reviewNeedsToggle(text: string): boolean {
+  return text.length > REVIEW_CLAMP_CHARS;
+}
+
+function renderGoogleReviewCardHtml(
+  review: {
+    readonly author: string;
+    readonly rating: number;
+    readonly text: string;
+    readonly publishTime: string | null;
+  },
+  locale: 'fr' | 'en',
+  index: number,
+): string {
+  const publishLabel = formatGoogleReviewDate(review.publishTime, locale);
+  const textId = `google-review-text-${index}`;
+  const seeMore = locale === 'en' ? 'See more' : 'Voir plus';
+  const seeLess = locale === 'en' ? 'See less' : 'Voir moins';
+  const clamped = reviewNeedsToggle(review.text);
+  const dateHtml =
+    publishLabel !== null
+      ? `<time class="rv-date" datetime="${escapeHtml(review.publishTime ?? '')}">${escapeHtml(publishLabel)}</time>`
+      : '';
+  const toggleHtml = clamped
+    ? `<button type="button" class="review-toggle btn-ligne" aria-expanded="false" aria-controls="${textId}" data-more="${escapeHtml(seeMore)}" data-less="${escapeHtml(seeLess)}">${escapeHtml(seeMore)}</button>`
+    : '';
+  return `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(review.rating)}</span><span class="rv-name">${escapeHtml(review.author)}</span></div>${dateHtml}<p id="${textId}" class="review-text${clamped ? ' is-clamped' : ''}">« ${escapeHtml(review.text)} »</p>${toggleHtml}</blockquote>`;
+}
 
 function formatPoiDistanceLabel(
   model: HotelKitModel,
@@ -443,22 +479,6 @@ export function renderKitApropos(model: HotelKitModel): string {
     </section>`;
 }
 
-function renderMiniGalleryHtml(
-  images: readonly { readonly src: string; readonly alt: string }[],
-): string {
-  if (images.length === 0) return '';
-  const imgs = images
-    .map((img) => `<img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">`)
-    .join('\n                ');
-  const dots = images.map((_, i) => `<span${i === 0 ? ' class="on"' : ''}></span>`).join('');
-  return `<div class="mini-gallery">
-              <div class="mg-track">
-                ${imgs}
-              </div>
-              ${images.length > 1 ? `<div class="mg-dots">${dots}</div>` : ''}
-            </div>`;
-}
-
 function extractRoomPriceAmount(
   locale: 'fr' | 'en',
   livePriceText: string | null,
@@ -485,21 +505,9 @@ function renderRoomPriceHtml(model: HotelKitModel, room: HotelRoomCardVM): strin
 function renderRoomImageHtml(
   images: readonly { readonly src: string; readonly alt: string }[],
 ): string {
-  if (images.length >= 2) {
-    const duo = images
-      .slice(0, 2)
-      .map(
-        (img) => `<img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">`,
-      )
-      .join('\n              ');
-    return `<div class="rv2-img-duo">${duo}</div>`;
-  }
-  if (images.length === 1) {
-    const [img] = images;
-    if (img === undefined) return '';
-    return `<img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">`;
-  }
-  return renderMiniGalleryHtml(images);
+  const [img] = images;
+  if (img === undefined) return '';
+  return `<img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">`;
 }
 
 function renderRoomCard(model: HotelKitModel, room: HotelRoomCardVM): string {
@@ -810,6 +818,24 @@ function formatTransportLine(
   return `${modeLabel}${linePart} ${tr.station} (${dist})${travel}${notes}`;
 }
 
+const KIT_MAP_PIN_SVG = `<svg viewBox="0 0 24 32" width="28" height="36" class="kit-static-map__pin-icon" focusable="false" aria-hidden="true"><path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20C24 5.4 18.6 0 12 0Z" fill="#0F172A"/><circle cx="12" cy="12" r="4.25" fill="#FAFAF8"/></svg>`;
+
+function renderKitStaticMapHtml(model: HotelKitModel): string {
+  if (model.latitude === null || model.longitude === null) return '';
+  const tileUrl = buildWikimediaStaticMapTileUrl({
+    latitude: model.latitude,
+    longitude: model.longitude,
+  });
+  const osmHref = buildOpenStreetMapHotelHref(model.latitude, model.longitude);
+  return `<figure class="kit-static-map">
+      <a href="${escapeHtml(osmHref)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(model.labels.staticMapAria)}" class="kit-static-map__link">
+        <img src="${escapeHtml(tileUrl)}" alt="${escapeHtml(model.labels.staticMapAlt)}" width="800" height="360" loading="lazy" decoding="async" class="kit-static-map__img">
+        <span class="kit-static-map__pin" aria-hidden="true">${KIT_MAP_PIN_SVG}</span>
+      </a>
+      <figcaption class="kit-static-map__attr">${model.labels.mapAttributionHtml}</figcaption>
+    </figure>`;
+}
+
 export function renderKitAcces(model: HotelKitModel): string {
   const fullAddress = formatFullAddress(model);
   const policyLines = formatPolicyLines(model);
@@ -865,22 +891,14 @@ export function renderKitAcces(model: HotelKitModel): string {
     .map((line) => `<li>${ICON_LOC}${escapeHtml(line)}</li>`)
     .join('\n            ');
 
-  const mapBlock =
-    model.latitude !== null && model.longitude !== null
-      ? `<div class="map-placeholder" role="img" aria-label="${escapeHtml(fullAddress)}">
-        ${ICON_LOC}
-        <span>${escapeHtml(fullAddress)} — ${model.latitude.toFixed(4)}, ${model.longitude.toFixed(4)}</span>
-      </div>`
-      : '';
+  const mapBlock = renderKitStaticMapHtml(model);
 
   const reviewCards: string[] = [];
   const googleQuotes = model.googleReviews.slice(0, 3);
   if (googleQuotes.length > 0) {
-    for (const review of googleQuotes) {
-      reviewCards.push(
-        `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(review.rating)}</span><span class="rv-name">${escapeHtml(review.author)}</span></div><p>« ${escapeHtml(review.text)} »</p></blockquote>`,
-      );
-    }
+    googleQuotes.forEach((review, index) => {
+      reviewCards.push(renderGoogleReviewCardHtml(review, model.locale, index));
+    });
   } else {
     for (const review of model.featuredReviews.slice(0, 2)) {
       reviewCards.push(
@@ -1064,10 +1082,12 @@ function renderAroundBucket(
   const items = pois
     .map((p, i) => {
       const hidden = i >= 3 ? ' more-hidden' : '';
-      const pick =
-        p.tip !== null && i === 0
-          ? `<span class="cc-pick">${ICON_STAR}${model.locale === 'en' ? 'Pick' : 'Choix'}</span>`
-          : '';
+      const isPick = p.tip !== null && i === 0;
+      const useConciergeFrame = isPick && bucket === 'do';
+      const pick = isPick
+        ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(useConciergeFrame ? model.labels.conciergePick : model.locale === 'en' ? 'Pick' : 'Choix')}</span>`
+        : '';
+      const pickClass = useConciergeFrame ? ' around-concierge' : '';
       const category =
         p.category !== null && p.category.trim() !== ''
           ? `<span class="around-cat">${escapeHtml(p.category)}</span>`
@@ -1087,7 +1107,7 @@ function renderAroundBucket(
           publicId: p.imagePublicId,
           transforms: 'f_auto,q_auto,c_fill,g_auto,w_520,h_400',
         });
-        return `<div class="around-item has-img${hidden}">
+        return `<div class="around-item has-img${pickClass}${hidden}">
             <div class="around-img">
               <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" loading="lazy">
               ${pick}
@@ -1097,7 +1117,7 @@ function renderAroundBucket(
             </div>
           </div>`;
       }
-      return `<div class="around-item${hidden}">
+      return `<div class="around-item${pickClass}${hidden}">
             ${pick}
             ${body}
           </div>`;
@@ -1135,10 +1155,10 @@ function renderUpcomingEventsSub(model: HotelKitModel): string {
   const items = events
     .map((ev, i) => {
       const hidden = i >= 3 ? ' more-hidden' : '';
-      const pick =
-        i === 1
-          ? `<span class="cc-pick">${ICON_STAR}${model.locale === 'en' ? 'Pick' : 'Choix'}</span>`
-          : '';
+      const isPick = i === 1;
+      const pick = isPick
+        ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(model.labels.conciergePick)}</span>`
+        : '';
       const desc = ev.description ?? '';
       const why =
         i === 1 && desc.includes('Ambiance unique')
@@ -1153,7 +1173,7 @@ function renderUpcomingEventsSub(model: HotelKitModel): string {
         ev.url !== null
           ? `<a href="${escapeHtml(ev.url)}" class="link-or around-link" target="_blank" rel="noopener noreferrer">${model.locale === 'en' ? 'Details →' : 'En savoir plus →'}</a>`
           : '';
-      return `<div class="around-item${hidden}">
+      return `<div class="around-item${isPick ? ' around-concierge' : ''}${hidden}">
             ${pick}
             <h5>${escapeHtml(ev.name)}</h5>
             ${meta}

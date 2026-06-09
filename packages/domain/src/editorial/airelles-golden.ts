@@ -1161,6 +1161,276 @@ export const AIRELLES_MICE_INFO = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// hotel_rooms — catalogue fiche (12 catégories officielles, photos + faits)
+// ---------------------------------------------------------------------------
+
+/** Single hero frame per room category — sourced from official Airelles media (see kit-airelles-display). */
+export interface AirellesGoldenRoomEntry {
+  readonly room_code: string;
+  readonly slug: string;
+  /** DB / Travelport aliases matched alongside `slug` and `room_code`. */
+  readonly slug_aliases?: readonly string[];
+  readonly name_fr: string;
+  readonly name_en: string;
+  readonly description_fr: string;
+  readonly description_en: string;
+  readonly size_sqm: number;
+  readonly bed_type_fr: string;
+  readonly bed_type_en: string;
+  readonly max_occupancy: number;
+  readonly is_signature?: boolean;
+  readonly hero_image: string;
+  readonly hero_alt_fr: string;
+  readonly hero_alt_en: string;
+  readonly display_order?: number;
+}
+
+export const AIRELLES_ROOM_CATALOG: readonly AirellesGoldenRoomEntry[] = [
+  {
+    room_code: 'superieure-village',
+    slug: 'chambre-superieure-village',
+    slug_aliases: ['superior-room-village-side'],
+    name_fr: 'Chambre Supérieure Village',
+    name_en: 'Superior Village Room',
+    description_fr:
+      'Chambre élégante donnant sur le village de Gordes, parquet point de Hongrie, lit king-size et salle de bain en pierre.',
+    description_en:
+      'An elegant room overlooking the village of Gordes, herringbone parquet, king-size bed and a stone bathroom.',
+    size_sqm: 30,
+    bed_type_fr: 'Lit King size · vue village',
+    bed_type_en: 'King-size bed · village view',
+    max_occupancy: 2,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-10`,
+    hero_alt_fr: 'Chambre Supérieure Village, Airelles Gordes, Gordes',
+    hero_alt_en: 'Superior Village room, Airelles Gordes, Gordes',
+    display_order: 1,
+  },
+  {
+    room_code: 'deluxe-village',
+    slug: 'chambre-deluxe-village',
+    slug_aliases: ['deluxe-room-village-side'],
+    name_fr: 'Chambre Deluxe Village',
+    name_en: 'Deluxe Village Room',
+    description_fr:
+      'Chambre Deluxe avec vue sur le village, plus spacieuse, au décor provençal raffiné et au mobilier chiné.',
+    description_en:
+      'A more spacious Deluxe room with village views, refined Provençal décor and antique furniture.',
+    size_sqm: 35,
+    bed_type_fr: 'Lit King size · vue village',
+    bed_type_en: 'King-size bed · village view',
+    max_occupancy: 2,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/places-2`,
+    hero_alt_fr: 'Chambre Deluxe Village, Airelles Gordes, Gordes',
+    hero_alt_en: 'Deluxe Village room, Airelles Gordes, Gordes',
+    display_order: 2,
+  },
+  {
+    room_code: 'superieure-vallee',
+    slug: 'chambre-superieure-vallee',
+    slug_aliases: ['superior-room-valley-side'],
+    name_fr: 'Chambre Supérieure Vallée',
+    name_en: 'Superior Valley Room',
+    description_fr:
+      'Chambre Supérieure ouvrant sur la vallée du Luberon, lumière du matin et panorama sur les collines d’oliviers.',
+    description_en:
+      'A Superior room opening onto the Luberon valley, morning light and a panorama over the olive-clad hills.',
+    size_sqm: 29,
+    bed_type_fr: 'Lit King size · vue vallée',
+    bed_type_en: 'King-size bed · valley view',
+    max_occupancy: 2,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-30`,
+    hero_alt_fr: 'Chambre Supérieure côté vallée, Airelles Gordes, Gordes',
+    hero_alt_en: 'Valley-side Superior room, Airelles Gordes, Gordes',
+    display_order: 3,
+  },
+  {
+    room_code: 'deluxe-vallee',
+    slug: 'chambre-deluxe-vallee',
+    slug_aliases: ['deluxe-room-valley-side'],
+    name_fr: 'Chambre Deluxe Vallée',
+    name_en: 'Deluxe Valley Room',
+    description_fr:
+      'Chambre Deluxe avec vue dégagée sur la vallée, espace généreux et salle de bain habillée de pierre.',
+    description_en:
+      'A Deluxe room with open valley views, generous space and a stone-clad bathroom.',
+    size_sqm: 34,
+    bed_type_fr: 'Lit King size · vue vallée',
+    bed_type_en: 'King-size bed · valley view',
+    max_occupancy: 2,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-11`,
+    hero_alt_fr: 'Chambre Deluxe côté vallée, Airelles Gordes, Gordes',
+    hero_alt_en: 'Valley-side Deluxe room, Airelles Gordes, Gordes',
+    display_order: 4,
+  },
+  {
+    room_code: 'junior-suite',
+    slug: 'junior-suite',
+    slug_aliases: ['junior-suite-valley-side'],
+    name_fr: 'Junior Suite',
+    name_en: 'Junior Suite',
+    description_fr:
+      'Junior Suite au coin salon ouvert, alliant le confort d’une suite à l’intimité d’une chambre, décor 18e revisité.',
+    description_en:
+      'A Junior Suite with an open sitting area, blending suite comfort with the intimacy of a room, in a revisited 18th-century décor.',
+    size_sqm: 40,
+    bed_type_fr: 'Lit King size · vue vallée',
+    bed_type_en: 'King-size bed · valley view',
+    max_occupancy: 2,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-21`,
+    hero_alt_fr: 'Junior Suite côté vallée, Airelles Gordes, Gordes',
+    hero_alt_en: 'Valley-side Junior Suite, Airelles Gordes, Gordes',
+    display_order: 5,
+  },
+  {
+    room_code: 'junior-suite-prestige',
+    slug: 'junior-suite-prestige',
+    slug_aliases: ['prestige-junior-suite-valley-side'],
+    name_fr: 'Junior Suite Prestige',
+    name_en: 'Prestige Junior Suite',
+    description_fr:
+      'Junior Suite Prestige plus vaste, vue vallée, salon et chambre articulés autour d’une terrasse provençale.',
+    description_en:
+      'A larger Prestige Junior Suite, valley view, with living and sleeping areas arranged around a Provençal terrace.',
+    size_sqm: 48,
+    bed_type_fr: 'Lit King size · coin salon',
+    bed_type_en: 'King-size bed · sitting area',
+    max_occupancy: 3,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-25`,
+    hero_alt_fr: 'Junior Suite Prestige côté vallée, Airelles Gordes, Gordes',
+    hero_alt_en: 'Valley-side Prestige Junior Suite, Airelles Gordes, Gordes',
+    display_order: 6,
+  },
+  {
+    room_code: 'suite-une-chambre',
+    slug: 'suite-a-une-chambre',
+    slug_aliases: ['one-bedroom-suite-valley-side', 'suite-une-chambre'],
+    name_fr: 'Suite à une Chambre',
+    name_en: 'One-Bedroom Suite',
+    description_fr:
+      'Suite avec chambre et salon séparés, idéale pour un séjour prolongé, dans le calme de La Bastide.',
+    description_en:
+      'A suite with separate bedroom and living room, ideal for a longer stay, in the quiet of La Bastide.',
+    size_sqm: 50,
+    bed_type_fr: 'Lit King size · salon séparé',
+    bed_type_en: 'King-size bed · separate living room',
+    max_occupancy: 3,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-23`,
+    hero_alt_fr: 'Suite à une chambre côté vallée, Airelles Gordes, Gordes',
+    hero_alt_en: 'Valley-side One-Bedroom Suite, Airelles Gordes, Gordes',
+    display_order: 7,
+  },
+  {
+    room_code: 'suite-une-chambre-terrasse',
+    slug: 'suite-a-une-chambre-terrasse',
+    name_fr: 'Suite à une Chambre Terrasse',
+    name_en: 'One-Bedroom Terrace Suite',
+    description_fr:
+      'Suite à une chambre prolongée d’une terrasse privée face à la vallée, pour les petits-déjeuners au soleil.',
+    description_en:
+      'A one-bedroom suite extended by a private terrace facing the valley, for breakfasts in the sun.',
+    size_sqm: 64,
+    bed_type_fr: 'Lit King size · vue vallée',
+    bed_type_en: 'King-size bed · valley view',
+    max_occupancy: 3,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-23`,
+    hero_alt_fr: 'Suite à une chambre avec terrasse, Airelles Gordes, Gordes',
+    hero_alt_en: 'One-bedroom terrace suite, Airelles Gordes, Gordes',
+    display_order: 8,
+  },
+  {
+    room_code: 'vasarely-suite',
+    slug: 'suite-vasarely',
+    name_fr: 'Suite Vasarely',
+    name_en: 'Vasarely Suite',
+    description_fr:
+      'Suite de prestige au salon séparé et au style d’époque, distinguée par sa vue époustouflante sur la vallée, tel un tableau provençal.',
+    description_en:
+      'A prestige suite with a separate living room and period style, set apart by its breathtaking valley view, like a Provençal painting.',
+    size_sqm: 60,
+    bed_type_fr: 'Lit King size · vue vallée',
+    bed_type_en: 'King-size bed · valley view',
+    max_occupancy: 3,
+    is_signature: true,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-13`,
+    hero_alt_fr: 'Chambre de la Suite Vasarely, Airelles Gordes, Gordes',
+    hero_alt_en: 'Bedroom of the Vasarely Suite, Airelles Gordes, Gordes',
+    display_order: 9,
+  },
+  {
+    room_code: 'suite-baron-de-simiane',
+    slug: 'suite-baron-de-simiane',
+    name_fr: 'Suite Baron de Simiane',
+    name_en: 'Baron de Simiane Suite',
+    description_fr:
+      'Suite empruntant son nom à l’une des plus illustres familles de Provence : finitions originales, mobilier du XVIIIe siècle et terrasse privée à la vue panoramique.',
+    description_en:
+      'A suite named after one of Provence’s most illustrious families: original finishes, 18th-century furniture and a private terrace with panoramic views.',
+    size_sqm: 91,
+    bed_type_fr: 'Lit King size · terrasse privée',
+    bed_type_en: 'King-size bed · private terrace',
+    max_occupancy: 3,
+    is_signature: true,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-12`,
+    hero_alt_fr: 'Suite Baron de Simiane, Airelles Gordes, Gordes',
+    hero_alt_en: 'Baron de Simiane Suite, Airelles Gordes, Gordes',
+    display_order: 10,
+  },
+  {
+    room_code: 'suite-duc-de-soubise',
+    slug: 'suite-duc-de-soubise',
+    name_fr: 'Suite Duc de Soubise',
+    name_en: 'Duc de Soubise Suite',
+    description_fr:
+      'Vaste suite de prestige avec petit salon, chambre et terrasse, dans l’esprit aristocratique de La Bastide.',
+    description_en:
+      'A vast prestige suite with a small sitting room, bedroom and terrace, in the aristocratic spirit of La Bastide.',
+    size_sqm: 102,
+    bed_type_fr: 'Lit King size · deux chambres',
+    bed_type_en: 'King-size bed · two bedrooms',
+    max_occupancy: 3,
+    is_signature: true,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-12`,
+    hero_alt_fr: 'Suite Duc de Soubise, Airelles Gordes, Gordes',
+    hero_alt_en: 'Duc de Soubise Suite, Airelles Gordes, Gordes',
+    display_order: 11,
+  },
+  {
+    room_code: 'maison-de-constance',
+    slug: 'maison-de-constance',
+    name_fr: 'Maison de Constance (villa privée)',
+    name_en: 'Maison de Constance (private villa)',
+    description_fr:
+      'Villa privée de quatre chambres avec piscine privée et accès direct au village de Gordes — la plus grande intimité de La Bastide, pour les familles et les groupes d’amis.',
+    description_en:
+      'A private four-bedroom villa with its own pool and direct access to Gordes village — the greatest privacy at La Bastide, for families and groups of friends.',
+    size_sqm: 250,
+    bed_type_fr: '4 chambres · piscine privée',
+    bed_type_en: '4 bedrooms · private pool',
+    max_occupancy: 8,
+    is_signature: true,
+    hero_image: `${AIRELLES_IMAGE_PREFIX}/press-6`,
+    hero_alt_fr: 'Maison de Constance, Airelles Gordes, Gordes',
+    hero_alt_en: 'Maison de Constance, Airelles Gordes, Gordes',
+    display_order: 12,
+  },
+] as const;
+
+const AIRELLES_GOLDEN_ROOM_INDEX = new Map<string, AirellesGoldenRoomEntry>(
+  AIRELLES_ROOM_CATALOG.flatMap((entry) => {
+    const keys = [entry.slug, entry.room_code, ...(entry.slug_aliases ?? [])];
+    return keys.map((key) => [key, entry] as const);
+  }),
+);
+
+/** Resolve a golden room row by editorial slug or DB `room_code`. */
+export function resolveAirellesGoldenRoom(
+  slug: string,
+  roomCode: string,
+): AirellesGoldenRoomEntry | undefined {
+  return AIRELLES_GOLDEN_ROOM_INDEX.get(slug) ?? AIRELLES_GOLDEN_ROOM_INDEX.get(roomCode);
+}
+
+// ---------------------------------------------------------------------------
 // hotel_rooms — indexable sub-page seed (ADR-0009, Suite Vasarely)
 // ---------------------------------------------------------------------------
 
@@ -1646,6 +1916,9 @@ export const AIRELLES_FEATURED_REVIEWS = [
 
 const GORDES_LAT = 43.911;
 const GORDES_LNG = 5.2;
+
+export const AIRELLES_LATITUDE = GORDES_LAT;
+export const AIRELLES_LONGITUDE = GORDES_LNG;
 
 export const AIRELLES_UPCOMING_EVENTS = [
   {
@@ -2368,6 +2641,8 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     phone_e164: AIRELLES_PHONE_E164,
     address: AIRELLES_ADDRESS,
     postal_code: AIRELLES_POSTAL_CODE,
+    latitude: AIRELLES_LATITUDE,
+    longitude: AIRELLES_LONGITUDE,
     email_reservations: AIRELLES_EMAIL_RESERVATIONS,
     mice_info: AIRELLES_MICE_INFO,
   };

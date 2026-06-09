@@ -25,6 +25,23 @@ export function HotelKitInteractions(): null {
       cleanups.push(() => btn.removeEventListener('click', onClick));
     });
 
+    document.querySelectorAll('.review-toggle').forEach((btn) => {
+      if (!(btn instanceof HTMLButtonElement)) return;
+      const textId = btn.getAttribute('aria-controls');
+      if (textId === null || textId === '') return;
+      const textEl = document.getElementById(textId);
+      if (textEl === null) return;
+      const labelMore = btn.getAttribute('data-more') ?? 'Voir plus';
+      const labelLess = btn.getAttribute('data-less') ?? 'Voir moins';
+      const onToggle = (): void => {
+        const clamped = textEl.classList.toggle('is-clamped');
+        btn.textContent = clamped ? labelMore : labelLess;
+        btn.setAttribute('aria-expanded', clamped ? 'false' : 'true');
+      };
+      btn.addEventListener('click', onToggle);
+      cleanups.push(() => btn.removeEventListener('click', onToggle));
+    });
+
     document.querySelectorAll('[data-toggle-more]').forEach((btn) => {
       if (!(btn instanceof HTMLButtonElement)) return;
       const targetId = btn.getAttribute('data-toggle-more');
