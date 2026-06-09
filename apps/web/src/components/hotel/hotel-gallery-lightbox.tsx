@@ -104,6 +104,14 @@ const MAX_DIALOG_TRANSFORMS = 'f_auto,q_auto:good,c_limit,w_1600,h_1067';
 /** Mosaic tile crop — square-ish 4:3 frame, smart-gravity centred. */
 const MOSAIC_TILE_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_auto,w_900,h_675';
 
+/**
+ * Kit `.htl-gallery img` zoom — premium 0.7s editorial easing
+ * (`--ease-editorial: cubic-bezier(.2,.7,.2,1)`) + scale-105 on hover, applied
+ * to every tile (hero + side) so the inline mosaic matches the HTML kit.
+ */
+const KIT_MOSAIC_IMAGE_CLASS =
+  'h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105';
+
 /** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
 const MOSAIC_SIDE_TILES = 4;
 
@@ -326,16 +334,21 @@ export function HotelGalleryLightbox({
       </h2>
 
       {!hideGrid && layout === 'mosaic' && hero !== null ? (
+        // Kit `.htl-gallery` mosaic — hero 2×2 left + four rounded tiles, 10px
+        // gutter, fixed 440px frame on desktop and the premium 0.7s editorial
+        // zoom (DA crème/taupe: `--ease-editorial`). Tailwind mirror of the kit
+        // CSS so the client island stays self-contained (no `.mch-kit` wrap).
         <div
-          className="grid h-auto grid-cols-1 gap-1 md:h-[500px] md:grid-cols-4 md:grid-rows-2"
+          className="grid h-auto grid-cols-1 gap-2.5 md:h-[440px] md:grid-cols-4 md:grid-rows-2"
           data-gallery-layout="mosaic"
         >
-          <figure className="relative min-h-[240px] overflow-hidden md:col-span-2 md:row-span-2 md:min-h-0">
+          <figure className="relative min-h-[240px] overflow-hidden rounded-lg md:col-span-2 md:row-span-2 md:min-h-0">
             {renderTileButton(hero, 0, {
               priority: true,
               width: 1600,
               height: 1067,
               variant: 'hero',
+              imageClassName: KIT_MOSAIC_IMAGE_CLASS,
             })}
           </figure>
           {mosaicTiles.map((img, idx) => {
@@ -348,11 +361,12 @@ export function HotelGalleryLightbox({
             return (
               <figure
                 key={img.publicId}
-                className="relative hidden min-h-0 overflow-hidden md:block"
+                className="relative hidden min-h-0 overflow-hidden rounded-lg md:block"
               >
                 {renderTileButton(img, galleryIndex, {
                   showOverflow: isLast && overflowLabel > 0,
                   overflowCountLabel: overflowLabel,
+                  imageClassName: KIT_MOSAIC_IMAGE_CLASS,
                 })}
               </figure>
             );
