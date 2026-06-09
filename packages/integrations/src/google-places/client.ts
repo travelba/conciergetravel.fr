@@ -25,12 +25,16 @@ import { retryingJsonRequest } from '../http/retry-request';
 import type { GooglePlacesError } from './errors';
 import {
   NearbySearchResponseSchema,
+  NormalisedPlaceDetailsSchema,
+  type NormalisedPlaceDetails,
   type NormalisedPlacePoi,
   type NormalisedPlacesPhoto,
   NormalisedPlacesPhotoSchema,
   PhotoMediaResponseSchema,
+  PlaceDetailsSchema,
   type PlacePhoto,
   type PlaceSearchResult,
+  StoredGoogleReviewSchema,
   TextSearchResponseSchema,
 } from './types';
 
@@ -428,6 +432,95 @@ async function resolvePhotoUri(
  * Sequential (no concurrency) to avoid the 60 QPM cap on the photo
  * endpoint. For ~10 photos / hotel that's < 1s overhead.
  */
+const PLACE_DETAILS_FIELD_MASK =
+  'id,rating,userRatingCount,reviews,googleMapsUri,websiteUri,displayName';
+
+/**
+ * Fetch place details for traveler reviews + official website / Maps URI.
+ *
+ * Google ToS caps surfaced reviews at 5 — we persist up to 5 and the UI
+ * shows 3 quotes. SKU: Place Details (Essentials) ≈ $17 / 1k requests.
+ */
+export async function fetchPlaceDetails(
+  cfg: GooglePlacesClientConfig,
+  placeId: string,
+): Promise<Result<NormalisedPlaceDetails, GooglePlacesError>> {
+  const resourceId = placeId.startsWith('places/') ? placeId.slice('places/'.length) : placeId;
+  const url = `${cfg.apiBase}/places/${encodeURIComponent(resourceId)}`;
+  const res = await retryingJsonRequest({
+    url,
+    method: 'GET',
+    headers: {
+      'X-Goog-Api-Key': cfg.apiKey,
+      'X-Goog-FieldMask': PLACE_DETAILS_FIELD_MASK,
+      Accept: 'application/json',
+    },
+    body: { kind: 'none' },
+  });
+  if (!res.ok) {
+    if (res.error.kind === 'auth_failed') return err({ kind: 'auth_failed' });
+    if (res.error.kind === 'rate_limited') return err({ kind: 'quota_exceeded' });
+    return err({ kind: 'http', error: res.error });
+  }
+  if (res.value.json === undefined) {
+    return err({ kind: 'parse_failure', details: 'empty place details response' });
+  }
+  const parsed = PlaceDetailsSchema.safeParse(res.value.json);
+  if (!parsed.success) {
+    return err({
+      kind: 'parse_failure',
+      details: `placeDetails schema mismatch: ${parsed.error.issues
+        .slice(0, 3)
+        .map((i) => `${i.path.join('.')}: ${i.message}`)
+        .join(' | ')}`,
+    });
+  }
+
+  const reviews: NormalisedPlaceDetails['reviews'] = [];
+  for (const review of parsed.data.reviews.slice(0, 5)) {
+    const rating = review.rating;
+    if (rating === undefined || !Number.isFinite(rating)) continue;
+    const textBlock = review.text ?? review.originalText;
+    const text = textBlock?.text?.trim();
+    if (text === undefined || text.length === 0) continue;
+    const author =
+      review.authorAttribution?.displayName?.trim() ??
+      (reviews.length === 0 ? 'Google user' : `Google user ${reviews.length + 1}`);
+    const candidate = {
+      author,
+      rating: Math.round(rating),
+      text,
+      ...(review.publishTime !== undefined ? { publish_time: review.publishTime } : {}),
+      ...(textBlock?.languageCode !== undefined ? { language: textBlock.languageCode } : {}),
+    };
+    const stored = StoredGoogleReviewSchema.safeParse(candidate);
+    if (stored.success) reviews.push(stored.data);
+  }
+
+  const normalised = {
+    placeId: parsed.data.id.replace(/^places\//u, ''),
+    ...(parsed.data.displayName?.text !== undefined
+      ? { displayName: parsed.data.displayName.text }
+      : {}),
+    rating:
+      parsed.data.rating !== undefined && Number.isFinite(parsed.data.rating)
+        ? Math.round(parsed.data.rating * 10) / 10
+        : null,
+    userRatingCount:
+      parsed.data.userRatingCount !== undefined && Number.isFinite(parsed.data.userRatingCount)
+        ? Math.trunc(parsed.data.userRatingCount)
+        : null,
+    reviews,
+    googleMapsUri: parsed.data.googleMapsUri ?? null,
+    websiteUri: parsed.data.websiteUri ?? null,
+  };
+  const out = NormalisedPlaceDetailsSchema.safeParse(normalised);
+  if (!out.success) {
+    return err({ kind: 'parse_failure', details: 'normalised place details schema mismatch' });
+  }
+  return ok(out.data);
+}
+
 export async function fetchPlacePhotos(
   cfg: GooglePlacesClientConfig,
   photos: readonly PlacePhoto[],

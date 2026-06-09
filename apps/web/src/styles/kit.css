@@ -2810,17 +2810,78 @@ body.booking-mobile-sheet-open {
   gap: 6px;
   z-index: 2;
 }
-.mch-kit .mini-gallery .mg-dots span {
+.mch-kit .mini-gallery .mg-dots span,
+.mch-kit .mini-gallery .mg-dots button {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-.mch-kit .mini-gallery .mg-dots span.on {
+.mch-kit .mini-gallery .mg-dots span.on,
+.mch-kit .mini-gallery .mg-dots button.on {
   background: #fff;
   width: 18px;
   border-radius: 3px;
+}
+.mch-kit .mini-gallery .mg-dots button {
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+.mch-kit .mini-gallery .mg-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+.mch-kit .mini-gallery .mg-arw {
+  pointer-events: auto;
+  width: 36px;
+  height: 36px;
+  margin: 0 10px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: #2b2b2b;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    opacity 0.2s;
+  opacity: 0;
+}
+.mch-kit .mini-gallery:hover .mg-arw {
+  opacity: 1;
+}
+.mch-kit .mini-gallery .mg-arw:hover {
+  background: #fff;
+  transform: scale(1.06);
+}
+.mch-kit .mini-gallery .mg-arw:focus-visible {
+  opacity: 1;
+  outline: 2px solid #8c7b5a;
+  outline-offset: 2px;
+}
+.mch-kit .mini-gallery--hero {
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+}
+@media (max-width: 768px) {
+  .mch-kit .mini-gallery .mg-arw {
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* --- Chambres v2 (carrousel + grille luxe) --- */

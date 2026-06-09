@@ -788,20 +788,26 @@ function formatTransportLine(
     rail: { fr: 'Gare', en: 'Station' },
     metro: { fr: 'Métro', en: 'Metro' },
     airport: { fr: 'Aéroport', en: 'Airport' },
+    airport_shuttle: { fr: 'Navette aéroport', en: 'Airport shuttle' },
     bus: { fr: 'Bus', en: 'Bus' },
   };
   const modeLabel = modeLabels[tr.mode]?.[model.locale] ?? tr.mode;
   const linePart = tr.line !== null && tr.line !== '' ? ` ${tr.line}` : '';
   const distKm = (tr.distanceMeters / 1000).toFixed(tr.distanceMeters >= 10_000 ? 0 : 1);
   const dist = model.locale === 'en' ? `${distKm} km` : `${distKm.replace('.', ',')} km`;
-  const walk =
-    tr.walkMinutes !== null
+  const intercity = tr.mode === 'train' || tr.mode === 'airport' || tr.mode === 'airport_shuttle';
+  const travel =
+    intercity && tr.walkMinutes !== null && tr.distanceMeters >= 5000
       ? model.locale === 'en'
-        ? ` · ${tr.walkMinutes} min walk`
-        : ` · ${tr.walkMinutes} min à pied`
-      : '';
+        ? ` · ${tr.walkMinutes} min drive`
+        : ` · ${tr.walkMinutes} min en voiture`
+      : tr.walkMinutes !== null
+        ? model.locale === 'en'
+          ? ` · ${tr.walkMinutes} min walk`
+          : ` · ${tr.walkMinutes} min à pied`
+        : '';
   const notes = tr.notes !== null && tr.notes.trim() !== '' ? ` — ${tr.notes.trim()}` : '';
-  return `${modeLabel}${linePart} ${tr.station} (${dist})${walk}${notes}`;
+  return `${modeLabel}${linePart} ${tr.station} (${dist})${travel}${notes}`;
 }
 
 export function renderKitAcces(model: HotelKitModel): string {
@@ -838,6 +844,19 @@ export function renderKitAcces(model: HotelKitModel): string {
       `<li>${ICON_EMAIL}<a href="mailto:${escapeHtml(model.emailReservations)}">${escapeHtml(model.emailReservations)}</a></li>`,
     );
   }
+  if (model.officialWebsiteUrl !== null) {
+    const officialHref = localizeKitOfficialHref(model.officialWebsiteUrl, model.locale);
+    if (officialHref !== null) {
+      coordsItems.push(
+        `<li>${ICON_LOC}<a href="${escapeHtml(officialHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.labels.officialWebsite)}</a></li>`,
+      );
+    }
+  }
+  if (model.googleMapsUrl !== null) {
+    coordsItems.push(
+      `<li>${ICON_LOC}<a href="${escapeHtml(model.googleMapsUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.labels.googleListing)}</a></li>`,
+    );
+  }
 
   const policyItems = policyLines
     .map((line) => `<li>${ICON_CHECK}${escapeHtml(line)}</li>`)
@@ -855,12 +874,21 @@ export function renderKitAcces(model: HotelKitModel): string {
       : '';
 
   const reviewCards: string[] = [];
-  for (const review of model.featuredReviews.slice(0, 2)) {
-    reviewCards.push(
-      `<blockquote class="review"><div class="rv-top"><span class="rv-score">${escapeHtml(review.rating !== null ? formatRatingFr(review.rating) : '5,0')}</span><span class="rv-name">${escapeHtml(review.source)}</span></div><p>« ${escapeHtml(review.quote)} »</p></blockquote>`,
-    );
+  const googleQuotes = model.googleReviews.slice(0, 3);
+  if (googleQuotes.length > 0) {
+    for (const review of googleQuotes) {
+      reviewCards.push(
+        `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(review.rating)}</span><span class="rv-name">${escapeHtml(review.author)}</span></div><p>« ${escapeHtml(review.text)} »</p></blockquote>`,
+      );
+    }
+  } else {
+    for (const review of model.featuredReviews.slice(0, 2)) {
+      reviewCards.push(
+        `<blockquote class="review"><div class="rv-top"><span class="rv-score">${escapeHtml(review.rating !== null ? formatRatingFr(review.rating) : '5,0')}</span><span class="rv-name">${escapeHtml(review.source)}</span></div><p>« ${escapeHtml(review.quote)} »</p></blockquote>`,
+      );
+    }
   }
-  if (model.resolvedRating !== null) {
+  if (model.resolvedRating !== null && googleQuotes.length === 0) {
     reviewCards.push(
       `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(model.resolvedRating.ratingValue)}</span><span class="rv-name">${model.locale === 'en' ? 'Guest rating' : 'Note voyageurs'} · ${formatReviewCount(model.resolvedRating.reviewCount, model.locale)} ${model.locale === 'en' ? 'reviews' : 'avis'}</span></div><p>${model.locale === 'en' ? 'Verified traveller feedback aggregated for this property.' : 'Retours voyageurs vérifiés agrégés pour cet établissement.'}</p></blockquote>`,
     );

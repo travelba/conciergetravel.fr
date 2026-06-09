@@ -96,3 +96,28 @@ export function deriveTravelEstimate(
   if (drive === null) return { mode: 'walk', minutes: walk };
   return { mode: 'drive', minutes: drive };
 }
+
+/** Minimal transport row shape for {@link deriveTransportTravelEstimate}. */
+export interface TransportTravelInput {
+  readonly mode: string;
+  readonly walkMinutes: number | null;
+  readonly distanceMeters: number;
+}
+
+/**
+ * Intercity access rows (gare, aéroport) store editorial drive time in
+ * `walk_minutes` when `distance_meters` is far beyond a walk — show that
+ * figure instead of deriving a walk time from distance.
+ */
+export function deriveTransportTravelEstimate(
+  transport: TransportTravelInput,
+): TravelEstimate | null {
+  const intercity =
+    transport.mode === 'train' ||
+    transport.mode === 'airport' ||
+    transport.mode === 'airport_shuttle';
+  if (intercity && transport.walkMinutes !== null && transport.distanceMeters >= 5000) {
+    return { mode: 'drive', minutes: Math.max(1, Math.round(transport.walkMinutes)) };
+  }
+  return deriveTravelEstimate(transport.walkMinutes, transport.distanceMeters);
+}

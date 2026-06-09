@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { PracticalInfo } from '@/components/hotel/practical-info';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import {
+  deriveTransportTravelEstimate,
   deriveTravelEstimate,
   deriveWalkMinutes,
   formatDistanceMeters,
@@ -27,6 +28,11 @@ import type {
 
 import { HotelStaticMap } from './hotel-static-map';
 
+export interface HotelAccessLinks {
+  readonly officialUrl: string | null;
+  readonly googleMapsUrl: string | null;
+}
+
 interface HotelLocationProps {
   readonly locale: SupportedLocale;
   readonly hotelName: string;
@@ -36,6 +42,8 @@ interface HotelLocationProps {
   readonly latitude: number | null;
   readonly longitude: number | null;
   readonly location: LocalisedLocation;
+  /** Official website + Google Maps listing (kit « Coordonnées » parity). */
+  readonly accessLinks?: HotelAccessLinks;
   /**
    * Golden template only: render the address + static map + transport list,
    * but NOT the POI buckets. The buckets (visit / do / shop) are relocated
@@ -52,6 +60,7 @@ const TRANSPORT_MODE_ORDER: readonly TransportMode[] = [
   'tram',
   'bus',
   'train',
+  'airport',
   'taxi',
   'airport_shuttle',
 ];
@@ -158,6 +167,7 @@ export async function HotelLocation({
   longitude,
   location,
   omitPois = false,
+  accessLinks,
 }: HotelLocationProps): Promise<React.ReactElement | null> {
   const hasPois = location.pointsOfInterest.length > 0 && !omitPois;
   const hasTransports = location.transports.length > 0;
@@ -220,6 +230,32 @@ export async function HotelLocation({
         </p>
       ) : null}
 
+      {accessLinks !== undefined && accessLinks.officialUrl !== null ? (
+        <p className="mt-2 text-sm">
+          <a
+            href={accessLinks.officialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted hover:text-fg underline"
+          >
+            {t('location.officialWebsite')}
+          </a>
+        </p>
+      ) : null}
+
+      {accessLinks !== undefined && accessLinks.googleMapsUrl !== null ? (
+        <p className="mt-2 text-sm">
+          <a
+            href={accessLinks.googleMapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted hover:text-fg underline"
+          >
+            {t('location.googleListing')}
+          </a>
+        </p>
+      ) : null}
+
       {hasPois ? (
         <p
           data-aeo="location-intro"
@@ -268,7 +304,7 @@ export async function HotelLocation({
                 <span className="text-muted text-xs tabular-nums">
                   {t('location.distanceMeters', { meters: tr.distanceMeters })}
                   {(() => {
-                    const tt = deriveTravelEstimate(tr.walkMinutes, tr.distanceMeters);
+                    const tt = deriveTransportTravelEstimate(tr);
                     if (tt === null) return '';
                     return ` · ${
                       tt.mode === 'drive'

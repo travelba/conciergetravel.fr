@@ -14,11 +14,17 @@
  * `labels` so the component stays i18n-free, and every room is always in the
  * DOM (carousel track) so the catalogue stays crawlable / linkable (SEO).
  */
-import { type ComponentProps, useCallback, useRef, useState } from 'react';
+import { type ComponentProps, useCallback, useRef } from 'react';
 
+import { RoomMiniGallery } from '@/components/hotel/room-mini-gallery';
 import { Link } from '@/i18n/navigation';
 
 type LinkHref = ComponentProps<typeof Link>['href'];
+
+export interface HotelRoomFactLine {
+  readonly kind: 'area' | 'bed';
+  readonly text: string;
+}
 
 export interface HotelRoomCardVM {
   readonly id: string;
@@ -40,6 +46,8 @@ export interface HotelRoomCardVM {
   readonly imageAlt: string;
   /** Short factual chips (surface, bed, occupancy) for `.rv2-facts`. */
   readonly facts: readonly string[];
+  /** Typed facts with icon hints for kit HTML renderer (area vs bed). */
+  readonly factLines?: readonly HotelRoomFactLine[];
   /**
    * Pre-formatted live "from" price (multi-supplier / Travelport overlay).
    * When present (and the grid receives `bookHref`/`bookLabel`), the card
@@ -64,6 +72,9 @@ export interface HotelRoomsGridProps {
     readonly prevRoom: string;
     readonly nextRoom: string;
     readonly seeAll: string;
+    readonly prevPhoto: string;
+    readonly nextPhoto: string;
+    readonly photoN: string;
   };
   readonly defaultVisible?: number;
   /** Shared booking destination for live-price cards (Phase 6 pilot). */
@@ -89,55 +100,6 @@ function FactIcon(): React.ReactElement {
         strokeLinejoin="round"
       />
     </svg>
-  );
-}
-
-/** Per-room mini-gallery with scroll-driven active dot (kit `.mini-gallery`). */
-function RoomMiniGallery({
-  images,
-  placeholder,
-}: {
-  readonly images: readonly { readonly src: string; readonly alt: string }[];
-  readonly placeholder: string;
-}): React.ReactElement {
-  const [active, setActive] = useState(0);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-
-  const onScroll = useCallback(() => {
-    const track = trackRef.current;
-    if (track === null) return;
-    const index = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
-    setActive((prev) => (prev === index ? prev : index));
-  }, []);
-
-  if (images.length === 0) {
-    return (
-      <div className="mini-gallery">
-        <div className="mg-track">
-          <span className="text-muted flex h-full w-full items-center justify-center bg-neutral-100 text-xs">
-            {placeholder}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mini-gallery">
-      <div ref={trackRef} className="mg-track" onScroll={onScroll}>
-        {images.map((img) => (
-          // eslint-disable-next-line @next/next/no-img-element -- Cloudinary asset (photo-quality rules: no next/image on hotel assets)
-          <img key={img.src} src={img.src} alt={img.alt} loading="lazy" decoding="async" />
-        ))}
-      </div>
-      {images.length > 1 ? (
-        <div className="mg-dots" aria-hidden>
-          {images.map((img, i) => (
-            <span key={img.src} className={i === active ? 'on' : undefined} />
-          ))}
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -171,7 +133,15 @@ export function HotelRoomsGrid({
               room.livePriceText !== null && bookHref !== undefined && bookLabel !== undefined;
             return (
               <article key={room.id} className="room-v2">
-                <RoomMiniGallery images={room.images} placeholder={room.imageAlt} />
+                <RoomMiniGallery
+                  images={room.images}
+                  placeholder={room.imageAlt}
+                  labels={{
+                    prevPhoto: labels.prevPhoto,
+                    nextPhoto: labels.nextPhoto,
+                    photoN: labels.photoN,
+                  }}
+                />
                 {room.isConciergePick ? (
                   <span className="cc-pick" style={{ top: '12px', left: '12px' }}>
                     {CONCIERGE_STAR}

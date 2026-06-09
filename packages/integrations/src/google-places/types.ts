@@ -128,3 +128,55 @@ export const NormalisedPlacePoiSchema = z.object({
   types: z.array(z.string()).default([]),
 });
 export type NormalisedPlacePoi = z.infer<typeof NormalisedPlacePoiSchema>;
+
+// ---------------------------------------------------------------------------
+// Place Details (New) — GET /v1/places/{placeId}
+// ---------------------------------------------------------------------------
+
+const PlaceReviewAuthorSchema = z.object({
+  displayName: z.string().optional(),
+  uri: z.string().url().optional(),
+  photoUri: z.string().url().optional(),
+});
+
+export const PlaceReviewSchema = z.object({
+  rating: z.number().min(1).max(5).optional(),
+  text: LocalizedTextSchema.optional(),
+  originalText: LocalizedTextSchema.optional(),
+  authorAttribution: PlaceReviewAuthorSchema.optional(),
+  publishTime: z.string().optional(),
+  relativePublishTimeDescription: z.string().optional(),
+});
+export type PlaceReview = z.infer<typeof PlaceReviewSchema>;
+
+export const PlaceDetailsSchema = z.object({
+  id: z.string().min(1),
+  displayName: LocalizedTextSchema.optional(),
+  rating: z.number().min(0).max(5).optional(),
+  userRatingCount: z.number().int().nonnegative().optional(),
+  reviews: z.array(PlaceReviewSchema).default([]),
+  googleMapsUri: z.string().url().optional(),
+  websiteUri: z.string().url().optional(),
+});
+export type PlaceDetails = z.infer<typeof PlaceDetailsSchema>;
+
+/** Normalised review row persisted in `hotels.google_reviews` jsonb. */
+export const StoredGoogleReviewSchema = z.object({
+  author: z.string().min(1),
+  rating: z.number().int().min(1).max(5),
+  text: z.string().min(1),
+  publish_time: z.string().optional(),
+  language: z.string().optional(),
+});
+export type StoredGoogleReview = z.infer<typeof StoredGoogleReviewSchema>;
+
+export const NormalisedPlaceDetailsSchema = z.object({
+  placeId: z.string().min(1),
+  displayName: z.string().optional(),
+  rating: z.number().min(0).max(5).nullable(),
+  userRatingCount: z.number().int().nonnegative().nullable(),
+  reviews: z.array(StoredGoogleReviewSchema),
+  googleMapsUri: z.string().url().nullable(),
+  websiteUri: z.string().url().nullable(),
+});
+export type NormalisedPlaceDetails = z.infer<typeof NormalisedPlaceDetailsSchema>;

@@ -23,6 +23,8 @@ import {
   readConciergeHook,
   readConciergePick,
   readExternalIds,
+  readGoogleAccess,
+  readGoogleReviews,
   readExternalSourcesProvenance,
   readFactualSummary,
   readFaq,
@@ -185,6 +187,9 @@ export interface HotelKitModel {
   readonly transports: readonly LocalisedTransport[];
   readonly phone: string | null;
   readonly emailReservations: string | null;
+  readonly officialWebsiteUrl: string | null;
+  readonly googleMapsUrl: string | null;
+  readonly googleReviews: ReturnType<typeof readGoogleReviews>;
   readonly latitude: number | null;
   readonly longitude: number | null;
   readonly architects: readonly string[];
@@ -234,6 +239,8 @@ export interface HotelKitModel {
     readonly accessPoliciesTitle: string;
     readonly accessTransportTitle: string;
     readonly travelerReviewsTitle: string;
+    readonly officialWebsite: string;
+    readonly googleListing: string;
     readonly enBrefSectionTitle: string;
     readonly navHeading: string;
   };
@@ -366,6 +373,7 @@ export async function prepareHotelKitModel(
   const { rooms } = detail;
   const row = patchKitGoldenRow(detail.row);
   const externalIds = readExternalIds(row);
+  const googleAccess = readGoogleAccess(row);
   const locationBuckets = readLocationByBucket(row, kitLocale);
   const policies = readPolicies(row, kitLocale);
   const inventory = readInventoryCounts(row);
@@ -743,6 +751,9 @@ export async function prepareHotelKitModel(
     transports: locationBuckets.transports,
     phone: readPhoneE164(row),
     emailReservations: externalIds.emailReservations,
+    officialWebsiteUrl: googleAccess.officialUrl,
+    googleMapsUrl: googleAccess.googleMapsUrl,
+    googleReviews: readGoogleReviews(row, kitLocale),
     latitude: row.latitude,
     longitude: row.longitude,
     architects,
@@ -799,6 +810,8 @@ export async function prepareHotelKitModel(
       accessPoliciesTitle: kitLocale === 'en' ? 'Stay conditions' : 'Conditions de séjour',
       accessTransportTitle: kitLocale === 'en' ? 'Getting there' : 'Accès',
       travelerReviewsTitle: kitLocale === 'en' ? 'Guest reviews' : 'Avis des voyageurs',
+      officialWebsite: t('location.officialWebsite'),
+      googleListing: t('location.googleListing'),
       enBrefSectionTitle: t('toc.enBref'),
       navHeading: t('toc.heading'),
       faqCategoryBefore: t('faq.categoryBefore'),

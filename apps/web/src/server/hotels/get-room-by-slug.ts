@@ -3,6 +3,7 @@ import 'server-only';
 import { z } from 'zod';
 
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
+import { mergeRoomGalleryImages } from '@/lib/hotel/sort-room-display-images';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getFakeRoomBySlug } from '@/server/hotels/dev-fake-room-detail';
@@ -203,6 +204,18 @@ function rowToDetail(
   locale: SupportedLocale,
 ): HotelRoomDetailRow {
   const name = pickName(raw, locale);
+  const localized = localizeImages(raw.images, locale, name);
+  const heroRaw =
+    typeof raw.hero_image === 'string' && raw.hero_image.length > 0 ? raw.hero_image : null;
+  const sortedImages = mergeRoomGalleryImages({
+    heroImage: heroRaw,
+    images: localized,
+    heroAlt: name,
+  }).map((img) => ({
+    publicId: img.publicId,
+    alt: img.alt,
+    category: img.category ?? null,
+  }));
   return {
     id: raw.id,
     slug: raw.slug,
@@ -214,8 +227,8 @@ function rowToDetail(
     bedType: raw.bed_type,
     sizeSqm: raw.size_sqm,
     amenities: readAmenityList(raw.amenities, locale),
-    heroImage: raw.hero_image,
-    images: localizeImages(raw.images, locale, name),
+    heroImage: sortedImages[0]?.publicId ?? heroRaw,
+    images: sortedImages,
     isSignature: raw.is_signature === true,
     indicativePrice: readIndicativePriceDetail(raw.indicative_price_minor),
     conciergeAdviceRaw: raw.concierge_advice ?? null,

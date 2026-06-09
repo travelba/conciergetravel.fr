@@ -1,4 +1,4 @@
-import { HotelImage, buildCloudinarySrc } from '@mch/ui';
+import { buildCloudinarySrc } from '@mch/ui';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 
 import { BookingWidget } from '@/components/hotel/booking-widget';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
+import { RoomMiniGallery } from '@/components/hotel/room-mini-gallery';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -278,9 +279,16 @@ async function renderRoomPage(
 
   const { room } = detail;
   const hotelRow = detail.hotel.row;
-  const heroPublicId = room.heroImage ?? room.images[0]?.publicId ?? null;
-  const heroAlt = room.images[0]?.alt ?? room.name;
-  const galleryImages = room.images.filter((img) => img.publicId !== heroPublicId);
+  const carouselImages = room.images.map((img) => ({
+    src: buildCloudinarySrc({
+      cloudName,
+      publicId: img.publicId,
+      transforms: 'f_auto,q_auto,c_fill,g_auto,w_1600,h_900',
+    }),
+    alt: img.alt,
+  }));
+  const heroPublicId = room.images[0]?.publicId ?? room.heroImage;
+  const galleryImages = room.images.slice(1);
 
   const longDescriptionParagraphs =
     room.longDescription !== null && room.longDescription.length > 0
@@ -477,17 +485,17 @@ async function renderRoomPage(
         </dl>
       </header>
 
-      {heroPublicId !== null ? (
-        <figure className="relative mb-10 aspect-[16/9] overflow-hidden rounded-lg">
-          <HotelImage
-            cloudName={cloudName}
-            publicId={heroPublicId}
-            alt={heroAlt}
-            width={1600}
-            height={900}
+      {carouselImages.length > 0 ? (
+        <figure className="mch-kit mb-10">
+          <RoomMiniGallery
             variant="hero"
-            priority
-            className="h-full w-full"
+            images={carouselImages}
+            placeholder={room.name}
+            labels={{
+              prevPhoto: t('gallery.prevPhoto'),
+              nextPhoto: t('gallery.nextPhoto'),
+              photoN: t('gallery.photoN'),
+            }}
           />
         </figure>
       ) : null}
@@ -523,29 +531,6 @@ async function renderRoomPage(
                 className="border-border bg-bg text-fg rounded-md border px-3 py-2 text-sm"
               >
                 {amenity}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {galleryImages.length > 0 ? (
-        <section aria-labelledby="room-gallery-title" className="mb-12">
-          <h2 id="room-gallery-title" className="sr-only">
-            {t('sections.gallery')}
-          </h2>
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {galleryImages.slice(0, 8).map((img) => (
-              <li key={img.publicId} className="relative aspect-square overflow-hidden rounded-md">
-                <HotelImage
-                  cloudName={cloudName}
-                  publicId={img.publicId}
-                  alt={img.alt}
-                  width={400}
-                  height={400}
-                  variant="thumbnail"
-                  className="h-full w-full"
-                />
               </li>
             ))}
           </ul>

@@ -3227,6 +3227,13 @@
       "pressHeading": "Press & professional rankings",
       "reviewsHeading": "Guest reviews"
     },
+    "googleReviews": {
+      "heading": "Guest reviews",
+      "listAria": "Google Maps reviews for this property",
+      "aggregateAria": "Rating {rating} out of 5 — {count} Google reviews",
+      "attribution": "Reviews provided by Google Maps.",
+      "viewOnGoogle": "View on Google"
+    },
     "conciergeAdvice": {
       "eyebrow": "The Concierge's tip",
       "defaultTitle": "What I would tell you before booking"
@@ -3466,6 +3473,9 @@
       "showLess": "Show fewer",
       "prevRoom": "Previous room",
       "nextRoom": "Next room",
+      "prevPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "photoN": "Photo {n}",
       "seeAll": "View all {count} rooms & suites",
       "indicativePriceFrom": "From {from} / night",
       "indicativePriceRange": "{from} – {to} / night"
@@ -3512,12 +3522,14 @@
       "addressLabel": "Address:",
       "cityLabel": "City:",
       "viewMap": "View on the map",
+      "officialWebsite": "Official website",
+      "googleListing": "Google listing",
       "mapAria": "View {hotelName} on the map",
       "staticMapAlt": "Map showing the location of {hotelName}",
       "staticMapAria": "Open the location of {hotelName} on OpenStreetMap",
       "mapAttribution": "Map data <osm>© OpenStreetMap contributors</osm> · Tiles <wikimedia>courtesy of the Wikimedia Foundation</wikimedia>",
       "poisTitle": "Points of interest",
-      "transportsTitle": "Transport",
+      "transportsTitle": "Getting there",
       "distanceMeters": "{meters, plural, =0 {on site} other {{meters} m}}",
       "walkMinutes": "{count, plural, one {# min walk} other {# min walk}}",
       "driveMinutes": "{count, plural, one {# min by car} other {# min by car}}",
@@ -3528,6 +3540,7 @@
         "bus": "Bus",
         "train": "Train",
         "taxi": "Taxi",
+        "airport": "Airport",
         "airport_shuttle": "Airport shuttle"
       },
       "intro": "Less than {walkMinutes} minutes on foot from the heart of the neighbourhood: museums, Michelin tables, and the everyday shops you actually need.",
@@ -3686,6 +3699,11 @@
       "description": "Overview",
       "amenities": "Room amenities",
       "gallery": "Photo gallery"
+    },
+    "gallery": {
+      "prevPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "photoN": "Photo {n}"
     },
     "noDescription": "Detailed description coming soon.",
     "returnHint": "Book {hotelName} by picking your dates on the hotel page.",

@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   defaultPlacesConfig,
+  fetchPlaceDetails,
   fetchPlacePhotos,
   searchNearbyPois,
   searchPlaceByNameAndCity,
@@ -71,6 +72,30 @@ const handlers = [
   http.get(`https://places.test/v1/places/${PLACE_ID}/photos/PHOTO_2/media`, () =>
     HttpResponse.json({
       photoUri: 'https://lh3.googleusercontent.com/places-cdn/test-signed-url-67890.jpg',
+    }),
+  ),
+  http.get(`https://places.test/v1/places/${PLACE_ID}`, () =>
+    HttpResponse.json({
+      id: PLACE_ID,
+      displayName: { text: 'Hôtel Le Bristol Paris', languageCode: 'fr' },
+      rating: 4.8,
+      userRatingCount: 842,
+      googleMapsUri: 'https://maps.google.com/?cid=123456789',
+      websiteUri: 'https://www.oetkercollection.com/hotels/le-bristol-paris/',
+      reviews: [
+        {
+          rating: 5,
+          text: { text: 'Un palace exceptionnel.', languageCode: 'fr' },
+          authorAttribution: { displayName: 'Marie L.' },
+          publishTime: '2026-01-15T10:00:00Z',
+        },
+        {
+          rating: 4,
+          originalText: { text: 'Lovely stay.', languageCode: 'en' },
+          authorAttribution: { displayName: 'John D.' },
+        },
+        { rating: 3, text: { text: '' } },
+      ],
     }),
   ),
   http.post(/\/v1\/places:searchNearby$/u, async ({ request }) => {
@@ -157,6 +182,21 @@ describe('fetchPlacePhotos', () => {
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.value).toEqual([]);
+  });
+});
+
+describe('fetchPlaceDetails', () => {
+  it('returns normalised rating, counts and up to 5 stored reviews', async () => {
+    const res = await fetchPlaceDetails(cfg, PLACE_ID);
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.value.placeId).toBe(PLACE_ID);
+    expect(res.value.rating).toBe(4.8);
+    expect(res.value.userRatingCount).toBe(842);
+    expect(res.value.reviews).toHaveLength(2);
+    expect(res.value.reviews[0]?.author).toBe('Marie L.');
+    expect(res.value.websiteUri).toMatch(/^https:\/\//u);
+    expect(res.value.googleMapsUri).toMatch(/^https:\/\//u);
   });
 });
 

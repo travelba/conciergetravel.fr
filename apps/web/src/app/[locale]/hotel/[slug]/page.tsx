@@ -25,6 +25,7 @@ import { HotelFaq } from '@/components/hotel/hotel-faq';
 import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
 import { HotelFeaturedReviews } from '@/components/hotel/hotel-featured-reviews';
+import { HotelGoogleReviews } from '@/components/hotel/hotel-google-reviews';
 import { HotelGallery } from '@/components/hotel/hotel-gallery';
 import { HotelGeoSection } from '@/components/hotel/hotel-geo-section';
 import { HotelInstagram } from '@/components/hotel/hotel-instagram';
@@ -66,6 +67,9 @@ import {
   readAmenitiesByCategory,
   readAwards,
   readExternalIds,
+  readGoogleAccess,
+  readGoogleReviews,
+  hasGoogleTravelerReviews,
   hasAnyPolicy,
   readFaq,
   readFaqByCategory,
@@ -470,6 +474,9 @@ async function renderHotelPage(
   const miceInfo = readMiceInfo(row, locale);
   const upcomingEvents = readUpcomingEvents(row, locale);
   const externalIds = readExternalIds(row);
+  const googleAccess = readGoogleAccess(row);
+  const googleReviews = readGoogleReviews(row, locale);
+  const showGoogleTravelerReviews = hasGoogleTravelerReviews(row);
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   // Hero alt: prefer the gallery row whose public_id matches hero_image —
   // never the arbitrary `galleryImages[0]` which is unrelated when the
@@ -1494,6 +1501,9 @@ async function renderHotelPage(
                     prevRoom: t('rooms.prevRoom'),
                     nextRoom: t('rooms.nextRoom'),
                     seeAll: t('rooms.seeAll', { count: orderedRoomCards.length }),
+                    prevPhoto: t('rooms.prevPhoto'),
+                    nextPhoto: t('rooms.nextPhoto'),
+                    photoN: t('rooms.photoN'),
                   }}
                 />
               ) : (locale === 'fr' || locale === 'en') && row.booking_mode === 'travelport' ? (
@@ -1583,10 +1593,19 @@ async function renderHotelPage(
               longitude={row.longitude}
               location={location}
               omitPois
+              accessLinks={googleAccess}
             />
-            {/* Avis voyageurs notés (featured_reviews avec note) — s'élide si
-                  toutes les citations sont de la presse (cas Airelles). */}
-            <HotelFeaturedReviews locale={locale} reviews={featuredReviews} variant="reviews" />
+            {showGoogleTravelerReviews ? (
+              <HotelGoogleReviews
+                locale={locale}
+                reviews={googleReviews}
+                rating={row.google_rating}
+                reviewCount={row.google_reviews_count}
+                googleMapsUrl={googleAccess.googleMapsUrl}
+              />
+            ) : (
+              <HotelFeaturedReviews locale={locale} reviews={featuredReviews} variant="reviews" />
+            )}
             {amadeusCategories.length > 0 ? (
               <section
                 aria-labelledby="reviews-breakdown-title"

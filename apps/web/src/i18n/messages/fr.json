@@ -3227,6 +3227,13 @@
       "pressHeading": "Extraits de presse & classements professionnels",
       "reviewsHeading": "Avis des voyageurs"
     },
+    "googleReviews": {
+      "heading": "Avis des voyageurs",
+      "listAria": "Avis Google Maps sur l'établissement",
+      "aggregateAria": "Note {rating} sur 5 — {count} avis Google",
+      "attribution": "Avis fournis par Google Maps.",
+      "viewOnGoogle": "Voir sur Google"
+    },
     "conciergeAdvice": {
       "eyebrow": "Le conseil du Concierge",
       "defaultTitle": "Mon conseil avant que vous réserviez"
@@ -3466,6 +3473,9 @@
       "showLess": "Réduire l’affichage",
       "prevRoom": "Chambre précédente",
       "nextRoom": "Chambre suivante",
+      "prevPhoto": "Photo précédente",
+      "nextPhoto": "Photo suivante",
+      "photoN": "Photo {n}",
       "seeAll": "Voir les {count} chambres & suites",
       "indicativePriceFrom": "À partir de {from} / nuit",
       "indicativePriceRange": "{from} – {to} / nuit"
@@ -3512,12 +3522,14 @@
       "addressLabel": "Adresse :",
       "cityLabel": "Ville :",
       "viewMap": "Voir sur la carte",
+      "officialWebsite": "Site officiel",
+      "googleListing": "Fiche Google",
       "mapAria": "Voir {hotelName} sur la carte",
       "staticMapAlt": "Carte de localisation de {hotelName}",
       "staticMapAria": "Ouvrir la localisation de {hotelName} sur OpenStreetMap",
       "mapAttribution": "Données <osm>© contributeurs OpenStreetMap</osm> · Tuiles <wikimedia>fournies par la Wikimedia Foundation</wikimedia>",
       "poisTitle": "À proximité",
-      "transportsTitle": "Transports",
+      "transportsTitle": "Accès",
       "distanceMeters": "{meters, plural, =0 {sur place} other {{meters} m}}",
       "walkMinutes": "{count, plural, one {# min à pied} other {# min à pied}}",
       "driveMinutes": "{count, plural, one {# min en voiture} other {# min en voiture}}",
@@ -3528,6 +3540,7 @@
         "bus": "Bus",
         "train": "Train",
         "taxi": "Taxi",
+        "airport": "Aéroport",
         "airport_shuttle": "Navette aéroport"
       },
       "intro": "À {walkMinutes} minutes à pied du centre, le quartier rassemble musées, terrasses étoilées et commerces utiles — voici la sélection à connaître avant d’arriver.",
@@ -3686,6 +3699,11 @@
       "description": "Présentation",
       "amenities": "Équipements de la chambre",
       "gallery": "Galerie photos"
+    },
+    "gallery": {
+      "prevPhoto": "Photo précédente",
+      "nextPhoto": "Photo suivante",
+      "photoN": "Photo {n}"
     },
     "noDescription": "Description détaillée à venir.",
     "returnHint": "Réservez {hotelName} en sélectionnant vos dates sur la fiche établissement.",

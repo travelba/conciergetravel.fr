@@ -20,6 +20,10 @@ import {
 
 export const AIRELLES_PROMOTE_SLUG = 'les-airelles-gordes';
 
+/** Google Places `place_id` for La Bastide de Gordes (Airelles). */
+/** Verified via Places API Place Details + geocode (2026-06-09). */
+export const AIRELLES_GOOGLE_PLACE_ID = 'ChIJ2UuLUtsNyhIRyWiV_tmXcL4';
+
 /** Cloudinary folder prefix for all Airelles Gordes kit / golden assets. */
 const AIRELLES_IMAGE_PREFIX = 'cct/hotels/les-airelles-gordes';
 
@@ -2360,6 +2364,7 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     wikipedia_url_fr: airellesExternalScalar('wikipedia_url_fr'),
     wikipedia_url_en: airellesExternalScalar('wikipedia_url_en'),
     official_url: airellesExternalScalar('official_url'),
+    google_place_id: AIRELLES_GOOGLE_PLACE_ID,
     phone_e164: AIRELLES_PHONE_E164,
     address: AIRELLES_ADDRESS,
     postal_code: AIRELLES_POSTAL_CODE,

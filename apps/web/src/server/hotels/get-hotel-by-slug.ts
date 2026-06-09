@@ -4,6 +4,7 @@ import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
 import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
+import { mergeRoomGalleryImages } from '@/lib/hotel/sort-room-display-images';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
@@ -127,6 +128,9 @@ export const HotelDetailRowSchema = z.object({
     .int()
     .nullish()
     .transform((v) => v ?? null),
+  google_place_id: stringOrEmpty,
+  google_reviews: z.unknown().nullable().optional(),
+  last_reviews_sync: stringOrEmpty,
   phone_e164: stringOrEmpty,
   // Pricing + aggregate-rating fields (migration 0066). All optional —
   // only populated for fiches with editorially-sourced figures (e.g.
@@ -181,7 +185,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, google_place_id, google_reviews, last_reviews_sync, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -447,6 +451,81 @@ export function readExternalIds(row: HotelDetailRow): HotelExternalIds {
       googleMapsCid,
     },
   };
+}
+
+/** Canonical Google Maps deep link from a Places API `place_id`. */
+export function buildGoogleMapsPlaceUrl(placeId: string): string {
+  const id = placeId.startsWith('places/') ? placeId.slice('places/'.length) : placeId;
+  return `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${encodeURIComponent(id)}`;
+}
+
+export interface HotelGoogleAccess {
+  readonly officialUrl: string | null;
+  readonly googleMapsUrl: string | null;
+}
+
+/**
+ * Official website + Google Maps / Business Profile link for #acces.
+ * Prefers `google_place_id` over legacy `external_sameas.google_maps_cid`.
+ */
+export function readGoogleAccess(row: HotelDetailRow): HotelGoogleAccess {
+  const externalIds = readExternalIds(row);
+  const placeIdRaw = takeStringOrNull(row.google_place_id);
+  let googleMapsUrl: string | null = null;
+  if (placeIdRaw !== null && placeIdRaw.length > 0) {
+    googleMapsUrl = buildGoogleMapsPlaceUrl(placeIdRaw);
+  } else if (externalIds.knowledgeGraph.googleMapsCid !== null) {
+    googleMapsUrl = `https://maps.google.com/?cid=${externalIds.knowledgeGraph.googleMapsCid}`;
+  }
+  return {
+    officialUrl: externalIds.officialUrl,
+    googleMapsUrl,
+  };
+}
+
+const StoredGoogleReviewSchema = z.object({
+  author: z.string().min(1),
+  rating: z.number().int().min(1).max(5),
+  text: z.string().min(1),
+  publish_time: z.string().optional(),
+  language: z.string().optional(),
+});
+
+export interface LocalisedGoogleReview {
+  readonly author: string;
+  readonly rating: number;
+  readonly text: string;
+  readonly publishTime: string | null;
+}
+
+/** Parses cached `google_reviews` jsonb synced from Google Places. */
+export function readGoogleReviews(
+  row: HotelDetailRow,
+  _locale: SupportedLocale,
+): readonly LocalisedGoogleReview[] {
+  const raw = row.google_reviews;
+  if (raw === null || raw === undefined || !Array.isArray(raw)) return [];
+  const out: LocalisedGoogleReview[] = [];
+  for (const entry of raw) {
+    const parsed = StoredGoogleReviewSchema.safeParse(entry);
+    if (!parsed.success) continue;
+    out.push({
+      author: parsed.data.author,
+      rating: parsed.data.rating,
+      text: parsed.data.text,
+      publishTime: parsed.data.publish_time ?? null,
+    });
+    if (out.length >= 5) break;
+  }
+  return out;
+}
+
+/** Whether #acces should render Google traveler reviews instead of editorial fallbacks. */
+export function hasGoogleTravelerReviews(row: HotelDetailRow): boolean {
+  if (readGoogleReviews(row, 'fr').length > 0) return true;
+  return (
+    row.google_rating !== null && row.google_reviews_count !== null && row.google_reviews_count > 0
+  );
 }
 
 /**
@@ -1640,6 +1719,7 @@ const TransportModeSchema = z.enum([
   'bus',
   'train',
   'taxi',
+  'airport',
   'airport_shuttle',
 ]);
 
@@ -3201,48 +3281,39 @@ function readRoomCardImage(
   locale: SupportedLocale,
   fallbackAlt: string,
 ): { readonly publicId: string; readonly alt: string } | null {
-  const hero = CloudinaryPublicIdSchema.safeParse(row.hero_image);
-  if (hero.success) return { publicId: hero.data, alt: fallbackAlt };
-  const gallery = GalleryImagesSchema.safeParse(row.images);
-  const first = gallery.success ? gallery.data[0] : undefined;
-  if (first !== undefined) {
-    return {
-      publicId: first.public_id,
-      alt: pickLocalizedText(locale, first.alt_fr, first.alt_en) ?? fallbackAlt,
-    };
-  }
-  return null;
+  const gallery = readRoomGallery(row, locale, fallbackAlt);
+  return gallery[0] ?? null;
 }
 
 /**
- * Mini-galerie d'une chambre (kit `.mini-gallery`) : `hero_image` en tête, puis
- * toutes les images de `images[]`, dédupliquées par `public_id`. Renvoie un
- * tableau vide quand aucune photo n'est exploitable.
+ * Mini-galerie d'une chambre (kit `.mini-gallery`) : toutes les photos
+ * dédupliquées, triées intérieur/chambre en premier (pas de priorité aveugle
+ * au `hero_image` quand c'est une salle de bain ou une vue).
  */
 function readRoomGallery(
   row: z.infer<typeof HotelRoomDbRowSchema>,
   locale: SupportedLocale,
   fallbackAlt: string,
 ): readonly { readonly publicId: string; readonly alt: string }[] {
-  const out: { publicId: string; alt: string }[] = [];
-  const seen = new Set<string>();
-  const hero = CloudinaryPublicIdSchema.safeParse(row.hero_image);
-  if (hero.success) {
-    out.push({ publicId: hero.data, alt: fallbackAlt });
-    seen.add(hero.data);
-  }
+  const items: { publicId: string; alt: string; category: string | null }[] = [];
   const gallery = GalleryImagesSchema.safeParse(row.images);
   if (gallery.success) {
     for (const img of gallery.data) {
-      if (seen.has(img.public_id)) continue;
-      seen.add(img.public_id);
-      out.push({
+      items.push({
         publicId: img.public_id,
         alt: pickLocalizedText(locale, img.alt_fr, img.alt_en) ?? fallbackAlt,
+        category: img.category ?? null,
       });
     }
   }
-  return out;
+  const hero =
+    typeof row.hero_image === 'string' && row.hero_image.length > 0 ? row.hero_image : null;
+  const sorted = mergeRoomGalleryImages({
+    heroImage: hero,
+    images: items,
+    heroAlt: fallbackAlt,
+  });
+  return sorted.map(({ publicId, alt }) => ({ publicId, alt }));
 }
 
 /** Slug shape: `^[a-z0-9]+(?:-[a-z0-9]+)*$` (matches `hotels_slug_ck`). */
