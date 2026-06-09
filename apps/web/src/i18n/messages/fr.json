@@ -3529,7 +3529,7 @@
       "mapAria": "Voir {hotelName} sur la carte",
       "staticMapAlt": "Carte de localisation de {hotelName}",
       "staticMapAria": "Ouvrir la localisation de {hotelName} sur OpenStreetMap",
-      "mapAttribution": "Données <osm>© contributeurs OpenStreetMap</osm> · Tuiles <wikimedia>fournies par la Wikimedia Foundation</wikimedia>",
+      "mapAttribution": "Données <osm>© contributeurs OpenStreetMap</osm>",
       "poisTitle": "À proximité",
       "transportsTitle": "Accès",
       "distanceMeters": "{meters, plural, =0 {sur place} other {{meters} m}}",

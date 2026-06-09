@@ -9,9 +9,9 @@ import { pickProximityCards } from '@/server/hotels/get-related-hotels';
 import { getPathname } from '@/i18n/navigation';
 import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
 import {
+  buildOpenStreetMapEmbedUrl,
   buildOpenStreetMapHotelHref,
-  buildWikimediaStaticMapTileUrl,
-} from '@/lib/maps/wikimedia-static-map';
+} from '@/lib/maps/openstreetmap-embed';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 import {
@@ -818,21 +818,26 @@ function formatTransportLine(
   return `${modeLabel}${linePart} ${tr.station} (${dist})${travel}${notes}`;
 }
 
-const KIT_MAP_PIN_SVG = `<svg viewBox="0 0 24 32" width="28" height="36" class="kit-static-map__pin-icon" focusable="false" aria-hidden="true"><path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20C24 5.4 18.6 0 12 0Z" fill="#0F172A"/><circle cx="12" cy="12" r="4.25" fill="#FAFAF8"/></svg>`;
-
 function renderKitStaticMapHtml(model: HotelKitModel): string {
   if (model.latitude === null || model.longitude === null) return '';
-  const tileUrl = buildWikimediaStaticMapTileUrl({
+  const embedUrl = buildOpenStreetMapEmbedUrl({
     latitude: model.latitude,
     longitude: model.longitude,
   });
   const osmHref = buildOpenStreetMapHotelHref(model.latitude, model.longitude);
+  const viewMapLabel = model.locale === 'en' ? 'View on the map' : 'Voir sur la carte';
   return `<figure class="kit-static-map">
-      <a href="${escapeHtml(osmHref)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(model.labels.staticMapAria)}" class="kit-static-map__link">
-        <img src="${escapeHtml(tileUrl)}" alt="${escapeHtml(model.labels.staticMapAlt)}" width="800" height="360" loading="lazy" decoding="async" class="kit-static-map__img">
-        <span class="kit-static-map__pin" aria-hidden="true">${KIT_MAP_PIN_SVG}</span>
-      </a>
-      <figcaption class="kit-static-map__attr">${model.labels.mapAttributionHtml}</figcaption>
+      <iframe
+        title="${escapeHtml(model.labels.staticMapAlt)}"
+        src="${escapeHtml(embedUrl)}"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        class="kit-static-map__embed"
+      ></iframe>
+      <figcaption class="kit-static-map__attr">
+        ${model.labels.mapAttributionHtml}
+        <a href="${escapeHtml(osmHref)}" target="_blank" rel="noopener noreferrer" class="kit-static-map__open">${escapeHtml(viewMapLabel)}</a>
+      </figcaption>
     </figure>`;
 }
 

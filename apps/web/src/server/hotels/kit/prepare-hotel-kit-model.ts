@@ -793,8 +793,8 @@ export async function prepareHotelKitModel(
       staticMapAria: t('location.staticMapAria', { hotelName: name }),
       mapAttributionHtml:
         kitLocale === 'en'
-          ? 'Map data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · Tiles <a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use" target="_blank" rel="noopener noreferrer">courtesy of the Wikimedia Foundation</a>'
-          : 'Données <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© contributeurs OpenStreetMap</a> · Tuiles <a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use" target="_blank" rel="noopener noreferrer">fournies par la Wikimedia Foundation</a>',
+          ? 'Map data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>'
+          : 'Données <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© contributeurs OpenStreetMap</a>',
       enBrefSectionTitle: t('toc.enBref'),
       navHeading: t('toc.heading'),
       faqCategoryBefore: t('faq.categoryBefore'),

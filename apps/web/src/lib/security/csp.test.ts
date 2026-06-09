@@ -34,10 +34,11 @@ describe('buildCspHeader', () => {
     expect(header).toContain('https://*.amadeus.com');
   });
 
-  it('whitelists Matterport + Kuula iframe hosts (HotelVirtualTour)', () => {
+  it('whitelists Matterport + Kuula + OpenStreetMap iframe hosts', () => {
     const header = buildCspHeader({ nonce: 'n', isDev: false });
     expect(header).toMatch(/frame-src[^;]*https:\/\/my\.matterport\.com/);
     expect(header).toMatch(/frame-src[^;]*https:\/\/kuula\.co/);
+    expect(header).toMatch(/frame-src[^;]*https:\/\/www\.openstreetmap\.org/);
   });
 
   it('whitelists Supabase + Upstash + Algolia for connect-src', () => {
@@ -53,9 +54,9 @@ describe('buildCspHeader', () => {
     expect(header).toMatch(/media-src[^;]*https:\/\/res\.cloudinary\.com/);
   });
 
-  it('allows Wikimedia Maps tiles for img-src (used by HotelStaticMap)', () => {
+  it('allows OpenStreetMap embed in frame-src (HotelStaticMap)', () => {
     const header = buildCspHeader({ nonce: 'n', isDev: false });
-    expect(header).toMatch(/img-src[^;]*https:\/\/maps\.wikimedia\.org/);
+    expect(header).toMatch(/frame-src[^;]*https:\/\/www\.openstreetmap\.org/);
   });
 });
 

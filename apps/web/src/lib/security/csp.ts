@@ -67,6 +67,8 @@ const FRAME_HOSTS = [
   "'self'",
   // Amadeus Hosted Payment Page (iframe).
   'https://*.amadeus.com',
+  // OpenStreetMap embed widget (`HotelStaticMap`, kit `#acces`).
+  'https://www.openstreetmap.org',
   // Immersive virtual-tour providers embedded on the hotel detail
   // page (see `apps/web/src/components/hotel/hotel-virtual-tour.tsx`
   // and migration `0023_hotel_virtual_tour.sql`). The DB CHECK
