@@ -119,6 +119,8 @@
     "report:hotel-fiches-cdc:full": "tsx src/hotels/audit-hotel-fiche-cdc.ts && tsx src/hotels/report-hotel-fiche-cdc.ts",
     "promote:airelles-golden": "tsx src/hotels/promote-airelles-golden.ts",
     "promote:airelles-golden:dry": "tsx src/hotels/promote-airelles-golden.ts --dry-run",
+    "promote:airelles-rooms": "tsx src/hotels/promote-airelles-rooms.ts",
+    "promote:airelles-rooms:dry": "tsx src/hotels/promote-airelles-rooms.ts --dry-run",
     "dedup:longread": "tsx src/hotels/dedup-longread-sections.ts",
     "dedup:longread:dry": "tsx src/hotels/dedup-longread-sections.ts --dry-run",
     "extract:michelin-awards": "tsx src/hotels/extract-michelin-awards.ts",

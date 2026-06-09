@@ -11,6 +11,7 @@
  * rather than fabricated (EEAT — IATA-accredited OTA).
  */
 
+import { AIRELLES_AMENITIES, type AirellesAmenityRecord } from './airelles-amenities';
 import {
   dropCannibalizingSections,
   dropDuplicateCategorySections,
@@ -722,9 +723,9 @@ export const AIRELLES_FAQ_CONTENT_KIT = [
     question_fr: 'Peut-on visiter l’abbaye de Sénanque en famille avec des enfants ?',
     question_en: 'Can we visit Sénanque Abbey as a family with children?',
     answer_fr:
-      'Oui, c’est une sortie que les enfants adorent. Je réserve la visite guidée sur senanque.fr et organise le transfert depuis La Bastide — comptez 2 km, idéal en matinée.',
+      'Oui, c’est une sortie que les enfants adorent. Je réserve la visite guidée sur senanque.fr et organise le transfert depuis La Bastide — comptez 2 km, idéal en matinée avant la chaleur.',
     answer_en:
-      'Yes — children love it. I’ll book the guided tour on senanque.fr and arrange the transfer from La Bastide — 2 km away, best in the morning.',
+      'Yes — children love it. I’ll book the guided tour on senanque.fr and arrange the transfer from La Bastide — 2 km away, best in the morning before the heat.',
     concierge_tip_fr:
       'Mi-juin à mi-juillet : réservez la visite une semaine avant pour les champs en fleur.',
     concierge_tip_en: 'Mid-June to mid-July: book the tour a week ahead for fields in bloom.',
@@ -1019,27 +1020,27 @@ export const AIRELLES_FAQ_CONTENT_PROMOTE = [
     question_fr: 'Quel type de petit-déjeuner est proposé ?',
     question_en: 'What kind of breakfast is served?',
     answer_fr:
-      'Buffet provençal chaque matin à La Table — terrasse ou salon, produits locaux et viennoiseries. Je vous suggère l’horaire idéal selon vos excursions du jour.',
+      'Buffet provençal chaque matin à La Table — terrasse ou salon, produits locaux et viennoiseries artisanales. Je vous suggère l’horaire idéal selon vos excursions : tôt si Sénanque, plus tard si matinée piscine.',
     answer_en:
-      'A Provençal buffet each morning at La Table — terrace or salon, local produce and pastries. I’ll suggest the ideal time based on your day’s excursions.',
+      'A Provençal buffet each morning at La Table — terrace or salon, local produce and artisan pastries. I’ll suggest the ideal time based on your plans: early for Sénanque, later for a pool morning.',
   },
   {
     category: 'during',
     question_fr: "Le Wi-Fi est-il disponible dans l'hôtel ?",
     question_en: 'Is Wi-Fi available throughout the hotel?',
     answer_fr:
-      'Oui, Wi-Fi gratuit dans tout l’hôtel et minibar réapprovisionné quotidiennement en chambre. Pour une attention particulière à l’arrivée, je la programme avec la conciergerie.',
+      'Oui, Wi-Fi gratuit dans tout l’hôtel et minibar réapprovisionné quotidiennement en chambre. Pour une attention particulière à l’arrivée — champagne, fruits ou fleurs — je la programme avec la conciergerie avant votre check-in.',
     answer_en:
-      'Yes, complimentary Wi-Fi throughout and a minibar replenished daily in-room. For a special arrival touch, I’ll arrange it with the concierge team.',
+      'Yes, complimentary Wi-Fi throughout and a minibar replenished daily in-room. For a special arrival touch — champagne, fruit or flowers — I’ll arrange it with the concierge before your check-in.',
   },
   {
     category: 'during',
     question_fr: `Les animaux sont-ils acceptés à ${AIRELLES_HOTEL_DISPLAY_NAME} ?`,
     question_en: `Are pets allowed at ${AIRELLES_HOTEL_DISPLAY_NAME}?`,
     answer_fr:
-      'Chiens et chats acceptés sur demande, dans certaines chambres et suites — 30 € par animal et par jour. Signalez-le à la réservation : je confirme la chambre adaptée avec vous.',
+      'Chiens et chats acceptés sur demande, dans certaines chambres et suites — 30 € par animal et par jour. Signalez-le à la réservation : je confirme la chambre adaptée et les modalités avec vous avant l’arrivée.',
     answer_en:
-      'Dogs and cats accepted on request, in selected rooms and suites — €30 per pet per day. Flag it when booking: I’ll confirm the right room with you.',
+      'Dogs and cats accepted on request, in selected rooms and suites — €30 per pet per day. Flag it when booking: I’ll confirm the right room and terms with you before arrival.',
   },
   {
     category: 'before',
@@ -1055,47 +1056,162 @@ export const AIRELLES_FAQ_CONTENT_PROMOTE = [
     question_fr: "L'hôtel dispose-t-il d'une piscine ?",
     question_en: 'Does the hotel have a pool?',
     answer_fr:
-      'Trois piscines : terrasse panoramique, bassin intérieur du spa et piscine dédiée au Summer Camp. Je vous indique les horaires calmes pour nager en toute sérénité.',
+      'Trois piscines : terrasse panoramique sur la vallée, bassin intérieur voûté du spa et piscine dédiée au Summer Camp. Je vous indique les créneaux les plus calmes pour nager en toute sérénité, selon la saison.',
     answer_en:
-      'Three pools: a panoramic terrace pool, the spa indoor pool and a Summer Camp children’s pool. I’ll point you to the quietest slots for a serene swim.',
+      'Three pools: a panoramic terrace pool, the spa’s vaulted indoor pool and a Summer Camp children’s pool. I’ll point you to the quietest slots for a serene swim, depending on the season.',
   },
   {
     category: 'before',
     question_fr: 'Puis-je effectuer un check-in anticipé ?',
     question_en: 'Is early check-in available?',
     answer_fr:
-      'Check-in dès 15h ; early check-in selon disponibilité — je m’en occupe avec la réception avant votre arrivée. Vos bagages sont gardés en attendant.',
+      'Check-in dès 15h ; early check-in selon disponibilité — je m’en occupe avec la réception avant votre arrivée. Vos bagages sont gardés en sécurité pendant que la chambre se prépare.',
     answer_en:
-      'Check-in from 3 pm; early check-in subject to availability — I’ll arrange it with reception before you arrive. Luggage is stored securely in the meantime.',
+      'Check-in from 3 pm; early check-in subject to availability — I’ll arrange it with reception before you arrive. Luggage is stored securely while your room is being prepared.',
   },
   {
     category: 'before',
     question_fr: "Des transferts vers l'aéroport sont-ils proposés ?",
     question_en: 'Are airport transfers offered?',
     answer_fr:
-      'Oui, transferts privés depuis Marseille-Provence ou Avignon TGV. Donnez-moi vos horaires : je confirme le chauffeur et l’accueil à l’arrivée.',
+      'Oui, transferts privés depuis Marseille-Provence (environ 1 h) ou Avignon TGV (50 min). Donnez-moi vos horaires de vol : je confirme le chauffeur et l’accueil nominatif à l’arrivée.',
     answer_en:
-      'Yes, private transfers from Marseille-Provence or Avignon TGV. Send me your schedule: I’ll confirm the driver and meet-and-greet on arrival.',
+      'Yes, private transfers from Marseille-Provence (about 1 hr) or Avignon TGV (50 min). Send me your flight times: I’ll confirm the driver and a personalised meet-and-greet on arrival.',
   },
   {
     category: 'before',
     question_fr: "Quelle est la politique d'annulation de l'hôtel ?",
     question_en: "What is the hotel's cancellation policy?",
     answer_fr:
-      'Les conditions dépendent du tarif réservé. Avant de confirmer, je vous communique la politique exacte et les délais — aucune mauvaise surprise à l’arrivée.',
+      'Les conditions dépendent du tarif réservé. Avant de confirmer, je vous communique la politique exacte, les délais d’annulation et les éventuels frais — aucune mauvaise surprise à l’arrivée.',
     answer_en:
-      'Terms depend on the rate booked. Before confirming, I’ll share the exact policy and deadlines — no surprises on arrival.',
+      'Terms depend on the rate booked. Before confirming, I’ll share the exact policy, cancellation deadlines and any fees — no surprises on arrival.',
   },
   {
     category: 'before',
     question_fr: 'Y a-t-il des taxes de séjour à payer ?',
     question_en: 'Are there any tourist taxes to pay?',
     answer_fr:
-      'La taxe de séjour s’applique selon la réglementation en vigueur à Gordes. Elle est réglée à l’arrivée ou au départ — je vous indique le montant lors de la confirmation.',
+      'La taxe de séjour s’applique selon la réglementation en vigueur à Gordes. Elle est réglée à l’arrivée ou au départ — je vous indique le montant exact lors de la confirmation de votre séjour.',
     answer_en:
-      'Tourist tax applies under Gordes local regulations. It is settled on arrival or departure — I’ll confirm the amount when booking.',
+      'Tourist tax applies under Gordes local regulations. It is settled on arrival or departure — I’ll confirm the exact amount when booking your stay.',
   },
 ] as const;
+
+// ---------------------------------------------------------------------------
+// mice_info — CDC §2.14 (five meeting rooms, source: airelles.com seminars page)
+// ---------------------------------------------------------------------------
+
+export const AIRELLES_MICE_INFO = {
+  summary_fr:
+    'Cinq salles lumineuses jusqu’à 180 personnes, équipées des dernières technologies, avec restauration signée Clover et La Table — séminaires et événements privés face au Luberon.',
+  summary_en:
+    'Five naturally lit rooms for up to 180 guests, fully equipped, with Clover and La Table catering — seminars and private events facing the Luberon.',
+  contact_email: 'as.maigne@airelles.com',
+  total_capacity_seated: 180,
+  spaces: [
+    {
+      key: 'salle-luberon',
+      name: 'Salon Luberon',
+      surface_sqm: 197,
+      max_seated: 180,
+      configurations: ['theatre', 'classroom', 'banquet', 'cocktail'],
+      has_natural_light: true,
+      notes_fr: 'Plus grande salle, cheminée et vue sur la vallée du Luberon.',
+      notes_en: 'Largest room, fireplace and Luberon valley view.',
+    },
+    {
+      key: 'salle-mistral',
+      name: 'Salon Mistral',
+      surface_sqm: 92,
+      max_seated: 82,
+      configurations: ['theatre', 'classroom', 'banquet', 'cocktail'],
+      has_natural_light: true,
+    },
+    {
+      key: 'salle-ventoux',
+      name: 'Salon Ventoux',
+      surface_sqm: 90,
+      max_seated: 80,
+      configurations: ['theatre', 'classroom', 'banquet', 'cocktail'],
+      has_natural_light: true,
+    },
+    {
+      key: 'salle-alpilles',
+      name: 'Salon Alpilles',
+      surface_sqm: 27,
+      max_seated: 17,
+      configurations: ['boardroom', 'u-shape'],
+      has_natural_light: true,
+    },
+    {
+      key: 'bibliotheque',
+      name: 'Bibliothèque',
+      surface_sqm: 27,
+      max_seated: 12,
+      configurations: ['boardroom'],
+      has_natural_light: true,
+    },
+  ],
+  event_types: ['corporate-meeting', 'wedding', 'gala-dinner', 'incentive'],
+} as const;
+
+// ---------------------------------------------------------------------------
+// hotel_rooms — indexable sub-page seed (ADR-0009, Suite Vasarely)
+// ---------------------------------------------------------------------------
+
+export const AIRELLES_INDEXABLE_ROOM = {
+  room_code: 'vasarely-suite',
+  slug: 'suite-vasarely',
+  name_fr: 'Suite Vasarely',
+  name_en: 'Vasarely Suite',
+  description_fr:
+    'Suite signature de 60 m² avec terrasse de 33 m², hommage à Victor Vasarely et vue panoramique sur la vallée du Luberon.',
+  description_en:
+    'Signature 60 sq m suite with a 33 sq m terrace, tribute to Victor Vasarely and a panoramic Luberon valley view.',
+  long_description_fr:
+    'La Suite Vasarely rend hommage au maître optique qui fit de Gordes un village d’artistes dès 1948. À 60 m², elle déploie une chambre king size, un salon séparé et une terrasse privative de 33 m² orientée plein sud sur la vallée du Luberon, les Alpilles et, par temps clair, le Mont Ventoux.\n\nChristophe Tollemer a composé un décor où pierre de Bourgogne, mobilier provençal chiné et tissus Pierre Frey dialoguent avec des accents géométriques inspirés de l’œuvre de Vasarely. La salle de bain en pierre propose une baignoire et une douche à l’italienne ; le minibar, la machine Nespresso et la climatisation complètent le confort palace.\n\nDepuis la terrasse, le village de Gordes semble suspendu au-dessus des oliviers. C’est la suite que je réserve en premier pour un séjour où l’on veut à la fois l’intimité d’un mas provençal et la splendeur d’une vue qui ne se partage qu’avec le ciel du Luberon — idéale pour une lune de miel ou un anniversaire de mariage.',
+  long_description_en:
+    'The Vasarely Suite pays tribute to the optical master who made Gordes an artists’ village from 1948. At 60 sq m, it offers a king-size bedroom, a separate sitting room and a 33 sq m private south-facing terrace over the Luberon valley, the Alpilles and, on clear days, Mont Ventoux.\n\nChristophe Tollemer designed a décor where Burgundy stone, antique Provençal furniture and Pierre Frey fabrics converse with geometric accents inspired by Vasarely’s work. The stone bathroom has a bathtub and walk-in shower; minibar, Nespresso machine and air conditioning complete the palace comfort.\n\nFrom the terrace, the village of Gordes seems suspended above the olive groves. It is the suite I book first for a stay that combines the intimacy of a Provençal mas with a view shared only with the Luberon sky — ideal for a honeymoon or wedding anniversary.',
+  max_occupancy: 3,
+  bed_type: 'King size',
+  size_sqm: 60,
+  is_signature: true,
+  display_order: 10,
+  hero_image: `${AIRELLES_IMAGE_PREFIX}/press-13`,
+  images: [
+    {
+      public_id: `${AIRELLES_IMAGE_PREFIX}/press-13`,
+      alt_fr: 'Chambre de la Suite Vasarely, Airelles Gordes, Gordes',
+      alt_en: 'Bedroom of the Vasarely Suite, Airelles Gordes, Gordes',
+      category: 'suite',
+    },
+    {
+      public_id: `${AIRELLES_IMAGE_PREFIX}/press-14`,
+      alt_fr: 'Salon de la Suite Vasarely, Airelles Gordes, Gordes',
+      alt_en: 'Living room of the Vasarely Suite, Airelles Gordes, Gordes',
+      category: 'suite',
+    },
+    {
+      public_id: `${AIRELLES_IMAGE_PREFIX}/press-25`,
+      alt_fr: 'Junior Suite Prestige, chambre, Airelles Gordes, Gordes',
+      alt_en: 'Prestige Junior Suite bedroom, Airelles Gordes, Gordes',
+      category: 'suite',
+    },
+    {
+      public_id: `${AIRELLES_IMAGE_PREFIX}/press-26`,
+      alt_fr: 'Salle de bain en pierre, Airelles Gordes, Gordes',
+      alt_en: 'Stone bathroom, Airelles Gordes, Gordes',
+      category: 'detail',
+    },
+    {
+      public_id: `${AIRELLES_IMAGE_PREFIX}/press-21`,
+      alt_fr: 'Junior Suite côté vallée, Airelles Gordes, Gordes',
+      alt_en: 'Valley-side Junior Suite, Airelles Gordes, Gordes',
+      category: 'suite',
+    },
+  ],
+} as const;
 
 // ---------------------------------------------------------------------------
 // concierge_advice + concierge_pick + concierge_hook
@@ -1301,14 +1417,13 @@ export function patchAirellesAwards(existing: unknown): unknown {
     });
 }
 
-/** Drop the FALSE "michelin_restaurant" amenity tag (fine_dining stays). */
-export function patchAirellesAmenities(existing: unknown): unknown {
-  if (!Array.isArray(existing)) return existing;
-  return existing.filter((entry) => {
-    if (entry === null || typeof entry !== 'object') return true;
-    return (entry as Record<string, unknown>)['key'] !== 'michelin_restaurant';
-  });
+/** CDC §2.6 — 80+ factual amenities (replaces sparse seed; drops false Michelin tag). */
+export function patchAirellesAmenities(_existing: unknown): readonly AirellesAmenityRecord[] {
+  return AIRELLES_AMENITIES;
 }
+
+/** Re-export for promote / audit consumers. */
+export { AIRELLES_AMENITIES, type AirellesAmenityRecord } from './airelles-amenities';
 
 /** Enrich `spa_info` with the concierge dossier (Guerlain partner, hours, tip). */
 export function patchAirellesSpa(existing: unknown): Record<string, unknown> {
@@ -1392,9 +1507,9 @@ export const AIRELLES_HISTORY_SECTION = {
   title_fr: 'Histoire & art de La Bastide',
   title_en: 'History & art of La Bastide',
   body_fr:
-    'Une demeure du XVIIIᵉ siècle ancrée dans le Gordes des peintres, restaurée en 2015 par l’architecte Christophe Tollemer.\n\nLa bastide fut au XVIIIᵉ siècle la demeure de la famille de Simiane, dont la marquise — petite-fille de Madame de Sévigné — marqua l’histoire du village. Au XXᵉ siècle, Gordes devient un véritable village d’artistes : Victor Vasarely s’y installe dès 1948 et y ouvre un musée didactique au château, tandis que Marc Chagall, Serge Poliakoff, André Lhote et Jean Deyrolle font de la cité perchée un foyer de l’art moderne. La suite signature de l’hôtel, la Vasarely Suite, rend hommage à ce passé.\n\nRouverte en 2015 après une restauration menée par cent cinquante artisans, La Bastide doit son décor à l’architecte d’intérieur Christophe Tollemer : pierre de Bourgogne, mobilier provençal chiné, tissus de la maison Pierre Frey. Chaque pièce conjugue l’authenticité d’un mas du Luberon et le confort d’un palace 5 étoiles.',
+    'Une demeure du XVIIIᵉ siècle ancrée dans le Gordes des peintres, restaurée en 2015 par l’architecte Christophe Tollemer.\n\nLa bastide fut au XVIIIᵉ siècle la demeure de la famille de Simiane, dont la marquise — petite-fille de Madame de Sévigné — marqua l’histoire du village. Au XXᵉ siècle, Gordes devient un véritable village d’artistes : Victor Vasarely s’y installe dès 1948 et y ouvre un musée didactique au château, tandis que Marc Chagall, Serge Poliakoff, André Lhote et Jean Deyrolle font de la cité perchée un foyer de l’art moderne. La suite signature de l’hôtel, la Vasarely Suite, rend hommage à ce passé.\n\nRouverte en 2015 après une restauration menée par cent cinquante artisans, La Bastide doit son décor à l’architecte d’intérieur Christophe Tollemer : pierre de Bourgogne, mobilier provençal chiné, tissus de la maison Pierre Frey. Chaque pièce conjugue l’authenticité d’un mas du Luberon et le confort d’un palace 5 étoiles. Les voûtes en pierre, les parquets point de Hongrie et les cheminées d’époque composent une atmosphère intime où le temps semble suspendu — exactement l’esprit qu’Airelles souhaitait préserver en rouvrant cette bastide aixoise.\n\nQuarante chambres et suites, six adresses gastronomiques, un spa Guerlain voûté et trois piscines complètent cette bastide où l’art de vivre provençal se lit autant dans les pierres que dans l’accueil discret de la conciergerie — le palace le plus intime du Luberon.',
   body_en:
-    'An 18th-century residence rooted in painterly Gordes, restored in 2015 by architect Christophe Tollemer.\n\nIn the 18th century the bastide was the home of the de Simiane family, whose marquise — granddaughter of Madame de Sévigné — left her mark on the village. In the 20th century Gordes became a true artists’ village: Victor Vasarely settled here from 1948 and opened a didactic museum in the castle, while Marc Chagall, Serge Poliakoff, André Lhote and Jean Deyrolle made the hilltop town a cradle of modern art. The hotel’s signature Vasarely Suite pays tribute to that past.\n\nReopened in 2015 after a restoration by a hundred and fifty craftspeople, La Bastide owes its décor to interior architect Christophe Tollemer: Burgundy stone, antique Provençal furniture, Pierre Frey fabrics. Every room blends the authenticity of a Luberon mas with five-star palace comfort.',
+    'An 18th-century residence rooted in painterly Gordes, restored in 2015 by architect Christophe Tollemer.\n\nIn the 18th century the bastide was the home of the de Simiane family, whose marquise — granddaughter of Madame de Sévigné — left her mark on the village. In the 20th century Gordes became a true artists’ village: Victor Vasarely settled here from 1948 and opened a didactic museum in the castle, while Marc Chagall, Serge Poliakoff, André Lhote and Jean Deyrolle made the hilltop town a cradle of modern art. The hotel’s signature Vasarely Suite pays tribute to that past.\n\nReopened in 2015 after a restoration by a hundred and fifty craftspeople, La Bastide owes its décor to interior architect Christophe Tollemer: Burgundy stone, antique Provençal furniture, Pierre Frey fabrics. Every room blends the authenticity of a Luberon mas with five-star palace comfort. Stone vaults, herringbone parquet and period fireplaces create an intimate atmosphere where time seems to stand still — the spirit Airelles set out to preserve when reopening this Aix-en-Provence bastide.',
 } as const;
 
 /** Kit golden fiche — history (also in `#bref`) + location narrative only; rest lives in structured blocks. */
@@ -1405,41 +1520,43 @@ const AIRELLES_LONG_DESCRIPTION_SECTIONS = [
     title_fr: 'Emplacement & cadre',
     title_en: 'Location & setting',
     body_fr:
-      'La Bastide domine Gordes depuis la Rue de la Combe, à quelques minutes à pied de la place du Château et des ruelles calcaires du village. La vue porte sur la vallée du Luberon, les Alpilles et, par temps clair, le Mont Ventoux.\n\nDepuis Avignon TGV (50 min) ou Marseille-Provence (1 h), la route serpente entre vignes, oliviers et villages perchés. Le parking de l’hôtel facilite l’arrivée ; la conciergerie coordonne transferts et excursions.',
+      'La Bastide domine Gordes depuis la Rue de la Combe, à quelques minutes à pied de la place du Château et des ruelles calcaires du village. La vue porte sur la vallée du Luberon, les Alpilles et, par temps clair, le Mont Ventoux.\n\nDepuis Avignon TGV (50 min) ou Marseille-Provence (1 h), la route serpente entre vignes, oliviers et villages perchés. Le parking de l’hôtel facilite l’arrivée ; la conciergerie coordonne transferts et excursions. En saison, trois piscines — terrasse panoramique, bassin spa voûté et piscine Summer Camp — invitent à alterner baignade et flânerie dans les jardins suspendus.\n\nGordes figure parmi les « Plus Beaux Villages de France » : calades, galeries et perspectives sur la vallée composent un décor que l’on explore à pied en quelques minutes depuis l’hôtel. La Bastide se situe à portée de l’abbaye de Sénanque, du Village des Bories et des domaines viticoles du Luberon — base idéale pour un séjour slow en Provence.\n\nLes jardins suspendus et la terrasse de La Table offrent le cadre le plus spectaculaire pour le petit-déjeuner ou un apéritif au coucher du soleil — un rituel que je recommande dès la première soirée.',
     body_en:
-      'La Bastide overlooks Gordes from Rue de la Combe, a few minutes’ walk from the Château square and the village’s limestone lanes. The view sweeps across the Luberon valley, the Alpilles and, on clear days, Mont Ventoux.\n\nFrom Avignon TGV (50 min) or Marseille-Provence (1 hr), the road winds through vines, olive groves and hilltop villages. On-site parking eases arrival; the concierge arranges transfers and excursions.',
+      'La Bastide overlooks Gordes from Rue de la Combe, a few minutes’ walk from the Château square and the village’s limestone lanes. The view sweeps across the Luberon valley, the Alpilles and, on clear days, Mont Ventoux.\n\nFrom Avignon TGV (50 min) or Marseille-Provence (1 hr), the road winds through vines, olive groves and hilltop villages. On-site parking eases arrival; the concierge arranges transfers and excursions. In season, three pools — a panoramic terrace pool, the vaulted spa pool and the Summer Camp pool — invite you to alternate swimming and strolling through the hanging gardens.\n\nGordes ranks among France’s “Most Beautiful Villages”: cobbled lanes, galleries and valley views form a setting you can explore on foot within minutes of the hotel. La Bastide is within reach of Sénanque Abbey, the Village des Bories and Luberon wine estates — an ideal base for a slow Provence stay.\n\nThe hanging gardens and La Table terrace offer the most spectacular setting for breakfast or a sunset aperitif — a ritual I recommend from your very first evening.',
   },
   {
     anchor: 'gordes-artistes',
     title_fr: 'Gordes, village d’artistes',
     title_en: 'Gordes, an artists’ village',
     body_fr:
-      'Au XXᵉ siècle, Gordes devient un foyer de l’art moderne : Victor Vasarely s’y installe dès 1948 et ouvre un musée didactique au château ; Marc Chagall, Serge Poliakoff, André Lhote et Jean Deyrolle y trouvent refuge. La suite Vasarely de La Bastide rend hommage à cet héritage.\n\nFlâner dans le village, c’est croiser galeries, ateliers et perspectives sur la vallée. La conciergerie réserve les visites du château, des Caves Saint-Firmin ou de l’abbaye de Sénanque — chaque sortie prolonge le séjour sans quitter l’esprit provençal de La Bastide.',
+      'Au XXᵉ siècle, Gordes devient un foyer de l’art moderne : Victor Vasarely s’y installe dès 1948 et ouvre un musée didactique au château ; Marc Chagall, Serge Poliakoff, André Lhote et Jean Deyrolle y trouvent refuge. La suite Vasarely de La Bastide rend hommage à cet héritage.\n\nFlâner dans le village, c’est croiser galeries, ateliers et perspectives sur la vallée. La conciergerie réserve les visites du château, des Caves Saint-Firmin ou de l’abbaye de Sénanque — chaque sortie prolonge le séjour sans quitter l’esprit provençal de La Bastide.\n\nLe marché du mardi matin, les sentiers du Luberon et les domaines viticoles voisins complètent l’expérience : Gordes n’est pas seulement un panorama depuis la terrasse, c’est un village vivant que l’on redécouvre à chaque promenade. Entre les galeries du centre et les ateliers disséminés dans les ruelles, l’hôtel s’inscrit dans cette lignée artistique — la Vasarely Suite en est la clé de voûte.\n\nC’est cette double lecture — palace suspendu et cité d’artistes — que La Bastide propose à ses hôtes, avec la conciergerie pour orchestrer chaque découverte.',
     body_en:
-      'In the 20th century Gordes became a cradle of modern art: Victor Vasarely settled here from 1948 and opened a didactic museum in the castle; Marc Chagall, Serge Poliakoff, André Lhote and Jean Deyrolle found refuge here. The hotel’s Vasarely Suite pays tribute to that legacy.\n\nStrolling the village means galleries, studios and views over the valley. The concierge books castle visits, the Caves Saint-Firmin or Sénanque Abbey — each outing extends the stay without leaving La Bastide’s Provençal spirit.',
+      'In the 20th century Gordes became a cradle of modern art: Victor Vasarely settled here from 1948 and opened a didactic museum in the castle; Marc Chagall, Serge Poliakoff, André Lhote and Jean Deyrolle found refuge here. The hotel’s Vasarely Suite pays tribute to that legacy.\n\nStrolling the village means galleries, studios and views over the valley. The concierge books castle visits, the Caves Saint-Firmin or Sénanque Abbey — each outing extends the stay without leaving La Bastide’s Provençal spirit.\n\nTuesday morning market, Luberon trails and neighbouring wine estates complete the experience: Gordes is not only a view from the terrace but a living village rediscovered on every walk. Between downtown galleries and studios tucked into the lanes, the hotel belongs to that artistic lineage — the Vasarely Suite is its keystone.\n\nThat dual reading — suspended palace and artists’ town — is what La Bastide offers its guests, with the concierge orchestrating every discovery.',
   },
 ] as const;
 
 export const AIRELLES_TRANSPORTS = [
   {
     mode: 'train',
-    name_fr: 'Gare Avignon TGV',
-    name_en: 'Avignon TGV station',
-    distance_km: 45,
-    duration_minutes: 50,
-    notes_fr: 'Ligne TGV Paris–Marseille ; transfert privé ou location depuis la gare.',
-    notes_en: 'TGV Paris–Marseille line; private transfer or car hire from the station.',
+    station: 'Gare Avignon TGV',
+    station_en: 'Avignon TGV station',
+    distance_meters: 45_000,
+    walk_minutes: 50,
+    notes_fr:
+      'Ligne TGV Paris–Marseille ; transfert privé ou location depuis la gare (environ 50 min).',
+    notes_en:
+      'TGV Paris–Marseille line; private transfer or car hire from the station (about 50 min).',
   },
   {
-    mode: 'air',
-    name_fr: 'Aéroport Marseille-Provence',
-    name_en: 'Marseille Provence Airport',
-    distance_km: 90,
-    duration_minutes: 60,
+    mode: 'airport',
+    station: 'Aéroport Marseille-Provence',
+    station_en: 'Marseille Provence Airport',
+    distance_meters: 90_000,
+    walk_minutes: 60,
     notes_fr:
-      'Vols internationaux et domestiques ; transfert privé sur réservation via la conciergerie.',
+      'Vols internationaux et domestiques ; transfert privé sur réservation via la conciergerie (environ 1 h).',
     notes_en:
-      'International and domestic flights; private transfer on reservation through the concierge.',
+      'International and domestic flights; private transfer on reservation through the concierge (about 1 hr).',
   },
 ] as const;
 
@@ -2247,5 +2364,6 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     address: AIRELLES_ADDRESS,
     postal_code: AIRELLES_POSTAL_CODE,
     email_reservations: AIRELLES_EMAIL_RESERVATIONS,
+    mice_info: AIRELLES_MICE_INFO,
   };
 }
