@@ -43,6 +43,7 @@
     "next": "catalog:",
     "next-intl": "catalog:",
     "react": "catalog:",
+    "react-day-picker": "^10.0.1",
     "react-dom": "catalog:",
     "schema-dts": "^2.0.0",
     "server-only": "^0.0.1",

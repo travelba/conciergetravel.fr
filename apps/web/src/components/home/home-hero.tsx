@@ -3,7 +3,7 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
-import { getPathname } from '@/i18n/navigation';
+import { HotelSearchBar } from '@/components/search/HotelSearchBar';
 import type { Locale } from '@/i18n/routing';
 import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
 
@@ -43,7 +43,6 @@ export async function HomeHero({
   const t = await getTranslations({ locale, namespace: 'homepage' });
   const tHero = await getTranslations({ locale, namespace: 'homepage.hero' });
   const tTrust = await getTranslations({ locale, namespace: 'homepage.trust' });
-  const action = getPathname({ locale, href: '/recherche' });
 
   return (
     <div className="mch-kit">
@@ -96,62 +95,7 @@ export async function HomeHero({
               </span>
             </div>
 
-            <form
-              className="search-bar"
-              role="search"
-              action={action}
-              method="get"
-              aria-label={tHero('searchTitle')}
-            >
-              <div className="sb-field">
-                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
-                  <path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z" />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg>
-                <span className="sb-text">
-                  <label htmlFor="home-hero-destination">{tHero('destinationLabel')}</label>
-                  <input
-                    id="home-hero-destination"
-                    name="destination"
-                    type="text"
-                    autoComplete="off"
-                    placeholder={tHero('destinationPlaceholder')}
-                    className="sb-val"
-                  />
-                </span>
-              </div>
-              <div className="sb-field" aria-hidden>
-                <svg className="icon" viewBox="0 0 24 24">
-                  <rect x="3" y="5" width="18" height="16" rx="2" />
-                  <path d="M3 9h18M8 3v4M16 3v4" />
-                </svg>
-                <span className="sb-text">
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--or)]">
-                    {tHero('searchPreviewDates')}
-                  </span>
-                  <span className="sb-val muted">{tHero('datesPlaceholder')}</span>
-                </span>
-              </div>
-              <div className="sb-field" aria-hidden>
-                <svg className="icon" viewBox="0 0 24 24">
-                  <circle cx="9" cy="8" r="3.2" />
-                  <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5a3 3 0 0 1 0 6M18 20c0-2.5-1-4.2-2.5-5.2" />
-                </svg>
-                <span className="sb-text">
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--or)]">
-                    {tHero('searchPreviewGuests')}
-                  </span>
-                  <span className="sb-val">{tHero('guestsDefault')}</span>
-                </span>
-              </div>
-              <button
-                type="submit"
-                className="btn btn-or search-go"
-                aria-label={tHero('searchSubmitAria')}
-              >
-                {tHero('searchSubmit')}
-              </button>
-            </form>
+            <HotelSearchBar locale={locale} />
           </div>
         </div>
       </section>
