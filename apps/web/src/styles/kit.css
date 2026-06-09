@@ -3757,6 +3757,12 @@ body.booking-mobile-sheet-open {
   padding: 0 0 16px;
   max-width: 640px;
 }
+.mch-kit .faq-item.faq-concierge .cq-reply {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--texte);
+  max-width: 720px;
+}
 
 .mch-kit .concierge-advice-section {
   border-bottom: 1px solid var(--ligne);

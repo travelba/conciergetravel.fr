@@ -15,7 +15,7 @@
       "name": "À quelle heure dois-je quitter ma chambre le jour du départ ?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Le départ doit être effectué avant midi. Un départ tardif peut être possible selon les disponibilités, avec des frais supplémentaires éventuels."
+        "text": "Le départ doit être effectué avant 12h00. Un départ tardif peut être possible selon les disponibilités, avec des frais supplémentaires éventuels."
       }
     },
     {
@@ -263,7 +263,7 @@
       "name": "L'Orangerie propose-t-elle un brunch le dimanche ?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Oui, chaque dimanche, le Brunch du Dimanche à La Table de La Bastide propose un buffet sucré et salé avec champagne servi sous forme de buffet, considéré comme l'un des meilleurs de la région."
+        "text": "Oui, chaque dimanche, le restaurant Clover Gordes propose un brunch opulent avec champagne servi sous forme de buffet, considéré comme l'un des meilleurs de la région."
       }
     },
     {

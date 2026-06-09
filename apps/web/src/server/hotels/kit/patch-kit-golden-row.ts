@@ -101,7 +101,7 @@ export function patchKitGoldenRow(row: HotelDetailRow): HotelDetailRow {
 
   const merged = mergeGoldenRow(row, golden);
 
-  // Supabase CDC audit reads 15 promoted FAQs; kit renders the full 30 at runtime.
+  // Supabase CDC audit reads 15 promoted FAQs; kit renders the full 77 at runtime.
   return {
     ...merged,
     faq_content: AIRELLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'],

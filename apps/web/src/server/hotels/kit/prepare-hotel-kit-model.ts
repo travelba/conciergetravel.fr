@@ -2,6 +2,7 @@ import 'server-only';
 
 import { getTranslations } from 'next-intl/server';
 
+import { AIRELLES_CONCIERGE_QUESTIONS_KIT } from '@mch/domain/editorial';
 import { buildCloudinarySrc } from '@mch/ui';
 
 import type { Locale } from '@/i18n/routing';
@@ -29,6 +30,7 @@ import {
   readFactualSummary,
   readFaq,
   readFaqByCategory,
+  readFaqDisplayGroups,
   readFeaturedReviews,
   readGallery,
   readHeroImage,
@@ -65,6 +67,7 @@ import {
 import { dropCannibalizingSections, resolvePopulatedBlocks } from '@mch/domain/editorial';
 
 import { createKitMediaResolver, type KitMediaResolver } from './kit-media-resolver';
+import { isHotelKitSlug } from './is-hotel-kit-slug';
 import { patchKitGoldenRow } from './patch-kit-golden-row';
 import {
   enrichAirellesKitRoomCards,
@@ -137,6 +140,37 @@ export interface HotelKitNavItem {
   readonly mobileHidden?: boolean;
 }
 
+export interface HotelKitConciergeQuestionGroup {
+  readonly label: string;
+  readonly items: readonly { question: string; reply: string }[];
+}
+
+function readAirellesConciergeQuestionGroups(
+  slug: string,
+  locale: SupportedLocale,
+): readonly HotelKitConciergeQuestionGroup[] {
+  if (!isHotelKitSlug(slug)) return [];
+  const groups: HotelKitConciergeQuestionGroup[] = [];
+  const indexByLabel = new Map<string, number>();
+  for (const item of AIRELLES_CONCIERGE_QUESTIONS_KIT) {
+    const label = pickLocalizedText(locale, item.category_fr, item.category_en) ?? item.category_fr;
+    const question = item.question_fr;
+    const reply = item.reply_fr;
+    const existing = indexByLabel.get(label);
+    const entry = { question, reply };
+    if (existing === undefined) {
+      indexByLabel.set(label, groups.length);
+      groups.push({ label, items: [entry] });
+    } else {
+      const group = groups[existing];
+      if (group !== undefined) {
+        groups[existing] = { label: group.label, items: [...group.items, entry] };
+      }
+    }
+  }
+  return groups;
+}
+
 export interface HotelKitEnBref {
   readonly eyebrow: string;
   readonly synthesis: string;
@@ -202,8 +236,10 @@ export interface HotelKitModel {
   readonly featuredInRankings: readonly HotelRankingMention[];
   readonly externalSourcesProvenance: ReturnType<typeof readExternalSourcesProvenance>;
   readonly faqGroups: readonly LocalisedFaqGroup[];
+  readonly faqDisplayGroups: ReturnType<typeof readFaqDisplayGroups>;
   readonly faqsFlat: ReturnType<typeof readFaq>;
   readonly topConciergeFaq: ReturnType<typeof readTopConciergeFaq>;
+  readonly conciergeQuestionGroups: readonly HotelKitConciergeQuestionGroup[];
   readonly conciergeAdvice: ReturnType<typeof readConciergeAdvice>;
   readonly relatedHotels: RelatedHotelsBundle;
   readonly upcomingEvents: ReturnType<typeof readUpcomingEvents>;
@@ -224,6 +260,9 @@ export interface HotelKitModel {
     readonly access: string;
     readonly around: string;
     readonly faq: string;
+    readonly faqLede: string;
+    readonly conciergeQuestions: string;
+    readonly conciergeQuestionsLede: string;
     readonly proximity: string;
     readonly proximityLede: string;
     readonly exploreRegion: string;
@@ -751,8 +790,10 @@ export async function prepareHotelKitModel(
     featuredInRankings,
     externalSourcesProvenance: readExternalSourcesProvenance(row),
     faqGroups: readFaqByCategory(row, kitLocale),
+    faqDisplayGroups: readFaqDisplayGroups(row, kitLocale),
     faqsFlat: readFaq(row, kitLocale),
     topConciergeFaq: readTopConciergeFaq(row, kitLocale),
+    conciergeQuestionGroups: readAirellesConciergeQuestionGroups(row.slug, kitLocale),
     conciergeAdvice: readConciergeAdvice(row, kitLocale),
     relatedHotels,
     upcomingEvents: readUpcomingEvents(row, kitLocale),
@@ -773,6 +814,18 @@ export async function prepareHotelKitModel(
       access: t('sections.location'),
       around: t('sections.around'),
       faq: t('sections.faq'),
+      faqLede:
+        kitLocale === 'en'
+          ? 'Everything a guest might ask before and during their stay — rooms, dining, spa, family and hotel policies.'
+          : "Tout ce qu'un voyageur peut se demander avant et pendant son séjour — adresse, chambres, tables, spa, famille et politiques de la maison.",
+      conciergeQuestions:
+        kitLocale === 'en'
+          ? 'The Concierge answers — Airelles Gordes, La Bastide'
+          : 'Le Concierge répond — Airelles Gordes, La Bastide',
+      conciergeQuestionsLede:
+        kitLocale === 'en'
+          ? 'Tables, transfers, spa, excursions or special occasions — how the Concierge replies when you ask.'
+          : "Tables, transferts, spa, excursions ou occasions spéciales : voici comment le Concierge formule sa réponse lorsque l'on lui pose la question.",
       proximity: t('sections.nearby'),
       proximityLede: tRelated('sameCitySub'),
       exploreRegion: tRelated('sameRegionTitle', { region: row.region }),

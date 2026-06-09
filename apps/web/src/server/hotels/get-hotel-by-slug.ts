@@ -922,6 +922,9 @@ export const FaqItemSchema = z.object({
   featured: z.boolean().optional(),
   concierge_tip_fr: z.string().min(1).optional(),
   concierge_tip_en: z.string().min(1).optional(),
+  /** Kit exhaustive FAQ — display group label (overrides category bucket label). */
+  group_fr: z.string().min(1).optional(),
+  group_en: z.string().min(1).optional(),
 });
 export type FaqItem = z.infer<typeof FaqItemSchema>;
 
@@ -935,10 +938,17 @@ export interface LocalisedFaq {
   readonly featured: boolean;
   /** Optional Concierge tip surfaced under the answer ("Mon conseil : …"). */
   readonly conciergeTip: string | null;
+  /** When set, FAQ is grouped under this label instead of the intent bucket. */
+  readonly groupLabel: string | null;
 }
 
 export interface LocalisedFaqGroup {
   readonly category: FaqCategory;
+  readonly items: readonly LocalisedFaq[];
+}
+
+export interface LocalisedFaqDisplayGroup {
+  readonly label: string;
   readonly items: readonly LocalisedFaq[];
 }
 
@@ -1111,12 +1121,18 @@ export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly 
     if (q === null || a === null) continue;
     const tipRaw = pickLocalizedText(locale, item.concierge_tip_fr, item.concierge_tip_en);
     const tip = typeof tipRaw === 'string' && tipRaw.trim().length > 0 ? tipRaw.trim() : null;
+    const groupLabelRaw = pickLocalizedText(locale, item.group_fr, item.group_en);
+    const groupLabel =
+      typeof groupLabelRaw === 'string' && groupLabelRaw.trim().length > 0
+        ? groupLabelRaw.trim()
+        : null;
     out.push({
       question: q,
       answer: a,
       category: item.category ?? 'before',
       featured: item.featured === true,
       conciergeTip: tip,
+      groupLabel,
     });
   }
   return out;
@@ -1177,6 +1193,54 @@ export function readFaqByCategory(
     }
   }
   return groups;
+}
+
+/**
+ * Groups FAQ by `groupLabel` when present (kit exhaustive FAQ). Preserves
+ * source order of first appearance. Falls back to {@link readFaqByCategory}
+ * when no item carries a group label.
+ */
+export function readFaqDisplayGroups(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): readonly LocalisedFaqDisplayGroup[] {
+  const flat = readFaq(row, locale);
+  if (flat.length === 0) return [];
+  if (!flat.some((item) => item.groupLabel !== null)) {
+    return readFaqByCategory(row, locale).map((g) => ({
+      label: faqCategoryBucketLabel(locale, g.category),
+      items: g.items,
+    }));
+  }
+  const groups: LocalisedFaqDisplayGroup[] = [];
+  const indexByLabel = new Map<string, number>();
+  for (const item of flat) {
+    const label = item.groupLabel ?? faqCategoryBucketLabel(locale, item.category);
+    const existing = indexByLabel.get(label);
+    if (existing === undefined) {
+      indexByLabel.set(label, groups.length);
+      groups.push({ label, items: [item] });
+    } else {
+      const group = groups[existing];
+      if (group !== undefined) {
+        groups[existing] = { label: group.label, items: [...group.items, item] };
+      }
+    }
+  }
+  return groups;
+}
+
+function faqCategoryBucketLabel(locale: SupportedLocale, category: FaqCategory): string {
+  switch (category) {
+    case 'before':
+      return locale === 'en' ? 'Before your stay' : 'Avant votre séjour';
+    case 'during':
+      return locale === 'en' ? 'During your stay' : 'Pendant votre séjour';
+    case 'after':
+      return locale === 'en' ? 'After your stay' : 'Après votre séjour';
+    case 'agency':
+      return locale === 'en' ? 'Booking & policies' : 'Réservation & politiques';
+  }
 }
 
 // ---------------------------------------------------------------------------

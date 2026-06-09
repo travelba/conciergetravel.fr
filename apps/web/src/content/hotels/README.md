@@ -9,9 +9,11 @@ Pilot: **Airelles Gordes** (`les-airelles-gordes`).
 3. **Styles** — `apps/web/src/styles/kit.css` (+ site layout header/footer)
 4. **Images** — Cloudinary `cct/hotels/{slug}/` (press kit + POI) ; static fallbacks in `public/kit/airelles/`
 
-## Regenerate body HTML after DA changes
+## Regenerate body HTML + golden FAQ after DA changes
 
 ```bash
+node scripts/build-airelles-faq-html.mjs
+node scripts/sync-airelles-faq-to-golden.mjs
 node scripts/extract-airelles-kit-body.mjs
 ```
 
