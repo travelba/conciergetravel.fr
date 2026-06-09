@@ -1266,31 +1266,27 @@ async function renderHotelPage(
         />
       ) : (
         <>
-          <nav
-            aria-label={t('breadcrumb.hotels')}
-            className="text-muted mb-6 flex flex-wrap items-center gap-2 text-sm"
-          >
-            <Link href="/destination" className="hover:text-fg transition-colors">
-              {countryLabel}
-            </Link>
-            <span aria-hidden className="opacity-50">
-              /
-            </span>
-            <Link
-              href={{
-                pathname: '/destination/[citySlug]',
-                params: { citySlug: cityHubSlug },
-              }}
-              className="hover:text-fg transition-colors"
-            >
-              {row.city}
-            </Link>
-            <span aria-hidden className="opacity-50">
-              /
-            </span>
-            <span className="text-fg" aria-current="page">
-              {name}
-            </span>
+          <nav aria-label={t('breadcrumb.hotels')} className="mch-kit">
+            <div className="breadcrumb">
+              <Link href="/destination">{countryLabel}</Link>
+              <span aria-hidden className="sep">
+                ›
+              </span>
+              <Link
+                href={{
+                  pathname: '/destination/[citySlug]',
+                  params: { citySlug: cityHubSlug },
+                }}
+              >
+                {row.city}
+              </Link>
+              <span aria-hidden className="sep">
+                ›
+              </span>
+              <span className="bc-current" aria-current="page">
+                {name}
+              </span>
+            </div>
           </nav>
 
           <HotelHero

@@ -59,31 +59,35 @@ export async function HotelHero({
   aggregateRating,
 }: HotelHeroProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
-  void region;
 
   const addressLine = formatAddressLine(address ?? '', postalCode, city, district);
+  const category = isPalace ? t('hero.palaceBadge') : t('hero.stars', { count: stars });
+  // Eyebrow: "Palace · Paris · Île-de-France" (kit `.eyebrow.left`).
+  const eyebrowParts = [category, city, region].filter((p) => p !== null && p !== '');
 
   return (
-    <header id="hotel-hero" className="mb-12" data-hotel-hero>
-      <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-        <div className="min-w-0 flex-1">
-          <div className="mb-4 flex flex-wrap items-center gap-4">
-            {isPalace ? (
-              <span className="border-gold-700/40 text-gold-800 inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wider">
-                {t('hero.palaceBadge')}
-              </span>
-            ) : (
-              <span className="border-gold-700/40 text-gold-800 inline-block rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wider">
-                {t('hero.stars', { count: stars })}
-              </span>
-            )}
+    <header id="hotel-hero" className="mch-kit mb-12" data-hotel-hero>
+      <div className="htl-head">
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <div className="min-w-0 flex-1">
+            <span className="eyebrow left">{eyebrowParts.join(' · ')}</span>
+            <h1>{name}</h1>
+            <div className="htl-stars" aria-label={category}>
+              <span aria-hidden="true">{'★'.repeat(stars)}</span>
+              {isPalace ? <span className="htl-palace">{t('hero.palaceBadge')}</span> : null}
+            </div>
+
+            {addressLine.length > 0 ? (
+              <p className="htl-loc">
+                <LocationIcon />
+                <span>{addressLine}</span>
+              </p>
+            ) : null}
+
             {aggregateRating !== null ? (
-              <p
-                className="text-fg inline-flex flex-wrap items-baseline gap-x-1"
-                data-testid="hotel-aggregate-rating"
-              >
+              <div className="htl-rating" data-testid="hotel-aggregate-rating">
                 <span
-                  className="font-serif text-2xl font-semibold"
+                  className="rt-score"
                   aria-label={t('rating.scoreAria', {
                     value: aggregateRating.ratingValue.toFixed(1),
                     best: aggregateRating.bestRating,
@@ -91,41 +95,31 @@ export async function HotelHero({
                 >
                   {aggregateRating.ratingValue.toFixed(1)}
                 </span>
-                <span className="text-muted text-base">/{aggregateRating.bestRating}</span>
-                {aggregateRating.reviewCount > 0 ? (
-                  <span className="text-muted ml-1 text-sm">
-                    · {t('rating.reviewCountShort', { count: aggregateRating.reviewCount })}
+                <span className="rt-tx">
+                  <b>
+                    {aggregateRating.ratingValue.toFixed(1)}/{aggregateRating.bestRating}
+                  </b>
+                  <span>
+                    {aggregateRating.reviewCount > 0
+                      ? `${t('rating.reviewCountShort', { count: aggregateRating.reviewCount })} · `
+                      : ''}
+                    {t('rating.ratedBy', {
+                      source: t(RATING_SOURCE_LABEL_KEY[aggregateRating.source]),
+                    })}
                   </span>
-                ) : null}
-                <span className="text-muted ml-1 text-sm">
-                  ·{' '}
-                  {t('rating.ratedBy', {
-                    source: t(RATING_SOURCE_LABEL_KEY[aggregateRating.source]),
-                  })}
                 </span>
-              </p>
+              </div>
             ) : null}
           </div>
 
-          <h1 className="text-fg mb-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">
-            {name}
-          </h1>
-
-          {addressLine.length > 0 ? (
-            <p className="text-muted flex items-start gap-2 text-base">
-              <LocationIcon />
-              <span>{addressLine}</span>
-            </p>
-          ) : null}
-        </div>
-
-        <div className="flex w-full shrink-0 flex-wrap gap-4 md:w-auto">
-          <HotelShareButton
-            hotelName={name}
-            shareText={description !== null ? description.slice(0, 160) : null}
-            canonicalUrl={canonicalUrl}
-          />
-          <HotelFavoriteButton hotelId={hotelId} hotelName={name} returnPath={localePath} />
+          <div className="flex w-full shrink-0 flex-wrap gap-4 md:w-auto">
+            <HotelShareButton
+              hotelName={name}
+              shareText={description !== null ? description.slice(0, 160) : null}
+              canonicalUrl={canonicalUrl}
+            />
+            <HotelFavoriteButton hotelId={hotelId} hotelName={name} returnPath={localePath} />
+          </div>
         </div>
       </div>
 

@@ -33,16 +33,21 @@ export async function BookingComingSoon({
       id="booking"
       aria-labelledby="booking-coming-soon-title"
       data-booking-placeholder
-      className="border-border bg-bg scroll-mt-24 rounded-lg border p-6"
+      className="mch-kit scroll-mt-24"
     >
-      <p className="text-accent mb-2 text-xs font-medium uppercase tracking-wider">
-        {t('eyebrow')}
-      </p>
-      <h2 id="booking-coming-soon-title" className="text-fg font-serif text-xl leading-tight">
-        {t('headline')}
-      </h2>
-      <p className="text-muted mt-3 text-sm leading-relaxed">{t('body', { name: hotelName })}</p>
-      <p className="text-muted/80 mt-4 text-xs">{t('note')}</p>
+      <div className="resa-card">
+        <p className="rp-from">{t('eyebrow')}</p>
+        <h2
+          id="booking-coming-soon-title"
+          className="mt-1 font-serif text-xl leading-tight text-[color:var(--noir)]"
+        >
+          {t('headline')}
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-[color:var(--texte-doux)]">
+          {t('body', { name: hotelName })}
+        </p>
+        <p className="resa-iata mt-4 text-left">{t('note')}</p>
+      </div>
     </section>
   );
 }
