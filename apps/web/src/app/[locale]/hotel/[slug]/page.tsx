@@ -1395,7 +1395,7 @@ async function renderHotelPage(
             : 'lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10'
         }
       >
-        <div className="min-w-0">
+        <div className="mch-htl-body min-w-0">
           {goldenTemplate ? (
             <>
               {/*

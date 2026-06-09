@@ -1569,6 +1569,35 @@
   margin-bottom: 14px;
   color: var(--noir);
 }
+
+/*
+ * Hotel fiche — editorial body rhythm (kit `.htl-section`).
+ *
+ * Applied via the `.mch-htl-body` wrapper class on the fiche's content
+ * column (`apps/web/.../hotel/[slug]/page.tsx`) so every top-level
+ * `<section>` shares the same generous vertical rhythm + a single hairline
+ * divider, WITHOUT having to touch the ~25 section sub-components. We use a
+ * top border (not bottom) + a `:first-of-type` reset so the divider sits
+ * between sections and never doubles a card's own border. Unlayered, so it
+ * wins over the components' Tailwind `mb-12` utility.
+ *
+ * NOT under `.mch-kit` on purpose: the column hosts rich components
+ * (EnrichedText, room cards) whose links/headings must keep their own
+ * styling — we only normalise the section spacing + heading scale here.
+ */
+.mch-htl-body > section {
+  margin: 0;
+  padding: 44px 0;
+  border-top: 1px solid var(--color-outline-variant);
+}
+.mch-htl-body > section:first-of-type {
+  border-top: 0;
+  padding-top: 8px;
+}
+.mch-htl-body > section > h2:first-child {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  line-height: 1.12;
+}
 .mch-kit .htl-lede {
   color: var(--texte-doux);
   font-size: 15px;
