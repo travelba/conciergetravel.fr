@@ -1,31 +1,10 @@
 import 'server-only';
 
 import {
-  dropDuplicateCategorySections,
-  sanitizeAirellesText,
-  sanitizeAirellesJsonb,
-  withAirellesKidClub,
-  patchAirellesAwards,
-  patchAirellesAmenities,
-  patchAirellesSpa,
-  patchAirellesPolicies,
-  AIRELLES_HIGHLIGHTS,
-  AIRELLES_FAQ_CONTENT,
-  AIRELLES_RESTAURANT_INFO,
-  AIRELLES_POINTS_OF_INTEREST,
-  AIRELLES_CONCIERGE_ADVICE,
-  AIRELLES_INSTAGRAM,
-  AIRELLES_FACTUAL_SUMMARY_FR,
-  AIRELLES_FACTUAL_SUMMARY_EN,
-  AIRELLES_META_DESC_FR,
-  AIRELLES_META_DESC_EN,
-  AIRELLES_PHONE_E164,
-  AIRELLES_ADDRESS,
-  AIRELLES_POSTAL_CODE,
-  AIRELLES_EMAIL_RESERVATIONS,
-  AIRELLES_CONCIERGE_PICK_SLUG,
-  AIRELLES_CONCIERGE_PICK_NOTE,
+  buildAirellesGoldenFields,
   AIRELLES_CONCIERGE_HOOK,
+  AIRELLES_CONCIERGE_PICK_NOTE,
+  AIRELLES_CONCIERGE_PICK_SLUG,
 } from '@mch/domain/editorial';
 
 import type { HotelDetail, HotelRoomRow, SupportedLocale } from '@/server/hotels/get-hotel-by-slug';
@@ -282,41 +261,18 @@ export function applyAirellesLocalOverride(
     return detail;
   }
 
-  const patchedRow = {
-    ...detail.row,
-    highlights: AIRELLES_HIGHLIGHTS,
-    faq_content: AIRELLES_FAQ_CONTENT,
-    restaurant_info: AIRELLES_RESTAURANT_INFO,
-    points_of_interest: AIRELLES_POINTS_OF_INTEREST,
-    concierge_advice: AIRELLES_CONCIERGE_ADVICE,
-    policies: patchAirellesPolicies(detail.row.policies),
-    awards: patchAirellesAwards(detail.row.awards),
-    amenities: patchAirellesAmenities(detail.row.amenities),
-    spa_info: patchAirellesSpa(detail.row.spa_info),
-    instagram: AIRELLES_INSTAGRAM,
-    description_fr:
-      typeof detail.row.description_fr === 'string'
-        ? sanitizeAirellesText(detail.row.description_fr)
-        : detail.row.description_fr,
-    description_en:
-      typeof detail.row.description_en === 'string'
-        ? sanitizeAirellesText(detail.row.description_en)
-        : detail.row.description_en,
-    long_description_sections: sanitizeAirellesJsonb(
-      dropDuplicateCategorySections(detail.row.long_description_sections),
-    ),
-    signature_experiences: sanitizeAirellesJsonb(
-      withAirellesKidClub(detail.row.signature_experiences),
-    ),
-    factual_summary_fr: AIRELLES_FACTUAL_SUMMARY_FR,
-    factual_summary_en: AIRELLES_FACTUAL_SUMMARY_EN,
-    meta_desc_fr: AIRELLES_META_DESC_FR,
-    meta_desc_en: AIRELLES_META_DESC_EN,
-    phone_e164: AIRELLES_PHONE_E164,
-    address: AIRELLES_ADDRESS,
-    postal_code: AIRELLES_POSTAL_CODE,
-    email_reservations: AIRELLES_EMAIL_RESERVATIONS,
-  };
+  const golden = buildAirellesGoldenFields({
+    description_fr: detail.row.description_fr,
+    description_en: detail.row.description_en,
+    awards: detail.row.awards,
+    amenities: detail.row.amenities,
+    spa_info: detail.row.spa_info,
+    policies: detail.row.policies,
+    long_description_sections: detail.row.long_description_sections,
+    signature_experiences: detail.row.signature_experiences,
+  });
+
+  const patchedRow = { ...detail.row, ...golden };
 
   return {
     row: patchedRow,

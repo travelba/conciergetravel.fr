@@ -57,6 +57,8 @@ import { selectHotels, patchHotelById, type SupabaseRestConfig } from './supabas
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
 // ─── CLI parsing ───────────────────────────────────────────────────────────
 
 interface CliArgs {
@@ -178,6 +180,12 @@ const SLUG_EXTRA_ALLOWED_HOSTS: Readonly<Record<string, readonly string[]>> = {
   // Fawn Bluff's brand site (fawnbluff.com) differs from its `official_url`
   // parent path (flospitality.com/fawnbluff). Both are legitimate.
   'fawn-bluff-private-lodge': ['fawnbluff.com'],
+  // Fairmont properties whose own brand site differs from the
+  // `fairmont.com/<city>` parent path. Both are official Accor-operated
+  // domains (added during the 2026-06-08 press-kit pilot — these carried
+  // the bulk of the usable imagery: 9 and 3 candidates respectively).
+  'fairmont-jasper-park-lodge': ['jasper-park-lodge.com'],
+  'fairmont-royal-york': ['thefairmontroyalyork.com'],
 };
 
 /**
@@ -293,6 +301,7 @@ async function fetchAsDataUri(url: string): Promise<string> {
       Accept: 'image/*',
     },
     redirect: 'follow',
+    signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) {
     throw new Error(`fetch source ${res.status}`);
@@ -368,18 +377,38 @@ Reply with ONLY the JSON object, no markdown, no preamble.`;
     max_tokens: 400,
   };
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`[upload-press-kit] OpenAI ${res.status}: ${t.slice(0, 300)}`);
+  // Retry with back-off on transient rate limits (429) and 5xx. Freshly
+  // funded OpenAI accounts sit on a low usage tier, so Vision bursts
+  // trip the per-minute cap; honour `Retry-After` when present, else
+  // exponential back-off. A non-retryable error (400 unsupported image,
+  // 401 bad key) throws immediately.
+  const MAX_ATTEMPTS = 6;
+  let res: Response | null = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (res.ok) break;
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt === MAX_ATTEMPTS) {
+      const t = await res.text();
+      throw new Error(`[upload-press-kit] OpenAI ${res.status}: ${t.slice(0, 300)}`);
+    }
+    const retryAfterHeader = Number.parseInt(res.headers.get('retry-after') ?? '', 10);
+    const backoffMs = Number.isFinite(retryAfterHeader)
+      ? Math.min(retryAfterHeader * 1000, 20000)
+      : Math.min(1500 * 2 ** (attempt - 1), 20000);
+    await res.text().catch(() => undefined);
+    await sleep(backoffMs);
+  }
+  if (!res) {
+    throw new Error('[upload-press-kit] OpenAI request never executed');
   }
 
   const payload = (await res.json()) as {
@@ -544,6 +573,9 @@ async function processHotel(
     } else {
       errors += 1;
     }
+
+    // Smooth the request rate to stay under the per-minute Vision cap.
+    await sleep(800);
     console.log(
       `    [${perImg.status.toUpperCase().padEnd(8)}] ${img.url.slice(0, 80)}${
         perImg.reason ? ` — ${perImg.reason.slice(0, 80)}` : ''

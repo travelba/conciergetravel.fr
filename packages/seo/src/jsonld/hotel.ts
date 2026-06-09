@@ -55,6 +55,8 @@ type BrandNode = {
 /** Hotel without the bare-IRI string union from schema-dts. */
 export type HotelNode = HotelBaseNode & {
   dateModified?: string;
+  /** ISO date (`YYYY-MM-DD`) of the last editorial review — LLM freshness signal. */
+  lastReviewed?: string;
   nearbyAttractions?: readonly NearbyAttractionNode[] | NearbyAttractionNode;
   containsPlace?: readonly ContainedPlaceNode[] | ContainedPlaceNode;
   /** Operational chain. See `HotelJsonLdInput.brand`. */
@@ -419,6 +421,14 @@ export interface HotelJsonLdInput {
    * either a `YYYY-MM-DDTHH:MM:SSZ` Datetime or a bare `YYYY-MM-DD`.
    */
   readonly dateModified?: string;
+  /**
+   * ISO date (`YYYY-MM-DD`) of the last editorial review. Schema.org
+   * extension used alongside `dateModified` on hotel detail pages for
+   * LLM freshness ingestion (GEO skill — triple sync with visible badge).
+   *
+   * Pass `row.updated_at.slice(0, 10)` when `updated_at` is set.
+   */
+  readonly lastReviewed?: string;
   /**
    * Editorial opening year (CDC §2.15 — `foundingDate` on Schema.org's
    * `Organization` parent of `Hotel`). Emitted as a bare `YYYY` string
@@ -925,6 +935,9 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
   }
   if (input.dateModified !== undefined && input.dateModified.length > 0) {
     out.dateModified = input.dateModified;
+  }
+  if (input.lastReviewed !== undefined && input.lastReviewed.length > 0) {
+    out.lastReviewed = input.lastReviewed;
   }
   if (input.foundingDate !== undefined && input.foundingDate.length > 0) {
     out.foundingDate = input.foundingDate;

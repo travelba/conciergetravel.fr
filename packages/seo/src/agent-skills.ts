@@ -112,6 +112,37 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       endpoint: { method: 'GET', path: '/api/agent/hotel/{slug}' },
     },
     {
+      name: 'get-hotel-photos',
+      description:
+        'Returns the hero image and categorised gallery for a hotel, with Cloudinary URLs at standard sizes and bilingual alt text and captions.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          slug: {
+            type: 'string',
+            description: 'Slug kebab-case de la fiche (ex. "les-airelles-gordes").',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+          category: {
+            type: 'string',
+            description:
+              'Filtre optionnel : exterior, lobby, room, dining, spa, pool, view, detail, concierge, events.',
+          },
+          limit: {
+            type: 'integer',
+            description: 'Nombre max de photos galerie (1–50, défaut 30).',
+            minimum: 1,
+            maximum: 50,
+          },
+        },
+        required: ['slug'],
+      },
+      endpoint: { method: 'GET', path: '/api/agent/hotel-photos' },
+    },
+    {
       name: 'get-hotel-room',
       description:
         'Récupérer une chambre ou une suite signature : description, équipements, dimensions, capacité, photos, et JSON-LD HotelRoom. C’est ici que le concierge précise étage, vue ou numéro à demander. URL canonique : /fr/hotel/{hotelSlug}/chambres/{roomSlug}.',

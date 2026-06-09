@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { haversineMeters } from '@mch/integrations/overpass';
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -140,7 +141,11 @@ export type RelatedHotelRow = z.infer<typeof RelatedHotelRowSchema>;
 export interface RelatedHotelsBundle {
   /** Other Palaces in the same city, capped to 6. */
   readonly sameCity: readonly RelatedHotelRow[];
-  /** Other Palaces of the same brand family (across cities), capped to 6. */
+  /** Other published hotels within ~75 km when coordinates are known, capped to 6. */
+  readonly nearby: readonly RelatedHotelRow[];
+  /** Other Palaces in the same department (excluding `sameCity`), capped to 6. */
+  readonly sameDepartment: readonly RelatedHotelRow[];
+  /** Other Palaces of the same brand family (same region when set), capped to 6. */
   readonly sameBrand: readonly RelatedHotelRow[];
   /** Brand label + slug when the family was detected. */
   readonly brand: { readonly slug: string; readonly label: string } | null;
@@ -148,8 +153,70 @@ export interface RelatedHotelsBundle {
   readonly sameRegion: readonly RelatedHotelRow[];
 }
 
+/** Max great-circle distance for the proximity carousel (Les hôtes à proximité). */
+const NEARBY_MAX_METERS = 75_000;
+const NEARBY_CANDIDATE_LIMIT = 120;
+const CLUSTER_LIMIT = 6;
+const PROXIMITY_CARD_LIMIT = 3;
+
+function parseCoordinate(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string') {
+    const n = Number.parseFloat(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function boundingBoxDeltas(
+  latitude: number,
+  radiusMeters: number,
+): {
+  readonly latDelta: number;
+  readonly lonDelta: number;
+} {
+  const latDelta = radiusMeters / 111_000;
+  const lonDelta = radiusMeters / (111_000 * Math.cos((latitude * Math.PI) / 180));
+  return { latDelta, lonDelta };
+}
+
+/**
+ * Picks geographically coherent cards for the proximity block (kit pilot +
+ * any surface that needs "nearby", not brand-wide maillage).
+ *
+ * Priority: same city → distance-ranked nearby → same department → same region.
+ * Brand siblings are intentionally excluded — they belong in a dedicated
+ * "same collection" section, not under "Les hôtes à proximité".
+ */
+export function pickProximityCards(
+  bundle: RelatedHotelsBundle,
+  currentRegion: string,
+  limit: number = PROXIMITY_CARD_LIMIT,
+): readonly RelatedHotelRow[] {
+  const region = currentRegion.trim();
+  const pool = [
+    ...bundle.sameCity,
+    ...bundle.nearby,
+    ...bundle.sameDepartment,
+    ...(region !== ''
+      ? bundle.sameRegion.filter((row) => row.region === '' || row.region === region)
+      : bundle.sameRegion),
+  ];
+  const seen = new Set<string>();
+  const out: RelatedHotelRow[] = [];
+  for (const row of pool) {
+    if (seen.has(row.slug)) continue;
+    seen.add(row.slug);
+    out.push(row);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 const RELATED_COLUMNS =
   'slug, slug_en, name, name_en, city, region, stars, is_palace, hero_image, description_fr, description_en';
+
+const RELATED_COLUMNS_WITH_GEO = `${RELATED_COLUMNS}, latitude, longitude`;
 
 /**
  * Fetches the related-hotels bundle for the maillage interne (skill:
@@ -165,9 +232,15 @@ export async function getRelatedHotels(args: {
   readonly city: string;
   readonly region: string;
   readonly name: string;
+  readonly department?: string | null;
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
 }): Promise<RelatedHotelsBundle> {
   const supabase = getSupabaseAdminClient();
   const brand = detectBrand(args.name);
+  const department = args.department?.trim() ?? '';
+  const anchorLat = args.latitude ?? null;
+  const anchorLon = args.longitude ?? null;
 
   // 1. Same city — ordered by `priority` then `name` for stable output.
   const cityRes = await supabase
@@ -178,24 +251,79 @@ export async function getRelatedHotels(args: {
     .neq('slug', args.currentSlug)
     .order('priority', { ascending: true })
     .order('name', { ascending: true })
-    .limit(6);
+    .limit(CLUSTER_LIMIT);
 
-  // 2. Same region (excluding the current city to keep clusters distinct).
-  const regionRes = await supabase
-    .from('hotels')
-    .select(RELATED_COLUMNS)
-    .eq('is_published', true)
-    .eq('region', args.region)
-    .neq('city', args.city)
-    .neq('slug', args.currentSlug)
-    .order('priority', { ascending: true })
-    .order('name', { ascending: true })
-    .limit(6);
+  // 2. Same department (excluding the current city to keep clusters distinct).
+  const departmentRes =
+    department !== ''
+      ? await supabase
+          .from('hotels')
+          .select(RELATED_COLUMNS)
+          .eq('is_published', true)
+          .eq('department', department)
+          .neq('city', args.city)
+          .neq('slug', args.currentSlug)
+          .order('priority', { ascending: true })
+          .order('name', { ascending: true })
+          .limit(CLUSTER_LIMIT)
+      : { data: [] as unknown[] };
 
-  // 3. Same brand — we don't have a `brand` column yet, so we widen the
-  //    query to the published catalog and filter in memory. With 30
-  //    rows this is fine; once we cross ~500 properties we'll add a
-  //    `brand_slug` column + index.
+  // 3. Same region (excluding the current city to keep clusters distinct).
+  const regionRes =
+    args.region.trim() !== ''
+      ? await supabase
+          .from('hotels')
+          .select(RELATED_COLUMNS)
+          .eq('is_published', true)
+          .eq('region', args.region)
+          .neq('city', args.city)
+          .neq('slug', args.currentSlug)
+          .order('priority', { ascending: true })
+          .order('name', { ascending: true })
+          .limit(CLUSTER_LIMIT)
+      : { data: [] as unknown[] };
+
+  // 4. Distance-ranked nearby — bounding-box pre-filter, haversine sort in memory.
+  const nearby: RelatedHotelRow[] = [];
+  if (anchorLat !== null && anchorLon !== null) {
+    const { latDelta, lonDelta } = boundingBoxDeltas(anchorLat, NEARBY_MAX_METERS);
+    const nearbyRes = await supabase
+      .from('hotels')
+      .select(RELATED_COLUMNS_WITH_GEO)
+      .eq('is_published', true)
+      .neq('slug', args.currentSlug)
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .gte('latitude', anchorLat - latDelta)
+      .lte('latitude', anchorLat + latDelta)
+      .gte('longitude', anchorLon - lonDelta)
+      .lte('longitude', anchorLon + lonDelta)
+      .limit(NEARBY_CANDIDATE_LIMIT);
+
+    const ranked: { row: RelatedHotelRow; distanceMeters: number }[] = [];
+    for (const raw of nearbyRes.data ?? []) {
+      const record = raw as Record<string, unknown>;
+      const lat = parseCoordinate(record['latitude']);
+      const lon = parseCoordinate(record['longitude']);
+      if (lat === null || lon === null) continue;
+      const parsed = RelatedHotelRowSchema.safeParse(raw);
+      if (!parsed.success) continue;
+      const distanceMeters = haversineMeters(anchorLat, anchorLon, lat, lon);
+      if (distanceMeters > NEARBY_MAX_METERS) continue;
+      ranked.push({ row: parsed.data, distanceMeters });
+    }
+    ranked.sort(
+      (a, b) => a.distanceMeters - b.distanceMeters || a.row.name.localeCompare(b.row.name, 'fr'),
+    );
+    for (const item of ranked) {
+      nearby.push(item.row);
+      if (nearby.length >= CLUSTER_LIMIT) break;
+    }
+  }
+
+  // 5. Same brand — published catalog filtered in memory. When the current
+  //    hotel carries an admin region, brand siblings outside that region are
+  //    excluded (e.g. Courchevel must not surface for Gordes).
   const sameBrand: RelatedHotelRow[] = [];
   if (brand !== null) {
     const brandRes = await supabase
@@ -207,13 +335,15 @@ export async function getRelatedHotels(args: {
       .order('name', { ascending: true })
       .limit(100);
     const data = brandRes.data ?? [];
+    const regionFilter = args.region.trim();
     for (const row of data) {
       const parsed = RelatedHotelRowSchema.safeParse(row);
       if (!parsed.success) continue;
+      if (regionFilter !== '' && parsed.data.region !== regionFilter) continue;
       const detected = detectBrand(parsed.data.name);
       if (detected !== null && detected.slug === brand.slug) {
         sameBrand.push(parsed.data);
-        if (sameBrand.length >= 6) break;
+        if (sameBrand.length >= CLUSTER_LIMIT) break;
       }
     }
   }
@@ -230,6 +360,8 @@ export async function getRelatedHotels(args: {
 
   return {
     sameCity: parseList(cityRes.data),
+    nearby,
+    sameDepartment: parseList(departmentRes.data),
     sameBrand,
     brand,
     sameRegion: parseList(regionRes.data),

@@ -1131,6 +1131,9 @@ const RestaurantVenueSchema = z.object({
   // guest acts on. Short, concrete (a named dish or dessert), bilingual.
   must_order_fr: z.string().min(1).max(200).optional(),
   must_order_en: z.string().min(1).max(200).optional(),
+  /** Editorial card body (kit DA `.resto-body > p`). Distinct from `tip_*` (cc-why). */
+  description_fr: z.string().min(1).max(500).optional(),
+  description_en: z.string().min(1).max(500).optional(),
   // Whether the venue is suitable for children (high chairs, kids menu,
   // relaxed setting). `true` shows a "famille bienvenue" badge.
   kid_friendly: z.boolean().optional(),
@@ -1161,6 +1164,7 @@ export interface LocalisedRestaurantVenue {
   readonly address: string | null;
   readonly priceNote: string | null;
   readonly mustOrder: string | null;
+  readonly description: string | null;
   readonly kidFriendly: boolean | null;
   readonly tip: string | null;
 }
@@ -1194,6 +1198,7 @@ export function readRestaurants(
     address: v.address ?? null,
     priceNote: pickLocalizedText(locale, v.price_note_fr, v.price_note_en),
     mustOrder: pickLocalizedText(locale, v.must_order_fr, v.must_order_en),
+    description: pickLocalizedText(locale, v.description_fr, v.description_en),
     kidFriendly: v.kid_friendly ?? null,
     tip: pickLocalizedText(locale, v.tip_fr, v.tip_en),
   }));
@@ -1286,7 +1291,7 @@ const InstagramFeedSchema = z.object({
   handle: z.string().min(1).max(60),
   profile_url: z.string().url(),
   followers: z.number().int().nonnegative().optional(),
-  posts: z.array(InstagramPostSchema).min(1).max(3),
+  posts: z.array(InstagramPostSchema).min(1).max(4),
 });
 
 export interface LocalisedInstagramPost {
@@ -1622,6 +1627,8 @@ const PointOfInterestSchema = z.object({
   price_note_en: z.string().min(1).max(200).optional(),
   tip_fr: z.string().min(1).max(400).optional(),
   tip_en: z.string().min(1).max(400).optional(),
+  /** Cloudinary public_id for kit `.around-img` cards (visit POIs). */
+  image_public_id: CloudinaryPublicIdSchema.optional(),
 });
 
 const PointsOfInterestSchema = z.array(PointOfInterestSchema);
@@ -1688,6 +1695,7 @@ export interface LocalisedPointOfInterest {
   readonly hours: string | null;
   readonly priceNote: string | null;
   readonly tip: string | null;
+  readonly imagePublicId: string | null;
 }
 
 export interface LocalisedTransport {
@@ -1835,6 +1843,7 @@ export function readLocation(row: HotelDetailRow, locale: SupportedLocale): Loca
           hours: pickLocalizedText(locale, p.hours_fr, p.hours_en),
           priceNote: pickLocalizedText(locale, p.price_note_fr, p.price_note_en),
           tip: pickLocalizedText(locale, p.tip_fr, p.tip_en),
+          imagePublicId: p.image_public_id ?? null,
         };
       })
     : [];
@@ -1984,6 +1993,19 @@ const UpcomingEventSchema = z.object({
    * re-validates HTTPS and drops anything else).
    */
   image_url: z.string().url().max(2048).nullable().optional(),
+  /**
+   * Human-readable season window for kit / editorial surfaces — e.g.
+   * « Toute l'année », « Juin–septembre ». When absent, the reader
+   * derives a compact label from `start_date` / `end_date` or
+   * `is_year_round`.
+   */
+  period_fr: z.string().min(1).max(120).optional(),
+  period_en: z.string().min(1).max(120).optional(),
+  /** Practical schedule — market mornings, concert evenings, etc. */
+  hours_fr: z.string().min(1).max(200).optional(),
+  hours_en: z.string().min(1).max(200).optional(),
+  /** Permanent fixture (weekly market year-round) — surfaces « Toute l'année » when `period_*` is absent. */
+  is_year_round: z.boolean().optional(),
 });
 
 const UpcomingEventsSchema = z.array(UpcomingEventSchema);
@@ -2004,6 +2026,75 @@ export interface LocalisedUpcomingEvent {
   readonly dtUuid: string | null;
   /** Representative event image (absolute HTTPS), or `null` when none. */
   readonly imageUrl: string | null;
+  /** Season / recurrence window for display (e.g. « Toute l'année », « Juin–août »). */
+  readonly period: string | null;
+  /** Practical hours / schedule when available. */
+  readonly schedule: string | null;
+}
+
+function isFullCalendarYear(startIso: string, endIso: string): boolean {
+  const start = new Date(`${startIso}T00:00:00Z`);
+  const end = new Date(`${endIso}T00:00:00Z`);
+  return (
+    start.getUTCFullYear() === end.getUTCFullYear() &&
+    start.getUTCMonth() === 0 &&
+    start.getUTCDate() === 1 &&
+    end.getUTCMonth() === 11 &&
+    end.getUTCDate() === 31
+  );
+}
+
+/**
+ * Compact period label for kit cards when `period_fr/en` is not stored.
+ * Mirrors the year-round heuristic in `hotel-events.tsx` (`formatEventDates`).
+ */
+function deriveUpcomingEventPeriod(
+  startIso: string,
+  endIso: string | null,
+  locale: SupportedLocale,
+  isYearRound: boolean | undefined,
+): string | null {
+  if (isYearRound) {
+    return pickLocalizedText(locale, 'Toute l’année', 'Year-round');
+  }
+  if (endIso === null || endIso === startIso) {
+    const start = new Date(`${startIso}T00:00:00Z`);
+    const fmt = new Intl.DateTimeFormat(locale, {
+      timeZone: 'UTC',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    return fmt.format(start);
+  }
+  if (isFullCalendarYear(startIso, endIso)) {
+    return pickLocalizedText(locale, 'Toute l’année', 'Year-round');
+  }
+  const start = new Date(`${startIso}T00:00:00Z`);
+  const end = new Date(`${endIso}T00:00:00Z`);
+  const fmtMonth = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'long' });
+  const startMonth = fmtMonth.format(start);
+  const endMonth = fmtMonth.format(end);
+  const startYear = start.getUTCFullYear();
+  const endYear = end.getUTCFullYear();
+  if (startYear === endYear && startMonth !== endMonth) {
+    return `${startMonth}–${endMonth}`;
+  }
+  const fmtShort = new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'short',
+  });
+  const fmtFull = new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  if (startYear === endYear) {
+    return `${fmtShort.format(start)} – ${fmtFull.format(end)}`;
+  }
+  return `${fmtFull.format(start)} – ${fmtFull.format(end)}`;
 }
 
 /**
@@ -2048,6 +2139,12 @@ export function readUpcomingEvents(
     const lastDay = e.end_date ?? e.start_date;
     if (lastDay < todayIso) continue;
     const description = pickLocalizedText(locale, e.description_fr, e.description_en);
+    const periodStored = pickLocalizedText(locale, e.period_fr, e.period_en);
+    const period =
+      periodStored !== null && periodStored.trim().length > 0
+        ? periodStored.trim()
+        : deriveUpcomingEventPeriod(e.start_date, e.end_date ?? null, locale, e.is_year_round);
+    const schedule = pickLocalizedText(locale, e.hours_fr, e.hours_en);
     localised.push({
       name: e.name.trim(),
       startDate: e.start_date,
@@ -2063,6 +2160,8 @@ export function readUpcomingEvents(
       url: e.url ?? null,
       dtUuid: e.dt_uuid ?? null,
       imageUrl: e.image_url ?? null,
+      period,
+      schedule: schedule !== null && schedule.trim().length > 0 ? schedule.trim() : null,
     });
   }
 
@@ -2655,6 +2754,12 @@ const SignatureExperienceSchema = z.object({
    */
   booking_required: z.boolean(),
   image_public_id: CloudinaryPublicIdSchema.optional(),
+  price_note_fr: z.string().min(1).max(120).optional(),
+  price_note_en: z.string().min(1).max(120).optional(),
+  tip_fr: z.string().min(1).max(400).optional(),
+  tip_en: z.string().min(1).max(400).optional(),
+  /** Vendor or official page for « En savoir plus » (not the booking tunnel). */
+  website: z.string().url().optional(),
 });
 
 const SignatureExperiencesSchema = z.array(SignatureExperienceSchema);
@@ -2667,6 +2772,9 @@ export interface LocalisedSignatureExperience {
   readonly badge: string | null;
   readonly bookingRequired: boolean;
   readonly imagePublicId: string | null;
+  readonly priceNote: string | null;
+  readonly tip: string | null;
+  readonly website: string | null;
 }
 
 /**
@@ -2694,6 +2802,9 @@ export function readSignatureExperiences(
     badge: pickLocalizedText(locale, e.badge_fr, e.badge_en),
     bookingRequired: e.booking_required,
     imagePublicId: e.image_public_id ?? null,
+    priceNote: pickLocalizedText(locale, e.price_note_fr, e.price_note_en),
+    tip: pickLocalizedText(locale, e.tip_fr, e.tip_en),
+    website: e.website ?? null,
   }));
 }
 
@@ -3150,6 +3261,11 @@ export interface HotelDetail {
  *
  * Tries the locale-matching slug column first; falls back to the other.
  */
+/** Kit pilot EN slugs share one DB row keyed by the FR slug. */
+const KIT_FETCH_SLUG_ALIASES: Readonly<Record<string, string>> = {
+  'les-airelles-gordes-en': 'les-airelles-gordes',
+};
+
 export async function getHotelBySlug(
   slug: string,
   locale: SupportedLocale,
@@ -3170,6 +3286,8 @@ export async function getHotelBySlug(
     const primaryColumn = pickByLocale(locale, 'slug', 'slug_en');
     const fallbackColumn = pickByLocale(locale, 'slug_en', 'slug');
 
+    const aliasSlug = KIT_FETCH_SLUG_ALIASES[slug];
+
     let row = await supabase
       .from('hotels')
       .select(HOTEL_COLUMNS)
@@ -3182,6 +3300,30 @@ export async function getHotelBySlug(
         .select(HOTEL_COLUMNS)
         .eq(fallbackColumn, slug)
         .maybeSingle();
+    }
+
+    if (!row.data && aliasSlug !== undefined) {
+      const aliasPrimary = await supabase
+        .from('hotels')
+        .select(HOTEL_COLUMNS)
+        .eq(primaryColumn, aliasSlug)
+        .maybeSingle();
+      if (aliasPrimary.data) {
+        row = aliasPrimary;
+      } else {
+        const aliasFallback = await supabase
+          .from('hotels')
+          .select(HOTEL_COLUMNS)
+          .eq(fallbackColumn, aliasSlug)
+          .maybeSingle();
+        if (aliasFallback.data) {
+          row = aliasFallback;
+        } else if (aliasPrimary.error !== null) {
+          row = aliasPrimary;
+        } else {
+          row = aliasFallback;
+        }
+      }
     }
 
     if (row.error || !row.data) {

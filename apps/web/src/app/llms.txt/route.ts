@@ -510,7 +510,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 26 compétences déclarées (dont 24 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
+              'Catalogue machine-readable des 27 compétences déclarées (dont 25 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-photos [hero+galerie Cloudinary], get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
           },
           {
             url: `${origin}/.well-known/hotels.jsonl`,
@@ -536,6 +536,11 @@ export async function GET(): Promise<NextResponse> {
             url: `${origin}/llms-full.txt`,
             description:
               'Corpus LLM verbeux — préambule éditorial EEAT (agence IATA/APST) puis une section FR et une section EN par hôtel indexable (résumé factuel, faits clés, fraîcheur). Complément rédactionnel de hotels.jsonl.',
+          },
+          {
+            url: `${origin}/api/agent/hotel-photos?slug=les-airelles-gordes&locale=fr`,
+            description:
+              'Endpoint photos MCP — renvoie hero + galerie catégorisée avec URLs Cloudinary, alt bilingue et captions pour une fiche hôtel. Paramètres : slug (requis), locale (fr|en), category (optionnel), limit (1–50).',
           },
           {
             url: `${origin}/api/agent/hotel-sources/le-bristol-paris`,

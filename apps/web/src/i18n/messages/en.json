@@ -312,6 +312,10 @@
     "destinationPlaceholder": "Hotel, city or country?",
     "comboboxLabel": "Destination or hotel",
     "listboxLabel": "Search suggestions",
+    "topCitiesHeading": "Popular destinations",
+    "typeCity": "City",
+    "typeRegion": "Region",
+    "typeCountry": "Country",
     "loading": "Searching…",
     "noResults": "No results",
     "seeAll": "See all results for “{query}”",
@@ -3101,6 +3105,7 @@
       "home": "Home",
       "hotels": "Hotels"
     },
+    "conciergeEyebrow": "A word from the Concierge",
     "hero": {
       "palace": "Palace Distinction",
       "palaceBadge": "Palace",
@@ -3241,6 +3246,7 @@
       "tocTitle": "Contents",
       "tocLabel": "Story table of contents",
       "readMore": "Read more",
+      "readMoreFull": "Read the full description",
       "readLess": "Show less"
     },
     "faq": {
@@ -3283,17 +3289,16 @@
       "onRequestLabel": "Price on request",
       "trust": {
         "listAria": "MyConciergeHotel guarantees",
-        "iata": "IATA-accredited agency",
-        "securePayment": "3-D Secure payment",
-        "noCard": "No card required",
-        "cancellation": "Flexible cancellation"
+        "bestRate": "Best rate guaranteed",
+        "freeCancellation": "Free cancellation"
       },
       "mobileBar": {
         "ctaSeePrices": "See rates",
         "ctaBook": "Book",
         "ctaAriaSeePrices": "See rates and book {name}",
         "ctaAriaBook": "Book {name}",
-        "trustChip": "IATA agency · secure payment"
+        "trustChip": "IATA agency · secure payment",
+        "closeSheet": "Close"
       }
     },
     "factSheet": {
@@ -3341,6 +3346,17 @@
       "booking": "Booking",
       "expand": "Show page contents",
       "collapse": "Hide contents"
+    },
+    "tocShort": {
+      "recit": "Story",
+      "chambres": "Rooms",
+      "brefHotel": "Overview",
+      "presse": "Press",
+      "lieu": "Access",
+      "autour": "Around",
+      "faq": "FAQ",
+      "proximite": "Nearby",
+      "enBref": "Facts"
     },
     "reassurance": {
       "title": "Why book with MyConciergeHotel?",

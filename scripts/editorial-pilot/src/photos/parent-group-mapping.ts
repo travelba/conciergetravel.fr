@@ -430,6 +430,12 @@ export const HOSTNAME_WHITELIST_GLOBAL: readonly string[] = [
   'cache.marriott.com',
   'marriottcontent.com',
   'static.fourseasons.com',
+  // Accor shared static image CDN — serves official media for Fairmont,
+  // Raffles, Sofitel & other Accor brands (Tavily surfaces it for every
+  // accor_lux property). Confirmed legitimate during the 2026-06-08
+  // press-kit pilot (Raffles Warsaw / Fairmont Beijing / The Savoy were
+  // dropping to 0 survivors because this host wasn't trusted).
+  'ahstatic.com',
   'aman.com',
   'images.relaischateaux.com',
   'media.relaischateaux.com',

@@ -101,7 +101,11 @@ import {
   type HotelDetailRow,
   type SupportedLocale,
 } from '@/server/hotels/get-hotel-by-slug';
+import { HotelPageKit } from '@/components/hotel/kit/hotel-page-kit';
 import { getRelatedHotels } from '@/server/hotels/get-related-hotels';
+import { isHotelKitSlug } from '@/server/hotels/kit/is-hotel-kit-slug';
+import { prepareHotelKitModel } from '@/server/hotels/kit/prepare-hotel-kit-model';
+import { buildHotelKitMetadataFromModel } from '@/server/hotels/kit/build-hotel-kit-json-ld';
 import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
 
 /**
@@ -201,6 +205,15 @@ export async function generateMetadata({
   const { locale: raw, slug } = await params;
   if (!isRoutingLocale(raw)) return {};
   const locale = raw;
+
+  if (isHotelKitSlug(slug)) {
+    const detail = await getHotelBySlug(slug, locale);
+    if (!detail) return { robots: { index: false, follow: false } };
+    const amadeusSentiment = await getAmadeusHotelSentiment(detail.row.amadeus_hotel_id);
+    const model = await prepareHotelKitModel(locale, detail, amadeusSentiment);
+    return buildHotelKitMetadataFromModel(model);
+  }
+
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
 
   const detail = await getHotelBySlug(slug, locale);
@@ -358,10 +371,11 @@ export default async function HotelPage({
   const detail = await getHotelBySlug(slug, locale);
   if (!detail) notFound();
 
-  // Fetch Amadeus sentiment in parallel with i18n bootstrap. The helper
-  // is fully forgiving (returns an `EMPTY` sentinel on missing id /
-  // missing env / failure) so it never tanks the route — see
-  // `get-amadeus-sentiment.ts`.
+  if (isHotelKitSlug(slug)) {
+    const amadeusSentiment = await getAmadeusHotelSentiment(detail.row.amadeus_hotel_id);
+    return <HotelPageKit locale={locale} detail={detail} amadeusSentiment={amadeusSentiment} />;
+  }
+
   const [t, amadeusSentiment] = await Promise.all([
     getTranslations('hotelPage'),
     getAmadeusHotelSentiment(detail.row.amadeus_hotel_id),
@@ -1244,6 +1258,9 @@ async function renderHotelPage(
       city: row.city,
       region: row.region,
       name,
+      department: row.department,
+      latitude: row.latitude,
+      longitude: row.longitude,
     }),
     getRankingsForHotel(row.id, { limit: 6 }),
     getGuideTeaserForCity(cityHubSlug, locale),
@@ -1324,12 +1341,6 @@ async function renderHotelPage(
         </div>
       </nav>
 
-      {/*
-        Kit template (`les-airelles-gordes.html`): the gallery mosaic leads the
-        page, full width, above the title — then the 2-column body opens with the
-        editorial head + sections on the left and the sticky reservation rail on
-        the right.
-      */}
       <HotelGallery
         locale={locale}
         cloudName={cloudName}
@@ -1388,24 +1399,10 @@ async function renderHotelPage(
           ) : null}
 
           {/*
-            Concierge-voice accroche (when the fiche carries a `concierge_hook`),
-            followed by the visible §2.3 factual summary. The factual summary
-            keeps its `#factual-summary` anchor + `speakable`/`data-aeo` GEO
-            contracts on every fiche; the accroche leads with the Concierge
-            persona when available.
+            §2.3 factual summary under the hero — `#factual-summary` GEO contract.
+            The Concierge hook lives inside `#apropos` (`HotelStory`, kit
+            `.concierge-quote`).
           */}
-          {conciergeHook !== null ? (
-            <figure className="border-gold-400/80 mb-8 mt-6 border-l-2 pl-5 sm:pl-7">
-              <blockquote className="text-fg font-serif text-2xl italic leading-snug sm:text-[1.7rem] sm:leading-snug">
-                {locale === 'fr' ? '«\u00A0' : '\u201C'}
-                {conciergeHook}
-                {locale === 'fr' ? '\u00A0»' : '\u201D'}
-              </blockquote>
-              <figcaption className="text-muted mt-4 text-xs font-semibold uppercase tracking-[0.22em]">
-                — {t('hero.conciergeSignature')}
-              </figcaption>
-            </figure>
-          ) : null}
           <FactualSummary
             summary={factualSummary}
             fallback={
@@ -1428,14 +1425,15 @@ async function renderHotelPage(
               closing the page. Section sub-component headings are demoted to H3
               in a follow-up lot. */}
           <>
-            {/* 1 — Le mot du Concierge & récit SEO (#apropos). The concierge
-                  hook + factual summary already lead the column above; the
-                  long-read prose + virtual tour + the citable AEO answer follow. */}
-            <span id="apropos" aria-hidden className="block scroll-mt-28" />
+            {/* 1 — Le mot du Concierge & récit SEO (#apropos). Kit layout:
+                  eyebrow + H2 + `.concierge-quote` + `.read-more` prose. */}
             <HotelStory
               locale={locale}
+              hotelName={name}
+              conciergeHook={conciergeHook}
               sections={storySections}
               collapsibleSections
+              useKitLayout
               heroParagraphs={
                 description !== null && description.length > 0
                   ? description
@@ -1473,8 +1471,7 @@ async function renderHotelPage(
             </section>
 
             {/* 2 — Chambres & suites (#chambres) */}
-            <span id="chambres" aria-hidden className="block scroll-mt-28" />
-            <section aria-labelledby="rooms-title" className="mb-12">
+            <section id="chambres" aria-labelledby="rooms-title" className="mb-12">
               <h2 id="rooms-title" className="text-fg mb-4 font-serif text-2xl">
                 {t('sections.rooms')}
               </h2>
@@ -1729,21 +1726,20 @@ async function renderHotelPage(
               bookingMode={row.booking_mode}
               priceFrom={railIndicativeFrom}
             />
-            {/*
-              Kit `.resa-compare` — non-affiliated price comparator under the
-              reservation card. Reads the stay dates client-side from the URL
-              so the fiche stays static/ISR; shows a sober "select dates"
-              prompt until a stay is chosen and never fabricates competitor
-              figures (skill: competitive-pricing-comparison).
-            */}
             <PriceComparator locale={locale} hotelId={row.id} priceConciergeMinor={null} />
             <HotelToc heading={t('toc.heading')} items={tocItems} />
           </div>
         </aside>
       </div>
 
-      {/* Reserved for the Phase 6 fixed mobile booking bar — inert today. */}
-      <BookingSlot locale={locale} hotelName={name} surface="mobilebar" />
+      <BookingSlot
+        locale={locale}
+        hotelName={name}
+        surface="mobilebar"
+        slug={row.slug}
+        bookingMode={row.booking_mode}
+        priceFrom={railIndicativeFrom}
+      />
 
       <TrackPageView
         event={{
@@ -1754,15 +1750,9 @@ async function renderHotelPage(
           bookingMode: row.booking_mode,
           isPalace: row.is_palace,
           stars: row.stars as 1 | 2 | 3 | 4 | 5,
-          hasPriceFrom: false,
+          hasPriceFrom: railIndicativeFrom !== null,
         }}
       />
-
-      {/*
-        Freshness signal is rendered once, in the `<HotelEnBref>` badge
-        (fiche-reorganisation plan — dedup. The former footer duplicate
-        was removed; the JSON-LD `Hotel.dateModified` still mirrors it).
-      */}
     </main>
   );
 }

@@ -312,6 +312,10 @@
     "destinationPlaceholder": "Hôtel, ville ou pays ?",
     "comboboxLabel": "Destination ou hôtel",
     "listboxLabel": "Suggestions de recherche",
+    "topCitiesHeading": "Destinations populaires",
+    "typeCity": "Ville",
+    "typeRegion": "Région",
+    "typeCountry": "Pays",
     "loading": "Recherche en cours…",
     "noResults": "Aucun résultat",
     "seeAll": "Voir tous les résultats pour « {query} »",
@@ -3101,6 +3105,7 @@
       "home": "Accueil",
       "hotels": "Hôtels"
     },
+    "conciergeEyebrow": "Le mot du Concierge",
     "hero": {
       "palace": "Distinction Palace",
       "palaceBadge": "Palace",
@@ -3241,6 +3246,7 @@
       "tocTitle": "Sommaire",
       "tocLabel": "Sommaire de la présentation",
       "readMore": "En savoir plus",
+      "readMoreFull": "Lire la description complète",
       "readLess": "Réduire"
     },
     "faq": {
@@ -3283,17 +3289,16 @@
       "onRequestLabel": "Tarif sur demande",
       "trust": {
         "listAria": "Garanties MyConciergeHotel",
-        "iata": "Agence IATA",
-        "securePayment": "Paiement 3-D Secure",
-        "noCard": "Aucune carte requise",
-        "cancellation": "Annulation flexible"
+        "bestRate": "Meilleur tarif garanti",
+        "freeCancellation": "Annulation gratuite"
       },
       "mobileBar": {
         "ctaSeePrices": "Voir les tarifs",
         "ctaBook": "Réserver",
         "ctaAriaSeePrices": "Voir les tarifs et réserver {name}",
         "ctaAriaBook": "Réserver {name}",
-        "trustChip": "Agence IATA · paiement sécurisé"
+        "trustChip": "Agence IATA · paiement sécurisé",
+        "closeSheet": "Fermer"
       }
     },
     "factSheet": {
@@ -3341,6 +3346,17 @@
       "booking": "Réservation",
       "expand": "Afficher le sommaire de la page",
       "collapse": "Masquer le sommaire"
+    },
+    "tocShort": {
+      "recit": "Concierge",
+      "chambres": "Chambres",
+      "brefHotel": "En bref",
+      "presse": "Presse",
+      "lieu": "Accès",
+      "autour": "Autour",
+      "faq": "FAQ",
+      "proximite": "Proche",
+      "enBref": "Fiche"
     },
     "reassurance": {
       "title": "Pourquoi réserver avec MyConciergeHotel ?",
