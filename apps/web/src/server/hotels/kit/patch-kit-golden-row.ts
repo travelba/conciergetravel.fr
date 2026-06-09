@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { buildAirellesGoldenFields } from '@mch/domain/editorial';
+import { AIRELLES_FAQ_CONTENT_KIT, buildAirellesGoldenFields } from '@mch/domain/editorial';
 
 import type { HotelDetailRow } from '@/server/hotels/get-hotel-by-slug';
 
@@ -99,7 +99,13 @@ export function patchKitGoldenRow(row: HotelDetailRow): HotelDetailRow {
     signature_experiences: row.signature_experiences,
   });
 
-  return mergeGoldenRow(row, golden);
+  const merged = mergeGoldenRow(row, golden);
+
+  // Supabase CDC audit reads 15 promoted FAQs; kit renders the full 30 at runtime.
+  return {
+    ...merged,
+    faq_content: AIRELLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'],
+  };
 }
 
 /** @deprecated Use {@link patchKitGoldenRow} */

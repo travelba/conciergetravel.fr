@@ -687,7 +687,7 @@ export const AIRELLES_HIGHLIGHTS = [
 // Source : FAQ Client Airelles Gordes ; faits alignés golden officiel
 // ---------------------------------------------------------------------------
 
-export const AIRELLES_FAQ_CONTENT = [
+export const AIRELLES_FAQ_CONTENT_KIT = [
   // —— Top 5 Concierge (questions client → concierge, pas le catalogue) ——
   {
     category: 'during',
@@ -990,6 +990,113 @@ export const AIRELLES_FAQ_CONTENT = [
   },
 ] as const;
 
+/** Full kit FAQ (30) — rendered on the DA fiche + JSON-LD extended set. */
+export const AIRELLES_FAQ_CONTENT = AIRELLES_FAQ_CONTENT_KIT;
+
+export const AIRELLES_HOTEL_DISPLAY_NAME = 'Airelles Gordes, La Bastide';
+
+/**
+ * CDC §2.11 promote payload (10–15 items): 5 featured situational + 10 canonical
+ * questions (exact wording from `canonical-faq-questions.ts`). Supabase audit reads
+ * this; {@link patchKitGoldenRow} swaps in {@link AIRELLES_FAQ_CONTENT_KIT} at runtime.
+ */
+export const AIRELLES_FAQ_CONTENT_PROMOTE = [
+  ...AIRELLES_FAQ_CONTENT_KIT.filter(
+    (item): item is (typeof AIRELLES_FAQ_CONTENT_KIT)[number] & { featured: true } =>
+      'featured' in item && item.featured === true,
+  ).slice(0, 5),
+  {
+    category: 'before',
+    question_fr: "L'hôtel dispose-t-il d'un parking ?",
+    question_en: 'Does the hotel have parking facilities?',
+    answer_fr:
+      'Oui, parking privé sur place et service voiturier. À votre arrivée, laissez la clé au voiturier — je coordonne si vous avez besoin d’une voiture de location pour le Luberon.',
+    answer_en:
+      'Yes, private on-site parking and valet service. On arrival, leave the key with the valet — I’ll coordinate a rental car if you need one for the Luberon.',
+  },
+  {
+    category: 'during',
+    question_fr: 'Quel type de petit-déjeuner est proposé ?',
+    question_en: 'What kind of breakfast is served?',
+    answer_fr:
+      'Buffet provençal chaque matin à La Table — terrasse ou salon, produits locaux et viennoiseries. Je vous suggère l’horaire idéal selon vos excursions du jour.',
+    answer_en:
+      'A Provençal buffet each morning at La Table — terrace or salon, local produce and pastries. I’ll suggest the ideal time based on your day’s excursions.',
+  },
+  {
+    category: 'during',
+    question_fr: "Le Wi-Fi est-il disponible dans l'hôtel ?",
+    question_en: 'Is Wi-Fi available throughout the hotel?',
+    answer_fr:
+      'Oui, Wi-Fi gratuit dans tout l’hôtel et minibar réapprovisionné quotidiennement en chambre. Pour une attention particulière à l’arrivée, je la programme avec la conciergerie.',
+    answer_en:
+      'Yes, complimentary Wi-Fi throughout and a minibar replenished daily in-room. For a special arrival touch, I’ll arrange it with the concierge team.',
+  },
+  {
+    category: 'during',
+    question_fr: `Les animaux sont-ils acceptés à ${AIRELLES_HOTEL_DISPLAY_NAME} ?`,
+    question_en: `Are pets allowed at ${AIRELLES_HOTEL_DISPLAY_NAME}?`,
+    answer_fr:
+      'Chiens et chats acceptés sur demande, dans certaines chambres et suites — 30 € par animal et par jour. Signalez-le à la réservation : je confirme la chambre adaptée avec vous.',
+    answer_en:
+      'Dogs and cats accepted on request, in selected rooms and suites — €30 per pet per day. Flag it when booking: I’ll confirm the right room with you.',
+  },
+  {
+    category: 'before',
+    question_fr: "Quelle est la distance entre l'hôtel et l'aéroport ?",
+    question_en: 'How far is the hotel from the airport?',
+    answer_fr:
+      'Marseille-Provence est à environ une heure en voiture ; Avignon TGV à 50 minutes. Je programme le transfert privé avec accueil nominatif — envoyez-moi vos horaires de vol.',
+    answer_en:
+      'Marseille-Provence is about an hour by car; Avignon TGV 50 minutes. I’ll schedule a private transfer with a personalised meet-and-greet — send me your flight times.',
+  },
+  {
+    category: 'during',
+    question_fr: "L'hôtel dispose-t-il d'une piscine ?",
+    question_en: 'Does the hotel have a pool?',
+    answer_fr:
+      'Trois piscines : terrasse panoramique, bassin intérieur du spa et piscine dédiée au Summer Camp. Je vous indique les horaires calmes pour nager en toute sérénité.',
+    answer_en:
+      'Three pools: a panoramic terrace pool, the spa indoor pool and a Summer Camp children’s pool. I’ll point you to the quietest slots for a serene swim.',
+  },
+  {
+    category: 'before',
+    question_fr: 'Puis-je effectuer un check-in anticipé ?',
+    question_en: 'Is early check-in available?',
+    answer_fr:
+      'Check-in dès 15h ; early check-in selon disponibilité — je m’en occupe avec la réception avant votre arrivée. Vos bagages sont gardés en attendant.',
+    answer_en:
+      'Check-in from 3 pm; early check-in subject to availability — I’ll arrange it with reception before you arrive. Luggage is stored securely in the meantime.',
+  },
+  {
+    category: 'before',
+    question_fr: "Des transferts vers l'aéroport sont-ils proposés ?",
+    question_en: 'Are airport transfers offered?',
+    answer_fr:
+      'Oui, transferts privés depuis Marseille-Provence ou Avignon TGV. Donnez-moi vos horaires : je confirme le chauffeur et l’accueil à l’arrivée.',
+    answer_en:
+      'Yes, private transfers from Marseille-Provence or Avignon TGV. Send me your schedule: I’ll confirm the driver and meet-and-greet on arrival.',
+  },
+  {
+    category: 'before',
+    question_fr: "Quelle est la politique d'annulation de l'hôtel ?",
+    question_en: "What is the hotel's cancellation policy?",
+    answer_fr:
+      'Les conditions dépendent du tarif réservé. Avant de confirmer, je vous communique la politique exacte et les délais — aucune mauvaise surprise à l’arrivée.',
+    answer_en:
+      'Terms depend on the rate booked. Before confirming, I’ll share the exact policy and deadlines — no surprises on arrival.',
+  },
+  {
+    category: 'before',
+    question_fr: 'Y a-t-il des taxes de séjour à payer ?',
+    question_en: 'Are there any tourist taxes to pay?',
+    answer_fr:
+      'La taxe de séjour s’applique selon la réglementation en vigueur à Gordes. Elle est réglée à l’arrivée ou au départ — je vous indique le montant lors de la confirmation.',
+    answer_en:
+      'Tourist tax applies under Gordes local regulations. It is settled on arrival or departure — I’ll confirm the amount when booking.',
+  },
+] as const;
+
 // ---------------------------------------------------------------------------
 // concierge_advice + concierge_pick + concierge_hook
 // ---------------------------------------------------------------------------
@@ -1074,23 +1181,23 @@ export const AIRELLES_INSTAGRAM = {
 // ---------------------------------------------------------------------------
 
 export const AIRELLES_FACTUAL_SUMMARY_FR =
-  'Palace du XVIIIe siècle dominant le village perché de Gordes, à 50 min d’Avignon TGV, avec 40 chambres, trois piscines, spa voûté et table de Jean-François Piège.';
+  'Palace du XVIIIe siècle à Gordes, à 50 min d’Avignon TGV : 40 chambres, trois piscines, spa Guerlain et table Jean-François Piège.';
 export const AIRELLES_FACTUAL_SUMMARY_EN =
-  '18th-century Palace overlooking the hilltop village of Gordes, 50 min from Avignon TGV, with 40 rooms, three pools, a vaulted spa and a Jean-François Piège table.';
+  'Palace overlooking hilltop Gordes, 50 min from Avignon TGV, with 40 rooms, three pools, a Guerlain spa and a Jean-François Piège table.';
 
 /** Magazine lede for `#apropos` — voice & atmosphere only (no duplicate of structured blocks). */
 export const AIRELLES_DESCRIPTION_FR =
-  'Avec quarante chambres et suites, Airelles Gordes, La Bastide, cultive une atmosphère intime au sommet du Luberon. Chaque hébergement conjugue voûtes en pierre, lin et mobilier chiné dans l’esprit des bastides provençales, avec une conciergerie qui anticipe sans envahir — du premier café sur la terrasse au dernier soin au spa Guerlain, toujours au rythme lent du village perché.';
+  'Avec quarante chambres et suites, Airelles Gordes, La Bastide, cultive une atmosphère intime au sommet du Luberon. Chaque hébergement conjugue voûtes en pierre, lin et mobilier chiné dans l’esprit des bastides provençales, avec une conciergerie qui anticipe sans envahir — du premier café sur la terrasse au dernier soin au spa Guerlain, toujours au rythme lent du village perché.\n\nDepuis la terrasse, la vue court sur la vallée ; à l’intérieur, les parquets point de Hongrie et la pierre de Bourgogne composent un refuge où le silence du village enveloppe chaque matin. La conciergerie orchestre tables, spa et escapades dans le Luberon sans briser cette parenthèse — c’est l’essence d’un séjour à La Bastide, entre art de vivre provençal et palace discret.';
 export const AIRELLES_DESCRIPTION_EN =
-  'With forty rooms and suites, Airelles Gordes, La Bastide, cultivates an intimate atmosphere above the Luberon. Each accommodation pairs stone vaults, linen and antique furniture in the spirit of Provençal bastides, with a concierge who anticipates without intruding — from the first terrace coffee to the last Guerlain spa ritual, always at the unhurried pace of the hilltop village.';
+  'With forty rooms and suites, Airelles Gordes, La Bastide, cultivates an intimate atmosphere above the Luberon. Each accommodation pairs stone vaults, linen and antique furniture in the spirit of Provençal bastides, with a concierge who anticipates without intruding — from the first terrace coffee to the last Guerlain spa ritual, always at the unhurried pace of the hilltop village.\n\nFrom the terrace, the view sweeps across the valley; indoors, herringbone parquet and Burgundy stone shape a refuge where the village silence wraps each morning. The concierge orchestrates tables, spa and Luberon outings without breaking the spell — the essence of a stay at La Bastide, between Provençal art de vivre and discreet palace service.';
 export const AIRELLES_META_DESC_FR =
   'Palace 5 étoiles à Gordes, sur les hauteurs du Luberon : vue sur la vallée, trois piscines, spa Airelles by Guerlain et table signée Jean-François Piège.';
 export const AIRELLES_META_DESC_EN =
   'Five-star Palace in Gordes, high above the Luberon: valley views, three pools, an Airelles by Guerlain spa and a table by chef Jean-François Piège.';
 export const AIRELLES_META_TITLE_FR =
-  'Airelles Gordes, La Bastide — Palace 5 étoiles à Gordes | MyConciergeHotel';
+  'Airelles Gordes La Bastide — Palace Gordes | MyConciergeHotel';
 export const AIRELLES_META_TITLE_EN =
-  'Airelles Gordes, La Bastide — Palace Gordes, Luberon | MyConciergeHotel';
+  'Airelles Gordes La Bastide — Palace Luberon | MyConciergeHotel';
 
 // ---------------------------------------------------------------------------
 // Narrative sanitiser — strip the FALSE "Clover Gordes is Michelin-starred"
@@ -1241,6 +1348,26 @@ export function patchAirellesPolicies(existing: unknown): Record<string, unknown
       : {};
   return {
     ...base,
+    check_in: {
+      time: '15:00',
+      notes_fr:
+        'Arrivée dès 15h ; early check-in selon disponibilité sur demande auprès de la conciergerie.',
+      notes_en:
+        'Arrival from 3 pm; early check-in subject to availability on request through the concierge.',
+    },
+    check_out: {
+      time: '12:00',
+      notes_fr:
+        'Départ jusqu’à 12h ; late check-out selon disponibilité — je m’en occupe avec la réception.',
+      notes_en:
+        'Departure until noon; late check-out subject to availability — I’ll arrange it with reception.',
+    },
+    cancellation: {
+      notes_fr:
+        'Conditions selon le tarif réservé. La conciergerie communique la politique exacte avant confirmation.',
+      notes_en:
+        'Terms depend on the rate booked. The concierge shares the exact policy before confirmation.',
+    },
     pets: {
       allowed: true,
       fee_eur: 30,
@@ -1281,6 +1408,38 @@ const AIRELLES_LONG_DESCRIPTION_SECTIONS = [
       'La Bastide domine Gordes depuis la Rue de la Combe, à quelques minutes à pied de la place du Château et des ruelles calcaires du village. La vue porte sur la vallée du Luberon, les Alpilles et, par temps clair, le Mont Ventoux.\n\nDepuis Avignon TGV (50 min) ou Marseille-Provence (1 h), la route serpente entre vignes, oliviers et villages perchés. Le parking de l’hôtel facilite l’arrivée ; la conciergerie coordonne transferts et excursions.',
     body_en:
       'La Bastide overlooks Gordes from Rue de la Combe, a few minutes’ walk from the Château square and the village’s limestone lanes. The view sweeps across the Luberon valley, the Alpilles and, on clear days, Mont Ventoux.\n\nFrom Avignon TGV (50 min) or Marseille-Provence (1 hr), the road winds through vines, olive groves and hilltop villages. On-site parking eases arrival; the concierge arranges transfers and excursions.',
+  },
+  {
+    anchor: 'gordes-artistes',
+    title_fr: 'Gordes, village d’artistes',
+    title_en: 'Gordes, an artists’ village',
+    body_fr:
+      'Au XXᵉ siècle, Gordes devient un foyer de l’art moderne : Victor Vasarely s’y installe dès 1948 et ouvre un musée didactique au château ; Marc Chagall, Serge Poliakoff, André Lhote et Jean Deyrolle y trouvent refuge. La suite Vasarely de La Bastide rend hommage à cet héritage.\n\nFlâner dans le village, c’est croiser galeries, ateliers et perspectives sur la vallée. La conciergerie réserve les visites du château, des Caves Saint-Firmin ou de l’abbaye de Sénanque — chaque sortie prolonge le séjour sans quitter l’esprit provençal de La Bastide.',
+    body_en:
+      'In the 20th century Gordes became a cradle of modern art: Victor Vasarely settled here from 1948 and opened a didactic museum in the castle; Marc Chagall, Serge Poliakoff, André Lhote and Jean Deyrolle found refuge here. The hotel’s Vasarely Suite pays tribute to that legacy.\n\nStrolling the village means galleries, studios and views over the valley. The concierge books castle visits, the Caves Saint-Firmin or Sénanque Abbey — each outing extends the stay without leaving La Bastide’s Provençal spirit.',
+  },
+] as const;
+
+export const AIRELLES_TRANSPORTS = [
+  {
+    mode: 'train',
+    name_fr: 'Gare Avignon TGV',
+    name_en: 'Avignon TGV station',
+    distance_km: 45,
+    duration_minutes: 50,
+    notes_fr: 'Ligne TGV Paris–Marseille ; transfert privé ou location depuis la gare.',
+    notes_en: 'TGV Paris–Marseille line; private transfer or car hire from the station.',
+  },
+  {
+    mode: 'air',
+    name_fr: 'Aéroport Marseille-Provence',
+    name_en: 'Marseille Provence Airport',
+    distance_km: 90,
+    duration_minutes: 60,
+    notes_fr:
+      'Vols internationaux et domestiques ; transfert privé sur réservation via la conciergerie.',
+    notes_en:
+      'International and domestic flights; private transfer on reservation through the concierge.',
   },
 ] as const;
 
@@ -1330,6 +1489,7 @@ export function patchAirellesLongDescriptionSections(existing: unknown): unknown
 export const AIRELLES_FEATURED_REVIEWS = [
   {
     source: 'Guide MICHELIN',
+    author: 'Guide MICHELIN',
     source_url:
       'https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874',
     quote_fr:
@@ -1339,6 +1499,7 @@ export const AIRELLES_FEATURED_REVIEWS = [
   },
   {
     source: 'Forbes Travel Guide',
+    author: 'Forbes Travel Guide',
     source_url:
       'https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide',
     quote_fr:
@@ -1348,6 +1509,7 @@ export const AIRELLES_FEATURED_REVIEWS = [
   },
   {
     source: 'Presse spécialisée',
+    author: 'Presse spécialisée',
     quote_fr:
       'Avec une adresse de premier choix au cœur de Gordes — « le plus beau village du monde » dominant les champs de lavande — La Bastide est à la hauteur de son cadre pittoresque.',
     quote_en:
@@ -1383,6 +1545,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'One of the busiest markets in the Luberon, at the foot of the castle: produce, olive oils, soaps and pottery.',
     pricing: { type: 'free', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/press-5`,
   },
   {
     name: "Jazz'n Wine — Domaine des Peyre",
@@ -1402,6 +1565,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'Summer jazz evenings and tastings in AOC Luberon organic vineyards. Unique atmosphere: estate organic wine, live music and stars — book ahead, evenings sell out.',
     pricing: { type: 'paid', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/poi-domaine-des-peyre`,
   },
   {
     name: 'Marché de Lourmarin',
@@ -1422,6 +1586,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'A renowned Provençal market in the Luberon: food, clothing and crafts, year-round.',
     pricing: { type: 'free', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/poi-marche-gordes`,
   },
   {
     name: "Les Soirées d'été de Gordes",
@@ -1441,6 +1606,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'Concerts and shows at the foot of Château de Gordes, in the village courtyard or gardens. Summer programme from June to August.',
     pricing: { type: 'paid', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/press-2`,
   },
   {
     name: 'Fête de la lavande',
@@ -1460,6 +1626,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'Lavender celebrations in Luberon villages: flower-float parades and distillation demos, late July.',
     pricing: { type: 'free', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/poi-abbaye-senanque`,
   },
   {
     name: 'Marché de Saint-Saturnin-lès-Apt',
@@ -1479,6 +1646,7 @@ export const AIRELLES_UPCOMING_EVENTS = [
     description_en:
       'Wednesday-morning market in this Vaucluse hilltop village: local produce, crafts and authentic atmosphere, 20 km from Gordes.',
     pricing: { type: 'free', amount_eur: null },
+    image_url: `${AIRELLES_IMAGE_PREFIX}/press-30`,
   },
 ] as const;
 
@@ -2009,6 +2177,18 @@ export const AIRELLES_EXTERNAL_SOURCES = [
   },
 ] as const;
 
+type AirellesExternalScalarField =
+  | 'wikidata_id'
+  | 'wikipedia_url_fr'
+  | 'wikipedia_url_en'
+  | 'official_url';
+
+function airellesExternalScalar(field: AirellesExternalScalarField): string {
+  const entry = AIRELLES_EXTERNAL_SOURCES.find((source) => source.field === field);
+  if (entry === undefined || typeof entry.value !== 'string') return '';
+  return entry.value;
+}
+
 // ---------------------------------------------------------------------------
 // buildAirellesGoldenFields — the full set of `public.hotels` columns to write
 // when promoting the golden template into the DB. Transforms that depend on the
@@ -2030,7 +2210,8 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
   const spaInfo = patchAirellesSpa(current.spa_info);
   return {
     highlights: AIRELLES_HIGHLIGHTS,
-    faq_content: AIRELLES_FAQ_CONTENT,
+    faq_content: AIRELLES_FAQ_CONTENT_PROMOTE,
+    transports: AIRELLES_TRANSPORTS,
     restaurant_info: AIRELLES_RESTAURANT_INFO,
     points_of_interest: AIRELLES_POINTS_OF_INTEREST,
     concierge_advice: AIRELLES_CONCIERGE_ADVICE,
@@ -2058,6 +2239,10 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     hero_image: AIRELLES_HERO_IMAGE,
     gallery_images: AIRELLES_GALLERY_IMAGES,
     external_sources: AIRELLES_EXTERNAL_SOURCES,
+    wikidata_id: airellesExternalScalar('wikidata_id'),
+    wikipedia_url_fr: airellesExternalScalar('wikipedia_url_fr'),
+    wikipedia_url_en: airellesExternalScalar('wikipedia_url_en'),
+    official_url: airellesExternalScalar('official_url'),
     phone_e164: AIRELLES_PHONE_E164,
     address: AIRELLES_ADDRESS,
     postal_code: AIRELLES_POSTAL_CODE,
