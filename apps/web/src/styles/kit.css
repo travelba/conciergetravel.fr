@@ -3624,6 +3624,14 @@ body.booking-mobile-sheet-open {
   background: #f7f4ee;
   border-color: var(--accent);
 }
+.mch-kit .around-item.around-concierge .around-body .cc-why {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(168, 150, 113, 0.45);
+}
+.mch-kit .around-body .cc-pick.inline {
+  margin-bottom: 10px;
+}
 .mch-kit .around-item.has-img {
   padding: 0;
   overflow: hidden;

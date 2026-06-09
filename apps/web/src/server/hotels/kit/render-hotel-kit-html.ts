@@ -106,10 +106,14 @@ function renderPoiParagraph(model: HotelKitModel, poi: LocalisedPointOfInterest)
   return escapeHtml(chunks.join('. '));
 }
 
-function renderPoiConciergeWhy(poi: LocalisedPointOfInterest): string {
+function renderPoiConciergeWhy(poi: LocalisedPointOfInterest, prominent = false): string {
   if (poi.tip === null || poi.tip.trim() === '') return '';
   if (poi.description !== null && poi.description.trim() === poi.tip.trim()) return '';
-  return `<p class="cc-why cc-why-sm">${escapeHtml(poi.tip.trim())}</p>`;
+  return `<p class="cc-why${prominent ? '' : ' cc-why-sm'}">${escapeHtml(poi.tip.trim())}</p>`;
+}
+
+function isAroundConciergeFrame(bucket: 'visit' | 'do' | 'eat' | 'shop', isPick: boolean): boolean {
+  return isPick && (bucket === 'do' || bucket === 'eat');
 }
 
 function renderRestoKindLine(venue: LocalisedRestaurantVenue): string {
@@ -1088,10 +1092,24 @@ function renderAroundBucket(
     .map((p, i) => {
       const hidden = i >= 3 ? ' more-hidden' : '';
       const isPick = p.tip !== null && i === 0;
-      const useConciergeFrame = isPick && bucket === 'do';
-      const pick = isPick
-        ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(useConciergeFrame ? model.labels.conciergePick : model.locale === 'en' ? 'Pick' : 'Choix')}</span>`
-        : '';
+      const useConciergeFrame = isAroundConciergeFrame(bucket, isPick);
+      const pickLabel = useConciergeFrame
+        ? model.labels.conciergePick
+        : model.locale === 'en'
+          ? 'Pick'
+          : 'Choix';
+      const pickOnImage =
+        isPick && p.imagePublicId !== null
+          ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(pickLabel)}</span>`
+          : '';
+      const pickInline =
+        isPick && p.imagePublicId === null && useConciergeFrame
+          ? `<span class="cc-pick inline">${ICON_STAR}${escapeHtml(pickLabel)}</span>`
+          : '';
+      const pickCorner =
+        isPick && p.imagePublicId === null && !useConciergeFrame
+          ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(pickLabel)}</span>`
+          : '';
       const pickClass = useConciergeFrame ? ' around-concierge' : '';
       const category =
         p.category !== null && p.category.trim() !== ''
@@ -1101,10 +1119,10 @@ function renderAroundBucket(
         p.website !== null
           ? `<a href="${escapeHtml(p.website)}" class="link-or around-link" target="_blank" rel="noopener noreferrer">${model.locale === 'en' ? 'Website →' : 'Site →'}</a>`
           : '';
-      const body = `${category}
+      const body = `${pickInline}${category}
             <h5>${escapeHtml(p.name)}</h5>
             <p>${renderPoiParagraph(model, p)}</p>
-            ${i === 0 ? renderPoiConciergeWhy(p) : ''}
+            ${i === 0 && isPick ? renderPoiConciergeWhy(p, useConciergeFrame) : ''}
             ${website}`;
       if (p.imagePublicId !== null) {
         const imgSrc = buildCloudinarySrc({
@@ -1115,7 +1133,7 @@ function renderAroundBucket(
         return `<div class="around-item has-img${pickClass}${hidden}">
             <div class="around-img">
               <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" loading="lazy">
-              ${pick}
+              ${pickOnImage}
             </div>
             <div class="around-body">
               ${body}
@@ -1123,7 +1141,7 @@ function renderAroundBucket(
           </div>`;
       }
       return `<div class="around-item${pickClass}${hidden}">
-            ${pick}
+            ${pickCorner}
             ${body}
           </div>`;
     })
