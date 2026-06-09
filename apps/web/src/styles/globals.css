@@ -12,6 +12,13 @@
 @import '@mch/ui/globals.css';
 
 /*
+ * NOTE: the HTML-kit port lives in `./kit.css` and is imported from
+ * `[locale]/layout.tsx` (JS side-effect import) rather than via `@import`
+ * here — a plain-CSS `@import` after `@config` was being dropped by
+ * Turbopack, leaving the `.mch-kit` component classes unstyled.
+ */
+
+/*
  * Directory map (annuaire) — list ↔ map synchronisation states.
  * Scoped to the directory surfaces; toggled imperatively by
  * `directory-map-layout.tsx` (Leaflet client island).

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Réserver votre séjour — Le Meurice | MyConciergeHotel</title>
+<meta name="description" content="Finalisez votre réservation au Meurice avec MyConciergeHotel : meilleur tarif garanti, surclassement et petit-déjeuner offerts, conciergerie 24/7.">
+<!-- Tunnel de réservation : pages privées non indexables -->
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://www.myconciergehotel.com/reserver">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/reserver.css">
+</head>
+<body class="hotel-page resa-tunnel">
+
+<!-- ============ HEADER (simplifié : tunnel) ============ -->
+<header class="header" id="header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="brand" aria-label="MyConciergeHotel — accueil">
+      <span class="brand-mono">M<em>C</em></span>
+      <span class="brand-name">MyConciergeHotel</span>
+    </a>
+    <div class="tunnel-secure" aria-label="Paiement sécurisé">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <span>Réservation sécurisée</span>
+    </div>
+    <div class="header-right">
+      <span class="hr-item"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C.5 8.4 2 5 5.5 5c2 0 3.4 1.2 4.5 2.6C11.1 6.2 12.5 5 14.5 5 18 5 19.5 8.4 22 11.8 19.5 16.4 12 21 12 21z"/></svg></span>
+      <span class="sep"></span>
+      <span class="hr-item"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Mon compte</span></span>
+    </div>
+  </div>
+</header>
+
+<main class="resa-main">
+  <div class="wrap">
+
+    <!-- Fil d'ariane / retour -->
+    <a class="resa-back" href="hotel.html">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      Retour à la fiche du Meurice
+    </a>
+
+    <!-- ============ STEPPER ============ -->
+    <nav class="stepper" aria-label="Étapes de la réservation">
+      <ol>
+        <li class="step is-active" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-lab">Votre séjour</span>
+        </li>
+        <li class="step" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-lab">Vos coordonnées</span>
+        </li>
+        <li class="step" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-lab">Paiement</span>
+        </li>
+        <li class="step" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-lab">Confirmation</span>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="resa-grid">
+      <!-- ============ COLONNE PRINCIPALE ============ -->
+      <div class="resa-col-main">
+
+        <!-- ÉTAPE 1 — Séjour & chambre -->
+        <section class="resa-panel is-active" data-panel="1" aria-labelledby="t-step1">
+          <span class="eyebrow">Étape 1 · Le carnet du Concierge</span>
+          <h1 id="t-step1">Composez votre séjour au Meurice</h1>
+          <p class="panel-lede">Choisissez vos dates et la chambre qui vous attend. Tous nos tarifs incluent le <strong>meilleur prix garanti</strong>, le petit-déjeuner offert et un surclassement selon disponibilité.</p>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="arrivee">Arrivée</label>
+              <input type="date" id="arrivee" name="arrivee">
+            </div>
+            <div class="field">
+              <label for="depart">Départ</label>
+              <input type="date" id="depart" name="depart">
+            </div>
+            <div class="field field-sm">
+              <label for="voyageurs">Voyageurs</label>
+              <select id="voyageurs" name="voyageurs">
+                <option value="1">1 voyageur</option>
+                <option value="2" selected>2 voyageurs</option>
+                <option value="3">3 voyageurs</option>
+                <option value="4">4 voyageurs</option>
+              </select>
+            </div>
+          </div>
+          <p class="field-hint" id="nights-hint">Sélectionnez vos dates pour calculer le nombre de nuits.</p>
+
+          <h2 class="sub-h">Votre chambre</h2>
+          <div class="room-list" role="radiogroup" aria-label="Choix de la chambre">
+
+            <label class="room-opt is-selected">
+              <input type="radio" name="room" value="deluxe" data-price="1290" data-name="Chambre Deluxe" checked>
+              <span class="room-media"><img src="assets/img/htl_resto.jpg" alt="Chambre Deluxe du Meurice" width="220" height="160" loading="lazy" decoding="async"></span>
+              <span class="room-info">
+                <span class="room-name">Chambre Deluxe</span>
+                <span class="room-desc">38 m² · vue cour · lit king-size · marbre &amp; boiseries</span>
+                <span class="room-perks"><em>Petit-déjeuner offert</em> · Annulation gratuite 48h</span>
+              </span>
+              <span class="room-price"><strong>1&nbsp;290&nbsp;€</strong><small>/ nuit</small></span>
+            </label>
+
+            <label class="room-opt">
+              <input type="radio" name="room" value="prestige" data-price="2480" data-name="Suite Prestige">
+              <span class="room-media"><img src="assets/img/htl_suite.jpg" alt="Suite Prestige du Meurice" width="220" height="160" loading="lazy" decoding="async"></span>
+              <span class="room-info">
+                <span class="room-name">Suite Prestige</span>
+                <span class="room-desc">65 m² · vue jardin des Tuileries · salon séparé</span>
+                <span class="room-perks"><em>Petit-déjeuner offert</em> · Surclassement prioritaire</span>
+              </span>
+              <span class="room-price"><strong>2&nbsp;480&nbsp;€</strong><small>/ nuit</small></span>
+            </label>
+
+            <label class="room-opt">
+              <input type="radio" name="room" value="belle-etoile" data-price="9800" data-name="Suite Belle Étoile">
+              <span class="room-media"><img src="assets/img/htl_facade.jpg" alt="Suite Belle Étoile du Meurice, terrasse panoramique" width="220" height="160" loading="lazy" decoding="async"></span>
+              <span class="room-info">
+                <span class="room-name">Suite Belle Étoile</span>
+                <span class="room-desc">230 m² · terrasse 360° · majordome privé</span>
+                <span class="room-perks"><em>Conciergerie dédiée</em> · Transfert privé inclus</span>
+              </span>
+              <span class="room-price"><strong>9&nbsp;800&nbsp;€</strong><small>/ nuit</small></span>
+            </label>
+
+          </div>
+
+          <div class="panel-actions">
+            <span></span>
+            <button type="button" class="btn btn-or" data-next>Continuer vers mes coordonnées</button>
+          </div>
+        </section>
+
+        <!-- ÉTAPE 2 — Coordonnées -->
+        <section class="resa-panel" data-panel="2" aria-labelledby="t-step2" hidden>
+          <span class="eyebrow">Étape 2 · Faisons connaissance</span>
+          <h1 id="t-step2">Vos coordonnées</h1>
+          <p class="panel-lede">Le Concierge a besoin de quelques informations pour préparer votre arrivée. Vos données restent confidentielles.</p>
+
+          <form id="form-coord" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label for="prenom">Prénom *</label>
+                <input type="text" id="prenom" name="prenom" autocomplete="given-name" required>
+              </div>
+              <div class="field">
+                <label for="nom">Nom *</label>
+                <input type="text" id="nom" name="nom" autocomplete="family-name" required>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label for="tel">Téléphone *</label>
+                <input type="tel" id="tel" name="tel" autocomplete="tel" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="demandes">Demandes spéciales <span class="opt">(optionnel)</span></label>
+              <textarea id="demandes" name="demandes" rows="3" placeholder="Étage élevé, fleurs à l'arrivée, réservation au restaurant…"></textarea>
+              <p class="field-hint">Le conseil du Concierge : précisez-nous l'occasion, nous nous occupons du reste.</p>
+            </div>
+          </form>
+
+          <div class="panel-actions">
+            <button type="button" class="btn-ghost" data-prev>Retour</button>
+            <button type="button" class="btn btn-or" data-next data-validate="form-coord">Continuer vers le paiement</button>
+          </div>
+        </section>
+
+        <!-- ÉTAPE 3 — Paiement -->
+        <section class="resa-panel" data-panel="3" aria-labelledby="t-step3" hidden>
+          <span class="eyebrow">Étape 3 · Dernière formalité</span>
+          <h1 id="t-step3">Paiement sécurisé</h1>
+          <p class="panel-lede">Le paiement est <strong>chiffré et sécurisé</strong>. Sur les tarifs flexibles, vous n'êtes débité qu'à l'hôtel — l'annulation reste gratuite jusqu'à 48h avant l'arrivée.</p>
+
+          <div class="pay-methods" role="radiogroup" aria-label="Mode de paiement">
+            <label class="pay-opt is-selected"><input type="radio" name="pay" value="card" checked> Carte bancaire</label>
+            <label class="pay-opt"><input type="radio" name="pay" value="hotel"> Payer à l'hôtel</label>
+          </div>
+
+          <form id="form-pay" novalidate>
+            <div class="field" data-pay-card>
+              <label for="cardname">Titulaire de la carte *</label>
+              <input type="text" id="cardname" name="cardname" autocomplete="cc-name" required>
+            </div>
+            <div class="field" data-pay-card>
+              <label for="cardnum">Numéro de carte *</label>
+              <input type="text" id="cardnum" name="cardnum" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+            </div>
+            <div class="field-row" data-pay-card>
+              <div class="field">
+                <label for="cardexp">Expiration *</label>
+                <input type="text" id="cardexp" name="cardexp" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" required>
+              </div>
+              <div class="field field-sm">
+                <label for="cardcvc">CVC *</label>
+                <input type="text" id="cardcvc" name="cardcvc" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="cc-csc" required>
+              </div>
+            </div>
+            <label class="check-line">
+              <input type="checkbox" id="cgv" name="cgv" required>
+              <span>J'accepte les conditions de réservation et la politique de confidentialité.</span>
+            </label>
+          </form>
+
+          <div class="trust-row">
+            <span class="trust-chip"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Paiement chiffré SSL</span>
+            <span class="trust-chip"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Meilleur tarif garanti</span>
+            <span class="trust-chip"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg> Annulation 48h</span>
+          </div>
+
+          <div class="panel-actions">
+            <button type="button" class="btn-ghost" data-prev>Retour</button>
+            <button type="button" class="btn btn-or" data-confirm data-validate="form-pay">Confirmer la réservation</button>
+          </div>
+        </section>
+
+        <!-- ÉTAPE 4 — Confirmation -->
+        <section class="resa-panel resa-confirm" data-panel="4" aria-labelledby="t-step4" hidden>
+          <div class="confirm-seal">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <span class="eyebrow">Nous vous attendions.</span>
+          <h1 id="t-step4">Votre séjour est confirmé</h1>
+          <p class="panel-lede">Un email récapitulatif vient de vous être envoyé. Le Concierge prépare déjà votre arrivée au Meurice.</p>
+
+          <div class="confirm-ref">
+            <span>Référence de réservation</span>
+            <strong id="confirm-code">MCH-—</strong>
+          </div>
+
+          <div class="confirm-recap" id="confirm-recap"></div>
+
+          <div class="confirm-next">
+            <h2 class="sub-h">La suite, en de bonnes mains</h2>
+            <ul class="cf-list">
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Notre Concierge vous contacte sous 24h pour vos demandes spéciales.</li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Surclassement confirmé selon disponibilité à l'arrivée.</li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Conciergerie 24/7 joignable jusqu'à votre départ.</li>
+            </ul>
+          </div>
+
+          <div class="panel-actions center">
+            <a href="index.html" class="btn btn-or">Retour à l'accueil</a>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ============ RÉCAP STICKY ============ -->
+      <aside class="resa-summary" aria-label="Récapitulatif de votre réservation">
+        <div class="sum-card">
+          <div class="sum-media">
+            <img src="assets/img/htl_facade.jpg" alt="Le Meurice, palace parisien rue de Rivoli" width="360" height="220" loading="lazy">
+          </div>
+          <div class="sum-body">
+            <span class="sum-stars">★★★★★ <span class="htl-palace">Palace</span></span>
+            <h3>Le Meurice</h3>
+            <span class="sum-loc">Paris 1ᵉʳ · 228 rue de Rivoli</span>
+
+            <div class="sum-lines">
+              <div class="sum-line"><span>Chambre</span><span id="sum-room">Chambre Deluxe</span></div>
+              <div class="sum-line"><span>Dates</span><span id="sum-dates">À définir</span></div>
+              <div class="sum-line"><span>Voyageurs</span><span id="sum-guests">2 voyageurs</span></div>
+              <div class="sum-line"><span id="sum-calc">Tarif / nuit</span><span id="sum-rate">1&nbsp;290&nbsp;€</span></div>
+            </div>
+
+            <div class="sum-perks">
+              <span><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Petit-déjeuner offert</span>
+              <span><svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Surclassement selon dispo</span>
+            </div>
+
+            <div class="sum-total">
+              <span>Total</span>
+              <strong id="sum-total">1&nbsp;290&nbsp;€</strong>
+            </div>
+            <p class="sum-note">Meilleur tarif garanti · sans intermédiaire · taxes incluses.</p>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<!-- ============ FOOTER (réduit : tunnel) ============ -->
+<footer class="footer footer-slim">
+  <div class="wrap foot-bottom">
+    <span>© 2026 MyConciergeHotel — Tous droits réservés.</span>
+    <span class="fb-iata">Agence IATA · Meilleur tarif garanti · Sans intermédiaire</span>
+  </div>
+</footer>
+
+<script src="assets/reserver.js" defer></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

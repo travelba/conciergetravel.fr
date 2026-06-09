@@ -39,13 +39,36 @@
       "rate": "Meilleur tarif négocié",
       "payment": "Paiement sécurisé"
     },
+    "atouts": {
+      "ariaLabel": "Nos atouts",
+      "selection": {
+        "title": "Sélection éditoriale",
+        "desc": "Chaque maison visitée et choisie une à une par nos concierges."
+      },
+      "iata": {
+        "title": "Agence IATA / APST",
+        "desc": "Tarifs nets, sans intermédiaire, garanties professionnelles."
+      },
+      "advice": {
+        "title": "Le conseil du Concierge",
+        "desc": "Un secret opérationnel au bas de chaque fiche hôtel."
+      },
+      "loyalty": {
+        "title": "Programme fidélité",
+        "desc": "Surclassements et privilèges VIP réservés aux membres."
+      }
+    },
     "hero": {
-      "posterAlt": "Suite d'un Palace parisien au crépuscule, vue sur les toits — sélection MyConciergeHotel",
+      "posterAlt": "Le Concierge de MyConciergeHotel, en manteau bordeaux, présente une adresse d'exception à un couple élégant dans un salon parisien face à la tour Eiffel",
       "searchTitle": "Rechercher un hôtel d'exception",
       "searchSubmit": "Rechercher",
       "searchSubmitAria": "Lancer la recherche dans le catalogue",
       "searchPreviewDates": "Dates",
-      "searchPreviewGuests": "Voyageurs"
+      "searchPreviewGuests": "Voyageurs",
+      "destinationLabel": "Destination",
+      "destinationPlaceholder": "Hôtel, ville ou pays ?",
+      "datesPlaceholder": "Arrivée – Départ",
+      "guestsDefault": "2 voyageurs"
     },
     "aeo": {
       "intro": "Ce que vous voulez savoir",
@@ -89,7 +112,12 @@
       "title": "Le Concierge Club — la conciergerie en accès libre",
       "body": "Créez un compte gratuit pour accéder à l'agenda de la conciergerie, sauvegarder vos sélections et recevoir les conseils opérationnels des Palaces choisis. Tier Prestige sur invitation — liste d'attente ouverte sur la même page.",
       "ctaDiscover": "Découvrir Le Concierge Club",
-      "ctaPrestige": "Espace Prestige"
+      "ctaPrestige": "Espace Prestige",
+      "benefit1": "Surclassements & attentions VIP",
+      "benefit2": "Conciergerie disponible 24h/24",
+      "benefit3": "Meilleur tarif garanti, sans intermédiaire",
+      "benefit4": "Vos adresses favorites enregistrées",
+      "visualAlt": "Le Concierge de MyConciergeHotel tenant le livre d'or des membres du Concierge Club, illustration aquarelle"
     },
     "openings": {
       "eyebrow": "Récemment passés au crible",
@@ -2569,6 +2597,7 @@
   "footer": {
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. Tous droits réservés.",
+    "iataLine": "Agence IATA · Meilleur tarif garanti · Sans intermédiaire",
     "tagline": "La sélection du Concierge — hôtels d'exception dans le monde. Sélection éditoriale, Conseil du Concierge par fiche, agence IATA accréditée.",
     "trust": {
       "iata": "Agence IATA / APST",

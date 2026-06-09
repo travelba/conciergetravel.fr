@@ -72,10 +72,15 @@ export async function SiteHeader(): Promise<ReactElement> {
         <div className="container mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-3">
           <Link
             href="/"
-            className="text-primary-heritage focus-visible:ring-ring font-serif text-lg tracking-tight hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+            className="focus-visible:ring-ring flex items-center gap-2.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
             aria-label={t('brand')}
           >
-            {t('brand')}
+            <span className="text-primary-heritage font-serif text-[1.7rem] font-medium leading-none tracking-[0.04em]">
+              M<span className="text-gold-700">C</span>
+            </span>
+            <span className="text-primary-heritage hidden font-serif text-lg leading-none tracking-[0.01em] sm:inline">
+              {t('brand')}
+            </span>
           </Link>
 
           <nav
@@ -158,7 +163,7 @@ function MegaTrigger({
         href={href}
         aria-haspopup="menu"
         aria-label={triggerAria}
-        className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2"
+        className="text-fg hover:text-gold-700 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors focus-visible:outline-none focus-visible:ring-2"
       >
         {label}
         <svg

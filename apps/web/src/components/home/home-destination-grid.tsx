@@ -92,25 +92,19 @@ function DestinationTileInner({
           cloudName={cloudName}
           publicId={imagePublicId}
           alt={label}
-          width={640}
-          height={800}
-          transforms="f_auto,q_auto:good,c_fill,g_auto,w_640,h_800"
-          sizes="(max-width: 640px) 72vw, (max-width: 1024px) 33vw, 25vw"
-          className="ease-editorial absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-[1.05] motion-reduce:transition-none"
+          width={520}
+          height={520}
+          transforms="f_auto,q_auto:good,c_fill,g_auto,w_520,h_520"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+          className="h-full w-full"
         />
       ) : (
         <div aria-hidden className="bg-charcoal absolute inset-0" />
       )}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
-      />
-      <div className="absolute inset-x-0 bottom-0 p-4">
-        <p className="font-serif text-xl leading-snug text-white">{label}</p>
-        {caption.length > 0 ? (
-          <p className="text-gold-200 mt-1 text-[11px] uppercase tracking-[0.18em]">{caption}</p>
-        ) : null}
-      </div>
+      <span className="dt-label">
+        {label}
+        {caption.length > 0 ? <em>{caption}</em> : null}
+      </span>
     </>
   );
 }
@@ -140,64 +134,62 @@ export async function HomeDestinationGrid({
   const eyebrow = t('featuredDestinations.eyebrow');
 
   return (
-    <section
-      aria-labelledby="home-featured-destinations"
-      className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-    >
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div className="max-w-2xl">
-          <p className="text-muted text-xs uppercase tracking-[0.18em]">{eyebrow}</p>
-          <h2
-            id="home-featured-destinations"
-            className="text-fg mt-2 font-serif text-3xl sm:text-4xl"
-          >
-            {t('featuredDestinations.title')}
-          </h2>
-          <p className="text-muted mt-3 text-sm sm:text-base">
-            {t('featuredDestinations.subtitle')}
-          </p>
-        </div>
-        <Link
-          href="/destination"
-          className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-        >
-          {t('featuredDestinations.seeAll')}
-        </Link>
-      </div>
+    <div className="mch-kit">
+      <section
+        className="section-pad"
+        id="destinations"
+        aria-labelledby="home-featured-destinations"
+      >
+        <div className="wrap">
+          <div className="mag-head">
+            <div className="mh-left">
+              <span className="eyebrow left">{eyebrow}</span>
+              <h2 id="home-featured-destinations">{t('featuredDestinations.title')}</h2>
+              <p>{t('featuredDestinations.subtitle')}</p>
+            </div>
+            <Link href="/destination" className="link-or">
+              {t('featuredDestinations.seeAll')} →
+            </Link>
+          </div>
 
-      {/*
-        Mobile : carrousel snap horizontal (peek ~28 %). Desktop : grille
-        2 → 4 colonnes de tuiles photo verticales (aspect 4/5).
-        Voir `.cursor/skills/responsive-ui-architecture/SKILL.md`.
-      */}
-      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
-        {destinations.map((d) => {
-          const liClassName =
-            'group relative aspect-[4/5] shrink-0 basis-[72%] snap-start overflow-hidden rounded-2xl sm:basis-auto';
-          const linkClassName =
-            'focus-visible:ring-ring block h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2';
-          if (d.variant === 'city') {
-            return (
-              <li key={d.key} className={liClassName}>
+          <div className="dest-grid">
+            {destinations.map((d) => {
+              if (d.variant === 'city') {
+                return (
+                  <Link
+                    key={d.key}
+                    href={{ pathname: '/destination/[citySlug]', params: { citySlug: d.citySlug } }}
+                    aria-label={d.label}
+                    className="dest-tile"
+                  >
+                    <DestinationTileInner
+                      label={d.label}
+                      caption={d.hint}
+                      imagePublicId={d.imagePublicId}
+                      cloudName={cloudName}
+                    />
+                  </Link>
+                );
+              }
+              if (d.variant === 'country') {
+                return (
+                  <Link key={d.key} href={d.href} aria-label={d.label} className="dest-tile">
+                    <DestinationTileInner
+                      label={d.label}
+                      caption={eyebrow}
+                      imagePublicId={d.imagePublicId}
+                      cloudName={cloudName}
+                    />
+                  </Link>
+                );
+              }
+              return (
                 <Link
-                  href={{ pathname: '/destination/[citySlug]', params: { citySlug: d.citySlug } }}
+                  key={d.key}
+                  href={{ pathname: '/classement/[slug]', params: { slug: d.rankingSlug } }}
                   aria-label={d.label}
-                  className={linkClassName}
+                  className="dest-tile"
                 >
-                  <DestinationTileInner
-                    label={d.label}
-                    caption={d.hint}
-                    imagePublicId={d.imagePublicId}
-                    cloudName={cloudName}
-                  />
-                </Link>
-              </li>
-            );
-          }
-          if (d.variant === 'country') {
-            return (
-              <li key={d.key} className={liClassName}>
-                <Link href={d.href} aria-label={d.label} className={linkClassName}>
                   <DestinationTileInner
                     label={d.label}
                     caption={eyebrow}
@@ -205,27 +197,11 @@ export async function HomeDestinationGrid({
                     cloudName={cloudName}
                   />
                 </Link>
-              </li>
-            );
-          }
-          return (
-            <li key={d.key} className={liClassName}>
-              <Link
-                href={{ pathname: '/classement/[slug]', params: { slug: d.rankingSlug } }}
-                aria-label={d.label}
-                className={linkClassName}
-              >
-                <DestinationTileInner
-                  label={d.label}
-                  caption={eyebrow}
-                  imagePublicId={d.imagePublicId}
-                  cloudName={cloudName}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

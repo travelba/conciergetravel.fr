@@ -7,14 +7,11 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 /**
- * `<HomeClubRibbon>` — Le Concierge Club institutional ribbon.
- *
- * After the 2026-05-26 PO consolidation, both tiers (free Club +
- * Prestige waitlist) live on a single landing — the ribbon now
- * carries one canonical CTA and the Prestige tier is discovered
- * in-page (`#prestige` anchor). Single-row framed border so it
- * reads as institutional rather than promotional — Phase 1 only
- * advertises the free tier perks (ADR-0020 SEA constraints).
+ * `<HomeClubRibbon>` — Le Concierge Club ported to the HTML kit `club`
+ * layout (design/html-kit/index.html §"Le Concierge Club"). Watercolour
+ * visual + benefits checklist + single canonical CTA. Phase 1 only
+ * advertises the free tier perks (ADR-0020 SEA constraints); the
+ * Prestige tier is discovered in-page on `/le-concierge-club`.
  *
  * Pure RSC.
  */
@@ -24,29 +21,38 @@ export async function HomeClubRibbon({
   readonly locale: Locale;
 }): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'homepage.clubRibbon' });
+  const benefits = [t('benefit1'), t('benefit2'), t('benefit3'), t('benefit4')];
 
   return (
-    <section
-      aria-labelledby="home-club-ribbon-title"
-      className="border-border container mx-auto max-w-screen-xl border-t px-4 py-10 sm:py-12"
-    >
-      <div className="border-border bg-muted/5 flex flex-col items-start gap-5 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <div className="max-w-2xl">
-          <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-          <h2 id="home-club-ribbon-title" className="text-fg mt-2 font-serif text-2xl sm:text-3xl">
-            {t('title')}
-          </h2>
-          <p className="text-muted mt-2 text-sm sm:text-base">{t('body')}</p>
+    <div className="mch-kit">
+      <section className="club" id="le-concierge-club" aria-labelledby="home-club-ribbon-title">
+        <div className="wrap club-inner">
+          <div className="club-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/kit/img/club_concierge.jpg" alt={t('visualAlt')} loading="lazy" />
+          </div>
+          <div className="club-body">
+            <div className="club-tx">
+              <span className="eyebrow left">{t('eyebrow')}</span>
+              <h2 id="home-club-ribbon-title">{t('title')}</h2>
+              <p>{t('body')}</p>
+              <Link href="/le-concierge-club" className="btn btn-or">
+                {t('ctaDiscover')}
+              </Link>
+            </div>
+            <ul className="club-list">
+              {benefits.map((b) => (
+                <li key={b}>
+                  <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <Link
-            href="/le-concierge-club"
-            className="bg-primary-heritage text-off-white hover:bg-primary-heritage/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-          >
-            {t('ctaDiscover')}
-          </Link>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

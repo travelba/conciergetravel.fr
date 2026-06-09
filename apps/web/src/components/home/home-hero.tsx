@@ -3,20 +3,16 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
-import { CatalogSearchForm } from '@/components/search/catalog-search-form';
+import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { CATALOGUE_COUNTRIES, CATALOGUE_PUBLISHED } from '@/lib/catalogue-stats';
-import { resolveHomeHeroMedia } from '@/lib/home/hero-media';
-
-import { HomeHeroVideo } from './home-hero-video';
 
 /**
  * Format a catalogue stat with locale-aware thousands separators.
  *
  * Server-side `Intl.NumberFormat` is locale-safe; the function is pure
  * and ships a stable string into the hero so the LCP text is identical
- * between SSR and the (absent) client hydration of this Server
- * Component. Avoids the "2,193 → 2 193" hydration mismatch trap.
+ * between SSR and the (absent) client hydration of this Server Component.
  */
 function formatStat(n: number, locale: Locale): string {
   const tag = locale === 'en' ? 'en-US' : 'fr-FR';
@@ -24,97 +20,141 @@ function formatStat(n: number, locale: Locale): string {
 }
 
 /**
- * `<HomeHero>` — editorial hero block with optional Cloudinary video
- * background and a search Booking-style form preview.
+ * `<HomeHero>` — editorial hero ported from the HTML kit
+ * (design/html-kit/index.html §hero). Full-bleed painted "Concierge"
+ * photo with a left-anchored dark scrim, eyebrow, H1, signature stats,
+ * lede, réassurance pills and an integrated Booking-style search bar.
  *
- * - Server Component. The hero copy (eyebrow, H1, subtitle, trust
- *   pills) renders SSR so LCP is met on a cold cache.
- * - The video background is delegated to `<HomeHeroVideo>`, a client
- *   island that respects `prefers-reduced-motion` and pauses on tab
- *   visibility loss.
- * - Falls back to a sober dark gradient when Cloudinary is not
- *   configured (preview environments, local dev without env vars).
- * - The search form posts only `destination` — Phase 1 keeps Amadeus
- *   gated (AGENTS.md §4ter). The visual `dates` / `guests` placeholders
- *   are disabled and carry no `name`.
+ * Server Component — the hero copy renders SSR so LCP is met on a cold
+ * cache. The search bar posts only `destination` to the locale-aware
+ * `/recherche` (Phase 1 keeps Amadeus gated — AGENTS.md §4ter); the
+ * dates / guests cells are sober disabled placeholders carrying no
+ * `name`, matching the layout users expect without wiring the funnel.
+ *
+ * `cloudName` is accepted for API compatibility with the previous video
+ * hero but is no longer used — the kit ships a fixed painted backdrop.
  */
 export async function HomeHero({
   locale,
-  cloudName,
 }: {
   readonly locale: Locale;
   readonly cloudName?: string;
 }): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'homepage' });
   const tHero = await getTranslations({ locale, namespace: 'homepage.hero' });
-  const media = resolveHomeHeroMedia(cloudName);
+  const tTrust = await getTranslations({ locale, namespace: 'homepage.trust' });
+  const action = getPathname({ locale, href: '/recherche' });
 
   return (
-    <section
-      aria-labelledby="home-hero-title"
-      className="relative isolate flex min-h-[640px] items-center overflow-hidden bg-[#0e0e10] text-white lg:min-h-[80vh]"
-    >
-      {/* Background layer — video if Cloudinary configured, sober
-          gradient otherwise. Both layers carry `aria-hidden` because
-          the brand copy is the accessible label. */}
-      <div className="absolute inset-0 -z-10">
-        {media !== null ? (
-          <HomeHeroVideo
-            videoUrl={media.videoUrl}
-            posterUrl={media.posterUrl}
-            posterAlt={tHero('posterAlt')}
-          />
-        ) : (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-br from-[#1c1c20] via-[#0e0e10] to-[#000000]"
-          />
-        )}
-        {/* Directional overlay: darker at the bottom (legibility under the
-            copy + search form), lighter at the top — more cinematic than a
-            flat scrim. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/25"
+    <div className="mch-kit">
+      <section aria-labelledby="home-hero-title" className="hero">
+        {/* Painted "Concierge" hero — decorative; the copy below is the
+            accessible label. Plain <img> + fetchPriority for LCP. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="hero-bg"
+          src="/kit/img/hero.jpg"
+          alt={tHero('posterAlt')}
+          fetchPriority="high"
         />
-        {/* Elegant fade into the page background so the dark hero doesn't
-            cut off with a hard edge. */}
-        <div
-          aria-hidden
-          className="from-bg absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t to-transparent"
-        />
-      </div>
+        <div aria-hidden className="hero-overlay" />
 
-      <div className="container mx-auto max-w-screen-xl px-4 py-20 sm:py-28 lg:py-32">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
-          <p className="flex items-center justify-center gap-3 text-xs font-medium uppercase tracking-[0.22em] text-white/70">
-            <span aria-hidden className="bg-gold h-px w-8" />
-            {t('eyebrow')}
-            <span aria-hidden className="bg-gold h-px w-8" />
-          </p>
-          <h1
-            id="home-hero-title"
-            className="font-serif text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl"
-          >
-            {t('title')}
-          </h1>
-          <p className="-mt-2 font-serif text-base italic text-white/80 sm:text-lg">
-            {t('stats', {
-              countries: formatStat(CATALOGUE_COUNTRIES, locale),
-              hotels: formatStat(CATALOGUE_PUBLISHED, locale),
-            })}
-          </p>
-          <p className="max-w-prose text-lg text-white/90 sm:text-xl">
-            {t('subtitle')}
-            <br />
-            {t('subtitleSecondary')}
-          </p>
+        <div className="wrap hero-grid">
+          <div className="hero-content">
+            <span className="eyebrow">{t('eyebrow')}</span>
+            <h1 id="home-hero-title">{t('title')}</h1>
+            <p className="hero-sub">
+              {t('stats', {
+                countries: formatStat(CATALOGUE_COUNTRIES, locale),
+                hotels: formatStat(CATALOGUE_PUBLISHED, locale),
+              })}
+            </p>
+            <p className="hero-para">
+              {t('subtitle')} {t('subtitleSecondary')}
+            </p>
 
-          <div className="mt-4 w-full max-w-3xl">
-            <CatalogSearchForm locale={locale} variant="hero" previewExtras />
+            <div className="hero-trust">
+              <span className="trust-pill">
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+                {tTrust('iata')}
+              </span>
+              <span className="trust-pill">
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <rect x="3" y="6" width="18" height="12" rx="2" />
+                  <path d="M3 10h18" />
+                </svg>
+                {tTrust('aspst')}
+              </span>
+              <span className="trust-pill">
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                {tTrust('amadeus')}
+              </span>
+            </div>
+
+            <form
+              className="search-bar"
+              role="search"
+              action={action}
+              method="get"
+              aria-label={tHero('searchTitle')}
+            >
+              <div className="sb-field">
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <span className="sb-text">
+                  <label htmlFor="home-hero-destination">{tHero('destinationLabel')}</label>
+                  <input
+                    id="home-hero-destination"
+                    name="destination"
+                    type="text"
+                    autoComplete="off"
+                    placeholder={tHero('destinationPlaceholder')}
+                    className="sb-val"
+                  />
+                </span>
+              </div>
+              <div className="sb-field" aria-hidden>
+                <svg className="icon" viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M3 9h18M8 3v4M16 3v4" />
+                </svg>
+                <span className="sb-text">
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--or)]">
+                    {tHero('searchPreviewDates')}
+                  </span>
+                  <span className="sb-val muted">{tHero('datesPlaceholder')}</span>
+                </span>
+              </div>
+              <div className="sb-field" aria-hidden>
+                <svg className="icon" viewBox="0 0 24 24">
+                  <circle cx="9" cy="8" r="3.2" />
+                  <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5a3 3 0 0 1 0 6M18 20c0-2.5-1-4.2-2.5-5.2" />
+                </svg>
+                <span className="sb-text">
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--or)]">
+                    {tHero('searchPreviewGuests')}
+                  </span>
+                  <span className="sb-val">{tHero('guestsDefault')}</span>
+                </span>
+              </div>
+              <button
+                type="submit"
+                className="btn btn-or search-go"
+                aria-label={tHero('searchSubmitAria')}
+              >
+                {tHero('searchSubmit')}
+              </button>
+            </form>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

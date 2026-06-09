@@ -94,7 +94,10 @@ export const config = {
   // SVG marks, etc.) — same trap as `sitemaps`: without the explicit
   // exclusion next-intl rewrites `/logos/foo.png` to `/fr/logos/foo.png`
   // which 404s, and the `next/image` lambda then 404s in turn.
+  // `kit` covers the HTML-kit static art direction assets in `public/kit/*`
+  // (hero, mosaic, concierge portrait…) — same trap: without it next-intl
+  // rewrites `/kit/img/hero.jpg` to `/fr/kit/img/hero.jpg` which 404s.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit).*)',
   ],
 };

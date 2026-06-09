@@ -83,8 +83,13 @@ export async function SiteFooter(): Promise<ReactElement> {
               which is currently `noindex, follow` until counsel signs
               off (see `mentions-legales/page.tsx` IS_DRAFT). */}
           <div className="lg:col-span-1">
-            <p className="text-primary-heritage font-serif text-lg">{t('company')}</p>
-            <p className="text-muted mt-2 text-sm">{t('tagline')}</p>
+            <p className="text-primary-heritage flex items-center gap-2.5 font-serif">
+              <span className="text-[2.4rem] font-medium leading-none tracking-[0.04em]">
+                M<span className="text-gold-700">C</span>
+              </span>
+              <span className="text-lg leading-tight">{t('company')}</span>
+            </p>
+            <p className="text-gold-700 mt-2 font-serif text-base italic">{t('tagline')}</p>
             <ul className="mt-4 flex flex-col gap-1.5 text-xs">
               <li className="text-muted flex items-start gap-1.5">
                 <span aria-hidden className="text-gold-700">
@@ -534,6 +539,7 @@ export async function SiteFooter(): Promise<ReactElement> {
 
         <div className="border-border text-muted mt-6 flex flex-col gap-3 border-t pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>{t('rights', { year })}</p>
+          <p className="text-gold-700 tracking-[0.1em]">{t('iataLine')}</p>
           <ConsentManageLink />
         </div>
       </div>

@@ -15,6 +15,7 @@ import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import '@/styles/globals.css';
+import '@/styles/kit.css';
 
 // Body / UI font — validated brand dossier (DA crème/taupe): Outfit (sans).
 const sans = Outfit({

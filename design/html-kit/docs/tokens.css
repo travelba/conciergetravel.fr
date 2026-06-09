@@ -1,0 +1,67 @@
+/* ============================================================
+   MyConciergeHotel — Design Tokens (source de vérité)
+   OTA luxe éditorial · vraies photos de luxe · ton concierge
+   Extrait du code de production (assets/style.css)
+   À importer en tête de tout projet (Cursor / Bolt / Tailwind).
+   ============================================================ */
+:root {
+  /* ---------- COULEURS — Neutres chauds (jamais de noir profond) ---------- */
+  --noir: #3a352d; /* taupe très foncé — titres, boutons pleins */
+  --anthracite: #4a4439; /* taupe chaud — hover bouton, citations */
+  --texte: #2b2722; /* texte courant */
+  --texte-doux: #6f675b; /* texte secondaire, légendes */
+
+  /* ---------- COULEURS — Accent (taupe sobre, JAMAIS d'or jaune) ---------- */
+  --or: #8c7b5a; /* accent principal (eyebrow, liens, étoiles) */
+  --or-clair: #a89671; /* accent clair sur fond sombre/photo */
+  --accent: #8c7b5a; /* alias sémantique de --or */
+
+  /* ---------- COULEURS — Fonds crème (JAMAIS de fond sombre) ---------- */
+  --creme: #f6f1e7; /* fond principal */
+  --creme-2: #efe8da; /* fond de section alternée */
+  --creme-3: #e8e0d0; /* fond footer / bandeaux */
+  --blanc: #ffffff; /* cartes */
+
+  /* ---------- LIGNES & OMBRES ---------- */
+  --ligne: rgba(140, 123, 90, 0.28); /* filets, bordures cartes */
+  --shadow-soft: 0 10px 30px rgba(22, 20, 15, 0.1);
+  --shadow: 0 18px 50px rgba(22, 20, 15, 0.18);
+
+  /* ---------- TYPOGRAPHIE ---------- */
+  --serif: 'EB Garamond', 'Cormorant Garamond', Georgia, serif; /* titres, citations, prix */
+  --sans: 'Outfit', 'Jost', system-ui, sans-serif; /* UI, corps, eyebrow */
+
+  /* échelle fluide (clamp) — alignée production */
+  --fs-h1: clamp(46px, 6.6vw, 92px);
+  --fs-h1-interne: clamp(34px, 5vw, 58px); /* H1 pages classement/guide */
+  --fs-h2: clamp(30px, 4vw, 46px);
+  --fs-h3: 22px;
+  --fs-body: 16px;
+  --fs-body-lg: 17px;
+  --fs-caption: 13px;
+  --fs-eyebrow: 12px;
+
+  --fw-light: 300; /* corps par défaut */
+  --fw-regular: 400;
+  --fw-medium: 500; /* titres, accents */
+
+  --lh-titre: 1.08;
+  --lh-corps: 1.6;
+
+  --ls-eyebrow: 0.34em; /* interlettrage majuscules eyebrow */
+  --ls-nav: 0.12em;
+  --ls-btn: 0.13em;
+
+  /* ---------- ESPACEMENTS & RAYONS ---------- */
+  --wrap: min(1240px, 92vw); /* conteneur centré */
+  --section-pad: 90px; /* padding vertical de section (desktop) */
+  --section-pad-mobile: 64px;
+  --radius-card: 8px;
+  --radius-card-lg: 14px;
+  --radius-pill: 999px;
+  --radius-btn: 2px;
+
+  /* ---------- TRANSITIONS ---------- */
+  --ease-image: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); /* zoom photo au hover */
+  --ease-ui: 0.28s ease;
+}

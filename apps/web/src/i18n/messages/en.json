@@ -39,13 +39,36 @@
       "rate": "Negotiated best rate",
       "payment": "Secure payment"
     },
+    "atouts": {
+      "ariaLabel": "Our strengths",
+      "selection": {
+        "title": "Editorial selection",
+        "desc": "Every property visited and hand-picked, one by one, by our concierges."
+      },
+      "iata": {
+        "title": "IATA / APST agency",
+        "desc": "Net rates, no middleman, professional guarantees."
+      },
+      "advice": {
+        "title": "The Concierge's tip",
+        "desc": "An operational secret at the foot of every hotel page."
+      },
+      "loyalty": {
+        "title": "Loyalty programme",
+        "desc": "Upgrades and VIP privileges reserved for members."
+      }
+    },
     "hero": {
       "posterAlt": "Parisian Palace suite at dusk, rooftops view — MyConciergeHotel selection",
       "searchTitle": "Search an extraordinary hotel",
       "searchSubmit": "Search",
       "searchSubmitAria": "Search the catalogue",
       "searchPreviewDates": "Dates",
-      "searchPreviewGuests": "Guests"
+      "searchPreviewGuests": "Guests",
+      "destinationLabel": "Destination",
+      "destinationPlaceholder": "Hotel, city or country?",
+      "datesPlaceholder": "Check-in – Check-out",
+      "guestsDefault": "2 guests"
     },
     "aeo": {
       "intro": "What you'll want to know",
@@ -89,7 +112,12 @@
       "title": "Le Concierge Club — open access to the concierge desk",
       "body": "Create a free account to unlock the concierge agenda, save your shortlist, and receive the operational tips of the Palaces we selected. Prestige tier is invitation-only — the waitlist sits on the same page.",
       "ctaDiscover": "Discover Le Concierge Club",
-      "ctaPrestige": "Prestige tier"
+      "ctaPrestige": "Prestige tier",
+      "benefit1": "Upgrades & VIP attentions",
+      "benefit2": "Concierge desk available 24/7",
+      "benefit3": "Best rate guaranteed, no middleman",
+      "benefit4": "Your favourite addresses saved",
+      "visualAlt": "The MyConciergeHotel Concierge holding the Concierge Club members' golden book, watercolour illustration"
     },
     "openings": {
       "eyebrow": "Recently visited",
@@ -2569,6 +2597,7 @@
   "footer": {
     "company": "MyConciergeHotel",
     "rights": "© {year} MyConciergeHotel. All rights reserved.",
+    "iataLine": "IATA agency · Best rate guaranteed · No middleman",
     "tagline": "The Concierge's Selection — extraordinary hotels around the world. Editorial selection, Concierge's Tip on every page, IATA-accredited agency.",
     "trust": {
       "iata": "IATA / APST agency",

@@ -40,58 +40,47 @@ export async function HomeTopRankings({
   if (top6.length === 0) return null;
 
   return (
-    <section
-      aria-labelledby="home-top-rankings"
-      className="border-border container mx-auto max-w-screen-xl border-t px-4 py-14 sm:py-20"
-    >
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div className="max-w-2xl">
-          <p className="text-muted text-xs uppercase tracking-[0.18em]">{t('eyebrow')}</p>
-          <h2 id="home-top-rankings" className="text-fg mt-2 font-serif text-3xl sm:text-4xl">
-            {t('title')}
-          </h2>
-          <p className="text-muted mt-3 text-sm sm:text-base">{t('subtitle')}</p>
-        </div>
-        <Link
-          href="/classements"
-          className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex rounded-md px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
-        >
-          {t('seeAll')}
-        </Link>
-      </div>
+    <div className="mch-kit">
+      <section className="section-pad section-noir" id="offres" aria-labelledby="home-top-rankings">
+        <div className="wrap">
+          <div className="mag-head">
+            <div className="mh-left">
+              <span className="eyebrow left">{t('eyebrow')}</span>
+              <h2 id="home-top-rankings" className="on-dark">
+                {t('title')}
+              </h2>
+              <p className="on-dark-doux">{t('subtitle')}</p>
+            </div>
+            <Link href="/classements" className="link-or">
+              {t('seeAll')} →
+            </Link>
+          </div>
 
-      {/*
-        Mobile : carrousel snap horizontal (1 card visible + peek du
-        suivant). Desktop : grille 2-cols (sm) → 3-cols (lg). Voir
-        `.cursor/skills/responsive-ui-architecture/SKILL.md` §"Snap
-        carousels".
-      */}
-      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
-        {top6.map((r) => {
-          const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
-          const summary = pickByLocale(
-            locale,
-            r.factualSummaryFr ?? '',
-            r.factualSummaryEn ?? r.factualSummaryFr ?? '',
-          );
-          return (
-            <li key={r.slug} className="shrink-0 basis-[82%] snap-start sm:basis-auto">
-              <Link
-                href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
-                className="border-border bg-bg hover:bg-muted/5 focus-visible:ring-ring block h-full rounded-lg border p-5 transition-colors focus-visible:outline-none focus-visible:ring-2"
-              >
-                <p className="text-muted text-[10px] uppercase tracking-[0.18em]">
-                  {r.entryCount > 0 ? t('entryCount', { count: r.entryCount }) : null}
-                </p>
-                <h3 className="text-fg mt-1 font-serif text-lg leading-snug">{title}</h3>
-                {summary !== '' ? (
-                  <p className="text-muted mt-3 line-clamp-3 text-sm">{summary}</p>
-                ) : null}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+          <div className="rank-grid">
+            {top6.map((r) => {
+              const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
+              const summary = pickByLocale(
+                locale,
+                r.factualSummaryFr ?? '',
+                r.factualSummaryEn ?? r.factualSummaryFr ?? '',
+              );
+              return (
+                <Link
+                  key={r.slug}
+                  href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
+                  className="rank-card"
+                >
+                  {r.entryCount > 0 ? (
+                    <span className="rk-count">{t('entryCount', { count: r.entryCount })}</span>
+                  ) : null}
+                  <h3>{title}</h3>
+                  {summary !== '' ? <span className="rk-desc">{summary}</span> : null}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
