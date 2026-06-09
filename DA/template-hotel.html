@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  TEMPLATE FICHE HÔTEL — MyConciergeHotel
+  Structure conforme à l'organigramme (9 sections) · SEO/GEO prioritaire
+  ----------------------------------------------------------------------------
+  JETONS ATOMIQUES À REMPLACER (identité de l'établissement) :
+    {{HOTEL_SLUG}}        ex. les-airelles-gordes   (URL + dossier Cloudinary)
+    {{HOTEL_NAME}}        ex. {{HOTEL_NAME}}
+    {{HOTEL_TYPE}}        ex. Palace                 (utilisé dans le <title>)
+    {{CITY}}              ex. Gordes
+    {{REGION}}            ex. Provence-Alpes-Côte d'Azur
+    {{HOTEL_STREET}}      ex. {{HOTEL_STREET}}
+    {{HOTEL_POSTAL}}      ex. {{HOTEL_POSTAL}}
+    {{HOTEL_LAT}}         ex. {{HOTEL_LAT}}
+    {{HOTEL_LNG}}         ex. {{HOTEL_LNG}}
+    {{HOTEL_PHONE}}       ex. {{HOTEL_PHONE}}
+    {{HOTEL_EMAIL}}       ex. reservation@…
+    {{ROOMS_COUNT}}       ex. 40
+    {{RATING}}            ex. 4.6   (format point, JSON-LD)
+    {{RATING_FR}}         ex. {{RATING_FR}}   (format virgule, affichage FR)
+    {{REVIEW_COUNT}}      ex. {{REVIEW_COUNT}}
+    {{META_DESCRIPTION}}  meta description SEO (150-160 car., mot-clé en tête)
+    {{OG_DESCRIPTION}}    description Open Graph (peut = META_DESCRIPTION)
+  ----------------------------------------------------------------------------
+  ZONES DE CONTENU ÉDITORIAL À PERSONNALISER PAR HÔTEL (non tokenisées —
+  remplacer le texte d'exemple Airelles par le contenu réel de l'établissement) :
+    · Le mot du Concierge (citation + description SEO ~1500 mots)
+    · Chambres & suites (3 cartes + sélection concierge)
+    · L'hôtel en bref : services, expérience signature, restaurants, spa, kid club
+    · Ils en parlent : presse, distinctions (award[] du JSON-LD), Instagram
+    · Emplacement & accès : carte, conditions, accessibilité, avis
+    · Autour de l'hôtel : à visiter / à faire / commerces (badges « choix du concierge »)
+    · Questions fréquentes (FAQPage JSON-LD à synchroniser avec l'affichage)
+    · Le Concierge Club / Les hôtes à proximité
+  ----------------------------------------------------------------------------
+  RÈGLES : 1 seul <H1> · 4 blocs JSON-LD (Hotel, Restaurant, BreadcrumbList,
+  FAQPage) · AUCUNE API de stockage navigateur · robots index,follow.
+  ============================================================================
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- SEO : Title 50-60 car. · mot-clé en tête, marque en fin -->
+<title>{{HOTEL_NAME}} — {{HOTEL_TYPE}} {{CITY}} | MyConciergeHotel</title>
+<meta name="description" content="{{META_DESCRIPTION}}">
+<link rel="canonical" href="https://www.myconciergehotel.com/hotel/{{HOTEL_SLUG}}">
+<meta name="robots" content="index,follow">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyConciergeHotel">
+<meta property="og:title" content="{{HOTEL_NAME}} — {{HOTEL_TYPE}} {{CITY}}">
+<meta property="og:description" content="{{OG_DESCRIPTION}}">
+<meta property="og:image" content="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_jpg,q_auto,c_fill,g_auto,w_1200,h_630/cct/hotels/{{HOTEL_SLUG}}/press-1">
+<meta property="og:url" content="https://www.myconciergehotel.com/hotel/{{HOTEL_SLUG}}">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<!-- JSON-LD : Hotel + AggregateRating -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Hotel",
+  "name": "{{HOTEL_NAME}}",
+  "url": "https://www.myconciergehotel.com/hotel/{{HOTEL_SLUG}}",
+  "starRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+  "description": "Perchée sur les pentes escarpées du village de Gordes, classé parmi les plus beaux villages de France, La Bastide semble suspendue entre ciel et terre, avec une vue dégagée sur la vallée du Luberon. Palace distingué Atout France : {{ROOMS_COUNT}} chambres et suites, trois piscines, le Spa Airelles sous voûtes de pierre et six restaurants dont Clover Gordes, la table provençale du chef multi-étoilé Jean-François Piège.",
+  "image": [
+    "https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,w_1600,h_900,c_fill,g_auto/cct/hotels/{{HOTEL_SLUG}}/press-1",
+    "https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,w_1600,h_900,c_fill,g_auto/cct/hotels/{{HOTEL_SLUG}}/press-2",
+    "https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,w_1600,h_900,c_fill,g_auto/cct/hotels/{{HOTEL_SLUG}}/press-3"
+  ],
+  "telephone": "{{HOTEL_PHONE}}",
+  "award": [
+    "Distinction Palace — Atout France",
+    "Trois Clés MICHELIN — Guide MICHELIN, 2024",
+    "Forbes Travel Guide Five-Star",
+    "2 toques — Clover Gordes — Gault&Millau, 2025"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{HOTEL_STREET}}",
+    "addressLocality": "{{CITY}}",
+    "postalCode": "{{HOTEL_POSTAL}}",
+    "addressRegion": "{{REGION}}",
+    "addressCountry": "FR"
+  },
+  "geo": { "@type": "GeoCoordinates", "latitude": "{{HOTEL_LAT}}", "longitude": "{{HOTEL_LNG}}" },
+  "numberOfRooms": "{{ROOMS_COUNT}}",
+  "checkinTime": "15:00",
+  "checkoutTime": "12:00",
+  "petsAllowed": true,
+  "currenciesAccepted": "EUR",
+  "paymentAccepted": "Visa, Mastercard, American Express, Apple Pay, Google Pay",
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "Spa Airelles", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Trois piscines", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Restaurant gastronomique", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Hammam", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Sauna", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "Conciergerie 24h/24", "value": true }
+  ],
+  "priceRange": "€€€€",
+  "sameAs": [
+    "https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon",
+    "https://www.instagram.com/airellesgordes/",
+    "https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874",
+    "https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide"
+  ],
+  "dateModified": "2026-06-05",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{RATING}}",
+    "bestRating": "5",
+    "worstRating": "1",
+    "reviewCount": "{{REVIEW_COUNT}}"
+  }
+}
+</script>
+
+<!-- JSON-LD : Restaurant gastronomique (signal GEO) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Clover Gordes",
+  "url": "https://www.myconciergehotel.com/hotel/{{HOTEL_SLUG}}",
+  "image": "https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,w_1600,h_900,c_fill,g_auto/cct/hotels/{{HOTEL_SLUG}}/press-4",
+  "servesCuisine": ["Provençale", "Française", "Gastronomique"],
+  "priceRange": "€€€€",
+  "award": "2 toques — Gault&Millau, 2025",
+  "description": "La table provençale du chef multi-étoilé Jean-François Piège, au cœur du Palace Airelles Gordes. Une cuisine de produits du Luberon servie sous les voûtes de pierre de La Bastide.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{HOTEL_STREET}}",
+    "addressLocality": "{{CITY}}",
+    "postalCode": "{{HOTEL_POSTAL}}",
+    "addressRegion": "{{REGION}}",
+    "addressCountry": "FR"
+  },
+  "containedInPlace": {
+    "@type": "Hotel",
+    "name": "{{HOTEL_NAME}}"
+  }
+}
+</script>
+
+<!-- JSON-LD : Fil d'Ariane -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Hôtels", "item": "https://www.myconciergehotel.com/hotels" },
+    { "@type": "ListItem", "position": 2, "name": "France", "item": "https://www.myconciergehotel.com/hotels/france" },
+    { "@type": "ListItem", "position": 3, "name": "{{CITY}}", "item": "https://www.myconciergehotel.com/hotels/france/gordes" },
+    { "@type": "ListItem", "position": 4, "name": "{{HOTEL_NAME}}", "item": "https://www.myconciergehotel.com/hotel/{{HOTEL_SLUG}}" }
+  ]
+}
+</script>
+
+<!-- JSON-LD : FAQ (synchroniser avec la section #faq) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Où se situe exactement {{HOTEL_NAME}} ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "La Bastide se trouve au {{HOTEL_STREET}}, {{HOTEL_POSTAL}} Gordes, dans le village perché, dominant la vallée du Luberon. Comptez 50 minutes depuis la gare d’Avignon TGV et environ 1 h depuis l’aéroport Marseille-Provence." } },
+    { "@type": "Question", "name": "Combien de piscines y a-t-il à La Bastide ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "L’hôtel compte trois piscines : la piscine en terrasse extérieure cernée d’oliviers, la piscine intérieure sous les voûtes du Spa Airelles, et une piscine dédiée aux enfants au Summer Camp." } },
+    { "@type": "Question", "name": "Le restaurant Clover Gordes a-t-il une étoile Michelin ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Non. Clover Gordes est la table provençale du chef multi-étoilé Jean-François Piège, mais le restaurant lui-même n’est pas étoilé. Il est ouvert tous les jours, de 12h15 à 14h et de 19h15 à 21h45 ; réservation sur SevenRooms." } },
+    { "@type": "Question", "name": "Quels restaurants trouve-t-on à l’hôtel ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "La Bastide réunit six adresses : Clover Gordes (J-F Piège), La Table de La Bastide (cuisine provençale), le Brunch du Dimanche, La Bastide de Pierres (trattoria italienne), un salon de thé Ladurée et le Beefbar." } },
+    { "@type": "Question", "name": "Combien de chambres et de suites compte l’hôtel ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "La Bastide dispose de {{ROOMS_COUNT}} chambres et suites, des Chambres Supérieures aux suites de prestige (Vasarely, Baron de Simiane, Duc de Soubise), ainsi que la Maison de Constance, une villa privée de quatre chambres avec piscine." } },
+    { "@type": "Question", "name": "Les animaux de compagnie sont-ils acceptés ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Chiens et chats sont acceptés sur demande, dans certaines chambres et suites, moyennant 30 € par animal et par jour. À signaler lors de la réservation auprès de la conciergerie ; contactez l’hôtel au {{HOTEL_PHONE}} pour confirmer les conditions." } },
+    { "@type": "Question", "name": "À quelle période l’hôtel est-il ouvert ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "La Bastide est un établissement saisonnier, ouvert du printemps à l’automne. Le Beefbar ouvre le 4 juin 2026. Pour les dates exactes d’ouverture et de fermeture, contactez la conciergerie." } },
+    { "@type": "Question", "name": "Comment réserver une table ou un séjour ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Notre conciergerie organise l’ensemble de votre séjour : chambres, tables, soins et excursions. Contactez-nous au {{HOTEL_PHONE}} ou par e-mail à {{HOTEL_EMAIL}}." } },
+    { "@type": "Question", "name": "Quels services de bien-être propose le Spa Airelles ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Le Spa Airelles, installé sous des voûtes en pierre, propose soins du visage, massages, sauna, hammam et une piscine intérieure. Les soins se réservent auprès de la conciergerie." } },
+    { "@type": "Question", "name": "L’hôtel accueille-t-il les familles ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Oui. L’Airelles Summer Camp accueille les enfants dans un espace dédié aux jeux et activités, avec sa propre piscine sécurisée. Plusieurs suites et la Maison de Constance conviennent aux familles." } },
+    { "@type": "Question", "name": "Quelles sont les principales choses à voir autour de Gordes ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "À pied : le Château de Gordes (6 min) et les Caves du Palais Saint-Firmin (5 min). En voiture : le Village des Bories, l’Abbaye de Sénanque et ses lavandes, et le Musée du Moulin des Bouillons." } },
+    { "@type": "Question", "name": "Quand la lavande de l’Abbaye de Sénanque est-elle en fleur ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Les champs de lavande devant l’abbaye fleurissent généralement de la mi-juin à la mi-juillet. La visite de l’abbaye se fait sur réservation (senanque.fr), comptez 8 € la visite guidée." } },
+    { "@type": "Question", "name": "Pourquoi choisir {{HOTEL_NAME}} ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Pour un palace 5 étoiles distingué Atout France, suspendu au-dessus de la vallée du Luberon : {{ROOMS_COUNT}} chambres et suites, trois piscines, le Spa Airelles sous voûtes de pierre et six restaurants dont Clover Gordes par Jean-François Piège. Notre conseil du Concierge : demandez la chambre 412, vue cathédrale sans vis-à-vis, refaite en 2024." } }
+  ]
+}
+</script>
+</head>
+<body class="hotel-page">
+
+<!-- ============ HEADER ============ -->
+<header class="header" id="header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="brand" aria-label="MyConciergeHotel — accueil">
+      <span class="brand-mono">M<em>C</em></span>
+      <span class="brand-name">MyConciergeHotel</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="index.html#hotels">Hôtels</a>
+      <a href="index.html#destinations">Destinations</a>
+      <a href="index.html#experiences">Expériences</a>
+      <a href="index.html#offres">Offres</a>
+      <a href="index.html#concierge">Le Concierge</a>
+      <a href="index.html#magazine">Magazine</a>
+    </nav>
+    <div class="header-right">
+      <span class="hr-item" aria-label="Favoris"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C.5 8.4 2 5 5.5 5c2 0 3.4 1.2 4.5 2.6C11.1 6.2 12.5 5 14.5 5 18 5 19.5 8.4 22 11.8 19.5 16.4 12 21 12 21z"/></svg></span>
+      <span class="sep"></span>
+      <span class="hr-item">FR <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></span>
+      <span class="sep"></span>
+      <span class="hr-item"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Mon compte</span></span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ FIL D'ARIANE ============ -->
+<nav class="breadcrumb wrap" aria-label="Fil d'Ariane">
+  <a href="index.html">Hôtels</a><span>›</span>
+  <a href="index.html#destinations">France</a><span>›</span>
+  <a href="index.html#destinations">Gordes</a><span>›</span>
+  <span class="bc-current">{{HOTEL_NAME}}</span>
+</nav>
+
+<!-- ============ GALERIE ============ -->
+<section class="htl-gallery wrap" aria-label="Galerie photos">
+  <figure class="g-main">
+    <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_1200,h_900/cct/hotels/{{HOTEL_SLUG}}/press-1" alt="La bastide du XVIIIe siècle et ses jardins en terrasses dominent le village perché de Gordes — {{HOTEL_NAME}}" loading="eager" width="1200" height="900">
+  </figure>
+  <figure class="g-thumb"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_600,h_450/cct/hotels/{{HOTEL_SLUG}}/press-2" alt="Entrée en pierre dorée de La Bastide, restaurée par 150 artisans" loading="lazy" width="600" height="450"></figure>
+  <figure class="g-thumb"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_600,h_450/cct/hotels/{{HOTEL_SLUG}}/press-5" alt="Piscine en terrasse cernée d'oliviers et de cyprès, vue sur la vallée du Luberon" loading="lazy" width="600" height="450"></figure>
+  <figure class="g-thumb g-more"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_600,h_450/cct/hotels/{{HOTEL_SLUG}}/press-3" alt="Salon de réception sous les voûtes de La Bastide" loading="lazy" width="600" height="450"><span class="g-more-tag">+ 48 photos</span></figure>
+</section>
+
+<!-- ============ CORPS ============ -->
+<div class="htl-body wrap">
+
+  <!-- COLONNE GAUCHE -->
+  <main class="htl-main">
+
+    <!-- En-tête -->
+    <header class="htl-head">
+      <span class="eyebrow left">Palace · Cœur du village · France</span>
+      <h1>{{HOTEL_NAME}}</h1>
+      <div class="htl-stars" aria-label="Palace 5 étoiles">
+        ★★★★★ <span class="htl-palace">Distinction Palace</span>
+      </div>
+      <p class="htl-loc">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        {{HOTEL_STREET}}, Gordes — face au Luberon
+      </p>
+      <div class="htl-rating">
+        <span class="rt-score">{{RATING_FR}}</span>
+        <span class="rt-tx"><b>Exceptionnel</b><span>{{REVIEW_COUNT}} avis · note /5</span></span>
+      </div>
+    </header>
+
+    <!-- Atouts express -->
+    <ul class="htl-feats">
+      <li><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Vue panoramique sur le Luberon</li>
+      <li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Conciergerie 24h/24</li>
+      <li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg>Spa Airelles &amp; trois piscines</li>
+      <li><svg class="icon" viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3M9 21h6"/></svg>6 restaurants dont Clover Gordes</li>
+    </ul>
+
+    <!-- ============================================================
+         SECTION 1 — LE MOT DU CONCIERGE + DESCRIPTION SEO
+         ============================================================ -->
+    <section class="htl-section" id="apropos">
+      <span class="eyebrow left">Le mot du Concierge</span>
+      <h2>{{HOTEL_NAME}} vu par le Concierge</h2>
+
+      <div class="concierge-quote">
+        <span class="cq-mark">“</span>
+        <p class="cq-text">Peu d'adresses tiennent leur promesse avant même qu'on ait franchi le seuil. La Bastide en fait partie : on la voit accrochée au village avant d'y arriver, et l'on comprend tout. Demandez la chambre 412 — vue cathédrale sans vis-à-vis — la direction ne la propose jamais d'elle-même.</p>
+        <div class="cq-sign">
+          <span class="cq-name">Le Concierge</span>
+          <span class="cq-role">Votre hôtelier de confiance</span>
+        </div>
+      </div>
+
+      <div class="read-more" id="seo-prose">
+        <div class="rm-clip">
+          <p class="htl-prose">Perchée sur les pentes escarpées de <strong>Gordes</strong>, classé parmi les plus beaux villages de France, <strong>{{HOTEL_NAME}}</strong> semble suspendue entre ciel et terre. Cette bastide du XVIIIᵉ siècle, restaurée par cent cinquante artisans lors de sa réouverture en 2015, domine la vallée du Luberon d'un panorama que rien ne vient interrompre. C'est un <strong>palace 5 étoiles</strong> distingué Atout France, l'une des cinq maisons de la collection Airelles, et la seule à offrir cette lecture frontale du paysage provençal.</p>
+          <p class="htl-prose">La maison compte <strong>{{ROOMS_COUNT}} chambres et suites</strong>, des Chambres Supérieures aux suites de prestige Vasarely, Baron de Simiane et Duc de Soubise, sans oublier la Maison de Constance, villa privée de quatre chambres avec sa propre piscine. Les chambres « côté vallée » (Valley Side) ouvrent sur le Luberon ; les « côté village » (Village Side) sur les toits de pierre de Gordes. Lumière du Sud, mobilier provençal chiné, salles de bains en pierre : chaque catégorie raconte la même histoire, à des échelles différentes.</p>
+          <p class="htl-prose">Côté table, <strong>La Bastide réunit six adresses</strong>. La signature, <strong>Clover Gordes</strong>, est la table provençale du chef multi-étoilé Jean-François Piège — deux toques au Gault&amp;Millau 2025, ouverte tous les jours de 12h15 à 14h et de 19h15 à 21h45. À ses côtés : La Table de La Bastide et sa cuisine provençale, le Brunch du Dimanche, la trattoria italienne La Bastide de Pierres, un salon de thé Ladurée et le Beefbar, qui ouvre le 4 juin 2026. On peut séjourner une semaine sans jamais dîner deux fois au même endroit.</p>
+          <p class="htl-prose">Le <strong>Spa Airelles</strong>, installé sous des voûtes en pierre, abrite soins du visage, massages, sauna, hammam et une piscine intérieure baignée d'une lumière tamisée. À l'extérieur, la piscine en terrasse, cernée d'oliviers et de cyprès centenaires, ouvre plein sud sur la vallée. Une troisième piscine, sécurisée, est réservée aux enfants de l'Airelles Summer Camp — car La Bastide est un palace où l'on vient aussi en famille, ce qui reste rare à ce niveau de prestation.</p>
+          <p class="htl-prose">L'emplacement fait le reste. Le <strong>Château de Gordes</strong>, Monument historique de la Renaissance, est à deux pas. Le Village des Bories — hameau de cabanes en pierre sèche — se rejoint en dix-neuf minutes de marche, et l'Abbaye Notre-Dame de Sénanque, dont les champs de lavande fleurissent de la mi-juin à la mi-juillet, à vingt-huit minutes à pied. La gare d'Avignon TGV est à cinquante minutes, l'aéroport Marseille-Provence à une heure. On arrive de Paris en début d'après-midi, on dîne face au Luberon le soir même.</p>
+          <p class="htl-prose">Ce que la conciergerie retient, au fond, c'est la cohérence : un service formé à l'école Airelles, une réception ouverte 24h/24, un personnel multilingue, et cette manière qu'a la maison de ne jamais forcer le luxe. Les distinctions suivent — Trois Clés au Guide MICHELIN 2024, Forbes Travel Guide Five-Star — mais elles ne disent pas l'essentiel : ici, on a le sentiment d'habiter la Provence, pas de la visiter.</p>
+        </div>
+        <button type="button" class="rm-toggle" aria-expanded="false" data-more="Lire la description complète" data-less="Réduire">
+          <span>Lire la description complète</span>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 2 — CHAMBRES & SUITES (carrousel + Sélection)
+         ============================================================ -->
+    <section class="htl-section" id="chambres">
+      <h2>Chambres &amp; suites du {{HOTEL_NAME}}</h2>
+      <p class="htl-lede">Quarante chambres et suites, du côté village au côté vallée, jusqu'aux suites de prestige et à la Maison de Constance. Voici la sélection que nous recommandons en priorité.</p>
+
+      <div class="carousel rooms-carousel">
+        <div class="carousel-track">
+
+          <article class="room-v2">
+            <div class="mini-gallery">
+              <div class="mg-track">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-3" alt="Deluxe Room Valley Side, vue vallée — {{HOTEL_NAME}}" loading="lazy">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-6" alt="Salle de bains en pierre, Deluxe Room — Airelles Gordes" loading="lazy">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-7" alt="Vue Luberon depuis la chambre — Airelles Gordes" loading="lazy">
+              </div>
+              <div class="mg-dots"><span class="on"></span><span></span><span></span></div>
+              <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Sélection du Concierge</span>
+            </div>
+            <div class="rv2-body">
+              <h3>Deluxe Room Valley Side</h3>
+              <p class="rv2-desc">Espace généreux ouvrant plein sud sur la vallée du Luberon. Le côté Valley recommandé par le Concierge pour la vue, sans vis-à-vis.</p>
+              <ul class="rv2-facts">
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 13l9-9 9 9M5 11v9h14v-9"/></svg>Surface : 38 m²</li>
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6M3 14h18M5 18v2M19 18v2"/></svg>Lit King size</li>
+              </ul>
+              <div class="rv2-cta">
+                <span class="rv2-price">690&nbsp;€<small>À partir de / nuit</small></span>
+                <a href="reserver.html" class="btn btn-or">Sélectionner</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="room-v2">
+            <div class="mini-gallery">
+              <div class="mg-track">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-2" alt="Superior Room Village Side, vue sur le village perché — {{HOTEL_NAME}}" loading="lazy">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-8" alt="Mobilier provençal, Superior Room — Airelles Gordes" loading="lazy">
+              </div>
+              <div class="mg-dots"><span class="on"></span><span></span></div>
+            </div>
+            <div class="rv2-body">
+              <h3>Superior Room Village Side</h3>
+              <p class="rv2-desc">Mobilier provençal et lumière du Luberon sous les voûtes de La Bastide, avec vue sur le village perché de Gordes.</p>
+              <ul class="rv2-facts">
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 13l9-9 9 9M5 11v9h14v-9"/></svg>Surface : 30 m²</li>
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6M3 14h18M5 18v2M19 18v2"/></svg>Lit Queen ou twin</li>
+              </ul>
+              <div class="rv2-cta">
+                <span class="rv2-price">540&nbsp;€<small>À partir de / nuit</small></span>
+                <a href="reserver.html" class="btn btn-or">Sélectionner</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="room-v2">
+            <div class="mini-gallery">
+              <div class="mg-track">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-9" alt="Vasarely Suite, suite de prestige — {{HOTEL_NAME}}" loading="lazy">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-10" alt="Salon de la Vasarely Suite — Airelles Gordes" loading="lazy">
+                <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_700,h_525/cct/hotels/{{HOTEL_SLUG}}/press-11" alt="Terrasse privative face au Luberon — Airelles Gordes" loading="lazy">
+              </div>
+              <div class="mg-dots"><span class="on"></span><span></span><span></span></div>
+            </div>
+            <div class="rv2-body">
+              <h3>Vasarely Suite</h3>
+              <p class="rv2-desc">Suite signature aux volumes d'exception, terrasse et vue face au Luberon. L'une des suites de prestige avec Baron de Simiane et Duc de Soubise.</p>
+              <ul class="rv2-facts">
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 13l9-9 9 9M5 11v9h14v-9"/></svg>Surface : 75 m²</li>
+                <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6M3 14h18M5 18v2M19 18v2"/></svg>Lit King size · terrasse</li>
+              </ul>
+              <div class="rv2-cta">
+                <span class="rv2-price">1 850&nbsp;€<small>À partir de / nuit</small></span>
+                <a href="reserver.html" class="btn btn-or">Sélectionner</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+        <button class="carousel-nav prev" type="button" aria-label="Chambre précédente"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="carousel-nav next" type="button" aria-label="Chambre suivante"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="rooms-more">
+        <a href="reserver.html" class="btn-ligne">Voir les {{ROOMS_COUNT}} chambres &amp; suites</a>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 3 — L'HÔTEL EN BREF
+         ============================================================ -->
+    <section class="htl-section" id="bref">
+      <h2>L'hôtel en bref</h2>
+
+      <!-- 3a · Services & équipements -->
+      <div class="bref-sub">
+        <h3>Services &amp; équipements</h3>
+        <p class="sub-lede">Vingt-neuf services et équipements, de la conciergerie 24h/24 au Wi-Fi gratuit. L'essentiel d'un palace, sans surenchère.</p>
+        <div class="amen-grid">
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><b>Conciergerie 24h/24</b><span>Réception et conciergerie en continu, personnel multilingue, service de réveil.</span></div>
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg><b>Spa &amp; trois piscines</b><span>Spa Airelles sous voûtes, piscine intérieure, hammam, sauna, salle de fitness.</span></div>
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3v8a6 6 0 0 0 12 0V3M9 21h6"/></svg><b>Six restaurants &amp; bar</b><span>Restaurant gastronomique, table provençale, trattoria, salon de thé, bar.</span></div>
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><b>Confort en chambre</b><span>Climatisation, minibar, coffre-fort, machine Nespresso, peignoirs et chaussons.</span></div>
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg><b>Services du quotidien</b><span>Service de chambre quotidien, couverture, blanchisserie, consigne à bagages.</span></div>
+          <div class="amen"><svg class="icon" viewBox="0 0 24 24"><path d="M3 13l9-9 9 9M5 11v9h14v-9"/></svg><b>Pratique &amp; accès</b><span>Wi-Fi gratuit, ports USB, ascenseur, établissement non-fumeur.</span></div>
+        </div>
+      </div>
+
+      <!-- 3b · Expérience signature -->
+      <div class="bref-sub">
+        <h3>Expérience signature</h3>
+        <p class="sub-lede">Ce que la conciergerie organise pour vous, au-delà de la chambre.</p>
+        <div class="exp-list">
+          <article class="exp-card">
+            <div class="exp-img">
+              <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_520,h_400/cct/hotels/{{HOTEL_SLUG}}/places-2" alt="Vol en montgolfière au-dessus du Luberon et des champs de lavande" loading="lazy">
+              <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Sélection du Concierge</span>
+            </div>
+            <div class="exp-tx">
+              <h4>Montgolfière au lever du soleil</h4>
+              <p>Vol au départ de Roussillon, au-dessus des ocres, des villages perchés et des champs de lavande. Une heure dans les airs, suivie du verre de l'amitié. La conciergerie réserve le créneau et le transfert.</p>
+              <div class="exp-foot">
+                <span class="exp-price">290&nbsp;€ <small>/ personne</small></span>
+                <a href="reserver.html" class="link-or">En savoir plus →</a>
+              </div>
+            </div>
+          </article>
+          <article class="exp-card">
+            <div class="exp-img">
+              <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_520,h_400/cct/hotels/{{HOTEL_SLUG}}/places-3" alt="Dégustation de vins AOC Luberon au Domaine des Peyre" loading="lazy">
+            </div>
+            <div class="exp-tx">
+              <h4>Dégustation au Domaine des Peyre</h4>
+              <p>Domaine en agriculture biologique au pied du Luberon : dégustation de vins AOC Luberon, parcours d'art contemporain dans les vignes et, l'été, soirées Jazz'n Wine. Transfert organisé depuis l'hôtel.</p>
+              <div class="exp-foot">
+                <span class="exp-price">Sur demande</span>
+                <a href="reserver.html" class="link-or">En savoir plus →</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- 3c · Restaurants & bars -->
+      <div class="bref-sub">
+        <h3>Restaurants &amp; bars</h3>
+        <p class="sub-lede">Six adresses sous le même toit. Notre table préférée porte le badge du Concierge.</p>
+        <div class="carousel resto-carousel">
+          <div class="carousel-track">
+            <article class="resto-card">
+              <div class="mini-gallery">
+                <div class="mg-track">
+                  <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_660,h_495/cct/hotels/{{HOTEL_SLUG}}/press-3" alt="Salle du restaurant Clover Gordes par Jean-François Piège" loading="lazy">
+                  <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_660,h_495/cct/hotels/{{HOTEL_SLUG}}/press-12" alt="Dressage d'une assiette provençale, Clover Gordes" loading="lazy">
+                </div>
+                <div class="mg-dots"><span class="on"></span><span></span></div>
+                <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Sélection du Concierge</span>
+              </div>
+              <div class="resto-body">
+                <h4>Clover Gordes</h4>
+                <span class="resto-kind">Table provençale · J-F Piège</span>
+                <p>La signature de la maison, par le chef multi-étoilé Jean-François Piège : 2 toques Gault&amp;Millau 2025. Tous les jours, 12h15-14h / 19h15-21h45. Demandez la table 12.</p>
+                <div class="resto-foot">
+                  <span class="resto-price">Menu dès 95&nbsp;€</span>
+                  <a href="reserver.html" class="link-or">Réserver →</a>
+                </div>
+              </div>
+            </article>
+            <article class="resto-card">
+              <div class="mini-gallery">
+                <div class="mg-track">
+                  <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_660,h_495/cct/hotels/{{HOTEL_SLUG}}/press-5" alt="Terrasse de La Table de La Bastide, vue Luberon" loading="lazy">
+                </div>
+                <div class="mg-dots"><span class="on"></span></div>
+              </div>
+              <div class="resto-body">
+                <h4>La Table de La Bastide</h4>
+                <span class="resto-kind">Cuisine provençale</span>
+                <p>La table du quotidien, ancrée dans le marché provençal et les producteurs du Luberon. Petit-déjeuner, déjeuner et dîner en terrasse face à la vallée.</p>
+                <div class="resto-foot">
+                  <span class="resto-price">À la carte</span>
+                  <a href="reserver.html" class="link-or">Réserver →</a>
+                </div>
+              </div>
+            </article>
+            <article class="resto-card">
+              <div class="mini-gallery">
+                <div class="mg-track">
+                  <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_660,h_495/cct/hotels/{{HOTEL_SLUG}}/press-6" alt="Trattoria La Bastide de Pierres, ambiance italienne" loading="lazy">
+                </div>
+                <div class="mg-dots"><span class="on"></span></div>
+              </div>
+              <div class="resto-body">
+                <h4>La Bastide de Pierres</h4>
+                <span class="resto-kind">Trattoria italienne</span>
+                <p>Cuisine italienne généreuse sous les pierres de la bastide. Le rendez-vous décontracté du soir, complété par le salon Ladurée et le Beefbar (ouverture 4 juin 2026).</p>
+                <div class="resto-foot">
+                  <span class="resto-price">À la carte</span>
+                  <a href="reserver.html" class="link-or">Réserver →</a>
+                </div>
+              </div>
+            </article>
+          </div>
+          <button class="carousel-nav prev" type="button" aria-label="Restaurant précédent"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button class="carousel-nav next" type="button" aria-label="Restaurant suivant"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+        <div class="rooms-more"><a href="reserver.html" class="btn-ligne">Voir les 6 restaurants &amp; bars</a></div>
+      </div>
+
+      <!-- 3d · Spa & bien-être -->
+      <div class="bref-sub">
+        <h3>Spa &amp; bien-être</h3>
+        <div class="feature-block">
+          <div class="fb-media mini-gallery">
+            <div class="mg-track">
+              <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_760,h_560/cct/hotels/{{HOTEL_SLUG}}/press-5" alt="Piscine intérieure du Spa Airelles, sous voûtes de pierre" loading="lazy">
+              <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_760,h_560/cct/hotels/{{HOTEL_SLUG}}/press-7" alt="Salle de soins du Spa Airelles" loading="lazy">
+            </div>
+            <div class="mg-dots"><span class="on"></span><span></span></div>
+          </div>
+          <div class="fb-tx">
+            <h4>Spa Airelles</h4>
+            <p>Installé sous des voûtes en pierre, le Spa Airelles cultive le calme et la lumière tamisée. Soins du visage, massages signature, hammam, sauna et piscine intérieure chauffée.</p>
+            <ul class="fb-meta">
+              <li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Ouvert tous les jours · <b>9h – 20h</b></span></li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg><span>Piscine intérieure, hammam, sauna, fitness</span></li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Soins sur réservation auprès de la conciergerie</span></li>
+            </ul>
+            <p class="fb-price">Massage signature à partir de 160&nbsp;€ <small>/ 60 min</small></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3e · Kid Club -->
+      <div class="bref-sub">
+        <h3>Kid Club</h3>
+        <div class="feature-block reverse">
+          <div class="fb-media mini-gallery">
+            <div class="mg-track">
+              <img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_760,h_560/cct/hotels/{{HOTEL_SLUG}}/places-6" alt="Airelles Summer Camp, espace enfants et piscine sécurisée" loading="lazy">
+            </div>
+            <div class="mg-dots"><span class="on"></span></div>
+          </div>
+          <div class="fb-tx">
+            <h4>Airelles Summer Camp</h4>
+            <p>Un espace entièrement dédié aux enfants, avec sa propre piscine sécurisée. Jeux, ateliers et activités encadrés pendant que les parents profitent du spa ou de la table — La Bastide est l'un des rares palaces pensés pour la famille.</p>
+            <ul class="fb-meta">
+              <li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>À partir de <b>4 ans</b></span></li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg><span>Ateliers créatifs, jeux d'eau, chasses au trésor, initiation nature</span></li>
+              <li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg><span>Piscine enfants sécurisée &amp; encadrement dédié</span></li>
+            </ul>
+            <p class="fb-price">Accès inclus pour les enfants des résidents</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 4 — ILS EN PARLENT
+         ============================================================ -->
+    <section class="htl-section" id="presse">
+      <h2>Ils en parlent</h2>
+
+      <div class="bref-sub">
+        <h3>Extraits de presse &amp; classements professionnels</h3>
+        <div class="press-grid">
+          <blockquote class="press-card">
+            <span class="press-src">Guide MICHELIN</span>
+            <p>Le village provençal perché de Gordes offre un cadre spectaculaire à l'un des hôtels les plus extraordinaires de la région — une distinction de taille, vu la concurrence.</p>
+          </blockquote>
+          <blockquote class="press-card">
+            <span class="press-src">Forbes Travel Guide</span>
+            <p>Accrochée aux abords du village de Gordes, avec une vue à couper le souffle sur la vallée du Luberon balayée par le mistral, La Bastide semble tout droit sortie d'un conte de fées médiéval français.</p>
+          </blockquote>
+          <blockquote class="press-card">
+            <span class="press-src">Presse spécialisée</span>
+            <p>Avec une adresse de premier choix au cœur de Gordes — « le plus beau village du monde » dominant les champs de lavande — La Bastide est à la hauteur de son cadre pittoresque.</p>
+          </blockquote>
+        </div>
+      </div>
+
+      <div class="bref-sub">
+        <h3>Distinctions</h3>
+        <div class="distinctions">
+          <span class="distinction"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Distinction Palace — Atout France</span>
+          <span class="distinction"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Trois Clés MICHELIN — 2024</span>
+          <span class="distinction"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Forbes Travel Guide Five-Star</span>
+          <span class="distinction"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>2 toques Gault&amp;Millau — Clover Gordes 2025</span>
+        </div>
+      </div>
+
+      <div class="bref-sub">
+        <h3>Instagram</h3>
+        <div class="insta-strip">
+          <a href="https://www.instagram.com/airellesgordes/" target="_blank" rel="noopener"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_300,h_300/cct/hotels/{{HOTEL_SLUG}}/press-1" alt="@airellesgordes — la bastide au lever du jour" loading="lazy"></a>
+          <a href="https://www.instagram.com/airellesgordes/" target="_blank" rel="noopener"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_300,h_300/cct/hotels/{{HOTEL_SLUG}}/press-5" alt="@airellesgordes — piscine en terrasse" loading="lazy"></a>
+          <a href="https://www.instagram.com/airellesgordes/" target="_blank" rel="noopener"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_300,h_300/cct/hotels/{{HOTEL_SLUG}}/press-4" alt="@airellesgordes — village de Gordes" loading="lazy"></a>
+          <a href="https://www.instagram.com/airellesgordes/" target="_blank" rel="noopener"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_300,h_300/cct/hotels/{{HOTEL_SLUG}}/press-3" alt="@airellesgordes — salon sous les voûtes" loading="lazy"></a>
+        </div>
+        <p class="affil-line"><strong>Affiliation :</strong> maison de la collection <a href="https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon" target="_blank" rel="noopener">Airelles</a> · profil <a href="https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874" target="_blank" rel="noopener">Guide MICHELIN</a> · <a href="https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide" target="_blank" rel="noopener">Forbes Travel Guide</a>.</p>
+        <div class="ranking-callout">
+          <p><b>Cet hôtel apparaît dans nos classements.</b> Retrouvez La Bastide parmi les plus belles adresses de Provence sélectionnées par la conciergerie.</p>
+          <a href="classement.html" class="btn-ligne">Voir le classement</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 5 — EMPLACEMENT & ACCÈS
+         ============================================================ -->
+    <section class="htl-section" id="acces">
+      <h2>Emplacement &amp; accès</h2>
+      <div class="access-grid">
+        <div class="access-card">
+          <h4>Coordonnées</h4>
+          <ul>
+            <li><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>{{HOTEL_STREET}}, {{HOTEL_POSTAL}} Gordes, {{REGION}}</li>
+            <li><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h4l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 2 7a2 2 0 0 1 2-2z"/></svg>{{HOTEL_PHONE}}</li>
+            <li><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>{{HOTEL_EMAIL}}</li>
+          </ul>
+        </div>
+        <div class="access-card">
+          <h4>Conditions de séjour</h4>
+          <ul>
+            <li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Arrivée à partir de 15h · départ avant 12h</li>
+            <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Animaux acceptés sur demande (30 €/animal/jour)</li>
+            <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Établissement saisonnier · non-fumeur · paiement à l'hôtel possible</li>
+          </ul>
+        </div>
+      </div>
+      <div class="access-card" style="margin-bottom:22px">
+        <h4>Accès</h4>
+        <ul>
+          <li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg>50 min depuis la gare d'Avignon TGV · ~1 h de l'aéroport Marseille-Provence</li>
+          <li><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Château de Gordes à deux pas · Village des Bories 1,5 km (19 min à pied)</li>
+        </ul>
+      </div>
+      <div class="map-placeholder" role="img" aria-label="Plan de situation — {{HOTEL_STREET}}, {{HOTEL_POSTAL}} Gordes">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span>{{HOTEL_STREET}}, {{HOTEL_POSTAL}} Gordes — {{HOTEL_LAT}}, {{HOTEL_LNG}}</span>
+      </div>
+
+      <!-- Avis des voyageurs -->
+      <div class="bref-sub">
+        <h3>Avis des voyageurs</h3>
+        <div class="review-grid">
+          <blockquote class="review">
+            <div class="rv-top"><span class="rv-score">5,0</span><span class="rv-name">Guide MICHELIN</span></div>
+            <p>« Un cadre spectaculaire à l'un des hôtels les plus extraordinaires de la région. »</p>
+          </blockquote>
+          <blockquote class="review">
+            <div class="rv-top"><span class="rv-score">5,0</span><span class="rv-name">Forbes Travel Guide</span></div>
+            <p>« Une vue à couper le souffle sur la vallée du Luberon balayée par le mistral. »</p>
+          </blockquote>
+          <blockquote class="review">
+            <div class="rv-top"><span class="rv-score">{{RATING_FR}}</span><span class="rv-name">Note voyageurs · {{REVIEW_COUNT}} avis</span></div>
+            <p>« Service à la hauteur du cadre, table d'exception et calme absolu face au Luberon. »</p>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 6 — AUTOUR DE L'HÔTEL
+         ============================================================ -->
+    <section class="htl-section" id="autour">
+      <h2>Autour de l'hôtel</h2>
+
+      <div class="around-sub">
+        <h3>Ce qu'on visite dans le quartier</h3>
+        <div class="around-list">
+          <div class="around-item">
+            <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Choix</span>
+            <h5>Château de Gordes</h5>
+            <p>Château Renaissance du XVIᵉ siècle, Monument historique au cœur du village. À 6 min.</p>
+          </div>
+          <div class="around-item">
+            <h5>Caves du Palais Saint-Firmin</h5>
+            <p>Caves semi-troglodytes creusées dans la roche : ancien moulin à huile, citernes, jardin en terrasse. À 5 min.</p>
+          </div>
+          <div class="around-item">
+            <h5>Abbaye Notre-Dame de Sénanque</h5>
+            <p>Abbaye cistercienne de 1148, encore en activité. Champs de lavande en fleur de mi-juin à mi-juillet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="around-sub">
+        <h3>Ce qu'on y fait</h3>
+        <div class="around-list">
+          <div class="around-item">
+            <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Choix</span>
+            <h5>Vol en montgolfière</h5>
+            <p>Au lever du soleil au-dessus des ocres et des lavandes, au départ de Roussillon. ~1 h de vol.</p>
+          </div>
+          <div class="around-item">
+            <h5>Vélos électriques</h5>
+            <p>Electric Move à Coustellet : relier Gordes, Roussillon et les villages perchés sans souffrir des montées.</p>
+          </div>
+          <div class="around-item">
+            <h5>Randonnée du Col de Gordes</h5>
+            <p>Boucle familiale au départ du village, vers les monts de Vaucluse : sentiers balisés et vues sur le village perché.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="around-sub">
+        <h3>Ce qui se passe pendant votre séjour</h3>
+        <div class="around-list">
+          <div class="around-item">
+            <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Choix</span>
+            <h5>Marché de Gordes</h5>
+            <p>L'un des marchés les plus courus du Luberon, au pied du château : primeurs, huiles d'olive, savons, poteries.</p>
+          </div>
+          <div class="around-item">
+            <h5>Marché de Lourmarin</h5>
+            <p>Marché provençal réputé : produits alimentaires, vêtements et objets artisanaux, toute l'année.</p>
+          </div>
+          <div class="around-item">
+            <h5>Jazz'n Wine — Domaine des Peyre</h5>
+            <p>Soirées jazz et dégustation dans les vignes en agriculture biologique, l'été.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="around-sub">
+        <h3>Restaurants &amp; bars autour</h3>
+        <div class="around-list">
+          <div class="around-item">
+            <span class="cc-pick"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Choix</span>
+            <h5>Le C — Hôtel Carcarille</h5>
+            <p>Table d'un hôtel familial 3 étoiles, cuisine provençale aux produits locaux, terrasse ombragée.</p>
+          </div>
+          <div class="around-item">
+            <h5>Mas de la Sénancole</h5>
+            <p>Mas de charme aux Imberts : cuisine du marché et terrasse au bord de la piscine, sur la route de Sénanque.</p>
+          </div>
+          <div class="around-item">
+            <h5>Le Fournil de Mamie Jeanne</h5>
+            <p>Boulangerie artisanale au cœur du village : pains au levain et fougasses pour le pique-nique.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="around-sub">
+        <h3>Commerces à proximité</h3>
+        <div class="around-list">
+          <div class="around-item">
+            <h5>Maison Brémond 1830</h5>
+            <p>Épicerie fine sur la place du Château : huiles d'olive, tapenades, miels, calissons et confitures.</p>
+          </div>
+          <div class="around-item">
+            <h5>Moulin du Clos des Jeannons</h5>
+            <p>Moulin familial, 27 hectares d'oliviers : vente directe de l'huile d'olive du domaine.</p>
+          </div>
+          <div class="around-item">
+            <h5>Pharmacie de Gordes</h5>
+            <p>Rue de l'Église, pour les imprévus du séjour : crème solaire, anti-moustiques, premiers soins.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 7 — QUESTIONS FRÉQUENTES (groupées)
+         ============================================================ -->
+    <section class="htl-section" id="faq">
+      <h2>Questions fréquentes — {{HOTEL_NAME}}</h2>
+
+      <div class="faq-group">
+        <h3>Avant votre séjour</h3>
+        <details class="faq-item" open>
+          <summary>Où se situe exactement {{HOTEL_NAME}} ?</summary>
+          <p>La Bastide se trouve au {{HOTEL_STREET}}, {{HOTEL_POSTAL}} Gordes, dans le village perché, dominant la vallée du Luberon. Comptez 50 minutes depuis la gare d'Avignon TGV et environ 1 h depuis l'aéroport Marseille-Provence.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Combien de chambres et de suites compte l'hôtel ?</summary>
+          <p>La Bastide dispose de {{ROOMS_COUNT}} chambres et suites, des Chambres Supérieures aux suites de prestige (Vasarely, Baron de Simiane, Duc de Soubise), ainsi que la Maison de Constance, une villa privée de quatre chambres avec piscine.</p>
+        </details>
+        <details class="faq-item">
+          <summary>À quelle période l'hôtel est-il ouvert ?</summary>
+          <p>La Bastide est un établissement saisonnier, ouvert du printemps à l'automne. Le Beefbar ouvre le 4 juin 2026. Pour les dates exactes d'ouverture et de fermeture, contactez la conciergerie.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Comment réserver une table ou un séjour ?</summary>
+          <p>Notre conciergerie organise l'ensemble de votre séjour : chambres, tables, soins et excursions. Contactez-nous au {{HOTEL_PHONE}} ou par e-mail à {{HOTEL_EMAIL}}.</p>
+        </details>
+      </div>
+
+      <div class="faq-group">
+        <h3>À propos de l'établissement</h3>
+        <details class="faq-item">
+          <summary>Combien de piscines y a-t-il à La Bastide ?</summary>
+          <p>L'hôtel compte trois piscines : la piscine en terrasse extérieure cernée d'oliviers, la piscine intérieure sous les voûtes du Spa Airelles, et une piscine dédiée aux enfants au Summer Camp.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Quels restaurants trouve-t-on à l'hôtel ?</summary>
+          <p>La Bastide réunit six adresses : Clover Gordes (J-F Piège), La Table de La Bastide (cuisine provençale), le Brunch du Dimanche, La Bastide de Pierres (trattoria italienne), un salon de thé Ladurée et le Beefbar.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Le restaurant Clover Gordes a-t-il une étoile Michelin ?</summary>
+          <p>Non. Clover Gordes est la table provençale du chef multi-étoilé Jean-François Piège, mais le restaurant lui-même n'est pas étoilé. Il est ouvert tous les jours, de 12h15 à 14h et de 19h15 à 21h45 ; réservation sur SevenRooms.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Quels services de bien-être propose le Spa Airelles ?</summary>
+          <p>Le Spa Airelles, installé sous des voûtes en pierre, propose soins du visage, massages, sauna, hammam et une piscine intérieure. Les soins se réservent auprès de la conciergerie.</p>
+        </details>
+      </div>
+
+      <div class="faq-group">
+        <h3>Pendant votre séjour</h3>
+        <details class="faq-item">
+          <summary>Les animaux de compagnie sont-ils acceptés ?</summary>
+          <p>Chiens et chats sont acceptés sur demande, dans certaines chambres et suites, moyennant 30 € par animal et par jour. À signaler lors de la réservation auprès de la conciergerie.</p>
+        </details>
+        <details class="faq-item">
+          <summary>L'hôtel accueille-t-il les familles ?</summary>
+          <p>Oui. L'Airelles Summer Camp accueille les enfants dans un espace dédié aux jeux et activités, avec sa propre piscine sécurisée. Plusieurs suites et la Maison de Constance conviennent aux familles.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Quand la lavande de l'Abbaye de Sénanque est-elle en fleur ?</summary>
+          <p>Les champs de lavande devant l'abbaye fleurissent généralement de la mi-juin à la mi-juillet. La visite de l'abbaye se fait sur réservation (senanque.fr), comptez 8 € la visite guidée.</p>
+        </details>
+      </div>
+
+      <div class="faq-group">
+        <h3>Conseil du Concierge</h3>
+        <details class="faq-item">
+          <summary>Pourquoi choisir {{HOTEL_NAME}} ?</summary>
+          <p>Pour un palace 5 étoiles distingué Atout France, suspendu au-dessus de la vallée du Luberon : {{ROOMS_COUNT}} chambres et suites, trois piscines, le Spa Airelles sous voûtes de pierre et six restaurants dont Clover Gordes par Jean-François Piège. Mon conseil : demandez la chambre 412 — vue cathédrale sans vis-à-vis, refaite en 2024 — et réservez la table 12 du restaurant gastronomique, côté cour.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 8 — LE CONCIERGE CLUB
+         ============================================================ -->
+    <section class="htl-section club-inline" id="club">
+      <span class="eyebrow left">Le Concierge Club</span>
+      <h2>Vos avantages dès la première nuit</h2>
+      <ul class="club-list">
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Surclassement selon disponibilité</li>
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Petit-déjeuner offert chaque matin</li>
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Arrivée anticipée / départ tardif (selon disponibilité)</li>
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Crédit hôtel de 100 € à utiliser sur place</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         SECTION 9 — LES HÔTES À PROXIMITÉ
+         ============================================================ -->
+    <section class="htl-section" id="proximite" style="border-bottom:none">
+      <h2>Les hôtes à proximité</h2>
+      <p class="htl-lede">D'autres maisons d'exception sélectionnées par la conciergerie autour de Gordes et en Provence.</p>
+      <div class="nearby-grid">
+        <a href="index.html#hotels" class="hcard">
+          <div class="hcard-img"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_500,h_625/cct/hotels/{{HOTEL_SLUG}}/press-4" alt="Autre adresse d'exception à Gordes" loading="lazy"></div>
+          <div class="hcard-body"><h3>Bastide de Gordes</h3><span class="loc">Gordes, France</span></div>
+        </a>
+        <a href="index.html#hotels" class="hcard">
+          <div class="hcard-img"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_500,h_625/cct/hotels/{{HOTEL_SLUG}}/places-3" alt="Maison d'hôtes en Luberon" loading="lazy"></div>
+          <div class="hcard-body"><h3>Domaine en Luberon</h3><span class="loc">Ménerbes, France</span></div>
+        </a>
+        <a href="index.html#hotels" class="hcard">
+          <div class="hcard-img"><img src="https://res.cloudinary.com/dvbjwh5wy/image/upload/f_auto,q_auto,c_fill,g_auto,w_500,h_625/cct/hotels/{{HOTEL_SLUG}}/places-6" alt="Hôtel de charme en Provence" loading="lazy"></div>
+          <div class="hcard-body"><h3>Mas provençal</h3><span class="loc">Roussillon, France</span></div>
+        </a>
+      </div>
+      <div class="nearby-region">
+        <a href="guide.html" class="btn-ligne">Explorer la Provence &amp; le Luberon</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- COLONNE DROITE : réservation sticky + comparateur -->
+  <aside class="htl-aside" id="resa">
+    <div class="resa-card">
+      <div class="resa-price"><span class="rp-from">À partir de</span><span class="rp-amount">540&nbsp;€</span><span class="rp-unit">/ nuit · 2 pers.</span></div>
+      <form class="resa-form" aria-label="Réserver ce séjour">
+        <label class="rf-field"><span>Arrivée</span><span class="rf-val">Sél. une date</span></label>
+        <label class="rf-field"><span>Départ</span><span class="rf-val">Sél. une date</span></label>
+        <label class="rf-field"><span>Voyageurs</span><span class="rf-val">2 adultes · 1 chambre</span></label>
+        <a href="reserver.html" class="btn btn-or resa-go">Vérifier les disponibilités</a>
+      </form>
+      <ul class="resa-trust">
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Meilleur tarif garanti</li>
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Annulation gratuite</li>
+        <li><svg class="icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Paiement à l'hôtel possible</li>
+      </ul>
+      <p class="resa-iata">Agence IATA · ASPST — sans intermédiaire</p>
+    </div>
+
+    <!-- Comparateur de prix (sous le widget) -->
+    <div class="resa-compare">
+      <div class="rc-title">Le même séjour ailleurs</div>
+      <div class="rc-row rc-best"><span class="rc-name">MyConciergeHotel</span><span class="rc-amt">540&nbsp;€</span></div>
+      <div class="rc-row"><span class="rc-name">Site officiel</span><span class="rc-amt">560&nbsp;€</span></div>
+      <div class="rc-row"><span class="rc-name">Booking.com</span><span class="rc-amt">578&nbsp;€</span></div>
+      <div class="rc-row"><span class="rc-name">Expedia</span><span class="rc-amt">585&nbsp;€</span></div>
+      <p class="rc-foot">Tarifs concurrents à titre informatif (meta-search). Aucun lien affilié. TTC indicatif pour 2 pers., variable selon les dates.</p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <span class="brand-mono">M<em>C</em></span>
+        <div class="fb-tag">L'Art du Voyage 5 Étoiles</div>
+        <p>Conciergerie hôtelière indépendante. Agence IATA — accès aux tarifs nets et aux avantages réservés aux maisons d'exception.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Explorer</h4>
+        <a href="index.html#hotels">Hôtels &amp; Palaces</a>
+        <a href="index.html#destinations">Destinations</a>
+        <a href="index.html#experiences">Par occasion</a>
+        <a href="classement.html">Classements</a>
+        <a href="index.html#magazine">Magazine</a>
+      </div>
+      <div class="foot-col">
+        <h4>Destinations</h4>
+        <a href="guide.html">Paris</a>
+        <a href="#">Côte d'Azur</a>
+        <a href="#">Italie</a>
+        <a href="#">Grèce</a>
+        <a href="#">Japon</a>
+        <a href="#">New York</a>
+      </div>
+      <div class="foot-col">
+        <h4>Catalogue</h4>
+        <a href="#">Palaces</a>
+        <a href="#">Hôtels 5 étoiles</a>
+        <a href="#">Boutique-hôtels</a>
+        <a href="#">Châteaux-hôtels</a>
+        <a href="#">Villas &amp; chalets</a>
+      </div>
+      <div class="foot-col">
+        <h4>Conciergerie</h4>
+        <a href="index.html#concierge">Le Concierge</a>
+        <a href="#">Le Concierge Club</a>
+        <a href="#">Aide &amp; contact</a>
+        <a href="#">À propos</a>
+        <a href="#">Mentions légales</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 MyConciergeHotel — Tous droits réservés.</span>
+      <span class="fb-iata">Agence IATA · Meilleur tarif garanti · Sans intermédiaire</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js" defer></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

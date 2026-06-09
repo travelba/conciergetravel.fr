@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /template-hotel.html
+Disallow: /template-guide.html
+Disallow: /demo-hotel-martinez.html
+Disallow: /demo-guide-cannes.html
+Disallow: /reserver.html
+Disallow: /docs/
+
+# Bots IA
+User-agent: GPTBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://www.myconciergehotel.com/sitemap.xml

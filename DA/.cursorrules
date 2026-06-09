@@ -1,0 +1,31 @@
+# MyConciergeHotel — Project rules for Cursor
+
+## Mission
+Luxury 5-star hotel OTA + concierge comparator (FR). Editorial style. SEO & GEO ALWAYS take priority over visual/theme choices.
+Reference docs in this repo: /docs/01_DOSSIER_DIRECTION_ARTISTIQUE.md, /docs/02_BIBLIOTHEQUE_COMPOSANTS.md, /docs/04_PROMPTS_CURSOR.md, /docs/tokens.css, /docs/tokens.json.
+
+## Non-negotiable design tokens (import /docs/tokens.css, never hardcode hex)
+- Backgrounds: cream #F6F1E7 / #EFE8DA / #E8E0D0. NEVER dark backgrounds.
+- Cards: white #FFFFFF, hairline border rgba(140,123,90,.28).
+- Text: #2B2722 / #6F675B; headings #3A352D.
+- Single accent: taupe #8C7B5A (#A89671 on photos). NO yellow/gold.
+- Fonts: EB Garamond (serif → headings, quotes, prices) + Outfit (sans → body, UI, eyebrows). Two families MAX.
+- Imagery: real luxury photos only. No watercolor/illustrations. Only illustrated element = concierge in BORDEAUX coat.
+
+## SEO/GEO rules (MANDATORY on every page)
+- Semantic HTML: header/nav/main/section/article/footer. No div-soup.
+- Exactly ONE <h1> per page, containing the primary keyword. Strict Hn order.
+- <title> 50-60 chars, <meta description> 150-160 chars, unique per page.
+- canonical + Open Graph + Twitter Card in <head>.
+- JSON-LD per page type: Home=TravelAgency+WebSite; Ranking=ItemList+BreadcrumbList(+FAQPage); Guide=TouristDestination+Article+BreadcrumbList(+FAQPage); Hotel=Hotel+Offer+AggregateRating/Review+BreadcrumbList; FAQ=FAQPage.
+- GEO: open each page/section with a direct factual sentence using <strong> + keyword. Include citable facts (exact addresses, "label Palace Atout France", World's 50 Best ranks, Michelin stars, indicative prices). Add FAQ sections on key pages.
+- Images: loading="lazy", decoding="async", explicit width/height, descriptive alt (brand + place + subject).
+- robots.txt must allow GPTBot, PerplexityBot, ClaudeBot, Google-Extended. Keep sitemap.xml updated.
+- Core Web Vitals: critical CSS inline, JS defer, fonts preconnect/preload. Target LCP<2.5s, CLS<0.1.
+
+## Editorial voice (concierge, FR, formal "vous")
+- Voice lives in eyebrows / chapôs / descriptions / captions — NEVER replaces the keyword in an Hn.
+- Winks (subtle, 1-2 per section): "Le carnet du Concierge", "Le conseil du Concierge", "Notre carnet le murmure…", "Entre nous…". No tutoiement.
+
+## Components
+Reuse classes from /docs/02_BIBLIOTHEQUE_COMPOSANTS.md (.header, .hero, .hcard, .crank, .guide-hero, .gq, .gtile, .concierge-feature, .price-compare, .faq-item, .btn-*, .footer). Keep French class names.
