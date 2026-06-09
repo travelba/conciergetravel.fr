@@ -374,6 +374,40 @@ press-releases/2025/six-senses-bangkok-announcement` — non-trivial
    near-worthless; those hotels need the R&C consortium DAM
    (`images.relaischateaux.com`) or Google Places, not the portal page.
 
+## Gotcha — Press-kit cohort pilot capitalised learnings (2026-06-08)
+
+14-hotel pilot (Accor / Marriott / Four Seasons). Full numbers + cohort
+sequencing in `docs/runbooks/photo-sourcing-press-kit-pilot.md`. The
+non-obvious bits to re-use:
+
+1. **`upload-press-kit-images.ts` now has retry/back-off + hard timeouts.**
+   A freshly-funded OpenAI account sits on a low usage tier → Vision bursts
+   trip a **429 "Rate limit"** (distinct from 429 `insufficient_quota` =
+   no credit). The script now retries 429/5xx (cap 20 s, honours
+   `Retry-After`), with `AbortSignal.timeout` 30 s on the Vision call and
+   15 s on the image fetch (a rate-limited request was hanging the whole run
+   for 9 min with no timeout). Keep `categorize --concurrency=2`.
+2. **Re-running `upload-press-kit` duplicates.** `pressIndex` is positional,
+   computed from existing `press-*` public_ids — a partially-uploaded hotel
+   re-uploads its survivors as `press-N+1`. On a partial failure, **re-run
+   ONLY the hotels at 0 uploads** (or dedupe afterwards).
+3. **Accor media live on `ahstatic.com`** (Fairmont/Raffles/Sofitel/Savoy) —
+   whitelisted in `HOSTNAME_WHITELIST_GLOBAL`. Property brand sites that
+   differ from the parent path need a `SLUG_EXTRA_ALLOWED_HOSTS` add-on
+   (e.g. `jasper-park-lodge.com`, `thefairmontroyalyork.com`).
+4. **Four Seasons is download-hostile.** `www.fourseasons.com/alt/img-opt/…`
+   → OpenAI "Error while downloading"; `press.fourseasons.com/.../news/…`
+   → HTML article ("unsupported image"). Only `press.fourseasons.com/content/dam/…`
+   (https) is usable → FS yields little. Needs a dedicated fetch (Referer/UA)
+   or manual sourcing before an FS cohort.
+5. **Acceptance must run on prod/preview, not local.** The local Next 16 dev
+   server 404s every route (the i18n proxy `apps/web/src/proxy.ts` is not
+   applied on the Turbopack instance; correlated with a broken symlink under
+   `apps/web`). Verify the rendered fiche on `myconciergehotel.com` instead.
+   When checking "zero supplier leak", scan **image URLs only**
+   (src/srcset/og:image/`ImageObject`) — OTA names in the price comparator
+   are plain text (legal) and the official-site link is a legitimate anchor.
+
 ## Finding — the 10-category coverage floor is structurally unreachable (2026-06-02)
 
 `photo-quality.mdc` frames "10/10 distinct categories" as a non-negotiable

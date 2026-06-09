@@ -16,6 +16,9 @@
  *   The `alt` key is recognised by Cloudinary's product gallery widget
  *   if we ever enable it.
  */
+import { readFileSync } from 'node:fs';
+import { extname } from 'node:path';
+
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import { err, ok, type Result } from '@mch/domain/shared';
 
@@ -24,6 +27,7 @@ import {
   CloudinaryResourceSchema,
   CloudinaryResourcesPageSchema,
   CloudinaryUploadResultSchema,
+  type CloudinaryLocalUploadInput,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,
 } from './types';
@@ -123,7 +127,7 @@ function stripHtml(s: string): string {
  * but never log it in the orchestrator (avoid leaking the URL of the
  * source asset if it happens to embed a session token).
  */
-function mapSdkError(e: unknown, input: CloudinaryUploadInput): CloudinaryError {
+function mapSdkError(e: unknown, input: { readonly sourceUrl: string }): CloudinaryError {
   // The Cloudinary SDK throws a mix of plain Error objects AND plain
   // dict objects like `{ message, http_code, error: { ... } }`. Calling
   // String() on the dict yields the useless `"[object Object]"` literal,
@@ -288,23 +292,32 @@ async function fetchSourceBytes(
   return err({ kind: 'unknown', message: lastMessage.slice(0, 200) });
 }
 
-/**
- * Upload an image from a public URL into the hotel folder.
- *
- * Idempotent: if a public_id already exists, Cloudinary overwrites
- * (because we pass `overwrite: true`) and returns the same `public_id`.
- * That lets the orchestrator re-run after a partial failure without
- * spawning duplicate assets.
- *
- * On `rate_limited` we retry with exponential back-off (free tier
- * commonly returns 420/429 after only a handful of uploads/min). On any
- * other error we surface immediately to the caller.
- */
-export async function uploadFromUrl(
-  input: CloudinaryUploadInput,
+interface UploadPayloadInput {
+  readonly sourceUrl?: string;
+  readonly hotelSlug: string;
+  readonly source: CloudinaryUploadInput['source'];
+  readonly index: number;
+  readonly publicIdShort?: string;
+  readonly altFr: string;
+  readonly altEn?: string;
+  readonly category?: string;
+  readonly extraTags?: readonly string[];
+}
+
+function mimeFromPath(localPath: string): string {
+  const ext = extname(localPath).toLowerCase();
+  if (ext === '.png') return 'image/png';
+  if (ext === '.webp') return 'image/webp';
+  if (ext === '.avif') return 'image/avif';
+  return 'image/jpeg';
+}
+
+async function uploadDataUri(
+  uploadPayload: string,
+  input: UploadPayloadInput,
 ): Promise<Result<CloudinaryUploadResult, CloudinaryError>> {
   const folder = `cct/hotels/${input.hotelSlug}`;
-  const publicIdShort = `${input.source}-${input.index}`;
+  const publicIdShort = input.publicIdShort ?? `${input.source}-${input.index}`;
 
   const altFr = stripHtml(input.altFr).slice(0, 200);
   const altEn = input.altEn !== undefined ? stripHtml(input.altEn).slice(0, 200) : undefined;
@@ -327,12 +340,6 @@ export async function uploadFromUrl(
   }
   const context = contextParts.join('|');
 
-  // Fetch the source bytes ourselves (policy-compliant UA) so Cloudinary
-  // never re-fetches the source — this is what was triggering Commons 429.
-  const fetched = await fetchSourceBytes(input.sourceUrl);
-  if (!fetched.ok) return err(fetched.error);
-  const uploadPayload = fetched.value.dataUri;
-
   let lastError: CloudinaryError | null = null;
   for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
     try {
@@ -343,8 +350,6 @@ export async function uploadFromUrl(
         resource_type: 'image',
         tags,
         context,
-        // Limit oversize Commons originals — Cloudinary will pick the
-        // appropriate inbound transformation. `c_limit` preserves AR.
         transformation: [{ width: 2400, height: 2400, crop: 'limit', quality: 'auto:best' }],
       });
 
@@ -367,17 +372,60 @@ export async function uploadFromUrl(
       }
       return ok(parsed.data);
     } catch (e) {
-      const mapped = mapSdkError(e, input);
+      const mapped = mapSdkError(e, { sourceUrl: input.sourceUrl ?? '' });
       lastError = mapped;
       if (mapped.kind !== 'rate_limited' || attempt === RATE_LIMIT_RETRIES) {
         return err(mapped);
       }
-      // Exponential back-off: 2s, 4s, 8s, 16s, 32s (max ~62s cumulative).
       const waitMs = 2000 * 2 ** attempt;
       await sleep(waitMs);
     }
   }
   return err(lastError ?? { kind: 'unknown', message: 'retry loop exited without resolution' });
+}
+
+/**
+ * Upload an image from a public URL into the hotel folder.
+ *
+ * Idempotent: if a public_id already exists, Cloudinary overwrites
+ * (because we pass `overwrite: true`) and returns the same `public_id`.
+ * That lets the orchestrator re-run after a partial failure without
+ * spawning duplicate assets.
+ *
+ * On `rate_limited` we retry with exponential back-off (free tier
+ * commonly returns 420/429 after only a handful of uploads/min). On any
+ * other error we surface immediately to the caller.
+ */
+export async function uploadFromUrl(
+  input: CloudinaryUploadInput,
+): Promise<Result<CloudinaryUploadResult, CloudinaryError>> {
+  const fetched = await fetchSourceBytes(input.sourceUrl);
+  if (!fetched.ok) return err(fetched.error);
+  return uploadDataUri(fetched.value.dataUri, input);
+}
+
+/**
+ * Upload a local image file (press-kit drop, PO-curated batch).
+ * Same folder / public_id / tag conventions as {@link uploadFromUrl}.
+ */
+export async function uploadFromLocalFile(
+  input: CloudinaryLocalUploadInput,
+): Promise<Result<CloudinaryUploadResult, CloudinaryError>> {
+  let bytes: Buffer;
+  try {
+    bytes = readFileSync(input.localPath);
+  } catch {
+    return err({ kind: 'source_unreachable', url: input.localPath });
+  }
+  if (bytes.byteLength === 0) {
+    return err({ kind: 'source_unreachable', url: input.localPath });
+  }
+  if (bytes.byteLength > MAX_SOURCE_BYTES) {
+    return err({ kind: 'asset_too_large', bytes: bytes.byteLength });
+  }
+  const base64 = bytes.toString('base64');
+  const dataUri = `data:${mimeFromPath(input.localPath)};base64,${base64}`;
+  return uploadDataUri(dataUri, input);
 }
 
 /** Intrinsic pixel dimensions of a stored Cloudinary asset. */

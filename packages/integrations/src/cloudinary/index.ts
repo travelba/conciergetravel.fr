@@ -14,12 +14,14 @@ export {
   configureCloudinary,
   listUploadedDimensions,
   toGalleryRow,
+  uploadFromLocalFile,
   uploadFromUrl,
 } from './client';
 export {
   CloudinaryResourceSchema,
   CloudinaryResourcesPageSchema,
   CloudinaryUploadResultSchema,
+  type CloudinaryLocalUploadInput,
   type CloudinaryResource,
   type CloudinaryUploadInput,
   type CloudinaryUploadResult,

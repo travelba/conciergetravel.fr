@@ -48,10 +48,18 @@
       "env": {
         "TAVILY_API_KEY": "${TAVILY_API_KEY}"
       }
+    },
+    "perplexity": {
+      "command": "npx",
+      "args": ["-y", "@perplexity-ai/mcp-server"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
+        "PERPLEXITY_TIMEOUT_MS": "600000"
+      }
     }
   },
   "_documentation": {
-    "rationale": "These five MCP servers are the project's preferred operational surfaces: Supabase (read-only DB introspection + migrations), Cloudinary (media), Resend (transactional email previews), shadcn (component catalogue), Tavily (web research). For Sentry, Vercel, GitHub, Datadog, Opsera, Sanity, and Superhuman, rely on the user-level config (`~/.cursor/mcp.json`).",
+    "rationale": "These six MCP servers are the project's preferred operational surfaces: Supabase (read-only DB introspection + migrations), Cloudinary (media), Resend (transactional email previews), shadcn (component catalogue), Tavily (web research), Perplexity (Sonar search/research/reasoning). For Sentry, Vercel, GitHub, Datadog, Opsera, Sanity, and Superhuman, rely on the user-level config (`~/.cursor/mcp.json`).",
     "secrets": "Never commit secrets here. Every `${VAR}` is interpolated from the contributor's shell environment. Example: export SUPABASE_ACCESS_TOKEN before launching Cursor.",
     "scope": "Project-level MCP files are a thin contract. The full toolkit (Sentry, Vercel, GitHub, Datadog, ...) stays at the user level so we don't fragment credentials across machines."
   }

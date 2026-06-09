@@ -26,6 +26,8 @@ export interface CloudinaryUploadInput {
   readonly source: 'commons' | 'places' | 'press' | 'manual';
   /** 1-based index within the source batch (used in `public_id`). */
   readonly index: number;
+  /** When set, replaces `{source}-{index}` as the Cloudinary asset name within the hotel folder. */
+  readonly publicIdShort?: string;
   /** Alt text (French). Surfaced in `<HotelImage alt>`. */
   readonly altFr: string;
   /** Alt text (English). Falls back to `altFr` when omitted. */
@@ -33,6 +35,20 @@ export interface CloudinaryUploadInput {
   /** Optional category — `exterior | lobby | room | spa | …`. */
   readonly category?: string;
   /** Extra tags appended after the defaults `[hotelSlug, source]`. */
+  readonly extraTags?: readonly string[];
+}
+
+/** Local file upload — same destination shape as {@link CloudinaryUploadInput}. */
+export interface CloudinaryLocalUploadInput {
+  /** Absolute or cwd-relative path to a JPEG/PNG/WebP on disk. */
+  readonly localPath: string;
+  readonly hotelSlug: string;
+  readonly source: 'commons' | 'places' | 'press' | 'manual';
+  readonly index: number;
+  readonly publicIdShort?: string;
+  readonly altFr: string;
+  readonly altEn?: string;
+  readonly category?: string;
   readonly extraTags?: readonly string[];
 }
 
