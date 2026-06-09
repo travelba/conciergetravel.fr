@@ -1,10 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useId, useState, type KeyboardEvent, type ReactElement } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactElement } from 'react';
 
 import type { Locale } from '@/i18n/routing';
 import { fetchSearchSuggestions, type Suggestions } from '@/lib/search/suggest-client';
+import { getTopSearchCities } from '@/lib/search/top-cities';
 import type { Destination, HotelResult } from '@/lib/search/types';
 
 const MIN_CHARS = 2;
@@ -41,6 +42,12 @@ type FlatOption =
 const OPTION_BASE =
   'flex cursor-pointer items-center gap-2 px-4 py-2 text-sm text-[color:var(--texte)]';
 
+const TYPE_LABEL_KEY: Record<Destination['type'], 'typeCity' | 'typeRegion' | 'typeCountry'> = {
+  city: 'typeCity',
+  region: 'typeRegion',
+  country: 'typeCountry',
+};
+
 /**
  * Destination autocomplete: debounced (250 ms, ≥ 2 chars) lookup against the
  * live `/api/search/suggest` endpoint with stale-request cancellation.
@@ -61,12 +68,14 @@ export function DestinationAutocomplete({
   fetchSuggestions = fetchSearchSuggestions,
 }: DestinationAutocompleteProps): ReactElement {
   const t = useTranslations('hotelSearchBar');
+  const topCities = getTopSearchCities(locale);
   const [destinations, setDestinations] = useState<readonly Destination[]>([]);
   const [hotels, setHotels] = useState<readonly HotelResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const reactId = useId();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const listboxId = `${reactId}-listbox`;
   const term = query.trim();
   const hasTerm = term.length >= MIN_CHARS;
@@ -109,7 +118,10 @@ export function DestinationAutocomplete({
         ...hotels.map((hotel): FlatOption => ({ kind: 'hotel', hotel })),
         { kind: 'all' },
       ]
-    : [];
+    : topCities.map((destination): FlatOption => ({ kind: 'destination', destination }));
+
+  const visibleDestinations = hasTerm ? destinations : topCities;
+  const visibleHotels = hasTerm ? hotels : [];
 
   const showNoResults = hasTerm && !loading && destinations.length === 0 && hotels.length === 0;
 
@@ -159,10 +171,17 @@ export function DestinationAutocomplete({
     }
   }
 
-  const dropdownOpen = isOpen && hasTerm;
+  const dropdownOpen = isOpen;
 
   return (
-    <div className="sb-field" style={{ position: 'relative' }}>
+    <div
+      className="sb-field"
+      style={{ position: 'relative' }}
+      onClick={() => {
+        onOpen();
+        inputRef.current?.focus();
+      }}
+    >
       <svg className="icon" viewBox="0 0 24 24" aria-hidden>
         <path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11z" />
         <circle cx="12" cy="10" r="2.5" />
@@ -170,6 +189,7 @@ export function DestinationAutocomplete({
       <span className="sb-text">
         <label htmlFor={inputId}>{t('destinationLabel')}</label>
         <input
+          ref={inputRef}
           id={inputId}
           type="search"
           role="combobox"
@@ -199,7 +219,7 @@ export function DestinationAutocomplete({
           id={listboxId}
           role="listbox"
           aria-label={t('listboxLabel')}
-          className="absolute left-0 top-full z-50 mt-2 max-h-[min(60vh,22rem)] w-[min(92vw,24rem)] overflow-y-auto rounded-lg border border-[rgba(43,39,34,0.12)] bg-white py-1 shadow-[var(--shadow)]"
+          className="sb-dropdown absolute left-0 top-full mt-2 max-h-[min(60vh,22rem)] w-[min(92vw,24rem)] overflow-y-auto rounded-lg border border-[rgba(43,39,34,0.12)] bg-white py-1"
         >
           {loading && destinations.length === 0 && hotels.length === 0 ? (
             <li role="presentation" className="px-4 py-2 text-sm text-[#9a9384]">
@@ -213,7 +233,16 @@ export function DestinationAutocomplete({
             </li>
           ) : null}
 
-          {destinations.map((destination, index) => {
+          {!hasTerm && topCities.length > 0 ? (
+            <li
+              role="presentation"
+              className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-[#9a9384]"
+            >
+              {t('topCitiesHeading')}
+            </li>
+          ) : null}
+
+          {visibleDestinations.map((destination, index) => {
             const optionIndex = index;
             const active = activeIndex === optionIndex;
             return (
@@ -226,13 +255,15 @@ export function DestinationAutocomplete({
                 className={active ? `${OPTION_BASE} bg-[rgba(43,39,34,0.06)]` : OPTION_BASE}
               >
                 <span className="font-medium">{destination.label}</span>
-                <span className="text-xs text-[#9a9384]">{destination.type}</span>
+                <span className="text-xs text-[#9a9384]">
+                  {t(TYPE_LABEL_KEY[destination.type])}
+                </span>
               </li>
             );
           })}
 
-          {hotels.map((hotel, index) => {
-            const optionIndex = destinations.length + index;
+          {visibleHotels.map((hotel, index) => {
+            const optionIndex = visibleDestinations.length + index;
             const active = activeIndex === optionIndex;
             const place = [hotel.city, hotel.country].filter((s) => s.length > 0).join(', ');
             return (
@@ -252,19 +283,21 @@ export function DestinationAutocomplete({
             );
           })}
 
-          <li
-            role="option"
-            aria-selected={activeIndex === options.length - 1}
-            onMouseEnter={() => setActiveIndex(options.length - 1)}
-            onClick={() => onSeeAllResults(query)}
-            className={
-              activeIndex === options.length - 1
-                ? `${OPTION_BASE} border-t border-[rgba(43,39,34,0.1)] bg-[rgba(43,39,34,0.06)] text-[color:var(--or)]`
-                : `${OPTION_BASE} border-t border-[rgba(43,39,34,0.1)] text-[color:var(--or)]`
-            }
-          >
-            {t('seeAll', { query: term })}
-          </li>
+          {hasTerm ? (
+            <li
+              role="option"
+              aria-selected={activeIndex === options.length - 1}
+              onMouseEnter={() => setActiveIndex(options.length - 1)}
+              onClick={() => onSeeAllResults(query)}
+              className={
+                activeIndex === options.length - 1
+                  ? `${OPTION_BASE} border-t border-[rgba(43,39,34,0.1)] bg-[rgba(43,39,34,0.06)] text-[color:var(--or)]`
+                  : `${OPTION_BASE} border-t border-[rgba(43,39,34,0.1)] text-[color:var(--or)]`
+              }
+            >
+              {t('seeAll', { query: term })}
+            </li>
+          ) : null}
         </ul>
       ) : null}
     </div>

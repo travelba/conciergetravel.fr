@@ -124,7 +124,6 @@ export async function BookingWidget({
   const tw = await getTranslations({ locale, namespace: 'hotelPage.widget' });
 
   const isPaidTunnel = bookingMode === 'amadeus' || bookingMode === 'little';
-  const isConcierge = !isPaidTunnel;
   const conciergeAction = getPathname({ locale, href: '/reservation/start' });
 
   const sectionId = surface === 'inline_section' ? 'booking' : undefined;
@@ -194,7 +193,7 @@ export async function BookingWidget({
         }}
       />
 
-      <TrustChips locale={locale} isConcierge={isConcierge} />
+      <TrustChips locale={locale} />
 
       <BookingWidgetSubmitTracker hotelId={hotelId} bookingMode={bookingMode} surface={surface} />
     </section>
@@ -339,13 +338,7 @@ function BookingWidgetForm({
   );
 }
 
-async function TrustChips({
-  locale,
-  isConcierge,
-}: {
-  readonly locale: SupportedLocale;
-  readonly isConcierge: boolean;
-}): Promise<ReactElement> {
+async function TrustChips({ locale }: { readonly locale: SupportedLocale }): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage.widget.trust' });
   return (
     <ul
@@ -354,17 +347,12 @@ async function TrustChips({
     >
       <li className="inline-flex items-center gap-1.5">
         <span aria-hidden>✓</span>
-        {t('iata')}
+        {t('bestRate')}
       </li>
       <li aria-hidden>·</li>
       <li className="inline-flex items-center gap-1.5">
         <span aria-hidden>✓</span>
-        {isConcierge ? t('noCard') : t('securePayment')}
-      </li>
-      <li aria-hidden>·</li>
-      <li className="inline-flex items-center gap-1.5">
-        <span aria-hidden>✓</span>
-        {t('cancellation')}
+        {t('freeCancellation')}
       </li>
     </ul>
   );

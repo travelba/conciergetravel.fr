@@ -4,6 +4,7 @@ import type { SupportedLocale } from '@/i18n/supported-locale';
 import { isTravelportSandboxEnabled } from '@/lib/travelport';
 
 import { BookingComingSoon } from './booking-coming-soon';
+import { BookingMobileBar } from './booking-mobile-bar';
 import { BookingSandboxRail } from './booking-sandbox-rail';
 
 /**
@@ -17,6 +18,11 @@ interface BookingSlotProps {
   readonly locale: SupportedLocale;
   readonly hotelName: string;
   readonly surface: BookingSurface;
+  /**
+   * When true, the rail renders as a bare `.resa-card` without the outer
+   * `<section id="booking">` wrapper — used inside the kit `.htl-aside`.
+   */
+  readonly embeddedInKitAside?: boolean;
   /**
    * Slug de la fiche — requis pour router l'hôtel pilote Travelport vers le
    * formulaire live (`<BookingSandboxRail>`).
@@ -42,13 +48,12 @@ interface BookingSlotProps {
  * them.
  *
  * Phase 1 (current): the rail shows a passive `<BookingComingSoon>`
- * placeholder; the mobile bar renders nothing (no live CTA to surface
- * yet — a permanent "bientôt disponible" sticky bar would be UX clutter
- * and borderline dark-pattern).
+ * placeholder; the mobile bar shows a compact sticky footer (dates +
+ * price hint + CTA) that expands into the same placeholder sheet.
  *
  * Phase 6 (booking APIs wired): the `rail` branch already swaps to the live
- * Travelport funnel (`<BookingSandboxRail>`) for allow-listed pilot hotels; a
- * future mobile bottom-bar will fill the `mobilebar` branch. The page layout,
+ * Travelport funnel (`<BookingSandboxRail>`) for allow-listed pilot hotels;
+ * the `mobilebar` branch mirrors it in the fixed bottom bar. The page layout,
  * anchors (`#booking`) and table-of-contents entry stay untouched — the funnel
  * re-lands in the exact same slot.
  */
@@ -59,23 +64,37 @@ export function BookingSlot({
   slug,
   bookingMode,
   priceFrom = null,
+  embeddedInKitAside = false,
 }: BookingSlotProps): React.ReactElement | null {
   if (surface === 'mobilebar') {
-    // Reserved for the Phase 6 fixed bottom bar. Inert until then.
-    return null;
+    return (
+      <BookingMobileBar
+        locale={locale}
+        hotelName={hotelName}
+        priceFrom={priceFrom}
+        {...(slug !== undefined ? { slug } : {})}
+        {...(bookingMode !== undefined ? { bookingMode } : {})}
+      />
+    );
   }
 
   // Pilote Travelport (Phase 6) : seul l'hôtel en `booking_mode = 'travelport'`,
   // sandbox activé (kill-switch env) et locale V1 (fr/en) bascule sur le
   // formulaire live ; tout le reste conserve le placeholder éditorial.
-  if (
+  const rail =
     slug !== undefined &&
     bookingMode === 'travelport' &&
     (locale === 'fr' || locale === 'en') &&
-    isTravelportSandboxEnabled()
-  ) {
-    return <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />;
-  }
+    isTravelportSandboxEnabled() ? (
+      <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />
+    ) : (
+      <BookingComingSoon
+        locale={locale}
+        hotelName={hotelName}
+        priceFrom={priceFrom}
+        embeddedInKitAside={embeddedInKitAside}
+      />
+    );
 
-  return <BookingComingSoon locale={locale} hotelName={hotelName} priceFrom={priceFrom} />;
+  return <div data-booking-rail>{rail}</div>;
 }

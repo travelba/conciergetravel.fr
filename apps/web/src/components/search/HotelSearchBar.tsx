@@ -32,8 +32,9 @@ export interface HotelSearchBarProps {
 
 const TRIGGER_FIELD =
   'sb-field w-full cursor-pointer text-left [font:inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--or)]';
+const PANEL_HOST = 'sb-panel-host';
 const PANEL =
-  'absolute left-0 top-full z-50 mt-2 rounded-lg border border-[rgba(43,39,34,0.12)] bg-white p-4 shadow-[var(--shadow)]';
+  'sb-panel absolute left-0 top-full mt-2 rounded-lg border border-[rgba(43,39,34,0.12)] bg-white p-4';
 
 /**
  * Orchestrator for the Lartisien-style hotel search bar, wired to the real
@@ -162,9 +163,16 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
     });
   }
 
+  const dateTag = locale === 'en' ? 'en-US' : 'fr-FR';
+  const dayMonth = new Intl.DateTimeFormat(dateTag, { day: 'numeric', month: 'short' });
+  const dayMonthYear = new Intl.DateTimeFormat(dateTag, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
   const datesValue =
     dateRange.from !== null && dateRange.to !== null
-      ? `${formatIsoDate(dateRange.from)} – ${formatIsoDate(dateRange.to)}`
+      ? `${dayMonth.format(dateRange.from)} – ${dayMonthYear.format(dateRange.to)}`
       : t('datesPlaceholder');
 
   const guests =
@@ -178,8 +186,7 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
       ref={barRef}
       role="search"
       aria-label={t('searchAria')}
-      className="search-bar"
-      style={{ overflow: 'visible' }}
+      className={activePanel !== null ? 'search-bar search-bar--panels-open' : 'search-bar'}
     >
       <DestinationAutocomplete
         inputId={DESTINATION_INPUT_ID}
@@ -197,7 +204,7 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
         {...(fetchSuggestions !== undefined ? { fetchSuggestions } : {})}
       />
 
-      <div style={{ position: 'relative' }}>
+      <div className={PANEL_HOST}>
         <button
           type="button"
           aria-haspopup="dialog"
@@ -217,8 +224,9 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
           </span>
         </button>
         {activePanel === 'dates' ? (
-          <div className={`${PANEL} w-[min(92vw,21rem)] md:w-[44rem] md:max-w-[92vw]`}>
+          <div className={`${PANEL} hotel-search-calendar-panel w-[min(92vw,17rem)] p-3`}>
             <DateRangePicker
+              locale={locale}
               value={dateRange}
               onChange={(range) => {
                 setDateRange(range);
@@ -231,7 +239,7 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
         ) : null}
       </div>
 
-      <div style={{ position: 'relative' }}>
+      <div className={PANEL_HOST}>
         <button
           type="button"
           aria-haspopup="dialog"

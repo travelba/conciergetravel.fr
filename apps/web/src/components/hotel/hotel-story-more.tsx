@@ -14,22 +14,45 @@ interface HotelStoryMoreProps {
     readonly more: string;
     readonly less: string;
   };
+  /**
+   * `kit` — DA `.read-more` / `.rm-clip` / `.rm-toggle` (gradient fade,
+   * max-height expand). Content stays in the DOM when collapsed (overflow
+   * hidden), matching `les-airelles-gordes.html`.
+   */
+  readonly variant?: 'default' | 'kit';
 }
 
 /**
- * "En savoir plus" disclosure for the hotel "À propos" block (golden
- * template). The intro paragraphs stay visible above; the detailed
- * `<h3>` sections collapse behind a single sober trigger so the fiche
- * opens on a calm, scannable summary and reveals the long read on demand.
- *
- * Accessibility: a real `<button aria-expanded aria-controls>` drives a
- * region with `id`; the region is `hidden` (not removed) when collapsed,
- * so the content is reachable by find-in-page and crawlers, and screen
- * readers announce the expanded/collapsed state.
+ * "En savoir plus" / "Lire la description complète" disclosure for the
+ * hotel "À propos" block (golden template).
  */
-export function HotelStoryMore({ children, labels }: HotelStoryMoreProps): React.ReactElement {
+export function HotelStoryMore({
+  children,
+  labels,
+  variant = 'default',
+}: HotelStoryMoreProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const regionId = useId();
+
+  if (variant === 'kit') {
+    return (
+      <div className={`mch-kit read-more${open ? 'open' : ''}`}>
+        <div className="rm-clip">{children}</div>
+        <button
+          type="button"
+          className="rm-toggle"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={regionId}
+        >
+          <span>{open ? labels.less : labels.more}</span>
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-2">

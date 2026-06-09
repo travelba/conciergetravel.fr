@@ -58,6 +58,7 @@ export interface PriceComparatorClientProps {
   readonly adultsDefault: number;
   readonly priceConciergeMinor: number | null;
   readonly labels: PriceComparatorLabels;
+  readonly surface?: 'default' | 'kit';
 }
 
 function formatEuroAmount(locale: Locale, amountMinor: number): string {
@@ -175,25 +176,38 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
   if (state.status === 'idle') {
     return (
       <div>
-        <p className="text-muted text-sm">{props.labels.selectDates}</p>
-        <p className="text-muted mt-4 text-[11px] leading-snug">{props.labels.legal}</p>
+        <p className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}>
+          {props.labels.selectDates}
+        </p>
+        <p
+          className={
+            props.surface === 'kit' ? 'rc-foot' : 'text-muted mt-4 text-[11px] leading-snug'
+          }
+        >
+          {props.labels.legal}
+        </p>
       </div>
     );
   }
 
   if (state.status === 'loading') {
     return (
-      <p className="text-muted text-sm" aria-live="polite" aria-busy="true">
+      <p
+        className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}
+        aria-live="polite"
+        aria-busy="true"
+      >
         {props.labels.loading}
       </p>
     );
   }
 
-  // CDC v3.2: when no data, hide the entire data block — only the section
-  // header remains. We still surface the legal mention so the page meets
-  // the disclosure requirement.
   if (state.status === 'unavailable') {
-    return <p className="text-muted text-sm">{props.labels.scenario.unavailable}</p>;
+    return (
+      <p className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}>
+        {props.labels.scenario.unavailable}
+      </p>
+    );
   }
 
   const { data } = state;
@@ -207,6 +221,24 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
     normalized,
     priceConciergeMinor: props.priceConciergeMinor,
   });
+
+  if (props.surface === 'kit') {
+    return (
+      <div>
+        {data.cached ? <p className="rc-foot">{props.labels.cachedNotice}</p> : null}
+        {data.competitors.map((c, index) => (
+          <div key={c.provider} className={index === 0 ? 'rc-row rc-best' : 'rc-row'}>
+            <span className="rc-name">{props.labels.providerLabel[c.provider]}</span>
+            <span className="rc-amt">{formatEuroAmount(props.locale, c.amountMinor)}</span>
+          </div>
+        ))}
+        <p className="rc-foot">{props.labels.legal}</p>
+        <p className="rc-foot" data-scenario={scenario.kind}>
+          {scenarioHeadline(scenario, props.labels)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

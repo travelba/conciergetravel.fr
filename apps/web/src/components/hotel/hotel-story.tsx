@@ -3,10 +3,13 @@ import { getTranslations } from 'next-intl/server';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { LocalisedHotelStorySection } from '@/server/hotels/get-hotel-by-slug';
 
+import { ConciergeQuote } from './concierge-quote';
 import { HotelStoryMore } from './hotel-story-more';
 
 interface HotelStoryProps {
   readonly locale: SupportedLocale;
+  readonly hotelName: string;
+  readonly conciergeHook: string | null;
   readonly sections: readonly LocalisedHotelStorySection[];
   readonly heroParagraphs: readonly string[] | null;
   /**
@@ -16,58 +19,38 @@ interface HotelStoryProps {
    * the full long read expanded.
    */
   readonly collapsibleSections?: boolean;
+  /**
+   * Kit layout (`les-airelles-gordes.html` § #apropos): `.htl-section`,
+   * eyebrow, concierge H2, `.concierge-quote`, `.read-more` + `.htl-prose`.
+   */
+  readonly useKitLayout?: boolean;
 }
 
-/**
- * Long-form "About the property" section (CDC §2.4).
- *
- * Layout intent
- * -------------
- *   ┌─ h2: About this property
- *   │
- *   │  hero paragraph(s) — optional, drawn from the short
- *   │  `description_*` text columns and used as a 100-200 word
- *   │  introduction.
- *   │
- *   │  ┌─ aside: Table of contents (sticky on lg+, inline on mobile)
- *   │  │   • Histoire & héritage
- *   │  │   • Emplacement
- *   │  │   • …
- *   │  │
- *   │  └─ article: ordered <h3 id> sections with multi-paragraph bodies
- *
- * Why this shape?
- * ---------------
- *   - 600-1000 words spread across 5-7 sections is the sweet spot
- *     Booking / Mr & Mrs Smith hit on their flagship palace pages;
- *     it's also what Google's E-E-A-T docs reward for travel content.
- *   - In-page anchors give us LLM-quotable URLs (`#histoire`) for
- *     ground-truth retrieval and a usable TOC for screen readers.
- *   - The TOC is rendered as a `<nav aria-label>` so assistive tech
- *     can skip the body and jump to the section heading directly.
- *
- * Editorial fallback
- * ------------------
- *   - If `sections` is empty, the component renders only the hero
- *     paragraphs (current pre-Phase-10.10 behaviour).
- *   - If both `sections` is empty AND `heroParagraphs` is null, the
- *     entire block is omitted — caller-side null-check unnecessary.
- *
- * Skill: nextjs-app-router (RSC + i18n), geo-llm-optimization (TOC +
- * anchor canonicals), accessibility (semantic dl/nav/article).
- */
 export async function HotelStory({
   locale,
+  hotelName,
+  conciergeHook,
   sections,
   heroParagraphs,
   collapsibleSections = false,
+  useKitLayout = false,
 }: HotelStoryProps): Promise<React.ReactElement | null> {
-  // Nothing to render: bail before reading the messages bundle.
   const hasSections = sections.length > 0;
   const hasHero = heroParagraphs !== null && heroParagraphs.length > 0;
-  if (!hasSections && !hasHero) return null;
+  if (!hasSections && !hasHero && conciergeHook === null) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
+
+  const heroProse =
+    hasHero && heroParagraphs !== null ? (
+      <>
+        {heroParagraphs.map((paragraph, idx) => (
+          <p key={idx} className="htl-prose">
+            {paragraph}
+          </p>
+        ))}
+      </>
+    ) : null;
 
   const detailedSections = hasSections ? (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
@@ -110,13 +93,54 @@ export async function HotelStory({
     </div>
   ) : null;
 
+  if (useKitLayout) {
+    return (
+      <section
+        id="apropos"
+        aria-labelledby="about-title"
+        className="mch-kit htl-section scroll-mt-28"
+      >
+        <span className="eyebrow left">{t('conciergeEyebrow')}</span>
+        <h2 id="about-title">{t('sections.conciergeWord', { hotel: hotelName })}</h2>
+
+        {conciergeHook !== null ? (
+          <ConciergeQuote text={conciergeHook} signature={t('hero.conciergeSignature')} />
+        ) : null}
+
+        {heroProse !== null ? (
+          <HotelStoryMore
+            variant="kit"
+            labels={{
+              more: t('story.readMoreFull'),
+              less: t('story.readLess'),
+            }}
+          >
+            {heroProse}
+          </HotelStoryMore>
+        ) : null}
+
+        {detailedSections !== null && collapsibleSections ? (
+          <HotelStoryMore labels={{ more: t('story.readMore'), less: t('story.readLess') }}>
+            {detailedSections}
+          </HotelStoryMore>
+        ) : (
+          detailedSections
+        )}
+      </section>
+    );
+  }
+
   return (
     <section aria-labelledby="about-title" className="mb-12">
       <h2 id="about-title" className="text-fg mb-3 font-serif text-2xl">
         {t('sections.about')}
       </h2>
 
-      {hasHero ? (
+      {conciergeHook !== null ? (
+        <ConciergeQuote text={conciergeHook} signature={t('hero.conciergeSignature')} />
+      ) : null}
+
+      {hasHero && heroParagraphs !== null ? (
         <div className="prose text-fg/90 mb-6 max-w-prose text-base">
           {heroParagraphs.map((paragraph, idx) => (
             <p key={idx} className="mb-3 last:mb-0">

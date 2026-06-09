@@ -4,11 +4,11 @@ import 'react-day-picker/style.css';
 
 import { useTranslations } from 'next-intl';
 import { DayPicker, type DateRange } from 'react-day-picker';
-import { useEffect, useState, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 
+import type { Locale } from '@/i18n/routing';
+import { getDayPickerLocale } from '@/lib/search/day-picker-locale';
 import type { DateRangeState } from '@/lib/search/types';
-
-const TWO_MONTH_MIN_WIDTH = '(min-width: 768px)';
 
 const MS_PER_DAY = 86_400_000;
 
@@ -25,6 +25,7 @@ export function nightsBetween(from: Date, to: Date): number {
 }
 
 export interface DateRangePickerProps {
+  readonly locale: Locale;
   readonly value: DateRangeState;
   readonly onChange: (range: DateRangeState) => void;
   /** "Annuler les dates" — resets to `{ from: null, to: null }`. */
@@ -39,32 +40,18 @@ function toDateRange(state: DateRangeState): DateRange | undefined {
 }
 
 /**
- * Range date picker rendering two months, weeks starting Monday, with past
- * days disabled. `react-day-picker` owns the range-selection logic (1st
- * click = from, 2nd = to, clicking before `from` redefines it); we mirror
- * its result into the parent's `{ from, to }` state and derive the nights
- * count for display.
+ * Compact range picker for the hero search bar — one month, small day cells,
+ * weeks starting Monday, past days disabled.
  */
 export function DateRangePicker({
+  locale,
   value,
   onChange,
   onClear,
   onValidate,
 }: DateRangePickerProps): ReactElement {
   const t = useTranslations('hotelSearchBar');
-
-  // Responsive month count: 1 on mobile, 2 side-by-side from `md`. The panel
-  // only renders after a click, so `window` is always defined for the lazy
-  // initial read; the effect just tracks viewport changes afterwards.
-  const [months, setMonths] = useState<1 | 2>(() =>
-    typeof window !== 'undefined' && window.matchMedia(TWO_MONTH_MIN_WIDTH).matches ? 2 : 1,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(TWO_MONTH_MIN_WIDTH);
-    const onChange = (event: MediaQueryListEvent): void => setMonths(event.matches ? 2 : 1);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+  const dayPickerLocale = getDayPickerLocale(locale);
 
   const today = startOfDay(new Date());
   const selected = toDateRange(value);
@@ -79,25 +66,31 @@ export function DateRangePicker({
   }
 
   return (
-    <div role="group" aria-label={t('calendarLabel')} className="text-[color:var(--texte)]">
+    <div
+      role="group"
+      aria-label={t('calendarLabel')}
+      className="hotel-search-calendar text-[color:var(--texte)]"
+    >
       <DayPicker
         mode="range"
-        numberOfMonths={months}
+        locale={dayPickerLocale}
+        lang={locale}
+        numberOfMonths={1}
         weekStartsOn={1}
         disabled={{ before: today }}
         selected={selected}
         onSelect={handleSelect}
       />
 
-      <div className="mt-2 flex items-center justify-between gap-4 border-t border-[rgba(43,39,34,0.1)] pt-3">
-        <p aria-live="polite" className="text-sm text-[color:var(--texte)]">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[rgba(43,39,34,0.1)] pt-2">
+        <p aria-live="polite" className="text-xs text-[color:var(--texte)]">
           {nights > 0 ? t('nights', { count: nights }) : t('datesHint')}
         </p>
-        <span className="flex items-center gap-3">
+        <span className="flex items-center gap-2">
           <button
             type="button"
             onClick={onClear}
-            className="text-sm text-[color:var(--texte)] underline underline-offset-2 hover:text-[color:var(--or)]"
+            className="text-xs text-[color:var(--texte)] underline underline-offset-2 hover:text-[color:var(--or)]"
           >
             {t('clearDates')}
           </button>
@@ -106,7 +99,7 @@ export function DateRangePicker({
               type="button"
               onClick={onValidate}
               disabled={nights < 1}
-              className="rounded-md bg-[color:var(--noir)] px-4 py-2 text-sm text-[#f6f1e7] hover:bg-[color:var(--anthracite)] disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-md bg-[color:var(--noir)] px-3 py-1.5 text-xs text-[#f6f1e7] hover:bg-[color:var(--anthracite)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t('validateDates')}
             </button>

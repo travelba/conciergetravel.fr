@@ -20,6 +20,8 @@ export interface PriceComparatorProps {
    * (CDC v3.2 §"informational" tone).
    */
   readonly priceConciergeMinor: number | null;
+  /** `kit` matches the DA `.resa-compare` card in the hotel aside. */
+  readonly surface?: 'default' | 'kit';
 }
 
 /**
@@ -67,6 +69,30 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
     },
   } as const;
 
+  const client = (
+    <Suspense fallback={<p className="text-muted text-sm">{labels.loading}</p>}>
+      <PriceComparatorClient
+        locale={props.locale}
+        hotelId={props.hotelId}
+        adultsDefault={props.adultsDefault ?? 2}
+        priceConciergeMinor={props.priceConciergeMinor}
+        labels={labels}
+        surface={props.surface ?? 'default'}
+      />
+    </Suspense>
+  );
+
+  if (props.surface === 'kit') {
+    return (
+      <div className="mch-kit resa-compare" aria-labelledby="price-comparator-title">
+        <div className="rc-title" id="price-comparator-title">
+          {labels.title}
+        </div>
+        {client}
+      </div>
+    );
+  }
+
   return (
     <section
       aria-labelledby="price-comparator-title"
@@ -79,15 +105,7 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
         <p className="text-muted mt-1 text-xs">{labels.subtitle}</p>
       </header>
 
-      <Suspense fallback={<p className="text-muted text-sm">{labels.loading}</p>}>
-        <PriceComparatorClient
-          locale={props.locale}
-          hotelId={props.hotelId}
-          adultsDefault={props.adultsDefault ?? 2}
-          priceConciergeMinor={props.priceConciergeMinor}
-          labels={labels}
-        />
-      </Suspense>
+      {client}
     </section>
   );
 }
