@@ -55,7 +55,7 @@ export async function HeaderQuickSearch({
       <button
         type="submit"
         aria-label={t('submitAria')}
-        className="bg-fg text-bg hover:bg-fg/90 inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium"
+        className="bg-primary-heritage text-off-white hover:bg-primary-heritage/90 inline-flex h-full items-center justify-center rounded-r-md px-3 text-xs font-medium"
       >
         <svg
           aria-hidden

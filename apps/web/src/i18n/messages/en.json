@@ -32,6 +32,13 @@
       "aspst": "Pay at the hotel",
       "amadeus": "Best price guaranteed"
     },
+    "trustBar": {
+      "ariaLabel": "Our commitments",
+      "iata": "IATA accredited",
+      "advisors": "French-speaking advisors",
+      "rate": "Negotiated best rate",
+      "payment": "Secure payment"
+    },
     "hero": {
       "posterAlt": "Parisian Palace suite at dusk, rooftops view — MyConciergeHotel selection",
       "searchTitle": "Search an extraordinary hotel",

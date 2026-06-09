@@ -68,11 +68,11 @@ export async function SiteHeader(): Promise<ReactElement> {
         {t('skipToContent')}
       </a>
 
-      <header className="border-border bg-bg/95 sticky top-0 z-40 border-b backdrop-blur">
+      <header className="border-outline-variant bg-bg/95 sticky top-0 z-40 border-b backdrop-blur">
         <div className="container mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-3">
           <Link
             href="/"
-            className="text-fg focus-visible:ring-ring font-serif text-lg tracking-tight hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+            className="text-primary-heritage focus-visible:ring-ring font-serif text-lg tracking-tight hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
             aria-label={t('brand')}
           >
             {t('brand')}

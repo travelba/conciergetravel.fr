@@ -72,7 +72,7 @@ export async function SiteFooter(): Promise<ReactElement> {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-border bg-bg mt-16 border-t">
+    <footer className="border-outline-variant bg-surface-container-high/40 mt-16 border-t">
       <div className="container mx-auto max-w-screen-xl px-4 py-10 sm:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           {/* Col 1 — Brand + trust signals
@@ -83,7 +83,7 @@ export async function SiteFooter(): Promise<ReactElement> {
               which is currently `noindex, follow` until counsel signs
               off (see `mentions-legales/page.tsx` IS_DRAFT). */}
           <div className="lg:col-span-1">
-            <p className="text-fg font-serif text-lg">{t('company')}</p>
+            <p className="text-primary-heritage font-serif text-lg">{t('company')}</p>
             <p className="text-muted mt-2 text-sm">{t('tagline')}</p>
             <ul className="mt-4 flex flex-col gap-1.5 text-xs">
               <li className="text-muted flex items-start gap-1.5">

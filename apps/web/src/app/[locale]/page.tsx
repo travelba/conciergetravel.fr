@@ -15,6 +15,7 @@ import { HomeHotelGrid } from '@/components/home/home-hotel-grid';
 import { HomeInspirationGrid } from '@/components/home/home-inspiration-grid';
 import { HomeOpeningsGrid } from '@/components/home/home-openings-grid';
 import { HomeTopRankings } from '@/components/home/home-top-rankings';
+import { HomeTrustBar } from '@/components/home/home-trust-bar';
 import { SeoJsonLd } from '@/components/seo/json-ld';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -194,6 +195,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           concierge. » + H1 « Nous vous attendions » + chiffres
           réels (127 pays · 2 193 adresses) */}
       <HomeHero locale={locale} cloudName={cloudName} />
+
+      <HomeTrustBar locale={locale} />
 
       {/* §2 — Le mot du Concierge (éditorial signé) */}
       <HomeEditorLetter locale={locale} />

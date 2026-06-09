@@ -86,10 +86,11 @@ export async function HomeHero({
       </div>
 
       <div className="container mx-auto max-w-screen-xl px-4 py-20 sm:py-28 lg:py-32">
-        <div className="flex max-w-3xl flex-col gap-6">
-          <p className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.22em] text-white/70">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
+          <p className="flex items-center justify-center gap-3 text-xs font-medium uppercase tracking-[0.22em] text-white/70">
             <span aria-hidden className="bg-gold h-px w-8" />
             {t('eyebrow')}
+            <span aria-hidden className="bg-gold h-px w-8" />
           </p>
           <h1
             id="home-hero-title"
@@ -109,19 +110,7 @@ export async function HomeHero({
             {t('subtitleSecondary')}
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2.5 text-xs text-white/75">
-            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
-              {t('trust.iata')}
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
-              {t('trust.aspst')}
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-sm">
-              {t('trust.amadeus')}
-            </span>
-          </div>
-
-          <div className="mt-4">
+          <div className="mt-4 w-full max-w-3xl">
             <CatalogSearchForm locale={locale} variant="hero" previewExtras />
           </div>
         </div>

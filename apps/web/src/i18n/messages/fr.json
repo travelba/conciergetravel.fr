@@ -32,6 +32,13 @@
       "aspst": "Paiement sur place",
       "amadeus": "Meilleur prix garanti"
     },
+    "trustBar": {
+      "ariaLabel": "Nos engagements",
+      "iata": "Accrédité IATA",
+      "advisors": "Conseillers francophones",
+      "rate": "Meilleur tarif négocié",
+      "payment": "Paiement sécurisé"
+    },
     "hero": {
       "posterAlt": "Suite d'un Palace parisien au crépuscule, vue sur les toits — sélection MyConciergeHotel",
       "searchTitle": "Rechercher un hôtel d'exception",

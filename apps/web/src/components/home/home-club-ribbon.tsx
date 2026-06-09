@@ -41,7 +41,7 @@ export async function HomeClubRibbon({
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <Link
             href="/le-concierge-club"
-            className="border-border bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+            className="bg-primary-heritage text-off-white hover:bg-primary-heritage/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
           >
             {t('ctaDiscover')}
           </Link>

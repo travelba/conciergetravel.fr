@@ -43,9 +43,9 @@ export async function CatalogSearchForm({
 
   const formClass = isHero
     ? showPreview
-      ? 'border-border bg-bg/95 shadow-card grid w-full gap-1 rounded-lg border p-2 backdrop-blur sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:gap-0 sm:divide-x sm:divide-border sm:p-1.5'
-      : 'border-border bg-bg/95 shadow-card flex w-full max-w-xl flex-col items-stretch gap-2 rounded-lg border p-2 backdrop-blur sm:flex-row sm:items-center'
-    : 'border-border bg-bg flex w-full max-w-xl items-center gap-2 rounded-md border p-1.5';
+      ? 'border-outline-variant bg-surface-container-lowest shadow-card grid w-full gap-1 rounded-lg border p-2 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:gap-0 sm:divide-x sm:divide-outline-variant sm:p-1.5'
+      : 'border-outline-variant bg-surface-container-lowest shadow-card flex w-full max-w-xl flex-col items-stretch gap-2 rounded-lg border p-2 sm:flex-row sm:items-center'
+    : 'border-outline-variant bg-surface-container-lowest flex w-full max-w-xl items-center gap-2 rounded-md border p-1.5';
 
   return (
     <form
@@ -129,8 +129,8 @@ export async function CatalogSearchForm({
         aria-label={t('searchSubmitAria')}
         className={
           showPreview
-            ? 'bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring m-1 inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 sm:m-0 sm:rounded-md sm:px-5'
-            : 'bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2'
+            ? 'bg-primary-heritage text-off-white hover:bg-primary-heritage/90 focus-visible:ring-ring m-1 inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 sm:m-0 sm:rounded-md sm:px-5'
+            : 'bg-primary-heritage text-off-white hover:bg-primary-heritage/90 focus-visible:ring-ring inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2'
         }
       >
         <svg
