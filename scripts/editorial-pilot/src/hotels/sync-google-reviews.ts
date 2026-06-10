@@ -1,7 +1,8 @@
 /**
  * sync-google-reviews.ts — Google Maps / Business Profile review sync.
  *
- * Fetches Place Details (rating, userRatingCount, up to 5 reviews) and
+ * Fetches Place Details (rating, userRatingCount, up to 5 reviews with
+ * substantive comments, newest first, any rating 1–5) and
  * PATCHes `hotels.google_rating`, `google_reviews_count`, `google_reviews`,
  * `last_reviews_sync`. Resolves `google_place_id` via geocode when missing.
  *

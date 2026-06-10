@@ -19,6 +19,7 @@
  * = $3.20 + $7 = $10.20. Inside the $200 monthly Maps credit by far.
  */
 
+import { selectGoogleReviewsForDisplay } from '@mch/domain/reviews';
 import { err, ok, type Result } from '@mch/domain/shared';
 import { retryingJsonRequest } from '../http/retry-request';
 
@@ -476,22 +477,39 @@ export async function fetchPlaceDetails(
     });
   }
 
-  const reviews: NormalisedPlaceDetails['reviews'] = [];
-  for (const review of parsed.data.reviews.slice(0, 5)) {
+  interface ApiReviewRow {
+    readonly author: string;
+    readonly rating: number;
+    readonly text: string;
+    readonly publishTime: string | null;
+    readonly language: string | undefined;
+  }
+
+  const apiCandidates: ApiReviewRow[] = [];
+  for (const review of parsed.data.reviews) {
     const rating = review.rating;
     if (rating === undefined || !Number.isFinite(rating)) continue;
     const textBlock = review.text ?? review.originalText;
     const text = textBlock?.text?.trim();
     if (text === undefined || text.length === 0) continue;
-    const author =
-      review.authorAttribution?.displayName?.trim() ??
-      (reviews.length === 0 ? 'Google user' : `Google user ${reviews.length + 1}`);
-    const candidate = {
-      author,
+    const author = review.authorAttribution?.displayName?.trim() ?? '';
+    apiCandidates.push({
+      author: author.length > 0 ? author : `Google user ${apiCandidates.length + 1}`,
       rating: Math.round(rating),
       text,
-      ...(review.publishTime !== undefined ? { publish_time: review.publishTime } : {}),
-      ...(textBlock?.languageCode !== undefined ? { language: textBlock.languageCode } : {}),
+      publishTime: review.publishTime ?? null,
+      language: textBlock?.languageCode,
+    });
+  }
+
+  const reviews: NormalisedPlaceDetails['reviews'] = [];
+  for (const row of selectGoogleReviewsForDisplay(apiCandidates, 5)) {
+    const candidate = {
+      author: row.author,
+      rating: row.rating,
+      text: row.text,
+      ...(row.publishTime !== null ? { publish_time: row.publishTime } : {}),
+      ...(row.language !== undefined ? { language: row.language } : {}),
     };
     const stored = StoredGoogleReviewSchema.safeParse(candidate);
     if (stored.success) reviews.push(stored.data);

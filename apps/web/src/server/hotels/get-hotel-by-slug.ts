@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { selectGoogleReviewsForDisplay } from '@mch/domain/reviews';
 import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
@@ -510,19 +511,28 @@ export function readGoogleReviews(
 ): readonly LocalisedGoogleReview[] {
   const raw = row.google_reviews;
   if (raw === null || raw === undefined || !Array.isArray(raw)) return [];
-  const out: LocalisedGoogleReview[] = [];
+  const candidates: Array<{
+    author: string;
+    rating: number;
+    text: string;
+    publishTime: string | null;
+  }> = [];
   for (const entry of raw) {
     const parsed = StoredGoogleReviewSchema.safeParse(entry);
     if (!parsed.success) continue;
-    out.push({
+    candidates.push({
       author: parsed.data.author,
       rating: parsed.data.rating,
       text: parsed.data.text,
       publishTime: parsed.data.publish_time ?? null,
     });
-    if (out.length >= 5) break;
   }
-  return out;
+  return selectGoogleReviewsForDisplay(candidates, 5).map((review) => ({
+    author: review.author,
+    rating: review.rating,
+    text: review.text,
+    publishTime: review.publishTime,
+  }));
 }
 
 /** Whether #acces should render Google traveler reviews instead of editorial fallbacks. */

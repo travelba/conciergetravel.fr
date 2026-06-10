@@ -12,7 +12,8 @@
     "./editorial": "./src/editorial/index.ts",
     "./shared": "./src/shared/index.ts",
     "./price-comparison": "./src/price-comparison/index.ts",
-    "./consent": "./src/consent/index.ts"
+    "./consent": "./src/consent/index.ts",
+    "./reviews": "./src/reviews/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

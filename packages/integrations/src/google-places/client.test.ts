@@ -91,8 +91,9 @@ const handlers = [
         },
         {
           rating: 4,
-          originalText: { text: 'Lovely stay.', languageCode: 'en' },
+          originalText: { text: 'Lovely stay overall.', languageCode: 'en' },
           authorAttribution: { displayName: 'John D.' },
+          publishTime: '2026-06-01T12:00:00Z',
         },
         { rating: 3, text: { text: '' } },
       ],
@@ -194,7 +195,9 @@ describe('fetchPlaceDetails', () => {
     expect(res.value.rating).toBe(4.8);
     expect(res.value.userRatingCount).toBe(842);
     expect(res.value.reviews).toHaveLength(2);
-    expect(res.value.reviews[0]?.author).toBe('Marie L.');
+    expect(res.value.reviews[0]?.author).toBe('John D.');
+    expect(res.value.reviews[0]?.rating).toBe(4);
+    expect(res.value.reviews[1]?.author).toBe('Marie L.');
     expect(res.value.websiteUri).toMatch(/^https:\/\//u);
     expect(res.value.googleMapsUri).toMatch(/^https:\/\//u);
   });

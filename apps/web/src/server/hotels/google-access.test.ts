@@ -161,4 +161,34 @@ describe('readGoogleReviews', () => {
     );
     expect(reviews).toHaveLength(0);
   });
+
+  it('sorts by publish_time descending and keeps ratings below 5', () => {
+    const reviews = readGoogleReviews(
+      minimalRow({
+        google_reviews: [
+          {
+            author: 'Older five',
+            rating: 5,
+            text: 'Séjour parfait, service au top.',
+            publish_time: '2025-01-01T00:00:00Z',
+          },
+          {
+            author: 'Recent three',
+            rating: 3,
+            text: 'Chambre bruyante côté cour intérieure.',
+            publish_time: '2026-06-01T00:00:00Z',
+          },
+          {
+            author: 'No text',
+            rating: 4,
+            text: 'Top',
+            publish_time: '2026-06-09T00:00:00Z',
+          },
+        ],
+      }),
+      'fr',
+    );
+    expect(reviews.map((r) => r.author)).toEqual(['Recent three', 'Older five']);
+    expect(reviews[0]?.rating).toBe(3);
+  });
 });
