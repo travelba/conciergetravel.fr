@@ -29,6 +29,7 @@ export function BookingStayUrlSync(): null {
       const next = `${window.location.pathname}?${params.toString()}`;
       if (next !== `${window.location.pathname}${window.location.search}`) {
         window.history.replaceState(null, '', next);
+        window.dispatchEvent(new Event('mch-stay-sync'));
       }
     };
 

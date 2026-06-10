@@ -6,7 +6,9 @@ import type { SupportedLocale } from '@/i18n/supported-locale';
 import { defaultHotelStay, todayIso } from '@/lib/booking/default-hotel-stay';
 
 import { BookingKitRailClient } from './booking-kit-rail-client';
+import { BookingStayUrlSync } from './booking-stay-url-sync';
 import { BookingWidgetSubmitTracker } from './booking-widget-tracker';
+import { BookingWidgetUrlHydrator } from './booking-widget-url-hydrator';
 
 interface BookingSandboxRailProps {
   readonly locale: SupportedLocale;
@@ -77,6 +79,8 @@ export async function BookingSandboxRail({
         bookingMode="travelport"
         surface="sticky_widget"
       />
+      <BookingWidgetUrlHydrator />
+      <BookingStayUrlSync />
     </>
   );
 }

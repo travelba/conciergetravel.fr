@@ -6,9 +6,12 @@ import { SubmitButton } from '@/components/booking/submit-button';
 import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import { intlLocaleTag } from '@/i18n/runtime';
+import { isIsoDate } from '@/lib/booking/stay-url-params';
 import { fetchTravelportSearch } from '@/lib/travelport/fetch-travelport-search';
 import { dispatchTravelportStay } from '@/lib/travelport/stay-event';
 import type { BookingMode } from '@mch/domain/hotels';
+
+import { BookingKitStayDates } from './booking-kit-stay-dates';
 
 export interface BookingKitRailLabels {
   readonly checkIn: string;
@@ -49,12 +52,6 @@ export interface BookingKitRailClientProps {
   readonly labels: BookingKitRailLabels;
 }
 
-function addDayIso(iso: string): string {
-  const t = Date.parse(`${iso}T00:00:00Z`);
-  if (!Number.isFinite(t)) return iso;
-  return new Date(t + 86_400_000).toISOString().slice(0, 10);
-}
-
 function formatEur(locale: SupportedLocale, minor: number): string {
   return new Intl.NumberFormat(intlLocaleTag(locale), {
     style: 'currency',
@@ -85,7 +82,30 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
   const [checkIn, setCheckIn] = useState(props.defaultStay.checkIn);
   const [checkOut, setCheckOut] = useState(props.defaultStay.checkOut);
   const [adults, setAdults] = useState(props.defaultStay.adults);
-  const minCheckOut = addDayIso(checkIn >= props.today ? checkIn : props.today);
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get('checkIn');
+      const to = params.get('checkOut');
+      if (from !== null && isIsoDate(from)) setCheckIn(from);
+      if (to !== null && isIsoDate(to)) setCheckOut(to);
+    }, 0);
+    return () => clearTimeout(handle);
+  }, []);
+
+  const onStayDatesChange = (nextIn: string, nextOut: string): void => {
+    setCheckIn(nextIn);
+    setCheckOut(nextOut);
+  };
+
+  useEffect(() => {
+    const form = document.querySelector<HTMLFormElement>(
+      '[data-booking-widget="kit_rail"] [data-testid="booking-widget-form"], aside#resa [data-testid="booking-widget-form"]',
+    );
+    if (form === null) return;
+    form.dispatchEvent(new Event('change', { bubbles: true }));
+  }, [checkIn, checkOut]);
 
   const [liveRate, setLiveRate] = useState<
     | { readonly status: 'idle' }
@@ -151,11 +171,6 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
     return () => form.removeEventListener('change', syncAdults);
   }, [isTravelport]);
 
-  const onCheckInChange = (next: string): void => {
-    setCheckIn(next);
-    if (checkOut <= next) setCheckOut(addDayIso(next));
-  };
-
   let priceAmount: string;
   if (isTravelport) {
     if (liveRate.status === 'ready') {
@@ -208,52 +223,13 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
         data-testid="booking-widget-form"
       >
         {!isTravelport ? <input type="hidden" name="hotelId" value={props.hotelId} /> : null}
-        <label className="rf-field">
-          <span>{props.labels.checkIn}</span>
-          {isTravelport ? (
-            <input
-              type="date"
-              name="checkIn"
-              value={checkIn}
-              min={props.today}
-              required
-              onChange={(e) => onCheckInChange(e.target.value)}
-              className="rf-val border-0 bg-transparent p-0"
-            />
-          ) : (
-            <input
-              type="date"
-              name="checkIn"
-              defaultValue={props.defaultStay.checkIn}
-              min={props.today}
-              required
-              className="rf-val border-0 bg-transparent p-0"
-            />
-          )}
-        </label>
-        <label className="rf-field">
-          <span>{props.labels.checkOut}</span>
-          {isTravelport ? (
-            <input
-              type="date"
-              name="checkOut"
-              value={checkOut}
-              min={minCheckOut}
-              required
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="rf-val border-0 bg-transparent p-0"
-            />
-          ) : (
-            <input
-              type="date"
-              name="checkOut"
-              defaultValue={props.defaultStay.checkOut}
-              min={props.defaultStay.checkOut}
-              required
-              className="rf-val border-0 bg-transparent p-0"
-            />
-          )}
-        </label>
+        <BookingKitStayDates
+          locale={props.locale}
+          checkIn={checkIn}
+          checkOut={checkOut}
+          today={props.today}
+          onChange={onStayDatesChange}
+        />
         <StayOccupancyFields
           defaults={{
             rooms: props.defaultStay.rooms,

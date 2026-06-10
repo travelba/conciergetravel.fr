@@ -2153,6 +2153,69 @@
   text-transform: uppercase;
   color: var(--texte-doux);
 }
+.mch-kit .rf-field-host {
+  position: relative;
+}
+.mch-kit .rf-field--trigger {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+}
+.mch-kit .rf-field--trigger .icon {
+  stroke: var(--or);
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke-width: 1.5;
+}
+.mch-kit .rf-field-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.mch-kit .resa-form .sb-panel,
+.mch-kit .rf-field-host .sb-panel {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 40;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(43, 39, 34, 0.12);
+  background: #fff;
+  box-shadow: 0 16px 48px rgba(20, 17, 12, 0.28);
+}
+.mch-kit .resa-form .hotel-search-calendar-panel,
+.mch-kit .rf-field-host .hotel-search-calendar-panel {
+  width: min(92vw, 17rem);
+  padding: 0.75rem;
+}
+.mch-kit .resa-form .hotel-search-calendar .rdp-root,
+.mch-kit .rf-field-host .hotel-search-calendar .rdp-root {
+  --rdp-accent-color: var(--or);
+  --rdp-accent-background-color: rgba(198, 167, 94, 0.14);
+  --rdp-day-height: 2rem;
+  --rdp-day-width: 2rem;
+  --rdp-day_button-height: 1.875rem;
+  --rdp-day_button-width: 1.875rem;
+  --rdp-months-gap: 0.75rem;
+  --rdp-nav-height: 2rem;
+  --rdp-nav_button-height: 1.5rem;
+  --rdp-nav_button-width: 1.5rem;
+  --rdp-weekday-padding: 0.2rem 0;
+  font-size: 0.8125rem;
+}
+.mch-kit .resa-form .hotel-search-calendar .rdp-month_caption,
+.mch-kit .rf-field-host .hotel-search-calendar .rdp-month_caption {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
 .mch-kit .rf-val {
   font-size: 14px;
   color: var(--noir);

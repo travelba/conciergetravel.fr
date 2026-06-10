@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactElement } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, useSyncExternalStore, type ReactElement } from 'react';
 
 import {
   computeScenario,
@@ -82,15 +81,43 @@ function scenarioHeadline(scenario: ComparisonScenario, labels: PriceComparatorL
   return map[scenario.kind];
 }
 
+function readStayParamsSnapshot(): {
+  readonly checkIn: string | null;
+  readonly checkOut: string | null;
+  readonly adults: string | null;
+} {
+  if (typeof window === 'undefined') {
+    return { checkIn: null, checkOut: null, adults: null };
+  }
+  const params = new URLSearchParams(window.location.search);
+  return {
+    checkIn: params.get('checkIn'),
+    checkOut: params.get('checkOut'),
+    adults: params.get('adults'),
+  };
+}
+
+function subscribeStayParams(onStoreChange: () => void): () => void {
+  const handler = (): void => onStoreChange();
+  window.addEventListener('popstate', handler);
+  window.addEventListener('mch-stay-sync', handler);
+  return () => {
+    window.removeEventListener('popstate', handler);
+    window.removeEventListener('mch-stay-sync', handler);
+  };
+}
+
 export function PriceComparatorClient(props: PriceComparatorClientProps): ReactElement | null {
-  // Stay dates are the single source of truth for the comparator: they
-  // live in the URL (`?checkIn=…&checkOut=…&adults=…`, filled by the
-  // booking-widget hydrator). Reading them via `useSearchParams` keeps the
-  // host fiche static/ISR (the island is wrapped in <Suspense> upstream).
-  const searchParams = useSearchParams();
-  const checkIn = searchParams.get('checkIn');
-  const checkOut = searchParams.get('checkOut');
-  const adultsParam = Number(searchParams.get('adults') ?? '');
+  // Stay dates live in the URL (`?checkIn=…&checkOut=…`) synced by
+  // `<BookingStayUrlSync>` via `history.replaceState` + `mch-stay-sync`.
+  const stayParams = useSyncExternalStore(
+    subscribeStayParams,
+    readStayParamsSnapshot,
+    readStayParamsSnapshot,
+  );
+  const checkIn = stayParams.checkIn;
+  const checkOut = stayParams.checkOut;
+  const adultsParam = Number(stayParams.adults ?? '');
   const adults =
     Number.isFinite(adultsParam) && adultsParam > 0 ? adultsParam : props.adultsDefault;
   const hasDates = checkIn !== null && checkIn !== '' && checkOut !== null && checkOut !== '';
