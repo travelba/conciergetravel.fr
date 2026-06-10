@@ -21,10 +21,10 @@
 /*
  * Directory map (annuaire) — list ↔ map synchronisation states.
  * Scoped to the directory surfaces; toggled imperatively by
- * `directory-map-layout.tsx` (Leaflet client island).
+ * `directory-map-layout.tsx` (Mapbox GL client island).
  */
 .mch-directory-card--active {
-  outline: 2px solid #f59e0b;
+  outline: 2px solid #8c7b5a;
   outline-offset: 2px;
   border-radius: 0.5rem;
 }
@@ -40,7 +40,7 @@
 }
 
 .mch-directory-popup__link {
-  color: #b45309;
+  color: #8c7b5a;
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 2px;

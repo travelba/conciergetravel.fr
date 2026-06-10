@@ -32,11 +32,8 @@ const IMG_HOSTS = [
   'blob:',
   'https://res.cloudinary.com',
   'https://*.supabase.co',
-  // Wikimedia Maps OSM tile server — used by `HotelStaticMap` to ship
-  // a free, no-API-key static map of the hotel location. The host is
-  // operated by the Wikimedia Foundation, no PII leaves the browser
-  // beyond the bare `lat,lon,zoom` baked into the tile URL.
-  'https://maps.wikimedia.org',
+  // Mapbox Static Images API — hotel location preview snapshots.
+  'https://api.mapbox.com',
 ] as const;
 
 const FONT_HOSTS = ["'self'", 'data:'] as const;
@@ -61,14 +58,14 @@ const CONNECT_HOSTS = [
   'https://vitals.vercel-insights.com',
   'https://*.vercel-analytics.com',
   'https://*.vercel-insights.com',
+  // Mapbox GL — vector tiles, sprites, glyphs.
+  'https://api.mapbox.com',
 ] as const;
 
 const FRAME_HOSTS = [
   "'self'",
   // Amadeus Hosted Payment Page (iframe).
   'https://*.amadeus.com',
-  // OpenStreetMap embed widget (`HotelStaticMap`, kit `#acces`).
-  'https://www.openstreetmap.org',
   // Immersive virtual-tour providers embedded on the hotel detail
   // page (see `apps/web/src/components/hotel/hotel-virtual-tour.tsx`
   // and migration `0023_hotel_virtual_tour.sql`). The DB CHECK

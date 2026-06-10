@@ -97,6 +97,11 @@ export const env = createEnv({
      * fallback, not a recommendation.
      */
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1).default('dvbjwh5wy'),
+    /**
+     * Mapbox public token (`pk.*`) — Mapbox GL directory map + Static Images
+     * on hotel fiches. Scoped to URL restrictions in the Mapbox dashboard.
+     */
+    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().startsWith('pk.').optional(),
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_SITE_URL: process.env['NEXT_PUBLIC_SITE_URL'],
@@ -114,6 +119,7 @@ export const env = createEnv({
     // `emptyStringAsUndefined` above, so `??` catches them too.
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
       process.env['NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'] ?? 'dvbjwh5wy',
+    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env['NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN'],
   },
   skipValidation:
     process.env['SKIP_ENV_VALIDATION'] === 'true' ||

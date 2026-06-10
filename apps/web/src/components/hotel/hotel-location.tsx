@@ -17,6 +17,7 @@ import {
  */
 type Translator = Awaited<ReturnType<typeof getTranslations>>;
 import { formatOpeningHoursToday, parseOpeningHoursForToday } from '@/lib/poi-hours';
+import { buildMapboxExternalMapHref } from '@/lib/maps/mapbox-static';
 import type {
   LocalisedLocation,
   LocalisedPoiBucketTips,
@@ -184,7 +185,7 @@ export async function HotelLocation({
 
   const mapHref =
     latitude !== null && longitude !== null
-      ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=15`
+      ? buildMapboxExternalMapHref(latitude, longitude)
       : null;
 
   const buckets = groupByBucket(location.pointsOfInterest);

@@ -7,10 +7,8 @@ import { pickProximityCards } from '@/server/hotels/get-related-hotels';
 
 import { getPathname } from '@/i18n/navigation';
 import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
-import {
-  buildOpenStreetMapEmbedUrl,
-  buildOpenStreetMapHotelHref,
-} from '@/lib/maps/openstreetmap-embed';
+import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
+import { buildMapboxExternalMapHref, buildMapboxStaticImageUrl } from '@/lib/maps/mapbox-static';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 import {
@@ -785,23 +783,26 @@ function formatTransportLine(
 
 function renderKitStaticMapHtml(model: HotelKitModel): string {
   if (model.latitude === null || model.longitude === null) return '';
-  const embedUrl = buildOpenStreetMapEmbedUrl({
+  const accessToken = getMapboxAccessToken();
+  if (accessToken === null) return '';
+  const imageUrl = buildMapboxStaticImageUrl({
     latitude: model.latitude,
     longitude: model.longitude,
+    accessToken,
   });
-  const osmHref = buildOpenStreetMapHotelHref(model.latitude, model.longitude);
+  const mapHref = buildMapboxExternalMapHref(model.latitude, model.longitude);
   const viewMapLabel = model.locale === 'en' ? 'View on the map' : 'Voir sur la carte';
   return `<figure class="kit-static-map">
-      <iframe
-        title="${escapeHtml(model.labels.staticMapAlt)}"
-        src="${escapeHtml(embedUrl)}"
+      <img
+        src="${escapeHtml(imageUrl)}"
+        alt="${escapeHtml(model.labels.staticMapAlt)}"
         loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
+        decoding="async"
         class="kit-static-map__embed"
-      ></iframe>
+      />
       <figcaption class="kit-static-map__attr">
         ${model.labels.mapAttributionHtml}
-        <a href="${escapeHtml(osmHref)}" target="_blank" rel="noopener noreferrer" class="kit-static-map__open">${escapeHtml(viewMapLabel)}</a>
+        <a href="${escapeHtml(mapHref)}" target="_blank" rel="noopener noreferrer" class="kit-static-map__open">${escapeHtml(viewMapLabel)}</a>
       </figcaption>
     </figure>`;
 }

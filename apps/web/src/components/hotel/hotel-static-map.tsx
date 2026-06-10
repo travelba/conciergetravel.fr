@@ -1,10 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import {
-  buildOpenStreetMapEmbedUrl,
-  buildOpenStreetMapHotelHref,
-} from '@/lib/maps/openstreetmap-embed';
+import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
+import { buildMapboxExternalMapHref, buildMapboxStaticImageUrl } from '@/lib/maps/mapbox-static';
 
 interface HotelStaticMapProps {
   readonly locale: SupportedLocale;
@@ -17,9 +15,9 @@ interface HotelStaticMapProps {
 /**
  * Static map preview for the hotel location block — CDC §2 bloc 7.
  *
- * Embeds the official OpenStreetMap export widget (no API key). We avoid
- * Wikimedia Maps tile hotlinking because `maps.wikimedia.org` returns 403
- * for non-WMF domains.
+ * Renders a Mapbox Static Images snapshot tinted to the editorial kit
+ * (light basemap + taupe pin). Falls back to nothing when the public
+ * token is unset (local dev without Mapbox credentials).
  */
 export async function HotelStaticMap({
   locale,
@@ -27,24 +25,43 @@ export async function HotelStaticMap({
   latitude,
   longitude,
   zoom = 15,
-}: HotelStaticMapProps): Promise<React.ReactElement> {
+}: HotelStaticMapProps): Promise<React.ReactElement | null> {
+  const accessToken = getMapboxAccessToken();
+  if (accessToken === null) return null;
+
   const t = await getTranslations({ locale, namespace: 'hotelPage.location' });
 
-  const embedUrl = buildOpenStreetMapEmbedUrl({ latitude, longitude, zoom });
-  const osmHref = buildOpenStreetMapHotelHref(latitude, longitude, zoom);
+  const imageUrl = buildMapboxStaticImageUrl({
+    latitude,
+    longitude,
+    zoom,
+    accessToken,
+  });
+  const mapHref = buildMapboxExternalMapHref(latitude, longitude);
 
   return (
     <figure className="border-border bg-bg mt-4 overflow-hidden rounded-lg border">
-      <iframe
-        title={t('staticMapAlt', { hotelName })}
-        src={embedUrl}
+      {/* eslint-disable-next-line @next/next/no-img-element -- Mapbox Static Images URL; next/image adds no CDN benefit */}
+      <img
+        src={imageUrl}
+        alt={t('staticMapAlt', { hotelName })}
         loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        className="border-border aspect-[20/9] w-full border-0"
+        decoding="async"
+        className="border-border aspect-[20/9] w-full border-0 object-cover"
       />
       <figcaption className="text-muted flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-[0.7rem]">
         <span>
           {t.rich('mapAttribution', {
+            mapbox: (chunks) => (
+              <a
+                href="https://www.mapbox.com/about/maps/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-fg underline"
+              >
+                {chunks}
+              </a>
+            ),
             osm: (chunks) => (
               <a
                 href="https://www.openstreetmap.org/copyright"
@@ -58,7 +75,7 @@ export async function HotelStaticMap({
           })}
         </span>
         <a
-          href={osmHref}
+          href={mapHref}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-fg underline"

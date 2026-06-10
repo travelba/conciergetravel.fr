@@ -881,8 +881,8 @@ export async function prepareHotelKitModel(
       staticMapAria: t('location.staticMapAria', { hotelName: name }),
       mapAttributionHtml:
         kitLocale === 'en'
-          ? 'Map data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>'
-          : 'Données <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© contributeurs OpenStreetMap</a>',
+          ? '© <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener noreferrer">Mapbox</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+          : '© <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener noreferrer">Mapbox</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
       enBrefSectionTitle: t('toc.enBref'),
       navHeading: t('toc.heading'),
       faqCategoryBefore: t('faq.categoryBefore'),
