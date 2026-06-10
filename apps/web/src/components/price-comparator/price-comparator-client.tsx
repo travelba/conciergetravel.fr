@@ -12,6 +12,7 @@ import {
 
 import type { Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
+import { STAY_URL_SYNC_EVENT } from '@/lib/booking/push-stay-to-url';
 
 export interface PriceComparatorLabels {
   readonly title: string;
@@ -100,10 +101,10 @@ function readStayParamsSnapshot(): {
 function subscribeStayParams(onStoreChange: () => void): () => void {
   const handler = (): void => onStoreChange();
   window.addEventListener('popstate', handler);
-  window.addEventListener('mch-stay-sync', handler);
+  window.addEventListener(STAY_URL_SYNC_EVENT, handler);
   return () => {
     window.removeEventListener('popstate', handler);
-    window.removeEventListener('mch-stay-sync', handler);
+    window.removeEventListener(STAY_URL_SYNC_EVENT, handler);
   };
 }
 

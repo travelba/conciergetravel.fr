@@ -37,58 +37,64 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const url = new URL(req.url);
+  try {
+    const url = new URL(req.url);
 
-  const ip = clientIp(req);
-  const verdict = await gateByIp(ip);
-  if (!verdict.ok) {
+    const ip = clientIp(req);
+    const verdict = await gateByIp(ip);
+    if (!verdict.ok) {
+      return NextResponse.json(
+        { ok: false, error: 'rate_limited' },
+        {
+          status: 429,
+          headers: {
+            ...NO_STORE,
+            'Retry-After': String(verdict.retryAfterSec),
+          },
+        },
+      );
+    }
+
+    const hotelId = url.searchParams.get('hotelId') ?? '';
+    const checkIn = url.searchParams.get('checkIn') ?? '';
+    const checkOut = url.searchParams.get('checkOut') ?? '';
+    const adults = url.searchParams.get('adults') ?? '2';
+
+    const outcome = await getPriceComparison({
+      hotelId,
+      checkIn,
+      checkOut,
+      adults: Number.parseInt(adults, 10),
+    });
+
+    if (!outcome.available) {
+      return NextResponse.json(
+        { ok: true, available: false, reason: outcome.reason },
+        { headers: NO_STORE },
+      );
+    }
+
     return NextResponse.json(
-      { ok: false, error: 'rate_limited' },
       {
-        status: 429,
+        ok: true,
+        available: true,
+        source: outcome.source,
+        cached: outcome.cached,
+        competitors: outcome.normalized.competitors,
+        benefitsValueMinor: outcome.normalized.benefitsValueMinor,
+        priceConciergeMinor: outcome.priceConciergeMinor,
+        stay: outcome.normalized.stay,
+      },
+      {
         headers: {
-          ...NO_STORE,
-          'Retry-After': String(verdict.retryAfterSec),
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
         },
       },
     );
-  }
-
-  const hotelId = url.searchParams.get('hotelId') ?? '';
-  const checkIn = url.searchParams.get('checkIn') ?? '';
-  const checkOut = url.searchParams.get('checkOut') ?? '';
-  const adults = url.searchParams.get('adults') ?? '2';
-
-  const outcome = await getPriceComparison({
-    hotelId,
-    checkIn,
-    checkOut,
-    adults: Number.parseInt(adults, 10),
-  });
-
-  if (!outcome.available) {
+  } catch {
     return NextResponse.json(
-      { ok: true, available: false, reason: outcome.reason },
+      { ok: true, available: false, reason: 'vendor_error' },
       { headers: NO_STORE },
     );
   }
-
-  return NextResponse.json(
-    {
-      ok: true,
-      available: true,
-      source: outcome.source,
-      cached: outcome.cached,
-      competitors: outcome.normalized.competitors,
-      benefitsValueMinor: outcome.normalized.benefitsValueMinor,
-      priceConciergeMinor: outcome.priceConciergeMinor,
-      stay: outcome.normalized.stay,
-    },
-    {
-      // The vendor data is allowed to be cached at the CDN for 60 s — even
-      // under the per-IP rate limit, this absorbs hot-path bursts on the
-      // same hotel detail page across users without re-hitting Makcorps.
-      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
-    },
-  );
 }

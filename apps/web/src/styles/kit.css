@@ -2073,6 +2073,7 @@
 .mch-kit .htl-aside {
   position: sticky;
   top: 96px;
+  overflow: visible;
 }
 /* CLS — reserve space for hydrated aside (booking rail + comparator). */
 .mch-kit .hotel-kit-aside-slot {
@@ -2105,6 +2106,7 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow);
+  overflow: visible;
 }
 .mch-kit .resa-price {
   display: flex;

@@ -7,6 +7,7 @@ import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields'
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import { intlLocaleTag } from '@/i18n/runtime';
 import { isIsoDate } from '@/lib/booking/stay-url-params';
+import { pushStayToUrl } from '@/lib/booking/push-stay-to-url';
 import { fetchTravelportSearch } from '@/lib/travelport/fetch-travelport-search';
 import { dispatchTravelportStay } from '@/lib/travelport/stay-event';
 import type { BookingMode } from '@mch/domain/hotels';
@@ -101,11 +102,24 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
 
   useEffect(() => {
     const form = document.querySelector<HTMLFormElement>(
-      '[data-booking-widget="kit_rail"] [data-testid="booking-widget-form"], aside#resa [data-testid="booking-widget-form"]',
+      'aside#resa [data-testid="booking-widget-form"], [data-booking-widget="kit_rail"] [data-testid="booking-widget-form"]',
     );
-    if (form === null) return;
-    form.dispatchEvent(new Event('change', { bubbles: true }));
-  }, [checkIn, checkOut]);
+    const readSmallInt = (name: string, fallback: number): number => {
+      const raw = form?.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
+      if (raw === undefined || raw.length === 0) return fallback;
+      const n = Number.parseInt(raw, 10);
+      return Number.isInteger(n) && n >= 0 ? n : fallback;
+    };
+
+    pushStayToUrl({
+      checkIn,
+      checkOut,
+      rooms: readSmallInt('rooms', props.defaultStay.rooms),
+      adults: readSmallInt('adults', adults),
+      children: readSmallInt('children', props.defaultStay.childAges.length),
+      childAges: props.defaultStay.childAges,
+    });
+  }, [adults, checkIn, checkOut, props.defaultStay.childAges, props.defaultStay.rooms]);
 
   const [liveRate, setLiveRate] = useState<
     | { readonly status: 'idle' }
