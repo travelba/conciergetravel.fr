@@ -110,13 +110,16 @@ export async function HotelHeroOverlay({
               aria-label={t('breadcrumb.hotels')}
               className="flex flex-wrap items-center gap-2 text-xs text-white/80 sm:text-sm"
             >
-              <Link href="/" className="transition-colors hover:text-white">
+              <Link href="/" className="cursor-pointer transition-colors hover:text-white">
                 {t('breadcrumb.home')}
               </Link>
               <span aria-hidden className="text-white/40">
                 /
               </span>
-              <Link href="/destination" className="transition-colors hover:text-white">
+              <Link
+                href="/destination"
+                className="cursor-pointer transition-colors hover:text-white"
+              >
                 {countryLabel}
               </Link>
               <span aria-hidden className="text-white/40">
@@ -124,7 +127,7 @@ export async function HotelHeroOverlay({
               </span>
               <Link
                 href={{ pathname: '/destination/[citySlug]', params: { citySlug: cityHubSlug } }}
-                className="transition-colors hover:text-white"
+                className="cursor-pointer transition-colors hover:text-white"
               >
                 {city}
               </Link>
@@ -135,13 +138,13 @@ export async function HotelHeroOverlay({
                 hotelName={name}
                 shareText={description !== null ? description.slice(0, 160) : null}
                 canonicalUrl={canonicalUrl}
-                buttonClassName="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white"
+                buttonClassName="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white disabled:cursor-not-allowed"
               />
               <HotelFavoriteButton
                 hotelId={hotelId}
                 hotelName={name}
                 returnPath={localePath}
-                buttonClassName="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white"
+                buttonClassName="inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -180,7 +183,7 @@ export async function HotelHeroOverlay({
             <HotelGalleryTrigger
               label={t('hero.viewPhotos')}
               count={photoCount}
-              className="absolute bottom-12 right-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white"
+              className="absolute bottom-12 right-4 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white"
             />
           ) : null}
         </div>

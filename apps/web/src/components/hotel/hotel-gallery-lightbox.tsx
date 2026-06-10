@@ -140,6 +140,13 @@ const KIT_MOSAIC_IMAGE_CLASS =
 const GALLERY_TILE_BUTTON_CLASS =
   'focus-visible:ring-ring group relative block h-full w-full min-h-0 cursor-pointer overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2';
 
+/** Lightbox chrome controls (back, close, prev/next). */
+const LIGHTBOX_CTRL_CLASS =
+  'cursor-pointer focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40';
+
+const LIGHTBOX_CLOSE_GRID_CLASS =
+  'cursor-pointer shrink-0 border border-[#8c7b5a]/35 bg-[#f6f1e7] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[#4a4439] transition-colors hover:bg-[#efe8da] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50';
+
 /** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
 const MOSAIC_SIDE_TILES = 4;
 
@@ -752,7 +759,7 @@ export function HotelGalleryLightbox({
                 <button
                   type="button"
                   onClick={close}
-                  className="shrink-0 border border-[#8c7b5a]/35 bg-[#f6f1e7] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[#4a4439] transition-colors hover:bg-[#efe8da] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50"
+                  className={LIGHTBOX_CLOSE_GRID_CLASS}
                   aria-label={translations.closeLightbox}
                 >
                   {translations.closeLightbox}
@@ -773,7 +780,7 @@ export function HotelGalleryLightbox({
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className="focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                className={`${LIGHTBOX_CTRL_CLASS} inline-flex items-center gap-1.5`}
               >
                 <span aria-hidden>←</span>
                 {translations.backToGallery}
@@ -781,7 +788,7 @@ export function HotelGalleryLightbox({
               <button
                 type="button"
                 onClick={close}
-                className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                className={LIGHTBOX_CTRL_CLASS}
                 aria-label={translations.closeLightbox}
               >
                 ✕
@@ -810,7 +817,7 @@ export function HotelGalleryLightbox({
               <button
                 type="button"
                 onClick={goPrev}
-                className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                className={LIGHTBOX_CTRL_CLASS}
                 aria-label={translations.previousImage}
                 disabled={total <= 1}
               >
@@ -824,7 +831,7 @@ export function HotelGalleryLightbox({
               <button
                 type="button"
                 onClick={goNext}
-                className="focus-visible:ring-ring rounded-md border border-white/30 px-3 py-1.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
+                className={LIGHTBOX_CTRL_CLASS}
                 aria-label={translations.nextImage}
                 disabled={total <= 1}
               >

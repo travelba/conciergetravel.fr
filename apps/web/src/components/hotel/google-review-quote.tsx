@@ -99,7 +99,7 @@ export function GoogleReviewQuote({
       {needsTruncate ? (
         <button
           type="button"
-          className="text-muted hover:text-fg mt-2 text-xs underline underline-offset-2"
+          className="text-muted hover:text-fg mt-2 cursor-pointer text-xs underline underline-offset-2"
           aria-expanded={expanded}
           aria-controls={textId}
           onClick={onToggle}

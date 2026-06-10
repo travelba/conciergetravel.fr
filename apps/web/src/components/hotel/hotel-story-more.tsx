@@ -61,7 +61,7 @@ export function HotelStoryMore({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={regionId}
-        className="border-border text-fg hover:border-fg/40 hover:bg-fg/[0.03] focus-visible:ring-fg/40 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2"
+        className="border-border text-fg hover:border-fg/40 hover:bg-fg/[0.03] focus-visible:ring-fg/40 inline-flex cursor-pointer items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2"
       >
         <span>{open ? labels.less : labels.more}</span>
         <svg

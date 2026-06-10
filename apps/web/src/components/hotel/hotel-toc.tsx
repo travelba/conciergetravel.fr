@@ -83,7 +83,7 @@ export function HotelToc({
               href={`#${item.anchor}`}
               aria-current={isActive ? 'true' : undefined}
               onClick={variant === 'floating' ? () => setOpen(false) : undefined}
-              className={`block border-l-2 py-1 pl-3 transition-colors ${
+              className={`block cursor-pointer border-l-2 py-1 pl-3 transition-colors ${
                 isActive
                   ? 'text-fg border-l-gold-600 font-medium'
                   : 'text-muted hover:border-l-muted/40 hover:text-fg border-l-transparent'
@@ -111,7 +111,7 @@ export function HotelToc({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label={collapseLabel ?? heading}
-                className="text-muted hover:text-fg -mr-1 rounded p-1"
+                className="text-muted hover:text-fg -mr-1 cursor-pointer rounded p-1"
               >
                 <svg aria-hidden viewBox="0 0 16 16" width="16" height="16">
                   <path
@@ -131,7 +131,7 @@ export function HotelToc({
             type="button"
             onClick={() => setOpen(true)}
             aria-label={expandLabel ?? heading}
-            className="border-border bg-bg/95 text-fg hover:bg-muted/10 flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium shadow-2xl ring-1 ring-black/5 backdrop-blur"
+            className="border-border bg-bg/95 text-fg hover:bg-muted/10 flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium shadow-2xl ring-1 ring-black/5 backdrop-blur"
           >
             <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" className="shrink-0">
               <path

@@ -50,7 +50,7 @@ export async function HotelBookingBar({
         </div>
         <Link
           href="/le-concierge/reserver"
-          className="flex items-center justify-center bg-neutral-900 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-neutral-700"
+          className="flex cursor-pointer items-center justify-center bg-neutral-900 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-neutral-700"
         >
           {t('hero.seeRates')}
         </Link>

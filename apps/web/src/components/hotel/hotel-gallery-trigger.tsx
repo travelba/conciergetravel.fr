@@ -54,7 +54,12 @@ export function HotelGalleryTrigger({
   const text = count !== null && count > 0 ? `${label} (${count})` : label;
 
   return (
-    <button type="button" onClick={handleClick} className={className} aria-label={text}>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={className !== undefined ? `cursor-pointer ${className}` : 'cursor-pointer'}
+      aria-label={text}
+    >
       <CameraIcon />
       <span>{text}</span>
     </button>

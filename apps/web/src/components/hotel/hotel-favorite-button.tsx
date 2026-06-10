@@ -51,7 +51,7 @@ type ResolvedState =
  * Skill: accessibility, responsive-ui-architecture, auth-role-management.
  */
 const defaultButtonClass =
-  'border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:cursor-progress disabled:opacity-70';
+  'border-border bg-bg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-11 min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-70';
 
 export function HotelFavoriteButton({
   hotelId,

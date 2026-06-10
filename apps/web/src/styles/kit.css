@@ -136,6 +136,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
   transition: 0.25s;
 }
 .mch-kit .link-or:hover {
@@ -1283,6 +1284,7 @@
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  cursor: pointer;
   transition: 0.25s;
 }
 .mch-kit .btn-ligne:hover {
@@ -1518,6 +1520,43 @@
   background: var(--creme);
 }
 
+/*
+ * Interactive affordance — pointer on every clickable kit surface.
+ * Tailwind preflight sets `cursor: default` on native <button>; `:where()`
+ * keeps specificity low so intentional utilities (e.g. `.cursor-not-allowed`
+ * on Phase-1 placeholder CTAs) still win.
+ */
+.mch-kit
+  :is(
+    a[href],
+    summary,
+    label.rf-field,
+    .htl-nav__link,
+    .breadcrumb a,
+    .cr-link,
+    .card,
+    .hcard,
+    .rank-card,
+    .dest-tile,
+    .occ-card,
+    .crank,
+    .insta-strip a,
+    .kit-static-map__attr a,
+    .affil-line a,
+    .faq-toggle-btn
+  ) {
+  cursor: pointer;
+}
+
+:where(.mch-kit) button:not(:disabled):not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
+:where(.mch-kit) button:disabled,
+:where(.mch-kit) button[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 /* fil d'Ariane + galerie + layout 2 col — chambres, équipements, avis, FAQ, rail réservation sticky. */
 .mch-kit .breadcrumb {
   display: flex;
@@ -1554,6 +1593,7 @@
   margin: 0;
   overflow: hidden;
   border-radius: 8px;
+  cursor: pointer;
 }
 .mch-kit .htl-gallery .g-main {
   grid-row: 1 / span 2;

@@ -162,7 +162,7 @@ export function HotelRoomsGrid({
                 />
                 <div className="rv2-body">
                   <h3>
-                    <Link href={roomHref} className="hover:underline">
+                    <Link href={roomHref} className="cursor-pointer hover:underline">
                       {room.name}
                     </Link>
                   </h3>

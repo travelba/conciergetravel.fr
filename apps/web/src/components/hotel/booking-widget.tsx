@@ -324,8 +324,8 @@ function BookingWidgetForm({
           type="submit"
           className={
             fakeEnabled && isPaidTunnel
-              ? 'border-gold-300 bg-gold-50 text-gold-900 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
-              : 'bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
+              ? 'border-gold-300 bg-gold-50 text-gold-900 focus-visible:ring-ring cursor-pointer rounded-md border px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
+              : 'bg-fg text-bg focus-visible:ring-ring cursor-pointer rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2'
           }
         >
           {labels.submit}

@@ -69,7 +69,7 @@ interface HotelShareButtonProps {
 type ShareStatus = 'idle' | 'sharing' | 'copied' | 'shared' | 'failed';
 
 const defaultShareButtonClass =
-  'border-border bg-bg text-fg hover:bg-bg/80 focus-visible:ring-ring inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 disabled:opacity-60';
+  'border-border bg-bg text-fg hover:bg-bg/80 focus-visible:ring-ring inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60';
 
 export function HotelShareButton({
   hotelName,
