@@ -4,10 +4,8 @@ import { useEffect, useState, type ReactElement } from 'react';
 
 import type { Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
-import {
-  TRAVELPORT_STAY_EVENT,
-  type TravelportStayDetail,
-} from '@/components/hotel/booking-sandbox-live-aside';
+import type { TravelportStayDetail } from '@/lib/travelport/stay-event';
+import { TRAVELPORT_STAY_EVENT } from '@/lib/travelport/stay-event';
 import { fetchTravelportSearch } from '@/lib/travelport/fetch-travelport-search';
 
 export interface TravelportKitLivePricesProps {

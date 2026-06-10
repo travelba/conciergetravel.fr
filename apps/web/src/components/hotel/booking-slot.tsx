@@ -89,6 +89,7 @@ export function BookingSlot({
       hotelId={hotelId ?? ''}
       hotelName={hotelName}
       slug={slug}
+      priceFrom={priceFrom}
       embeddedInKitAside={embeddedInKitAside}
     />
   ) : isPaidLive && hotelId !== undefined && railContext !== undefined ? (
