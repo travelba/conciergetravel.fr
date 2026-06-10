@@ -6,6 +6,7 @@ import {
   isPaidBookingMode,
   isSupplierBookableRail,
 } from '@/lib/booking/booking-mode-helpers';
+import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
 import { isTravelportSandboxEnabled } from '@/lib/travelport';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 
@@ -89,6 +90,7 @@ export function BookingSlot({
       hotelId={hotelId ?? ''}
       hotelName={hotelName}
       slug={slug}
+      defaultStay={railContext?.defaultStay ?? defaultHotelStay()}
       priceFrom={priceFrom}
       embeddedInKitAside={embeddedInKitAside}
     />

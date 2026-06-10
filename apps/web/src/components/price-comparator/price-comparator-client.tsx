@@ -119,17 +119,44 @@ function subscribeStayParams(onStoreChange: () => void): () => void {
   };
 }
 
+function resolveStayDates(
+  mounted: boolean,
+  stayKey: string,
+  defaultCheckIn: string | undefined,
+  defaultCheckOut: string | undefined,
+): { readonly checkIn: string | null; readonly checkOut: string | null } {
+  // SSR + hydration: never read `window.location` — use server-provided defaults
+  // so the first client paint matches the cached ISR HTML byte-for-byte.
+  if (!mounted) {
+    return {
+      checkIn: defaultCheckIn ?? null,
+      checkOut: defaultCheckOut ?? null,
+    };
+  }
+  const parsed = parseStayParamsKey(stayKey);
+  return {
+    checkIn: parsed.checkIn ?? defaultCheckIn ?? null,
+    checkOut: parsed.checkOut ?? defaultCheckOut ?? null,
+  };
+}
+
 export function PriceComparatorClient(props: PriceComparatorClientProps): ReactElement | null {
-  // Stay dates live in the URL (`?checkIn=…&checkOut=…`) synced by
-  // `<BookingStayUrlSync>` via `history.replaceState` + `mch-stay-sync`.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(handle);
+  }, []);
+
   const stayKey = useSyncExternalStore(subscribeStayParams, readStayParamsKey, () => '');
-  const {
-    checkIn: urlCheckIn,
-    checkOut: urlCheckOut,
-    adults: adultsRaw,
-  } = parseStayParamsKey(stayKey);
-  const checkIn = urlCheckIn ?? props.defaultCheckIn ?? null;
-  const checkOut = urlCheckOut ?? props.defaultCheckOut ?? null;
+
+  const { checkIn, checkOut } = resolveStayDates(
+    mounted,
+    stayKey,
+    props.defaultCheckIn,
+    props.defaultCheckOut,
+  );
+
+  const adultsRaw = mounted ? parseStayParamsKey(stayKey).adults : null;
   const adultsParam = Number(adultsRaw ?? '');
   const adults =
     Number.isFinite(adultsParam) && adultsParam > 0 ? adultsParam : props.adultsDefault;
@@ -140,26 +167,17 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
     | { readonly status: 'loading' }
     | { readonly status: 'unavailable' }
     | { readonly status: 'available'; readonly data: ApiResponseAvailable }
-  >(hasDates ? { status: 'loading' } : { status: 'idle' });
+  >({ status: 'loading' });
 
-  // Reset state when the underlying request changes, using the React 19
-  // "track previous value" pattern so the transition happens during render
-  // and complies with `react-hooks/set-state-in-effect`.
-  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const requestKey = `${props.hotelId}|${checkIn ?? ''}|${checkOut ?? ''}|${adults}`;
-  const [previousRequestKey, setPreviousRequestKey] = useState(requestKey);
-  if (previousRequestKey !== requestKey) {
-    setPreviousRequestKey(requestKey);
-    setState(hasDates ? { status: 'loading' } : { status: 'idle' });
-  }
 
   useEffect(() => {
-    // No stay selected → nothing to fetch (the idle prompt is shown).
-    if (!hasDates || checkIn === null || checkOut === null) return;
+    if (!hasDates || checkIn === null || checkOut === null) {
+      setState({ status: 'idle' });
+      return;
+    }
 
-    // Fetch *after* mount + after first paint: deferred via `requestIdleCallback`
-    // when available, falls back to a 200 ms timeout. The comparator must
-    // never delay LCP per skill performance guardrail.
+    setState({ status: 'loading' });
     let cancelled = false;
 
     const trigger = () => {
@@ -217,17 +235,14 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
       if (typeof rIC === 'function' && typeof cIC === 'function') cIC(handle);
       else window.clearTimeout(handle as number);
     };
-  }, [props.hotelId, checkIn, checkOut, adults, hasDates]);
+  }, [adults, checkIn, checkOut, hasDates, props.hotelId, requestKey]);
 
-  // No stay dates yet → sober prompt + the legal mention (never fabricate
-  // competitor figures). The prompt invites the user to pick dates in the
-  // booking widget above.
+  const statusClass = props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm';
+
   if (state.status === 'idle') {
     return (
       <div>
-        <p className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}>
-          {props.labels.selectDates}
-        </p>
+        <p className={statusClass}>{props.labels.selectDates}</p>
         <p
           className={
             props.surface === 'kit' ? 'rc-foot' : 'text-muted mt-4 text-[11px] leading-snug'
@@ -241,22 +256,14 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
 
   if (state.status === 'loading') {
     return (
-      <p
-        className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}
-        aria-live="polite"
-        aria-busy="true"
-      >
+      <p className={statusClass} aria-live="polite" aria-busy="true" suppressHydrationWarning>
         {props.labels.loading}
       </p>
     );
   }
 
   if (state.status === 'unavailable') {
-    return (
-      <p className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}>
-        {props.labels.scenario.unavailable}
-      </p>
-    );
+    return <p className={statusClass}>{props.labels.scenario.unavailable}</p>;
   }
 
   const { data } = state;

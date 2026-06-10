@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server';
 
 import { getPathname } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import { defaultHotelStay, todayIso } from '@/lib/booking/default-hotel-stay';
+import { todayIso } from '@/lib/booking/default-hotel-stay';
+import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 
 import { BookingKitRailClient } from './booking-kit-rail-client';
 import { BookingStayUrlSync } from './booking-stay-url-sync';
@@ -15,6 +16,7 @@ interface BookingSandboxRailProps {
   readonly hotelId: string;
   readonly hotelName: string;
   readonly slug: string;
+  readonly defaultStay: HotelBookingRailContext['defaultStay'];
   readonly priceFrom?: string | null;
   readonly embeddedInKitAside?: boolean;
 }
@@ -28,13 +30,14 @@ export async function BookingSandboxRail({
   hotelId,
   hotelName,
   slug,
+  defaultStay,
   priceFrom = null,
   embeddedInKitAside = false,
 }: BookingSandboxRailProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
   const tw = await getTranslations({ locale, namespace: 'hotelPage.widget' });
 
-  const stay = defaultHotelStay();
+  const stay = defaultStay;
   const action = getPathname({
     locale,
     href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },

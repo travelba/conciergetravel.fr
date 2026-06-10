@@ -80,20 +80,24 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
       ? props.priceFrom
       : null;
 
+  const [mounted, setMounted] = useState(false);
   const [checkIn, setCheckIn] = useState(props.defaultStay.checkIn);
   const [checkOut, setCheckOut] = useState(props.defaultStay.checkOut);
   const [adults, setAdults] = useState(props.defaultStay.adults);
 
   useEffect(() => {
-    const handle = setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get('checkIn');
-      const to = params.get('checkOut');
-      if (from !== null && isIsoDate(from)) setCheckIn(from);
-      if (to !== null && isIsoDate(to)) setCheckOut(to);
-    }, 0);
-    return () => clearTimeout(handle);
+    const handle = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(handle);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('checkIn');
+    const to = params.get('checkOut');
+    if (from !== null && isIsoDate(from)) setCheckIn(from);
+    if (to !== null && isIsoDate(to)) setCheckOut(to);
+  }, [mounted]);
 
   const onStayDatesChange = (nextIn: string, nextOut: string): void => {
     setCheckIn(nextIn);
@@ -101,9 +105,11 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
   };
 
   useEffect(() => {
+    if (!mounted) return;
     const form = document.querySelector<HTMLFormElement>(
       'aside#resa [data-testid="booking-widget-form"], [data-booking-widget="kit_rail"] [data-testid="booking-widget-form"]',
     );
+    if (form === null) return;
     const readSmallInt = (name: string, fallback: number): number => {
       const raw = form?.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
       if (raw === undefined || raw.length === 0) return fallback;
@@ -119,18 +125,18 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
       children: readSmallInt('children', props.defaultStay.childAges.length),
       childAges: props.defaultStay.childAges,
     });
-  }, [adults, checkIn, checkOut, props.defaultStay.childAges, props.defaultStay.rooms]);
+  }, [adults, checkIn, checkOut, mounted, props.defaultStay.childAges, props.defaultStay.rooms]);
 
   const [liveRate, setLiveRate] = useState<
     | { readonly status: 'idle' }
     | { readonly status: 'loading' }
     | { readonly status: 'ready'; readonly amountMinor: number }
     | { readonly status: 'empty' }
-  >({ status: isTravelport ? 'loading' : 'idle' });
+  >({ status: isTravelport ? 'idle' : 'idle' });
 
   useEffect(() => {
-    if (!isTravelport || props.slug === undefined) {
-      setLiveRate({ status: 'idle' });
+    if (!mounted || !isTravelport || props.slug === undefined) {
+      if (!isTravelport) setLiveRate({ status: 'idle' });
       return;
     }
 
@@ -166,7 +172,7 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
     return () => {
       cancelled = true;
     };
-  }, [adults, checkIn, checkOut, isTravelport, props.slug]);
+  }, [adults, checkIn, checkOut, isTravelport, mounted, props.slug]);
 
   useEffect(() => {
     if (!isTravelport) return;
@@ -203,13 +209,16 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
   }
 
   const showPriceBand = isTravelport || editorialPrice !== null;
+  const priceAriaBusy = mounted && isTravelport && liveRate.status === 'loading';
 
   const card = (
     <div className="resa-card">
       {showPriceBand ? (
-        <div className="resa-price" aria-busy={isTravelport && liveRate.status === 'loading'}>
+        <div className="resa-price" aria-busy={priceAriaBusy}>
           <span className="rp-from">{props.labels.priceFromLabel}</span>
-          <span className="rp-amount">{priceAmount}</span>
+          <span className="rp-amount" suppressHydrationWarning>
+            {priceAmount}
+          </span>
           <span className="rp-unit">{props.labels.priceFromUnit}</span>
         </div>
       ) : (

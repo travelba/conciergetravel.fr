@@ -79,7 +79,13 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
   } as const;
 
   const client = (
-    <Suspense fallback={<p className="text-muted text-sm">{labels.loading}</p>}>
+    <Suspense
+      fallback={
+        <p className={props.surface === 'kit' ? 'rc-foot' : 'text-muted text-sm'}>
+          {labels.loading}
+        </p>
+      }
+    >
       <PriceComparatorClient
         locale={props.locale}
         hotelId={props.hotelId}
