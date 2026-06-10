@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
+import { loadPhotoEnv } from '../photos/env-photos.js';
+import { patchHotelById, selectHotels, type SupabaseRestConfig } from '../photos/supabase-rest.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadDotenv({ path: resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: resolve(__dirname, '../../../../.env') });
@@ -27,6 +30,28 @@ const ArgsSchema = z.object({
   hotelId: z.string().uuid().optional(),
   giataId: z.string().min(1),
 });
+
+async function upsertRow(
+  cfg: SupabaseRestConfig,
+  table: string,
+  body: Readonly<Record<string, unknown>>,
+  onConflict: string,
+): Promise<boolean> {
+  const res = await fetch(
+    `${cfg.url}/rest/v1/${table}?on_conflict=${encodeURIComponent(onConflict)}`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: cfg.serviceRoleKey,
+        Authorization: `Bearer ${cfg.serviceRoleKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(body),
+    },
+  );
+  return res.ok;
+}
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
@@ -42,24 +67,22 @@ async function main(): Promise<void> {
     throw new Error('Provide --slug= or --hotel-id=');
   }
 
-  const { createClient } = await import('@supabase/supabase-js');
-  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'];
-  if (url === undefined || key === undefined) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
-  }
-  const supabase = createClient(url, key);
+  const env = loadPhotoEnv();
+  const cfg: SupabaseRestConfig = {
+    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+  };
 
   let hotelId = args.hotelId;
   if (hotelId === undefined && args.slug !== undefined) {
-    const { data, error } = await supabase
-      .from('hotels')
-      .select('id')
-      .eq('slug', args.slug)
-      .maybeSingle();
-    if (error !== null) throw error;
-    if (data === null) throw new Error(`Hotel not found: ${args.slug}`);
-    hotelId = data.id as string;
+    const rows = await selectHotels<{ id: string }>(cfg, {
+      columns: 'id',
+      filters: [`slug=eq.${encodeURIComponent(args.slug)}`],
+      limit: 1,
+    });
+    const row = rows[0];
+    if (row === undefined) throw new Error(`Hotel not found: ${args.slug}`);
+    hotelId = row.id;
   }
   if (hotelId === undefined) throw new Error('Could not resolve hotel id');
 
@@ -92,7 +115,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  await supabase.from('hotels').update({ giata_id: args.giataId }).eq('id', hotelId);
+  await patchHotelById(cfg, hotelId, { giata_id: args.giataId });
 
   const priorities: Record<string, number> = {
     little_emperors: 10,
@@ -104,7 +127,9 @@ async function main(): Promise<void> {
   let connections = 0;
 
   for (const row of property.value.supplierRows) {
-    const { error: gErr } = await supabase.from('giata_supplier_properties').upsert(
+    const giataOk = await upsertRow(
+      cfg,
+      'giata_supplier_properties',
       {
         giata_id: row.giataId,
         supplier: row.supplier,
@@ -113,11 +138,13 @@ async function main(): Promise<void> {
         provider_code_raw: row.providerCodeRaw,
         confidence: 'giata_api',
       },
-      { onConflict: 'giata_id,supplier' },
+      'giata_id,supplier',
     );
-    if (gErr === null) stored += 1;
+    if (giataOk) stored += 1;
 
-    const { error: cErr } = await supabase.from('hotel_supplier_connections').upsert(
+    const connOk = await upsertRow(
+      cfg,
+      'hotel_supplier_connections',
       {
         hotel_id: hotelId,
         supplier: row.supplier,
@@ -125,9 +152,9 @@ async function main(): Promise<void> {
         enabled: true,
         priority: priorities[row.supplier] ?? 100,
       },
-      { onConflict: 'hotel_id,supplier' },
+      'hotel_id,supplier',
     );
-    if (cErr === null) connections += 1;
+    if (connOk) connections += 1;
   }
 
   console.log(
