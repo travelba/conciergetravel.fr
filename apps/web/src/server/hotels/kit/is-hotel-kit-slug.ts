@@ -3,6 +3,11 @@ export const HOTEL_KIT_SLUGS = [
   'les-airelles-gordes',
   'les-airelles-gordes-en',
   'prince-de-galles-paris',
+  'cheval-blanc-paris',
+  'le-bristol-paris',
+  'les-airelles-courchevel',
+  'les-pres-deugenie',
+  'shangri-la-paris',
 ] as const;
 
 export type HotelKitSlug = (typeof HOTEL_KIT_SLUGS)[number];

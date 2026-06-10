@@ -81,7 +81,7 @@ pnpm --filter @mch/editorial-pilot faq:perplexity:validate -- \
   --input=out/faq-perplexity/le-bristol-paris.json \
   --hotel-name="Le Bristol Paris"
 
-# 2. Push to Supabase (requires migration 0075)
+# 2. Push to Supabase (migration 0075 — ✅ applied prod 2026-06-10)
 pnpm --filter @mch/editorial-pilot faq:perplexity:push -- \
   --slug=le-bristol-paris \
   --input=out/faq-perplexity/le-bristol-paris.json
@@ -96,7 +96,7 @@ Existing published fiches without kit data **fail** `evaluatePublishGate()` and 
 
 Remediation order:
 
-1. Apply migration `0075_hotels_faq_kit_concierge_questions.sql`.
+1. ~~Apply migration `0075_hotels_faq_kit_concierge_questions.sql`.~~ **Done** on Supabase prod (`20260610123602`, 2026-06-10). Migration `0074_giata_identity` applied same day.
 2. Run Perplexity per slug (or batch runner when available) → validate → push.
 3. Re-run `audit-hotel-fiche.ts` on the wave; fix category gaps before next wave.
 
@@ -112,29 +112,33 @@ Prioritise high-traffic fiches (Palaces Paris, Relais & Châteaux flagship) if t
 
 Components: `apps/web/src/components/hotel/hotel-faq.tsx`, `hotel-concierge-questions.tsx`.
 
+**Kit shell (`isHotelKitSlug`):** même bloc `#concierge-questions` via `render-hotel-kit-html.ts`, alimenté par `prepare-hotel-kit-model.ts`. Le titre DOIT venir de `hotelPage.conciergeQuestions.title` avec `{ hotel: name }` — pas de copy pilote (« Airelles Gordes… ») en dur. Régression observée sur `prince-de-galles-paris` prod avant fix 2026-06-10 : contenu DB correct, titre faux.
+
 ## Rule 7 — Pilot fix → project contract (non-negotiable)
 
 Any improvement validated on a **pilot fiche** (Airelles, Prince de Galles, …) must land as a **catalogue-wide contract**, not a one-off slug patch.
 
-| Pilot learning (2026-06)                                        | Project-wide application                                                                                                                                    |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Audit omitted `faq_content_kit` / `concierge_questions` columns | `CDC_HOTEL_COLUMNS` in `audit-hotel-fiche-cdc.ts` — all audits                                                                                              |
-| JSON-LD used kit slice (42) instead of promote (15)             | `readFaqPromote()` + `build-hotel-kit-json-ld.ts` — **every** kit + legacy fiche                                                                            |
-| Kit scaffold without Perplexity taxonomy / EN                   | `evaluateFaqKitRowEnrichment()` + CDC checks `cdc.11.faq_kit_*` / `cdc.11.concierge_*` — **every** published row                                            |
-| Concierge golden fallback FR-only                               | `kit-concierge-questions.ts` uses `pickLocalizedText` — all kit slugs                                                                                       |
-| Slug-specific normalizer script                                 | Prefer `faq:perplexity:validate` → `push` → optional `sync-hotel-faq-perplexity-to-ts.ts`; slug scripts are **temporary** until folded into the generic CLI |
+| Pilot learning (2026-06)                                                      | Project-wide application                                                                                                                                    |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit omitted `faq_content_kit` / `concierge_questions` columns               | `CDC_HOTEL_COLUMNS` in `audit-hotel-fiche-cdc.ts` — all audits                                                                                              |
+| JSON-LD used kit slice (42) instead of promote (15)                           | `readFaqPromote()` + `build-hotel-kit-json-ld.ts` — **every** kit + legacy fiche                                                                            |
+| Kit scaffold without Perplexity taxonomy / EN                                 | `evaluateFaqKitRowEnrichment()` + CDC checks `cdc.11.faq_kit_*` / `cdc.11.concierge_*` — **every** published row                                            |
+| Concierge golden fallback FR-only                                             | `kit-concierge-questions.ts` uses `pickLocalizedText` — all kit slugs                                                                                       |
+| **Titre `#concierge-questions` hardcodé « Airelles… »** (PdG prod 2026-06-10) | `prepare-hotel-kit-model.ts` → `t('conciergeQuestions.title', { hotel: name })` — **tous** kit slugs ; jamais de string pilote en dur                       |
+| Slug-specific normalizer script                                               | Prefer `faq:perplexity:validate` → `push` → optional `sync-hotel-faq-perplexity-to-ts.ts`; slug scripts are **temporary** until folded into the generic CLI |
 
 **Before closing a pilot PR:** ask « Does this diff apply only to `prince-de-galles-paris` / `les-airelles-gordes`? » If yes → extract shared helper, wire audit/gates/render path, document in this skill. **2218/2219 fiches** still lack kit data (2026-06-10) — gates surface the gap; remediation is Perplexity waves, not pilot exceptions.
 
 ## Anti-patterns
 
-| Anti-pattern                         | Why it fails                                              | Correct path                                          |
-| ------------------------------------ | --------------------------------------------------------- | ----------------------------------------------------- |
-| « Fiche standard = 10 FAQ LLM only » | Policy catalogue entier — rule `hotel-faq-perplexity.mdc` | Perplexity kit + concierge on every fiche             |
-| 60 items in `faq_content` only       | Breaks max-15 gate + JSON-LD cap                          | Split kit / promote via `faq-perplexity-transform.ts` |
-| Concierge block Airelles-only        | Bloc `#concierge-questions` on all fiches with data       | `readConciergeQuestionGroups()` in standard page      |
-| Skip validate before push            | Zod + coverage gates catch canonical gaps                 | Always `faq:perplexity:validate` first                |
-| Pilot-only gate / render fix         | 2219 fiches must share the same contract                  | Rule 7 — extract to shared module + CDC audit         |
+| Anti-pattern                            | Why it fails                                                        | Correct path                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| « Fiche standard = 10 FAQ LLM only »    | Policy catalogue entier — rule `hotel-faq-perplexity.mdc`           | Perplexity kit + concierge on every fiche                                          |
+| 60 items in `faq_content` only          | Breaks max-15 gate + JSON-LD cap                                    | Split kit / promote via `faq-perplexity-transform.ts`                              |
+| Concierge block Airelles-only           | Bloc `#concierge-questions` on all fiches with data                 | `readConciergeQuestionGroups()` in standard page                                   |
+| Skip validate before push               | Zod + coverage gates catch canonical gaps                           | Always `faq:perplexity:validate` first                                             |
+| Pilot-only gate / render fix            | 2219 fiches must share the same contract                            | Rule 7 — extract to shared module + CDC audit                                      |
+| Titre concierge kit = nom pilote en dur | Prince de Galles affichait « Airelles Gordes » avec bon contenu PdG | `t('conciergeQuestions.title', { hotel: name })` dans `prepare-hotel-kit-model.ts` |
 
 ## References
 

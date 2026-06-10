@@ -896,12 +896,8 @@ export async function prepareHotelKitModelUncached(
         kitLocale === 'en'
           ? 'Everything a guest might ask before and during their stay — rooms, dining, spa, family and hotel policies.'
           : "Tout ce qu'un voyageur peut se demander avant et pendant son séjour — adresse, chambres, tables, spa, famille et politiques de la maison.",
-      conciergeQuestions:
-        kitLocale === 'en' ? `The Concierge answers — ${name}` : `Le Concierge répond — ${name}`,
-      conciergeQuestionsLede:
-        kitLocale === 'en'
-          ? 'Tables, transfers, spa, excursions or special occasions — how the Concierge replies when you ask.'
-          : "Tables, transferts, spa, excursions ou occasions spéciales : voici comment le Concierge formule sa réponse lorsque l'on lui pose la question.",
+      conciergeQuestions: t('conciergeQuestions.title', { hotel: name }),
+      conciergeQuestionsLede: t('conciergeQuestions.lede'),
       proximity: t('sections.nearby'),
       proximityLede: tRelated('sameCitySub'),
       exploreRegion: tRelated('sameRegionTitle', { region: row.region }),

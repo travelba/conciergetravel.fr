@@ -1,0 +1,141 @@
+/**
+ * Factual amenities for Les Prés d'Eugénie — CDC §2.6 (≥ 80).
+ * Sourced from lespresdeugenie.com (rooms, spa, leisure pages) and official fact sheet.
+ */
+
+export interface LesPresDeugenieAmenityRecord {
+  readonly key: string;
+  readonly label_fr: string;
+  readonly label_en: string;
+}
+
+function a(key: string, label_fr: string, label_en: string): LesPresDeugenieAmenityRecord {
+  return { key, label_fr, label_en };
+}
+
+export const LES_PRES_DEUGENIE_AMENITIES: readonly LesPresDeugenieAmenityRecord[] = [
+  a('relais_chateaux', 'Relais & Châteaux depuis 1968', 'Relais & Châteaux since 1968'),
+  a(
+    'palace_france',
+    'Distinction Palace de France depuis 2017',
+    'Palace de France distinction since 2017',
+  ),
+  a('five_star', 'Hôtel 5 étoiles', 'Five-star hotel'),
+  a('family_owned', 'Maison familiale Guérard', 'Guérard family-owned estate'),
+  a('concierge_24h', 'Conciergerie 24h/24', '24-hour concierge'),
+  a('reception_24h', 'Réception 24h/24', '24-hour front desk'),
+  a('daily_housekeeping', 'Service de chambre quotidien', 'Daily housekeeping'),
+  a('turndown_service', 'Service de couverture', 'Turndown service'),
+  a('luggage_storage', 'Consigne à bagages', 'Luggage storage'),
+  a('laundry', 'Blanchisserie', 'Laundry service'),
+  a('dry_cleaning', 'Nettoyage à sec', 'Dry cleaning'),
+  a('room_service', 'Service en chambre', 'Room service'),
+  a('multilingual_staff', 'Personnel multilingue', 'Multilingual staff'),
+  a('parking_free', 'Parking extérieur gratuit', 'Complimentary outdoor parking'),
+  a(
+    'ev_charging',
+    'Bornes Tesla & Porsche Destination Charging',
+    'Tesla & Porsche Destination Charging',
+  ),
+  a('wifi_free', 'WiFi gratuit', 'Complimentary WiFi'),
+  a('air_conditioning', 'Climatisation', 'Air conditioning'),
+  a('chromecast_tv', 'Télévision avec Chromecast', 'Television with Chromecast'),
+  a('bluetooth_speaker', 'Enceinte Bluetooth en chambre', 'In-room Bluetooth speaker'),
+  a('microfiltered_water', 'Eau microfiltrée offerte', 'Complimentary microfiltered water'),
+  a('tea_coffee', 'Thés, infusions et café filtre', 'Teas, infusions and filter coffee'),
+  a(
+    'balcony_terrace',
+    'Balcon ou terrasse (majorité des chambres)',
+    'Balcony or terrace (most rooms)',
+  ),
+  a('antique_furniture', 'Mobilier ancien et peintures', 'Antique furniture and paintings'),
+  a('45_rooms_suites', '45 chambres et suites', '45 rooms and suites'),
+  a('eight_hectares', 'Domaine de 8 hectares', 'Eight-hectare estate'),
+  a('five_buildings', '5 bâtisses historiques', 'Five historic buildings'),
+  a('seven_gardens', '7 jardins poétiques', 'Seven poetic gardens'),
+  a(
+    'restaurant_3_stars',
+    'Restaurant Michel Guérard — 3 étoiles MICHELIN',
+    'Michel Guérard restaurant — 3 MICHELIN Stars',
+  ),
+  a('restaurant_orangerie', 'L’Orangerie — 1 étoile MICHELIN', 'L’Orangerie — 1 MICHELIN Star'),
+  a(
+    'ferme_aux_grives',
+    'La Ferme aux Grives — auberge de terroir',
+    'La Ferme aux Grives — country inn',
+  ),
+  a('cafe_mere_poule', 'Café Mère Poule', 'Café Mère Poule'),
+  a('lounge_bar', 'Loulou’s Lounge Bar', 'Loulou’s Lounge Bar'),
+  a('grande_cuisine_minceur', 'Grande Cuisine Minceur®', 'Grande Cuisine Minceur®'),
+  a('cookery_school', 'École de Cuisine', 'Cookery school'),
+  a(
+    'ferme_thermale',
+    'La Ferme Thermale — spa thermal 1 000 m²',
+    'La Ferme Thermale — 1,000 sq m thermal spa',
+  ),
+  a('sisley_spa', 'Soins beauté Sisley', 'Sisley beauty treatments'),
+  a('thermal_springs', 'Sources thermales millénaires', 'Millennia-old thermal springs'),
+  a('nordic_bath', 'Bain nordique en prairie', 'Nordic bath in the meadow'),
+  a('outdoor_sauna', 'Sauna extérieur', 'Outdoor sauna'),
+  a('heated_pool', 'Piscine extérieure chauffée 26 °C', 'Heated outdoor pool at 26 °C'),
+  a('pool_year_round', 'Piscine ouverte toute l’année', 'Pool open year-round'),
+  a('fitness_cabin', 'Cabane Fitness Technogym', 'Technogym fitness cabin'),
+  a('personal_trainer', 'Coach privé (sur demande)', 'Private coach (on request)'),
+  a('tennis_courts', '2 courts de tennis', 'Two tennis courts'),
+  a('bicycles', 'Vélos VTC et VAE', 'City and e-bikes'),
+  a('golf_nearby', 'Golf Les Greens d’Eugénie (9 trous)', 'Les Greens d’Eugénie golf (9 holes)'),
+  a('kids_friendly', 'Label Kid Friendly', 'Kid Friendly label'),
+  a('kids_club_summer', 'Kids Club estival', 'Summer kids club'),
+  a('babysitting', 'Baby-sitting (sur demande)', 'Babysitting (on request)'),
+  a('pets_allowed', 'Animaux acceptés (Couvent & Village)', 'Pets welcome (Couvent & Village)'),
+  a('pet_fee', 'Supplément animal 26 €/jour', 'Pet supplement €26/day'),
+  a('mice_events', 'Réceptions et séminaires', 'Receptions and seminars'),
+  a('private_dining', 'Dîners privatifs', 'Private dining'),
+  a('wine_cellar', 'Cave et accords mets-vins', 'Wine cellar and pairings'),
+  a('boutique', 'Boutique Eugénie', 'Eugénie boutique'),
+  a('gift_shop', 'Cadeaux et produits Maison', 'Gifts and house products'),
+  a('armagnac_estate', 'Armagnac des vignes de la propriété', 'Armagnac from estate vines'),
+  a('medical_staff', 'Médecins et diététiciennes (cures)', 'Physicians and dieticians (cures)'),
+  a('thermal_cures', 'Cures thermales 7–18 jours', 'Thermal cures 7–18 days'),
+  a('spa_day_pass', 'Escapades spa à la journée', 'Spa day escapes'),
+  a('massage_kobido', 'Kobido et réflexologie plantaire', 'Kobido and foot reflexology'),
+  a('kaolin_bath', 'Bains de kaolin individuels', 'Individual kaolin baths'),
+  a('steam_bath', 'Bain de vapeur thermal', 'Thermal steam bath'),
+  a('vegetable_garden', 'Potagers du domaine', 'Estate vegetable gardens'),
+  a('rose_garden', 'Jardin de roses', 'Rose garden'),
+  a('water_garden', 'Jardin d’eau', 'Water garden'),
+  a('boxwood_garden', 'Jardin de buis', 'Boxwood garden'),
+  a('maison_rose', 'Maison Rose — maison d’hôtes 3*', 'Maison Rose — 3-star guest house'),
+  a('couvent_herbes', 'Couvent des Herbes', 'Couvent des Herbes'),
+  a('village_logis', 'Logis des Grives au Village', 'Logis des Grives in the Village'),
+  a(
+    'onzen_terrace',
+    'Terrasse Onzen privatif (chambre Indigo)',
+    'Private Onzen terrace (Indigo room)',
+  ),
+  a('transfers', 'Transferts gares et aéroports', 'Station and airport transfers'),
+  a(
+    'car_rental',
+    'Location de voiture (Dax / Mont-de-Marsan)',
+    'Car rental (Dax / Mont-de-Marsan)',
+  ),
+  a('grandes_tables', 'Membre des Grandes Tables du Monde', 'Grandes Tables du Monde member'),
+  a(
+    'gault_millau',
+    '5 Toques Gault & Millau (restaurant étoilé)',
+    '5 Gault & Millau toques (starred restaurant)',
+  ),
+  a('comite_colbert', 'Membre du Comité Colbert', 'Comité Colbert member'),
+  a('instagram', '@lespresdeugenie', '@lespresdeugenie'),
+  a('non_smoking_rooms', 'Chambres non-fumeurs', 'Non-smoking rooms'),
+  a('safe', 'Coffre-fort en chambre', 'In-room safe'),
+  a('minibar', 'Minibar', 'Minibar'),
+  a(
+    'hypoallergenic',
+    'Literie hypoallergénique (sur demande)',
+    'Hypoallergenic bedding (on request)',
+  ),
+  a('extra_beds', 'Lits supplémentaires (suites)', 'Extra beds (suites)'),
+  a('early_checkin', 'Early check-in sur demande', 'Early check-in on request'),
+  a('late_checkout', 'Late check-out sur demande', 'Late check-out on request'),
+];

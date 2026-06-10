@@ -2,9 +2,15 @@ import 'server-only';
 
 import {
   AIRELLES_FAQ_CONTENT_KIT,
+  LES_PRES_DEUGENIE_FAQ_CONTENT_KIT,
   PRINCE_DE_GALLES_FAQ_CONTENT_KIT,
   buildAirellesGoldenFields,
+  buildChevalBlancParisGoldenFields,
+  buildLeBristolParisGoldenFields,
+  buildLesAirellesCourchevelGoldenFields,
+  buildLesPresDeugenieGoldenFields,
   buildPrinceDeGallesGoldenFields,
+  buildShangriLaParisGoldenFields,
 } from '@mch/domain/editorial';
 
 import type { HotelDetailRow } from '@/server/hotels/get-hotel-by-slug';
@@ -24,7 +30,12 @@ type GoldenFieldsBuilder = (current: {
 
 const GOLDEN_BUILDERS: Readonly<Record<string, GoldenFieldsBuilder>> = {
   'les-airelles-gordes': buildAirellesGoldenFields,
+  'les-airelles-courchevel': buildLesAirellesCourchevelGoldenFields,
   'prince-de-galles-paris': buildPrinceDeGallesGoldenFields,
+  'cheval-blanc-paris': buildChevalBlancParisGoldenFields,
+  'le-bristol-paris': buildLeBristolParisGoldenFields,
+  'les-pres-deugenie': buildLesPresDeugenieGoldenFields,
+  'shangri-la-paris': buildShangriLaParisGoldenFields,
 };
 
 /** EN kit slugs share the FR golden payload builder. */
@@ -44,6 +55,8 @@ function resolveKitFaqContentOverride(slug: string): HotelDetailRow['faq_content
       return AIRELLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'];
     case 'prince-de-galles-paris':
       return PRINCE_DE_GALLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'];
+    case 'les-pres-deugenie':
+      return LES_PRES_DEUGENIE_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'];
     default:
       return null;
   }
@@ -70,21 +83,24 @@ function mergeGoldenRow(row: HotelDetailRow, golden: Record<string, unknown>): H
     long_description_sections: golden[
       'long_description_sections'
     ] as HotelDetailRow['long_description_sections'],
-    description_fr: golden['description_fr'] as string,
-    description_en: golden['description_en'] as string,
-    factual_summary_fr: golden['factual_summary_fr'] as string,
-    factual_summary_en: golden['factual_summary_en'] as string,
-    meta_desc_fr: golden['meta_desc_fr'] as string,
-    meta_desc_en: golden['meta_desc_en'] as string,
-    meta_title_fr: golden['meta_title_fr'] as string,
-    meta_title_en: golden['meta_title_en'] as string,
-    hero_image: golden['hero_image'] as string,
+    description_fr: (golden['description_fr'] as string | undefined) ?? row.description_fr,
+    description_en: (golden['description_en'] as string | undefined) ?? row.description_en,
+    factual_summary_fr:
+      (golden['factual_summary_fr'] as string | undefined) ?? row.factual_summary_fr,
+    factual_summary_en:
+      (golden['factual_summary_en'] as string | undefined) ?? row.factual_summary_en,
+    meta_desc_fr: (golden['meta_desc_fr'] as string | undefined) ?? row.meta_desc_fr,
+    meta_desc_en: (golden['meta_desc_en'] as string | undefined) ?? row.meta_desc_en,
+    meta_title_fr: (golden['meta_title_fr'] as string | undefined) ?? row.meta_title_fr,
+    meta_title_en: (golden['meta_title_en'] as string | undefined) ?? row.meta_title_en,
+    hero_image: (golden['hero_image'] as string | undefined) ?? row.hero_image,
     gallery_images: golden['gallery_images'] as HotelDetailRow['gallery_images'],
     external_sources: golden['external_sources'] as HotelDetailRow['external_sources'],
-    phone_e164: golden['phone_e164'] as string,
-    address: golden['address'] as string,
-    postal_code: golden['postal_code'] as string,
-    email_reservations: golden['email_reservations'] as string,
+    phone_e164: (golden['phone_e164'] as string | undefined) ?? row.phone_e164,
+    address: (golden['address'] as string | undefined) ?? row.address,
+    postal_code: (golden['postal_code'] as string | undefined) ?? row.postal_code,
+    email_reservations:
+      (golden['email_reservations'] as string | undefined) ?? row.email_reservations,
     concierge_pick: golden['concierge_pick'] as HotelDetailRow['concierge_pick'],
     concierge_hook: golden['concierge_hook'] as HotelDetailRow['concierge_hook'],
     concierge_questions: golden['concierge_questions'] as HotelDetailRow['concierge_questions'],
