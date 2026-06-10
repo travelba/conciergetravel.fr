@@ -8,6 +8,15 @@ import type { Locale } from '@/i18n/routing';
 import { intlLocaleTag } from '@/i18n/runtime';
 
 import { SubmitButton } from '@/components/booking/submit-button';
+import { fetchTravelportSearch } from '@/lib/travelport/fetch-travelport-search';
+
+export const TRAVELPORT_STAY_EVENT = 'mch:travelport-stay' as const;
+
+export interface TravelportStayDetail {
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly adults: number;
+}
 
 function addDayIso(iso: string): string {
   const t = Date.parse(`${iso}T00:00:00Z`);
@@ -30,6 +39,10 @@ export interface BookingSandboxLiveAsideLabels {
   readonly conciergeLabel: string;
   readonly bestRateBadge: string;
   readonly providerLabel: Record<CompetitorProvider, string>;
+  readonly liveRateTitle: string;
+  readonly liveRateLoading: string;
+  readonly liveRateLegal: string;
+  readonly liveRateCached: string;
 }
 
 interface ComparePayload {
@@ -40,6 +53,7 @@ interface ComparePayload {
 export interface BookingSandboxLiveAsideProps {
   readonly locale: Locale;
   readonly hotelId: string;
+  readonly slug: string;
   readonly formAction: string;
   readonly labels: BookingSandboxLiveAsideLabels;
   readonly defaults: {
@@ -54,6 +68,8 @@ export interface BookingSandboxLiveAsideProps {
   readonly embeddedInKitAside: boolean;
   /** When false, skips `/api/price-comparison` and hides the compare block. */
   readonly compareEnabled?: boolean;
+  /** When true, fetches `/api/travelport/search` when dates change. */
+  readonly liveRatesEnabled?: boolean;
 }
 
 function formatEuroAmount(locale: Locale, amountMinor: number): string {
@@ -70,6 +86,7 @@ function formatEuroAmount(locale: Locale, amountMinor: number): string {
  */
 export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): ReactElement {
   const compareEnabled = props.compareEnabled ?? true;
+  const liveRatesEnabled = props.liveRatesEnabled ?? false;
   const [checkIn, setCheckIn] = useState(props.defaults.checkIn);
   const [checkOut, setCheckOut] = useState(props.defaults.checkOut);
   const [adults, setAdults] = useState(props.defaults.adults);
@@ -80,6 +97,58 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
     | { readonly status: 'ready'; readonly data: ComparePayload }
     | { readonly status: 'empty' }
   >({ status: 'loading' });
+
+  const [liveRate, setLiveRate] = useState<
+    | { readonly status: 'idle' }
+    | { readonly status: 'loading' }
+    | { readonly status: 'ready'; readonly amountMinor: number; readonly cached: boolean }
+    | { readonly status: 'empty' }
+  >({ status: liveRatesEnabled ? 'loading' : 'idle' });
+
+  useEffect(() => {
+    if (!liveRatesEnabled) {
+      setLiveRate({ status: 'idle' });
+      return;
+    }
+
+    const detail: TravelportStayDetail = { checkIn, checkOut, adults };
+    window.dispatchEvent(new CustomEvent(TRAVELPORT_STAY_EVENT, { detail }));
+
+    let cancelled = false;
+    setLiveRate({ status: 'loading' });
+
+    fetchTravelportSearch({
+      slug: props.slug,
+      checkIn,
+      checkOut,
+      adults,
+      matchRooms: false,
+    })
+      .then((body) => {
+        if (cancelled) return;
+        if (
+          body.ok === true &&
+          body.available === true &&
+          typeof body.cheapestMinor === 'number' &&
+          body.cheapestMinor > 0
+        ) {
+          setLiveRate({
+            status: 'ready',
+            amountMinor: body.cheapestMinor,
+            cached: body.cached === true,
+          });
+          return;
+        }
+        setLiveRate({ status: 'empty' });
+      })
+      .catch(() => {
+        if (!cancelled) setLiveRate({ status: 'empty' });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [adults, checkIn, checkOut, liveRatesEnabled, props.slug]);
 
   useEffect(() => {
     if (!compareEnabled) {
@@ -148,6 +217,52 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
   const rowBestClass = props.embeddedInKitAside ? 'rc-row rc-best' : `${rowClass} font-medium`;
   const nameClass = props.embeddedInKitAside ? 'rc-name' : undefined;
   const amtClass = props.embeddedInKitAside ? 'rc-amt' : 'tabular-nums';
+
+  const liveRateBlock =
+    liveRatesEnabled && liveRate.status !== 'idle' ? (
+      <div
+        className={
+          props.embeddedInKitAside
+            ? 'resa-compare'
+            : 'border-border bg-bg-subtle/40 mt-2 rounded-md border p-3'
+        }
+      >
+        <div className={props.embeddedInKitAside ? 'rc-title' : 'text-fg mb-2 text-sm font-medium'}>
+          {props.labels.liveRateTitle}
+        </div>
+        {liveRate.status === 'loading' ? (
+          <p
+            className={props.embeddedInKitAside ? 'rc-foot' : 'text-muted text-sm'}
+            aria-busy="true"
+          >
+            {props.labels.liveRateLoading}
+          </p>
+        ) : null}
+        {liveRate.status === 'ready' ? (
+          <div className={rowBestClass}>
+            <span className={nameClass}>
+              MyConciergeHotel{' '}
+              {props.embeddedInKitAside ? (
+                <em>{props.labels.bestRateBadge}</em>
+              ) : (
+                <span className="text-muted text-xs font-normal">
+                  ({props.labels.bestRateBadge})
+                </span>
+              )}
+            </span>
+            <span className={amtClass}>{formatEuroAmount(props.locale, liveRate.amountMinor)}</span>
+          </div>
+        ) : null}
+        {liveRate.status === 'ready' && liveRate.cached ? (
+          <p className={props.embeddedInKitAside ? 'rc-foot' : 'text-muted mt-1 text-xs'}>
+            {props.labels.liveRateCached}
+          </p>
+        ) : null}
+        <p className={props.embeddedInKitAside ? 'rc-foot' : 'text-muted mt-2 text-xs'}>
+          {props.labels.liveRateLegal}
+        </p>
+      </div>
+    ) : null;
 
   const compareBlock = (
     <div
@@ -245,7 +360,7 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
         </label>
       </div>
 
-      {compareEnabled ? compareBlock : null}
+      {compareEnabled ? compareBlock : liveRateBlock}
 
       <SubmitButton
         pendingLabel={props.labels.submitting}

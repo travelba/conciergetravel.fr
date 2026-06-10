@@ -16,7 +16,6 @@ import {
   buildOfferJsonLdInput,
   prepareHotelBookingRail,
 } from '@/server/booking/prepare-hotel-booking-rail';
-import { getTravelportLiveRoomPrices } from '@/server/booking/travelport-offer';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
 import { HotelHero } from '@/components/hotel/hotel-hero';
@@ -540,13 +539,7 @@ async function renderHotelPage(
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
   const origin = siteOrigin();
 
-  // Étape C — prix « à partir de » live Travelport injectés sur les cartes
-  // chambres (best-effort, gated pilote ; `null` hors pilote ou en cas d'échec,
-  // les cartes restent éditoriales). Voir `getTravelportLiveRoomPrices`.
-  const travelportLiveRooms =
-    (locale === 'fr' || locale === 'en') && row.booking_mode === 'travelport'
-      ? await getTravelportLiveRoomPrices({ slug: row.slug, locale, rooms })
-      : null;
+  // Travelport live prices load client-side / Suspense — never block SSR here.
   // Multi-supplier deterministic prices (Phase 3/4). Inert unless the
   // kill-switch is on AND supplier connections are seeded for this hotel;
   // when active, these `roomId -> best EUR` prices take precedence over the
@@ -595,9 +588,7 @@ async function renderHotelPage(
       galleryTiles.length > 0 ? galleryTiles[index % galleryTiles.length] : undefined;
     const roomName = room.name ?? room.room_code;
     const isConciergePick = conciergePick !== null && room.slug === conciergePick.slug;
-    const liveFromMinor =
-      aggregatedRoomPrices?.fromByRoomId.get(room.id) ??
-      travelportLiveRooms?.fromByRoomId.get(room.id);
+    const liveFromMinor = aggregatedRoomPrices?.fromByRoomId.get(room.id);
     let livePriceText: string | null = null;
     let bookAria: string | null = null;
     if (liveFromMinor !== undefined && tCard !== null) {

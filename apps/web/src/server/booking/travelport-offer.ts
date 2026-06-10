@@ -485,7 +485,7 @@ async function searchAndNormalize(input: {
   readonly slug: string;
   readonly stay: ResolvedStay;
 }): Promise<
-  | { readonly ok: true; readonly data: NormalizedSearch }
+  | { readonly ok: true; readonly data: NormalizedSearch; readonly cached: boolean }
   | {
       readonly ok: false;
       readonly reason: SearchReason;
@@ -496,7 +496,7 @@ async function searchAndNormalize(input: {
 
   const cacheKey = searchCacheKey(input.slug, input.stay);
   const cached = await loadNormalizedSearch(cacheKey);
-  if (cached !== null) return { ok: true, data: cached };
+  if (cached !== null) return { ok: true, data: cached, cached: true };
 
   const creds = getTravelportCredentials();
   if (creds === null) return { ok: false, reason: 'no_credentials' };
@@ -536,7 +536,205 @@ async function searchAndNormalize(input: {
     rates,
   };
   await redis.set(cacheKey, JSON.stringify(data), { ex: SEARCH_TTL_SEC });
-  return { ok: true, data };
+  return { ok: true, data, cached: false };
+}
+
+export interface TravelportEditorialRoomRef {
+  readonly id: string;
+  readonly name: string | null;
+  readonly room_code: string;
+}
+
+function matchEditorialRoomPrices(
+  rooms: readonly TravelportEditorialRoomRef[],
+  rates: readonly CachedRate[],
+): ReadonlyMap<string, number> {
+  const fromByRoomId = new Map<string, number>();
+  for (const room of rooms) {
+    const wanted = normalizeName(room.name ?? room.room_code);
+    if (wanted.size === 0) continue;
+    let bestPrice: number | undefined;
+    let bestOverlap = 0;
+    for (const opt of rates) {
+      const overlap = [...normalizeName(opt.roomLabel)].filter((t) => wanted.has(t)).length;
+      if (overlap === 0) continue;
+      if (
+        overlap > bestOverlap ||
+        (overlap === bestOverlap && (bestPrice === undefined || opt.priceMinor < bestPrice))
+      ) {
+        bestOverlap = overlap;
+        bestPrice = opt.priceMinor;
+      }
+    }
+    if (bestPrice !== undefined) fromByRoomId.set(room.id, bestPrice);
+  }
+  return fromByRoomId;
+}
+
+async function fetchEditorialRoomsForSlug(
+  slug: string,
+): Promise<readonly TravelportEditorialRoomRef[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data: hotel, error: hotelErr } = await supabase
+      .from('hotels')
+      .select('id')
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .maybeSingle();
+    if (hotelErr || hotel === null) return [];
+    const hotelId = (hotel as { id: string }).id;
+    const { data: rooms, error: roomsErr } = await supabase
+      .from('hotel_rooms')
+      .select('id, name_fr, name_en, room_code')
+      .eq('hotel_id', hotelId)
+      .order('display_order', { ascending: true, nullsFirst: false })
+      .order('is_signature', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true });
+    if (roomsErr || rooms === null) return [];
+    return (
+      rooms as { id: string; name_fr: string | null; name_en: string | null; room_code: string }[]
+    ).map((r) => ({
+      id: r.id,
+      name: r.name_fr ?? r.name_en,
+      room_code: r.room_code,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface TravelportSearchQuery {
+  readonly slug: string;
+  readonly checkIn?: string | undefined;
+  readonly checkOut?: string | undefined;
+  readonly adults?: string | undefined;
+  readonly children?: string | undefined;
+  /** When true, loads editorial rooms and returns `fromByRoomId`. */
+  readonly matchEditorialRooms?: boolean | undefined;
+  readonly editorialRooms?: readonly TravelportEditorialRoomRef[] | undefined;
+}
+
+export type TravelportSearchOutcome =
+  | {
+      readonly ok: true;
+      readonly available: true;
+      readonly cached: boolean;
+      readonly stay: ResolvedStay;
+      readonly cheapestMinor: number | null;
+      readonly fromByRoomId: Readonly<Record<string, number>>;
+    }
+  | { readonly ok: true; readonly available: false; readonly reason: SearchReason | 'disabled' }
+  | { readonly ok: false; readonly reason: 'rate_limited' };
+
+/**
+ * Public Travelport search for fiche overlays, booking rail and cron pre-warm.
+ * Never throws — callers map failures to editorial fallbacks.
+ */
+export async function queryTravelportSearch(
+  query: TravelportSearchQuery,
+): Promise<TravelportSearchOutcome> {
+  if (!isTravelportSandboxEnabled() || !(await isTravelportBookingSlug(query.slug))) {
+    return { ok: true, available: false, reason: 'disabled' };
+  }
+
+  const { stay } = resolveStay({
+    checkIn: query.checkIn,
+    checkOut: query.checkOut,
+    adults: query.adults,
+    children: query.children,
+  });
+
+  let res: Awaited<ReturnType<typeof searchAndNormalize>>;
+  try {
+    res = await searchAndNormalize({ slug: query.slug, stay });
+  } catch {
+    return { ok: true, available: false, reason: 'search_failed' };
+  }
+  if (!res.ok) return { ok: true, available: false, reason: res.reason };
+
+  const rates = res.data.rates;
+  let cheapestMinor: number | null = null;
+  const firstRate = rates[0];
+  if (firstRate !== undefined) {
+    cheapestMinor = rates.reduce(
+      (min, r) => (r.priceMinor < min ? r.priceMinor : min),
+      firstRate.priceMinor,
+    );
+  }
+
+  let editorialRooms = query.editorialRooms;
+  if (
+    query.matchEditorialRooms === true &&
+    (editorialRooms === undefined || editorialRooms.length === 0)
+  ) {
+    editorialRooms = await fetchEditorialRoomsForSlug(query.slug);
+  }
+
+  const fromByRoomId =
+    editorialRooms !== undefined && editorialRooms.length > 0
+      ? matchEditorialRoomPrices(editorialRooms, rates)
+      : new Map<string, number>();
+
+  const fromByRoomIdRecord: Record<string, number> = {};
+  for (const [id, minor] of fromByRoomId) fromByRoomIdRecord[id] = minor;
+
+  return {
+    ok: true,
+    available: true,
+    cached: res.cached,
+    stay,
+    cheapestMinor,
+    fromByRoomId: fromByRoomIdRecord,
+  };
+}
+
+export interface TravelportPrewarmResult {
+  readonly slug: string;
+  readonly ok: boolean;
+  readonly cached: boolean;
+  readonly reason?: string;
+}
+
+/** Lists published hotels on the Travelport pilot (`booking_mode = travelport`). */
+export async function listTravelportPilotSlugs(): Promise<readonly string[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('hotels')
+      .select('slug')
+      .eq('is_published', true)
+      .eq('booking_mode', 'travelport');
+    if (error || data === null) return [];
+    return (data as { slug: string }[]).map((r) => r.slug);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Pre-warms the default stay (J+30 → J+31, 2 adultes) in Redis for every
+ * Travelport pilot hotel. Intended for Vercel Cron — absorbs cold-cache latency
+ * on the fiche without blocking SSR.
+ */
+export async function prewarmTravelportPilotCaches(): Promise<readonly TravelportPrewarmResult[]> {
+  const slugs = await listTravelportPilotSlugs();
+  const results: TravelportPrewarmResult[] = [];
+  for (const slug of slugs) {
+    const outcome = await queryTravelportSearch({
+      slug,
+      adults: '2',
+      matchEditorialRooms: false,
+    });
+    if (outcome.ok && outcome.available) {
+      results.push({ slug, ok: true, cached: outcome.cached });
+    } else if (outcome.ok && !outcome.available) {
+      results.push({ slug, ok: false, cached: false, reason: outcome.reason });
+    } else {
+      results.push({ slug, ok: false, cached: false, reason: outcome.reason });
+    }
+  }
+  return results;
 }
 
 /**
@@ -698,26 +896,7 @@ export async function getTravelportLiveRoomPrices(input: {
   }
   if (!res.ok) return null;
 
-  const fromByRoomId = new Map<string, number>();
-  for (const room of input.rooms) {
-    const wanted = normalizeName(room.name ?? room.room_code);
-    if (wanted.size === 0) continue;
-    let bestPrice: number | undefined;
-    let bestOverlap = 0;
-    for (const opt of res.data.rates) {
-      const overlap = [...normalizeName(opt.roomLabel)].filter((t) => wanted.has(t)).length;
-      if (overlap === 0) continue;
-      if (
-        overlap > bestOverlap ||
-        (overlap === bestOverlap && (bestPrice === undefined || opt.priceMinor < bestPrice))
-      ) {
-        bestOverlap = overlap;
-        bestPrice = opt.priceMinor;
-      }
-    }
-    if (bestPrice !== undefined) fromByRoomId.set(room.id, bestPrice);
-  }
-
+  const fromByRoomId = matchEditorialRoomPrices(input.rooms, res.data.rates);
   if (fromByRoomId.size === 0) return null;
   return { fromByRoomId };
 }

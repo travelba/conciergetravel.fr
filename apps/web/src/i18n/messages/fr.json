@@ -4114,7 +4114,12 @@
       "adults": "Adultes",
       "submit": "Voir les disponibilités",
       "submitting": "Recherche…",
-      "note": "Pilote preprod — aucun paiement n'est prélevé à ce stade."
+      "note": "Pilote preprod — aucun paiement n'est prélevé à ce stade.",
+      "liveRateTitle": "Tarif en direct",
+      "liveRateLoading": "Recherche du meilleur tarif…",
+      "liveRateLegal": "Prix TTC pour le séjour sélectionné, source Travelport GDS. Les tarifs peuvent varier.",
+      "liveRateCached": "Tarif issu du cache (moins de 8 min).",
+      "liveRateBest": "meilleur tarif"
     },
     "card": {
       "book": "Réserver",

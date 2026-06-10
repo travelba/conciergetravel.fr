@@ -16,6 +16,8 @@ import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { BookingSlot } from '../booking-slot';
 import { PriceComparator } from '../../price-comparator';
 import { HotelKitInteractions } from './hotel-kit-interactions';
+import { TravelportKitLivePrices } from './travelport-kit-live-prices';
+import { isTravelportSandboxEnabled } from '@/lib/travelport';
 
 interface HotelPageKitProps {
   readonly locale: Locale;
@@ -112,6 +114,17 @@ export async function HotelPageKit({
       </div>
 
       <HotelKitInteractions />
+
+      {row.booking_mode === 'travelport' && isTravelportSandboxEnabled() ? (
+        <TravelportKitLivePrices
+          locale={model.locale}
+          slug={row.slug}
+          checkIn={railContext.defaultStay.checkIn}
+          checkOut={railContext.defaultStay.checkOut}
+          adults={railContext.defaultStay.adults}
+          priceUnit={model.labels.fromPriceUnit}
+        />
+      ) : null}
 
       <BookingSlot
         locale={model.locale}

@@ -4082,7 +4082,12 @@
       "adults": "Adults",
       "submit": "Check availability",
       "submitting": "Searching…",
-      "note": "Preprod pilot — no payment is taken at this stage."
+      "note": "Preprod pilot — no payment is taken at this stage.",
+      "liveRateTitle": "Live rate",
+      "liveRateLoading": "Fetching the best rate…",
+      "liveRateLegal": "Total price incl. tax for the selected stay, sourced from Travelport GDS. Rates may vary.",
+      "liveRateCached": "Rate served from cache (under 8 min).",
+      "liveRateBest": "best rate"
     },
     "card": {
       "book": "Book",

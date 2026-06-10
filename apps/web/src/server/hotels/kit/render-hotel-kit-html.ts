@@ -499,7 +499,7 @@ function renderRoomCard(model: HotelKitModel, room: HotelRoomCardVM): string {
   const why =
     room.conciergeNote !== null ? `<p class="cc-why">${escapeHtml(room.conciergeNote)}</p>` : '';
 
-  return `<article class="room-v2${pickClass}">
+  return `<article class="room-v2${pickClass}" data-room-id="${escapeHtml(room.id)}">
             <div class="rv2-img">
               ${galleryHtml}
               ${pickBadge}

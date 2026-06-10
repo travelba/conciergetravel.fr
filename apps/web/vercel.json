@@ -5,5 +5,11 @@
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm turbo run build --filter=@mch/web",
   "outputDirectory": ".next",
-  "ignoreCommand": "cd ../.. && npx turbo-ignore @mch/web"
+  "ignoreCommand": "cd ../.. && npx turbo-ignore @mch/web",
+  "crons": [
+    {
+      "path": "/api/cron/travelport-prewarm",
+      "schedule": "*/7 * * * *"
+    }
+  ]
 }

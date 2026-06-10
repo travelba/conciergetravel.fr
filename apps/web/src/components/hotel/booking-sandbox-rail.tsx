@@ -53,9 +53,11 @@ export async function BookingSandboxRail({
     <BookingSandboxLiveAside
       locale={locale}
       hotelId={hotelId}
+      slug={slug}
       formAction={action}
       embeddedInKitAside={embeddedInKitAside}
       compareEnabled={false}
+      liveRatesEnabled
       headline={tRail('headline', { hotel: hotelName })}
       intro={tRail('intro')}
       footnote={tRail('note')}
@@ -69,9 +71,13 @@ export async function BookingSandboxRail({
         compareTitle: tCompare('title'),
         compareLoading: tCompare('loading'),
         compareLegal: tCompare('legal'),
-        conciergeLabel: tCompare('conciergeLabel'),
-        bestRateBadge: tCompare('bestRateBadge'),
+        conciergeLabel: 'MyConciergeHotel',
+        bestRateBadge: tRail('liveRateBest'),
         providerLabel,
+        liveRateTitle: tRail('liveRateTitle'),
+        liveRateLoading: tRail('liveRateLoading'),
+        liveRateLegal: tRail('liveRateLegal'),
+        liveRateCached: tRail('liveRateCached'),
       }}
     />
   );
