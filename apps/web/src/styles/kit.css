@@ -3729,21 +3729,18 @@ body.booking-mobile-sheet-open {
   font-weight: 500;
 }
 .mch-kit .faq-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-@media (min-width: 900px) {
-  .mch-kit .faq-list {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 32px;
-  }
+  display: block;
 }
 .mch-kit .faq-list.is-collapsed .faq-more-hidden {
   display: none;
 }
 .mch-kit .faq-more-wrap {
-  margin: 2px 0 6px;
+  margin: 2px 0 4px;
+}
+.mch-kit .faq-more-wrap .faq-toggle-btn {
+  padding: 5px 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
 }
 .mch-kit .faq-item {
   border-bottom: 1px solid var(--ligne);
