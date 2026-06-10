@@ -78,6 +78,22 @@ export function HotelKitInteractions(): null {
       cleanups.push(() => btn.removeEventListener('click', onAround));
     });
 
+    document.querySelectorAll('.faq-toggle-btn').forEach((btn) => {
+      if (!(btn instanceof HTMLButtonElement)) return;
+      const group = btn.closest('.faq-group');
+      const list = group?.querySelector('.faq-list[data-faq-list]');
+      if (!(list instanceof HTMLElement)) return;
+      const labelMore = btn.getAttribute('data-more') ?? 'Voir plus';
+      const labelLess = btn.getAttribute('data-less') ?? 'Voir moins';
+      const onToggle = (): void => {
+        const collapsed = list.classList.toggle('is-collapsed');
+        btn.textContent = collapsed ? labelMore : labelLess;
+        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      };
+      btn.addEventListener('click', onToggle);
+      cleanups.push(() => btn.removeEventListener('click', onToggle));
+    });
+
     document.querySelectorAll('.mini-gallery').forEach((gallery) => {
       const track = gallery.querySelector('.mg-track');
       const dots = gallery.querySelectorAll('.mg-dots span');

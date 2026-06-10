@@ -5,6 +5,7 @@ import {
   AIRELLES_CONCIERGE_PICK_NOTE,
   AIRELLES_CONCIERGE_PICK_SLUG,
   AIRELLES_ROOM_CATALOG,
+  AIRELLES_ROOM_INDICATIVE_FROM_MINOR,
   buildAirellesGoldenFields,
 } from '@mch/domain/editorial';
 
@@ -59,20 +60,11 @@ export function isAirellesGoldenTemplate(slug: string): boolean {
 // ---------------------------------------------------------------------------
 
 /** Indicative nightly anchors (EUR minor units) for the local sandbox rail. */
-const LOCAL_PRICE_BY_CODE: Readonly<Record<string, number>> = {
-  'superieure-village': 54000,
-  'deluxe-village': 79000,
-  'superieure-vallee': 85000,
-  'deluxe-vallee': 95000,
-  'junior-suite': 120000,
-  'junior-suite-prestige': 145000,
-  'suite-une-chambre': 170000,
-  'suite-une-chambre-terrasse': 195000,
-  'vasarely-suite': 240000,
-  'suite-baron-de-simiane': 260000,
-  'suite-duc-de-soubise': 290000,
-  'maison-de-constance': 650000,
-};
+function readLocalIndicativePrice(roomCode: string): HotelRoomRow['indicativePrice'] {
+  const fromMinor = AIRELLES_ROOM_INDICATIVE_FROM_MINOR[roomCode];
+  if (fromMinor === undefined) return null;
+  return { fromMinor, toMinor: null, currency: 'EUR' };
+}
 
 function buildRooms(locale: SupportedLocale): HotelRoomRow[] {
   const isFr = locale === 'fr';
@@ -89,14 +81,7 @@ function buildRooms(locale: SupportedLocale): HotelRoomRow[] {
         size_sqm: entry.size_sqm,
         amenities: [],
         isSignature: entry.is_signature === true,
-        indicativePrice:
-          LOCAL_PRICE_BY_CODE[entry.room_code] !== undefined
-            ? {
-                fromMinor: LOCAL_PRICE_BY_CODE[entry.room_code] as number,
-                toMinor: null,
-                currency: 'EUR',
-              }
-            : null,
+        indicativePrice: readLocalIndicativePrice(entry.room_code),
         displayOrder: entry.display_order ?? index,
         cardImagePublicId: entry.hero_image,
         cardImageAlt: isFr ? entry.hero_alt_fr : entry.hero_alt_en,

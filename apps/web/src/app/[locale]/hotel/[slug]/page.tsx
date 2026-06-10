@@ -75,6 +75,7 @@ import {
   readFaqByCategory,
   readTopConciergeFaq,
   readFeaturedReviews,
+  filterPublicHotelGalleryImages,
   readGallery,
   readHeroImage,
   readHeroVideo,
@@ -468,7 +469,7 @@ async function renderHotelPage(
   const faqGroups = readFaqByCategory(row, locale);
   const topConciergeFaq = readTopConciergeFaq(row, locale);
   const heroPublicId = readHeroImage(row);
-  const galleryImages = readGallery(row, locale, name);
+  const galleryImages = filterPublicHotelGalleryImages(readGallery(row, locale, name));
   const virtualTour = readVirtualTour(row);
   const heroVideo = readHeroVideo(row);
   const miceInfo = readMiceInfo(row, locale);

@@ -10,6 +10,7 @@ import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
+  filterPublicHotelGalleryImages,
   readAffiliations,
   readAwards,
   readGallery,
@@ -48,7 +49,9 @@ function imageRights(src: {
 
 function buildKitJsonLdImages(model: HotelKitModel): (string | JsonLd.ImageObjectInput)[] {
   const heroPublicId = readHeroImage(model.row);
-  const galleryImages = readGallery(model.row, model.locale, model.name);
+  const galleryImages = filterPublicHotelGalleryImages(
+    readGallery(model.row, model.locale, model.name),
+  );
   const heroGalleryMatch =
     heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
 

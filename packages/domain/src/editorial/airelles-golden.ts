@@ -1018,6 +1018,28 @@ export const AIRELLES_ROOM_CATALOG: readonly AirellesGoldenRoomEntry[] = [
   },
 ] as const;
 
+/**
+ * Editorial indicative nightly anchors (EUR minor units) for the kit § `#chambres`
+ * and booking rail. DB `indicative_price_minor` may be null in prod — enriched at
+ * read time via `enrichAirellesRoomRow`. Values align with `DA/les-airelles-gordes.html`
+ * for the three priority cards (Deluxe Valley 690 €, Superior Village 490 €,
+ * Vasarely 1 850 €).
+ */
+export const AIRELLES_ROOM_INDICATIVE_FROM_MINOR: Readonly<Record<string, number>> = {
+  'superieure-village': 49_000,
+  'deluxe-village': 79_000,
+  'superieure-vallee': 85_000,
+  'deluxe-vallee': 69_000,
+  'junior-suite': 120_000,
+  'junior-suite-prestige': 145_000,
+  'suite-une-chambre': 170_000,
+  'suite-une-chambre-terrasse': 195_000,
+  'vasarely-suite': 185_000,
+  'suite-baron-de-simiane': 260_000,
+  'suite-duc-de-soubise': 290_000,
+  'maison-de-constance': 650_000,
+};
+
 const AIRELLES_GOLDEN_ROOM_INDEX = new Map<string, AirellesGoldenRoomEntry>(
   AIRELLES_ROOM_CATALOG.flatMap((entry) => {
     const keys = [entry.slug, entry.room_code, ...(entry.slug_aliases ?? [])];

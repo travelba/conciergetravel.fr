@@ -319,29 +319,6 @@ export function renderKitBreadcrumb(model: HotelKitModel): string {
 </nav>`;
 }
 
-export function renderKitGallery(model: HotelKitModel): string {
-  if (model.galleryHero === null) return '';
-  const hero = model.galleryHero;
-  const thumbs = model.galleryThumbs;
-  const lastIdx = thumbs.length - 1;
-  const thumbHtml = thumbs
-    .map((t, i) => {
-      const more =
-        i === lastIdx && model.galleryOverflowCount > 0
-          ? `<span class="g-more-tag">+ ${model.galleryOverflowCount} photos</span>`
-          : '';
-      const moreClass = more.length > 0 ? ' g-more' : '';
-      return `<figure class="g-thumb${moreClass}"><img src="${escapeHtml(t.src)}" alt="${escapeHtml(t.alt)}" loading="lazy" decoding="async" width="${t.width}" height="${t.height}">${more}</figure>`;
-    })
-    .join('\n  ');
-  return `<section class="htl-gallery wrap" aria-label="${model.locale === 'en' ? 'Photo gallery' : 'Galerie photos'}">
-  <figure class="g-main">
-    <img src="${escapeHtml(hero.src)}" alt="${escapeHtml(hero.alt)}" loading="eager" fetchpriority="high" decoding="async" width="${hero.width}" height="${hero.height}">
-  </figure>
-  ${thumbHtml}
-</section>`;
-}
-
 export function renderKitHead(model: HotelKitModel): string {
   const category = model.isPalace ? 'Palace' : `${model.stars}★`;
   const eyebrow = [category, model.city, model.region].filter(Boolean).join(' · ');
@@ -470,26 +447,24 @@ export function renderKitApropos(model: HotelKitModel): string {
 }
 
 function extractRoomPriceAmount(
-  locale: 'fr' | 'en',
   livePriceText: string | null,
   priceLabel: string | null,
-): { readonly prefix: string; readonly amount: string } | null {
+): string | null {
   const raw = livePriceText ?? priceLabel;
   if (raw === null || raw.trim() === '') return null;
-  const prefix = locale === 'en' ? 'From' : 'À partir de';
   const amount = raw
     .replace(/^À partir de\s+/iu, '')
     .replace(/^From\s+/iu, '')
+    .replace(/^dès\s+/iu, '')
     .replace(/\s*\/\s*n(?:u(?:it|ight))?\s*$/iu, '')
     .trim();
-  if (amount.length === 0) return null;
-  return { prefix, amount };
+  return amount.length > 0 ? amount : null;
 }
 
 function renderRoomPriceHtml(model: HotelKitModel, room: HotelRoomCardVM): string {
-  const parsed = extractRoomPriceAmount(model.locale, room.livePriceText, room.priceLabel);
-  if (parsed === null) return '';
-  return `<span class="rv2-price"><small>${escapeHtml(parsed.prefix)}</small>${escapeHtml(parsed.amount)}</span>`;
+  const amount = extractRoomPriceAmount(room.livePriceText, room.priceLabel);
+  if (amount === null) return '';
+  return `<span class="rv2-price">${escapeHtml(amount)}<small>${escapeHtml(model.labels.fromPriceUnit)}</small></span>`;
 }
 
 function renderRoomImageHtml(
@@ -1278,17 +1253,51 @@ export function renderKitTopConciergeFaq(model: HotelKitModel): string {
     </section>`;
 }
 
+const FAQ_VISIBLE_PER_GROUP = 3;
+
+function renderFaqGroupBlock<T extends { question: string }>(
+  locale: 'fr' | 'en',
+  label: string,
+  items: readonly T[],
+  options: {
+    groupIndex: number;
+    concierge?: boolean;
+    renderAnswer: (item: T) => string;
+  },
+): string {
+  const seeMore = locale === 'en' ? 'See more' : 'Voir plus';
+  const seeLess = locale === 'en' ? 'See less' : 'Voir moins';
+  const hasMore = items.length > FAQ_VISIBLE_PER_GROUP;
+  const collapsedClass = hasMore ? ' is-collapsed' : '';
+
+  const details = items
+    .map((item, itemIdx) => {
+      const hidden = itemIdx >= FAQ_VISIBLE_PER_GROUP ? ' faq-more-hidden' : '';
+      const open = !options.concierge && options.groupIndex === 0 && itemIdx === 0 ? ' open' : '';
+      const conciergeClass = options.concierge ? ' faq-concierge' : '';
+      return `<details class="faq-item${conciergeClass}${hidden}"${open}><summary>${escapeHtml(item.question)}</summary>${options.renderAnswer(item)}</details>`;
+    })
+    .join('\n        ');
+
+  const toggle = hasMore
+    ? `<div class="faq-more-wrap"><button type="button" class="btn-ligne faq-toggle-btn" aria-expanded="false" data-more="${escapeHtml(seeMore)}" data-less="${escapeHtml(seeLess)}">${escapeHtml(seeMore)}</button></div>`
+    : '';
+
+  return `<div class="faq-group">
+        <h3>${escapeHtml(label)}</h3>
+        <div class="faq-list${collapsedClass}" data-faq-list>${details}</div>
+        ${toggle}
+      </div>`;
+}
+
 export function renderKitFaq(model: HotelKitModel): string {
   const groups = model.faqDisplayGroups
-    .map((g, groupIdx) => {
-      const items = g.items
-        .map(
-          (item, itemIdx) =>
-            `<details class="faq-item"${groupIdx === 0 && itemIdx === 0 ? ' open' : ''}><summary>${escapeHtml(item.question)}</summary><p>${escapeHtml(item.answer)}</p></details>`,
-        )
-        .join('\n        ');
-      return `<div class="faq-group"><h3>${escapeHtml(g.label)}</h3>${items}</div>`;
-    })
+    .map((g, groupIdx) =>
+      renderFaqGroupBlock(model.locale, g.label, g.items, {
+        groupIndex: groupIdx,
+        renderAnswer: (item) => `<p>${escapeHtml(item.answer)}</p>`,
+      }),
+    )
     .join('\n      ');
   if (groups.length === 0) return '';
   return `<section class="htl-section" id="faq">
@@ -1301,15 +1310,13 @@ export function renderKitFaq(model: HotelKitModel): string {
 export function renderKitConciergeQuestions(model: HotelKitModel): string {
   if (model.conciergeQuestionGroups.length === 0) return '';
   const groups = model.conciergeQuestionGroups
-    .map((g) => {
-      const items = g.items
-        .map(
-          (item) =>
-            `<details class="faq-item faq-concierge"><summary>${escapeHtml(item.question)}</summary><p class="cq-reply">${escapeHtml(item.reply)}</p></details>`,
-        )
-        .join('\n        ');
-      return `<div class="faq-group"><h3>${escapeHtml(g.label)}</h3>${items}</div>`;
-    })
+    .map((g, groupIdx) =>
+      renderFaqGroupBlock(model.locale, g.label, g.items, {
+        groupIndex: groupIdx,
+        concierge: true,
+        renderAnswer: (item) => `<p class="cq-reply">${escapeHtml(item.reply)}</p>`,
+      }),
+    )
     .join('\n      ');
   return `<section class="htl-section" id="concierge-questions">
       <h2>${escapeHtml(model.labels.conciergeQuestions)}</h2>
@@ -1375,9 +1382,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitEnBref(model),
   ].join('\n\n    ');
   return {
-    prefixHtml: `${renderKitBreadcrumb(model)}
-
-${renderKitGallery(model)}`,
+    prefixHtml: renderKitBreadcrumb(model),
     mainHtml: main,
   };
 }

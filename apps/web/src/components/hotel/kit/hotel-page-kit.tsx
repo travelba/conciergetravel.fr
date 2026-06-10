@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 
 import { HotelExternalSourcesFooter } from '@/components/hotel/hotel-external-sources-footer';
+import { HotelGallery } from '@/components/hotel/hotel-gallery';
 import { SeoJsonLd } from '@/components/seo/json-ld';
 import { TrackPageView } from '@/lib/analytics/hooks';
 import type { Locale } from '@/i18n/routing';
@@ -43,6 +44,18 @@ export async function HotelPageKit({
 
       <div className="mch-kit hotel-page">
         <div dangerouslySetInnerHTML={{ __html: prefixHtml }} />
+
+        {model.galleryHeroDescriptor !== null || model.galleryGridImages.length > 0 ? (
+          <div className="wrap mt-3.5">
+            <HotelGallery
+              locale={model.locale}
+              cloudName={model.cloudName}
+              hero={model.galleryHeroDescriptor}
+              images={model.galleryGridImages}
+              hotelName={model.name}
+            />
+          </div>
+        ) : null}
 
         <div className="htl-body wrap">
           <main className="htl-main" dangerouslySetInnerHTML={{ __html: mainHtml }} />

@@ -1651,6 +1651,17 @@ export function readGallery(
   }));
 }
 
+/** Club Concierge / brand lounge shots — editorial, not hotel property photos. */
+export function isConciergeGalleryCategory(category: string | null | undefined): boolean {
+  return category?.toLowerCase() === 'concierge';
+}
+
+export function filterPublicHotelGalleryImages(
+  images: readonly LocalisedGalleryImage[],
+): readonly LocalisedGalleryImage[] {
+  return images.filter((img) => !isConciergeGalleryCategory(img.category));
+}
+
 // ---------------------------------------------------------------------------
 // Location enrichment — points_of_interest (jsonb) + transports (jsonb)
 // ---------------------------------------------------------------------------

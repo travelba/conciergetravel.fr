@@ -32,6 +32,7 @@ import {
   readFaqByCategory,
   readFaqDisplayGroups,
   readFeaturedReviews,
+  filterPublicHotelGalleryImages,
   readGallery,
   readHeroImage,
   readHighlights,
@@ -209,6 +210,12 @@ export interface HotelKitModel {
   readonly galleryHero: HotelKitGalleryTile | null;
   readonly galleryThumbs: readonly HotelKitGalleryTile[];
   readonly galleryOverflowCount: number;
+  readonly galleryHeroDescriptor: {
+    readonly publicId: string;
+    readonly alt: string;
+    readonly caption: string | null;
+  } | null;
+  readonly galleryGridImages: readonly LocalisedGalleryImage[];
   readonly resolvedRating: HotelKitResolvedRating | null;
   readonly roomCards: readonly HotelRoomCardVM[];
   readonly roomCount: number;
@@ -427,7 +434,7 @@ export async function prepareHotelKitModel(
   const description = pickDescription(row, kitLocale);
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const heroPublicId = readHeroImage(row);
-  const galleryImages = readGallery(row, kitLocale, name);
+  const galleryImages = filterPublicHotelGalleryImages(readGallery(row, kitLocale, name));
   const heroGalleryMatch =
     heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
   const galleryTiles =
@@ -468,6 +475,32 @@ export async function prepareHotelKitModel(
     .map((img) => toGalleryTile(cloudName, img, GALLERY_THUMB_TRANSFORMS, 600, 450));
 
   const galleryOverflowCount = Math.max(0, galleryImages.length - (1 + mosaicThumbs.length));
+
+  const galleryHeroDescriptor =
+    heroGalleryMatch !== undefined
+      ? {
+          publicId: heroGalleryMatch.publicId,
+          alt: heroGalleryMatch.alt,
+          caption: heroGalleryMatch.caption,
+        }
+      : heroPublicId !== null
+        ? {
+            publicId: heroPublicId,
+            alt: name,
+            caption: null,
+          }
+        : galleryImages[0] !== undefined
+          ? {
+              publicId: galleryImages[0].publicId,
+              alt: galleryImages[0].alt,
+              caption: galleryImages[0].caption,
+            }
+          : null;
+
+  const galleryGridImages =
+    heroPublicId !== null
+      ? galleryImages.filter((g) => g.publicId !== heroPublicId)
+      : galleryImages;
 
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
@@ -755,6 +788,8 @@ export async function prepareHotelKitModel(
     galleryHero: mosaicHero,
     galleryThumbs: mosaicThumbs,
     galleryOverflowCount,
+    galleryHeroDescriptor,
+    galleryGridImages,
     resolvedRating,
     roomCards: orderedRoomCards,
     roomCount: rooms.length,

@@ -1,6 +1,10 @@
 import 'server-only';
 
-import { AIRELLES_PROMOTE_SLUG, resolveAirellesGoldenRoom } from '@mch/domain/editorial';
+import {
+  AIRELLES_PROMOTE_SLUG,
+  AIRELLES_ROOM_INDICATIVE_FROM_MINOR,
+  resolveAirellesGoldenRoom,
+} from '@mch/domain/editorial';
 
 import type { HotelRoomDetailRow } from '@/server/hotels/get-room-by-slug';
 import type { HotelRoomRow, SupportedLocale } from '@/server/hotels/get-hotel-by-slug';
@@ -37,6 +41,13 @@ export function enrichAirellesRoomRow<T extends HotelRoomRow>(room: T, locale: S
       ? room.galleryImages.slice(0, 1)
       : [{ publicId: golden.hero_image, alt: pickAlt(golden, locale) }];
 
+  const goldenFromMinor = AIRELLES_ROOM_INDICATIVE_FROM_MINOR[golden.room_code];
+  const indicativePrice =
+    room.indicativePrice ??
+    (goldenFromMinor !== undefined
+      ? { fromMinor: goldenFromMinor, toMinor: null, currency: 'EUR' as const }
+      : null);
+
   return {
     ...room,
     name: room.name ?? (locale === 'en' ? golden.name_en : golden.name_fr),
@@ -49,6 +60,7 @@ export function enrichAirellesRoomRow<T extends HotelRoomRow>(room: T, locale: S
     cardImagePublicId: galleryImages[0]?.publicId ?? room.cardImagePublicId,
     cardImageAlt: galleryImages[0]?.alt ?? room.cardImageAlt,
     galleryImages,
+    indicativePrice,
   };
 }
 
