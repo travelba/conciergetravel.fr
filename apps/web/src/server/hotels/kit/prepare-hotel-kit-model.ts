@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { getTranslations } from 'next-intl/server';
 
 import { buildCloudinarySrc } from '@mch/ui';
@@ -402,7 +404,7 @@ function toGalleryTile(
   };
 }
 
-export async function prepareHotelKitModel(
+export async function prepareHotelKitModelUncached(
   locale: Locale,
   detail: HotelDetail,
   amadeusSentiment: AmadeusHotelSentiment,
@@ -935,6 +937,9 @@ export async function prepareHotelKitModel(
     },
   };
 }
+
+/** Request-scoped dedup when the kit model is needed more than once per render. */
+export const prepareHotelKitModel = cache(prepareHotelKitModelUncached);
 
 // Re-export for type-only consumers
 export type { HotelDetail };

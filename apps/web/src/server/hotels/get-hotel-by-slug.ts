@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { selectGoogleReviewsForDisplay } from '@mch/domain/reviews';
 import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
@@ -3507,7 +3509,7 @@ const KIT_FETCH_SLUG_ALIASES: Readonly<Record<string, string>> = {
   'les-airelles-gordes-en': 'les-airelles-gordes',
 };
 
-export async function getHotelBySlug(
+export async function getHotelBySlugUncached(
   slug: string,
   locale: SupportedLocale,
 ): Promise<HotelDetail | null> {
@@ -3650,6 +3652,9 @@ export async function getHotelBySlug(
     return null;
   }
 }
+
+/** Request-scoped dedup — `generateMetadata` and the page share one Supabase fetch. */
+export const getHotelBySlug = cache(getHotelBySlugUncached);
 
 /** Pre-renderable list of slugs (FR + EN), for `generateStaticParams`. */
 export interface PublishedHotelSlug {

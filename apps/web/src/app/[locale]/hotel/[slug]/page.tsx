@@ -127,8 +127,7 @@ import {
 import { HotelPageKit } from '@/components/hotel/kit/hotel-page-kit';
 import { getRelatedHotels } from '@/server/hotels/get-related-hotels';
 import { isHotelKitSlug } from '@/server/hotels/kit/is-hotel-kit-slug';
-import { prepareHotelKitModel } from '@/server/hotels/kit/prepare-hotel-kit-model';
-import { buildHotelKitMetadataFromModel } from '@/server/hotels/kit/build-hotel-kit-json-ld';
+import { buildHotelKitMetadata } from '@/server/hotels/kit/build-hotel-kit-metadata';
 import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
 
 /**
@@ -232,9 +231,7 @@ export async function generateMetadata({
   if (isHotelKitSlug(slug)) {
     const detail = await getHotelBySlug(slug, locale);
     if (!detail) return { robots: { index: false, follow: false } };
-    const amadeusSentiment = await getAmadeusHotelSentiment(detail.row.amadeus_hotel_id);
-    const model = await prepareHotelKitModel(locale, detail, amadeusSentiment);
-    return buildHotelKitMetadataFromModel(model);
+    return buildHotelKitMetadata(locale, detail);
   }
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });

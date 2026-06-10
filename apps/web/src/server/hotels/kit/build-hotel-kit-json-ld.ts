@@ -5,10 +5,7 @@ import { JsonLd } from '@mch/seo';
 import { buildCloudinarySrc } from '@mch/ui';
 
 import { getPathname } from '@/i18n/navigation';
-import { pickLocalizedText } from '@/i18n/supported-locale';
-import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
-import { isHotelIndexable } from '@/server/hotels/indexability';
 import {
   filterPublicHotelGalleryImages,
   readAffiliations,
@@ -21,13 +18,7 @@ import {
   type GalleryLicence,
 } from '@/server/hotels/get-hotel-by-slug';
 
-import {
-  buildHotelDiscoverRobots,
-  buildHotelOgImages,
-  buildHotelOpenGraphAlternates,
-  buildHotelSeoTitle,
-  pickHotelJsonLdFaqEntries,
-} from '@/lib/seo/hotel-page-seo';
+import { pickHotelJsonLdFaqEntries } from '@/lib/seo/hotel-page-seo';
 import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
 import { buildHotelKnowledgeGraphJsonLdFields } from '@/server/hotels/hotel-json-ld-fields';
 import { readExternalIds } from '@/server/hotels/get-hotel-by-slug';
@@ -35,6 +26,8 @@ import { buildOfferJsonLdInput } from '@/server/booking/prepare-hotel-booking-ra
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
+
+export { buildHotelKitMetadata, buildHotelKitMetadataFromModel } from './build-hotel-kit-metadata';
 
 function siteOrigin(): string {
   const raw = env.NEXT_PUBLIC_SITE_URL ?? 'https://myconciergehotel.com';
@@ -351,77 +344,4 @@ export function buildHotelKitJsonLd(
     ...(faqNode !== null ? [faqNode] : []),
     ...(visitItemListJsonLd !== null ? [visitItemListJsonLd] : []),
   ] as unknown as Record<string, unknown>[];
-}
-
-export function buildHotelKitMetadataFromModel(model: HotelKitModel) {
-  const heroPublicId = readHeroImage(model.row);
-  const ogImagePublicId = heroPublicId ?? 'cct/hotels/les-airelles-gordes/press-1';
-  const ogImages = buildHotelOgImages(model.cloudName, ogImagePublicId, model.name);
-  const firstOgImage = ogImages[0];
-  const ogImageUrl = firstOgImage !== undefined ? firstOgImage.url : '';
-
-  const titleOverride = pickLocalizedText(
-    model.locale,
-    model.row.meta_title_fr,
-    model.row.meta_title_en,
-  );
-  const descOverride = pickLocalizedText(
-    model.locale,
-    model.row.meta_desc_fr,
-    model.row.meta_desc_en,
-  );
-
-  const title =
-    titleOverride !== null && titleOverride !== ''
-      ? titleOverride
-      : buildHotelSeoTitle({
-          name: model.name,
-          city: model.city,
-          district: model.district,
-          region: model.region,
-          isPalace: model.isPalace,
-          stars: model.stars,
-          locale: model.locale,
-        });
-
-  const description =
-    descOverride !== null && descOverride !== ''
-      ? descOverride
-      : (model.factualSummary?.text ?? model.description?.slice(0, 160) ?? undefined);
-
-  const isStub = !isHotelIndexable(model.row);
-
-  return {
-    title: { absolute: title },
-    description: description !== undefined ? description.slice(0, 160) : undefined,
-    robots: buildHotelDiscoverRobots(isStub),
-    alternates: {
-      canonical: model.canonicalPath,
-      languages: buildHreflangAlternates((l) =>
-        getPathname({
-          locale: l,
-          href: {
-            pathname: '/hotel/[slug]',
-            params: { slug: l === 'en' ? model.slugEn : model.slugFr },
-          },
-        }),
-      ),
-    },
-    openGraph: {
-      type: 'website' as const,
-      title: model.name,
-      description: description !== undefined ? description.slice(0, 200) : undefined,
-      locale: ogLocale(model.locale),
-      alternateLocale: [...buildHotelOpenGraphAlternates(model.locale)],
-      siteName: 'MyConciergeHotel',
-      url: model.canonicalUrl,
-      images: ogImages,
-    },
-    twitter: {
-      card: 'summary_large_image' as const,
-      title: model.name,
-      description: description !== undefined ? description.slice(0, 200) : undefined,
-      images: [ogImageUrl],
-    },
-  };
 }
