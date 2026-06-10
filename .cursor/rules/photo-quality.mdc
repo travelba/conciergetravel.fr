@@ -29,7 +29,17 @@ Un seul point manquant = PR refusée.
 - [ ] Coût réel ~$0.0007/photo (gpt-4o-mini avec image `detail: high` à 1600px width) — budget Phase 1 < $0.30 pour 4 fiches
 - [ ] Photos marquées `keep=false` par Vision **doivent** être exclues du `gallery_images` final (raison stockée dans un log d'audit, pas en DB)
 
-### ✅ Sources officielles uniquement (Hard Rule renforcée 2026-05-29)
+### ✅ Correspondance sujet (CDC §2.2bis — 2026-06-10)
+
+- [ ] Chaque POI `#autour` utilise un asset Cloudinary **`poi-{slug}`** — jamais un slot galerie `press-*` recyclé
+- [ ] Script dédié `resource-{slug}-poi-images.ts` exécuté avant `promote:*-golden` sur les fiches kit
+- [ ] `pnpm --filter @mch/editorial-pilot audit:photo-subject -- --slug=<slug>` → 0 fail structural
+- [ ] Fiches pilote : `--vision` sur POI avant sign-off PO (Layer 3)
+- [ ] Spa / F&B : mismatch visuel → re-sourcer officiel (D12) — pas remapper `category`/`alt_*` seul
+- [ ] Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category` doivent passer
+
+Domain : `packages/domain/src/photos/photo-subject-correspondence.ts` · skill `photo-pipeline` §Photo-subject correspondence.
+
 
 **Photos autorisées** (par ordre de préférence) :
 1. **Site officiel de l'hôtel** — galerie publique, press kit, fiche brand (Aman, R&C, LHW, FS, MO). Récupéré via Tavily extract puis upload Cloudinary.

@@ -35,6 +35,11 @@ export const PRINCE_DE_GALLES_PROMOTE_SLUG = 'prince-de-galles-paris';
 /** Cloudinary folder prefix for Prince de Galles kit / golden assets. */
 export const PRINCE_DE_GALLES_IMAGE_PREFIX = 'cct/hotels/prince-de-galles-paris';
 
+/** Dedicated POI card asset — never reuse hotel gallery `press-*`. See `resource-prince-de-galles-poi-images.ts`. */
+export function princeDeGallesPoiImage(poiSlug: string): string {
+  return `${PRINCE_DE_GALLES_IMAGE_PREFIX}/poi-${poiSlug}`;
+}
+
 // ---------------------------------------------------------------------------
 // Shared contact constants (official — Marriott hotel page)
 // ---------------------------------------------------------------------------
@@ -162,7 +167,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.873792,
     longitude: 2.295028,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-20`,
+    image_public_id: princeDeGallesPoiImage('arc-de-triomphe'),
     description_fr:
       'Monument emblématique de la place Charles-de-Gaulle, achevé en 1836. Terrasse panoramique sur les douze avenues rayonnantes et la ligne des Champs-Élysées.',
     description_en:
@@ -189,7 +194,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866109,
     longitude: 2.312454,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-1`,
+    image_public_id: princeDeGallesPoiImage('grand-palais'),
     description_fr:
       'Chef-d’œuvre de l’architecture Belle Époque (1900), verrière monumentale et programmation culturelle au cœur des Champs-Élysées.',
     description_en:
@@ -212,7 +217,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866047,
     longitude: 2.314424,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-3`,
+    image_public_id: princeDeGallesPoiImage('petit-palais'),
     description_fr:
       'Musée municipal gratuit (collections permanentes) dans un palais de l’Exposition universelle de 1900, jardin intérieur et café en terrasse.',
     description_en:
@@ -239,7 +244,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.865633,
     longitude: 2.321236,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-21`,
+    image_public_id: princeDeGallesPoiImage('place-de-la-concorde'),
     description_fr:
       'Plus grande place de Paris, entre le jardin des Tuileries et les Champs-Élysées. Obélisque de Louxor et fontaines de Jacques Ignace Hittorff.',
     description_en:
@@ -261,7 +266,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.868703,
     longitude: 2.303305,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-24`,
+    image_public_id: princeDeGallesPoiImage('musee-yves-saint-laurent'),
     description_fr:
       'Ancien hôtel particulier de l’avenue Marceau où Yves Saint Laurent créa pendant près de trente ans. Atelier reconstitué et collections de haute couture.',
     description_en:
@@ -288,7 +293,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.865242,
     longitude: 2.297839,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-7`,
+    image_public_id: princeDeGallesPoiImage('palais-galliera'),
     description_fr:
       'Musée municipal de la mode avenue Pierre-Ier-de-Serbie, plus de 200 000 pièces. Expositions temporaires dans un palais néoclassique et son jardin.',
     description_en:
@@ -311,7 +316,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.861908,
     longitude: 2.300888,
     bucket: 'visit',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-2`,
+    image_public_id: princeDeGallesPoiImage('cathedrale-sainte-trinite'),
     description_fr:
       'Cathédrale orthodoxe russe de style néo-russe (2016), cinq coupoles dorées et iconostase contemporaine. Visites guidées sur réservation.',
     description_en:
@@ -334,7 +339,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8698,
     longitude: 2.3078,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-20`,
+    image_public_id: princeDeGallesPoiImage('champs-elysees'),
     description_fr:
       'L’avenue la plus célèbre de Paris, de la place de la Concorde à l’Arc de triomphe. Cinémas historiques, flagship stores et terrasses entre deux rendez-vous.',
     description_en:
@@ -356,7 +361,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866787,
     longitude: 2.303934,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-28`,
+    image_public_id: princeDeGallesPoiImage('theatre-champs-elysees'),
     description_fr:
       'Salle Art Nouveau inaugurée en 1913 (15 avenue Montaigne). Programmation classique, jazz et danse dans une architecture de Auguste Perret.',
     description_en:
@@ -379,7 +384,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.864242,
     longitude: 2.297636,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-11`,
+    image_public_id: princeDeGallesPoiImage('palais-de-tokyo'),
     description_fr:
       'Plus grand centre d’art contemporain d’Europe, ouvert jusqu’à minuit. Expositions éphémères, performances et restaurant Le Tout-Paris sur les toits.',
     description_en:
@@ -404,7 +409,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.868,
     longitude: 2.313,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-18`,
+    image_public_id: princeDeGallesPoiImage('jardin-champs-elysees'),
     description_fr:
       'Parc entre le Grand Palais et la place de la Concorde, kiosques, théâtre de marionnettes et allées ombragées pour une pause entre deux musées.',
     description_en:
@@ -426,7 +431,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.863,
     longitude: 2.308,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-19`,
+    image_public_id: princeDeGallesPoiImage('croisiere-seine'),
     description_fr:
       'Embarquement au Port de la Conférence, sous le pont de l’Alma. Croisières d’une heure ou dîners-croisières sur la Seine entre les monuments.',
     description_en:
@@ -449,7 +454,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8775,
     longitude: 2.3095,
     bucket: 'do',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-12`,
+    image_public_id: princeDeGallesPoiImage('le-clarence'),
     description_fr:
       'Hôtel particulier avenue de Friedland, table trois étoiles MICHELIN de Arnaud Donckele. Cuisine française d’exception dans un cadre de demeure privée.',
     description_en:
@@ -472,7 +477,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.870445,
     longitude: 2.306291,
     bucket: 'shop',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-26`,
+    image_public_id: princeDeGallesPoiImage('galeries-lafayette-champs-elysees'),
     description_fr:
       'Concept store sur les Champs-Élysées : mode créateur, beauté, restauration et rooftop avec vue sur l’Arc de triomphe.',
     description_en:
@@ -497,7 +502,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8665,
     longitude: 2.3045,
     bucket: 'shop',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-25`,
+    image_public_id: princeDeGallesPoiImage('avenue-montaigne'),
     description_fr:
       'Artère du luxe entre les Champs-Élysées et la Seine : Chanel, Dior, Louis Vuitton, haute joaillerie et showrooms de créateurs.',
     description_en:
@@ -519,7 +524,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.871,
     longitude: 2.303,
     bucket: 'shop',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-24`,
+    image_public_id: princeDeGallesPoiImage('maison-guerlain-champs-elysees'),
     description_fr:
       'Temple de la parfumerie française au 68 des Champs-Élysées, depuis 1914. Atelier de personnalisation et collections iconiques (Shalimar, La Petite Robe Noire).',
     description_en:
@@ -542,7 +547,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.867565,
     longitude: 2.306835,
     bucket: 'shop',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-27`,
+    image_public_id: princeDeGallesPoiImage('louis-vuitton-champs-elysees'),
     description_fr:
       'Maison historique Louis Vuitton sur les Champs-Élysées, malletier depuis 1854. Maroquinerie, prêt-à-porter et espace personnalisation.',
     description_en:
@@ -565,7 +570,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8669,
     longitude: 2.3038,
     bucket: 'shop',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-23`,
+    image_public_id: princeDeGallesPoiImage('galerie-dior'),
     description_fr:
       'Galerie Dior avenue Montaigne : parcours immersif sur l’histoire de la maison, de 1947 à aujourd’hui, robes de haute couture et ateliers reconstitués.',
     description_en:

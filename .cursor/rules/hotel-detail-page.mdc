@@ -25,6 +25,19 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 |---|---|---|---|---|
 | 1 | En-tête identité (H1, étoiles, fil d'ariane, **note /5 source Google prioritaire == JSON-LD**, badges, favori, share, langue, devise) | Supabase `hotels` + Payload editorial | `<HotelHeader>` | `Hotel` + `BreadcrumbList` |
 | 2 | Galerie média (≥ 30 photos catégorisées, 1 vidéo ≥ 30 s, visite 360°, alt enrichi, lightbox clavier) | Payload `media` (≥ 30 + 10 catégories couvertes) | `<HotelGallery>` + `<HotelVideo>` + `<Hotel360Tour>` | `ImageObject[]` (caption obligatoire) + `VideoObject` |
+
+### §2.2bis — Correspondance photo / sujet (2026-06-10)
+
+Chaque photo rendue doit correspondre au **sujet affiché** (POI, spa, restaurant, chambre…). La présence d’un `image_public_id` ou d’un `category` ne suffit pas.
+
+| Surface | Règle | Gate / outil |
+| ------- | ----- | ------------- |
+| POI `#autour` | Asset dédié `poi-{slug}` — jamais slot galerie `press-*` | `gold.poi_dedicated_images`, `gold.poi_photo_structural` |
+| Galerie hôtel | `category` Vision cohérente avec `alt_fr` (spa ≠ chambre) | `photos.gallery_alt_category`, `categorize-with-vision.ts` |
+| Spa / F&B kit | Re-sourcer officiel si pixels ≠ sujet — pas remapper metadata | skill `hotel-kit-rollout` D12 |
+| Validation PO | Vision QA POI avant sign-off pilote | `audit:photo-subject -- --slug=x --vision` |
+
+Domain : `packages/domain/src/photos/photo-subject-correspondence.ts` · skill `photo-pipeline` §Photo-subject correspondence.
 | 3 | Résumé factuel IA-ready (150 chars, format strict) | Payload `factual_summary_fr/_en` | `<FactualSummary>` | `Hotel.description` |
 | 4 | Description longue narrative (600-1000 mots uniques, H2/H3 structurés, 8-12 mots-clés longue traîne) | Payload `description_long_fr/_en` | `<LongDescription>` | (texte body, dans `Article` si guide associé) |
 | 5 | Types de chambres → sous-pages indexables `/hotel/[slug]/chambres/[room-slug]` | Supabase `rooms` + Payload | `<RoomCardList>` (sur fiche) + page dédiée | `HotelRoom` + `Offer` (sur sous-page) |
@@ -57,6 +70,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 13. **Échelle note** : `/10` codé en dur dans l'UI → refus. Toutes les sources sont /5 ; afficher `value/{bestRating}` + attribution de source visible (« Note Google » + nombre d'avis).
 14. **`reviewRating` fabriqué** : note (ex. 5/5) posée sur une citation éditoriale sans note réelle → refus (EEAT).
 15. **Wrapper JSON-LD** : tous les blocs passent par `<SeoJsonLd>` (ou le primitif `<JsonLdScript>`) avec le nonce CSP ; jamais de `<script>` JSON-LD brut.
+16. **Correspondance photo/sujet (§2.2bis)** : POI = asset `poi-{slug}` dédié (gate `gold.poi_photo_structural`) ; galerie `category` incohérente avec `alt_fr` → fail (`photos.gallery_alt_category`) ; mismatch visuel spa/POI → re-sourcer, pas remapper metadata (skill `photo-pipeline` §Photo-subject correspondence, `hotel-kit-rollout` D13–D14).
 
 ## Golden template & audit catalogue
 

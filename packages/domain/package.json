@@ -13,6 +13,7 @@
     "./shared": "./src/shared/index.ts",
     "./price-comparison": "./src/price-comparison/index.ts",
     "./consent": "./src/consent/index.ts",
+    "./photos": "./src/photos/index.ts",
     "./reviews": "./src/reviews/index.ts"
   },
   "scripts": {

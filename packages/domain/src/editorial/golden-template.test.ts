@@ -8,11 +8,13 @@ import {
   dropCannibalizingSections,
   dropDuplicateCategorySections,
   evaluatePoiBuckets,
+  evaluatePoiDedicatedImages,
   evaluatePoiImages,
   evaluatePoiHandoff,
   evaluateSpaDossier,
   evaluateVenueHandoff,
   hasVerifiedMichelinAward,
+  isDedicatedPoiImagePublicId,
   isDuplicateCategorySection,
   resolvePopulatedBlocks,
 } from './golden-template';
@@ -75,6 +77,19 @@ describe('poi handoff + buckets', () => {
       { name: 'b' },
     ]);
     expect(cov).toEqual({ total: 2, withImage: 1 });
+  });
+
+  it('rejects hotel gallery press-* ids as dedicated POI images', () => {
+    expect(isDedicatedPoiImagePublicId('cct/hotels/x/press-17')).toBe(false);
+    expect(isDedicatedPoiImagePublicId('cct/hotels/x/poi-arc-de-triomphe')).toBe(true);
+  });
+
+  it('counts dedicated poi-* image_public_id', () => {
+    const cov = evaluatePoiDedicatedImages([
+      { name: 'a', image_public_id: 'cct/hotels/x/poi-a' },
+      { name: 'b', image_public_id: 'cct/hotels/x/press-3' },
+    ]);
+    expect(cov).toEqual({ total: 2, dedicated: 1 });
   });
 });
 

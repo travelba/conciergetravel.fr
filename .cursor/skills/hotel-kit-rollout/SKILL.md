@@ -35,14 +35,16 @@ Invoke when:
 
 Héritées de D1–D6 (runbook) + retours PO PdG 2026-06-10.
 
-| #   | Sujet                         | Règle                                                                                                                                                                                                                                                       |
-| --- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D7  | **F&B**                       | `restaurant_info.venues[]` = **tous** les outlets officiels (restaurants **et** bars distincts si le site les sépare). Pas de fusion bar/resto ; pas de quota arbitraire « = Airelles ».                                                                    |
-| D8  | **`#acces` — Avis voyageurs** | **Uniquement** `google_reviews[]` sync Google Business Profile (`author` + `publish_time` + texte). **Interdit** `featured_reviews` / presse dans ce sous-bloc. CLI : `reviews:sync -- --slug=<slug>`.                                                      |
-| D9  | **POI `#autour`**             | Chaque entrée `visit` / `do` / `shop` porte **`image_public_id`** (rendu `around-item has-img`). Gate : `gold.poi_images`.                                                                                                                                  |
-| D10 | **`#concierge-questions`**    | Titre : `Le Concierge répond — {hotel.name}`. Réponses **informatives** (3ᵉ personne / « La conciergerie peut… »). **Interdit** engagement 1ʳᵉ personne : « Je réserve », « Je confirme », « Je m'occupe de… ». Gate : `cdc.11.concierge_informative_tone`. |
-| D11 | **Titres & labels**           | Jamais de nom de fiche de référence hardcodé (« Airelles Gordes », etc.). Fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                                                                                     |
-| D12 | **Photos incorrectes**        | Si une photo ne correspond pas au sujet (ex. patio étiqueté spa) → **re-sourcer depuis le site officiel**, pas seulement recatégoriser / réordonner la galerie existante. Voir §Rule 1 ci-dessous.                                                          |
+| #   | Sujet                         | Règle                                                                                                                                                                                                                                                                                                                |
+| --- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D7  | **F&B**                       | `restaurant_info.venues[]` = **tous** les outlets officiels (restaurants **et** bars distincts si le site les sépare). Pas de fusion bar/resto ; pas de quota arbitraire « = Airelles ».                                                                                                                             |
+| D8  | **`#acces` — Avis voyageurs** | **Uniquement** `google_reviews[]` sync Google Business Profile (`author` + `publish_time` + texte). **Interdit** `featured_reviews` / presse dans ce sous-bloc. CLI : `reviews:sync -- --slug=<slug>`.                                                                                                               |
+| D9  | **POI `#autour`**             | Chaque entrée `visit` / `do` / `shop` porte **`image_public_id`** (rendu `around-item has-img`). Gate : `gold.poi_images`.                                                                                                                                                                                           |
+| D10 | **`#concierge-questions`**    | Titre : `Le Concierge répond — {hotel.name}`. Réponses **informatives** (3ᵉ personne / « La conciergerie peut… »). **Interdit** engagement 1ʳᵉ personne : « Je réserve », « Je confirme », « Je m'occupe de… ». Gate : `cdc.11.concierge_informative_tone`.                                                          |
+| D11 | **Titres & labels**           | Jamais de nom de fiche de référence hardcodé (« Airelles Gordes », etc.). Fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                                                                                                                                              |
+| D12 | **Photos incorrectes**        | Si une photo ne correspond pas au sujet (ex. patio étiqueté spa) → **re-sourcer depuis le site officiel**, pas seulement recatégoriser / réordonner la galerie existante. Voir §Rule 1 ci-dessous.                                                                                                                   |
+| D13 | **POI = photo dédiée**        | Chaque POI `#autour` porte un asset Cloudinary **`poi-{slug}`** (Wikimedia / officiel / AI fallback) — **jamais** un slot `press-*` de la galerie hôtel. Gate : `gold.poi_dedicated_images`. Script modèle : `resource-airelles-poi-images.ts` ; PdG : `resource-prince-de-galles-poi-images.ts` (`pdg:photos:poi`). |
+| D14 | **Correspondance sujet**      | Avant validation PO : `audit:photo-subject -- --slug=x` (L1 structural) + `--vision` sur les fiches pilote. Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category`. Domain : `@mch/domain/photos`. Voir skill `photo-pipeline` §Photo-subject correspondence.                                        |
 
 ---
 
@@ -81,7 +83,8 @@ Avant de demander validation PO :
 - [ ] **Galerie** : ≥ 30 images CDC ou plan Phase 2 documenté ; catégories spa/restaurant/exterior **vérifiées visuellement**.
 - [ ] **F&B** : count venues = site officiel (D7).
 - [ ] **Google reviews** : sync GMB, ≥ 3 avis datés dans `#acces` (D8).
-- [ ] **POI** : 100 % `image_public_id` (D9).
+- [ ] **POI** : 100 % `image_public_id` **dédiés** `poi-{slug}` — pas de `press-*` recyclé (D9 + D13).
+- [ ] **Photo-subject audit** : `audit:photo-subject -- --slug=x` → 0 fail structural ; `--vision` sur pilotes (D14).
 - [ ] **Concierge questions** : 20–30 items, ton informatif (D10).
 - [ ] **FAQ kit** : Perplexity 40–60 + promote 10–15 (skill `hotel-faq-perplexity-enrichment`).
 - [ ] **Audit** : `audit:hotel-fiches-cdc -- --slug=<slug>` — golden + CDC ≥ 95 %.
@@ -102,7 +105,7 @@ Répliquer le pattern **un golden TS + scripts npm dédiés** plutôt que des on
 | Promote script       | `scripts/editorial-pilot/src/hotels/promote-{kebab-slug}-golden.ts`            |
 | npm scripts          | `scripts/editorial-pilot/package.json` (`promote:…`, `{chain}:photos:gallery`) |
 
-Gates partagés : `scripts/editorial-pilot/src/hotels/hotel-fiche-cdc-gates.ts` (`cdc.10.google_reviews_gmb`, `cdc.11.concierge_informative_tone`, `gold.poi_images`).
+Gates partagés : `scripts/editorial-pilot/src/hotels/hotel-fiche-cdc-gates.ts` (`cdc.10.google_reviews_gmb`, `cdc.11.concierge_informative_tone`, `gold.poi_images`, `gold.poi_dedicated_images`).
 
 ---
 
@@ -132,15 +135,16 @@ Hard rule [`.cursor/rules/user-acceptance-before-commit.mdc`](../../rules/user-a
 
 ## Anti-patterns
 
-| Anti-pattern                                          | Correctif                         |
-| ----------------------------------------------------- | --------------------------------- |
-| Remapper metadata spa sans changer l'asset Cloudinary | Rule 1 — Tavily + upload officiel |
-| 1 seul restaurant alors que le site liste bar + resto | D7 — éclater `venues[]`           |
-| Presse Forbes dans « Avis voyageurs »                 | D8 — `reviews:sync` only          |
-| POI sans vignette                                     | D9 — `image_public_id` Cloudinary |
-| « Je réserve… » dans `#concierge-questions`           | D10 — réécriture 3ᵉ personne      |
-| Label « Airelles » sur une autre fiche                | D11 — i18n + titres dynamiques    |
-| « Tests passent, ship » sans walk navigateur          | Rule 5                            |
+| Anti-pattern                                          | Correctif                                            |
+| ----------------------------------------------------- | ---------------------------------------------------- |
+| Remapper metadata spa sans changer l'asset Cloudinary | Rule 1 — Tavily + upload officiel                    |
+| 1 seul restaurant alors que le site liste bar + resto | D7 — éclater `venues[]`                              |
+| Presse Forbes dans « Avis voyageurs »                 | D8 — `reviews:sync` only                             |
+| POI sans vignette                                     | D9 — `image_public_id` Cloudinary                    |
+| POI avec photo chambre / galerie `press-*`            | D13 — `resource-{slug}-poi-images.ts` + `poi-{slug}` |
+| « Je réserve… » dans `#concierge-questions`           | D10 — réécriture 3ᵉ personne                         |
+| Label « Airelles » sur une autre fiche                | D11 — i18n + titres dynamiques                       |
+| « Tests passent, ship » sans walk navigateur          | Rule 5                                               |
 
 ---
 

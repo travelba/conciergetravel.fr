@@ -485,6 +485,62 @@ wellness suite), **re-source from the official site** (Tavily → chain DAM /
 metadata/resolver remap alone. Reference fix: PdG `press-17` → Marriott Scene7
 `lc-parlc-lux-parlc-spa-double-13746` via `pdg:photos:wellness`.
 
+## Photo-subject correspondence system (CDC §2.2bis — 2026-06-10)
+
+> **Problem class** : a photo can pass every metadata gate (non-null `category`,
+> enriched `alt_fr`, dedicated `public_id`) while showing the **wrong pixels**
+> (Musée YSL card displaying a Lalique bedroom). Presence ≠ correspondence.
+
+Three enforcement layers — all mandatory on kit pilots, recommended catalogue-wide:
+
+| Layer                    | What it checks                                                                    | Tool / gate                                                                             | When                             |
+| ------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------- |
+| **L1 Structural**        | POI uses `poi-{slug}` not `press-*`; gallery `category` vs `alt_fr` vocabulary    | `@mch/domain/photos` · gates `gold.poi_photo_structural`, `photos.gallery_alt_category` | Every CDC audit + CI             |
+| **L2 Sourcing manifest** | Each POI/spa slot uploaded from Wikimedia / official / AI with venue-specific alt | `resource-{slug}-poi-images.ts` · `pdg:photos:poi`                                      | Before `promote:*-golden`        |
+| **L3 Vision QA**         | OpenAI Vision confirms POI pixels match venue name                                | `audit:photo-subject -- --slug=x --vision`                                              | PO sign-off + spot-check rollout |
+
+### L1 — Domain module (single source of truth)
+
+`packages/domain/src/photos/photo-subject-correspondence.ts` exports:
+
+- `isDedicatedPoiImagePublicId()` / `isRecycledHotelGalleryPublicId()`
+- `evaluatePoiStructuralCorrespondence()` — POI contract
+- `evaluateGalleryAltCategoryCorrespondence()` — spa/dining/room alt heuristics
+- `evaluatePhotoSlotExpectations()` — optional golden manifest per slot (`press-17` → `spa`)
+
+Import: `@mch/domain/photos` (editorial gates) or `@mch/domain/editorial` (re-exports POI helpers).
+
+### L2 — POI sourcing pattern (never recycle gallery)
+
+**Anti-pattern refusé** : assign `points_of_interest[].image_public_id = press-24` to pass `gold.poi_images`.
+
+**Workflow obligatoire** :
+
+1. Copy `resource-airelles-poi-images.ts` → `resource-{slug}-poi-images.ts`.
+2. One Commons / official / AI source **per POI slug** → Cloudinary `cct/hotels/{slug}/poi-{poi-slug}`.
+3. Golden file : `princeDeGallesPoiImage('musee-yves-saint-laurent')` etc.
+4. `pnpm --filter @mch/editorial-pilot {prefix}:photos:poi` then `promote:{slug}-golden`.
+5. `audit:photo-subject -- --slug={slug}` → 0 structural fails.
+
+### L3 — Vision QA (optional but required before PO sign-off)
+
+```powershell
+pnpm --filter @mch/editorial-pilot audit:photo-subject -- --slug=prince-de-galles-paris --vision
+```
+
+Flags POIs where Vision detects a subject mismatch (hotel room on a museum card). ~$0.001/POI (gpt-4o-mini).
+
+### CDC gates wired (hotel-fiche-cdc-gates.ts)
+
+| Gate id                       | Severity | Fails when                                          |
+| ----------------------------- | -------- | --------------------------------------------------- |
+| `gold.poi_images`             | warn     | POI missing any `image_public_id`                   |
+| `gold.poi_dedicated_images`   | warn     | POI uses `press-*` instead of `poi-*`               |
+| `gold.poi_photo_structural`   | warn     | Any L1 POI structural issue                         |
+| `photos.gallery_alt_category` | warn     | Gallery category contradicts `alt_fr` (spa+chambre) |
+
+Cross-links: skill `hotel-kit-rollout` D13–D14 · rule `hotel-detail-page.mdc` §2.2bis · `photo-quality.mdc` §Correspondance sujet.
+
 **Why this matters:**
 
 1. **Independents need a different strategy.** Tier D (1282 hotels =

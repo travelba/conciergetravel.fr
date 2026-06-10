@@ -12,9 +12,14 @@ import {
   detectFabricatedStarClaim,
   evaluatePoiBuckets,
   evaluatePoiImages,
+  evaluatePoiDedicatedImages,
   evaluateSpaDossier,
   resolvePopulatedBlocks,
 } from '@mch/domain/editorial';
+import {
+  evaluateGalleryAltCategoryCorrespondence,
+  evaluatePoiStructuralCorrespondence,
+} from '@mch/domain/photos';
 
 import {
   gateFactualSummaryFormat,
@@ -1832,6 +1837,9 @@ export function evaluateCdcHotelFiche(
   const venues = countCompleteVenues(row.restaurant_info);
   const poiBuckets = evaluatePoiBuckets(row.points_of_interest);
   const poiImages = evaluatePoiImages(row.points_of_interest);
+  const poiDedicatedImages = evaluatePoiDedicatedImages(row.points_of_interest);
+  const poiStructural = evaluatePoiStructuralCorrespondence(row.points_of_interest);
+  const galleryAltCategory = evaluateGalleryAltCategoryCorrespondence(row.gallery_images);
   const spa = evaluateSpaDossier(row.spa_info);
   const events = analyzeEvents(row);
   const igPosts = instagramPostCount(row);
@@ -1891,8 +1899,42 @@ export function evaluateCdcHotelFiche(
     passed: poiImages.total === 0 || poiImages.withImage === poiImages.total,
     severity: 'warn',
     field: 'points_of_interest.image_public_id',
-    message: `${poiImages.total - poiImages.withImage}/${poiImages.total} POIs missing image_public_id (CDC D8)`,
-    pipeline: 'golden POI manifest — press-* Cloudinary ids',
+    message: `${poiImages.total - poiImages.withImage}/${poiImages.total} POIs missing image_public_id (CDC D9)`,
+    pipeline: 'resource-{slug}-poi-images.ts — Wikimedia / official / Places',
+  });
+  addCdcCheck(b, {
+    id: 'gold.poi_dedicated_images',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed:
+      poiDedicatedImages.total === 0 || poiDedicatedImages.dedicated === poiDedicatedImages.total,
+    severity: 'warn',
+    field: 'points_of_interest.image_public_id',
+    message: `${poiDedicatedImages.total - poiDedicatedImages.dedicated}/${poiDedicatedImages.total} POIs reuse hotel gallery press-* instead of dedicated poi-* assets (CDC D9bis)`,
+    pipeline: 'resource-{slug}-poi-images.ts + golden manifest poi-{slug} ids',
+  });
+  addCdcCheck(b, {
+    id: 'gold.poi_photo_structural',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: poiStructural.total === 0 || poiStructural.ok === poiStructural.total,
+    severity: 'warn',
+    field: 'points_of_interest.image_public_id',
+    message: `${poiStructural.total - poiStructural.ok}/${poiStructural.total} POIs fail photo-subject structural contract (dedicated poi-* + no gallery recycle)`,
+    pipeline: 'audit:photo-subject + resource-{slug}-poi-images.ts',
+  });
+  addCdcCheck(b, {
+    id: 'photos.gallery_alt_category',
+    block: '02',
+    dimension: 'photo',
+    phase: 'cdc_target',
+    passed: galleryAltCategory.total === 0 || galleryAltCategory.issues.length === 0,
+    severity: 'warn',
+    field: 'gallery_images.category',
+    message: `${galleryAltCategory.issues.length} gallery photo(s) with category/alt_fr mismatch (e.g. spa labeled as room)`,
+    pipeline: 'categorize-with-vision.ts + audit:photo-subject --vision',
   });
 
   if (isRecord(row.spa_info)) {

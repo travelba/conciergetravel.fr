@@ -20,6 +20,11 @@ export type PoiBucket = 'visit' | 'do' | 'shop';
 
 export const POI_BUCKETS: readonly PoiBucket[] = ['visit', 'do', 'shop'];
 
+export {
+  evaluatePoiDedicatedImages,
+  isDedicatedPoiImagePublicId,
+} from '../photos/photo-subject-correspondence';
+
 /* ── small helpers ── */
 
 function asRecord(value: unknown): Record<string, unknown> | null {
