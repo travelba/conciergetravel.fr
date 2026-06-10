@@ -16,6 +16,9 @@ export interface PriceComparatorProps {
    * (`?checkIn=…&checkOut=…`) so the host page stays static / ISR.
    */
   readonly adultsDefault?: number;
+  /** Widget default stay — used until the client syncs dates into the URL. */
+  readonly defaultCheckIn?: string;
+  readonly defaultCheckOut?: string;
   /**
    * Live MyConciergeHotel price (EUR cents, TTC). When `null` the widget
    * still renders the competitor list but skips the scenario verdict
@@ -81,6 +84,8 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
         locale={props.locale}
         hotelId={props.hotelId}
         adultsDefault={props.adultsDefault ?? 2}
+        {...(props.defaultCheckIn !== undefined ? { defaultCheckIn: props.defaultCheckIn } : {})}
+        {...(props.defaultCheckOut !== undefined ? { defaultCheckOut: props.defaultCheckOut } : {})}
         priceConciergeMinor={props.priceConciergeMinor}
         labels={labels}
         surface={props.surface ?? 'default'}

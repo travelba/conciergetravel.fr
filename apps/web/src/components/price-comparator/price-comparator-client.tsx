@@ -59,6 +59,8 @@ export interface PriceComparatorClientProps {
   readonly hotelId: string;
   /** Party size used when the URL carries no `adults` param. */
   readonly adultsDefault: number;
+  readonly defaultCheckIn?: string;
+  readonly defaultCheckOut?: string;
   readonly priceConciergeMinor: number | null;
   readonly labels: PriceComparatorLabels;
   readonly surface?: 'default' | 'kit';
@@ -82,19 +84,28 @@ function scenarioHeadline(scenario: ComparisonScenario, labels: PriceComparatorL
   return map[scenario.kind];
 }
 
-function readStayParamsSnapshot(): {
+function readStayParamsKey(): string {
+  if (typeof window === 'undefined') return '';
+  const params = new URLSearchParams(window.location.search);
+  const checkIn = params.get('checkIn') ?? '';
+  const checkOut = params.get('checkOut') ?? '';
+  const adults = params.get('adults') ?? '';
+  return `${checkIn}|${checkOut}|${adults}`;
+}
+
+function parseStayParamsKey(key: string): {
   readonly checkIn: string | null;
   readonly checkOut: string | null;
   readonly adults: string | null;
 } {
-  if (typeof window === 'undefined') {
+  if (key.length === 0) {
     return { checkIn: null, checkOut: null, adults: null };
   }
-  const params = new URLSearchParams(window.location.search);
+  const [checkIn = '', checkOut = '', adults = ''] = key.split('|');
   return {
-    checkIn: params.get('checkIn'),
-    checkOut: params.get('checkOut'),
-    adults: params.get('adults'),
+    checkIn: checkIn.length > 0 ? checkIn : null,
+    checkOut: checkOut.length > 0 ? checkOut : null,
+    adults: adults.length > 0 ? adults : null,
   };
 }
 
@@ -111,14 +122,15 @@ function subscribeStayParams(onStoreChange: () => void): () => void {
 export function PriceComparatorClient(props: PriceComparatorClientProps): ReactElement | null {
   // Stay dates live in the URL (`?checkIn=…&checkOut=…`) synced by
   // `<BookingStayUrlSync>` via `history.replaceState` + `mch-stay-sync`.
-  const stayParams = useSyncExternalStore(
-    subscribeStayParams,
-    readStayParamsSnapshot,
-    readStayParamsSnapshot,
-  );
-  const checkIn = stayParams.checkIn;
-  const checkOut = stayParams.checkOut;
-  const adultsParam = Number(stayParams.adults ?? '');
+  const stayKey = useSyncExternalStore(subscribeStayParams, readStayParamsKey, () => '');
+  const {
+    checkIn: urlCheckIn,
+    checkOut: urlCheckOut,
+    adults: adultsRaw,
+  } = parseStayParamsKey(stayKey);
+  const checkIn = urlCheckIn ?? props.defaultCheckIn ?? null;
+  const checkOut = urlCheckOut ?? props.defaultCheckOut ?? null;
+  const adultsParam = Number(adultsRaw ?? '');
   const adults =
     Number.isFinite(adultsParam) && adultsParam > 0 ? adultsParam : props.adultsDefault;
   const hasDates = checkIn !== null && checkIn !== '' && checkOut !== null && checkOut !== '';

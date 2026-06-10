@@ -43,6 +43,6 @@ export function pushStayToUrl(stay: StayUrlParams): void {
 
   if (next !== current) {
     window.history.replaceState(null, '', next);
+    window.dispatchEvent(new Event(STAY_URL_SYNC_EVENT));
   }
-  window.dispatchEvent(new Event(STAY_URL_SYNC_EVENT));
 }

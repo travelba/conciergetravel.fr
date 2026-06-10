@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRef, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import { DateRangePicker, nightsBetween, startOfDay } from '@/components/search/DateRangePicker';
 import { useClickOutside } from '@/hooks/useClickOutside';
@@ -51,7 +51,13 @@ export function BookingKitStayDates({
 }: BookingKitStayDatesProps): ReactElement {
   const t = useTranslations('hotelSearchBar');
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const hostRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handle = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(handle);
+  }, []);
 
   useClickOutside(hostRef, () => setOpen(false), open);
 
@@ -67,7 +73,7 @@ export function BookingKitStayDates({
     year: 'numeric',
   });
   const datesValue =
-    from !== null && to !== null
+    mounted && from !== null && to !== null
       ? `${dayMonth.format(from)} – ${dayMonthYear.format(to)}`
       : t('datesPlaceholder');
 
@@ -110,7 +116,9 @@ export function BookingKitStayDates({
           <CalendarIcon />
           <span className="rf-field-body">
             <span>{t('datesLabel')}</span>
-            <span className="rf-val">{datesValue}</span>
+            <span className="rf-val" suppressHydrationWarning>
+              {datesValue}
+            </span>
           </span>
         </button>
         {open ? (

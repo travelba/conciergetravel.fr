@@ -95,6 +95,9 @@ export async function HotelPageKit({
             <PriceComparator
               locale={model.locale}
               hotelId={row.id}
+              adultsDefault={railContext.defaultStay.adults}
+              defaultCheckIn={railContext.defaultStay.checkIn}
+              defaultCheckOut={railContext.defaultStay.checkOut}
               priceConciergeMinor={null}
               surface="kit"
             />
