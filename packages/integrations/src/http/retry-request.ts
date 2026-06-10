@@ -205,3 +205,114 @@ export async function retryingJsonRequest(init: RetryingRequestInit): Promise<
 
   return err({ kind: 'network', cause: new Error('max attempts exceeded') });
 }
+
+/**
+ * Same retry/timeout contract as `retryingJsonRequest`, but returns raw text
+ * (for XML vendors such as GIATA MultiCodes).
+ */
+export async function retryingTextRequest(init: RetryingRequestInit): Promise<
+  Result<
+    {
+      readonly status: number;
+      readonly headers: Headers;
+      readonly text: string;
+    },
+    HttpError
+  >
+> {
+  const method = init.method ?? 'GET';
+  const timeoutMs = init.timeoutMs ?? 8_000;
+  const maxAttempts = init.maxAttempts ?? 3;
+  const { body: rawBody, contentType } = buildFetchBody(init.body);
+
+  const headerRecord: Record<string, string> = { ...init.headers };
+  if (contentType !== undefined) {
+    headerRecord['Content-Type'] = contentType;
+  }
+  if (init.idempotencyKey !== undefined) {
+    headerRecord['Idempotency-Key'] = init.idempotencyKey;
+  }
+
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    attempt += 1;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+
+    let response: Response;
+    try {
+      const requestInit: RequestInit = {
+        method,
+        headers: headerRecord,
+        signal: controller.signal,
+      };
+      if (rawBody !== undefined) {
+        requestInit.body = rawBody;
+      }
+      response = await fetch(init.url, requestInit);
+    } catch (cause) {
+      clearTimeout(timer);
+      if (cause instanceof Error && cause.name === 'AbortError') {
+        if (attempt >= maxAttempts) {
+          return err({ kind: 'timeout' });
+        }
+        await sleep(jitteredBackoffMs(attempt - 1, 200));
+        continue;
+      }
+      if (attempt >= maxAttempts) {
+        return err({ kind: 'network', cause });
+      }
+      await sleep(jitteredBackoffMs(attempt - 1, 200));
+      continue;
+    } finally {
+      clearTimeout(timer);
+    }
+
+    const retryAfterSec = parseRetryAfterSec(response.headers.get('Retry-After'));
+    const text = await response.text();
+
+    if (response.ok) {
+      return ok({
+        status: response.status,
+        headers: response.headers,
+        text,
+      });
+    }
+
+    if (
+      shouldRetryStatus(response.status) &&
+      canRetryForMethod(method, init.idempotencyKey) &&
+      attempt < maxAttempts
+    ) {
+      const waitMs =
+        retryAfterSec !== undefined ? retryAfterSec * 1000 : jitteredBackoffMs(attempt - 1, 200);
+      await sleep(waitMs);
+      continue;
+    }
+
+    if (response.status === 401) {
+      return err({ kind: 'auth_failed' });
+    }
+    if (response.status === 404) {
+      return err({ kind: 'not_found' });
+    }
+    if (response.status === 429) {
+      if (retryAfterSec !== undefined) {
+        return err({ kind: 'rate_limited', retryAfterSec });
+      }
+      return err({ kind: 'rate_limited' });
+    }
+    if (response.status >= 500) {
+      return err({ kind: 'upstream_5xx', status: response.status });
+    }
+    return err({
+      kind: 'upstream_4xx',
+      status: response.status,
+      body: text.length > 0 ? text.slice(0, 200) : undefined,
+    });
+  }
+
+  return err({ kind: 'network', cause: new Error('max attempts exceeded') });
+}

@@ -123,7 +123,8 @@ const promoteLines = promoteItems
 const output = `/**
  * AUTO-GENERATED — do not edit by hand.
  * Source: DA/_generated/airelles-faq-data.json (Perplexity research)
- * Regenerate: node scripts/sync-airelles-faq-to-golden.mjs
+ * Source: DA/_generated/airelles-faq-data.json (Perplexity research)
+ * Regenerate: pnpm --filter @mch/editorial-pilot faq:perplexity:sync-ts -- --input=DA/_generated/airelles-faq-data.json --out=packages/domain/src/editorial/airelles-faq-perplexity.generated.ts --prefix=AIRELLES --hotel-name="Airelles Gordes, La Bastide"
  */
 
 /** ${faqItems.length} factual FAQ items for kit render + JSON-LD. */

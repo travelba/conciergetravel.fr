@@ -67,11 +67,29 @@ const SharedEnvSchema = z.object({
   RATEHAWK_KEY_ID: z.string().optional(),
   RATEHAWK_API_KEY: z.string().optional(),
 
-  // Little Emperors — private members club, NO public B2B API as of 2026-06.
-  // Kept optional/disabled; the connector degrades to concierge/email mode.
+  // Little Emperors — primary luxury channel (API partnership — ADR-0026).
   LITTLE_EMPERORS_ENABLED: z.coerce.boolean().default(false),
   LITTLE_EMPERORS_API_BASE: optionalUrl,
   LITTLE_EMPERORS_API_KEY: z.string().optional(),
+
+  // GIATA MultiCodes — property identity + supplier crosswalk (REST XML).
+  GIATA_ENABLED: z.coerce.boolean().default(false),
+  GIATA_MC_BASE_URL: optionalUrl,
+  /** Format `user|company` per GIATA spec. */
+  GIATA_MC_USERNAME: z.string().optional(),
+  GIATA_MC_PASSWORD: z.string().optional(),
+  GIATA_MC_API_VERSION: z.string().default('1.latest'),
+  /** @deprecated Use GIATA_MC_* — kept for transitional scripts. */
+  GIATA_API_BASE: optionalUrl,
+  GIATA_API_KEY: z.string().optional(),
+  GIATA_API_PREFIX: z.string().optional(),
+
+  // GIATA Room Type Mapping (RTM) — dedupe supplier room labels at rate-shop time.
+  GIATA_RTM_ENABLED: z.coerce.boolean().default(false),
+  GIATA_RTM_BASE_URL: optionalUrl,
+  GIATA_RTM_USERNAME: z.string().optional(),
+  GIATA_RTM_PASSWORD: z.string().optional(),
+  GIATA_RTM_USE_MAP_PLUS: z.coerce.boolean().default(true),
 
   // Multi-supplier rate-shopping orchestrator kill-switch (fiche/tunnel).
   MULTI_SUPPLIER_RATESHOPPING_ENABLED: z.coerce.boolean().default(false),

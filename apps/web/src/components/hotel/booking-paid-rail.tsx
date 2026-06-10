@@ -17,7 +17,7 @@ import { BookingWidgetUrlHydrator } from './booking-widget-url-hydrator';
 interface BookingPaidRailProps {
   readonly locale: SupportedLocale;
   readonly hotelId: string;
-  readonly bookingMode: 'amadeus' | 'little';
+  readonly bookingMode: 'amadeus' | 'little' | 'multi_supplier';
   readonly railContext: HotelBookingRailContext;
   readonly priceFromLabel?: string | null;
   readonly embeddedInKitAside?: boolean;

@@ -61,10 +61,7 @@ Invoke when:
 
 ### FAQ extraction (CDC §2.11 — levier GEO majeur)
 
-- Authored in Payload `faq_content` JSONB.
-- **Volume per page type:**
-  - Hotel detail: **10–15 Q&A obligatoires** (CDC §2.11, up from 5 in V1).
-  - Classements, sélections, comparatifs, guides: 5–10 Q&A.
+- **All hotel fiches (Perplexity mandatory):** `faq_content_kit` (40–60 factual DOM) + `faq_content` promote (10–15, JSON-LD + gates) + `concierge_questions` (20–30). Rule: [`hotel-faq-perplexity.mdc`](../../rules/hotel-faq-perplexity.mdc). Skill: [`hotel-faq-perplexity-enrichment`](../hotel-faq-perplexity-enrichment/SKILL.md).
 - **10 questions canoniques (obligatoires sur fiche hôtel)** — must be present even when answers are generic, because LLMs rank pages on coverage breadth:
   1. Y a-t-il un parking ? (gratuit/payant, valet, EV, hauteur)
   2. À quelle heure est servi le petit-déjeuner et combien coûte-t-il ?

@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { buildGiataRtmLabelIndex, mapGiataRoomTypes } from '@mch/integrations/giata';
+import type { GiataRtmLabelIndex } from '@mch/integrations/giata';
 import { rgExtKey } from '@mch/integrations/ratehawk';
 import type {
   NormalizedRate,
@@ -9,11 +11,13 @@ import type {
 } from '@mch/integrations/supplier';
 
 import {
+  getHotelGiataRtmContext,
   getHotelSupplierConnections,
   getRoomSupplierMappings,
   type RoomSupplierMapping,
 } from '@/server/booking/supplier-catalog-repo';
 import { getSupplierConnectors } from '@/server/booking/supplier-registry';
+import { getGiataRtmClientConfig } from '@/server/giata/rtm-config';
 
 /**
  * Rate-shopping orchestrator (Phase 3).
@@ -24,8 +28,9 @@ import { getSupplierConnectors } from '@/server/booking/supplier-registry';
  * no fuzzy matching); groups by canonical room and reduces to the best price
  * per room (tie-break on connection `priority`, lower wins).
  *
- * Unmapped rates are still surfaced (grouped by supplier label) so a missing
- * mapping degrades gracefully instead of hiding inventory.
+ * Unmapped rates fall back to GIATA Room Type Mapping (RTM) when
+ * `GIATA_RTM_ENABLED` and `hotels.giata_id` are set; otherwise they are
+ * grouped per supplier label so inventory is never hidden.
  */
 
 export interface AggregatedRate extends NormalizedRate {
@@ -82,6 +87,47 @@ function resolveCanonicalRoomId(
   return null;
 }
 
+async function resolveGiataRtmLabelIndex(
+  hotelId: string,
+  rates: readonly NormalizedRate[],
+): Promise<ReadonlyMap<string, GiataRtmLabelIndex> | null> {
+  const rtmConfig = getGiataRtmClientConfig();
+  if (rtmConfig === null) return null;
+
+  const context = await getHotelGiataRtmContext(hotelId);
+  if (context === null) return null;
+
+  const uniqueLabels = [...new Set(rates.map((r) => r.roomLabel))];
+  const mapped = await mapGiataRoomTypes(rtmConfig, {
+    giataId: context.giataId,
+    propertyName: context.propertyName,
+    roomTypes: uniqueLabels,
+  });
+  if (!mapped.ok) return null;
+  return buildGiataRtmLabelIndex(mapped.value);
+}
+
+function groupKeyForRate(
+  rate: NormalizedRate,
+  canonicalRoomId: string | null,
+  giataIndex: ReadonlyMap<string, GiataRtmLabelIndex> | null,
+): string {
+  if (canonicalRoomId !== null) return `room:${canonicalRoomId}`;
+  const giata = giataIndex?.get(rate.roomLabel);
+  if (giata !== undefined) return `giata:${giata.groupId}`;
+  return `unmapped:${rate.supplier}:${rate.roomLabel.trim().toLowerCase()}`;
+}
+
+function displayLabelForRate(
+  rate: NormalizedRate,
+  canonicalRoomId: string | null,
+  giataIndex: ReadonlyMap<string, GiataRtmLabelIndex> | null,
+): string {
+  if (canonicalRoomId !== null) return rate.roomLabel;
+  const giata = giataIndex?.get(rate.roomLabel);
+  return giata?.groupName ?? rate.roomLabel;
+}
+
 /**
  * Run rate-shopping for a hotel + stay. Returns aggregated rooms with the best
  * cross-supplier price. Never throws — a failing supplier is simply omitted.
@@ -130,22 +176,24 @@ export async function shopRates(input: {
     allRates.push(...outcome.value);
   });
 
-  // Group by canonical room (deterministic) or a per-supplier label fallback.
+  const giataIndex = await resolveGiataRtmLabelIndex(input.hotelId, allRates);
+
+  // Group by editorial mapping, else GIATA RTM group, else per-supplier label.
   const groups = new Map<
     string,
     { label: string; canonicalRoomId: string | null; rates: AggregatedRate[] }
   >();
   for (const rate of allRates) {
     const canonicalRoomId = resolveCanonicalRoomId(rate, mappings);
-    const key =
-      canonicalRoomId ?? `unmapped:${rate.supplier}:${rate.roomLabel.trim().toLowerCase()}`;
+    const key = groupKeyForRate(rate, canonicalRoomId, giataIndex);
+    const label = displayLabelForRate(rate, canonicalRoomId, giataIndex);
     const aggregated: AggregatedRate = {
       ...rate,
       priority: priorityBySupplier.get(rate.supplier) ?? 100,
     };
     const existing = groups.get(key);
     if (existing === undefined) {
-      groups.set(key, { label: rate.roomLabel, canonicalRoomId, rates: [aggregated] });
+      groups.set(key, { label, canonicalRoomId, rates: [aggregated] });
     } else {
       existing.rates.push(aggregated);
     }

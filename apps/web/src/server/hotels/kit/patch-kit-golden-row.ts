@@ -1,6 +1,11 @@
 import 'server-only';
 
-import { AIRELLES_FAQ_CONTENT_KIT, buildAirellesGoldenFields } from '@mch/domain/editorial';
+import {
+  AIRELLES_FAQ_CONTENT_KIT,
+  PRINCE_DE_GALLES_FAQ_CONTENT_KIT,
+  buildAirellesGoldenFields,
+  buildPrinceDeGallesGoldenFields,
+} from '@mch/domain/editorial';
 
 import type { HotelDetailRow } from '@/server/hotels/get-hotel-by-slug';
 
@@ -19,6 +24,7 @@ type GoldenFieldsBuilder = (current: {
 
 const GOLDEN_BUILDERS: Readonly<Record<string, GoldenFieldsBuilder>> = {
   'les-airelles-gordes': buildAirellesGoldenFields,
+  'prince-de-galles-paris': buildPrinceDeGallesGoldenFields,
 };
 
 /** EN kit slugs share the FR golden payload builder. */
@@ -29,6 +35,18 @@ const GOLDEN_BUILDER_ALIASES: Readonly<Record<string, keyof typeof GOLDEN_BUILDE
 function resolveGoldenBuilder(slug: string): GoldenFieldsBuilder | null {
   const key = GOLDEN_BUILDER_ALIASES[slug] ?? slug;
   return GOLDEN_BUILDERS[key] ?? null;
+}
+
+function resolveKitFaqContentOverride(slug: string): HotelDetailRow['faq_content'] | null {
+  switch (slug) {
+    case 'les-airelles-gordes':
+    case 'les-airelles-gordes-en':
+      return AIRELLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'];
+    case 'prince-de-galles-paris':
+      return PRINCE_DE_GALLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'];
+    default:
+      return null;
+  }
 }
 
 function mergeGoldenRow(row: HotelDetailRow, golden: Record<string, unknown>): HotelDetailRow {
@@ -101,11 +119,16 @@ export function patchKitGoldenRow(row: HotelDetailRow): HotelDetailRow {
 
   const merged = mergeGoldenRow(row, golden);
 
-  // Supabase CDC audit reads 15 promoted FAQs; kit renders the full 77 at runtime.
-  return {
-    ...merged,
-    faq_content: AIRELLES_FAQ_CONTENT_KIT as HotelDetailRow['faq_content'],
-  };
+  // Supabase CDC audit reads promoted FAQs; kit slugs render the full kit set at runtime.
+  const kitFaqOverride = resolveKitFaqContentOverride(slug);
+  if (kitFaqOverride !== null) {
+    return {
+      ...merged,
+      faq_content: kitFaqOverride,
+    };
+  }
+
+  return merged;
 }
 
 /** @deprecated Use {@link patchKitGoldenRow} */

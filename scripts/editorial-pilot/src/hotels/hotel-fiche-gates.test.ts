@@ -11,6 +11,7 @@ import {
 } from './hotel-fiche-gates.js';
 import { ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
 import { FACTUAL_SUMMARY_MIN_CHARS } from './factual-summary-generator.js';
+import { CONCIERGE_QUESTIONS_MIN, FAQ_KIT_MIN_ITEMS } from './faq-perplexity-taxonomy.js';
 
 function buildAdviceBody(wordCount: number): string {
   const words = Array.from({ length: wordCount }, (_, i) => `mot${i}`);
@@ -44,6 +45,32 @@ function buildLongSections(count: number): Array<{
     anchor: `section-${i + 1}`,
     title_fr: `Section ${i + 1}`,
     body_fr: buildAdviceBody(220),
+  }));
+}
+
+function buildMinimalKitFaq(count: number): Array<{
+  question_fr: string;
+  answer_fr: string;
+  group_fr: string;
+  category_fr: string;
+}> {
+  return Array.from({ length: count }, (_, i) => ({
+    question_fr: `Question kit ${i + 1} ?`,
+    answer_fr: buildAdviceBody(15),
+    group_fr: 'Séjour',
+    category_fr: 'Chambres & Suites',
+  }));
+}
+
+function buildMinimalConciergeQuestions(count: number): Array<{
+  question_fr: string;
+  answer_fr: string;
+  category_fr: string;
+}> {
+  return Array.from({ length: count }, (_, i) => ({
+    question_fr: `Je souhaite organiser une visite ${i + 1} ?`,
+    answer_fr: buildAdviceBody(20),
+    category_fr: 'Excursions & Visites culturelles',
   }));
 }
 
@@ -82,6 +109,8 @@ function referenceHotelRow(): HotelAuditRow {
       },
     },
     faq_content: buildCanonicalFaq(name),
+    faq_content_kit: buildMinimalKitFaq(FAQ_KIT_MIN_ITEMS),
+    concierge_questions: buildMinimalConciergeQuestions(CONCIERGE_QUESTIONS_MIN),
     long_description_sections: buildLongSections(4),
     highlights: [
       { label_fr: 'Vue Tuileries' },
@@ -145,6 +174,8 @@ function relaisChateauxMinimalRow(): HotelAuditRow {
       question_fr: `Question ad hoc ${i + 1}?`,
       answer_fr: buildAdviceBody(20),
     })),
+    faq_content_kit: buildMinimalKitFaq(FAQ_KIT_MIN_ITEMS),
+    concierge_questions: buildMinimalConciergeQuestions(CONCIERGE_QUESTIONS_MIN),
     long_description_sections: [],
     highlights: null,
     amenities: null,

@@ -40,10 +40,24 @@ export const env = createEnv({
     RATEHAWK_API_BASE: z.string().url().optional(),
     RATEHAWK_KEY_ID: z.string().optional(),
     RATEHAWK_API_KEY: z.string().optional(),
-    // Little Emperors — pas d'API publique ; mode concierge/email.
+    // Little Emperors — canal principal luxe (ADR-0026).
     LITTLE_EMPERORS_ENABLED: z.coerce.boolean().default(false),
     LITTLE_EMPERORS_API_BASE: z.string().url().optional(),
     LITTLE_EMPERORS_API_KEY: z.string().optional(),
+    // GIATA Multicodes — identité propriété + crosswalk fournisseurs.
+    GIATA_ENABLED: z.coerce.boolean().default(false),
+    GIATA_MC_BASE_URL: z.string().url().optional(),
+    GIATA_MC_USERNAME: z.string().optional(),
+    GIATA_MC_PASSWORD: z.string().optional(),
+    GIATA_MC_API_VERSION: z.string().default('1.latest'),
+    GIATA_API_BASE: z.string().url().optional(),
+    GIATA_API_KEY: z.string().optional(),
+    GIATA_API_PREFIX: z.string().optional(),
+    GIATA_RTM_ENABLED: z.coerce.boolean().default(false),
+    GIATA_RTM_BASE_URL: z.string().url().optional(),
+    GIATA_RTM_USERNAME: z.string().optional(),
+    GIATA_RTM_PASSWORD: z.string().optional(),
+    GIATA_RTM_USE_MAP_PLUS: z.coerce.boolean().default(true),
     // Kill-switch de l'orchestrateur rate-shopping multi-fournisseurs sur la
     // fiche/tunnel. OFF par défaut : aucune requête DB supplémentaire sur les
     // ~2200 fiches tant que des connexions fournisseurs ne sont pas seedées.

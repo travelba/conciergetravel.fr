@@ -9,6 +9,7 @@
     "./travelport": "./src/travelport/index.ts",
     "./ratehawk": "./src/ratehawk/index.ts",
     "./little-emperors": "./src/little-emperors/index.ts",
+    "./giata": "./src/giata/index.ts",
     "./supplier": "./src/supplier/index.ts",
     "./little-hotelier": "./src/little-hotelier/index.ts",
     "./makcorps": "./src/makcorps/index.ts",

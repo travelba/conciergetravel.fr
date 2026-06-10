@@ -4,7 +4,11 @@ import type { ReactElement } from 'react';
 import { getPathname } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import { defaultHotelStay, todayIso } from '@/lib/booking/default-hotel-stay';
-import { isConciergeBookingMode, isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
+import {
+  isConciergeBookingMode,
+  isPaidBookingMode,
+  isSupplierBookableRail,
+} from '@/lib/booking/booking-mode-helpers';
 import { isTravelportSandboxEnabled } from '@/lib/travelport';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 import type { BookingMode } from '@mch/domain/hotels';
@@ -40,11 +44,14 @@ export async function BookingMobileBar({
     (locale === 'fr' || locale === 'en') &&
     isTravelportSandboxEnabled();
 
+  const isSupplierLive = isSupplierBookableRail(railContext, hotelId);
+
   const isPaidLive =
-    hotelId !== undefined &&
-    isPaidBookingMode(bookingMode) &&
-    railContext !== undefined &&
-    railContext.lockActionUrl !== null;
+    isSupplierLive ||
+    (hotelId !== undefined &&
+      isPaidBookingMode(bookingMode) &&
+      railContext !== undefined &&
+      railContext.lockActionUrl !== null);
 
   const isConciergeLive = hotelId !== undefined && isConciergeBookingMode(bookingMode);
 
@@ -118,7 +125,10 @@ export async function BookingMobileBar({
             },
           }
         : {})}
-      {...(isPaidLive && hotelId !== undefined && railContext.lockActionUrl !== null
+      {...(isPaidLive &&
+      hotelId !== undefined &&
+      railContext !== undefined &&
+      railContext.lockActionUrl !== null
         ? {
             paidAction: railContext.lockActionUrl,
             paidDefaults: {

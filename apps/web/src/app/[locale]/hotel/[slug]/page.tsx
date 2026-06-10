@@ -26,6 +26,7 @@ import { TrackPageView } from '@/lib/analytics/hooks';
 import { HotelAwards } from '@/components/hotel/hotel-awards';
 import { HotelEnBref } from '@/components/hotel/hotel-en-bref';
 import { HotelKidClub } from '@/components/hotel/hotel-kid-club';
+import { HotelConciergeQuestions } from '@/components/hotel/hotel-concierge-questions';
 import { HotelFaq } from '@/components/hotel/hotel-faq';
 import { TopConciergeFaq } from '@/components/hotel/top-concierge-faq';
 import { HotelFeaturedInRankings } from '@/components/hotel/hotel-featured-in-rankings';
@@ -86,8 +87,10 @@ import {
   readGoogleReviews,
   hasGoogleTravelerReviews,
   hasAnyPolicy,
-  readFaq,
+  readFaqPromote,
   readFaqByCategory,
+  readFaqDisplayGroups,
+  readConciergeQuestionGroups,
   readTopConciergeFaq,
   readFeaturedReviews,
   filterPublicHotelGalleryImages,
@@ -475,8 +478,10 @@ async function renderHotelPage(
   const externalSourcesProvenance = readExternalSourcesProvenance(row);
   const factualSummary = readFactualSummary(row, locale);
   const featuredReviews = readFeaturedReviews(row, locale);
-  const faqs = readFaq(row, locale);
+  const faqPromote = readFaqPromote(row, locale);
   const faqGroups = readFaqByCategory(row, locale);
+  const faqDisplayGroups = readFaqDisplayGroups(row, locale);
+  const conciergeQuestionGroups = readConciergeQuestionGroups(row, locale);
   const topConciergeFaq = readTopConciergeFaq(row, locale);
   const heroPublicId = readHeroImage(row);
   const galleryImages = filterPublicHotelGalleryImages(readGallery(row, locale, name));
@@ -1171,7 +1176,7 @@ async function renderHotelPage(
 
   const faqPayload = pickHotelJsonLdFaqEntries([
     { question: aeoQuestion, answer: aeoAnswer },
-    ...faqs.map((f) => ({ question: f.question, answer: f.answer })),
+    ...faqPromote.map((f) => ({ question: f.question, answer: f.answer })),
   ]);
   const faqJsonLd = JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd(faqPayload));
 
@@ -1675,7 +1680,9 @@ async function renderHotelPage(
             <TopConciergeFaq locale={locale} items={topConciergeFaq} />
 
             {/* 7 — Questions fréquentes (#faq) — un seul FAQPage JSON-LD. */}
-            {faqGroups.length > 0 ? (
+            {faqDisplayGroups.length > 0 ? (
+              <HotelFaq locale={locale} displayGroups={faqDisplayGroups} />
+            ) : faqGroups.length > 0 ? (
               <HotelFaq locale={locale} groups={faqGroups} />
             ) : (
               <section id="faq" aria-labelledby="faq-title-fallback" className="mb-12 scroll-mt-24">
@@ -1685,6 +1692,14 @@ async function renderHotelPage(
                 <p className="text-muted text-sm">{t('noFaq')}</p>
               </section>
             )}
+
+            {conciergeQuestionGroups.length > 0 ? (
+              <HotelConciergeQuestions
+                locale={locale}
+                hotelName={name}
+                groups={conciergeQuestionGroups}
+              />
+            ) : null}
 
             {/* 8 — Le Concierge Club (kit `club-inline`, D5). Vue publique /
                   anonyme statique → garde la fiche cacheable (ISR) ; le CTA

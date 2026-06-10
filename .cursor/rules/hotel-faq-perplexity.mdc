@@ -1,0 +1,60 @@
+---
+description: FAQ Perplexity obligatoire sur TOUTES les fiches hôtel publiées (existantes et futures) — 40–60 factuelles + 20–30 questions concierge, modèle deux tiers promote/kit. Policy CDC §2.11 étendue. Complète hotel-detail-page.mdc ; le HOW-TO opérationnel vit dans hotel-faq-perplexity-enrichment/SKILL.md.
+globs: "apps/web/src/**/hotel/**/*.{ts,tsx},scripts/editorial-pilot/src/hotels/**/*.{ts,md},packages/db/migrations/*faq*"
+alwaysApply: false
+---
+
+# FAQ Perplexity — policy catalogue entier
+
+> **Skill vs rule** : cette rule dit **quoi** est obligatoire sur chaque fiche.
+> La skill [`hotel-faq-perplexity-enrichment`](../skills/hotel-faq-perplexity-enrichment/SKILL.md) dit **comment** (prompt MCP, CLI, taxonomy, gates).
+
+## Scope — sans exception
+
+S'applique à **toutes** les fiches hôtel :
+
+- Les **2219+ publiées** actuelles (remédiation par vagues).
+- **Toute nouvelle fiche** ou republication.
+- **Toute locale** (FR canonique ; EN traduit après push FR).
+
+Pas de dérogation « fiche standard vs kit » : le kit Perplexity **est** le contrat FAQ du catalogue.
+
+## Modèle deux tiers (obligatoire)
+
+| Colonne | Volume | Rôle |
+| --- | --- | --- |
+| `faq_content_kit` | **40–60** (max 80) | FAQ factuelles exhaustives — DOM / GEO / LLM |
+| `faq_content` | **10–15** | Sous-ensemble promote — JSON-LD + 10 canoniques + Top 5 featured |
+| `concierge_questions` | **20–30** | Q/R voix concierge proactive (« Je… ») — bloc `#concierge-questions` |
+
+**Interdit** : stocker 40–60 items uniquement dans `faq_content` (casse le gate max 15).
+
+## Sources & qualité
+
+- Recherche Perplexity croisée : site officiel, TripAdvisor, Booking, Expedia, Hotels.com, Michelin, presse luxe, blogs, Google reviews.
+- Chiffre non confirmé par ≥ 2 sources → phrase de fallback conciergerie (pas d'invention).
+- Ton **factuel** dans `faq[]` ; ton **concierge proactif** uniquement dans `concierge_questions[]`.
+
+## Gates (PR + publish)
+
+Un agent ou une PR qui touche la FAQ hôtel **doit** :
+
+1. Valider : `pnpm --filter @mch/editorial-pilot faq:perplexity:validate -- --input=… --hotel-name=…`
+2. Pousser : `pnpm --filter @mch/editorial-pilot faq:perplexity:push -- --slug=… --input=…`
+3. Humanizer Top 5 : `pnpm --filter @mch/editorial-pilot concierge:humanize:faq -- --slug=…`
+
+Checks audit CDC : `cdc.11.faq_kit_count`, `cdc.11.concierge_questions_count` (blocker si publié).
+
+## Rendu web
+
+- DOM FAQ : `readFaq()` → `faq_content_kit` si présent.
+- JSON-LD : `readFaqPromote()` → `faq_content` uniquement (cap 20).
+- Bloc concierge : `readConciergeQuestionGroups()` sur **toutes** les fiches (pas réservé au kit Airelles).
+
+## Références
+
+- Prompt : `scripts/editorial-pilot/prompts/12-hotel-faq-perplexity-research.md`
+- Golden validé : `DA/_generated/airelles-faq-data.json`
+- Migration : `packages/db/migrations/0075_hotels_faq_kit_concierge_questions.sql`
+- [`hotel-detail-page.mdc`](hotel-detail-page.mdc) bloc 11
+- [`geo-llm-optimization`](../skills/geo-llm-optimization/SKILL.md) §FAQ extraction

@@ -47,8 +47,8 @@ export function getSupplierConnectors(): ReadonlyMap<Supplier, HotelSupplierConn
     );
   }
 
-  // Little Emperors — concierge/email only (no live search). Registered so the
-  // funnel can detect the connection and route to the concierge handover.
+  // Little Emperors — primary channel (ADR-0026). Stub until partnership API ships;
+  // replace connector when LE exposes searchAvailability / book.
   if (env.LITTLE_EMPERORS_ENABLED === true) {
     map.set('little_emperors', createLittleEmperorsConnector());
   }

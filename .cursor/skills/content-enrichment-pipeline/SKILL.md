@@ -794,3 +794,4 @@ shape — a root-level key probe on an array column is a false negative.
 - Events JSON-LD: `packages/seo/src/jsonld/event.ts` (`eventJsonLd`, `buildEventListJsonLd`).
 - Events reader: `apps/web/src/server/hotels/get-hotel-by-slug.ts` (`readUpcomingEvents`).
 - Events cron: `.github/workflows/sync-hotel-events.yml`.
+- **Hotel FAQ kit (Perplexity):** [`hotel-faq-perplexity-enrichment`](../hotel-faq-perplexity-enrichment/SKILL.md) — 40–60 factual + 20–30 concierge Q&A, two-tier promote/kit model, MCP workflow.

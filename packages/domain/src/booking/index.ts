@@ -15,3 +15,4 @@ export * from './guest';
 export * from './idempotency';
 export * from './offer';
 export * from './state';
+export * from './pick-winning-rate';

@@ -11,7 +11,13 @@ import {
 
 import { BookingWidgetSubmitTracker } from './booking-widget-tracker';
 
-export type BookingMode = 'amadeus' | 'little' | 'travelport' | 'email' | 'display_only';
+export type BookingMode =
+  | 'amadeus'
+  | 'little'
+  | 'travelport'
+  | 'email'
+  | 'display_only'
+  | 'multi_supplier';
 
 /**
  * Live "starting at" price emitted by the server-side best-offer fetch
@@ -21,7 +27,7 @@ export type BookingMode = 'amadeus' | 'little' | 'travelport' | 'email' | 'displ
  */
 export interface BookingWidgetPriceFrom {
   readonly amount: IndicativePriceMinor;
-  readonly source: 'amadeus_live' | 'editorial_indicative' | 'on_request';
+  readonly source: 'amadeus_live' | 'supplier_live' | 'editorial_indicative' | 'on_request';
 }
 
 /**

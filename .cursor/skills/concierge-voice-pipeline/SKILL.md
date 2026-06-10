@@ -601,5 +601,6 @@ instancier `new OpenAI({ apiKey })` sans options.
   - `content-modeling` — Payload `concierge_advice` field shape + validation.
   - `structured-data-schema-org` — FAQ JSON-LD 10-15 entries (préservé).
   - `geo-llm-optimization` — AEO blocks 40-80 mots vs FAQ 50-100 mots (densité par cible).
+  - `hotel-faq-perplexity-enrichment` — FAQ kit 40–60 + concierge questions 20–30 (ton factuel vs voix « Je » séparés).
   - `seo-technical` §"Add a new locale" — checklist 13 surfaces pour DE/IT/ES/AR/ZH/JA (la voix Concierge doit être préservée dans chaque `translate-hotels-<xx>.ts`).
   - `content-enrichment-pipeline` — passes 1-7 amont (draft factuel, fact-check, anchor-scrub).

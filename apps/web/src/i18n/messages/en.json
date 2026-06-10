@@ -3259,10 +3259,15 @@
       "readLess": "Show less"
     },
     "faq": {
+      "lede": "Everything a guest might ask before and during their stay — rooms, dining, spa, family and hotel policies.",
       "categoryBefore": "Before your stay",
       "categoryDuring": "During your stay",
       "categoryAfter": "After your stay",
       "categoryAgency": "About the property"
+    },
+    "conciergeQuestions": {
+      "title": "The Concierge answers — {hotel}",
+      "lede": "Tables, transfers, spa, excursions or special occasions — how the Concierge replies when you ask."
     },
     "topConciergeFaq": {
       "title": "The Concierge's 5 top answers about this hotel",

@@ -3259,10 +3259,15 @@
       "readLess": "Réduire"
     },
     "faq": {
+      "lede": "Tout ce qu'un voyageur peut se demander avant et pendant son séjour — adresse, chambres, tables, spa, famille et politiques de la maison.",
       "categoryBefore": "Avant votre séjour",
       "categoryDuring": "Pendant votre séjour",
       "categoryAfter": "Après votre séjour",
       "categoryAgency": "À propos de l'établissement"
+    },
+    "conciergeQuestions": {
+      "title": "Le Concierge répond — {hotel}",
+      "lede": "Tables, transferts, spa, excursions ou occasions spéciales : voici comment le Concierge formule sa réponse lorsque l'on lui pose la question."
     },
     "topConciergeFaq": {
       "title": "Les 5 réponses du Concierge sur cet hôtel",

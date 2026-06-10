@@ -1,7 +1,11 @@
 import type { BookingMode } from '@mch/domain/hotels';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import { isConciergeBookingMode, isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
+import {
+  isConciergeBookingMode,
+  isPaidBookingMode,
+  isSupplierBookableRail,
+} from '@/lib/booking/booking-mode-helpers';
 import { isTravelportSandboxEnabled } from '@/lib/travelport';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 
@@ -69,19 +73,22 @@ export function BookingSlot({
 
   const isConciergeLive = hotelId !== undefined && isConciergeBookingMode(bookingMode);
 
+  const isSupplierLive = isSupplierBookableRail(railContext, hotelId);
+
   const isPaidLive =
-    hotelId !== undefined &&
-    isPaidBookingMode(bookingMode) &&
-    railContext !== undefined &&
-    railContext.lockActionUrl !== null;
+    isSupplierLive ||
+    (hotelId !== undefined &&
+      isPaidBookingMode(bookingMode) &&
+      railContext !== undefined &&
+      railContext.lockActionUrl !== null);
 
   const rail = isTravelportLive ? (
     <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />
-  ) : isPaidLive ? (
+  ) : isPaidLive && hotelId !== undefined && railContext !== undefined ? (
     <BookingPaidRail
       locale={locale}
       hotelId={hotelId}
-      bookingMode={bookingMode}
+      bookingMode={resolvePaidRailBookingMode(isSupplierLive, bookingMode)}
       railContext={railContext}
       priceFromLabel={priceFrom}
       embeddedInKitAside={embeddedInKitAside}
@@ -105,4 +112,13 @@ export function BookingSlot({
   );
 
   return <div data-booking-rail>{rail}</div>;
+}
+
+function resolvePaidRailBookingMode(
+  isSupplierLive: boolean,
+  bookingMode: BookingMode | undefined,
+): 'amadeus' | 'little' | 'multi_supplier' {
+  if (isSupplierLive) return 'multi_supplier';
+  if (bookingMode === 'amadeus' || bookingMode === 'little') return bookingMode;
+  return 'amadeus';
 }

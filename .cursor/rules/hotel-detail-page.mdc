@@ -33,7 +33,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 | 8 | Tarifs & moteur de réservation (widget sticky, calendrier, comparateur, TTC, codes promo) | Amadeus offers + Makcorps/Apify comparateur | `<BookingWidget>` (déjà en place, à enrichir) | `Offer[]` avec `priceValidUntil` |
 | 9 | Politiques & infos pratiques (check-in/out, animaux, fumeur, paiement, annulation, taxes explicites) | Payload `policies` | `<HotelPolicies>` | (texte structuré, embed `LodgingBusiness.checkinTime/Out`) |
 | 10 | Avis clients (**/5** + sous-notes, distribution, filtres, réponses hôtelier, sources agrégées) | Supabase `reviews` + agrégation **Google (prioritaire) / Amadeus** | `<ReviewsBlock>` | `AggregateRating` (`bestRating: 5`) + `Review[]` |
-| 11 | FAQ structurée (**10-15 Q&A obligatoires**, dont 10 questions canoniques) | Payload `faq_content` | `<FaqBlock>` | `FAQPage` |
+| 11 | FAQ structurée (**Perplexity obligatoire** : `faq_content_kit` 40–60 + `concierge_questions` 20–30 + `faq_content` promote 10–15) | Supabase jsonb | `<HotelFaq>` + `<HotelConciergeQuestions>` | `FAQPage` (promote only) |
 | 12 | Contenu éditorial local "Que faire autour" (guide ville 2000 mots, top POIs, événements, itinéraires) | Payload `editorial_pages.type = local_guide` | `<LocalGuideTeaser>` (lien profond) | `Article` (sur la page guide elle-même) |
 | 13 | Réassurance & autorité (labels Clef Verte / Michelin Key / LEED, presse, garanties, partenaires) | Payload `awards` (`verified: true` uniquement) | `<TrustSignals>` | `Hotel.award[]` |
 | 14 | Bloc pro / groupes / événements (devis séminaire/mariage, capacités salles, formulaire MICE) | Payload `mice_events` | `<MiceBlock>` | (formulaire — pas de Schema dédié) |
@@ -43,7 +43,7 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
 ## Hard rules (PR doit refuser si manquant)
 
 1. **Photos** : `< 30` photos OU une catégorie vide → publish bloqué côté Payload, mais aussi assertion en E2E.
-2. **FAQ** : `< 10` Q&A → publish bloqué.
+2. **FAQ Perplexity (catalogue entier)** : `faq_content_kit` ≥ 40 + `concierge_questions` ≥ 20 + `faq_content` promote 10–15 avec 10 canoniques → publish bloqué si manquant. Rule [`hotel-faq-perplexity.mdc`](hotel-faq-perplexity.mdc) + skill `hotel-faq-perplexity-enrichment`.
 3. **Factual summary** : `length > 150` chars OU format différent du template → lint warning bloquant.
 4. **AggregateRating** : `bestRating: '10'` en JSON-LD → refus systématique.
 5. **Offer** : `priceValidUntil` absent → refus.
@@ -115,4 +115,4 @@ flowchart TB
 
 - CDC v3.0 §2 (architecture fiche, 15 blocs), §3 (URL, i18n, accessibilité), §4 (data model), §6 (SEO/GEO).
 - ADR-0007 (ISR — cible de rendu), ADR-0008, ADR-0009, ADR-0025 (fiche éditoriale d'abord). Note : la décision « éditorial avant booking » vit dans **ADR-0025**, **pas** dans ADR-0024 (qui concerne le transform photo signature).
-- Skills : `seo-technical`, `geo-llm-optimization`, `structured-data-schema-org`, `content-modeling`, `accessibility`, `performance-engineering`, `booking-engine`.
+- Skills : `seo-technical`, `geo-llm-optimization`, `structured-data-schema-org`, `content-modeling`, `accessibility`, `performance-engineering`, `booking-engine`, `hotel-faq-perplexity-enrichment` (kit FAQ Perplexity 40–60 + concierge questions).

@@ -308,8 +308,10 @@ export function buildHotelKitJsonLd(
     ]),
   );
 
+  // JSON-LD FAQPage — promote subset only (10–15 CDC items), not the 40–60 kit DOM.
+  // Skill: hotel-faq-perplexity-enrichment §Rule 3 + readFaqPromote in get-hotel-by-slug.
   const faqItems = pickHotelJsonLdFaqEntries(
-    model.faqsFlat.map((f) => ({
+    model.faqsPromote.map((f) => ({
       question: f.question,
       answer: f.answer,
     })),

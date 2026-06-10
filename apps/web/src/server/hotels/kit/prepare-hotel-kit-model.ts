@@ -2,7 +2,6 @@ import 'server-only';
 
 import { getTranslations } from 'next-intl/server';
 
-import { AIRELLES_CONCIERGE_QUESTIONS_KIT } from '@mch/domain/editorial';
 import { buildCloudinarySrc } from '@mch/ui';
 
 import type { Locale } from '@/i18n/routing';
@@ -23,6 +22,7 @@ import {
   readConciergeAdvice,
   readConciergeHook,
   readConciergePick,
+  readConciergeQuestionGroups,
   readExternalIds,
   readGoogleAccess,
   readGoogleReviews,
@@ -31,6 +31,7 @@ import {
   readFaq,
   readFaqByCategory,
   readFaqDisplayGroups,
+  readFaqPromote,
   readFeaturedReviews,
   filterPublicHotelGalleryImages,
   readGallery,
@@ -76,7 +77,50 @@ import {
   enrichAirellesKitRoomCards,
   orderAirellesKitRoomCards,
   resolveAirellesKitRoomImages,
+  type AirellesKitRoomImagePair,
 } from './kit-airelles-display';
+import {
+  enrichPrinceDeGallesKitRoomCards,
+  orderPrinceDeGallesKitRoomCards,
+  resolvePrinceDeGallesKitRoomImages,
+  type PrinceDeGallesKitRoomImagePair,
+} from './kit-prince-de-galles-display';
+import {
+  readKitConciergeQuestionGroupsFromGolden,
+  type HotelKitConciergeQuestionGroup,
+} from './kit-concierge-questions';
+
+type KitDisplayBrand = 'airelles' | 'prince-de-galles';
+
+function resolveKitDisplayBrand(row: Pick<HotelDetailRow, 'slug' | 'slug_en'>): KitDisplayBrand {
+  const kitSlug = isHotelKitSlug(row.slug)
+    ? row.slug
+    : row.slug_en !== null && isHotelKitSlug(row.slug_en)
+      ? row.slug_en
+      : null;
+  if (kitSlug === null) {
+    throw new Error(`resolveKitDisplayBrand: unsupported kit slug ${row.slug}`);
+  }
+  if (kitSlug === 'prince-de-galles-paris') {
+    return 'prince-de-galles';
+  }
+  return 'airelles';
+}
+
+type KitRoomImagePair = AirellesKitRoomImagePair | PrinceDeGallesKitRoomImagePair;
+
+function resolveKitRoomImages(
+  brand: KitDisplayBrand,
+  roomSlug: string,
+  roomCode: string,
+): KitRoomImagePair | undefined {
+  switch (brand) {
+    case 'airelles':
+      return resolveAirellesKitRoomImages(roomSlug, roomCode);
+    case 'prince-de-galles':
+      return resolvePrinceDeGallesKitRoomImages(roomSlug, roomCode);
+  }
+}
 
 function pickName(row: HotelDetailRow, locale: SupportedLocale): string {
   const enName = row.name_en !== null && row.name_en.length > 0 ? row.name_en : row.name;
@@ -143,36 +187,7 @@ export interface HotelKitNavItem {
   readonly mobileHidden?: boolean;
 }
 
-export interface HotelKitConciergeQuestionGroup {
-  readonly label: string;
-  readonly items: readonly { question: string; reply: string }[];
-}
-
-function readAirellesConciergeQuestionGroups(
-  slug: string,
-  locale: SupportedLocale,
-): readonly HotelKitConciergeQuestionGroup[] {
-  if (!isHotelKitSlug(slug)) return [];
-  const groups: HotelKitConciergeQuestionGroup[] = [];
-  const indexByLabel = new Map<string, number>();
-  for (const item of AIRELLES_CONCIERGE_QUESTIONS_KIT) {
-    const label = pickLocalizedText(locale, item.category_fr, item.category_en) ?? item.category_fr;
-    const question = item.question_fr;
-    const reply = item.reply_fr;
-    const existing = indexByLabel.get(label);
-    const entry = { question, reply };
-    if (existing === undefined) {
-      indexByLabel.set(label, groups.length);
-      groups.push({ label, items: [entry] });
-    } else {
-      const group = groups[existing];
-      if (group !== undefined) {
-        groups[existing] = { label: group.label, items: [...group.items, entry] };
-      }
-    }
-  }
-  return groups;
-}
+export type { HotelKitConciergeQuestionGroup };
 
 export interface HotelKitEnBref {
   readonly eyebrow: string;
@@ -247,6 +262,7 @@ export interface HotelKitModel {
   readonly faqGroups: readonly LocalisedFaqGroup[];
   readonly faqDisplayGroups: ReturnType<typeof readFaqDisplayGroups>;
   readonly faqsFlat: ReturnType<typeof readFaq>;
+  readonly faqsPromote: ReturnType<typeof readFaqPromote>;
   readonly topConciergeFaq: ReturnType<typeof readTopConciergeFaq>;
   readonly conciergeQuestionGroups: readonly HotelKitConciergeQuestionGroup[];
   readonly conciergeAdvice: ReturnType<typeof readConciergeAdvice>;
@@ -328,8 +344,9 @@ function buildKitRoomImages(
   hotelGallery: readonly LocalisedGalleryImage[],
   roomName: string,
   locale: 'fr' | 'en',
+  kitBrand: KitDisplayBrand,
 ): readonly { readonly src: string; readonly alt: string }[] {
-  const curated = resolveAirellesKitRoomImages(room.slug, room.room_code);
+  const curated = resolveKitRoomImages(kitBrand, room.slug, room.room_code);
 
   const altForPublicId = (publicId: string): string => {
     const raw =
@@ -401,6 +418,7 @@ export async function prepareHotelKitModel(
   const tCard = await getTranslations({ locale: kitLocale, namespace: 'reservationRooms.card' });
   const { rooms } = detail;
   const row = patchKitGoldenRow(detail.row);
+  const kitBrand = resolveKitDisplayBrand(row);
   const externalIds = readExternalIds(row);
   const googleAccess = readGoogleAccess(row);
   const locationBuckets = readLocationByBucket(row, kitLocale);
@@ -557,7 +575,14 @@ export async function prepareHotelKitModel(
       livePriceText = tCard('from', { price: priceText });
       bookAria = tCard('bookAria', { room: roomName, price: priceText });
     }
-    const roomImages = buildKitRoomImages(room, cloudName, galleryImages, roomName, kitLocale);
+    const roomImages = buildKitRoomImages(
+      room,
+      cloudName,
+      galleryImages,
+      roomName,
+      kitLocale,
+      kitBrand,
+    );
     const facts: string[] = [];
     if (room.size_sqm !== null) facts.push(t('rooms.size', { count: room.size_sqm }));
     if (room.bed_type !== null && room.bed_type !== '') facts.push(room.bed_type);
@@ -589,10 +614,10 @@ export async function prepareHotelKitModel(
     };
   });
 
-  const orderedRoomCards = enrichAirellesKitRoomCards(
-    orderAirellesKitRoomCards(roomCards),
-    kitLocale,
-  );
+  const orderedRoomCards =
+    kitBrand === 'prince-de-galles'
+      ? enrichPrinceDeGallesKitRoomCards(orderPrinceDeGallesKitRoomCards(roomCards), kitLocale)
+      : enrichAirellesKitRoomCards(orderAirellesKitRoomCards(roomCards), kitLocale);
 
   const priced = rooms
     .map((r) => r.indicativePrice)
@@ -840,8 +865,13 @@ export async function prepareHotelKitModel(
     faqGroups: readFaqByCategory(row, kitLocale),
     faqDisplayGroups: readFaqDisplayGroups(row, kitLocale),
     faqsFlat: readFaq(row, kitLocale),
+    faqsPromote: readFaqPromote(row, kitLocale),
     topConciergeFaq: readTopConciergeFaq(row, kitLocale),
-    conciergeQuestionGroups: readAirellesConciergeQuestionGroups(row.slug, kitLocale),
+    conciergeQuestionGroups: (() => {
+      const fromDb = readConciergeQuestionGroups(row, kitLocale);
+      if (fromDb.length > 0) return fromDb;
+      return readKitConciergeQuestionGroupsFromGolden(row.slug, kitLocale);
+    })(),
     conciergeAdvice: readConciergeAdvice(row, kitLocale),
     relatedHotels,
     upcomingEvents: readUpcomingEvents(row, kitLocale),

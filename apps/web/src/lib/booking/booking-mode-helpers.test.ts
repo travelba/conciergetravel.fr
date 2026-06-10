@@ -4,6 +4,7 @@ import {
   isConciergeBookingMode,
   isLiveBookingMode,
   isPaidBookingMode,
+  isSupplierBookableRail,
 } from './booking-mode-helpers';
 
 describe('booking-mode-helpers', () => {
@@ -25,5 +26,17 @@ describe('booking-mode-helpers', () => {
     expect(isLiveBookingMode('amadeus')).toBe(true);
     expect(isLiveBookingMode('travelport')).toBe(false);
     expect(isLiveBookingMode(undefined)).toBe(false);
+  });
+
+  it('detects supplier bookable rail from context', () => {
+    expect(
+      isSupplierBookableRail(
+        { supplierBookable: true, lockActionUrl: '/reservation/offer/x/lock' },
+        'hotel-uuid',
+      ),
+    ).toBe(true);
+    expect(
+      isSupplierBookableRail({ supplierBookable: false, lockActionUrl: null }, 'hotel-uuid'),
+    ).toBe(false);
   });
 });

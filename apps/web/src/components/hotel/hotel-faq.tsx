@@ -1,11 +1,19 @@
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
-import type { FaqCategory, LocalisedFaqGroup } from '@/server/hotels/get-hotel-by-slug';
+import type {
+  FaqCategory,
+  LocalisedFaqDisplayGroup,
+  LocalisedFaqGroup,
+} from '@/server/hotels/get-hotel-by-slug';
 
 interface HotelFaqProps {
   readonly locale: SupportedLocale;
-  readonly groups: readonly LocalisedFaqGroup[];
+  /** Intent buckets (standard 10–15 FAQ). */
+  readonly groups?: readonly LocalisedFaqGroup[];
+  /** Perplexity kit grouping by `group_fr` (40–60 FAQ). Takes precedence when non-empty. */
+  readonly displayGroups?: readonly LocalisedFaqDisplayGroup[];
+  readonly lede?: string | null;
 }
 
 /**
@@ -31,11 +39,62 @@ interface HotelFaqProps {
  */
 export async function HotelFaq({
   locale,
-  groups,
+  groups = [],
+  displayGroups = [],
+  lede = null,
 }: HotelFaqProps): Promise<React.ReactElement | null> {
-  if (groups.length === 0) return null;
+  const useDisplay = displayGroups.length > 0;
+  if (!useDisplay && groups.length === 0) return null;
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
+  const faqLede = lede ?? t('faq.lede');
+
+  if (useDisplay) {
+    return (
+      <section id="faq" aria-labelledby="faq-title" className="mb-12 scroll-mt-24">
+        <h2 id="faq-title" className="text-fg mb-2 font-serif text-2xl">
+          {t('sections.faq')}
+        </h2>
+        {faqLede.length > 0 ? <p className="text-muted mb-6 text-sm">{faqLede}</p> : null}
+        <div className="flex flex-col gap-8">
+          {displayGroups.map((group, groupIndex) => {
+            const anchor = `faq-${slugify(group.label)}`;
+            return (
+              <section key={group.label} aria-labelledby={anchor}>
+                <h3
+                  id={anchor}
+                  className="text-fg mb-3 scroll-mt-24 font-serif text-lg uppercase tracking-[0.16em]"
+                >
+                  {group.label}
+                </h3>
+                <ul className="divide-border flex flex-col divide-y">
+                  {group.items.map((item, i) => {
+                    const isFirstOpen = groupIndex === 0 && i === 0;
+                    return (
+                      <li key={i} className="py-4">
+                        <details className="group" {...(isFirstOpen ? { open: true } : {})}>
+                          <summary className="text-fg cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">
+                            <span
+                              className="mr-2 inline-block transition-transform group-open:rotate-90"
+                              aria-hidden
+                            >
+                              ›
+                            </span>
+                            {item.question}
+                          </summary>
+                          <p className="text-muted mt-2 text-sm">{item.answer}</p>
+                        </details>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
 
   // Localised label + slug per category. Slugs are stable across
   // locales so an FR canonical link to `#faq-before` keeps working on
@@ -96,4 +155,13 @@ export async function HotelFaq({
       </div>
     </section>
   );
+}
+
+function slugify(label: string): string {
+  return label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }

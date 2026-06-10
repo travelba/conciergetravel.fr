@@ -73,6 +73,10 @@ export const HotelDetailRowSchema = z.object({
   highlights: z.unknown().nullable().optional(),
   amenities: z.unknown().nullable().optional(),
   faq_content: z.unknown().nullable().optional(),
+  /** Extended Perplexity kit (40–60). When set, DOM FAQ reads this; JSON-LD uses faq_content. */
+  faq_content_kit: z.unknown().nullable().optional(),
+  /** Concierge-voice Q&A (20–30) — proactive replies, separate from factual FAQ. */
+  concierge_questions: z.unknown().nullable().optional(),
   restaurant_info: z.unknown().nullable().optional(),
   spa_info: z.unknown().nullable().optional(),
   // Social feed teaser (no dedicated DB column yet — populated by the local
@@ -186,7 +190,7 @@ export const HotelDetailRowSchema = z.object({
 export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
 
 const HOTEL_COLUMNS =
-  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, google_place_id, google_reviews, last_reviews_sync, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+  'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, faq_content_kit, concierge_questions, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, google_place_id, google_reviews, last_reviews_sync, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
 /**
  * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
@@ -928,6 +932,18 @@ export const FaqItemSchema = z.object({
 });
 export type FaqItem = z.infer<typeof FaqItemSchema>;
 
+const ConciergeQuestionItemSchema = z.object({
+  category_fr: z.string().min(1),
+  category_en: z.string().min(1).optional(),
+  question_fr: z.string().min(1),
+  question_en: z.string().min(1).optional(),
+  reply_fr: z.string().min(1),
+  reply_en: z.string().min(1).optional(),
+});
+export type ConciergeQuestionItem = z.infer<typeof ConciergeQuestionItemSchema>;
+
+const ConciergeQuestionsSchema = z.array(ConciergeQuestionItemSchema);
+
 const FaqContentSchema = z.array(FaqItemSchema);
 
 export interface LocalisedFaq {
@@ -1111,8 +1127,19 @@ export function readAmenitiesByCategory(
   return groups.sort((a, b) => categoryOrder(a.category) - categoryOrder(b.category));
 }
 
-export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly LocalisedFaq[] {
-  const parsed = FaqContentSchema.safeParse(row.faq_content);
+export interface LocalisedConciergeQuestion {
+  readonly categoryLabel: string;
+  readonly question: string;
+  readonly reply: string;
+}
+
+export interface LocalisedConciergeQuestionGroup {
+  readonly label: string;
+  readonly items: readonly { readonly question: string; readonly reply: string }[];
+}
+
+function parseFaqItems(raw: unknown, locale: SupportedLocale): readonly LocalisedFaq[] {
+  const parsed = FaqContentSchema.safeParse(raw);
   if (!parsed.success) return [];
   const out: LocalisedFaq[] = [];
   for (const item of parsed.data) {
@@ -1139,6 +1166,30 @@ export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly 
 }
 
 /**
+ * Full FAQ for DOM — uses `faq_content_kit` when present (40–60 kit fiches),
+ * otherwise `faq_content` (standard 10–15 fiches).
+ */
+export function readFaq(row: HotelDetailRow, locale: SupportedLocale): readonly LocalisedFaq[] {
+  const kitRaw = row.faq_content_kit;
+  const source =
+    kitRaw !== null && kitRaw !== undefined && Array.isArray(kitRaw) && kitRaw.length > 0
+      ? kitRaw
+      : row.faq_content;
+  return parseFaqItems(source, locale);
+}
+
+/**
+ * Promote subset for JSON-LD — always reads `faq_content` (10–15), never the
+ * extended kit. Skill: hotel-faq-perplexity-enrichment §Rule 3.
+ */
+export function readFaqPromote(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): readonly LocalisedFaq[] {
+  return parseFaqItems(row.faq_content, locale);
+}
+
+/**
  * Returns up to 5 FAQ items marked `featured: true` — the "Top 5
  * réponses du Concierge" visible block (ADR-0011 C1, WS5 phase 4).
  *
@@ -1155,9 +1206,42 @@ export function readTopConciergeFaq(
   row: HotelDetailRow,
   locale: SupportedLocale,
 ): readonly LocalisedFaq[] {
-  const all = readFaq(row, locale);
+  const all = readFaqPromote(row, locale);
   const featured = all.filter((f) => f.featured);
   return featured.slice(0, 5);
+}
+
+/**
+ * Concierge-voice Q&A from `concierge_questions` jsonb (kit fiches).
+ * Returns [] when column absent or empty.
+ */
+export function readConciergeQuestionGroups(
+  row: HotelDetailRow,
+  locale: SupportedLocale,
+): readonly LocalisedConciergeQuestionGroup[] {
+  const parsed = ConciergeQuestionsSchema.safeParse(row.concierge_questions);
+  if (!parsed.success || parsed.data.length === 0) return [];
+
+  const groups: LocalisedConciergeQuestionGroup[] = [];
+  const indexByLabel = new Map<string, number>();
+  for (const item of parsed.data) {
+    const label = pickLocalizedText(locale, item.category_fr, item.category_en) ?? item.category_fr;
+    const question = pickLocalizedText(locale, item.question_fr, item.question_en);
+    const reply = pickLocalizedText(locale, item.reply_fr, item.reply_en);
+    if (question === null || reply === null) continue;
+    const existing = indexByLabel.get(label);
+    const entry = { question, reply };
+    if (existing === undefined) {
+      indexByLabel.set(label, groups.length);
+      groups.push({ label, items: [entry] });
+    } else {
+      const group = groups[existing];
+      if (group !== undefined) {
+        groups[existing] = { label: group.label, items: [...group.items, entry] };
+      }
+    }
+  }
+  return groups;
 }
 
 /**

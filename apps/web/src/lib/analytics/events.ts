@@ -11,7 +11,13 @@
  *   - Free-text fields (e.g. error messages) MUST be sanitised by the
  *     dispatcher before reaching downstream sinks.
  */
-export type BookingMode = 'amadeus' | 'little' | 'travelport' | 'email' | 'display_only';
+export type BookingMode =
+  | 'amadeus'
+  | 'little'
+  | 'travelport'
+  | 'email'
+  | 'display_only'
+  | 'multi_supplier';
 
 export type HotelView = {
   readonly name: 'view_hotel';

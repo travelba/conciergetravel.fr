@@ -149,3 +149,29 @@ export async function getRoomSupplierMappings(
   }
   return out;
 }
+
+const HotelGiataContextSchema = z.object({
+  giata_id: z.string().nullable(),
+  name: z.string(),
+});
+
+/** GIATA RTM context for rate-shopping (property id + display name). */
+export async function getHotelGiataRtmContext(
+  hotelId: string,
+): Promise<{ readonly giataId: string; readonly propertyName: string } | null> {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('hotels')
+    .select('giata_id, name')
+    .eq('id', hotelId)
+    .maybeSingle();
+
+  if (error !== null || data === null) return null;
+  const row = HotelGiataContextSchema.safeParse(data);
+  if (!row.success) return null;
+  const giataId = row.data.giata_id?.trim();
+  if (giataId === undefined || giataId.length === 0) return null;
+  const propertyName = row.data.name.trim();
+  if (propertyName.length === 0) return null;
+  return { giataId, propertyName };
+}

@@ -25,6 +25,7 @@ import {
   countFeaturedFaqTips,
   isFaqCanonicalSet,
 } from './canonical-faq-questions.js';
+import { CONCIERGE_QUESTIONS_MIN, FAQ_KIT_MIN_ITEMS } from './faq-perplexity-taxonomy.js';
 import { ADVICE_BODY_MAX_WORDS, ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
 import { META_DESC_MAX_CHARS, META_DESC_MIN_CHARS } from './meta-desc-generator.js';
 import {
@@ -1223,6 +1224,31 @@ export function evaluateCdcHotelFiche(
     field: 'faq_content.answer_en',
     message: 'FAQ missing EN answers (hreflang parity)',
     pipeline: 'run-faq-canonical.ts',
+  });
+
+  const kitLen = jsonLen(row.faq_content_kit);
+  const conciergeLen = jsonLen(row.concierge_questions);
+  addCdcCheck(b, {
+    id: 'cdc.11.faq_kit_count',
+    block: '11',
+    dimension: 'faq',
+    phase: 'phase1',
+    passed: kitLen >= FAQ_KIT_MIN_ITEMS,
+    severity: 'blocker',
+    field: 'faq_content_kit',
+    message: `${kitLen} kit FAQ items (Perplexity target ≥ ${FAQ_KIT_MIN_ITEMS})`,
+    pipeline: 'faq:perplexity:push',
+  });
+  addCdcCheck(b, {
+    id: 'cdc.11.concierge_questions_count',
+    block: '11',
+    dimension: 'faq',
+    phase: 'phase1',
+    passed: conciergeLen >= CONCIERGE_QUESTIONS_MIN,
+    severity: 'blocker',
+    field: 'concierge_questions',
+    message: `${conciergeLen} concierge questions (target ≥ ${CONCIERGE_QUESTIONS_MIN})`,
+    pipeline: 'faq:perplexity:push',
   });
 
   /* ── Bloc 12 — Guide local ── */

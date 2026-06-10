@@ -17,6 +17,7 @@ import {
   isFaqCanonicalSet,
   type FaqItemLike,
 } from './canonical-faq-questions.js';
+import { CONCIERGE_QUESTIONS_MIN, FAQ_KIT_MIN_ITEMS } from './faq-perplexity-taxonomy.js';
 import { ADVICE_BODY_MAX_WORDS, ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
 import { DESCRIPTION_EXTEND_MIN_CHARS } from './description-extend-generator.js';
 import { META_DESC_MAX_CHARS, META_DESC_MIN_CHARS } from './meta-desc-generator.js';
@@ -120,6 +121,8 @@ export interface HotelAuditRow {
   readonly factual_summary_en: string | null;
   readonly concierge_advice: ConciergeAdvicePayload | null;
   readonly faq_content: readonly FaqItemLike[] | null;
+  readonly faq_content_kit?: readonly FaqItemLike[] | null;
+  readonly concierge_questions?: readonly Record<string, unknown>[] | null;
   readonly long_description_sections: readonly LongDescriptionSection[] | null;
   readonly highlights: unknown;
   readonly amenities: unknown;
@@ -403,6 +406,16 @@ export function evaluatePublishGate(row: HotelAuditRow): { pass: boolean; failur
   const faqLen = jsonArrayLen(row.faq_content);
   if (faqLen < FAQ_MIN_ITEMS) {
     failures.push(`faq_content too short (${faqLen} items)`);
+  }
+  const kitLen = jsonArrayLen(row.faq_content_kit ?? null);
+  if (kitLen < FAQ_KIT_MIN_ITEMS) {
+    failures.push(`faq_content_kit too short (${kitLen} items, need ≥ ${FAQ_KIT_MIN_ITEMS})`);
+  }
+  const conciergeLen = jsonArrayLen(row.concierge_questions ?? null);
+  if (conciergeLen < CONCIERGE_QUESTIONS_MIN) {
+    failures.push(
+      `concierge_questions too short (${conciergeLen} items, need ≥ ${CONCIERGE_QUESTIONS_MIN})`,
+    );
   }
   return { pass: failures.length === 0, failures };
 }

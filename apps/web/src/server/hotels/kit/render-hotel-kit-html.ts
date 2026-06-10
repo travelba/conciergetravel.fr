@@ -14,12 +14,12 @@ import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 import {
-  AIRELLES_KIT_AMENITY_BLOCKS,
   amenityIconHtml,
   formatKitDistinctionLabel,
   isKitSignatureExperienceConciergePick,
   orderKitSignatureExperiences,
 } from './kit-airelles-display';
+import { resolveKitAmenityBlocks } from './resolve-kit-amenity-blocks';
 import { localizeKitOfficialHref, resolveKitLearnMoreLink } from './kit-learn-more-link';
 import {
   escapeHtml,
@@ -536,11 +536,13 @@ export function renderKitChambres(model: HotelKitModel): string {
 }
 
 export function renderKitBref(model: HotelKitModel): string {
-  const amenHtml = AIRELLES_KIT_AMENITY_BLOCKS.map((block) => {
-    const title = model.locale === 'en' ? block.titleEn : block.titleFr;
-    const detail = model.locale === 'en' ? block.descEn : block.descFr;
-    return `<div class="amen">${amenityIconHtml(block.icon)}<b>${escapeHtml(title)}</b><span>${escapeHtml(detail)}</span></div>`;
-  }).join('\n          ');
+  const amenHtml = resolveKitAmenityBlocks(model.slugFr)
+    .map((block) => {
+      const title = model.locale === 'en' ? block.titleEn : block.titleFr;
+      const detail = model.locale === 'en' ? block.descEn : block.descFr;
+      return `<div class="amen">${amenityIconHtml(block.icon)}<b>${escapeHtml(title)}</b><span>${escapeHtml(detail)}</span></div>`;
+    })
+    .join('\n          ');
 
   const historyBlock =
     model.storySections.length > 0
@@ -1187,11 +1189,20 @@ function renderUpcomingEventsSub(model: HotelKitModel): string {
 }
 
 function renderKitPressAffiliation(model: HotelKitModel): string {
-  if (model.slugFr !== 'les-airelles-gordes') return '';
-  if (model.locale === 'en') {
-    return `<p class="affil-line"><strong>Affiliation:</strong> part of the <a href="https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon" target="_blank" rel="noopener noreferrer">Airelles</a> collection · <a href="https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874" target="_blank" rel="noopener noreferrer">MICHELIN Guide</a> · <a href="https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide" target="_blank" rel="noopener noreferrer">Forbes Travel Guide</a>.</p>`;
+  switch (model.slugFr) {
+    case 'les-airelles-gordes':
+      if (model.locale === 'en') {
+        return `<p class="affil-line"><strong>Affiliation:</strong> part of the <a href="https://airelles.com/en/destination/gordes-hotel/la-bastide-5-star-provence-luberon" target="_blank" rel="noopener noreferrer">Airelles</a> collection · <a href="https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874" target="_blank" rel="noopener noreferrer">MICHELIN Guide</a> · <a href="https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide" target="_blank" rel="noopener noreferrer">Forbes Travel Guide</a>.</p>`;
+      }
+      return `<p class="affil-line"><strong>Affiliation :</strong> maison de la collection <a href="https://airelles.com/fr/destination/gordes-hotel/la-bastide-5-star-provence-luberon" target="_blank" rel="noopener noreferrer">Airelles</a> · profil <a href="https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874" target="_blank" rel="noopener noreferrer">Guide MICHELIN</a> · <a href="https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide" target="_blank" rel="noopener noreferrer">Forbes Travel Guide</a>.</p>`;
+    case 'prince-de-galles-paris':
+      if (model.locale === 'en') {
+        return `<p class="affil-line"><strong>Affiliation:</strong> member of <a href="https://www.marriott.com/en/hotels/parlc-prince-de-galles-a-luxury-collection-hotel-paris/overview/" target="_blank" rel="noopener noreferrer">The Luxury Collection</a> by Marriott · <a href="https://guide.michelin.com/fr/fr/hotels-stays/paris/prince-de-galles-6873" target="_blank" rel="noopener noreferrer">MICHELIN Guide</a>.</p>`;
+      }
+      return `<p class="affil-line"><strong>Affiliation :</strong> membre de <a href="https://www.marriott.com/fr/hotels/parlc-prince-de-galles-a-luxury-collection-hotel-paris/overview/" target="_blank" rel="noopener noreferrer">The Luxury Collection</a> by Marriott · profil <a href="https://guide.michelin.com/fr/fr/hotels-stays/paris/prince-de-galles-6873" target="_blank" rel="noopener noreferrer">Guide MICHELIN</a>.</p>`;
+    default:
+      return '';
   }
-  return `<p class="affil-line"><strong>Affiliation :</strong> maison de la collection <a href="https://airelles.com/fr/destination/gordes-hotel/la-bastide-5-star-provence-luberon" target="_blank" rel="noopener noreferrer">Airelles</a> · profil <a href="https://guide.michelin.com/fr/fr/hotels-stays/gordes/airelles-gordes-la-bastide-6874" target="_blank" rel="noopener noreferrer">Guide MICHELIN</a> · <a href="https://www.forbestravelguide.com/hotels/french-riviera-france/airelles-gordes-la-bastide" target="_blank" rel="noopener noreferrer">Forbes Travel Guide</a>.</p>`;
 }
 
 export function renderKitAutour(model: HotelKitModel): string {
