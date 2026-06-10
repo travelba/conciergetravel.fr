@@ -52,6 +52,8 @@ export interface BookingSandboxLiveAsideProps {
   readonly intro: string;
   readonly footnote: string;
   readonly embeddedInKitAside: boolean;
+  /** When false, skips `/api/price-comparison` and hides the compare block. */
+  readonly compareEnabled?: boolean;
 }
 
 function formatEuroAmount(locale: Locale, amountMinor: number): string {
@@ -67,6 +69,7 @@ function formatEuroAmount(locale: Locale, amountMinor: number): string {
  * dates → un appel `/api/price-comparison` → MyConciergeHotel + OTA ensemble.
  */
 export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): ReactElement {
+  const compareEnabled = props.compareEnabled ?? true;
   const [checkIn, setCheckIn] = useState(props.defaults.checkIn);
   const [checkOut, setCheckOut] = useState(props.defaults.checkOut);
   const [adults, setAdults] = useState(props.defaults.adults);
@@ -79,6 +82,11 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
   >({ status: 'loading' });
 
   useEffect(() => {
+    if (!compareEnabled) {
+      setCompare({ status: 'empty' });
+      return;
+    }
+
     let cancelled = false;
     setCompare({ status: 'loading' });
 
@@ -127,7 +135,7 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
     return () => {
       cancelled = true;
     };
-  }, [adults, checkIn, checkOut, props.hotelId]);
+  }, [adults, checkIn, checkOut, compareEnabled, props.hotelId]);
 
   const onCheckInChange = (next: string): void => {
     setCheckIn(next);
@@ -237,7 +245,7 @@ export function BookingSandboxLiveAside(props: BookingSandboxLiveAsideProps): Re
         </label>
       </div>
 
-      {compareBlock}
+      {compareEnabled ? compareBlock : null}
 
       <SubmitButton
         pendingLabel={props.labels.submitting}

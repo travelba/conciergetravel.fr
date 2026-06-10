@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { getPriceComparison } from '@/server/price-comparison/service';
 import { gateByIp } from '@/server/price-comparison/rate-limit';
+import { isPriceComparisonDisabled } from '@/lib/price-comparison/enabled';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,6 +30,13 @@ function clientIp(req: NextRequest): string {
  *  - rate-limited to 30 req/min/IP.
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  if (isPriceComparisonDisabled()) {
+    return NextResponse.json(
+      { ok: true, available: false, reason: 'disabled' },
+      { headers: NO_STORE },
+    );
+  }
+
   const url = new URL(req.url);
 
   const ip = clientIp(req);

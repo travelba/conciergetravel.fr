@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server';
 
 import type { Locale } from '@/i18n/routing';
 
+import { isPriceComparisonDisabled } from '@/lib/price-comparison/enabled';
+
 import { PriceComparatorClient } from './price-comparator-client';
 
 export interface PriceComparatorProps {
@@ -41,7 +43,9 @@ export interface PriceComparatorProps {
  * present. The island is wrapped in `<Suspense>` because `useSearchParams`
  * would otherwise opt the whole route out of static rendering.
  */
-export async function PriceComparator(props: PriceComparatorProps): Promise<ReactElement> {
+export async function PriceComparator(props: PriceComparatorProps): Promise<ReactElement | null> {
+  if (isPriceComparisonDisabled()) return null;
+
   const t = await getTranslations('priceComparator');
 
   const labels = {

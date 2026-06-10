@@ -55,6 +55,7 @@ export async function BookingSandboxRail({
       hotelId={hotelId}
       formAction={action}
       embeddedInKitAside={embeddedInKitAside}
+      compareEnabled={false}
       headline={tRail('headline', { hotel: hotelName })}
       intro={tRail('intro')}
       footnote={tRail('note')}
