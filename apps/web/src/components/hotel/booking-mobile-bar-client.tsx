@@ -8,8 +8,10 @@ export interface BookingMobileBarLabels {
   readonly priceFromLabel: string;
   readonly ctaSeePrices: string;
   readonly ctaBook: string;
+  readonly ctaConcierge: string;
   readonly ctaAriaSeePrices: string;
   readonly ctaAriaBook: string;
+  readonly ctaAriaConcierge: string;
   readonly sheetTitle: string;
   readonly closeSheet: string;
   readonly checkIn: string;
@@ -17,12 +19,14 @@ export interface BookingMobileBarLabels {
   readonly adults: string;
   readonly comingSoonCta: string;
   readonly sandboxSubmit: string;
+  readonly conciergeSubmit: string;
+  readonly paidSubmit: string;
 }
 
 interface BookingMobileBarClientProps {
   readonly priceFrom: string | null;
   readonly labels: BookingMobileBarLabels;
-  readonly variant: 'coming_soon' | 'sandbox_live';
+  readonly variant: 'coming_soon' | 'sandbox_live' | 'concierge_live' | 'paid_live';
   readonly sandboxAction?: string | undefined;
   readonly sandboxDefaults?:
     | {
@@ -30,6 +34,29 @@ interface BookingMobileBarClientProps {
         readonly checkOut: string;
         readonly adults: number;
         readonly today: string;
+      }
+    | undefined;
+  readonly conciergeAction?: string | undefined;
+  readonly conciergeDefaults?:
+    | {
+        readonly hotelId: string;
+        readonly checkIn: string;
+        readonly checkOut: string;
+        readonly adults: number;
+        readonly children: number;
+        readonly today: string;
+      }
+    | undefined;
+  readonly paidAction?: string | undefined;
+  readonly paidDefaults?:
+    | {
+        readonly hotelId: string;
+        readonly checkIn: string;
+        readonly checkOut: string;
+        readonly adults: number;
+        readonly children: number;
+        readonly today: string;
+        readonly fake: boolean;
       }
     | undefined;
 }
@@ -44,6 +71,10 @@ export function BookingMobileBarClient({
   variant,
   sandboxAction,
   sandboxDefaults,
+  conciergeAction,
+  conciergeDefaults,
+  paidAction,
+  paidDefaults,
 }: BookingMobileBarClientProps): ReactElement {
   const sheetId = useId();
   const titleId = useId();
@@ -87,8 +118,18 @@ export function BookingMobileBarClient({
   }, [closeExpanded, expanded]);
 
   const hasPrice = priceFrom !== null && priceFrom !== '';
-  const ctaLabel = variant === 'sandbox_live' ? labels.ctaBook : labels.ctaSeePrices;
-  const ctaAria = variant === 'sandbox_live' ? labels.ctaAriaBook : labels.ctaAriaSeePrices;
+  const ctaLabel =
+    variant === 'sandbox_live' || variant === 'paid_live'
+      ? labels.ctaBook
+      : variant === 'concierge_live'
+        ? labels.ctaConcierge
+        : labels.ctaSeePrices;
+  const ctaAria =
+    variant === 'sandbox_live' || variant === 'paid_live'
+      ? labels.ctaAriaBook
+      : variant === 'concierge_live'
+        ? labels.ctaAriaConcierge
+        : labels.ctaAriaSeePrices;
 
   return (
     <div className="resa-mobile-bar-wrap mch-kit">
@@ -176,6 +217,30 @@ export function BookingMobileBarClient({
                 submit: labels.sandboxSubmit,
               }}
             />
+          ) : variant === 'paid_live' && paidAction !== undefined && paidDefaults !== undefined ? (
+            <PaidSheetForm
+              action={paidAction}
+              defaults={paidDefaults}
+              labels={{
+                checkIn: labels.checkIn,
+                checkOut: labels.checkOut,
+                adults: labels.adults,
+                submit: labels.paidSubmit,
+              }}
+            />
+          ) : variant === 'concierge_live' &&
+            conciergeAction !== undefined &&
+            conciergeDefaults !== undefined ? (
+            <ConciergeSheetForm
+              action={conciergeAction}
+              defaults={conciergeDefaults}
+              labels={{
+                checkIn: labels.checkIn,
+                checkOut: labels.checkOut,
+                adults: labels.adults,
+                submit: labels.conciergeSubmit,
+              }}
+            />
           ) : (
             <ComingSoonSheetContent labels={labels} hasPrice={hasPrice} priceFrom={priceFrom} />
           )}
@@ -227,6 +292,150 @@ function ComingSoonSheetContent({
         {labels.comingSoonCta}
       </button>
     </>
+  );
+}
+
+function PaidSheetForm({
+  action,
+  defaults,
+  labels,
+}: {
+  readonly action: string;
+  readonly defaults: {
+    readonly hotelId: string;
+    readonly checkIn: string;
+    readonly checkOut: string;
+    readonly adults: number;
+    readonly children: number;
+    readonly today: string;
+    readonly fake: boolean;
+  };
+  readonly labels: {
+    readonly checkIn: string;
+    readonly checkOut: string;
+    readonly adults: string;
+    readonly submit: string;
+  };
+}): ReactElement {
+  return (
+    <form
+      method="post"
+      action={action}
+      className="resa-mobile-sheet__form"
+      data-testid="booking-widget-form"
+    >
+      <input type="hidden" name="hotelId" value={defaults.hotelId} />
+      {defaults.fake ? <input type="hidden" name="fake" value="1" /> : null}
+      <label className="rf-field">
+        <span>{labels.checkIn}</span>
+        <input
+          type="date"
+          name="checkIn"
+          defaultValue={defaults.checkIn}
+          min={defaults.today}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <label className="rf-field">
+        <span>{labels.checkOut}</span>
+        <input
+          type="date"
+          name="checkOut"
+          defaultValue={defaults.checkOut}
+          min={defaults.checkOut}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <label className="rf-field">
+        <span>{labels.adults}</span>
+        <input
+          type="number"
+          name="adults"
+          min={1}
+          max={9}
+          defaultValue={defaults.adults}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <input type="hidden" name="children" value={defaults.children} />
+      <button type="submit" className="btn btn-or resa-go">
+        {labels.submit}
+      </button>
+    </form>
+  );
+}
+
+function ConciergeSheetForm({
+  action,
+  defaults,
+  labels,
+}: {
+  readonly action: string;
+  readonly defaults: {
+    readonly hotelId: string;
+    readonly checkIn: string;
+    readonly checkOut: string;
+    readonly adults: number;
+    readonly children: number;
+    readonly today: string;
+  };
+  readonly labels: {
+    readonly checkIn: string;
+    readonly checkOut: string;
+    readonly adults: string;
+    readonly submit: string;
+  };
+}): ReactElement {
+  return (
+    <form
+      method="get"
+      action={action}
+      className="resa-mobile-sheet__form"
+      data-testid="booking-widget-form"
+    >
+      <input type="hidden" name="hotelId" value={defaults.hotelId} />
+      <label className="rf-field">
+        <span>{labels.checkIn}</span>
+        <input
+          type="date"
+          name="checkIn"
+          defaultValue={defaults.checkIn}
+          min={defaults.today}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <label className="rf-field">
+        <span>{labels.checkOut}</span>
+        <input
+          type="date"
+          name="checkOut"
+          defaultValue={defaults.checkOut}
+          min={defaults.checkOut}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <label className="rf-field">
+        <span>{labels.adults}</span>
+        <input
+          type="number"
+          name="adults"
+          min={1}
+          max={9}
+          defaultValue={defaults.adults}
+          required
+          className="rf-val border-0 bg-transparent p-0"
+        />
+      </label>
+      <input type="hidden" name="children" value={defaults.children} />
+      <button type="submit" className="btn btn-or resa-go">
+        {labels.submit}
+      </button>
+    </form>
   );
 }
 

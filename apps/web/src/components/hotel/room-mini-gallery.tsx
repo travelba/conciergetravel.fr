@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 
 export interface RoomMiniGalleryImage {
   readonly src: string;
@@ -20,6 +20,11 @@ export interface RoomMiniGalleryProps {
   /** `card` = room grid tile (4/3, rounded top). `hero` = room sub-page lead. */
   readonly variant?: 'card' | 'hero';
   readonly className?: string;
+  /**
+   * Optional overlay inside `.mini-gallery` (kit `template-hotel.html` places
+   * `.cc-pick` here so it stacks above the photo carousel).
+   */
+  readonly overlay?: ReactNode;
 }
 
 /**
@@ -32,6 +37,7 @@ export function RoomMiniGallery({
   labels,
   variant = 'card',
   className,
+  overlay,
 }: RoomMiniGalleryProps): React.ReactElement {
   const [active, setActive] = useState(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -77,6 +83,7 @@ export function RoomMiniGallery({
             {placeholder}
           </span>
         </div>
+        {overlay}
       </div>
     );
   }
@@ -123,6 +130,7 @@ export function RoomMiniGallery({
           </div>
         </>
       ) : null}
+      {overlay}
     </div>
   );
 }

@@ -5,11 +5,14 @@ import { HotelGallery } from '@/components/hotel/hotel-gallery';
 import { SeoJsonLd } from '@/components/seo/json-ld';
 import { TrackPageView } from '@/lib/analytics/hooks';
 import type { Locale } from '@/i18n/routing';
+import { isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
 import type { AmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
 import type { HotelDetail } from '@/server/hotels/get-hotel-by-slug';
+import { prepareHotelBookingRail } from '@/server/booking/prepare-hotel-booking-rail';
 import { buildHotelKitJsonLd } from '@/server/hotels/kit/build-hotel-kit-json-ld';
 import { prepareHotelKitModel } from '@/server/hotels/kit/prepare-hotel-kit-model';
 import { assembleHotelKitShell } from '@/server/hotels/kit/render-hotel-kit-html';
+import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 
 import { BookingSlot } from '../booking-slot';
 import { PriceComparator } from '../../price-comparator';
@@ -32,11 +35,29 @@ export async function HotelPageKit({
   detail,
   amadeusSentiment,
 }: HotelPageKitProps): Promise<React.ReactElement> {
-  const model = await prepareHotelKitModel(locale, detail, amadeusSentiment);
-  const { prefixHtml, mainHtml } = assembleHotelKitShell(model);
-  const jsonLdNodes = buildHotelKitJsonLd(model);
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
   const { row } = detail;
+
+  const [model, railContext] = await Promise.all([
+    prepareHotelKitModel(locale, detail, amadeusSentiment),
+    prepareHotelBookingRail({
+      locale,
+      hotelId: row.id,
+      bookingMode: row.booking_mode,
+      amadeusHotelId: row.amadeus_hotel_id,
+    }),
+  ]);
+
+  const railIndicativeFrom =
+    railContext.priceFrom !== null
+      ? formatIndicativePriceParts(railContext.priceFrom.amount, model.locale).from
+      : model.railIndicativeFrom;
+
+  const { prefixHtml, mainHtml } = assembleHotelKitShell(model);
+  const jsonLdNodes = buildHotelKitJsonLd(
+    model,
+    isPaidBookingMode(row.booking_mode) ? railContext : undefined,
+  );
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <>
@@ -66,9 +87,11 @@ export async function HotelPageKit({
               hotelName={model.name}
               surface="rail"
               slug={row.slug}
+              hotelId={row.id}
               bookingMode={row.booking_mode}
-              priceFrom={model.railIndicativeFrom}
+              priceFrom={railIndicativeFrom}
               embeddedInKitAside
+              railContext={railContext}
             />
             <PriceComparator
               locale={model.locale}
@@ -96,8 +119,10 @@ export async function HotelPageKit({
         hotelName={model.name}
         surface="mobilebar"
         slug={row.slug}
+        hotelId={row.id}
         bookingMode={row.booking_mode}
-        priceFrom={model.railIndicativeFrom}
+        priceFrom={railIndicativeFrom}
+        railContext={railContext}
       />
 
       <TrackPageView
@@ -109,7 +134,7 @@ export async function HotelPageKit({
           bookingMode: row.booking_mode,
           isPalace: row.is_palace,
           stars: row.stars as 1 | 2 | 3 | 4 | 5,
-          hasPriceFrom: model.railIndicativeFrom !== null,
+          hasPriceFrom: railIndicativeFrom !== null,
         }}
       />
     </>

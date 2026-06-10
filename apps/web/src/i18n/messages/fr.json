@@ -3391,6 +3391,7 @@
       "closeLightbox": "Fermer la galerie",
       "mosaicEyebrow": "La galerie",
       "mosaicCount": "{count, plural, one {# photo} other {# photos}}",
+      "mosaicViewFull": "Voir en grand",
       "backToGallery": "Retour à la galerie"
     },
     "virtualTour": {
@@ -3470,7 +3471,7 @@
       "viewDetail": "Voir la chambre",
       "signatureBadge": "Signature",
       "signatureAria": "Suite signature de l’hôtel",
-      "conciergePick": "Le choix du Concierge",
+      "conciergePick": "Sélection du Concierge",
       "showAll": "Voir les {count} autres chambres",
       "showLess": "Réduire l’affichage",
       "prevRoom": "Chambre précédente",

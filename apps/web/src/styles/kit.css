@@ -2959,6 +2959,10 @@ body.booking-mobile-sheet-open {
   box-shadow: var(--shadow);
   transform: translateY(-3px);
 }
+.mch-kit .rooms-carousel .room-v2.room-concierge {
+  background: #f7f4ee;
+  border-color: var(--accent);
+}
 .mch-kit .rooms-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -3736,6 +3740,7 @@ body.booking-mobile-sheet-open {
 }
 .mch-kit .faq-more-wrap {
   margin: 2px 0 4px;
+  text-align: right;
 }
 .mch-kit .faq-more-wrap .faq-toggle-btn {
   padding: 5px 12px;

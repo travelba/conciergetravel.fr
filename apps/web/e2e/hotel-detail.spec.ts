@@ -78,7 +78,7 @@ test.describe('hotel detail page', () => {
     const ctaForm = bookingSection.locator('form[action="/reservation/start"]');
     await expect(ctaForm).toBeVisible();
     await expect(ctaForm.locator('input[name="hotelId"]')).toHaveAttribute('value', /.+/);
-    await expect(ctaForm.getByRole('button', { name: 'Demander un devis' })).toBeVisible();
+    await expect(ctaForm.getByRole('button', { name: 'Réserver via mon concierge' })).toBeVisible();
   });
 
   test('EN serves the localized slug with correct lang and content', async ({ page }) => {

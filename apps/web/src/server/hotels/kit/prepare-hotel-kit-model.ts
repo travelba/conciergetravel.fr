@@ -573,6 +573,13 @@ export async function prepareHotelKitModel(
       facts,
       livePriceText,
       bookAria,
+      roomPageHref: getPathname({
+        locale: kitLocale,
+        href: {
+          pathname: '/hotel/[slug]/chambres/[roomSlug]',
+          params: { slug: slugForLocale, roomSlug: room.slug },
+        },
+      }),
     };
   });
 

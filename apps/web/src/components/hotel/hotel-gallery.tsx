@@ -132,6 +132,7 @@ export async function HotelGallery({
         closeLightbox: t('gallery.closeLightbox'),
         mosaicEyebrow: t('gallery.mosaicEyebrow'),
         mosaicCountLabel: t('gallery.mosaicCount', { count: galleryTotal }),
+        mosaicViewFull: t('gallery.mosaicViewFull'),
         backToGallery: t('gallery.backToGallery'),
         // Pass the raw ICU template — interpolated client-side because a
         // closure cannot cross the RSC boundary (Next 15.3 throws

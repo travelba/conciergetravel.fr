@@ -10,7 +10,12 @@ import { buildCloudinarySrc } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
 import { TravelportLiveRooms } from '@/components/hotel/travelport-live-rooms';
+import { isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
+import {
+  buildOfferJsonLdInput,
+  prepareHotelBookingRail,
+} from '@/server/booking/prepare-hotel-booking-rail';
 import { getTravelportLiveRoomPrices } from '@/server/booking/travelport-offer';
 import { ConciergeAdvice } from '@/components/hotel/concierge-advice';
 import { FactualSummary } from '@/components/hotel/factual-summary';
@@ -114,12 +119,12 @@ import { buildHotelKitMetadataFromModel } from '@/server/hotels/kit/build-hotel-
 import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
 
 /**
- * Rendering mode (Phase 1 — editorial site, booking funnel removed):
+ * Rendering mode (Phase 1 — editorial site, concierge funnel live):
  *
- *  - The fiche no longer hosts a booking funnel: the prime conversion
- *    slot is a passive `<BookingSlot>` placeholder until the Amadeus /
- *    Little APIs are wired in Phase 6 (see ADR-0024 + AGENTS.md §4ter).
- *    The page therefore no longer reads stay-window `searchParams`.
+ *  - The prime conversion slot (`<BookingSlot>`) ships a live concierge
+ *    request form for `display_only` / `email` hotels; paid GDS modes
+ *    stay on placeholder until Phase 6 (ADR-0024 + AGENTS.md §4ter).
+ *    The page does not read stay-window `searchParams`.
  *  - It still emits multiple `<JsonLdScript>` blocks that need the
  *    per-request CSP nonce; the page reads it once via
  *    `next/headers#headers()` and forwards it as a prop (see
@@ -656,12 +661,22 @@ async function renderHotelPage(
     ...roomCards.filter((card) => !card.isConciergePick),
   ];
 
+  const railContext = await prepareHotelBookingRail({
+    locale,
+    hotelId: row.id,
+    bookingMode: row.booking_mode,
+    amadeusHotelId: row.amadeus_hotel_id,
+  });
+
   // Indicative "from" price for the reservation rail widget (kit `.resa-price`
   // « À partir de … »). Cheapest editorial room price, locale-formatted; `null`
   // when no room carries one (the widget then drops the price block). This is
   // the editorial indicative anchor — NOT a bookable rate (rail stays inert
   // until the funnel lands, Phase 6 / ADR-0025).
   const railIndicativeFrom = ((): string | null => {
+    if (railContext.priceFrom !== null) {
+      return formatIndicativePriceParts(railContext.priceFrom.amount, locale).from;
+    }
     const priced = rooms
       .map((r) => r.indicativePrice)
       .filter((p): p is NonNullable<typeof p> => p !== null);
@@ -1087,6 +1102,12 @@ async function renderHotelPage(
             worstRating: resolvedRating.worstRating,
           },
         }
+      : {}),
+    ...(isPaidBookingMode(row.booking_mode)
+      ? ((): { offer?: NonNullable<ReturnType<typeof buildOfferJsonLdInput>> } => {
+          const offer = buildOfferJsonLdInput(railContext, canonicalUrl);
+          return offer !== null ? { offer } : {};
+        })()
       : {}),
   };
   const hotelJsonLd = JsonLd.withSchemaOrgContext(JsonLd.hotelJsonLd(hotelInput));
@@ -1744,8 +1765,10 @@ async function renderHotelPage(
               hotelName={name}
               surface="rail"
               slug={row.slug}
+              hotelId={row.id}
               bookingMode={row.booking_mode}
               priceFrom={railIndicativeFrom}
+              railContext={railContext}
             />
             <PriceComparator locale={locale} hotelId={row.id} priceConciergeMinor={null} />
             <HotelToc heading={t('toc.heading')} items={tocItems} />
@@ -1758,8 +1781,10 @@ async function renderHotelPage(
         hotelName={name}
         surface="mobilebar"
         slug={row.slug}
+        hotelId={row.id}
         bookingMode={row.booking_mode}
         priceFrom={railIndicativeFrom}
+        railContext={railContext}
       />
 
       <TrackPageView

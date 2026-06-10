@@ -57,6 +57,8 @@ export interface HotelRoomCardVM {
   readonly livePriceText: string | null;
   /** Per-room accessible label for the booking CTA (when `livePriceText`). */
   readonly bookAria: string | null;
+  /** Indexable room sub-page path (kit HTML renderer). */
+  readonly roomPageHref?: string | undefined;
 }
 
 export interface HotelRoomsGridProps {
@@ -131,8 +133,23 @@ export function HotelRoomsGrid({
             } as const;
             const showLiveCta =
               room.livePriceText !== null && bookHref !== undefined && bookLabel !== undefined;
+            const pickOverlay = room.isConciergePick ? (
+              <span className="cc-pick">
+                {CONCIERGE_STAR}
+                {labels.conciergePick}
+              </span>
+            ) : room.isSignature ? (
+              <span className="cc-pick">
+                {CONCIERGE_STAR}
+                {labels.signatureBadge}
+              </span>
+            ) : null;
+
             return (
-              <article key={room.id} className="room-v2">
+              <article
+                key={room.id}
+                className={room.isConciergePick ? 'room-v2 room-concierge' : 'room-v2'}
+              >
                 <RoomMiniGallery
                   images={room.images}
                   placeholder={room.imageAlt}
@@ -141,18 +158,8 @@ export function HotelRoomsGrid({
                     nextPhoto: labels.nextPhoto,
                     photoN: labels.photoN,
                   }}
+                  overlay={pickOverlay}
                 />
-                {room.isConciergePick ? (
-                  <span className="cc-pick" style={{ top: '12px', left: '12px' }}>
-                    {CONCIERGE_STAR}
-                    {labels.conciergePick}
-                  </span>
-                ) : room.isSignature ? (
-                  <span className="cc-pick" style={{ top: '12px', left: '12px' }}>
-                    {CONCIERGE_STAR}
-                    {labels.signatureBadge}
-                  </span>
-                ) : null}
                 <div className="rv2-body">
                   <h3>
                     <Link href={roomHref} className="hover:underline">
@@ -161,6 +168,9 @@ export function HotelRoomsGrid({
                   </h3>
                   {room.description !== null && room.description !== '' ? (
                     <p className="rv2-desc">{room.description}</p>
+                  ) : null}
+                  {room.conciergeNote !== null && room.conciergeNote !== '' ? (
+                    <p className="cc-why">{room.conciergeNote}</p>
                   ) : null}
                   {room.facts.length > 0 ? (
                     <ul className="rv2-facts">

@@ -21,6 +21,9 @@ import {
   type GalleryLicence,
 } from '@/server/hotels/get-hotel-by-slug';
 
+import { buildOfferJsonLdInput } from '@/server/booking/prepare-hotel-booking-rail';
+import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
+
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 
 function siteOrigin(): string {
@@ -95,7 +98,10 @@ function buildKitJsonLdImages(model: HotelKitModel): (string | JsonLd.ImageObjec
 }
 
 /** JSON-LD for kit pilot fiches — parity with legacy hotel page builder. */
-export function buildHotelKitJsonLd(model: HotelKitModel): Record<string, unknown>[] {
+export function buildHotelKitJsonLd(
+  model: HotelKitModel,
+  railContext?: HotelBookingRailContext,
+): Record<string, unknown>[] {
   const origin = siteOrigin();
   const jsonLdImages = buildKitJsonLdImages(model);
   const awards = readAwards(model.row, model.locale);
@@ -138,6 +144,9 @@ export function buildHotelKitJsonLd(model: HotelKitModel): Record<string, unknow
     ...model.locationBuckets.eat,
     ...model.locationBuckets.shop,
   ];
+
+  const liveOffer =
+    railContext !== undefined ? buildOfferJsonLdInput(railContext, model.canonicalUrl) : null;
 
   const hotelNode = JsonLd.withSchemaOrgContext(
     JsonLd.hotelJsonLd({
@@ -251,6 +260,7 @@ export function buildHotelKitJsonLd(model: HotelKitModel): Record<string, unknow
         name: model.city,
         url: cityHubUrl,
       },
+      ...(liveOffer !== null ? { offer: liveOffer } : {}),
     }),
   );
 

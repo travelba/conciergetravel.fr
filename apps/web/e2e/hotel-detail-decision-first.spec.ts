@@ -41,7 +41,9 @@ test.describe('hotel detail — decision-first surface', () => {
     // Either the paid lock CTA OR the concierge variant — both flows
     // result in a visible submit control. The seam is email-mode so
     // we get the concierge variant by default.
-    const cta = bookingSection.getByRole('button', { name: /(devis|réserver|book)/i });
+    const cta = bookingSection.getByRole('button', {
+      name: /réserver via mon concierge|book via my concierge/i,
+    });
     await expect(cta).toBeVisible();
   });
 

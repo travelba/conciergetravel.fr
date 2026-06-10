@@ -507,7 +507,7 @@ function renderRoomCard(model: HotelKitModel, room: HotelRoomCardVM): string {
               ${hasFacts ? `<ul class="rv2-facts">${factsHtml}</ul>` : ''}
               <div class="rv2-cta">
                 ${priceHtml}
-                <a href="${model.reservationBasePath}" class="btn btn-or">${escapeHtml(model.labels.selectRoom)}</a>
+                <a href="${escapeHtml(room.roomPageHref ?? model.reservationBasePath)}" class="btn btn-or">${escapeHtml(model.labels.selectRoom)}</a>
               </div>
             </div>
           </article>`;
@@ -527,7 +527,7 @@ export function renderKitChambres(model: HotelKitModel): string {
           ${cards}
       </div>
       <div class="rooms-more">
-        <a href="${model.reservationBasePath}" class="btn-ligne">${escapeHtml(model.labels.roomsMore)} →</a>
+        <a href="#chambres" class="btn-ligne">${escapeHtml(model.labels.roomsMore)} →</a>
       </div>
     </section>`;
 }

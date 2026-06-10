@@ -3391,6 +3391,7 @@
       "closeLightbox": "Close gallery",
       "mosaicEyebrow": "The gallery",
       "mosaicCount": "{count, plural, one {# photo} other {# photos}}",
+      "mosaicViewFull": "View full size",
       "backToGallery": "Back to the gallery"
     },
     "virtualTour": {
@@ -3470,7 +3471,7 @@
       "viewDetail": "View room",
       "signatureBadge": "Signature",
       "signatureAria": "Property’s signature suite",
-      "conciergePick": "The Concierge’s pick",
+      "conciergePick": "Concierge selection",
       "showAll": "View the {count} other rooms",
       "showLess": "Show fewer",
       "prevRoom": "Previous room",
