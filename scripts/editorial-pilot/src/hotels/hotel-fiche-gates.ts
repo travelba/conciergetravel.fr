@@ -18,6 +18,10 @@ import {
   type FaqItemLike,
 } from './canonical-faq-questions.js';
 import { CONCIERGE_QUESTIONS_MIN, FAQ_KIT_MIN_ITEMS } from './faq-perplexity-taxonomy.js';
+import {
+  evaluateFaqKitRowEnrichment,
+  hasFaqKitEnrichmentSurface,
+} from './faq-kit-row-enrichment.js';
 import { ADVICE_BODY_MAX_WORDS, ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
 import { DESCRIPTION_EXTEND_MIN_CHARS } from './description-extend-generator.js';
 import { META_DESC_MAX_CHARS, META_DESC_MIN_CHARS } from './meta-desc-generator.js';
@@ -416,6 +420,19 @@ export function evaluatePublishGate(row: HotelAuditRow): { pass: boolean; failur
     failures.push(
       `concierge_questions too short (${conciergeLen} items, need ≥ ${CONCIERGE_QUESTIONS_MIN})`,
     );
+  }
+  if (hasFaqKitEnrichmentSurface(kitLen)) {
+    const enrichment = evaluateFaqKitRowEnrichment({
+      hotelName: row.name,
+      faq_content_kit: row.faq_content_kit,
+      faq_content: row.faq_content,
+      concierge_questions: row.concierge_questions,
+    });
+    if (!enrichment.ok) {
+      for (const issue of enrichment.issues.filter((i) => i.severity === 'blocker')) {
+        failures.push(issue.message);
+      }
+    }
   }
   return { pass: failures.length === 0, failures };
 }

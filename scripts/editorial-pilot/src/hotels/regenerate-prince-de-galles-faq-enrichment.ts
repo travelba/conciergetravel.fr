@@ -26,7 +26,7 @@ import {
   type NormalisedConciergeQuestion,
   type NormalisedFaqKitItem,
 } from './faq-perplexity-taxonomy.js';
-import { evaluateFaqKitCoverage } from './faq-perplexity-gates.js';
+import { evaluateFaqKitRowEnrichment } from './faq-kit-row-enrichment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -566,11 +566,14 @@ function main(): void {
     enrichConciergeItem(item),
   );
 
-  const gate = evaluateFaqKitCoverage(kit, concierge, 'Prince de Galles', [
-    ...PRINCE_DE_GALLES_FAQ_CONTENT_PROMOTE,
-  ]);
+  const gate = evaluateFaqKitRowEnrichment({
+    hotelName: 'Prince de Galles',
+    faq_content_kit: kit,
+    faq_content: [...PRINCE_DE_GALLES_FAQ_CONTENT_PROMOTE],
+    concierge_questions: concierge,
+  });
   if (!gate.ok) {
-    console.error('Gate failures:');
+    console.error('Enrichment gates failed:');
     for (const issue of gate.issues) console.error(`  [${issue.severity}] ${issue.message}`);
     process.exit(1);
   }

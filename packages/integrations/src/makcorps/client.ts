@@ -26,7 +26,8 @@ export async function fetchMakcorpsHotelQuotes(
   url.searchParams.set('checkout', v.checkout);
   url.searchParams.set('adults', String(v.adults));
   url.searchParams.set('rooms', String(rooms));
-  url.searchParams.set('currency', v.currency);
+  // Makcorps docs: `cur=` (not `currency=`) selects settlement currency.
+  url.searchParams.set('cur', v.currency);
   url.searchParams.set('api_key', cfg.apiKey);
 
   const res = await retryingJsonRequest({

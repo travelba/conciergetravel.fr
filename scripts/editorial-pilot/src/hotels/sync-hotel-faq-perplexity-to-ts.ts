@@ -12,7 +12,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { parsePerplexityHotelFaqResearch, evaluateFaqKitCoverage } from './faq-perplexity-gates.js';
+import { parsePerplexityHotelFaqResearch } from './faq-perplexity-gates.js';
+import { evaluateFaqKitRowEnrichment } from './faq-kit-row-enrichment.js';
 import { transformPerplexityHotelFaq } from './faq-perplexity-transform.js';
 
 interface CliArgs {
@@ -53,13 +54,16 @@ function main(): void {
   if (!parsed.ok) throw new Error('Invalid Perplexity JSON — run validate first');
 
   const transformed = transformPerplexityHotelFaq(parsed.data, { hotelName: args.hotelName });
-  const gate = evaluateFaqKitCoverage(
-    transformed.kit,
-    transformed.conciergeQuestions,
-    args.hotelName,
-    transformed.promote,
-  );
-  if (!gate.ok) throw new Error('Kit gates failed');
+  const gate = evaluateFaqKitRowEnrichment({
+    hotelName: args.hotelName,
+    faq_content_kit: transformed.kit,
+    faq_content: transformed.promote,
+    concierge_questions: transformed.conciergeQuestions,
+  });
+  if (!gate.ok) throw new Error('Kit enrichment gates failed');
+
+  const optionalStr = (key: string, value: string | undefined): string =>
+    value !== undefined && value.length > 0 ? `\n    ${key}: '${esc(value)}',` : '';
 
   const faqLines = transformed.kit
     .map(
@@ -68,7 +72,7 @@ function main(): void {
     group_fr: '${esc(item.group_fr)}',
     group_en: '${esc(item.group_en)}',
     question_fr: '${esc(item.question_fr)}',
-    answer_fr: '${esc(item.answer_fr)}',
+    answer_fr: '${esc(item.answer_fr)}',${optionalStr('question_en', item.question_en)}${optionalStr('answer_en', item.answer_en)}
   }`,
     )
     .join(',\n');
@@ -91,7 +95,7 @@ function main(): void {
     category_fr: '${esc(item.category_fr)}',
     category_en: '${esc(item.category_en)}',
     question_fr: '${esc(item.question_fr)}',
-    reply_fr: '${esc(item.reply_fr)}',
+    reply_fr: '${esc(item.reply_fr)}',${optionalStr('question_en', item.question_en)}${optionalStr('reply_en', item.reply_en)}
   }`,
     )
     .join(',\n');

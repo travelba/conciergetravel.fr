@@ -55,12 +55,19 @@ const GALLERY_SOURCES: readonly Readonly<{
   {
     url: 'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-s-lection-shooting-oubrun-18140:Classic-Hor?wid=2880&fit=constrain',
   },
-  { damFile: 'parlc-prince-7097-hor-clsc' },
-  { damFile: 'parlc-mosaic-suite-6020-hor-wide' },
+  {
+    url: 'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-hammam2-40183:Classic-Hor?wid=2880&fit=constrain',
+  },
+  {
+    url: 'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-relax2-39825:Classic-Hor?wid=2880&fit=constrain',
+  },
   { damFile: 'parlc-suite-bathroom-0856-hor-wide' },
-  { damFile: 'parlc-prince-9106-hor-clsc' },
-  { damFile: 'parlc-suite-bathroom-2591-hor-wide' },
-  { damFile: 'parlc-patio-5653-hor-clsc' },
+  {
+    url: 'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-gym-27587:Classic-Hor?wid=2880&fit=constrain',
+  },
+  {
+    url: 'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-double-13746:Classic-Hor?wid=2880&fit=constrain',
+  },
   { damFile: 'parlc-suite-patrick-hellmann-0852-hor-wide' },
   { damFile: 'parlc-george-view-2593-hor-wide' },
   { damFile: 'parlc-attraction-eiffel-0251-hor-clsc' },

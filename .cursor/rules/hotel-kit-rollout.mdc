@@ -1,0 +1,52 @@
+---
+description: Consignes PO verrouillées pour le rollout template kit hôtel (pilotes Airelles + Prince de Galles → catalogue). F&B complets, avis Google uniquement dans #acces, POI avec photo, ton concierge informatif, re-sourcing photo officiel via Tavily/DAM — jamais remapper seul. À lire avant toute fiche pilote suivante.
+globs:
+  - apps/web/src/app/**/hotel/**
+  - apps/web/src/components/hotel/**
+  - packages/domain/src/editorial/*-golden.ts
+  - packages/domain/src/editorial/*-gallery.ts
+  - scripts/editorial-pilot/src/hotels/promote-*-golden.ts
+  - scripts/editorial-pilot/src/photos/resource-*-gallery*.ts
+alwaysApply: false
+---
+
+# Hotel kit rollout — consignes PO (fiches suivantes)
+
+Skill complète : [`.cursor/skills/hotel-kit-rollout/SKILL.md`](mdc:.cursor/skills/hotel-kit-rollout/SKILL.md).
+
+Runbook : [`docs/runbooks/airelles-reference-fiche-plan.md`](mdc:docs/runbooks/airelles-reference-fiche-plan.md).
+
+## Pilotes validés comme référence
+
+1. **`les-airelles-gordes`** — structure 9 sections + design kit.
+2. **`prince-de-galles-paris`** — données PO (F&B, GMB, POI photos, ton concierge, sourcing spa officiel Marriott).
+
+Chaque fiche pilote suivante **doit** passer la checklist du skill avant validation PO.
+
+## Règles PO — rappel express
+
+| # | Règle |
+| - | ----- |
+| D7 | Tous les outlets F&B officiels (bars séparés si le site les distingue). |
+| D8 | `#acces` « Avis voyageurs » = **Google GMB only** (`google_reviews[]`). Pas de presse. |
+| D9 | Chaque POI `visit`/`do`/`shop` → **`image_public_id`**. |
+| D10 | `#concierge-questions` : ton **informatif** (« La conciergerie peut… »). **Pas** « Je réserve / Je confirme ». |
+| D11 | Pas de label hardcodé d'une autre fiche (ex. Airelles). |
+| D12 | Photo incorrecte → **sourcer site officiel** (Tavily / DAM chaîne / Google Places) + re-upload Cloudinary. **Interdit** de ne corriger que metadata/resolver. |
+
+## Workflow minimal par slug
+
+1. Golden TS (`{slug}-golden.ts` + gallery + concierge-questions).
+2. Photos batch ou upload ciblé depuis source **officielle**.
+3. `reviews:sync -- --slug=<slug>`.
+4. `promote:{slug}-golden`.
+5. `audit:hotel-fiches-cdc -- --slug=<slug>`.
+6. Walk-through navigateur FR + EN ([`user-acceptance-loop`](mdc:.cursor/skills/user-acceptance-loop/SKILL.md)) **avant commit**.
+
+## Gates audit (automatisés)
+
+- `cdc.10.google_reviews_gmb`
+- `cdc.11.concierge_informative_tone`
+- `gold.poi_images`
+
+Voir `scripts/editorial-pilot/src/hotels/hotel-fiche-cdc-gates.ts`.

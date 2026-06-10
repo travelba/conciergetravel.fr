@@ -55,6 +55,21 @@ describe('parseMakcorpsResponse', () => {
     expect(out).toEqual([{ provider: 'booking_com', price: 120 }]);
   });
 
+  it('maps Expedia.com and LuxuryCollection (Marriott direct)', () => {
+    const out = parseMakcorpsResponse({
+      comparison: [
+        {
+          vendor1: 'Expedia.com',
+          Totalprice1: '$2,504',
+          vendor2: 'LuxuryCollection',
+          Totalprice2: '$2,506',
+        },
+      ],
+    });
+    expect(out).toContainEqual({ provider: 'expedia', price: 2504 });
+    expect(out).toContainEqual({ provider: 'official_site', price: 2506 });
+  });
+
   it('drops vendors not in the allow-list (e.g. Agoda)', () => {
     const out = parseMakcorpsResponse({
       comparison: [{ vendor1: 'Agoda', price1: '90.00' }],

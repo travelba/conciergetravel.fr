@@ -20,6 +20,7 @@ import {
   orderKitSignatureExperiences,
 } from './kit-airelles-display';
 import { resolveKitAmenityBlocks } from './resolve-kit-amenity-blocks';
+import { KIT_GENERIC_ASSETS, resolveKitClubIllustration } from './kit-generic-assets';
 import { localizeKitOfficialHref, resolveKitLearnMoreLink } from './kit-learn-more-link';
 import {
   escapeHtml,
@@ -282,7 +283,7 @@ function renderKidClubBlock(model: HotelKitModel): string {
             }
           : model.media.kidClub(k.title);
       return `<div class="bref-sub">
-        <h3>${model.locale === 'en' ? 'Kids Club' : 'Kids Club — Airelles Summer Camp'}</h3>
+        <h3>${model.locale === 'en' ? 'Kids Club' : 'Kids Club'}</h3>
         <div class="feature-block reverse">
           <div class="fb-media mini-gallery">
             <div class="mg-track">
@@ -877,16 +878,13 @@ export function renderKitAcces(model: HotelKitModel): string {
     googleQuotes.forEach((review, index) => {
       reviewCards.push(renderGoogleReviewCardHtml(review, model.locale, index));
     });
-  } else {
-    for (const review of model.featuredReviews.slice(0, 2)) {
-      reviewCards.push(
-        `<blockquote class="review"><div class="rv-top"><span class="rv-score">${escapeHtml(review.rating !== null ? formatRatingFr(review.rating) : '5,0')}</span><span class="rv-name">${escapeHtml(review.source)}</span></div><p>« ${escapeHtml(review.quote)} »</p></blockquote>`,
-      );
-    }
-  }
-  if (model.resolvedRating !== null && googleQuotes.length === 0) {
+  } else if (model.resolvedRating !== null) {
+    const mapsLink =
+      model.googleMapsUrl !== null
+        ? `<p class="review-google-link"><a href="${escapeHtml(model.googleMapsUrl)}" target="_blank" rel="noopener noreferrer">${model.locale === 'en' ? 'View all reviews on Google' : 'Voir tous les avis sur Google'}</a></p>`
+        : '';
     reviewCards.push(
-      `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(model.resolvedRating.ratingValue)}</span><span class="rv-name">${model.locale === 'en' ? 'Guest rating' : 'Note voyageurs'} · ${formatReviewCount(model.resolvedRating.reviewCount, model.locale)} ${model.locale === 'en' ? 'reviews' : 'avis'}</span></div><p>${model.locale === 'en' ? 'Verified traveller feedback aggregated for this property.' : 'Retours voyageurs vérifiés agrégés pour cet établissement.'}</p></blockquote>`,
+      `<blockquote class="review"><div class="rv-top"><span class="rv-score">${formatRatingFr(model.resolvedRating.ratingValue)}</span><span class="rv-name">${model.locale === 'en' ? 'Google rating' : 'Note Google'} · ${formatReviewCount(model.resolvedRating.reviewCount, model.locale)} ${model.locale === 'en' ? 'reviews' : 'avis'}</span></div><p>${model.locale === 'en' ? 'Individual Google reviews sync on the next Places refresh — aggregate rating shown below.' : 'Les avis Google nominatifs se synchronisent au prochain rafraîchissement Places — note agrégée ci-dessous.'}</p>${mapsLink}</blockquote>`,
     );
   }
   const reviewsHtml =
@@ -961,10 +959,11 @@ export function renderKitEnBref(model: HotelKitModel): string {
 
 export function renderKitClub(model: HotelKitModel): string {
   const p = localePrefix(model.locale);
+  const clubImg = resolveKitClubIllustration(model);
   return `<section class="htl-section club-inline" id="club">
       <div class="club-grid">
         <div class="club-illus" aria-hidden="true">
-          <img src="/kit/airelles/club-concierge.jpg" alt="${model.locale === 'en' ? 'Le Concierge Club benefits at Airelles Gordes' : 'Avantages Le Concierge Club à Airelles Gordes'}" loading="lazy" width="666" height="1000">
+          <img src="${escapeHtml(clubImg.src)}" alt="${escapeHtml(clubImg.alt)}" loading="lazy" width="666" height="1000">
         </div>
         <div class="club-content">
           <span class="eyebrow left">Le Concierge Club</span>
@@ -1006,7 +1005,9 @@ export function renderKitPresse(model: HotelKitModel): string {
               publicId: post.imagePublicId,
               transforms: 'f_auto,q_auto,c_fill,g_auto,w_400,h_400',
             })
-          : '/kit/airelles/facade-aerienne.jpg';
+          : model.galleryHero !== null
+            ? model.galleryHero.src
+            : KIT_GENERIC_ASSETS.proximity;
       return `<a href="${escapeHtml(model.instagramFeed?.profileUrl ?? '#')}" target="_blank" rel="noopener"><img src="${escapeHtml(src)}" alt="${escapeHtml(post.caption ?? model.name)}" loading="lazy"></a>`;
     })
     .join('\n          ');
@@ -1356,7 +1357,7 @@ export function renderKitProximite(model: HotelKitModel): string {
               publicId: h.hero_image,
               transforms: 'f_auto,q_auto,c_fill,g_auto,w_600,h_450',
             })
-          : '/kit/airelles/velo-village.jpg';
+          : KIT_GENERIC_ASSETS.proximity;
       const name = model.locale === 'en' && h.name_en ? h.name_en : h.name;
       return `<a href="${p}/hotel/${escapeHtml(slug)}" class="hcard">
           <div class="hcard-img"><img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy"></div>

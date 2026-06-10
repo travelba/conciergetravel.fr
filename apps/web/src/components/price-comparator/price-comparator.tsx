@@ -51,6 +51,8 @@ export async function PriceComparator(props: PriceComparatorProps): Promise<Reac
     selectDates: t('selectDates'),
     legal: t('legal'),
     cachedNotice: t('cachedNotice'),
+    conciergeLabel: t('conciergeLabel'),
+    bestRateBadge: t('bestRateBadge'),
     providerLabel: {
       booking_com: t('providerLabel.booking_com'),
       expedia: t('providerLabel.expedia'),

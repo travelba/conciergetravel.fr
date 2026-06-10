@@ -87,6 +87,19 @@ function mergeGoldenRow(row: HotelDetailRow, golden: Record<string, unknown>): H
     email_reservations: golden['email_reservations'] as string,
     concierge_pick: golden['concierge_pick'] as HotelDetailRow['concierge_pick'],
     concierge_hook: golden['concierge_hook'] as HotelDetailRow['concierge_hook'],
+    concierge_questions: golden['concierge_questions'] as HotelDetailRow['concierge_questions'],
+    mice_info: golden['mice_info'] as HotelDetailRow['mice_info'],
+    affiliations: golden['affiliations'] as HotelDetailRow['affiliations'],
+    opened_at: (golden['opened_at'] as string | null | undefined) ?? row.opened_at,
+    transports: (golden['transports'] as HotelDetailRow['transports']) ?? row.transports,
+    latitude: (golden['latitude'] as number | null | undefined) ?? row.latitude,
+    longitude: (golden['longitude'] as number | null | undefined) ?? row.longitude,
+    wikidata_id: (golden['wikidata_id'] as string | null | undefined) ?? row.wikidata_id,
+    wikipedia_url_fr:
+      (golden['wikipedia_url_fr'] as string | null | undefined) ?? row.wikipedia_url_fr,
+    wikipedia_url_en:
+      (golden['wikipedia_url_en'] as string | null | undefined) ?? row.wikipedia_url_en,
+    official_url: (golden['official_url'] as string | null | undefined) ?? row.official_url,
   };
 }
 

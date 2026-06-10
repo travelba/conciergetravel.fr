@@ -1,6 +1,6 @@
 # Skills catalogue — MyConciergeHotel.com
 
-> 37 agent skills covering every vertical. Each skill is a `SKILL.md` file
+> 38 agent skills covering every vertical. Each skill is a `SKILL.md` file
 > with YAML frontmatter (`name`, `description`) that Cursor reads at session
 > start; the body is loaded into context only when the agent decides the
 > skill is relevant to the current task.
@@ -25,6 +25,7 @@ Use this when you don't know where to start.
 | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Booking tunnel (search → offer → payment → confirmation)                                                                                    | [`booking-engine`](booking-engine/SKILL.md)                                                                                                          |
 | Hotel detail page, room sub-pages, editorial fiches                                                                                         | [`content-modeling`](content-modeling/SKILL.md)                                                                                                      |
+| **Hotel kit rollout** (pilotes Airelles/PdG → catalogue — F&B, GMB, POI photos, ton concierge, photo officielle)                            | [`hotel-kit-rollout`](hotel-kit-rollout/SKILL.md) ⭐ NEW                                                                                             |
 | Long-read editorial guides / rankings — **matrice architecture** (combinator, axes, slugOverride, postal_code)                              | [`editorial-rankings-matrix`](editorial-rankings-matrix/SKILL.md) ⭐ NEW                                                                             |
 | Long-read editorial guides / rankings — **LLM pipeline**                                                                                    | [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐                                                                                         |
 | Long-read editorial guides / rankings — **rendering** (TOC, auto-link, callouts)                                                            | [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐ NEW                                                                     |
@@ -110,6 +111,7 @@ Use this when you don't know where to start.
 - [`llm-output-robustness`](llm-output-robustness/SKILL.md) ⭐ — multi-call pipelines, schema drift tolerance.
 - [`concierge-voice-pipeline`](concierge-voice-pipeline/SKILL.md) ⭐ — pass 8, ConciergeAdvice, shortener.
 - [`content-enrichment-pipeline`](content-enrichment-pipeline/SKILL.md) ⭐ — DATAtourisme + Wikidata + Wikipedia + Tavily.
+- [`hotel-kit-rollout`](hotel-kit-rollout/SKILL.md) ⭐ — consignes PO pilotes (Airelles + PdG) → rollout catalogue.
 
 ### SEO, GEO, structured data
 

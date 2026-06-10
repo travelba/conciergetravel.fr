@@ -8,6 +8,7 @@ import {
   dropCannibalizingSections,
   dropDuplicateCategorySections,
   evaluatePoiBuckets,
+  evaluatePoiImages,
   evaluatePoiHandoff,
   evaluateSpaDossier,
   evaluateVenueHandoff,
@@ -66,6 +67,14 @@ describe('poi handoff + buckets', () => {
   it('reports missing bucket coverage', () => {
     const cov = evaluatePoiBuckets([{ name: 'a', bucket: 'visit', distance_meters: 1 }]);
     expect(cov.allBucketsCovered).toBe(false);
+  });
+
+  it('counts POIs with image_public_id', () => {
+    const cov = evaluatePoiImages([
+      { name: 'a', image_public_id: 'cct/hotels/x/poi-a' },
+      { name: 'b' },
+    ]);
+    expect(cov).toEqual({ total: 2, withImage: 1 });
   });
 });
 

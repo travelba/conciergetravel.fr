@@ -478,6 +478,13 @@ sequence:
 | D    | 0-9 photos + `parent_group = independent`                  | Tavily on `official_url` only + manual editorial review   |
 | DONE | ≥ 10 photos AND has `hero_image`                           | Skip entirely (idempotent re-run never re-pays)           |
 
+**Rule — photo mismatch (PO consigne D12, skill `hotel-kit-rollout`)** : when a
+gallery slot shows the **wrong subject** (patio labeled spa, bathroom labeled
+wellness suite), **re-source from the official site** (Tavily → chain DAM /
+`official_url` / Google Places) and **re-upload to Cloudinary** — never fix by
+metadata/resolver remap alone. Reference fix: PdG `press-17` → Marriott Scene7
+`lc-parlc-lux-parlc-spa-double-13746` via `pdg:photos:wellness`.
+
 **Why this matters:**
 
 1. **Independents need a different strategy.** Tier D (1282 hotels =
@@ -808,8 +815,8 @@ isn't guaranteed-sorted.
 - `.cursor/rules/photo-quality.mdc` (sourcing legality, banned domains).
 - `.cursor/skills/photo-quality-seo-geo-agentique/SKILL.md` (signature
   transform `ADR-0024`, JSON-LD ImageObject contract).
-- `.cursor/skills/content-enrichment-pipeline/SKILL.md` (Wikimedia,
-  Tavily extract).
+- `.cursor/skills/hotel-kit-rollout/SKILL.md` (PO consignes D7–D12, photo
+  re-source workflow, pilot checklist).
 - `.cursor/skills/backoffice-cms/SKILL.md` §direct-sql-bypass (cache
   invalidation after bulk update).
 - `.cursor/skills/api-integration/SKILL.md` (HTTP client patterns for

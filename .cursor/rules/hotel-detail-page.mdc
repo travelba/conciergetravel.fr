@@ -115,4 +115,4 @@ flowchart TB
 
 - CDC v3.0 §2 (architecture fiche, 15 blocs), §3 (URL, i18n, accessibilité), §4 (data model), §6 (SEO/GEO).
 - ADR-0007 (ISR — cible de rendu), ADR-0008, ADR-0009, ADR-0025 (fiche éditoriale d'abord). Note : la décision « éditorial avant booking » vit dans **ADR-0025**, **pas** dans ADR-0024 (qui concerne le transform photo signature).
-- Skills : `seo-technical`, `geo-llm-optimization`, `structured-data-schema-org`, `content-modeling`, `accessibility`, `performance-engineering`, `booking-engine`, `hotel-faq-perplexity-enrichment` (kit FAQ Perplexity 40–60 + concierge questions).
+- Skills : `seo-technical`, `geo-llm-optimization`, `structured-data-schema-org`, `content-modeling`, `accessibility`, `performance-engineering`, `booking-engine`, `hotel-faq-perplexity-enrichment` (kit FAQ Perplexity 40–60 + concierge questions), **`hotel-kit-rollout`** (consignes PO pilotes → catalogue, D7–D12).

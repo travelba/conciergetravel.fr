@@ -173,6 +173,25 @@ export function evaluatePoiBuckets(pointsOfInterest: unknown): PoiBucketCoverage
   };
 }
 
+export interface PoiImageCoverage {
+  readonly total: number;
+  readonly withImage: number;
+}
+
+/** CDC D8 — every POI card in #lieu must carry a Cloudinary `image_public_id`. */
+export function evaluatePoiImages(pointsOfInterest: unknown): PoiImageCoverage {
+  const items = Array.isArray(pointsOfInterest) ? (pointsOfInterest as unknown[]) : [];
+  let withImage = 0;
+  for (const item of items) {
+    const rec = asRecord(item);
+    if (rec === null) continue;
+    if (nonEmptyString(rec['image_public_id']) || nonEmptyString(rec['imagePublicId'])) {
+      withImage += 1;
+    }
+  }
+  return { total: items.length, withImage };
+}
+
 /* ── Spa dossier richness ── */
 
 export interface SpaDossier {

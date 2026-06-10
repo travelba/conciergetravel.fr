@@ -4040,6 +4040,21 @@ body.booking-mobile-sheet-open {
   color: var(--accent);
   font-weight: 500;
 }
+.mch-kit .rc-row.rc-us {
+  background: var(--creme-2);
+  margin: 0 -20px;
+  padding: 11px 20px;
+  border-radius: 6px;
+  border-bottom: none;
+}
+.mch-kit .rc-row.rc-us .rc-name {
+  font-weight: 500;
+  color: var(--noir);
+}
+.mch-kit .rc-row.rc-us .rc-amt {
+  color: var(--accent);
+  font-weight: 500;
+}
 .mch-kit .rc-foot {
   font-size: 10.5px;
   color: var(--texte-doux);

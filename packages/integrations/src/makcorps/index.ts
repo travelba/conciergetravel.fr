@@ -11,3 +11,4 @@ export {
 } from './client';
 export { MakcorpsHotelQuoteInputSchema, type MakcorpsHotelQuoteInput } from './types';
 export { parseMakcorpsResponse, type ParsedMakcorpsEntry } from './parse';
+export { resolveMakcorpsHotelId } from './mapping';

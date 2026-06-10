@@ -11,11 +11,11 @@ description: Perplexity-driven exhaustive hotel FAQ research for MyConciergeHote
 
 Two-tier FAQ model — **every** hotel fiche:
 
-| Layer         | Column                | Volume         | Tone                  | Consumer                                           |
-| ------------- | --------------------- | -------------- | --------------------- | -------------------------------------------------- |
-| **Kit**       | `faq_content_kit`     | 40–60 (max 80) | Factuel, fiche info   | DOM `<HotelFaq>` grouped by `group_fr`             |
-| **Promote**   | `faq_content`         | 10–15          | Factuel               | JSON-LD `FAQPage` + publish gates + Top 5 featured |
-| **Concierge** | `concierge_questions` | 20–30          | Voix « Je », proactif | Bloc `#concierge-questions`                        |
+| Layer         | Column                | Volume         | Tone                                      | Consumer                                           |
+| ------------- | --------------------- | -------------- | ----------------------------------------- | -------------------------------------------------- |
+| **Kit**       | `faq_content_kit`     | 40–60 (max 80) | Factuel, fiche info                       | DOM `<HotelFaq>` grouped by `group_fr`             |
+| **Promote**   | `faq_content`         | 10–15          | Factuel                                   | JSON-LD `FAQPage` + publish gates + Top 5 featured |
+| **Concierge** | `concierge_questions` | 20–30          | Informatif, conciergerie (pas de « Je… ») | Bloc `#concierge-questions`                        |
 
 Golden reference: `DA/_generated/airelles-faq-data.json` (77 kit + 15 promote + 28 concierge).
 
@@ -112,6 +112,20 @@ Prioritise high-traffic fiches (Palaces Paris, Relais & Châteaux flagship) if t
 
 Components: `apps/web/src/components/hotel/hotel-faq.tsx`, `hotel-concierge-questions.tsx`.
 
+## Rule 7 — Pilot fix → project contract (non-negotiable)
+
+Any improvement validated on a **pilot fiche** (Airelles, Prince de Galles, …) must land as a **catalogue-wide contract**, not a one-off slug patch.
+
+| Pilot learning (2026-06)                                        | Project-wide application                                                                                                                                    |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit omitted `faq_content_kit` / `concierge_questions` columns | `CDC_HOTEL_COLUMNS` in `audit-hotel-fiche-cdc.ts` — all audits                                                                                              |
+| JSON-LD used kit slice (42) instead of promote (15)             | `readFaqPromote()` + `build-hotel-kit-json-ld.ts` — **every** kit + legacy fiche                                                                            |
+| Kit scaffold without Perplexity taxonomy / EN                   | `evaluateFaqKitRowEnrichment()` + CDC checks `cdc.11.faq_kit_*` / `cdc.11.concierge_*` — **every** published row                                            |
+| Concierge golden fallback FR-only                               | `kit-concierge-questions.ts` uses `pickLocalizedText` — all kit slugs                                                                                       |
+| Slug-specific normalizer script                                 | Prefer `faq:perplexity:validate` → `push` → optional `sync-hotel-faq-perplexity-to-ts.ts`; slug scripts are **temporary** until folded into the generic CLI |
+
+**Before closing a pilot PR:** ask « Does this diff apply only to `prince-de-galles-paris` / `les-airelles-gordes`? » If yes → extract shared helper, wire audit/gates/render path, document in this skill. **2218/2219 fiches** still lack kit data (2026-06-10) — gates surface the gap; remediation is Perplexity waves, not pilot exceptions.
+
 ## Anti-patterns
 
 | Anti-pattern                         | Why it fails                                              | Correct path                                          |
@@ -120,6 +134,7 @@ Components: `apps/web/src/components/hotel/hotel-faq.tsx`, `hotel-concierge-ques
 | 60 items in `faq_content` only       | Breaks max-15 gate + JSON-LD cap                          | Split kit / promote via `faq-perplexity-transform.ts` |
 | Concierge block Airelles-only        | Bloc `#concierge-questions` on all fiches with data       | `readConciergeQuestionGroups()` in standard page      |
 | Skip validate before push            | Zod + coverage gates catch canonical gaps                 | Always `faq:perplexity:validate` first                |
+| Pilot-only gate / render fix         | 2219 fiches must share the same contract                  | Rule 7 — extract to shared module + CDC audit         |
 
 ## References
 
@@ -128,3 +143,4 @@ Components: `apps/web/src/components/hotel/hotel-faq.tsx`, `hotel-concierge-ques
 - [`geo-llm-optimization`](../geo-llm-optimization/SKILL.md) — FAQ extraction / GEO
 - [`content-enrichment-pipeline`](../content-enrichment-pipeline/SKILL.md) — cross-source validation
 - [`concierge-voice-pipeline`](../concierge-voice-pipeline/SKILL.md) — voix « Je » Top 5
+- [`hotel-kit-rollout`](../hotel-kit-rollout/SKILL.md) — consignes PO D7–D12 (ton concierge informatif, GMB, POI photos)

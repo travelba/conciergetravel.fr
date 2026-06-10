@@ -4,6 +4,8 @@ import { buildCloudinarySrc } from '@mch/ui';
 
 import type { LocalisedGalleryImage } from '@/server/hotels/get-hotel-by-slug';
 
+import { isAirellesKitSlug, KIT_GENERIC_ASSETS } from './kit-generic-assets';
+
 export interface KitMediaTile {
   readonly src: string;
   readonly alt: string;
@@ -62,7 +64,9 @@ export function createKitMediaResolver(
   cloudName: string,
   gallery: readonly LocalisedGalleryImage[],
   hotelName: string,
+  slugFr: string,
 ): KitMediaResolver {
+  const airelles = isAirellesKitSlug(slugFr);
   const byCategory = (category: string): readonly LocalisedGalleryImage[] =>
     gallery.filter((g) => g.category?.toLowerCase() === category);
 
@@ -80,9 +84,34 @@ export function createKitMediaResolver(
 
   return {
     spaHero(defaultAlt) {
-      // `press-21` gallery metadata says « piscine intérieure » but the asset was
-      // overwritten by a room upload — the kit static is the canonical spa pool.
-      return staticTile('/kit/airelles/spa-piscine.jpg', defaultAlt || `${hotelName} — spa`);
+      const spaGallery = byCategory('spa');
+      const wellnessPattern =
+        /wellness suite|calma|hammam|salle de soin|treatment room|spa suite|rituel/i;
+      const wellnessInSpa = pickGalleryByAlt(spaGallery, wellnessPattern);
+      if (wellnessInSpa !== undefined) {
+        return toCloudinaryTile(
+          cloudName,
+          wellnessInSpa,
+          'f_auto,q_auto,c_fill,g_auto,w_900,h_675',
+        );
+      }
+      const wellnessInPool = pickGalleryByAlt(poolGallery, wellnessPattern);
+      if (wellnessInPool !== undefined) {
+        return toCloudinaryTile(
+          cloudName,
+          wellnessInPool,
+          'f_auto,q_auto,c_fill,g_auto,w_900,h_675',
+        );
+      }
+      const spaImg = spaGallery[0];
+      if (spaImg !== undefined) {
+        return toCloudinaryTile(cloudName, spaImg, 'f_auto,q_auto,c_fill,g_auto,w_900,h_675');
+      }
+      if (airelles) {
+        // `press-21` was overwritten by a room upload — Airelles kit static is canonical.
+        return staticTile('/kit/airelles/spa-piscine.jpg', defaultAlt || `${hotelName} — spa`);
+      }
+      return staticTile(KIT_GENERIC_ASSETS.spa, defaultAlt || `${hotelName} — spa`);
     },
 
     diningForVenue(venueName, index, defaultAlt) {
@@ -95,8 +124,11 @@ export function createKitMediaResolver(
       if (diningImg !== undefined) {
         return toCloudinaryTile(cloudName, diningImg, 'f_auto,q_auto,c_fill,g_auto,w_700,h_525');
       }
-      const fallback = KIT_DINING_ORDER[index % KIT_DINING_ORDER.length] ?? KIT_DINING_ORDER[0];
-      return staticTile(fallback, defaultAlt || venueName);
+      if (airelles) {
+        const fallback = KIT_DINING_ORDER[index % KIT_DINING_ORDER.length] ?? KIT_DINING_ORDER[0];
+        return staticTile(fallback, defaultAlt || venueName);
+      }
+      return staticTile(KIT_GENERIC_ASSETS.dining, defaultAlt || venueName);
     },
 
     kidClub(defaultAlt) {
@@ -104,7 +136,13 @@ export function createKitMediaResolver(
       if (kidsPool !== undefined) {
         return toCloudinaryTile(cloudName, kidsPool, 'f_auto,q_auto,c_fill,g_auto,w_900,h_675');
       }
-      return staticTile('/kit/airelles/kids-piscine.jpg', defaultAlt || `${hotelName} — kids club`);
+      if (airelles) {
+        return staticTile(
+          '/kit/airelles/kids-piscine.jpg',
+          defaultAlt || `${hotelName} — kids club`,
+        );
+      }
+      return staticTile(KIT_GENERIC_ASSETS.experience[0], defaultAlt || `${hotelName} — kids club`);
     },
 
     experienceAt(index, defaultAlt) {
@@ -112,11 +150,13 @@ export function createKitMediaResolver(
       if (img !== undefined) {
         return toCloudinaryTile(cloudName, img, 'f_auto,q_auto,c_fill,g_auto,w_700,h_525');
       }
-      const fallbacks = [
-        '/kit/airelles/velo-village.jpg',
-        '/kit/airelles/constance-jardin.jpg',
-        '/kit/airelles/piscine-terrasse.jpg',
-      ] as const;
+      const fallbacks = airelles
+        ? ([
+            '/kit/airelles/velo-village.jpg',
+            '/kit/airelles/constance-jardin.jpg',
+            '/kit/airelles/piscine-terrasse.jpg',
+          ] as const)
+        : KIT_GENERIC_ASSETS.experience;
       const fb = fallbacks[index % fallbacks.length] ?? fallbacks[0];
       return staticTile(fb, defaultAlt);
     },

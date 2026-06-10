@@ -768,7 +768,7 @@ export async function prepareHotelKitModel(
     other: t('amenityCategories.other'),
   } as const;
 
-  const media = createKitMediaResolver(cloudName, galleryImages, name);
+  const media = createKitMediaResolver(cloudName, galleryImages, name, slugFr);
 
   const featuredReviews = readFeaturedReviews(row, kitLocale);
   const awards = readAwards(row, kitLocale);
@@ -897,9 +897,7 @@ export async function prepareHotelKitModel(
           ? 'Everything a guest might ask before and during their stay — rooms, dining, spa, family and hotel policies.'
           : "Tout ce qu'un voyageur peut se demander avant et pendant son séjour — adresse, chambres, tables, spa, famille et politiques de la maison.",
       conciergeQuestions:
-        kitLocale === 'en'
-          ? 'The Concierge answers — Airelles Gordes, La Bastide'
-          : 'Le Concierge répond — Airelles Gordes, La Bastide',
+        kitLocale === 'en' ? `The Concierge answers — ${name}` : `Le Concierge répond — ${name}`,
       conciergeQuestionsLede:
         kitLocale === 'en'
           ? 'Tables, transfers, spa, excursions or special occasions — how the Concierge replies when you ask.'

@@ -25,7 +25,7 @@ Pas de dérogation « fiche standard vs kit » : le kit Perplexity **est** le co
 | --- | --- | --- |
 | `faq_content_kit` | **40–60** (max 80) | FAQ factuelles exhaustives — DOM / GEO / LLM |
 | `faq_content` | **10–15** | Sous-ensemble promote — JSON-LD + 10 canoniques + Top 5 featured |
-| `concierge_questions` | **20–30** | Q/R voix concierge proactive (« Je… ») — bloc `#concierge-questions` |
+| `concierge_questions` | **20–30** | Q/R **informatives** (conciergerie, 3ᵉ personne) — bloc `#concierge-questions` ; **interdit** l'engagement au 1ᵉʳ personne (« Je réserve », « I confirm ») |
 
 **Interdit** : stocker 40–60 items uniquement dans `faq_content` (casse le gate max 15).
 
@@ -33,7 +33,7 @@ Pas de dérogation « fiche standard vs kit » : le kit Perplexity **est** le co
 
 - Recherche Perplexity croisée : site officiel, TripAdvisor, Booking, Expedia, Hotels.com, Michelin, presse luxe, blogs, Google reviews.
 - Chiffre non confirmé par ≥ 2 sources → phrase de fallback conciergerie (pas d'invention).
-- Ton **factuel** dans `faq[]` ; ton **concierge proactif** uniquement dans `concierge_questions[]`.
+- Ton **factuel** dans `faq[]` et dans `concierge_questions[]` : réponses **informatives** (horaires, procédure, alternatives) — la conciergerie **peut** organiser, sans s'engager au « je » (« La conciergerie peut… », « Il est recommandé de… »).
 
 ## Gates (PR + publish)
 
@@ -43,7 +43,9 @@ Un agent ou une PR qui touche la FAQ hôtel **doit** :
 2. Pousser : `pnpm --filter @mch/editorial-pilot faq:perplexity:push -- --slug=… --input=…`
 3. Humanizer Top 5 : `pnpm --filter @mch/editorial-pilot concierge:humanize:faq -- --slug=…`
 
-Checks audit CDC : `cdc.11.faq_kit_count`, `cdc.11.concierge_questions_count` (blocker si publié).
+Checks audit CDC : `cdc.11.faq_kit_count`, `cdc.11.concierge_questions_count` (blocker si publié) ; lorsque kit ≥ 40 : `cdc.11.faq_kit_taxonomy`, `cdc.11.faq_kit_en_parity`, `cdc.11.concierge_en_parity`, `cdc.11.concierge_taxonomy` (via `evaluateFaqKitRowEnrichment`).
+
+**Pilot → projet :** toute correction validée sur Airelles / Prince de Galles doit être généralisée (audit columns, JSON-LD promote, gates enrichment) — jamais laissée en one-off slug. Voir skill §Rule 7.
 
 ## Rendu web
 

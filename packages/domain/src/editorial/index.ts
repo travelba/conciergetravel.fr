@@ -30,6 +30,7 @@ export * from './golden-template';
 export * from './airelles-golden';
 export * from './prince-de-galles-gallery';
 export * from './prince-de-galles-golden';
+export * from './prince-de-galles-concierge-questions';
 export * from './prince-de-galles-amenities';
 export * from './prince-de-galles-kit-blocks';
 export * from './prince-de-galles-rooms';

@@ -16,16 +16,22 @@
   fact-sheet GEO `#en-bref`, ConciergeAdvice avant la FAQ, note /5 + source,
   **aucune donnée fabriquée**, photos **légales uniquement** (skill `photo-pipeline`).
 
-## Décisions actées (D1–D6)
+## Décisions actées (D1–D12)
 
-| #   | Décision                                                                                                                     |
-| --- | ---------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Organigramme **9 sections du template** = canonique (remplace l'ordre « golden » PO).                                        |
-| D2  | Regrouper les composants épars sous 3 H2 conteneurs : **L'hôtel en bref**, **Ils en parlent**, **Autour de l'hôtel**.        |
-| D3  | Mini-galerie par chambre : câbler `hotel_rooms.images[]` + sourcer les photos chambre.                                       |
-| D4  | **Kid Club** = entrée typée `signature_experiences` (`kind: kid_club`), pas de nouvelle table.                               |
-| D5  | **Le Concierge Club** = composant statique partagé (skill `membership-program`).                                             |
-| D6  | Conflit d'ancre : garder le fact-sheet GEO sous `#en-bref` ; le cluster services du template prend l'ancre `#hotel-en-bref`. |
+| #   | Décision                                                                                                                                                                                                           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D1  | Organigramme **9 sections du template** = canonique (remplace l'ordre « golden » PO).                                                                                                                              |
+| D2  | Regrouper les composants épars sous 3 H2 conteneurs : **L'hôtel en bref**, **Ils en parlent**, **Autour de l'hôtel**.                                                                                              |
+| D3  | Mini-galerie par chambre : câbler `hotel_rooms.images[]` + sourcer les photos chambre.                                                                                                                             |
+| D4  | **Kid Club** = entrée typée `signature_experiences` (`kind: kid_club`), pas de nouvelle table.                                                                                                                     |
+| D5  | **Le Concierge Club** = composant statique partagé (skill `membership-program`).                                                                                                                                   |
+| D6  | Conflit d'ancre : garder le fact-sheet GEO sous `#en-bref` ; le cluster services du template prend l'ancre `#hotel-en-bref`.                                                                                       |
+| D7  | **`restaurant_info.venues`** = **tous** les outlets F&B **officiels** (restaurants **et** bars distincts si le site les sépare). Pas de quota « = Airelles » ; pas de fusion bar/resto si la source les distingue. |
+| D8  | **`#acces` — Avis voyageurs** = **uniquement** `google_reviews[]` sync Google Business Profile (`author` + `publish_time` + texte). **Interdit** le fallback presse / `featured_reviews` dans ce sous-bloc.        |
+| D9  | **`points_of_interest[]`** : **`image_public_id` obligatoire** sur chaque entrée `visit` / `do` / `shop` (rendu `around-item has-img`).                                                                            |
+| D10 | **`#concierge-questions`** : titre dynamique `Le Concierge répond — {hotel.name}` ; réponses **informatives** (3ᵉ personne / conciergerie), **sans engagement** (« Je réserve », « Je confirme »).                 |
+| D11 | **Titres & assets** : jamais de slug de référence hardcodé (ex. « Airelles Gordes ») ; fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                               |
+| D12 | **Photo incorrecte** : re-sourcer depuis le **site officiel** (Tavily / DAM chaîne / Google Places) + upload Cloudinary — **ne pas** se limiter à recatégoriser la galerie existante.                              |
 
 ## Audit données Airelles (Phase 0 — 2026-06-09, Supabase prod)
 
@@ -52,7 +58,7 @@
 | 2   | `#chambres`      | Chambres & suites — carrousel + mini-galerie/chambre                   | `HotelRoomsGrid` → carrousel                                   |
 | 3   | `#hotel-en-bref` | L'hôtel en bref : Services / Expérience / Restaurants / Spa / Kid Club | Amenities + SignatureExperiences + Restaurants + Spa + KidClub |
 | 4   | `#presse`        | Ils en parlent : Presse / Distinctions / Instagram / classement        | Press(split reviews) + Awards + Instagram + FeaturedInRankings |
-| 5   | `#acces`         | Emplacement & accès + Avis voyageurs                                   | `HotelLocation` + `HotelPolicies` + avis notés                 |
+| 5   | `#acces`         | Emplacement & accès + **Avis Google** (auteur + date)                  | `HotelLocation` + `HotelPolicies` + `readGoogleReviews()`      |
 | 6   | `#autour`        | Autour de l'hôtel : visiter / faire / pendant / restos / commerces     | `HotelNeighbourhoodBuckets` + `HotelEvents`                    |
 | 7   | `#faq`           | Questions fréquentes (groupées par thème)                              | `HotelFaq`                                                     |
 | 8   | `#club`          | Le Concierge Club (inline)                                             | **nouveau** `HotelClubInline`                                  |
@@ -69,7 +75,22 @@ JSON-LD : `Hotel` + **`Restaurant`** (nouveau, depuis `restaurant_info`) + `Brea
 - **Phase 2** composants : carrousel chambres (2.1), split presse (2.2), Kid Club (2.3), Concierge Club inline (2.4), JSON-LD Restaurant (2.5).
 - **Phase 3** données Airelles : photos chambre (pipeline Tavily légal), Kid Club, restos autour, prose.
 - **Phase 4** validation : DoD ci-dessous.
-- **Phase 5** généralisation (après « validé » PO).
+- **Phase 5** généralisation (après « validé » PO sur **chaque** pilote données).
+
+## Consignes PO — fiches suivantes (verrouillées 2026-06-10)
+
+> Retours PO **`prince-de-galles-paris`** → règles D7–D12 ci-dessus, généralisées au catalogue.
+> **Skill agent (checklist + workflow)** : [`.cursor/skills/hotel-kit-rollout/SKILL.md`](../../.cursor/skills/hotel-kit-rollout/SKILL.md).
+> **Rule** (auto-suggérée sur fichiers golden/galerie/hotel) : [`.cursor/rules/hotel-kit-rollout.mdc`](../../.cursor/rules/hotel-kit-rollout.mdc).
+
+### Pilotes de référence
+
+| Slug                     | Statut                             | Promote                           |
+| ------------------------ | ---------------------------------- | --------------------------------- |
+| `les-airelles-gordes`    | Structure kit                      | `promote:airelles-golden`         |
+| `prince-de-galles-paris` | Données PO + spa officiel Marriott | `promote:prince-de-galles-golden` |
+
+Avant validation PO sur tout nouveau pilote : checklist skill §Rule 2 + walk-through [`user-acceptance-loop`](../../.cursor/skills/user-acceptance-loop/SKILL.md).
 
 ## Definition of Done — Airelles
 
@@ -77,7 +98,10 @@ JSON-LD : `Hotel` + **`Restaurant`** (nouveau, depuis `restaurant_info`) + `Brea
 - [ ] Chambres en carrousel + mini-galeries (réelles ou 1 photo + placeholder propre).
 - [ ] « L'hôtel en bref » regroupe Services/Expérience/Restaurants/Spa/Kid Club.
 - [ ] « Ils en parlent » regroupe Presse/Distinctions/Instagram/classement.
-- [ ] « Autour » : sous-blocs visiter/faire/pendant/(restos)/commerces.
+- [ ] « Autour » : sous-blocs visiter/faire/pendant/(restos)/commerces **avec photo** (`image_public_id` sur chaque POI).
+- [ ] `#acces` : ≥ 3 avis **Google** (nom utilisateur + date), pas de presse dans « Avis voyageurs ».
+- [ ] `#concierge-questions` : titre `{hotel.name}` ; réponses informatives sans « Je… ».
+- [ ] `#hotel-en-bref` : **tous** les outlets F&B officiels (bars séparés si source distincte).
 - [ ] Aside : carte résa + comparateur (données réelles ou « sélectionnez vos dates »).
 - [ ] Garde-fous : 1 `FAQPage`, `#factual-summary`, `#en-bref`, JSON-LD Hotel+Restaurant+Breadcrumb+FAQ valides, axe clean.
 - [ ] Aucune donnée fabriquée ; aucun hotlink illégal.

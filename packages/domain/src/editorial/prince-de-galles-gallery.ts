@@ -150,28 +150,28 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-13',
     category: 'spa',
-    alt_fr: 'Salle de bain de la Wellness Suite, Prince de Galles Paris',
-    alt_en: 'Bathroom of the Wellness Suite, Prince de Galles Paris',
+    alt_fr: 'Hammam et douche de la Wellness Suite CALMA PARIS, Prince de Galles Paris',
+    alt_en: 'Hammam and shower in the CALMA PARIS Wellness Suite, Prince de Galles Paris',
     caption_fr:
-      'La Wellness Suite accueille soins et hammam sur rendez-vous, dans l’intimité d’une salle de bain en marbre.',
+      'Le hammam de la Wellness Suite CALMA PARIS prolonge les soins visage et corps — accès privatif sur rendez-vous, au cœur du palace George V.',
     caption_en:
-      'The Wellness Suite hosts treatments and a hammam by appointment, in the privacy of a marble bathroom.',
+      'The CALMA PARIS Wellness Suite hammam extends face and body treatments — private access by appointment at the heart of the George V palace.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-14',
     category: 'spa',
-    alt_fr: 'Salle de bain à mosaïque colorée de la Suite Mosaïque, Prince de Galles Paris',
-    alt_en: 'Colourful mosaic bathroom of the Mosaic Suite, Prince de Galles Paris',
+    alt_fr: 'Espace détente de la Wellness Suite CALMA PARIS, Prince de Galles Paris',
+    alt_en: 'Relaxation area of the CALMA PARIS Wellness Suite, Prince de Galles Paris',
     caption_fr:
-      'La mosaïque de céramique aux teintes Art déco habille la salle de bain, l’une des plus photogéniques de la maison.',
+      'Matériaux nobles et lumière tamisée composent l’atmosphère méditerranéenne de la Wellness Suite, exclusive au Prince de Galles à Paris.',
     caption_en:
-      'Ceramic mosaic in Art Deco hues dresses the bathroom, one of the most photogenic in the house.',
+      'Noble materials and soft light shape the Mediterranean mood of the Wellness Suite, exclusive to Prince de Galles in Paris.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-15',
-    category: 'spa',
+    category: 'detail',
     alt_fr: 'Salle de bain en marbre d’une suite signature, Prince de Galles Paris',
     alt_en: 'Marble bathroom of a signature suite, Prince de Galles Paris',
     caption_fr:
@@ -182,7 +182,7 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-16',
-    category: 'pool',
+    category: 'detail',
     alt_fr: 'Salle de fitness 24h/24 du Prince de Galles Paris',
     alt_en: '24-hour fitness room at Prince de Galles Paris',
     caption_fr:
@@ -193,13 +193,13 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-17',
-    category: 'pool',
-    alt_fr: 'Wellness Suite CALMA au Prince de Galles Paris',
-    alt_en: 'CALMA Wellness Suite at Prince de Galles Paris',
+    category: 'spa',
+    alt_fr: 'Massage duo en Wellness Suite CALMA PARIS, Prince de Galles Paris',
+    alt_en: 'Duo massage in the CALMA PARIS Wellness Suite, Prince de Galles Paris',
     caption_fr:
-      'La Wellness Suite CALMA accueille soins et hammam sur rendez-vous — alternative bien-être lorsque le palace ne dispose pas de bassin.',
+      'La Wellness Suite CALMA PARIS propose massages duo et rituels à la fleur d’oranger amère — exclusive au palace, sur rendez-vous de 9 h à 21 h.',
     caption_en:
-      'The CALMA Wellness Suite hosts treatments and a hammam by appointment — the wellness alternative where the palace has no pool.',
+      'The CALMA PARIS Wellness Suite offers duo massages and bitter-orange blossom rituals — exclusive to the palace, by appointment from 9 am to 9 pm.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {

@@ -12,6 +12,7 @@ import { Apify, Makcorps } from '@mch/integrations';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { redis } from '@/lib/redis';
 
+import { fetchConciergePriceMinor } from './concierge-price';
 import { incrementAndCheckMakcorpsQuota, peekMakcorpsQuota } from './quota';
 import { persistComparison, readLastPersistedComparison } from './persist';
 
@@ -48,6 +49,8 @@ export type PriceComparisonOutcome =
       readonly available: true;
       readonly source: PriceComparisonSource;
       readonly normalized: NormalizedComparison;
+      /** Live MyConciergeHotel rate (EUR cents TTC) when supplier ARI exists. */
+      readonly priceConciergeMinor: number | null;
       /**
        * When `true`, the data comes from the persisted fallback because
        * the Makcorps daily quota was exhausted. The widget shows a
@@ -138,6 +141,54 @@ function normalizedFromPersisted(
   });
 }
 
+interface CompetitorFetchResult {
+  readonly entries: readonly RawCompetitorEntry[];
+  readonly rawPayload: unknown;
+  readonly source: PriceComparisonSource;
+}
+
+async function fetchCompetitorEntries(
+  hotel: HotelLookup,
+  input: PriceComparisonInput,
+): Promise<CompetitorFetchResult> {
+  let entries: readonly RawCompetitorEntry[] = [];
+  let rawPayload: unknown = null;
+  let source: PriceComparisonSource = 'makcorps';
+
+  if (hotel.makcorpsHotelId !== null) {
+    const mkCfg = Makcorps.makcorpsConfigFromSharedEnv();
+    const mkResult = await Makcorps.fetchMakcorpsHotelQuotes(mkCfg, {
+      hotelId: hotel.makcorpsHotelId,
+      checkin: input.checkIn,
+      checkout: input.checkOut,
+      adults: input.adults,
+      currency: 'EUR',
+    });
+    if (mkResult.ok) {
+      rawPayload = mkResult.value;
+      entries = Makcorps.parseMakcorpsResponse(mkResult.value);
+    }
+  }
+
+  if (entries.length === 0) {
+    const apifyCfg = Apify.apifyConfigFromSharedEnv();
+    const apifyResult = await Apify.fetchApifyHotelQuotes(apifyCfg, {
+      hotelName: hotel.name,
+      city: hotel.city,
+      checkin: input.checkIn,
+      checkout: input.checkOut,
+      adults: input.adults,
+    });
+    if (apifyResult.ok) {
+      entries = apifyResult.value;
+      source = 'apify';
+      rawPayload = null;
+    }
+  }
+
+  return { entries, rawPayload, source };
+}
+
 /**
  * Orchestrates the full comparator pipeline (skill:
  * competitive-pricing-comparison §Architecture).
@@ -161,75 +212,92 @@ export async function getPriceComparison(
   const hotel = await lookupHotel(input.hotelId);
   if (hotel === null) return { available: false, reason: 'unknown_hotel' };
 
-  if (hotel.makcorpsHotelId === null) {
+  const stayQuery = {
+    checkIn: input.checkIn,
+    checkOut: input.checkOut,
+    adults: input.adults,
+    currency: 'EUR' as const,
+  };
+
+  const [cached, priceConciergeMinorEarly] = await Promise.all([
+    readFromCache(input),
+    fetchConciergePriceMinor(input.hotelId, stayQuery),
+  ]);
+  if (cached !== null && cached.competitors.length > 0) {
+    return {
+      available: true,
+      source: 'cache',
+      normalized: cached,
+      priceConciergeMinor: priceConciergeMinorEarly,
+      cached: false,
+    };
+  }
+
+  const apifyConfigured =
+    Apify.apifyConfigFromSharedEnv().token.length > 0 &&
+    Apify.apifyConfigFromSharedEnv().actorId.length > 0;
+  if (hotel.makcorpsHotelId === null && !apifyConfigured) {
+    const priceConciergeMinor = await fetchConciergePriceMinor(input.hotelId, stayQuery);
+    if (priceConciergeMinor !== null) {
+      return {
+        available: true,
+        source: 'cache',
+        normalized: normalizeComparison({
+          entries: [],
+          stay: stayQuery,
+        }),
+        priceConciergeMinor,
+        cached: false,
+      };
+    }
     return { available: false, reason: 'no_makcorps_id' };
   }
 
-  const cached = await readFromCache(input);
-  if (cached !== null && cached.competitors.length > 0) {
-    return { available: true, source: 'cache', normalized: cached, cached: false };
-  }
-
-  // Quota check **before** the Makcorps call.
-  const peek = await peekMakcorpsQuota();
-  if (peek.used >= peek.quota) {
-    const persisted = await readLastPersistedComparison(
-      input.hotelId,
-      input.checkIn,
-      input.checkOut,
-    );
-    if (persisted !== null) {
-      const normalized = normalizedFromPersisted(persisted, input);
-      if (normalized.competitors.length > 0) {
+  // Quota check **before** the Makcorps call (Apify-only hotels skip this gate).
+  if (hotel.makcorpsHotelId !== null) {
+    const peek = await peekMakcorpsQuota();
+    if (peek.used >= peek.quota) {
+      const persisted = await readLastPersistedComparison(
+        input.hotelId,
+        input.checkIn,
+        input.checkOut,
+      );
+      const priceConciergeMinor = await fetchConciergePriceMinor(input.hotelId, stayQuery);
+      if (persisted !== null) {
+        const normalized = normalizedFromPersisted(persisted, input);
+        if (normalized.competitors.length > 0) {
+          return {
+            available: true,
+            source: 'persisted_fallback',
+            normalized,
+            priceConciergeMinor,
+            cached: true,
+          };
+        }
+      }
+      if (priceConciergeMinor !== null) {
         return {
           available: true,
           source: 'persisted_fallback',
-          normalized,
+          normalized: normalizeComparison({ entries: [], stay: stayQuery }),
+          priceConciergeMinor,
           cached: true,
         };
       }
+      return { available: false, reason: 'vendor_error' };
     }
-    return { available: false, reason: 'vendor_error' };
+
+    await incrementAndCheckMakcorpsQuota();
   }
 
-  // Reserve a slot, then attempt the vendor call.
-  await incrementAndCheckMakcorpsQuota();
-
-  const mkCfg = Makcorps.makcorpsConfigFromSharedEnv();
-  const mkResult = await Makcorps.fetchMakcorpsHotelQuotes(mkCfg, {
-    hotelId: hotel.makcorpsHotelId,
-    checkin: input.checkIn,
-    checkout: input.checkOut,
-    adults: input.adults,
-    currency: 'EUR',
-  });
-
-  let entries: readonly RawCompetitorEntry[] = [];
-  let rawPayload: unknown = null;
-  let source: PriceComparisonSource = 'makcorps';
-
-  if (mkResult.ok) {
-    rawPayload = mkResult.value;
-    entries = Makcorps.parseMakcorpsResponse(mkResult.value);
-  } else {
-    // Vendor fallback path — Apify is opt-in (token may be empty).
-    const apifyCfg = Apify.apifyConfigFromSharedEnv();
-    const apifyResult = await Apify.fetchApifyHotelQuotes(apifyCfg, {
-      hotelName: hotel.name,
-      city: hotel.city,
-      checkin: input.checkIn,
-      checkout: input.checkOut,
-      adults: input.adults,
-    });
-    if (apifyResult.ok) {
-      entries = apifyResult.value;
-      source = 'apify';
-    }
-  }
+  const [priceConciergeMinor, { entries, rawPayload, source }] = await Promise.all([
+    fetchConciergePriceMinor(input.hotelId, stayQuery),
+    fetchCompetitorEntries(hotel, input),
+  ]);
 
   const normalized = normalizeComparison({
     entries,
-    stay: { checkIn: input.checkIn, checkOut: input.checkOut, adults: input.adults },
+    stay: stayQuery,
   });
 
   if (normalized.competitors.length === 0) {
@@ -246,9 +314,19 @@ export async function getPriceComparison(
           available: true,
           source: 'persisted_fallback',
           normalized: fallback,
+          priceConciergeMinor,
           cached: true,
         };
       }
+    }
+    if (priceConciergeMinor !== null) {
+      return {
+        available: true,
+        source,
+        normalized,
+        priceConciergeMinor,
+        cached: false,
+      };
     }
     return { available: false, reason: 'no_data' };
   }
@@ -263,5 +341,5 @@ export async function getPriceComparison(
     rawPayload,
   });
 
-  return { available: true, source, normalized, cached: false };
+  return { available: true, source, normalized, priceConciergeMinor, cached: false };
 }

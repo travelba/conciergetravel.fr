@@ -21,12 +21,22 @@ const PROVIDER_MAP: Record<string, CompetitorProvider> = {
   'booking.com': 'booking_com',
   booking: 'booking_com',
   expedia: 'expedia',
+  'expedia.com': 'expedia',
   'hotels.com': 'hotels_com',
   hotels: 'hotels_com',
   'official site': 'official_site',
   official: 'official_site',
   direct: 'official_site',
+  luxurycollection: 'official_site',
+  'luxury collection': 'official_site',
 };
+
+const normalizeVendorName = (name: string): string =>
+  name
+    .trim()
+    .toLowerCase()
+    .replace(/\.com$/u, '')
+    .replace(/\s+/gu, ' ');
 
 export interface ParsedMakcorpsEntry {
   readonly provider: CompetitorProvider;
@@ -35,8 +45,8 @@ export interface ParsedMakcorpsEntry {
 
 const tryProvider = (name: unknown): CompetitorProvider | null => {
   if (typeof name !== 'string') return null;
-  const key = name.trim().toLowerCase();
-  return PROVIDER_MAP[key] ?? null;
+  const key = normalizeVendorName(name);
+  return PROVIDER_MAP[key] ?? PROVIDER_MAP[name.trim().toLowerCase()] ?? null;
 };
 
 const tryPrice = (value: unknown): number | null => {
@@ -44,9 +54,11 @@ const tryPrice = (value: unknown): number | null => {
     return Number.isFinite(value) && value > 0 ? value : null;
   }
   if (typeof value === 'string') {
-    // Tolerate "EUR 120.00", "120,00 €", "120" — strip non-numeric/dot/comma
-    // then normalise the decimal separator.
-    const cleaned = value.replace(/[^\d.,-]/g, '').replace(',', '.');
+    // Tolerate "EUR 120.00", "120,50 €", "$2,504" (US thousands), "120" —
+    // strip currency symbols then normalise separators.
+    let cleaned = value.replace(/[^\d.,\s-]/g, '').trim();
+    cleaned = cleaned.replace(/,(?=\d{3}(?:,|\.|\b|-|$))/gu, '');
+    cleaned = cleaned.replace(/\s/gu, '').replace(',', '.');
     const n = Number.parseFloat(cleaned);
     return Number.isFinite(n) && n > 0 ? n : null;
   }
@@ -87,7 +99,10 @@ function extractFromRow(row: Record<string, unknown>): ParsedMakcorpsEntry[] {
     const idx = match[1]!;
     const provider = tryProvider(row[key]);
     if (provider === null) continue;
-    const price = tryPrice(row[`price${idx}`]);
+    const totalKey = `Totalprice${idx}`;
+    const totalKeyAlt = `totalprice${idx}`;
+    const price =
+      tryPrice(row[totalKey]) ?? tryPrice(row[totalKeyAlt]) ?? tryPrice(row[`price${idx}`]);
     if (price === null) continue;
     out.push({ provider, price });
   }

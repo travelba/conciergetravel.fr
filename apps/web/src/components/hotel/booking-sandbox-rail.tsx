@@ -1,15 +1,17 @@
 import type { ReactElement } from 'react';
 import { getTranslations } from 'next-intl/server';
 
-import { SubmitButton } from '@/components/booking/submit-button';
 import { getPathname } from '@/i18n/navigation';
+import type { CompetitorProvider } from '@mch/domain/price-comparison';
 
-import { BookingSandboxDateFields } from './booking-sandbox-date-fields';
+import { BookingSandboxLiveAside } from './booking-sandbox-live-aside';
 
 interface BookingSandboxRailProps {
   readonly locale: 'fr' | 'en';
+  readonly hotelId: string;
   readonly hotelName: string;
   readonly slug: string;
+  readonly embeddedInKitAside?: boolean;
 }
 
 function addDaysIso(days: number): string {
@@ -17,22 +19,21 @@ function addDaysIso(days: number): string {
 }
 
 /**
- * Pilote Travelport (Phase 6) — variante **live** du seam `<BookingSlot>` pour
- * l'hôtel allow-listé. Rend un vrai formulaire de réservation (dates +
- * occupants) qui pointe vers la page gated
- * `/[locale]/reservation/sandbox/[slug]/chambres` : sélection chambre/tarif →
- * recap → confirmation/annulation de la réservation sandbox.
- *
- * Aucun paiement à ce stade (preprod). Reste strictement opt-in (gating dans
- * `<BookingSlot>`) ; les autres fiches conservent le placeholder
- * `<BookingComingSoon>`.
+ * Pilote Travelport — dates, tarif MyConciergeHotel et comparatif OTA
+ * dans le même bloc, mis à jour automatiquement quand les dates changent.
  */
 export async function BookingSandboxRail({
   locale,
+  hotelId,
   hotelName,
   slug,
+  embeddedInKitAside = false,
 }: BookingSandboxRailProps): Promise<ReactElement> {
-  const t = await getTranslations({ locale, namespace: 'reservationRooms.rail' });
+  const [tRail, tCompare] = await Promise.all([
+    getTranslations({ locale, namespace: 'reservationRooms.rail' }),
+    getTranslations({ locale, namespace: 'priceComparator' }),
+  ]);
+
   const today = addDaysIso(0);
   const checkIn = addDaysIso(30);
   const checkOut = addDaysIso(31);
@@ -41,36 +42,36 @@ export async function BookingSandboxRail({
     href: { pathname: '/reservation/sandbox/[slug]/chambres', params: { slug } },
   });
 
+  const providerLabel: Record<CompetitorProvider, string> = {
+    booking_com: tCompare('providerLabel.booking_com'),
+    expedia: tCompare('providerLabel.expedia'),
+    hotels_com: tCompare('providerLabel.hotels_com'),
+    official_site: tCompare('providerLabel.official_site'),
+  };
+
   return (
-    <section
-      id="booking"
-      aria-labelledby="booking-sandbox-title"
-      data-booking-widget="rail"
-      className="border-border bg-bg scroll-mt-24 rounded-lg border p-6"
-    >
-      <p className="text-accent mb-2 text-xs font-medium uppercase tracking-wider">
-        {t('eyebrow')}
-      </p>
-      <h2 id="booking-sandbox-title" className="text-fg font-serif text-xl leading-tight">
-        {t('headline', { hotel: hotelName })}
-      </h2>
-      <p className="text-muted mt-3 text-sm leading-relaxed">{t('intro')}</p>
-
-      <form method="get" action={action} className="mt-4 flex flex-col gap-4">
-        <BookingSandboxDateFields
-          labels={{ checkIn: t('checkIn'), checkOut: t('checkOut'), adults: t('adults') }}
-          defaults={{ checkIn, checkOut, adults: 1 }}
-          today={today}
-        />
-        <SubmitButton
-          pendingLabel={t('submitting')}
-          className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-70"
-        >
-          {t('submit')}
-        </SubmitButton>
-      </form>
-
-      <p className="text-muted/80 mt-4 text-xs">{t('note')}</p>
-    </section>
+    <BookingSandboxLiveAside
+      locale={locale}
+      hotelId={hotelId}
+      formAction={action}
+      embeddedInKitAside={embeddedInKitAside}
+      headline={tRail('headline', { hotel: hotelName })}
+      intro={tRail('intro')}
+      footnote={tRail('note')}
+      defaults={{ checkIn, checkOut, adults: 2, today }}
+      labels={{
+        checkIn: tRail('checkIn'),
+        checkOut: tRail('checkOut'),
+        adults: tRail('adults'),
+        submit: tRail('submit'),
+        submitting: tRail('submitting'),
+        compareTitle: tCompare('title'),
+        compareLoading: tCompare('loading'),
+        compareLegal: tCompare('legal'),
+        conciergeLabel: tCompare('conciergeLabel'),
+        bestRateBadge: tCompare('bestRateBadge'),
+        providerLabel,
+      }}
+    />
   );
 }

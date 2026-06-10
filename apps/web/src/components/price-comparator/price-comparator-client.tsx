@@ -21,6 +21,8 @@ export interface PriceComparatorLabels {
   readonly selectDates: string;
   readonly legal: string;
   readonly cachedNotice: string;
+  readonly conciergeLabel: string;
+  readonly bestRateBadge: string;
   readonly providerLabel: Record<CompetitorProvider, string>;
   readonly scenario: {
     readonly cheaper: string;
@@ -40,6 +42,7 @@ interface ApiResponseAvailable {
   readonly cached: boolean;
   readonly competitors: readonly CompetitorPrice[];
   readonly benefitsValueMinor: number;
+  readonly priceConciergeMinor: number | null;
   readonly stay: NormalizedComparison['stay'];
 }
 
@@ -140,7 +143,13 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
             setState({ status: 'unavailable' });
             return;
           }
-          if (!parsed.available || parsed.competitors.length === 0) {
+          if (!parsed.available) {
+            setState({ status: 'unavailable' });
+            return;
+          }
+          const hasConcierge =
+            parsed.priceConciergeMinor !== null && parsed.priceConciergeMinor > 0;
+          if (!hasConcierge && parsed.competitors.length === 0) {
             setState({ status: 'unavailable' });
             return;
           }
@@ -211,6 +220,11 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
   }
 
   const { data } = state;
+  const priceConciergeMinor =
+    data.priceConciergeMinor !== null && data.priceConciergeMinor > 0
+      ? data.priceConciergeMinor
+      : props.priceConciergeMinor;
+
   const normalized: NormalizedComparison = {
     competitors: data.competitors,
     benefitsValueMinor: data.benefitsValueMinor,
@@ -219,15 +233,34 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
   };
   const scenario = computeScenario({
     normalized,
-    priceConciergeMinor: props.priceConciergeMinor,
+    priceConciergeMinor,
   });
+
+  const conciergeIsCheapest =
+    priceConciergeMinor !== null &&
+    (normalized.cheapestCompetitor === null ||
+      priceConciergeMinor <= normalized.cheapestCompetitor.amountMinor);
 
   if (props.surface === 'kit') {
     return (
       <div>
         {data.cached ? <p className="rc-foot">{props.labels.cachedNotice}</p> : null}
-        {data.competitors.map((c, index) => (
-          <div key={c.provider} className={index === 0 ? 'rc-row rc-best' : 'rc-row'}>
+        {priceConciergeMinor !== null ? (
+          <div className={conciergeIsCheapest ? 'rc-row rc-best' : 'rc-row rc-us'}>
+            <span className="rc-name">
+              {props.labels.conciergeLabel}
+              {conciergeIsCheapest ? (
+                <>
+                  {' '}
+                  <em>{props.labels.bestRateBadge}</em>
+                </>
+              ) : null}
+            </span>
+            <span className="rc-amt">{formatEuroAmount(props.locale, priceConciergeMinor)}</span>
+          </div>
+        ) : null}
+        {data.competitors.map((c) => (
+          <div key={c.provider} className="rc-row">
             <span className="rc-name">{props.labels.providerLabel[c.provider]}</span>
             <span className="rc-amt">{formatEuroAmount(props.locale, c.amountMinor)}</span>
           </div>
@@ -260,6 +293,27 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
           </tr>
         </thead>
         <tbody>
+          {priceConciergeMinor !== null ? (
+            <tr
+              className={
+                conciergeIsCheapest
+                  ? 'border-border/60 bg-bg-subtle border-b last:border-0'
+                  : 'border-border/60 border-b last:border-0'
+              }
+            >
+              <th scope="row" className="text-fg py-2 pr-2 font-medium">
+                {props.labels.conciergeLabel}
+                {conciergeIsCheapest ? (
+                  <span className="text-muted ml-1 text-xs font-normal">
+                    ({props.labels.bestRateBadge})
+                  </span>
+                ) : null}
+              </th>
+              <td className="text-fg py-2 pl-2 text-right font-medium tabular-nums">
+                {formatEuroAmount(props.locale, priceConciergeMinor)}
+              </td>
+            </tr>
+          ) : null}
           {data.competitors.map((c) => (
             <tr key={c.provider} className="border-border/60 border-b last:border-0">
               <th scope="row" className="text-fg py-2 pr-2 font-normal">

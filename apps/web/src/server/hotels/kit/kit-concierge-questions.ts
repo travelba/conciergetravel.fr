@@ -18,6 +18,8 @@ interface ConciergeQuestionKitItem {
   readonly category_en: string;
   readonly question_fr: string;
   readonly reply_fr: string;
+  readonly question_en?: string;
+  readonly reply_en?: string;
 }
 
 function buildKitConciergeQuestionGroups(
@@ -28,8 +30,9 @@ function buildKitConciergeQuestionGroups(
   const indexByLabel = new Map<string, number>();
   for (const item of items) {
     const label = pickLocalizedText(locale, item.category_fr, item.category_en) ?? item.category_fr;
-    const question = item.question_fr;
-    const reply = item.reply_fr;
+    const question =
+      pickLocalizedText(locale, item.question_fr, item.question_en) ?? item.question_fr;
+    const reply = pickLocalizedText(locale, item.reply_fr, item.reply_en) ?? item.reply_fr;
     const existing = indexByLabel.get(label);
     const entry = { question, reply };
     if (existing === undefined) {

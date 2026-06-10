@@ -67,6 +67,7 @@ export function BookingSlot({
 
   const isTravelportLive =
     slug !== undefined &&
+    hotelId !== undefined &&
     bookingMode === 'travelport' &&
     (locale === 'fr' || locale === 'en') &&
     isTravelportSandboxEnabled();
@@ -83,7 +84,13 @@ export function BookingSlot({
       railContext.lockActionUrl !== null);
 
   const rail = isTravelportLive ? (
-    <BookingSandboxRail locale={locale} hotelName={hotelName} slug={slug} />
+    <BookingSandboxRail
+      locale={locale}
+      hotelId={hotelId ?? ''}
+      hotelName={hotelName}
+      slug={slug}
+      embeddedInKitAside={embeddedInKitAside}
+    />
   ) : isPaidLive && hotelId !== undefined && railContext !== undefined ? (
     <BookingPaidRail
       locale={locale}

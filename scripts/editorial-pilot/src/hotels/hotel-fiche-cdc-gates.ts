@@ -11,6 +11,7 @@ import {
   countCompleteVenues,
   detectFabricatedStarClaim,
   evaluatePoiBuckets,
+  evaluatePoiImages,
   evaluateSpaDossier,
   resolvePopulatedBlocks,
 } from '@mch/domain/editorial';
@@ -26,6 +27,10 @@ import {
   isFaqCanonicalSet,
 } from './canonical-faq-questions.js';
 import { CONCIERGE_QUESTIONS_MIN, FAQ_KIT_MIN_ITEMS } from './faq-perplexity-taxonomy.js';
+import {
+  evaluateFaqKitRowEnrichment,
+  hasFaqKitEnrichmentSurface,
+} from './faq-kit-row-enrichment.js';
 import { ADVICE_BODY_MAX_WORDS, ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
 import { META_DESC_MAX_CHARS, META_DESC_MIN_CHARS } from './meta-desc-generator.js';
 import {
@@ -131,6 +136,7 @@ export interface CdcHotelAuditRow extends HotelAuditRow {
   readonly email_reservations: string | null;
   readonly google_rating: number | null;
   readonly google_reviews_count: number | null;
+  readonly google_reviews: unknown;
   readonly featured_reviews: unknown;
   readonly mice_info: unknown;
   readonly hero_video: unknown;
@@ -317,11 +323,29 @@ function countVerifiedAffiliations(row: CdcHotelAuditRow): number {
   return row.affiliations.filter((a) => isRecord(a) && a['verified'] === true).length;
 }
 
+function hasGmbReviewRows(row: CdcHotelAuditRow): boolean {
+  if (!Array.isArray(row.google_reviews)) return false;
+  return row.google_reviews.some((entry) => {
+    if (!isRecord(entry)) return false;
+    const author = entry['author'];
+    const text = entry['text'];
+    return (
+      typeof author === 'string' &&
+      author.trim().length > 0 &&
+      typeof text === 'string' &&
+      text.trim().length > 0
+    );
+  });
+}
+
 function hasReviewsSignal(row: CdcHotelAuditRow): boolean {
+  if (hasGmbReviewRows(row)) return true;
   const gr = row.google_rating;
   const gc = row.google_reviews_count;
   if (typeof gr === 'number' && gr > 0) return true;
   if (typeof gc === 'number' && gc > 0) return true;
+  const kitLen = jsonLen(row.faq_content_kit);
+  if (hasFaqKitEnrichmentSurface(kitLen)) return false;
   return jsonLen(row.featured_reviews) > 0;
 }
 
@@ -1153,9 +1177,21 @@ export function evaluateCdcHotelFiche(
     phase: 'cdc_target',
     passed: hasReviewsSignal(row),
     severity: 'warn',
-    field: 'google_rating|featured_reviews',
+    field: 'google_rating|google_reviews|featured_reviews',
     message: 'no review signal (ReviewsBlock + AggregateRating JSON-LD)',
     pipeline: 'Google Places / Amadeus sentiments Phase 6',
+  });
+  const kitReviewsSurface = hasFaqKitEnrichmentSurface(jsonLen(row.faq_content_kit));
+  addCdcCheck(b, {
+    id: 'cdc.10.google_reviews_gmb',
+    block: '10',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: !kitReviewsSurface || hasGmbReviewRows(row),
+    severity: 'warn',
+    field: 'google_reviews',
+    message: 'kit fiche #acces requires synced Google My Business reviews (author + text)',
+    pipeline: 'reviews:sync — sync-google-reviews.ts',
   });
 
   /* ── Bloc 11 — FAQ ── */
@@ -1249,6 +1285,91 @@ export function evaluateCdcHotelFiche(
     field: 'concierge_questions',
     message: `${conciergeLen} concierge questions (target ≥ ${CONCIERGE_QUESTIONS_MIN})`,
     pipeline: 'faq:perplexity:push',
+  });
+
+  const faqKitEnrichment =
+    kitLen >= FAQ_KIT_MIN_ITEMS
+      ? evaluateFaqKitRowEnrichment({
+          hotelName: row.name,
+          faq_content_kit: row.faq_content_kit,
+          faq_content: row.faq_content,
+          concierge_questions: row.concierge_questions,
+        })
+      : null;
+  const kitTaxonomyOk =
+    faqKitEnrichment === null
+      ? true
+      : faqKitEnrichment.issues.filter((i) => i.code.startsWith('kit.category')).length === 0;
+  addCdcCheck(b, {
+    id: 'cdc.11.faq_kit_taxonomy',
+    block: '11',
+    dimension: 'faq',
+    phase: 'phase1',
+    passed: !hasFaqKitEnrichmentSurface(kitLen) || kitTaxonomyOk,
+    severity: 'blocker',
+    field: 'faq_content_kit.group_fr',
+    message: 'kit FAQ missing Perplexity category coverage (≥2 per factual bucket)',
+    pipeline: 'faq:perplexity:validate',
+  });
+  const kitEnOk =
+    faqKitEnrichment === null
+      ? true
+      : faqKitEnrichment.issues.every((i) => i.code !== 'kit.en_parity');
+  addCdcCheck(b, {
+    id: 'cdc.11.faq_kit_en_parity',
+    block: '11',
+    dimension: 'faq',
+    phase: 'cdc_target',
+    passed: !hasFaqKitEnrichmentSurface(kitLen) || kitEnOk,
+    severity: 'blocker',
+    field: 'faq_content_kit.answer_en',
+    message: 'kit FAQ missing EN question/answer (hreflang parity)',
+    pipeline: 'faq:perplexity:push + EN pass',
+  });
+  const conciergeEnOk =
+    faqKitEnrichment === null
+      ? true
+      : faqKitEnrichment.issues.every((i) => i.code !== 'concierge.en_parity');
+  addCdcCheck(b, {
+    id: 'cdc.11.concierge_en_parity',
+    block: '11',
+    dimension: 'faq',
+    phase: 'cdc_target',
+    passed: conciergeLen < CONCIERGE_QUESTIONS_MIN || conciergeEnOk,
+    severity: 'blocker',
+    field: 'concierge_questions.reply_en',
+    message: 'concierge_questions missing EN question/reply',
+    pipeline: 'faq:perplexity:push + EN pass',
+  });
+  const conciergeTaxonomyOk =
+    faqKitEnrichment === null
+      ? true
+      : faqKitEnrichment.issues.every((i) => i.code !== 'concierge.taxonomy');
+  addCdcCheck(b, {
+    id: 'cdc.11.concierge_taxonomy',
+    block: '11',
+    dimension: 'faq',
+    phase: 'phase1',
+    passed: conciergeLen < CONCIERGE_QUESTIONS_MIN || conciergeTaxonomyOk,
+    severity: 'blocker',
+    field: 'concierge_questions.category_fr',
+    message: 'concierge_questions use non-allowlist category_fr labels',
+    pipeline: 'faq:perplexity:validate',
+  });
+  const conciergeToneOk =
+    faqKitEnrichment === null
+      ? true
+      : faqKitEnrichment.issues.every((i) => i.code !== 'concierge.informative_tone');
+  addCdcCheck(b, {
+    id: 'cdc.11.concierge_informative_tone',
+    block: '11',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: conciergeLen < CONCIERGE_QUESTIONS_MIN || conciergeToneOk,
+    severity: 'warn',
+    field: 'concierge_questions.reply_fr',
+    message: 'concierge replies use first-person commitment (CDC D10 — informative tone)',
+    pipeline: 'faq:perplexity:push + prince-de-galles-concierge-questions.ts',
   });
 
   /* ── Bloc 12 — Guide local ── */
@@ -1710,6 +1831,7 @@ export function evaluateCdcHotelFiche(
   /* ── Golden template — concierge handoff richness ── */
   const venues = countCompleteVenues(row.restaurant_info);
   const poiBuckets = evaluatePoiBuckets(row.points_of_interest);
+  const poiImages = evaluatePoiImages(row.points_of_interest);
   const spa = evaluateSpaDossier(row.spa_info);
   const events = analyzeEvents(row);
   const igPosts = instagramPostCount(row);
@@ -1760,6 +1882,17 @@ export function evaluateCdcHotelFiche(
     field: 'points_of_interest',
     message: `${poiBuckets.complete} POIs with full handoff (need ≥ ${GOLDEN_POI_HANDOFF_MIN})`,
     pipeline: 'pois:sync + concierge:humanize:pois',
+  });
+  addCdcCheck(b, {
+    id: 'gold.poi_images',
+    block: 'gold',
+    dimension: 'golden',
+    phase: 'cdc_target',
+    passed: poiImages.total === 0 || poiImages.withImage === poiImages.total,
+    severity: 'warn',
+    field: 'points_of_interest.image_public_id',
+    message: `${poiImages.total - poiImages.withImage}/${poiImages.total} POIs missing image_public_id (CDC D8)`,
+    pipeline: 'golden POI manifest — press-* Cloudinary ids',
   });
 
   if (isRecord(row.spa_info)) {

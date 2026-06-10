@@ -93,12 +93,14 @@ export async function HotelPageKit({
               embeddedInKitAside
               railContext={railContext}
             />
-            <PriceComparator
-              locale={model.locale}
-              hotelId={row.id}
-              priceConciergeMinor={null}
-              surface="kit"
-            />
+            {row.booking_mode !== 'travelport' ? (
+              <PriceComparator
+                locale={model.locale}
+                hotelId={row.id}
+                priceConciergeMinor={null}
+                surface="kit"
+              />
+            ) : null}
           </aside>
         </div>
 

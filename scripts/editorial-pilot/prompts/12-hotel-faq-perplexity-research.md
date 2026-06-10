@@ -40,7 +40,7 @@ Categories to cover exhaustively (use these exact French labels):
 
 Every question where the guest needs personalized concierge assistance. Aim for **20 to 30 questions minimum**.
 
-Tone: warm, proactive, luxury concierge voice — use "Je", offer to act immediately.
+Tone: **informative concierge desk** — factual, helpful, **no first-person commitment**. Prefer « La conciergerie peut… », « Il est recommandé de… », « Les réservations s'effectuent… » — **never** « Je réserve / Je confirme / I will book ».
 Each item: `category`, `question`, `concierge_reply`
 
 Categories (use these exact French labels):

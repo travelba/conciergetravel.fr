@@ -105,6 +105,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       cached: outcome.cached,
       competitors: outcome.normalized.competitors,
       benefitsValueMinor: outcome.normalized.benefitsValueMinor,
+      priceConciergeMinor: outcome.priceConciergeMinor,
       stay: outcome.normalized.stay,
     },
     {

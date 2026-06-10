@@ -24,6 +24,7 @@ import {
   PRINCE_DE_GALLES_FAQ_CONTENT_KIT,
   PRINCE_DE_GALLES_FAQ_CONTENT_PROMOTE,
 } from './prince-de-galles-faq.generated';
+import { PRINCE_DE_GALLES_CONCIERGE_QUESTIONS_KIT } from './prince-de-galles-concierge-questions';
 import {
   PRINCE_DE_GALLES_GALLERY_IMAGES,
   PRINCE_DE_GALLES_HERO_IMAGE,
@@ -47,25 +48,46 @@ export const PRINCE_DE_GALLES_LATITUDE = 48.869092;
 export const PRINCE_DE_GALLES_LONGITUDE = 2.300681;
 
 // ---------------------------------------------------------------------------
-// restaurant_info.venues — 3 official F&B venues + concierge handoffs
+// restaurant_info.venues — 4 official F&B outlets (Marriott dining page, CDC D7)
 // ---------------------------------------------------------------------------
 
 export const PRINCE_DE_GALLES_RESTAURANT_INFO = {
-  count: 3,
-  michelin_stars: 0,
+  count: 4,
+  michelin_stars: 1,
   venues: [
     {
-      name: '19.20 Paris by Norbert Tarayre',
-      type_fr: 'Bistrot parisien · Chef Norbert Tarayre · Bar Belle Époque',
-      type_en: 'Parisian bistro · Chef Norbert Tarayre · Belle Époque bar',
+      name: 'Bar 19.20',
+      type_fr: 'Bar cocktails Art déco · 7h–00h30',
+      type_en: 'Art Deco cocktail bar · 7 am–12:30 am',
+      features: ['Cocktails signature', 'Tea Time week-end', 'Snacking'],
+      hours_fr: 'Tous les jours 7h–00h30',
+      hours_en: 'Daily 7 am–12:30 am',
+      description_fr:
+        'Le bar Art déco du palace sert cocktails, snacking et tea time le week-end dans l’ambiance Belle Époque du salon 19.20 — murs peints, lumière dorée et comptoir historique.',
+      description_en:
+        'The palace Art Deco bar serves cocktails, light bites and weekend tea time in the Belle Époque mood of the 19.20 salon — painted walls, golden light and historic counter.',
+      website: 'https://www.19-20paris.fr/en/',
+      reservation_url: 'https://www.19-20paris.fr/en/',
+      phone: FNB_PHONE_DISPLAY,
+      price_note_fr: 'Tea Time à partir de 65 € · cocktails à la carte',
+      price_note_en: 'Tea Time from €65 · cocktails à la carte',
+      tip_fr:
+        'Mon conseil : pour un apéritif avant le théâtre, le comptoir du bar vers 19 h capte la lumière Art déco sans l’affluence du dîner.',
+      tip_en:
+        'My tip: for a pre-theatre apéritif, the bar counter around 7 pm catches the Art Deco light without dinner crowds.',
+    },
+    {
+      name: 'Restaurant 19.20 by Norbert Tarayre',
+      type_fr: 'Bistrot parisien · Chef Norbert Tarayre',
+      type_en: 'Parisian bistro · Chef Norbert Tarayre',
       chef: 'Norbert Tarayre',
-      features: ['Cuisine de bistrot', 'Tea Time', 'Bar Art Déco'],
+      features: ['Cuisine de bistrot', 'Menu 49 €', 'Tea Time week-end'],
       hours_fr: 'Tous les jours 12h–14h et 19h–22h15 · Tea Time ven–dim 16h–17h',
       hours_en: 'Daily 12–2 pm and 7–10:15 pm · Tea Time Fri–Sun 4–5 pm',
       description_fr:
-        'Norbert Tarayre revisite les classiques du bistrot parisien dans le bar Art Déco de l’hôtel. Menu à 49 € le midi et le soir. Tea Time le week-end signé Hélène Kerloeguen.',
+        'Norbert Tarayre revisite les classiques du bistrot parisien dans le salon Art déco. Menu à 49 € le midi et le soir ; tea time le week-end signé Hélène Kerloeguen.',
       description_en:
-        'Norbert Tarayre reworks Parisian bistro classics in the hotel’s Art Deco bar. €49 menu at lunch and dinner. Weekend Tea Time by pastry chef Hélène Kerloeguen.',
+        'Norbert Tarayre reworks Parisian bistro classics in the Art Deco salon. €49 menu at lunch and dinner; weekend tea time by pastry chef Hélène Kerloeguen.',
       website: 'https://www.19-20paris.fr/en/',
       reservation_url: 'https://www.19-20paris.fr/en/',
       phone: FNB_PHONE_DISPLAY,
@@ -99,16 +121,16 @@ export const PRINCE_DE_GALLES_RESTAURANT_INFO = {
         'My tip: for a weekend, book two weeks ahead. Ask for counter seats facing the kitchen — the staging is worth the show.',
     },
     {
-      name: 'Le Patio',
-      type_fr: 'Cour Art Déco à ciel ouvert · Afternoon tea & brunch',
-      type_en: 'Open-air Art Deco courtyard · Afternoon tea & brunch',
+      name: 'Le Patio & Cabana Bar',
+      type_fr: 'Cour Art Déco · Cabana bar · Brunch & cocktails',
+      type_en: 'Art Deco courtyard · Cabana bar · Brunch & cocktails',
       features: ['Cour intérieure emblématique', 'Afternoon tea', 'Brunch du dimanche'],
       hours_fr: 'Afternoon tea ven–dim 16h–17h30 · Brunch le dimanche (selon programme)',
       hours_en: 'Afternoon tea Fri–Sun 4–5:30 pm · Sunday brunch (per schedule)',
       description_fr:
-        'La cour Art Déco emblématique de la maison, prolongée par des chambres avec balcon. Afternoon tea le week-end ; brunch dominical quand le calendrier l’ouvre.',
+        'La cour mosaïquée emblématique sert petit-déjeuner, déjeuner, brunch dominical et cocktails. Le cabana bar offre une terrasse plus intime au cœur du palace.',
       description_en:
-        'The hotel’s emblematic Art Deco courtyard, extended by balcony rooms. Weekend afternoon tea; Sunday brunch when the calendar allows.',
+        'The emblematic mosaic courtyard serves breakfast, lunch, Sunday brunch and cocktails. The cabana bar offers a more intimate terrace at the heart of the palace.',
       website:
         'https://www.marriott.com/fr/hotels/parlc-prince-de-galles-a-luxury-collection-hotel-paris/dining/',
       reservation_url: 'https://www.19-20paris.fr/en/',
@@ -140,6 +162,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.873792,
     longitude: 2.295028,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-20`,
     description_fr:
       'Monument emblématique de la place Charles-de-Gaulle, achevé en 1836. Terrasse panoramique sur les douze avenues rayonnantes et la ligne des Champs-Élysées.',
     description_en:
@@ -166,6 +189,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866109,
     longitude: 2.312454,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-1`,
     description_fr:
       'Chef-d’œuvre de l’architecture Belle Époque (1900), verrière monumentale et programmation culturelle au cœur des Champs-Élysées.',
     description_en:
@@ -188,6 +212,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866047,
     longitude: 2.314424,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-3`,
     description_fr:
       'Musée municipal gratuit (collections permanentes) dans un palais de l’Exposition universelle de 1900, jardin intérieur et café en terrasse.',
     description_en:
@@ -214,6 +239,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.865633,
     longitude: 2.321236,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-21`,
     description_fr:
       'Plus grande place de Paris, entre le jardin des Tuileries et les Champs-Élysées. Obélisque de Louxor et fontaines de Jacques Ignace Hittorff.',
     description_en:
@@ -235,6 +261,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.868703,
     longitude: 2.303305,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-24`,
     description_fr:
       'Ancien hôtel particulier de l’avenue Marceau où Yves Saint Laurent créa pendant près de trente ans. Atelier reconstitué et collections de haute couture.',
     description_en:
@@ -261,6 +288,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.865242,
     longitude: 2.297839,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-7`,
     description_fr:
       'Musée municipal de la mode avenue Pierre-Ier-de-Serbie, plus de 200 000 pièces. Expositions temporaires dans un palais néoclassique et son jardin.',
     description_en:
@@ -283,6 +311,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.861908,
     longitude: 2.300888,
     bucket: 'visit',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-2`,
     description_fr:
       'Cathédrale orthodoxe russe de style néo-russe (2016), cinq coupoles dorées et iconostase contemporaine. Visites guidées sur réservation.',
     description_en:
@@ -305,6 +334,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8698,
     longitude: 2.3078,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-20`,
     description_fr:
       'L’avenue la plus célèbre de Paris, de la place de la Concorde à l’Arc de triomphe. Cinémas historiques, flagship stores et terrasses entre deux rendez-vous.',
     description_en:
@@ -326,6 +356,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.866787,
     longitude: 2.303934,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-28`,
     description_fr:
       'Salle Art Nouveau inaugurée en 1913 (15 avenue Montaigne). Programmation classique, jazz et danse dans une architecture de Auguste Perret.',
     description_en:
@@ -348,6 +379,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.864242,
     longitude: 2.297636,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-11`,
     description_fr:
       'Plus grand centre d’art contemporain d’Europe, ouvert jusqu’à minuit. Expositions éphémères, performances et restaurant Le Tout-Paris sur les toits.',
     description_en:
@@ -372,6 +404,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.868,
     longitude: 2.313,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-18`,
     description_fr:
       'Parc entre le Grand Palais et la place de la Concorde, kiosques, théâtre de marionnettes et allées ombragées pour une pause entre deux musées.',
     description_en:
@@ -393,6 +426,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.863,
     longitude: 2.308,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-19`,
     description_fr:
       'Embarquement au Port de la Conférence, sous le pont de l’Alma. Croisières d’une heure ou dîners-croisières sur la Seine entre les monuments.',
     description_en:
@@ -415,6 +449,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8775,
     longitude: 2.3095,
     bucket: 'do',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-12`,
     description_fr:
       'Hôtel particulier avenue de Friedland, table trois étoiles MICHELIN de Arnaud Donckele. Cuisine française d’exception dans un cadre de demeure privée.',
     description_en:
@@ -437,6 +472,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.870445,
     longitude: 2.306291,
     bucket: 'shop',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-26`,
     description_fr:
       'Concept store sur les Champs-Élysées : mode créateur, beauté, restauration et rooftop avec vue sur l’Arc de triomphe.',
     description_en:
@@ -461,6 +497,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8665,
     longitude: 2.3045,
     bucket: 'shop',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-25`,
     description_fr:
       'Artère du luxe entre les Champs-Élysées et la Seine : Chanel, Dior, Louis Vuitton, haute joaillerie et showrooms de créateurs.',
     description_en:
@@ -482,6 +519,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.871,
     longitude: 2.303,
     bucket: 'shop',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-24`,
     description_fr:
       'Temple de la parfumerie française au 68 des Champs-Élysées, depuis 1914. Atelier de personnalisation et collections iconiques (Shalimar, La Petite Robe Noire).',
     description_en:
@@ -504,6 +542,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.867565,
     longitude: 2.306835,
     bucket: 'shop',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-27`,
     description_fr:
       'Maison historique Louis Vuitton sur les Champs-Élysées, malletier depuis 1854. Maroquinerie, prêt-à-porter et espace personnalisation.',
     description_en:
@@ -526,6 +565,7 @@ export const PRINCE_DE_GALLES_POINTS_OF_INTEREST = [
     latitude: 48.8669,
     longitude: 2.3038,
     bucket: 'shop',
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-23`,
     description_fr:
       'Galerie Dior avenue Montaigne : parcours immersif sur l’histoire de la maison, de 1947 à aujourd’hui, robes de haute couture et ateliers reconstitués.',
     description_en:
@@ -663,156 +703,10 @@ export const PRINCE_DE_GALLES_HIGHLIGHTS = [
 
 export { PRINCE_DE_GALLES_FAQ_CONTENT_KIT, PRINCE_DE_GALLES_FAQ_CONTENT_PROMOTE };
 
-// ---------------------------------------------------------------------------
-// concierge_questions — 8 grouped Q&A (#concierge-questions block)
-// ---------------------------------------------------------------------------
-
-export const PRINCE_DE_GALLES_CONCIERGE_QUESTIONS_KIT = [
-  {
-    category_fr: 'Transferts & Transport',
-    category_en: 'Transfers & Transport',
-    question_fr: 'Pouvez-vous organiser un transfert depuis Charles-de-Gaulle vers George V ?',
-    reply_fr:
-      'Je réserve un VTC ou une limousine selon votre vol et vos bagages. Prévenez-moi 24 h à l’avance avec le numéro de vol : j’aligne l’heure d’arrivée sur le check-in et le voiturier.',
-  },
-  {
-    category_fr: 'Transferts & Transport',
-    category_en: 'Transfers & Transport',
-    question_fr: 'Pouvez-vous réserver un chauffeur pour une soirée avenue Montaigne ?',
-    reply_fr:
-      'Je mets un chauffeur à disposition pour vos rendez-vous couture ou dîner. Indiquez-moi les horaires de prise en charge et de retour : je confirme le véhicule et le numéro du chauffeur.',
-  },
-  {
-    category_fr: 'Réservations de restaurants',
-    category_en: 'Restaurant Reservations',
-    question_fr: 'Je souhaite dîner au comptoir Akira Back samedi prochain, est-ce possible ?',
-    reply_fr:
-      'Je contacte le restaurant et tente le comptoir face à la cuisine — c’est la demande la plus courue. Deux semaines d’anticipation en week-end ; je vous tiens informé sous 24 h.',
-  },
-  {
-    category_fr: 'Réservations de restaurants',
-    category_en: 'Restaurant Reservations',
-    question_fr: 'Pouvez-vous réserver le tea time du 19.20 pour dimanche après-midi ?',
-    reply_fr:
-      'Le tea time du week-end se remplit vite. Je réserve pour vous au 19.20 ou sur Le Patio si le soleil est au rendez-vous — précisez le nombre de convives et vos préférences sucrées.',
-  },
-  {
-    category_fr: 'Wellness & Fitness',
-    category_en: 'Wellness & Fitness',
-    question_fr: 'Je souhaite un massage en chambre demain matin, est-ce possible ?',
-    reply_fr:
-      'CALMA PARIS intervient en Wellness Suite ou en chambre sur rendez-vous. Je vérifie les créneaux disponibles demain matin et vous propose la carte des soins adaptée à votre emploi du temps.',
-  },
-  {
-    category_fr: 'Chambres & Suites',
-    category_en: 'Rooms & Suites',
-    question_fr:
-      'Pour une première venue, quelle chambre recommandez-vous avec balcon sur Le Patio ?',
-    reply_fr:
-      'Je réserve la Chambre Art Déco Deluxe Balcon côté cour : le calme du Patio sans renoncer à la lumière. Précisez votre date d’arrivée — je bloque la catégorie et note la préparation en chambre.',
-  },
-  {
-    category_fr: 'Événements & MICE',
-    category_en: 'Events & MICE',
-    question_fr: 'Nous cherchons une salle pour 60 personnes en cocktail, que proposez-vous ?',
-    reply_fr:
-      'Le Salon Grand Chaillot accueille jusqu’à 70 convives en réception. Je vous envoie le plan, les configurations et un devis restauration signé 19.20 ou Akira Back selon votre brief.',
-  },
-  {
-    category_fr: 'Paris & Culture',
-    category_en: 'Paris & Culture',
-    question_fr: 'Pouvez-vous réserver des billets pour le Théâtre des Champs-Élysées ce soir ?',
-    reply_fr:
-      'Je vérifie la programmation et les places restantes à cinq minutes à pied de l’hôtel. Si le créneau est complet, je propose une alternative au Palais de Tokyo ou une visite privée en soirée.',
-  },
-  {
-    category_fr: 'Shopping & Mode',
-    category_en: 'Shopping & Fashion',
-    question_fr: 'Pouvez-vous réserver une cabine privée sur l’avenue Montaigne demain matin ?',
-    reply_fr:
-      'Je contacte les maisons que vous ciblez et bloque un créneau avant l’ouverture quand c’est possible. Précisez vos marques et votre budget : j’aligne l’itinéraire avec votre agenda.',
-  },
-  {
-    category_fr: 'Shopping & Mode',
-    category_en: 'Shopping & Fashion',
-    question_fr: 'Où faire une pause shopping entre deux rendez-vous couture ?',
-    reply_fr:
-      'Le tea time du 19.20 ou un déjeuner express sur Le Patio calme l’agenda sans quitter le palace. Je réserve la table et synchronise le retour voiturier pour la suite des essayages.',
-  },
-  {
-    category_fr: 'Famille & Enfants',
-    category_en: 'Family & Children',
-    question_fr: 'Nous voyageons avec deux enfants — pouvez-vous préparer les chambres ?',
-    reply_fr:
-      'Je note l’âge des enfants et prépare lits supplémentaires, barrières et accueil adapté. Un room-service enfant et des activités autour du Grand Palais peuvent compléter le séjour.',
-  },
-  {
-    category_fr: 'Famille & Enfants',
-    category_en: 'Family & Children',
-    question_fr: 'Proposez-vous une baby-sitter pour une soirée au Akira Back ?',
-    reply_fr:
-      'Je peux recommander une agence partenaire vérifiée sur demande. Prévenez-moi quarante-huit heures à l’avance avec l’horaire et le nombre d’enfants.',
-  },
-  {
-    category_fr: 'Business & Séjour pro',
-    category_en: 'Business Travel',
-    question_fr: 'Pouvez-vous organiser un petit-déjeuner de travail en salon privé ?',
-    reply_fr:
-      'Le Petit Chaillot ou la Suite Or accueillent huit à quarante personnes selon la configuration. Je coordonne le catering, le wifi dédié et l’accès voiturier pour vos invités.',
-  },
-  {
-    category_fr: 'Business & Séjour pro',
-    category_en: 'Business Travel',
-    question_fr: 'Avez-vous une imprimante ou un espace coworking à proximité ?',
-    reply_fr:
-      'La réception imprime vos documents sur demande. Pour un espace calme, je réserve le salon d’affaires ou une suite avec salon séparé selon la durée de votre réunion.',
-  },
-  {
-    category_fr: 'Surclassements & Fidélité',
-    category_en: 'Upgrades & Loyalty',
-    question_fr: 'Puis-je obtenir un surclassement avec mon statut Marriott Bonvoy ?',
-    reply_fr:
-      'Je vérifie la disponibilité la veille de votre arrivée et note votre statut Elite. Les surclassements restent subjectifs à l’occupation — je vous confirme dès que la chambre est assignée.',
-  },
-  {
-    category_fr: 'Surclassements & Fidélité',
-    category_en: 'Upgrades & Loyalty',
-    question_fr: 'Quelle chambre recommandez-vous pour une lune de miel en juillet ?',
-    reply_fr:
-      'Je oriente vers la Chambre Art Déco Deluxe Balcon côté cour ou la Suite Saphir pour la terrasse. Précisez vos dates : je bloque la catégorie et prépare une attention discrète en chambre.',
-  },
-  {
-    category_fr: 'Paris by night',
-    category_en: 'Paris by Night',
-    question_fr: 'Où dîner après le spectacle si Akira Back est complet ?',
-    reply_fr:
-      'Le 19.20 by Norbert Tarayre tient souvent des tables tardives, et Le Patio sert des plats légers jusqu’au service du soir. Je réserve selon votre heure de sortie de théâtre.',
-  },
-  {
-    category_fr: 'Paris by night',
-    category_en: 'Paris by Night',
-    question_fr: 'Pouvez-vous réserver un bar à cocktails avec vue sur la Seine ?',
-    reply_fr:
-      'Je connais plusieurs adresses à quinze minutes en taxi — rooftop, speakeasy ou bar d’hôtel partenaire. Indiquez l’ambiance recherchée et l’heure : je confirme la réservation.',
-  },
-  {
-    category_fr: 'Sécurité & Discrétion',
-    category_en: 'Security & Discretion',
-    question_fr: 'Pouvez-vous accueillir une arrivée discrète avec accès séparé ?',
-    reply_fr:
-      'Le voiturier et la réception coordonnent les arrivées sensibles sans passage par le lobby principal quand le planning le permet. Décrivez-moi le protocole souhaité : je l’applique avec l’équipe.',
-  },
-  {
-    category_fr: 'Room service & In-room',
-    category_en: 'Room Service & In-room',
-    question_fr: 'Pouvez-vous organiser un dîner en chambre après le service du restaurant ?',
-    reply_fr:
-      'Le room-service propose une carte réduite après vingt-deux heures selon la cuisine. Je commande pour vous et synchronise l’heure de livraison avec votre retour de spectacle ou de dîner externe.',
-  },
-] as const;
-
-export type PrinceDeGallesConciergeQuestionKit =
-  (typeof PRINCE_DE_GALLES_CONCIERGE_QUESTIONS_KIT)[number];
+export {
+  PRINCE_DE_GALLES_CONCIERGE_QUESTIONS_KIT,
+  type PrinceDeGallesConciergeQuestionKit,
+} from './prince-de-galles-concierge-questions';
 
 // ---------------------------------------------------------------------------
 // spa_info — CALMA PARIS Wellness Suite (not a palace-scale spa)
@@ -1222,7 +1116,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'wellness-suite-calma',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-13`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-17`,
     title_fr: 'Rituel CALMA PARIS en Wellness Suite',
     title_en: 'CALMA PARIS ritual in the Wellness Suite',
     description_fr:
