@@ -13,7 +13,12 @@ export interface HotelKitConciergeQuestionGroup {
   readonly items: readonly { question: string; reply: string }[];
 }
 
-type ConciergeQuestionKitItem = (typeof AIRELLES_CONCIERGE_QUESTIONS_KIT)[number];
+interface ConciergeQuestionKitItem {
+  readonly category_fr: string;
+  readonly category_en: string;
+  readonly question_fr: string;
+  readonly reply_fr: string;
+}
 
 function buildKitConciergeQuestionGroups(
   locale: SupportedLocale,
