@@ -146,6 +146,7 @@ function baseCdcRow(overrides: Partial<CdcHotelAuditRow> = {}): CdcHotelAuditRow
     virtual_tour_url: 'https://example.com/tour',
     google_rating: 4.8,
     google_reviews_count: 1200,
+    google_reviews: [],
     featured_reviews: [
       {
         source: 'Forbes',
