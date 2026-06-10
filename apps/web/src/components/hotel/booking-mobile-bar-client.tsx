@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from 'react';
 
+import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
+
 export interface BookingMobileBarLabels {
   readonly datesPlaceholder: string;
   readonly guestsHint: string;
@@ -42,8 +44,10 @@ interface BookingMobileBarClientProps {
         readonly hotelId: string;
         readonly checkIn: string;
         readonly checkOut: string;
+        readonly rooms: number;
         readonly adults: number;
         readonly children: number;
+        readonly childAges: readonly number[];
         readonly today: string;
       }
     | undefined;
@@ -53,8 +57,10 @@ interface BookingMobileBarClientProps {
         readonly hotelId: string;
         readonly checkIn: string;
         readonly checkOut: string;
+        readonly rooms: number;
         readonly adults: number;
         readonly children: number;
+        readonly childAges: readonly number[];
         readonly today: string;
         readonly fake: boolean;
       }
@@ -224,7 +230,6 @@ export function BookingMobileBarClient({
               labels={{
                 checkIn: labels.checkIn,
                 checkOut: labels.checkOut,
-                adults: labels.adults,
                 submit: labels.paidSubmit,
               }}
             />
@@ -237,7 +242,6 @@ export function BookingMobileBarClient({
               labels={{
                 checkIn: labels.checkIn,
                 checkOut: labels.checkOut,
-                adults: labels.adults,
                 submit: labels.conciergeSubmit,
               }}
             />
@@ -305,15 +309,16 @@ function PaidSheetForm({
     readonly hotelId: string;
     readonly checkIn: string;
     readonly checkOut: string;
+    readonly rooms: number;
     readonly adults: number;
     readonly children: number;
+    readonly childAges: readonly number[];
     readonly today: string;
     readonly fake: boolean;
   };
   readonly labels: {
     readonly checkIn: string;
     readonly checkOut: string;
-    readonly adults: string;
     readonly submit: string;
   };
 }): ReactElement {
@@ -348,19 +353,13 @@ function PaidSheetForm({
           className="rf-val border-0 bg-transparent p-0"
         />
       </label>
-      <label className="rf-field">
-        <span>{labels.adults}</span>
-        <input
-          type="number"
-          name="adults"
-          min={1}
-          max={9}
-          defaultValue={defaults.adults}
-          required
-          className="rf-val border-0 bg-transparent p-0"
-        />
-      </label>
-      <input type="hidden" name="children" value={defaults.children} />
+      <StayOccupancyFields
+        defaults={{
+          rooms: defaults.rooms,
+          adults: defaults.adults,
+          childAges: defaults.childAges,
+        }}
+      />
       <button type="submit" className="btn btn-or resa-go">
         {labels.submit}
       </button>
@@ -378,14 +377,15 @@ function ConciergeSheetForm({
     readonly hotelId: string;
     readonly checkIn: string;
     readonly checkOut: string;
+    readonly rooms: number;
     readonly adults: number;
     readonly children: number;
+    readonly childAges: readonly number[];
     readonly today: string;
   };
   readonly labels: {
     readonly checkIn: string;
     readonly checkOut: string;
-    readonly adults: string;
     readonly submit: string;
   };
 }): ReactElement {
@@ -419,19 +419,13 @@ function ConciergeSheetForm({
           className="rf-val border-0 bg-transparent p-0"
         />
       </label>
-      <label className="rf-field">
-        <span>{labels.adults}</span>
-        <input
-          type="number"
-          name="adults"
-          min={1}
-          max={9}
-          defaultValue={defaults.adults}
-          required
-          className="rf-val border-0 bg-transparent p-0"
-        />
-      </label>
-      <input type="hidden" name="children" value={defaults.children} />
+      <StayOccupancyFields
+        defaults={{
+          rooms: defaults.rooms,
+          adults: defaults.adults,
+          childAges: defaults.childAges,
+        }}
+      />
       <button type="submit" className="btn btn-or resa-go">
         {labels.submit}
       </button>

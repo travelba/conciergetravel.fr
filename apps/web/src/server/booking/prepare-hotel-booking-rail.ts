@@ -130,7 +130,7 @@ export async function prepareHotelBookingRail(
         checkIn: stay.checkIn,
         checkOut: stay.checkOut,
         adults: stay.adults,
-        childAges: [],
+        childAges: stay.childAges.length > 0 ? [...stay.childAges] : [],
       })
     : EMPTY_BEST_OFFER;
 

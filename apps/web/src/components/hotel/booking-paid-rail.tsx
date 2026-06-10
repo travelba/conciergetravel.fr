@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import { SubmitButton } from '@/components/booking/submit-button';
+import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale } from '@/i18n/supported-locale';
@@ -112,19 +113,13 @@ export async function BookingPaidRail({
             className="rf-val border-0 bg-transparent p-0"
           />
         </label>
-        <label className="rf-field">
-          <span>{t('booking.adults')}</span>
-          <input
-            type="number"
-            name="adults"
-            min={1}
-            max={9}
-            defaultValue={stay.adults}
-            required
-            className="rf-val border-0 bg-transparent p-0"
-          />
-        </label>
-        <input type="hidden" name="children" value={stay.children} />
+        <StayOccupancyFields
+          defaults={{
+            rooms: stay.rooms,
+            adults: stay.adults,
+            childAges: stay.childAges,
+          }}
+        />
         <SubmitButton className="btn btn-or resa-go" pendingLabel={t('booking.submit')}>
           {railContext.fakeEnabled ? t('booking.submitTest') : t('booking.submit')}
         </SubmitButton>

@@ -337,6 +337,10 @@
     "decrease": "Decrease {label}",
     "increase": "Increase {label}",
     "validateRoom": "Confirm room",
+    "childAgesGroupLabel": "Children's ages",
+    "childAgeLabel": "Child {index}",
+    "childAgeSelectAria": "Age of child {index}",
+    "childAgeYears": "{age, plural, one {# year} other {# years}}",
     "submit": "Search",
     "submitAria": "Run the search",
     "errors": {
@@ -3906,7 +3910,9 @@
       "title": "Your stay",
       "stay": "Stay",
       "guests": "Guests",
-      "guestsValue": "{adults, plural, one {# adult} other {# adults}}{children, plural, =0 {} one {, # child} other {, # children}}"
+      "guestsValue": "{adults, plural, one {# adult} other {# adults}}{children, plural, =0 {} one {, # child} other {, # children}}",
+      "roomsValue": "{rooms, plural, one {# room} other {# rooms}}",
+      "childAgesValue": "Ages: {ages}"
     },
     "form": {
       "legend": "Your details",

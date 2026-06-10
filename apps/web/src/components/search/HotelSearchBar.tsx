@@ -8,6 +8,8 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatIsoDate, parseIsoDate } from '@/lib/search/url';
+import { clampAdults, clampRooms, resizeChildAges } from '@/lib/booking/hotel-stay';
+import { parseStayUrlParams, serializeChildAges } from '@/lib/booking/stay-url-params';
 import type { ActivePanel, DateRangeState, Destination, HotelResult } from '@/lib/search/types';
 
 import { DateRangePicker, nightsBetween, startOfDay } from './DateRangePicker';
@@ -54,6 +56,7 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
   const [rooms, setRooms] = useState(1);
   const [adults, setAdults] = useState(2);
   const [childrenCount, setChildrenCount] = useState(0);
+  const [childAges, setChildAges] = useState<number[]>([]);
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [errorKey, setErrorKey] = useState<ErrorKey | null>(null);
 
@@ -75,16 +78,11 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
       if (from !== null && to !== null) {
         setDateRange({ from, to });
       }
-      const adultsRaw = params.get('adults');
-      if (adultsRaw !== null) {
-        const parsed = Number.parseInt(adultsRaw, 10);
-        if (Number.isFinite(parsed) && parsed >= 1) setAdults(parsed);
-      }
-      const childrenRaw = params.get('children');
-      if (childrenRaw !== null) {
-        const parsed = Number.parseInt(childrenRaw, 10);
-        if (Number.isFinite(parsed) && parsed >= 0) setChildrenCount(parsed);
-      }
+      const parsedStay = parseStayUrlParams(params);
+      setRooms(parsedStay.occupancy.rooms);
+      setAdults(parsedStay.occupancy.adults);
+      setChildAges([...parsedStay.occupancy.childAges]);
+      setChildrenCount(parsedStay.occupancy.childAges.length);
     }, 0);
     return () => clearTimeout(handle);
   }, []);
@@ -157,8 +155,10 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
         destination: destinationText,
         checkIn: formatIsoDate(from),
         checkOut: formatIsoDate(to),
+        rooms: String(rooms),
         adults: String(adults),
         children: String(childrenCount),
+        ...(childAges.length > 0 ? { childAges: serializeChildAges(childAges) } : {}),
       },
     });
   }
@@ -264,9 +264,18 @@ export function HotelSearchBar({ locale, fetchSuggestions }: HotelSearchBarProps
               rooms={rooms}
               adults={adults}
               childrenCount={childrenCount}
-              onRoomsChange={(value) => setRooms(Math.max(1, value))}
-              onAdultsChange={(value) => setAdults(Math.max(1, value))}
-              onChildrenChange={(value) => setChildrenCount(Math.max(0, value))}
+              childAges={childAges}
+              onRoomsChange={(value) => setRooms(clampRooms(value))}
+              onAdultsChange={(value) => setAdults(clampAdults(value))}
+              onChildrenChange={(value) => {
+                const nextCount = Math.max(0, value);
+                setChildrenCount(nextCount);
+                setChildAges([...resizeChildAges(childAges, nextCount)]);
+              }}
+              onChildAgesChange={(ages) => {
+                setChildAges([...ages]);
+                setChildrenCount(ages.length);
+              }}
               onValidate={() => setActivePanel(null)}
             />
           </div>

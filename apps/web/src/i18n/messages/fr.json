@@ -337,6 +337,10 @@
     "decrease": "Diminuer {label}",
     "increase": "Augmenter {label}",
     "validateRoom": "Valider ma chambre",
+    "childAgesGroupLabel": "Âges des enfants",
+    "childAgeLabel": "Enfant {index}",
+    "childAgeSelectAria": "Âge de l'enfant {index}",
+    "childAgeYears": "{age, plural, one {# an} other {# ans}}",
     "submit": "Rechercher",
     "submitAria": "Lancer la recherche",
     "errors": {
@@ -3906,7 +3910,9 @@
       "title": "Votre séjour",
       "stay": "Séjour",
       "guests": "Voyageurs",
-      "guestsValue": "{adults, plural, one {# adulte} other {# adultes}}{children, plural, =0 {} one {, # enfant} other {, # enfants}}"
+      "guestsValue": "{adults, plural, one {# adulte} other {# adultes}}{children, plural, =0 {} one {, # enfant} other {, # enfants}}",
+      "roomsValue": "{rooms, plural, one {# chambre} other {# chambres}}",
+      "childAgesValue": "Âges : {ages} ans"
     },
     "form": {
       "legend": "Vos coordonnées",

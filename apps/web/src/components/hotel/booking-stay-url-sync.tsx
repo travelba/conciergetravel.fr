@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 
 /**
- * Keeps `?checkIn=&checkOut=&adults=&children=` in the URL in sync with the
- * fiche booking form so `<PriceComparator>` can fetch competitor rates without
- * opting the route out of ISR.
+ * Keeps stay query params in the URL in sync with the fiche booking form so
+ * `<PriceComparator>` can fetch competitor rates without opting the route out
+ * of ISR.
  */
 export function BookingStayUrlSync(): null {
   useEffect(() => {
@@ -16,15 +16,15 @@ export function BookingStayUrlSync(): null {
 
     const sync = (): void => {
       const params = new URLSearchParams(window.location.search);
-      const checkIn = form.querySelector<HTMLInputElement>('input[name="checkIn"]')?.value;
-      const checkOut = form.querySelector<HTMLInputElement>('input[name="checkOut"]')?.value;
-      const adults = form.querySelector<HTMLInputElement>('input[name="adults"]')?.value;
-      const children = form.querySelector<HTMLInputElement>('input[name="children"]')?.value;
-
-      if (checkIn !== undefined && checkIn.length > 0) params.set('checkIn', checkIn);
-      if (checkOut !== undefined && checkOut.length > 0) params.set('checkOut', checkOut);
-      if (adults !== undefined && adults.length > 0) params.set('adults', adults);
-      if (children !== undefined && children.length > 0) params.set('children', children);
+      const fields = ['checkIn', 'checkOut', 'rooms', 'adults', 'children', 'childAges'] as const;
+      for (const name of fields) {
+        const value = form.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
+        if (value !== undefined && value.length > 0) {
+          params.set(name, value);
+        } else {
+          params.delete(name);
+        }
+      }
 
       const next = `${window.location.pathname}?${params.toString()}`;
       if (next !== `${window.location.pathname}${window.location.search}`) {
@@ -33,8 +33,12 @@ export function BookingStayUrlSync(): null {
     };
 
     form.addEventListener('change', sync);
+    form.addEventListener('input', sync);
     sync();
-    return () => form.removeEventListener('change', sync);
+    return () => {
+      form.removeEventListener('change', sync);
+      form.removeEventListener('input', sync);
+    };
   }, []);
 
   return null;

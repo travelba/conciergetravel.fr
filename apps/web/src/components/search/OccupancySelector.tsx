@@ -3,14 +3,18 @@
 import { useTranslations } from 'next-intl';
 import { type ReactElement } from 'react';
 
+import { ChildAgeFields } from '@/components/booking/child-age-fields';
+
 export interface OccupancySelectorProps {
   readonly rooms: number;
   readonly adults: number;
   /** Named `childrenCount` (not `children`) — `children` is React-reserved. */
   readonly childrenCount: number;
+  readonly childAges: readonly number[];
   readonly onRoomsChange: (value: number) => void;
   readonly onAdultsChange: (value: number) => void;
   readonly onChildrenChange: (value: number) => void;
+  readonly onChildAgesChange: (ages: readonly number[]) => void;
   /** "Valider ma chambre" — closes the panel (values are already live). */
   readonly onValidate: () => void;
 }
@@ -85,9 +89,11 @@ export function OccupancySelector({
   rooms,
   adults,
   childrenCount,
+  childAges,
   onRoomsChange,
   onAdultsChange,
   onChildrenChange,
+  onChildAgesChange,
   onValidate,
 }: OccupancySelectorProps): ReactElement {
   const t = useTranslations('hotelSearchBar');
@@ -120,6 +126,7 @@ export function OccupancySelector({
         min={0}
         onChange={onChildrenChange}
       />
+      <ChildAgeFields variant="panel" childAges={childAges} onChange={onChildAgesChange} />
       <button
         type="button"
         onClick={onValidate}

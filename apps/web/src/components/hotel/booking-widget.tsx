@@ -9,6 +9,8 @@ import {
   type IndicativePriceMinor,
 } from '@/lib/format-indicative-price';
 
+import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
+
 import { BookingWidgetSubmitTracker } from './booking-widget-tracker';
 
 export type BookingMode =
@@ -51,8 +53,10 @@ interface BookingWidgetProps {
   readonly defaultStay: {
     readonly checkIn: string;
     readonly checkOut: string;
+    readonly rooms: number;
     readonly adults: number;
     readonly children: number;
+    readonly childAges: readonly number[];
   };
   /** Pre-computed lock action URL (paid tunnel) or `null` for concierge modes. */
   readonly lockActionUrl: string | null;
@@ -188,8 +192,6 @@ export async function BookingWidget({
         labels={{
           checkIn: t('booking.checkIn'),
           checkOut: t('booking.checkOut'),
-          adults: t('booking.adults'),
-          children: t('booking.children'),
           submit: isPaidTunnel
             ? fakeEnabled
               ? t('booking.submitTest')
@@ -239,8 +241,10 @@ interface BookingFormProps {
   readonly defaultStay: {
     readonly checkIn: string;
     readonly checkOut: string;
+    readonly rooms: number;
     readonly adults: number;
     readonly children: number;
+    readonly childAges: readonly number[];
   };
   readonly formAction: string;
   readonly method: 'get' | 'post';
@@ -248,8 +252,6 @@ interface BookingFormProps {
   readonly labels: {
     readonly checkIn: string;
     readonly checkOut: string;
-    readonly adults: string;
-    readonly children: string;
     readonly submit: string;
     readonly submitHint: string | null;
   };
@@ -279,7 +281,7 @@ function BookingWidgetForm({
       ) : null}
       {isPaidTunnel && fakeEnabled ? <input type="hidden" name="fake" value="1" /> : null}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-fg font-medium">{labels.checkIn}</span>
           <input
@@ -300,30 +302,15 @@ function BookingWidgetForm({
             className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
           />
         </label>
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-fg font-medium">{labels.adults}</span>
-          <input
-            type="number"
-            name="adults"
-            min={1}
-            max={9}
-            defaultValue={defaultStay.adults}
-            required
-            className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="text-fg font-medium">{labels.children}</span>
-          <input
-            type="number"
-            name="children"
-            min={0}
-            max={9}
-            defaultValue={defaultStay.children}
-            className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
-          />
-        </label>
       </div>
+
+      <StayOccupancyFields
+        defaults={{
+          rooms: defaultStay.rooms,
+          adults: defaultStay.adults,
+          childAges: defaultStay.childAges,
+        }}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
         <button

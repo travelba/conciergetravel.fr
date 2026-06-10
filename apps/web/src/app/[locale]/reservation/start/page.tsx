@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { redirect } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { parseChildAgesParam } from '@/lib/booking/stay-url-params';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getFakeHotelHead } from '@/server/booking/dev-fake-hotel';
 import { submitEmailBookingRequest } from '@/server/booking/email-request';
@@ -32,8 +33,10 @@ interface StartSearchParams {
   readonly hotelId?: string;
   readonly checkIn?: string;
   readonly checkOut?: string;
+  readonly rooms?: string;
   readonly adults?: string;
   readonly children?: string;
+  readonly childAges?: string;
   readonly error?: string;
   readonly retryAfter?: string;
   readonly scope?: string;
@@ -126,8 +129,12 @@ async function submitAction(formData: FormData): Promise<void> {
     checkIn: typeof formData.get('checkIn') === 'string' ? (formData.get('checkIn') as string) : '',
     checkOut:
       typeof formData.get('checkOut') === 'string' ? (formData.get('checkOut') as string) : '',
+    rooms: pickInt(formData.get('rooms'), 1),
     adults: pickInt(formData.get('adults'), 1),
     children: pickInt(formData.get('children'), 0),
+    childAges: parseChildAgesParam(
+      typeof formData.get('childAges') === 'string' ? (formData.get('childAges') as string) : null,
+    ),
     guest: {
       firstName:
         typeof formData.get('firstName') === 'string' ? (formData.get('firstName') as string) : '',
@@ -157,8 +164,10 @@ async function submitAction(formData: FormData): Promise<void> {
     hotelId: payload.hotelId,
     checkIn: payload.checkIn,
     checkOut: payload.checkOut,
+    rooms: String(payload.rooms),
     adults: String(payload.adults),
     children: String(payload.children),
+    ...(payload.childAges.length > 0 ? { childAges: payload.childAges.join(',') } : {}),
     error: result.error.kind,
   };
   if (result.error.kind === 'rate_limited') {
@@ -187,8 +196,10 @@ export default async function ReservationStartPage({
   const hotelId = pickString(sp.hotelId);
   const checkIn = pickString(sp.checkIn) ?? '';
   const checkOut = pickString(sp.checkOut) ?? '';
+  const rooms = pickInt(sp.rooms, 1);
   const adults = pickInt(sp.adults, 2);
-  const children = pickInt(sp.children, 0);
+  const childAges = parseChildAgesParam(sp.childAges);
+  const children = childAges.length > 0 ? childAges.length : pickInt(sp.children, 0);
   const errorKind = pickString(sp.error);
   const retryAfter = pickInt(sp.retryAfter, 0);
   const rateScope = pickString(sp.scope);
@@ -233,7 +244,13 @@ export default async function ReservationStartPage({
           </div>
           <div>
             <dt className="text-muted text-xs uppercase tracking-wide">{t('summary.guests')}</dt>
-            <dd className="text-fg text-sm">{t('summary.guestsValue', { adults, children })}</dd>
+            <dd className="text-fg text-sm">
+              {t('summary.guestsValue', { adults, children })}
+              {rooms > 1 ? ` · ${t('summary.roomsValue', { rooms })}` : ''}
+              {childAges.length > 0
+                ? ` · ${t('summary.childAgesValue', { ages: childAges.join(', ') })}`
+                : ''}
+            </dd>
           </div>
         </dl>
       </section>
@@ -243,8 +260,12 @@ export default async function ReservationStartPage({
         <input type="hidden" name="hotelId" value={hotelId} />
         <input type="hidden" name="checkIn" value={checkIn} />
         <input type="hidden" name="checkOut" value={checkOut} />
+        <input type="hidden" name="rooms" value={String(rooms)} />
         <input type="hidden" name="adults" value={String(adults)} />
         <input type="hidden" name="children" value={String(children)} />
+        {childAges.length > 0 ? (
+          <input type="hidden" name="childAges" value={childAges.join(',')} />
+        ) : null}
 
         <fieldset className="flex flex-col gap-4">
           <legend className="text-fg font-serif text-lg">{t('form.legend')}</legend>

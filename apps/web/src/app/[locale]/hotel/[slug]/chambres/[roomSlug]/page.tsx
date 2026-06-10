@@ -16,6 +16,7 @@ import { getPathname } from '@/i18n/navigation';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
+import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
@@ -223,22 +224,6 @@ export default async function RoomPage({
   return renderRoomPage(locale, detail, t);
 }
 
-function defaultRoomStay(): {
-  checkIn: string;
-  checkOut: string;
-  adults: number;
-  children: number;
-} {
-  // Mirror the hotel page default (today + 30 / +33). Keeps the room
-  // sub-page widget aligned with the parent hotel widget on cold visit.
-  const now = new Date();
-  const ci = new Date(now.getTime() + 30 * 86_400_000);
-  const co = new Date(now.getTime() + 33 * 86_400_000);
-  const fmt = (d: Date): string =>
-    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
-  return { checkIn: fmt(ci), checkOut: fmt(co), adults: 2, children: 0 };
-}
-
 function lockActionFor(locale: Locale, hotelId: string, offerId: string | null): string {
   // Same fallback shape as the parent hotel page — when no live offer
   // is available we ship the synthetic `TEST-OFFER-<id>` so the form
@@ -338,7 +323,7 @@ async function renderRoomPage(
   // the widget can show a "from" price + use a real `offerId` in the
   // lock URL. Concierge modes (email / display_only) skip the fetch
   // (no offer to surface) and use the concierge form.
-  const stay = defaultRoomStay();
+  const stay = defaultHotelStay();
   const bookable = hotelRow.booking_mode === 'amadeus' || hotelRow.booking_mode === 'little';
   const fakeEnabled = isFakeOffersEnabled();
   const bestOffer = bookable

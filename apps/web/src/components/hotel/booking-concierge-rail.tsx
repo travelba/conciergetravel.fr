@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import { SubmitButton } from '@/components/booking/submit-button';
+import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
 import { getPathname } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import { defaultHotelStay, todayIso } from '@/lib/booking/default-hotel-stay';
@@ -91,19 +92,13 @@ export async function BookingConciergeRail({
             className="rf-val border-0 bg-transparent p-0"
           />
         </label>
-        <label className="rf-field">
-          <span>{t('displayOnly.adults')}</span>
-          <input
-            type="number"
-            name="adults"
-            min={1}
-            max={9}
-            defaultValue={stay.adults}
-            required
-            className="rf-val border-0 bg-transparent p-0"
-          />
-        </label>
-        <input type="hidden" name="children" value={stay.children} />
+        <StayOccupancyFields
+          defaults={{
+            rooms: stay.rooms,
+            adults: stay.adults,
+            childAges: stay.childAges,
+          }}
+        />
         <SubmitButton className="btn btn-or resa-go" pendingLabel={tw('conciergeSubmit')}>
           {tw('conciergeSubmit')}
         </SubmitButton>

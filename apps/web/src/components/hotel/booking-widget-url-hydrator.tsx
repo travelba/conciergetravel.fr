@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { isIsoDate, isSmallInt } from '@/lib/booking/stay-url-params';
+
 /**
  * Booking widget URL hydrator (C1 / ADR-0013).
  *
@@ -48,13 +50,15 @@ export function BookingWidgetUrlHydrator(): null {
       input.value = value;
     };
 
-    const isIsoDate = (s: string): boolean => /^\d{4}-\d{2}-\d{2}$/u.test(s);
-    const isSmallInt = (s: string): boolean => /^\d{1,2}$/u.test(s);
+    const isIsoDateLocal = (s: string): boolean => isIsoDate(s);
+    const isSmallIntLocal = (s: string): boolean => isSmallInt(s);
 
-    hydrate('checkIn', isIsoDate);
-    hydrate('checkOut', isIsoDate);
-    hydrate('adults', isSmallInt);
-    hydrate('children', isSmallInt);
+    hydrate('checkIn', isIsoDateLocal);
+    hydrate('checkOut', isIsoDateLocal);
+    hydrate('rooms', isSmallIntLocal);
+    hydrate('adults', isSmallIntLocal);
+    hydrate('children', isSmallIntLocal);
+    hydrate('childAges', (s) => /^(\d{1,2})(,\d{1,2})*$/u.test(s));
   }, []);
 
   return null;
