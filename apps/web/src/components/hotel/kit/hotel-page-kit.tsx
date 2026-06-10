@@ -6,7 +6,6 @@ import { SeoJsonLd } from '@/components/seo/json-ld';
 import { TrackPageView } from '@/lib/analytics/hooks';
 import type { Locale } from '@/i18n/routing';
 import { isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
-import type { AmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
 import type { HotelDetail } from '@/server/hotels/get-hotel-by-slug';
 import { prepareHotelBookingRail } from '@/server/booking/prepare-hotel-booking-rail';
 import { buildHotelKitJsonLd } from '@/server/hotels/kit/build-hotel-kit-json-ld';
@@ -21,7 +20,6 @@ import { HotelKitInteractions } from './hotel-kit-interactions';
 interface HotelPageKitProps {
   readonly locale: Locale;
   readonly detail: HotelDetail;
-  readonly amadeusSentiment: AmadeusHotelSentiment;
 }
 
 /**
@@ -33,12 +31,11 @@ interface HotelPageKitProps {
 export async function HotelPageKit({
   locale,
   detail,
-  amadeusSentiment,
 }: HotelPageKitProps): Promise<React.ReactElement> {
   const { row } = detail;
 
   const [model, railContext] = await Promise.all([
-    prepareHotelKitModel(locale, detail, amadeusSentiment),
+    prepareHotelKitModel(locale, detail),
     prepareHotelBookingRail({
       locale,
       hotelId: row.id,

@@ -71,6 +71,21 @@ export async function prepareHotelBookingRail(
   const stay = defaultHotelStay();
   const fakeEnabled = isFakeOffersEnabled();
 
+  // Travelport pilot — sandbox funnel only; skip supplier / Amadeus shop on SSR.
+  if (input.bookingMode === 'travelport') {
+    return {
+      defaultStay: stay,
+      fakeEnabled,
+      supplierBookable: false,
+      bestOffer: EMPTY_BEST_OFFER,
+      lockActionUrl: null,
+      lockRateToken: null,
+      priceFrom: null,
+      limitedAvailability: null,
+      availabilityState: 'unknown',
+    };
+  }
+
   const connections = await getHotelSupplierConnections(input.hotelId);
   const multiSupplierActive =
     env.MULTI_SUPPLIER_RATESHOPPING_ENABLED === true && connections.length > 0;

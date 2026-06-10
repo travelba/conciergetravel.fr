@@ -387,8 +387,7 @@ export default async function HotelPage({
   if (!detail) notFound();
 
   if (isHotelKitSlug(slug)) {
-    const amadeusSentiment = await getAmadeusHotelSentiment(detail.row.amadeus_hotel_id);
-    return <HotelPageKit locale={locale} detail={detail} amadeusSentiment={amadeusSentiment} />;
+    return <HotelPageKit locale={locale} detail={detail} />;
   }
 
   const [t, amadeusSentiment] = await Promise.all([

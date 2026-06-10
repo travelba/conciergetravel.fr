@@ -11,7 +11,7 @@ import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/su
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { citySlug } from '@/server/destinations/cities';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
-import { getTravelportLiveRoomPrices } from '@/server/booking/travelport-offer';
+import { getAmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
 import type { HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
 import { getPathname } from '@/i18n/navigation';
 import { env } from '@/lib/env';
@@ -61,7 +61,6 @@ import {
 } from '@/server/hotels/get-hotel-by-slug';
 import type { AmenityCategory } from '@/server/hotels/amenity-taxonomy';
 import { intlLocaleTag } from '@/i18n/runtime';
-import type { AmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
 import { getRelatedHotels, type RelatedHotelsBundle } from '@/server/hotels/get-related-hotels';
 import {
   getRankingsForHotel,
@@ -407,19 +406,21 @@ function toGalleryTile(
 export async function prepareHotelKitModelUncached(
   locale: Locale,
   detail: HotelDetail,
-  amadeusSentiment: AmadeusHotelSentiment,
 ): Promise<HotelKitModel> {
   if (locale !== 'fr' && locale !== 'en') {
     throw new Error(`Hotel kit pilot supports fr/en only, got ${locale}`);
   }
 
   const kitLocale = locale;
-  const t = await getTranslations({ locale: kitLocale, namespace: 'hotelPage' });
-  const tRelated = await getTranslations({ locale: kitLocale, namespace: 'relatedHotels' });
-  const tTldr = await getTranslations({ locale: kitLocale, namespace: 'hotelTldr' });
-  const tCard = await getTranslations({ locale: kitLocale, namespace: 'reservationRooms.card' });
   const { rooms } = detail;
   const row = patchKitGoldenRow(detail.row);
+  const [t, tRelated, tTldr, tCard, amadeusSentiment] = await Promise.all([
+    getTranslations({ locale: kitLocale, namespace: 'hotelPage' }),
+    getTranslations({ locale: kitLocale, namespace: 'relatedHotels' }),
+    getTranslations({ locale: kitLocale, namespace: 'hotelTldr' }),
+    getTranslations({ locale: kitLocale, namespace: 'reservationRooms.card' }),
+    getAmadeusHotelSentiment(row.amadeus_hotel_id),
+  ]);
   const kitBrand = resolveKitDisplayBrand(row);
   const externalIds = readExternalIds(row);
   const googleAccess = readGoogleAccess(row);
@@ -540,10 +541,9 @@ export async function prepareHotelKitModelUncached(
   const cityHubSlug = citySlug(row.city);
   const countryLabel = pickByLocale(kitLocale, 'France', 'France');
 
-  const travelportLiveRooms =
-    row.booking_mode === 'travelport'
-      ? await getTravelportLiveRoomPrices({ slug: row.slug, locale: kitLocale, rooms })
-      : null;
+  // SSR must not await Travelport — `searchByCoordinates` blocks TTFB 3–10 s on
+  // cold cache. Room cards keep editorial `indicative_price`; live GDS overlay
+  // resumes via Suspense stream in Phase 6 (see legacy `TravelportLiveRooms`).
   const aggregatedRoomPrices = await getAggregatedRoomPrices({
     hotelId: row.id,
     stay: {
@@ -567,9 +567,7 @@ export async function prepareHotelKitModelUncached(
       galleryTiles.length > 0 ? galleryTiles[index % galleryTiles.length] : undefined;
     const roomName = room.name ?? room.room_code;
     const isConciergePick = conciergePick !== null && room.slug === conciergePick.slug;
-    const liveFromMinor =
-      aggregatedRoomPrices?.fromByRoomId.get(room.id) ??
-      travelportLiveRooms?.fromByRoomId.get(room.id);
+    const liveFromMinor = aggregatedRoomPrices?.fromByRoomId.get(room.id);
     let livePriceText: string | null = null;
     let bookAria: string | null = null;
     if (liveFromMinor !== undefined) {
