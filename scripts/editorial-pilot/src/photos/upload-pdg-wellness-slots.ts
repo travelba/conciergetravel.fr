@@ -7,11 +7,29 @@
 
 import { PRINCE_DE_GALLES_GALLERY_IMAGES } from '@mch/domain/editorial';
 import { configureCloudinary, uploadFromUrl } from '@mch/integrations/cloudinary';
+import type { CloudinaryError } from '@mch/integrations/cloudinary';
 
 import { loadPhotoEnv, requirePhotoEnv } from './env-photos.js';
 import { patchHotelById, selectHotels, type SupabaseRestConfig } from './supabase-rest.js';
 
+interface GalleryRow {
+  readonly public_id: string;
+  readonly alt_fr: string;
+  readonly alt_en: string;
+  readonly caption_fr: string;
+  readonly caption_en: string;
+  readonly category: string;
+  readonly credit?: string;
+  readonly width?: number;
+  readonly height?: number;
+}
+
 const SLUG = 'prince-de-galles-paris';
+
+function formatCloudinaryError(error: CloudinaryError): string {
+  if (error.kind === 'unknown') return error.message;
+  return error.kind;
+}
 
 /** 0-based gallery index → Scene7 source (Marriott official DAM). */
 const SLOT_SOURCES: Readonly<Record<number, string>> = {
@@ -49,18 +67,15 @@ async function main(): Promise<void> {
     serviceRoleKey: photoEnv.SUPABASE_SERVICE_ROLE_KEY,
   };
 
-  const gallery = [...PRINCE_DE_GALLES_GALLERY_IMAGES].map((meta, i) => {
-    const index = i + 1;
-    return {
-      public_id: meta.public_id,
-      alt_fr: meta.alt_fr,
-      alt_en: meta.alt_en,
-      caption_fr: meta.caption_fr,
-      caption_en: meta.caption_en,
-      category: meta.category,
-      credit: meta.credit,
-    };
-  });
+  const gallery: GalleryRow[] = PRINCE_DE_GALLES_GALLERY_IMAGES.map((meta) => ({
+    public_id: meta.public_id,
+    alt_fr: meta.alt_fr,
+    alt_en: meta.alt_en,
+    caption_fr: meta.caption_fr,
+    caption_en: meta.caption_en,
+    category: meta.category,
+    credit: meta.credit,
+  }));
 
   for (const [idxStr, sourceUrl] of Object.entries(SLOT_SOURCES)) {
     const i = Number(idxStr);
@@ -80,11 +95,13 @@ async function main(): Promise<void> {
     });
 
     if (!result.ok) {
-      throw new Error(`[pdg-wellness] upload failed press-${index}: ${result.error.message}`);
+      throw new Error(
+        `[pdg-wellness] upload failed press-${index}: ${formatCloudinaryError(result.error)}`,
+      );
     }
 
     gallery[i] = {
-      public_id: result.value.public_id,
+      public_id: meta.public_id,
       alt_fr: meta.alt_fr,
       alt_en: meta.alt_en,
       caption_fr: meta.caption_fr,
