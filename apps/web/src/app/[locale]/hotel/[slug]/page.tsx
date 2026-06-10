@@ -56,8 +56,18 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
+import {
+  buildHotelDiscoverRobots,
+  buildHotelOgImages,
+  buildHotelOpenGraphAlternates,
+  buildHotelSeoTitle,
+  pickHotelJsonLdFaqEntries,
+} from '@/lib/seo/hotel-page-seo';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { citySlug } from '@/server/destinations/cities';
+import { countrySlug } from '@/server/annuaire/country-slugs';
+import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
+import { buildHotelKnowledgeGraphJsonLdFields } from '@/server/hotels/hotel-json-ld-fields';
 import { getGuideTeaserForCity } from '@/server/guides/get-guide-teaser';
 import {
   getAmadeusHotelSentiment,
@@ -252,7 +262,15 @@ export async function generateMetadata({
   // `hasGoldenHero` — no per-slug flag.
   const metadataTitle: NonNullable<Metadata['title']> = hasGoldenHero(row)
     ? {
-        absolute: `${name} — ${row.is_palace ? 'Palace' : `Hôtel ${row.stars}★`} ${row.city} | MyConciergeHotel`,
+        absolute: buildHotelSeoTitle({
+          name,
+          city: row.city,
+          district: row.district ?? '',
+          region: row.region,
+          isPalace: row.is_palace,
+          stars: row.stars,
+          locale,
+        }),
       }
     : title;
   const desc =
@@ -290,26 +308,12 @@ export async function generateMetadata({
   //   - Fall back to undefined when no hero is set; Next.js drops the
   //     `og:image` tag rather than emitting an empty one.
   const heroPublicId = readHeroImage(row);
-  const ogImageUrl =
-    heroPublicId !== null
-      ? buildCloudinarySrc({
-          cloudName: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-          publicId: heroPublicId,
-          transforms: 'f_jpg,q_auto,c_fill,g_auto,w_1200,h_630',
-        })
-      : undefined;
   const ogImages =
-    ogImageUrl !== undefined
-      ? [
-          {
-            url: ogImageUrl,
-            width: 1200,
-            height: 630,
-            alt: name,
-            type: 'image/jpeg' as const,
-          },
-        ]
+    heroPublicId !== null
+      ? buildHotelOgImages(env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, heroPublicId, name)
       : undefined;
+  const firstOgImage = ogImages !== undefined ? ogImages[0] : undefined;
+  const ogImageUrl = firstOgImage !== undefined ? firstOgImage.url : undefined;
 
   // EEAT guard (Phase 1, May 2026 — `AGENTS.md §4ter`): a "stub" sheet
   // — i.e. one that does NOT meet the minimum indexability bar —
@@ -343,7 +347,7 @@ export async function generateMetadata({
   return {
     title: metadataTitle,
     description: desc,
-    ...(isStub ? { robots: { index: false, follow: true } } : {}),
+    robots: buildHotelDiscoverRobots(isStub),
     alternates: {
       canonical,
       languages: buildHreflangAlternates(buildCanonicalPath),
@@ -353,6 +357,7 @@ export async function generateMetadata({
       title,
       description: desc,
       locale: ogLocale(locale),
+      alternateLocale: [...buildHotelOpenGraphAlternates(locale)],
       siteName: 'MyConciergeHotel',
       url: absoluteUrl,
       ...(ogImages !== undefined ? { images: ogImages } : {}),
@@ -1041,46 +1046,15 @@ async function renderHotelPage(
     //   - email          → reservation email (booking_mode=email)
     // Each field is omitted when null so a partially enriched row
     // emits a clean, lint-free payload.
-    ...(externalIds.wikidataId !== null ? { wikidataId: externalIds.wikidataId } : {}),
-    // ACTION 3 (SEO) — `sameAs[]` is read from the DB knowledge-graph anchors
-    // (`external_sameas` socials + `official_url` + Wikidata/Wikipedia/…). When
-    // enrichment hasn't run yet we fall back to the row's own `official_url`
-    // (generic, no hard-coded per-fiche URL) so the array is never empty.
-    ...((): { sameAs?: readonly string[] } => {
-      if (externalIds.sameAs.length > 0) return { sameAs: externalIds.sameAs };
-      const fallbackOfficial = typeof row.official_url === 'string' ? row.official_url.trim() : '';
-      if (fallbackOfficial.startsWith('https://')) {
-        return { sameAs: [fallbackOfficial] };
-      }
-      return {};
-    })(),
-    ...((): { subjectOf?: { url: string; name?: string; inLanguage?: 'fr' | 'en' }[] } => {
-      const list: { url: string; name?: string; inLanguage?: 'fr' | 'en' }[] = [];
-      if (externalIds.wikipediaUrlFr !== null) {
-        list.push({
-          url: externalIds.wikipediaUrlFr,
-          name: `${name} — Wikipédia`,
-          inLanguage: 'fr',
-        });
-      }
-      if (externalIds.wikipediaUrlEn !== null) {
-        list.push({
-          url: externalIds.wikipediaUrlEn,
-          name: `${name} — Wikipedia`,
-          inLanguage: 'en',
-        });
-      }
-      if (externalIds.commonsGalleryUrl !== null) {
-        list.push({ url: externalIds.commonsGalleryUrl, name: `${name} — Wikimedia Commons` });
-      }
-      return list.length > 0 ? { subjectOf: list } : {};
-    })(),
-    ...(externalIds.emailReservations !== null && row.booking_mode === 'email'
-      ? { email: externalIds.emailReservations }
-      : {}),
-    ...(externalIds.knowledgeGraph.architects.length > 0
-      ? { architects: externalIds.knowledgeGraph.architects }
-      : {}),
+    ...buildHotelKnowledgeGraphJsonLdFields({
+      externalIds,
+      name,
+      bookingMode: row.booking_mode,
+      emailReservations: externalIds.emailReservations,
+      googleMapsUrl: googleAccess.googleMapsUrl,
+      latitude: row.latitude,
+      longitude: row.longitude,
+    }),
     // Aggregate rating priority — editorial DB value first (migration 0066,
     // ACTION 2), then Amadeus, then the Google Places snapshot. Only fiches
     // with a populated `aggregate_rating_value` use this branch. The Amadeus
@@ -1103,7 +1077,7 @@ async function renderHotelPage(
           },
         }
       : {}),
-    ...(isPaidBookingMode(row.booking_mode)
+    ...(railContext.supplierBookable || isPaidBookingMode(row.booking_mode)
       ? ((): { offer?: NonNullable<ReturnType<typeof buildOfferJsonLdInput>> } => {
           const offer = buildOfferJsonLdInput(railContext, canonicalUrl);
           return offer !== null ? { offer } : {};
@@ -1120,6 +1094,8 @@ async function renderHotelPage(
     row.country_label_fr !== null && row.country_label_fr !== '' ? row.country_label_fr : 'France',
     row.country_label_en !== null && row.country_label_en !== '' ? row.country_label_en : 'France',
   );
+  const countryHubPath = buildHotelCountryHubPath(row, locale);
+  const countryHubUrl = `${origin}${countryHubPath}`;
 
   // BreadcrumbList JSON-LD — Accueil → Pays (destination index) → Ville (city
   // hub) → fiche. Mirrors the on-page breadcrumb (`<nav>` further down) per
@@ -1131,7 +1107,7 @@ async function renderHotelPage(
   const breadcrumbJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.breadcrumbJsonLd([
       { name: t('breadcrumb.home'), url: `${origin}${getPathname({ locale, href: '/' })}` },
-      { name: countryLabel, url: `${origin}${getPathname({ locale, href: '/destination' })}` },
+      { name: countryLabel, url: countryHubUrl },
       { name: row.city, url: cityHubUrl },
       { name, url: canonicalUrl },
     ]),
@@ -1193,10 +1169,10 @@ async function renderHotelPage(
     );
   }
 
-  const faqPayload: Array<{ question: string; answer: string }> = [
+  const faqPayload = pickHotelJsonLdFaqEntries([
     { question: aeoQuestion, answer: aeoAnswer },
     ...faqs.map((f) => ({ question: f.question, answer: f.answer })),
-  ];
+  ]);
   const faqJsonLd = JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd(faqPayload));
 
   // Event[] JSON-LD — one standalone node per upcoming event (CDC §2 "À
@@ -1350,7 +1326,16 @@ async function renderHotelPage(
 
       <nav aria-label={t('breadcrumb.hotels')} className="mch-kit">
         <div className="breadcrumb">
-          <Link href="/destination">{countryLabel}</Link>
+          <Link
+            href={{
+              pathname: '/hotels/[pays]',
+              params: {
+                pays: countrySlug(row.country_label_fr, row.country_label_en, row.country_code),
+              },
+            }}
+          >
+            {countryLabel}
+          </Link>
           <span aria-hidden className="sep">
             ›
           </span>

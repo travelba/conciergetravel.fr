@@ -256,6 +256,24 @@ describe('hotelJsonLd', () => {
     expect(node.petsAllowed).toBe(false);
   });
 
+  it('emits hasMap when an HTTPS map URL is provided', () => {
+    const node = hotelJsonLd({
+      name: 'Hôtel Carte',
+      url: 'https://example.com/map',
+      hasMap: 'https://www.google.com/maps/search/?api=1&query=48.85,2.35',
+    });
+    expect(node.hasMap).toBe('https://www.google.com/maps/search/?api=1&query=48.85,2.35');
+  });
+
+  it('drops a non-HTTPS hasMap URL', () => {
+    const node = hotelJsonLd({
+      name: 'Hôtel Carte',
+      url: 'https://example.com/map',
+      hasMap: 'http://insecure.example/maps',
+    });
+    expect(node.hasMap).toBeUndefined();
+  });
+
   it('emits offer + aggregateRating only when provided', () => {
     const node = hotelJsonLd({
       name: 'Hôtel C',

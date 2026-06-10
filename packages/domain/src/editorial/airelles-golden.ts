@@ -1210,7 +1210,7 @@ export const AIRELLES_META_DESC_FR =
 export const AIRELLES_META_DESC_EN =
   'Five-star Palace in Gordes, high above the Luberon: valley views, three pools, an Airelles by Guerlain spa and a table by chef Jean-François Piège.';
 export const AIRELLES_META_TITLE_FR =
-  'Airelles Gordes La Bastide — Palace Gordes | MyConciergeHotel';
+  'Airelles Gordes, La Bastide — Palace 5★ Luberon | MyConciergeHotel';
 export const AIRELLES_META_TITLE_EN =
   'Airelles Gordes La Bastide — Palace Luberon | MyConciergeHotel';
 
@@ -1922,7 +1922,7 @@ export const AIRELLES_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/les-airelles-gordes/press-11',
     category: 'room',
-    alt_fr: 'Chambre Deluxe Valley de l’Airelles Gordes, Gordes',
+    alt_fr: 'Chambre Deluxe Vallée de l’Airelles Gordes, Gordes',
     alt_en: 'Deluxe Valley bedroom at Airelles Gordes, Gordes',
     caption_fr:
       'La Chambre Deluxe Valley ouvre sur la vallée du Luberon depuis une voûte en pierre et un parquet chevron.',

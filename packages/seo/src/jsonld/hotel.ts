@@ -96,6 +96,8 @@ export type HotelNode = HotelBaseNode & {
   smokingAllowed?: boolean;
   /** Reservation email — surfaces as `email` (Organization inheritance). */
   email?: string;
+  /** Google Maps (or equivalent) deep link — Schema.org `hasMap`. */
+  hasMap?: string;
   /** Founders, named architects, etc. (Schema.org `founder` on Organization). */
   founder?: readonly { '@type': 'Person'; name: string }[];
 };
@@ -542,6 +544,11 @@ export interface HotelJsonLdInput {
   readonly slogan?: string;
   /** Hotel marketing email (booking-mode=email; never logged). */
   readonly email?: string;
+  /**
+   * HTTPS map URL — Schema.org `hasMap`. Typically a Google Maps search or
+   * Business Profile deep link derived from coordinates or `google_place_id`.
+   */
+  readonly hasMap?: string;
   /**
    * CSS selectors identifying the spoken-summary regions on the page.
    * Defaults to `['#tldr', '#faq']` when omitted but a non-empty
@@ -1144,6 +1151,9 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
   }
   if (input.email !== undefined && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(input.email)) {
     out.email = input.email;
+  }
+  if (input.hasMap !== undefined && /^https:\/\/[^\s<>]+$/iu.test(input.hasMap)) {
+    out.hasMap = input.hasMap;
   }
   // currenciesAccepted + paymentAccepted — constants for the French
   // luxury catalog, but exposed as inputs so future markets can override.

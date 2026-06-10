@@ -1,7 +1,7 @@
 'use client';
 
 import { HotelImage } from '@mch/ui';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { GALLERY_OPEN_EVENT, type GalleryOpenDetail } from './hotel-gallery-trigger';
 
@@ -409,7 +409,6 @@ export function HotelGalleryLightbox({
   // 'single'.
   const [viewMode, setViewMode] = useState<'grid' | 'single'>('grid');
   const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const titleId = useId();
 
   const total = allImages.length;
   const editorialRows = useMemo(() => buildEditorialRows(allImages), [allImages]);
@@ -729,7 +728,7 @@ export function HotelGalleryLightbox({
           <dialog>, so the previous disable directive was removed.) */}
       <dialog
         ref={dialogRef}
-        aria-labelledby={titleId}
+        aria-label={translations.lightboxLabel}
         aria-modal="true"
         onClose={close}
         onClick={onBackdropClick}
@@ -739,10 +738,6 @@ export function HotelGalleryLightbox({
             : 'm-0 w-full max-w-5xl rounded-lg bg-black/95 p-0 text-white backdrop:bg-black/80'
         }
       >
-        <h2 id={titleId} className="sr-only">
-          {translations.lightboxLabel}
-        </h2>
-
         {viewMode === 'grid' ? (
           <div className="flex h-full flex-col">
             <header className="shrink-0 border-b border-[#8c7b5a]/25 px-6 py-6 md:px-10 md:py-7">

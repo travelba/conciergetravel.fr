@@ -21,6 +21,16 @@ import {
   type GalleryLicence,
 } from '@/server/hotels/get-hotel-by-slug';
 
+import {
+  buildHotelDiscoverRobots,
+  buildHotelOgImages,
+  buildHotelOpenGraphAlternates,
+  buildHotelSeoTitle,
+  pickHotelJsonLdFaqEntries,
+} from '@/lib/seo/hotel-page-seo';
+import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
+import { buildHotelKnowledgeGraphJsonLdFields } from '@/server/hotels/hotel-json-ld-fields';
+import { readExternalIds } from '@/server/hotels/get-hotel-by-slug';
 import { buildOfferJsonLdInput } from '@/server/booking/prepare-hotel-booking-rail';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 
@@ -148,6 +158,21 @@ export function buildHotelKitJsonLd(
   const liveOffer =
     railContext !== undefined ? buildOfferJsonLdInput(railContext, model.canonicalUrl) : null;
 
+  const externalIds = readExternalIds(model.row);
+  const knowledgeGraph = buildHotelKnowledgeGraphJsonLdFields({
+    externalIds,
+    name: model.name,
+    bookingMode: model.row.booking_mode,
+    emailReservations: model.emailReservations,
+    googleMapsUrl: model.googleMapsUrl,
+    latitude: model.latitude,
+    longitude: model.longitude,
+    officialUrlFallback: model.officialWebsiteUrl,
+  });
+
+  const countryHubPath = buildHotelCountryHubPath(model.row, model.locale);
+  const countryHubUrl = `${origin}${countryHubPath}`;
+
   const hotelNode = JsonLd.withSchemaOrgContext(
     JsonLd.hotelJsonLd({
       name: model.name,
@@ -260,6 +285,7 @@ export function buildHotelKitJsonLd(
         name: model.city,
         url: cityHubUrl,
       },
+      ...knowledgeGraph,
       ...(liveOffer !== null ? { offer: liveOffer } : {}),
     }),
   );
@@ -272,7 +298,7 @@ export function buildHotelKitJsonLd(
       },
       {
         name: model.countryLabel,
-        url: `${origin}${getPathname({ locale: model.locale, href: '/destination' })}`,
+        url: countryHubUrl,
       },
       {
         name: model.city,
@@ -282,10 +308,12 @@ export function buildHotelKitJsonLd(
     ]),
   );
 
-  const faqItems = model.faqsFlat.map((f) => ({
-    question: f.question,
-    answer: f.answer,
-  }));
+  const faqItems = pickHotelJsonLdFaqEntries(
+    model.faqsFlat.map((f) => ({
+      question: f.question,
+      answer: f.answer,
+    })),
+  );
   const faqNode =
     faqItems.length > 0 ? JsonLd.withSchemaOrgContext(JsonLd.faqPageJsonLd(faqItems)) : null;
 
@@ -324,14 +352,11 @@ export function buildHotelKitJsonLd(
 }
 
 export function buildHotelKitMetadataFromModel(model: HotelKitModel) {
-  const ogImageUrl =
-    model.galleryHero !== null
-      ? model.galleryHero.src
-      : buildCloudinarySrc({
-          cloudName: model.cloudName,
-          publicId: 'cct/hotels/les-airelles-gordes/press-1',
-          transforms: 'f_jpg,q_auto,c_fill,g_auto,w_1200,h_630',
-        });
+  const heroPublicId = readHeroImage(model.row);
+  const ogImagePublicId = heroPublicId ?? 'cct/hotels/les-airelles-gordes/press-1';
+  const ogImages = buildHotelOgImages(model.cloudName, ogImagePublicId, model.name);
+  const firstOgImage = ogImages[0];
+  const ogImageUrl = firstOgImage !== undefined ? firstOgImage.url : '';
 
   const titleOverride = pickLocalizedText(
     model.locale,
@@ -347,7 +372,15 @@ export function buildHotelKitMetadataFromModel(model: HotelKitModel) {
   const title =
     titleOverride !== null && titleOverride !== ''
       ? titleOverride
-      : `${model.name} — ${model.isPalace ? 'Palace' : `Hôtel ${model.stars}★`} ${model.city} | MyConciergeHotel`;
+      : buildHotelSeoTitle({
+          name: model.name,
+          city: model.city,
+          district: model.district,
+          region: model.region,
+          isPalace: model.isPalace,
+          stars: model.stars,
+          locale: model.locale,
+        });
 
   const description =
     descOverride !== null && descOverride !== ''
@@ -359,7 +392,7 @@ export function buildHotelKitMetadataFromModel(model: HotelKitModel) {
   return {
     title: { absolute: title },
     description: description !== undefined ? description.slice(0, 160) : undefined,
-    ...(isStub ? { robots: { index: false, follow: true } as const } : {}),
+    robots: buildHotelDiscoverRobots(isStub),
     alternates: {
       canonical: model.canonicalPath,
       languages: buildHreflangAlternates((l) =>
@@ -377,11 +410,10 @@ export function buildHotelKitMetadataFromModel(model: HotelKitModel) {
       title: model.name,
       description: description !== undefined ? description.slice(0, 200) : undefined,
       locale: ogLocale(model.locale),
+      alternateLocale: [...buildHotelOpenGraphAlternates(model.locale)],
       siteName: 'MyConciergeHotel',
       url: model.canonicalUrl,
-      images: [
-        { url: ogImageUrl, width: 1200, height: 630, alt: model.name, type: 'image/jpeg' as const },
-      ],
+      images: ogImages,
     },
     twitter: {
       card: 'summary_large_image' as const,

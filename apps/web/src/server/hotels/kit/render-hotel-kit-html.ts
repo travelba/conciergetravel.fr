@@ -10,6 +10,8 @@ import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
 import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
 import { buildMapboxExternalMapHref, buildMapboxStaticImageUrl } from '@/lib/maps/mapbox-static';
 
+import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
+
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 import {
   AIRELLES_KIT_AMENITY_BLOCKS,
@@ -309,9 +311,10 @@ function renderKidClubBlock(model: HotelKitModel): string {
 
 export function renderKitBreadcrumb(model: HotelKitModel): string {
   const p = localePrefix(model.locale);
+  const countryHubPath = buildHotelCountryHubPath(model.row, model.locale);
   return `<nav class="breadcrumb wrap" aria-label="Fil d'Ariane">
   <a href="${p}/hotels">${model.locale === 'en' ? 'Hotels' : 'Hôtels'}</a><span>›</span>
-  <a href="${p}/destination">${escapeHtml(model.countryLabel)}</a><span>›</span>
+  <a href="${p}${countryHubPath}">${escapeHtml(model.countryLabel)}</a><span>›</span>
   <a href="${p}/destination/${escapeHtml(model.cityHubSlug)}">${escapeHtml(model.city)}</a><span>›</span>
   <span class="bc-current">${escapeHtml(model.name)}</span>
 </nav>`;
@@ -796,6 +799,8 @@ function renderKitStaticMapHtml(model: HotelKitModel): string {
       <img
         src="${escapeHtml(imageUrl)}"
         alt="${escapeHtml(model.labels.staticMapAlt)}"
+        width="800"
+        height="360"
         loading="lazy"
         decoding="async"
         class="kit-static-map__embed"

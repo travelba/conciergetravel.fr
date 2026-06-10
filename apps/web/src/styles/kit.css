@@ -2074,6 +2074,31 @@
   position: sticky;
   top: 96px;
 }
+/* CLS — reserve space for hydrated aside (booking rail + comparator). */
+.mch-kit .hotel-kit-aside-slot {
+  min-height: 28rem;
+}
+.mch-kit .hotel-kit-gallery-slot {
+  min-height: 15rem;
+}
+@media (min-width: 768px) {
+  .mch-kit .hotel-kit-gallery-slot {
+    min-height: 27.5rem;
+  }
+}
+.mch-kit .hotel-kit-sources-slot {
+  min-height: 10rem;
+}
+.mch-kit .resa-compare {
+  min-height: 7.5rem;
+}
+/* Below-fold sections — skip layout work until near viewport (HTML weight perf). */
+.mch-kit .htl-section#faq,
+.mch-kit .htl-section#proximite,
+.mch-kit .htl-section#concierge-questions {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 36rem;
+}
 .mch-kit .resa-card {
   background: #fff;
   border: 1px solid var(--ligne);

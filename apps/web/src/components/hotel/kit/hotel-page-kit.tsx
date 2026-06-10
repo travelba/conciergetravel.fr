@@ -55,7 +55,7 @@ export async function HotelPageKit({
   const { prefixHtml, mainHtml } = assembleHotelKitShell(model);
   const jsonLdNodes = buildHotelKitJsonLd(
     model,
-    isPaidBookingMode(row.booking_mode) ? railContext : undefined,
+    railContext.supplierBookable || isPaidBookingMode(row.booking_mode) ? railContext : undefined,
   );
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
@@ -67,7 +67,7 @@ export async function HotelPageKit({
         <div dangerouslySetInnerHTML={{ __html: prefixHtml }} />
 
         {model.galleryHeroDescriptor !== null || model.galleryGridImages.length > 0 ? (
-          <div className="wrap mt-3.5">
+          <div className="hotel-kit-gallery-slot wrap mt-3.5">
             <HotelGallery
               locale={model.locale}
               cloudName={model.cloudName}
@@ -81,7 +81,7 @@ export async function HotelPageKit({
         <div className="htl-body wrap">
           <main className="htl-main" dangerouslySetInnerHTML={{ __html: mainHtml }} />
 
-          <aside aria-label="Réservation" className="htl-aside" id="resa">
+          <aside aria-label="Réservation" className="htl-aside hotel-kit-aside-slot" id="resa">
             <BookingSlot
               locale={model.locale}
               hotelName={model.name}
@@ -103,7 +103,7 @@ export async function HotelPageKit({
         </div>
 
         {model.externalSourcesProvenance !== null ? (
-          <div className="wrap">
+          <div className="hotel-kit-sources-slot wrap">
             <HotelExternalSourcesFooter
               locale={model.locale}
               provenance={model.externalSourcesProvenance}

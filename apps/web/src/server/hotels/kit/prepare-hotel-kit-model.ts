@@ -67,6 +67,8 @@ import {
 
 import { dropCannibalizingSections, resolvePopulatedBlocks } from '@mch/domain/editorial';
 
+import { normalizeHotelImageAltFr } from '@/lib/seo/hotel-page-seo';
+
 import { createKitMediaResolver, type KitMediaResolver } from './kit-media-resolver';
 import { isHotelKitSlug } from './is-hotel-kit-slug';
 import { patchKitGoldenRow } from './patch-kit-golden-row';
@@ -325,13 +327,17 @@ function buildKitRoomImages(
   cloudName: string,
   hotelGallery: readonly LocalisedGalleryImage[],
   roomName: string,
+  locale: 'fr' | 'en',
 ): readonly { readonly src: string; readonly alt: string }[] {
   const curated = resolveAirellesKitRoomImages(room.slug, room.room_code);
 
-  const altForPublicId = (publicId: string): string =>
-    hotelGallery.find((g) => g.publicId === publicId)?.alt ??
-    room.galleryImages.find((g) => g.publicId === publicId)?.alt ??
-    roomName;
+  const altForPublicId = (publicId: string): string => {
+    const raw =
+      hotelGallery.find((g) => g.publicId === publicId)?.alt ??
+      room.galleryImages.find((g) => g.publicId === publicId)?.alt ??
+      roomName;
+    return locale === 'fr' ? normalizeHotelImageAltFr(raw) : raw;
+  };
 
   const toImages = (entries: readonly { readonly publicId: string; readonly alt: string }[]) =>
     entries.map((g) => buildCloudinaryRoomImage(cloudName, g.publicId, g.alt));
@@ -551,7 +557,7 @@ export async function prepareHotelKitModel(
       livePriceText = tCard('from', { price: priceText });
       bookAria = tCard('bookAria', { room: roomName, price: priceText });
     }
-    const roomImages = buildKitRoomImages(room, cloudName, galleryImages, roomName);
+    const roomImages = buildKitRoomImages(room, cloudName, galleryImages, roomName, kitLocale);
     const facts: string[] = [];
     if (room.size_sqm !== null) facts.push(t('rooms.size', { count: room.size_sqm }));
     if (room.bed_type !== null && room.bed_type !== '') facts.push(room.bed_type);
