@@ -1187,6 +1187,7 @@
 }
 
 .mch-kit.home-page {
+  position: relative;
   background: var(--creme);
 }
 

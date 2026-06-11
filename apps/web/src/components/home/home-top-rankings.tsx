@@ -6,25 +6,13 @@ import type { ReactElement } from 'react';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { KIT_STATIC_RANKINGS, kitStaticLinkHref } from '@/lib/home/kit-home-static-fallback';
 import type { PublishedRankingCard } from '@/server/rankings/get-ranking-by-slug';
 
 /**
- * `<HomeTopRankings>` — « Les meilleurs hôtels, selon nos critères ».
- *
- * Six classements automatiquement sélectionnés sur la métrique
- * `entryCount desc` (cf. `listPublishedRankings`). Au 2026-05-28 le top
- * 6 effectif est : World's 50 Best 2025 (100), Condé Nast Gold List
- * 2025-26 (70), Italie (50), USA (50), Royaume-Uni (48), Japon (38) —
- * un mix sain entre prix institutionnels et géographies, sans
- * curation manuelle à maintenir.
- *
- * Decision (PO 2026-05-28) — automatic top-by-entry-count plutôt qu'une
- * liste figée (`TOP_RANKING_NAV_ENTRIES`). Avantage : zéro maintenance
- * quand de nouveaux classements sont publiés. Inconvénient : si on
- * publie 6 classements géographiques massifs, le mix éditorial peut
- * dériver. À reconsidérer si la diversité du top 6 devient un sujet.
- *
- * Pure RSC. Reçoit l'array complet en prop (Promise.all parent).
+ * `<HomeTopRankings>` — « Les meilleurs hôtels, selon nos critères »
+ * (design/html-kit §offres). Live top-6 by entry count when Supabase
+ * is wired; static kit cards otherwise.
  */
 export async function HomeTopRankings({
   locale,
@@ -32,12 +20,10 @@ export async function HomeTopRankings({
 }: {
   readonly locale: Locale;
   readonly rankings: readonly PublishedRankingCard[];
-}): Promise<ReactElement | null> {
-  if (rankings.length === 0) return null;
+}): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'homepage.featuredRankings' });
-
   const top6 = [...rankings].sort((a, b) => b.entryCount - a.entryCount).slice(0, 6);
-  if (top6.length === 0) return null;
+  const useStatic = top6.length === 0;
 
   return (
     <div className="mch-kit">
@@ -57,27 +43,44 @@ export async function HomeTopRankings({
           </div>
 
           <div className="rank-grid reveal">
-            {top6.map((r) => {
-              const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
-              const summary = pickByLocale(
-                locale,
-                r.factualSummaryFr ?? '',
-                r.factualSummaryEn ?? r.factualSummaryFr ?? '',
-              );
-              return (
-                <Link
-                  key={r.slug}
-                  href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
-                  className="rank-card"
-                >
-                  {r.entryCount > 0 ? (
-                    <span className="rk-count">{t('entryCount', { count: r.entryCount })}</span>
-                  ) : null}
-                  <h3>{title}</h3>
-                  {summary !== '' ? <span className="rk-desc">{summary}</span> : null}
-                </Link>
-              );
-            })}
+            {useStatic
+              ? KIT_STATIC_RANKINGS.map((tile) => {
+                  const title = pickByLocale(locale, tile.titleFr, tile.titleEn);
+                  const count = pickByLocale(locale, tile.countLabelFr, tile.countLabelEn);
+                  const desc = pickByLocale(locale, tile.descFr, tile.descEn);
+                  return (
+                    <Link
+                      key={tile.titleFr}
+                      href={kitStaticLinkHref(tile.link)}
+                      className="rank-card"
+                    >
+                      <span className="rk-count">{count}</span>
+                      <h3>{title}</h3>
+                      <span className="rk-desc">{desc}</span>
+                    </Link>
+                  );
+                })
+              : top6.map((r) => {
+                  const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
+                  const summary = pickByLocale(
+                    locale,
+                    r.factualSummaryFr ?? '',
+                    r.factualSummaryEn ?? r.factualSummaryFr ?? '',
+                  );
+                  return (
+                    <Link
+                      key={r.slug}
+                      href={{ pathname: '/classement/[slug]', params: { slug: r.slug } }}
+                      className="rank-card"
+                    >
+                      {r.entryCount > 0 ? (
+                        <span className="rk-count">{t('entryCount', { count: r.entryCount })}</span>
+                      ) : null}
+                      <h3>{title}</h3>
+                      {summary !== '' ? <span className="rk-desc">{summary}</span> : null}
+                    </Link>
+                  );
+                })}
           </div>
         </div>
       </section>

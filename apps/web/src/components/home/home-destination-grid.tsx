@@ -7,6 +7,7 @@ import { HotelImage } from '@mch/ui';
 
 import { Link } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { KIT_STATIC_DEST_IMAGES } from '@/lib/home/kit-home-static-fallback';
 
 /**
  * Typed hrefs for the six intl country guide pages currently shipped
@@ -79,11 +80,13 @@ function DestinationTileInner({
   caption,
   imagePublicId,
   cloudName,
+  staticImageSrc,
 }: {
   readonly label: string;
   readonly caption: string;
   readonly imagePublicId: string | null;
   readonly cloudName: string;
+  readonly staticImageSrc: string | null;
 }): ReactElement {
   return (
     <>
@@ -97,6 +100,14 @@ function DestinationTileInner({
           transforms="f_auto,q_auto:good,c_fill,g_auto,w_520,h_520"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
           className="h-full w-full"
+        />
+      ) : staticImageSrc !== null ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={staticImageSrc}
+          alt={label}
+          loading="lazy"
+          className="h-full w-full object-cover"
         />
       ) : (
         <div aria-hidden className="bg-charcoal absolute inset-0" />
@@ -167,6 +178,7 @@ export async function HomeDestinationGrid({
                       caption={d.hint}
                       imagePublicId={d.imagePublicId}
                       cloudName={cloudName}
+                      staticImageSrc={KIT_STATIC_DEST_IMAGES[d.key] ?? null}
                     />
                   </Link>
                 );
@@ -179,6 +191,7 @@ export async function HomeDestinationGrid({
                       caption={eyebrow}
                       imagePublicId={d.imagePublicId}
                       cloudName={cloudName}
+                      staticImageSrc={KIT_STATIC_DEST_IMAGES[d.key] ?? null}
                     />
                   </Link>
                 );
@@ -195,6 +208,7 @@ export async function HomeDestinationGrid({
                     caption={eyebrow}
                     imagePublicId={d.imagePublicId}
                     cloudName={cloudName}
+                    staticImageSrc={KIT_STATIC_DEST_IMAGES[d.key] ?? null}
                   />
                 </Link>
               );

@@ -243,58 +243,66 @@ export interface PublishedRankingCard {
 }
 
 export async function listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
-  const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from('editorial_rankings')
-    .select(
-      'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
-    )
-    .eq('is_published', true)
-    .order('kind', { ascending: true })
-    .order('title_fr', { ascending: true });
-  if (error !== null || data === null) return [];
-  const ids = data.map((r) => r.id as string);
-  const counts = new Map<string, number>();
-  if (ids.length > 0) {
-    // Supabase REST caps each `.select()` at 1000 rows by default.
-    // At 2026-05-28 the catalogue holds 2260 entries across 190
-    // rankings, so a single fetch silently truncates and under-counts
-    // the biggest lists (50 Best, Gold List). We paginate explicitly
-    // with `.range()` until the batch is shorter than the page size.
-    const PAGE_SIZE = 1000;
-    let from = 0;
-    // Hard ceiling so a runaway query can never hammer the DB —
-    // 20k entries = 10× the current catalogue, well above any
-    // realistic 24-month growth.
-    const SAFETY_CEILING = 20000;
-    while (from < SAFETY_CEILING) {
-      const { data: entries } = await supabase
-        .from('editorial_ranking_entries')
-        .select('ranking_id')
-        .in('ranking_id', ids)
-        .range(from, from + PAGE_SIZE - 1);
-      if (entries === null || entries.length === 0) break;
-      for (const e of entries) {
-        const k = e.ranking_id as string;
-        counts.set(k, (counts.get(k) ?? 0) + 1);
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('editorial_rankings')
+      .select(
+        'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
+      )
+      .eq('is_published', true)
+      .order('kind', { ascending: true })
+      .order('title_fr', { ascending: true });
+    if (error !== null || data === null) return [];
+    const ids = data.map((r) => r.id as string);
+    const counts = new Map<string, number>();
+    if (ids.length > 0) {
+      // Supabase REST caps each `.select()` at 1000 rows by default.
+      // At 2026-05-28 the catalogue holds 2260 entries across 190
+      // rankings, so a single fetch silently truncates and under-counts
+      // the biggest lists (50 Best, Gold List). We paginate explicitly
+      // with `.range()` until the batch is shorter than the page size.
+      const PAGE_SIZE = 1000;
+      let from = 0;
+      // Hard ceiling so a runaway query can never hammer the DB —
+      // 20k entries = 10× the current catalogue, well above any
+      // realistic 24-month growth.
+      const SAFETY_CEILING = 20000;
+      while (from < SAFETY_CEILING) {
+        const { data: entries } = await supabase
+          .from('editorial_ranking_entries')
+          .select('ranking_id')
+          .in('ranking_id', ids)
+          .range(from, from + PAGE_SIZE - 1);
+        if (entries === null || entries.length === 0) break;
+        for (const e of entries) {
+          const k = e.ranking_id as string;
+          counts.set(k, (counts.get(k) ?? 0) + 1);
+        }
+        if (entries.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
       }
-      if (entries.length < PAGE_SIZE) break;
-      from += PAGE_SIZE;
     }
+    return data.map((r) => {
+      const axesParsed = AxesSchema.safeParse(r.axes ?? {});
+      return {
+        slug: r.slug as string,
+        titleFr: r.title_fr as string,
+        titleEn: (r.title_en as string | null) ?? null,
+        kind: r.kind as 'best_of' | 'awarded' | 'thematic' | 'geographic',
+        entryCount: counts.get(r.id as string) ?? 0,
+        heroImage: (r.hero_image as string | null) ?? null,
+        factualSummaryFr: (r.factual_summary_fr as string | null) ?? null,
+        factualSummaryEn: (r.factual_summary_en as string | null) ?? null,
+        axes: axesParsed.success ? axesParsed.data : { types: [], themes: [], occasions: [] },
+        updatedAt: (r.updated_at as string | null) ?? null,
+      };
+    });
+  } catch (e) {
+    console.error(
+      '[listPublishedRankings] failed:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
   }
-  return data.map((r) => {
-    const axesParsed = AxesSchema.safeParse(r.axes ?? {});
-    return {
-      slug: r.slug as string,
-      titleFr: r.title_fr as string,
-      titleEn: (r.title_en as string | null) ?? null,
-      kind: r.kind as 'best_of' | 'awarded' | 'thematic' | 'geographic',
-      entryCount: counts.get(r.id as string) ?? 0,
-      heroImage: (r.hero_image as string | null) ?? null,
-      factualSummaryFr: (r.factual_summary_fr as string | null) ?? null,
-      factualSummaryEn: (r.factual_summary_en as string | null) ?? null,
-      axes: axesParsed.success ? axesParsed.data : { types: [], themes: [], occasions: [] },
-      updatedAt: (r.updated_at as string | null) ?? null,
-    };
-  });
 }
