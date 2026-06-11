@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { HotelRoomCardVM, HotelRoomFactLine } from '@/components/hotel/hotel-rooms-grid';
+import type { HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
 
 import {
   getKitWaveRoomConfig,
@@ -13,7 +13,7 @@ import {
 export type { KitWaveRoomImagePair };
 
 export function enrichKitWaveRoomCards(
-  hotelSlug: string,
+  _hotelSlug: string,
   cards: readonly HotelRoomCardVM[],
   _locale: 'fr' | 'en',
 ): HotelRoomCardVM[] {
@@ -25,7 +25,18 @@ export function orderCatalogKitRoomCards(
   cards: readonly HotelRoomCardVM[],
 ): HotelRoomCardVM[] {
   if (!isKitWaveSlug(hotelSlug)) return [...cards];
-  return orderKitWaveRoomCards(hotelSlug, cards);
+
+  const orderedKeys = orderKitWaveRoomCards(
+    hotelSlug,
+    cards.map((card) => ({ id: card.id, slug: card.slug })),
+  );
+  const byId = new Map(cards.map((card) => [card.id, card]));
+  const ordered: HotelRoomCardVM[] = [];
+  for (const key of orderedKeys) {
+    const card = byId.get(key.id);
+    if (card !== undefined) ordered.push(card);
+  }
+  return ordered;
 }
 
 export function resolveCatalogKitRoomImages(
