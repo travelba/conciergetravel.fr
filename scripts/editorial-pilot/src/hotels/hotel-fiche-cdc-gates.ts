@@ -2000,6 +2000,7 @@ export function evaluateCdcHotelFiche(
     const kitChecks = evaluateKitAcceptanceGates({
       slug: row.slug,
       name: row.name,
+      hero_image: row.hero_image,
       concierge_pick: row.concierge_pick,
       gallery_images: row.gallery_images,
       google_reviews: row.google_reviews,

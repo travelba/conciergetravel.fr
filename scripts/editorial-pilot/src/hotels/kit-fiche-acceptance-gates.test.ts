@@ -13,9 +13,15 @@ function wave5StubInput(slug: string) {
   return {
     slug,
     name: 'Test Hotel',
+    hero_image: 'cct/hotels/test/press-1',
     concierge_pick: { slug: 'seine-junior-suite', note: { fr: 'Note FR', en: 'Note EN' } },
     gallery_images: [
-      { url: 'https://example.com/same.jpg', category: 'spa', alt_fr: 'spa test' },
+      {
+        public_id: 'cct/hotels/test/press-1',
+        url: 'https://example.com/same.jpg',
+        category: 'spa',
+        alt_fr: 'spa test',
+      },
       { url: 'https://example.com/same.jpg', category: 'dining', alt_fr: 'restaurant test' },
     ],
     google_reviews: [
@@ -97,6 +103,8 @@ describe('evaluateKitAcceptanceGates', () => {
     expect(failed).toContain('kit.11.concierge_questions_count');
     expect(failed.some((id) => id.startsWith('kit.11.concierge_informative_tone'))).toBe(true);
     expect(failed).toContain('kit.02.gallery_no_duplicate_source_url');
+    expect(failed).toContain('kit.02.hero_not_in_gallery');
+    expect(failed).toContain('kit.02.gallery_source_url_tracked');
     expect(failed).toContain('kit.10.gmb_review_count');
     expect(failed).toContain('kit.10.gmb_sync_fresh');
     expect(failed).toContain('kit.10.gmb_display_triplet_fresh');
@@ -111,6 +119,7 @@ describe('evaluateKitAcceptanceGates', () => {
       {
         slug: 'prince-de-galles-paris',
         name: 'Prince de Galles',
+        hero_image: 'cct/hotels/prince-de-galles-paris/hero',
         concierge_pick: {
           slug: 'chambre-art-deco-deluxe-balcon',
           note: { fr: 'Pick', en: 'Pick' },

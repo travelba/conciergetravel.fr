@@ -37,10 +37,44 @@ export const KIT_PO_REMARK_REGISTRY: readonly KitPoRemarkEntry[] = [
     walkProof: 'Screenshot #chambres — badge cc-pick sur carte 1',
   },
   {
+    remark: 'Photo principale identique à une vignette galerie (mosaïque)',
+    rootCause:
+      'hero_image = press-1 réutilisé dans gallery_images[0] ; le gate url-only ne voyait pas les doublons sans source_url',
+    gates: [
+      'kit.02.hero_not_in_gallery',
+      'kit.02.gallery_unique_public_id',
+      'kit.02.gallery_source_url_tracked',
+    ],
+    walkProof: 'Screenshot mosaïque — hero ≠ 4 tuiles droite',
+  },
+  {
+    remark: 'Hero pas une vue d’ensemble de l’établissement',
+    rootCause: 'press-1 = réception ou détail chambre labelé exterior ; pas de gate catégorie hero',
+    gates: ['kit.02.hero_category_exterior_or_view', 'kit.02.gallery_alt_category'],
+    walkProof: 'Screenshot hero — façade ou domaine visible',
+  },
+  {
+    remark: 'Photos chambres ne correspondent pas aux cartes',
+    rootCause: 'fallback galerie index % length au lieu de map room slug → photo dédiée',
+    gates: [
+      'kit.02.chambres_visible_have_photo',
+      'kit.16.room_batch_script',
+      'kit.16.room_display_module',
+    ],
+    walkProof: 'Screenshot #chambres — visuel = nom de la chambre',
+  },
+  {
+    remark: 'POI / activités / commerces — photo IA avant sourcing réel',
+    rootCause: 'script POI génère poi-* IA sans Tavily/Commons/Places d’abord',
+    gates: ['kit.07.poi_structural', 'gold.poi_dedicated_images', 'gold.poi_photo_structural'],
+    walkProof: 'Screenshot #autour — photo reconnaissable du lieu nommé',
+  },
+  {
     remark: 'Photo expérience ou restaurant qui ne correspond pas au sujet',
     rootCause: 'même URL Cloudinary recyclée sur plusieurs slots ; fallback galerie générique',
     gates: [
       'kit.02.gallery_no_duplicate_source_url',
+      'kit.02.gallery_source_url_tracked',
       'kit.02.gallery_alt_category',
       'kit.03.signature_experiences_dedicated_image',
       'photos.gallery_alt_category',
@@ -103,6 +137,7 @@ export const KIT_PO_REMARK_REGISTRY: readonly KitPoRemarkEntry[] = [
     remark: 'Spa dossier / photo spa incorrecte',
     rootCause: 'spa_info incomplet + hero spa résolu sur mauvais slot galerie',
     gates: ['gold.spa_dossier', 'kit.02.gallery_category_spa', 'kit.02.gallery_category_dining'],
+    walkProof: 'Screenshot #hotel-en-bref spa — cabine/soins, pas ferme extérieure seule',
   },
   {
     remark: '« C’est bon » sur deploy HTML sans walk PO',

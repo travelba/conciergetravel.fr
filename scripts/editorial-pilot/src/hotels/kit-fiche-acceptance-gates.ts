@@ -75,6 +75,7 @@ export interface KitRoomAuditRow {
 export interface KitAcceptanceInput {
   readonly slug: string;
   readonly name: string;
+  readonly hero_image: string | null;
   readonly concierge_pick: unknown;
   readonly gallery_images: unknown;
   readonly google_reviews: unknown;
@@ -159,21 +160,83 @@ function roomImageCountBySlug(rooms: readonly KitRoomAuditRow[]): Map<string, nu
   return map;
 }
 
-function countDuplicateGallerySourceUrls(gallery_images: unknown): number {
+function readPublicId(item: Record<string, unknown>): string | null {
+  const publicId = item['public_id'];
+  if (typeof publicId === 'string' && publicId.trim().length > 0) return publicId.trim();
+  return null;
+}
+
+function readSourceUrl(item: Record<string, unknown>): string | null {
+  const url = item['url'] ?? item['source_url'];
+  if (typeof url !== 'string' || url.trim().length < 12) return null;
+  return url.trim();
+}
+
+function galleryPublicIds(gallery_images: unknown): readonly string[] {
+  if (!Array.isArray(gallery_images)) return [];
+  const ids: string[] = [];
+  for (const item of gallery_images) {
+    if (!isRecord(item)) continue;
+    const publicId = readPublicId(item);
+    if (publicId !== null) ids.push(publicId);
+  }
+  return ids;
+}
+
+function countDuplicateGalleryPublicIds(gallery_images: unknown): number {
   if (!Array.isArray(gallery_images)) return 0;
   const counts = new Map<string, number>();
   for (const item of gallery_images) {
     if (!isRecord(item)) continue;
-    const url = item['url'];
-    if (typeof url !== 'string' || url.trim().length < 12) continue;
-    const key = url.trim();
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    const publicId = readPublicId(item);
+    if (publicId === null) continue;
+    counts.set(publicId, (counts.get(publicId) ?? 0) + 1);
   }
   let dupSlots = 0;
   for (const n of counts.values()) {
     if (n > 1) dupSlots += n - 1;
   }
   return dupSlots;
+}
+
+function countDuplicateGallerySourceUrls(gallery_images: unknown): number {
+  if (!Array.isArray(gallery_images)) return 0;
+  const counts = new Map<string, number>();
+  for (const item of gallery_images) {
+    if (!isRecord(item)) continue;
+    const url = readSourceUrl(item);
+    if (url === null) continue;
+    counts.set(url, (counts.get(url) ?? 0) + 1);
+  }
+  let dupSlots = 0;
+  for (const n of counts.values()) {
+    if (n > 1) dupSlots += n - 1;
+  }
+  return dupSlots;
+}
+
+function countGalleryMissingSourceUrls(gallery_images: unknown): number {
+  if (!Array.isArray(gallery_images)) return KIT_GALLERY_MIN;
+  let missing = 0;
+  for (const item of gallery_images) {
+    if (!isRecord(item)) {
+      missing += 1;
+      continue;
+    }
+    if (readSourceUrl(item) === null) missing += 1;
+  }
+  return missing;
+}
+
+function galleryCategoryForPublicId(gallery_images: unknown, publicId: string): string | null {
+  if (!Array.isArray(gallery_images)) return null;
+  for (const item of gallery_images) {
+    if (!isRecord(item)) continue;
+    if (readPublicId(item) !== publicId) continue;
+    const cat = item['category'];
+    return typeof cat === 'string' && cat.length > 0 ? cat.toLowerCase() : null;
+  }
+  return null;
 }
 
 function galleryCategorySet(gallery_images: unknown): Set<string> {
@@ -303,6 +366,16 @@ export function evaluateKitAcceptanceGates(
   const kitLen = jsonLen(input.faq_content_kit);
   const gmbReviews = parseGmbReviews(input.google_reviews);
   const dupUrls = countDuplicateGallerySourceUrls(input.gallery_images);
+  const dupPublicIds = countDuplicateGalleryPublicIds(input.gallery_images);
+  const missingSourceUrls = countGalleryMissingSourceUrls(input.gallery_images);
+  const heroPublicId =
+    typeof input.hero_image === 'string' && input.hero_image.trim().length > 0
+      ? input.hero_image.trim()
+      : null;
+  const heroAppearsInGallery =
+    heroPublicId !== null && galleryPublicIds(input.gallery_images).includes(heroPublicId);
+  const heroCategory =
+    heroPublicId !== null ? galleryCategoryForPublicId(input.gallery_images, heroPublicId) : null;
   const galleryCats = galleryCategorySet(input.gallery_images);
   const galleryCount = jsonLen(input.gallery_images);
   const sigExp = analyzeSignatureExperiences(input.signature_experiences);
@@ -389,6 +462,47 @@ export function evaluateKitAcceptanceGates(
     dupUrls === 0
       ? 'gallery source URLs are unique per slot'
       : `${dupUrls} gallery slot(s) reuse the same source url (D12 — distinct pixels per subject)`,
+  );
+
+  pushCheck(
+    checks,
+    'kit.02.gallery_source_url_tracked',
+    galleryCount >= KIT_GALLERY_MIN && missingSourceUrls === 0,
+    missingSourceUrls === 0
+      ? 'every gallery slot carries source url (enables pixel-level dedup audit)'
+      : `${missingSourceUrls}/${galleryCount} gallery slot(s) missing url/source_url — run gallery batch with GALLERY_SOURCES`,
+  );
+
+  pushCheck(
+    checks,
+    'kit.02.gallery_unique_public_id',
+    dupPublicIds === 0,
+    dupPublicIds === 0
+      ? 'gallery public_id values are unique'
+      : `${dupPublicIds} gallery slot(s) reuse the same Cloudinary public_id`,
+  );
+
+  pushCheck(
+    checks,
+    'kit.02.hero_not_in_gallery',
+    heroPublicId !== null && !heroAppearsInGallery,
+    heroPublicId === null
+      ? 'hero_image missing'
+      : heroAppearsInGallery
+        ? `hero_image "${heroPublicId}" must not appear in gallery_images (mosaic duplicate on page)`
+        : 'hero_image is separate from the 30 gallery slots',
+  );
+
+  pushCheck(
+    checks,
+    'kit.02.hero_category_exterior_or_view',
+    heroPublicId !== null &&
+      (!heroAppearsInGallery || heroCategory === 'exterior' || heroCategory === 'view'),
+    heroPublicId === null
+      ? 'hero_image missing'
+      : heroAppearsInGallery && heroCategory !== 'exterior' && heroCategory !== 'view'
+        ? `hero slot category="${heroCategory ?? 'unknown'}" — must be exterior or view (full property shot)`
+        : 'hero must show the hotel overview (exterior or view)',
   );
 
   const altCategory = evaluateGalleryAltCategoryCorrespondence(input.gallery_images);

@@ -87,6 +87,9 @@ Chaque remarque PO wave 5 est verrouillée dans
 | Remarque PO                                | Gates automatisés                                                                                                       |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | Photos chambres manquantes                 | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script`                      |
+| Hero dupliqué dans la mosaïque             | `kit.02.hero_not_in_gallery`, `kit.02.gallery_unique_public_id`, `kit.02.gallery_source_url_tracked`                    |
+| Hero pas une vue d’ensemble                | `kit.02.hero_category_exterior_or_view`                                                                                 |
+| POI photo IA sans sourcing réel            | `kit.07.poi_structural`, `gold.poi_dedicated_images`, walk `#autour`                                                    |
 | Sélection Concierge chambre invisible      | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module`                        |
 | Photos expérience / restaurant incorrectes | `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_alt_category`, `kit.03.signature_experiences_dedicated_image` |
 | FAQ trop faible                            | `kit.11.faq_kit_not_stub`, `kit.11.faq_kit_count`, `kit.11.faq_kit_has_groups`                                          |
@@ -124,7 +127,22 @@ L'audit `audit:hotel-fiches-cdc` **exit 1** liste les remarques PO encore ouvert
 
 ---
 
-## Rule 2 — Checklist données par fiche pilote
+## Rule 7 — Ordre photo obligatoire (PO 2026-06-10)
+
+**Anti-pattern refusé** : uploader 30 press-\* puis remapper alt/category ; générer POI IA avant d’avoir cherché Commons / site officiel / Google Places.
+
+**Ordre imposé par slot** (chaque slot = sujet unique, `source_url` tracée dans le manifest) :
+
+1. **Hero** — 1 photo **exterior** ou **view** montrant l’établissement dans son ensemble. `hero_image` **interdit** dans `gallery_images[]` (gate `kit.02.hero_not_in_gallery`).
+2. **Galerie 30** — 10 catégories CDC, **0 URL source dupliquée**, **0 public_id dupliqué**, chaque entrée porte `url` ou `source_url` (gate `kit.02.gallery_source_url_tracked`).
+3. **Chambres** — 1 photo officielle par `room.slug` via `resource-{slug}-rooms.ts` + map display ; **interdit** le fallback `galleryTiles[index % n]`.
+4. **Spa / resto (#hotel-en-bref)** — slot galerie `spa`/`dining` vérifié visuellement ; si le pixel ne correspond pas → re-sourcer (Rule 1), pas seulement `spaHero()` resolver.
+5. **POI #autour** — pour chaque POI : Tavily/Commons/Places **d’abord** ; upload `poi-{slug}` ; **IA seulement** si aucune source libre de droits (documenter dans le script).
+6. **Promote** → `audit:hotel-fiches-cdc` exit 0 sur tous les `kit.02.*` → **walk Rule 6** (mosaïque + chambres + spa + autour).
+
+**Exemple Les Prés d’Eugénie** : `press-1` (réception) était hero **et** galerie[0] ; `press-4` reprenait la même URL source que `press-1` — invisible au gate url tant que `source_url` absent du JSONB.
+
+---
 
 Avant de demander validation PO :
 
