@@ -39,7 +39,7 @@ const GALLERY_SOURCES: readonly Readonly<{
 }>[] = [
   { imgixFile: 'abwDDbbci2UF6Rqd_VIDEOHEADERHOMEARL.jpg' },
   { imgixFile: 'abREoVxvIZEnjqaN_ARLVUEDRONE.png' },
-  { imgixFile: 'adTKo5GXnQHGZTpP_ARL-Fa%C3%A7adeco%C3%82te%CC%81piste%40Jetlag.png' },
+  { imgixFile: 'abRDdVxvIZEnjqZa_DRONEARLVF.png' },
   {
     imgixFile: 'aNztf55xUNkB1VA3_ARL-Lieucommun-Salonavecservice%C2%A9JonathanDucrest.jpg',
   },

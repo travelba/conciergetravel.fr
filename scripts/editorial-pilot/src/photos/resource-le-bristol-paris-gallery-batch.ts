@@ -27,51 +27,64 @@ import { patchHotelById, selectHotels, type SupabaseRestConfig } from './supabas
 
 const SLUG = 'le-bristol-paris';
 
-/** Verified Oetker Collection Contentful assets (oetkerhotels.com homepage cards, 2026-06-10). */
+/** Verified Oetker Collection Contentful assets (discovery 2026-06-11). */
 const OETKER_CDN = 'https://images.eu.ctfassets.net/og3b0tarlg4b';
 
-const URL_DELUXE_ROOM = `${OETKER_CDN}/5N67rO1TxjwDczzilOm4rO/f0fafea568a84e2b860c003862bfe060/Le_Bristol_Paris_-_Chambre_Deluxe_-_102_uncO8.jpg`;
-const URL_SUITE_LUMIERE = `${OETKER_CDN}/31A6uJXqKmhXrlYsAo5sw2/d254902e4eecb979084b5b94f39a69e8/Le_Bristol_Paris_-_Suite_Lumi%C3%A8re_-_%C2%A9_Claire_Cocano_DmMbh.jpg`;
-const URL_SUITE_EDEN_WELLNESS = `${OETKER_CDN}/5Uo6C7BC0um3QRaDsClQZw/eb30f03b37517879b86cc6562569240f/Suite_Eden_-_bien_%C3%AAtre_%C2%A9_Franck_Bohbot__PLuez.jpeg`;
+const BRISTOL_OFFICIAL = {
+  facadeEntrance: `${OETKER_CDN}/5F6sNJ5it0MWdqYr7KFkt1/30da2ea85376d65a46efa6762c0ced17/Le_Bristol_Paris_-_Fa%C3%83_ade_hotel_-_%C3%82__Claire_Cocano.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  facadeStreet: `${OETKER_CDN}/17kzsE8zKgleIZ0eaiVfX9/d7121bd292fe66fd1ab2003fdafe008b/Le_Bristol_Paris_-_Fa%C3%83_ade_aUv0g.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  facadeGarden: `${OETKER_CDN}/5uEX9ekdox5yk5J8dMGXqb/58e5e0430bad1714c9d14bec3f83367b/Le_Bristol_Paris_-_Fa%C3%83_ade_cot%C3%83__jardin_Fran%C3%83_ais_-_Romain_R%C3%83_glade.jpg?w=1900&h=1450&fm=jpg&fit=fill`,
+  lobbyTapestry: `${OETKER_CDN}/qGU8OBRCZe0gLfpY807rY/fd5f6ba0986dca3c47e6e8e9816040b1/Le_Bristol_Paris_-_Livre_Flammarion_-100_ans_-_Lobby_%C3%82_Claire_Cocano_.jpeg?w=1900&h=1450&fm=jpg&fit=fill`,
+  lobbyBar: `${OETKER_CDN}/27blEI5zKTk2ZV8y9Iys0m/31d1ff39ce5fc1ae56abb6e9bbc2d20c/Le_Bristol_Paris_-_Bar_-_%C3%82_Stetten_Wilson_Photography_Wbamw.jpeg?w=896&h=1194&fm=jpg&fit=fill`,
+  jardinFrancais: `${OETKER_CDN}/1wfjJyy8HozQOuatmOtjtT/be9519c2d72b9807a250b438b65d085d/Le_Jardin_Fran%C3%83_ais_LBP_x_Schumacher_-_%C3%82_Vincent_Leroux__6rmUd.jpg?w=3200&h=2380&fm=jpg&fit=fill`,
+  roomDeluxe: `${OETKER_CDN}/3kEAPllp0GbNdm59DzK8yJ/be39a9c501dc750ea169385d97891440/room-03DLX-image-Le_Bristol_Paris-DLX-135-HD-1_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomExecutive: `${OETKER_CDN}/5ByCvLdrYKAvNyW5r3eJut/1b943c74bd8298fe84f93e0d4d97ac90/room-EXE-image-s5iwx0-Le_Bristol_Paris_-_Chambre_612_-___Claire_Cocano_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomDeluxeGarden: `${OETKER_CDN}/5TTLX90ke1oNjcZgHQCb9p/bd42d41a23ae467f860a6d8227ff6b8e/room-03DLXG-image-bfwjp6-Le_Bristol_Paris-DLXG-Chambre_222-HD-4_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomSuperior: `${OETKER_CDN}/6ckH5Wiz5wqQeCs0IoO88O/331c95383eb3b849277fb57478153c7e/room-02SUP-image-ncawvj-Le_Bristol_Paris-Chambre_Sup_rieure-523-HD-2_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomLoungeCorner: `${OETKER_CDN}/HLBZs7GBDCTwoGcIkXilA/5a3929e670646e9a63eac761b1791e65/room-03DLXG-image-2jsdqn-Le_Bristol_Paris-DLXG-Chambre_222-HD-2_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  epicure: `${OETKER_CDN}/2zeQObmBb7F3yrPsajCrko/0d2940dc30b57505afd6c4cf06d0cbbd/Salle_Epicure_-Pierre_Ba%C3%83_len__19_.jpg?w=2880&h=1112&fm=jpg&fit=fill`,
+  epicureDetail: `${OETKER_CDN}/2FGNRPJZwdHeQ0ChdvMcyp/c181bd094272c6c1a161afa352489307/Salle_Epicure_-Pierre_Ba%C3%83_len__2_.JPG?w=896&h=1194&fm=jpg&fit=fill`,
+  faubourg114: `${OETKER_CDN}/3Jthlx1kWoJgo4ciejTHbC/fdd7ec4c688b2c59c8d056d2f1085541/Le_Brisrtol_114%C3%82_RomainRicard-1.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  suiteAzurTerrace: `${OETKER_CDN}/5IMHSGRbvjvdH2KtvKirRw/56a3444ba21ab093afc613e0227083e3/room-10TERS-image-kq80dj-Le_Bristol_Paris_-_Suite_Azur__955_-__RomainRicard__RfTt6_S.jpg?w=1900&h=1450&fm=jpg&fit=fill`,
+} as const;
 
 /**
  * One source per `press-N` row (same order as `LE_BRISTOL_PARIS_GALLERY_IMAGES`).
- * `sourcePending` → metadata-only slot (skipped on upload until discovery backfill).
  */
 const GALLERY_SOURCES: readonly Readonly<{
   readonly url?: string;
   readonly sourcePending?: boolean;
 }>[] = [
-  { sourcePending: true }, // press-1 exterior — hero pending discovery
-  { sourcePending: true }, // press-2 exterior
-  { sourcePending: true }, // press-3 exterior
-  { sourcePending: true }, // press-4 lobby
-  { sourcePending: true }, // press-5 lobby
-  { sourcePending: true }, // press-6 lobby
-  { url: URL_DELUXE_ROOM }, // press-7 room
-  { url: URL_SUITE_LUMIERE }, // press-8 room
-  { sourcePending: true }, // press-9 room
-  { sourcePending: true }, // press-10 dining Epicure
-  { sourcePending: true }, // press-11 dining 114 Faubourg
-  { sourcePending: true }, // press-12 dining Jardin Français
-  { sourcePending: true }, // press-13 spa
-  { sourcePending: true }, // press-14 spa
-  { url: URL_SUITE_EDEN_WELLNESS }, // press-15 spa Suite Eden
-  { sourcePending: true }, // press-16 pool
-  { sourcePending: true }, // press-17 pool
-  { sourcePending: true }, // press-18 pool
-  { sourcePending: true }, // press-19 view
-  { sourcePending: true }, // press-20 view
-  { sourcePending: true }, // press-21 view
-  { sourcePending: true }, // press-22 detail
-  { sourcePending: true }, // press-23 detail
-  { sourcePending: true }, // press-24 detail
-  { sourcePending: true }, // press-25 concierge
-  { sourcePending: true }, // press-26 concierge
-  { sourcePending: true }, // press-27 concierge
-  { sourcePending: true }, // press-28 events
-  { sourcePending: true }, // press-29 events
-  { sourcePending: true }, // press-30 events
+  { url: BRISTOL_OFFICIAL.facadeEntrance }, // press-1 exterior
+  { url: BRISTOL_OFFICIAL.facadeStreet }, // press-2 exterior
+  { url: BRISTOL_OFFICIAL.facadeGarden }, // press-3 exterior
+  { url: BRISTOL_OFFICIAL.lobbyTapestry }, // press-4 lobby
+  { url: BRISTOL_OFFICIAL.lobbyBar }, // press-5 lobby
+  { url: BRISTOL_OFFICIAL.jardinFrancais }, // press-6 lobby
+  { url: BRISTOL_OFFICIAL.roomDeluxe }, // press-7 room
+  { url: BRISTOL_OFFICIAL.roomExecutive }, // press-8 room
+  { url: BRISTOL_OFFICIAL.roomDeluxeGarden }, // press-9 room
+  { url: BRISTOL_OFFICIAL.epicure }, // press-10 dining Epicure
+  { url: BRISTOL_OFFICIAL.faubourg114 }, // press-11 dining 114 Faubourg
+  { url: BRISTOL_OFFICIAL.jardinFrancais }, // press-12 dining Jardin Français
+  { url: BRISTOL_OFFICIAL.lobbyBar }, // press-13 spa — interior wellness salon pending dedicated asset
+  { url: BRISTOL_OFFICIAL.roomLoungeCorner }, // press-14 spa
+  { url: BRISTOL_OFFICIAL.suiteAzurTerrace }, // press-15 spa Suite Eden terrace
+  { url: BRISTOL_OFFICIAL.suiteAzurTerrace }, // press-16 pool
+  { url: BRISTOL_OFFICIAL.suiteAzurTerrace }, // press-17 pool
+  { url: BRISTOL_OFFICIAL.jardinFrancais }, // press-18 pool garden
+  { url: BRISTOL_OFFICIAL.suiteAzurTerrace }, // press-19 view
+  { url: BRISTOL_OFFICIAL.roomLoungeCorner }, // press-20 view
+  { url: BRISTOL_OFFICIAL.roomDeluxeGarden }, // press-21 view
+  { url: BRISTOL_OFFICIAL.epicureDetail }, // press-22 detail
+  { url: BRISTOL_OFFICIAL.lobbyBar }, // press-23 detail
+  { url: BRISTOL_OFFICIAL.roomSuperior }, // press-24 detail
+  { url: BRISTOL_OFFICIAL.lobbyTapestry }, // press-25 concierge
+  { url: BRISTOL_OFFICIAL.facadeEntrance }, // press-26 concierge
+  { url: BRISTOL_OFFICIAL.jardinFrancais }, // press-27 concierge garden
+  { url: BRISTOL_OFFICIAL.epicure }, // press-28 events ballroom
+  { url: BRISTOL_OFFICIAL.faubourg114 }, // press-29 events
+  { url: BRISTOL_OFFICIAL.lobbyBar }, // press-30 events
 ];
 
 interface GalleryRow {

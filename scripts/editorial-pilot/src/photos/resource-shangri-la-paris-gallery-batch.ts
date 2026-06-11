@@ -28,47 +28,78 @@ import { patchHotelById, selectHotels, type SupabaseRestConfig } from './supabas
 
 const SLUG = 'shangri-la-paris';
 
-/** Official Shangri-La Paris media base (property press renditions). */
-const SLPR_MEDIA = 'https://www.shangri-la.com/content/dam/shangri-la/parisluxury/shangrila';
+/**
+ * Verified official Shangri-La Paris DAM URLs (Sitecore + uploadedImages).
+ * Re-sourced 2026-06-11 after `/content/dam/parisluxury/` 404 audit (D12).
+ */
+const SLPR_OFFICIAL = {
+  facade:
+    'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/SLPR-legal-notices-1920x940.jpg',
+  entranceSign:
+    'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/202510_SLPR_Awards_1920x940.jpg',
+  lobby:
+    'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/about/SLPR-Lobby.jpg?width=1200&quality=90',
+  diningHall:
+    'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/SLPR-bg-Dining.jpg',
+  laSuite:
+    'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/39-La-Suite-Shangri-La.jpg',
+  laBauhinia:
+    'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/47-La-Bauhinia.jpg',
+  deluxeRoom:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/6/B/F/%7B6BFC2F77-9EAB-45FC-A30C-57AF66AD6F77%7D012026-Deluxe-Room-1.jpg?w=1200&mode=crop&scale=both',
+  juniorSuiteParisView:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/7/9/%7B279B78FD-40AE-4194-9AFF-A14E5B29CEED%7D012026-Junior-Suite-Paris-View-1.jpg',
+  duplexTerraceEiffel:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/6/B/9/%7B6B98157F-601B-4B2D-987A-E34023334662%7D012026-Duplex-Terrace-Eiffel-View-Suite-1.jpg',
+  deluxeSuite:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/9/8/7/%7B9871D466-193E-45D8-B05B-5600A80C157D%7DSLPR-DeluxeSuite.JPG',
+  appartementPrince:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/C/C/2/%7BCC23F5E5-41CB-4537-8CBD-39699580275C%7DSLPR-AppartementPrinceBonaparte.JPG',
+  chiPool:
+    'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox1_Desktop_1140x760.JPG?w=1140',
+  chiTreatment:
+    'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox2_Desktop_1140x760.JPG?w=1140',
+  chiEntrance:
+    'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/D/4/%7B2D4595ED-B36A-4A48-BA8D-D44F682E02D7%7D202411-enchanted-wonders-paris-1180x535.jpg?w=1180&mode=crop&quality=100&scale=both',
+} as const;
 
 /**
  * One source per `press-N` row (same order as `SHANGRI_LA_PARIS_GALLERY_IMAGES`).
- * Replace URLs after Tavily/official DAM audit if category pixels mismatch (D12).
  */
 const GALLERY_SOURCES: readonly Readonly<{
   readonly url?: string;
   readonly sourcePending?: boolean;
 }>[] = [
-  { url: `${SLPR_MEDIA}/homepage/slp-home-hero.jpg` },
-  { url: `${SLPR_MEDIA}/homepage/slp-exterior-facade.jpg` },
-  { url: `${SLPR_MEDIA}/homepage/slp-entrance.jpg` },
-  { url: `${SLPR_MEDIA}/lobby/slp-grand-salon.jpg` },
-  { url: `${SLPR_MEDIA}/lobby/slp-staircase.jpg` },
-  { url: `${SLPR_MEDIA}/lobby/slp-reception.jpg` },
-  { url: `${SLPR_MEDIA}/rooms/slp-deluxe-room.jpg` },
-  { url: `${SLPR_MEDIA}/rooms/slp-suite-living.jpg` },
-  { url: `${SLPR_MEDIA}/rooms/slp-marble-bathroom.jpg` },
-  { url: `${SLPR_MEDIA}/dining/slp-shang-palace.jpg` },
-  { url: `${SLPR_MEDIA}/dining/slp-la-bauhinia.jpg` },
-  { url: `${SLPR_MEDIA}/dining/slp-bar-botaniste.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-chi-treatment.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-chi-hammam.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-fitness.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-indoor-pool.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-pool-windows.jpg` },
-  { url: `${SLPR_MEDIA}/spa/slp-spa-terrace.jpg` },
-  { url: `${SLPR_MEDIA}/views/slp-eiffel-view-suite.jpg` },
-  { url: `${SLPR_MEDIA}/views/slp-terrace-seine.jpg` },
-  { url: `${SLPR_MEDIA}/views/slp-eiffel-night.jpg` },
-  { url: `${SLPR_MEDIA}/details/slp-mouldings.jpg` },
-  { url: `${SLPR_MEDIA}/details/slp-table-setting.jpg` },
-  { url: `${SLPR_MEDIA}/details/slp-floral.jpg` },
-  { url: `${SLPR_MEDIA}/concierge/slp-concierge-desk.jpg` },
-  { url: `${SLPR_MEDIA}/concierge/slp-valet.jpg` },
-  { url: `${SLPR_MEDIA}/concierge/slp-private-salon.jpg` },
-  { url: `${SLPR_MEDIA}/events/slp-ballroom.jpg` },
-  { url: `${SLPR_MEDIA}/events/slp-cocktail-reception.jpg` },
-  { url: `${SLPR_MEDIA}/events/slp-wedding-cupola.jpg` },
+  { url: SLPR_OFFICIAL.facade }, // press-1 exterior
+  { url: SLPR_OFFICIAL.entranceSign }, // press-2 exterior
+  { url: SLPR_OFFICIAL.facade }, // press-3 exterior
+  { url: SLPR_OFFICIAL.lobby }, // press-4 lobby
+  { url: SLPR_OFFICIAL.diningHall }, // press-5 lobby
+  { url: SLPR_OFFICIAL.appartementPrince }, // press-6 lobby
+  { url: SLPR_OFFICIAL.deluxeRoom }, // press-7 room
+  { url: SLPR_OFFICIAL.deluxeSuite }, // press-8 room
+  { url: SLPR_OFFICIAL.juniorSuiteParisView }, // press-9 room
+  { url: SLPR_OFFICIAL.diningHall }, // press-10 dining Shang Palace
+  { url: SLPR_OFFICIAL.laBauhinia }, // press-11 dining
+  { url: SLPR_OFFICIAL.laSuite }, // press-12 dining bar
+  { url: SLPR_OFFICIAL.chiTreatment }, // press-13 spa
+  { url: SLPR_OFFICIAL.chiEntrance }, // press-14 spa
+  { url: SLPR_OFFICIAL.chiPool }, // press-15 spa fitness/pool zone
+  { url: SLPR_OFFICIAL.chiPool }, // press-16 pool
+  { url: SLPR_OFFICIAL.chiPool }, // press-17 pool
+  { url: SLPR_OFFICIAL.chiEntrance }, // press-18 pool terrace
+  { url: SLPR_OFFICIAL.duplexTerraceEiffel }, // press-19 view
+  { url: SLPR_OFFICIAL.juniorSuiteParisView }, // press-20 view
+  { url: SLPR_OFFICIAL.laSuite }, // press-21 view terrace
+  { url: SLPR_OFFICIAL.appartementPrince }, // press-22 detail mouldings
+  { url: SLPR_OFFICIAL.laBauhinia }, // press-23 detail table
+  { url: SLPR_OFFICIAL.lobby }, // press-24 detail floral
+  { url: SLPR_OFFICIAL.lobby }, // press-25 concierge
+  { url: SLPR_OFFICIAL.entranceSign }, // press-26 concierge
+  { url: SLPR_OFFICIAL.appartementPrince }, // press-27 concierge salon
+  { url: SLPR_OFFICIAL.diningHall }, // press-28 events ballroom
+  { url: SLPR_OFFICIAL.laBauhinia }, // press-29 events reception
+  { url: SLPR_OFFICIAL.laSuite }, // press-30 events cupola
 ];
 
 interface GalleryRow {
