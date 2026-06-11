@@ -94,7 +94,7 @@ export function getKitGoldenPayload(slug: string): KitGoldenPayload | null {
 }
 
 export function isKitWaveSlug(slug: string): slug is KitWaveSlug {
-  return slug in PAYLOADS;
+  return (KIT_WAVE_SLUGS as readonly string[]).includes(slug);
 }
 
 export function buildKitGoldenFieldsFromPayload(

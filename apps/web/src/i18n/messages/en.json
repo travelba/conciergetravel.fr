@@ -99,18 +99,68 @@
     },
     "editorLetter": {
       "eyebrow": "A word from the Concierge",
-      "title": "Welcome from your trusted hotelier",
-      "paragraph1": "Here is the selection we keep up to date for you: 2,193 extraordinary houses across 127 countries, picked one by one. No hundred-thousand-address catalogue, no algorithm that decides on our behalf.",
-      "paragraph2": "You'll find Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys and rare gems the guidebooks haven't reached yet. No pay-to-play. No hotel commission influences the selection.",
-      "paragraph3": "Our signature: every page closes with a Concierge's Tip — a room to ask for by number, a table to reserve three months ahead, an arrival time that changes everything. Our hotelier partners trusted us with it.",
-      "signatureName": "The Concierge",
-      "signatureRole": "Your trusted hotelier",
+      "title": "A word from the Concierge",
+      "paragraph1": "More than a stay, we orchestrate rare, unforgettable moments for you. Every detail matters; every moment belongs to you.",
+      "paragraph2": "",
+      "paragraph3": "",
+      "signatureName": "Jean-Baptiste L.",
+      "signatureRole": "Head Concierge",
       "cta": "Our editorial method"
+    },
+    "conciergeFeature": {
+      "eyebrow": "Your personal concierge",
+      "title": "A trusted advisor at every step of your journey",
+      "body": "From the first recommendation to the final attention, our Concierge orchestrates your stay like a score. He knows the houses, their directors, their secrets — and ensures every detail feels like you.",
+      "bullet1": "Tailored recommendations, never standardised",
+      "bullet2": "Upgrades and attentions negotiated for you",
+      "bullet3": "A discreet presence, available 24/7",
+      "cta": "Call on the Concierge",
+      "visualAlt": "The MyConciergeHotel Concierge welcoming an elegant couple in a palace lobby, watercolour illustration"
+    },
+    "kitHeader": {
+      "hotels": "Hotels",
+      "destinations": "Destinations",
+      "experiences": "Experiences",
+      "rankings": "Rankings",
+      "concierge": "The Concierge",
+      "magazine": "Magazine",
+      "favorites": "Favourites"
+    },
+    "kitFooter": {
+      "tagline": "The Art of Five-Star Travel",
+      "body": "Independent hotel concierge. IATA agency — net rates and privileges reserved for exceptional houses.",
+      "exploreTitle": "Explore",
+      "exploreHotels": "Hotels & Palaces",
+      "exploreDestinations": "Destinations",
+      "exploreOccasions": "By occasion",
+      "exploreRankings": "Rankings",
+      "exploreMagazine": "Magazine",
+      "destinationsTitle": "Destinations",
+      "destParis": "Paris",
+      "destRiviera": "French Riviera",
+      "destItaly": "Italy",
+      "destGreece": "Greece",
+      "destJapan": "Japan",
+      "destNewYork": "New York",
+      "catalogueTitle": "Catalogue",
+      "cataloguePalaces": "Palaces",
+      "catalogueFiveStar": "5-star hotels",
+      "catalogueBoutique": "Boutique hotels",
+      "catalogueChateau": "Château hotels",
+      "catalogueVillas": "Villas & chalets",
+      "conciergeTitle": "Concierge",
+      "conciergeAbout": "The Concierge",
+      "conciergeClub": "Le Concierge Club",
+      "conciergeContact": "Help & contact",
+      "conciergeAboutPage": "About",
+      "conciergeLegal": "Legal notice",
+      "copyright": "© {year} MyConciergeHotel — All rights reserved.",
+      "iataLine": "IATA agency · Best rate guaranteed · No middleman"
     },
     "clubRibbon": {
       "eyebrow": "Our programme",
-      "title": "Le Concierge Club — open access to the concierge desk",
-      "body": "Create a free account to unlock the concierge agenda, save your shortlist, and receive the operational tips of the Palaces we selected. Prestige tier is invitation-only — the waitlist sits on the same page.",
+      "title": "Le Concierge Club",
+      "body": "Create a free account to access the Concierge agenda, save your favourite addresses and receive operational tips before anyone else.",
       "ctaDiscover": "Discover Le Concierge Club",
       "ctaPrestige": "Prestige tier",
       "benefit1": "Upgrades & VIP attentions",
@@ -183,10 +233,12 @@
       ]
     },
     "featuredHotels": {
-      "eyebrow": "Concierge picks",
-      "title": "On the desk this week",
-      "subtitle": "Six addresses our Concierge has been recommending lately. Every page closes with a Concierge Tip — the room number, the table, the timing the guidebooks never share.",
-      "seeAll": "Browse the full catalogue →",
+      "eyebrow": "Editorial magazine",
+      "title": "Inspiration & Escape",
+      "subtitle": "Our selection of extraordinary destinations and hotels, hand-picked and verified one by one by our concierge team.",
+      "seeAll": "Discover the magazine →",
+      "experience": "Experience",
+      "featured": "Featured",
       "palace": "Palace",
       "relaisChateaux": "Relais & Châteaux",
       "boutique": "Boutique hotel",
@@ -223,27 +275,27 @@
       "axes": {
         "spa": {
           "title": "Spa & wellness",
-          "subtitle": "Water cellars, signature treatments, partner skincare houses — the Concierge selection."
-        },
-        "famille": {
-          "title": "Family",
-          "subtitle": "Connecting suites, kids' club, bespoke welcome for ages 6 to 12."
-        },
-        "golf": {
-          "title": "Golf",
-          "subtitle": "Resort hotels with signature courses, green fees included, gastronomic clubhouse."
+          "subtitle": "Water cellars, signature treatments, partner skincare houses."
         },
         "luneDeMiel": {
           "title": "Honeymoon",
-          "subtitle": "View suites, in-room dining, couple's spa, private transfers — the honeymoon setting."
+          "subtitle": "View suites, in-room dining, couple's spa, private transfers."
         },
         "gastronomie": {
-          "title": "Gastronomy & Michelin stars",
-          "subtitle": "Michelin-starred chefs, signature hotel restaurants, tasting menus to reserve three months ahead."
+          "title": "Gastronomy & stars",
+          "subtitle": "Michelin-starred chefs, signature tables, exceptional tasting menus."
+        },
+        "balneaire": {
+          "title": "Seaside escape",
+          "subtitle": "Overwater villas, private lagoons, immaculate beaches at the end of the world."
         },
         "rooftop": {
-          "title": "Rooftop",
-          "subtitle": "Panoramic roof bars, terrace suites, sky pools — drinks above the skyline."
+          "title": "Rooftop & city",
+          "subtitle": "Panoramic bars, terrace suites, sky pools above the rooftops."
+        },
+        "retraite": {
+          "title": "Retreat & serenity",
+          "subtitle": "Riads, palaces and sanctuaries to recharge far from the bustle."
         }
       }
     },

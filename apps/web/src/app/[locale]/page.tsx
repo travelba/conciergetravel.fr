@@ -5,14 +5,17 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
-import { HomeAeoFaq, loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
+import { loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
 import { HomeClubRibbon } from '@/components/home/home-club-ribbon';
-import { HomeConciergeAdviceCarousel } from '@/components/home/home-concierge-advice-carousel';
+import { HomeConciergeFeature } from '@/components/home/home-concierge-feature';
 import { HomeDestinationGrid } from '@/components/home/home-destination-grid';
 import { HomeEditorLetter } from '@/components/home/home-editor-letter';
 import { HomeHero } from '@/components/home/home-hero';
 import { HomeHotelGrid } from '@/components/home/home-hotel-grid';
 import { HomeInspirationGrid } from '@/components/home/home-inspiration-grid';
+import { HomeKitFooter } from '@/components/home/home-kit-footer';
+import { HomeKitHeader } from '@/components/home/home-kit-header';
+import { HomeKitReveal } from '@/components/home/home-kit-reveal';
 import { HomeOpeningsGrid } from '@/components/home/home-openings-grid';
 import { HomeTopRankings } from '@/components/home/home-top-rankings';
 import { HomeTrustBar } from '@/components/home/home-trust-bar';
@@ -185,66 +188,37 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       : null;
 
   return (
-    <main className="bg-bg">
-      <SeoJsonLd
-        nonce={nonce}
-        nodes={[websiteJsonLd, homeFaqJsonLd, openingsItemListJsonLd, featuredItemListJsonLd]}
-      />
+    <HomeKitReveal>
+      <main className="mch-kit home-page">
+        <SeoJsonLd
+          nonce={nonce}
+          nodes={[websiteJsonLd, homeFaqJsonLd, openingsItemListJsonLd, featuredItemListJsonLd]}
+        />
 
-      {/* §1 — Hero éditorial : « MyConciergeHotel — Book like a
-          concierge. » + H1 « Nous vous attendions » + chiffres
-          réels (127 pays · 2 193 adresses) */}
-      <HomeHero locale={locale} cloudName={cloudName} />
+        <HomeKitHeader />
 
-      <HomeTrustBar locale={locale} />
-
-      {/* §2 — Le mot du Concierge (éditorial signé) */}
-      <HomeEditorLetter locale={locale} />
-
-      {/* §3 — Le Concierge a frappé à leur porte (4 dernières
-          adresses passées au crible, CTA → /ouvertures) */}
-      <HomeOpeningsGrid locale={locale} openings={openings} cloudName={cloudName} />
-
-      {/* §4 — Les fiches du moment : 6 fiches sélectionnées par la
-          conciergerie, mixées par tier (Palace / R&C / boutique) et
-          rééquilibrées par pays via `diversifyByCountry` pour
-          éviter l'effet "six Paris d'affilée" (audit 2026-05-27).
-          Voir `lib/home/featured-hotels.ts` + ADR-0021 (scope mondial). */}
-      <HomeHotelGrid locale={locale} hotels={featuredHotels} cloudName={cloudName} />
-
-      {/* §5 — Trouver la bonne adresse selon l'occasion (6 axes :
-          Spa, Famille, Golf, Lune de miel, Gastronomie, Rooftop) */}
-      <HomeInspirationGrid locale={locale} />
-
-      {/* §6 — Là où le Concierge aime envoyer ses clients
-          (8 destinations : Paris, Côte d'Azur, Italie, Grèce,
-          Japon, Maroc, États-Unis, Royaume-Uni) */}
-      <HomeDestinationGrid
-        locale={locale}
-        cloudName={cloudName}
-        destinations={pickHomeDestinations(
-          cityCounts,
-          locale,
-          (count) => t('featuredDestinations.countLabel', { count }),
-          destinationHeroImages,
-        )}
-      />
-
-      {/* §7 — Les meilleurs hôtels, selon nos critères (6 classements
-          avec le plus d'entrées, sélection automatique) */}
-      <HomeTopRankings locale={locale} rankings={rankings} />
-
-      {/* §8 — Le Conseil du Concierge × 3 (échantillon daily-rotated
-          depuis 40 fiches, deterministe par UTC date — la "voix"
-          opérationnelle qui referme la home avant la FAQ). */}
-      <HomeConciergeAdviceCarousel locale={locale} />
-
-      {/* §9 — Bandeau institutionnel Le Concierge Club (CTA gratuit
-          + Prestige in-page anchor — ADR-0019/0020). */}
-      <HomeClubRibbon locale={locale} />
-
-      {/* §10 — Ce que vous voulez savoir (4 Q&A AEO + FAQPage JSON-LD) */}
-      <HomeAeoFaq locale={locale} entries={aeoEntries} />
-    </main>
+        {/* Ordre aligné sur design/html-kit/index.html */}
+        <HomeHero locale={locale} cloudName={cloudName} />
+        <HomeHotelGrid locale={locale} hotels={featuredHotels} cloudName={cloudName} />
+        <HomeTrustBar locale={locale} />
+        <HomeConciergeFeature locale={locale} />
+        <HomeOpeningsGrid locale={locale} openings={openings} cloudName={cloudName} />
+        <HomeInspirationGrid locale={locale} />
+        <HomeDestinationGrid
+          locale={locale}
+          cloudName={cloudName}
+          destinations={pickHomeDestinations(
+            cityCounts,
+            locale,
+            (count) => t('featuredDestinations.countLabel', { count }),
+            destinationHeroImages,
+          )}
+        />
+        <HomeTopRankings locale={locale} rankings={rankings} />
+        <HomeClubRibbon locale={locale} />
+        <HomeEditorLetter locale={locale} />
+        <HomeKitFooter locale={locale} />
+      </main>
+    </HomeKitReveal>
   );
 }

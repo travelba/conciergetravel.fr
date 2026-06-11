@@ -151,6 +151,61 @@
   padding: 22px 0;
   transition: 0.3s ease;
 }
+/* Homepage hero overlay — white type over the painted Concierge photo */
+.mch-kit.home-page .header.header--overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 26px 0;
+}
+.mch-kit.home-page .header.header--overlay .brand-mono,
+.mch-kit.home-page .header.header--overlay .brand-name {
+  color: #fff;
+}
+.mch-kit.home-page .header.header--overlay .brand-mono em {
+  color: var(--or-clair);
+}
+.mch-kit.home-page .header.header--overlay .nav a {
+  color: rgba(255, 255, 255, 0.88);
+}
+.mch-kit.home-page .header.header--overlay .nav a:hover {
+  color: var(--or-clair);
+}
+.mch-kit.home-page .header.header--overlay .header-right,
+.mch-kit.home-page .header.header--overlay .header-right .hr-item {
+  color: rgba(255, 255, 255, 0.9);
+}
+.mch-kit.home-page .header.header--overlay .header-right .sep {
+  background: rgba(255, 255, 255, 0.3);
+}
+.mch-kit.home-page .header.header--overlay.scrolled {
+  position: fixed;
+  background: rgba(246, 241, 231, 0.94);
+  backdrop-filter: blur(10px);
+  padding: 16px 0;
+  box-shadow: 0 4px 20px rgba(58, 53, 45, 0.12);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .brand-mono,
+.mch-kit.home-page .header.header--overlay.scrolled .brand-name {
+  color: var(--noir);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .brand-mono em {
+  color: var(--accent);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .nav a {
+  color: var(--texte);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .nav a:hover {
+  color: var(--accent);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .header-right,
+.mch-kit.home-page .header.header--overlay.scrolled .header-right .hr-item {
+  color: var(--texte);
+}
+.mch-kit.home-page .header.header--overlay.scrolled .header-right .sep {
+  background: rgba(58, 53, 45, 0.25);
+}
 .mch-kit .header.scrolled {
   background: rgba(246, 241, 231, 0.94);
   backdrop-filter: blur(10px);
@@ -231,11 +286,11 @@
 /* ===== HERO ===== */
 .mch-kit .hero {
   position: relative;
-  min-height: 86vh;
+  min-height: 92vh;
   display: flex;
   align-items: center;
   overflow: hidden;
-  padding: 96px 0 60px;
+  padding: 140px 0 60px;
 }
 /* Search dropdowns (destination / dates / guests) must float over the hero
    photo and the section below — not clip inside the hero card. */
@@ -1109,6 +1164,30 @@
 .mch-kit .foot-bottom .fb-iata {
   color: var(--accent);
   letter-spacing: 0.1em;
+}
+
+/* ===== REVEAL (scroll animation) ===== */
+.mch-kit .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+.mch-kit .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mch-kit .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.mch-kit.home-page {
+  background: var(--creme);
 }
 
 /* ===== RESPONSIVE ===== */

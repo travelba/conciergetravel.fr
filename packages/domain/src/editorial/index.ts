@@ -56,5 +56,8 @@ export * from './cheval-blanc-paris-golden';
 export * from './cheval-blanc-paris-concierge-questions';
 export * from './cheval-blanc-paris-amenities';
 export * from './kit-wave-amenity-blocks';
+export * from './kit-wave-room-catalog';
+export * from './kit-wave-faq-seed';
+export * from './kit-wave-room-types';
 export * from './les-airelles-courchevel-rooms';
 export * from './les-pres-deugenie-faq.generated';

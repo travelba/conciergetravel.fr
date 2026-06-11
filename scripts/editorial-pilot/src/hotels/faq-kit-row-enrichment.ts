@@ -10,6 +10,7 @@ import { isFaqCanonicalSet } from './canonical-faq-questions.js';
 import { evaluateFaqKitCoverage } from './faq-perplexity-gates.js';
 import {
   CONCIERGE_QUESTION_CATEGORIES_FR,
+  CONCIERGE_QUESTIONS_MIN,
   FAQ_KIT_MIN_ITEMS,
   FAQ_PROMOTE_MIN_ITEMS,
   type NormalisedConciergeQuestion,
@@ -233,4 +234,62 @@ export function evaluateFaqKitRowEnrichment(params: {
     conciergeCount: concierge.length,
     issues,
   };
+}
+
+/**
+ * Kit fiche mandatory concierge gates — run even when `faq_content_kit` is still a
+ * promote stub (wave 5 gap). Skill: hotel-kit-rollout D10 + PO remark « FAQ Concierge faible ».
+ */
+export function evaluateKitConciergeMandatoryGates(
+  concierge_questions: unknown,
+): readonly FaqKitRowEnrichmentIssue[] {
+  const concierge = parseConciergeItems(concierge_questions);
+  const issues: FaqKitRowEnrichmentIssue[] = [];
+
+  if (concierge.length < CONCIERGE_QUESTIONS_MIN) {
+    issues.push({
+      code: 'concierge.count',
+      message: `${concierge.length} concierge_questions (kit target ≥ ${CONCIERGE_QUESTIONS_MIN})`,
+      severity: 'blocker',
+    });
+  }
+
+  const conciergeMissingEn = concierge.filter(
+    (item) =>
+      typeof item.question_en !== 'string' ||
+      item.question_en.trim().length === 0 ||
+      typeof item.reply_en !== 'string' ||
+      item.reply_en.trim().length === 0,
+  ).length;
+  if (concierge.length >= CONCIERGE_QUESTIONS_MIN && conciergeMissingEn > 0) {
+    issues.push({
+      code: 'concierge.en_parity',
+      message: `${conciergeMissingEn}/${concierge.length} concierge questions missing EN question or reply`,
+      severity: 'blocker',
+    });
+  }
+
+  const invalidConciergeCategories = concierge.filter(
+    (item) => !(CONCIERGE_QUESTION_CATEGORIES_FR as readonly string[]).includes(item.category_fr),
+  );
+  if (invalidConciergeCategories.length > 0) {
+    issues.push({
+      code: 'concierge.taxonomy',
+      message: `${invalidConciergeCategories.length} concierge items use non-allowlist category_fr`,
+      severity: 'blocker',
+    });
+  }
+
+  const commitmentTone = concierge.filter((item) =>
+    conciergeReplyUsesCommitmentTone(item.reply_fr, item.reply_en),
+  );
+  if (commitmentTone.length > 0) {
+    issues.push({
+      code: 'concierge.informative_tone',
+      message: `${commitmentTone.length} concierge replies use first-person commitment (CDC D10)`,
+      severity: 'blocker',
+    });
+  }
+
+  return issues;
 }

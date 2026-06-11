@@ -7,8 +7,10 @@ import { Outfit, EB_Garamond } from 'next/font/google';
 import { ConditionalAnalytics } from '@/components/analytics';
 import { ConsentBanner } from '@/components/consent';
 import { Breadcrumb } from '@/components/layout/breadcrumb';
-import { SiteFooter } from '@/components/layout/site-footer';
-import { SiteHeader } from '@/components/layout/site-header';
+import {
+  ConditionalSiteFooter,
+  ConditionalSiteHeader,
+} from '@/components/layout/conditional-site-chrome';
 import { SiteSeoJsonLd } from '@/components/seo/site-json-ld';
 import { Toaster } from '@mch/ui';
 import { getPathname } from '@/i18n/navigation';
@@ -92,7 +94,7 @@ export default async function LocaleLayout({
       <body className="flex min-h-dvh flex-col overflow-x-clip">
         <SiteSeoJsonLd locale={locale} nonce={nonce} />
         <NextIntlClientProvider messages={messages}>
-          <SiteHeader />
+          <ConditionalSiteHeader />
           {/*
             Visible fil d'ariane (ADR-0014 §2.4) — mirror of the per-page
             `BreadcrumbList` JSON-LD. Returns `null` on the home page.
@@ -107,7 +109,7 @@ export default async function LocaleLayout({
           <div id="main" tabIndex={-1} className="flex-1 outline-none">
             {children}
           </div>
-          <SiteFooter />
+          <ConditionalSiteFooter />
           <ConsentBanner />
           {/* Global toast surface (sober-luxe styled) — see @mch/ui Toaster. */}
           <Toaster />

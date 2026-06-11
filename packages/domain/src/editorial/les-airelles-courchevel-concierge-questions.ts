@@ -25,8 +25,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'Helicopter links from Courchevel altiport or from Lyon/Chambéry can be coordinated on request. Timing depends on weather and slot availability — forty-eight hours’ notice is recommended.',
   },
   {
-    category_fr: 'Ski & Domaine skiable',
-    category_en: 'Ski & Ski Area',
+    category_fr: 'Expériences personnalisées',
+    category_en: 'Personalized Experiences',
     question_fr: 'L’hôtel est-il vraiment ski-in / ski-out ?',
     reply_fr:
       'Les Airelles Courchevel est situé au Jardin Alpin avec accès direct aux pistes des 3 Vallées. Le ski valet (Bernard Orcel) prépare les skis à l’arrivée ; préciser le niveau et le type de fixation lors de la réservation.',
@@ -35,8 +35,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'Les Airelles Courchevel sits in Le Jardin Alpin with direct access to Three Valleys slopes. The ski valet (Bernard Orcel) prepares skis on arrival; share skill level and binding type when booking.',
   },
   {
-    category_fr: 'Ski & Domaine skiable',
-    category_en: 'Ski & Ski Area',
+    category_fr: 'Expériences personnalisées',
+    category_en: 'Personalized Experiences',
     question_fr: 'Pouvez-vous réserver un guide pour une journée hors-piste ?',
     reply_fr:
       'La conciergerie peut recommander un moniteur ESF ou un guide de haute montagne selon le niveau et la zone visée (Bellecôte, Grand Couloir, etc.). La réservation la veille, avec le profil du skieur, permet de confirmer le créneau.',
@@ -145,8 +145,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'Chalets Ormello and 1908 can host private dinners with Les Airelles catering. Guest count and desired menu guide the proposal — quote on request from the events concierge.',
   },
   {
-    category_fr: 'Excursions & Visites',
-    category_en: 'Excursions & Visits',
+    category_fr: 'Excursions & Visites culturelles',
+    category_en: 'Excursions & Cultural Visits',
     question_fr: 'Pouvez-vous réserver une motoneige pour une sortie en soirée ?',
     reply_fr:
       'Des sorties en motoneige (vallée de la Tarentaise, dîner en altitude) sont proposées par des opérateurs partenaires. L’horaire et le nombre de participants permettent de confirmer le créneau la veille.',
@@ -155,8 +155,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'Snowmobile outings (Tarentaise valley, mountaintop dinner) are offered by partner operators. Timing and party size confirm the slot the day before.',
   },
   {
-    category_fr: 'Excursions & Visites',
-    category_en: 'Excursions & Visits',
+    category_fr: 'Excursions & Visites culturelles',
+    category_en: 'Excursions & Cultural Visits',
     question_fr: 'Où patiner sur glace à proximité de l’hôtel ?',
     reply_fr:
       'Une patinoire est accessible au palace ; la patinoire olympique de Courchevel 1850 se trouve à quelques minutes à pied. La conciergerie communique les horaires publics et les créneaux de glace libre.',
@@ -165,8 +165,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'An ice rink is available at the palace; Courchevel 1850 Olympic rink is a few minutes on foot. The concierge desk shares public hours and free-skate slots.',
   },
   {
-    category_fr: 'Shopping & Services',
-    category_en: 'Shopping & Services',
+    category_fr: 'Shopping & Services de luxe',
+    category_en: 'Shopping & Luxury Services',
     question_fr: 'La boutique Vanille & Lilas est-elle ouverte aux visiteurs ?',
     reply_fr:
       'La boutique Vanille & Lilas au palace propose mode, accessoires et cadeaux Airelles. Les horaires saisonniers et les pièces disponibles sont confirmés sur place ou via la conciergerie.',
@@ -175,8 +175,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'The Vanille & Lilas boutique at the palace offers fashion, accessories and Airelles gifts. Seasonal hours and available pieces are confirmed on site or through the concierge desk.',
   },
   {
-    category_fr: 'Shopping & Services',
-    category_en: 'Shopping & Services',
+    category_fr: 'Shopping & Services de luxe',
+    category_en: 'Shopping & Luxury Services',
     question_fr: 'Pouvez-vous réserver une cabine privée dans les boutiques de Courchevel 1850 ?',
     reply_fr:
       'Les maisons de Courchevel 1850 acceptent parfois un créneau privé sur demande. Les marques ciblées et l’horaire souhaité permettent à la conciergerie d’aligner l’itinéraire sur le programme de ski.',
@@ -185,8 +185,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'Courchevel 1850 houses sometimes accept a private slot on request. Target brands and preferred time let the concierge desk align the itinerary with the ski schedule.',
   },
   {
-    category_fr: 'Ski & Domaine skiable',
-    category_en: 'Ski & Ski Area',
+    category_fr: 'Expériences personnalisées',
+    category_en: 'Personalized Experiences',
     question_fr: 'Pouvez-vous réserver des forfaits 3 Vallées pour toute la famille ?',
     reply_fr:
       'Les forfaits 3 Vallées (600 km de pistes) peuvent être préparés avant l’arrivée. Le nombre de jours et les dates de ski suffisent ; les skipass sont remis à la réception ou au ski room.',
@@ -245,8 +245,8 @@ export const LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT = [
       'La Folie Douce and La Fruitière are among addresses managed by Les Airelles (half-board per package). The concierge desk reserves the space and coordinates transfer from Le Jardin Alpin.',
   },
   {
-    category_fr: 'Ski & Domaine skiable',
-    category_en: 'Ski & Ski Area',
+    category_fr: 'Expériences personnalisées',
+    category_en: 'Personalized Experiences',
     question_fr: 'Proposez-vous du ski de fond ou d’autres activités hors ski alpin ?',
     reply_fr:
       'Ski de fond, promenade en calèche et raquettes peuvent être organisés via la conciergerie. L’activité souhaitée et le niveau orientent la recommandation vers l’opérateur partenaire adapté.',

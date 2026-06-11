@@ -40,6 +40,12 @@ import {
   CDC_COMPLETE_THRESHOLD,
   CDC_PARTIAL_THRESHOLD,
 } from './hotel-fiche-cdc-gates.js';
+import {
+  hasKitAcceptanceFailures,
+  isHotelKitSlug,
+  type KitRoomAuditRow,
+} from './kit-fiche-acceptance-gates.js';
+import { KIT_PO_REMARK_REGISTRY } from './kit-po-remark-registry.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -48,7 +54,7 @@ loadDotenv({ path: resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: resolve(__dirname, '../../../../.env') });
 
 const CDC_HOTEL_COLUMNS =
-  'id,slug,slug_en,name,name_en,is_published,luxury_tier,country_code,priority,updated_at,stars,is_palace,city,district,address,postal_code,latitude,longitude,phone_e164,email_reservations,description_fr,description_en,meta_title_fr,meta_title_en,meta_desc_fr,meta_desc_en,factual_summary_fr,factual_summary_en,concierge_advice,faq_content,faq_content_kit,concierge_questions,long_description_sections,highlights,amenities,points_of_interest,transports,restaurant_info,spa_info,policies,awards,affiliations,signature_experiences,number_of_rooms,number_of_suites,opened_at,official_url,wikidata_id,wikipedia_url_fr,wikipedia_url_en,external_sameas,hero_image,gallery_images,hero_video,virtual_tour_url,google_rating,google_reviews_count,google_reviews,featured_reviews,mice_info,booking_mode,upcoming_events,instagram,concierge_pick,concierge_hook,external_sources';
+  'id,slug,slug_en,name,name_en,is_published,luxury_tier,country_code,priority,updated_at,stars,is_palace,city,district,address,postal_code,latitude,longitude,phone_e164,email_reservations,description_fr,description_en,meta_title_fr,meta_title_en,meta_desc_fr,meta_desc_en,factual_summary_fr,factual_summary_en,concierge_advice,faq_content,faq_content_kit,concierge_questions,long_description_sections,highlights,amenities,points_of_interest,transports,restaurant_info,spa_info,policies,awards,affiliations,signature_experiences,number_of_rooms,number_of_suites,opened_at,official_url,wikidata_id,wikipedia_url_fr,wikipedia_url_en,external_sameas,hero_image,gallery_images,hero_video,virtual_tour_url,google_rating,google_reviews_count,google_reviews,last_reviews_sync,featured_reviews,mice_info,booking_mode,upcoming_events,instagram,concierge_pick,concierge_hook,external_sources';
 
 interface PostgrestEnv {
   readonly restBase: string;
@@ -137,7 +143,12 @@ async function fetchPublishedGuideSlugsPg(client: import('pg').Client): Promise<
   return new Set(result.rows.map((r) => r.slug));
 }
 
-async function fetchRoomStatsPg(client: import('pg').Client): Promise<Map<string, RoomAuditStats>> {
+interface RoomAuditMaps {
+  readonly stats: Map<string, RoomAuditStats>;
+  readonly kitRooms: Map<string, readonly KitRoomAuditRow[]>;
+}
+
+async function fetchRoomStatsPg(client: import('pg').Client): Promise<RoomAuditMaps> {
   const sql = `
     select
       h.slug,
@@ -166,17 +177,36 @@ async function fetchRoomStatsPg(client: import('pg').Client): Promise<Map<string
       indexable: row.indexable,
     });
   }
-  return map;
+  const kitSql = `
+    select h.slug as hotel_slug, r.slug as room_slug,
+      coalesce(jsonb_array_length(r.images), 0)::int as image_count
+    from public.hotel_rooms r
+    join public.hotels h on h.id = r.hotel_id
+    where r.slug is not null and length(r.slug) > 0
+  `;
+  const kitResult = await client.query<{
+    hotel_slug: string;
+    room_slug: string;
+    image_count: number;
+  }>(kitSql);
+  const kitRooms = new Map<string, KitRoomAuditRow[]>();
+  for (const row of kitResult.rows) {
+    const cur = kitRooms.get(row.hotel_slug) ?? [];
+    cur.push({ slug: row.room_slug, imageCount: row.image_count });
+    kitRooms.set(row.hotel_slug, cur);
+  }
+  return { stats: map, kitRooms };
 }
 
 async function fetchHotelsViaPg(args: CliArgs): Promise<{
   rows: CdcHotelAuditRow[];
   guideSlugs: Set<string>;
   roomStats: Map<string, RoomAuditStats>;
+  kitRoomRows: Map<string, readonly KitRoomAuditRow[]>;
 }> {
   const client = await connectPg();
   try {
-    const [guideSlugs, roomStats] = await Promise.all([
+    const [guideSlugs, roomMaps] = await Promise.all([
       fetchPublishedGuideSlugsPg(client),
       fetchRoomStatsPg(client),
     ]);
@@ -192,7 +222,12 @@ async function fetchHotelsViaPg(args: CliArgs): Promise<{
     const limitClause = args.limit !== null ? `limit ${args.limit}` : '';
     const sql = `select ${CDC_HOTEL_COLUMNS} from public.hotels ${where} order by slug asc ${limitClause}`;
     const result = await client.query<CdcHotelAuditRow>(sql, params);
-    return { rows: result.rows, guideSlugs, roomStats };
+    return {
+      rows: result.rows,
+      guideSlugs,
+      roomStats: roomMaps.stats,
+      kitRoomRows: roomMaps.kitRooms,
+    };
   } finally {
     await client.end();
   }
@@ -226,11 +261,12 @@ interface RoomRestRow {
 async function fetchRoomStatsPostgrest(
   env: PostgrestEnv,
   idToSlug: ReadonlyMap<string, string>,
-): Promise<Map<string, RoomAuditStats>> {
+): Promise<RoomAuditMaps> {
   interface MutableRoomStats {
     total: number;
     withSlug: number;
     indexable: number;
+    kitRows: KitRoomAuditRow[];
   }
   const byId = new Map<string, MutableRoomStats>();
   const PAGE = 1000;
@@ -251,6 +287,7 @@ async function fetchRoomStatsPostgrest(
         total: 0,
         withSlug: 0,
         indexable: 0,
+        kitRows: [],
       };
       cur.total += 1;
       const hasSlug = typeof room.slug === 'string' && room.slug.length > 0;
@@ -259,6 +296,9 @@ async function fetchRoomStatsPostgrest(
         typeof room.long_description_fr === 'string' && room.long_description_fr.length >= 800;
       const imageCount = Array.isArray(room.images) ? room.images.length : 0;
       if (hasSlug && longEnough && imageCount >= 5) cur.indexable += 1;
+      if (hasSlug && typeof room.slug === 'string') {
+        cur.kitRows.push({ slug: room.slug, imageCount });
+      }
       byId.set(room.hotel_id, cur);
     }
     if (batch.length < PAGE) break;
@@ -266,17 +306,26 @@ async function fetchRoomStatsPostgrest(
   }
 
   const bySlug = new Map<string, RoomAuditStats>();
+  const kitBySlug = new Map<string, readonly KitRoomAuditRow[]>();
   for (const [id, slug] of idToSlug) {
     const stats = byId.get(id);
-    if (stats) bySlug.set(slug, stats);
+    if (stats) {
+      bySlug.set(slug, {
+        total: stats.total,
+        withSlug: stats.withSlug,
+        indexable: stats.indexable,
+      });
+      kitBySlug.set(slug, stats.kitRows);
+    }
   }
-  return bySlug;
+  return { stats: bySlug, kitRooms: kitBySlug };
 }
 
 async function fetchHotelsViaPostgrest(args: CliArgs): Promise<{
   rows: CdcHotelAuditRow[];
   guideSlugs: Set<string>;
   roomStats: Map<string, RoomAuditStats>;
+  kitRoomRows: Map<string, readonly KitRoomAuditRow[]>;
 }> {
   const env = loadPostgrestEnv();
   const params = new URLSearchParams();
@@ -311,17 +360,18 @@ async function fetchHotelsViaPostgrest(args: CliArgs): Promise<{
     if (typeof id === 'string') idToSlug.set(id, row.slug);
   }
 
-  const [guideSlugs, roomStats] = await Promise.all([
+  const [guideSlugs, roomMaps] = await Promise.all([
     fetchPublishedGuideSlugsPostgrest(),
     fetchRoomStatsPostgrest(env, idToSlug),
   ]);
-  return { rows, guideSlugs, roomStats };
+  return { rows, guideSlugs, roomStats: roomMaps.stats, kitRoomRows: roomMaps.kitRooms };
 }
 
 async function fetchCatalogue(args: CliArgs): Promise<{
   rows: CdcHotelAuditRow[];
   guideSlugs: Set<string>;
   roomStats: Map<string, RoomAuditStats>;
+  kitRoomRows: Map<string, readonly KitRoomAuditRow[]>;
 }> {
   if (auditForcePostgrest() || !hasPgConnectionString()) {
     return fetchHotelsViaPostgrest(args);
@@ -369,6 +419,7 @@ function evaluateAll(
   rows: readonly CdcHotelAuditRow[],
   guideSlugs: ReadonlySet<string>,
   roomStats: ReadonlyMap<string, RoomAuditStats>,
+  kitRoomRows: ReadonlyMap<string, readonly KitRoomAuditRow[]>,
 ): CdcHotelAuditResult[] {
   const cityToGuide = buildCityToGuideSlugMap(guideSlugs);
   return rows.map((raw) => {
@@ -376,9 +427,37 @@ function evaluateAll(
     const ctx: CdcAuditContext = {
       roomStats: roomStats.get(row.slug) ?? emptyRoomStats(),
       guideSlug: resolveGuideSlugForHotel(row.city, guideSlugs, cityToGuide),
+      kitRoomRows: kitRoomRows.get(row.slug) ?? [],
     };
     return evaluateCdcHotelFiche(row, ctx);
   });
+}
+
+function reportKitAcceptanceFailures(results: readonly CdcHotelAuditResult[]): number {
+  let count = 0;
+  for (const result of results) {
+    if (!isHotelKitSlug(result.slug)) continue;
+    if (!hasKitAcceptanceFailures(result.slug, result.cdc_checks)) continue;
+    count += 1;
+    const failed = result.cdc_gaps.filter((g) => g.field.startsWith('kit.'));
+    console.error(`\n[audit:hotel-fiches-cdc] KIT ACCEPTANCE BLOCKED — ${result.slug}`);
+    for (const gap of failed) {
+      console.error(`  ✗ ${gap.field}: ${gap.message}`);
+    }
+    const failedIds = new Set(
+      result.cdc_checks.filter((c) => c.id.startsWith('kit.') && !c.passed).map((c) => c.id),
+    );
+    const touchedRemarks = KIT_PO_REMARK_REGISTRY.filter((entry) =>
+      entry.gates.some((g) => [...failedIds].some((fid) => fid === g || fid.startsWith(`${g}_`))),
+    );
+    if (touchedRemarks.length > 0) {
+      console.error('  PO remarks still open:');
+      for (const entry of touchedRemarks) {
+        console.error(`    - ${entry.remark}`);
+      }
+    }
+  }
+  return count;
 }
 
 function todayStamp(): string {
@@ -547,8 +626,8 @@ export function buildCdcSummary(results: readonly CdcHotelAuditResult[]): string
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
-  const { rows, guideSlugs, roomStats } = await fetchCatalogue(args);
-  let results = evaluateAll(rows, guideSlugs, roomStats);
+  const { rows, guideSlugs, roomStats, kitRoomRows } = await fetchCatalogue(args);
+  let results = evaluateAll(rows, guideSlugs, roomStats, kitRoomRows);
   const minScore = args.minScore;
   if (minScore !== null) {
     results = results.filter((r) => r.score_cdc < minScore);
@@ -604,6 +683,14 @@ async function main(): Promise<void> {
     const csvPath = resolve(dir, `hotel-fiche-cdc-backlog-${stamp}.csv`);
     writeCsv(csvPath, results);
     console.log(`CSV    → ${csvPath}`);
+  }
+
+  const kitBlocked = reportKitAcceptanceFailures(results);
+  if (kitBlocked > 0) {
+    console.error(
+      `\n[audit:hotel-fiches-cdc] ${kitBlocked} kit fiche(s) failed PO acceptance gates (D15–D19). Exit 1.`,
+    );
+    process.exit(1);
   }
 }
 

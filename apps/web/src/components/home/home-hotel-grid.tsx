@@ -48,7 +48,7 @@ export async function HomeHotelGrid({
     <div className="mch-kit">
       <section className="magazine" id="magazine" aria-labelledby="home-featured-hotels">
         <div className="wrap">
-          <div className="mag-head">
+          <div className="mag-head reveal">
             <div className="mh-left">
               <span className="eyebrow left">{t('eyebrow')}</span>
               <h2 id="home-featured-hotels">{t('title')}</h2>
@@ -59,7 +59,7 @@ export async function HomeHotelGrid({
             </Link>
           </div>
 
-          <div className="mosaic">
+          <div className="mosaic reveal">
             {hotels.map((h, i) => {
               const slug = pickByLocale(locale, h.slug, h.slugEn ?? h.slug);
               const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);
@@ -68,7 +68,7 @@ export async function HomeHotelGrid({
                 h.countryLabelFr,
                 h.countryLabelEn !== '' ? h.countryLabelEn : h.countryLabelFr,
               );
-              const tierBadge = pickTierBadge(h, t);
+              const mosaicTag = pickMosaicTag(i, t);
               const location = countryLabel.length > 0 ? `${h.city}, ${countryLabel}` : h.city;
               const isFeature = i === 0;
               return (
@@ -93,7 +93,7 @@ export async function HomeHotelGrid({
                     className="h-full w-full"
                   />
                   <div className="card-body">
-                    {tierBadge !== null ? <span className="card-tag">{tierBadge}</span> : null}
+                    {mosaicTag !== null ? <span className="card-tag">{mosaicTag}</span> : null}
                     <h3>{name}</h3>
                     <div className="loc">{location}</div>
                   </div>
@@ -107,13 +107,11 @@ export async function HomeHotelGrid({
   );
 }
 
-function pickTierBadge(
-  h: FeaturedHotelCard,
-  t: (key: 'palace' | 'relaisChateaux' | 'boutique' | 'chateau') => string,
+function pickMosaicTag(
+  index: number,
+  t: (key: 'experience' | 'featured') => string,
 ): string | null {
-  if (h.isPalace) return t('palace');
-  if (h.luxuryTier === 'relais_chateaux') return t('relaisChateaux');
-  if (h.luxuryTier === 'boutique') return t('boutique');
-  if (h.luxuryTier === 'chateau') return t('chateau');
+  if (index === 0) return t('experience');
+  if (index === 1) return t('featured');
   return null;
 }

@@ -184,6 +184,7 @@
     "travelport:ingest:dry": "tsx src/booking/ingest-travelport-content.ts --dry-run",
     "travelport:book": "tsx src/booking/book-travelport.ts",
     "ratehawk:probe": "tsx src/booking/probe-ratehawk.ts",
+    "ratehawk:e2e": "tsx src/booking/ratehawk-e2e-sandbox.ts",
     "giata:sync": "tsx src/booking/sync-giata-hotel.ts",
     "ratehawk:ingest": "tsx src/booking/ingest-ratehawk-content.ts",
     "ratehawk:ingest:dry": "tsx src/booking/ingest-ratehawk-content.ts --dry-run",

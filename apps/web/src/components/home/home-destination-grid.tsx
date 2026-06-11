@@ -141,7 +141,7 @@ export async function HomeDestinationGrid({
         aria-labelledby="home-featured-destinations"
       >
         <div className="wrap">
-          <div className="mag-head">
+          <div className="mag-head reveal">
             <div className="mh-left">
               <span className="eyebrow left">{eyebrow}</span>
               <h2 id="home-featured-destinations">{t('featuredDestinations.title')}</h2>
@@ -152,7 +152,7 @@ export async function HomeDestinationGrid({
             </Link>
           </div>
 
-          <div className="dest-grid">
+          <div className="dest-grid reveal">
             {destinations.map((d) => {
               if (d.variant === 'city') {
                 return (

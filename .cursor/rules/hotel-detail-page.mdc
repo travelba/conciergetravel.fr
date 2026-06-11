@@ -38,6 +38,27 @@ Chaque photo rendue doit correspondre au **sujet affiché** (POI, spa, restauran
 | Validation PO | Vision QA POI avant sign-off pilote | `audit:photo-subject -- --slug=x --vision` |
 
 Domain : `packages/domain/src/photos/photo-subject-correspondence.ts` · skill `photo-pipeline` §Photo-subject correspondence.
+
+### §2.5bis — Kit fiche PO acceptance (2026-06-10, wave 5 retro)
+
+Fiches `HOTEL_KIT_SLUGS` : conformité = **parité rendu PO** (pas deploy / 30/30 seul).
+
+**Matrice complète remarque PO → gate** :
+`scripts/editorial-pilot/src/hotels/kit-po-remark-registry.ts`
+
+| Remarque PO | Gates |
+| ----------- | ----- |
+| Photos chambres manquantes | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script` |
+| Sélection Concierge chambre invisible | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module` |
+| Photos expérience / restaurant incorrectes | `kit.02.gallery_*`, `kit.03.signature_experiences_dedicated_image`, `photos.gallery_alt_category` |
+| FAQ trop faible | `kit.11.faq_kit_*`, `cdc.11.faq_kit_count` |
+| FAQ Concierge trop faible | `kit.11.concierge_*`, `cdc.11.concierge_informative_tone` (blocker kit) |
+| Avis Google récents manquants | `kit.10.gmb_*`, `cdc.10.google_reviews_gmb` |
+| POI / F&B / spa | `kit.07.poi_structural`, `gold.poi_*`, `gold.venues_all_handoff`, `gold.spa_dossier` (blockers kit) |
+| « C'est bon » sans walk | `kit.19.closure_audit_exit_zero` + skill `hotel-kit-rollout` Rule 6 |
+
+Implémentation : `kit-fiche-acceptance-gates.ts` — `audit:hotel-fiches-cdc` **exit 1** si une fiche kit échoue.
+
 | 3 | Résumé factuel IA-ready (150 chars, format strict) | Payload `factual_summary_fr/_en` | `<FactualSummary>` | `Hotel.description` |
 | 4 | Description longue narrative (600-1000 mots uniques, H2/H3 structurés, 8-12 mots-clés longue traîne) | Payload `description_long_fr/_en` | `<LongDescription>` | (texte body, dans `Article` si guide associé) |
 | 5 | Types de chambres → sous-pages indexables `/hotel/[slug]/chambres/[room-slug]` | Supabase `rooms` + Payload | `<RoomCardList>` (sur fiche) + page dédiée | `HotelRoom` + `Offer` (sur sous-page) |

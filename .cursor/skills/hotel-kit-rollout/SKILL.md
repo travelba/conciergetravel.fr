@@ -35,16 +35,67 @@ Invoke when:
 
 Héritées de D1–D6 (runbook) + retours PO PdG 2026-06-10.
 
-| #   | Sujet                         | Règle                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| --- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D7  | **F&B**                       | `restaurant_info.venues[]` = **tous** les outlets officiels (restaurants **et** bars distincts si le site les sépare). Pas de fusion bar/resto ; pas de quota arbitraire « = Airelles ».                                                                                                                                                                                                                                         |
-| D8  | **`#acces` — Avis voyageurs** | **Uniquement** `google_reviews[]` sync Google Business Profile (`author` + `publish_time` + texte). **Interdit** `featured_reviews` / presse dans ce sous-bloc. CLI : `reviews:sync -- --slug=<slug>`.                                                                                                                                                                                                                           |
-| D9  | **POI `#autour`**             | Chaque entrée `visit` / `do` / `shop` porte **`image_public_id`** (rendu `around-item has-img`). Gate : `gold.poi_images`.                                                                                                                                                                                                                                                                                                       |
-| D10 | **`#concierge-questions`**    | Titre : `Le Concierge répond — {hotel.name}` via i18n `hotelPage.conciergeQuestions.title` + `{ hotel: name }` dans `prepare-hotel-kit-model.ts` — **jamais** hardcoder un nom pilote (régression PdG 2026-06-10). Réponses **informatives** (3ᵉ personne / « La conciergerie peut… »). **Interdit** engagement 1ʳᵉ personne : « Je réserve », « Je confirme », « Je m'occupe de… ». Gate : `cdc.11.concierge_informative_tone`. |
-| D11 | **Titres & labels**           | Jamais de nom de fiche de référence hardcodé (« Airelles Gordes », etc.). Fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                                                                                                                                                                                                                                                          |
-| D12 | **Photos incorrectes**        | Si une photo ne correspond pas au sujet (ex. patio étiqueté spa) → **re-sourcer depuis le site officiel**, pas seulement recatégoriser / réordonner la galerie existante. Voir §Rule 1 ci-dessous.                                                                                                                                                                                                                               |
-| D13 | **POI = photo dédiée**        | Chaque POI `#autour` porte un asset Cloudinary **`poi-{slug}`** (Wikimedia / officiel / AI fallback) — **jamais** un slot `press-*` de la galerie hôtel. Gate : `gold.poi_dedicated_images`. Script modèle : `resource-airelles-poi-images.ts` ; PdG : `resource-prince-de-galles-poi-images.ts` (`pdg:photos:poi`).                                                                                                             |
-| D14 | **Correspondance sujet**      | Avant validation PO : `audit:photo-subject -- --slug=x` (L1 structural) + `--vision` sur les fiches pilote. Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category`. Domain : `@mch/domain/photos`. Voir skill `photo-pipeline` §Photo-subject correspondence.                                                                                                                                                    |
+| #   | Sujet                          | Règle                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D7  | **F&B**                        | `restaurant_info.venues[]` = **tous** les outlets officiels (restaurants **et** bars distincts si le site les sépare). Pas de fusion bar/resto ; pas de quota arbitraire « = Airelles ».                                                                                                                                                                                                                                         |
+| D8  | **`#acces` — Avis voyageurs**  | **Uniquement** `google_reviews[]` sync Google Business Profile (`author` + `publish_time` + texte). **Interdit** `featured_reviews` / presse dans ce sous-bloc. CLI : `reviews:sync -- --slug=<slug>`.                                                                                                                                                                                                                           |
+| D9  | **POI `#autour`**              | Chaque entrée `visit` / `do` / `shop` porte **`image_public_id`** (rendu `around-item has-img`). Gate : `gold.poi_images`.                                                                                                                                                                                                                                                                                                       |
+| D10 | **`#concierge-questions`**     | Titre : `Le Concierge répond — {hotel.name}` via i18n `hotelPage.conciergeQuestions.title` + `{ hotel: name }` dans `prepare-hotel-kit-model.ts` — **jamais** hardcoder un nom pilote (régression PdG 2026-06-10). Réponses **informatives** (3ᵉ personne / « La conciergerie peut… »). **Interdit** engagement 1ʳᵉ personne : « Je réserve », « Je confirme », « Je m'occupe de… ». Gate : `cdc.11.concierge_informative_tone`. |
+| D11 | **Titres & labels**            | Jamais de nom de fiche de référence hardcodé (« Airelles Gordes », etc.). Fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                                                                                                                                                                                                                                                          |
+| D12 | **Photos incorrectes**         | Si une photo ne correspond pas au sujet (ex. patio étiqueté spa) → **re-sourcer depuis le site officiel**, pas seulement recatégoriser / réordonner la galerie existante. Voir §Rule 1 ci-dessous.                                                                                                                                                                                                                               |
+| D13 | **POI = photo dédiée**         | Chaque POI `#autour` porte un asset Cloudinary **`poi-{slug}`** (Wikimedia / officiel / AI fallback) — **jamais** un slot `press-*` de la galerie hôtel. Gate : `gold.poi_dedicated_images`. Script modèle : `resource-airelles-poi-images.ts` ; PdG : `resource-prince-de-galles-poi-images.ts` (`pdg:photos:poi`).                                                                                                             |
+| D14 | **Correspondance sujet**       | Avant validation PO : `audit:photo-subject -- --slug=x` (L1 structural) + `--vision` sur les fiches pilote. Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category`. Domain : `@mch/domain/photos`. Voir skill `photo-pipeline` §Photo-subject correspondence.                                                                                                                                                    |
+| D15 | **`#chambres` — pick visible** | Le `concierge_pick.slug` doit être la **carte n°1** parmi les **3** tuiles rendues (`renderKitChambres` → `slice(0, 3)`). Chaque tuile visible porte **≥ 1 photo** (DB `hotel_rooms.images[]` ou map `kit-{slug}-display.ts`). Gate : `kit.02.chambres_pick_first_visible`, `kit.02.chambres_visible_have_photo`.                                                                                                                |
+| D16 | **Module chambres par slug**   | Chaque kit hors pilote Gordes/PdG exige `resource-{slug}-rooms.ts` + entrées dans `kit-{brand}-display.ts` (pattern PdG). **Interdit** de réutiliser `orderAirellesKitRoomCards` / `resolveAirellesKitRoomImages` pour d'autres slugs (régression wave 5).                                                                                                                                                                       |
+| D17 | **FAQ kit ≠ stub promote**     | `faq_content_kit` = Perplexity **40–60** avec `group_fr` — **jamais** `FAQ_CONTENT_KIT = FAQ_CONTENT_PROMOTE`. Gate : `kit.11.faq_kit_not_stub` + `cdc.11.faq_kit_count`.                                                                                                                                                                                                                                                        |
+| D18 | **GMB frais**                  | `reviews:sync` < 30 j ; ≥ 3 avis substantifs en cache ; plus récent ≤ 90 j. Gates : `kit.10.gmb_review_count`, `kit.10.gmb_review_recency`, `kit.10.gmb_sync_fresh`.                                                                                                                                                                                                                                                             |
+| D19 | **Clôture « livré »**          | **Les deux** : (a) `audit:hotel-fiches-cdc -- --slug=x` **exit 0** sur gates `kit.*` ; (b) walk navigateur §Rule 6. Score CDC ≥ 95 % **sans** gates `kit.*` verts = **refusé**.                                                                                                                                                                                                                                                  |
+
+---
+
+## Rule 6 — Clôture kit : PO parity, pas deploy parity
+
+**Incident wave 5 (2026-06-10)** : 5 fiches poussées avec galerie 30/30 + POI + amen-grid en HTML. PO a vu chambres sans photo, pick invisible, pixels spa/resto faux, FAQ maigre, avis GMB pas récents. Cause : validation sur checks **structurels** (upload, grep prod) au lieu de **parité visuelle CDC**.
+
+### Anti-patterns refusés (hard fail)
+
+| Anti-pattern agent                         | Pourquoi c'est faux                                       | Preuve exigée                                                 |
+| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------- |
+| « 30/30 Cloudinary = CDC photos OK »       | D12/D14 = correspondance **pixel**, pas compteur          | `audit:photo-subject --vision` + screenshot spa/resto/chambre |
+| « `concierge_pick` en DB = pick visible »  | Seules 3 cartes rendues ; pick peut être 7ᵉ sans ordering | Screenshot `#chambres` avec badge `cc-pick` sur carte n°1     |
+| « `faq_content_kit` présent = FAQ OK »     | 5 items = stub promote (Cheval Blanc)                     | `kit.11.faq_kit_not_stub` + DOM ≥ 40 questions groupées       |
+| « `google_reviews_count` > 0 = avis OK »   | Cache stale / 1 avis / pas les plus récents               | `reviews:sync` + dates visibles dans `#acces`                 |
+| « HTML prod contient `amen-grid` = livré » | Deploy ≠ rendu PO                                         | Walk FR+EN vs `/hotel/les-airelles-gordes`                    |
+
+### Walk obligatoire avant « c'est bon » (en plus de Rule 5)
+
+Comparer **côte à côte** avec la référence Gordes — sections :
+
+1. `#chambres` — pick en 1ʳᵉ carte + photo sur chaque tuile visible
+2. `#hotel-en-bref` — spa + restaurant : sujet photo = label
+3. `#acces` — 3 avis GMB datés (pas presse)
+4. `#faq` + `#concierge-questions` — profondeur comparable (pas 5 FAQ)
+5. `#autour` — vignette dédiée par POI
+
+Screenshots desktop + mobile FR + EN. Commit `Tested:` cite les gates `kit.*` passés.
+
+### Matrice PO → gates (source de vérité code)
+
+Chaque remarque PO wave 5 est verrouillée dans
+`scripts/editorial-pilot/src/hotels/kit-po-remark-registry.ts` :
+
+| Remarque PO                                | Gates automatisés                                                                                                       |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Photos chambres manquantes                 | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script`                      |
+| Sélection Concierge chambre invisible      | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module`                        |
+| Photos expérience / restaurant incorrectes | `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_alt_category`, `kit.03.signature_experiences_dedicated_image` |
+| FAQ trop faible                            | `kit.11.faq_kit_not_stub`, `kit.11.faq_kit_count`, `kit.11.faq_kit_has_groups`                                          |
+| FAQ Concierge trop faible                  | `kit.11.concierge_questions_count`, `kit.11.concierge_informative_tone`, `kit.11.concierge_taxonomy`                    |
+| Avis Google récents manquants              | `kit.10.gmb_*`, `cdc.10.google_reviews_gmb`                                                                             |
+| POI / F&B / spa (PdG)                      | `kit.07.poi_structural`, `gold.venues_all_handoff`, `gold.spa_dossier` (blockers kit)                                   |
+| Clôture « livré » abusive                  | `kit.19.closure_audit_exit_zero` + Rule 6 walk                                                                          |
+
+L'audit `audit:hotel-fiches-cdc` **exit 1** liste les remarques PO encore ouvertes.
 
 ---
 
@@ -80,15 +131,16 @@ Avant de demander validation PO :
 - [ ] **Structure** : 9 sections kit, ancres D1–D6 (runbook).
 - [ ] **Golden file** : `packages/domain/src/editorial/{slug}-golden.ts` (+ gallery, concierge-questions si volumineux).
 - [ ] **Promote** : `promote:{slug}-golden` → Supabase ; 0 champ critique NULL.
-- [ ] **Galerie** : ≥ 30 images CDC ou plan Phase 2 documenté ; catégories spa/restaurant/exterior **vérifiées visuellement**.
+- [ ] **Galerie** : ≥ 30 images CDC ; **0 URL source dupliquée** (`kit.02.gallery_no_duplicate_source_url`) ; spa/restaurant/expérience **vérifiés visuellement** (D12/D14).
+- [ ] **Chambres kit** : pick carte #1 + 3 tuiles visibles avec photo (`kit.02.*`) ; script `resource-{slug}-rooms.ts` (D15–D16).
 - [ ] **F&B** : count venues = site officiel (D7).
-- [ ] **Google reviews** : sync GMB, ≥ 3 avis datés dans `#acces` (D8).
+- [ ] **Google reviews** : `reviews:sync` < 30 j, ≥ 3 avis, plus récent ≤ 90 j (D8 + D18 + `kit.10.*`).
 - [ ] **POI** : 100 % `image_public_id` **dédiés** `poi-{slug}` — pas de `press-*` recyclé (D9 + D13).
 - [ ] **Photo-subject audit** : `audit:photo-subject -- --slug=x` → 0 fail structural ; `--vision` sur pilotes (D14).
 - [ ] **Concierge questions** : 20–30 items, ton informatif (D10).
 - [ ] **FAQ kit** : Perplexity 40–60 + promote 10–15 (skill `hotel-faq-perplexity-enrichment`).
-- [ ] **Audit** : `audit:hotel-fiches-cdc -- --slug=<slug>` — golden + CDC ≥ 95 %.
-- [ ] **Walk FR + EN** : desktop + mobile, discoverability depuis `/` si nav touchée.
+- [ ] **Audit** : `audit:hotel-fiches-cdc -- --slug=<slug>` — **exit 0** incluant tous les gates `kit.*` (D19).
+- [ ] **Walk FR + EN** : Rule 6 — 5 sections vs Gordes, desktop + mobile.
 
 ---
 
@@ -105,7 +157,7 @@ Répliquer le pattern **un golden TS + scripts npm dédiés** plutôt que des on
 | Promote script       | `scripts/editorial-pilot/src/hotels/promote-{kebab-slug}-golden.ts`            |
 | npm scripts          | `scripts/editorial-pilot/package.json` (`promote:…`, `{chain}:photos:gallery`) |
 
-Gates partagés : `scripts/editorial-pilot/src/hotels/hotel-fiche-cdc-gates.ts` (`cdc.10.google_reviews_gmb`, `cdc.11.concierge_informative_tone`, `gold.poi_images`, `gold.poi_dedicated_images`).
+Gates partagés : `hotel-fiche-cdc-gates.ts` + **`kit-fiche-acceptance-gates.ts`** (D15–D19, exit 1 sur fiche kit). Legacy : `cdc.10.google_reviews_gmb` (blocker kit), `gold.poi_*`, `cdc.11.faq_kit_count`.
 
 ---
 
@@ -144,7 +196,10 @@ Hard rule [`.cursor/rules/user-acceptance-before-commit.mdc`](../../rules/user-a
 | POI avec photo chambre / galerie `press-*`            | D13 — `resource-{slug}-poi-images.ts` + `poi-{slug}` |
 | « Je réserve… » dans `#concierge-questions`           | D10 — réécriture 3ᵉ personne                         |
 | Label « Airelles » sur une autre fiche                | D11 — i18n + titres dynamiques                       |
-| « Tests passent, ship » sans walk navigateur          | Rule 5                                               |
+| « Tests passent, ship » sans walk navigateur          | Rule 5 + Rule 6                                      |
+| « Score CDC 95 % » avec gates `kit.*` rouges          | D19 — `audit:hotel-fiches-cdc` exit 1                |
+| Réutiliser ordering/images Airelles pour autre slug   | D16 — `kit-{slug}-display.ts` dédié                  |
+| `FAQ_CONTENT_KIT = FAQ_CONTENT_PROMOTE`               | D17 — `kit.11.faq_kit_not_stub`                      |
 
 ---
 

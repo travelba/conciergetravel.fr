@@ -21,6 +21,7 @@ import {
   CHEVAL_BLANC_PARIS_GALLERY_IMAGES,
   CHEVAL_BLANC_PARIS_HERO_IMAGE,
 } from './cheval-blanc-paris-gallery';
+import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const CHEVAL_BLANC_PARIS_PROMOTE_SLUG = 'cheval-blanc-paris';
 
@@ -759,47 +760,8 @@ function chevalBlancParisExternalScalar(field: ChevalBlancParisExternalScalarFie
   return entry.value;
 }
 
-export const CHEVAL_BLANC_PARIS_FAQ_CONTENT_PROMOTE = [
-  {
-    question_fr: 'Où se situe Cheval Blanc Paris ?',
-    answer_fr:
-      '8 quai du Louvre, 75001 Paris, dans le bâtiment historique de la Samaritaine, face au Pont Neuf et au Louvre.',
-    question_en: 'Where is Cheval Blanc Paris located?',
-    answer_en:
-      '8 Quai du Louvre, 75001 Paris, in the historic Samaritaine building, facing Pont Neuf and the Louvre.',
-  },
-  {
-    question_fr: 'Combien de chambres compte la Maison ?',
-    answer_fr: '72 clefs : 26 chambres et 46 suites, signées Peter Marino.',
-    question_en: 'How many rooms does the Maison have?',
-    answer_en: '72 keys: 26 rooms and 46 suites, by Peter Marino.',
-  },
-  {
-    question_fr: 'Quels restaurants sont sur place ?',
-    answer_fr:
-      'Plénitude (3 étoiles), Hakuba (2 étoiles), Le Tout-Paris (1 étoile), Langosteria, Le Jardin (saisonnier) et leurs bars.',
-    question_en: 'Which restaurants are on site?',
-    answer_en:
-      'Plénitude (3 Stars), Hakuba (2 Stars), Le Tout-Paris (1 Star), Langosteria, Le Jardin (seasonal) and their bars.',
-  },
-  {
-    question_fr: 'Y a-t-il un spa ?',
-    answer_fr:
-      'Oui — le Dior Spa Cheval Blanc propose soins Dior, piscine à débordement en mosaïque et fitness.',
-    question_en: 'Is there a spa?',
-    answer_en:
-      'Yes — Dior Spa Cheval Blanc offers Dior treatments, a mosaic infinity pool and fitness.',
-  },
-  {
-    question_fr: 'Quels sont les horaires de check-in et check-out ?',
-    answer_fr:
-      'Arrivée à partir de 15 h ; départ jusqu’à 12 h (sous réserve de disponibilité pour les départs tardifs).',
-    question_en: 'What are check-in and check-out times?',
-    answer_en: 'Arrival from 3 pm; departure until noon (late checkout subject to availability).',
-  },
-] as const;
-
-export const CHEVAL_BLANC_PARIS_FAQ_CONTENT_KIT = CHEVAL_BLANC_PARIS_FAQ_CONTENT_PROMOTE;
+export const CHEVAL_BLANC_PARIS_FAQ_CONTENT_PROMOTE = buildKitWaveFaqPromote('cheval-blanc-paris');
+export const CHEVAL_BLANC_PARIS_FAQ_CONTENT_KIT = buildKitWaveFaqKit('cheval-blanc-paris');
 
 export const CHEVAL_BLANC_PARIS_TRANSPORTS = [
   {

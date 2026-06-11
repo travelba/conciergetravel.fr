@@ -20,6 +20,7 @@ import {
   LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES,
   LES_AIRELLES_COURCHEVEL_HERO_IMAGE,
 } from './les-airelles-courchevel-gallery';
+import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const LES_AIRELLES_COURCHEVEL_PROMOTE_SLUG = 'les-airelles-courchevel';
 
@@ -1090,5 +1091,7 @@ export function buildLesAirellesCourchevelGoldenFields(
     mice_info: LES_AIRELLES_COURCHEVEL_MICE_INFO,
     affiliations: LES_AIRELLES_COURCHEVEL_AFFILIATIONS,
     opened_at: '1990-01-01',
+    faq_content: buildKitWaveFaqPromote('les-airelles-courchevel'),
+    faq_content_kit: buildKitWaveFaqKit('les-airelles-courchevel'),
   };
 }

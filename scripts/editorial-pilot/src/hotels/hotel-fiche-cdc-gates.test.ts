@@ -230,6 +230,7 @@ function REQUIRED_GALLERY(): Array<Record<string, string>> {
 const fullCtx: CdcAuditContext = {
   roomStats: { total: 5, withSlug: 5, indexable: 2 },
   guideSlug: 'paris',
+  kitRoomRows: [],
 };
 
 describe('evaluateCdcHotelFiche', () => {
@@ -264,6 +265,7 @@ describe('evaluateCdcHotelFiche', () => {
     const ctx: CdcAuditContext = {
       roomStats: { total: 0, withSlug: 0, indexable: 0 },
       guideSlug: null,
+      kitRoomRows: [],
     };
     const result = evaluateCdcHotelFiche(minimal, ctx);
     expect(result.score_cdc).toBeLessThan(CDC_COMPLETE_THRESHOLD);

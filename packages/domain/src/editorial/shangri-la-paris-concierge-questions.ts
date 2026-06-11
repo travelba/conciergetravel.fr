@@ -253,7 +253,7 @@ export const SHANGRI_LA_PARIS_CONCIERGE_QUESTIONS_KIT = [
       'La station Iéna (ligne 9) est à deux minutes à pied ; la ligne 9 rejoint Chaussée d’Antin — La Fayette puis l’Opéra en correspondance. Un taxi prend environ quinze minutes selon le trafic.',
     question_en: 'Which metro is closest for reaching Opéra Garnier?',
     reply_en:
-      'Iéna station (line 9) is a two-minute walk; line 9 reaches Chaussée d’Antin — La Fayette then Opéra with a change. A taxi takes about fifteen minutes depending on traffic.',
+      'Station Iéna (line 9) is a two-minute walk; line 9 reaches Chaussée d’Antin — La Fayette then Opéra with a change. A taxi takes about fifteen minutes depending on traffic.',
   },
 ] as const;
 

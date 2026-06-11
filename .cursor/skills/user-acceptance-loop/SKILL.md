@@ -186,6 +186,32 @@ Tested: walked /fr/, /en/, /fr/le-concierge-club, /fr/le-concierge-club/
 | `browser-use` subagent                           | Long flows (≥ 5 clicks) | Delegate with explicit start URL + success criterion |
 | `mcp_plugin-vercel-vercel` list_deployments      | Preview URL lookup      | Filter on branch + state=READY                       |
 
+## Hotel kit fiche closure (`HOTEL_KIT_SLUGS`)
+
+**Mandatory in addition to steps 1–5** when shipping or claiming « livré » on a kit
+hotel page. Skill detail : [`hotel-kit-rollout`](../hotel-kit-rollout/SKILL.md) Rule 6.
+
+Before browser walk, run:
+
+```powershell
+pnpm --filter @mch/editorial-pilot audit:hotel-fiches-cdc -- --slug=<slug>
+```
+
+**Exit code must be 0** — any failed `kit.*` gate blocks ship (D19). A score CDC ≥ 95 %
+with red `kit.*` gates is **not** acceptance.
+
+Browser compare vs `/hotel/les-airelles-gordes` (same locale):
+
+| Section                         | Pass criterion                                               |
+| ------------------------------- | ------------------------------------------------------------ |
+| `#chambres`                     | Badge Concierge on **card 1** ; photo on all 3 visible cards |
+| `#hotel-en-bref`                | Spa + restaurant photos match labels                         |
+| `#acces`                        | ≥ 3 Google reviews with author + date (no press)             |
+| `#faq` + `#concierge-questions` | Depth comparable to reference (not 5 FAQ stub)               |
+| `#autour`                       | Dedicated POI thumbnail per item                             |
+
+Report `Tested:` must cite audit exit 0 + screenshots of the 5 sections FR+EN.
+
 ## Common walk recipes
 
 ### Recipe A — new public route

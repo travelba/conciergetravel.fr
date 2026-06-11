@@ -9,7 +9,8 @@
  *   5. promote:{slug}-golden
  *   6. reviews:sync
  *   7. {slug}:photos:gallery (if npm script exists)
- *   8. audit:hotel-fiches-cdc
+ *   8. audit:hotel-fiches-cdc (exit 1 if kit.* gates fail — D19)
+ *   9. walk navigateur Rule 6 (skill hotel-kit-rollout) — agent, not CLI
  *
  * Usage:
  *   pnpm --filter @mch/editorial-pilot kit:wave5:dry

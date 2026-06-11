@@ -32,6 +32,11 @@
 | D10 | **`#concierge-questions`** : titre dynamique `Le Concierge répond — {hotel.name}` ; réponses **informatives** (3ᵉ personne / conciergerie), **sans engagement** (« Je réserve », « Je confirme »).                 |
 | D11 | **Titres & assets** : jamais de slug de référence hardcodé (ex. « Airelles Gordes ») ; fallbacks média **neutres** ou Cloudinary de l'hôtel courant.                                                               |
 | D12 | **Photo incorrecte** : re-sourcer depuis le **site officiel** (Tavily / DAM chaîne / Google Places) + upload Cloudinary — **ne pas** se limiter à recatégoriser la galerie existante.                              |
+| D15 | **`#chambres`** : `concierge_pick` en **carte n°1** (sur 3 visibles) + photo sur chaque tuile.                                                                                                                     |
+| D16 | **Chambres kit par slug** : `resource-{slug}-rooms.ts` + map display dédiée — pas le fallback Airelles Gordes.                                                                                                     |
+| D17 | **FAQ kit** : Perplexity 40–60 (`group_fr`) — interdit `faq_content_kit = faq_content` stub.                                                                                                                       |
+| D18 | **GMB** : `reviews:sync` récent ; avis affichés datés et ≤ 90 j.                                                                                                                                                   |
+| D19 | **Clôture** : gates `kit.*` verts (audit exit 0) + walk visuel §skill `hotel-kit-rollout` Rule 6 — **pas** « deploy + 30/30 ».                                                                                     |
 
 ## Audit données Airelles (Phase 0 — 2026-06-09, Supabase prod)
 

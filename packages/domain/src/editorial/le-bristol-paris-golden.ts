@@ -16,10 +16,7 @@ import {
   LE_BRISTOL_PARIS_AMENITIES,
   type LeBristolParisAmenityRecord,
 } from './le-bristol-paris-amenities';
-import {
-  LE_BRISTOL_PARIS_FAQ_CONTENT_KIT,
-  LE_BRISTOL_PARIS_FAQ_CONTENT_PROMOTE,
-} from './le-bristol-paris-faq.generated';
+import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 import { LE_BRISTOL_PARIS_CONCIERGE_QUESTIONS_KIT } from './le-bristol-paris-concierge-questions';
 import {
   LE_BRISTOL_PARIS_GALLERY_IMAGES,
@@ -668,7 +665,8 @@ export const LE_BRISTOL_PARIS_HIGHLIGHTS = [
   },
 ] as const;
 
-export { LE_BRISTOL_PARIS_FAQ_CONTENT_KIT, LE_BRISTOL_PARIS_FAQ_CONTENT_PROMOTE };
+export const LE_BRISTOL_PARIS_FAQ_CONTENT_PROMOTE = buildKitWaveFaqPromote('le-bristol-paris');
+export const LE_BRISTOL_PARIS_FAQ_CONTENT_KIT = buildKitWaveFaqKit('le-bristol-paris');
 export {
   LE_BRISTOL_PARIS_CONCIERGE_QUESTIONS_KIT,
   type LeBristolParisConciergeQuestionKit,

@@ -16,10 +16,7 @@ import {
   type LesPresDeugenieAmenityRecord,
 } from './les-pres-deugenie-amenities';
 import { LES_PRES_DEUGENIE_CONCIERGE_QUESTIONS_KIT } from './les-pres-deugenie-concierge-questions';
-import {
-  LES_PRES_DEUGENIE_FAQ_CONTENT_KIT,
-  LES_PRES_DEUGENIE_FAQ_CONTENT_PROMOTE,
-} from './les-pres-deugenie-faq.generated';
+import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 import {
   LES_PRES_DEUGENIE_GALLERY_IMAGES,
   LES_PRES_DEUGENIE_HERO_IMAGE,
@@ -665,7 +662,8 @@ export const LES_PRES_DEUGENIE_HIGHLIGHTS = [
   },
 ] as const;
 
-export { LES_PRES_DEUGENIE_FAQ_CONTENT_KIT, LES_PRES_DEUGENIE_FAQ_CONTENT_PROMOTE };
+export const LES_PRES_DEUGENIE_FAQ_CONTENT_PROMOTE = buildKitWaveFaqPromote('les-pres-deugenie');
+export const LES_PRES_DEUGENIE_FAQ_CONTENT_KIT = buildKitWaveFaqKit('les-pres-deugenie');
 export {
   LES_PRES_DEUGENIE_CONCIERGE_QUESTIONS_KIT,
   type LesPresDeugenieConciergeQuestionKit,

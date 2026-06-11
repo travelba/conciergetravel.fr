@@ -43,7 +43,7 @@ export async function HomeTopRankings({
     <div className="mch-kit">
       <section className="section-pad section-noir" id="offres" aria-labelledby="home-top-rankings">
         <div className="wrap">
-          <div className="mag-head">
+          <div className="mag-head reveal">
             <div className="mh-left">
               <span className="eyebrow left">{t('eyebrow')}</span>
               <h2 id="home-top-rankings" className="on-dark">
@@ -56,7 +56,7 @@ export async function HomeTopRankings({
             </Link>
           </div>
 
-          <div className="rank-grid">
+          <div className="rank-grid reveal">
             {top6.map((r) => {
               const title = pickByLocale(locale, r.titleFr, r.titleEn ?? r.titleFr);
               const summary = pickByLocale(

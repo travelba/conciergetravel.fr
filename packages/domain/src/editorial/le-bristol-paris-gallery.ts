@@ -169,8 +169,8 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/le-bristol-paris/press-15',
     category: 'spa',
-    alt_fr: 'Suite Eden bien-être, Le Bristol Paris',
-    alt_en: 'Suite Eden wellness area, Le Bristol Paris',
+    alt_fr: 'Cabine de soins bien-être Spa Le Bristol Paris, rituels La Prairie',
+    alt_en: 'Spa Le Bristol Paris wellness treatment room, La Prairie rituals',
     caption_fr:
       'La Suite Eden accueille les rituels bien-être en chambre ou en suite dédiée, pour un séjour hors du temps.',
     caption_en: 'Suite Eden hosts in-room or in-suite wellness rituals for a timeless stay.',

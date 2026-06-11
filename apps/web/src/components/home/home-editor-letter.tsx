@@ -23,8 +23,8 @@ export async function HomeEditorLetter({
 
   return (
     <div className="mch-kit">
-      <section className="concierge-band" aria-labelledby="home-editor-letter-title">
-        <div className="wrap cb-inner">
+      <section className="concierge-band" id="concierge" aria-labelledby="home-editor-letter-title">
+        <div className="wrap cb-inner reveal">
           <div className="cb-quote">
             <span className="cb-mark" aria-hidden>
               &ldquo;

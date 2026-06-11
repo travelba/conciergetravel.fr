@@ -26,7 +26,7 @@ export async function HomeTrustBar({ locale }: { readonly locale: Locale }): Pro
   return (
     <div className="mch-kit">
       <section className="atouts" aria-label={t('ariaLabel')}>
-        <div className="wrap atouts-grid">
+        <div className="wrap atouts-grid reveal">
           {items.map(({ key, icon }) => (
             <div className="atout" key={key}>
               <AtoutIcon type={icon} />

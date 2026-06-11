@@ -16,19 +16,20 @@ import type { Locale } from '@/i18n/routing';
  * Pure RSC.
  */
 type InspirationCard = {
-  readonly messageKey: 'spa' | 'famille' | 'golf' | 'luneDeMiel' | 'gastronomie' | 'rooftop';
+  readonly messageKey: 'spa' | 'luneDeMiel' | 'gastronomie' | 'balneaire' | 'rooftop' | 'retraite';
   readonly axe: 'theme' | 'occasion';
   readonly valeur: string;
   readonly img: string;
 };
 
+/** Six tuiles — alignées sur design/html-kit/index.html §"Par occasion". */
 const CARDS: readonly InspirationCard[] = [
   { messageKey: 'spa', axe: 'theme', valeur: 'spa-bienetre', img: 'occ_spa.jpg' },
-  { messageKey: 'famille', axe: 'theme', valeur: 'famille', img: 'occ_balneaire.jpg' },
-  { messageKey: 'golf', axe: 'theme', valeur: 'sport-golf', img: 'occ_retraite.jpg' },
   { messageKey: 'luneDeMiel', axe: 'occasion', valeur: 'lune-de-miel', img: 'occ_lunedemiel.jpg' },
   { messageKey: 'gastronomie', axe: 'theme', valeur: 'gastronomie', img: 'occ_gastronomie.jpg' },
+  { messageKey: 'balneaire', axe: 'theme', valeur: 'piscine', img: 'occ_balneaire.jpg' },
   { messageKey: 'rooftop', axe: 'theme', valeur: 'rooftop', img: 'occ_rooftop.jpg' },
+  { messageKey: 'retraite', axe: 'occasion', valeur: 'minceur', img: 'occ_retraite.jpg' },
 ];
 
 export async function HomeInspirationGrid({
@@ -46,7 +47,7 @@ export async function HomeInspirationGrid({
         aria-labelledby="home-inspiration-title"
       >
         <div className="wrap">
-          <div className="mag-head">
+          <div className="mag-head reveal">
             <div className="mh-left">
               <span className="eyebrow left">{t('eyebrow')}</span>
               <h2 id="home-inspiration-title">{t('title')}</h2>
@@ -57,7 +58,7 @@ export async function HomeInspirationGrid({
             </Link>
           </div>
 
-          <div className="occ-grid">
+          <div className="occ-grid reveal">
             {CARDS.map((card) => {
               const style = { '--bg': `url('/kit/img/${card.img}')` } as CSSProperties;
               return (

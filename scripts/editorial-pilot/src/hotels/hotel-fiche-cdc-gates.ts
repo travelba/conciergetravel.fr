@@ -7,6 +7,7 @@
  */
 
 import {
+  buildKitWaveRoomAuditContext,
   countCannibalizingSections,
   countCompleteVenues,
   detectFabricatedStarClaim,
@@ -14,6 +15,7 @@ import {
   evaluatePoiImages,
   evaluatePoiDedicatedImages,
   evaluateSpaDossier,
+  isKitWaveSlug,
   resolvePopulatedBlocks,
 } from '@mch/domain/editorial';
 import {
@@ -37,6 +39,11 @@ import {
   hasFaqKitEnrichmentSurface,
 } from './faq-kit-row-enrichment.js';
 import { ADVICE_BODY_MAX_WORDS, ADVICE_BODY_MIN_WORDS } from './concierge-advice-generator.js';
+import {
+  evaluateKitAcceptanceGates,
+  isHotelKitSlug,
+  type KitRoomAuditRow,
+} from './kit-fiche-acceptance-gates.js';
 import { META_DESC_MAX_CHARS, META_DESC_MIN_CHARS } from './meta-desc-generator.js';
 import {
   countWords,
@@ -142,6 +149,7 @@ export interface CdcHotelAuditRow extends HotelAuditRow {
   readonly google_rating: number | null;
   readonly google_reviews_count: number | null;
   readonly google_reviews: unknown;
+  readonly last_reviews_sync: string | null;
   readonly featured_reviews: unknown;
   readonly mice_info: unknown;
   readonly hero_video: unknown;
@@ -161,6 +169,8 @@ export interface CdcHotelAuditRow extends HotelAuditRow {
 export interface CdcAuditContext {
   readonly roomStats: RoomAuditStats;
   readonly guideSlug: string | null;
+  /** Per-room slug + image count — required for kit acceptance gates (D15). */
+  readonly kitRoomRows: readonly KitRoomAuditRow[];
 }
 
 export interface DimensionScore {
@@ -503,6 +513,13 @@ function instagramPostCount(row: CdcHotelAuditRow): number {
   const ig = isRecord(row.instagram) ? row.instagram : null;
   if (ig === null) return 0;
   return Array.isArray(ig['posts']) ? (ig['posts'] as unknown[]).length : 0;
+}
+
+/** Kit fiches: warn/info golden/photo gates become blockers (D19). */
+function severityForKitSlug(slug: string, base: GapSeverity): GapSeverity {
+  if (!isHotelKitSlug(slug)) return base;
+  if (base === 'blocker') return 'blocker';
+  return 'blocker';
 }
 
 function hasConciergeField(value: unknown): boolean {
@@ -1186,14 +1203,15 @@ export function evaluateCdcHotelFiche(
     message: 'no review signal (ReviewsBlock + AggregateRating JSON-LD)',
     pipeline: 'Google Places / Amadeus sentiments Phase 6',
   });
-  const kitReviewsSurface = hasFaqKitEnrichmentSurface(jsonLen(row.faq_content_kit));
+  const kitReviewsSurface =
+    isHotelKitSlug(row.slug) || hasFaqKitEnrichmentSurface(jsonLen(row.faq_content_kit));
   addCdcCheck(b, {
     id: 'cdc.10.google_reviews_gmb',
     block: '10',
     dimension: 'golden',
     phase: 'cdc_target',
     passed: !kitReviewsSurface || hasGmbReviewRows(row),
-    severity: 'warn',
+    severity: isHotelKitSlug(row.slug) ? 'blocker' : 'warn',
     field: 'google_reviews',
     message: 'kit fiche #acces requires synced Google My Business reviews (author + text)',
     pipeline: 'reviews:sync — sync-google-reviews.ts',
@@ -1371,7 +1389,7 @@ export function evaluateCdcHotelFiche(
     dimension: 'golden',
     phase: 'cdc_target',
     passed: conciergeLen < CONCIERGE_QUESTIONS_MIN || conciergeToneOk,
-    severity: 'warn',
+    severity: isHotelKitSlug(row.slug) ? 'blocker' : 'warn',
     field: 'concierge_questions.reply_fr',
     message: 'concierge replies use first-person commitment (CDC D10 — informative tone)',
     pipeline: 'faq:perplexity:push + prince-de-galles-concierge-questions.ts',
@@ -1862,7 +1880,7 @@ export function evaluateCdcHotelFiche(
       dimension: 'golden',
       phase: 'cdc_target',
       passed: venues.complete === venues.total,
-      severity: 'info',
+      severity: severityForKitSlug(row.slug, 'info'),
       field: 'restaurant_info.venues',
       message: `${venues.total - venues.complete} venues missing full handoff`,
       pipeline: 'enrichment — restaurant handoff',
@@ -1897,7 +1915,7 @@ export function evaluateCdcHotelFiche(
     dimension: 'golden',
     phase: 'cdc_target',
     passed: poiImages.total === 0 || poiImages.withImage === poiImages.total,
-    severity: 'warn',
+    severity: severityForKitSlug(row.slug, 'warn'),
     field: 'points_of_interest.image_public_id',
     message: `${poiImages.total - poiImages.withImage}/${poiImages.total} POIs missing image_public_id (CDC D9)`,
     pipeline: 'resource-{slug}-poi-images.ts — Wikimedia / official / Places',
@@ -1909,7 +1927,7 @@ export function evaluateCdcHotelFiche(
     phase: 'cdc_target',
     passed:
       poiDedicatedImages.total === 0 || poiDedicatedImages.dedicated === poiDedicatedImages.total,
-    severity: 'warn',
+    severity: severityForKitSlug(row.slug, 'warn'),
     field: 'points_of_interest.image_public_id',
     message: `${poiDedicatedImages.total - poiDedicatedImages.dedicated}/${poiDedicatedImages.total} POIs reuse hotel gallery press-* instead of dedicated poi-* assets (CDC D9bis)`,
     pipeline: 'resource-{slug}-poi-images.ts + golden manifest poi-{slug} ids',
@@ -1920,7 +1938,7 @@ export function evaluateCdcHotelFiche(
     dimension: 'golden',
     phase: 'cdc_target',
     passed: poiStructural.total === 0 || poiStructural.ok === poiStructural.total,
-    severity: 'warn',
+    severity: severityForKitSlug(row.slug, 'warn'),
     field: 'points_of_interest.image_public_id',
     message: `${poiStructural.total - poiStructural.ok}/${poiStructural.total} POIs fail photo-subject structural contract (dedicated poi-* + no gallery recycle)`,
     pipeline: 'audit:photo-subject + resource-{slug}-poi-images.ts',
@@ -1931,7 +1949,7 @@ export function evaluateCdcHotelFiche(
     dimension: 'photo',
     phase: 'cdc_target',
     passed: galleryAltCategory.total === 0 || galleryAltCategory.issues.length === 0,
-    severity: 'warn',
+    severity: severityForKitSlug(row.slug, 'warn'),
     field: 'gallery_images.category',
     message: `${galleryAltCategory.issues.length} gallery photo(s) with category/alt_fr mismatch (e.g. spa labeled as room)`,
     pipeline: 'categorize-with-vision.ts + audit:photo-subject --vision',
@@ -1944,7 +1962,7 @@ export function evaluateCdcHotelFiche(
       dimension: 'golden',
       phase: 'cdc_target',
       passed: spa.complete,
-      severity: 'warn',
+      severity: severityForKitSlug(row.slug, 'warn'),
       field: 'spa_info',
       message: 'spa_info dossier incomplete (need description + hours + contact + tip)',
       pipeline: 'enrichment — spa dossier',
@@ -1968,11 +1986,58 @@ export function evaluateCdcHotelFiche(
     dimension: 'golden',
     phase: 'cdc_target',
     passed: hasConciergeField(row.concierge_pick),
-    severity: 'info',
+    severity: isHotelKitSlug(row.slug) ? 'blocker' : 'info',
     field: 'concierge_pick',
     message: 'concierge_pick missing (Concierge room recommendation)',
     pipeline: 'editorial — concierge pick',
   });
+
+  /* ── Kit PO acceptance (D15–D19) — render parity, not deploy parity ── */
+  if (isHotelKitSlug(row.slug)) {
+    const waveRoomCtx = isKitWaveSlug(row.slug)
+      ? buildKitWaveRoomAuditContext(row.slug, ctx.kitRoomRows)
+      : null;
+    const kitChecks = evaluateKitAcceptanceGates({
+      slug: row.slug,
+      name: row.name,
+      concierge_pick: row.concierge_pick,
+      gallery_images: row.gallery_images,
+      google_reviews: row.google_reviews,
+      last_reviews_sync: row.last_reviews_sync,
+      faq_content_kit: row.faq_content_kit,
+      faq_content: row.faq_content,
+      concierge_questions: row.concierge_questions,
+      signature_experiences: row.signature_experiences,
+      points_of_interest: row.points_of_interest,
+      orderedRoomSlugs: waveRoomCtx?.orderedRoomSlugs,
+      rooms: waveRoomCtx?.rooms ?? ctx.kitRoomRows,
+    });
+    for (const kitCheck of kitChecks) {
+      const block = kitCheck.id.startsWith('kit.11.')
+        ? '11'
+        : kitCheck.id.startsWith('kit.10.')
+          ? '10'
+          : kitCheck.id.startsWith('kit.02.')
+            ? '02'
+            : 'kit';
+      const dimension: CdcDimension = kitCheck.id.startsWith('kit.11.')
+        ? 'faq'
+        : kitCheck.id.startsWith('kit.02.')
+          ? 'photo'
+          : 'golden';
+      addCdcCheck(b, {
+        id: kitCheck.id,
+        block,
+        dimension,
+        phase: 'cdc_target',
+        passed: kitCheck.passed,
+        severity: 'blocker',
+        field: kitCheck.id,
+        message: kitCheck.message,
+        pipeline: 'kit-fiche-acceptance-gates.ts — skill hotel-kit-rollout D15–D19',
+      });
+    }
+  }
   addCdcCheck(b, {
     id: 'gold.concierge_hook',
     block: 'gold',

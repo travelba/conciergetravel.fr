@@ -87,11 +87,18 @@ import {
   type PrinceDeGallesKitRoomImagePair,
 } from './kit-prince-de-galles-display';
 import {
+  enrichKitWaveRoomCards,
+  orderCatalogKitRoomCards,
+  resolveCatalogKitRoomImages,
+  type KitWaveRoomImagePair,
+} from './kit-catalog-room-display';
+import { isKitWaveSlug } from '@mch/domain/editorial';
+import {
   readKitConciergeQuestionGroupsFromGolden,
   type HotelKitConciergeQuestionGroup,
 } from './kit-concierge-questions';
 
-type KitDisplayBrand = 'airelles' | 'prince-de-galles';
+type KitDisplayBrand = 'airelles' | 'prince-de-galles' | 'catalog';
 
 function resolveKitDisplayBrand(row: Pick<HotelDetailRow, 'slug' | 'slug_en'>): KitDisplayBrand {
   const kitSlug = isHotelKitSlug(row.slug)
@@ -105,13 +112,20 @@ function resolveKitDisplayBrand(row: Pick<HotelDetailRow, 'slug' | 'slug_en'>): 
   if (kitSlug === 'prince-de-galles-paris') {
     return 'prince-de-galles';
   }
+  if (isKitWaveSlug(kitSlug)) {
+    return 'catalog';
+  }
   return 'airelles';
 }
 
-type KitRoomImagePair = AirellesKitRoomImagePair | PrinceDeGallesKitRoomImagePair;
+type KitRoomImagePair =
+  | AirellesKitRoomImagePair
+  | PrinceDeGallesKitRoomImagePair
+  | KitWaveRoomImagePair;
 
 function resolveKitRoomImages(
   brand: KitDisplayBrand,
+  kitSlug: string,
   roomSlug: string,
   roomCode: string,
 ): KitRoomImagePair | undefined {
@@ -120,6 +134,8 @@ function resolveKitRoomImages(
       return resolveAirellesKitRoomImages(roomSlug, roomCode);
     case 'prince-de-galles':
       return resolvePrinceDeGallesKitRoomImages(roomSlug, roomCode);
+    case 'catalog':
+      return resolveCatalogKitRoomImages(kitSlug, roomSlug, roomCode);
   }
 }
 
@@ -346,8 +362,9 @@ function buildKitRoomImages(
   roomName: string,
   locale: 'fr' | 'en',
   kitBrand: KitDisplayBrand,
+  kitSlug: string,
 ): readonly { readonly src: string; readonly alt: string }[] {
-  const curated = resolveKitRoomImages(kitBrand, room.slug, room.room_code);
+  const curated = resolveKitRoomImages(kitBrand, kitSlug, room.slug, room.room_code);
 
   const altForPublicId = (publicId: string): string => {
     const raw =
@@ -582,6 +599,7 @@ export async function prepareHotelKitModelUncached(
       roomName,
       kitLocale,
       kitBrand,
+      slugFr,
     );
     const facts: string[] = [];
     if (room.size_sqm !== null) facts.push(t('rooms.size', { count: room.size_sqm }));
@@ -617,7 +635,9 @@ export async function prepareHotelKitModelUncached(
   const orderedRoomCards =
     kitBrand === 'prince-de-galles'
       ? enrichPrinceDeGallesKitRoomCards(orderPrinceDeGallesKitRoomCards(roomCards), kitLocale)
-      : enrichAirellesKitRoomCards(orderAirellesKitRoomCards(roomCards), kitLocale);
+      : kitBrand === 'catalog'
+        ? enrichKitWaveRoomCards(slugFr, orderCatalogKitRoomCards(slugFr, roomCards), kitLocale)
+        : enrichAirellesKitRoomCards(orderAirellesKitRoomCards(roomCards), kitLocale);
 
   const priced = rooms
     .map((r) => r.indicativePrice)

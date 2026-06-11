@@ -18,6 +18,7 @@ import {
   SHANGRI_LA_PARIS_GALLERY_IMAGES,
   SHANGRI_LA_PARIS_HERO_IMAGE,
 } from './shangri-la-paris-gallery';
+import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const SHANGRI_LA_PARIS_PROMOTE_SLUG = 'shangri-la-paris';
 
@@ -1294,5 +1295,7 @@ export function buildShangriLaParisGoldenFields(
     email_reservations: SHANGRI_LA_PARIS_EMAIL_RESERVATIONS,
     mice_info: SHANGRI_LA_PARIS_MICE_INFO,
     affiliations: SHANGRI_LA_PARIS_AFFILIATIONS,
+    faq_content: buildKitWaveFaqPromote('shangri-la-paris'),
+    faq_content_kit: buildKitWaveFaqKit('shangri-la-paris'),
   };
 }

@@ -34,7 +34,7 @@ export async function HomeOpeningsGrid({
     <div className="mch-kit">
       <section className="section-pad" id="hotels" aria-labelledby="home-openings-title">
         <div className="wrap">
-          <div className="mag-head">
+          <div className="mag-head reveal">
             <div className="mh-left">
               <span className="eyebrow left">{t('eyebrow')}</span>
               <h2 id="home-openings-title">{t('title')}</h2>
@@ -45,7 +45,7 @@ export async function HomeOpeningsGrid({
             </Link>
           </div>
 
-          <div className="grid-4">
+          <div className="grid-4 reveal">
             {openings.map((h) => {
               const slug = pickByLocale(locale, h.slug, h.slugEn ?? h.slug);
               const name = pickByLocale(locale, h.nameFr, h.nameEn ?? h.nameFr);

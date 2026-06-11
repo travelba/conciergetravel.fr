@@ -26,7 +26,7 @@ export async function HomeClubRibbon({
   return (
     <div className="mch-kit">
       <section className="club" id="le-concierge-club" aria-labelledby="home-club-ribbon-title">
-        <div className="wrap club-inner">
+        <div className="wrap club-inner reveal">
           <div className="club-visual">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/kit/img/club_concierge.jpg" alt={t('visualAlt')} loading="lazy" />

@@ -1,4 +1,8 @@
-/** Pilot slugs rendered with the DA kit shell (`mch-kit hotel-page`) + full data stack. */
+/**
+ * Pilot slugs rendered with the DA kit shell (`mch-kit hotel-page`) + full data stack.
+ * Keep in sync with `scripts/editorial-pilot/src/hotels/kit-fiche-acceptance-gates.ts`.
+ * PO acceptance gates D15–D19 apply to every slug listed here.
+ */
 export const HOTEL_KIT_SLUGS = [
   'les-airelles-gordes',
   'les-airelles-gordes-en',
