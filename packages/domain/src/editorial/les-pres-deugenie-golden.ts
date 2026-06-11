@@ -570,7 +570,7 @@ export const LES_PRES_DEUGENIE_CONCIERGE_ADVICE = {
   },
 } as const;
 
-export const LES_PRES_DEUGENIE_CONCIERGE_PICK_SLUG = 'chambre-prestige-jardin';
+export const LES_PRES_DEUGENIE_CONCIERGE_PICK_SLUG = 'terrace-room-with-onzen';
 
 export const LES_PRES_DEUGENIE_CONCIERGE_PICK_NOTE = {
   fr: 'Terrasse jardin — la chambre que je recommande en premier pour une première venue aux Prés.',
@@ -816,6 +816,14 @@ export const LES_PRES_DEUGENIE_INSTAGRAM = {
       caption_fr: 'L’Orangerie — grillades sur cheminée et terrasse Al Fresco l’été.',
       caption_en: 'L’Orangerie — hearth grillades and Al Fresco terrace in summer.',
     },
+    {
+      permalink: 'https://www.instagram.com/lespresdeugenie/',
+      image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-13`,
+      caption_fr:
+        'Les jardins poétiques du domaine — huit hectares entre roseraies, potagers et prairies landaises.',
+      caption_en:
+        'The estate’s poetic gardens — eight hectares of rose beds, kitchen plots and Landes meadows.',
+    },
   ],
 } as const;
 
@@ -895,6 +903,8 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
       'Table triplement étoilée du mercredi au dimanche soir — réservation indispensable, surtout en haute saison.',
     description_en:
       'Three-star table Tuesday to Sunday evenings — reservation essential, especially in high season.',
+    badge_fr: 'Sélection du Concierge',
+    badge_en: 'Concierge pick',
     booking_required: true,
     website: 'https://lespresdeugenie.com/les-tables/restaurant-etoile-michel-guerard/',
     tip_fr:

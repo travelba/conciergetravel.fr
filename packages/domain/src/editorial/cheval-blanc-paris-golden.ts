@@ -526,7 +526,7 @@ export const CHEVAL_BLANC_PARIS_CONCIERGE_ADVICE = {
   },
 } as const;
 
-export const CHEVAL_BLANC_PARIS_CONCIERGE_PICK_SLUG = 'suite-seine';
+export const CHEVAL_BLANC_PARIS_CONCIERGE_PICK_SLUG = 'seine-junior-suite';
 
 export const CHEVAL_BLANC_PARIS_CONCIERGE_PICK_NOTE = {
   fr: 'Jardin d’hiver face à la Seine — la suite que je recommande en premier pour une première venue.',
@@ -683,6 +683,14 @@ export const CHEVAL_BLANC_PARIS_INSTAGRAM = {
       image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-10`,
       caption_fr: 'Plénitude — les Absolues d’Arnaud Donckele au cœur de la Samaritaine.',
       caption_en: 'Plénitude — Arnaud Donckele’s Absolues at the heart of Samaritaine.',
+    },
+    {
+      permalink: 'https://www.instagram.com/chevalblancparis/',
+      image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-1`,
+      caption_fr:
+        'La Samaritaine renaît — façade historique et entrée de la Maison Cheval Blanc sur le quai du Louvre.',
+      caption_en:
+        'The Samaritaine reborn — historic façade and Cheval Blanc Maison entrance on Quai du Louvre.',
     },
   ],
 } as const;
@@ -883,6 +891,8 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
       'Table triplement étoilée d’Arnaud Donckele, du mardi au samedi à partir de 19 h 30. Réservation indispensable.',
     description_en:
       'Arnaud Donckele’s three-star table, Tuesday to Saturday from 7:30 pm. Reservation essential.',
+    badge_fr: 'Sélection du Concierge',
+    badge_en: 'Concierge pick',
     booking_required: true,
     website: 'https://www.chevalblanc.com/fr/maison/paris/restaurants-et-bars/plenitude/',
     tip_fr:
@@ -914,6 +924,49 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
     booking_required: true,
     tip_fr: 'Mon conseil : enchaînez soin et bain à 17 h avant un dîner à Plénitude.',
     tip_en: 'My tip: follow treatment and pool at 5 pm before dinner at Plénitude.',
+  },
+  {
+    key: 'hakuba-omakase',
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-12`,
+    title_fr: 'Omakase au comptoir Hakuba',
+    title_en: 'Omakase at the Hakuba counter',
+    description_fr:
+      'Table japonaise deux étoiles — comptoir limité, service du mardi au samedi soir sur réservation.',
+    description_en:
+      'Two-star Japanese table — limited counter seats, Tuesday to Saturday evenings by reservation.',
+    booking_required: true,
+    website: 'https://www.chevalblanc.com/fr/maison/paris/restaurants-et-bars/hakuba/',
+    tip_fr:
+      'Mon conseil : demandez le créneau 20 h 30 — le rythme du comptoir y est le plus fluide.',
+    tip_en: 'My tip: ask for the 8:30 pm slot — the counter rhythm flows best then.',
+  },
+  {
+    key: 'langosteria-seafood',
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-14`,
+    title_fr: 'Crudo & homard — Langosteria',
+    title_en: 'Crudo & lobster — Langosteria',
+    description_fr:
+      'Restaurant italien de la Maison — fruits de mer crus, pâtes fraîches et vue sur la cour Samaritaine.',
+    description_en:
+      'The Maison’s Italian restaurant — raw seafood, fresh pasta and views over the Samaritaine courtyard.',
+    booking_required: true,
+    website: 'https://www.chevalblanc.com/fr/maison/paris/restaurants-et-bars/langosteria/',
+    tip_fr: 'Mon conseil : ouvrez par le crudo du jour — la carte change selon l’arrivage.',
+    tip_en: 'My tip: start with the crudo of the day — the menu shifts with the catch.',
+  },
+  {
+    key: 'seine-croisiere-privee',
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-17`,
+    title_fr: 'Croisière privée sur la Seine',
+    title_en: 'Private Seine cruise',
+    description_fr:
+      'Péniche ou yacht charter au départ du quai — champagne et vue Louvre organisés par la conciergerie.',
+    description_en:
+      'Barge or yacht charter from the quay — champagne and Louvre views arranged by the concierge.',
+    booking_required: true,
+    tip_fr:
+      'Mon conseil : partez au coucher du soleil après Le Tout-Paris — la lumière sur les quais est irréelle.',
+    tip_en: 'My tip: leave at sunset after Le Tout-Paris — the light on the embankments is unreal.',
   },
 ] as const;
 

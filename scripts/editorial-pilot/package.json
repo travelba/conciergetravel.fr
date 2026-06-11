@@ -137,6 +137,8 @@
     "promote:airelles-golden:dry": "tsx src/hotels/promote-airelles-golden.ts --dry-run",
     "promote:les-airelles-courchevel-golden": "tsx src/hotels/promote-les-airelles-courchevel-golden.ts",
     "promote:les-airelles-courchevel-golden:dry": "tsx src/hotels/promote-les-airelles-courchevel-golden.ts --dry-run",
+    "promote:les-airelles-courchevel-rooms": "tsx src/hotels/promote-les-airelles-courchevel-rooms.ts",
+    "promote:les-airelles-courchevel-rooms:dry": "tsx src/hotels/promote-les-airelles-courchevel-rooms.ts --dry-run",
     "arl-cv:photos:plan": "tsx src/photos/resource-les-airelles-courchevel-gallery-batch.ts --dry-run",
     "arl-cv:photos:gallery:dry": "tsx src/photos/resource-les-airelles-courchevel-gallery-batch.ts --dry-run",
     "arl-cv:photos:gallery": "tsx src/photos/resource-les-airelles-courchevel-gallery-batch.ts",

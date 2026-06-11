@@ -574,7 +574,7 @@ export const LE_BRISTOL_PARIS_CONCIERGE_ADVICE = {
   },
 } as const;
 
-export const LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG = 'chambre-prestige-jardin';
+export const LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG = 'suite-eden';
 
 export const LE_BRISTOL_PARIS_CONCIERGE_PICK_NOTE = {
   fr: 'Vue jardin — la chambre que je recommande en premier pour une première venue au Bristol.',
@@ -813,6 +813,14 @@ export const LE_BRISTOL_PARIS_INSTAGRAM = {
       caption_fr: 'Afternoon tea au Jardin Français, entre roses et fontaines.',
       caption_en: 'Afternoon tea at Le Jardin Français, among roses and fountains.',
     },
+    {
+      permalink: 'https://www.instagram.com/lebristolparis/',
+      image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-20`,
+      caption_fr:
+        'Façade du palace sur le Faubourg Saint-Honoré — hôtel particulier du XVIIIe au cœur du pouvoir parisien.',
+      caption_en:
+        'Palace façade on Faubourg Saint-Honoré — an 18th-century town house at the heart of Parisian power.',
+    },
   ],
 } as const;
 
@@ -917,6 +925,8 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
       'Table trois étoiles MICHELIN face au jardin à la française — réserver en semaine pour la terrasse.',
     description_en:
       'Three-MICHELIN-star table facing the French garden — book on a weekday for the terrace.',
+    badge_fr: 'Sélection du Concierge',
+    badge_en: 'Concierge pick',
     booking_required: true,
     website: 'https://www.oetkercollection.com/hotels/le-bristol-paris/restaurants-bar/epicure/',
     tip_fr:
