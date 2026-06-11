@@ -8,7 +8,45 @@
  * view, detail, concierge, events (3 images each).
  */
 
-export const LES_PRES_DEUGENIE_HERO_IMAGE = 'cct/hotels/les-pres-deugenie/press-1';
+export const LES_PRES_DEUGENIE_HERO_IMAGE = 'cct/hotels/les-pres-deugenie/hero';
+
+/** Official source for dedicated hero upload — exterior overview (Rule 7). */
+export const LES_PRES_DEUGENIE_HERO_SOURCE_URL =
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/2501-01_13_lpde_heurebleue_bd-edited.jpg';
+
+/** Parallel to {@link LES_PRES_DEUGENIE_GALLERY_IMAGES} — provenance for kit audit gates. */
+export const LES_PRES_DEUGENIE_GALLERY_SOURCE_URLS = [
+  'https://lespresdeugenie.com/wp-content/uploads/2024/02/LPDE_nouvelle-reception_2024.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/EUG-FERME-THERMALE-VUE-EXT-059-YOAN-CHEVOJON-BD.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/02/imperatrice-eugenie_romantique.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/01/IMG2-edited.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/10/LPDE_vignette_chambre_couvent.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/08/eugenie_chambre_boutondor-600x600.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/86.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/72.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/76.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/tarte-tomate_lpde.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/61.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/2106-02_01_lpde_yoga_bd.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG9.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/70-1-2048x1152.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/IMG2-2048x1152.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG2.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG23.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/chateau-de-bachen-1.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/boucherie_lpde.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/IMG2-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG23-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/02/LPDE_nouvelle-reception_2024-768x1356.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/86-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/72-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2026/05/Barbagoa-2026-Logo.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/76-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/61-1536x864.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/2501-01_13_lpde_heurebleue_bd-edited-1536x1536.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2026/05/Barbagoa-2026-Logo.jpg?context=barbagoa-soiree',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/01/IMG2-edited-2048x2048.jpg',
+] as const;
 
 export const LES_PRES_DEUGENIE_GALLERY_IMAGES = [
   {

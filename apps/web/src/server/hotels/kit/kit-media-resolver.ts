@@ -84,9 +84,12 @@ export function createKitMediaResolver(
 
   return {
     spaHero(defaultAlt) {
-      const spaGallery = byCategory('spa');
+      const spaGallery = byCategory('spa').filter((g) => {
+        const alt = g.alt.toLowerCase();
+        return !/ferme thermale|vue ext|yoga|jardin/i.test(alt);
+      });
       const wellnessPattern =
-        /wellness suite|calma|hammam|salle de soin|treatment room|spa suite|rituel/i;
+        /wellness suite|calma|hammam|salle de soin|treatment room|spa suite|rituel|cabine|institut/i;
       const wellnessInSpa = pickGalleryByAlt(spaGallery, wellnessPattern);
       if (wellnessInSpa !== undefined) {
         return toCloudinaryTile(

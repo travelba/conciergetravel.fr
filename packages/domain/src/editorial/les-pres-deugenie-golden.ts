@@ -19,8 +19,10 @@ import { LES_PRES_DEUGENIE_CONCIERGE_QUESTIONS_KIT } from './les-pres-deugenie-c
 import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 import {
   LES_PRES_DEUGENIE_GALLERY_IMAGES,
+  LES_PRES_DEUGENIE_GALLERY_SOURCE_URLS,
   LES_PRES_DEUGENIE_HERO_IMAGE,
 } from './les-pres-deugenie-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 
 export const LES_PRES_DEUGENIE_PROMOTE_SLUG = 'les-pres-deugenie';
 
@@ -1227,7 +1229,10 @@ export function buildLesPresDeugenieGoldenFields(
     meta_title_fr: LES_PRES_DEUGENIE_META_TITLE_FR,
     meta_title_en: LES_PRES_DEUGENIE_META_TITLE_EN,
     hero_image: LES_PRES_DEUGENIE_HERO_IMAGE,
-    gallery_images: LES_PRES_DEUGENIE_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      LES_PRES_DEUGENIE_GALLERY_IMAGES,
+      LES_PRES_DEUGENIE_GALLERY_SOURCE_URLS,
+    ),
     external_sources: LES_PRES_DEUGENIE_EXTERNAL_SOURCES,
     wikidata_id: lesPresDeugenieExternalScalar('wikidata_id'),
     official_url: lesPresDeugenieExternalScalar('official_url'),

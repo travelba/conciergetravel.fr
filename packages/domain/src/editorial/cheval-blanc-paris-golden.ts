@@ -19,8 +19,10 @@ import {
 import { CHEVAL_BLANC_PARIS_CONCIERGE_QUESTIONS_KIT } from './cheval-blanc-paris-concierge-questions';
 import {
   CHEVAL_BLANC_PARIS_GALLERY_IMAGES,
+  CHEVAL_BLANC_PARIS_GALLERY_SOURCE_URLS,
   CHEVAL_BLANC_PARIS_HERO_IMAGE,
 } from './cheval-blanc-paris-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const CHEVAL_BLANC_PARIS_PROMOTE_SLUG = 'cheval-blanc-paris';
@@ -1097,7 +1099,10 @@ export function buildChevalBlancParisGoldenFields(
     meta_title_fr: CHEVAL_BLANC_PARIS_META_TITLE_FR,
     meta_title_en: CHEVAL_BLANC_PARIS_META_TITLE_EN,
     hero_image: CHEVAL_BLANC_PARIS_HERO_IMAGE,
-    gallery_images: CHEVAL_BLANC_PARIS_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      CHEVAL_BLANC_PARIS_GALLERY_IMAGES,
+      CHEVAL_BLANC_PARIS_GALLERY_SOURCE_URLS,
+    ),
     external_sources: CHEVAL_BLANC_PARIS_EXTERNAL_SOURCES,
     wikidata_id: chevalBlancParisExternalScalar('wikidata_id'),
     official_url: chevalBlancParisExternalScalar('official_url'),

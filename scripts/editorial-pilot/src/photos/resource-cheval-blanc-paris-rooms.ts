@@ -1,7 +1,8 @@
 import { runKitWaveRoomResource } from './resource-kit-wave-rooms-shared.js';
 
 const dryRun = process.argv.includes('--dry-run');
-runKitWaveRoomResource('cheval-blanc-paris', dryRun).catch((err: unknown) => {
+const force = process.argv.includes('--force');
+runKitWaveRoomResource('cheval-blanc-paris', dryRun, force).catch((err: unknown) => {
   console.error(err);
   process.exit(1);
 });

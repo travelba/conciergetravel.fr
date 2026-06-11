@@ -8,7 +8,12 @@
  * (assets.airelles.com / airelles.com official DAM).
  */
 
-export const LES_AIRELLES_COURCHEVEL_HERO_IMAGE = 'cct/hotels/les-airelles-courchevel/press-1';
+import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
+
+export const LES_AIRELLES_COURCHEVEL_HERO_IMAGE = 'cct/hotels/les-airelles-courchevel/hero';
+
+export const LES_AIRELLES_COURCHEVEL_HERO_SOURCE_URL =
+  'https://assets.airelles.com/images/airelles2023/abREoVxvIZEnjqaN_ARLVUEDRONE.png?auto=format%2Ccompress&w=2600';
 
 export const LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES = [
   {
@@ -331,6 +336,47 @@ export const LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES = [
 ] as const;
 
 /** CDC §2.2 category floor — 10 required categories. */
+const ARL_CV_IMGIX = 'https://assets.airelles.com/images/airelles2023/';
+const ARL_CV_IMGIX_Q = '?auto=format%2Ccompress&w=2600';
+
+export const LES_AIRELLES_COURCHEVEL_GALLERY_PRESS_SLOT_URLS = [
+  `${ARL_CV_IMGIX}abwDDbbci2UF6Rqd_VIDEOHEADERHOMEARL.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}abREoVxvIZEnjqaN_ARLVUEDRONE.png${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}abRDdVxvIZEnjqZa_DRONEARLVF.png${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNztf55xUNkB1VA3_ARL-Lieucommun-Salonavecservice%C2%A9JonathanDucrest.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZiojZvPdc1huKx1J_LesAirelles-LeBaravecmixologue.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}Zg_IRxrFxhpPBU9o_ARL-Fumoir.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aXN9SgIvOtkhB3ey_ARL-Chambre-L%27Appartement%C2%A9VincentLeroux.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZkdQfiol0Zci9PdA_LesAirelles-LYS315-Chambre2-D%C3%A9tail.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNqBqJ5xUNkB1OEv_2m.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZharrjjCgu4jzuwV_BLOG-ARL-TabledesAirelles-Salle.jpeg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aV0ME3NYClf9o0Zi_ARL-Salle-Matsuhisa%C2%A9VincentLeroux.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZiogKfPdc1huKxvn_Moyen-LesAirelles-CoinSavoyard-Table%C2%A9ViaTolila.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aQtMirpReVYa4F1T_ShootingExportWebseq3-7.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}Zkx5lyol0Zci9UIU_SuiteNecker-De%CC%81tails.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNzWJJ5xUNkB1Ujy_SPA.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZjoJh0MTzAJOCmvG_Moyen-Piscine-Vued%27ensemble-1.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNqCCZ5xUNkB1OFK_4m.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNqCgp5xUNkB1OFX_lastm.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNqINp5xUNkB1OKW_ARL-Vuemontagne%C2%A9YoannetMarco.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}abRDdVxvIZEnjqZa_DRONEARLVF.png${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZuQVhrVsGrYSvVEv_ChaletdePierres-Terrasse%C2%A9ViaTolila.-2.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}Zkxhmiol0Zci9T4T_Chambres%26Suites.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNqBhZ5xUNkB1OEm_1m.jpeg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aNup2Z5xUNkB1Q6I_4m.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZgPr27LRO5ile6wB_LesAirelles-BoutiqueV%26L.jpeg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aQMnHrpReVYa30xx_ARL-Service-TabledesAirelles%C2%A9Yoannetmarco.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aV0K2nNYClf9o0Yr_ARL-FOLIEDOUCE.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}Zes593Uurf2G3N5n_ARL-MotoneigeExpe%CC%81rience.jpg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}ZgPrBrLRO5ile6vt_Patinoire.jpeg${ARL_CV_IMGIX_Q}`,
+  `${ARL_CV_IMGIX}aV0M6HNYClf9o0Z3_ARL-Salle-Palladio%C2%A9VincentLeroux-1.jpg${ARL_CV_IMGIX_Q}`,
+] as const;
+
+export const LES_AIRELLES_COURCHEVEL_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPerPressSlot(
+  LES_AIRELLES_COURCHEVEL_GALLERY_PRESS_SLOT_URLS,
+  LES_AIRELLES_COURCHEVEL_HERO_SOURCE_URL,
+);
+
 export const LES_AIRELLES_COURCHEVEL_GALLERY_CDC_CATEGORIES = [
   'exterior',
   'lobby',

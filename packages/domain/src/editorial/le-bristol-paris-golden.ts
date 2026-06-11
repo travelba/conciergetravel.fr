@@ -20,8 +20,10 @@ import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed'
 import { LE_BRISTOL_PARIS_CONCIERGE_QUESTIONS_KIT } from './le-bristol-paris-concierge-questions';
 import {
   LE_BRISTOL_PARIS_GALLERY_IMAGES,
+  LE_BRISTOL_PARIS_GALLERY_SOURCE_URLS,
   LE_BRISTOL_PARIS_HERO_IMAGE,
 } from './le-bristol-paris-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 
 export const LE_BRISTOL_PARIS_PROMOTE_SLUG = 'le-bristol-paris';
 
@@ -1244,7 +1246,10 @@ export function buildLeBristolParisGoldenFields(
     meta_title_fr: LE_BRISTOL_PARIS_META_TITLE_FR,
     meta_title_en: LE_BRISTOL_PARIS_META_TITLE_EN,
     hero_image: LE_BRISTOL_PARIS_HERO_IMAGE,
-    gallery_images: LE_BRISTOL_PARIS_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      LE_BRISTOL_PARIS_GALLERY_IMAGES,
+      LE_BRISTOL_PARIS_GALLERY_SOURCE_URLS,
+    ),
     external_sources: LE_BRISTOL_PARIS_EXTERNAL_SOURCES,
     wikidata_id: leBristolParisExternalScalar('wikidata_id'),
     wikipedia_url_fr: leBristolParisExternalScalar('wikipedia_url_fr'),

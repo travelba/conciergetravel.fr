@@ -116,7 +116,9 @@ export async function HotelPageKit({
 
       <HotelKitInteractions />
 
-      {row.booking_mode === 'travelport' && isTravelportSandboxEnabled() ? (
+      {row.booking_mode === 'travelport' &&
+      isTravelportSandboxEnabled() &&
+      !railContext.supplierBookable ? (
         <TravelportKitLivePrices
           locale={model.locale}
           slug={row.slug}

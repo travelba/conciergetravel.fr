@@ -9,6 +9,7 @@ import { buildCloudinarySrc } from '@mch/ui';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
+import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
 import { citySlug } from '@/server/destinations/cities';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
 import { getAmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
@@ -561,12 +562,13 @@ export async function prepareHotelKitModelUncached(
   // SSR must not await Travelport — `searchByCoordinates` blocks TTFB 3–10 s on
   // cold cache. Room cards keep editorial `indicative_price`; live GDS overlay
   // resumes via Suspense stream in Phase 6 (see legacy `TravelportLiveRooms`).
+  const kitStay = defaultHotelStay();
   const aggregatedRoomPrices = await getAggregatedRoomPrices({
     hotelId: row.id,
     stay: {
-      checkIn: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10),
-      checkOut: new Date(Date.now() + 31 * 86_400_000).toISOString().slice(0, 10),
-      adults: 1,
+      checkIn: kitStay.checkIn,
+      checkOut: kitStay.checkOut,
+      adults: kitStay.adults,
     },
   });
 

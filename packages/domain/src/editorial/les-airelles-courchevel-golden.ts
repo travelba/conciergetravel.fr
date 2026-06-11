@@ -18,8 +18,10 @@ import {
 import { LES_AIRELLES_COURCHEVEL_CONCIERGE_QUESTIONS_KIT } from './les-airelles-courchevel-concierge-questions';
 import {
   LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES,
+  LES_AIRELLES_COURCHEVEL_GALLERY_SOURCE_URLS,
   LES_AIRELLES_COURCHEVEL_HERO_IMAGE,
 } from './les-airelles-courchevel-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const LES_AIRELLES_COURCHEVEL_PROMOTE_SLUG = 'les-airelles-courchevel';
@@ -1076,7 +1078,10 @@ export function buildLesAirellesCourchevelGoldenFields(
     meta_title_fr: LES_AIRELLES_COURCHEVEL_META_TITLE_FR,
     meta_title_en: LES_AIRELLES_COURCHEVEL_META_TITLE_EN,
     hero_image: LES_AIRELLES_COURCHEVEL_HERO_IMAGE,
-    gallery_images: LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES,
+      LES_AIRELLES_COURCHEVEL_GALLERY_SOURCE_URLS,
+    ),
     external_sources: LES_AIRELLES_COURCHEVEL_EXTERNAL_SOURCES,
     wikidata_id: courchevelExternalScalar('wikidata_id'),
     wikipedia_url_fr: courchevelExternalScalar('wikipedia_url_fr'),

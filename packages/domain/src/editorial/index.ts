@@ -59,4 +59,5 @@ export * from './kit-wave-amenity-blocks';
 export * from './kit-wave-room-catalog';
 export * from './kit-wave-faq-seed';
 export * from './kit-wave-room-types';
+export * from './kit-gallery-promote';
 export * from './les-airelles-courchevel-rooms';

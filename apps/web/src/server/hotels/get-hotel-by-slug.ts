@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 
-import { selectGoogleReviewsForDisplay } from '@mch/domain/reviews';
+import { selectGoogleReviewsForAccesDisplay } from '@mch/domain/reviews';
 import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
@@ -529,7 +529,7 @@ export function readGoogleReviews(
       publishTime: parsed.data.publish_time ?? null,
     });
   }
-  return selectGoogleReviewsForDisplay(candidates, 5).map((review) => ({
+  return selectGoogleReviewsForAccesDisplay(candidates, 3).map((review) => ({
     author: review.author,
     rating: review.rating,
     text: review.text,

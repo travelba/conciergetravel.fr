@@ -493,11 +493,11 @@ metadata/resolver remap alone. Reference fix: PdG `press-17` → Marriott Scene7
 
 Three enforcement layers — all mandatory on kit pilots, recommended catalogue-wide:
 
-| Layer                    | What it checks                                                                    | Tool / gate                                                                             | When                             |
-| ------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------- |
-| **L1 Structural**        | POI uses `poi-{slug}` not `press-*`; gallery `category` vs `alt_fr` vocabulary    | `@mch/domain/photos` · gates `gold.poi_photo_structural`, `photos.gallery_alt_category` | Every CDC audit + CI             |
-| **L2 Sourcing manifest** | Each POI/spa slot uploaded from Wikimedia / official / AI with venue-specific alt | `resource-{slug}-poi-images.ts` · `pdg:photos:poi`                                      | Before `promote:*-golden`        |
-| **L3 Vision QA**         | OpenAI Vision confirms POI pixels match venue name                                | `audit:photo-subject -- --slug=x --vision`                                              | PO sign-off + spot-check rollout |
+| Layer                    | What it checks                                                                                                                                  | Tool / gate                                                                                                                                    | When                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **L1 Structural**        | POI uses `poi-{slug}` not `press-*`; gallery `category` vs `alt_fr` vocabulary                                                                  | `@mch/domain/photos` · gates `gold.poi_photo_structural`, `photos.gallery_alt_category`                                                        | Every CDC audit + CI             |
+| **L2 Sourcing manifest** | Each slot uploaded from Wikimedia / official / AI with venue-specific alt ; kit hero **hors** galerie ; `url`/`source_url` on every gallery row | `resource-{slug}-gallery-batch.ts` · `resource-{slug}-poi-images.ts` · gates `kit.02.gallery_source_url_tracked`, `kit.02.hero_not_in_gallery` | Before `promote:*-golden`        |
+| **L3 Vision QA**         | OpenAI Vision confirms POI pixels match venue name                                                                                              | `audit:photo-subject -- --slug=x --vision`                                                                                                     | PO sign-off + spot-check rollout |
 
 ### L1 — Domain module (single source of truth)
 
@@ -510,6 +510,46 @@ Three enforcement layers — all mandatory on kit pilots, recommended catalogue-
 
 Import: `@mch/domain/photos` (editorial gates) or `@mch/domain/editorial` (re-exports POI helpers).
 
+### L2 — Kit hero + galerie (Rule 7 — 2026-06-10)
+
+**Anti-patterns refusés** :
+
+- `hero_image = press-1` **and** `gallery_images[0].public_id = press-1` → mosaïque affiche la même photo (grande + vignette).
+- Batch `GALLERY_SOURCES` avec deux URLs identiques (ex. réception crop + réception full) → doublon pixels invisible sans `url` en DB.
+- Chambres sans `resource-{slug}-rooms.ts` → fallback galerie index % length.
+
+**Workflow obligatoire (kit pilots)** :
+
+1. Choisir **1 hero exterior/view** (vue d’ensemble) — upload séparé ou slot `press-N` **exclu** des 30 galerie.
+2. Remplir `{slug}-gallery.ts` : 30 entrées, `url`/`source_url` par slot, 0 URL dupliquée.
+3. `resource-{slug}-gallery-batch.ts` pousse `url` dans le JSONB Supabase (pas seulement Cloudinary).
+4. `resource-{slug}-rooms.ts` + `resource-{slug}-poi-images.ts` (POI : réel d’abord, IA documentée en fallback).
+5. Gates `kit.02.*` verts + walk mosaïque (skill `hotel-kit-rollout` Rule 6–8).
+
+**Contentful dedup (2026-06-11)** — `packages/domain/src/editorial/kit-gallery-promote.ts` :
+
+- `buildKitGallerySourceUrlsPerPressSlot()` : repli **`w±1`** sur `ctfassets.net` — **pas** `?mchPress=` (HTTP 400 Contentful).
+- Préférer 30 URLs uniques dans `*_GALLERY_PRESS_SLOT_URLS` ; hero URL **absente** des 30 slots.
+- Tester assets problématiques : `curl.exe -sI "<url>"` avant batch (Suite Eden, Suite Lumière Bristol = 403/400 avec params).
+
+### L2 — POI batch orchestration (Rule 8 — 2026-06-11)
+
+**Timing observé wave 5** (5 fiches, 79 POI séquentiels) :
+
+| Mode POI                  | Durée / image | 18 POI     |
+| ------------------------- | ------------- | ---------- |
+| Wikimedia → Cloudinary    | ~3–5 s        | ~2 min     |
+| OpenAI `gpt-image-1` high | ~45–90 s      | ~15–27 min |
+
+**Règles** :
+
+1. `photos:discover -- --slug=x` **avant** d'écrire `POI_SOURCES`.
+2. Remplir Commons/officiel pour **tous** les POI « monument / ville » ; réserver IA aux shops sans photo libre.
+3. **Ne pas** enchaîner `{s1}:photos:poi ; {s2}:photos:poi ; …` — lancer **5 terminaux** ou accepter ~1 h IA.
+4. Après POI : `promote` seulement si golden référence de nouveaux `poi-*` (souvent déjà OK post-promote phase 3).
+
+Cross-links: skill `hotel-kit-rollout` Rule 8 · D22.
+
 ### L2 — POI sourcing pattern (never recycle gallery)
 
 **Anti-pattern refusé** : assign `points_of_interest[].image_public_id = press-24` to pass `gold.poi_images`.
@@ -519,7 +559,7 @@ Import: `@mch/domain/photos` (editorial gates) or `@mch/domain/editorial` (re-ex
 1. Copy `resource-airelles-poi-images.ts` → `resource-{slug}-poi-images.ts`.
 2. One Commons / official / AI source **per POI slug** → Cloudinary `cct/hotels/{slug}/poi-{poi-slug}`.
 3. Golden file : `princeDeGallesPoiImage('musee-yves-saint-laurent')` etc.
-4. `pnpm --filter @mch/editorial-pilot {prefix}:photos:poi` then `promote:{slug}-golden`.
+4. `pnpm --filter @mch/editorial-pilot {prefix}:photos:poi` then re-audit (promote déjà fait phase 3 — Rule 8).
 5. `audit:photo-subject -- --slug={slug}` → 0 structural fails.
 
 ### L3 — Vision QA (optional but required before PO sign-off)
@@ -532,14 +572,19 @@ Flags POIs where Vision detects a subject mismatch (hotel room on a museum card)
 
 ### CDC gates wired (hotel-fiche-cdc-gates.ts)
 
-| Gate id                       | Severity | Fails when                                          |
-| ----------------------------- | -------- | --------------------------------------------------- |
-| `gold.poi_images`             | warn     | POI missing any `image_public_id`                   |
-| `gold.poi_dedicated_images`   | warn     | POI uses `press-*` instead of `poi-*`               |
-| `gold.poi_photo_structural`   | warn     | Any L1 POI structural issue                         |
-| `photos.gallery_alt_category` | warn     | Gallery category contradicts `alt_fr` (spa+chambre) |
+| Gate id                                  | Severity      | Fails when                                          |
+| ---------------------------------------- | ------------- | --------------------------------------------------- |
+| `gold.poi_images`                        | warn          | POI missing any `image_public_id`                   |
+| `gold.poi_dedicated_images`              | warn          | POI uses `press-*` instead of `poi-*`               |
+| `gold.poi_photo_structural`              | warn          | Any L1 POI structural issue                         |
+| `photos.gallery_alt_category`            | warn          | Gallery category contradicts `alt_fr` (spa+chambre) |
+| `kit.02.hero_not_in_gallery`             | blocker (kit) | `hero_image` appears in `gallery_images[]`          |
+| `kit.02.hero_category_exterior_or_view`  | blocker (kit) | Hero not exterior/view overview                     |
+| `kit.02.gallery_source_url_tracked`      | blocker (kit) | Gallery row missing `url`/`source_url`              |
+| `kit.02.gallery_no_duplicate_source_url` | blocker (kit) | Same source URL on 2+ slots                         |
+| `kit.02.gallery_unique_public_id`        | blocker (kit) | Duplicate `public_id` in gallery                    |
 
-Cross-links: skill `hotel-kit-rollout` D13–D14 · rule `hotel-detail-page.mdc` §2.2bis · `photo-quality.mdc` §Correspondance sujet.
+Cross-links: skill `hotel-kit-rollout` D13–D14, D20–D22, Rule 7–8 · rule `hotel-detail-page.mdc` §2.2bis · `photo-quality.mdc` §Correspondance sujet.
 
 **Why this matters:**
 
@@ -871,7 +916,7 @@ isn't guaranteed-sorted.
 - `.cursor/rules/photo-quality.mdc` (sourcing legality, banned domains).
 - `.cursor/skills/photo-quality-seo-geo-agentique/SKILL.md` (signature
   transform `ADR-0024`, JSON-LD ImageObject contract).
-- `.cursor/skills/hotel-kit-rollout/SKILL.md` (PO consignes D7–D12, photo
+- `.cursor/skills/hotel-kit-rollout/SKILL.md` (PO consignes D7–D22, Rule 7–8 batch orchestration, photo
   re-source workflow, pilot checklist).
 - `.cursor/skills/backoffice-cms/SKILL.md` §direct-sql-bypass (cache
   invalidation after bulk update).

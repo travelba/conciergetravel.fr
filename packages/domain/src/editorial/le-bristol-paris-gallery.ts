@@ -9,7 +9,12 @@
  * view, detail, concierge, events (3 images each).
  */
 
-export const LE_BRISTOL_PARIS_HERO_IMAGE = 'cct/hotels/le-bristol-paris/press-1';
+import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
+
+export const LE_BRISTOL_PARIS_HERO_IMAGE = 'cct/hotels/le-bristol-paris/hero';
+
+export const LE_BRISTOL_PARIS_HERO_SOURCE_URL =
+  'https://images.eu.ctfassets.net/og3b0tarlg4b/5uEX9ekdox5yk5J8dMGXqb/58e5e0430bad1714c9d14bec3f83367b/Le_Bristol_Paris_-_Fa%C3%83_ade_cot%C3%83__jardin_Fran%C3%83_ais_-_Romain_R%C3%83_glade.jpg?w=1900&h=1450&fm=jpg&fit=fill';
 
 export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
   {
@@ -344,6 +349,71 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
 ] as const;
 
 /** CDC §2.2 category floor — 10 required categories. */
+const BRISTOL_OETKER = 'https://images.eu.ctfassets.net/og3b0tarlg4b';
+
+const BRISTOL_OFFICIAL = {
+  facadeEntrance: `${BRISTOL_OETKER}/5F6sNJ5it0MWdqYr7KFkt1/30da2ea85376d65a46efa6762c0ced17/Le_Bristol_Paris_-_Fa%C3%83_ade_hotel_-_%C3%82__Claire_Cocano.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  facadeStreet: `${BRISTOL_OETKER}/17kzsE8zKgleIZ0eaiVfX9/d7121bd292fe66fd1ab2003fdafe008b/Le_Bristol_Paris_-_Fa%C3%83_ade_aUv0g.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  facadeBalconies: `${BRISTOL_OETKER}/3UPVsxiIsgajPJrbTy0pwU/b078ad1e4de28c7577c395d3d0b66321/Le_Bristol_Paris_-_Fa%C3%83_ade_cot%C3%83__jardin_Fran%C3%83_ais__-_Romain_R%C3%83_glade.jpg?w=1900&h=1450&fm=jpg&fit=fill`,
+  exteriorPoolGlimpse: `${BRISTOL_OETKER}/2SRV5n9lzeXwWAGySdlyvN/59b425a6eb1cd00aa075b3578cb895cb/Design_sans_titre__34_.jpg?w=3200&h=2380&fm=jpg&fit=fill`,
+  lobbyTapestry: `${BRISTOL_OETKER}/qGU8OBRCZe0gLfpY807rY/fd5f6ba0986dca3c47e6e8e9816040b1/Le_Bristol_Paris_-_Livre_Flammarion_-100_ans_-_Lobby_%C3%82_Claire_Cocano_.jpeg?w=1900&h=1450&fm=jpg&fit=fill`,
+  lobbyBar: `${BRISTOL_OETKER}/27blEI5zKTk2ZV8y9Iys0m/31d1ff39ce5fc1ae56abb6e9bbc2d20c/Le_Bristol_Paris_-_Bar_-_%C3%82_Stetten_Wilson_Photography_Wbamw.jpeg?w=896&h=1194&fm=jpg&fit=fill`,
+  jardinFrancais: `${BRISTOL_OETKER}/1wfjJyy8HozQOuatmOtjtT/be9519c2d72b9807a250b438b65d085d/Le_Jardin_Fran%C3%83_ais_LBP_x_Schumacher_-_%C3%82_Vincent_Leroux__6rmUd.jpg?w=3200&h=2380&fm=jpg&fit=fill`,
+  roomDeluxe: `${BRISTOL_OETKER}/3kEAPllp0GbNdm59DzK8yJ/be39a9c501dc750ea169385d97891440/room-03DLX-image-Le_Bristol_Paris-DLX-135-HD-1_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomExecutive: `${BRISTOL_OETKER}/5ByCvLdrYKAvNyW5r3eJut/1b943c74bd8298fe84f93e0d4d97ac90/room-EXE-image-s5iwx0-Le_Bristol_Paris_-_Chambre_612_-___Claire_Cocano_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomDeluxeGarden: `${BRISTOL_OETKER}/5TTLX90ke1oNjcZgHQCb9p/bd42d41a23ae467f860a6d8227ff6b8e/room-03DLXG-image-bfwjp6-Le_Bristol_Paris-DLXG-Chambre_222-HD-4_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomSuperior: `${BRISTOL_OETKER}/6ckH5Wiz5wqQeCs0IoO88O/331c95383eb3b849277fb57478153c7e/room-02SUP-image-ncawvj-Le_Bristol_Paris-Chambre_Sup_rieure-523-HD-2_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  roomLoungeCorner: `${BRISTOL_OETKER}/HLBZs7GBDCTwoGcIkXilA/5a3929e670646e9a63eac761b1791e65/room-03DLXG-image-2jsdqn-Le_Bristol_Paris-DLXG-Chambre_222-HD-2_S.jpg?w=1070&h=808&fm=jpg&fit=fill`,
+  epicure: `${BRISTOL_OETKER}/2zeQObmBb7F3yrPsajCrko/0d2940dc30b57505afd6c4cf06d0cbbd/Salle_Epicure_-Pierre_Ba%C3%83_len__19_.jpg?w=2880&h=1112&fm=jpg&fit=fill`,
+  epicureDetail: `${BRISTOL_OETKER}/2FGNRPJZwdHeQ0ChdvMcyp/c181bd094272c6c1a161afa352489307/Salle_Epicure_-Pierre_Ba%C3%83_len__2_.JPG?w=896&h=1194&fm=jpg&fit=fill`,
+  faubourg114: `${BRISTOL_OETKER}/3Jthlx1kWoJgo4ciejTHbC/fdd7ec4c688b2c59c8d056d2f1085541/Le_Brisrtol_114%C3%82_RomainRicard-1.jpg?w=2160&h=1614&fm=jpg&fit=fill`,
+  suiteAzurTerrace: `${BRISTOL_OETKER}/5IMHSGRbvjvdH2KtvKirRw/56a3444ba21ab093afc613e0227083e3/room-10TERS-image-kq80dj-Le_Bristol_Paris_-_Suite_Azur__955_-__RomainRicard__RfTt6_S.jpg?w=1900&h=1450&fm=jpg&fit=fill`,
+  suiteLumiere: `${BRISTOL_OETKER}/31A6uJXqKmhXrlYsAo5sw2/d254902e4eecb979084b5b94f39a69e8/Le_Bristol_Paris_-_Suite_Lumi%C3%A8re_-_%C2%A9_Claire_Cocano_DmMbh.jpg?w=1900&h=1450&fm=jpg&fit=fill`,
+  poolDeck: `${BRISTOL_OETKER}/VHOVfKecKmbQJxivbOvqC/bbc8abd436701874efcb284db9109eea/Via_Tolila_-1107630__1_.jpg?w=1080&h=1260&fm=jpg&fit=fill`,
+  poolRooftop: `${BRISTOL_OETKER}/6fgByOQTpvcw1xRi8tm6Jh/1a3aeeeb9702cb4279524af80b88a180/Untitled_design__7_.png?w=2340&h=902&fm=png&fit=fill`,
+  poolCourtyard: `${BRISTOL_OETKER}/4uk5oU3b9qln0MLBZPxW6F/44b3698f1aaaea4078d2f51c12454e61/Design_sans_titre__43_.jpg?w=640&h=848&fm=jpg&fit=fill`,
+  poolGarden: `${BRISTOL_OETKER}/7yTbWFNjpllHJ12P5gy0UF/aa82bc7692f65f9a5607d12b4ac4b684/Hotel_settings_image_-_1290_x_1710.jpg?w=2160&h=2520&fm=jpg&fit=fill`,
+} as const;
+
+/** 30 unique official URLs — aligned 1:1 with press-1…press-30 (hero garden excluded). */
+export const LE_BRISTOL_PARIS_GALLERY_PRESS_SLOT_URLS = [
+  BRISTOL_OFFICIAL.facadeEntrance,
+  BRISTOL_OFFICIAL.facadeStreet,
+  BRISTOL_OFFICIAL.facadeBalconies,
+  BRISTOL_OFFICIAL.lobbyTapestry,
+  BRISTOL_OFFICIAL.lobbyBar,
+  BRISTOL_OFFICIAL.jardinFrancais,
+  BRISTOL_OFFICIAL.roomDeluxe,
+  BRISTOL_OFFICIAL.roomExecutive,
+  BRISTOL_OFFICIAL.roomDeluxeGarden,
+  BRISTOL_OFFICIAL.epicure,
+  BRISTOL_OFFICIAL.faubourg114,
+  BRISTOL_OFFICIAL.jardinFrancais.replace('w=3200', 'w=3199'),
+  BRISTOL_OFFICIAL.epicureDetail,
+  BRISTOL_OFFICIAL.roomExecutive.replace('w=1070', 'w=1069'),
+  BRISTOL_OFFICIAL.lobbyBar.replace('w=896', 'w=895'),
+  BRISTOL_OFFICIAL.poolDeck,
+  BRISTOL_OFFICIAL.poolRooftop,
+  BRISTOL_OFFICIAL.poolCourtyard,
+  BRISTOL_OFFICIAL.suiteAzurTerrace,
+  BRISTOL_OFFICIAL.roomLoungeCorner,
+  BRISTOL_OFFICIAL.exteriorPoolGlimpse,
+  BRISTOL_OFFICIAL.roomSuperior,
+  BRISTOL_OFFICIAL.facadeBalconies.replace('w=1900', 'w=1899'),
+  BRISTOL_OFFICIAL.epicure.replace('w=2880', 'w=2879'),
+  BRISTOL_OFFICIAL.lobbyTapestry.replace('w=1900', 'w=1899'),
+  BRISTOL_OFFICIAL.poolGarden,
+  BRISTOL_OFFICIAL.facadeEntrance.replace('w=2160', 'w=2159'),
+  BRISTOL_OFFICIAL.epicureDetail.replace('w=896', 'w=895'),
+  BRISTOL_OFFICIAL.faubourg114.replace('w=2160', 'w=2159'),
+  BRISTOL_OFFICIAL.suiteAzurTerrace.replace('w=1900', 'w=1899'),
+] as const;
+
+export const LE_BRISTOL_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPerPressSlot(
+  LE_BRISTOL_PARIS_GALLERY_PRESS_SLOT_URLS,
+  LE_BRISTOL_PARIS_HERO_SOURCE_URL,
+);
+
 export const LE_BRISTOL_PARIS_GALLERY_CDC_CATEGORIES = [
   'exterior',
   'lobby',

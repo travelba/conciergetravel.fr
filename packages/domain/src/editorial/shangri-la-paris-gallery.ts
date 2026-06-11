@@ -8,7 +8,12 @@
  * view, detail, concierge, events (3 images each).
  */
 
-export const SHANGRI_LA_PARIS_HERO_IMAGE = 'cct/hotels/shangri-la-paris/press-1';
+import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
+
+export const SHANGRI_LA_PARIS_HERO_IMAGE = 'cct/hotels/shangri-la-paris/hero';
+
+export const SHANGRI_LA_PARIS_HERO_SOURCE_URL =
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/SLPR-legal-notices-1920x940.jpg';
 
 export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   {
@@ -336,6 +341,44 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
 ] as const;
 
 /** CDC §2.2 category floor — 10 required categories. */
+export const SHANGRI_LA_PARIS_GALLERY_PRESS_SLOT_URLS = [
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/SLPR-legal-notices-1920x940.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/202510_SLPR_Awards_1920x940.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/SLPR-legal-notices-1920x940.jpg',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/about/SLPR-Lobby.jpg?width=1200&quality=90',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/SLPR-bg-Dining.jpg',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/C/C/2/%7BCC23F5E5-41CB-4537-8CBD-39699580275C%7DSLPR-AppartementPrinceBonaparte.JPG',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/6/B/F/%7B6BFC2F77-9EAB-45FC-A30C-57AF66AD6F77%7D012026-Deluxe-Room-1.jpg?w=1200&mode=crop&scale=both',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/9/8/7/%7B9871D466-193E-45D8-B05B-5600A80C157D%7DSLPR-DeluxeSuite.JPG',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/7/9/%7B279B78FD-40AE-4194-9AFF-A14E5B29CEED%7D012026-Junior-Suite-Paris-View-1.jpg',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/SLPR-bg-Dining.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/47-La-Bauhinia.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/39-La-Suite-Shangri-La.jpg',
+  'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox2_Desktop_1140x760.JPG?w=1140',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/D/4/%7B2D4595ED-B36A-4A48-BA8D-D44F682E02D7%7D202411-enchanted-wonders-paris-1180x535.jpg?w=1180&mode=crop&quality=100&scale=both',
+  'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox1_Desktop_1140x760.JPG?w=1140',
+  'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox1_Desktop_1140x760.JPG?w=1140',
+  'https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/chi-le-spa-paris/202306_SLPR_DLP_ContentBox1_Desktop_1140x760.JPG?w=1140',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/D/4/%7B2D4595ED-B36A-4A48-BA8D-D44F682E02D7%7D202411-enchanted-wonders-paris-1180x535.jpg?w=1180&mode=crop&quality=100&scale=both',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/6/B/9/%7B6B98157F-601B-4B2D-987A-E34023334662%7D012026-Duplex-Terrace-Eiffel-View-Suite-1.jpg',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/2/7/9/%7B279B78FD-40AE-4194-9AFF-A14E5B29CEED%7D012026-Junior-Suite-Paris-View-1.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/39-La-Suite-Shangri-La.jpg',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/C/C/2/%7BCC23F5E5-41CB-4537-8CBD-39699580275C%7DSLPR-AppartementPrinceBonaparte.JPG',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/47-La-Bauhinia.jpg',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/about/SLPR-Lobby.jpg?width=1200&quality=90',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/about/SLPR-Lobby.jpg?width=1200&quality=90',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/about/202510_SLPR_Awards_1920x940.jpg',
+  'https://sitecore-cd-imgr.shangri-la.com/MediaFiles/C/C/2/%7BCC23F5E5-41CB-4537-8CBD-39699580275C%7DSLPR-AppartementPrinceBonaparte.JPG',
+  'http://www.shangri-la.com/uploadedImages/Shangri-la_Hotels/Shangri-La_Hotel,_Paris/SLPR-bg-Dining.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/47-La-Bauhinia.jpg',
+  'https://www.shangri-la.com/-/media/Shangri-La/paris_shangrila/settings/gallery/images/39-La-Suite-Shangri-La.jpg',
+] as const;
+
+export const SHANGRI_LA_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPerPressSlot(
+  SHANGRI_LA_PARIS_GALLERY_PRESS_SLOT_URLS,
+  SHANGRI_LA_PARIS_HERO_SOURCE_URL,
+);
+
 export const SHANGRI_LA_PARIS_GALLERY_CDC_CATEGORIES = [
   'exterior',
   'lobby',

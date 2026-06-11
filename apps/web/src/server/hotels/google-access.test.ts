@@ -67,7 +67,7 @@ function minimalRow(overrides: Partial<HotelDetailRow> = {}): HotelDetailRow {
         author: 'Marie L.',
         rating: 5,
         text: 'Un séjour parfait.',
-        publish_time: '2026-01-10T12:00:00Z',
+        publish_time: '2026-05-15T12:00:00Z',
         language: 'fr',
       },
     ],
@@ -149,7 +149,7 @@ describe('readGoogleReviews', () => {
     expect(reviews[0]?.author).toBe('Marie L.');
     expect(reviews[0]?.rating).toBe(5);
     expect(reviews[0]?.text).toContain('séjour');
-    expect(reviews[0]?.publishTime).toBe('2026-01-10T12:00:00Z');
+    expect(reviews[0]?.publishTime).toBe('2026-05-15T12:00:00Z');
   });
 
   it('drops invalid entries', () => {
@@ -162,15 +162,38 @@ describe('readGoogleReviews', () => {
     expect(reviews).toHaveLength(0);
   });
 
-  it('sorts by publish_time descending and keeps ratings below 5', () => {
+  it('excludes GMB quotes older than 90 days from #acces display', () => {
     const reviews = readGoogleReviews(
       minimalRow({
         google_reviews: [
+          {
+            author: 'Recent three',
+            rating: 3,
+            text: 'Chambre bruyante côté cour intérieure.',
+            publish_time: '2026-06-01T00:00:00Z',
+          },
           {
             author: 'Older five',
             rating: 5,
             text: 'Séjour parfait, service au top.',
             publish_time: '2025-01-01T00:00:00Z',
+          },
+        ],
+      }),
+      'fr',
+    );
+    expect(reviews.map((r) => r.author)).toEqual(['Recent three']);
+  });
+
+  it('sorts fresh reviews by publish_time descending and keeps ratings below 5', () => {
+    const reviews = readGoogleReviews(
+      minimalRow({
+        google_reviews: [
+          {
+            author: 'Mid four',
+            rating: 4,
+            text: 'Bon séjour, petit-déjeuner excellent.',
+            publish_time: '2026-05-01T00:00:00Z',
           },
           {
             author: 'Recent three',
@@ -188,7 +211,7 @@ describe('readGoogleReviews', () => {
       }),
       'fr',
     );
-    expect(reviews.map((r) => r.author)).toEqual(['Recent three', 'Older five']);
+    expect(reviews.map((r) => r.author)).toEqual(['Recent three', 'Mid four']);
     expect(reviews[0]?.rating).toBe(3);
   });
 });

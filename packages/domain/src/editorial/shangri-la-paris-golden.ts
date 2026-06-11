@@ -16,8 +16,10 @@ import {
 import { SHANGRI_LA_PARIS_CONCIERGE_QUESTIONS_KIT } from './shangri-la-paris-concierge-questions';
 import {
   SHANGRI_LA_PARIS_GALLERY_IMAGES,
+  SHANGRI_LA_PARIS_GALLERY_SOURCE_URLS,
   SHANGRI_LA_PARIS_HERO_IMAGE,
 } from './shangri-la-paris-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const SHANGRI_LA_PARIS_PROMOTE_SLUG = 'shangri-la-paris';
@@ -1281,7 +1283,10 @@ export function buildShangriLaParisGoldenFields(
     meta_title_fr: SHANGRI_LA_PARIS_META_TITLE_FR,
     meta_title_en: SHANGRI_LA_PARIS_META_TITLE_EN,
     hero_image: SHANGRI_LA_PARIS_HERO_IMAGE,
-    gallery_images: SHANGRI_LA_PARIS_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      SHANGRI_LA_PARIS_GALLERY_IMAGES,
+      SHANGRI_LA_PARIS_GALLERY_SOURCE_URLS,
+    ),
     external_sources: SHANGRI_LA_PARIS_EXTERNAL_SOURCES,
     wikidata_id: shangriLaParisExternalScalar('wikidata_id'),
     wikipedia_url_fr: shangriLaParisExternalScalar('wikipedia_url_fr'),

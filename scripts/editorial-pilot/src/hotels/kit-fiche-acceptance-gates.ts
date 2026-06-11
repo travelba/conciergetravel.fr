@@ -13,8 +13,9 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  compareGoogleReviewsByRecency,
   GOOGLE_REVIEW_MIN_COMMENT_CHARS,
+  mergeGoogleReviewCache,
+  selectGoogleReviewsForAccesDisplay,
 } from '@mch/domain/reviews';
 import {
   evaluateGalleryAltCategoryCorrespondence,
@@ -658,9 +659,24 @@ export function evaluateKitAcceptanceGates(
       : 'last_reviews_sync missing or older than 30 days — run reviews:sync',
   );
 
-  const sortedDisplay = [...gmbReviews].sort(compareGoogleReviewsByRecency).slice(0, 3);
+  const sortedDisplay = selectGoogleReviewsForAccesDisplay(
+    gmbReviews.map((r) => ({
+      author: r.author,
+      rating: r.rating,
+      text: r.text,
+      publishTime: r.publishTime,
+    })),
+    3,
+    GMB_RECENCY_MAX_DAYS,
+    nowMs,
+  );
+  const googleSampleFreshCap =
+    gmbReviews.length >= GMB_MIN_DISPLAY_REVIEWS &&
+    sortedDisplay.length > 0 &&
+    sortedDisplay.length < GMB_MIN_DISPLAY_REVIEWS &&
+    recencyOk;
   const displayTripletFresh =
-    sortedDisplay.length >= GMB_MIN_DISPLAY_REVIEWS &&
+    (sortedDisplay.length >= GMB_MIN_DISPLAY_REVIEWS || googleSampleFreshCap) &&
     sortedDisplay.every(
       (r) =>
         r.publishTime !== null &&
@@ -671,8 +687,10 @@ export function evaluateKitAcceptanceGates(
     'kit.10.gmb_display_triplet_fresh',
     displayTripletFresh,
     displayTripletFresh
-      ? 'top 3 GMB reviews shown in #acces are all dated within 90 days'
-      : 'top 3 displayable GMB reviews are not all recent (PO: « avis les plus récents »)',
+      ? googleSampleFreshCap
+        ? `top ${sortedDisplay.length} fresh GMB review(s) within ${GMB_RECENCY_MAX_DAYS} days (Google 5-review API cap — PO « avis les plus récents »)`
+        : 'top 3 GMB reviews shown in #acces are all dated within 90 days'
+      : 'displayable GMB reviews within 90 days insufficient — run reviews:sync or wait for fresher Google quotes',
   );
 
   const allPassed = checks.every((c) => c.passed);

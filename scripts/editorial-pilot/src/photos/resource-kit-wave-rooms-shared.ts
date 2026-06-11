@@ -32,17 +32,23 @@ const EnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(40),
 });
 
-function parseArgs(argv: readonly string[]): { readonly slug: string; readonly dryRun: boolean } {
+function parseArgs(argv: readonly string[]): {
+  readonly slug: string;
+  readonly dryRun: boolean;
+  readonly force: boolean;
+} {
   let slug = '';
   let dryRun = false;
+  let force = false;
   for (const arg of argv) {
     if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
     else if (arg === '--dry-run') dryRun = true;
+    else if (arg === '--force') force = true;
   }
   if (!isKitWaveSlug(slug)) {
     throw new Error(`--slug must be one of kit wave slugs, got "${slug}"`);
   }
-  return { slug, dryRun };
+  return { slug, dryRun, force };
 }
 
 async function fetchRoomRows(
@@ -129,7 +135,11 @@ async function patchRoom(
   }
 }
 
-export async function runKitWaveRoomResource(slug: string, dryRun: boolean): Promise<void> {
+export async function runKitWaveRoomResource(
+  slug: string,
+  dryRun: boolean,
+  force = false,
+): Promise<void> {
   const env = EnvSchema.parse(process.env);
   const cfg: SupabaseRestConfig = {
     url: env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/+$/u, ''),
@@ -172,7 +182,7 @@ export async function runKitWaveRoomResource(slug: string, dryRun: boolean): Pro
   for (const roomSlug of visible) {
     const row = dbRooms.find((r) => r.slug === roomSlug);
     if (row === undefined) continue;
-    if (row.imageCount >= 1) {
+    if (row.imageCount >= 1 && !force) {
       console.log(`[skip] ${roomSlug} already has ${String(row.imageCount)} image(s)`);
       continue;
     }
@@ -197,7 +207,7 @@ export async function runKitWaveRoomResource(slug: string, dryRun: boolean): Pro
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
-  await runKitWaveRoomResource(args.slug, args.dryRun);
+  await runKitWaveRoomResource(args.slug, args.dryRun, args.force);
 }
 
 if (

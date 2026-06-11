@@ -64,7 +64,7 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
     ],
     roomImages: {
       'seine-junior-suite': pair('cheval-blanc-paris', 9),
-      'eiffel-suite': pair('cheval-blanc-paris', 7),
+      'eiffel-suite': pair('cheval-blanc-paris', 19),
       'pont-neuf-deluxe-room': pair('cheval-blanc-paris', 8),
       'deluxe-room': pair('cheval-blanc-paris', 7),
     },
@@ -73,8 +73,8 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
     pickSlug: LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG,
     cardPriority: [[LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG], ['suite-paris'], ['suite-azur']],
     roomImages: {
-      'suite-eden': pair('le-bristol-paris', 8, 9),
-      'suite-paris': pair('le-bristol-paris', 7),
+      'suite-eden': pair('le-bristol-paris', 15),
+      'suite-paris': pair('le-bristol-paris', 8),
       'suite-azur': pair('le-bristol-paris', 9),
     },
   },
@@ -93,20 +93,20 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
       ['classic-superior-room'],
     ],
     roomImages: {
-      'terrace-room-with-onzen': pair('les-pres-deugenie', 7),
-      'de-luxe-rooms': pair('les-pres-deugenie', 8),
-      'classic-superior-room': pair('les-pres-deugenie', 9),
+      'terrace-room-with-onzen': pair('les-pres-deugenie', 27),
+      'de-luxe-rooms': pair('les-pres-deugenie', 9),
+      'classic-superior-room': pair('les-pres-deugenie', 7),
     },
   },
   'shangri-la-paris': {
     pickSlug: SHANGRI_LA_PARIS_CONCIERGE_PICK_SLUG,
     cardPriority: [[SHANGRI_LA_PARIS_CONCIERGE_PICK_SLUG], ['superior-room'], ['deluxe-room']],
     roomImages: {
-      'terrace-eiffel-view-room': pair('shangri-la-paris', 8, 9),
+      'terrace-eiffel-view-room': pair('shangri-la-paris', 19, 20),
       'superior-room': pair('shangri-la-paris', 7),
-      'deluxe-room': pair('shangri-la-paris', 7),
-      'terrace-room': pair('shangri-la-paris', 8),
-      'eiffel-view-room': pair('shangri-la-paris', 8),
+      'deluxe-room': pair('shangri-la-paris', 8),
+      'terrace-room': pair('shangri-la-paris', 20),
+      'eiffel-view-room': pair('shangri-la-paris', 19),
     },
   },
 };

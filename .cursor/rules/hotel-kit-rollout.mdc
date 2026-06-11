@@ -33,7 +33,12 @@ Chaque fiche pilote suivante **doit** passer la checklist du skill avant validat
 | D10 | `#concierge-questions` : ton **informatif** (« La conciergerie peut… »). **Pas** « Je réserve / Je confirme ». |
 | D11 | Pas de label hardcodé d'une autre fiche (ex. Airelles). |
 | D12 | Photo incorrecte → **sourcer site officiel** (Tavily / DAM chaîne / Google Places) + re-upload Cloudinary. **Interdit** de ne corriger que metadata/resolver. |
-| D15 | `#chambres` : `concierge_pick` = **carte n°1** / 3 visibles, chaque tuile avec photo. |
+| D13 | POI `#autour` → asset **`poi-{slug}`** dédié — jamais slot galerie `press-*`. Sourcing réel (Commons / officiel / Places) **avant** IA. |
+| D14 | Correspondance sujet : `audit:photo-subject` L1 + `--vision` pilotes ; gates `photos.gallery_alt_category`, `gold.poi_photo_structural`. |
+| D20 | **Hero mosaïque** : `hero_image` **interdit** dans `gallery_images[]` ; catégorie hero = `exterior` ou `view` (vue d’ensemble établissement). Gates : `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view`. |
+| D21 | **Ordre photo** (Rule 7 skill) : hero → galerie 30 (`url`/`source_url` unique) → chambres par slug → spa/resto → POI → promote → audit → walk. |
+| D22 | **Orchestration batch** (Rule 8) : une phase = une commande ; POI Commons avant IA ; pas de chaîne 5× POI (~50 min) ; Contentful sans `?mchPress=`. |
+| D15 | `#chambres` : `concierge_pick` = **carte n°1** / 3 visibles, chaque tuile avec photo **dédiée** (pas fallback galerie). |
 | D16 | Module chambres **par slug** (`kit-{slug}-display.ts`) — pas le chemin Airelles générique. |
 | D17 | `faq_content_kit` Perplexity 40–60 — **pas** alias du promote. |
 | D18 | GMB : sync < 30 j, ≥ 3 avis, plus récent ≤ 90 j. |
@@ -41,18 +46,35 @@ Chaque fiche pilote suivante **doit** passer la checklist du skill avant validat
 
 ## Workflow minimal par slug
 
-1. Golden TS (`{slug}-golden.ts` + gallery + concierge-questions).
-2. Photos batch ou upload ciblé depuis source **officielle**.
-3. `reviews:sync -- --slug=<slug>`.
-4. `promote:{slug}-golden`.
-5. `audit:hotel-fiches-cdc -- --slug=<slug>`.
-6. Walk-through navigateur FR + EN — skill §Rule 6 ([`hotel-kit-rollout`](mdc:.cursor/skills/hotel-kit-rollout/SKILL.md)) **avant commit**.
-7. **`audit:hotel-fiches-cdc` exit 0** sur gates `kit.*` — sinon **pas livré** (D19).
+Skill **Rule 8** = orchestration détaillée (phases, durées, parallélisation). Résumé :
+
+| Phase | Action |
+| ----- | ------ |
+| 0 | `photos:discover -- --slug=<slug>` |
+| 1 | `{prefix}:photos:gallery` — hero exterior/view **hors** galerie ; 30 URLs uniques dans `{slug}-gallery.ts` |
+| 2 | `reviews:sync -- --slug=<slug>` |
+| 3 | `promote:{slug}-golden` |
+| 4 | `resource-{slug}-rooms.ts --force` |
+| 5 | `{prefix}:photos:poi` — **Commons/Places d’abord** ; IA ≤ 6 slots/documenté |
+| 6 | `audit:hotel-fiches-cdc -- --slug=<slug>` — exit 0 sur `kit.*` |
+| 7 | Walk Rule 6 FR+EN — **avant commit** |
+
+**Wave catalogue (N slugs)** : paralléliser phases 1 et 5 sur N terminaux (1 slug/terminal). **Interdit** : `slug1:poi ; slug2:poi ; …` dans un seul shell.
+
+Artefacts : golden TS + `run-kit-wave-gallery-batch.ts` + `kit-gallery-promote.ts` (`attachKitGallerySourceUrls`).
 
 ## Gates audit (automatisés — blockers kit)
 
+**Photos (`kit.02.*`)** :
+- `kit.02.hero_not_in_gallery` — pas de doublon hero / vignette mosaïque
+- `kit.02.hero_category_exterior_or_view` — hero = vue d’ensemble
+- `kit.02.gallery_unique_public_id` — pas de `public_id` dupliqué dans la galerie
+- `kit.02.gallery_source_url_tracked` — chaque slot porte `url`/`source_url` (dédup pixels)
+- `kit.02.gallery_no_duplicate_source_url` — 0 URL source réutilisée
+- `kit.02.gallery_alt_category` — spa ≠ chambre dans alt/category
 - `kit.02.chambres_pick_first_visible` / `kit.02.chambres_visible_have_photo`
-- `kit.02.gallery_no_duplicate_source_url`
+
+**Autres** :
 - `kit.11.faq_kit_not_stub`
 - `kit.10.gmb_*` (count, recency, sync)
 - `cdc.10.google_reviews_gmb` (blocker si kit)

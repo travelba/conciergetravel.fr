@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   compareGoogleReviewsByRecency,
   hasSubstantiveGoogleReviewComment,
+  isGoogleReviewWithinDisplayWindow,
+  mergeGoogleReviewCache,
+  selectGoogleReviewsForAccesDisplay,
   selectGoogleReviewsForDisplay,
   type GoogleReviewCandidate,
 } from './google-review-selection';
@@ -95,5 +98,54 @@ describe('selectGoogleReviewsForDisplay', () => {
   it('drops rating-only / empty-text rows', () => {
     const selected = selectGoogleReviewsForDisplay(pool, 5);
     expect(selected.some((r) => r.author === 'Empty')).toBe(false);
+  });
+});
+
+describe('selectGoogleReviewsForAccesDisplay', () => {
+  const nowMs = Date.parse('2026-06-10T12:00:00.000Z');
+
+  it('excludes stale quotes outside the 90-day window', () => {
+    const pool: readonly GoogleReviewCandidate[] = [
+      {
+        author: 'Recent',
+        rating: 3,
+        text: 'Commentaire récent détaillé.',
+        publishTime: '2026-05-28T09:45:28.907616117Z',
+      },
+      {
+        author: 'Stale',
+        rating: 5,
+        text: 'Palace magnifique, service impeccable.',
+        publishTime: '2025-12-29T10:46:32.432846029Z',
+      },
+    ];
+    expect(selectGoogleReviewsForAccesDisplay(pool, 3, 90, nowMs).map((r) => r.author)).toEqual([
+      'Recent',
+    ]);
+  });
+});
+
+describe('mergeGoogleReviewCache', () => {
+  const nowMs = Date.parse('2026-06-10T12:00:00.000Z');
+
+  it('keeps a fresh cached row when the API sample drops it', () => {
+    const existing: GoogleReviewCandidate[] = [
+      {
+        author: 'Cached fresh',
+        rating: 5,
+        text: 'Still valid cached review text.',
+        publishTime: '2026-05-01T00:00:00.000Z',
+      },
+    ];
+    const incoming: GoogleReviewCandidate[] = [
+      {
+        author: 'API fresh',
+        rating: 4,
+        text: 'New review from Google Places API.',
+        publishTime: '2026-06-01T00:00:00.000Z',
+      },
+    ];
+    const merged = mergeGoogleReviewCache(existing, incoming, { maxStored: 5 });
+    expect(merged.map((r) => r.author)).toEqual(['API fresh', 'Cached fresh']);
   });
 });

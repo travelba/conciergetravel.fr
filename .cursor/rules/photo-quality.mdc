@@ -31,12 +31,18 @@ Un seul point manquant = PR refusée.
 
 ### ✅ Correspondance sujet (CDC §2.2bis — 2026-06-10)
 
+- [ ] **Hero kit** : `hero_image` **absent** de `gallery_images[]` (gate `kit.02.hero_not_in_gallery`)
+- [ ] **Hero kit** : catégorie `exterior` ou `view` — vue d’ensemble de l’établissement (gate `kit.02.hero_category_exterior_or_view`)
+- [ ] **Galerie kit** : chaque entrée porte `url` ou `source_url` en DB (gate `kit.02.gallery_source_url_tracked`)
+- [ ] **Galerie kit** : 0 URL source dupliquée (gate `kit.02.gallery_no_duplicate_source_url`) ; 0 `public_id` dupliqué (`kit.02.gallery_unique_public_id`)
+- [ ] **Chambres kit** : photo dédiée par `room.slug` — pas de recyclage galerie (gates `kit.02.chambres_*`, `kit.16.room_*`)
 - [ ] Chaque POI `#autour` utilise un asset Cloudinary **`poi-{slug}`** — jamais un slot galerie `press-*` recyclé
+- [ ] POI : sourcing réel (Commons / site officiel / Google Places) **avant** génération IA — documenter dans `resource-{slug}-poi-images.ts`
 - [ ] Script dédié `resource-{slug}-poi-images.ts` exécuté avant `promote:*-golden` sur les fiches kit
 - [ ] `pnpm --filter @mch/editorial-pilot audit:photo-subject -- --slug=<slug>` → 0 fail structural
-- [ ] Fiches pilote : `--vision` sur POI avant sign-off PO (Layer 3)
+- [ ] Fiches pilote : `--vision` sur POI + walk mosaïque/chambres/spa/autour avant sign-off PO (Layer 3 + Rule 6)
 - [ ] Spa / F&B : mismatch visuel → re-sourcer officiel (D12) — pas remapper `category`/`alt_*` seul
-- [ ] Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category` doivent passer
+- [ ] Gates CDC : `gold.poi_photo_structural`, `photos.gallery_alt_category`, gates `kit.02.*` doivent passer
 
 Domain : `packages/domain/src/photos/photo-subject-correspondence.ts` · skill `photo-pipeline` §Photo-subject correspondence.
 

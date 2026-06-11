@@ -28,6 +28,7 @@ import {
   fetchPlaceDetails,
   geocodeHotelQuery,
 } from '@mch/integrations/google-places';
+import { mergeGoogleReviewCache } from '@mch/domain/reviews';
 
 import { loadPhotoEnv } from '../photos/env-photos.js';
 import { patchHotelById, selectHotels, type SupabaseRestConfig } from '../photos/supabase-rest.js';
@@ -42,9 +43,10 @@ interface HotelRow {
   readonly city: string;
   readonly country_code: string | null;
   readonly google_place_id: string | null;
+  readonly google_reviews: unknown;
 }
 
-const HOTEL_COLUMNS = 'id, slug, name, city, country_code, google_place_id';
+const HOTEL_COLUMNS = 'id, slug, name, city, country_code, google_place_id, google_reviews';
 
 interface CliArgs {
   readonly slug: string | null;
@@ -131,6 +133,44 @@ async function resolvePlaceId(
   });
   if (!geo.ok) return null;
   return { placeId: geo.value.placeId, resolvedVia: 'geocode' };
+}
+
+function parseStoredGoogleReviews(raw: unknown): Array<{
+  author: string;
+  rating: number;
+  text: string;
+  publishTime: string | null;
+}> {
+  if (!Array.isArray(raw)) return [];
+  const out: Array<{
+    author: string;
+    rating: number;
+    text: string;
+    publishTime: string | null;
+  }> = [];
+  for (const entry of raw) {
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) continue;
+    const row = entry as Record<string, unknown>;
+    const author = row['author'];
+    const text = row['text'];
+    const rating = row['rating'];
+    const publishTime = row['publish_time'];
+    if (typeof author !== 'string' || author.trim().length === 0) continue;
+    if (typeof text !== 'string' || text.trim().length === 0) continue;
+    if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+      continue;
+    }
+    out.push({
+      author: author.trim(),
+      text: text.trim(),
+      rating,
+      publishTime:
+        typeof publishTime === 'string' && publishTime.trim().length > 0
+          ? publishTime.trim()
+          : null,
+    });
+  }
+  return out;
 }
 
 async function main(): Promise<void> {
@@ -221,15 +261,35 @@ async function main(): Promise<void> {
       continue;
     }
 
+    const incomingCandidates = reviews.map((review) => ({
+      author: review.author,
+      rating: review.rating,
+      text: review.text,
+      publishTime: review.publish_time ?? null,
+    }));
+    const existingCandidates = parseStoredGoogleReviews(hotel.google_reviews);
+    const mergedCandidates = mergeGoogleReviewCache(existingCandidates, incomingCandidates, {
+      maxStored: 5,
+    });
+    const mergedReviews = mergedCandidates.map((review) => {
+      const row: Record<string, unknown> = {
+        author: review.author,
+        rating: review.rating,
+        text: review.text,
+      };
+      if (review.publishTime !== null) row['publish_time'] = review.publishTime;
+      return row;
+    });
+
     const resolvedVia = effectivePlaceId !== resolved.placeId ? 'geocode' : resolved.resolvedVia;
     console.log(
-      `OK ${resolvedVia} rating=${rating ?? '—'} count=${userRatingCount ?? '—'} quotes=${reviews.length}`,
+      `OK ${resolvedVia} rating=${rating ?? '—'} count=${userRatingCount ?? '—'} quotes=${mergedReviews.length} (api=${reviews.length} merged=${existingCandidates.length})`,
     );
 
     const payload: Record<string, unknown> = {
       google_rating: rating,
       google_reviews_count: userRatingCount,
-      google_reviews: reviews,
+      google_reviews: mergedReviews,
       last_reviews_sync: new Date().toISOString(),
     };
     if (effectivePlaceId !== (hotel.google_place_id?.trim() ?? '')) {
@@ -262,7 +322,7 @@ async function main(): Promise<void> {
       placeId: effectivePlaceId,
       rating,
       reviewCount: userRatingCount,
-      storedReviews: reviews.length,
+      storedReviews: mergedReviews.length,
     });
   }
 

@@ -32,10 +32,13 @@ Chaque photo rendue doit correspondre au **sujet affiché** (POI, spa, restauran
 
 | Surface | Règle | Gate / outil |
 | ------- | ----- | ------------- |
-| POI `#autour` | Asset dédié `poi-{slug}` — jamais slot galerie `press-*` | `gold.poi_dedicated_images`, `gold.poi_photo_structural` |
+| **Hero mosaïque (kit)** | `hero_image` = vue **exterior** ou **view** de l’établissement ; **interdit** dans `gallery_images[]` (pas de doublon grande + petite tuile) | `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view` |
+| **Galerie 30 (kit)** | 30 slots uniques ; chaque entrée porte `url` ou `source_url` ; 0 URL source dupliquée ; 0 `public_id` dupliqué | `kit.02.gallery_source_url_tracked`, `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_unique_public_id` |
+| **Chambres (kit)** | 1 photo officielle par `room.slug` — pas de fallback `galleryTiles[index % n]` | `kit.02.chambres_visible_have_photo`, `kit.16.room_*` |
+| POI `#autour` | Asset dédié `poi-{slug}` — sourcing réel (Commons / officiel / Places) **avant** IA | `gold.poi_dedicated_images`, `gold.poi_photo_structural`, `kit.07.poi_structural` |
 | Galerie hôtel | `category` Vision cohérente avec `alt_fr` (spa ≠ chambre) | `photos.gallery_alt_category`, `categorize-with-vision.ts` |
-| Spa / F&B kit | Re-sourcer officiel si pixels ≠ sujet — pas remapper metadata | skill `hotel-kit-rollout` D12 |
-| Validation PO | Vision QA POI avant sign-off pilote | `audit:photo-subject -- --slug=x --vision` |
+| Spa / F&B kit | Re-sourcer officiel si pixels ≠ sujet — pas remapper metadata | skill `hotel-kit-rollout` D12, Rule 7 |
+| Validation PO | Vision QA + walk mosaïque/chambres/spa/autour avant sign-off pilote | `audit:photo-subject -- --slug=x --vision` · skill `hotel-kit-rollout` Rule 6 |
 
 Domain : `packages/domain/src/photos/photo-subject-correspondence.ts` · skill `photo-pipeline` §Photo-subject correspondence.
 
@@ -48,9 +51,13 @@ Fiches `HOTEL_KIT_SLUGS` : conformité = **parité rendu PO** (pas deploy / 30/3
 
 | Remarque PO | Gates |
 | ----------- | ----- |
-| Photos chambres manquantes | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script` |
+| Hero = vignette mosaïque (même photo) | `kit.02.hero_not_in_gallery`, `kit.02.gallery_unique_public_id` |
+| Hero pas vue d’ensemble établissement | `kit.02.hero_category_exterior_or_view` |
+| Doublons pixels (URL source) | `kit.02.gallery_source_url_tracked`, `kit.02.gallery_no_duplicate_source_url` |
+| Photos chambres incorrectes / manquantes | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script` |
 | Sélection Concierge chambre invisible | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module` |
-| Photos expérience / restaurant incorrectes | `kit.02.gallery_*`, `kit.03.signature_experiences_dedicated_image`, `photos.gallery_alt_category` |
+| POI : IA avant photo réelle | `kit.07.poi_structural`, `gold.poi_dedicated_images` + walk `#autour` |
+| Photos expérience / restaurant / spa incorrectes | `kit.02.gallery_*`, `kit.03.signature_experiences_dedicated_image`, `photos.gallery_alt_category` |
 | FAQ trop faible | `kit.11.faq_kit_*`, `cdc.11.faq_kit_count` |
 | FAQ Concierge trop faible | `kit.11.concierge_*`, `cdc.11.concierge_informative_tone` (blocker kit) |
 | Avis Google récents manquants | `kit.10.gmb_*`, `cdc.10.google_reviews_gmb` |
@@ -92,6 +99,7 @@ Implémentation : `kit-fiche-acceptance-gates.ts` — `audit:hotel-fiches-cdc` *
 14. **`reviewRating` fabriqué** : note (ex. 5/5) posée sur une citation éditoriale sans note réelle → refus (EEAT).
 15. **Wrapper JSON-LD** : tous les blocs passent par `<SeoJsonLd>` (ou le primitif `<JsonLdScript>`) avec le nonce CSP ; jamais de `<script>` JSON-LD brut.
 16. **Correspondance photo/sujet (§2.2bis)** : POI = asset `poi-{slug}` dédié (gate `gold.poi_photo_structural`) ; galerie `category` incohérente avec `alt_fr` → fail (`photos.gallery_alt_category`) ; mismatch visuel spa/POI → re-sourcer, pas remapper metadata (skill `photo-pipeline` §Photo-subject correspondence, `hotel-kit-rollout` D13–D14).
+17. **Hero kit + mosaïque (§2.2bis — fiches `HOTEL_KIT_SLUGS`)** : `hero_image` ∉ `gallery_images[]` ; hero = catégorie `exterior` ou `view` ; chaque slot galerie trace `url`/`source_url` ; chambres = photo dédiée par slug. Gates `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view`, `kit.02.gallery_source_url_tracked`. Ordre sourcing : skill `hotel-kit-rollout` Rule 7.
 
 ## Golden template & audit catalogue
 
