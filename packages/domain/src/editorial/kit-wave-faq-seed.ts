@@ -97,41 +97,25 @@ const CDC_CANONICAL_FAQ = [
 
 type CanonicalAnswerKey = (typeof CDC_CANONICAL_FAQ)[number]['key'];
 
+interface CanonicalAnswerBlock {
+  readonly fr: string;
+  readonly en: string;
+  readonly featured?: boolean;
+  readonly tipFr?: string;
+  readonly tipEn?: string;
+}
+
 interface CanonicalPromoteAnswers {
-  readonly parking: {
-    readonly fr: string;
-    readonly en: string;
-    readonly featured?: boolean;
-    readonly tipFr?: string;
-    readonly tipEn?: string;
-  };
-  readonly breakfast: {
-    readonly fr: string;
-    readonly en: string;
-    readonly featured?: boolean;
-    readonly tipFr?: string;
-    readonly tipEn?: string;
-  };
-  readonly wifi: { readonly fr: string; readonly en: string };
-  readonly pets: { readonly fr: string; readonly en: string; readonly featured?: boolean };
-  readonly airport: { readonly fr: string; readonly en: string };
-  readonly pool: { readonly fr: string; readonly en: string };
-  readonly early_checkin: {
-    readonly fr: string;
-    readonly en: string;
-    readonly featured?: boolean;
-    readonly tipFr?: string;
-    readonly tipEn?: string;
-  };
-  readonly transfers: {
-    readonly fr: string;
-    readonly en: string;
-    readonly featured?: boolean;
-    readonly tipFr?: string;
-    readonly tipEn?: string;
-  };
-  readonly cancellation: { readonly fr: string; readonly en: string };
-  readonly taxes: { readonly fr: string; readonly en: string };
+  readonly parking: CanonicalAnswerBlock;
+  readonly breakfast: CanonicalAnswerBlock;
+  readonly wifi: CanonicalAnswerBlock;
+  readonly pets: CanonicalAnswerBlock;
+  readonly airport: CanonicalAnswerBlock;
+  readonly pool: CanonicalAnswerBlock;
+  readonly early_checkin: CanonicalAnswerBlock;
+  readonly transfers: CanonicalAnswerBlock;
+  readonly cancellation: CanonicalAnswerBlock;
+  readonly taxes: CanonicalAnswerBlock;
 }
 
 const GROUP_EN: Record<string, string> = {

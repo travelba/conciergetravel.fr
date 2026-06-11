@@ -60,4 +60,3 @@ export * from './kit-wave-room-catalog';
 export * from './kit-wave-faq-seed';
 export * from './kit-wave-room-types';
 export * from './les-airelles-courchevel-rooms';
-export * from './les-pres-deugenie-faq.generated';
