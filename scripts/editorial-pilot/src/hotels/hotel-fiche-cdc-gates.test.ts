@@ -147,6 +147,7 @@ function baseCdcRow(overrides: Partial<CdcHotelAuditRow> = {}): CdcHotelAuditRow
     google_rating: 4.8,
     google_reviews_count: 1200,
     google_reviews: [],
+    last_reviews_sync: null,
     featured_reviews: [
       {
         source: 'Forbes',

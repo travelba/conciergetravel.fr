@@ -2009,8 +2009,10 @@ export function evaluateCdcHotelFiche(
       concierge_questions: row.concierge_questions,
       signature_experiences: row.signature_experiences,
       points_of_interest: row.points_of_interest,
-      orderedRoomSlugs: waveRoomCtx?.orderedRoomSlugs,
       rooms: waveRoomCtx?.rooms ?? ctx.kitRoomRows,
+      ...(waveRoomCtx?.orderedRoomSlugs !== undefined
+        ? { orderedRoomSlugs: waveRoomCtx.orderedRoomSlugs }
+        : {}),
     });
     for (const kitCheck of kitChecks) {
       const block = kitCheck.id.startsWith('kit.11.')
