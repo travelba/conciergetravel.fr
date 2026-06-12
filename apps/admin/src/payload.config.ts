@@ -36,7 +36,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     meta: {
-      titleSuffix: '— ConciergeTravel admin',
+      titleSuffix: '— MyConciergeHotel admin',
     },
   },
   editor: lexicalEditor({}),
@@ -77,7 +77,7 @@ export default buildConfig({
       },
       mcp: {
         serverOptions: {
-          serverInfo: { name: 'ConciergeTravel CMS', version: '1.0.0' },
+          serverInfo: { name: 'MyConciergeHotel CMS', version: '1.0.0' },
         },
       },
     }),

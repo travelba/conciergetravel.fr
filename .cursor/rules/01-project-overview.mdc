@@ -26,7 +26,7 @@ Le ton, l’UX, l’architecture d’information et le contenu doivent exprimer 
 
 ## Stack imposée
 Toujours respecter la stack existante du repo :
-- Next.js 15 App Router
+- Next.js 16 App Router
 - React 19
 - TypeScript strict
 - Supabase PostgreSQL + RLS

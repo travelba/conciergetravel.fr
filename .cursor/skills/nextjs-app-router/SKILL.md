@@ -1,11 +1,11 @@
 ---
 name: nextjs-app-router
-description: Next.js 15 App Router patterns and conventions for MyConciergeHotel.com. Use whenever you create or modify routes, layouts, server actions, route handlers, metadata, fetch caching, revalidation tags, or middleware.
+description: Next.js 16 App Router patterns and conventions for MyConciergeHotel.com. Use whenever you create or modify routes, layouts, server actions, route handlers, metadata, fetch caching, revalidation tags, or middleware.
 ---
 
-# Next.js 15 App Router — MyConciergeHotel.com
+# Next.js 16 App Router — MyConciergeHotel.com
 
-We use **Next.js 15 App Router** with **React 19 Server Components by default**. Every change must respect the contractual rendering matrix (cf. `product-architecture` skill).
+We use **Next.js 16 App Router** (Turbopack) with **React 19 Server Components by default**. Every change must respect the contractual rendering matrix (cf. `product-architecture` skill).
 
 ## Triggers
 
