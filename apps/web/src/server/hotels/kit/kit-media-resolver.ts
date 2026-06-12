@@ -1,7 +1,11 @@
 import 'server-only';
 
 import { buildCloudinarySrc } from '@mch/ui';
-import { resolveKitWaveDiningPublicId, resolveKitWaveSpaHeroPublicId } from '@mch/domain/editorial';
+import {
+  normalizeKitVenueName,
+  resolveKitWaveDiningPublicId,
+  resolveKitWaveSpaHeroPublicId,
+} from '@mch/domain/editorial';
 
 import type { LocalisedGalleryImage } from '@/server/hotels/get-hotel-by-slug';
 
@@ -32,11 +36,7 @@ const KIT_DINING_ORDER = [
 ] as const;
 
 function normalizeName(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+  return normalizeKitVenueName(name);
 }
 
 function toCloudinaryTile(
@@ -143,6 +143,14 @@ export function createKitMediaResolver(
       if (wavePublicId !== undefined) {
         const waveTile = tileFromPublicId(wavePublicId, defaultAlt || venueName);
         if (waveTile !== undefined) return waveTile;
+        return {
+          src: buildCloudinarySrc({
+            cloudName,
+            publicId: wavePublicId,
+            transforms: 'f_auto,q_auto,c_fill,g_auto,w_700,h_525',
+          }),
+          alt: defaultAlt || venueName,
+        };
       }
       const key = normalizeName(venueName);
       const staticPath = KIT_DINING_STATIC[key];

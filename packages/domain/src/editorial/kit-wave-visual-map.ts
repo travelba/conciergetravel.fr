@@ -17,8 +17,15 @@ function normalizeVenueName(name: string): string {
   return name
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u2018\u2019\u201B\u2032`]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
     .toLowerCase()
     .trim();
+}
+
+/** Shared venue key for dining maps — normalizes curly apostrophes (Loulou's vs Loulou's). */
+export function normalizeKitVenueName(name: string): string {
+  return normalizeVenueName(name);
 }
 
 function pressPublicId(slug: KitWaveSlug, slot: number): string {
@@ -59,6 +66,7 @@ const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, nu
     'la ferme aux grives': 12,
     'cafe mere poule': 24,
     "loulou's lounge bar": 5,
+    'loulous lounge bar': 5,
   },
   'shangri-la-paris': {
     'shang palace': 10,

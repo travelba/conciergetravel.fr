@@ -131,7 +131,13 @@ function crossBlockDupes(
   if (spaPublicId !== null) track(spaPublicId, 'spa:block');
 
   return [...usage.entries()]
-    .filter(([, tags]) => tags.length > 1)
+    .filter(([, tags]) => {
+      if (tags.length <= 1) return false;
+      const kinds = new Set(tags.map((t) => t.split(':')[0] ?? ''));
+      // Same press-* on exp + resto is intentional when the experience is at that venue.
+      if (tags.length === 2 && kinds.has('exp') && kinds.has('resto')) return false;
+      return true;
+    })
     .map(([id, tags]) => `${id} → ${tags.join(', ')}`);
 }
 

@@ -913,7 +913,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'minceur-orangerie',
-    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-29`,
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-30`,
     title_fr: 'Déjeuner Grande Cuisine Minceur® — L’Orangerie',
     title_en: 'Grande Cuisine Minceur® lunch — L’Orangerie',
     description_fr:
