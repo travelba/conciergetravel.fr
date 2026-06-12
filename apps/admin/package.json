@@ -20,6 +20,7 @@
     "@mch/seo": "workspace:*",
     "@payloadcms/db-postgres": "^3.20.0",
     "@payloadcms/next": "^3.20.0",
+    "@payloadcms/plugin-mcp": "3.84.1",
     "@payloadcms/richtext-lexical": "^3.20.0",
     "@payloadcms/translations": "^3.20.0",
     "next": "catalog:",

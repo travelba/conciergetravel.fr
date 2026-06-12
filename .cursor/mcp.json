@@ -93,6 +93,16 @@
       "headers": {
         "Authorization": "Bearer ${APIFY_API_TOKEN}"
       }
+    },
+    "payload-cms": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:3001/api/mcp",
+        "--header",
+        "Authorization: Bearer ${PAYLOAD_MCP_API_KEY}"
+      ]
     }
   },
   "_documentation": {
