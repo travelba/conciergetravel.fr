@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { postgresAdapter } from '@payloadcms/db-postgres';
+import { mcpPlugin } from '@payloadcms/plugin-mcp';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
@@ -35,11 +36,52 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     meta: {
-      titleSuffix: '— MyConciergeHotel admin',
+      titleSuffix: '— ConciergeTravel admin',
     },
   },
   editor: lexicalEditor({}),
   collections: [Users, Hotels, HotelRooms, HotelMemberBenefits, ClubEligibility],
+  plugins: [
+    /**
+     * MCP server exposed at `/api/mcp` (port 3001 in dev).
+     *
+     * Lets MCP clients (Cursor, Claude, agents) query and edit editorial
+     * content with per-key granular permissions. API keys are managed in
+     * the admin panel under MCP → API Keys; every request must carry one
+     * as a Bearer token, and Payload access control still applies on top.
+     *
+     * Guard-rails:
+     * - `users` is deliberately NOT exposed.
+     * - `delete` is disabled everywhere — agents may create and update
+     *   editorial content but never destroy it.
+     */
+    mcpPlugin({
+      collections: {
+        hotels: {
+          description:
+            'Editorial mirror of the 5★ hotels catalogue (cms.hotels, synced to public.hotels — see ADR 0010).',
+          enabled: { find: true, create: true, update: true, delete: false },
+        },
+        hotel_rooms: {
+          description: 'Room types and editorial room content per hotel.',
+          enabled: { find: true, create: true, update: true, delete: false },
+        },
+        hotel_member_benefits: {
+          description: 'Member benefits (loyalty programme) attached to hotels.',
+          enabled: { find: true, create: true, update: true, delete: false },
+        },
+        club_eligibility: {
+          description: 'Club eligibility rules for the loyalty programme.',
+          enabled: { find: true, create: true, update: true, delete: false },
+        },
+      },
+      mcp: {
+        serverOptions: {
+          serverInfo: { name: 'ConciergeTravel CMS', version: '1.0.0' },
+        },
+      },
+    }),
+  ],
   db: postgresAdapter({
     schemaName: 'cms',
     disableCreateDatabase: true,
