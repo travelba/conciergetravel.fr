@@ -39,7 +39,7 @@
     },
     "shadcn": {
       "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
+      "args": ["-y", "shadcn@latest", "mcp"]
     },
     "tavily": {
       "command": "npx",
