@@ -913,7 +913,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'minceur-orangerie',
-    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-11`,
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-29`,
     title_fr: 'Déjeuner Grande Cuisine Minceur® — L’Orangerie',
     title_en: 'Grande Cuisine Minceur® lunch — L’Orangerie',
     description_fr:
@@ -927,7 +927,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'grille-orangerie',
-    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-12`,
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-11`,
     title_fr: 'Grillades La Grille — cheminée L’Orangerie',
     title_en: 'La Grille hearth grillades — L’Orangerie',
     description_fr:

@@ -133,6 +133,7 @@
     "audit:hotel-fiches:published": "tsx src/hotels/audit-hotel-fiche.ts --published-only",
     "audit:hotel-fiches-cdc": "tsx src/hotels/audit-hotel-fiche-cdc.ts",
     "audit:hotel-fiches-cdc:published": "tsx src/hotels/audit-hotel-fiche-cdc.ts --published-only",
+    "audit:kit-visiteur": "tsx src/hotels/audit-kit-visiteur.ts",
     "audit:photo-subject": "tsx src/photos/audit-photo-subject-correspondence.ts",
     "audit:photo-subject:published": "tsx src/photos/audit-photo-subject-correspondence.ts --published-only",
     "report:hotel-fiches-cdc": "tsx src/hotels/report-hotel-fiche-cdc.ts",

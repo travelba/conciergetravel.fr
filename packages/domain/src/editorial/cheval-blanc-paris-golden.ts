@@ -891,7 +891,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'hakuba-omakase',
-    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-12`,
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-23`,
     title_fr: 'Omakase au comptoir Hakuba',
     title_en: 'Omakase at the Hakuba counter',
     description_fr:
@@ -906,7 +906,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'langosteria-seafood',
-    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-14`,
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-12`,
     title_fr: 'Crudo & homard — Langosteria',
     title_en: 'Crudo & lobster — Langosteria',
     description_fr:

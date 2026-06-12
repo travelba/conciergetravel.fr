@@ -73,9 +73,9 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
     pickSlug: LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG,
     cardPriority: [[LE_BRISTOL_PARIS_CONCIERGE_PICK_SLUG], ['suite-paris'], ['suite-azur']],
     roomImages: {
-      'suite-eden': pair('le-bristol-paris', 15),
+      'suite-eden': pair('le-bristol-paris', 9),
       'suite-paris': pair('le-bristol-paris', 8),
-      'suite-azur': pair('le-bristol-paris', 9),
+      'suite-azur': pair('le-bristol-paris', 19),
     },
   },
   'les-airelles-courchevel': {
@@ -94,8 +94,8 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
     ],
     roomImages: {
       'terrace-room-with-onzen': pair('les-pres-deugenie', 27),
-      'de-luxe-rooms': pair('les-pres-deugenie', 9),
-      'classic-superior-room': pair('les-pres-deugenie', 7),
+      'de-luxe-rooms': pair('les-pres-deugenie', 7),
+      'classic-superior-room': pair('les-pres-deugenie', 8),
     },
   },
   'shangri-la-paris': {
@@ -103,8 +103,8 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
     cardPriority: [[SHANGRI_LA_PARIS_CONCIERGE_PICK_SLUG], ['superior-room'], ['deluxe-room']],
     roomImages: {
       'terrace-eiffel-view-room': pair('shangri-la-paris', 19, 20),
-      'superior-room': pair('shangri-la-paris', 7),
-      'deluxe-room': pair('shangri-la-paris', 8),
+      'superior-room': pair('shangri-la-paris', 6),
+      'deluxe-room': pair('shangri-la-paris', 7),
       'terrace-room': pair('shangri-la-paris', 20),
       'eiffel-view-room': pair('shangri-la-paris', 19),
     },

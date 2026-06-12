@@ -1027,7 +1027,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'soiree-chinoise-privee',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-10`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-22`,
     title_fr: 'Soirée chinoise privée au Shang Palace',
     title_en: 'Private Chinese soirée at Shang Palace',
     description_fr:

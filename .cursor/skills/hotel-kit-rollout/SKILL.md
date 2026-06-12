@@ -51,8 +51,9 @@ Héritées de D1–D6 (runbook) + retours PO PdG 2026-06-10.
 | D18 | **GMB frais**                    | `reviews:sync` < 30 j ; ≥ 3 avis substantifs en cache ; plus récent ≤ 90 j. Gates : `kit.10.gmb_review_count`, `kit.10.gmb_review_recency`, `kit.10.gmb_sync_fresh`.                                                                                                                                                                                                                                                             |
 | D19 | **Clôture « livré »**            | **Les deux** : (a) `audit:hotel-fiches-cdc -- --slug=x` **exit 0** sur gates `kit.*` ; (b) walk navigateur §Rule 6. Score CDC ≥ 95 % **sans** gates `kit.*` verts = **refusé**.                                                                                                                                                                                                                                                  |
 | D20 | **Hero mosaïque**                | `hero_image` **interdit** dans `gallery_images[]` ; catégorie hero = **`exterior`** ou **`view`** (vue d’ensemble). Gates : `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view`. Walk : hero ≠ vignette droite.                                                                                                                                                                                                |
-| D21 | **Ordre photo (Rule 7)**         | Hero → galerie 30 (`url` unique) → chambres par slug → spa/resto → POI (réel avant IA) → promote → audit → walk. **Interdit** : 30 press-\* puis remapper alt ; POI IA avant Commons/Places.                                                                                                                                                                                                                                     |
-| D22 | **Orchestration batch (Rule 8)** | **Une phase = une commande** (ou 5 terminaux parallèles par slug). **Interdit** d'enchaîner galerie×5 + POI×5 dans un seul shell (~2 h). POI : Commons/Places **avant** OpenAI ; viser **≤ 20 %** de slots IA par fiche. Contentful (`ctfassets.net`) : **jamais** `?mchPress=` — variantes `w±1` (Rule 8 §3).                                                                                                                   |
+| D21 | **Audit visiteur HTML**          | Gate `kit.20.visiteur_render_audit` — parse le HTML live `/hotel/{slug}` : ≥4 `exp-card`, 0 `htl_resto.jpg`, 0 réutilisation cross-bloc, alt chambre = label. CLI : `audit:kit-visiteur -- --wave5`. Auto dans `audit:hotel-fiches-cdc` (prefetch prod). Skip : `MCH_SKIP_KIT_VISITEUR_AUDIT=1`. Complète Rule 6 walk, ne le remplace pas.                                                                                       |
+| D22 | **Ordre photo (Rule 7)**         | Hero → galerie 30 (`url` unique) → chambres par slug → spa/resto → POI (réel avant IA) → promote → audit → walk. **Interdit** : 30 press-\* puis remapper alt ; POI IA avant Commons/Places.                                                                                                                                                                                                                                     |
+| D23 | **Orchestration batch (Rule 8)** | **Une phase = une commande** (ou 5 terminaux parallèles par slug). **Interdit** d'enchaîner galerie×5 + POI×5 dans un seul shell (~2 h). POI : Commons/Places **avant** OpenAI ; viser **≤ 20 %** de slots IA par fiche. Contentful (`ctfassets.net`) : **jamais** `?mchPress=` — variantes `w±1` (Rule 8 §3).                                                                                                                   |
 
 ---
 
@@ -71,6 +72,7 @@ Héritées de D1–D6 (runbook) + retours PO PdG 2026-06-10.
 | « `google_reviews_count` > 0 = avis OK »    | Cache stale / 1 avis / pas les plus récents               | `reviews:sync` + dates visibles dans `#acces`             |
 | POI IA sans Tavily/Commons/Places           | D21 — photo générique ≠ lieu nommé                        | `resource-{slug}-poi-images.ts` + walk `#autour`          |
 | « HTML prod contient `amen-grid` = livré »  | Deploy ≠ rendu PO                                         | Walk FR+EN vs `/hotel/les-airelles-gordes`                |
+| Grille expériences vide / resto placeholder | Zod golden ou visual-map non déployé                      | `kit.20.visiteur_render_audit` + `audit:kit-visiteur`     |
 
 ### Walk obligatoire avant « c'est bon » (en plus de Rule 5)
 
@@ -89,19 +91,19 @@ Screenshots desktop + mobile FR + EN. Commit `Tested:` cite les gates `kit.*` pa
 Chaque remarque PO wave 5 est verrouillée dans
 `scripts/editorial-pilot/src/hotels/kit-po-remark-registry.ts` :
 
-| Remarque PO                                | Gates automatisés                                                                                                       |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Photos chambres manquantes                 | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script`                      |
-| Hero dupliqué dans la mosaïque             | `kit.02.hero_not_in_gallery`, `kit.02.gallery_unique_public_id`, `kit.02.gallery_source_url_tracked`                    |
-| Hero pas une vue d’ensemble                | `kit.02.hero_category_exterior_or_view`                                                                                 |
-| POI photo IA sans sourcing réel            | `kit.07.poi_structural`, `gold.poi_dedicated_images`, walk `#autour`                                                    |
-| Sélection Concierge chambre invisible      | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module`                        |
-| Photos expérience / restaurant incorrectes | `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_alt_category`, `kit.03.signature_experiences_dedicated_image` |
-| FAQ trop faible                            | `kit.11.faq_kit_not_stub`, `kit.11.faq_kit_count`, `kit.11.faq_kit_has_groups`                                          |
-| FAQ Concierge trop faible                  | `kit.11.concierge_questions_count`, `kit.11.concierge_informative_tone`, `kit.11.concierge_taxonomy`                    |
-| Avis Google récents manquants              | `kit.10.gmb_*`, `cdc.10.google_reviews_gmb`                                                                             |
-| POI / F&B / spa (PdG)                      | `kit.07.poi_structural`, `gold.venues_all_handoff`, `gold.spa_dossier` (blockers kit)                                   |
-| Clôture « livré » abusive                  | `kit.19.closure_audit_exit_zero` + Rule 6 walk                                                                          |
+| Remarque PO                                | Gates automatisés                                                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Photos chambres manquantes                 | `kit.02.chambres_visible_have_photo`, `kit.02.chambres_pick_has_photo`, `kit.16.room_batch_script`                                                      |
+| Hero dupliqué dans la mosaïque             | `kit.02.hero_not_in_gallery`, `kit.02.gallery_unique_public_id`, `kit.02.gallery_source_url_tracked`                                                    |
+| Hero pas une vue d’ensemble                | `kit.02.hero_category_exterior_or_view`                                                                                                                 |
+| POI photo IA sans sourcing réel            | `kit.07.poi_structural`, `gold.poi_dedicated_images`, walk `#autour`                                                                                    |
+| Sélection Concierge chambre invisible      | `kit.02.chambres_pick_first_visible`, `kit.02.concierge_pick_note`, `kit.16.room_display_module`                                                        |
+| Photos expérience / restaurant incorrectes | `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_alt_category`, `kit.03.signature_experiences_dedicated_image`, `kit.20.visiteur_render_audit` |
+| FAQ trop faible                            | `kit.11.faq_kit_not_stub`, `kit.11.faq_kit_count`, `kit.11.faq_kit_has_groups`                                                                          |
+| FAQ Concierge trop faible                  | `kit.11.concierge_questions_count`, `kit.11.concierge_informative_tone`, `kit.11.concierge_taxonomy`                                                    |
+| Avis Google récents manquants              | `kit.10.gmb_*`, `cdc.10.google_reviews_gmb`                                                                                                             |
+| POI / F&B / spa (PdG)                      | `kit.07.poi_structural`, `gold.venues_all_handoff`, `gold.spa_dossier` (blockers kit)                                                                   |
+| Clôture « livré » abusive                  | `kit.19.closure_audit_exit_zero` + Rule 6 walk                                                                                                          |
 
 L'audit `audit:hotel-fiches-cdc` **exit 1** liste les remarques PO encore ouvertes.
 

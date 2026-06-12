@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { buildCloudinarySrc } from '@mch/ui';
+import { resolveKitWaveDiningPublicId, resolveKitWaveSpaHeroPublicId } from '@mch/domain/editorial';
 
 import type { LocalisedGalleryImage } from '@/server/hotels/get-hotel-by-slug';
 
@@ -82,8 +83,28 @@ export function createKitMediaResolver(
     pattern: RegExp,
   ): LocalisedGalleryImage | undefined => images.find((g) => pattern.test(g.alt));
 
+  const tileFromPublicId = (
+    publicId: string,
+    alt: string,
+    transforms = 'f_auto,q_auto,c_fill,g_auto,w_700,h_525',
+  ): KitMediaTile | undefined => {
+    const img = gallery.find((g) => g.publicId === publicId);
+    if (img === undefined) return undefined;
+    return toCloudinaryTile(cloudName, { ...img, alt: alt.length > 0 ? alt : img.alt }, transforms);
+  };
+
+  const waveSpaHeroId = resolveKitWaveSpaHeroPublicId(slugFr);
+
   return {
     spaHero(defaultAlt) {
+      if (waveSpaHeroId !== undefined) {
+        const waveTile = tileFromPublicId(
+          waveSpaHeroId,
+          defaultAlt,
+          'f_auto,q_auto,c_fill,g_auto,w_900,h_675',
+        );
+        if (waveTile !== undefined) return waveTile;
+      }
       const spaGallery = byCategory('spa').filter((g) => {
         const alt = g.alt.toLowerCase();
         return !/ferme thermale|vue ext|yoga|jardin/i.test(alt);
@@ -118,6 +139,11 @@ export function createKitMediaResolver(
     },
 
     diningForVenue(venueName, index, defaultAlt) {
+      const wavePublicId = resolveKitWaveDiningPublicId(slugFr, venueName);
+      if (wavePublicId !== undefined) {
+        const waveTile = tileFromPublicId(wavePublicId, defaultAlt || venueName);
+        if (waveTile !== undefined) return waveTile;
+      }
       const key = normalizeName(venueName);
       const staticPath = KIT_DINING_STATIC[key];
       if (staticPath !== undefined) {

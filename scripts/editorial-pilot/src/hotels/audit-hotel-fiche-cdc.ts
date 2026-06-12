@@ -46,6 +46,7 @@ import {
   type KitRoomAuditRow,
 } from './kit-fiche-acceptance-gates.js';
 import { KIT_PO_REMARK_REGISTRY } from './kit-po-remark-registry.js';
+import { prefetchKitVisiteurHtmlForSlugs } from './audit-kit-visiteur.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -420,14 +421,17 @@ function evaluateAll(
   guideSlugs: ReadonlySet<string>,
   roomStats: ReadonlyMap<string, RoomAuditStats>,
   kitRoomRows: ReadonlyMap<string, readonly KitRoomAuditRow[]>,
+  kitRenderedHtml: ReadonlyMap<string, string>,
 ): CdcHotelAuditResult[] {
   const cityToGuide = buildCityToGuideSlugMap(guideSlugs);
   return rows.map((raw) => {
     const row = normalizeNumericFields(raw);
+    const renderedHtmlFr = kitRenderedHtml.get(row.slug);
     const ctx: CdcAuditContext = {
       roomStats: roomStats.get(row.slug) ?? emptyRoomStats(),
       guideSlug: resolveGuideSlugForHotel(row.city, guideSlugs, cityToGuide),
       kitRoomRows: kitRoomRows.get(row.slug) ?? [],
+      ...(renderedHtmlFr !== undefined ? { kitRenderedHtmlFr: renderedHtmlFr } : {}),
     };
     return evaluateCdcHotelFiche(row, ctx);
   });
@@ -627,7 +631,8 @@ export function buildCdcSummary(results: readonly CdcHotelAuditResult[]): string
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const { rows, guideSlugs, roomStats, kitRoomRows } = await fetchCatalogue(args);
-  let results = evaluateAll(rows, guideSlugs, roomStats, kitRoomRows);
+  const kitRenderedHtml = await prefetchKitVisiteurHtmlForSlugs(rows.map((r) => r.slug));
+  let results = evaluateAll(rows, guideSlugs, roomStats, kitRoomRows, kitRenderedHtml);
   const minScore = args.minScore;
   if (minScore !== null) {
     results = results.filter((r) => r.score_cdc < minScore);
@@ -688,7 +693,7 @@ async function main(): Promise<void> {
   const kitBlocked = reportKitAcceptanceFailures(results);
   if (kitBlocked > 0) {
     console.error(
-      `\n[audit:hotel-fiches-cdc] ${kitBlocked} kit fiche(s) failed PO acceptance gates (D15–D19). Exit 1.`,
+      `\n[audit:hotel-fiches-cdc] ${kitBlocked} kit fiche(s) failed PO acceptance gates (D15–D20). Exit 1.`,
     );
     process.exit(1);
   }

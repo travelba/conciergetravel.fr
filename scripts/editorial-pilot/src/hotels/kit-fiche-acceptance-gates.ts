@@ -2,7 +2,7 @@
  * Kit fiche PO acceptance gates — every wave-5 PO remark → automated blocker.
  *
  * Registry: `kit-po-remark-registry.ts` (remark ↔ gate matrix).
- * Skill: `.cursor/skills/hotel-kit-rollout/SKILL.md` §D7–D19 + Rule 6.
+ * Skill: `.cursor/skills/hotel-kit-rollout/SKILL.md` §D7–D21 + Rule 6.
  *
  * Keep HOTEL_KIT_SLUGS in sync with:
  * `apps/web/src/server/hotels/kit/is-hotel-kit-slug.ts`
@@ -21,7 +21,9 @@ import {
   evaluateGalleryAltCategoryCorrespondence,
   evaluatePoiStructuralCorrespondence,
 } from '@mch/domain/photos';
+import { isKitWaveSlug } from '@mch/domain/editorial';
 
+import { auditKitVisiteurHtml, formatKitVisiteurGateMessage } from './audit-kit-visiteur.js';
 import {
   evaluateFaqKitRowEnrichment,
   evaluateKitConciergeMandatoryGates,
@@ -89,6 +91,8 @@ export interface KitAcceptanceInput {
   /** Room slugs in render order (post `order*KitRoomCards`). Falls back to DB order. */
   readonly orderedRoomSlugs?: readonly string[];
   readonly rooms: readonly KitRoomAuditRow[];
+  /** Fetched `/hotel/{slug}` HTML — enables kit.20 visitor render audit (wave-5). */
+  readonly renderedHtmlFr?: string;
 }
 
 export interface KitAcceptanceCheck {
@@ -692,6 +696,33 @@ export function evaluateKitAcceptanceGates(
         : 'top 3 GMB reviews shown in #acces are all dated within 90 days'
       : 'displayable GMB reviews within 90 days insufficient — run reviews:sync or wait for fresher Google quotes',
   );
+
+  /* ── D18/D20 — rendered HTML visitor audit (Rule 6 complement) ── */
+  if (isKitWaveSlug(input.slug)) {
+    if (process.env['MCH_SKIP_KIT_VISITEUR_AUDIT'] === '1') {
+      pushCheck(
+        checks,
+        'kit.20.visiteur_render_audit',
+        true,
+        'skipped — MCH_SKIP_KIT_VISITEUR_AUDIT=1',
+      );
+    } else if (input.renderedHtmlFr === undefined || input.renderedHtmlFr.length === 0) {
+      pushCheck(
+        checks,
+        'kit.20.visiteur_render_audit',
+        false,
+        'rendered HTML not available — audit fetches from KIT_VISITEUR_BASE_URL / NEXT_PUBLIC_SITE_URL',
+      );
+    } else {
+      const report = auditKitVisiteurHtml(input.renderedHtmlFr, input.slug);
+      pushCheck(
+        checks,
+        'kit.20.visiteur_render_audit',
+        report.passed,
+        formatKitVisiteurGateMessage(report),
+      );
+    }
+  }
 
   const allPassed = checks.every((c) => c.passed);
   pushCheck(

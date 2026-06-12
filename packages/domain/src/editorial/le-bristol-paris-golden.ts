@@ -953,6 +953,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
       'Piscine couverte 6e étage, 6 h 30–22 h 30 — vue Tour Eiffel et Montmartre, réservée aux clients.',
     description_en:
       '6th-floor indoor pool, 6:30 am–10:30 pm — Eiffel Tower and Montmartre views, guests only.',
+    booking_required: false,
     tip_fr: 'Mon conseil : quelques longueurs à l’aube, avant le petit-déjeuner au jardin.',
     tip_en: 'My tip: a few lengths at dawn, before garden breakfast.',
   },
@@ -969,7 +970,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
     tip_en: 'My tip: book the couples suite late afternoon, then head to the pool.',
   },
   {
-    key: '114-faubourg-bar',
+    key: 'faubourg-114-bar',
     image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-11`,
     title_fr: 'Comptoir 114 Faubourg après spectacle',
     title_en: '114 Faubourg counter after a show',

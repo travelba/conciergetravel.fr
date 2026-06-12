@@ -96,8 +96,8 @@ export const LES_AIRELLES_COURCHEVEL_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/les-airelles-courchevel/press-8',
     category: 'room',
-    alt_fr: 'Chambre Deluxe coin nuit, Les Airelles Courchevel',
-    alt_en: 'Deluxe Room sleeping area, Les Airelles Courchevel',
+    alt_fr: 'Suite Prestige Tour, Les Airelles Courchevel',
+    alt_en: 'Prestige Tower Suite, Les Airelles Courchevel',
     caption_fr:
       'Mobilier chiné, vitraux et parquet ciré rappellent les châteaux austro-hongrois du XIXe siècle.',
     caption_en:

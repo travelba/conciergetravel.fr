@@ -368,6 +368,13 @@ function buildKitRoomImages(
   const curated = resolveKitRoomImages(kitBrand, kitSlug, room.slug, room.room_code);
 
   const altForPublicId = (publicId: string): string => {
+    const fromRoom = room.galleryImages.find((g) => g.publicId === publicId)?.alt;
+    if (fromRoom !== undefined && fromRoom.length > 0) {
+      return locale === 'fr' ? normalizeHotelImageAltFr(fromRoom) : fromRoom;
+    }
+    if (curated !== undefined) {
+      return locale === 'fr' ? normalizeHotelImageAltFr(roomName) : roomName;
+    }
     const raw =
       hotelGallery.find((g) => g.publicId === publicId)?.alt ??
       room.galleryImages.find((g) => g.publicId === publicId)?.alt ??

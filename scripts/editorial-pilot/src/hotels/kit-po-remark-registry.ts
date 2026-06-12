@@ -140,6 +140,13 @@ export const KIT_PO_REMARK_REGISTRY: readonly KitPoRemarkEntry[] = [
     walkProof: 'Screenshot #hotel-en-bref spa — cabine/soins, pas ferme extérieure seule',
   },
   {
+    remark: 'Grille expériences vide ou photos resto génériques (htl_resto.jpg)',
+    rootCause:
+      'signature_experiences Zod reject → 0 exp-card ; restaurants sans kit-wave-visual-map (fallback index)',
+    gates: ['kit.20.visiteur_render_audit'],
+    walkProof: 'Rule 6 — #hotel-en-bref expériences ≥4 cartes + resto sans placeholder',
+  },
+  {
     remark: '« C’est bon » sur deploy HTML sans walk PO',
     rootCause: 'acceptance = grep prod / score CDC sans gates kit.* ni screenshots',
     gates: ['kit.19.closure_audit_exit_zero'],

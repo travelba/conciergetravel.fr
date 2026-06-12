@@ -712,6 +712,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
       'Ski valet Bernard Orcel prépare les skis la veille — rejoignez le Jardin Alpin à 8 h 30 pour la piste encore fraîche.',
     description_en:
       'Bernard Orcel ski valet prepares skis the night before — reach Le Jardin Alpin at 8:30 am for still-fresh slopes.',
+    booking_required: false,
     tip_fr:
       'Mon conseil : indiquez niveau et type de ski à la réservation — les skis sont affûtés selon la météo du matin.',
     tip_en:

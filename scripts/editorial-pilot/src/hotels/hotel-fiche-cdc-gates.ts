@@ -171,6 +171,8 @@ export interface CdcAuditContext {
   readonly guideSlug: string | null;
   /** Per-room slug + image count — required for kit acceptance gates (D15). */
   readonly kitRoomRows: readonly KitRoomAuditRow[];
+  /** Live `/hotel/{slug}` HTML (FR) for kit.20 visitor render audit (wave-5). */
+  readonly kitRenderedHtmlFr?: string;
 }
 
 export interface DimensionScore {
@@ -2014,6 +2016,7 @@ export function evaluateCdcHotelFiche(
       ...(waveRoomCtx?.orderedRoomSlugs !== undefined
         ? { orderedRoomSlugs: waveRoomCtx.orderedRoomSlugs }
         : {}),
+      ...(ctx.kitRenderedHtmlFr !== undefined ? { renderedHtmlFr: ctx.kitRenderedHtmlFr } : {}),
     });
     for (const kitCheck of kitChecks) {
       const block = kitCheck.id.startsWith('kit.11.')
@@ -2037,7 +2040,7 @@ export function evaluateCdcHotelFiche(
         severity: 'blocker',
         field: kitCheck.id,
         message: kitCheck.message,
-        pipeline: 'kit-fiche-acceptance-gates.ts — skill hotel-kit-rollout D15–D19',
+        pipeline: 'kit-fiche-acceptance-gates.ts — skill hotel-kit-rollout D15–D20',
       });
     }
   }

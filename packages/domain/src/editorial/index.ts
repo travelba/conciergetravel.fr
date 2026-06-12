@@ -57,6 +57,7 @@ export * from './cheval-blanc-paris-concierge-questions';
 export * from './cheval-blanc-paris-amenities';
 export * from './kit-wave-amenity-blocks';
 export * from './kit-wave-room-catalog';
+export * from './kit-wave-visual-map';
 export * from './kit-wave-faq-seed';
 export * from './kit-wave-room-types';
 export * from './kit-gallery-promote';

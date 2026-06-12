@@ -217,8 +217,8 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/le-bristol-paris/press-19',
     category: 'view',
-    alt_fr: 'Vue sur les toits de Paris depuis le Le Bristol Paris',
-    alt_en: 'Paris rooftop view from Le Bristol Paris',
+    alt_fr: 'Suite Azur terrasse, Le Bristol Paris',
+    alt_en: 'Suite Azur terrace, Le Bristol Paris',
     caption_fr:
       'Depuis les étages élevés et la piscine, la ligne des toits haussmanniens déroule jusqu’à la Tour Eiffel.',
     caption_en:
