@@ -1,10 +1,16 @@
 {
   "$schema": "https://raw.githubusercontent.com/cursor-ai/mcp-config-schema/main/schema.json",
   "_comment": [
-    "Project-local MCP server pinning for MyConciergeHotel.com.",
+    "Project-local MCP server pinning for ConciergeTravel.fr.",
     "Servers listed here are the ones every contributor (human or agent) should",
     "have available. User-level config still applies on top — these entries",
     "merely document the project's expected toolkit.",
+    "",
+    "Audit 2026-06-12: 4 of 7 entries pointed to non-existent npm packages",
+    "(@cloudinary/mcp-asset-management, @resend/mcp-server, @shadcn/mcp,",
+    "@tavily/mcp all 404) and failed silently on IDE startup. Package names",
+    "are now verified against the npm registry. Resend was removed: Brevo is",
+    "the project's ESP (see .env.example / packages/integrations/brevo).",
     "",
     "We DO NOT embed secrets here. Each server reads its credentials from the",
     "contributor's user-level Cursor config (`~/.cursor/mcp.json`) or from",
@@ -12,7 +18,7 @@
     "  https://docs.cursor.com/context/model-context-protocol"
   ],
   "mcpServers": {
-    "user-supabase": {
+    "supabase": {
       "command": "npx",
       "args": [
         "-y",
@@ -24,27 +30,20 @@
         "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       }
     },
-    "plugin-cloudinary-cloudinary-asset-mgmt": {
+    "cloudinary-assets": {
       "command": "npx",
-      "args": ["-y", "@cloudinary/mcp-asset-management@latest"],
+      "args": ["-y", "@cloudinary/asset-management@latest"],
       "env": {
         "CLOUDINARY_URL": "${CLOUDINARY_URL}"
       }
     },
-    "plugin-resend-resend": {
+    "shadcn": {
       "command": "npx",
-      "args": ["-y", "@resend/mcp-server@latest"],
-      "env": {
-        "RESEND_API_KEY": "${RESEND_API_KEY}"
-      }
+      "args": ["shadcn@latest", "mcp"]
     },
-    "plugin-shadcn-shadcn": {
+    "tavily": {
       "command": "npx",
-      "args": ["-y", "@shadcn/mcp@latest"]
-    },
-    "plugin-tavily-tavily": {
-      "command": "npx",
-      "args": ["-y", "@tavily/mcp@latest"],
+      "args": ["-y", "tavily-mcp@latest"],
       "env": {
         "TAVILY_API_KEY": "${TAVILY_API_KEY}"
       }
@@ -63,11 +62,43 @@
       "env": {
         "MAPBOX_ACCESS_TOKEN": "${MAPBOX_ACCESS_TOKEN}"
       }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--headless"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    },
+    "upstash": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/mcp-server@latest",
+        "--email",
+        "${UPSTASH_EMAIL}",
+        "--api-key",
+        "${UPSTASH_API_KEY}"
+      ]
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "apify": {
+      "url": "https://mcp.apify.com",
+      "headers": {
+        "Authorization": "Bearer ${APIFY_API_TOKEN}"
+      }
     }
   },
   "_documentation": {
-    "rationale": "These seven MCP servers are the project's preferred operational surfaces: Supabase (read-only DB introspection + migrations), Cloudinary (media), Resend (transactional email previews), shadcn (component catalogue), Tavily (web research), Perplexity (Sonar search/research/reasoning), mapbox (geocoding, directions — token in ~/.cursor/mcp.json). For Sentry, Vercel, GitHub, Datadog, Opsera, Sanity, and Superhuman, rely on the user-level config (`~/.cursor/mcp.json`).",
+    "rationale": "Eleven MCP servers as the project's operational surfaces: Supabase (read-only DB introspection), Cloudinary (media pipeline), shadcn (component catalogue), Tavily + Perplexity (web research), Mapbox (geocoding/directions), Playwright (UAT loop required by user-acceptance-before-commit.mdc), Chrome DevTools (Core Web Vitals traces, complements lighthouserc.json), Upstash (Redis cache + ratelimit debugging), Context7 (up-to-date docs for Next 16 / React 19 / Tailwind 4 / Payload 3 — prevents hallucinated APIs), Apify (price-intelligence fallback actors, token already in .env). For Sentry, Vercel and GitHub, prefer the remote OAuth servers in user-level config: https://mcp.sentry.dev/mcp, https://mcp.vercel.com, https://api.githubcopilot.com/mcp/.",
     "secrets": "Never commit secrets here. Every `${VAR}` is interpolated from the contributor's shell environment. Example: export SUPABASE_ACCESS_TOKEN before launching Cursor.",
-    "scope": "Project-level MCP files are a thin contract. The full toolkit (Sentry, Vercel, GitHub, Datadog, ...) stays at the user level so we don't fragment credentials across machines."
+    "scope": "Project-level MCP files are a thin contract. The full toolkit (Sentry, Vercel, GitHub, Datadog, ...) stays at the user level so we don't fragment credentials across machines.",
+    "next": "Planned: @payloadcms/plugin-mcp on apps/admin (editorial collections exposure), DataForSEO + Google Search Console MCP (SEO ops), Algolia MCP (index tuning), fal.ai/Replicate (deferred until photo/video phase per AGENTS.md §4bis)."
   }
 }
