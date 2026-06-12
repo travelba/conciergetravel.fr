@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { ServerFunctionClient } from 'payload';
 import { RootLayout } from '@payloadcms/next/layouts';
 import config from '@payload-config';
 import { handleServerFunctions } from '@payloadcms/next/layouts';
@@ -15,17 +16,16 @@ export const metadata: Metadata = {
 
 const adminConfigPromise = Promise.resolve(config);
 
-export default function PayloadAdminLayout({ children }: { readonly children: React.ReactNode }) {
-  const serverFunction = (fnArgs: {
-    readonly name: string;
-    readonly args: Record<string, unknown>;
-  }) =>
-    handleServerFunctions({
-      ...fnArgs,
-      config: adminConfigPromise,
-      importMap: payloadAdminImportMap,
-    });
+const serverFunction: ServerFunctionClient = async function (fnArgs) {
+  'use server';
+  return handleServerFunctions({
+    ...fnArgs,
+    config: adminConfigPromise,
+    importMap: payloadAdminImportMap,
+  });
+};
 
+export default function PayloadAdminLayout({ children }: { readonly children: React.ReactNode }) {
   return (
     <RootLayout
       config={adminConfigPromise}

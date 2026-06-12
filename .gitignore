@@ -132,3 +132,6 @@ apps/web/.env.*.local
 tmp-tavily/
 
 .env*
+
+# Payload auto-generated import map (dev server regenerates it)
+apps/admin/src/app/(payload)/admin/importMap.js
