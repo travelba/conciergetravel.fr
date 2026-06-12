@@ -1,6 +1,6 @@
 # Skills catalogue — MyConciergeHotel.com
 
-> 38 agent skills covering every vertical. Each skill is a `SKILL.md` file
+> 46 agent skills covering every vertical. Each skill is a `SKILL.md` file
 > with YAML frontmatter (`name`, `description`) that Cursor reads at session
 > start; the body is loaded into context only when the agent decides the
 > skill is relevant to the current task.
@@ -60,6 +60,9 @@ Use this when you don't know where to start.
 | Mobile-first responsive UI (Tailwind + shadcn + tokens)                                                                                                                                 | [`responsive-ui-architecture`](responsive-ui-architecture/SKILL.md)                                                                                  |
 | **CSS-only dropdown / menu** that keeps the host as a Server Component (hover + focus-within, no `'use client'`)                                                                        | [`responsive-ui-architecture` §CSS-only dropdowns](responsive-ui-architecture/SKILL.md) ✏️                                                           |
 | **`unstable_cache` returning a `Map`/`Set`/`Date`** silently 500s on cache hit (JSON round-trip → `{}`)                                                                                 | [`nextjs-app-router` §`unstable_cache` return values MUST be JSON-serialisable](nextjs-app-router/SKILL.md) ✏️                                       |
+| **Animations, micro-interactions, photo hover effects, scroll reveals, page transitions** (CSS-first, GPU-only, LCP-safe)                                                               | [`luxury-motion-effects`](luxury-motion-effects/SKILL.md) ⭐ NEW                                                                                     |
+| **Public MCP server / agent-actionable tools** (search, quote, get-hotel — ADR-0017 surface as MCP)                                                                                     | [`mcp-server-development`](mcp-server-development/SKILL.md) ⭐ NEW                                                                                   |
+| **Mobile app iOS / Android** (Expo, apps/mobile, tokens partagés, deep links, EAS, stores)                                                                                              | [`mobile-app-expo`](mobile-app-expo/SKILL.md) ⭐ NEW                                                                                                 |
 | Metadata, hreflang, sitemaps, robots, anti-cannibalisation                                                                                                                              | [`seo-technical`](seo-technical/SKILL.md)                                                                                                            |
 | llms.txt, AEO blocks, JSON-LD agent-skills, FAQ extraction                                                                                                                              | [`geo-llm-optimization`](geo-llm-optimization/SKILL.md)                                                                                              |
 | JSON-LD builders (Hotel, Article, FAQ, ItemList, BreadcrumbList) + **CSP nonce contract**                                                                                               | [`structured-data-schema-org`](structured-data-schema-org/SKILL.md) ✏️                                                                               |
@@ -102,7 +105,12 @@ Use this when you don't know where to start.
 
 ### Front-end & UX
 
-- [`nextjs-app-router`](nextjs-app-router/SKILL.md), [`responsive-ui-architecture`](responsive-ui-architecture/SKILL.md), [`accessibility`](accessibility/SKILL.md), [`performance-engineering`](performance-engineering/SKILL.md), [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐.
+- [`nextjs-app-router`](nextjs-app-router/SKILL.md), [`responsive-ui-architecture`](responsive-ui-architecture/SKILL.md), [`accessibility`](accessibility/SKILL.md), [`performance-engineering`](performance-engineering/SKILL.md), [`editorial-long-read-rendering`](editorial-long-read-rendering/SKILL.md) ⭐, [`luxury-motion-effects`](luxury-motion-effects/SKILL.md) ⭐ NEW.
+
+### Agentic & mobile surfaces
+
+- [`mcp-server-development`](mcp-server-development/SKILL.md) ⭐ NEW — public MCP server over the ADR-0017 agent endpoints (search / get-hotel / quote).
+- [`mobile-app-expo`](mobile-app-expo/SKILL.md) ⭐ NEW — iOS + Android app (Expo, `apps/mobile`, shared tokens & domain, EAS, store compliance).
 
 ### Editorial / rankings / guides pipeline
 
