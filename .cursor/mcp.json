@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/cursor-ai/mcp-config-schema/main/schema.json",
   "_comment": [
-    "Project-local MCP server pinning for ConciergeTravel.fr.",
+    "Project-local MCP server pinning for MyConciergeHotel.com.",
     "Servers listed here are the ones every contributor (human or agent) should",
     "have available. User-level config still applies on top — these entries",
     "merely document the project's expected toolkit.",
@@ -107,7 +107,7 @@
   },
   "_documentation": {
     "rationale": "Eleven MCP servers as the project's operational surfaces: Supabase (read-only DB introspection), Cloudinary (media pipeline), shadcn (component catalogue), Tavily + Perplexity (web research), Mapbox (geocoding/directions), Playwright (UAT loop required by user-acceptance-before-commit.mdc), Chrome DevTools (Core Web Vitals traces, complements lighthouserc.json), Upstash (Redis cache + ratelimit debugging), Context7 (up-to-date docs for Next 16 / React 19 / Tailwind 4 / Payload 3 — prevents hallucinated APIs), Apify (price-intelligence fallback actors, token already in .env). For Sentry, Vercel and GitHub, prefer the remote OAuth servers in user-level config: https://mcp.sentry.dev/mcp, https://mcp.vercel.com, https://api.githubcopilot.com/mcp/.",
-    "secrets": "Never commit secrets here. Every `${VAR}` is interpolated from the contributor's shell environment. Example: export SUPABASE_ACCESS_TOKEN before launching Cursor.",
+    "secrets": "Never commit secrets here. Every `${VAR}` is interpolated from the contributor's shell environment. Example: export SUPABASE_ACCESS_TOKEN before launching Cursor. For PAYLOAD_MCP_API_KEY, run `pnpm --filter @mch/admin mcp:key` (creates the key AND registers the env var on Windows), then restart Cursor.",
     "scope": "Project-level MCP files are a thin contract. The full toolkit (Sentry, Vercel, GitHub, Datadog, ...) stays at the user level so we don't fragment credentials across machines.",
     "next": "Planned: @payloadcms/plugin-mcp on apps/admin (editorial collections exposure), DataForSEO + Google Search Console MCP (SEO ops), Algolia MCP (index tuning), fal.ai/Replicate (deferred until photo/video phase per AGENTS.md §4bis)."
   }

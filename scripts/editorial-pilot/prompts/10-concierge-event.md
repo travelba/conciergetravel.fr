@@ -20,7 +20,7 @@ Pour chaque événement qu'un client peut envisager pendant son séjour, écris 
 - Pas de promotion d'opérateur tiers (ne cite jamais Booking, Expedia, Airbnb, Vivaticket, etc.).
 - Pas de prix inventé. Si tu n'as pas le prix dans l'INPUT, n'en mets pas. **Mais** si le champ `pricing` est présent dans l'INPUT, tu peux le reformuler en français (`≈ 25 €`, `gratuit`).
 - Aucune URL, aucune balise HTML, aucun emoji, aucune liste à puces.
-- Tutoiement interdit (vouvoiement obligatoire — règle ConciergeTravel).
+- Tutoiement interdit (vouvoiement obligatoire — règle MyConciergeHotel).
 - Toujours TTC, toujours en euros.
 
 ## Conseil actionnable — patterns autorisés

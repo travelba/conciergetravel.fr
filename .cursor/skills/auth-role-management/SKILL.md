@@ -5,7 +5,7 @@ description: Supabase Auth + RBAC integration for MyConciergeHotel.com (customer
 
 # Auth and role management — MyConciergeHotel.com
 
-Authentication is **Supabase Auth** (CDC §2). The app uses `@supabase/ssr` for Next.js 15 App Router cookie-based sessions. Role-based access is layered: **app-level guards** + **RLS policies** referencing JWT custom claims.
+Authentication is **Supabase Auth** (CDC §2). The app uses `@supabase/ssr` for Next.js 16 App Router cookie-based sessions. Role-based access is layered: **app-level guards** + **RLS policies** referencing JWT custom claims.
 
 ## Triggers
 

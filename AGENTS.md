@@ -8,11 +8,11 @@
 MyConciergeHotel.com is **La sélection du Concierge** — an **IATA-accredited online travel agency** curating
 extraordinary hotels worldwide: Palaces (Atout France label), Relais & Châteaux, Forbes Five Star,
 Michelin Keys, Leading Hotels of the World, boutique hotels and editorial gems. The catalogue today
-covers **615 published hotels across 91 countries**. Every hotel page closes with a **Concierge's Tip** —
+covers **2 219 published hotels across 127 countries** (live count 2026-06-12 — refresh via `lib/catalogue-stats.ts`). Every hotel page closes with a **Concierge's Tip** —
 the operational secret guidebooks never share. See [ADR-0021 — Pivot scope mondial](docs/adr/0021-pivot-scope-mondial.md).
 The product is split into:
 
-- **`apps/web`** — the public Next.js 15 site (booking, search, editorial, account).
+- **`apps/web`** — the public Next.js 16 site (booking, search, editorial, account).
 - **`apps/admin`** — the Payload CMS back-office.
 - **`packages/`** — shared domain, integrations, SEO, emails, DB, observability, UI primitives.
 

@@ -2,7 +2,7 @@
   "name": "conciergetravel",
   "private": true,
   "version": "0.0.1",
-  "description": "ConciergeTravel.fr — OTA luxe hôtels 5★ et Palaces France. Monorepo Next.js 16 + Payload CMS 3 + Supabase + Amadeus GDS.",
+  "description": "MyConciergeHotel.com — La sélection du Concierge. OTA luxe accréditée IATA, hôtels d'exception monde entier. Monorepo Next.js 16 + Payload CMS 3 + Supabase + Amadeus GDS.",
   "license": "UNLICENSED",
   "packageManager": "pnpm@10.33.2",
   "engines": {
