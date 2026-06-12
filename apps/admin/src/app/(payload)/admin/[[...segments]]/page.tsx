@@ -9,11 +9,17 @@ type Args = {
   searchParams: Promise<Record<string, string | string[]>>;
 };
 
+/**
+ * Forward `segments` untouched: Payload distinguishes `undefined`
+ * (dashboard root, `/admin`) from an array. Coercing to `[]` makes it
+ * compute the route as `/admin/` and 404 on the dashboard.
+ */
 async function normalizedParams(paramsPromise: Args['params']) {
   const p = await paramsPromise;
-  return Promise.resolve({
-    segments: p.segments ?? [],
-  });
+  // Payload types `segments` as `string[]`, but its RootPage explicitly
+  // handles `undefined` at runtime (`Array.isArray` guard), so the cast
+  // is safe — and required to keep the dashboard route working.
+  return { segments: p.segments as string[] };
 }
 
 export const generateMetadata = async ({ params, searchParams }: Args): Promise<Metadata> =>
