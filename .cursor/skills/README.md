@@ -1,6 +1,6 @@
 # Skills catalogue — MyConciergeHotel.com
 
-> 46 agent skills covering every vertical. Each skill is a `SKILL.md` file
+> 47 agent skills covering every vertical. Each skill is a `SKILL.md` file
 > with YAML frontmatter (`name`, `description`) that Cursor reads at session
 > start; the body is loaded into context only when the agent decides the
 > skill is relevant to the current task.
@@ -63,6 +63,7 @@ Use this when you don't know where to start.
 | **Animations, micro-interactions, photo hover effects, scroll reveals, page transitions** (CSS-first, GPU-only, LCP-safe)                                                               | [`luxury-motion-effects`](luxury-motion-effects/SKILL.md) ⭐ NEW                                                                                     |
 | **Public MCP server / agent-actionable tools** (search, quote, get-hotel — ADR-0017 surface as MCP)                                                                                     | [`mcp-server-development`](mcp-server-development/SKILL.md) ⭐ NEW                                                                                   |
 | **Mobile app iOS / Android** (Expo, apps/mobile, tokens partagés, deep links, EAS, stores)                                                                                              | [`mobile-app-expo`](mobile-app-expo/SKILL.md) ⭐ NEW                                                                                                 |
+| **WhatsApp Business concierge proactif** (opt-in, templates HSM, fenêtre 24h, journey J-7→J+7, LLM groundé, escalade humaine)                                                          | [`whatsapp-concierge-journey`](whatsapp-concierge-journey/SKILL.md) ⭐ NEW                                                                           |
 | Metadata, hreflang, sitemaps, robots, anti-cannibalisation                                                                                                                              | [`seo-technical`](seo-technical/SKILL.md)                                                                                                            |
 | llms.txt, AEO blocks, JSON-LD agent-skills, FAQ extraction                                                                                                                              | [`geo-llm-optimization`](geo-llm-optimization/SKILL.md)                                                                                              |
 | JSON-LD builders (Hotel, Article, FAQ, ItemList, BreadcrumbList) + **CSP nonce contract**                                                                                               | [`structured-data-schema-org`](structured-data-schema-org/SKILL.md) ✏️                                                                               |
@@ -135,7 +136,7 @@ Use this when you don't know where to start.
 
 ### Business verticals
 
-- [`booking-engine`](booking-engine/SKILL.md), [`loyalty-program`](loyalty-program/SKILL.md), [`membership-program`](membership-program/SKILL.md).
+- [`booking-engine`](booking-engine/SKILL.md), [`loyalty-program`](loyalty-program/SKILL.md), [`membership-program`](membership-program/SKILL.md), [`whatsapp-concierge-journey`](whatsapp-concierge-journey/SKILL.md) ⭐ NEW — accompagnement concierge proactif de chaque client ayant réservé (l'ambition cœur du site).
 
 ## 4. Capitalisation workflow — every session adds value
 
