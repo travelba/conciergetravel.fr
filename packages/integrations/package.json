@@ -39,7 +39,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
