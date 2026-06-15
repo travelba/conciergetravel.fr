@@ -2390,32 +2390,10 @@
   display: none;
 }
 .mch-kit .resa-mobile-bar {
-  position: fixed;
-  z-index: 45;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   align-items: stretch;
   gap: 8px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-  background: rgba(255, 255, 255, 0.94);
-  border-top: 1px solid var(--ligne);
-  box-shadow: 0 -4px 16px rgba(20, 17, 12, 0.06);
-  backdrop-filter: blur(8px);
-  transform: translateY(110%);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    transform 0.28s ease,
-    opacity 0.28s ease;
-}
-.resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar,
-.mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar,
-.resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
+  padding: 8px 12px;
 }
 .mch-kit .resa-mobile-bar__summary {
   flex: 1;
@@ -2481,15 +2459,6 @@
   align-self: center;
   padding: 12px 18px;
   white-space: nowrap;
-}
-.mch-kit .resa-mobile-bar-spacer {
-  display: none;
-  height: calc(60px + env(safe-area-inset-bottom, 0px));
-}
-.resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar-spacer,
-.mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer,
-.resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar-spacer {
-  display: block;
 }
 .mch-kit .resa-mobile-sheet[hidden] {
   display: none;
@@ -2827,15 +2796,31 @@ body.booking-mobile-sheet-open {
   }
   .resa-mobile-bar-wrap {
     display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--ligne);
+    box-shadow: 0 -4px 16px rgba(20, 17, 12, 0.08);
+    backdrop-filter: blur(8px);
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.28s ease,
+      opacity 0.28s ease;
   }
-  .mch-kit .resa-mobile-bar-spacer {
-    display: none;
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+  .resa-mobile-bar-wrap[data-revealed='true'],
+  .resa-mobile-bar-wrap.is-revealed {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
-  .resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar-spacer,
-  .mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer,
-  .resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar-spacer {
-    display: block;
+  body.has-mobile-booking-bar {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   }
   .mch-kit .htl-body {
     padding-bottom: 0;

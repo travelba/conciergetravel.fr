@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from 'react';
+import { createPortal } from 'react-dom';
 
 import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
 
@@ -65,8 +66,13 @@ interface BookingMobileBarClientProps {
     | undefined;
 }
 
+const MOBILE_BAR_MAX_WIDTH_PX = 680;
 const SCROLL_REVEAL_OFFSET_PX = 120;
 const MOBILE_REVEAL_ANCHOR_SELECTOR = '[data-booking-mobile-reveal-anchor]';
+
+function isMobileBarViewport(): boolean {
+  return window.matchMedia(`(max-width: ${MOBILE_BAR_MAX_WIDTH_PX}px)`).matches;
+}
 
 function shouldRevealMobileBar(): boolean {
   const anchor = document.querySelector(MOBILE_REVEAL_ANCHOR_SELECTOR);
@@ -92,12 +98,17 @@ export function BookingMobileBarClient({
   conciergeDefaults,
   paidAction,
   paidDefaults,
-}: BookingMobileBarClientProps): ReactElement {
+}: BookingMobileBarClientProps): ReactElement | null {
   const sheetId = useId();
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpandedState] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [portaled, setPortaled] = useState(false);
+
+  useEffect(() => {
+    setPortaled(true);
+  }, []);
 
   useEffect(() => {
     const syncRevealed = (): void => {
@@ -128,6 +139,14 @@ export function BookingMobileBarClient({
       window.removeEventListener('resize', syncRevealed);
     };
   }, []);
+
+  useEffect(() => {
+    const showDock = revealed && isMobileBarViewport();
+    document.body.classList.toggle('has-mobile-booking-bar', showDock);
+    return () => {
+      document.body.classList.remove('has-mobile-booking-bar');
+    };
+  }, [revealed]);
 
   const toggleExpanded = useCallback((): void => {
     setExpandedState((prev) => {
@@ -173,13 +192,12 @@ export function BookingMobileBarClient({
   const ctaLabel = hasChooseRoomsLink ? labels.ctaChooseRooms : labels.ctaSeePrices;
   const ctaAria = hasChooseRoomsLink ? labels.ctaAriaChooseRooms : labels.ctaAriaSeePrices;
 
-  return (
+  const bar = (
     <div
       className={`resa-mobile-bar-wrap mch-kit${revealed ? 'is-revealed' : ''}`}
       data-revealed={revealed ? 'true' : 'false'}
+      data-mobile-booking-bar="true"
     >
-      <div className="resa-mobile-bar-spacer" aria-hidden />
-
       <div
         className="resa-mobile-bar"
         data-booking-widget="mobile_bar"
@@ -300,6 +318,12 @@ export function BookingMobileBarClient({
       </div>
     </div>
   );
+
+  if (!portaled) {
+    return null;
+  }
+
+  return createPortal(bar, document.body) as ReactElement;
 }
 
 function ComingSoonSheetContent({

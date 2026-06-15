@@ -91,36 +91,38 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${sans.variable} ${serif.variable}`}>
-      <body className="flex min-h-dvh flex-col overflow-x-clip">
+      <body className="flex min-h-dvh flex-col">
         <SiteSeoJsonLd locale={locale} nonce={nonce} />
-        <NextIntlClientProvider messages={messages}>
-          <ConditionalSiteHeader />
-          {/*
+        <div className="flex min-h-dvh min-w-0 flex-1 flex-col overflow-x-clip">
+          <NextIntlClientProvider messages={messages}>
+            <ConditionalSiteHeader />
+            {/*
             Visible fil d'ariane (ADR-0014 §2.4) — mirror of the per-page
             `BreadcrumbList` JSON-LD. Returns `null` on the home page.
           */}
-          <Breadcrumb />
-          {/*
+            <Breadcrumb />
+            {/*
             `#main` is the skip-link target. Mark it as `role="main"` /
             `<main>`-equivalent landmark via the `id` and `tabIndex={-1}`
             so screen readers and keyboard users can jump straight from
             the header skip-link to the page content.
           */}
-          <div id="main" tabIndex={-1} className="flex-1 outline-none">
-            {children}
-          </div>
-          <ConditionalSiteFooter />
-          <ConsentBanner />
-          {/* Global toast surface (sober-luxe styled) — see @mch/ui Toaster. */}
-          <Toaster />
-          {/*
+            <div id="main" tabIndex={-1} className="flex-1 outline-none">
+              {children}
+            </div>
+            <ConditionalSiteFooter />
+            <ConsentBanner />
+            {/* Global toast surface (sober-luxe styled) — see @mch/ui Toaster. */}
+            <Toaster />
+            {/*
             Consent-gated analytics — Vercel Analytics + Speed Insights
             only mount when `analytics === true` in the cookie. See
             `/components/analytics/conditional-analytics.tsx` and the
             cookie policy (`/cookies`).
           */}
-          <ConditionalAnalytics />
-        </NextIntlClientProvider>
+            <ConditionalAnalytics />
+          </NextIntlClientProvider>
+        </div>
       </body>
     </html>
   );
