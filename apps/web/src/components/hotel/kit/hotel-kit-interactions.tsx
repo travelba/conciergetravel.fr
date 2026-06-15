@@ -65,7 +65,28 @@ export function HotelKitInteractions(): null {
     });
 
     document.querySelectorAll('.around-list[data-around-list]').forEach((list) => {
+      if (list.closest('[data-kit-carousel]') !== null) return;
       list.classList.add('is-collapsed');
+    });
+
+    document.querySelectorAll('[data-kit-carousel]').forEach((carousel) => {
+      const track = carousel.querySelector('.carousel-track');
+      if (!(track instanceof HTMLElement)) return;
+      const prev = carousel.querySelector('.carousel-nav.prev');
+      const next = carousel.querySelector('.carousel-nav.next');
+      const scrollByCard = (dir: 1 | -1): void => {
+        const slide = track.querySelector<HTMLElement>('.around-item');
+        const step = slide !== null ? slide.offsetWidth + 18 : track.clientWidth * 0.85;
+        track.scrollBy({ left: dir * step, behavior: 'smooth' });
+      };
+      const onPrev = (): void => scrollByCard(-1);
+      const onNext = (): void => scrollByCard(1);
+      prev?.addEventListener('click', onPrev);
+      next?.addEventListener('click', onNext);
+      cleanups.push(() => {
+        prev?.removeEventListener('click', onPrev);
+        next?.removeEventListener('click', onNext);
+      });
     });
 
     document.querySelectorAll('.around-item[data-poi-id]').forEach((item) => {

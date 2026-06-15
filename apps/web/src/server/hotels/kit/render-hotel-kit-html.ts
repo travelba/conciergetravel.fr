@@ -44,6 +44,45 @@ import type {
 
 const REVIEW_CLAMP_CHARS = 220;
 
+const CAROUSEL_NAV_PREV =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+const CAROUSEL_NAV_NEXT =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+
+function wrapKitDisclosure(options: {
+  readonly title: string;
+  readonly lede?: string;
+  readonly body: string;
+  readonly heading?: 'h2' | 'h3';
+  readonly className?: string;
+  readonly titleId?: string;
+}): string {
+  const heading = options.heading ?? 'h3';
+  const ledePart =
+    options.lede !== undefined && options.lede.length > 0
+      ? `<p class="sub-lede">${escapeProseHtml(options.lede)}</p>`
+      : '';
+  const extraClass = options.className !== undefined ? ` ${options.className}` : '';
+  const titleIdAttr = options.titleId !== undefined ? ` id="${escapeHtml(options.titleId)}"` : '';
+  return `<details class="kit-disclosure${extraClass}">
+    <summary class="kit-disclosure__summary">
+      <${heading} class="kit-disclosure__title"${titleIdAttr}>${escapeHtml(options.title)}</${heading}>
+      <span class="kit-disclosure__chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="kit-disclosure__body">
+      ${ledePart}
+      ${options.body}
+    </div>
+  </details>`;
+}
+
+function renderKitCarouselNav(locale: 'fr' | 'en'): string {
+  const prevLabel = locale === 'en' ? 'Previous' : 'Précédent';
+  const nextLabel = locale === 'en' ? 'Next' : 'Suivant';
+  return `<button type="button" class="carousel-nav prev" aria-label="${escapeHtml(prevLabel)}">${CAROUSEL_NAV_PREV}</button>
+        <button type="button" class="carousel-nav next" aria-label="${escapeHtml(nextLabel)}">${CAROUSEL_NAV_NEXT}</button>`;
+}
+
 function reviewNeedsToggle(text: string): boolean {
   return text.length > REVIEW_CLAMP_CHARS;
 }
@@ -556,24 +595,33 @@ export function renderKitBref(model: HotelKitModel): string {
             ) ?? model.storySections[0];
           if (section === undefined) return '';
           const [ledePara, ...restParas] = section.paragraphs;
-          const ledeHtml =
-            ledePara !== undefined ? `<p class="sub-lede">${escapeProseHtml(ledePara)}</p>` : '';
           const paras = restParas
             .map((p) => `<p class="histoire-txt">${escapeProseHtml(p)}</p>`)
             .join('\n        ');
           return `<div class="bref-sub bref-histoire">
-        <h3>${escapeHtml(section.title)}</h3>
-        ${ledeHtml}
-        ${paras}
+        ${wrapKitDisclosure({
+          title: section.title,
+          ...(ledePara !== undefined ? { lede: ledePara } : {}),
+          body: paras,
+        })}
       </div>`;
         })()
       : '';
+
+  const amenitiesLede =
+    model.locale === 'en'
+      ? `${model.amenitiesFlat.length} services and amenities — palace essentials without excess.`
+      : `${model.amenitiesFlat.length} services et équipements, de la conciergerie 24h/24 au Wi-Fi gratuit. L'essentiel d'un palace, sans surenchère.`;
+  const amenitiesTitle = model.locale === 'en' ? 'Services & amenities' : 'Services & équipements';
+  const amenitiesBody = `<div class="amen-grid">
+          ${amenHtml}
+        </div>`;
 
   const expList = orderKitSignatureExperiences(
     model.signatureExperiences.filter((e) => e.kind !== 'kid_club'),
   );
   const expHtml = expList
-    .map((exp, i) => {
+    .map((exp, expIndex) => {
       const isPick = isKitSignatureExperienceConciergePick(exp);
       const imgTile =
         exp.imagePublicId !== null
@@ -585,13 +633,12 @@ export function renderKitBref(model: HotelKitModel): string {
               }),
               alt: exp.title,
             }
-          : model.media.experienceAt(i, exp.title);
+          : model.media.experienceAt(expIndex, exp.title);
       const imgSrc = imgTile.src;
-      const hidden = i >= 3 ? ' more-hidden' : '';
       const pick = isPick
         ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(model.labels.conciergePick)}</span>`
         : '';
-      return `<article class="exp-card${isPick ? ' exp-concierge' : ''}${hidden}">
+      return `<article class="exp-card exp-card--mosaic${isPick ? ' exp-concierge' : ''}">
             <div class="exp-img">
               <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(exp.title)}" loading="lazy">
               ${pick}
@@ -647,27 +694,20 @@ export function renderKitBref(model: HotelKitModel): string {
       <h2>${escapeHtml(model.labels.briefHotel)}</h2>
       ${historyBlock}
       <div class="bref-sub">
-        <h3>${model.locale === 'en' ? 'Services & amenities' : 'Services & équipements'}</h3>
-        <p class="sub-lede">${model.locale === 'en' ? `${model.amenitiesFlat.length} services and amenities — palace essentials without excess.` : `${model.amenitiesFlat.length} services et équipements, de la conciergerie 24h/24 au Wi-Fi gratuit. L'essentiel d'un palace, sans surenchère.`}</p>
-        <div class="amen-grid">
-          ${amenHtml}
-        </div>
+        ${wrapKitDisclosure({
+          title: amenitiesTitle,
+          lede: amenitiesLede,
+          body: amenitiesBody,
+        })}
       </div>
       ${
         expList.length > 0
           ? `<div class="bref-sub">
         <h3>${model.locale === 'en' ? 'Signature experiences' : 'Expériences signature'}</h3>
         <p class="sub-lede">${model.locale === 'en' ? 'What the concierge arranges for you, beyond the room.' : 'Ce que la conciergerie organise pour vous, au-delà de la chambre.'}</p>
-        <div class="exp-list${expList.length > 3 ? ' is-collapsed' : ''}" id="exp-list-container">
+        <div class="exp-mosaic" id="exp-mosaic">
           ${expHtml}
         </div>
-        ${
-          expList.length > 3
-            ? `<div class="exp-more-wrap">
-          <button type="button" class="btn-ligne exp-toggle-btn" data-toggle-more="exp-list-container" id="btn-voir-exp" aria-expanded="false" data-more="${model.locale === 'en' ? 'See more' : 'Voir plus'}" data-less="${model.locale === 'en' ? 'See less' : 'Voir moins'}">${model.locale === 'en' ? 'See more' : 'Voir plus'}</button>
-        </div>`
-            : ''
-        }
       </div>`
           : ''
       }
@@ -1042,12 +1082,13 @@ function renderAroundBucket(
   model: HotelKitModel,
   bucket: 'visit' | 'do' | 'eat' | 'shop',
   title: string,
+  layout: 'carousel' | 'disclosure-grid',
 ): string {
   const pois = model.locationBuckets[bucket];
   if (pois.length === 0) return '';
   const items = pois
     .map((p, i) => {
-      const hidden = i >= 3 ? ' more-hidden' : '';
+      const hidden = layout === 'disclosure-grid' && i >= 3 ? ' more-hidden' : '';
       const isPick = p.tip !== null && i === 0;
       const useConciergeFrame = isAroundConciergeFrame(bucket, isPick);
       const pickLabel = useConciergeFrame
@@ -1109,16 +1150,34 @@ function renderAroundBucket(
           </div>`;
     })
     .join('\n          ');
-  return `<div class="around-sub">
+
+  if (layout === 'carousel') {
+    const nav = pois.length > 1 ? renderKitCarouselNav(model.locale) : '';
+    return `<div class="around-sub around-sub--carousel">
         <h3>${escapeHtml(title)}</h3>
-        <div class="around-list" data-around-list>
+        <div class="carousel around-carousel" data-kit-carousel>
+          <div class="carousel-track">
+            ${items}
+          </div>
+          ${nav}
+        </div>
+      </div>`;
+  }
+
+  const listBody = `<div class="around-list${pois.length > 3 ? ' is-collapsed' : ''}" data-around-list>
           ${items}
         </div>
         ${
           pois.length > 3
             ? `<div class="around-more-wrap"><button type="button" class="btn-ligne around-toggle-btn">${model.locale === 'en' ? 'See more' : 'Voir plus'}</button></div>`
             : ''
-        }
+        }`;
+
+  return `<div class="around-sub">
+        ${wrapKitDisclosure({
+          title,
+          body: listBody,
+        })}
       </div>`;
 }
 
@@ -1208,11 +1267,11 @@ export function renderKitAutour(model: HotelKitModel): string {
   } as const;
 
   const subs = [
-    renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale]),
-    renderAroundBucket(model, 'do', bucketTitles.do[model.locale]),
+    renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale], 'carousel'),
+    renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'disclosure-grid'),
     renderUpcomingEventsSub(model),
-    renderAroundBucket(model, 'eat', bucketTitles.eat[model.locale]),
-    renderAroundBucket(model, 'shop', bucketTitles.shop[model.locale]),
+    renderAroundBucket(model, 'eat', bucketTitles.eat[model.locale], 'disclosure-grid'),
+    renderAroundBucket(model, 'shop', bucketTitles.shop[model.locale], 'disclosure-grid'),
   ]
     .filter((s) => s.length > 0)
     .join('\n');
@@ -1284,9 +1343,8 @@ function renderFaqGroupBlock<T extends { question: string }>(
   const details = items
     .map((item, itemIdx) => {
       const hidden = itemIdx >= FAQ_VISIBLE_PER_GROUP ? ' faq-more-hidden' : '';
-      const open = !options.concierge && options.groupIndex === 0 && itemIdx === 0 ? ' open' : '';
       const conciergeClass = options.concierge ? ' faq-concierge' : '';
-      return `<details class="faq-item${conciergeClass}${hidden}"${open}><summary>${escapeHtml(item.question)}</summary>${options.renderAnswer(item)}</details>`;
+      return `<details class="faq-item${conciergeClass}${hidden}"><summary>${escapeHtml(item.question)}</summary>${options.renderAnswer(item)}</details>`;
     })
     .join('\n        ');
 
@@ -1311,10 +1369,16 @@ export function renderKitFaq(model: HotelKitModel): string {
     )
     .join('\n      ');
   if (groups.length === 0) return '';
+  const faqBody = `<p class="htl-lede">${escapeHtml(model.labels.faqLede)}</p>
+      ${groups}`;
   return `<section class="htl-section" id="faq">
-      <h2>${escapeHtml(model.labels.faq)}</h2>
-      <p class="htl-lede">${escapeHtml(model.labels.faqLede)}</p>
-      ${groups}
+      ${wrapKitDisclosure({
+        title: model.labels.faq,
+        body: faqBody,
+        heading: 'h2',
+        className: 'kit-disclosure--section',
+        titleId: 'faq-title',
+      })}
     </section>`;
 }
 

@@ -3373,7 +3373,11 @@
         "ctaAriaBook": "Réserver {name}",
         "ctaAriaChooseRooms": "Choisir une chambre à {name}",
         "trustChip": "Agence IATA · paiement sécurisé",
-        "closeSheet": "Fermer"
+        "closeSheet": "Fermer",
+        "editStay": "Modifier le séjour",
+        "occupancyRooms": "{count, plural, one {# chambre} other {# chambres}}",
+        "occupancyAdults": "{count, plural, one {# adulte} other {# adultes}}",
+        "occupancyChildren": "{count, plural, one {# enfant} other {# enfants}}"
       }
     },
     "factSheet": {

@@ -74,12 +74,16 @@ test.describe('booking — fiche hotel journey', () => {
 
     await page.evaluate(() => window.scrollTo(0, 400));
 
-    const mobileCta = page.locator('[data-booking-widget="mobile_bar"] .resa-mobile-bar__cta');
+    const mobileCta = page.locator(
+      '[data-booking-widget="mobile_bar"] [data-testid="booking-mobile-bar-cta"]',
+    );
     await expect(mobileCta).toBeVisible();
     await expect(mobileCta).toHaveText(/choisir chambres/i);
 
-    await page.locator('[data-booking-widget="mobile_bar"] .resa-mobile-bar__summary').click();
-    const sheetForm = page.locator('.resa-mobile-sheet [data-testid="booking-widget-form"]');
+    await page.locator('[data-testid="booking-mobile-bar-summary"]').click();
+    const sheetForm = page.locator(
+      '.resa-mobile-widget__sheet [data-testid="booking-widget-form"]',
+    );
     await expect(sheetForm).toBeVisible();
     await expect(sheetForm.getByRole('button', { name: /choisir chambres/i })).toBeEnabled();
   });

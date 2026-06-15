@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import { getPathname } from '@/i18n/navigation';
-import { intlLocaleTag } from '@/i18n/runtime';
 import type { SupportedLocale } from '@/i18n/supported-locale';
 import { mobileDefaultHotelStay, todayIso } from '@/lib/booking/default-hotel-stay';
 import {
@@ -14,7 +13,9 @@ import { isTravelportSandboxEnabled } from '@/lib/travelport';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
 import type { BookingMode } from '@mch/domain/hotels';
 
+import type { BookingKitRailLabels } from './booking-kit-rail-client';
 import { BookingMobileBarClient } from './booking-mobile-bar-client';
+import { BookingWidgetSubmitTracker } from './booking-widget-tracker';
 
 interface BookingMobileBarProps {
   readonly locale: SupportedLocale;
@@ -26,46 +27,30 @@ interface BookingMobileBarProps {
   readonly railContext?: HotelBookingRailContext;
 }
 
-function formatMobileBarDateValue(isoDate: string, locale: SupportedLocale): string {
-  const formatter = new Intl.DateTimeFormat(intlLocaleTag(locale), {
-    day: 'numeric',
-    month: 'short',
-  });
-  const parseIso = (iso: string): Date => new Date(`${iso}T12:00:00Z`);
-  return formatter.format(parseIso(isoDate));
-}
-
-function formatMobileBarDates(
-  checkIn: string,
-  checkOut: string,
-  checkInLabel: string,
-  checkOutLabel: string,
+async function loadKitRailLabels(
   locale: SupportedLocale,
-): string {
-  const formatter = new Intl.DateTimeFormat(intlLocaleTag(locale), {
-    day: 'numeric',
-    month: 'short',
-  });
-  const parseIso = (iso: string): Date => new Date(`${iso}T12:00:00Z`);
-  return `${checkInLabel} ${formatter.format(parseIso(checkIn))} · ${checkOutLabel} ${formatter.format(parseIso(checkOut))}`;
-}
+  hotelName: string,
+): Promise<BookingKitRailLabels> {
+  const t = await getTranslations({ locale, namespace: 'hotelPage' });
+  const tw = await getTranslations({ locale, namespace: 'hotelPage.widget' });
 
-function buildConciergeQueryString(
-  hotelId: string,
-  stay: ReturnType<typeof mobileDefaultHotelStay>,
-): string {
-  const params = new URLSearchParams({
-    hotelId,
-    checkIn: stay.checkIn,
-    checkOut: stay.checkOut,
-    rooms: String(stay.rooms),
-    adults: String(stay.adults),
-    children: String(stay.children),
-  });
-  for (const age of stay.childAges) {
-    params.append('childAge', String(age));
-  }
-  return params.toString();
+  return {
+    checkIn: t('displayOnly.checkIn'),
+    checkOut: t('displayOnly.checkOut'),
+    priceFromLabel: tw('priceFromLabel'),
+    priceFromUnit: tw('priceFromUnit'),
+    onRequestLabel: tw('onRequestLabel'),
+    submitConcierge: tw('conciergeSubmit'),
+    submitTravelport: tw('travelportSubmit'),
+    submitPending: tw('submitPending'),
+    trustListAria: tw('trust.listAria'),
+    trustBestRate: tw('trust.bestRate'),
+    trustChip: t('displayOnly.trustChip'),
+    headlineFallback: t('displayOnly.headline'),
+    conciergeSection: t('sections.concierge'),
+    conciergeExplainer: tw('conciergeExplainer', { name: hotelName }),
+    sla: t('displayOnly.sla'),
+  };
 }
 
 export async function BookingMobileBar({
@@ -79,7 +64,6 @@ export async function BookingMobileBar({
 }: BookingMobileBarProps): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
   const tw = await getTranslations({ locale, namespace: 'hotelPage.widget' });
-  const tRail = await getTranslations({ locale, namespace: 'reservationRooms.rail' });
 
   const isSandboxLive =
     slug !== undefined &&
@@ -98,28 +82,17 @@ export async function BookingMobileBar({
 
   const isConciergeLive = hotelId !== undefined && isConciergeBookingMode(bookingMode);
 
-  const variant = isSandboxLive
-    ? ('sandbox_live' as const)
+  const variant: 'concierge' | 'travelport' | 'paid' | 'coming_soon' = isSandboxLive
+    ? 'travelport'
     : isPaidLive
-      ? ('paid_live' as const)
+      ? 'paid'
       : isConciergeLive
-        ? ('concierge_live' as const)
-        : ('coming_soon' as const);
+        ? 'concierge'
+        : 'coming_soon';
 
   const stay = mobileDefaultHotelStay();
   const today = todayIso();
-
-  const checkInLabel = isSandboxLive ? tRail('checkIn') : t('displayOnly.checkIn');
-  const checkOutLabel = isSandboxLive ? tRail('checkOut') : t('displayOnly.checkOut');
-  const datesLabel = formatMobileBarDates(
-    stay.checkIn,
-    stay.checkOut,
-    checkInLabel,
-    checkOutLabel,
-    locale,
-  );
-  const checkInDateValue = formatMobileBarDateValue(stay.checkIn, locale);
-  const checkOutDateValue = formatMobileBarDateValue(stay.checkOut, locale);
+  const kitLabels = await loadKitRailLabels(locale, hotelName);
 
   const sandboxAction =
     isSandboxLive && slug !== undefined
@@ -133,95 +106,63 @@ export async function BookingMobileBar({
     ? getPathname({ locale, href: '/reservation/start' })
     : undefined;
 
-  const chooseRoomsHref =
-    sandboxAction !== undefined
-      ? `${sandboxAction}?${new URLSearchParams({
-          checkIn: stay.checkIn,
-          checkOut: stay.checkOut,
-          adults: String(stay.adults),
-        }).toString()}`
-      : conciergeAction !== undefined && hotelId !== undefined
-        ? `${conciergeAction}?${buildConciergeQueryString(hotelId, stay)}`
-        : undefined;
+  const paidAction =
+    isPaidLive && railContext !== undefined && railContext.lockActionUrl !== null
+      ? railContext.lockActionUrl
+      : undefined;
+
+  const formAction =
+    variant === 'travelport' && sandboxAction !== undefined
+      ? sandboxAction
+      : variant === 'paid' && paidAction !== undefined
+        ? paidAction
+        : variant === 'concierge' && conciergeAction !== undefined
+          ? conciergeAction
+          : '#';
+
+  const formMethod: 'get' | 'post' = variant === 'paid' ? 'post' : 'get';
 
   const labels = {
-    datesLabel,
-    checkInDateValue,
-    checkOutDateValue,
-    priceFromLabel: tw('priceFromLabel'),
-    ctaSeePrices: tw('mobileBar.ctaSeePrices'),
+    ...kitLabels,
+    editStay: tw('mobileBar.editStay'),
     ctaChooseRooms: tw('mobileBar.ctaChooseRooms'),
-    ctaAriaSeePrices: tw('mobileBar.ctaAriaSeePrices', { name: hotelName }),
-    ctaAriaChooseRooms: tw('mobileBar.ctaAriaChooseRooms', { name: hotelName }),
-    sheetTitle: isSandboxLive
-      ? tRail('headline', { hotel: hotelName })
-      : isPaidLive
-        ? t('sections.booking')
-        : isConciergeLive
-          ? tw('conciergeTitle')
-          : t('sections.booking'),
-    closeSheet: tw('mobileBar.closeSheet'),
-    checkIn: checkInLabel,
-    checkOut: checkOutLabel,
-    adults: isSandboxLive ? tRail('adults') : t('displayOnly.adults'),
     comingSoonCta: t('bookingComingSoon.cta'),
-    sandboxSubmit: tw('mobileBar.ctaChooseRooms'),
-    conciergeSubmit: tw('mobileBar.ctaChooseRooms'),
-    paidSubmit:
-      railContext?.fakeEnabled === true ? t('booking.submitTest') : tw('mobileBar.ctaChooseRooms'),
+    closeSheet: tw('mobileBar.closeSheet'),
+    occupancyRooms: tw('mobileBar.occupancyRooms', { count: stay.rooms }),
+    occupancyAdults: tw('mobileBar.occupancyAdults', { count: stay.adults }),
+    occupancyChildren: tw('mobileBar.occupancyChildren', { count: stay.childAges.length }),
   };
 
+  const tracker =
+    hotelId !== undefined && bookingMode !== undefined ? (
+      <BookingWidgetSubmitTracker
+        hotelId={hotelId}
+        bookingMode={bookingMode}
+        surface="mobile_bar"
+      />
+    ) : null;
+
   return (
-    <BookingMobileBarClient
-      priceFrom={priceFrom}
-      labels={labels}
-      variant={variant}
-      {...(chooseRoomsHref !== undefined ? { chooseRoomsHref } : {})}
-      {...(isSandboxLive && sandboxAction !== undefined
-        ? {
-            sandboxAction,
-            sandboxDefaults: {
-              checkIn: stay.checkIn,
-              checkOut: stay.checkOut,
-              adults: stay.adults,
-              today,
-            },
-          }
-        : {})}
-      {...(isConciergeLive && hotelId !== undefined && conciergeAction !== undefined
-        ? {
-            conciergeAction,
-            conciergeDefaults: {
-              hotelId,
-              checkIn: stay.checkIn,
-              checkOut: stay.checkOut,
-              rooms: stay.rooms,
-              adults: stay.adults,
-              children: stay.children,
-              childAges: stay.childAges,
-              today,
-            },
-          }
-        : {})}
-      {...(isPaidLive &&
-      hotelId !== undefined &&
-      railContext !== undefined &&
-      railContext.lockActionUrl !== null
-        ? {
-            paidAction: railContext.lockActionUrl,
-            paidDefaults: {
-              hotelId,
-              checkIn: stay.checkIn,
-              checkOut: stay.checkOut,
-              rooms: stay.rooms,
-              adults: stay.adults,
-              children: stay.children,
-              childAges: stay.childAges,
-              today,
-              fake: railContext.fakeEnabled,
-            },
-          }
-        : {})}
-    />
+    <>
+      <BookingMobileBarClient
+        locale={locale}
+        variant={variant}
+        formAction={formAction}
+        formMethod={formMethod}
+        {...(hotelId !== undefined ? { hotelId } : {})}
+        {...(variant === 'paid' && railContext?.fakeEnabled === true ? { fake: true } : {})}
+        defaultStay={{
+          checkIn: stay.checkIn,
+          checkOut: stay.checkOut,
+          rooms: stay.rooms,
+          adults: stay.adults,
+          childAges: stay.childAges,
+        }}
+        today={today}
+        priceFrom={priceFrom}
+        labels={labels}
+      />
+      {tracker}
+    </>
   );
 }
