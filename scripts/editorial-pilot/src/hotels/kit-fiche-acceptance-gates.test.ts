@@ -109,8 +109,8 @@ describe('evaluateKitAcceptanceGates', () => {
     expect(failed).toContain('kit.10.gmb_sync_fresh');
     expect(failed).toContain('kit.10.gmb_display_triplet_fresh');
     expect(failed).toContain('kit.03.signature_experiences_dedicated_image');
-    expect(failed).toContain('kit.16.room_batch_script');
-    expect(failed).toContain('kit.16.room_display_module');
+    // cheval-blanc-paris now ships resource-*-rooms.ts; kit.16.room_display_module
+    // passes via kit-catalog-room-display.ts — no longer wave-5 blockers for this slug.
     expect(failed).toContain('kit.19.closure_audit_exit_zero');
   });
 
