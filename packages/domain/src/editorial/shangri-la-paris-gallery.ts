@@ -19,23 +19,23 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/shangri-la-paris/press-1',
     category: 'exterior',
-    alt_fr: 'Façade haussmannienne du Shangri-La Paris, ancien Palais d’Iéna, avenue d’Iéna',
-    alt_en: 'Haussmann facade of Shangri-La Paris, former Palais d’Iéna, Avenue d’Iéna',
+    alt_fr: 'Entrée du palace Shangri-La Paris, enseigne et porte cochère avenue d’Iéna',
+    alt_en: 'Shangri-La Paris entrance, sign and carriage porch on Avenue d’Iéna',
     caption_fr:
-      'L’ancien hôtel particulier du prince Roland Bonaparte, érigé en 1896, domine l’avenue d’Iéna face à la Seine.',
+      'L’entrée du palace ouvre sur le 16e arrondissement, à deux pas du Trocadéro et de la Tour Eiffel.',
     caption_en:
-      'Prince Roland Bonaparte’s former town house, built in 1896, overlooks Avenue d’Iéna facing the Seine.',
+      'The palace entrance opens onto the 16th arrondissement, steps from Trocadéro and the Eiffel Tower.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-2',
     category: 'exterior',
-    alt_fr: 'Entrée du palace Shangri-La Paris, 16e arrondissement',
-    alt_en: 'Entrance of Shangri-La Paris palace, 16th arrondissement',
+    alt_fr: 'Campagne visuelle du Shangri-La Paris — palace et jardins, vue d’ensemble',
+    alt_en: 'Shangri-La Paris campaign visual — palace and gardens, overview',
     caption_fr:
-      'L’entrée du palace ouvre sur le 16e arrondissement, à deux pas du Trocadéro et de la Tour Eiffel.',
+      'Le palace déploie ses jardins et sa façade haussmannienne sur l’avenue d’Iéna, face au Trocadéro.',
     caption_en:
-      'The palace entrance opens onto the 16th arrondissement, steps from Trocadéro and the Eiffel Tower.',
+      'The palace unfolds its gardens and Haussmann facade on Avenue d’Iéna, facing the Trocadéro.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
@@ -309,12 +309,12 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/shangri-la-paris/press-28',
     category: 'events',
-    alt_fr: 'Salle de réception historique du Shangri-La Paris',
-    alt_en: 'Historic reception room at Shangri-La Paris',
+    alt_fr: 'Distinctions Palace et récompenses du Shangri-La Paris',
+    alt_en: 'Palace distinctions and awards at Shangri-La Paris',
     caption_fr:
-      'Les salons classés du Palais d’Iéna accueillent mariages, galas et boardrooms jusqu’à 280 convives.',
+      'Palace Atout France, Forbes Five Star et distinctions Michelin Keys affichées au Shangri-La Paris.',
     caption_en:
-      'The listed Palais d’Iéna salons host weddings, galas and boardrooms for up to 280 guests.',
+      'Atout France Palace, Forbes Five Star and Michelin Keys distinctions at Shangri-La Paris.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
@@ -386,7 +386,7 @@ const SHANGRI_OFFICIAL = {
 /** 30 unique official URLs — one canonical path per press slot (hero excluded). */
 export const SHANGRI_LA_PARIS_GALLERY_PRESS_SLOT_URLS = [
   SHANGRI_OFFICIAL.entrance,
-  SHANGRI_OFFICIAL.awards,
+  SHANGRI_OFFICIAL.enchanted,
   SHANGRI_OFFICIAL.shangPalaceBanner,
   SHANGRI_OFFICIAL.lobby,
   SHANGRI_OFFICIAL.lounges,
@@ -412,7 +412,7 @@ export const SHANGRI_LA_PARIS_GALLERY_PRESS_SLOT_URLS = [
   SHANGRI_OFFICIAL.salonsPrince,
   SHANGRI_OFFICIAL.womanRoomView,
   SHANGRI_OFFICIAL.conciergeSalon,
-  SHANGRI_OFFICIAL.enchanted,
+  SHANGRI_OFFICIAL.awards,
   SHANGRI_OFFICIAL.diningBg,
   `${SHANGRI_SITE}/dining/restaurants/the-art-of-breakfast/09022026-marie-bonaparte-1920x500.jpg`,
 ] as const;
