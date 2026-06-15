@@ -574,6 +574,12 @@ export function renderKitChambres(model: HotelKitModel): string {
     </section>`;
 }
 
+function signatureExperienceSlideRatio(expIndex: number, isPick: boolean): number {
+  if (isPick) return 1.42;
+  const ratios = [1.18, 0.9, 1.32, 0.86, 1.08, 1.24, 0.94, 1.15];
+  return ratios[expIndex % ratios.length] ?? 1.1;
+}
+
 export function renderKitBref(model: HotelKitModel): string {
   const amenHtml = resolveKitAmenityBlocks(model.slugFr)
     .map((block) => {
@@ -638,21 +644,25 @@ export function renderKitBref(model: HotelKitModel): string {
       const pick = isPick
         ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(model.labels.conciergePick)}</span>`
         : '';
-      return `<article class="exp-card exp-card--mosaic${isPick ? ' exp-concierge' : ''}">
-            <div class="exp-img">
+      const slideRatio = signatureExperienceSlideRatio(expIndex, isPick);
+      const tipHtml =
+        isPick && exp.tip !== null && exp.tip.trim() !== ''
+          ? `<p class="cc-why">${escapeHtml(exp.tip.trim())}</p>`
+          : '';
+      const link = resolveKitLearnMoreLink(model, exp);
+      const linkHtml = `<a href="${escapeHtml(link.href)}" class="link-or"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label)}</a>`;
+      return `<article class="exp-justified-slide${isPick ? ' exp-concierge' : ''}" style="--exp-slide-ratio: ${slideRatio}">
+            <div class="exp-justified-media">
               <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(exp.title)}" loading="lazy">
               ${pick}
-            </div>
-            <div class="exp-tx">
-              <h4>${escapeHtml(exp.title)}</h4>
-              <p>${escapeHtml(exp.description)}</p>
-              ${isPick && exp.tip !== null && exp.tip.trim() !== '' ? `<p class="cc-why">${escapeHtml(exp.tip.trim())}</p>` : ''}
-              <div class="exp-foot">
-                <span class="exp-price">${formatExperiencePrice(model, exp)}</span>
-                ${(() => {
-                  const link = resolveKitLearnMoreLink(model, exp);
-                  return `<a href="${escapeHtml(link.href)}" class="link-or"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label)}</a>`;
-                })()}
+              <div class="exp-justified-overlay">
+                <h4>${escapeHtml(exp.title)}</h4>
+                <p class="exp-justified-desc">${escapeHtml(exp.description)}</p>
+                ${tipHtml}
+                <div class="exp-foot">
+                  <span class="exp-price">${formatExperiencePrice(model, exp)}</span>
+                  ${linkHtml}
+                </div>
               </div>
             </div>
           </article>`;
@@ -705,8 +715,11 @@ export function renderKitBref(model: HotelKitModel): string {
           ? `<div class="bref-sub">
         <h3>${model.locale === 'en' ? 'Signature experiences' : 'Expériences signature'}</h3>
         <p class="sub-lede">${model.locale === 'en' ? 'What the concierge arranges for you, beyond the room.' : 'Ce que la conciergerie organise pour vous, au-delà de la chambre.'}</p>
-        <div class="exp-mosaic" id="exp-mosaic">
-          ${expHtml}
+        <div class="carousel exp-justified-carousel" data-kit-carousel id="exp-justified-carousel">
+          <div class="carousel-track">
+            ${expHtml}
+          </div>
+          ${expList.length > 1 ? renderKitCarouselNav(model.locale) : ''}
         </div>
       </div>`
           : ''
@@ -1268,7 +1281,7 @@ export function renderKitAutour(model: HotelKitModel): string {
 
   const subs = [
     renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale], 'carousel'),
-    renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'disclosure-grid'),
+    renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'carousel'),
     renderUpcomingEventsSub(model),
     renderAroundBucket(model, 'eat', bucketTitles.eat[model.locale], 'disclosure-grid'),
     renderAroundBucket(model, 'shop', bucketTitles.shop[model.locale], 'disclosure-grid'),
@@ -1422,10 +1435,16 @@ export function renderKitProximite(model: HotelKitModel): string {
         </a>`;
     })
     .join('\n        ');
+  const nav = cards.length > 1 ? renderKitCarouselNav(model.locale) : '';
   return `<section class="htl-section" id="proximite" style="border-bottom:none">
       <h2>${escapeHtml(model.labels.proximity)}</h2>
       <p class="htl-lede">${escapeHtml(model.labels.proximityLede)}</p>
-      <div class="nearby-grid">${grid}</div>
+      <div class="carousel nearby-carousel" data-kit-carousel>
+        <div class="carousel-track">
+          ${grid}
+        </div>
+        ${nav}
+      </div>
       <div class="nearby-region">
         <a href="${p}/destination/${escapeHtml(model.cityHubSlug)}" class="btn-ligne">${escapeHtml(model.labels.exploreRegion)}</a>
       </div>
