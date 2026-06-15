@@ -2159,11 +2159,30 @@
 .mch-kit .hotel-kit-aside-slot {
   min-height: 28rem;
 }
+/* Intro stack — mobile: titre au-dessus du carrousel ; desktop: galerie DA-first. */
+.mch-kit .hotel-kit-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+.mch-kit .hotel-kit-head-slot {
+  order: 1;
+}
 .mch-kit .hotel-kit-gallery-slot {
+  order: 2;
   min-height: 15rem;
 }
 @media (min-width: 768px) {
+  .mch-kit .hotel-kit-intro {
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .mch-kit .hotel-kit-head-slot {
+    order: 2;
+  }
   .mch-kit .hotel-kit-gallery-slot {
+    order: 1;
     min-height: 27.5rem;
   }
 }

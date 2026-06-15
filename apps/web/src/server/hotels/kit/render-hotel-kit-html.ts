@@ -1378,10 +1378,11 @@ export function renderKitProximite(model: HotelKitModel): string {
 /** Shell + main column (DA layout). Aside is rendered in React. */
 export function assembleHotelKitShell(model: HotelKitModel): {
   readonly prefixHtml: string;
+  /** Eyebrow + H1 + stars (+ loc/rating) — lifted out for mobile reorder vs gallery. */
+  readonly headHtml: string;
   readonly mainHtml: string;
 } {
   const main = [
-    renderKitHead(model),
     renderKitFeats(model),
     renderKitSectionNav(model),
     renderKitFactualSummary(model),
@@ -1401,6 +1402,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
   ].join('\n\n    ');
   return {
     prefixHtml: renderKitBreadcrumb(model),
+    headHtml: renderKitHead(model),
     mainHtml: main,
   };
 }

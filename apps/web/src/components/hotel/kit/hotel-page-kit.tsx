@@ -51,7 +51,8 @@ export async function HotelPageKit({
       ? formatIndicativePriceParts(railContext.priceFrom.amount, model.locale).from
       : model.railIndicativeFrom;
 
-  const { prefixHtml, mainHtml } = assembleHotelKitShell(model);
+  const { prefixHtml, headHtml, mainHtml } = assembleHotelKitShell(model);
+  const hasGallery = model.galleryHeroDescriptor !== null || model.galleryGridImages.length > 0;
   const jsonLdNodes = buildHotelKitJsonLd(
     model,
     railContext.supplierBookable || isPaidBookingMode(row.booking_mode) ? railContext : undefined,
@@ -65,17 +66,20 @@ export async function HotelPageKit({
       <div className="mch-kit hotel-page">
         <div dangerouslySetInnerHTML={{ __html: prefixHtml }} />
 
-        {model.galleryHeroDescriptor !== null || model.galleryGridImages.length > 0 ? (
-          <div className="hotel-kit-gallery-slot wrap mt-3.5">
-            <HotelGallery
-              locale={model.locale}
-              cloudName={model.cloudName}
-              hero={model.galleryHeroDescriptor}
-              images={model.galleryGridImages}
-              hotelName={model.name}
-            />
-          </div>
-        ) : null}
+        <div className="hotel-kit-intro wrap">
+          <div className="hotel-kit-head-slot" dangerouslySetInnerHTML={{ __html: headHtml }} />
+          {hasGallery ? (
+            <div className="hotel-kit-gallery-slot">
+              <HotelGallery
+                locale={model.locale}
+                cloudName={model.cloudName}
+                hero={model.galleryHeroDescriptor}
+                images={model.galleryGridImages}
+                hotelName={model.name}
+              />
+            </div>
+          ) : null}
+        </div>
 
         <div className="htl-body wrap">
           <main className="htl-main" dangerouslySetInnerHTML={{ __html: mainHtml }} />
