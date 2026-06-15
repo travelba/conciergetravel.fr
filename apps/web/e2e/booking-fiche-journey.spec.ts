@@ -72,15 +72,15 @@ test.describe('booking — fiche hotel journey', () => {
       await cookieAccept.click();
     }
 
+    await page.evaluate(() => window.scrollTo(0, 400));
+
     const mobileCta = page.locator('[data-booking-widget="mobile_bar"] .resa-mobile-bar__cta');
     await expect(mobileCta).toBeVisible();
-    await expect(mobileCta).toHaveText(/réserver via mon concierge/i);
+    await expect(mobileCta).toHaveText(/choisir chambres/i);
 
-    await mobileCta.click();
+    await page.locator('[data-booking-widget="mobile_bar"] .resa-mobile-bar__summary').click();
     const sheetForm = page.locator('.resa-mobile-sheet [data-testid="booking-widget-form"]');
     await expect(sheetForm).toBeVisible();
-    await expect(
-      sheetForm.getByRole('button', { name: /réserver via mon concierge/i }),
-    ).toBeEnabled();
+    await expect(sheetForm.getByRole('button', { name: /choisir chambres/i })).toBeEnabled();
   });
 });
