@@ -127,7 +127,6 @@ export function DirectoryMapboxCanvas({
     if (token === null || container === null || points.length === 0) return;
 
     mapboxgl.accessToken = token;
-    mapboxgl.config.EVENTS_URL = '';
 
     let cancelled = false;
     const markers = markersRef.current;
