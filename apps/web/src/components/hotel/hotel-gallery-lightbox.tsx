@@ -1,6 +1,10 @@
 'use client';
 
-import { KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY } from '@mch/domain/photos';
+import {
+  KIT_GALLERY_FILTER_TAB_MIN_PHOTOS,
+  KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
+  pickKitMosaicRepresentativeThumbnails,
+} from '@mch/domain/photos';
 import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -39,7 +43,15 @@ function normalizeCategoryToFilter(
 ): GalleryCategoryFilter | null {
   const value = category?.trim().toLowerCase() ?? '';
   if (value === '') return null;
-  if (value === 'room' || value === 'suite' || value === 'bedroom') return 'room';
+  if (
+    value === 'room' ||
+    value === 'suite' ||
+    value === 'bedroom' ||
+    value === 'detail' ||
+    value === 'bathroom'
+  ) {
+    return 'room';
+  }
   if (value === 'pool' || value === 'swimming_pool') return 'pool';
   if (value === 'restaurant' || value === 'dining' || value === 'bar') return 'restaurant';
   if (value === 'spa' || value === 'wellness') return 'spa';
@@ -58,23 +70,44 @@ interface FilteredGallerySlice {
   readonly globalIndices: readonly number[];
 }
 
+function buildAllTabMosaicSlice(
+  hero: GalleryLightboxImage | null,
+  galleryCatalogue: readonly GalleryLightboxImage[],
+  allImages: readonly GalleryLightboxImage[],
+): FilteredGallerySlice {
+  const sideReps = pickKitMosaicRepresentativeThumbnails(galleryCatalogue, MOSAIC_SIDE_TILES);
+  const items =
+    hero !== null
+      ? [hero, ...sideReps]
+      : sideReps.length > 0
+        ? sideReps
+        : galleryCatalogue.slice(0, 1 + MOSAIC_SIDE_TILES);
+
+  const globalIndices = items.map((img) => {
+    const index = allImages.findIndex((candidate) => candidate.publicId === img.publicId);
+    return index >= 0 ? index : 0;
+  });
+
+  return { items, globalIndices };
+}
+
 function buildFilteredGallerySlice(
   allImages: readonly GalleryLightboxImage[],
   filter: GalleryCategoryFilter,
+  galleryCatalogue: readonly GalleryLightboxImage[],
+  hero: GalleryLightboxImage | null,
 ): FilteredGallerySlice {
   if (filter === 'all') {
-    return {
-      items: allImages,
-      globalIndices: allImages.map((_, index) => index),
-    };
+    return buildAllTabMosaicSlice(hero, galleryCatalogue, allImages);
   }
 
   const items: GalleryLightboxImage[] = [];
   const globalIndices: number[] = [];
-  allImages.forEach((image, index) => {
+  galleryCatalogue.forEach((image, index) => {
     if (imageMatchesFilter(image, filter)) {
       items.push(image);
-      globalIndices.push(index);
+      const globalIndex = allImages.findIndex((candidate) => candidate.publicId === image.publicId);
+      globalIndices.push(globalIndex >= 0 ? globalIndex : index + (hero !== null ? 1 : 0));
     }
   });
   return { items, globalIndices };
@@ -523,32 +556,28 @@ export function HotelGalleryLightbox({
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
   const mobileTouchStartX = useRef<number>(0);
 
-  const filteredSlice = useMemo(
-    () => buildFilteredGallerySlice(allImages, activeFilter),
-    [activeFilter, allImages],
-  );
-
   const mosaicSlice = useMemo((): FilteredGallerySlice => {
+    const base = buildFilteredGallerySlice(allImages, activeFilter, galleryCatalogue, hero);
     if (activeFilter === 'all') {
-      return filteredSlice;
+      return base;
     }
-    const base = buildFilteredGallerySlice(galleryCatalogue, activeFilter);
     const cap = KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY;
     return {
       items: base.items.slice(0, cap),
       globalIndices: base.globalIndices.slice(0, cap),
     };
-  }, [activeFilter, filteredSlice, galleryCatalogue]);
+  }, [activeFilter, allImages, galleryCatalogue, hero]);
 
   const availableFilters = useMemo(() => {
     return GALLERY_CATEGORY_FILTERS.filter((filter) => {
       if (filter === 'all') {
         return galleryCatalogue.length > 0 || hero !== null;
       }
-      const count = buildFilteredGallerySlice(galleryCatalogue, filter).items.length;
-      return count >= KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY;
+      const count = buildFilteredGallerySlice(allImages, filter, galleryCatalogue, hero).items
+        .length;
+      return count >= KIT_GALLERY_FILTER_TAB_MIN_PHOTOS;
     });
-  }, [galleryCatalogue, hero]);
+  }, [allImages, galleryCatalogue, hero]);
 
   const filterCounts = useMemo(() => {
     const counts = new Map<GalleryCategoryFilter, number>();
@@ -557,10 +586,13 @@ export function HotelGalleryLightbox({
         counts.set('all', galleryCatalogue.length + (hero !== null ? 1 : 0));
         continue;
       }
-      counts.set(filter, buildFilteredGallerySlice(galleryCatalogue, filter).items.length);
+      counts.set(
+        filter,
+        buildFilteredGallerySlice(allImages, filter, galleryCatalogue, hero).items.length,
+      );
     }
     return counts;
-  }, [galleryCatalogue, hero]);
+  }, [allImages, galleryCatalogue, hero]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -693,13 +725,8 @@ export function HotelGalleryLightbox({
 
   const mobileDisplaySlice = useMemo(() => {
     if (activeFilter !== 'all') return mosaicSlice;
-    const items = hero !== null ? [hero, ...thumbnails] : [...thumbnails];
-    const globalIndices = items.map((img) => {
-      const index = allImages.findIndex((candidate) => candidate.publicId === img.publicId);
-      return index >= 0 ? index : 0;
-    });
-    return { items, globalIndices };
-  }, [activeFilter, allImages, hero, mosaicSlice, thumbnails]);
+    return buildAllTabMosaicSlice(hero, galleryCatalogue, allImages);
+  }, [activeFilter, allImages, galleryCatalogue, hero, mosaicSlice]);
 
   const scrollMobileCarouselTo = useCallback(
     (index: number): void => {
@@ -1004,14 +1031,8 @@ export function HotelGalleryLightbox({
                   })}
                   {thumbnails.slice(0, MOSAIC_SIDE_TILES).map((img, idx) => {
                     const galleryIndex = idx + 1;
-                    const isLast = idx === Math.min(MOSAIC_SIDE_TILES, thumbnails.length) - 1;
-                    const classicOverflowOnLast =
-                      thumbnails.length >= MOSAIC_SIDE_TILES &&
-                      (overflowCount > 0 || thumbnails.length > MOSAIC_SIDE_TILES);
-                    const overflowLabel =
-                      isLast && classicOverflowOnLast
-                        ? overflowCount + Math.max(0, thumbnails.length - MOSAIC_SIDE_TILES)
-                        : 0;
+                    const isLast = idx === thumbnails.length - 1;
+                    const overflowLabel = isLast && overflowCount > 0 ? overflowCount : 0;
                     return (
                       <div key={img.publicId} className="relative min-h-0">
                         {renderTileButton(img, galleryIndex, {

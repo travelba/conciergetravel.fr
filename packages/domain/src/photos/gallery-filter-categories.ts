@@ -9,6 +9,16 @@
 /** User-facing mosaic filter ids (Chambres, Piscine, Restaurant, Spa, Vue). */
 export const KIT_GALLERY_FILTER_UI_IDS = ['view', 'room', 'pool', 'restaurant', 'spa'] as const;
 
+/** Side vignettes on the "Tous" mosaic (one per non-view filter). */
+export const KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT = 4;
+
+/**
+ * Minimum gallery photos in a filter category before its tab is shown.
+ * Kit publish gates still require {@link KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY}
+ * for full 5×5 compliance — this lower bar is UI-only for partial catalogues.
+ */
+export const KIT_GALLERY_FILTER_TAB_MIN_PHOTOS = 1;
+
 export type KitGalleryFilterUiId = (typeof KIT_GALLERY_FILTER_UI_IDS)[number];
 
 /** Strict gallery slot count for kit fiches (hero excluded). */
@@ -23,12 +33,24 @@ export interface GalleryCategoryCarrier {
   readonly category?: string | null;
 }
 
+export interface GalleryPublicIdCarrier extends GalleryCategoryCarrier {
+  readonly publicId?: string;
+}
+
 export function normalizeGalleryDbCategoryToFilter(
   category: string | null | undefined,
 ): KitGalleryFilterUiId | null {
   const value = category?.trim().toLowerCase() ?? '';
   if (value === '') return null;
-  if (value === 'room' || value === 'suite' || value === 'bedroom') return 'room';
+  if (
+    value === 'room' ||
+    value === 'suite' ||
+    value === 'bedroom' ||
+    value === 'detail' ||
+    value === 'bathroom'
+  ) {
+    return 'room';
+  }
   if (value === 'pool' || value === 'swimming_pool') return 'pool';
   if (value === 'restaurant' || value === 'dining' || value === 'bar') return 'restaurant';
   if (value === 'spa' || value === 'wellness') return 'spa';
@@ -68,26 +90,49 @@ export function hasKitGalleryFiveByFiveStructure(
 
 /**
  * Pick one representative thumbnail per non-view filter for the "Tous" mosaic
- * (hero covers Vue). Falls back to array order when the 5×5 structure is absent.
+ * (hero covers Vue). Fills remaining slots from gallery order when a category
+ * is missing (legacy / partial catalogues such as the 12-photo Airelles pilot).
  */
-export function pickKitMosaicRepresentativeThumbnails<T extends GalleryCategoryCarrier>(
+export function pickKitMosaicRepresentativeThumbnails<T extends GalleryPublicIdCarrier>(
   images: readonly T[],
   sideTileCount: number,
+  options?: { readonly excludePublicIds?: readonly string[] },
 ): readonly T[] {
   if (images.length === 0 || sideTileCount <= 0) return [];
 
-  if (hasKitGalleryFiveByFiveStructure(images)) {
-    const picked: T[] = [];
-    for (const filter of KIT_GALLERY_FILTER_UI_IDS) {
-      if (filter === 'view') continue;
-      const match = images.find(
-        (img) => normalizeGalleryDbCategoryToFilter(img.category ?? null) === filter,
-      );
-      if (match !== undefined) picked.push(match);
-      if (picked.length >= sideTileCount) break;
+  const exclude = new Set(options?.excludePublicIds ?? []);
+  const eligible = images.filter((img) => {
+    const id = img.publicId ?? '';
+    return id === '' || !exclude.has(id);
+  });
+
+  const picked: T[] = [];
+  const pickedIds = new Set<string>();
+
+  for (const filter of KIT_GALLERY_FILTER_UI_IDS) {
+    if (filter === 'view') continue;
+    const match = eligible.find((img) => {
+      const id = img.publicId ?? '';
+      if (id !== '' && pickedIds.has(id)) return false;
+      return normalizeGalleryDbCategoryToFilter(img.category ?? null) === filter;
+    });
+    if (match !== undefined) {
+      picked.push(match);
+      const id = match.publicId ?? '';
+      if (id !== '') pickedIds.add(id);
     }
-    if (picked.length >= sideTileCount) return picked.slice(0, sideTileCount);
+    if (picked.length >= sideTileCount) break;
   }
 
-  return images.slice(0, sideTileCount);
+  if (picked.length < sideTileCount) {
+    for (const img of eligible) {
+      const id = img.publicId ?? '';
+      if (id !== '' && pickedIds.has(id)) continue;
+      picked.push(img);
+      if (id !== '') pickedIds.add(id);
+      if (picked.length >= sideTileCount) break;
+    }
+  }
+
+  return picked.slice(0, sideTileCount);
 }

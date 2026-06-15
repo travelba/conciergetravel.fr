@@ -249,6 +249,7 @@ export interface HotelKitModel {
     readonly publicId: string;
     readonly alt: string;
     readonly caption: string | null;
+    readonly category?: string | null;
   } | null;
   readonly galleryGridImages: readonly LocalisedGalleryImage[];
   readonly resolvedRating: HotelKitResolvedRating | null;
@@ -535,18 +536,22 @@ export async function prepareHotelKitModelUncached(
           publicId: heroGalleryMatch.publicId,
           alt: heroGalleryMatch.alt,
           caption: heroGalleryMatch.caption,
+          category: heroGalleryMatch.category,
         }
       : heroPublicId !== null
         ? {
             publicId: heroPublicId,
             alt: name,
             caption: null,
+            category:
+              galleryImages.find((g) => g.publicId === heroPublicId)?.category ?? 'exterior',
           }
         : galleryImages[0] !== undefined
           ? {
               publicId: galleryImages[0].publicId,
               alt: galleryImages[0].alt,
               caption: galleryImages[0].caption,
+              category: galleryImages[0].category,
             }
           : null;
 

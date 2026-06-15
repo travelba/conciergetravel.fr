@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   countGalleryPhotosByFilterCategory,
   hasKitGalleryFiveByFiveStructure,
+  KIT_GALLERY_FILTER_TAB_MIN_PHOTOS,
+  KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
   KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
   KIT_GALLERY_SLOT_COUNT,
   pickKitMosaicRepresentativeThumbnails,
@@ -44,7 +46,25 @@ describe('gallery-filter-categories', () => {
     expect(thumbs.map((t) => t.category)).toEqual(['room', 'pool', 'dining', 'spa']);
   });
 
-  it('exports canonical kit slot constants', () => {
+  it('picks one thumb per non-view category for partial catalogues (Airelles pilot)', () => {
+    const partial = [
+      { publicId: 'pool-1', category: 'pool' },
+      { publicId: 'room-1', category: 'room' },
+      { publicId: 'dining-1', category: 'dining' },
+      { publicId: 'spa-1', category: 'spa' },
+      { publicId: 'view-1', category: 'view' },
+    ];
+    const thumbs = pickKitMosaicRepresentativeThumbnails(
+      partial,
+      KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+    );
+    expect(thumbs).toHaveLength(4);
+    expect(thumbs.map((t) => t.category)).toEqual(['room', 'pool', 'dining', 'spa']);
+  });
+
+  it('exports UI tab minimum separate from publish gate', () => {
+    expect(KIT_GALLERY_FILTER_TAB_MIN_PHOTOS).toBe(1);
+    expect(KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT).toBe(4);
     expect(KIT_GALLERY_SLOT_COUNT).toBe(25);
     expect(KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY).toBe(5);
   });

@@ -1,4 +1,7 @@
-import { pickKitMosaicRepresentativeThumbnails } from '@mch/domain/photos';
+import {
+  KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+  pickKitMosaicRepresentativeThumbnails,
+} from '@mch/domain/photos';
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
@@ -62,8 +65,7 @@ interface HotelGalleryProps {
  * grid surfaces the strongest 11 while the lightbox honours the full
  * catalogue without bandwidth penalty (thumbnails use `c_thumb,w_400`).
  */
-const MAX_THUMBNAILS = 11;
-const MOSAIC_SIDE_TILES = 4;
+const MOSAIC_SIDE_TILES = KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT;
 const PLACEHOLDER_MOSAIC_TILES = 4;
 
 export async function HotelGallery({
@@ -114,27 +116,20 @@ export async function HotelGallery({
     hero !== null ? { ...hero, category: heroCategory } : null;
 
   const mosaicSideTiles = pickKitMosaicRepresentativeThumbnails(images, MOSAIC_SIDE_TILES);
-  const mosaicSideIds = new Set(mosaicSideTiles.map((img) => img.publicId));
-  const orderedImages =
-    mosaicSideTiles.length >= MOSAIC_SIDE_TILES
-      ? [...mosaicSideTiles, ...images.filter((img) => !mosaicSideIds.has(img.publicId))]
-      : images;
 
-  const thumbnails: readonly GalleryLightboxImage[] = orderedImages
-    .slice(0, MAX_THUMBNAILS)
-    .map((img) => ({
-      publicId: img.publicId,
-      alt: img.alt,
-      caption: img.caption,
-      category: img.category,
-    }));
+  const thumbnails: readonly GalleryLightboxImage[] = mosaicSideTiles.map((img) => ({
+    publicId: img.publicId,
+    alt: img.alt,
+    caption: img.caption,
+    category: img.category,
+  }));
   const allLightboxImages: readonly GalleryLightboxImage[] = images.map((img) => ({
     publicId: img.publicId,
     alt: img.alt,
     caption: img.caption,
     category: img.category,
   }));
-  const overflowCount = Math.max(0, images.length - MAX_THUMBNAILS);
+  const overflowCount = Math.max(0, images.length - mosaicSideTiles.length);
   const galleryTotal = (heroForLightbox !== null ? 1 : 0) + allLightboxImages.length;
 
   return (
