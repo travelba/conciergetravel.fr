@@ -1,3 +1,4 @@
+import { pickKitMosaicRepresentativeThumbnails } from '@mch/domain/photos';
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
@@ -62,6 +63,7 @@ interface HotelGalleryProps {
  * catalogue without bandwidth penalty (thumbnails use `c_thumb,w_400`).
  */
 const MAX_THUMBNAILS = 11;
+const MOSAIC_SIDE_TILES = 4;
 const PLACEHOLDER_MOSAIC_TILES = 4;
 
 export async function HotelGallery({
@@ -111,7 +113,14 @@ export async function HotelGallery({
   const heroForLightbox: GalleryLightboxImage | null =
     hero !== null ? { ...hero, category: heroCategory } : null;
 
-  const thumbnails: readonly GalleryLightboxImage[] = images
+  const mosaicSideTiles = pickKitMosaicRepresentativeThumbnails(images, MOSAIC_SIDE_TILES);
+  const mosaicSideIds = new Set(mosaicSideTiles.map((img) => img.publicId));
+  const orderedImages =
+    mosaicSideTiles.length >= MOSAIC_SIDE_TILES
+      ? [...mosaicSideTiles, ...images.filter((img) => !mosaicSideIds.has(img.publicId))]
+      : images;
+
+  const thumbnails: readonly GalleryLightboxImage[] = orderedImages
     .slice(0, MAX_THUMBNAILS)
     .map((img) => ({
       publicId: img.publicId,
@@ -161,7 +170,6 @@ export async function HotelGallery({
         filterEmpty: t('gallery.filterEmpty'),
         carouselPrevPhoto: t('gallery.carouselPrevPhoto'),
         carouselNextPhoto: t('gallery.carouselNextPhoto'),
-        carouselPhotoN: t('gallery.carouselPhotoN'),
       }}
     />
   );

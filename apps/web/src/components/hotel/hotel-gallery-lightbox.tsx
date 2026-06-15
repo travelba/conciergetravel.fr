@@ -1,5 +1,6 @@
 'use client';
 
+import { KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY } from '@mch/domain/photos';
 import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -151,7 +152,6 @@ interface HotelGalleryLightboxProps {
     readonly filterEmpty: string;
     readonly carouselPrevPhoto: string;
     readonly carouselNextPhoto: string;
-    readonly carouselPhotoN: string;
   };
 }
 
@@ -545,11 +545,16 @@ export function HotelGalleryLightbox({
   // C4 — the lightbox cycles through the full set (≥ 30 when available),
   // while the visible grid stays capped. When `lightboxImages` is set,
   // we honour the full catalogue; otherwise we mirror the visible grid
-  // for backwards compatibility with any other caller.
+  // Full lightbox catalogue (hero + gallery rows). Category filters count
+  // gallery slots only — hero stays on the "Tous" mosaic, not in Vue/Chambres tabs.
+  const galleryCatalogue = useMemo<readonly GalleryLightboxImage[]>(
+    () => lightboxImages ?? thumbnails,
+    [lightboxImages, thumbnails],
+  );
+
   const allImages = useMemo<readonly GalleryLightboxImage[]>(() => {
-    const base = lightboxImages ?? thumbnails;
-    return hero !== null ? [hero, ...base] : base;
-  }, [hero, lightboxImages, thumbnails]);
+    return hero !== null ? [hero, ...galleryCatalogue] : [...galleryCatalogue];
+  }, [hero, galleryCatalogue]);
 
   const [activeFilter, setActiveFilter] = useState<GalleryCategoryFilter>('all');
   const [mobileCarouselIndex, setMobileCarouselIndex] = useState<number>(0);
@@ -561,20 +566,39 @@ export function HotelGalleryLightbox({
     [activeFilter, allImages],
   );
 
+  const mosaicSlice = useMemo((): FilteredGallerySlice => {
+    if (activeFilter === 'all') {
+      return filteredSlice;
+    }
+    const base = buildFilteredGallerySlice(galleryCatalogue, activeFilter);
+    const cap = KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY;
+    return {
+      items: base.items.slice(0, cap),
+      globalIndices: base.globalIndices.slice(0, cap),
+    };
+  }, [activeFilter, filteredSlice, galleryCatalogue]);
+
   const availableFilters = useMemo(() => {
     return GALLERY_CATEGORY_FILTERS.filter((filter) => {
-      if (filter === 'all') return allImages.length > 0;
-      return allImages.some((image) => imageMatchesFilter(image, filter));
+      if (filter === 'all') {
+        return galleryCatalogue.length > 0 || hero !== null;
+      }
+      const count = buildFilteredGallerySlice(galleryCatalogue, filter).items.length;
+      return count >= KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY;
     });
-  }, [allImages]);
+  }, [galleryCatalogue, hero]);
 
   const filterCounts = useMemo(() => {
     const counts = new Map<GalleryCategoryFilter, number>();
     for (const filter of GALLERY_CATEGORY_FILTERS) {
-      counts.set(filter, buildFilteredGallerySlice(allImages, filter).items.length);
+      if (filter === 'all') {
+        counts.set('all', galleryCatalogue.length + (hero !== null ? 1 : 0));
+        continue;
+      }
+      counts.set(filter, buildFilteredGallerySlice(galleryCatalogue, filter).items.length);
     }
     return counts;
-  }, [allImages]);
+  }, [galleryCatalogue, hero]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -636,6 +660,12 @@ export function HotelGalleryLightbox({
       dialog.close();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!availableFilters.includes(activeFilter)) {
+      setActiveFilter('all');
+    }
+  }, [activeFilter, availableFilters]);
 
   useEffect(() => {
     setMobileCarouselIndex(0);
@@ -705,25 +735,24 @@ export function HotelGalleryLightbox({
 
   const current = total > 0 ? allImages[currentIndex] : undefined;
 
-  const mosaicLead = filteredSlice.items[0];
-  const mosaicSideTiles = filteredSlice.items.slice(1, 1 + MOSAIC_SIDE_TILES);
+  const mosaicLead = mosaicSlice.items[0];
+  const mosaicSideTiles = mosaicSlice.items.slice(1, 1 + MOSAIC_SIDE_TILES);
   const mosaicOverflowCount =
-    mosaicSideTiles.length === MOSAIC_SIDE_TILES &&
-    filteredSlice.items.length > 1 + MOSAIC_SIDE_TILES
-      ? filteredSlice.items.length - (1 + MOSAIC_SIDE_TILES)
+    mosaicSideTiles.length === MOSAIC_SIDE_TILES && mosaicSlice.items.length > 1 + MOSAIC_SIDE_TILES
+      ? mosaicSlice.items.length - (1 + MOSAIC_SIDE_TILES)
       : 0;
 
   const useClassicMosaic = activeFilter === 'all' && layout === 'mosaic' && hero !== null;
 
   const mobileDisplaySlice = useMemo(() => {
-    if (activeFilter !== 'all') return filteredSlice;
+    if (activeFilter !== 'all') return mosaicSlice;
     const items = hero !== null ? [hero, ...thumbnails] : [...thumbnails];
     const globalIndices = items.map((img) => {
       const index = allImages.findIndex((candidate) => candidate.publicId === img.publicId);
       return index >= 0 ? index : 0;
     });
     return { items, globalIndices };
-  }, [activeFilter, allImages, filteredSlice, hero, thumbnails]);
+  }, [activeFilter, allImages, hero, mosaicSlice, thumbnails]);
 
   const scrollMobileCarouselTo = useCallback(
     (index: number): void => {
@@ -1007,7 +1036,7 @@ export function HotelGalleryLightbox({
       {!hideGrid && layout === 'mosaic' && allImages.length > 0 ? (
         <>
           {renderFilterTabs()}
-          {filteredSlice.items.length === 0 ? (
+          {mosaicSlice.items.length === 0 ? (
             <p className="text-sm text-[#6f675b] md:mb-0">{translations.filterEmpty}</p>
           ) : (
             <>
@@ -1059,7 +1088,7 @@ export function HotelGalleryLightbox({
                   className="hidden h-[440px] grid-cols-4 grid-rows-2 gap-2.5 md:grid"
                   data-gallery-layout="mosaic-filtered"
                 >
-                  {renderTileButton(mosaicLead, filteredSlice.globalIndices[0] ?? 0, {
+                  {renderTileButton(mosaicLead, mosaicSlice.globalIndices[0] ?? 0, {
                     className: `${GALLERY_TILE_BUTTON_CLASS} col-span-2 row-span-2 min-h-0`,
                     priority: true,
                     width: 1200,
@@ -1070,7 +1099,7 @@ export function HotelGalleryLightbox({
                     imageClassName: KIT_MOSAIC_IMAGE_CLASS,
                   })}
                   {mosaicSideTiles.map((img, idx) => {
-                    const galleryIndex = filteredSlice.globalIndices[idx + 1] ?? idx + 1;
+                    const galleryIndex = mosaicSlice.globalIndices[idx + 1] ?? idx + 1;
                     const isLast = idx === mosaicSideTiles.length - 1;
                     return (
                       <div key={`${img.publicId}-${galleryIndex}`} className="relative min-h-0">

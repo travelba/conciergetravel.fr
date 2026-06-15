@@ -88,7 +88,6 @@ export function HotelInteractiveMap({
     if (container === null) return;
 
     mapboxgl.accessToken = accessToken;
-    mapboxgl.config.EVENTS_URL = '';
 
     const map = new mapboxgl.Map({
       container,
