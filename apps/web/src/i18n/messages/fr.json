@@ -3419,6 +3419,7 @@
       "lieu": "Emplacement & accès",
       "avis": "Avis & distinctions",
       "autour": "Autour de l'hôtel",
+      "evenements": "Évènements à venir",
       "conseil": "Le Conseil du Concierge",
       "faq": "Questions fréquentes",
       "proximite": "Les hôtes à proximité",
@@ -3433,6 +3434,7 @@
       "presse": "Presse",
       "lieu": "Accès",
       "autour": "Autour",
+      "evenements": "Évènements",
       "faq": "FAQ",
       "proximite": "Proche",
       "enBref": "Fiche"
@@ -3680,6 +3682,8 @@
       "lead": "Les rendez-vous que je glisse dans les programmes de mes clients à {city} — concerts, expos, festivals à deux pas du {hotelName}.",
       "tipFallback": "Mon conseil : réservez 7 jours avant pour les billets concert.",
       "officialSource": "Voir la source officielle",
+      "buyTicket": "Réserver",
+      "newBadge": "Nouveau",
       "category": {
         "concert": "Concert",
         "expo": "Exposition",

@@ -3419,6 +3419,7 @@
       "lieu": "Location & access",
       "avis": "Reviews & awards",
       "autour": "Around the hotel",
+      "evenements": "Upcoming events",
       "conseil": "The Concierge's tip",
       "faq": "FAQ",
       "proximite": "Hotels nearby",
@@ -3433,6 +3434,7 @@
       "presse": "Press",
       "lieu": "Access",
       "autour": "Around",
+      "evenements": "Events",
       "faq": "FAQ",
       "proximite": "Nearby",
       "enBref": "Facts"
@@ -3680,6 +3682,8 @@
       "lead": "The dates I slip into my guests’ programme in {city} — concerts, exhibitions, festivals a few steps from {hotelName}.",
       "tipFallback": "My tip: book concert tickets seven days ahead.",
       "officialSource": "View official source",
+      "buyTicket": "Buy tickets",
+      "newBadge": "New",
       "category": {
         "concert": "Concert",
         "expo": "Exhibition",

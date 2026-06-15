@@ -7,6 +7,7 @@ export const KIT_GENERIC_ASSETS = {
   spa: '/kit/img/htl_spa.jpg',
   proximity: '/kit/img/htl_facade.jpg',
   experience: ['/kit/img/experience.jpg', '/kit/img/paris.jpg', '/kit/img/htl_facade.jpg'] as const,
+  event: '/kit/img/experience.jpg',
 } as const;
 
 export function isAirellesKitSlug(slugFr: string): boolean {

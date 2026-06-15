@@ -38,8 +38,10 @@ import {
   ratingQualitativeLabel,
 } from './kit-html-utils';
 import type {
+  EventCategory,
   LocalisedPointOfInterest,
   LocalisedRestaurantVenue,
+  LocalisedUpcomingEvent,
 } from '@/server/hotels/get-hotel-by-slug';
 
 const REVIEW_CLAMP_CHARS = 220;
@@ -210,43 +212,91 @@ function formatExperiencePrice(
   return model.locale === 'en' ? 'On request' : 'Sur demande';
 }
 
-function renderRestoFoot(model: HotelKitModel, venue: LocalisedRestaurantVenue): string {
-  const price =
-    venue.priceNote !== null && venue.priceNote.trim() !== ''
-      ? venue.priceNote.trim()
-      : model.locale === 'en'
-        ? 'À la carte'
-        : 'À la carte';
-  const localizedWebsite = localizeKitOfficialHref(venue.website, model.locale);
-  const localizedReservation = localizeKitOfficialHref(venue.reservationUrl, model.locale);
-  const bookHref = localizedReservation ?? localizedWebsite ?? model.reservationBasePath;
-  const external = bookHref.startsWith('http');
-  const bookLabel = model.locale === 'en' ? 'Book →' : 'Réserver →';
-  return `<div class="resto-foot">
-                <span class="resto-price">${escapeHtml(price)}</span>
-                <a href="${escapeHtml(bookHref)}" class="link-or"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${bookLabel}</a>
-              </div>`;
+const KIT_JUSTIFIED_IMG_TRANSFORMS = 'f_auto,q_auto,c_fill,g_auto,w_700,h_525';
+
+function renderKitJustifiedSlide(options: {
+  readonly title: string;
+  readonly description: string;
+  readonly imgSrc: string;
+  readonly imgAlt: string;
+  readonly priceHtml: string;
+  readonly linkHref: string;
+  readonly linkLabel: string;
+  readonly linkExternal: boolean;
+  readonly isConciergePick?: boolean;
+  readonly pickLabel?: string;
+  readonly tipHtml?: string;
+  readonly slideRatio?: number;
+}): string {
+  const ratio = options.slideRatio ?? 1.1;
+  const pick =
+    options.isConciergePick === true && options.pickLabel !== undefined
+      ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(options.pickLabel)}</span>`
+      : '';
+  const tip = options.tipHtml ?? '';
+  const cardClass = options.isConciergePick === true ? ' exp-concierge' : '';
+  const externalAttr = options.linkExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+  return `<article class="exp-justified-slide${cardClass}" style="--exp-slide-ratio: ${ratio}">
+            <div class="exp-justified-media">
+              <img src="${escapeHtml(options.imgSrc)}" alt="${escapeHtml(options.imgAlt)}" loading="lazy">
+              ${pick}
+              <div class="exp-justified-overlay">
+                <h4>${escapeHtml(options.title)}</h4>
+                <p class="exp-justified-desc">${escapeHtml(options.description)}</p>
+                ${tip}
+                <div class="exp-foot">
+                  <span class="exp-price">${options.priceHtml}</span>
+                  <a href="${escapeHtml(options.linkHref)}" class="link-or"${externalAttr}>${escapeHtml(options.linkLabel)}</a>
+                </div>
+              </div>
+            </div>
+          </article>`;
 }
 
-function renderSpaFeatureBlock(model: HotelKitModel): string {
-  const spa = model.spa;
-  if (spa === null) return '';
+function renderKitJustifiedCarouselSection(
+  model: HotelKitModel,
+  options: {
+    readonly title: string;
+    readonly lede?: string;
+    readonly slides: readonly string[];
+    readonly carouselId: string;
+  },
+): string {
+  if (options.slides.length === 0) return '';
+  const ledePart =
+    options.lede !== undefined && options.lede.length > 0
+      ? `<p class="sub-lede">${escapeHtml(options.lede)}</p>`
+      : '';
+  return `<div class="bref-sub">
+        <h3>${escapeHtml(options.title)}</h3>
+        ${ledePart}
+        <div class="carousel exp-justified-carousel" data-kit-carousel id="${escapeHtml(options.carouselId)}">
+          <div class="carousel-track">
+            ${options.slides.join('\n            ')}
+          </div>
+          ${options.slides.length > 1 ? renderKitCarouselNav(model.locale) : ''}
+        </div>
+      </div>`;
+}
 
-  const img = model.media.spaHero(spa.name);
+function buildSpaOverlayDescription(
+  model: HotelKitModel,
+  spa: NonNullable<HotelKitModel['spa']>,
+): string {
+  const chunks: string[] = [];
+  if (spa.description !== null && spa.description.trim() !== '') {
+    chunks.push(spa.description.trim());
+  }
   const meta: string[] = [];
-
   if (spa.hours !== null && spa.hours.trim() !== '') {
     meta.push(
-      `<li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>${model.locale === 'en' ? 'Open daily · ' : 'Ouvert tous les jours · '}<b>${escapeHtml(spa.hours)}</b>${spa.phone !== null ? ` · ${escapeHtml(spa.phone)}` : ''}</span></li>`,
+      model.locale === 'en'
+        ? `Open daily · ${spa.hours.trim()}`
+        : `Ouvert tous les jours · ${spa.hours.trim()}`,
     );
-  } else if (spa.phone !== null) {
-    meta.push(`<li>${ICON_PHONE}<span>${escapeHtml(spa.phone)}</span></li>`);
   }
-
   if (spa.features.length > 0) {
-    meta.push(
-      `<li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg><span>${escapeHtml(spa.features.join(', '))}</span></li>`,
-    );
+    meta.push(spa.features.join(', '));
   } else if (spa.treatmentRooms !== null || spa.surfaceSqm !== null) {
     const parts: string[] = [];
     if (spa.treatmentRooms !== null) {
@@ -263,89 +313,127 @@ function renderSpaFeatureBlock(model: HotelKitModel): string {
           : `fitness ${spa.surfaceSqm} m²`,
       );
     }
-    meta.push(
-      `<li><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 12c0-4 3-7 8-7s8 3 8 7M4 12c0 4 3 7 8 7s8-3 8-7"/></svg><span>${escapeHtml(parts.join(', '))}</span></li>`,
-    );
+    if (parts.length > 0) meta.push(parts.join(', '));
   }
-
-  if (spa.tip !== null && spa.tip.trim() !== '') {
-    meta.push(`<li>${ICON_LOC}<span>${escapeHtml(spa.tip)}</span></li>`);
+  if (spa.phone !== null && spa.phone.trim() !== '') {
+    meta.push(spa.phone.trim());
   }
+  if (meta.length > 0) chunks.push(meta.join(' · '));
+  return chunks.join(' — ');
+}
 
-  const priceBlock =
-    spa.priceNote !== null && spa.priceNote.trim() !== ''
-      ? `<p class="fb-price">${escapeHtml(spa.priceNote)}<small>${model.locale === 'en' ? ' on request with the concierge' : ' sur réservation auprès de la conciergerie'}</small></p>`
-      : '';
+function formatSpaPriceHtml(model: HotelKitModel, spa: NonNullable<HotelKitModel['spa']>): string {
+  if (spa.priceNote !== null && spa.priceNote.trim() !== '') {
+    const note = escapeHtml(spa.priceNote.trim());
+    const suffix =
+      model.locale === 'en'
+        ? ' on request with the concierge'
+        : ' sur réservation auprès de la conciergerie';
+    return `${note}<small>${escapeHtml(suffix)}</small>`;
+  }
+  return model.locale === 'en' ? 'On request' : 'Sur demande';
+}
 
+function renderSpaFeatureBlock(model: HotelKitModel): string {
+  const spa = model.spa;
+  if (spa === null) return '';
+
+  const img = model.media.spaHero(spa.name);
   const moreHrefRaw = spa.website ?? spa.reservationUrl ?? model.reservationBasePath;
   const moreHref = moreHrefRaw.startsWith('http')
     ? (localizeKitOfficialHref(moreHrefRaw, model.locale) ?? moreHrefRaw)
     : moreHrefRaw;
   const moreExternal = moreHref.startsWith('http');
+  const moreLabel = model.locale === 'en' ? 'Learn more →' : 'En savoir plus →';
+  const tipHtml =
+    spa.tip !== null && spa.tip.trim() !== ''
+      ? `<p class="cc-why">${escapeHtml(spa.tip.trim())}</p>`
+      : undefined;
 
-  return `<div class="bref-sub">
-        <h3>${model.locale === 'en' ? 'Spa & wellness' : 'Spa & bien-être'}</h3>
-        <div class="feature-block">
-          <div class="fb-media mini-gallery">
-            <div class="mg-track">
-              <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">
-            </div>
-            <div class="mg-dots"><span class="on"></span></div>
-          </div>
-          <div class="fb-tx">
-            <h4>${escapeHtml(spa.name)}</h4>
-            ${spa.description !== null ? `<p>${escapeHtml(spa.description)}</p>` : ''}
-            ${meta.length > 0 ? `<ul class="fb-meta">${meta.join('\n              ')}</ul>` : ''}
-            ${priceBlock}
-            <a href="${escapeHtml(moreHref)}" class="link-or fb-more-link"${moreExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>${model.locale === 'en' ? 'Learn more →' : 'En savoir plus →'}</a>
-          </div>
-        </div>
-      </div>`;
+  const slide = renderKitJustifiedSlide({
+    title: spa.name,
+    description: buildSpaOverlayDescription(model, spa),
+    imgSrc: img.src,
+    imgAlt: img.alt,
+    priceHtml: formatSpaPriceHtml(model, spa),
+    linkHref: moreHref,
+    linkLabel: moreLabel,
+    linkExternal: moreExternal,
+    ...(tipHtml !== undefined ? { tipHtml } : {}),
+    slideRatio: 1.18,
+  });
+
+  return renderKitJustifiedCarouselSection(model, {
+    title: model.locale === 'en' ? 'Spa & wellness' : 'Spa & bien-être',
+    slides: [slide],
+    carouselId: 'spa-justified-carousel',
+  });
 }
 
 function renderKidClubBlock(model: HotelKitModel): string {
   const kidClubs = model.signatureExperiences.filter((e) => e.kind === 'kid_club');
   if (kidClubs.length === 0) return '';
 
-  return kidClubs
-    .map((k) => {
-      const img =
-        k.imagePublicId !== null
-          ? {
-              src: buildCloudinarySrc({
-                cloudName: model.cloudName,
-                publicId: k.imagePublicId,
-                transforms: 'f_auto,q_auto,c_fill,g_auto,w_900,h_675',
-              }),
-              alt: k.title,
-            }
-          : model.media.kidClub(k.title);
-      return `<div class="bref-sub">
-        <h3>${model.locale === 'en' ? 'Kids Club' : 'Kids Club'}</h3>
-        <div class="feature-block reverse">
-          <div class="fb-media mini-gallery">
-            <div class="mg-track">
-              <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">
-            </div>
-            <div class="mg-dots"><span class="on"></span></div>
-          </div>
-          <div class="fb-tx">
-            <h4>${escapeHtml(k.title)}</h4>
-            <p>${escapeHtml(k.description)}</p>
-            <ul class="fb-meta">
-              <li><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>${model.locale === 'en' ? 'From <b>4 years</b>' : 'À partir de <b>4 ans</b>'}</span></li>
-              <li>${ICON_CHECK}<span>${model.locale === 'en' ? 'Creative workshops, treasure hunts, secure pool' : 'Ateliers créatifs, chasses au trésor, piscine sécurisée'}</span></li>
-            </ul>
-            <p class="fb-price">${model.locale === 'en' ? 'Included for resident children' : 'Accès inclus pour les enfants des résidents'}</p>
-            ${(() => {
-              const link = resolveKitLearnMoreLink(model, k);
-              return `<a href="${escapeHtml(link.href)}" class="link-or fb-more-link"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label)}</a>`;
-            })()}
-          </div>
-        </div>
-      </div>`;
-    })
-    .join('\n');
+  const slides = kidClubs.map((k, index) => {
+    const img =
+      k.imagePublicId !== null
+        ? {
+            src: buildCloudinarySrc({
+              cloudName: model.cloudName,
+              publicId: k.imagePublicId,
+              transforms: KIT_JUSTIFIED_IMG_TRANSFORMS,
+            }),
+            alt: k.title,
+          }
+        : model.media.kidClub(k.title);
+    const link = resolveKitLearnMoreLink(model, k);
+    const ageLine = model.locale === 'en' ? 'From 4 years' : 'À partir de 4 ans';
+    const activitiesLine =
+      model.locale === 'en'
+        ? 'Creative workshops, treasure hunts, secure pool'
+        : 'Ateliers créatifs, chasses au trésor, piscine sécurisée';
+    const description = `${k.description} — ${ageLine}. ${activitiesLine}.`;
+    const priceHtml =
+      model.locale === 'en'
+        ? 'Included for resident children'
+        : 'Accès inclus pour les enfants des résidents';
+
+    return renderKitJustifiedSlide({
+      title: k.title,
+      description,
+      imgSrc: img.src,
+      imgAlt: img.alt,
+      priceHtml,
+      linkHref: link.href,
+      linkLabel: link.label,
+      linkExternal: link.external,
+      slideRatio: signatureExperienceSlideRatio(index, false),
+    });
+  });
+
+  return renderKitJustifiedCarouselSection(model, {
+    title: model.locale === 'en' ? 'Kids Club' : 'Kids Club',
+    slides,
+    carouselId: 'kid-club-justified-carousel',
+  });
+}
+
+function renderRestoFoot(model: HotelKitModel, venue: LocalisedRestaurantVenue): string {
+  const price =
+    venue.priceNote !== null && venue.priceNote.trim() !== ''
+      ? venue.priceNote.trim()
+      : model.locale === 'en'
+        ? 'À la carte'
+        : 'À la carte';
+  const localizedWebsite = localizeKitOfficialHref(venue.website, model.locale);
+  const localizedReservation = localizeKitOfficialHref(venue.reservationUrl, model.locale);
+  const bookHref = localizedReservation ?? localizedWebsite ?? model.reservationBasePath;
+  const external = bookHref.startsWith('http');
+  const bookLabel = model.locale === 'en' ? 'Book →' : 'Réserver →';
+  return `<div class="resto-foot">
+                <span class="resto-price">${escapeHtml(price)}</span>
+                <a href="${escapeHtml(bookHref)}" class="link-or"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${bookLabel}</a>
+              </div>`;
 }
 
 export function renderKitBreadcrumb(model: HotelKitModel): string {
@@ -626,48 +714,52 @@ export function renderKitBref(model: HotelKitModel): string {
   const expList = orderKitSignatureExperiences(
     model.signatureExperiences.filter((e) => e.kind !== 'kid_club'),
   );
-  const expHtml = expList
-    .map((exp, expIndex) => {
-      const isPick = isKitSignatureExperienceConciergePick(exp);
-      const imgTile =
-        exp.imagePublicId !== null
-          ? {
-              src: buildCloudinarySrc({
-                cloudName: model.cloudName,
-                publicId: exp.imagePublicId,
-                transforms: 'f_auto,q_auto,c_fill,g_auto,w_700,h_525',
-              }),
-              alt: exp.title,
-            }
-          : model.media.experienceAt(expIndex, exp.title);
-      const imgSrc = imgTile.src;
-      const pick = isPick
-        ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(model.labels.conciergePick)}</span>`
-        : '';
-      const slideRatio = signatureExperienceSlideRatio(expIndex, isPick);
-      const tipHtml =
-        isPick && exp.tip !== null && exp.tip.trim() !== ''
-          ? `<p class="cc-why">${escapeHtml(exp.tip.trim())}</p>`
-          : '';
-      const link = resolveKitLearnMoreLink(model, exp);
-      const linkHtml = `<a href="${escapeHtml(link.href)}" class="link-or"${link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link.label)}</a>`;
-      return `<article class="exp-justified-slide${isPick ? ' exp-concierge' : ''}" style="--exp-slide-ratio: ${slideRatio}">
-            <div class="exp-justified-media">
-              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(exp.title)}" loading="lazy">
-              ${pick}
-              <div class="exp-justified-overlay">
-                <h4>${escapeHtml(exp.title)}</h4>
-                <p class="exp-justified-desc">${escapeHtml(exp.description)}</p>
-                ${tipHtml}
-                <div class="exp-foot">
-                  <span class="exp-price">${formatExperiencePrice(model, exp)}</span>
-                  ${linkHtml}
-                </div>
-              </div>
-            </div>
-          </article>`;
-    })
-    .join('\n          ');
+  const expSlides = expList.map((exp, expIndex) => {
+    const isPick = isKitSignatureExperienceConciergePick(exp);
+    const imgTile =
+      exp.imagePublicId !== null
+        ? {
+            src: buildCloudinarySrc({
+              cloudName: model.cloudName,
+              publicId: exp.imagePublicId,
+              transforms: KIT_JUSTIFIED_IMG_TRANSFORMS,
+            }),
+            alt: exp.title,
+          }
+        : model.media.experienceAt(expIndex, exp.title);
+    const tipHtml =
+      isPick && exp.tip !== null && exp.tip.trim() !== ''
+        ? `<p class="cc-why">${escapeHtml(exp.tip.trim())}</p>`
+        : undefined;
+    const link = resolveKitLearnMoreLink(model, exp);
+    return renderKitJustifiedSlide({
+      title: exp.title,
+      description: exp.description,
+      imgSrc: imgTile.src,
+      imgAlt: imgTile.alt,
+      priceHtml: formatExperiencePrice(model, exp),
+      linkHref: link.href,
+      linkLabel: link.label,
+      linkExternal: link.external,
+      isConciergePick: isPick,
+      pickLabel: model.labels.conciergePick,
+      ...(tipHtml !== undefined ? { tipHtml } : {}),
+      slideRatio: signatureExperienceSlideRatio(expIndex, isPick),
+    });
+  });
+
+  const expSection =
+    expSlides.length > 0
+      ? renderKitJustifiedCarouselSection(model, {
+          title: model.locale === 'en' ? 'Signature experiences' : 'Expériences signature',
+          lede:
+            model.locale === 'en'
+              ? 'What the concierge arranges for you, beyond the room.'
+              : 'Ce que la conciergerie organise pour vous, au-delà de la chambre.',
+          slides: expSlides,
+          carouselId: 'exp-justified-carousel',
+        })
+      : '';
 
   const restos = model.restaurants?.venues ?? [];
   const restoHtml = restos
@@ -710,20 +802,7 @@ export function renderKitBref(model: HotelKitModel): string {
           body: amenitiesBody,
         })}
       </div>
-      ${
-        expList.length > 0
-          ? `<div class="bref-sub">
-        <h3>${model.locale === 'en' ? 'Signature experiences' : 'Expériences signature'}</h3>
-        <p class="sub-lede">${model.locale === 'en' ? 'What the concierge arranges for you, beyond the room.' : 'Ce que la conciergerie organise pour vous, au-delà de la chambre.'}</p>
-        <div class="carousel exp-justified-carousel" data-kit-carousel id="exp-justified-carousel">
-          <div class="carousel-track">
-            ${expHtml}
-          </div>
-          ${expList.length > 1 ? renderKitCarouselNav(model.locale) : ''}
-        </div>
-      </div>`
-          : ''
-      }
+      ${expSection}
       ${
         restos.length > 0
           ? `<div class="bref-sub">
@@ -1194,66 +1273,6 @@ function renderAroundBucket(
       </div>`;
 }
 
-function renderUpcomingEventMeta(ev: HotelKitModel['upcomingEvents'][number]): string {
-  const parts: string[] = [];
-  if (ev.period !== null && ev.period.length > 0) {
-    parts.push(`<span class="around-cat">${escapeHtml(ev.period)}</span>`);
-  }
-  if (ev.schedule !== null && ev.schedule.length > 0) {
-    parts.push(`<span class="around-schedule">${escapeHtml(ev.schedule)}</span>`);
-  }
-  if (parts.length === 0) return '';
-  return `<p class="around-meta">${parts.join('')}</p>`;
-}
-
-function renderUpcomingEventsSub(model: HotelKitModel): string {
-  const events = model.upcomingEvents;
-  if (events.length === 0) return '';
-  const title = model.locale === 'en' ? 'During your stay' : 'Ce qui se passe pendant votre séjour';
-  const items = events
-    .map((ev, i) => {
-      const hidden = i >= 3 ? ' more-hidden' : '';
-      const isPick = i === 1;
-      const pick = isPick
-        ? `<span class="cc-pick">${ICON_STAR}${escapeHtml(model.labels.conciergePick)}</span>`
-        : '';
-      const desc = ev.description ?? '';
-      const why =
-        i === 1 && desc.includes('Ambiance unique')
-          ? `<p class="cc-why cc-why-sm">${model.locale === 'en' ? 'Unique atmosphere: estate organic wine, live music and stars. Book ahead — evenings sell out.' : 'Ambiance unique : le vin bio du domaine, la musique live et les étoiles. Réservez à l’avance, les soirées affichent complet.'}</p>`
-          : '';
-      const body =
-        i === 1 && desc.includes('Ambiance unique')
-          ? escapeHtml(desc.split('Ambiance unique')[0]?.trim() ?? desc)
-          : escapeHtml(desc);
-      const meta = renderUpcomingEventMeta(ev);
-      const link =
-        ev.url !== null
-          ? `<a href="${escapeHtml(ev.url)}" class="link-or around-link" target="_blank" rel="noopener noreferrer">${model.locale === 'en' ? 'Details →' : 'En savoir plus →'}</a>`
-          : '';
-      return `<div class="around-item${isPick ? ' around-concierge' : ''}${hidden}">
-            ${pick}
-            <h5>${escapeHtml(ev.name)}</h5>
-            ${meta}
-            <p>${body}</p>
-            ${why}
-            ${link}
-          </div>`;
-    })
-    .join('\n          ');
-  return `<div class="around-sub">
-        <h3>${escapeHtml(title)}</h3>
-        <div class="around-list" data-around-list>
-          ${items}
-        </div>
-        ${
-          events.length > 3
-            ? `<div class="around-more-wrap"><button type="button" class="btn-ligne around-toggle-btn">${model.locale === 'en' ? 'See more' : 'Voir plus'}</button></div>`
-            : ''
-        }
-      </div>`;
-}
-
 function renderKitPressAffiliation(model: HotelKitModel): string {
   switch (model.slugFr) {
     case 'les-airelles-gordes':
@@ -1271,6 +1290,248 @@ function renderKitPressAffiliation(model: HotelKitModel): string {
   }
 }
 
+const EVENT_LIST_THUMB_TRANSFORMS = 'f_auto,q_auto,c_fill,g_auto,w_220,h_220';
+
+const EVENT_META_ICON_LOC =
+  '<svg class="event-list-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+const EVENT_META_ICON_DATE =
+  '<svg class="event-list-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg>';
+const EVENT_META_ICON_TIME =
+  '<svg class="event-list-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.5 2"/></svg>';
+const EVENT_META_ICON_PRICE =
+  '<svg class="event-list-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16M7 15h1.5M15 15h2M6.5 6h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>';
+const EVENT_CTA_TICKET_ICON =
+  '<svg class="event-list-cta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.8a2 2 0 0 0 0 3.9V16.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2.8a2 2 0 0 0 0-3.9z"/><path d="M9 8.5v7"/></svg>';
+
+type EventDateRailParts =
+  | { readonly kind: 'year-round'; readonly category: EventCategory }
+  | { readonly kind: 'dated'; readonly day: string; readonly month: string };
+
+function isYearRoundEventDateRange(startIso: string, endIso: string | null): boolean {
+  if (endIso === null || endIso === startIso) return false;
+  const start = new Date(`${startIso}T00:00:00Z`);
+  const end = new Date(`${endIso}T00:00:00Z`);
+  return (
+    start.getUTCFullYear() === end.getUTCFullYear() &&
+    start.getUTCMonth() === 0 &&
+    start.getUTCDate() === 1 &&
+    end.getUTCMonth() === 11 &&
+    end.getUTCDate() === 31
+  );
+}
+
+function getEventDateRailParts(
+  ev: LocalisedUpcomingEvent,
+  locale: 'fr' | 'en',
+): EventDateRailParts {
+  if (isYearRoundEventDateRange(ev.startDate, ev.endDate)) {
+    return { kind: 'year-round', category: ev.category };
+  }
+  const start = new Date(`${ev.startDate}T00:00:00Z`);
+  const day = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', day: 'numeric' }).format(start);
+  const month = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', month: 'short' })
+    .format(start)
+    .replace(/\.$/u, '')
+    .toUpperCase();
+  return { kind: 'dated', day, month };
+}
+
+function formatKitEventDateLabel(ev: LocalisedUpcomingEvent, locale: 'fr' | 'en'): string {
+  if (ev.period !== null && ev.period.length > 0) return ev.period;
+  const start = new Date(`${ev.startDate}T00:00:00Z`);
+  const monthFull: 'long' | 'short' = locale === 'en' ? 'short' : 'long';
+  const fmtFull = new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: monthFull,
+    year: 'numeric',
+  });
+  if (ev.endDate === null || ev.endDate === ev.startDate) {
+    return fmtFull.format(start);
+  }
+  const end = new Date(`${ev.endDate}T00:00:00Z`);
+  if (isYearRoundEventDateRange(ev.startDate, ev.endDate)) {
+    return locale === 'en' ? 'Open year-round' : 'Ouvert toute l’année';
+  }
+  const fmtShort = new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'short',
+  });
+  const startYear = start.getUTCFullYear();
+  const endYear = end.getUTCFullYear();
+  if (startYear === endYear) {
+    return `${fmtShort.format(start)} – ${fmtFull.format(end)}`;
+  }
+  return `${fmtFull.format(start)} – ${fmtFull.format(end)}`;
+}
+
+function formatKitEventPricingLabel(
+  model: HotelKitModel,
+  ev: LocalisedUpcomingEvent,
+): string | null {
+  if (ev.pricing === null) return null;
+  if (ev.pricing.type === 'free') return model.labels.eventsPricingFree;
+  if (ev.pricing.amountEur !== null) {
+    return model.locale === 'en'
+      ? `From ${ev.pricing.amountEur} €`
+      : `À partir de ${ev.pricing.amountEur} €`;
+  }
+  return model.labels.eventsPricingPaidNoAmount;
+}
+
+function kitEventCategoryLabel(model: HotelKitModel, category: EventCategory): string {
+  switch (category) {
+    case 'concert':
+      return model.labels.eventsCategoryConcert;
+    case 'expo':
+      return model.labels.eventsCategoryExpo;
+    case 'festival':
+      return model.labels.eventsCategoryFestival;
+    case 'sport':
+      return model.labels.eventsCategorySport;
+    case 'theater':
+      return model.labels.eventsCategoryTheater;
+    case 'other':
+      return model.labels.eventsCategoryOther;
+  }
+}
+
+function renderKitEventCategoryRailIcon(category: EventCategory): string {
+  switch (category) {
+    case 'concert':
+      return '<path d="M9 17V4l10-2v13"/><circle cx="6" cy="17" r="3"/><circle cx="16" cy="15" r="3"/>';
+    case 'expo':
+      return '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m4 18 5-5 4 4 3-3 4 4"/>';
+    case 'festival':
+      return '<path d="M12 2.5 14 9l6.5 2L14 13l-2 6.5L10 13l-6.5-2L10 9z"/>';
+    case 'sport':
+      return '<path d="M8 21h8M12 17v4"/><path d="M6 4h12v4a6 6 0 0 1-12 0z"/>';
+    case 'theater':
+      return '<path d="M4 5c0 8 3.5 14 8 14s8-6 8-14c0 0-4 2-8 2S4 5 4 5z"/>';
+    case 'other':
+      return '<rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/>';
+    default:
+      return '<rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/>';
+  }
+}
+
+function renderKitEventDateRail(parts: EventDateRailParts): string {
+  if (parts.kind === 'year-round') {
+    return `<div class="event-list-date event-list-date--year-round" aria-hidden="true">
+        <svg class="event-list-date-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${renderKitEventCategoryRailIcon(parts.category)}</svg>
+      </div>`;
+  }
+  return `<div class="event-list-date" aria-hidden="true">
+        <span class="event-list-date__day">${escapeHtml(parts.day)}</span>
+        <span class="event-list-date__month">${escapeHtml(parts.month)}</span>
+      </div>`;
+}
+
+function resolveKitEventThumb(
+  model: HotelKitModel,
+  ev: LocalisedUpcomingEvent,
+): { readonly src: string; readonly alt: string } {
+  const alt = `${ev.name} — ${model.city}`;
+  if (ev.imageUrl !== null && ev.imageUrl.length > 0) {
+    if (ev.imageUrl.startsWith('http')) {
+      return { src: ev.imageUrl, alt };
+    }
+    return {
+      src: buildCloudinarySrc({
+        cloudName: model.cloudName,
+        publicId: ev.imageUrl,
+        transforms: EVENT_LIST_THUMB_TRANSFORMS,
+      }),
+      alt,
+    };
+  }
+  return { src: KIT_GENERIC_ASSETS.event, alt };
+}
+
+function isKitEventNew(ev: LocalisedUpcomingEvent, index: number): boolean {
+  if (index > 0) return false;
+  const today = new Date();
+  const start = new Date(`${ev.startDate}T00:00:00Z`);
+  const diffDays = (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+  return diffDays >= 0 && diffDays <= 21;
+}
+
+function renderKitEventListCard(
+  model: HotelKitModel,
+  ev: LocalisedUpcomingEvent,
+  index: number,
+): string {
+  const thumb = resolveKitEventThumb(model, ev);
+  const dateLabel = formatKitEventDateLabel(ev, model.locale);
+  const pricingLabel = formatKitEventPricingLabel(model, ev);
+  const locationLabel =
+    ev.venueName !== null && ev.venueName.length > 0 ? ev.venueName : model.city;
+  const dateRail = renderKitEventDateRail(getEventDateRailParts(ev, model.locale));
+  const categoryLabel = kitEventCategoryLabel(model, ev.category);
+  const newRibbon = isKitEventNew(ev, index)
+    ? `<span class="event-list-ribbon">${escapeHtml(model.labels.eventsNewBadge)}</span>`
+    : '';
+
+  const metaItems: string[] = [];
+  if (locationLabel.length > 0) {
+    metaItems.push(
+      `<li class="event-list-meta-item">${EVENT_META_ICON_LOC}<span>${escapeHtml(locationLabel)}</span></li>`,
+    );
+  }
+  if (dateLabel.length > 0) {
+    metaItems.push(
+      `<li class="event-list-meta-item">${EVENT_META_ICON_DATE}<span>${escapeHtml(dateLabel)}</span></li>`,
+    );
+  }
+  if (ev.schedule !== null && ev.schedule.length > 0) {
+    metaItems.push(
+      `<li class="event-list-meta-item">${EVENT_META_ICON_TIME}<span>${escapeHtml(ev.schedule)}</span></li>`,
+    );
+  }
+  if (pricingLabel !== null) {
+    metaItems.push(
+      `<li class="event-list-meta-item">${EVENT_META_ICON_PRICE}<span>${escapeHtml(pricingLabel)}</span></li>`,
+    );
+  }
+
+  const description =
+    ev.description !== null && ev.description.length > 0
+      ? `<p class="event-list-desc">${escapeHtml(ev.description)}</p>`
+      : '';
+
+  const cta =
+    ev.url !== null
+      ? `<a href="${escapeHtml(ev.url)}" class="event-list-cta" target="_blank" rel="noopener noreferrer">${EVENT_CTA_TICKET_ICON}<span>${escapeHtml(model.labels.eventsBuyTicket)}</span></a>`
+      : '';
+
+  return `<article class="event-list-card" data-aeo="upcoming-event">
+        ${newRibbon}
+        <div class="event-list-thumb">
+          <img src="${escapeHtml(thumb.src)}" alt="${escapeHtml(thumb.alt)}" width="220" height="220" loading="lazy" decoding="async" />
+        </div>
+        <div class="event-list-body">
+          <span class="event-list-category">${escapeHtml(categoryLabel)}</span>
+          <h3 class="event-list-title">${escapeHtml(ev.name)}</h3>
+          <ul class="event-list-meta">${metaItems.join('')}</ul>
+          ${description}
+          ${cta}
+        </div>
+        ${dateRail}
+      </article>`;
+}
+
+export function renderKitEventList(model: HotelKitModel): string {
+  const events = model.upcomingEvents;
+  if (events.length === 0) return '';
+  const cards = events.map((ev, i) => renderKitEventListCard(model, ev, i)).join('\n      ');
+  return `<section class="htl-section event-list-section" id="evenements" data-aeo="upcoming-events" aria-labelledby="event-list-title">
+      <h2 id="event-list-title">${escapeHtml(model.labels.eventsTitle)}</h2>
+      <p class="sub-lede">${escapeHtml(model.labels.eventsLead)}</p>
+      <div class="event-list">${cards}</div>
+    </section>`;
+}
+
 export function renderKitAutour(model: HotelKitModel): string {
   const bucketTitles = {
     visit: { fr: "Ce qu'on visite dans le quartier", en: 'What to visit nearby' },
@@ -1282,7 +1543,6 @@ export function renderKitAutour(model: HotelKitModel): string {
   const subs = [
     renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale], 'carousel'),
     renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'carousel'),
-    renderUpcomingEventsSub(model),
     renderAroundBucket(model, 'eat', bucketTitles.eat[model.locale], 'disclosure-grid'),
     renderAroundBucket(model, 'shop', bucketTitles.shop[model.locale], 'disclosure-grid'),
   ]
@@ -1469,6 +1729,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitPresse(model),
     renderKitAcces(model),
     renderKitAutour(model),
+    renderKitEventList(model),
     renderKitConciergeAdvice(model),
     ...(model.conciergeQuestionGroups.length === 0 ? [renderKitTopConciergeFaq(model)] : []),
     renderKitFaq(model),

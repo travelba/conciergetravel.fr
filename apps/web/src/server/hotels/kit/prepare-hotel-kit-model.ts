@@ -336,6 +336,19 @@ export interface HotelKitModel {
     readonly reserveTable: string;
     readonly enBrefSectionTitle: string;
     readonly navHeading: string;
+    readonly eventsTitle: string;
+    readonly eventsLead: string;
+    readonly eventsBuyTicket: string;
+    readonly eventsNewBadge: string;
+    readonly eventsOfficialSource: string;
+    readonly eventsPricingFree: string;
+    readonly eventsPricingPaidNoAmount: string;
+    readonly eventsCategoryConcert: string;
+    readonly eventsCategoryExpo: string;
+    readonly eventsCategoryFestival: string;
+    readonly eventsCategorySport: string;
+    readonly eventsCategoryTheater: string;
+    readonly eventsCategoryOther: string;
   };
 }
 
@@ -781,6 +794,7 @@ export async function prepareHotelKitModelUncached(
   const featuredReviews = readFeaturedReviews(row, kitLocale);
   const awards = readAwards(row, kitLocale);
   const instagramFeed = readInstagram(row, kitLocale);
+  const upcomingEvents = readUpcomingEvents(row, kitLocale);
   const hasPresse =
     featuredReviews.length > 0 ||
     awards.length > 0 ||
@@ -796,6 +810,15 @@ export async function prepareHotelKitModelUncached(
       : []),
     { anchor: 'acces', label: t('toc.lieu'), shortLabel: t('tocShort.lieu') },
     { anchor: 'autour', label: t('toc.autour'), shortLabel: t('tocShort.autour') },
+    ...(upcomingEvents.length > 0
+      ? [
+          {
+            anchor: 'evenements',
+            label: t('toc.evenements'),
+            shortLabel: t('tocShort.evenements'),
+          } as const,
+        ]
+      : []),
     { anchor: 'faq', label: t('toc.faq'), shortLabel: t('tocShort.faq') },
     { anchor: 'proximite', label: t('toc.proximite'), shortLabel: t('tocShort.proximite') },
     {
@@ -882,7 +905,7 @@ export async function prepareHotelKitModelUncached(
     })(),
     conciergeAdvice: readConciergeAdvice(row, kitLocale),
     relatedHotels,
-    upcomingEvents: readUpcomingEvents(row, kitLocale),
+    upcomingEvents,
     inventory,
     historyDates,
     railIndicativeFrom,
@@ -931,6 +954,19 @@ export async function prepareHotelKitModelUncached(
           : '© <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener noreferrer">Mapbox</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
       enBrefSectionTitle: t('toc.enBref'),
       navHeading: t('toc.heading'),
+      eventsTitle: t('events.title'),
+      eventsLead: t('events.lead', { city: row.city, hotelName: name }),
+      eventsBuyTicket: t('events.buyTicket'),
+      eventsNewBadge: t('events.newBadge'),
+      eventsOfficialSource: t('events.officialSource'),
+      eventsPricingFree: t('events.pricing.free'),
+      eventsPricingPaidNoAmount: t('events.pricing.paidNoAmount'),
+      eventsCategoryConcert: t('events.category.concert'),
+      eventsCategoryExpo: t('events.category.expo'),
+      eventsCategoryFestival: t('events.category.festival'),
+      eventsCategorySport: t('events.category.sport'),
+      eventsCategoryTheater: t('events.category.theater'),
+      eventsCategoryOther: t('events.category.other'),
       faqCategoryBefore: t('faq.categoryBefore'),
       faqCategoryDuring: t('faq.categoryDuring'),
       faqCategoryAfter: t('faq.categoryAfter'),
