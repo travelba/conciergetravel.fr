@@ -5,15 +5,12 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactElement } fr
 import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields';
 
 export interface BookingMobileBarLabels {
-  readonly datesPlaceholder: string;
-  readonly guestsHint: string;
+  readonly datesLabel: string;
   readonly priceFromLabel: string;
   readonly ctaSeePrices: string;
-  readonly ctaBook: string;
-  readonly ctaConcierge: string;
+  readonly ctaChooseRooms: string;
   readonly ctaAriaSeePrices: string;
-  readonly ctaAriaBook: string;
-  readonly ctaAriaConcierge: string;
+  readonly ctaAriaChooseRooms: string;
   readonly sheetTitle: string;
   readonly closeSheet: string;
   readonly checkIn: string;
@@ -29,6 +26,7 @@ interface BookingMobileBarClientProps {
   readonly priceFrom: string | null;
   readonly labels: BookingMobileBarLabels;
   readonly variant: 'coming_soon' | 'sandbox_live' | 'concierge_live' | 'paid_live';
+  readonly chooseRoomsHref?: string | undefined;
   readonly sandboxAction?: string | undefined;
   readonly sandboxDefaults?:
     | {
@@ -67,14 +65,17 @@ interface BookingMobileBarClientProps {
     | undefined;
 }
 
+const SCROLL_REVEAL_OFFSET_PX = 280;
+
 /**
- * Fixed bottom booking bar for mobile viewports (≤680px). Collapsed by
- * default; tap opens a bottom sheet with the full (or placeholder) form.
+ * Fixed bottom booking bar for mobile (≤680px). Hidden until the user scrolls
+ * past the gallery; collapsed state shows dates only — tap opens occupancy sheet.
  */
 export function BookingMobileBarClient({
   priceFrom,
   labels,
   variant,
+  chooseRoomsHref,
   sandboxAction,
   sandboxDefaults,
   conciergeAction,
@@ -86,6 +87,16 @@ export function BookingMobileBarClient({
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpandedState] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const onScroll = (): void => {
+      setRevealed(window.scrollY > SCROLL_REVEAL_OFFSET_PX);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const toggleExpanded = useCallback((): void => {
     setExpandedState((prev) => {
@@ -124,21 +135,18 @@ export function BookingMobileBarClient({
   }, [closeExpanded, expanded]);
 
   const hasPrice = priceFrom !== null && priceFrom !== '';
-  const ctaLabel =
-    variant === 'sandbox_live' || variant === 'paid_live'
-      ? labels.ctaBook
-      : variant === 'concierge_live'
-        ? labels.ctaConcierge
-        : labels.ctaSeePrices;
-  const ctaAria =
-    variant === 'sandbox_live' || variant === 'paid_live'
-      ? labels.ctaAriaBook
-      : variant === 'concierge_live'
-        ? labels.ctaAriaConcierge
-        : labels.ctaAriaSeePrices;
+  const hasChooseRoomsLink =
+    chooseRoomsHref !== undefined &&
+    chooseRoomsHref !== '' &&
+    (variant === 'sandbox_live' || variant === 'concierge_live');
+  const ctaLabel = hasChooseRoomsLink ? labels.ctaChooseRooms : labels.ctaSeePrices;
+  const ctaAria = hasChooseRoomsLink ? labels.ctaAriaChooseRooms : labels.ctaAriaSeePrices;
 
   return (
-    <div className="resa-mobile-bar-wrap mch-kit">
+    <div
+      className={`resa-mobile-bar-wrap mch-kit${revealed ? 'is-revealed' : ''}`}
+      data-revealed={revealed ? 'true' : 'false'}
+    >
       <div className="resa-mobile-bar-spacer" aria-hidden />
 
       <div
@@ -156,8 +164,7 @@ export function BookingMobileBarClient({
           onClick={toggleExpanded}
         >
           <span className="resa-mobile-bar__meta">
-            <span className="resa-mobile-bar__dates">{labels.datesPlaceholder}</span>
-            <span className="resa-mobile-bar__guests">{labels.guestsHint}</span>
+            <span className="resa-mobile-bar__dates">{labels.datesLabel}</span>
           </span>
           {hasPrice ? (
             <span className="resa-mobile-bar__price">
@@ -167,16 +174,26 @@ export function BookingMobileBarClient({
           ) : null}
         </button>
 
-        <button
-          type="button"
-          className="btn btn-or resa-mobile-bar__cta"
-          aria-label={ctaAria}
-          aria-expanded={expanded}
-          aria-controls={sheetId}
-          onClick={toggleExpanded}
-        >
-          {ctaLabel}
-        </button>
+        {hasChooseRoomsLink ? (
+          <a
+            href={chooseRoomsHref}
+            className="btn btn-or resa-mobile-bar__cta"
+            aria-label={ctaAria}
+          >
+            {ctaLabel}
+          </a>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-or resa-mobile-bar__cta"
+            aria-label={ctaAria}
+            aria-expanded={expanded}
+            aria-controls={sheetId}
+            onClick={toggleExpanded}
+          >
+            {ctaLabel}
+          </button>
+        )}
       </div>
 
       <div

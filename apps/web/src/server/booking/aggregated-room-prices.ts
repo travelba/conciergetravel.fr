@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { StayQuery, Supplier } from '@mch/integrations/supplier';
 
-import { env } from '@/lib/env';
+import { isMultiSupplierRateShoppingEnabled } from '@/lib/booking/multi-supplier-flags';
 import { shopRates } from '@/server/booking/rate-shopping';
 
 /**
@@ -32,7 +32,7 @@ export async function getAggregatedRoomPrices(input: {
   readonly hotelId: string;
   readonly stay: StayQuery;
 }): Promise<AggregatedRoomPrices> {
-  if (env.MULTI_SUPPLIER_RATESHOPPING_ENABLED !== true) return EMPTY;
+  if (!isMultiSupplierRateShoppingEnabled()) return EMPTY;
 
   const result = await shopRates({ hotelId: input.hotelId, stay: input.stay });
 

@@ -6,6 +6,11 @@ import { Suspense } from 'react';
 
 import { JsonLd, buildAeoBlock } from '@mch/seo';
 
+import {
+  KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+  pickKitMosaicRepresentativeThumbnails,
+} from '@mch/domain/photos';
+
 import { buildCloudinarySrc } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
@@ -64,6 +69,7 @@ import {
   pickHotelJsonLdFaqEntries,
 } from '@/lib/seo/hotel-page-seo';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
+import { buildHotelGalleryViewModel } from '@/server/hotels/build-hotel-gallery-view-model';
 import { citySlug } from '@/server/destinations/cities';
 import { countrySlug } from '@/server/annuaire/country-slugs';
 import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
@@ -480,6 +486,8 @@ async function renderHotelPage(
   const topConciergeFaq = readTopConciergeFaq(row, locale);
   const heroPublicId = readHeroImage(row);
   const galleryImages = filterPublicHotelGalleryImages(readGallery(row, locale, name));
+  const heroGalleryMatch =
+    heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
   const virtualTour = readVirtualTour(row);
   const heroVideo = readHeroVideo(row);
   const miceInfo = readMiceInfo(row, locale);
@@ -489,52 +497,22 @@ async function renderHotelPage(
   const googleReviews = readGoogleReviews(row, locale);
   const showGoogleTravelerReviews = hasGoogleTravelerReviews(row);
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  // Hero alt: prefer the gallery row whose public_id matches hero_image —
-  // never the arbitrary `galleryImages[0]` which is unrelated when the
-  // hero was uploaded outside the gallery flow. Falls back to the hotel
-  // name (always a safe, descriptive alt) rather than to a stray entry.
-  // Fix 2026-05-31 (`photo-quality.mdc` Hard Rule 16 + WCAG 1.1.1).
-  const heroGalleryMatch =
-    heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
-  const heroDescriptor =
-    heroPublicId !== null
-      ? {
-          publicId: heroPublicId,
-          alt: heroGalleryMatch?.alt ?? name,
-          caption: heroGalleryMatch?.caption ?? null,
-        }
-      : null;
-
-  // The curation pass (`curate-top-photos.ts`) keeps the hero as
-  // `gallery_images[0]` so its alt/caption metadata survives and re-curation
-  // stays idempotent. The mosaic + lightbox render the hero separately
-  // (`heroDescriptor`), so exclude it here to avoid showing it twice.
+  const goldenTemplate = hasGoldenHero(row);
+  const galleryViewModel = buildHotelGalleryViewModel({
+    heroPublicId,
+    galleryImages,
+    hotelName: name,
+    omitOverlayHeroFromMosaic: goldenTemplate,
+  });
+  const galleryHero = galleryViewModel.hero;
+  const galleryGridTiles = galleryViewModel.gridImages;
   const galleryTiles =
     heroPublicId !== null
       ? galleryImages.filter((g) => g.publicId !== heroPublicId)
       : galleryImages;
-
-  // Golden-template (Airelles Gordes, local fixture only): the full-bleed
-  // overlay hero already renders `heroDescriptor` edge-to-edge at the top of
-  // the page, so the gallery mosaic below would otherwise repeat the exact
-  // same shot as its big tile. Promote the first remaining gallery photo to
-  // be the mosaic hero and shift the rest into the grid — keeping every
-  // image unique. Falls back to the standard descriptor when no tile exists.
-  const goldenTemplate = hasGoldenHero(row);
   const conciergePick = readConciergePick(row, locale);
   const conciergeHook = readConciergeHook(row, locale);
   const geoBlocks = readGeoQa(row, locale);
-  const firstGalleryTile = galleryTiles[0];
-  const galleryHero =
-    goldenTemplate && firstGalleryTile !== undefined
-      ? {
-          publicId: firstGalleryTile.publicId,
-          alt: firstGalleryTile.alt,
-          caption: firstGalleryTile.caption,
-        }
-      : heroDescriptor;
-  const galleryGridTiles =
-    goldenTemplate && firstGalleryTile !== undefined ? galleryTiles.slice(1) : galleryTiles;
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
   const origin = siteOrigin();
@@ -738,7 +716,10 @@ async function renderHotelPage(
   }
   // Tiles exclude the hero (already emitted above as `representativeOfPage`)
   // so the 5 ImageObject nodes are hero + 4 distinct mosaic tiles.
-  for (const img of galleryTiles.slice(0, 4)) {
+  for (const img of pickKitMosaicRepresentativeThumbnails(
+    galleryGridTiles,
+    KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+  )) {
     const url = buildCloudinarySrc({
       cloudName,
       publicId: img.publicId,

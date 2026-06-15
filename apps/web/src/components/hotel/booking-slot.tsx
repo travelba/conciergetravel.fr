@@ -66,7 +66,10 @@ export function BookingSlot({
     );
   }
 
+  const isSupplierLive = isSupplierBookableRail(railContext, hotelId);
+
   const isTravelportLive =
+    !isSupplierLive &&
     slug !== undefined &&
     hotelId !== undefined &&
     bookingMode === 'travelport' &&
@@ -75,8 +78,6 @@ export function BookingSlot({
 
   const isConciergeLive = hotelId !== undefined && isConciergeBookingMode(bookingMode);
 
-  const isSupplierLive = isSupplierBookableRail(railContext, hotelId);
-
   const isPaidLive =
     isSupplierLive ||
     (hotelId !== undefined &&
@@ -84,42 +85,43 @@ export function BookingSlot({
       railContext !== undefined &&
       railContext.lockActionUrl !== null);
 
-  const rail = isTravelportLive ? (
-    <BookingSandboxRail
-      locale={locale}
-      hotelId={hotelId ?? ''}
-      hotelName={hotelName}
-      slug={slug}
-      defaultStay={railContext?.defaultStay ?? defaultHotelStay()}
-      priceFrom={priceFrom}
-      embeddedInKitAside={embeddedInKitAside}
-    />
-  ) : isPaidLive && hotelId !== undefined && railContext !== undefined ? (
-    <BookingPaidRail
-      locale={locale}
-      hotelId={hotelId}
-      bookingMode={resolvePaidRailBookingMode(isSupplierLive, bookingMode)}
-      railContext={railContext}
-      priceFromLabel={priceFrom}
-      embeddedInKitAside={embeddedInKitAside}
-    />
-  ) : isConciergeLive ? (
-    <BookingConciergeRail
-      locale={locale}
-      hotelId={hotelId}
-      hotelName={hotelName}
-      bookingMode={bookingMode}
-      priceFrom={priceFrom}
-      embeddedInKitAside={embeddedInKitAside}
-    />
-  ) : (
-    <BookingComingSoon
-      locale={locale}
-      hotelName={hotelName}
-      priceFrom={priceFrom}
-      embeddedInKitAside={embeddedInKitAside}
-    />
-  );
+  const rail =
+    isPaidLive && hotelId !== undefined && railContext !== undefined ? (
+      <BookingPaidRail
+        locale={locale}
+        hotelId={hotelId}
+        bookingMode={resolvePaidRailBookingMode(isSupplierLive, bookingMode)}
+        railContext={railContext}
+        priceFromLabel={priceFrom}
+        embeddedInKitAside={embeddedInKitAside}
+      />
+    ) : isTravelportLive ? (
+      <BookingSandboxRail
+        locale={locale}
+        hotelId={hotelId ?? ''}
+        hotelName={hotelName}
+        slug={slug}
+        defaultStay={railContext?.defaultStay ?? defaultHotelStay()}
+        priceFrom={priceFrom}
+        embeddedInKitAside={embeddedInKitAside}
+      />
+    ) : isConciergeLive ? (
+      <BookingConciergeRail
+        locale={locale}
+        hotelId={hotelId}
+        hotelName={hotelName}
+        bookingMode={bookingMode}
+        priceFrom={priceFrom}
+        embeddedInKitAside={embeddedInKitAside}
+      />
+    ) : (
+      <BookingComingSoon
+        locale={locale}
+        hotelName={hotelName}
+        priceFrom={priceFrom}
+        embeddedInKitAside={embeddedInKitAside}
+      />
+    );
 
   return <div data-booking-rail>{rail}</div>;
 }

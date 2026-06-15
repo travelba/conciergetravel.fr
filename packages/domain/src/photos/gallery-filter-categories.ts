@@ -47,14 +47,17 @@ export function normalizeGalleryDbCategoryToFilter(
     value === 'suite' ||
     value === 'bedroom' ||
     value === 'detail' ||
-    value === 'bathroom'
+    value === 'bathroom' ||
+    value === 'interior'
   ) {
     return 'room';
   }
   if (value === 'pool' || value === 'swimming_pool') return 'pool';
   if (value === 'restaurant' || value === 'dining' || value === 'bar') return 'restaurant';
   if (value === 'spa' || value === 'wellness') return 'spa';
-  if (value === 'view' || value === 'exterior' || value === 'facade') return 'view';
+  if (value === 'view' || value === 'exterior' || value === 'facade' || value === 'landscape') {
+    return 'view';
+  }
   return null;
 }
 
@@ -135,4 +138,22 @@ export function pickKitMosaicRepresentativeThumbnails<T extends GalleryPublicIdC
   }
 
   return picked.slice(0, sideTileCount);
+}
+
+/** Best view/exterior shot for the mosaic lead when the page hero is already shown elsewhere. */
+export function pickBestViewGalleryImage<T extends GalleryPublicIdCarrier>(
+  images: readonly T[],
+  options?: { readonly excludePublicIds?: readonly string[] },
+): T | undefined {
+  if (images.length === 0) return undefined;
+  const exclude = new Set(options?.excludePublicIds ?? []);
+  const eligible = images.filter((img) => {
+    const id = img.publicId ?? '';
+    return id === '' || !exclude.has(id);
+  });
+  const viewMatch = eligible.find(
+    (img) => normalizeGalleryDbCategoryToFilter(img.category ?? null) === 'view',
+  );
+  if (viewMatch !== undefined) return viewMatch;
+  return eligible[0];
 }

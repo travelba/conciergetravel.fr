@@ -16,7 +16,9 @@ Product: [GIATA MultiCodes](https://www.giata.com/) — canonical property ident
 
 Credentials arrive **by email only** — never commit. Reset link valid ~24 h after provisioning.
 
-**Portal login ≠ API login.** The GIATA web portal may use `email + password`, but the REST API expects HTTP Basic with username `localPart|companyName` (spec §1), e.g. `benjamin|Travelba` — not `benjamin@travelba.fr`. If all variants return 401, copy the exact username string from Anne's email or ask GIATA support.
+**Username format (Travelba account, 2026-06):** `giata|travelba.fr` (user `giata`, company `travelba.fr` — mailbox `giata@travelba.fr`). **Not** the Room Mapping username (`travelba`).
+
+**Portal login ≠ API login.** The GIATA web portal may use `email + password`, but the REST API expects HTTP Basic with username `localPart|companyName` (spec §1), e.g. `giata|travelba.fr`. The MC password is sent to the `giata@travelba.fr` inbox — it may differ from Room Mapping (`travelba` / staging password).
 
 ## Wire format
 
@@ -65,7 +67,7 @@ Example property excerpt (spec §2.2):
 ```env
 GIATA_ENABLED=1
 GIATA_MC_BASE_URL=https://multicodes.giatamedia.com
-GIATA_MC_USERNAME=you@travelba.fr|Travelba
+GIATA_MC_USERNAME=giata|travelba.fr
 GIATA_MC_PASSWORD=...
 GIATA_MC_API_VERSION=1.latest
 ```

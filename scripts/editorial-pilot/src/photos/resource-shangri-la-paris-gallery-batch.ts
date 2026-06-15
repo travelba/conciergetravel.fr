@@ -1,5 +1,5 @@
 /**
- * Phase 3 — full 30-image gallery for `shangri-la-paris`.
+ * Phase 3 — full 25-image gallery for `shangri-la-paris` (CDC kit 5×5).
  *
  * Metadata + source URLs in `@mch/domain` (`SHANGRI_LA_PARIS_GALLERY_*`).
  *

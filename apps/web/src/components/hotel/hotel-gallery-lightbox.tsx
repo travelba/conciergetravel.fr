@@ -3,6 +3,7 @@
 import {
   KIT_GALLERY_FILTER_TAB_MIN_PHOTOS,
   KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
+  normalizeGalleryDbCategoryToFilter,
   pickKitMosaicRepresentativeThumbnails,
 } from '@mch/domain/photos';
 import { HotelImage } from '@mch/ui';
@@ -38,30 +39,9 @@ const GALLERY_CATEGORY_FILTERS: readonly GalleryCategoryFilter[] = [
 
 const EAGER_IMAGE_COUNT = 5;
 
-function normalizeCategoryToFilter(
-  category: string | null | undefined,
-): GalleryCategoryFilter | null {
-  const value = category?.trim().toLowerCase() ?? '';
-  if (value === '') return null;
-  if (
-    value === 'room' ||
-    value === 'suite' ||
-    value === 'bedroom' ||
-    value === 'detail' ||
-    value === 'bathroom'
-  ) {
-    return 'room';
-  }
-  if (value === 'pool' || value === 'swimming_pool') return 'pool';
-  if (value === 'restaurant' || value === 'dining' || value === 'bar') return 'restaurant';
-  if (value === 'spa' || value === 'wellness') return 'spa';
-  if (value === 'view' || value === 'exterior' || value === 'facade') return 'view';
-  return null;
-}
-
 function imageMatchesFilter(image: GalleryLightboxImage, filter: GalleryCategoryFilter): boolean {
   if (filter === 'all') return true;
-  return normalizeCategoryToFilter(image.category) === filter;
+  return normalizeGalleryDbCategoryToFilter(image.category) === filter;
 }
 
 interface FilteredGallerySlice {
@@ -284,11 +264,11 @@ const GALLERY_FILTER_TAB_ACTIVE_CLASS = 'border-accent text-accent';
 const GALLERY_FILTER_TAB_IDLE_CLASS =
   'border-transparent text-muted hover:border-border hover:text-fg';
 
-const MOBILE_CAROUSEL_ARROW_CLASS =
-  'pointer-events-auto flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/35 bg-[#2b2722]/55 text-lg text-white/95 backdrop-blur-sm transition-colors hover:bg-[#2b2722]/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60';
-
 /** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
 const MOSAIC_SIDE_TILES = 4;
+const MOBILE_FICHE_TILE_COUNT = 5;
+/** Third mobile vignette opens the full gallery grid. */
+const MOBILE_GALLERY_OPENER_INDEX = 2;
 
 /**
  * Luxury caption overlay burned onto a gallery photo (CDC §2 bloc 2 polish
@@ -552,9 +532,6 @@ export function HotelGalleryLightbox({
   }, [hero, galleryCatalogue]);
 
   const [activeFilter, setActiveFilter] = useState<GalleryCategoryFilter>('all');
-  const [mobileCarouselIndex, setMobileCarouselIndex] = useState<number>(0);
-  const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
-  const mobileTouchStartX = useRef<number>(0);
 
   const mosaicSlice = useMemo((): FilteredGallerySlice => {
     const base = buildFilteredGallerySlice(allImages, activeFilter, galleryCatalogue, hero);
@@ -661,13 +638,6 @@ export function HotelGalleryLightbox({
     }
   }, [activeFilter, availableFilters]);
 
-  useEffect(() => {
-    setMobileCarouselIndex(0);
-    if (mobileCarouselRef.current !== null) {
-      mobileCarouselRef.current.scrollLeft = 0;
-    }
-  }, [activeFilter]);
-
   // Allow any page-level trigger (e.g. the golden-template hero header
   // `<HotelGalleryTrigger>`) to open the lightbox via a window event,
   // without prop-drilling a shared ref/store across the RSC boundary.
@@ -728,43 +698,7 @@ export function HotelGalleryLightbox({
     return buildAllTabMosaicSlice(hero, galleryCatalogue, allImages);
   }, [activeFilter, allImages, galleryCatalogue, hero, mosaicSlice]);
 
-  const scrollMobileCarouselTo = useCallback(
-    (index: number): void => {
-      const track = mobileCarouselRef.current;
-      if (track === null) return;
-      const clamped = Math.max(0, Math.min(mobileDisplaySlice.items.length - 1, index));
-      track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
-      setMobileCarouselIndex(clamped);
-    },
-    [mobileDisplaySlice.items.length],
-  );
-
-  const onMobileCarouselScroll = useCallback((): void => {
-    const track = mobileCarouselRef.current;
-    if (track === null) return;
-    const index = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
-    setMobileCarouselIndex((prev) => (prev === index ? prev : index));
-  }, []);
-
-  const onMobileCarouselTouchStart = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>): void => {
-      const touch = event.touches.item(0);
-      if (touch !== null) mobileTouchStartX.current = touch.clientX;
-    },
-    [],
-  );
-
-  const onMobileCarouselTouchEnd = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>): void => {
-      const touch = event.changedTouches.item(0);
-      if (touch === null) return;
-      const delta = mobileTouchStartX.current - touch.clientX;
-      if (Math.abs(delta) < 48) return;
-      if (delta > 0) scrollMobileCarouselTo(mobileCarouselIndex + 1);
-      else scrollMobileCarouselTo(mobileCarouselIndex - 1);
-    },
-    [mobileCarouselIndex, scrollMobileCarouselTo],
-  );
+  const mobileFicheOverflow = Math.max(0, allImages.length - MOBILE_FICHE_TILE_COUNT);
 
   const renderFilterTabs = (): React.ReactElement | null => {
     if (availableFilters.length <= 1) return null;
@@ -798,75 +732,60 @@ export function HotelGalleryLightbox({
     );
   };
 
-  const renderMobileCarousel = (): React.ReactElement | null => {
-    if (mobileDisplaySlice.items.length === 0) return null;
-    return (
-      <div className="relative md:hidden">
+  const renderMobileFicheGrid = (): React.ReactElement | null => {
+    const tiles = mobileDisplaySlice.items.slice(0, MOBILE_FICHE_TILE_COUNT);
+    if (tiles.length === 0) return null;
+
+    const topRow = tiles.slice(0, 2);
+    const bottomRow = tiles.slice(2, MOBILE_FICHE_TILE_COUNT);
+
+    const renderMobileTile = (
+      img: GalleryLightboxImage,
+      displayIndex: number,
+    ): React.ReactElement => {
+      const globalIndex = mobileDisplaySlice.globalIndices[displayIndex] ?? displayIndex;
+      const isGalleryOpener = displayIndex === MOBILE_GALLERY_OPENER_INDEX;
+      const overflowLabel = isGalleryOpener && mobileFicheOverflow > 0 ? mobileFicheOverflow : 0;
+
+      return (
         <div
-          ref={mobileCarouselRef}
-          id="hotel-gallery-mosaic-panel"
-          role="tabpanel"
-          aria-label={translations.thumbnailsLabel}
-          className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          onScroll={onMobileCarouselScroll}
-          onTouchStart={onMobileCarouselTouchStart}
-          onTouchEnd={onMobileCarouselTouchEnd}
+          key={`${img.publicId}-${displayIndex}`}
+          className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-md"
         >
-          {mobileDisplaySlice.items.map((img, displayIndex) => {
-            const globalIndex = mobileDisplaySlice.globalIndices[displayIndex] ?? displayIndex;
-            return (
-              <div
-                key={`${img.publicId}-${globalIndex}`}
-                className="relative aspect-[4/3] w-full shrink-0 snap-center overflow-hidden rounded-lg"
-              >
-                {renderTileButton(img, globalIndex, {
-                  className: `${GALLERY_TILE_BUTTON_CLASS} h-full rounded-lg`,
-                  priority: displayIndex < EAGER_IMAGE_COUNT,
-                  width: 1200,
-                  height: 900,
-                  variant: displayIndex === 0 ? 'hero' : 'thumbnail',
-                  transforms: displayIndex === 0 ? MOSAIC_HERO_TRANSFORMS : MOSAIC_TILE_TRANSFORMS,
-                  sizes: '100vw',
-                  imageClassName: KIT_MOSAIC_IMAGE_CLASS,
-                })}
-              </div>
-            );
+          {renderTileButton(img, globalIndex, {
+            className: `${GALLERY_TILE_BUTTON_CLASS} h-full rounded-md`,
+            priority: displayIndex < EAGER_IMAGE_COUNT,
+            width: 600,
+            height: 450,
+            variant: displayIndex === 0 ? 'hero' : 'thumbnail',
+            transforms: displayIndex === 0 ? MOSAIC_HERO_TRANSFORMS : MOSAIC_TILE_TRANSFORMS,
+            sizes: '50vw',
+            imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+            showOverflow: isGalleryOpener && overflowLabel > 0,
+            overflowCountLabel: overflowLabel,
+            ...(isGalleryOpener ? { onActivate: openGrid } : {}),
           })}
         </div>
-        {mobileDisplaySlice.items.length > 1 ? (
-          <>
-            <p
-              aria-live="polite"
-              className="text-muted mt-3 text-center text-xs tabular-nums tracking-wide"
-            >
-              {formatLightboxCounter(
-                translations.lightboxCounterTemplate,
-                mobileCarouselIndex + 1,
-                mobileDisplaySlice.items.length,
-              )}
-            </p>
-            <div
-              className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2"
-              aria-hidden={false}
-            >
-              <button
-                type="button"
-                className={`${MOBILE_CAROUSEL_ARROW_CLASS} pointer-events-auto`}
-                aria-label={translations.carouselPrevPhoto}
-                onClick={() => scrollMobileCarouselTo(mobileCarouselIndex - 1)}
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                className={`${MOBILE_CAROUSEL_ARROW_CLASS} pointer-events-auto`}
-                aria-label={translations.carouselNextPhoto}
-                onClick={() => scrollMobileCarouselTo(mobileCarouselIndex + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </>
+      );
+    };
+
+    return (
+      <div
+        id="hotel-gallery-mosaic-panel"
+        role="tabpanel"
+        aria-label={translations.thumbnailsLabel}
+        className="flex flex-col gap-1.5 md:hidden"
+        data-gallery-layout="mobile-fiche"
+      >
+        {topRow.length > 0 ? (
+          <div className="grid grid-cols-2 gap-1.5">
+            {topRow.map((img, idx) => renderMobileTile(img, idx))}
+          </div>
+        ) : null}
+        {bottomRow.length > 0 ? (
+          <div className="grid grid-cols-3 gap-1.5">
+            {bottomRow.map((img, idx) => renderMobileTile(img, idx + topRow.length))}
+          </div>
         ) : null}
       </div>
     );
@@ -886,12 +805,17 @@ export function HotelGalleryLightbox({
       readonly variant?: 'hero' | 'thumbnail';
       readonly transforms?: string;
       readonly sizes?: string;
+      readonly onActivate?: () => void;
     },
   ): React.ReactElement => (
     <button
       type="button"
       className={opts.className ?? GALLERY_TILE_BUTTON_CLASS}
-      onClick={() =>
+      onClick={() => {
+        if (opts.onActivate !== undefined) {
+          opts.onActivate();
+          return;
+        }
         openAt(
           galleryIndex,
           mosaicFrameForLightbox({
@@ -899,9 +823,13 @@ export function HotelGalleryLightbox({
             ...(opts.width !== undefined ? { width: opts.width } : {}),
             ...(opts.height !== undefined ? { height: opts.height } : {}),
           }),
-        )
+        );
+      }}
+      aria-label={
+        opts.onActivate !== undefined
+          ? translations.mosaicEyebrow
+          : `${translations.openLightbox} : ${img.alt}`
       }
-      aria-label={`${translations.openLightbox} : ${img.alt}`}
     >
       <HotelImage
         cloudName={cloudName}
@@ -1001,7 +929,7 @@ export function HotelGalleryLightbox({
   };
 
   return (
-    <section aria-labelledby="gallery-title" className={hideGrid ? '' : 'mb-16'}>
+    <section aria-labelledby="gallery-title" className={hideGrid ? '' : 'mb-4 md:mb-16'}>
       <h2 id="gallery-title" className="sr-only">
         {translations.lightboxLabel}
       </h2>
@@ -1013,7 +941,7 @@ export function HotelGalleryLightbox({
             <p className="text-sm text-[#6f675b] md:mb-0">{translations.filterEmpty}</p>
           ) : (
             <>
-              {renderMobileCarousel()}
+              {renderMobileFicheGrid()}
               {useClassicMosaic ? (
                 <div
                   className="hidden h-[440px] grid-cols-4 grid-rows-2 gap-2.5 md:grid"

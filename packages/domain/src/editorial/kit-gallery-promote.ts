@@ -3,6 +3,10 @@
  * CDC §2.2bis · `kit.02.gallery_source_url_tracked`.
  */
 
+import {
+  KIT_GALLERY_LEGACY_MIN,
+  KIT_GALLERY_SLOT_COUNT,
+} from '../photos/gallery-filter-categories';
 import { normalizeGallerySourceUrlForDedup } from '../photos/gallery-source-url';
 
 export interface KitGalleryManifestEntry {
@@ -45,7 +49,8 @@ export function kitHeroPublicIdForSlug(slug: string): string {
 }
 
 /**
- * Assemble 30 unique gallery source URLs aligned with press-1…press-30.
+ * Assemble unique gallery source URLs aligned with press-1…press-N.
+ * Supports kit 25-slot (5×5) and legacy 30-slot manifests.
  * Each slot starts from `pressSlotUrls[i]`; skips hero URL and prior duplicates.
  */
 function contentfulUniqueVariant(base: string, slotOneBased: number, attempt: number): string {
@@ -89,9 +94,10 @@ export function buildKitGallerySourceUrlsPerPressSlot(
   pressSlotUrls: readonly string[],
   heroSourceUrl: string,
 ): readonly string[] {
-  if (pressSlotUrls.length !== 30) {
+  const slotCount = pressSlotUrls.length;
+  if (slotCount !== KIT_GALLERY_SLOT_COUNT && slotCount !== KIT_GALLERY_LEGACY_MIN) {
     throw new Error(
-      `buildKitGallerySourceUrlsPerPressSlot: expected 30 press slot urls, got ${pressSlotUrls.length}`,
+      `buildKitGallerySourceUrlsPerPressSlot: expected ${KIT_GALLERY_SLOT_COUNT} or ${KIT_GALLERY_LEGACY_MIN} press slot urls, got ${slotCount}`,
     );
   }
   const hero = heroSourceUrl.trim();
@@ -108,7 +114,7 @@ export function buildKitGallerySourceUrlsPerPressSlot(
     );
   };
 
-  for (let i = 0; i < 30; i += 1) {
+  for (let i = 0; i < slotCount; i += 1) {
     const slotOneBased = i + 1;
     let url = pressSlotUrls[i]?.trim() ?? '';
     let scan = 0;
@@ -122,7 +128,7 @@ export function buildKitGallerySourceUrlsPerPressSlot(
       url = dedupeGallerySourceUrl(base, slotOneBased, 0);
     }
     let attempt = 0;
-    while (isTaken(url) && attempt < 30) {
+    while (isTaken(url) && attempt < slotCount) {
       const base = pressSlotUrls[i]?.trim() ?? pressSlotUrls[0]?.trim() ?? '';
       url = dedupeGallerySourceUrl(base, slotOneBased, attempt);
       attempt += 1;

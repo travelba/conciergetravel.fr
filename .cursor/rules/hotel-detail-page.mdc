@@ -32,8 +32,10 @@ Chaque photo rendue doit correspondre au **sujet affiché** (POI, spa, restauran
 
 | Surface | Règle | Gate / outil |
 | ------- | ----- | ------------- |
-| **Hero mosaïque (kit)** | `hero_image` = vue **exterior** ou **view** de l’établissement ; **interdit** dans `gallery_images[]` (pas de doublon grande + petite tuile) | `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view` |
-| **Galerie 30 (kit)** | 30 slots uniques ; chaque entrée porte `url` ou `source_url` ; 0 URL source dupliquée ; 0 `public_id` dupliqué | `kit.02.gallery_source_url_tracked`, `kit.02.gallery_no_duplicate_source_url`, `kit.02.gallery_unique_public_id` |
+| **Hero mosaïque (kit)** | `hero_image` = **Vue** (`view` / `exterior`) ; **interdit** dans `gallery_images[]` (pas de doublon grande + petite tuile) | `kit.02.hero_not_in_gallery`, `kit.02.hero_category_view` |
+| **Galerie kit 5×5 (2026-06-10)** | **25 slots** galerie + **1 hero Vue** ; 5 filtres UI (Chambres, Piscine, Restaurant, Spa, Vue) × **5 photos** ; onglet masqué si &lt; 5 ; mosaïque filtrée = 1 grande + 4 vignettes | `kit.02.gallery_total_25`, `kit.02.gallery_five_per_filter_category` |
+| **Galerie legacy (kit wave 5)** | 30 slots / 10 catégories CDC jusqu’à migration 5×5 | `kit.02.gallery_count`, `kit.02.gallery_required_categories` |
+| **Galerie catalogue Payload** | ≥ 30 photos / 10 catégories (Phase 2 photo pipeline) | Payload validation + E2E |
 | **Chambres (kit)** | 1 photo officielle par `room.slug` — pas de fallback `galleryTiles[index % n]` | `kit.02.chambres_visible_have_photo`, `kit.16.room_*` |
 | POI `#autour` | Asset dédié `poi-{slug}` — sourcing réel (Commons / officiel / Places) **avant** IA | `gold.poi_dedicated_images`, `gold.poi_photo_structural`, `kit.07.poi_structural` |
 | Galerie hôtel | `category` Vision cohérente avec `alt_fr` (spa ≠ chambre) | `photos.gallery_alt_category`, `categorize-with-vision.ts` |
@@ -99,7 +101,7 @@ Implémentation : `kit-fiche-acceptance-gates.ts` — `audit:hotel-fiches-cdc` *
 14. **`reviewRating` fabriqué** : note (ex. 5/5) posée sur une citation éditoriale sans note réelle → refus (EEAT).
 15. **Wrapper JSON-LD** : tous les blocs passent par `<SeoJsonLd>` (ou le primitif `<JsonLdScript>`) avec le nonce CSP ; jamais de `<script>` JSON-LD brut.
 16. **Correspondance photo/sujet (§2.2bis)** : POI = asset `poi-{slug}` dédié (gate `gold.poi_photo_structural`) ; galerie `category` incohérente avec `alt_fr` → fail (`photos.gallery_alt_category`) ; mismatch visuel spa/POI → re-sourcer, pas remapper metadata (skill `photo-pipeline` §Photo-subject correspondence, `hotel-kit-rollout` D13–D14).
-17. **Hero kit + mosaïque (§2.2bis — fiches `HOTEL_KIT_SLUGS`)** : `hero_image` ∉ `gallery_images[]` ; hero = catégorie `exterior` ou `view` ; chaque slot galerie trace `url`/`source_url` ; chambres = photo dédiée par slug. Gates `kit.02.hero_not_in_gallery`, `kit.02.hero_category_exterior_or_view`, `kit.02.gallery_source_url_tracked`. Ordre sourcing : skill `hotel-kit-rollout` Rule 7.
+17. **Hero kit + mosaïque (§2.2bis — fiches `HOTEL_KIT_SLUGS`)** : `hero_image` ∉ `gallery_images[]` ; hero = **Vue** (`view` / `exterior`) ; galerie kit cible **25 slots** (5×5 filtres UI) + hero ; chaque slot trace `url`/`source_url`. Gates `kit.02.hero_not_in_gallery`, `kit.02.hero_category_view`, `kit.02.gallery_total_25`, `kit.02.gallery_five_per_filter_category`. Legacy 30-slot jusqu’à migration. Ordre sourcing : skill `hotel-kit-rollout` Rule 7.
 
 ## Golden template & audit catalogue
 

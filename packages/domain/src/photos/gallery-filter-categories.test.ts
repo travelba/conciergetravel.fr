@@ -7,6 +7,7 @@ import {
   KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
   KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
   KIT_GALLERY_SLOT_COUNT,
+  pickBestViewGalleryImage,
   pickKitMosaicRepresentativeThumbnails,
 } from './gallery-filter-categories';
 
@@ -60,6 +61,15 @@ describe('gallery-filter-categories', () => {
     );
     expect(thumbs).toHaveLength(4);
     expect(thumbs.map((t) => t.category)).toEqual(['room', 'pool', 'dining', 'spa']);
+  });
+
+  it('picks best view lead for golden overlay fiches', () => {
+    const images = [
+      { publicId: 'pool-1', category: 'pool' },
+      { publicId: 'village-view', category: 'view' },
+      { publicId: 'room-1', category: 'room' },
+    ];
+    expect(pickBestViewGalleryImage(images)?.publicId).toBe('village-view');
   });
 
   it('exports UI tab minimum separate from publish gate', () => {

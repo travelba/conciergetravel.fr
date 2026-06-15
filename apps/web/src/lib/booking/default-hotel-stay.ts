@@ -40,3 +40,29 @@ export function defaultHotelStayOccupancy(): HotelStayOccupancy {
 export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+/**
+ * Mobile sticky bar defaults — check-in today, one night, 1 room / 2 adults.
+ * Desktop rails keep {@link defaultHotelStay} (J+30 editorial convention).
+ */
+export function mobileDefaultHotelStay(): {
+  readonly checkIn: string;
+  readonly checkOut: string;
+  readonly rooms: number;
+  readonly adults: number;
+  readonly children: number;
+  readonly childAges: readonly number[];
+} {
+  const now = new Date();
+  const tomorrow = new Date(now.getTime() + 86_400_000);
+  const fmt = (d: Date): string =>
+    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  return {
+    checkIn: fmt(now),
+    checkOut: fmt(tomorrow),
+    rooms: 1,
+    adults: 2,
+    children: 0,
+    childAges: [],
+  };
+}

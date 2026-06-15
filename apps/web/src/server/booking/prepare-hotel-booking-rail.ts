@@ -12,7 +12,7 @@ import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
 import { isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
-import { env } from '@/lib/env';
+import { isMultiSupplierRateShoppingEnabled } from '@/lib/booking/multi-supplier-flags';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import { shopRates } from '@/server/booking/rate-shopping';
 import { getHotelSupplierConnections } from '@/server/booking/supplier-catalog-repo';
@@ -71,24 +71,8 @@ export async function prepareHotelBookingRail(
   const stay = defaultHotelStay();
   const fakeEnabled = isFakeOffersEnabled();
 
-  // Travelport pilot — sandbox funnel only; skip supplier / Amadeus shop on SSR.
-  if (input.bookingMode === 'travelport') {
-    return {
-      defaultStay: stay,
-      fakeEnabled,
-      supplierBookable: false,
-      bestOffer: EMPTY_BEST_OFFER,
-      lockActionUrl: null,
-      lockRateToken: null,
-      priceFrom: null,
-      limitedAvailability: null,
-      availabilityState: 'unknown',
-    };
-  }
-
   const connections = await getHotelSupplierConnections(input.hotelId);
-  const multiSupplierActive =
-    env.MULTI_SUPPLIER_RATESHOPPING_ENABLED === true && connections.length > 0;
+  const multiSupplierActive = isMultiSupplierRateShoppingEnabled() && connections.length > 0;
 
   if (multiSupplierActive) {
     const shopResult = await shopRates({ hotelId: input.hotelId, stay });
@@ -131,6 +115,21 @@ export async function prepareHotelBookingRail(
       priceFrom: null,
       limitedAvailability: null,
       availabilityState: shopResult.rooms.length === 0 ? 'sold_out' : 'unknown',
+    };
+  }
+
+  // Travelport legacy pilot — sandbox funnel only when orchestrator is off.
+  if (input.bookingMode === 'travelport') {
+    return {
+      defaultStay: stay,
+      fakeEnabled,
+      supplierBookable: false,
+      bestOffer: EMPTY_BEST_OFFER,
+      lockActionUrl: null,
+      lockRateToken: null,
+      priceFrom: null,
+      limitedAvailability: null,
+      availabilityState: 'unknown',
     };
   }
 

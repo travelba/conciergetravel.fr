@@ -3368,8 +3368,10 @@
       "mobileBar": {
         "ctaSeePrices": "See rates",
         "ctaBook": "Book",
+        "ctaChooseRooms": "Choose rooms",
         "ctaAriaSeePrices": "See rates and book {name}",
         "ctaAriaBook": "Book {name}",
+        "ctaAriaChooseRooms": "Choose a room at {name}",
         "trustChip": "IATA agency · secure payment",
         "closeSheet": "Close"
       }

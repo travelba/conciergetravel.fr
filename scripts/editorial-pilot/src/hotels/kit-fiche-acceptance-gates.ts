@@ -23,6 +23,12 @@ import {
   countDuplicateCanonicalGallerySourceUrlsFromRows,
   evaluateGalleryAltCategoryCorrespondence,
   evaluatePoiStructuralCorrespondence,
+  countGalleryPhotosByFilterCategory,
+  hasKitGalleryFiveByFiveStructure,
+  KIT_GALLERY_FILTER_UI_IDS,
+  KIT_GALLERY_LEGACY_MIN,
+  KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
+  KIT_GALLERY_SLOT_COUNT,
 } from '@mch/domain/photos';
 import { isKitWaveSlug } from '@mch/domain/editorial';
 
@@ -36,8 +42,8 @@ import {
   FAQ_KIT_MIN_ITEMS,
   FAQ_PROMOTE_MIN_ITEMS,
 } from './faq-perplexity-taxonomy.js';
-/** CDC §2.2 categories — duplicated here to avoid circular import with hotel-fiche-cdc-gates. */
-const KIT_REQUIRED_GALLERY_CATEGORIES = [
+/** Legacy CDC §2.2 categories — still required for 30-slot kit fiches until 5×5 migration. */
+const KIT_LEGACY_GALLERY_CATEGORIES = [
   'exterior',
   'lobby',
   'room',
@@ -105,7 +111,6 @@ export interface KitAcceptanceCheck {
 }
 
 const KIT_VISIBLE_ROOM_COUNT = 3;
-const KIT_GALLERY_MIN = 30;
 const GMB_MIN_DISPLAY_REVIEWS = 3;
 const GMB_RECENCY_MAX_DAYS = 90;
 const GMB_SYNC_MAX_DAYS = 30;
@@ -212,7 +217,7 @@ function countDuplicateGallerySourceUrls(gallery_images: unknown): number {
 }
 
 function countGalleryMissingSourceUrls(gallery_images: unknown): number {
-  if (!Array.isArray(gallery_images)) return KIT_GALLERY_MIN;
+  if (!Array.isArray(gallery_images)) return KIT_GALLERY_SLOT_COUNT;
   let missing = 0;
   for (const item of gallery_images) {
     if (!isRecord(item)) {
@@ -444,11 +449,27 @@ export function evaluateKitAcceptanceGates(
   }
 
   /* ── D12/D14 — galerie & correspondance sujet ── */
+  const galleryRows = Array.isArray(input.gallery_images) ? input.gallery_images : [];
+  const isFiveByFiveGallery = hasKitGalleryFiveByFiveStructure(galleryRows);
+  const galleryMeetsKitMinimum =
+    galleryCount === KIT_GALLERY_SLOT_COUNT || galleryCount >= KIT_GALLERY_LEGACY_MIN;
+
+  pushCheck(
+    checks,
+    'kit.02.gallery_total_25',
+    galleryMeetsKitMinimum,
+    galleryCount === KIT_GALLERY_SLOT_COUNT
+      ? `${galleryCount} gallery_images (CDC kit 5×5 = ${KIT_GALLERY_SLOT_COUNT} slots + hero Vue)`
+      : galleryCount >= KIT_GALLERY_LEGACY_MIN
+        ? `${galleryCount} gallery_images (legacy ${KIT_GALLERY_LEGACY_MIN}-slot — migrate to ${KIT_GALLERY_SLOT_COUNT})`
+        : `${galleryCount} gallery_images — kit requires ${KIT_GALLERY_SLOT_COUNT} (5×5) or legacy ≥ ${KIT_GALLERY_LEGACY_MIN}`,
+  );
+
   pushCheck(
     checks,
     'kit.02.gallery_count',
-    galleryCount >= KIT_GALLERY_MIN,
-    `${galleryCount} gallery_images (CDC kit target ≥ ${KIT_GALLERY_MIN})`,
+    galleryMeetsKitMinimum,
+    `${galleryCount} gallery_images (kit target ${KIT_GALLERY_SLOT_COUNT} or legacy ≥ ${KIT_GALLERY_LEGACY_MIN})`,
   );
 
   pushCheck(
@@ -463,7 +484,7 @@ export function evaluateKitAcceptanceGates(
   pushCheck(
     checks,
     'kit.02.gallery_source_url_tracked',
-    galleryCount >= KIT_GALLERY_MIN && missingSourceUrls === 0,
+    galleryMeetsKitMinimum && missingSourceUrls === 0,
     missingSourceUrls === 0
       ? 'every gallery slot carries source url (enables pixel-level dedup audit)'
       : `${missingSourceUrls}/${galleryCount} gallery slot(s) missing url/source_url — run gallery batch with GALLERY_SOURCES`,
@@ -486,7 +507,19 @@ export function evaluateKitAcceptanceGates(
       ? 'hero_image missing'
       : heroAppearsInGallery
         ? `hero_image "${heroPublicId}" must not appear in gallery_images (mosaic duplicate on page)`
-        : 'hero_image is separate from the 30 gallery slots',
+        : 'hero_image is separate from the 25 gallery slots',
+  );
+
+  pushCheck(
+    checks,
+    'kit.02.hero_category_view',
+    heroPublicId !== null &&
+      (!heroAppearsInGallery || heroCategory === 'exterior' || heroCategory === 'view'),
+    heroPublicId === null
+      ? 'hero_image missing'
+      : heroAppearsInGallery && heroCategory !== 'exterior' && heroCategory !== 'view'
+        ? `hero slot category="${heroCategory ?? 'unknown'}" — must be view (Vue d’ensemble du palace)`
+        : 'hero must be a Vue / exterior overview (separate from gallery)',
   );
 
   pushCheck(
@@ -520,15 +553,39 @@ export function evaluateKitAcceptanceGates(
     );
   }
 
-  const missingCats = KIT_REQUIRED_GALLERY_CATEGORIES.filter((c) => !galleryCats.has(c));
-  pushCheck(
-    checks,
-    'kit.02.gallery_required_categories',
-    missingCats.length === 0,
-    missingCats.length === 0
-      ? 'all CDC photo categories represented'
-      : `missing gallery categories: ${missingCats.join(', ')}`,
-  );
+  if (galleryCount === KIT_GALLERY_SLOT_COUNT) {
+    const filterCounts = countGalleryPhotosByFilterCategory(galleryRows);
+    const underfilled = KIT_GALLERY_FILTER_UI_IDS.filter(
+      (id) => filterCounts[id] < KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
+    );
+    pushCheck(
+      checks,
+      'kit.02.gallery_five_per_filter_category',
+      underfilled.length === 0,
+      underfilled.length === 0
+        ? `each filter category carries ${KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY} photos (Chambres, Piscine, Restaurant, Spa, Vue)`
+        : `filter categories under ${KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY} photos: ${underfilled.join(', ')}`,
+    );
+  }
+
+  if (!isFiveByFiveGallery && galleryCount >= KIT_GALLERY_LEGACY_MIN) {
+    const missingCats = KIT_LEGACY_GALLERY_CATEGORIES.filter((c) => !galleryCats.has(c));
+    pushCheck(
+      checks,
+      'kit.02.gallery_required_categories',
+      missingCats.length === 0,
+      missingCats.length === 0
+        ? 'all legacy CDC photo categories represented'
+        : `missing gallery categories: ${missingCats.join(', ')}`,
+    );
+  } else if (isFiveByFiveGallery) {
+    pushCheck(
+      checks,
+      'kit.02.gallery_required_categories',
+      true,
+      '5×5 filter categories satisfied (legacy 10-category floor waived)',
+    );
+  }
 
   /* ── D12 — expériences signature (image dédiée, pas fallback galerie) ── */
   pushCheck(

@@ -3368,8 +3368,10 @@
       "mobileBar": {
         "ctaSeePrices": "Voir les tarifs",
         "ctaBook": "Réserver",
+        "ctaChooseRooms": "Choisir chambres",
         "ctaAriaSeePrices": "Voir les tarifs et réserver {name}",
         "ctaAriaBook": "Réserver {name}",
+        "ctaAriaChooseRooms": "Choisir une chambre à {name}",
         "trustChip": "Agence IATA · paiement sécurisé",
         "closeSheet": "Fermer"
       }

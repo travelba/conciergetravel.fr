@@ -2194,8 +2194,8 @@
 .mch-kit .hotel-kit-intro {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 8px;
 }
 .mch-kit .hotel-kit-head-slot {
   order: 1;
@@ -2397,12 +2397,23 @@
   bottom: 0;
   display: flex;
   align-items: stretch;
-  gap: 10px;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: rgba(255, 255, 255, 0.97);
+  gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.94);
   border-top: 1px solid var(--ligne);
-  box-shadow: 0 -8px 28px rgba(20, 17, 12, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 -4px 16px rgba(20, 17, 12, 0.06);
+  backdrop-filter: blur(8px);
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
+}
+.mch-kit .resa-mobile-bar-wrap.is-revealed .resa-mobile-bar {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 .mch-kit .resa-mobile-bar__summary {
   flex: 1;
@@ -2442,8 +2453,7 @@
   text-overflow: ellipsis;
 }
 .mch-kit .resa-mobile-bar__guests {
-  font-size: 11.5px;
-  color: var(--texte-doux);
+  display: none;
 }
 .mch-kit .resa-mobile-bar__price {
   display: flex;
@@ -2472,6 +2482,10 @@
 }
 .mch-kit .resa-mobile-bar-spacer {
   display: none;
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+}
+.mch-kit .resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer {
+  display: block;
 }
 .mch-kit .resa-mobile-sheet[hidden] {
   display: none;
@@ -2732,6 +2746,17 @@ body.booking-mobile-sheet-open {
   }
 }
 @media (max-width: 680px) {
+  .mch-kit .htl-body {
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+  .mch-kit .hotel-kit-gallery-slot {
+    margin-bottom: 0;
+  }
+  .mch-kit .htl-main > .htl-feats:first-child {
+    margin-top: 4px;
+    padding-top: 10px;
+  }
   .mch-kit .htl-gallery {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 200px 120px;
@@ -2783,8 +2808,8 @@ body.booking-mobile-sheet-open {
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
     gap: 16px;
-    padding: 16px 0;
-    margin: 18px 0 4px;
+    padding: 8px 0 6px;
+    margin: 4px 0 0;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -2800,8 +2825,11 @@ body.booking-mobile-sheet-open {
     display: block;
   }
   .mch-kit .resa-mobile-bar-spacer {
+    display: none;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+  .mch-kit .resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer {
     display: block;
-    height: calc(68px + env(safe-area-inset-bottom, 0px));
   }
   .mch-kit .htl-body {
     padding-bottom: 0;

@@ -140,8 +140,9 @@ L'audit `audit:hotel-fiches-cdc` **exit 1** liste les remarques PO encore ouvert
 
 **Ordre imposé par slot** (chaque slot = sujet unique, `source_url` tracée dans le manifest) :
 
-1. **Hero** — 1 photo **exterior** ou **view** montrant l’établissement dans son ensemble. `hero_image` **interdit** dans `gallery_images[]` (gate `kit.02.hero_not_in_gallery`).
-2. **Galerie 30** — 10 catégories CDC, **0 URL source dupliquée**, **0 public_id dupliqué**, chaque entrée porte `url` ou `source_url` (gate `kit.02.gallery_source_url_tracked`).
+1. **Hero** — 1 photo **Vue** (`view` / `exterior`) montrant l’établissement dans son ensemble. `hero_image` **interdit** dans `gallery_images[]` (gate `kit.02.hero_not_in_gallery`).
+2. **Galerie 5×5 (kit cible, 2026-06-10)** — **25 slots** (`press-1…25`) : 5 filtres UI (Vue, Chambres, Piscine, Restaurant, Spa) × **5 photos** chacun. Hero = 6ᵉ Vue **hors** galerie. **0 URL source dupliquée**, **0 public_id dupliqué**, chaque entrée porte `url` ou `source_url`. Gates : `kit.02.gallery_total_25`, `kit.02.gallery_five_per_filter_category`, `kit.02.gallery_source_url_tracked`. UI : onglet filtre masqué si &lt; 5 photos ; mosaïque filtrée = 1 lead + 4 vignettes. Domain : `@mch/domain/photos/gallery-filter-categories.ts`.
+   - **Legacy** : fiches wave 5 encore à **30 slots / 10 catégories CDC** passent `kit.02.gallery_count` (≥ 30) jusqu’à migration pilote par slug.
 3. **Chambres** — 1 photo officielle par `room.slug` via `resource-{slug}-rooms.ts` + map display ; **interdit** le fallback `galleryTiles[index % n]`.
 4. **Spa / resto (#hotel-en-bref)** — slot galerie `spa`/`dining` vérifié visuellement ; si le pixel ne correspond pas → re-sourcer (Rule 1), pas seulement `spaHero()` resolver.
 5. **POI #autour** — pour chaque POI : Tavily/Commons/Places **d’abord** ; upload `poi-{slug}` ; **IA seulement** si aucune source libre de droits (documenter dans le script).

@@ -4,6 +4,11 @@ import { cache } from 'react';
 
 import { getTranslations } from 'next-intl/server';
 
+import {
+  KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+  pickKitMosaicRepresentativeThumbnails,
+} from '@mch/domain/photos';
+
 import { buildCloudinarySrc } from '@mch/ui';
 
 import type { Locale } from '@/i18n/routing';
@@ -13,6 +18,7 @@ import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
 import { citySlug } from '@/server/destinations/cities';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
 import { getAmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
+import { buildHotelGalleryViewModel } from '@/server/hotels/build-hotel-gallery-view-model';
 import type { HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
 import { getPathname } from '@/i18n/navigation';
 import { env } from '@/lib/env';
@@ -489,76 +495,41 @@ export async function prepareHotelKitModelUncached(
   const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const heroPublicId = readHeroImage(row);
   const galleryImages = filterPublicHotelGalleryImages(readGallery(row, kitLocale, name));
-  const heroGalleryMatch =
-    heroPublicId !== null ? galleryImages.find((g) => g.publicId === heroPublicId) : undefined;
-  const galleryTiles =
-    heroPublicId !== null
-      ? galleryImages.filter((g) => g.publicId !== heroPublicId)
-      : galleryImages;
+  const galleryViewModel = buildHotelGalleryViewModel({
+    heroPublicId,
+    galleryImages,
+    hotelName: name,
+  });
+  const galleryHeroDescriptor = galleryViewModel.hero;
+  const galleryGridImages = galleryViewModel.gridImages;
 
-  const heroInGallery = heroGalleryMatch !== undefined;
+  const heroGalleryMatch =
+    galleryHeroDescriptor !== null
+      ? galleryImages.find((g) => g.publicId === galleryHeroDescriptor.publicId)
+      : undefined;
+
   const mosaicHero =
     heroGalleryMatch !== undefined
       ? toGalleryTile(cloudName, heroGalleryMatch, GALLERY_MAIN_TRANSFORMS, 1200, 900)
-      : heroPublicId !== null
+      : galleryHeroDescriptor !== null
         ? {
             src: buildCloudinarySrc({
               cloudName,
-              publicId: heroPublicId,
+              publicId: galleryHeroDescriptor.publicId,
               transforms: GALLERY_MAIN_TRANSFORMS,
             }),
-            alt: name,
+            alt: galleryHeroDescriptor.alt,
             width: 1200,
             height: 900,
           }
-        : galleryImages[0] !== undefined
-          ? toGalleryTile(cloudName, galleryImages[0], GALLERY_MAIN_TRANSFORMS, 1200, 900)
-          : null;
+        : null;
 
-  const mosaicThumbCandidates =
-    heroPublicId !== null && heroInGallery
-      ? galleryTiles
-      : heroPublicId !== null
-        ? galleryImages
-        : galleryImages.length > 1
-          ? galleryImages.slice(1)
-          : [];
+  const mosaicThumbs = pickKitMosaicRepresentativeThumbnails(
+    galleryGridImages,
+    KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT,
+  ).map((img) => toGalleryTile(cloudName, img, GALLERY_THUMB_TRANSFORMS, 600, 450));
 
-  const mosaicThumbs = mosaicThumbCandidates
-    .slice(0, 4)
-    .map((img) => toGalleryTile(cloudName, img, GALLERY_THUMB_TRANSFORMS, 600, 450));
-
-  const galleryOverflowCount = Math.max(0, galleryImages.length - (1 + mosaicThumbs.length));
-
-  const galleryHeroDescriptor =
-    heroGalleryMatch !== undefined
-      ? {
-          publicId: heroGalleryMatch.publicId,
-          alt: heroGalleryMatch.alt,
-          caption: heroGalleryMatch.caption,
-          category: heroGalleryMatch.category,
-        }
-      : heroPublicId !== null
-        ? {
-            publicId: heroPublicId,
-            alt: name,
-            caption: null,
-            category:
-              galleryImages.find((g) => g.publicId === heroPublicId)?.category ?? 'exterior',
-          }
-        : galleryImages[0] !== undefined
-          ? {
-              publicId: galleryImages[0].publicId,
-              alt: galleryImages[0].alt,
-              caption: galleryImages[0].caption,
-              category: galleryImages[0].category,
-            }
-          : null;
-
-  const galleryGridImages =
-    heroPublicId !== null
-      ? galleryImages.filter((g) => g.publicId !== heroPublicId)
-      : galleryImages;
+  const galleryOverflowCount = Math.max(0, galleryGridImages.length - mosaicThumbs.length);
 
   const slugFr = row.slug;
   const slugEn = row.slug_en !== null && row.slug_en !== '' ? row.slug_en : row.slug;
@@ -596,7 +567,9 @@ export async function prepareHotelKitModelUncached(
 
   const roomCards: HotelRoomCardVM[] = rooms.map((room, index) => {
     const fallbackTile =
-      galleryTiles.length > 0 ? galleryTiles[index % galleryTiles.length] : undefined;
+      galleryGridImages.length > 0
+        ? galleryGridImages[index % galleryGridImages.length]
+        : undefined;
     const roomName = room.name ?? room.room_code;
     const isConciergePick = conciergePick !== null && room.slug === conciergePick.slug;
     const liveFromMinor = aggregatedRoomPrices?.fromByRoomId.get(room.id);

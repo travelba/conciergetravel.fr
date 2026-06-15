@@ -162,8 +162,8 @@ describe('readGoogleReviews', () => {
     expect(reviews).toHaveLength(0);
   });
 
-  it('excludes GMB quotes older than 90 days from #acces display', () => {
-    const reviews = readGoogleReviews(
+  it('excludes stale-only GMB quotes unless Places sample is saturated and sync is fresh', () => {
+    const mixed = readGoogleReviews(
       minimalRow({
         google_reviews: [
           {
@@ -182,7 +182,22 @@ describe('readGoogleReviews', () => {
       }),
       'fr',
     );
-    expect(reviews.map((r) => r.author)).toEqual(['Recent three']);
+    expect(mixed.map((r) => r.author)).toEqual(['Recent three']);
+
+    const staleOnly = readGoogleReviews(
+      minimalRow({
+        google_reviews: Array.from({ length: 5 }, (_, i) => ({
+          author: `Traveler ${i}`,
+          rating: 5,
+          text: `Detailed traveler feedback number ${i}.`,
+          publish_time: `2024-0${i + 1}-01T00:00:00.000Z`,
+        })),
+        last_reviews_sync: '2026-06-09T00:00:00.000Z',
+      }),
+      'fr',
+    );
+    expect(staleOnly).toHaveLength(3);
+    expect(staleOnly[0]?.author).toBe('Traveler 4');
   });
 
   it('sorts fresh reviews by publish_time descending and keeps ratings below 5', () => {

@@ -54,16 +54,9 @@ interface HotelGalleryProps {
  * later via the standard `gallery_images` flow.
  */
 /**
- * C4 — cap the *visible* thumbnail grid at 11 tiles (6 above the fold,
- * 5 lazy-loaded on scroll). Anything beyond is reachable through the
- * "+N" overflow chip on the 11th tile and the lightbox iterates the
- * full 30+ photo set. Cap is empirical: tested on iPhone 12 mini
- * (2-column grid) and 27" desktop (6-column grid), both stay under
- * 2 vertical rows before requiring scroll.
- *
- * CDC §2 bloc 2 mandates ≥ 30 photos at the publication gate; this
- * grid surfaces the strongest 11 while the lightbox honours the full
- * catalogue without bandwidth penalty (thumbnails use `c_thumb,w_400`).
+ * CDC §2 bloc 2 — category mosaic (Vue hero + 4 category vignettes) with
+ * filter tabs. The lightbox cycles the full gallery corpus; overflow chip
+ * on the last vignette surfaces the remaining photos.
  */
 const MOSAIC_SIDE_TILES = KIT_GALLERY_MOSAIC_SIDE_TILE_COUNT;
 const PLACEHOLDER_MOSAIC_TILES = 4;
