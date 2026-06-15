@@ -2385,80 +2385,108 @@
   text-align: center;
 }
 
-/* ---------- MOBILE STICKY BOOKING BAR (≤680px) ---------- */
+/* ---------- MOBILE STICKY BOOKING BAR (≤680px) — kit resa-card dock ---------- */
 .resa-mobile-bar-wrap {
   display: none;
 }
 .mch-kit .resa-mobile-bar {
+  padding: 0;
+}
+.mch-kit .resa-mobile-bar__card {
   display: flex;
   align-items: stretch;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 10px 14px;
 }
 .mch-kit .resa-mobile-bar__summary {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid var(--ligne);
-  border-radius: 10px;
-  background: var(--creme);
+  border-radius: 8px;
+  background: var(--blanc);
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.2s;
+  font: inherit;
+  color: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .mch-kit .resa-mobile-bar__summary:hover,
 .mch-kit .resa-mobile-bar__summary:focus-visible {
-  border-color: var(--accent);
+  border-color: var(--or-clair);
   outline: none;
+  box-shadow: 0 0 0 3px rgba(140, 123, 90, 0.12);
 }
-.mch-kit .resa-mobile-bar__summary:focus-visible {
-  box-shadow: 0 0 0 3px rgba(140, 123, 90, 0.18);
+.mch-kit .resa-mobile-bar__dates-grid {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 14px;
+  align-items: center;
 }
-.mch-kit .resa-mobile-bar__meta {
+.mch-kit .resa-mobile-bar__date-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
-.mch-kit .resa-mobile-bar__dates {
+.mch-kit .resa-mobile-bar__date-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+  font-weight: 400;
+  line-height: 1.2;
+}
+.mch-kit .resa-mobile-bar__date-value {
   font-size: 13px;
   font-weight: 500;
   color: var(--noir);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
 }
-.mch-kit .resa-mobile-bar__guests {
-  display: none;
-}
-.mch-kit .resa-mobile-bar__price {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+.mch-kit .resa-mobile-bar__summary .resa-price {
   flex-shrink: 0;
-  line-height: 1.15;
+  padding: 0 10px 0 12px;
+  margin: 0;
+  border: none;
+  border-left: 1px solid var(--ligne);
+  align-items: flex-end;
+  gap: 1px;
 }
-.mch-kit .resa-mobile-bar__from {
+.mch-kit .resa-mobile-bar__summary .rp-from {
   font-size: 9.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--texte-doux);
+  letter-spacing: 0.14em;
 }
-.mch-kit .resa-mobile-bar__price strong {
-  font-family: var(--kit-serif);
+.mch-kit .resa-mobile-bar__summary .rp-amount {
+  font-size: 22px;
+  line-height: 1.05;
+}
+.mch-kit .resa-mobile-bar__chevron {
+  flex-shrink: 0;
+  color: var(--or);
   font-size: 20px;
-  color: var(--noir);
-  font-weight: 500;
+  line-height: 1;
+  opacity: 0.75;
+  margin-left: -2px;
 }
 .mch-kit .resa-mobile-bar__cta {
   flex-shrink: 0;
-  align-self: center;
-  padding: 12px 18px;
+  align-self: stretch;
+  min-width: 7.5rem;
+  min-height: 48px;
+  padding: 0 14px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-decoration: none;
   white-space: nowrap;
+  width: auto;
+  margin-top: 0;
 }
 .mch-kit .resa-mobile-sheet[hidden] {
   display: none;
@@ -2466,7 +2494,7 @@
 .mch-kit .resa-mobile-sheet:not([hidden]) {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -2475,29 +2503,35 @@
   position: absolute;
   inset: 0;
   border: none;
-  background: rgba(20, 17, 12, 0.42);
+  background: rgba(43, 39, 34, 0.48);
   cursor: pointer;
 }
 .mch-kit .resa-mobile-sheet__panel {
   position: relative;
   z-index: 1;
-  background: #fff;
-  border-radius: 16px 16px 0 0;
-  padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
-  max-height: min(78vh, 520px);
+  border-radius: 12px 12px 0 0;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+  max-height: min(82vh, 560px);
   overflow-y: auto;
-  box-shadow: 0 -12px 40px rgba(20, 17, 12, 0.16);
+}
+.mch-kit .resa-mobile-sheet__panel--kit {
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--ligne);
+  box-shadow: var(--shadow);
 }
 .mch-kit .resa-mobile-sheet__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ligne);
 }
 .mch-kit .resa-mobile-sheet__title {
   font-family: var(--kit-serif);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 500;
   color: var(--noir);
   margin: 0;
@@ -2514,6 +2548,13 @@
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.mch-kit .resa-mobile-sheet__close:hover {
+  border-color: var(--or-clair);
+  background: var(--creme-2);
 }
 .mch-kit .resa-mobile-sheet__close:focus-visible {
   outline: 2px solid var(--accent);
@@ -2801,17 +2842,23 @@ body.booking-mobile-sheet-open {
     right: 0;
     bottom: 0;
     z-index: 50;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--creme);
     border-top: 1px solid var(--ligne);
-    box-shadow: 0 -4px 16px rgba(20, 17, 12, 0.08);
-    backdrop-filter: blur(8px);
+    box-shadow: 0 -10px 30px rgba(22, 20, 15, 0.12);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     transform: translateY(100%);
     opacity: 0;
     pointer-events: none;
     transition:
-      transform 0.28s ease,
-      opacity 0.28s ease;
+      transform 0.32s ease,
+      opacity 0.32s ease;
+  }
+  .resa-mobile-bar-wrap::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--or-clair), transparent);
+    opacity: 0.85;
   }
   .resa-mobile-bar-wrap[data-revealed='true'],
   .resa-mobile-bar-wrap.is-revealed {
@@ -2820,7 +2867,20 @@ body.booking-mobile-sheet-open {
     pointer-events: auto;
   }
   body.has-mobile-booking-bar {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  }
+  .mch-kit .resa-mobile-bar__card {
+    padding: 10px 12px 12px;
+    gap: 8px;
+  }
+  .mch-kit .resa-mobile-bar__cta {
+    min-width: 6.75rem;
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    padding: 0 12px;
+  }
+  .mch-kit .resa-mobile-bar__summary .rp-amount {
+    font-size: 20px;
   }
   .mch-kit .htl-body {
     padding-bottom: 0;

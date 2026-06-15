@@ -7,6 +7,8 @@ import { StayOccupancyFields } from '@/components/booking/stay-occupancy-fields'
 
 export interface BookingMobileBarLabels {
   readonly datesLabel: string;
+  readonly checkInDateValue: string;
+  readonly checkOutDateValue: string;
   readonly priceFromLabel: string;
   readonly ctaSeePrices: string;
   readonly ctaChooseRooms: string;
@@ -205,44 +207,57 @@ export function BookingMobileBarClient({
         role="region"
         aria-label={labels.sheetTitle}
       >
-        <button
-          type="button"
-          className="resa-mobile-bar__summary"
-          aria-expanded={expanded}
-          aria-controls={sheetId}
-          onClick={toggleExpanded}
-        >
-          <span className="resa-mobile-bar__meta">
-            <span className="resa-mobile-bar__dates">{labels.datesLabel}</span>
-          </span>
-          {hasPrice ? (
-            <span className="resa-mobile-bar__price">
-              <span className="resa-mobile-bar__from">{labels.priceFromLabel}</span>
-              <strong>{priceFrom}</strong>
-            </span>
-          ) : null}
-        </button>
-
-        {hasChooseRoomsLink ? (
-          <a
-            href={chooseRoomsHref}
-            className="btn btn-or resa-mobile-bar__cta"
-            aria-label={ctaAria}
-          >
-            {ctaLabel}
-          </a>
-        ) : (
+        <div className="resa-mobile-bar__card">
           <button
             type="button"
-            className="btn btn-or resa-mobile-bar__cta"
-            aria-label={ctaAria}
+            className="resa-mobile-bar__summary"
             aria-expanded={expanded}
             aria-controls={sheetId}
+            aria-label={labels.datesLabel}
             onClick={toggleExpanded}
           >
-            {ctaLabel}
+            <div className="resa-mobile-bar__dates-grid">
+              <span className="resa-mobile-bar__date-cell">
+                <span className="resa-mobile-bar__date-label">{labels.checkIn}</span>
+                <span className="resa-mobile-bar__date-value">{labels.checkInDateValue}</span>
+              </span>
+              <span className="resa-mobile-bar__date-cell">
+                <span className="resa-mobile-bar__date-label">{labels.checkOut}</span>
+                <span className="resa-mobile-bar__date-value">{labels.checkOutDateValue}</span>
+              </span>
+            </div>
+            {hasPrice ? (
+              <div className="resa-price resa-mobile-bar__price">
+                <span className="rp-from">{labels.priceFromLabel}</span>
+                <span className="rp-amount">{priceFrom}</span>
+              </div>
+            ) : null}
+            <span className="resa-mobile-bar__chevron" aria-hidden="true">
+              ›
+            </span>
           </button>
-        )}
+
+          {hasChooseRoomsLink ? (
+            <a
+              href={chooseRoomsHref}
+              className="btn btn-or resa-go resa-mobile-bar__cta"
+              aria-label={ctaAria}
+            >
+              {ctaLabel}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-or resa-go resa-mobile-bar__cta"
+              aria-label={ctaAria}
+              aria-expanded={expanded}
+              aria-controls={sheetId}
+              onClick={toggleExpanded}
+            >
+              {ctaLabel}
+            </button>
+          )}
+        </div>
       </div>
 
       <div
@@ -261,7 +276,7 @@ export function BookingMobileBarClient({
           onClick={closeExpanded}
         />
 
-        <div className="resa-mobile-sheet__panel">
+        <div className="resa-mobile-sheet__panel resa-card resa-mobile-sheet__panel--kit">
           <header className="resa-mobile-sheet__head">
             <h2 id={titleId} className="resa-mobile-sheet__title">
               {labels.sheetTitle}

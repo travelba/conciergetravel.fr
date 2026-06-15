@@ -26,6 +26,15 @@ interface BookingMobileBarProps {
   readonly railContext?: HotelBookingRailContext;
 }
 
+function formatMobileBarDateValue(isoDate: string, locale: SupportedLocale): string {
+  const formatter = new Intl.DateTimeFormat(intlLocaleTag(locale), {
+    day: 'numeric',
+    month: 'short',
+  });
+  const parseIso = (iso: string): Date => new Date(`${iso}T12:00:00Z`);
+  return formatter.format(parseIso(isoDate));
+}
+
 function formatMobileBarDates(
   checkIn: string,
   checkOut: string,
@@ -109,6 +118,8 @@ export async function BookingMobileBar({
     checkOutLabel,
     locale,
   );
+  const checkInDateValue = formatMobileBarDateValue(stay.checkIn, locale);
+  const checkOutDateValue = formatMobileBarDateValue(stay.checkOut, locale);
 
   const sandboxAction =
     isSandboxLive && slug !== undefined
@@ -135,6 +146,8 @@ export async function BookingMobileBar({
 
   const labels = {
     datesLabel,
+    checkInDateValue,
+    checkOutDateValue,
     priceFromLabel: tw('priceFromLabel'),
     ctaSeePrices: tw('mobileBar.ctaSeePrices'),
     ctaChooseRooms: tw('mobileBar.ctaChooseRooms'),
