@@ -1206,9 +1206,9 @@ export const AIRELLES_DESCRIPTION_FR =
 export const AIRELLES_DESCRIPTION_EN =
   'With forty rooms and suites, Airelles Gordes, La Bastide, cultivates an intimate atmosphere above the Luberon. Each accommodation pairs stone vaults, linen and antique furniture in the spirit of Provençal bastides, with a concierge who anticipates without intruding — from the first terrace coffee to the last Guerlain spa ritual, always at the unhurried pace of the hilltop village.\n\nFrom the terrace, the view sweeps across the valley; indoors, herringbone parquet and Burgundy stone shape a refuge where the village silence wraps each morning. The concierge orchestrates tables, spa and Luberon outings without breaking the spell — the essence of a stay at La Bastide, between Provençal art de vivre and discreet palace service.';
 export const AIRELLES_META_DESC_FR =
-  'Palace 5 étoiles à Gordes, sur les hauteurs du Luberon : vue sur la vallée, trois piscines, spa Airelles by Guerlain et table signée Jean-François Piège.';
+  'Hôtel palace de luxe à Gordes, sur les hauteurs du Luberon : 40 chambres, trois piscines, spa Guerlain et table Jean-François Piège. Palace Atout France depuis 2016.';
 export const AIRELLES_META_DESC_EN =
-  'Five-star Palace in Gordes, high above the Luberon: valley views, three pools, an Airelles by Guerlain spa and a table by chef Jean-François Piège.';
+  'Luxury palace hotel in Gordes on the Luberon ridge: 40 rooms, three pools, Guerlain spa and Jean-François Piège at Clover Gordes. Atout France Palace since 2016.';
 export const AIRELLES_META_TITLE_FR =
   'Airelles Gordes, La Bastide — Palace 5★ Luberon | MyConciergeHotel';
 export const AIRELLES_META_TITLE_EN =

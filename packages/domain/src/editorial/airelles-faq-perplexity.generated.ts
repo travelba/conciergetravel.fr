@@ -624,6 +624,61 @@ export const AIRELLES_FAQ_CONTENT_KIT = [
     answer_fr:
       "Oui, les chambres sont équipées de produits de toilette de luxe, et les invités sont souvent surpris par la qualité et la variété des produits mis à leur disposition, allant jusqu'à recevoir des pyjamas et des chapeaux.",
   },
+  {
+    category: 'agency',
+    group_fr: 'Histoire & propriété',
+    group_en: 'History & ownership',
+    question_fr: "Qui est le propriétaire d'Airelles Gordes, La Bastide ?",
+    question_en: 'Who owns Airelles Gordes, La Bastide?',
+    answer_fr:
+      'Airelles Gordes, La Bastide appartient à la collection Airelles, marque de LOV Hotel Collection (LOV Group). La bastide a rejoint le portefeuille lors du lancement de la marque en 2017, aux côtés du palace Les Airelles à Courchevel. L’établissement est exploité par la maison Airelles et a reçu la distinction Palace d’Atout France en 2016.',
+    answer_en:
+      'Airelles Gordes, La Bastide belongs to the Airelles collection, a brand of LOV Hotel Collection (LOV Group). The bastide joined the portfolio when the brand launched in 2017, alongside Les Airelles palace in Courchevel. The property is operated by the Airelles house and received the Atout France Palace distinction in 2016.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Événements privés',
+    group_en: 'Private events',
+    question_fr: 'Combien coûte un mariage à Airelles Gordes, La Bastide ?',
+    question_en: 'How much does a wedding at Airelles Gordes, La Bastide cost?',
+    answer_fr:
+      'La Bastide propose des formules mariage sur devis. Une location partielle démarre autour de 70 000 € TTC pour une soixantaine d’invités, incluant généralement quatre à cinq chambres. Le tarif varie selon la saison, le nombre de convives et les prestations (traiteur, décoration, musique). Contactez la conciergerie pour la brochure MICE et une visite du site.',
+    answer_en:
+      'La Bastide offers bespoke wedding packages on quotation. Partial buyout starts at around €70,000 incl. tax for about sixty guests, usually including four to five guest rooms. Pricing depends on season, headcount and services (catering, décor, music). Contact the concierge for the MICE brochure and a site visit.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Destination & saison',
+    group_en: 'Destination & season',
+    question_fr: 'Comment est Gordes en hiver ?',
+    question_en: 'What is Gordes like in winter?',
+    answer_fr:
+      'Gordes reste l’un des Plus Beaux Villages de France en hiver : lumière rasante, ruelles calmes, marchés et galeries selon les dates. La Bastide ferme de novembre à mi-avril ; les piscines extérieures sont saisonnières. Hors saison, le village se parcourt à pied sans foule — une escapade différente, avant la réouverture printanière du palace.',
+    answer_en:
+      'Gordes remains one of France’s Most Beautiful Villages in winter: low golden light, quiet lanes, markets and galleries on select dates. La Bastide closes from November to mid-April; outdoor pools are seasonal. Off-season, explore the village on foot without the crowds — a different escape before the palace reopens in spring.',
+  },
+  {
+    category: 'agency',
+    group_fr: 'Histoire & propriété',
+    group_en: 'History & ownership',
+    question_fr: 'Quelle est l’histoire de La Bastide de Gordes ?',
+    question_en: 'What is the history of La Bastide de Gordes?',
+    answer_fr:
+      'Au XVIIIe siècle, La Bastide était la demeure de la famille de Simiane. Gordes devint un village d’artistes au XXe siècle — Vasarely, Chagall ou Poliakoff y travaillèrent. Rouverte en 2015 après une restauration signée Christophe Tollemer et confiée à cent cinquante artisans, la bastide rejoint la collection Airelles avec la distinction Palace en 2016.',
+    answer_en:
+      'In the 18th century La Bastide was home to the de Simiane family. Gordes became an artists’ village in the 20th century — Vasarely, Chagall and Poliakoff worked here. Reopened in 2015 after a restoration by Christophe Tollemer and a hundred and fifty craftspeople, it joined the Airelles collection with Palace distinction in 2016.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Destination & saison',
+    group_en: 'Destination & season',
+    question_fr: 'Quels sont les meilleurs hôtels de luxe à Gordes ?',
+    question_en: 'What are the best luxury hotels in Gordes, Provence?',
+    answer_fr:
+      'Gordes compte peu d’adresses palace : Airelles Gordes, La Bastide (Palace Atout France 2016, 40 chambres et suites) domine le village perché. D’autres maisons de charme se trouvent dans le Luberon voisin, mais pour un service palace, un spa Guerlain et des tables signées — dont Clover Gordes de Jean-François Piège — La Bastide reste la référence locale.',
+    answer_en:
+      'Gordes has few palace-grade addresses: Airelles Gordes, La Bastide (Atout France Palace 2016, 40 rooms and suites) overlooks the hilltop village. Charming houses dot the wider Luberon, but for palace service, a Guerlain spa and signature tables — including Jean-François Piège’s Clover Gordes — La Bastide remains the local benchmark.',
+  },
 ] as const;
 
 /** CDC §2.11 promote subset (15 items). */
@@ -648,49 +703,9 @@ export const AIRELLES_FAQ_CONTENT_PROMOTE = [
     category: 'before',
     group_fr: 'Arrivée & Départ',
     group_en: 'Arrival & Departure',
-    question_fr: 'Puis-je obtenir un départ tardif sans frais supplémentaires ?',
-    answer_fr:
-      "Un départ tardif peut être accordé selon les disponibilités, mais il n'est généralement pas gratuit. Les conditions spécifiques dépendent de la période de votre séjour et de l'occupation de l'hôtel.",
-  },
-  {
-    category: 'before',
-    group_fr: 'Arrivée & Départ',
-    group_en: 'Arrival & Departure',
-    question_fr: "Quel est l'âge minimum requis pour l'enregistrement ?",
-    answer_fr:
-      "L'âge minimum requis pour l'enregistrement est de 18 ans. Une pièce d'identité avec photo et une carte de crédit seront nécessaires à votre arrivée.",
-  },
-  {
-    category: 'before',
-    group_fr: 'Arrivée & Départ',
-    group_en: 'Arrival & Departure',
     question_fr: "Est-il possible d'obtenir un early check-in ?",
     answer_fr:
       "Un early check-in peut être possible selon les disponibilités, généralement à partir de 12h00 ; contactez la conciergerie à l'avance pour confirmer. Nous vous recommandons de nous contacter à l'avance pour discuter de vos besoins spécifiques.",
-  },
-  {
-    category: 'before',
-    group_fr: 'Arrivée & Départ',
-    group_en: 'Arrival & Departure',
-    question_fr: "Que se passe-t-il si j'arrive après minuit ?",
-    answer_fr:
-      "L'enregistrement est possible à tout moment après 15h00. Si vous prévoyez d'arriver après minuit, veuillez nous informer à l'avance pour que nous puissions préparer votre chambre et assurer un accueil approprié.",
-  },
-  {
-    category: 'before',
-    group_fr: 'Arrivée & Départ',
-    group_en: 'Arrival & Departure',
-    question_fr: "Est-ce que je peux laisser mes bagages à l'hôtel après le départ ?",
-    answer_fr:
-      'Oui, un service de consigne à bagages est disponible gratuitement après votre départ, vous permettant de profiter de la région avant de quitter la zone.',
-  },
-  {
-    category: 'before',
-    group_fr: 'Arrivée & Départ',
-    group_en: 'Arrival & Departure',
-    question_fr: "L'hôtel propose-t-il un service d'enregistrement sans contact ?",
-    answer_fr:
-      "Oui, un service d'enregistrement et de départ sans contact est disponible pour plus de commodité et de sécurité selon vos préférences.",
   },
   {
     category: 'before',
@@ -748,6 +763,61 @@ export const AIRELLES_FAQ_CONTENT_PROMOTE = [
     question_fr: "Est-ce que l'hôtel est facilement accessible en voiture électrique ?",
     answer_fr:
       "Oui, l'hôtel dispose d'une station de recharge pour véhicules électriques avec 2 bornes de 22 kW maximum, disponibles 24h/24 pour les clients et invités.",
+  },
+  {
+    category: 'agency',
+    group_fr: 'Histoire & propriété',
+    group_en: 'History & ownership',
+    question_fr: "Qui est le propriétaire d'Airelles Gordes, La Bastide ?",
+    question_en: 'Who owns Airelles Gordes, La Bastide?',
+    answer_fr:
+      'Airelles Gordes, La Bastide appartient à la collection Airelles, marque de LOV Hotel Collection (LOV Group). La bastide a rejoint le portefeuille lors du lancement de la marque en 2017, aux côtés du palace Les Airelles à Courchevel. L’établissement est exploité par la maison Airelles et a reçu la distinction Palace d’Atout France en 2016.',
+    answer_en:
+      'Airelles Gordes, La Bastide belongs to the Airelles collection, a brand of LOV Hotel Collection (LOV Group). The bastide joined the portfolio when the brand launched in 2017, alongside Les Airelles palace in Courchevel. The property is operated by the Airelles house and received the Atout France Palace distinction in 2016.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Événements privés',
+    group_en: 'Private events',
+    question_fr: 'Combien coûte un mariage à Airelles Gordes, La Bastide ?',
+    question_en: 'How much does a wedding at Airelles Gordes, La Bastide cost?',
+    answer_fr:
+      'La Bastide propose des formules mariage sur devis. Une location partielle démarre autour de 70 000 € TTC pour une soixantaine d’invités, incluant généralement quatre à cinq chambres. Le tarif varie selon la saison, le nombre de convives et les prestations (traiteur, décoration, musique). Contactez la conciergerie pour la brochure MICE et une visite du site.',
+    answer_en:
+      'La Bastide offers bespoke wedding packages on quotation. Partial buyout starts at around €70,000 incl. tax for about sixty guests, usually including four to five guest rooms. Pricing depends on season, headcount and services (catering, décor, music). Contact the concierge for the MICE brochure and a site visit.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Destination & saison',
+    group_en: 'Destination & season',
+    question_fr: 'Comment est Gordes en hiver ?',
+    question_en: 'What is Gordes like in winter?',
+    answer_fr:
+      'Gordes reste l’un des Plus Beaux Villages de France en hiver : lumière rasante, ruelles calmes, marchés et galeries selon les dates. La Bastide ferme de novembre à mi-avril ; les piscines extérieures sont saisonnières. Hors saison, le village se parcourt à pied sans foule — une escapade différente, avant la réouverture printanière du palace.',
+    answer_en:
+      'Gordes remains one of France’s Most Beautiful Villages in winter: low golden light, quiet lanes, markets and galleries on select dates. La Bastide closes from November to mid-April; outdoor pools are seasonal. Off-season, explore the village on foot without the crowds — a different escape before the palace reopens in spring.',
+  },
+  {
+    category: 'agency',
+    group_fr: 'Histoire & propriété',
+    group_en: 'History & ownership',
+    question_fr: 'Quelle est l’histoire de La Bastide de Gordes ?',
+    question_en: 'What is the history of La Bastide de Gordes?',
+    answer_fr:
+      'Au XVIIIe siècle, La Bastide était la demeure de la famille de Simiane. Gordes devint un village d’artistes au XXe siècle — Vasarely, Chagall ou Poliakoff y travaillèrent. Rouverte en 2015 après une restauration signée Christophe Tollemer et confiée à cent cinquante artisans, la bastide rejoint la collection Airelles avec la distinction Palace en 2016.',
+    answer_en:
+      'In the 18th century La Bastide was home to the de Simiane family. Gordes became an artists’ village in the 20th century — Vasarely, Chagall and Poliakoff worked here. Reopened in 2015 after a restoration by Christophe Tollemer and a hundred and fifty craftspeople, it joined the Airelles collection with Palace distinction in 2016.',
+  },
+  {
+    category: 'before',
+    group_fr: 'Destination & saison',
+    group_en: 'Destination & season',
+    question_fr: 'Quels sont les meilleurs hôtels de luxe à Gordes ?',
+    question_en: 'What are the best luxury hotels in Gordes, Provence?',
+    answer_fr:
+      'Gordes compte peu d’adresses palace : Airelles Gordes, La Bastide (Palace Atout France 2016, 40 chambres et suites) domine le village perché. D’autres maisons de charme se trouvent dans le Luberon voisin, mais pour un service palace, un spa Guerlain et des tables signées — dont Clover Gordes de Jean-François Piège — La Bastide reste la référence locale.',
+    answer_en:
+      'Gordes has few palace-grade addresses: Airelles Gordes, La Bastide (Atout France Palace 2016, 40 rooms and suites) overlooks the hilltop village. Charming houses dot the wider Luberon, but for palace service, a Guerlain spa and signature tables — including Jean-François Piège’s Clover Gordes — La Bastide remains the local benchmark.',
   },
 ] as const;
 

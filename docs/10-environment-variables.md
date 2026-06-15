@@ -44,6 +44,8 @@ Add-Content .env.local 'OPENAI_API_KEY="sk-proj-…"'
 Add-Content .env.local 'ANTHROPIC_API_KEY="sk-ant-…"'
 Add-Content .env.local 'TAVILY_API_KEY="tvly-prod-…"'
 Add-Content .env.local 'DATATOURISME_API_KEY="…"'
+Add-Content .env.local 'DATAFORSEO_USERNAME="votre_login_api"'
+Add-Content .env.local 'DATAFORSEO_PASSWORD="votre_mot_de_passe_api"'
 
 # Re-lancer bootstrap → la section "local-only" est préservée
 pnpm bootstrap:env
