@@ -81,7 +81,7 @@ export async function HotelPageKit({
         <div className="hotel-kit-intro wrap">
           <div className="hotel-kit-head-slot" dangerouslySetInnerHTML={{ __html: headHtml }} />
           {hasGallery ? (
-            <div className="hotel-kit-gallery-slot">
+            <div className="hotel-kit-gallery-slot" data-booking-mobile-reveal-anchor>
               <HotelGallery
                 locale={model.locale}
                 cloudName={model.cloudName}

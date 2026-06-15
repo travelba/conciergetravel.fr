@@ -65,7 +65,17 @@ interface BookingMobileBarClientProps {
     | undefined;
 }
 
-const SCROLL_REVEAL_OFFSET_PX = 280;
+const SCROLL_REVEAL_OFFSET_PX = 120;
+const MOBILE_REVEAL_ANCHOR_SELECTOR = '[data-booking-mobile-reveal-anchor]';
+
+function shouldRevealMobileBar(): boolean {
+  const anchor = document.querySelector(MOBILE_REVEAL_ANCHOR_SELECTOR);
+  if (anchor !== null) {
+    const rect = anchor.getBoundingClientRect();
+    return rect.bottom < window.innerHeight * 0.62;
+  }
+  return window.scrollY > SCROLL_REVEAL_OFFSET_PX;
+}
 
 /**
  * Fixed bottom booking bar for mobile (≤680px). Hidden until the user scrolls
@@ -90,12 +100,33 @@ export function BookingMobileBarClient({
   const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
-    const onScroll = (): void => {
-      setRevealed(window.scrollY > SCROLL_REVEAL_OFFSET_PX);
+    const syncRevealed = (): void => {
+      setRevealed(shouldRevealMobileBar());
     };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+
+    syncRevealed();
+
+    const anchor = document.querySelector(MOBILE_REVEAL_ANCHOR_SELECTOR);
+    let observer: IntersectionObserver | null = null;
+
+    if (anchor !== null) {
+      observer = new IntersectionObserver(
+        () => {
+          syncRevealed();
+        },
+        { threshold: [0, 0.15, 0.35, 0.55, 0.75, 1] },
+      );
+      observer.observe(anchor);
+    }
+
+    window.addEventListener('scroll', syncRevealed, { passive: true });
+    window.addEventListener('resize', syncRevealed, { passive: true });
+
+    return () => {
+      if (observer !== null) observer.disconnect();
+      window.removeEventListener('scroll', syncRevealed);
+      window.removeEventListener('resize', syncRevealed);
+    };
   }, []);
 
   const toggleExpanded = useCallback((): void => {

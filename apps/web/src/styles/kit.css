@@ -2391,7 +2391,7 @@
 }
 .mch-kit .resa-mobile-bar {
   position: fixed;
-  z-index: 40;
+  z-index: 45;
   left: 0;
   right: 0;
   bottom: 0;
@@ -2410,6 +2410,7 @@
     transform 0.28s ease,
     opacity 0.28s ease;
 }
+.resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar,
 .mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar,
 .resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar {
   transform: translateY(0);
@@ -2485,6 +2486,7 @@
   display: none;
   height: calc(60px + env(safe-area-inset-bottom, 0px));
 }
+.resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar-spacer,
 .mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer,
 .resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar-spacer {
   display: block;
@@ -2830,6 +2832,7 @@ body.booking-mobile-sheet-open {
     display: none;
     height: calc(60px + env(safe-area-inset-bottom, 0px));
   }
+  .resa-mobile-bar-wrap[data-revealed='true'] .resa-mobile-bar-spacer,
   .mch-kit.resa-mobile-bar-wrap.is-revealed .resa-mobile-bar-spacer,
   .resa-mobile-bar-wrap.mch-kit.is-revealed .resa-mobile-bar-spacer {
     display: block;
