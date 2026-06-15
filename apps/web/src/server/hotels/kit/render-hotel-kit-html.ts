@@ -78,6 +78,21 @@ function wrapKitDisclosure(options: {
   </details>`;
 }
 
+function wrapAccessDisclosure(options: {
+  readonly title: string;
+  readonly body: string;
+  readonly className?: string;
+}): string {
+  const extraClass = options.className !== undefined ? ` ${options.className}` : '';
+  return `<details class="access-disclosure${extraClass}" data-default-closed="true">
+    <summary class="access-disclosure__summary">
+      <span class="access-disclosure__title">${escapeHtml(options.title)}</span>
+      <span class="access-disclosure__chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="access-disclosure__body">${options.body}</div>
+  </details>`;
+}
+
 function renderKitCarouselNav(locale: 'fr' | 'en'): string {
   const prevLabel = locale === 'en' ? 'Previous' : 'Précédent';
   const nextLabel = locale === 'en' ? 'Next' : 'Suivant';
@@ -956,28 +971,29 @@ export function renderKitAcces(model: HotelKitModel): string {
   });
   const accessLines = [...transportLines, ...visitLines];
 
-  const coordsItems: string[] = [];
+  let addressItem = '';
+  const coordsAfterAddress: string[] = [];
   if (fullAddress.length > 0) {
-    coordsItems.push(`<li>${ICON_LOC}${escapeHtml(fullAddress)}</li>`);
+    addressItem = `<li>${ICON_LOC}${escapeHtml(fullAddress)}</li>`;
   }
   if (model.phone !== null) {
-    coordsItems.push(`<li>${ICON_PHONE}${escapeHtml(model.phone)}</li>`);
+    coordsAfterAddress.push(`<li>${ICON_PHONE}${escapeHtml(model.phone)}</li>`);
   }
   if (model.emailReservations !== null) {
-    coordsItems.push(
+    coordsAfterAddress.push(
       `<li>${ICON_EMAIL}<a href="mailto:${escapeHtml(model.emailReservations)}">${escapeHtml(model.emailReservations)}</a></li>`,
     );
   }
   if (model.officialWebsiteUrl !== null) {
     const officialHref = localizeKitOfficialHref(model.officialWebsiteUrl, model.locale);
     if (officialHref !== null) {
-      coordsItems.push(
+      coordsAfterAddress.push(
         `<li>${ICON_LOC}<a href="${escapeHtml(officialHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.labels.officialWebsite)}</a></li>`,
       );
     }
   }
   if (model.googleMapsUrl !== null) {
-    coordsItems.push(
+    coordsAfterAddress.push(
       `<li>${ICON_LOC}<a href="${escapeHtml(model.googleMapsUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.labels.googleListing)}</a></li>`,
     );
   }
@@ -992,7 +1008,7 @@ export function renderKitAcces(model: HotelKitModel): string {
   const mapBlock = renderKitMapSlotHtml(model);
 
   const reviewCards: string[] = [];
-  const googleQuotes = model.googleReviews.slice(0, 3);
+  const googleQuotes = model.googleReviews;
   if (googleQuotes.length > 0) {
     googleQuotes.forEach((review, index) => {
       reviewCards.push(renderGoogleReviewCardHtml(review, model.locale, index));
@@ -1010,14 +1026,53 @@ export function renderKitAcces(model: HotelKitModel): string {
     reviewCards.length > 0
       ? `<div class="bref-sub">
         <h3>${escapeHtml(model.labels.travelerReviewsTitle)}</h3>
-        <div class="review-grid">${reviewCards.join('\n          ')}</div>
+        <div class="carousel reviews-carousel" data-kit-carousel id="reviews-carousel">
+          <div class="carousel-track">${reviewCards.join('\n          ')}</div>
+          ${reviewCards.length > 1 ? renderKitCarouselNav(model.locale) : ''}
+        </div>
       </div>`
       : '';
 
+  const coordsContactLabel = model.locale === 'en' ? 'Contact & links' : 'Contact & liens';
+  const coordsExtraHtml =
+    coordsAfterAddress.length > 0
+      ? wrapAccessDisclosure({
+          title: coordsContactLabel,
+          body: `<ul class="access-list">${coordsAfterAddress.join('\n            ')}</ul>`,
+          className: 'access-disclosure--inline',
+        })
+      : '';
+
+  const coordsCardHtml =
+    addressItem.length > 0 || coordsExtraHtml.length > 0
+      ? `<div class="access-card access-card--coords">
+        <h4>${escapeHtml(model.labels.accessCoordsTitle)}</h4>
+        ${addressItem.length > 0 ? `<ul class="access-list">${addressItem}</ul>` : ''}
+        ${coordsExtraHtml}
+      </div>`
+      : '';
+
+  const policiesCardHtml =
+    policyItems.length > 0
+      ? wrapAccessDisclosure({
+          title: model.labels.accessPoliciesTitle,
+          body: `<ul class="access-list">${policyItems}</ul>`,
+          className: 'access-disclosure--card',
+        })
+      : '';
+
+  const transportHtml =
+    accessItems.length > 0
+      ? wrapAccessDisclosure({
+          title: model.labels.accessTransportTitle,
+          body: `<ul class="access-list">${accessItems}</ul>`,
+        })
+      : '';
+
   if (
-    coordsItems.length === 0 &&
-    policyItems.length === 0 &&
-    accessItems.length === 0 &&
+    coordsCardHtml.length === 0 &&
+    policiesCardHtml.length === 0 &&
+    transportHtml.length === 0 &&
     mapBlock.length === 0 &&
     reviewsHtml.length === 0
   ) {
@@ -1027,22 +1082,10 @@ export function renderKitAcces(model: HotelKitModel): string {
   return `<section class="htl-section" id="acces">
       <h2>${escapeHtml(model.labels.access)}</h2>
       <div class="access-grid">
-        ${
-          coordsItems.length > 0
-            ? `<div class="access-card"><h4>${escapeHtml(model.labels.accessCoordsTitle)}</h4><ul>${coordsItems.join('\n            ')}</ul></div>`
-            : ''
-        }
-        ${
-          policyItems.length > 0
-            ? `<div class="access-card"><h4>${escapeHtml(model.labels.accessPoliciesTitle)}</h4><ul>${policyItems}</ul></div>`
-            : ''
-        }
+        ${coordsCardHtml}
+        ${policiesCardHtml}
       </div>
-      ${
-        accessItems.length > 0
-          ? `<div class="access-card" style="margin-bottom:22px"><h4>${escapeHtml(model.labels.accessTransportTitle)}</h4><ul>${accessItems}</ul></div>`
-          : ''
-      }
+      ${transportHtml.length > 0 ? `<div class="access-transport-wrap">${transportHtml}</div>` : ''}
       ${mapBlock}
       ${reviewsHtml}
     </section>`;
@@ -1744,7 +1787,6 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitApropos(model),
     renderKitChambres(model),
     renderKitBref(model),
-    renderKitClub(model),
     renderKitPresse(model),
     renderKitAcces(model),
     renderKitAutour(model),
@@ -1755,6 +1797,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitConciergeQuestions(model),
     renderKitProximite(model),
     renderKitEnBref(model),
+    renderKitClub(model),
   ].join('\n\n    ');
   return {
     prefixHtml: renderKitBreadcrumb(model),

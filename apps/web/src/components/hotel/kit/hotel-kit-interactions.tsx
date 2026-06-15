@@ -82,7 +82,7 @@ export function HotelKitInteractions(): null {
       const next = carousel.querySelector('.carousel-nav.next');
       const scrollByCard = (dir: 1 | -1): void => {
         const slide = track.querySelector<HTMLElement>(
-          '.around-item, .hcard, .exp-justified-slide, .room-v2, .resto-card',
+          '.around-item, .hcard, .exp-justified-slide, .room-v2, .resto-card, .reviews-carousel .review',
         );
         const step = slide !== null ? slide.offsetWidth + 18 : track.clientWidth * 0.85;
         track.scrollBy({ left: dir * step, behavior: 'smooth' });

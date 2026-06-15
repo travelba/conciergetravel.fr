@@ -12,6 +12,8 @@ import type {
 interface HotelExternalSourcesFooterProps {
   readonly locale: SupportedLocale;
   readonly provenance: HotelExternalSourcesProvenance | null;
+  /** Kit fiche — collapsible disclosure + `.mch-kit` panel styles. */
+  readonly surface?: 'default' | 'kit';
 }
 
 /**
@@ -60,6 +62,7 @@ interface HotelExternalSourcesFooterProps {
 export async function HotelExternalSourcesFooter({
   locale,
   provenance,
+  surface = 'default',
 }: HotelExternalSourcesFooterProps): Promise<ReactElement | null> {
   if (provenance === null) return null;
   const { references, facts, collectedAt } = provenance;
@@ -78,6 +81,46 @@ export async function HotelExternalSourcesFooter({
           new Date(collectedAt),
         )
       : null;
+
+  const factsBlock = hasFacts ? (
+    <FactsBlock locale={locale} facts={facts} surface={surface} />
+  ) : null;
+  const referencesBlock = hasReferences ? (
+    <ReferencesBlock references={references} surface={surface} />
+  ) : null;
+
+  if (surface === 'kit') {
+    return (
+      <section
+        className="htl-section hotel-kit-sources"
+        id="sources"
+        style={{ borderBottom: 'none' }}
+      >
+        <details className="kit-disclosure kit-disclosure--section" data-default-closed="true">
+          <summary className="kit-disclosure__summary">
+            <h2 className="kit-disclosure__title" id="external-sources-title">
+              {t('heading')}
+            </h2>
+            <span className="kit-disclosure__chevron" aria-hidden="true" />
+          </summary>
+          <div className="kit-disclosure__body">
+            <p className="htl-lede">{t('intro')}</p>
+            <div className="kit-sources-panel">
+              <div className="kit-sources-grid">
+                {factsBlock}
+                {referencesBlock}
+              </div>
+              {collectedLabel !== null ? (
+                <p className="kit-sources-collected">
+                  {t('lastCollected', { date: collectedLabel })}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </details>
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby="external-sources-title" className="mb-12">
@@ -104,11 +147,49 @@ export async function HotelExternalSourcesFooter({
 async function FactsBlock({
   locale,
   facts,
+  surface = 'default',
 }: {
   locale: SupportedLocale;
   facts: HotelExternalSourcesProvenance['facts'];
+  surface?: 'default' | 'kit';
 }): Promise<ReactElement> {
   const t = await getTranslations({ locale, namespace: 'hotelPage.sources.facts' });
+  if (surface === 'kit') {
+    return (
+      <div className="kit-sources-block">
+        <h3 className="kit-sources-block__title">{t('heading')}</h3>
+        <dl className="kit-sources-facts">
+          {facts.inceptionYear !== null ? (
+            <div className="kit-sources-fact">
+              <dt>{t('inceptionYear')}</dt>
+              <dd>
+                {facts.inceptionYear}{' '}
+                <span className="kit-sources-attribution">{t('attribution.wikidata')}</span>
+              </dd>
+            </div>
+          ) : null}
+          {facts.architects.length > 0 ? (
+            <div className="kit-sources-fact">
+              <dt>{t('architects', { count: facts.architects.length })}</dt>
+              <dd>
+                {facts.architects.join(', ')}{' '}
+                <span className="kit-sources-attribution">{t('attribution.wikidata')}</span>
+              </dd>
+            </div>
+          ) : null}
+          {facts.heritageDesignations.length > 0 ? (
+            <div className="kit-sources-fact">
+              <dt>{t('heritageDesignations')}</dt>
+              <dd>
+                {facts.heritageDesignations.join(', ')}{' '}
+                <span className="kit-sources-attribution">{t('attribution.wikidata')}</span>
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+      </div>
+    );
+  }
   return (
     <div>
       <h3 className="text-muted mb-3 text-xs font-medium uppercase tracking-wider">
@@ -161,10 +242,37 @@ const REF_LABEL_KEY: Readonly<Record<HotelExternalSourceReferenceKind, string>> 
 
 async function ReferencesBlock({
   references,
+  surface = 'default',
 }: {
   references: readonly HotelExternalSourceReference[];
+  surface?: 'default' | 'kit';
 }): Promise<ReactElement> {
   const t = await getTranslations('hotelPage.sources.references');
+  if (surface === 'kit') {
+    return (
+      <div className="kit-sources-block">
+        <h3 className="kit-sources-block__title">{t('heading')}</h3>
+        <ul className="kit-sources-refs">
+          {references.map((ref) => {
+            const label = t(REF_LABEL_KEY[ref.kind]);
+            return (
+              <li key={ref.kind}>
+                <span aria-hidden className="kit-sources-ref-arrow">
+                  →
+                </span>
+                <a href={ref.url} rel="nofollow noopener" target="_blank">
+                  {label}
+                  {ref.identifier !== null ? (
+                    <span className="kit-sources-ref-id">({ref.identifier})</span>
+                  ) : null}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
   return (
     <div>
       <h3 className="text-muted mb-3 text-xs font-medium uppercase tracking-wider">

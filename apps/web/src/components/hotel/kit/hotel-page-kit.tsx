@@ -125,6 +125,7 @@ export async function HotelPageKit({
             <HotelExternalSourcesFooter
               locale={model.locale}
               provenance={model.externalSourcesProvenance}
+              surface="kit"
             />
           </div>
         ) : null}
