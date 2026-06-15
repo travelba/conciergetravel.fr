@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { POI_HOVER_EVENT, type PoiHoverDetail } from '@/components/hotel/hotel-interactive-map';
+
 /**
  * Client behaviours from `DA/assets/app.js` for kit hotel fiches:
  * read-more toggle, experiences "voir plus", around-list collapses, mini-galleries.
@@ -65,6 +67,29 @@ export function HotelKitInteractions(): null {
     document.querySelectorAll('.around-list[data-around-list]').forEach((list) => {
       list.classList.add('is-collapsed');
     });
+
+    document.querySelectorAll('.around-item[data-poi-id]').forEach((item) => {
+      const poiId = item.getAttribute('data-poi-id');
+      if (poiId === null || poiId === '') return;
+      const dispatch = (id: string | null): void => {
+        window.dispatchEvent(
+          new CustomEvent<PoiHoverDetail>(POI_HOVER_EVENT, { detail: { poiId: id } }),
+        );
+      };
+      const onEnter = (): void => dispatch(poiId);
+      const onLeave = (): void => dispatch(null);
+      item.addEventListener('mouseenter', onEnter);
+      item.addEventListener('mouseleave', onLeave);
+      item.addEventListener('focusin', onEnter);
+      item.addEventListener('focusout', onLeave);
+      cleanups.push(() => {
+        item.removeEventListener('mouseenter', onEnter);
+        item.removeEventListener('mouseleave', onLeave);
+        item.removeEventListener('focusin', onEnter);
+        item.removeEventListener('focusout', onLeave);
+      });
+    });
+
     document.querySelectorAll('.around-toggle-btn').forEach((btn) => {
       if (!(btn instanceof HTMLButtonElement)) return;
       const onAround = (): void => {

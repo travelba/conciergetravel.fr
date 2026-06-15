@@ -13,9 +13,13 @@ import { prepareHotelKitModel } from '@/server/hotels/kit/prepare-hotel-kit-mode
 import { assembleHotelKitShell } from '@/server/hotels/kit/render-hotel-kit-html';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 
+import { HotelLocationMap } from '@/components/hotel/hotel-location-map';
+import type { LocalisedPointOfInterest } from '@/server/hotels/get-hotel-by-slug';
+
 import { BookingSlot } from '../booking-slot';
 import { PriceComparator } from '../../price-comparator';
 import { HotelKitInteractions } from './hotel-kit-interactions';
+import { HotelKitMapPortal } from './hotel-kit-map-portal';
 import { TravelportKitLivePrices } from './travelport-kit-live-prices';
 import { isTravelportSandboxEnabled } from '@/lib/travelport';
 
@@ -58,6 +62,14 @@ export async function HotelPageKit({
     railContext.supplierBookable || isPaidBookingMode(row.booking_mode) ? railContext : undefined,
   );
   const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  const kitMapPois: LocalisedPointOfInterest[] = [
+    ...model.locationBuckets.visit,
+    ...model.locationBuckets.do,
+    ...model.locationBuckets.eat,
+    ...model.locationBuckets.shop,
+  ];
+  const showKitMap = model.latitude !== null && model.longitude !== null;
 
   return (
     <>
@@ -117,6 +129,19 @@ export async function HotelPageKit({
           </div>
         ) : null}
       </div>
+
+      {showKitMap && model.latitude !== null && model.longitude !== null ? (
+        <HotelKitMapPortal>
+          <HotelLocationMap
+            locale={model.locale}
+            hotelName={model.name}
+            latitude={model.latitude}
+            longitude={model.longitude}
+            pois={kitMapPois}
+            surface="kit"
+          />
+        </HotelKitMapPortal>
+      ) : null}
 
       <HotelKitInteractions />
 

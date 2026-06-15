@@ -15,6 +15,8 @@ interface HotelLocationMapProps {
   readonly latitude: number;
   readonly longitude: number;
   readonly pois: readonly LocalisedPointOfInterest[];
+  /** Kit fiches reuse `.kit-static-map` spacing inside `#acces`. */
+  readonly surface?: 'default' | 'kit';
 }
 
 function poiMapId(poi: LocalisedPointOfInterest): string {
@@ -46,6 +48,7 @@ export async function HotelLocationMap({
   latitude,
   longitude,
   pois,
+  surface = 'default',
 }: HotelLocationMapProps): Promise<React.ReactElement | null> {
   const accessToken = getMapboxAccessToken();
   if (accessToken === null) return null;
@@ -77,8 +80,10 @@ export async function HotelLocationMap({
     ),
   });
 
+  const wrapperClass = surface === 'kit' ? 'hotel-kit-map-slot-inner kit-static-map' : 'mt-4';
+
   return (
-    <>
+    <div className={wrapperClass}>
       <div className="lg:hidden">
         <HotelStaticMap
           locale={locale}
@@ -101,6 +106,6 @@ export async function HotelLocationMap({
         </HotelInteractiveMap>
       </div>
       <HotelGalleryViewPhotosLink label={t('viewPhotosFromHotel')} />
-    </>
+    </div>
   );
 }

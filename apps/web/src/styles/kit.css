@@ -2082,11 +2082,42 @@
   color: var(--noir);
 }
 .mch-kit .kit-static-map__open {
+  margin-left: auto;
   font-family: var(--kit-sans);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.mch-kit .hotel-kit-map-slot {
+  min-height: 0;
+}
+
+.mch-kit .hotel-kit-map-slot-inner figure {
+  margin-top: 0;
+}
+
+.mch-kit .around-reserve {
+  display: inline-flex;
+  margin-top: 10px;
+  border-radius: 0.5rem;
+  background: var(--accent, #8c7b5a);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.mch-kit .around-reserve:hover {
+  opacity: 0.9;
+}
+
+.mch-kit .around-body .around-reserve {
+  margin-top: 12px;
 }
 .mch-kit .map-placeholder .icon {
   width: 22px;

@@ -8,7 +8,6 @@ import { pickProximityCards } from '@/server/hotels/get-related-hotels';
 import { getPathname } from '@/i18n/navigation';
 import { formatGoogleReviewDate } from '@/lib/format-google-review-date';
 import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
-import { buildMapboxExternalMapHref, buildMapboxStaticImageUrl } from '@/lib/maps/mapbox-static';
 
 import { buildHotelCountryHubPath } from '@/server/hotels/country-hub-path';
 
@@ -787,32 +786,20 @@ function formatTransportLine(
   return `${modeLabel}${linePart} ${tr.station} (${dist})${travel}${notes}`;
 }
 
-function renderKitStaticMapHtml(model: HotelKitModel): string {
+function poiKitHoverId(poi: {
+  readonly osmId: string | null;
+  readonly name: string;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+}): string {
+  return poi.osmId ?? `${poi.name}-${poi.latitude ?? 0}-${poi.longitude ?? 0}`;
+}
+
+/** Empty mount point — {@link HotelKitMapPortal} hydrates the React map stack. */
+function renderKitMapSlotHtml(model: HotelKitModel): string {
   if (model.latitude === null || model.longitude === null) return '';
-  const accessToken = getMapboxAccessToken();
-  if (accessToken === null) return '';
-  const imageUrl = buildMapboxStaticImageUrl({
-    latitude: model.latitude,
-    longitude: model.longitude,
-    accessToken,
-  });
-  const mapHref = buildMapboxExternalMapHref(model.latitude, model.longitude);
-  const viewMapLabel = model.locale === 'en' ? 'View on the map' : 'Voir sur la carte';
-  return `<figure class="kit-static-map">
-      <img
-        src="${escapeHtml(imageUrl)}"
-        alt="${escapeHtml(model.labels.staticMapAlt)}"
-        width="800"
-        height="360"
-        loading="lazy"
-        decoding="async"
-        class="kit-static-map__embed"
-      />
-      <figcaption class="kit-static-map__attr">
-        ${model.labels.mapAttributionHtml}
-        <a href="${escapeHtml(mapHref)}" target="_blank" rel="noopener noreferrer" class="kit-static-map__open">${escapeHtml(viewMapLabel)}</a>
-      </figcaption>
-    </figure>`;
+  if (getMapboxAccessToken() === null) return '';
+  return `<div id="hotel-kit-map-slot" class="hotel-kit-map-slot" aria-hidden="true"></div>`;
 }
 
 export function renderKitAcces(model: HotelKitModel): string {
@@ -870,7 +857,7 @@ export function renderKitAcces(model: HotelKitModel): string {
     .map((line) => `<li>${ICON_LOC}${escapeHtml(line)}</li>`)
     .join('\n            ');
 
-  const mapBlock = renderKitStaticMapHtml(model);
+  const mapBlock = renderKitMapSlotHtml(model);
 
   const reviewCards: string[] = [];
   const googleQuotes = model.googleReviews.slice(0, 3);
@@ -1089,10 +1076,16 @@ function renderAroundBucket(
         p.website !== null
           ? `<a href="${escapeHtml(p.website)}" class="link-or around-link" target="_blank" rel="noopener noreferrer">${model.locale === 'en' ? 'Website →' : 'Site →'}</a>`
           : '';
+      const reserveTable =
+        bucket === 'eat' && p.reservationUrl !== null
+          ? `<a href="${escapeHtml(p.reservationUrl)}" class="around-reserve" target="_blank" rel="nofollow noopener noreferrer">${escapeHtml(model.labels.reserveTable)}</a>`
+          : '';
+      const poiId = escapeHtml(poiKitHoverId(p));
       const body = `${pickInline}${category}
             <h5>${escapeHtml(p.name)}</h5>
             <p>${renderPoiParagraph(model, p)}</p>
             ${i === 0 && isPick ? renderPoiConciergeWhy(p, useConciergeFrame) : ''}
+            ${reserveTable}
             ${website}`;
       if (p.imagePublicId !== null) {
         const imgSrc = buildCloudinarySrc({
@@ -1100,7 +1093,7 @@ function renderAroundBucket(
           publicId: p.imagePublicId,
           transforms: 'f_auto,q_auto,c_fill,g_auto,w_520,h_400',
         });
-        return `<div class="around-item has-img${pickClass}${hidden}">
+        return `<div class="around-item has-img${pickClass}${hidden}" data-poi-id="${poiId}">
             <div class="around-img">
               <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" loading="lazy">
               ${pickOnImage}
@@ -1110,7 +1103,7 @@ function renderAroundBucket(
             </div>
           </div>`;
       }
-      return `<div class="around-item${pickClass}${hidden}">
+      return `<div class="around-item${pickClass}${hidden}" data-poi-id="${poiId}">
             ${pickCorner}
             ${body}
           </div>`;
