@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import type { SupportedLocale } from '@/i18n/supported-locale';
+import { formatDistanceMeters } from '@/lib/format-distance';
 import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
 import { buildMapboxExternalMapHref } from '@/lib/maps/mapbox-static';
 import type { LocalisedPointOfInterest } from '@/server/hotels/get-hotel-by-slug';
@@ -22,15 +23,31 @@ function poiMapId(poi: LocalisedPointOfInterest): string {
   return poi.osmId ?? `${poi.name}-${poi.latitude ?? 0}-${poi.longitude ?? 0}`;
 }
 
-function toMapPois(pois: readonly LocalisedPointOfInterest[]): readonly HotelMapPoi[] {
+function formatPoiDistanceLabel(
+  poi: LocalisedPointOfInterest,
+  locale: SupportedLocale,
+  walkMinutesLabel: (count: number) => string,
+): string {
+  const distance = formatDistanceMeters(poi.distanceMeters, locale);
+  if (poi.walkMinutes !== null && poi.walkMinutes > 0) {
+    return `${distance} · ${walkMinutesLabel(poi.walkMinutes)}`;
+  }
+  return distance;
+}
+
+function toMapPois(
+  pois: readonly LocalisedPointOfInterest[],
+  locale: SupportedLocale,
+  walkMinutesLabel: (count: number) => string,
+): readonly HotelMapPoi[] {
   const result: HotelMapPoi[] = [];
   for (const poi of pois) {
     if (poi.latitude === null || poi.longitude === null) continue;
     result.push({
       id: poiMapId(poi),
       name: poi.name,
-      type: poi.type,
       category: poi.category,
+      distanceLabel: formatPoiDistanceLabel(poi, locale, walkMinutesLabel),
       latitude: poi.latitude,
       longitude: poi.longitude,
       bucket: poi.bucket,
@@ -56,7 +73,13 @@ export async function HotelLocationMap({
 
   const t = await getTranslations({ locale, namespace: 'hotelPage.location' });
   const mapHref = buildMapboxExternalMapHref(latitude, longitude);
-  const mapPois = toMapPois(pois);
+  const mapPois = toMapPois(pois, locale, (count) => t('walkMinutes', { count }));
+  const legendLabels = {
+    visit: t('mapLegend.visit'),
+    do: t('mapLegend.do'),
+    eat: t('mapLegend.eat'),
+    shop: t('mapLegend.shop'),
+  } as const;
 
   const attribution = t.rich('mapAttribution', {
     mapbox: (chunks) => (
@@ -100,6 +123,7 @@ export async function HotelLocationMap({
           latitude={latitude}
           longitude={longitude}
           pois={mapPois}
+          legendLabels={legendLabels}
           mapHref={mapHref}
           viewMapLabel={t('viewMap')}
         >

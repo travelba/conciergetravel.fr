@@ -3605,6 +3605,12 @@
       "staticMapAlt": "Carte de localisation de {hotelName}",
       "staticMapAria": "Ouvrir la localisation de {hotelName} sur Mapbox",
       "reserveTable": "Réserver une table →",
+      "mapLegend": {
+        "visit": "Visiter",
+        "do": "À faire",
+        "eat": "Manger",
+        "shop": "Commerces"
+      },
       "mapAttribution": "© <mapbox>Mapbox</mapbox> · © <osm>OpenStreetMap</osm>",
       "poisTitle": "À proximité",
       "transportsTitle": "Accès",
