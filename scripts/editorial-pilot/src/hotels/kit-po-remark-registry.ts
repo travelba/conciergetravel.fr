@@ -108,7 +108,8 @@ export const KIT_PO_REMARK_REGISTRY: readonly KitPoRemarkEntry[] = [
   },
   {
     remark: 'Avis Google les plus récents manquants dans #acces',
-    rootCause: 'cache GMB stale ; gate passait sur google_reviews_count sans recency',
+    rootCause:
+      'Google Places renvoie max 5 avis — échantillon parfois entièrement >90j malgré sync fresh ; waiver PO D10 si cache saturé + daté',
     gates: [
       'kit.10.gmb_review_count',
       'kit.10.gmb_review_recency',

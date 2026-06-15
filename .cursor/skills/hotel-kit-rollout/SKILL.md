@@ -322,17 +322,51 @@ Hard rule [`.cursor/rules/user-acceptance-before-commit.mdc`](../../rules/user-a
 Google Places ne renvoie que **5 avis** (souvent triés par pertinence, pas par date). Conséquence wave 5 :
 
 1. **UI + sync** — `@mch/domain/reviews` :
-   - `selectGoogleReviewsForAccesDisplay(reviews, 3, 90)` : n’affiche que les quotes datées ≤ 90 j (pas de citation « récente » sur un avis de décembre).
+   - `selectGoogleReviewsForAccesDisplay(reviews, 3, 90)` : n’affiche que les quotes datées ≤ 90 j.
+   - `selectGoogleReviewsForAccesWithApiCapFallback(...)` : si le pool frais est vide mais cache 5/5 daté + sync ≤ 30 j, affiche les 3 quotes les plus récentes **avec leurs vraies dates** (pas de label « récent » inventé).
    - `mergeGoogleReviewCache(existing, incoming, { maxStored: 5 })` dans `reviews:sync` : conserve un avis encore frais que Google a retiré de son échantillon.
-2. **Gate `kit.10.gmb_display_triplet_fresh`** — passe si ≥ 3 avis frais **ou** si l’échantillon Google ne contient que 1–2 avis ≤ 90 j mais le plus récent est frais (`googleSampleFreshCap` — PO « avis les plus récents » sans inventer un 3ᵉ).
-3. **Gate `kit.10.gmb_review_recency`** — reste strict : échoue quand **aucun** avis cache ≤ 90 j (ex. Bristol janv. 2026, Airelles Courchevel fév. 2026). **Aucun contournement code** : attendre de vrais avis Google dans l’API ou accepter `audit exit 1` jusqu’au prochain `reviews:sync` hebdo.
+2. **Gate `kit.10.gmb_display_triplet_fresh`** — passe si ≥ 3 avis frais **ou** si l’échantillon Google ne contient que 1–2 avis ≤ 90 j mais le plus récent est frais (`googleSampleFreshCap` — PO « avis les plus récents » sans inventer un 3ᵉ) **ou** si l’échantillon Places est **saturé à 5 avis datés**, entièrement > 90 j, avec `last_reviews_sync` ≤ 30 j (`selectGoogleReviewsForAccesWithApiCapFallback` → mode `stale_api_cap_waiver` — PO décision 2026-06-15 wave 5 Airelles Courchevel + Prés d’Eugénie).
+3. **Gate `kit.10.gmb_review_recency`** — strict par défaut ; **waiver API-cap** identique au point 2 quand sync fresh + cache saturé (5/5) + toutes les quotes datées. Sinon : `reviews:sync` hebdo jusqu’à apparition d’un avis ≤ 90 j dans l’API.
 
 Checklist post-`reviews:sync` wave :
 
 ```powershell
 pnpm reviews:sync -- --slug=<slug>
-pnpm audit:hotel-fiches-cdc -- --slug=<slug>  # exit 0 attendu si ≥1 avis ≤90j dans cache
+pnpm audit:hotel-fiches-cdc -- --slug=<slug>  # exit 0 si ≥1 avis ≤90j OU waiver API-cap (5/5 stale + sync fresh)
 ```
+
+---
+
+## Rule 10 — Correspondance visuelle PO (manifest ↔ rendu — 2026-06-15)
+
+**Incident Shangri-La Paris** : `press-10` (Shang Palace) pointait vers `47-La-Bauhinia.jpg` ; `press-12` (Bar Botaniste) recyclait une suite ; `press-14` (hammam) utilisait une photo « enchanted wonders » ; la piscine était dupliquée via `?w=1140` vs `?w=1139`. L’audit visiteur passait vert car (a) la dédup URL était **littérale** (query ≠), (b) le regex spa exigeait `&amp;` alors que le HTML rend `Spa & bien-être`, (c) exp+resto partageant le même `press-*` était **autorisé**.
+
+### Checklist obligatoire quand le PO signale « mauvaise photo » ou avant clôture kit
+
+1. **Matrice venue → slot** — ouvrir `{slug}-gallery.ts` + `kit-wave-visual-map.ts` : chaque restaurant / spa / expérience doit pointer vers un asset **officiel** dont le sujet correspond au label (pas un autre venue du même hôtel).
+2. **30 chemins canoniques uniques** — `countDuplicateCanonicalGallerySourceUrls(PRESS_SLOT_URLS) === 0` (`packages/domain/src/photos/gallery-source-url.ts`). Les variantes `?w=` / `?mchPress=` ne comptent **pas** comme distinctes.
+3. **Scrape officiel** — pour Sitecore / Contentful : extraire les `background-image:url(...)` des pages dining/spa **avant** d’écrire le manifest (cf. Shang Palace → `shangpalace-image2-630x364.jpg`, Bar Botaniste → bannière `SLPR-LeBarBotaniste-1920x500.JPG`).
+4. **Re-upload** — `{prefix}:photos:gallery` puis `promote:{slug}-golden` ; ne pas se contenter de remapper alt/category.
+5. **Gates** — `kit.02.gallery_no_duplicate_source_url` (canonical), `kit.20.visiteur_render_audit` :
+   - spa block parsé (`Spa & bien-être` **ou** `Spa &amp; bien-être`) ;
+   - **0** réutilisation cross-block d’un même `press-*` (chambres, exp, resto, spa, Instagram) ;
+   - expérience et restaurant = slots **distincts** même si l’expérience se déroule au restaurant.
+6. **Walk Rule 6** — `#hotel-en-bref` : comparer visuellement chaque tuile resto/spa/exp vs label ; screenshot si doute.
+
+```powershell
+pnpm --filter @mch/domain test -- gallery-source-url shangri-la-paris-gallery
+pnpm --filter @mch/editorial-pilot audit:kit-visiteur -- --slug=<slug>
+pnpm --filter @mch/editorial-pilot slp:photos:gallery:dry   # puis upload si manifest changé
+```
+
+**Anti-patterns refusés** :
+
+| Anti-pattern                                                   | Pourquoi ça échoue                   | Fix                              |
+| -------------------------------------------------------------- | ------------------------------------ | -------------------------------- |
+| `?mchPress=N` ou `?w=±1` pour « dédupliquer »                  | Mêmes pixels, gate canonical attrape | Asset officiel distinct par slot |
+| Réutiliser galerie settings `47-La-Bauhinia` pour Shang Palace | Incohérence venue                    | URL page restaurant officielle   |
+| `audit:kit-visiteur` vert sans spaPublicId                     | Regex spa trop strict                | Rule 10 §5                       |
+| Waiver exp+resto même `press-*`                                | PO voit la même photo 2×             | Slots dédiés exp vs resto        |
 
 ---
 

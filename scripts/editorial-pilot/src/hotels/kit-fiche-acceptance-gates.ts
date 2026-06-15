@@ -13,11 +13,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX,
   GOOGLE_REVIEW_MIN_COMMENT_CHARS,
   mergeGoogleReviewCache,
   selectGoogleReviewsForAccesDisplay,
+  selectGoogleReviewsForAccesWithApiCapFallback,
 } from '@mch/domain/reviews';
 import {
+  countDuplicateCanonicalGallerySourceUrlsFromRows,
   evaluateGalleryAltCategoryCorrespondence,
   evaluatePoiStructuralCorrespondence,
 } from '@mch/domain/photos';
@@ -205,19 +208,7 @@ function countDuplicateGalleryPublicIds(gallery_images: unknown): number {
 }
 
 function countDuplicateGallerySourceUrls(gallery_images: unknown): number {
-  if (!Array.isArray(gallery_images)) return 0;
-  const counts = new Map<string, number>();
-  for (const item of gallery_images) {
-    if (!isRecord(item)) continue;
-    const url = readSourceUrl(item);
-    if (url === null) continue;
-    counts.set(url, (counts.get(url) ?? 0) + 1);
-  }
-  let dupSlots = 0;
-  for (const n of counts.values()) {
-    if (n > 1) dupSlots += n - 1;
-  }
-  return dupSlots;
+  return countDuplicateCanonicalGallerySourceUrlsFromRows(gallery_images);
 }
 
 function countGalleryMissingSourceUrls(gallery_images: unknown): number {
@@ -465,8 +456,8 @@ export function evaluateKitAcceptanceGates(
     'kit.02.gallery_no_duplicate_source_url',
     dupUrls === 0,
     dupUrls === 0
-      ? 'gallery source URLs are unique per slot'
-      : `${dupUrls} gallery slot(s) reuse the same source url (D12 — distinct pixels per subject)`,
+      ? 'gallery source URLs are unique per slot (canonical path — query variants count as duplicates)'
+      : `${dupUrls} gallery slot(s) reuse the same canonical source path (D12 / Rule 10 — distinct pixels per subject)`,
   );
 
   pushCheck(
@@ -642,14 +633,6 @@ export function evaluateKitAcceptanceGates(
   const recencyOk =
     newest !== null &&
     (daysSince(newest, nowMs) ?? Number.POSITIVE_INFINITY) <= GMB_RECENCY_MAX_DAYS;
-  pushCheck(
-    checks,
-    'kit.10.gmb_review_recency',
-    recencyOk,
-    recencyOk
-      ? `newest GMB review within ${GMB_RECENCY_MAX_DAYS} days`
-      : `newest cached GMB review stale or undated — run reviews:sync`,
-  );
 
   const syncAge =
     input.last_reviews_sync !== null ? daysSince(input.last_reviews_sync, nowMs) : null;
@@ -663,6 +646,35 @@ export function evaluateKitAcceptanceGates(
       : 'last_reviews_sync missing or older than 30 days — run reviews:sync',
   );
 
+  const accesSelection = selectGoogleReviewsForAccesWithApiCapFallback(
+    gmbReviews.map((r) => ({
+      author: r.author,
+      rating: r.rating,
+      text: r.text,
+      publishTime: r.publishTime,
+    })),
+    GMB_MIN_DISPLAY_REVIEWS,
+    {
+      maxAgeDays: GMB_RECENCY_MAX_DAYS,
+      nowMs,
+      lastSyncIso: input.last_reviews_sync,
+      syncMaxAgeDays: GMB_SYNC_MAX_DAYS,
+      apiSampleMax: GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX,
+    },
+  );
+  const apiCapStaleWaiver = accesSelection.mode === 'stale_api_cap_waiver';
+
+  pushCheck(
+    checks,
+    'kit.10.gmb_review_recency',
+    recencyOk || apiCapStaleWaiver,
+    recencyOk
+      ? `newest GMB review within ${GMB_RECENCY_MAX_DAYS} days`
+      : apiCapStaleWaiver
+        ? `Google Places ${GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX}-review sample saturated; newest quote >${GMB_RECENCY_MAX_DAYS}d but sync fresh — PO API-cap waiver`
+        : `newest cached GMB review stale or undated — run reviews:sync`,
+  );
+
   const sortedDisplay = selectGoogleReviewsForAccesDisplay(
     gmbReviews.map((r) => ({
       author: r.author,
@@ -670,7 +682,7 @@ export function evaluateKitAcceptanceGates(
       text: r.text,
       publishTime: r.publishTime,
     })),
-    3,
+    GMB_MIN_DISPLAY_REVIEWS,
     GMB_RECENCY_MAX_DAYS,
     nowMs,
   );
@@ -680,20 +692,23 @@ export function evaluateKitAcceptanceGates(
     sortedDisplay.length < GMB_MIN_DISPLAY_REVIEWS &&
     recencyOk;
   const displayTripletFresh =
-    (sortedDisplay.length >= GMB_MIN_DISPLAY_REVIEWS || googleSampleFreshCap) &&
-    sortedDisplay.every(
-      (r) =>
-        r.publishTime !== null &&
-        (daysSince(r.publishTime, nowMs) ?? Number.POSITIVE_INFINITY) <= GMB_RECENCY_MAX_DAYS,
-    );
+    apiCapStaleWaiver ||
+    ((sortedDisplay.length >= GMB_MIN_DISPLAY_REVIEWS || googleSampleFreshCap) &&
+      sortedDisplay.every(
+        (r) =>
+          r.publishTime !== null &&
+          (daysSince(r.publishTime, nowMs) ?? Number.POSITIVE_INFINITY) <= GMB_RECENCY_MAX_DAYS,
+      ));
   pushCheck(
     checks,
     'kit.10.gmb_display_triplet_fresh',
     displayTripletFresh,
     displayTripletFresh
-      ? googleSampleFreshCap
-        ? `top ${sortedDisplay.length} fresh GMB review(s) within ${GMB_RECENCY_MAX_DAYS} days (Google 5-review API cap — PO « avis les plus récents »)`
-        : 'top 3 GMB reviews shown in #acces are all dated within 90 days'
+      ? apiCapStaleWaiver
+        ? `top ${accesSelection.reviews.length} dated GMB quote(s) from saturated Places sample (all >${GMB_RECENCY_MAX_DAYS}d — PO API-cap waiver)`
+        : googleSampleFreshCap
+          ? `top ${sortedDisplay.length} fresh GMB review(s) within ${GMB_RECENCY_MAX_DAYS} days (Google 5-review API cap — PO « avis les plus récents »)`
+          : 'top 3 GMB reviews shown in #acces are all dated within 90 days'
       : 'displayable GMB reviews within 90 days insufficient — run reviews:sync or wait for fresher Google quotes',
   );
 

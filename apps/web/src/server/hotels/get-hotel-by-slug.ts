@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 
-import { selectGoogleReviewsForAccesDisplay } from '@mch/domain/reviews';
+import { selectGoogleReviewsForAccesWithApiCapFallback } from '@mch/domain/reviews';
 import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
@@ -529,7 +529,9 @@ export function readGoogleReviews(
       publishTime: parsed.data.publish_time ?? null,
     });
   }
-  return selectGoogleReviewsForAccesDisplay(candidates, 3).map((review) => ({
+  return selectGoogleReviewsForAccesWithApiCapFallback(candidates, 3, {
+    lastSyncIso: row.last_reviews_sync,
+  }).reviews.map((review) => ({
     author: review.author,
     rating: review.rating,
     text: review.text,

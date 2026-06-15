@@ -1,11 +1,16 @@
 export {
+  GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX,
   GOOGLE_REVIEW_DISPLAY_MAX_AGE_DAYS,
   GOOGLE_REVIEW_MIN_COMMENT_CHARS,
+  GOOGLE_REVIEW_SYNC_MAX_AGE_DAYS,
   compareGoogleReviewsByRecency,
   hasSubstantiveGoogleReviewComment,
   isGoogleReviewWithinDisplayWindow,
   mergeGoogleReviewCache,
   selectGoogleReviewsForAccesDisplay,
+  selectGoogleReviewsForAccesWithApiCapFallback,
   selectGoogleReviewsForDisplay,
+  type GoogleAccesReviewSelection,
+  type GoogleAccesReviewSelectionMode,
   type GoogleReviewCandidate,
 } from './google-review-selection';

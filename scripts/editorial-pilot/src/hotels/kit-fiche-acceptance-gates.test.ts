@@ -114,7 +114,7 @@ describe('evaluateKitAcceptanceGates', () => {
     expect(failed).toContain('kit.19.closure_audit_exit_zero');
   });
 
-  it('passes chambres + GMB gates when pick-first and photos present', () => {
+  it('passes GMB gates when pick-first and photos present', () => {
     const checks = evaluateKitAcceptanceGates(
       {
         slug: 'prince-de-galles-paris',
@@ -193,6 +193,47 @@ describe('evaluateKitAcceptanceGates', () => {
     for (const id of roomGmbIds) {
       expect(checks.find((c) => c.id === id)?.passed).toBe(true);
     }
+  });
+
+  it('passes GMB recency gates under Places API-cap stale waiver', () => {
+    const staleReviews = Array.from({ length: 5 }, (_, i) => ({
+      author: `Traveler ${i}`,
+      rating: 5,
+      text: 'Substantive traveler review with enough detail.',
+      publish_time: `2024-0${i + 1}-01T00:00:00.000Z`,
+    }));
+    const checks = evaluateKitAcceptanceGates(
+      {
+        ...wave5StubInput('les-airelles-courchevel'),
+        google_reviews: staleReviews,
+        last_reviews_sync: '2026-06-01T00:00:00.000Z',
+        gallery_images: Array.from({ length: 30 }, (_, i) => ({
+          url: `https://example.com/a-${i}.jpg`,
+          category: ['exterior', 'lobby', 'room', 'dining', 'spa'][i % 5],
+          alt_fr: `Alt ${i}`,
+        })),
+        signature_experiences: Array.from({ length: 4 }, (_, i) => ({
+          key: `exp-${i}`,
+          title_fr: 'T',
+          title_en: 'T',
+          description_fr: 'D',
+          description_en: 'D',
+          booking_required: false,
+          image_public_id: `cct/hotels/arl-cv/press-${i + 1}`,
+        })),
+        rooms: [
+          { slug: 'suite-alpine', imageCount: 2 },
+          { slug: 'chambre-deluxe', imageCount: 1 },
+          { slug: 'suite-prestige', imageCount: 1 },
+        ],
+        orderedRoomSlugs: ['suite-alpine', 'chambre-deluxe', 'suite-prestige'],
+      },
+      NOW,
+    );
+
+    expect(checks.find((c) => c.id === 'kit.10.gmb_review_recency')?.passed).toBe(true);
+    expect(checks.find((c) => c.id === 'kit.10.gmb_display_triplet_fresh')?.passed).toBe(true);
+    expect(checks.find((c) => c.id === 'kit.10.gmb_sync_fresh')?.passed).toBe(true);
   });
 
   it('ignores non-kit slugs', () => {

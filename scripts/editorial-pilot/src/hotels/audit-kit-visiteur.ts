@@ -114,10 +114,10 @@ function duplicatePubIds(cards: readonly KitVisiteurCard[]): string[] {
 }
 
 function crossBlockDupes(
-  slug: string,
   rooms: readonly KitVisiteurCard[],
   exps: readonly KitVisiteurCard[],
   restos: readonly KitVisiteurCard[],
+  instagram: readonly KitVisiteurCard[],
   spaPublicId: string | null,
 ): string[] {
   const usage = new Map<string, string[]>();
@@ -128,17 +128,44 @@ function crossBlockDupes(
   for (const r of rooms) track(r.publicId, `room:${r.label}`);
   for (const e of exps) track(e.publicId, `exp:${e.label}`);
   for (const r of restos) track(r.publicId, `resto:${r.label}`);
+  for (const i of instagram) track(i.publicId, `instagram:${i.label}`);
   if (spaPublicId !== null) track(spaPublicId, 'spa:block');
 
   return [...usage.entries()]
-    .filter(([, tags]) => {
-      if (tags.length <= 1) return false;
-      const kinds = new Set(tags.map((t) => t.split(':')[0] ?? ''));
-      // Same press-* on exp + resto is intentional when the experience is at that venue.
-      if (tags.length === 2 && kinds.has('exp') && kinds.has('resto')) return false;
-      return true;
-    })
+    .filter(([, tags]) => tags.length > 1)
     .map(([id, tags]) => `${id} → ${tags.join(', ')}`);
+}
+
+function matchInstagramCards(html: string, slug: string): KitVisiteurCard[] {
+  const pattern = new RegExp(`<section aria-labelledby="instagram-title"[\\s\\S]*?</section>`, 'i');
+  const section = html.match(pattern)?.[0];
+  if (section === undefined) return [];
+
+  const imgPattern = new RegExp(`<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"`, 'g');
+  const cards: KitVisiteurCard[] = [];
+  let index = 0;
+  for (const match of section.matchAll(imgPattern)) {
+    const src = match[1];
+    const alt = match[2];
+    if (src === undefined || alt === undefined) continue;
+    index += 1;
+    cards.push({
+      label: `instagram-${index}`,
+      alt: decodeHtmlEntities(alt),
+      publicId: extractPublicIdFromSrc(slug, src),
+    });
+  }
+  return cards;
+}
+
+function extractSpaPublicId(html: string, slug: string): string | null {
+  const spaSection = html.match(
+    /<h3>Spa\s*(?:&amp;|&)\s*bien-être<\/h3>[\s\S]*?(?=<h[23]|$)/iu,
+  )?.[0];
+  if (spaSection === undefined) return null;
+  const imgMatch = spaSection.match(/<img[^>]+src="([^"]+)"/iu);
+  if (imgMatch?.[1] === undefined) return null;
+  return extractPublicIdFromSrc(slug, imgMatch[1]);
 }
 
 /** Parse live `/hotel/{slug}` HTML (FR) into a visitor audit report. */
@@ -146,14 +173,8 @@ export function auditKitVisiteurHtml(html: string, slug: string): KitVisiteurAud
   const roomCards = matchCardsForSlug(html, slug, 'room-v2', 'h3');
   const experiences = matchCardsForSlug(html, slug, 'exp-card', 'h4');
   const restaurants = matchCardsForSlug(html, slug, 'resto-card', 'h4');
-
-  let spaPublicId: string | null = null;
-  const spaMatch = html.match(
-    /<h3>Spa &amp; bien-être<\/h3>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"/,
-  );
-  if (spaMatch?.[1] !== undefined) {
-    spaPublicId = extractPublicIdFromSrc(slug, spaMatch[1]);
-  }
+  const instagram = matchInstagramCards(html, slug);
+  const spaPublicId = extractSpaPublicId(html, slug);
 
   const placeholderCount = (html.match(/\/kit\/img\/[^"']+\.(jpg|png|webp)/g) ?? []).length;
 
@@ -180,7 +201,7 @@ export function auditKitVisiteurHtml(html: string, slug: string): KitVisiteurAud
     issues.push(`${restoPlaceholders} restaurant card(s) use generic htl_resto.jpg placeholder`);
   }
 
-  const cross = crossBlockDupes(slug, roomCards, experiences, restaurants, spaPublicId);
+  const cross = crossBlockDupes(roomCards, experiences, restaurants, instagram, spaPublicId);
   if (cross.length > MAX_CROSS_BLOCK_DUPES) {
     issues.push(
       `cross-block photo reuse: ${cross.slice(0, 5).join(' | ')}${cross.length > 5 ? ' …' : ''}`,

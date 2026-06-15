@@ -6,6 +6,7 @@ import {
   isGoogleReviewWithinDisplayWindow,
   mergeGoogleReviewCache,
   selectGoogleReviewsForAccesDisplay,
+  selectGoogleReviewsForAccesWithApiCapFallback,
   selectGoogleReviewsForDisplay,
   type GoogleReviewCandidate,
 } from './google-review-selection';
@@ -122,6 +123,73 @@ describe('selectGoogleReviewsForAccesDisplay', () => {
     expect(selectGoogleReviewsForAccesDisplay(pool, 3, 90, nowMs).map((r) => r.author)).toEqual([
       'Recent',
     ]);
+  });
+});
+
+describe('selectGoogleReviewsForAccesWithApiCapFallback', () => {
+  const nowMs = Date.parse('2026-06-10T12:00:00.000Z');
+
+  const stalePool: readonly GoogleReviewCandidate[] = Array.from({ length: 5 }, (_, i) => ({
+    author: `Traveler ${i}`,
+    rating: 5,
+    text: `Substantive traveler review number ${i}.`,
+    publishTime: `2024-0${i + 1}-01T00:00:00.000Z`,
+  }));
+
+  it('returns fresh quotes when any review is within the display window', () => {
+    const pool: readonly GoogleReviewCandidate[] = [
+      ...stalePool,
+      {
+        author: 'Fresh',
+        rating: 4,
+        text: 'Recent stay with detailed feedback.',
+        publishTime: '2026-05-01T00:00:00.000Z',
+      },
+    ];
+    const selection = selectGoogleReviewsForAccesWithApiCapFallback(pool, 3, {
+      nowMs,
+      lastSyncIso: '2026-06-01T00:00:00.000Z',
+    });
+    expect(selection.mode).toBe('fresh');
+    expect(selection.reviews.map((r) => r.author)).toEqual(['Fresh']);
+  });
+
+  it('waives to dated stale quotes when Places sample is saturated and sync is fresh', () => {
+    const selection = selectGoogleReviewsForAccesWithApiCapFallback(stalePool, 3, {
+      nowMs,
+      lastSyncIso: '2026-06-01T00:00:00.000Z',
+    });
+    expect(selection.mode).toBe('stale_api_cap_waiver');
+    expect(selection.reviews).toHaveLength(3);
+    expect(selection.reviews.map((r) => r.author)).toEqual([
+      'Traveler 4',
+      'Traveler 3',
+      'Traveler 2',
+    ]);
+  });
+
+  it('does not waive when sync is missing or stale', () => {
+    expect(
+      selectGoogleReviewsForAccesWithApiCapFallback(stalePool, 3, {
+        nowMs,
+        lastSyncIso: null,
+      }).mode,
+    ).toBe('empty');
+    expect(
+      selectGoogleReviewsForAccesWithApiCapFallback(stalePool, 3, {
+        nowMs,
+        lastSyncIso: '2026-01-01T00:00:00.000Z',
+      }).mode,
+    ).toBe('empty');
+  });
+
+  it('does not waive when cache has fewer than five quotes', () => {
+    expect(
+      selectGoogleReviewsForAccesWithApiCapFallback(stalePool.slice(0, 4), 3, {
+        nowMs,
+        lastSyncIso: '2026-06-01T00:00:00.000Z',
+      }).mode,
+    ).toBe('empty');
   });
 });
 

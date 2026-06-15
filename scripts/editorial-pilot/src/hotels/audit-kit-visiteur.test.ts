@@ -54,7 +54,7 @@ describe('auditKitVisiteurHtml', () => {
     expect(report.issues.some((i) => i.includes('Superior card'))).toBe(true);
   });
 
-  it('allows same press-* on exp-card and resto-card (same venue)', () => {
+  it('flags exp and resto sharing the same press-* (Rule 10 — dedicated slots)', () => {
     const html = `<html><body>
       <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-10" alt="Dîner" /><h4>Dîner au Shang Palace</h4></article>
       <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-11" alt="Exp 2" /><h4>Experience 2</h4></article>
@@ -63,7 +63,19 @@ describe('auditKitVisiteurHtml', () => {
       <article class="resto-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-10" alt="Shang Palace" /><h4>Shang Palace</h4></article>
     </body></html>`;
     const report = auditKitVisiteurHtml(html, SLUG);
-    expect(report.issues.some((i) => i.includes('cross-block'))).toBe(false);
+    expect(report.issues.some((i) => i.includes('cross-block'))).toBe(true);
+  });
+
+  it('detects spa block when heading uses raw ampersand', () => {
+    const html = `<html><body>
+      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-20" alt="E1" /><h4>E1</h4></article>
+      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-21" alt="E2" /><h4>E2</h4></article>
+      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-22" alt="E3" /><h4>E3</h4></article>
+      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-23" alt="E4" /><h4>E4</h4></article>
+      <h3>Spa & bien-être</h3><img src="${CLOUD}/cct/hotels/${SLUG}/press-16" alt="Spa pool" />
+    </body></html>`;
+    const report = auditKitVisiteurHtml(html, SLUG);
+    expect(report.spaPublicId).toBe('press-16');
   });
 
   it('flags room + exp sharing the same press-*', () => {

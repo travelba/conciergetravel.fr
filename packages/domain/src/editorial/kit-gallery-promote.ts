@@ -3,6 +3,8 @@
  * CDC §2.2bis · `kit.02.gallery_source_url_tracked`.
  */
 
+import { normalizeGallerySourceUrlForDedup } from '../photos/gallery-source-url';
+
 export interface KitGalleryManifestEntry {
   readonly public_id: string;
   readonly alt_fr: string;
@@ -93,29 +95,39 @@ export function buildKitGallerySourceUrlsPerPressSlot(
     );
   }
   const hero = heroSourceUrl.trim();
+  const heroKey = normalizeGallerySourceUrlForDedup(hero);
   const used = new Set<string>();
   const out: string[] = [];
+
+  const isTaken = (url: string): boolean => {
+    const trimmed = url.trim();
+    return (
+      trimmed.length < 12 ||
+      normalizeGallerySourceUrlForDedup(trimmed) === heroKey ||
+      used.has(trimmed)
+    );
+  };
 
   for (let i = 0; i < 30; i += 1) {
     const slotOneBased = i + 1;
     let url = pressSlotUrls[i]?.trim() ?? '';
     let scan = 0;
-    while ((url.length < 12 || url === hero || used.has(url)) && scan < pressSlotUrls.length) {
+    while (isTaken(url) && scan < pressSlotUrls.length) {
       const nextIdx = (i + scan) % pressSlotUrls.length;
       url = pressSlotUrls[nextIdx]?.trim() ?? '';
       scan += 1;
     }
-    if (url.length < 12 || url === hero || used.has(url)) {
+    if (isTaken(url)) {
       const base = pressSlotUrls[i]?.trim() ?? pressSlotUrls[0]?.trim() ?? '';
       url = dedupeGallerySourceUrl(base, slotOneBased, 0);
     }
     let attempt = 0;
-    while ((url === hero || used.has(url)) && attempt < 30) {
+    while (isTaken(url) && attempt < 30) {
       const base = pressSlotUrls[i]?.trim() ?? pressSlotUrls[0]?.trim() ?? '';
       url = dedupeGallerySourceUrl(base, slotOneBased, attempt);
       attempt += 1;
     }
-    if (url === hero || used.has(url)) {
+    if (isTaken(url)) {
       throw new Error(
         `buildKitGallerySourceUrlsPerPressSlot: no unique url for press-${slotOneBased}`,
       );

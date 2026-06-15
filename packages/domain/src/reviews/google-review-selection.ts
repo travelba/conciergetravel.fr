@@ -4,6 +4,19 @@ export const GOOGLE_REVIEW_MIN_COMMENT_CHARS = 10;
 /** Kit #acces PO — only show cached GMB quotes dated within this window. */
 export const GOOGLE_REVIEW_DISPLAY_MAX_AGE_DAYS = 90;
 
+/** Google Places Details returns at most this many review rows per fetch. */
+export const GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX = 5;
+
+/** Kit gate — `last_reviews_sync` must be newer than this for the API-cap stale waiver. */
+export const GOOGLE_REVIEW_SYNC_MAX_AGE_DAYS = 30;
+
+export type GoogleAccesReviewSelectionMode = 'fresh' | 'stale_api_cap_waiver' | 'empty';
+
+export interface GoogleAccesReviewSelection<T extends GoogleReviewCandidate> {
+  readonly reviews: readonly T[];
+  readonly mode: GoogleAccesReviewSelectionMode;
+}
+
 export interface GoogleReviewCandidate {
   readonly author: string;
   readonly rating: number;
@@ -92,6 +105,71 @@ export function selectGoogleReviewsForAccesDisplay<T extends GoogleReviewCandida
   return selectGoogleReviewsForDisplay(reviews, reviews.length)
     .filter((review) => isGoogleReviewWithinDisplayWindow(review.publishTime, maxAgeDays, nowMs))
     .slice(0, limit);
+}
+
+function googleSyncAgeDays(lastSyncIso: string | null, nowMs: number): number | null {
+  if (lastSyncIso === null) return null;
+  const trimmed = lastSyncIso.trim();
+  if (trimmed.length === 0) return null;
+  const ms = Date.parse(trimmed);
+  if (!Number.isFinite(ms)) return null;
+  return (nowMs - ms) / (1000 * 60 * 60 * 24);
+}
+
+/**
+ * #acces review picker — prefers quotes within `maxAgeDays`, then falls back to the
+ * newest dated rows when Google Places returns a saturated 5-review sample that is
+ * entirely stale (PO D10 API-cap waiver; sync must be fresh).
+ */
+export function selectGoogleReviewsForAccesWithApiCapFallback<T extends GoogleReviewCandidate>(
+  reviews: readonly T[],
+  limit: number,
+  options?: {
+    readonly maxAgeDays?: number;
+    readonly nowMs?: number;
+    readonly lastSyncIso?: string | null;
+    readonly syncMaxAgeDays?: number;
+    readonly apiSampleMax?: number;
+  },
+): GoogleAccesReviewSelection<T> {
+  if (limit <= 0) return { reviews: [], mode: 'empty' };
+
+  const maxAgeDays = options?.maxAgeDays ?? GOOGLE_REVIEW_DISPLAY_MAX_AGE_DAYS;
+  const nowMs = options?.nowMs ?? Date.now();
+  const syncMaxAgeDays = options?.syncMaxAgeDays ?? GOOGLE_REVIEW_SYNC_MAX_AGE_DAYS;
+  const apiSampleMax = options?.apiSampleMax ?? GOOGLE_PLACES_API_REVIEW_SAMPLE_MAX;
+
+  const fresh = selectGoogleReviewsForAccesDisplay(reviews, limit, maxAgeDays, nowMs);
+  if (fresh.length > 0) {
+    return { reviews: fresh, mode: 'fresh' };
+  }
+
+  const pool = selectGoogleReviewsForDisplay(reviews, reviews.length);
+  if (pool.length < limit) {
+    return { reviews: [], mode: 'empty' };
+  }
+
+  const syncAgeDays = googleSyncAgeDays(options?.lastSyncIso ?? null, nowMs);
+  const syncOk = syncAgeDays !== null && syncAgeDays <= syncMaxAgeDays;
+  if (!syncOk || pool.length < apiSampleMax) {
+    return { reviews: [], mode: 'empty' };
+  }
+
+  const allDated = pool.every((review) => publishTimeSortKey(review.publishTime) !== null);
+  if (!allDated) {
+    return { reviews: [], mode: 'empty' };
+  }
+
+  const newest = pool[0];
+  if (newest === undefined) {
+    return { reviews: [], mode: 'empty' };
+  }
+
+  if (isGoogleReviewWithinDisplayWindow(newest.publishTime, maxAgeDays, nowMs)) {
+    return { reviews: pool.slice(0, limit), mode: 'fresh' };
+  }
+
+  return { reviews: pool.slice(0, limit), mode: 'stale_api_cap_waiver' };
 }
 
 function reviewDedupeKey(review: GoogleReviewCandidate): string {

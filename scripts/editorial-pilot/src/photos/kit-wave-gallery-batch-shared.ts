@@ -6,6 +6,10 @@
  * - Duplicate source URLs fail fast before Cloudinary upload
  */
 
+import {
+  assertUniqueCanonicalGallerySourceUrls,
+  normalizeGallerySourceUrlForDedup,
+} from '@mch/domain/photos';
 import { uploadFromUrl, type CloudinaryUploadResult } from '@mch/integrations/cloudinary';
 
 export interface KitGalleryManifestMeta {
@@ -48,20 +52,7 @@ export function assertGallerySourceCount(
 }
 
 export function assertUniqueGallerySourceUrls(slug: string, urls: readonly string[]): void {
-  const seen = new Map<string, number>();
-  for (let i = 0; i < urls.length; i++) {
-    const url = urls[i]?.trim() ?? '';
-    if (url.length < 12) {
-      throw new Error(`[${slug}-gallery] slot ${i + 1} missing source url`);
-    }
-    const prev = seen.get(url);
-    if (prev !== undefined) {
-      throw new Error(
-        `[${slug}-gallery] duplicate source url at press-${prev + 1} and press-${i + 1}: ${url}`,
-      );
-    }
-    seen.set(url, i);
-  }
+  assertUniqueCanonicalGallerySourceUrls(slug, urls);
 }
 
 export function assertHeroSourceNotInGallery(
@@ -69,8 +60,10 @@ export function assertHeroSourceNotInGallery(
   heroSourceUrl: string,
   gallerySourceUrls: readonly string[],
 ): void {
-  const hero = heroSourceUrl.trim();
-  const idx = gallerySourceUrls.findIndex((u) => u.trim() === hero);
+  const heroKey = normalizeGallerySourceUrlForDedup(heroSourceUrl.trim());
+  const idx = gallerySourceUrls.findIndex(
+    (u) => normalizeGallerySourceUrlForDedup(u.trim()) === heroKey,
+  );
   if (idx >= 0) {
     throw new Error(
       `[${slug}-gallery] hero source url duplicates gallery press-${idx + 1} — pick a distinct overview shot`,

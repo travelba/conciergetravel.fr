@@ -855,7 +855,7 @@ export const SHANGRI_LA_PARIS_INSTAGRAM = {
     },
     {
       permalink: 'https://www.instagram.com/shangrilaparis/',
-      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-10`,
+      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-23`,
       caption_fr:
         'Shang Palace, seule table chinoise étoilée MICHELIN de France — dim sum et haute gastronomie cantonaise.',
       caption_en:
@@ -863,14 +863,14 @@ export const SHANGRI_LA_PARIS_INSTAGRAM = {
     },
     {
       permalink: 'https://www.instagram.com/shangrilaparis/',
-      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-16`,
+      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-17`,
       caption_fr:
         'Piscine intérieure de 17 m du CHI Spa — lumière naturelle et terrasse végétalisée.',
       caption_en: 'CHI Spa’s 17-metre indoor pool — natural light and landscaped terrace.',
     },
     {
       permalink: 'https://www.instagram.com/shangrilaparis/',
-      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-11`,
+      image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-24`,
       caption_fr:
         'La Bauhinia sous sa verrière — petit-déjeuner et dîners franco-asiatiques au cœur du palace.',
       caption_en:
@@ -966,7 +966,7 @@ function shangriLaParisExternalScalar(field: ShangriLaParisExternalScalarField):
 export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   {
     key: 'atelier-dim-sum',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-10`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-23`,
     title_fr: 'Atelier dim sum au Shang Palace',
     title_en: 'Dim sum workshop at Shang Palace',
     description_fr:
@@ -993,7 +993,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'diner-verriere-bauhinia',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-11`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-24`,
     title_fr: 'Dîner privé sous la verrière La Bauhinia',
     title_en: 'Private dinner under La Bauhinia cupola',
     description_fr:
@@ -1005,7 +1005,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'visite-patrimoine',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-4`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-25`,
     title_fr: 'Visite guidée du patrimoine du Palais d’Iéna',
     title_en: 'Guided tour of Palais d’Iéna heritage',
     description_fr:
@@ -1027,7 +1027,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'soiree-chinoise-privee',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-22`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-28`,
     title_fr: 'Soirée chinoise privée au Shang Palace',
     title_en: 'Private Chinese soirée at Shang Palace',
     description_fr:
