@@ -5,6 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from 'mapbox-gl';
 import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 
+import { buildLuxuryPoiMarkerElement } from '@/lib/maps/poi-marker-element';
 import { applyMchMapTheme, buildPinSvg, MCH_MAPBOX_STYLE } from '@/lib/maps/mapbox-theme';
 
 import type { PoiBucket } from '@/server/hotels/get-hotel-by-slug';
@@ -18,23 +19,11 @@ export interface PoiHoverDetail {
 export interface HotelMapPoi {
   readonly id: string;
   readonly name: string;
+  readonly type: string;
+  readonly category: string | null;
   readonly latitude: number;
   readonly longitude: number;
   readonly bucket: PoiBucket;
-}
-
-const POI_BUCKET_COLORS: Readonly<Record<PoiBucket, string>> = {
-  visit: '#3B82F6',
-  do: '#10B981',
-  eat: '#F97316',
-  shop: '#8B5CF6',
-};
-
-function buildPoiPinElement(color: string): HTMLDivElement {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'mch-poi-pin';
-  wrapper.innerHTML = `<svg viewBox="0 0 24 32" width="22" height="28" aria-hidden="true" focusable="false" style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.35))"><path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20C24 5.4 18.6 0 12 0Z" fill="${color}"/><circle cx="12" cy="12" r="3.5" fill="#f6f1e7"/></svg>`;
-  return wrapper;
 }
 
 interface HotelInteractiveMapProps {
@@ -51,8 +40,8 @@ interface HotelInteractiveMapProps {
 
 /**
  * Mapbox GL canvas for the hotel location block (desktop ≥ lg).
- * POI pins are colour-coded by bucket; hovering a {@link PoiHoverTarget}
- * card pulses the matching pin.
+ * POI pins carry typology glyphs (castle, museum, fork…) on a taupe
+ * editorial pin; hovering a {@link PoiHoverTarget} card pulses the pin.
  */
 export function HotelInteractiveMap({
   accessToken,
@@ -111,8 +100,12 @@ export function HotelInteractiveMap({
       poiMarkersRef.current.clear();
 
       for (const poi of poisRef.current) {
-        const color = POI_BUCKET_COLORS[poi.bucket];
-        const el = buildPoiPinElement(color);
+        const el = buildLuxuryPoiMarkerElement({
+          bucket: poi.bucket,
+          type: poi.type,
+          category: poi.category,
+          name: poi.name,
+        });
         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([poi.longitude, poi.latitude])
           .setPopup(new mapboxgl.Popup({ closeButton: false, offset: 14 }).setText(poi.name))

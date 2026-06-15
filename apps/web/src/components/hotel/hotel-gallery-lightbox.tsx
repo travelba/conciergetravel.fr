@@ -4,12 +4,7 @@ import { KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY } from '@mch/domain/photos';
 import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  GALLERY_CATEGORY_FILTER_EVENT,
-  GALLERY_OPEN_EVENT,
-  type GalleryCategoryOpenDetail,
-  type GalleryOpenDetail,
-} from './hotel-gallery-trigger';
+import { GALLERY_OPEN_EVENT, type GalleryOpenDetail } from './hotel-gallery-trigger';
 
 export interface GalleryLightboxImage {
   readonly publicId: string;
@@ -61,18 +56,6 @@ interface FilteredGallerySlice {
   readonly items: readonly GalleryLightboxImage[];
   /** Index of each visible tile inside the full lightbox catalogue. */
   readonly globalIndices: readonly number[];
-}
-
-function resolveExternalCategoryFilter(category: string): GalleryCategoryFilter | null {
-  const value = category.trim().toLowerCase();
-  if (value === 'vue') return 'view';
-  const mapped = normalizeCategoryToFilter(value);
-  if (mapped !== null) return mapped;
-  if (value === 'chambres' || value === 'rooms') return 'room';
-  if (value === 'piscine' || value === 'pool') return 'pool';
-  if (value === 'restaurant') return 'restaurant';
-  if (value === 'spa') return 'spa';
-  return null;
 }
 
 function buildFilteredGallerySlice(
@@ -141,8 +124,6 @@ interface HotelGalleryLightboxProps {
     readonly mosaicCountLabel: string;
     /** Back-to-mosaic affordance shown in single-photo view. */
     readonly backToGallery: string;
-    /** Hover chip on editorial spread tiles ("Voir en grand"). */
-    readonly mosaicViewFull: string;
     readonly filterAll: string;
     readonly filterRooms: string;
     readonly filterPool: string;
@@ -484,25 +465,6 @@ function EditorialSpreadCaption({
   );
 }
 
-function GalleryExpandHint({ label }: { readonly label: string }): React.ReactElement {
-  return (
-    <span
-      aria-hidden
-      className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-[#2b2722]/55 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/95 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
-    >
-      <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-        <path
-          d="M8 4H4v4M20 16v4h-4M4 16v4h4M20 4h-4v4"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-      </svg>
-      {label}
-    </span>
-  );
-}
-
 function GalleryCaptionOverlay({
   caption,
   reveal,
@@ -691,21 +653,6 @@ export function HotelGalleryLightbox({
     window.addEventListener(GALLERY_OPEN_EVENT, handler);
     return () => window.removeEventListener(GALLERY_OPEN_EVENT, handler);
   }, [openAt, openGrid, total]);
-
-  // Location map → gallery filtered by category (e.g. "Vue" photos).
-  useEffect(() => {
-    const handler = (event: Event): void => {
-      const detail = (event as CustomEvent<GalleryCategoryOpenDetail>).detail;
-      const category = detail?.category;
-      if (typeof category !== 'string') return;
-      const filter = resolveExternalCategoryFilter(category);
-      if (filter === null) return;
-      setActiveFilter(filter);
-      openGrid();
-    };
-    window.addEventListener(GALLERY_CATEGORY_FILTER_EVENT, handler);
-    return () => window.removeEventListener(GALLERY_CATEGORY_FILTER_EVENT, handler);
-  }, [openGrid]);
 
   // Keyboard navigation while the dialog is mounted and open.
   useEffect(() => {
@@ -985,7 +932,6 @@ export function HotelGalleryLightbox({
               priority={priority}
               className={EDITORIAL_IMAGE_HOVER_CLASS}
             />
-            <GalleryExpandHint label={translations.mosaicViewFull} />
           </div>
           <EditorialSpreadCaption
             caption={caption}

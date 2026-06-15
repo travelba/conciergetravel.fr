@@ -3604,7 +3604,6 @@
       "mapAria": "View {hotelName} on the map",
       "staticMapAlt": "Map showing the location of {hotelName}",
       "staticMapAria": "Open the location of {hotelName} on Mapbox",
-      "viewPhotosFromHotel": "📷 View photos from the hotel →",
       "reserveTable": "Book a table →",
       "mapAttribution": "© <mapbox>Mapbox</mapbox> · © <osm>OpenStreetMap</osm>",
       "poisTitle": "Points of interest",

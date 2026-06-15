@@ -10,9 +10,6 @@ import type { ReactElement } from 'react';
  */
 export const GALLERY_OPEN_EVENT = 'mch:open-hotel-gallery';
 
-/** Map / location block → gallery filtered by category (e.g. `{ category: 'vue' }`). */
-export const GALLERY_CATEGORY_FILTER_EVENT = 'open-gallery';
-
 /**
  * `mode` decides which view the gallery dialog opens on:
  * - `'grid'` (default for the hero "Voir les photos" trigger) → the full
@@ -22,10 +19,6 @@ export const GALLERY_CATEGORY_FILTER_EVENT = 'open-gallery';
 export interface GalleryOpenDetail {
   readonly index: number;
   readonly mode?: 'grid' | 'single';
-}
-
-export interface GalleryCategoryOpenDetail {
-  readonly category: string;
 }
 
 interface HotelGalleryTriggerProps {

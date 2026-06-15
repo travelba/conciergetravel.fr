@@ -326,7 +326,6 @@ export interface HotelKitModel {
     readonly staticMapAlt: string;
     readonly staticMapAria: string;
     readonly mapAttributionHtml: string;
-    readonly viewPhotosFromHotel: string;
     readonly reserveTable: string;
     readonly enBrefSectionTitle: string;
     readonly navHeading: string;
@@ -947,7 +946,6 @@ export async function prepareHotelKitModelUncached(
       googleListing: t('location.googleListing'),
       staticMapAlt: t('location.staticMapAlt', { hotelName: name }),
       staticMapAria: t('location.staticMapAria', { hotelName: name }),
-      viewPhotosFromHotel: t('location.viewPhotosFromHotel'),
       reserveTable: t('location.reserveTable'),
       mapAttributionHtml:
         kitLocale === 'en'

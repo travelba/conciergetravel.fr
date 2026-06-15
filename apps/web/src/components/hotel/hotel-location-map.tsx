@@ -5,7 +5,6 @@ import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
 import { buildMapboxExternalMapHref } from '@/lib/maps/mapbox-static';
 import type { LocalisedPointOfInterest } from '@/server/hotels/get-hotel-by-slug';
 
-import { HotelGalleryViewPhotosLink } from './hotel-gallery-view-link';
 import { HotelInteractiveMap, type HotelMapPoi } from './hotel-interactive-map';
 import { HotelStaticMap } from './hotel-static-map';
 
@@ -30,6 +29,8 @@ function toMapPois(pois: readonly LocalisedPointOfInterest[]): readonly HotelMap
     result.push({
       id: poiMapId(poi),
       name: poi.name,
+      type: poi.type,
+      category: poi.category,
       latitude: poi.latitude,
       longitude: poi.longitude,
       bucket: poi.bucket,
@@ -105,7 +106,6 @@ export async function HotelLocationMap({
           {attribution}
         </HotelInteractiveMap>
       </div>
-      <HotelGalleryViewPhotosLink label={t('viewPhotosFromHotel')} />
     </div>
   );
 }
