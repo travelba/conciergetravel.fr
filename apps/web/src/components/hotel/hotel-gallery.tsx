@@ -13,6 +13,7 @@ interface HotelGalleryProps {
     readonly publicId: string;
     readonly alt: string;
     readonly caption?: string | null;
+    readonly category?: string | null;
   } | null;
   readonly images: readonly LocalisedGalleryImage[];
   readonly hotelName: string;
@@ -103,22 +104,35 @@ export async function HotelGallery({
   // C4 — visible grid stays capped at 11 tiles; the lightbox receives
   // the full image set so navigation cycles through the entire CDC §2
   // ≥ 30-photo corpus without forcing a 30-tile grid on initial load.
+  const heroCategory =
+    hero !== null
+      ? (hero.category ?? images.find((img) => img.publicId === hero.publicId)?.category ?? null)
+      : null;
+  const heroForLightbox: GalleryLightboxImage | null =
+    hero !== null ? { ...hero, category: heroCategory } : null;
+
   const thumbnails: readonly GalleryLightboxImage[] = images
     .slice(0, MAX_THUMBNAILS)
-    .map((img) => ({ publicId: img.publicId, alt: img.alt, caption: img.caption }));
+    .map((img) => ({
+      publicId: img.publicId,
+      alt: img.alt,
+      caption: img.caption,
+      category: img.category,
+    }));
   const allLightboxImages: readonly GalleryLightboxImage[] = images.map((img) => ({
     publicId: img.publicId,
     alt: img.alt,
     caption: img.caption,
+    category: img.category,
   }));
   const overflowCount = Math.max(0, images.length - MAX_THUMBNAILS);
-  const galleryTotal = (hero !== null ? 1 : 0) + allLightboxImages.length;
+  const galleryTotal = (heroForLightbox !== null ? 1 : 0) + allLightboxImages.length;
 
   return (
     <HotelGalleryLightbox
       cloudName={cloudName}
       layout="mosaic"
-      hero={hero}
+      hero={heroForLightbox}
       thumbnails={thumbnails}
       lightboxImages={allLightboxImages}
       overflowCount={overflowCount}
@@ -138,6 +152,16 @@ export async function HotelGallery({
         // closure cannot cross the RSC boundary (Next 15.3 throws
         // "Functions cannot be passed directly to Client Components").
         lightboxCounterTemplate: t.raw('gallery.lightboxCounter') as string,
+        filterAll: t('gallery.filterAll'),
+        filterRooms: t('gallery.filterRooms'),
+        filterPool: t('gallery.filterPool'),
+        filterRestaurant: t('gallery.filterRestaurant'),
+        filterSpa: t('gallery.filterSpa'),
+        filterView: t('gallery.filterView'),
+        filterEmpty: t('gallery.filterEmpty'),
+        carouselPrevPhoto: t('gallery.carouselPrevPhoto'),
+        carouselNextPhoto: t('gallery.carouselNextPhoto'),
+        carouselPhotoN: t('gallery.carouselPhotoN'),
       }}
     />
   );

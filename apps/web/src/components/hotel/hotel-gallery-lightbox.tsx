@@ -15,6 +15,68 @@ export interface GalleryLightboxImage {
    * for accessibility regardless.
    */
   readonly caption?: string | null;
+  /** `gallery_images.category` — drives mosaic filter tabs when present. */
+  readonly category?: string | null;
+}
+
+/** User-facing mosaic filter ids (Chambres, Piscine, …). */
+export type GalleryCategoryFilter = 'all' | 'room' | 'pool' | 'restaurant' | 'spa' | 'view';
+
+const GALLERY_CATEGORY_FILTERS: readonly GalleryCategoryFilter[] = [
+  'all',
+  'room',
+  'pool',
+  'restaurant',
+  'spa',
+  'view',
+];
+
+const EAGER_IMAGE_COUNT = 5;
+
+function normalizeCategoryToFilter(
+  category: string | null | undefined,
+): GalleryCategoryFilter | null {
+  const value = category?.trim().toLowerCase() ?? '';
+  if (value === '') return null;
+  if (value === 'room' || value === 'suite' || value === 'bedroom') return 'room';
+  if (value === 'pool' || value === 'swimming_pool') return 'pool';
+  if (value === 'restaurant' || value === 'dining' || value === 'bar') return 'restaurant';
+  if (value === 'spa' || value === 'wellness') return 'spa';
+  if (value === 'view' || value === 'exterior' || value === 'facade') return 'view';
+  return null;
+}
+
+function imageMatchesFilter(image: GalleryLightboxImage, filter: GalleryCategoryFilter): boolean {
+  if (filter === 'all') return true;
+  return normalizeCategoryToFilter(image.category) === filter;
+}
+
+interface FilteredGallerySlice {
+  readonly items: readonly GalleryLightboxImage[];
+  /** Index of each visible tile inside the full lightbox catalogue. */
+  readonly globalIndices: readonly number[];
+}
+
+function buildFilteredGallerySlice(
+  allImages: readonly GalleryLightboxImage[],
+  filter: GalleryCategoryFilter,
+): FilteredGallerySlice {
+  if (filter === 'all') {
+    return {
+      items: allImages,
+      globalIndices: allImages.map((_, index) => index),
+    };
+  }
+
+  const items: GalleryLightboxImage[] = [];
+  const globalIndices: number[] = [];
+  allImages.forEach((image, index) => {
+    if (imageMatchesFilter(image, filter)) {
+      items.push(image);
+      globalIndices.push(index);
+    }
+  });
+  return { items, globalIndices };
 }
 
 type GalleryLayout = 'default' | 'mosaic';
@@ -63,6 +125,16 @@ interface HotelGalleryLightboxProps {
     readonly backToGallery: string;
     /** Hover chip on editorial spread tiles ("Voir en grand"). */
     readonly mosaicViewFull: string;
+    readonly filterAll: string;
+    readonly filterRooms: string;
+    readonly filterPool: string;
+    readonly filterRestaurant: string;
+    readonly filterSpa: string;
+    readonly filterView: string;
+    readonly filterEmpty: string;
+    readonly carouselPrevPhoto: string;
+    readonly carouselNextPhoto: string;
+    readonly carouselPhotoN: string;
   };
 }
 
@@ -146,6 +218,18 @@ const LIGHTBOX_CTRL_CLASS =
 
 const LIGHTBOX_CLOSE_GRID_CLASS =
   'cursor-pointer shrink-0 border border-[#8c7b5a]/35 bg-[#f6f1e7] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[#4a4439] transition-colors hover:bg-[#efe8da] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50';
+
+/** Category filter tabs — kit taupe / editorial uppercase rhythm. */
+const GALLERY_FILTER_TAB_CLASS =
+  'cursor-pointer shrink-0 rounded-full border px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50';
+
+const GALLERY_FILTER_TAB_ACTIVE_CLASS = 'border-[#8c7b5a] bg-[#8c7b5a] text-[#f6f1e7]';
+
+const GALLERY_FILTER_TAB_IDLE_CLASS =
+  'border-[#8c7b5a]/30 bg-[#f6f1e7] text-[#4a4439] hover:border-[#8c7b5a]/55 hover:bg-[#efe8da]';
+
+const MOBILE_CAROUSEL_ARROW_CLASS =
+  'pointer-events-auto flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/35 bg-[#2b2722]/55 text-lg text-white/95 backdrop-blur-sm transition-colors hover:bg-[#2b2722]/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60';
 
 /** Stitch hotel-detail mosaic — hero 2×2 + four tiles on the right (desktop). */
 const MOSAIC_SIDE_TILES = 4;
@@ -306,6 +390,30 @@ function formatEditorialIndex(index: number): string {
   return String(index + 1).padStart(2, '0');
 }
 
+function filterLabelFor(
+  filter: GalleryCategoryFilter,
+  translations: HotelGalleryLightboxProps['translations'],
+): string {
+  switch (filter) {
+    case 'all':
+      return translations.filterAll;
+    case 'room':
+      return translations.filterRooms;
+    case 'pool':
+      return translations.filterPool;
+    case 'restaurant':
+      return translations.filterRestaurant;
+    case 'spa':
+      return translations.filterSpa;
+    case 'view':
+      return translations.filterView;
+  }
+}
+
+function formatLightboxCounter(template: string, current: number, total: number): string {
+  return template.replace('{current}', String(current)).replace('{total}', String(total));
+}
+
 /** Caption below the frame — magazine spread, not a dark overlay. */
 function EditorialSpreadCaption({
   caption,
@@ -400,6 +508,30 @@ export function HotelGalleryLightbox({
     const base = lightboxImages ?? thumbnails;
     return hero !== null ? [hero, ...base] : base;
   }, [hero, lightboxImages, thumbnails]);
+
+  const [activeFilter, setActiveFilter] = useState<GalleryCategoryFilter>('all');
+  const [mobileCarouselIndex, setMobileCarouselIndex] = useState<number>(0);
+  const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
+
+  const filteredSlice = useMemo(
+    () => buildFilteredGallerySlice(allImages, activeFilter),
+    [activeFilter, allImages],
+  );
+
+  const availableFilters = useMemo(() => {
+    return GALLERY_CATEGORY_FILTERS.filter((filter) => {
+      if (filter === 'all') return allImages.length > 0;
+      return allImages.some((image) => imageMatchesFilter(image, filter));
+    });
+  }, [allImages]);
+
+  const filterCounts = useMemo(() => {
+    const counts = new Map<GalleryCategoryFilter, number>();
+    for (const filter of GALLERY_CATEGORY_FILTERS) {
+      counts.set(filter, buildFilteredGallerySlice(allImages, filter).items.length);
+    }
+    return counts;
+  }, [allImages]);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -501,10 +633,157 @@ export function HotelGalleryLightbox({
 
   const current = total > 0 ? allImages[currentIndex] : undefined;
 
-  const mosaicTiles = thumbnails.slice(0, MOSAIC_SIDE_TILES);
-  const mosaicOverflowOnLast =
-    mosaicTiles.length === MOSAIC_SIDE_TILES &&
-    (overflowCount > 0 || thumbnails.length > MOSAIC_SIDE_TILES);
+  const mosaicLead = filteredSlice.items[0];
+  const mosaicSideTiles = filteredSlice.items.slice(1, 1 + MOSAIC_SIDE_TILES);
+  const mosaicOverflowCount =
+    mosaicSideTiles.length === MOSAIC_SIDE_TILES &&
+    filteredSlice.items.length > 1 + MOSAIC_SIDE_TILES
+      ? filteredSlice.items.length - (1 + MOSAIC_SIDE_TILES)
+      : 0;
+
+  const useClassicMosaic = activeFilter === 'all' && layout === 'mosaic' && hero !== null;
+
+  const mobileDisplaySlice = useMemo(() => {
+    if (activeFilter !== 'all') return filteredSlice;
+    const items = hero !== null ? [hero, ...thumbnails] : [...thumbnails];
+    const globalIndices = items.map((img) => {
+      const index = allImages.findIndex((candidate) => candidate.publicId === img.publicId);
+      return index >= 0 ? index : 0;
+    });
+    return { items, globalIndices };
+  }, [activeFilter, allImages, filteredSlice, hero, thumbnails]);
+
+  const scrollMobileCarouselTo = useCallback(
+    (index: number): void => {
+      const track = mobileCarouselRef.current;
+      if (track === null) return;
+      const clamped = Math.max(0, Math.min(mobileDisplaySlice.items.length - 1, index));
+      track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+      setMobileCarouselIndex(clamped);
+    },
+    [mobileDisplaySlice.items.length],
+  );
+
+  const onMobileCarouselScroll = useCallback((): void => {
+    const track = mobileCarouselRef.current;
+    if (track === null) return;
+    const index = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+    setMobileCarouselIndex((prev) => (prev === index ? prev : index));
+  }, []);
+
+  useEffect(() => {
+    setMobileCarouselIndex(0);
+    const track = mobileCarouselRef.current;
+    if (track !== null) track.scrollTo({ left: 0, behavior: 'auto' });
+  }, [activeFilter]);
+
+  const renderFilterTabs = (): React.ReactElement | null => {
+    if (availableFilters.length <= 1) return null;
+    return (
+      <div
+        role="tablist"
+        aria-label={translations.mosaicEyebrow}
+        className="mb-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {availableFilters.map((filter) => {
+          const isActive = activeFilter === filter;
+          const count = filterCounts.get(filter) ?? 0;
+          return (
+            <button
+              key={filter}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls="hotel-gallery-mosaic-panel"
+              onClick={() => setActiveFilter(filter)}
+              className={`${GALLERY_FILTER_TAB_CLASS} ${
+                isActive ? GALLERY_FILTER_TAB_ACTIVE_CLASS : GALLERY_FILTER_TAB_IDLE_CLASS
+              }`}
+            >
+              {filterLabelFor(filter, translations)}
+              <span className="sr-only">{` (${count})`}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderMobileCarousel = (): React.ReactElement | null => {
+    if (mobileDisplaySlice.items.length === 0) return null;
+    return (
+      <div className="relative md:hidden">
+        <div
+          ref={mobileCarouselRef}
+          id="hotel-gallery-mosaic-panel"
+          role="tabpanel"
+          aria-label={translations.thumbnailsLabel}
+          className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          onScroll={onMobileCarouselScroll}
+        >
+          {mobileDisplaySlice.items.map((img, displayIndex) => {
+            const globalIndex = mobileDisplaySlice.globalIndices[displayIndex] ?? displayIndex;
+            return (
+              <div
+                key={`${img.publicId}-${globalIndex}`}
+                className="relative aspect-[4/3] w-full shrink-0 snap-center overflow-hidden rounded-lg"
+              >
+                {renderTileButton(img, globalIndex, {
+                  className: `${GALLERY_TILE_BUTTON_CLASS} h-full rounded-lg`,
+                  priority: displayIndex < EAGER_IMAGE_COUNT,
+                  width: 1200,
+                  height: 900,
+                  variant: displayIndex === 0 ? 'hero' : 'thumbnail',
+                  transforms: displayIndex === 0 ? MOSAIC_HERO_TRANSFORMS : MOSAIC_TILE_TRANSFORMS,
+                  sizes: '100vw',
+                  imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+                })}
+              </div>
+            );
+          })}
+        </div>
+        {mobileDisplaySlice.items.length > 1 ? (
+          <>
+            <div className="mt-3 flex justify-center gap-1.5">
+              {mobileDisplaySlice.items.map((img, index) => (
+                <button
+                  key={`dot-${img.publicId}-${index}`}
+                  type="button"
+                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                    index === mobileCarouselIndex ? 'bg-[#8c7b5a]' : 'bg-[#8c7b5a]/30'
+                  }`}
+                  aria-label={translations.carouselPhotoN.replace('{n}', String(index + 1))}
+                  aria-current={index === mobileCarouselIndex ? 'true' : undefined}
+                  onClick={() => scrollMobileCarouselTo(index)}
+                />
+              ))}
+            </div>
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2"
+              aria-hidden={false}
+            >
+              <button
+                type="button"
+                className={`${MOBILE_CAROUSEL_ARROW_CLASS} pointer-events-auto`}
+                aria-label={translations.carouselPrevPhoto}
+                onClick={() => scrollMobileCarouselTo(mobileCarouselIndex - 1)}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className={`${MOBILE_CAROUSEL_ARROW_CLASS} pointer-events-auto`}
+                aria-label={translations.carouselNextPhoto}
+                onClick={() => scrollMobileCarouselTo(mobileCarouselIndex + 1)}
+              >
+                ›
+              </button>
+            </div>
+          </>
+        ) : null}
+      </div>
+    );
+  };
 
   const renderTileButton = (
     img: GalleryLightboxImage,
@@ -632,48 +911,95 @@ export function HotelGalleryLightbox({
         {translations.lightboxLabel}
       </h2>
 
-      {!hideGrid && layout === 'mosaic' && hero !== null ? (
-        // Kit `.htl-gallery` mosaic — hero 2×2 left + four rounded tiles, 10px
-        // gutter, fixed 440px frame on desktop and the premium 0.7s editorial
-        // zoom (DA crème/taupe: `--ease-editorial`). Tailwind mirror of the kit
-        // CSS so the client island stays self-contained (no `.mch-kit` wrap).
-        <div
-          className="grid h-auto grid-cols-1 gap-2.5 md:h-[440px] md:grid-cols-4 md:grid-rows-2"
-          data-gallery-layout="mosaic"
-        >
-          {renderTileButton(hero, 0, {
-            className: `${GALLERY_TILE_BUTTON_CLASS} min-h-[240px] md:col-span-2 md:row-span-2 md:min-h-0`,
-            priority: true,
-            width: 1200,
-            height: 900,
-            variant: 'hero',
-            transforms: MOSAIC_HERO_TRANSFORMS,
-            sizes: MOSAIC_HERO_SIZES,
-            imageClassName: KIT_MOSAIC_IMAGE_CLASS,
-          })}
-          {mosaicTiles.map((img, idx) => {
-            const galleryIndex = idx + 1;
-            const isLast = idx === mosaicTiles.length - 1;
-            const overflowLabel =
-              isLast && mosaicOverflowOnLast
-                ? overflowCount + Math.max(0, thumbnails.length - MOSAIC_SIDE_TILES)
-                : 0;
-            return (
-              <div key={img.publicId} className="relative hidden min-h-0 md:contents">
-                {renderTileButton(img, galleryIndex, {
-                  className: `${GALLERY_TILE_BUTTON_CLASS} hidden md:block`,
-                  showOverflow: isLast && overflowLabel > 0,
-                  overflowCountLabel: overflowLabel,
-                  width: 900,
-                  height: 675,
-                  transforms: MOSAIC_TILE_TRANSFORMS,
-                  sizes: MOSAIC_THUMB_SIZES,
-                  imageClassName: KIT_MOSAIC_IMAGE_CLASS,
-                })}
-              </div>
-            );
-          })}
-        </div>
+      {!hideGrid && layout === 'mosaic' && allImages.length > 0 ? (
+        <>
+          {renderFilterTabs()}
+          {filteredSlice.items.length === 0 ? (
+            <p className="text-sm text-[#6f675b] md:mb-0">{translations.filterEmpty}</p>
+          ) : (
+            <>
+              {renderMobileCarousel()}
+              {useClassicMosaic ? (
+                <div
+                  className="hidden h-[440px] grid-cols-4 grid-rows-2 gap-2.5 md:grid"
+                  data-gallery-layout="mosaic"
+                >
+                  {renderTileButton(hero, 0, {
+                    className: `${GALLERY_TILE_BUTTON_CLASS} col-span-2 row-span-2 min-h-0`,
+                    priority: true,
+                    width: 1200,
+                    height: 900,
+                    variant: 'hero',
+                    transforms: MOSAIC_HERO_TRANSFORMS,
+                    sizes: MOSAIC_HERO_SIZES,
+                    imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+                  })}
+                  {thumbnails.slice(0, MOSAIC_SIDE_TILES).map((img, idx) => {
+                    const galleryIndex = idx + 1;
+                    const isLast = idx === Math.min(MOSAIC_SIDE_TILES, thumbnails.length) - 1;
+                    const classicOverflowOnLast =
+                      thumbnails.length >= MOSAIC_SIDE_TILES &&
+                      (overflowCount > 0 || thumbnails.length > MOSAIC_SIDE_TILES);
+                    const overflowLabel =
+                      isLast && classicOverflowOnLast
+                        ? overflowCount + Math.max(0, thumbnails.length - MOSAIC_SIDE_TILES)
+                        : 0;
+                    return (
+                      <div key={img.publicId} className="relative min-h-0">
+                        {renderTileButton(img, galleryIndex, {
+                          className: GALLERY_TILE_BUTTON_CLASS,
+                          showOverflow: isLast && overflowLabel > 0,
+                          overflowCountLabel: overflowLabel,
+                          priority: galleryIndex < EAGER_IMAGE_COUNT,
+                          width: 900,
+                          height: 675,
+                          transforms: MOSAIC_TILE_TRANSFORMS,
+                          sizes: MOSAIC_THUMB_SIZES,
+                          imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : mosaicLead !== undefined ? (
+                <div
+                  className="hidden h-[440px] grid-cols-4 grid-rows-2 gap-2.5 md:grid"
+                  data-gallery-layout="mosaic-filtered"
+                >
+                  {renderTileButton(mosaicLead, filteredSlice.globalIndices[0] ?? 0, {
+                    className: `${GALLERY_TILE_BUTTON_CLASS} col-span-2 row-span-2 min-h-0`,
+                    priority: true,
+                    width: 1200,
+                    height: 900,
+                    variant: 'hero',
+                    transforms: MOSAIC_HERO_TRANSFORMS,
+                    sizes: MOSAIC_HERO_SIZES,
+                    imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+                  })}
+                  {mosaicSideTiles.map((img, idx) => {
+                    const galleryIndex = filteredSlice.globalIndices[idx + 1] ?? idx + 1;
+                    const isLast = idx === mosaicSideTiles.length - 1;
+                    return (
+                      <div key={`${img.publicId}-${galleryIndex}`} className="relative min-h-0">
+                        {renderTileButton(img, galleryIndex, {
+                          className: GALLERY_TILE_BUTTON_CLASS,
+                          showOverflow: isLast && mosaicOverflowCount > 0,
+                          overflowCountLabel: mosaicOverflowCount,
+                          priority: idx + 1 < EAGER_IMAGE_COUNT,
+                          width: 900,
+                          height: 675,
+                          transforms: MOSAIC_TILE_TRANSFORMS,
+                          sizes: MOSAIC_THUMB_SIZES,
+                          imageClassName: KIT_MOSAIC_IMAGE_CLASS,
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </>
+          )}
+        </>
       ) : null}
 
       {!hideGrid &&
@@ -710,6 +1036,7 @@ export function HotelGalleryLightbox({
                   className: `${GALLERY_TILE_BUTTON_CLASS} h-full rounded-md`,
                   showOverflow: isOverflowSlot,
                   overflowCountLabel: overflowCount,
+                  priority: galleryIndex < EAGER_IMAGE_COUNT,
                   width: 600,
                   height: 600,
                   transforms: MOSAIC_TILE_TRANSFORMS,
@@ -770,7 +1097,7 @@ export function HotelGalleryLightbox({
           </div>
         ) : current !== undefined ? (
           <div className="relative">
-            {/* Single-photo top bar — back to mosaic + close. */}
+            {/* Single-photo top bar — back, counter (top-right), close. */}
             <div className="flex items-center justify-between gap-3 px-4 pt-3 text-sm">
               <button
                 type="button"
@@ -780,14 +1107,23 @@ export function HotelGalleryLightbox({
                 <span aria-hidden>←</span>
                 {translations.backToGallery}
               </button>
-              <button
-                type="button"
-                onClick={close}
-                className={LIGHTBOX_CTRL_CLASS}
-                aria-label={translations.closeLightbox}
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-3">
+                <p aria-live="polite" className="tabular-nums tracking-wide text-white/80">
+                  {formatLightboxCounter(
+                    translations.lightboxCounterTemplate,
+                    currentIndex + 1,
+                    total,
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={close}
+                  className={LIGHTBOX_CTRL_CLASS}
+                  aria-label={translations.closeLightbox}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <figure className="relative mt-3 aspect-[3/2] w-full">
@@ -818,11 +1154,13 @@ export function HotelGalleryLightbox({
               >
                 ←
               </button>
-              <p aria-live="polite" className="text-white/80">
-                {translations.lightboxCounterTemplate
-                  .replace('{current}', String(currentIndex + 1))
-                  .replace('{total}', String(total))}
-              </p>
+              <span className="sr-only" aria-live="polite">
+                {formatLightboxCounter(
+                  translations.lightboxCounterTemplate,
+                  currentIndex + 1,
+                  total,
+                )}
+              </span>
               <button
                 type="button"
                 onClick={goNext}

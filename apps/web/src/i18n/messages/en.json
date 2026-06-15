@@ -3456,7 +3456,17 @@
       "mosaicEyebrow": "The gallery",
       "mosaicCount": "{count, plural, one {# photo} other {# photos}}",
       "mosaicViewFull": "View full size",
-      "backToGallery": "Back to the gallery"
+      "backToGallery": "Back to the gallery",
+      "filterAll": "All",
+      "filterRooms": "Rooms",
+      "filterPool": "Pool",
+      "filterRestaurant": "Restaurant",
+      "filterSpa": "Spa",
+      "filterView": "Views",
+      "filterEmpty": "No photos in this category yet.",
+      "carouselPrevPhoto": "Previous photo",
+      "carouselNextPhoto": "Next photo",
+      "carouselPhotoN": "Photo {n}"
     },
     "virtualTour": {
       "title": "Virtual tour",
