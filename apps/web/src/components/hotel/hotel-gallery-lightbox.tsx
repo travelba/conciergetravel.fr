@@ -3,7 +3,12 @@
 import { HotelImage } from '@mch/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { GALLERY_OPEN_EVENT, type GalleryOpenDetail } from './hotel-gallery-trigger';
+import {
+  GALLERY_CATEGORY_FILTER_EVENT,
+  GALLERY_OPEN_EVENT,
+  type GalleryCategoryOpenDetail,
+  type GalleryOpenDetail,
+} from './hotel-gallery-trigger';
 
 export interface GalleryLightboxImage {
   readonly publicId: string;
@@ -55,6 +60,18 @@ interface FilteredGallerySlice {
   readonly items: readonly GalleryLightboxImage[];
   /** Index of each visible tile inside the full lightbox catalogue. */
   readonly globalIndices: readonly number[];
+}
+
+function resolveExternalCategoryFilter(category: string): GalleryCategoryFilter | null {
+  const value = category.trim().toLowerCase();
+  if (value === 'vue') return 'view';
+  const mapped = normalizeCategoryToFilter(value);
+  if (mapped !== null) return mapped;
+  if (value === 'chambres' || value === 'rooms') return 'room';
+  if (value === 'piscine' || value === 'pool') return 'pool';
+  if (value === 'restaurant') return 'restaurant';
+  if (value === 'spa') return 'spa';
+  return null;
 }
 
 function buildFilteredGallerySlice(
@@ -219,14 +236,14 @@ const LIGHTBOX_CTRL_CLASS =
 const LIGHTBOX_CLOSE_GRID_CLASS =
   'cursor-pointer shrink-0 border border-[#8c7b5a]/35 bg-[#f6f1e7] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[#4a4439] transition-colors hover:bg-[#efe8da] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50';
 
-/** Category filter tabs — kit taupe / editorial uppercase rhythm. */
+/** Category filter tabs — underline accent, smooth transition. */
 const GALLERY_FILTER_TAB_CLASS =
-  'cursor-pointer shrink-0 rounded-full border px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8c7b5a]/50';
+  'cursor-pointer shrink-0 border-b-2 px-3 py-2 text-xs font-medium transition-[color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40';
 
-const GALLERY_FILTER_TAB_ACTIVE_CLASS = 'border-[#8c7b5a] bg-[#8c7b5a] text-[#f6f1e7]';
+const GALLERY_FILTER_TAB_ACTIVE_CLASS = 'border-accent text-accent';
 
 const GALLERY_FILTER_TAB_IDLE_CLASS =
-  'border-[#8c7b5a]/30 bg-[#f6f1e7] text-[#4a4439] hover:border-[#8c7b5a]/55 hover:bg-[#efe8da]';
+  'border-transparent text-muted hover:border-border hover:text-fg';
 
 const MOBILE_CAROUSEL_ARROW_CLASS =
   'pointer-events-auto flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/35 bg-[#2b2722]/55 text-lg text-white/95 backdrop-blur-sm transition-colors hover:bg-[#2b2722]/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60';
@@ -512,6 +529,7 @@ export function HotelGalleryLightbox({
   const [activeFilter, setActiveFilter] = useState<GalleryCategoryFilter>('all');
   const [mobileCarouselIndex, setMobileCarouselIndex] = useState<number>(0);
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
+  const mobileTouchStartX = useRef<number>(0);
 
   const filteredSlice = useMemo(
     () => buildFilteredGallerySlice(allImages, activeFilter),
@@ -587,6 +605,13 @@ export function HotelGalleryLightbox({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setMobileCarouselIndex(0);
+    if (mobileCarouselRef.current !== null) {
+      mobileCarouselRef.current.scrollLeft = 0;
+    }
+  }, [activeFilter]);
+
   // Allow any page-level trigger (e.g. the golden-template hero header
   // `<HotelGalleryTrigger>`) to open the lightbox via a window event,
   // without prop-drilling a shared ref/store across the RSC boundary.
@@ -604,6 +629,21 @@ export function HotelGalleryLightbox({
     window.addEventListener(GALLERY_OPEN_EVENT, handler);
     return () => window.removeEventListener(GALLERY_OPEN_EVENT, handler);
   }, [openAt, openGrid, total]);
+
+  // Location map → gallery filtered by category (e.g. "Vue" photos).
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<GalleryCategoryOpenDetail>).detail;
+      const category = detail?.category;
+      if (typeof category !== 'string') return;
+      const filter = resolveExternalCategoryFilter(category);
+      if (filter === null) return;
+      setActiveFilter(filter);
+      openGrid();
+    };
+    window.addEventListener(GALLERY_CATEGORY_FILTER_EVENT, handler);
+    return () => window.removeEventListener(GALLERY_CATEGORY_FILTER_EVENT, handler);
+  }, [openGrid]);
 
   // Keyboard navigation while the dialog is mounted and open.
   useEffect(() => {
@@ -671,11 +711,25 @@ export function HotelGalleryLightbox({
     setMobileCarouselIndex((prev) => (prev === index ? prev : index));
   }, []);
 
-  useEffect(() => {
-    setMobileCarouselIndex(0);
-    const track = mobileCarouselRef.current;
-    if (track !== null) track.scrollTo({ left: 0, behavior: 'auto' });
-  }, [activeFilter]);
+  const onMobileCarouselTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>): void => {
+      const touch = event.touches.item(0);
+      if (touch !== null) mobileTouchStartX.current = touch.clientX;
+    },
+    [],
+  );
+
+  const onMobileCarouselTouchEnd = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>): void => {
+      const touch = event.changedTouches.item(0);
+      if (touch === null) return;
+      const delta = mobileTouchStartX.current - touch.clientX;
+      if (Math.abs(delta) < 48) return;
+      if (delta > 0) scrollMobileCarouselTo(mobileCarouselIndex + 1);
+      else scrollMobileCarouselTo(mobileCarouselIndex - 1);
+    },
+    [mobileCarouselIndex, scrollMobileCarouselTo],
+  );
 
   const renderFilterTabs = (): React.ReactElement | null => {
     if (availableFilters.length <= 1) return null;
@@ -720,6 +774,8 @@ export function HotelGalleryLightbox({
           aria-label={translations.thumbnailsLabel}
           className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onScroll={onMobileCarouselScroll}
+          onTouchStart={onMobileCarouselTouchStart}
+          onTouchEnd={onMobileCarouselTouchEnd}
         >
           {mobileDisplaySlice.items.map((img, displayIndex) => {
             const globalIndex = mobileDisplaySlice.globalIndices[displayIndex] ?? displayIndex;
@@ -744,20 +800,16 @@ export function HotelGalleryLightbox({
         </div>
         {mobileDisplaySlice.items.length > 1 ? (
           <>
-            <div className="mt-3 flex justify-center gap-1.5">
-              {mobileDisplaySlice.items.map((img, index) => (
-                <button
-                  key={`dot-${img.publicId}-${index}`}
-                  type="button"
-                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                    index === mobileCarouselIndex ? 'bg-[#8c7b5a]' : 'bg-[#8c7b5a]/30'
-                  }`}
-                  aria-label={translations.carouselPhotoN.replace('{n}', String(index + 1))}
-                  aria-current={index === mobileCarouselIndex ? 'true' : undefined}
-                  onClick={() => scrollMobileCarouselTo(index)}
-                />
-              ))}
-            </div>
+            <p
+              aria-live="polite"
+              className="text-muted mt-3 text-center text-xs tabular-nums tracking-wide"
+            >
+              {formatLightboxCounter(
+                translations.lightboxCounterTemplate,
+                mobileCarouselIndex + 1,
+                mobileDisplaySlice.items.length,
+              )}
+            </p>
             <div
               className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2"
               aria-hidden={false}

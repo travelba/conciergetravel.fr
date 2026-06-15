@@ -27,7 +27,8 @@ import type {
   TransportMode,
 } from '@/server/hotels/get-hotel-by-slug';
 
-import { HotelStaticMap } from './hotel-static-map';
+import { HotelLocationMap } from './hotel-location-map';
+import { PoiHoverTarget } from './poi-hover-target';
 
 export interface HotelAccessLinks {
   readonly officialUrl: string | null;
@@ -209,11 +210,12 @@ export async function HotelLocation({
       )}
 
       {latitude !== null && longitude !== null ? (
-        <HotelStaticMap
+        <HotelLocationMap
           locale={locale}
           hotelName={hotelName}
           latitude={latitude}
           longitude={longitude}
+          pois={location.pointsOfInterest}
         />
       ) : null}
 
@@ -444,6 +446,8 @@ function PoiRichCard({
   // broken guidance for a place a guest would obviously reach by car.
   const travel = deriveTravelEstimate(poi.walkMinutes, poi.distanceMeters);
   const { hoursLabel, hoursClosed, pricingLabel } = computePoiBadges(poi, locale, t);
+  const showEatReserve = poi.bucket === 'eat' && poi.reservationUrl !== null;
+  const poiHoverId = poi.osmId ?? `${poi.name}-${poi.latitude ?? 0}-${poi.longitude ?? 0}`;
 
   const transitBadge =
     poi.nearestTransit !== null
@@ -458,7 +462,10 @@ function PoiRichCard({
       : null;
 
   return (
-    <li className="border-border bg-bg hover:border-accent/40 flex h-full gap-4 rounded-xl border p-4 transition-colors sm:p-5">
+    <PoiHoverTarget
+      poiId={poiHoverId}
+      className="border-border bg-bg hover:border-accent/40 flex h-full gap-4 rounded-xl border p-4 transition-colors sm:p-5"
+    >
       <PoiMedallion icon={icon} />
       <div className="flex min-w-0 flex-col gap-1">
         <span className="text-fg font-medium leading-snug">{poi.name}</span>
@@ -505,6 +512,17 @@ function PoiRichCard({
           </ul>
         ) : null}
 
+        {showEatReserve ? (
+          <a
+            href={poi.reservationUrl ?? undefined}
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            className="bg-accent mt-2 inline-flex w-fit rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+          >
+            {t('location.reserveTable')}
+          </a>
+        ) : null}
+
         <div className="mt-auto pt-2">
           <PracticalInfo
             hours={poi.hours}
@@ -512,7 +530,7 @@ function PoiRichCard({
             phone={poi.phone}
             address={poi.address}
             website={poi.website}
-            reservationUrl={poi.reservationUrl}
+            reservationUrl={showEatReserve ? null : poi.reservationUrl}
             tip={poi.tip}
             labels={{
               title: t('practical.title'),
@@ -527,7 +545,7 @@ function PoiRichCard({
           />
         </div>
       </div>
-    </li>
+    </PoiHoverTarget>
   );
 }
 
