@@ -208,7 +208,12 @@ export function auditKitVisiteurHtml(html: string, slug: string): KitVisiteurAud
 export function resolveKitVisiteurBaseUrl(): string {
   const fromEnv = process.env['KIT_VISITEUR_BASE_URL'] ?? process.env['NEXT_PUBLIC_SITE_URL'];
   if (typeof fromEnv === 'string' && fromEnv.trim().length > 0) {
-    return fromEnv.replace(/\/+$/u, '');
+    const trimmed = fromEnv.replace(/\/+$/u, '');
+    // Local dev .env often sets localhost — kit HTML audit must hit prod/preview.
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/iu.test(trimmed)) {
+      return 'https://myconciergehotel.com';
+    }
+    return trimmed;
   }
   return 'https://myconciergehotel.com';
 }
