@@ -192,10 +192,35 @@ interface HotelGalleryLightboxProps {
  */
 const MAX_DIALOG_TRANSFORMS = 'f_auto,q_auto:good,c_limit,w_1600,h_1067';
 
-/** Mosaic tile crop — square-ish 4:3 frame, smart-gravity centred. */
-const MOSAIC_TILE_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_auto,w_900,h_675';
+interface SingleViewFrame {
+  readonly transforms: string;
+  readonly width: number;
+  readonly height: number;
+  readonly objectFit: 'cover' | 'contain';
+}
 
-const MOSAIC_HERO_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_auto,w_1200,h_900';
+/** Same crop as the mosaic tile, scaled up for the single-photo dialog. */
+function mosaicFrameForLightbox(opts: {
+  readonly transforms?: string;
+  readonly width?: number;
+  readonly height?: number;
+}): SingleViewFrame {
+  const width = opts.width ?? 900;
+  const height = opts.height ?? 675;
+  const base = opts.transforms ?? MOSAIC_TILE_TRANSFORMS;
+  const lightboxWidth = Math.min(1800, width * 2);
+  const lightboxHeight = Math.min(1350, height * 2);
+  const transforms = base
+    .replace(/w_\d+/, `w_${lightboxWidth}`)
+    .replace(/h_\d+/, `h_${lightboxHeight}`);
+  return { transforms, width: lightboxWidth, height: lightboxHeight, objectFit: 'cover' };
+}
+
+/** Mosaic tile crop — square-ish 4:3 frame, center gravity (not g_auto: wide
+ * banners + portrait shots collapse to identical crops under smart gravity). */
+const MOSAIC_TILE_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_center,w_900,h_675';
+
+const MOSAIC_HERO_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_center,w_1200,h_900';
 
 /** Editorial spread — asymmetric magazine rhythm inside the full-gallery dialog. */
 const EDITORIAL_LEAD_TRANSFORMS = 'f_auto,q_auto:good,c_fill,g_auto,w_1800,h_720';
@@ -558,15 +583,18 @@ export function HotelGalleryLightbox({
   // 'grid'; clicking a mosaic tile (or an inline thumbnail) drills into
   // 'single'.
   const [viewMode, setViewMode] = useState<'grid' | 'single'>('grid');
+  /** When set, single view matches the mosaic tile crop the user clicked (WYSIWYG). */
+  const [singleViewFrame, setSingleViewFrame] = useState<SingleViewFrame | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const total = allImages.length;
   const editorialRows = useMemo(() => buildEditorialRows(allImages), [allImages]);
 
   const openAt = useCallback(
-    (index: number): void => {
+    (index: number, frame?: SingleViewFrame): void => {
       if (index < 0 || index >= total) return;
       setCurrentIndex(index);
+      setSingleViewFrame(frame ?? null);
       setViewMode('single');
       setIsOpen(true);
     },
@@ -575,22 +603,26 @@ export function HotelGalleryLightbox({
 
   const openGrid = useCallback((): void => {
     if (total === 0) return;
+    setSingleViewFrame(null);
     setViewMode('grid');
     setIsOpen(true);
   }, [total]);
 
   const close = useCallback((): void => {
+    setSingleViewFrame(null);
     setIsOpen(false);
   }, []);
 
   const goPrev = useCallback((): void => {
     if (total === 0) return;
+    setSingleViewFrame(null);
     setCurrentIndex((i) => (i - 1 + total) % total);
   }, [total]);
 
   const goNext = useCallback((): void => {
     if (total === 0) return;
-    setCurrentIndex((i) => (i + 1) % total);
+    setSingleViewFrame(null);
+    setCurrentIndex((i) => (i + 1 + total) % total);
   }, [total]);
 
   // Sync the React `isOpen` state with the native <dialog> show/close API.
@@ -856,7 +888,16 @@ export function HotelGalleryLightbox({
     <button
       type="button"
       className={opts.className ?? GALLERY_TILE_BUTTON_CLASS}
-      onClick={() => openAt(galleryIndex)}
+      onClick={() =>
+        openAt(
+          galleryIndex,
+          mosaicFrameForLightbox({
+            ...(opts.transforms !== undefined ? { transforms: opts.transforms } : {}),
+            ...(opts.width !== undefined ? { width: opts.width } : {}),
+            ...(opts.height !== undefined ? { height: opts.height } : {}),
+          }),
+        )
+      }
       aria-label={`${translations.openLightbox} : ${img.alt}`}
     >
       <HotelImage
@@ -1153,7 +1194,10 @@ export function HotelGalleryLightbox({
             <div className="flex items-center justify-between gap-3 px-4 pt-3 text-sm">
               <button
                 type="button"
-                onClick={() => setViewMode('grid')}
+                onClick={() => {
+                  setSingleViewFrame(null);
+                  setViewMode('grid');
+                }}
                 className={`${LIGHTBOX_CTRL_CLASS} inline-flex items-center gap-1.5`}
               >
                 <span aria-hidden>←</span>
@@ -1183,11 +1227,15 @@ export function HotelGalleryLightbox({
                 cloudName={cloudName}
                 publicId={current.publicId}
                 alt={current.alt}
-                width={1600}
-                height={1067}
-                transforms={MAX_DIALOG_TRANSFORMS}
+                width={singleViewFrame?.width ?? 1600}
+                height={singleViewFrame?.height ?? 1067}
+                transforms={singleViewFrame?.transforms ?? MAX_DIALOG_TRANSFORMS}
                 sizes="(max-width: 768px) 100vw, 80vw"
-                className="h-full w-full object-contain"
+                className={
+                  singleViewFrame?.objectFit === 'cover'
+                    ? 'h-full w-full object-cover'
+                    : 'h-full w-full object-contain'
+                }
               />
               <GalleryCaptionOverlay
                 caption={current.caption ?? current.alt}
