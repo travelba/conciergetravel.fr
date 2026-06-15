@@ -69,6 +69,12 @@ export function HotelKitInteractions(): null {
       list.classList.add('is-collapsed');
     });
 
+    document.querySelectorAll('.mch-kit [data-default-closed]').forEach((el) => {
+      if (el instanceof HTMLDetailsElement) {
+        el.open = false;
+      }
+    });
+
     document.querySelectorAll('[data-kit-carousel]').forEach((carousel) => {
       const track = carousel.querySelector('.carousel-track');
       if (!(track instanceof HTMLElement)) return;
@@ -76,7 +82,7 @@ export function HotelKitInteractions(): null {
       const next = carousel.querySelector('.carousel-nav.next');
       const scrollByCard = (dir: 1 | -1): void => {
         const slide = track.querySelector<HTMLElement>(
-          '.around-item, .hcard, .exp-justified-slide',
+          '.around-item, .hcard, .exp-justified-slide, .room-v2, .resto-card',
         );
         const step = slide !== null ? slide.offsetWidth + 18 : track.clientWidth * 0.85;
         track.scrollBy({ left: dir * step, behavior: 'smooth' });

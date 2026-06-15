@@ -3274,6 +3274,7 @@ body.booking-mobile-sheet-open {
 /* --- Chambres v2 (carrousel + grille luxe) --- */
 .mch-kit .rooms-carousel .room-v2 {
   width: 340px;
+  flex-shrink: 0;
   background: #fff;
   border: 1px solid var(--ligne);
   border-radius: 12px;
@@ -3290,6 +3291,12 @@ body.booking-mobile-sheet-open {
 .mch-kit .rooms-carousel .room-v2.room-concierge {
   background: #f7f4ee;
   border-color: var(--accent);
+}
+.mch-kit .rooms-carousel .room-v2:hover .rv2-img img {
+  transform: scale(1.04);
+}
+.mch-kit .rooms-carousel .room-v2:hover .rv2-img-duo img {
+  transform: scale(1.04);
 }
 .mch-kit .rooms-grid {
   display: grid;
@@ -3503,6 +3510,9 @@ body.booking-mobile-sheet-open {
 }
 .mch-kit .kit-disclosure:not([open]) .kit-disclosure__body {
   display: none;
+}
+.mch-kit .kit-disclosure:not([open]) > :not(summary) {
+  display: none !important;
 }
 .mch-kit .kit-disclosure--section {
   padding: 0;
@@ -3719,6 +3729,7 @@ body.booking-mobile-sheet-open {
 /* --- Restaurants (carrousel + grille luxe) --- */
 .mch-kit .resto-carousel .resto-card {
   width: 320px;
+  flex-shrink: 0;
   background: #fff;
   border: 1px solid var(--ligne);
   border-radius: 12px;
@@ -3731,6 +3742,13 @@ body.booking-mobile-sheet-open {
 .mch-kit .resto-carousel .resto-card:hover {
   box-shadow: var(--shadow);
   transform: translateY(-3px);
+}
+.mch-kit .resto-carousel .resto-card.resto-concierge {
+  background: #f7f4ee;
+  border-color: var(--accent);
+}
+.mch-kit .resto-carousel .resto-card:hover .resto-img img {
+  transform: scale(1.04);
 }
 .mch-kit .resto-grid {
   display: grid;
@@ -4230,6 +4248,48 @@ body.booking-mobile-sheet-open {
 .mch-kit .faq-group {
   margin-bottom: 8px;
 }
+.mch-kit .faq-group-disclosure {
+  border: none;
+}
+.mch-kit .faq-group-disclosure__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  margin: 18px 0 4px;
+  user-select: none;
+}
+.mch-kit .faq-group-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+.mch-kit .faq-group-disclosure__title {
+  font-family: var(--kit-sans);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+.mch-kit .faq-group-disclosure__chevron {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  transform: rotate(45deg);
+  margin-top: 2px;
+  transition: transform 0.25s ease;
+}
+.mch-kit .faq-group-disclosure[open] .faq-group-disclosure__chevron {
+  transform: rotate(225deg);
+  margin-top: 4px;
+}
+.mch-kit .faq-group-disclosure:not([open]) .faq-group-disclosure__body {
+  display: none;
+}
 .mch-kit .faq-group > h3 {
   font-family: var(--kit-sans);
   font-size: 12px;
@@ -4693,11 +4753,46 @@ body.booking-mobile-sheet-open {
   }
 }
 @media (max-width: 680px) {
+  .mch-kit .carousel-track {
+    gap: 12px;
+  }
+  .mch-kit .rooms-carousel .room-v2,
+  .mch-kit .resto-carousel .resto-card,
+  .mch-kit .around-carousel .around-item,
+  .mch-kit .around-carousel .around-item.has-img {
+    width: min(248px, calc(100vw - 48px));
+  }
+  .mch-kit .nearby-carousel .hcard {
+    width: min(220px, calc(100vw - 56px));
+  }
+  .mch-kit .rooms-carousel .rv2-img {
+    height: 168px;
+  }
+  .mch-kit .resto-carousel .resto-img {
+    height: 148px;
+  }
+  .mch-kit .rooms-carousel .rv2-body,
+  .mch-kit .resto-carousel .resto-body {
+    padding: 14px 16px 16px;
+  }
+  .mch-kit .rooms-carousel .rv2-body h3,
+  .mch-kit .resto-carousel .resto-body h4 {
+    font-size: 18px;
+  }
   .mch-kit .exp-justified-carousel {
-    --exp-slide-height: 340px;
+    --exp-slide-height: 280px;
   }
   .mch-kit .exp-justified-carousel .exp-justified-slide {
-    width: calc(var(--exp-slide-height) * max(var(--exp-slide-ratio, 1.1), 0.92));
+    width: min(
+      calc(var(--exp-slide-height) * max(var(--exp-slide-ratio, 1.1), 0.92)),
+      min(248px, calc(100vw - 48px))
+    );
+  }
+  .mch-kit .exp-justified-overlay {
+    padding: 14px 16px 16px;
+  }
+  .mch-kit .exp-justified-overlay h4 {
+    font-size: 18px;
   }
   .mch-kit .exp-card {
     grid-template-columns: 1fr;

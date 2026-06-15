@@ -66,7 +66,7 @@ function wrapKitDisclosure(options: {
       : '';
   const extraClass = options.className !== undefined ? ` ${options.className}` : '';
   const titleIdAttr = options.titleId !== undefined ? ` id="${escapeHtml(options.titleId)}"` : '';
-  return `<details class="kit-disclosure${extraClass}">
+  return `<details class="kit-disclosure${extraClass}" data-default-closed="true">
     <summary class="kit-disclosure__summary">
       <${heading} class="kit-disclosure__title"${titleIdAttr}>${escapeHtml(options.title)}</${heading}>
       <span class="kit-disclosure__chevron" aria-hidden="true"></span>
@@ -644,8 +644,8 @@ function renderRoomCard(model: HotelKitModel, room: HotelRoomCardVM): string {
 }
 
 export function renderKitChambres(model: HotelKitModel): string {
-  const visible = model.roomCards.slice(0, 3);
-  const cards = visible.map((r) => renderRoomCard(model, r)).join('\n\n          ');
+  if (model.roomCards.length === 0) return '';
+  const cards = model.roomCards.map((r) => renderRoomCard(model, r)).join('\n\n          ');
   const lede =
     model.locale === 'en'
       ? `${model.roomCount} rooms and suites — our Concierge's priority selection.`
@@ -653,11 +653,14 @@ export function renderKitChambres(model: HotelKitModel): string {
   return `<section class="htl-section" id="chambres">
       <h2>${escapeHtml(model.labels.roomsSectionTitle)}</h2>
       <p class="htl-lede">${escapeHtml(lede)}</p>
-      <div class="rooms-grid">
+      <div class="carousel rooms-carousel" data-kit-carousel id="chambres-carousel">
+        <div class="carousel-track">
           ${cards}
+        </div>
+        ${model.roomCards.length > 1 ? renderKitCarouselNav(model.locale) : ''}
       </div>
       <div class="rooms-more">
-        <a href="#chambres" class="btn-ligne">${escapeHtml(model.labels.roomsMore)} →</a>
+        <a href="${escapeHtml(model.travelportRoomsHref)}" class="btn-ligne">${escapeHtml(model.labels.roomsMore)} →</a>
       </div>
     </section>`;
 }
@@ -772,8 +775,7 @@ export function renderKitBref(model: HotelKitModel): string {
       const cardClass = isPick ? 'resto-card resto-concierge' : 'resto-card';
       const kindLine = renderRestoKindLine(r);
       const why = isPick ? renderRestoConciergeWhy(r) : '';
-      const hidden = i >= 3 ? ' more-hidden' : '';
-      return `<article class="${cardClass}${hidden}">
+      return `<article class="${cardClass}">
             <div class="resto-img">
               <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" loading="lazy">
               ${pick}
@@ -795,11 +797,13 @@ export function renderKitBref(model: HotelKitModel): string {
   return `<section class="htl-section" id="hotel-en-bref">
       <h2>${escapeHtml(model.labels.briefHotel)}</h2>
       ${historyBlock}
-      <div class="bref-sub">
+      <div class="bref-sub bref-amenities">
         ${wrapKitDisclosure({
           title: amenitiesTitle,
           lede: amenitiesLede,
           body: amenitiesBody,
+          className: 'kit-disclosure--bref',
+          titleId: 'amenities-title',
         })}
       </div>
       ${expSection}
@@ -808,16 +812,12 @@ export function renderKitBref(model: HotelKitModel): string {
           ? `<div class="bref-sub">
         <h3>Restaurants &amp; bars</h3>
         <p class="sub-lede">${model.locale === 'en' ? 'Six addresses under one roof. Our favourite table wears the Concierge badge.' : 'Six adresses sous le même toit. Notre table préférée porte le badge du Concierge.'}</p>
-        <div class="resto-grid${restos.length > 3 ? ' is-collapsed' : ''}" id="resto-list-container">
-          ${restoHtml}
+        <div class="carousel resto-carousel" data-kit-carousel id="resto-carousel">
+          <div class="carousel-track">
+            ${restoHtml}
+          </div>
+          ${restos.length > 1 ? renderKitCarouselNav(model.locale) : ''}
         </div>
-        ${
-          restos.length > 3
-            ? `<div class="resto-more-wrap">
-          <button type="button" class="btn-ligne resto-toggle-btn" data-toggle-more="resto-list-container" id="btn-voir-resto" aria-expanded="false" data-more="${model.locale === 'en' ? 'See more' : 'Voir plus'}" data-less="${model.locale === 'en' ? 'See less' : 'Voir moins'}">${model.locale === 'en' ? 'See more' : 'Voir plus'}</button>
-        </div>`
-            : ''
-        }
       </div>`
           : ''
       }
@@ -1598,6 +1598,16 @@ export function renderKitTopConciergeFaq(model: HotelKitModel): string {
 
 const FAQ_VISIBLE_PER_GROUP = 3;
 
+/** FAQ kit groups that stay expanded on first paint (FR + EN labels). */
+function isKitFaqServicesGroupLabel(label: string): boolean {
+  const normalized = label.trim().toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  return (
+    normalized === 'services' ||
+    normalized === 'services inclus' ||
+    normalized === 'included services'
+  );
+}
+
 function renderFaqGroupBlock<T extends { question: string }>(
   locale: 'fr' | 'en',
   label: string,
@@ -1625,11 +1635,20 @@ function renderFaqGroupBlock<T extends { question: string }>(
     ? `<div class="faq-more-wrap"><button type="button" class="btn-ligne faq-toggle-btn" aria-expanded="false" data-more="${escapeHtml(seeMore)}" data-less="${escapeHtml(seeLess)}">${escapeHtml(seeMore)}</button></div>`
     : '';
 
-  return `<div class="faq-group">
-        <h3>${escapeHtml(label)}</h3>
-        <div class="faq-list${collapsedClass}" data-faq-list>${details}</div>
-        ${toggle}
-      </div>`;
+  const defaultOpen = isKitFaqServicesGroupLabel(label);
+  const openAttr = defaultOpen ? ' open' : '';
+  const closedData = defaultOpen ? '' : ' data-default-closed="true"';
+
+  return `<details class="faq-group faq-group-disclosure"${openAttr}${closedData}>
+        <summary class="faq-group-disclosure__summary">
+          <span class="faq-group-disclosure__title">${escapeHtml(label)}</span>
+          <span class="faq-group-disclosure__chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="faq-group-disclosure__body">
+          <div class="faq-list${collapsedClass}" data-faq-list>${details}</div>
+          ${toggle}
+        </div>
+      </details>`;
 }
 
 export function renderKitFaq(model: HotelKitModel): string {
