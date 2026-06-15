@@ -1,11 +1,11 @@
 /**
- * Phase 3 — curated 30-image gallery manifest for `cheval-blanc-paris`.
+ * Phase 3 — curated 25-image gallery manifest for `cheval-blanc-paris`.
+ *
+ * CDC §2.2 kit (2026-06-10) — 5 UI categories × 5 photos :
+ * Vue, Chambres, Piscine, Restaurant, Spa. Hero Vue is separate (`hero`).
  *
  * Upload sources live in
  * `scripts/editorial-pilot/src/photos/resource-cheval-blanc-paris-gallery-batch.ts`.
- *
- * CDC §2.2 — 10 category floor: exterior, lobby, room, dining, spa, pool,
- * view, detail, concierge, events (3 images each).
  */
 
 import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
@@ -18,7 +18,7 @@ export const CHEVAL_BLANC_PARIS_HERO_SOURCE_URL =
 export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-1',
-    category: 'exterior',
+    category: 'view',
     alt_fr: 'Façade du Cheval Blanc Paris sur le quai du Louvre, face à la Seine',
     alt_en: 'Cheval Blanc Paris facade on Quai du Louvre, facing the Seine',
     caption_fr:
@@ -29,7 +29,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-2',
-    category: 'exterior',
+    category: 'view',
     alt_fr: 'Vue du Cheval Blanc Paris et du Pont Neuf depuis la Seine',
     alt_en: 'View of Cheval Blanc Paris and Pont Neuf from the Seine',
     caption_fr:
@@ -40,18 +40,18 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-3',
-    category: 'exterior',
-    alt_fr: 'Architecture du Cheval Blanc Paris, quai du Louvre 75001',
-    alt_en: 'Cheval Blanc Paris architecture, Quai du Louvre 75001',
+    category: 'view',
+    alt_fr: 'Le Jardin rooftop, vue Tour Eiffel, Cheval Blanc Paris',
+    alt_en: 'Le Jardin rooftop with Eiffel Tower view, Cheval Blanc Paris',
     caption_fr:
-      'Edouard François a repensé l’enveloppe ; Peter Marino signe les intérieurs contemporains de la Maison parisienne.',
+      'Le Jardin suspendu au 7e étage capte la Tour Eiffel en saison estivale — table en plein ciel par beau temps.',
     caption_en:
-      'Edouard François reshaped the envelope; Peter Marino signs the contemporary interiors of the Paris Maison.',
+      'Le Jardin, suspended on the 7th floor, catches the Eiffel Tower in summer — an open-sky table in fine weather.',
     credit: 'Cheval Blanc Paris (LVMH) — Oliver Fly Photography',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-4',
-    category: 'lobby',
+    category: 'room',
     alt_fr: 'Salon d’accueil du Cheval Blanc Paris, lumière tamisée',
     alt_en: 'Reception lounge at Cheval Blanc Paris, soft light',
     caption_fr:
@@ -62,7 +62,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-5',
-    category: 'lobby',
+    category: 'room',
     alt_fr: 'Lobby du Cheval Blanc Paris, escalier et œuvres d’art',
     alt_en: 'Cheval Blanc Paris lobby, staircase and artworks',
     caption_fr:
@@ -73,7 +73,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-6',
-    category: 'lobby',
+    category: 'room',
     alt_fr: 'Accueil familial au lobby du Cheval Blanc Paris',
     alt_en: 'Family welcome at Cheval Blanc Paris lobby',
     caption_fr:
@@ -106,7 +106,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-9',
-    category: 'room',
+    category: 'pool',
     alt_fr: 'Suite Seine avec jardin d’hiver, Cheval Blanc Paris',
     alt_en: 'Seine Suite with winter garden, Cheval Blanc Paris',
     caption_fr:
@@ -228,17 +228,17 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-20',
     category: 'view',
-    alt_fr: 'Le Jardin rooftop, vue Tour Eiffel, Cheval Blanc Paris',
-    alt_en: 'Le Jardin rooftop with Eiffel Tower view, Cheval Blanc Paris',
+    alt_fr: 'Balcon du Le Tout-Paris, panorama sur la Seine',
+    alt_en: 'Le Tout-Paris balcony, panorama over the Seine',
     caption_fr:
-      'Le Jardin suspendu au 7e étage capte la Tour Eiffel en saison estivale — table en plein ciel par beau temps.',
+      'Le balcon du Le Tout-Paris offre l’une des vues les plus nettes sur la Seine depuis le 1er arrondissement.',
     caption_en:
-      'Le Jardin, suspended on the 7th floor, catches the Eiffel Tower in summer — an open-sky table in fine weather.',
+      'Le Tout-Paris balcony offers one of the clearest Seine views from the 1st arrondissement.',
     credit: 'Cheval Blanc Paris (LVMH) — Vincent Leroux',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-21',
-    category: 'view',
+    category: 'pool',
     alt_fr: 'Balcon du Le Tout-Paris, panorama sur la Seine',
     alt_en: 'Le Tout-Paris balcony, panorama over the Seine',
     caption_fr:
@@ -249,7 +249,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-22',
-    category: 'detail',
+    category: 'dining',
     alt_fr: 'Création du chef à Plénitude, Cheval Blanc Paris',
     alt_en: 'Chef’s creation at Plénitude, Cheval Blanc Paris',
     caption_fr:
@@ -260,7 +260,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-23',
-    category: 'detail',
+    category: 'dining',
     alt_fr: 'Salle du restaurant Hakuba, Cheval Blanc Paris',
     alt_en: 'Hakuba restaurant room, Cheval Blanc Paris',
     caption_fr:
@@ -271,7 +271,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-24',
-    category: 'detail',
+    category: 'spa',
     alt_fr: 'Suite L’Appartement, détail décoratif, Cheval Blanc Paris',
     alt_en: 'L’Appartement Suite decorative detail, Cheval Blanc Paris',
     caption_fr:
@@ -282,7 +282,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-25',
-    category: 'concierge',
+    category: 'spa',
     alt_fr: 'Conciergerie du Cheval Blanc Paris',
     alt_en: 'Concierge desk at Cheval Blanc Paris',
     caption_fr:
@@ -291,71 +291,15 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
       'The concierge coordinates starred tables, Louvre tickets and Dior Spa access — day or night.',
     credit: 'Cheval Blanc Paris (LVMH)',
   },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-26',
-    category: 'concierge',
-    alt_fr: 'Ambassadrice Dior Spa Cheval Blanc Paris',
-    alt_en: 'Dior Spa Cheval Blanc Paris ambassador',
-    caption_fr:
-      'Les Artisans de la Maison personnalisent chaque séjour : spa, restauration et surprises discrètes en chambre.',
-    caption_en:
-      'Maison Artisans personalise each stay: spa, dining and discreet in-room surprises.',
-    credit: 'Cheval Blanc Paris (LVMH) — Adrien Vigreux',
-  },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-27',
-    category: 'concierge',
-    alt_fr: 'Service sur mesure en suite, Cheval Blanc Paris',
-    alt_en: 'Bespoke in-suite service, Cheval Blanc Paris',
-    caption_fr:
-      'Majordomes et conciergerie anticipent les demandes de dernière minute — tables, transferts et privatisations.',
-    caption_en:
-      'Butlers and concierge anticipate last-minute requests — tables, transfers and privatisations.',
-    credit: 'Cheval Blanc Paris (LVMH)',
-  },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-28',
-    category: 'events',
-    alt_fr: 'Salon privatisable Le Tout-Paris, Cheval Blanc Paris',
-    alt_en: 'Privatisable Le Tout-Paris salon, Cheval Blanc Paris',
-    caption_fr:
-      'Le Tout-Paris se privatise en totalité ou partiellement pour cocktails et dîners sur la terrasse du 7e étage.',
-    caption_en:
-      'Le Tout-Paris can be fully or partially privatised for cocktails and dinners on the 7th-floor terrace.',
-    credit: 'Cheval Blanc Paris (LVMH) — Ilya Food Stories',
-  },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-29',
-    category: 'events',
-    alt_fr: 'Suite L’Appartement pour réception privée, Cheval Blanc Paris',
-    alt_en: 'L’Appartement Suite for private reception, Cheval Blanc Paris',
-    caption_fr:
-      'Les suites L’Appartement accueillent réceptions intimes et célébrations familiales loin de l’agitation du quai.',
-    caption_en:
-      'L’Appartement suites host intimate receptions and family celebrations away from quayside bustle.',
-    credit: 'Cheval Blanc Paris (LVMH) — Vincent Leroux',
-  },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-30',
-    category: 'events',
-    alt_fr: 'Dîner dominical au Le Tout-Paris, Cheval Blanc Paris',
-    alt_en: 'Sunday lunch at Le Tout-Paris, Cheval Blanc Paris',
-    caption_fr:
-      'Le déjeuner dominical au Le Tout-Paris rassemble familles et amis — brasserie étoilée avec vue sur Paris.',
-    caption_en:
-      'Sunday lunch at Le Tout-Paris brings families and friends together — starred brasserie with a Paris view.',
-    credit: 'Cheval Blanc Paris (LVMH) — Ilya Food Stories',
-  },
 ] as const;
 
-/** CDC §2.2 category floor — 10 required categories. */
+/** Kit 5×5 — official Prismic URLs (hero excluded). */
 const CHEVAL_BLANC_PRISMIC_W = 'auto=format,compress&w=2880';
 
-/** Raw press-slot URLs (press-2 = hero source — deduped in {@link CHEVAL_BLANC_PARIS_GALLERY_SOURCE_URLS}). */
 export const CHEVAL_BLANC_PARIS_GALLERY_PRESS_SLOT_URLS = [
   `https://images.prismic.io/lvmh-chevalblanc/aEb52Lh8WN-LV5rR_ChevalBlancParis_Fa%C3%A7ade3_Oliver_Fly_Photography_32025.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/aiKrfQeQX7-eW2iQ_Light-ChevalBlancParis_PontNeufJR_OliverFly2026-1-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/aGUCC3fc4bHWi86A_Light-ChevalBlancParis_Fa%C3%A7ade_OliverFly.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
+  `https://images.prismic.io/lvmh-chevalblanc/ad3-xp1ZCF7ETKac_Light-ChevalBlancParis_LeJardin_VueEiffel_VincentLeroux-2-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z8_85hsAHJWomUB3_WebRGB-ChevalBlancParis_Salond%27Accueil_AlexandreTabaste.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z-WJyndAxsiBwAPn_WebRGB-ChevalBlancParis-LeToutParis-salle-EdouardFran%C3%A7ois-2021.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z9wuHDiBA97Giuw3_WebRGB-ChevalBlancParis-Shootingphotosenfants-Lobby-Chlo%C3%A9Gassian-5avril2023-02.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
@@ -372,17 +316,12 @@ export const CHEVAL_BLANC_PARIS_GALLERY_PRESS_SLOT_URLS = [
   `https://images.prismic.io/lvmh-chevalblanc/Z-0KhndAxsiBwNua_WebRGB-ChevalBlancParis_Piscine_OliverFly.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z-0KaXdAxsiBwNuR_WebRGB-ChevalBlancParis_Piscineinfinie_AlexandreTabaste-2-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z_kS8evxEdbNO6gd_WebRGB-ChevalBlancParis_SuiteEiffel_Salon_VincentLeroux-1-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/ad3-xp1ZCF7ETKac_Light-ChevalBlancParis_LeJardin_VueEiffel_VincentLeroux-2-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/agRTtaYofJOwHLYf_Light-ChevalBlancParis_LeTout-Paris_Balcon_Ilyafoodstories-8-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/aTlGTHNYClf9oARl_Light-ChevalBlancParis_Pl%C3%A9nitude_Grousec%C3%A9leripassion_2025_Ilyafoodstories-1-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/aTk673NYClf9oAFB_Light-ChevalBlancParis_Hakuba_Salle_Carolinedutrey-2-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
+  `https://images.prismic.io/lvmh-chevalblanc/Z_d3quvxEdbNO1EV_WebRGB-ChevalBlancParis_L%27Appartement_SuiteRavel-AlexandreTabaste-3-_0535.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z_d33uvxEdbNO1Ed_WebRGB-ChevalBlancParis_L%27Appartement_SuiteQuintessence_VincentLeroux.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
   `https://images.prismic.io/lvmh-chevalblanc/Z-0MmHdAxsiBwNwL_WebRGB-ChevalBlancParis_AmbassadriceDiorSpa_KiaraBaratta_AdrienVigreux-2-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/aP-H6bpReVYa3tgg_Beauty%26bodymamanb%C3%A9b%C3%A9_DiorSpaChevalBlanc-1-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/Z_d3quvxEdbNO1EV_WebRGB-ChevalBlancParis_L%27Appartement_SuiteRavel-AlexandreTabaste-3-_0535.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/aftDdsBOoF08xrK3_ChevalBlancParis_Salle_LeTout-Paris_2026_IlyaFoodStories-3-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/Z_d44OvxEdbNO1Fv_WebRGB-ChevalBlancParis_L%27Appartement_SuiteQuintessence_VincentLeroux-2.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
-  `https://images.prismic.io/lvmh-chevalblanc/Z_kXyuvxEdbNO6v-_WebRGB-ChevalBlancParis_LeTout-Paris_D%C3%A9jeunerDominical_ilyafoodstories-1-.jpg?${CHEVAL_BLANC_PRISMIC_W}`,
 ] as const;
 
 /** Provenance URLs for promote + `kit.02.gallery_source_url_tracked` (hero excluded). */
@@ -392,14 +331,9 @@ export const CHEVAL_BLANC_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsP
 );
 
 export const CHEVAL_BLANC_PARIS_GALLERY_CDC_CATEGORIES = [
-  'exterior',
-  'lobby',
+  'view',
   'room',
+  'pool',
   'dining',
   'spa',
-  'pool',
-  'view',
-  'detail',
-  'concierge',
-  'events',
 ] as const;

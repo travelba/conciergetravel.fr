@@ -86,6 +86,12 @@ export const env = createEnv({
     REVALIDATE_SECRET: z.string().min(16),
     DATADOG_ENABLED: z.coerce.boolean().default(false),
     LOYALTY_PREMIUM_BILLING_ENABLED: z.coerce.boolean().default(false),
+    /**
+     * When true, every published hotel fiche renders the kit shell (`HotelPageKit`)
+     * instead of the legacy 15-block layout. Pilot slugs in `HOTEL_KIT_SLUGS` are
+     * always kit regardless of this flag. Flip on only after batch validation walks.
+     */
+    MCH_HOTEL_KIT_CATALOGUE_ROLLOUT: z.coerce.boolean().default(false),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.string().url(),

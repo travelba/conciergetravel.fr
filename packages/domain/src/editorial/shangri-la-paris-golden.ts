@@ -966,7 +966,7 @@ function shangriLaParisExternalScalar(field: ShangriLaParisExternalScalarField):
 export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   {
     key: 'atelier-dim-sum',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-23`,
+    image_public_id: shangriLaParisPoiImage('tour-eiffel-trocadero'),
     title_fr: 'Atelier dim sum au Shang Palace',
     title_en: 'Dim sum workshop at Shang Palace',
     description_fr:
@@ -980,7 +980,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'rituel-prince-bonaparte',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-13`,
+    image_public_id: shangriLaParisPoiImage('bois-de-boulogne'),
     title_fr: 'Rituel Prince Bonaparte au CHI Spa',
     title_en: 'Prince Bonaparte ritual at CHI Spa',
     description_fr:
@@ -993,7 +993,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'diner-verriere-bauhinia',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-24`,
+    image_public_id: shangriLaParisPoiImage('cite-architecture'),
     title_fr: 'Dîner privé sous la verrière La Bauhinia',
     title_en: 'Private dinner under La Bauhinia cupola',
     description_fr:
@@ -1005,7 +1005,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'visite-patrimoine',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-25`,
+    image_public_id: shangriLaParisPoiImage('palais-galliera'),
     title_fr: 'Visite guidée du patrimoine du Palais d’Iéna',
     title_en: 'Guided tour of Palais d’Iéna heritage',
     description_fr:
@@ -1016,7 +1016,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'petit-dejeuner-vue-eiffel',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-20`,
+    image_public_id: shangriLaParisPoiImage('promenade-seine'),
     title_fr: 'Petit-déjeuner vue Tour Eiffel en terrasse',
     title_en: 'Eiffel Tower view terrace breakfast',
     description_fr:
@@ -1027,7 +1027,7 @@ export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'soiree-chinoise-privee',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-16`,
+    image_public_id: shangriLaParisPoiImage('musee-guimet'),
     title_fr: 'Soirée chinoise privée au Shang Palace',
     title_en: 'Private Chinese soirée at Shang Palace',
     description_fr:

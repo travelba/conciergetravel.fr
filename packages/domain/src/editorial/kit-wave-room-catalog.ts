@@ -106,7 +106,7 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
       'superior-room': pair('shangri-la-paris', 6),
       'deluxe-room': pair('shangri-la-paris', 7),
       'terrace-room': pair('shangri-la-paris', 20),
-      'eiffel-view-room': pair('shangri-la-paris', 19),
+      'eiffel-view-room': pair('shangri-la-paris', 21),
     },
   },
 };

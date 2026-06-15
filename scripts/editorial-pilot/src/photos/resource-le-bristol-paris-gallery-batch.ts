@@ -1,5 +1,5 @@
 /**
- * Phase 3 — full 30-image gallery for `le-bristol-paris`.
+ * Phase 3 — kit 25-slot gallery (5×5) for `le-bristol-paris`.
  *
  * Metadata + source URLs in `@mch/domain` (`LE_BRISTOL_PARIS_GALLERY_*`).
  *

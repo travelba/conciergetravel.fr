@@ -15,8 +15,6 @@ import {
 
 import type { HotelDetailRow } from '@/server/hotels/get-hotel-by-slug';
 
-import { isHotelKitSlug } from './is-hotel-kit-slug';
-
 type GoldenFieldsBuilder = (current: {
   readonly description_fr: unknown;
   readonly description_en: unknown;
@@ -124,12 +122,16 @@ function mergeGoldenRow(row: HotelDetailRow, golden: Record<string, unknown>): H
  * always has complete restaurants, spa, POI, FAQ, photos, etc. — independent
  * of `MCH_LOCAL_FIXTURE` (prod preview must match the reference).
  */
+function resolveGoldenPatchSlug(row: HotelDetailRow): string | null {
+  if (resolveGoldenBuilder(row.slug) !== null) return row.slug;
+  if (row.slug_en !== null && row.slug_en !== '' && resolveGoldenBuilder(row.slug_en) !== null) {
+    return row.slug_en;
+  }
+  return null;
+}
+
 export function patchKitGoldenRow(row: HotelDetailRow): HotelDetailRow {
-  const slug = isHotelKitSlug(row.slug)
-    ? row.slug
-    : row.slug_en !== null && isHotelKitSlug(row.slug_en)
-      ? row.slug_en
-      : null;
+  const slug = resolveGoldenPatchSlug(row);
   if (slug === null) return row;
 
   const build = resolveGoldenBuilder(slug);

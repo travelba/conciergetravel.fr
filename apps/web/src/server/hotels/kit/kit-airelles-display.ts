@@ -322,10 +322,10 @@ export const AIRELLES_KIT_ROOM_SECOND: Readonly<Record<string, string>> = Object
     .map(([key, pair]) => [key, pair.second]),
 );
 
-/** DA § `#chambres` — first three cards: Deluxe Valley, Superior Village, Vasarely. */
+/** DA § `#chambres` — Concierge pick first, then signature valley + Vasarely. */
 const AIRELLES_KIT_CARD_PRIORITY: readonly (readonly string[])[] = [
+  ['suite-baron-de-simiane', 'baron-de-simiane-suite'],
   ['chambre-deluxe-vallee', 'deluxe-room-valley-side', 'deluxe-vallee'],
-  ['chambre-superieure-village', 'superior-room-village-side', 'superieure-village'],
   ['suite-vasarely', 'vasarely-suite'],
 ];
 

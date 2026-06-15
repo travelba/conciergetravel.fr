@@ -687,13 +687,24 @@ function signatureExperienceSlideRatio(expIndex: number, isPick: boolean): numbe
 }
 
 export function renderKitBref(model: HotelKitModel): string {
-  const amenHtml = resolveKitAmenityBlocks(model.slugFr)
+  const curatedAmenHtml = resolveKitAmenityBlocks(model.slugFr)
     .map((block) => {
       const title = model.locale === 'en' ? block.titleEn : block.titleFr;
       const detail = model.locale === 'en' ? block.descEn : block.descFr;
       return `<div class="amen">${amenityIconHtml(block.icon)}<b>${escapeHtml(title)}</b><span>${escapeHtml(detail)}</span></div>`;
     })
     .join('\n          ');
+
+  const amenHtml =
+    curatedAmenHtml.length > 0
+      ? curatedAmenHtml
+      : model.amenitiesFlat
+          .slice(0, 12)
+          .map(
+            (label) =>
+              `<div class="amen">${amenityIconHtml('daily')}<b>${escapeHtml(label)}</b></div>`,
+          )
+          .join('\n          ');
 
   const historyBlock =
     model.storySections.length > 0

@@ -25,8 +25,10 @@ import {
   PRINCE_DE_GALLES_FAQ_CONTENT_PROMOTE,
 } from './prince-de-galles-faq.generated';
 import { PRINCE_DE_GALLES_CONCIERGE_QUESTIONS_KIT } from './prince-de-galles-concierge-questions';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 import {
   PRINCE_DE_GALLES_GALLERY_IMAGES,
+  PRINCE_DE_GALLES_GALLERY_SOURCE_URLS,
   PRINCE_DE_GALLES_HERO_IMAGE,
 } from './prince-de-galles-gallery';
 
@@ -1444,7 +1446,10 @@ export function buildPrinceDeGallesGoldenFields(
     meta_title_fr: PRINCE_DE_GALLES_META_TITLE_FR,
     meta_title_en: PRINCE_DE_GALLES_META_TITLE_EN,
     hero_image: PRINCE_DE_GALLES_HERO_IMAGE,
-    gallery_images: PRINCE_DE_GALLES_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      PRINCE_DE_GALLES_GALLERY_IMAGES,
+      PRINCE_DE_GALLES_GALLERY_SOURCE_URLS,
+    ),
     external_sources: PRINCE_DE_GALLES_EXTERNAL_SOURCES,
     wikidata_id: princeDeGallesExternalScalar('wikidata_id'),
     wikipedia_url_fr: princeDeGallesExternalScalar('wikipedia_url_fr'),

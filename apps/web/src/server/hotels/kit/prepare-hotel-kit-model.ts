@@ -79,7 +79,6 @@ import { dropCannibalizingSections, resolvePopulatedBlocks } from '@mch/domain/e
 import { normalizeHotelImageAltFr } from '@/lib/seo/hotel-page-seo';
 
 import { createKitMediaResolver, type KitMediaResolver } from './kit-media-resolver';
-import { isHotelKitSlug } from './is-hotel-kit-slug';
 import { patchKitGoldenRow } from './patch-kit-golden-row';
 import {
   enrichAirellesKitRoomCards,
@@ -107,22 +106,18 @@ import {
 
 type KitDisplayBrand = 'airelles' | 'prince-de-galles' | 'catalog';
 
-function resolveKitDisplayBrand(row: Pick<HotelDetailRow, 'slug' | 'slug_en'>): KitDisplayBrand {
-  const kitSlug = isHotelKitSlug(row.slug)
-    ? row.slug
-    : row.slug_en !== null && isHotelKitSlug(row.slug_en)
-      ? row.slug_en
-      : null;
-  if (kitSlug === null) {
-    throw new Error(`resolveKitDisplayBrand: unsupported kit slug ${row.slug}`);
-  }
-  if (kitSlug === 'prince-de-galles-paris') {
+function resolveKitDisplayBrand(row: Pick<HotelDetailRow, 'slug'>): KitDisplayBrand {
+  const slugFr = row.slug;
+  if (slugFr === 'prince-de-galles-paris') {
     return 'prince-de-galles';
   }
-  if (isKitWaveSlug(kitSlug)) {
+  if (slugFr === 'les-airelles-gordes' || slugFr === 'les-airelles-gordes-en') {
+    return 'airelles';
+  }
+  if (isKitWaveSlug(slugFr)) {
     return 'catalog';
   }
-  return 'airelles';
+  return 'catalog';
 }
 
 type KitRoomImagePair =

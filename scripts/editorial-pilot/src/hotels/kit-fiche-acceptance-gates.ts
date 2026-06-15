@@ -62,6 +62,14 @@ const REPO_ROOT = resolve(__dirname, '../../../..');
 /** Reference pilots — exempt from per-slug room batch/display modules (D16). */
 export const KIT_REFERENCE_PILOT_SLUGS = ['les-airelles-gordes', 'prince-de-galles-paris'] as const;
 
+/** Post-Airelles template validation batch — keep in sync with `is-hotel-kit-slug.ts`. */
+export const HOTEL_KIT_VALIDATE_BATCH_SLUGS = [
+  'prince-de-galles-paris',
+  'cheval-blanc-paris',
+  'le-bristol-paris',
+  'shangri-la-paris',
+] as const;
+
 /** Published kit slugs (exclude locale alias `*-en` — DB canonical slug only). */
 export const HOTEL_KIT_SLUGS = [
   'les-airelles-gordes',

@@ -131,7 +131,7 @@ import {
 } from '@/server/hotels/get-hotel-by-slug';
 import { HotelPageKit } from '@/components/hotel/kit/hotel-page-kit';
 import { getRelatedHotels } from '@/server/hotels/get-related-hotels';
-import { isHotelKitSlug } from '@/server/hotels/kit/is-hotel-kit-slug';
+import { shouldRenderHotelKitPage } from '@/server/hotels/kit/is-hotel-kit-slug';
 import { buildHotelKitMetadata } from '@/server/hotels/kit/build-hotel-kit-metadata';
 import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
 
@@ -233,16 +233,14 @@ export async function generateMetadata({
   if (!isRoutingLocale(raw)) return {};
   const locale = raw;
 
-  if (isHotelKitSlug(slug)) {
-    const detail = await getHotelBySlug(slug, locale);
-    if (!detail) return { robots: { index: false, follow: false } };
+  const detail = await getHotelBySlug(slug, locale);
+  if (!detail) return { robots: { index: false, follow: false } };
+
+  if (shouldRenderHotelKitPage(slug, detail.row.is_published)) {
     return buildHotelKitMetadata(locale, detail);
   }
 
   const t = await getTranslations({ locale, namespace: 'hotelPage' });
-
-  const detail = await getHotelBySlug(slug, locale);
-  if (!detail) return { robots: { index: false, follow: false } };
 
   const { row } = detail;
   const name = pickName(row, locale);
@@ -391,7 +389,7 @@ export default async function HotelPage({
   const detail = await getHotelBySlug(slug, locale);
   if (!detail) notFound();
 
-  if (isHotelKitSlug(slug)) {
+  if (shouldRenderHotelKitPage(slug, detail.row.is_published)) {
     return <HotelPageKit locale={locale} detail={detail} />;
   }
 

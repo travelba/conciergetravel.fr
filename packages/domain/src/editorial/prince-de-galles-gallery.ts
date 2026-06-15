@@ -13,7 +13,22 @@
  * (skip category vs. honest “no pool” editorial note).
  */
 
-export const PRINCE_DE_GALLES_HERO_IMAGE = 'cct/hotels/prince-de-galles-paris/press-1';
+import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
+
+const PRINCE_DE_GALLES_DAM_PREFIX =
+  'https://cache.marriott.com/content/dam/marriott-renditions/PARLC/';
+const PRINCE_DE_GALLES_DAM_SUFFIX =
+  '?output-quality=70&interpolation=progressive-bilinear&downsize=2880px:*';
+
+function princeDeGallesDamUrl(file: string): string {
+  return `${PRINCE_DE_GALLES_DAM_PREFIX}${file}.jpg${PRINCE_DE_GALLES_DAM_SUFFIX}`;
+}
+
+export const PRINCE_DE_GALLES_HERO_IMAGE = 'cct/hotels/prince-de-galles-paris/hero';
+
+export const PRINCE_DE_GALLES_HERO_SOURCE_URL = princeDeGallesDamUrl(
+  'parlc-hotel-facade-5619-hor-wide',
+);
 
 export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   {
@@ -338,15 +353,55 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-30',
     category: 'events',
-    alt_fr: 'Le Patio du Prince de Galles Paris, réceptions en plein air',
-    alt_en: 'Le Patio at Prince de Galles Paris, outdoor receptions',
+    alt_fr: 'Suite Mosaïque du Prince de Galles Paris, salon pour réceptions privées',
+    alt_en: 'Mosaic Suite at Prince de Galles Paris, salon for private receptions',
     caption_fr:
-      'Le Patio mosaïqué accueille cocktails et dîners privés en plein air, au cœur du palace de l’avenue George V.',
+      'La Suite Mosaïque accueille cocktails et dîners privés dans un décor Art déco — capacité jusqu’à douze convives.',
     caption_en:
-      'The mosaic Patio hosts cocktails and private outdoor dinners, at the heart of the Avenue George V palace.',
+      'The Mosaic Suite hosts cocktails and private dinners in an Art Deco setting — capacity up to twelve guests.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
 ] as const;
+
+/** Raw Marriott DAM / Scene7 URLs per press slot (hero excluded — deduped in {@link PRINCE_DE_GALLES_GALLERY_SOURCE_URLS}). */
+export const PRINCE_DE_GALLES_GALLERY_PRESS_SLOT_URLS = [
+  princeDeGallesDamUrl('parlc-hotel-facade-5618-hor-clsc'),
+  princeDeGallesDamUrl('parlc-hotel-facade-5619-hor-clsc'),
+  princeDeGallesDamUrl('parlc-exterior-4792-hor-clsc'),
+  princeDeGallesDamUrl('parlc-lobby-9112-hor-clsc'),
+  princeDeGallesDamUrl('parlc-marble-stairs-6041-ver-clsc'),
+  princeDeGallesDamUrl('parlc-suite-living-8696-hor-wide'),
+  princeDeGallesDamUrl('parlc-art-deco-1138-hor-wide'),
+  princeDeGallesDamUrl('parlc-art-deco-6033-hor-wide'),
+  princeDeGallesDamUrl('parlc-courtyardview-guestroom-0592-hor-wide'),
+  princeDeGallesDamUrl('parlc-patio-5651-hor-clsc'),
+  princeDeGallesDamUrl('parlc-le-patio-0640-hor-clsc'),
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-s-lection-shooting-oubrun-18140:Classic-Hor?wid=2880&fit=constrain',
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-hammam2-40183:Classic-Hor?wid=2880&fit=constrain',
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-relax2-39825:Classic-Hor?wid=2880&fit=constrain',
+  princeDeGallesDamUrl('parlc-suite-bathroom-0856-hor-wide'),
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-gym-27587:Classic-Hor?wid=2880&fit=constrain',
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lux-parlc-spa-double-13746:Classic-Hor?wid=2880&fit=constrain',
+  princeDeGallesDamUrl('parlc-suite-patrick-hellmann-0852-hor-wide'),
+  princeDeGallesDamUrl('parlc-george-view-2593-hor-wide'),
+  princeDeGallesDamUrl('parlc-attraction-eiffel-0251-hor-clsc'),
+  princeDeGallesDamUrl('parlc-art-deco-0642-hor-wide'),
+  princeDeGallesDamUrl('parlc-art-deco-0643-hor-wide'),
+  princeDeGallesDamUrl('parlc-suite-patrick-hellmann-0855-hor-clsc'),
+  'https://cache.marriott.com/is/image/marriotts7prod/lc-parlc-lobby-and-concierge--23375:Classic-Hor?wid=2880&fit=constrain',
+  princeDeGallesDamUrl('parlc-prince-5630-hor-clsc'),
+  princeDeGallesDamUrl('parlc-prince-9090-hor-wide'),
+  princeDeGallesDamUrl('parlc-prince-5632-hor-wide'),
+  princeDeGallesDamUrl('parlc-mosaic-suite-4802-hor-wide'),
+  princeDeGallesDamUrl('parlc-patio-5653-hor-clsc'),
+  princeDeGallesDamUrl('parlc-mosaic-suite-4800-hor-wide'),
+] as const;
+
+/** Provenance URLs for promote + `kit.02.gallery_source_url_tracked` (hero excluded). */
+export const PRINCE_DE_GALLES_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPerPressSlot(
+  PRINCE_DE_GALLES_GALLERY_PRESS_SLOT_URLS,
+  PRINCE_DE_GALLES_HERO_SOURCE_URL,
+);
 
 /** CDC §2.2 category floor — 10 required categories. */
 export const PRINCE_DE_GALLES_GALLERY_CDC_CATEGORIES = [

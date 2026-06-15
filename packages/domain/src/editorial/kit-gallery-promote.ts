@@ -102,16 +102,17 @@ export function buildKitGallerySourceUrlsPerPressSlot(
   }
   const hero = heroSourceUrl.trim();
   const heroKey = normalizeGallerySourceUrlForDedup(hero);
-  const used = new Set<string>();
+  const usedCanonical = new Set<string>();
   const out: string[] = [];
+
+  const canonicalKey = (url: string): string => normalizeGallerySourceUrlForDedup(url.trim());
 
   const isTaken = (url: string): boolean => {
     const trimmed = url.trim();
-    return (
-      trimmed.length < 12 ||
-      normalizeGallerySourceUrlForDedup(trimmed) === heroKey ||
-      used.has(trimmed)
-    );
+    if (trimmed.length < 12) return true;
+    const key = canonicalKey(trimmed);
+    if (key === heroKey) return true;
+    return usedCanonical.has(key);
   };
 
   for (let i = 0; i < slotCount; i += 1) {
@@ -138,7 +139,7 @@ export function buildKitGallerySourceUrlsPerPressSlot(
         `buildKitGallerySourceUrlsPerPressSlot: no unique url for press-${slotOneBased}`,
       );
     }
-    used.add(url);
+    usedCanonical.add(canonicalKey(url));
     out.push(url);
   }
   return out;

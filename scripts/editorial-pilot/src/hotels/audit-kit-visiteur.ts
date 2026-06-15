@@ -9,6 +9,13 @@
 
 import { isKitWaveSlug, KIT_WAVE_SLUGS } from '@mch/domain/editorial';
 
+/** Kit slugs audited via live HTML visitor pass (wave 5 + Prince de Galles). */
+const KIT_VISITEUR_SLUGS = [...KIT_WAVE_SLUGS, 'prince-de-galles-paris'] as const;
+
+function isKitVisiteurSlug(slug: string): boolean {
+  return (KIT_VISITEUR_SLUGS as readonly string[]).includes(slug);
+}
+
 const MIN_EXP_CARDS = 4;
 const MAX_DINING_PLACEHOLDERS = 0;
 const MAX_CROSS_BLOCK_DUPES = 0;
@@ -171,7 +178,7 @@ function extractSpaPublicId(html: string, slug: string): string | null {
 /** Parse live `/hotel/{slug}` HTML (FR) into a visitor audit report. */
 export function auditKitVisiteurHtml(html: string, slug: string): KitVisiteurAuditReport {
   const roomCards = matchCardsForSlug(html, slug, 'room-v2', 'h3');
-  const experiences = matchCardsForSlug(html, slug, 'exp-card', 'h4');
+  const experiences = matchCardsForSlug(html, slug, 'exp-justified-slide', 'h4');
   const restaurants = matchCardsForSlug(html, slug, 'resto-card', 'h4');
   const instagram = matchInstagramCards(html, slug);
   const spaPublicId = extractSpaPublicId(html, slug);
@@ -259,7 +266,7 @@ export async function prefetchKitVisiteurHtmlForSlugs(
 ): Promise<Map<string, string>> {
   if (process.env['MCH_SKIP_KIT_VISITEUR_AUDIT'] === '1') return new Map();
 
-  const targets = slugs.filter((s) => isKitWaveSlug(s));
+  const targets = slugs.filter((s) => isKitVisiteurSlug(s));
   const base = resolveKitVisiteurBaseUrl();
   const entries = await Promise.all(
     targets.map(async (slug) => {
@@ -295,8 +302,8 @@ export async function runKitVisiteurCli(argv: readonly string[]): Promise<number
 
   let exitCode = 0;
   for (const slug of slugs) {
-    if (!isKitWaveSlug(slug)) {
-      console.warn(`[audit:kit-visiteur] skip non-wave slug ${slug}`);
+    if (!isKitVisiteurSlug(slug)) {
+      console.warn(`[audit:kit-visiteur] skip non-kit slug ${slug}`);
       continue;
     }
     const html = await fetchKitVisiteurHtml(slug);

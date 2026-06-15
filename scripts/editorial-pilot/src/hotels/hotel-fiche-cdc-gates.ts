@@ -7,7 +7,7 @@
  */
 
 import {
-  buildKitWaveRoomAuditContext,
+  buildKitPilotRoomAuditContext,
   countCannibalizingSections,
   countCompleteVenues,
   detectFabricatedStarClaim,
@@ -15,7 +15,6 @@ import {
   evaluatePoiImages,
   evaluatePoiDedicatedImages,
   evaluateSpaDossier,
-  isKitWaveSlug,
   resolvePopulatedBlocks,
 } from '@mch/domain/editorial';
 import {
@@ -1996,9 +1995,7 @@ export function evaluateCdcHotelFiche(
 
   /* ── Kit PO acceptance (D15–D19) — render parity, not deploy parity ── */
   if (isHotelKitSlug(row.slug)) {
-    const waveRoomCtx = isKitWaveSlug(row.slug)
-      ? buildKitWaveRoomAuditContext(row.slug, ctx.kitRoomRows)
-      : null;
+    const pilotRoomCtx = buildKitPilotRoomAuditContext(row.slug, ctx.kitRoomRows);
     const kitChecks = evaluateKitAcceptanceGates({
       slug: row.slug,
       name: row.name,
@@ -2012,9 +2009,9 @@ export function evaluateCdcHotelFiche(
       concierge_questions: row.concierge_questions,
       signature_experiences: row.signature_experiences,
       points_of_interest: row.points_of_interest,
-      rooms: waveRoomCtx?.rooms ?? ctx.kitRoomRows,
-      ...(waveRoomCtx?.orderedRoomSlugs !== undefined
-        ? { orderedRoomSlugs: waveRoomCtx.orderedRoomSlugs }
+      rooms: pilotRoomCtx?.rooms ?? ctx.kitRoomRows,
+      ...(pilotRoomCtx?.orderedRoomSlugs !== undefined
+        ? { orderedRoomSlugs: pilotRoomCtx.orderedRoomSlugs }
         : {}),
       ...(ctx.kitRenderedHtmlFr !== undefined ? { renderedHtmlFr: ctx.kitRenderedHtmlFr } : {}),
     });

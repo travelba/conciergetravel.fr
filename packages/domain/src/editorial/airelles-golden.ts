@@ -17,6 +17,11 @@ import {
   dropDuplicateCategorySections,
   resolvePopulatedBlocks,
 } from './golden-template';
+import {
+  attachKitGallerySourceUrls,
+  buildKitGallerySourceUrlsPerPressSlot,
+  kitHeroPublicIdForSlug,
+} from './kit-gallery-promote';
 
 export const AIRELLES_PROMOTE_SLUG = 'les-airelles-gordes';
 
@@ -700,6 +705,7 @@ export {
 } from './airelles-faq-perplexity.generated';
 
 import {
+  AIRELLES_CONCIERGE_QUESTIONS_KIT,
   AIRELLES_FAQ_CONTENT_KIT,
   AIRELLES_FAQ_CONTENT_PROMOTE,
 } from './airelles-faq-perplexity.generated';
@@ -1806,7 +1812,64 @@ export function resolveAirellesSignatureExperiences(): unknown[] {
 // Room carousels use press-31+ (see kit-airelles-display.ts).
 // ---------------------------------------------------------------------------
 
-export const AIRELLES_HERO_IMAGE = 'cct/hotels/les-airelles-gordes/press-1';
+const AIRELLES_GALLERY_OFFICIAL_PAGE =
+  'https://airelles.com/fr/destination/gordes-hotel/la-bastide-5-star-provence-luberon';
+
+/** Hero drone frame — dedicated `hero` public_id (D20: never duplicated in gallery press-*). */
+export const AIRELLES_HERO_SOURCE_URL =
+  'https://assets.airelles.com/images/airelles2023/ZpD4LR5LeNNTxF8x_LaBastide-Hotel&Jardin-Drone-overview-topshot2%C2%A9HiddenCliff-2024.jpg?auto=format%2Ccompress&w=2600';
+
+export const AIRELLES_HERO_IMAGE = kitHeroPublicIdForSlug(AIRELLES_PROMOTE_SLUG);
+
+const AIRELLES_IMGIX_BASE = 'https://assets.airelles.com/images/airelles2023/';
+const AIRELLES_IMGIX_SUFFIX = '?auto=format%2Ccompress&w=2600';
+
+function airellesGordesImgix(file: string): string {
+  return `${AIRELLES_IMGIX_BASE}${encodeURIComponent(file)}${AIRELLES_IMGIX_SUFFIX}`;
+}
+
+/** Per press-slot provenance — unique canonical paths (upload-airelles-gordes-gallery + net-new 23–30). */
+const AIRELLES_GALLERY_PRESS_SLOT_RAW_URLS = [
+  airellesGordesImgix('ZqDwCx5LeNNTxdMQ_LaBastide-Hotel-Entr\u00e9e\u00a9HiddenCliff-2024.jpg'),
+  airellesGordesImgix('Zlcy4aWtHYXtT5n7_BDG-Lieuxcommuns-R\u00e9ception.jpg'),
+  'https://airelles.com/fr/destination/gordes-hotel/club-concierge',
+  airellesGordesImgix(
+    'ZpD4LB5LeNNTxF8w_LaBastide-Exp\u00e9rience-Balade\u00e0v\u00e9los-VillagedeGordes-\u00a9HiddenCliff-2024.jpg',
+  ),
+  'https://airelles.com/fr/destination/gordes-hotel/maison-de-constance',
+  'https://airelles.com/fr/destination/gordes-hotel/piscine-exterieure',
+  'https://airelles.com/fr/destination/gordes-hotel/kids-club',
+  airellesGordesImgix('Zfhefg4qyfNhFw6l_BDG-Sup\u00e9rieureVillage-Chambre.jpg'),
+  'https://airelles.com/fr/destination/gordes-hotel/chambres-deluxe-valley',
+  airellesGordesImgix('agLKL6YofJOwHGxv_BDG-SuiteBarondeSimiane-Chambre\u00a9VincentLeroux.jpg'),
+  'https://airelles.com/fr/destination/gordes-hotel/suite-vasarely',
+  'https://airelles.com/fr/destination/gordes-hotel/suite-vasarely-terrasse',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/la-bastide-pierres-restaurant-italien',
+  airellesGordesImgix(
+    'ahWfi7K9tuLqEJu9_BDG\u2013LaTabledelaBastide-Terrasse\u00a9VincentLeroux.png',
+  ),
+  airellesGordesImgix('Zemj8XUurf2G3L4c_BDG-CloverGordes-VueTerrasse.jpg'),
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/beefbar-gordes',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/brunch-dominical',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/laduree-gordes',
+  airellesGordesImgix('ahWilLK9tuLqEJxS_BDG-Spa\u00a9VincentLeroux.png'),
+  'https://airelles.com/fr/destination/gordes-hotel/spa-airelles-guerlain',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/clover-gordes-jean-francois-piege-cuisine-terroir-terrasse',
+  AIRELLES_GALLERY_OFFICIAL_PAGE,
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/la-table-de-la-bastide-restaurant',
+  'https://airelles.com/fr/destination/gordes-hotel/spa-piscine-interieure',
+  'https://airelles.com/fr/destination/gordes-hotel/evenements-mice',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/la-table-de-la-bastide-terrasse',
+  'https://airelles.com/fr/destination/gordes-hotel/decoration-interieure',
+  'https://airelles.com/fr/destination/gordes-hotel/village-de-gordes',
+  'https://airelles.com/fr/destination/gordes-hotel/chambres-superieure-village',
+  'https://airelles.com/fr/destination/gordes-hotel/restaurants/laduree-salon-de-the',
+] as const;
+
+export const AIRELLES_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPerPressSlot(
+  AIRELLES_GALLERY_PRESS_SLOT_RAW_URLS,
+  AIRELLES_HERO_SOURCE_URL,
+);
 
 export const AIRELLES_GALLERY_IMAGES = [
   {
@@ -2230,6 +2293,8 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
   return {
     highlights: AIRELLES_HIGHLIGHTS,
     faq_content: AIRELLES_FAQ_CONTENT_PROMOTE,
+    faq_content_kit: AIRELLES_FAQ_CONTENT_KIT,
+    concierge_questions: AIRELLES_CONCIERGE_QUESTIONS_KIT,
     transports: AIRELLES_TRANSPORTS,
     restaurant_info: AIRELLES_RESTAURANT_INFO,
     points_of_interest: AIRELLES_POINTS_OF_INTEREST,
@@ -2256,7 +2321,10 @@ export function buildAirellesGoldenFields(current: AirellesGoldenInput): Record<
     meta_title_fr: AIRELLES_META_TITLE_FR,
     meta_title_en: AIRELLES_META_TITLE_EN,
     hero_image: AIRELLES_HERO_IMAGE,
-    gallery_images: AIRELLES_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      AIRELLES_GALLERY_IMAGES,
+      AIRELLES_GALLERY_SOURCE_URLS,
+    ),
     external_sources: AIRELLES_EXTERNAL_SOURCES,
     wikidata_id: airellesExternalScalar('wikidata_id'),
     wikipedia_url_fr: airellesExternalScalar('wikipedia_url_fr'),
