@@ -73,7 +73,9 @@ async function main(): Promise<void> {
     });
     if (result.status === 0) {
       console.log('\n✅ PAYLOAD_MCP_API_KEY enregistrée dans Windows (setx).');
-      console.log('   Ferme complètement Cursor puis rouvre-le pour que la variable soit prise en compte.');
+      console.log(
+        '   Ferme complètement Cursor puis rouvre-le pour que la variable soit prise en compte.',
+      );
     } else {
       console.log('\n⚠️ setx a échoué — enregistre la clé manuellement :');
       console.log(`   setx PAYLOAD_MCP_API_KEY "${apiKey}"`);

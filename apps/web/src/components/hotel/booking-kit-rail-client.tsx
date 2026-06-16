@@ -95,6 +95,7 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
     const params = new URLSearchParams(window.location.search);
     const from = params.get('checkIn');
     const to = params.get('checkOut');
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot sync of URL query params into state after mount
     if (from !== null && isIsoDate(from)) setCheckIn(from);
     if (to !== null && isIsoDate(to)) setCheckOut(to);
   }, [mounted]);
@@ -136,6 +137,7 @@ export function BookingKitRailClient(props: BookingKitRailClientProps): ReactEle
 
   useEffect(() => {
     if (!mounted || !isTravelport || props.slug === undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset to idle when live rates are not applicable
       if (!isTravelport) setLiveRate({ status: 'idle' });
       return;
     }
