@@ -14,7 +14,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  fetchHotelContent,
+  fetchRoomGroups,
   searchHotelPage,
   type RateHawkClientConfig,
 } from '@mch/integrations/ratehawk';
@@ -234,9 +234,9 @@ async function main(): Promise<void> {
   const rates = hp.value.data?.hotels?.[0]?.rates ?? [];
   console.log(`[rh:bootstrap] hotelpage : ${rates.length} tarif(s)`);
 
-  const content = await fetchHotelContent(cfg, [etgId], 'en');
-  const groups = content.ok === true ? (content.value.data?.hotels?.[0]?.room_groups ?? []) : [];
-  console.log(`[rh:bootstrap] content : ${groups.length} room_group(s)`);
+  const groupsRes = await fetchRoomGroups(cfg, etgId, 'en');
+  const groups = groupsRes.ok ? groupsRes.value : [];
+  console.log(`[rh:bootstrap] room_groups : ${groups.length} (content + hotel/info fallback)`);
 
   const rooms = await sbGet<readonly Record<string, unknown>[]>(
     env,
@@ -274,7 +274,7 @@ async function main(): Promise<void> {
     hotel_id: hotel.id,
     hotel_room_id: hotelRoomId,
     supplier: 'ratehawk' as const,
-    supplier_room_key: { rgExt },
+    supplier_room_key: { rg_ext: rgExt },
     confidence: 'auto_high' as const,
   }));
 
