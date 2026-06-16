@@ -16,7 +16,7 @@ function sampleHtml(opts: {
 }): string {
   const expCards = Array.from({ length: opts.exps ?? 4 }, (_, i) => {
     const pid = opts.sharedPress !== undefined && i === 1 ? opts.sharedPress : `press-${20 + i}`;
-    return `<article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/${pid}" alt="Exp ${i}" /><h4>Experience ${i}</h4></article>`;
+    return `<article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/${pid}" alt="Exp ${i}" /><h4>Experience ${i}</h4></article>`;
   }).join('');
   const restoSrc = opts.restoPlaceholder
     ? '/kit/img/htl_resto.jpg'
@@ -56,10 +56,10 @@ describe('auditKitVisiteurHtml', () => {
 
   it('flags exp and resto sharing the same press-* (Rule 10 — dedicated slots)', () => {
     const html = `<html><body>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-10" alt="Dîner" /><h4>Dîner au Shang Palace</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-11" alt="Exp 2" /><h4>Experience 2</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-12" alt="Exp 3" /><h4>Experience 3</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-13" alt="Exp 4" /><h4>Experience 4</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-10" alt="Dîner" /><h4>Dîner au Shang Palace</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-11" alt="Exp 2" /><h4>Experience 2</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-12" alt="Exp 3" /><h4>Experience 3</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-13" alt="Exp 4" /><h4>Experience 4</h4></article>
       <article class="resto-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-10" alt="Shang Palace" /><h4>Shang Palace</h4></article>
     </body></html>`;
     const report = auditKitVisiteurHtml(html, SLUG);
@@ -68,10 +68,10 @@ describe('auditKitVisiteurHtml', () => {
 
   it('detects spa block when heading uses raw ampersand', () => {
     const html = `<html><body>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-20" alt="E1" /><h4>E1</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-21" alt="E2" /><h4>E2</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-22" alt="E3" /><h4>E3</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-23" alt="E4" /><h4>E4</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-20" alt="E1" /><h4>E1</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-21" alt="E2" /><h4>E2</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-22" alt="E3" /><h4>E3</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-23" alt="E4" /><h4>E4</h4></article>
       <h3>Spa & bien-être</h3><img src="${CLOUD}/cct/hotels/${SLUG}/press-16" alt="Spa pool" />
     </body></html>`;
     const report = auditKitVisiteurHtml(html, SLUG);
@@ -81,10 +81,10 @@ describe('auditKitVisiteurHtml', () => {
   it('flags room + exp sharing the same press-*', () => {
     const html = `<html><body>
       <article class="room-v2"><img src="${CLOUD}/cct/hotels/${SLUG}/press-9" alt="Suite" /><h3>Suite sur pistes</h3></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-9" alt="Ski" /><h4>Première descente</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-11" alt="E2" /><h4>E2</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-12" alt="E3" /><h4>E3</h4></article>
-      <article class="exp-card"><img src="${CLOUD}/cct/hotels/${SLUG}/press-13" alt="E4" /><h4>E4</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-9" alt="Ski" /><h4>Première descente</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-11" alt="E2" /><h4>E2</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-12" alt="E3" /><h4>E3</h4></article>
+      <article class="exp-justified-slide"><img src="${CLOUD}/cct/hotels/${SLUG}/press-13" alt="E4" /><h4>E4</h4></article>
     </body></html>`;
     const report = auditKitVisiteurHtml(html, SLUG);
     expect(report.issues.some((i) => i.includes('cross-block'))).toBe(true);

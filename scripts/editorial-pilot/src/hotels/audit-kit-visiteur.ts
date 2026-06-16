@@ -69,8 +69,18 @@ function matchCardsForSlug(
   );
   const cards: KitVisiteurCard[] = [];
   for (const articleMatch of html.matchAll(articlePattern)) {
+    const articleStart = articleMatch.index ?? 0;
     const inner = articleMatch[1];
     if (inner === undefined) continue;
+
+    const prefix = html.slice(Math.max(0, articleStart - 800), articleStart);
+    if (
+      /id="spa-justified-carousel"/u.test(prefix) ||
+      /id="kid-club-justified-carousel"/u.test(prefix)
+    ) {
+      continue;
+    }
+
     const imgMatch = inner.match(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"/u);
     const headingMatch = inner.match(new RegExp(`<${headingTag}>([^<]+)</${headingTag}>`, 'u'));
     if (
