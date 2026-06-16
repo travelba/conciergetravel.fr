@@ -63,20 +63,27 @@ function matchCardsForSlug(
   articleClass: string,
   headingTag: 'h3' | 'h4',
 ): KitVisiteurCard[] {
-  const pattern = new RegExp(
-    `<article class="${articleClass}[^"]*"[^>]*>[\\s\\S]*?<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*>[\\s\\S]*?<${headingTag}>([^<]+)</${headingTag}>`,
+  const articlePattern = new RegExp(
+    `<article class="${articleClass}[^"]*"[^>]*>([\\s\\S]*?)</article>`,
     'g',
   );
   const cards: KitVisiteurCard[] = [];
-  for (const match of html.matchAll(pattern)) {
-    const src = match[1];
-    const alt = match[2];
-    const label = match[3];
-    if (src === undefined || alt === undefined || label === undefined) continue;
+  for (const articleMatch of html.matchAll(articlePattern)) {
+    const inner = articleMatch[1];
+    if (inner === undefined) continue;
+    const imgMatch = inner.match(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"/u);
+    const headingMatch = inner.match(new RegExp(`<${headingTag}>([^<]+)</${headingTag}>`, 'u'));
+    if (
+      imgMatch?.[1] === undefined ||
+      imgMatch[2] === undefined ||
+      headingMatch?.[1] === undefined
+    ) {
+      continue;
+    }
     cards.push({
-      label: label.trim(),
-      alt: decodeHtmlEntities(alt),
-      publicId: extractPublicIdFromSrc(slug, src),
+      label: headingMatch[1].trim(),
+      alt: decodeHtmlEntities(imgMatch[2]),
+      publicId: extractPublicIdFromSrc(slug, imgMatch[1]),
     });
   }
   return cards;

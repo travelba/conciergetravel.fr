@@ -966,7 +966,7 @@ function shangriLaParisExternalScalar(field: ShangriLaParisExternalScalarField):
 export const SHANGRI_LA_PARIS_SIGNATURE_EXPERIENCES = [
   {
     key: 'atelier-dim-sum',
-    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-22`,
+    image_public_id: `${SHANGRI_LA_PARIS_IMAGE_PREFIX}/press-2`,
     title_fr: 'Atelier dim sum au Shang Palace',
     title_en: 'Dim sum workshop at Shang Palace',
     description_fr:

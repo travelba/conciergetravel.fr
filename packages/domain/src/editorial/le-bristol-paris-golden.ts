@@ -751,7 +751,7 @@ export const LE_BRISTOL_PARIS_UPCOMING_EVENTS = [
     description_en:
       'Fashion Week: couture houses open their salons fifteen minutes from the palace.',
     pricing: { type: 'invitation', amount_eur: null },
-    image_url: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-20`,
+    image_url: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-30`,
   },
   {
     name: 'Fête nationale — défilé et feu d’artifice',
@@ -815,7 +815,7 @@ export const LE_BRISTOL_PARIS_INSTAGRAM = {
     },
     {
       permalink: 'https://www.instagram.com/lebristolparis/',
-      image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-20`,
+      image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-27`,
       caption_fr:
         'Façade du palace sur le Faubourg Saint-Honoré — hôtel particulier du XVIIIe au cœur du pouvoir parisien.',
       caption_en:
