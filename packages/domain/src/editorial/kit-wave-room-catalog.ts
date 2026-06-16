@@ -16,6 +16,11 @@ import {
 } from './les-airelles-courchevel-rooms';
 import { LES_PRES_DEUGENIE_CONCIERGE_PICK_SLUG } from './les-pres-deugenie-golden';
 import { SHANGRI_LA_PARIS_CONCIERGE_PICK_SLUG } from './shangri-la-paris-golden';
+import {
+  CONRAD_LOS_ANGELES_CONCIERGE_PICK_SLUG,
+  CONRAD_LOS_ANGELES_CARD_PRIORITY,
+  CONRAD_LOS_ANGELES_ROOM_IMAGES,
+} from './conrad-los-angeles-rooms';
 import { isKitWaveSlug, KIT_WAVE_SLUGS, type KitWaveSlug } from './kit-golden-loader';
 
 export { isKitWaveSlug, KIT_WAVE_SLUGS, type KitWaveSlug };
@@ -42,6 +47,7 @@ const PREFIX = {
   'les-airelles-courchevel': 'cct/hotels/les-airelles-courchevel',
   'les-pres-deugenie': 'cct/hotels/les-pres-deugenie',
   'shangri-la-paris': 'cct/hotels/shangri-la-paris',
+  'conrad-los-angeles': 'cct/hotels/conrad-los-angeles',
 } as const satisfies Record<KitWaveSlug, string>;
 
 function press(slug: KitWaveSlug, n: number): string {
@@ -108,6 +114,14 @@ const WAVE_ROOM_CONFIGS: Readonly<Record<KitWaveSlug, KitWaveRoomConfig>> = {
       'terrace-room': pair('shangri-la-paris', 20),
       'eiffel-view-room': pair('shangri-la-paris', 5),
     },
+  },
+  // Conrad LA is a Travelport pilot, but its live inventory was sandbox data;
+  // the curated catalogue (conrad-los-angeles-rooms.ts) replaces it. Images use
+  // Google Places `places-*` frames (no `press-*` slots).
+  'conrad-los-angeles': {
+    pickSlug: CONRAD_LOS_ANGELES_CONCIERGE_PICK_SLUG,
+    cardPriority: CONRAD_LOS_ANGELES_CARD_PRIORITY,
+    roomImages: CONRAD_LOS_ANGELES_ROOM_IMAGES,
   },
 };
 

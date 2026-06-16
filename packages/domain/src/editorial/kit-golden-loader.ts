@@ -14,6 +14,7 @@ export const KIT_WAVE_SLUGS = [
   'les-airelles-courchevel',
   'les-pres-deugenie',
   'shangri-la-paris',
+  'conrad-los-angeles',
 ] as const;
 
 export type KitWaveSlug = (typeof KIT_WAVE_SLUGS)[number];

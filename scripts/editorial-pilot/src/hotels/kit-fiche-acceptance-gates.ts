@@ -79,6 +79,7 @@ export const HOTEL_KIT_SLUGS = [
   'les-airelles-courchevel',
   'les-pres-deugenie',
   'shangri-la-paris',
+  'conrad-los-angeles',
 ] as const;
 
 export type HotelKitSlug = (typeof HOTEL_KIT_SLUGS)[number];

@@ -606,6 +606,31 @@ const WAVE_FAQ_CONTEXT: Readonly<Record<KitWaveSlug, HotelFaqContext>> = {
       'La Terrace Eiffel View Room — terrasse privée et vue Tour Eiffel ; le pick du Concierge.',
     pickEn: 'Terrace Eiffel View Room — private terrace and Eiffel Tower view; the Concierge pick.',
   },
+  'conrad-los-angeles': {
+    name: 'Conrad Los Angeles',
+    city: 'Los Angeles',
+    checkIn: '15h00',
+    checkOut: '12h00',
+    petsNoteFr:
+      'Hôtel pet-friendly — frais et conditions précisés par la réception ; signaler l’animal avant l’arrivée.',
+    petsNoteEn:
+      'Pet-friendly hotel — fees and conditions confirmed by reception; notify about the pet before arrival.',
+    diningFr:
+      'San Laurel et Agua Viva par José Andrés, plus le bar The Beaudry Room — chaque adresse est distincte.',
+    diningEn:
+      'San Laurel and Agua Viva by José Andrés, plus The Beaudry Room bar — each outlet is separate.',
+    spaFr:
+      'Conrad Spa d’environ 650 m², salle de fitness et piscine extérieure en rooftop au-dessus de Downtown.',
+    spaEn: 'Conrad Spa of about 650 sq m, fitness room and a rooftop outdoor pool above Downtown.',
+    locationFr:
+      '100 South Grand Avenue, 90012 Los Angeles — tour Frank Gehry de The Grand LA, face au Walt Disney Concert Hall.',
+    locationEn:
+      '100 South Grand Avenue, 90012 Los Angeles — The Grand LA’s Frank Gehry tower, facing the Walt Disney Concert Hall.',
+    pickFr:
+      'Une Premium View King orientée ouest aux étages 12-15 — vue Walt Disney Concert Hall ; le pick du Concierge.',
+    pickEn:
+      'A west-facing Premium View King on floors 12-15 — Walt Disney Concert Hall view; the Concierge pick.',
+  },
 };
 
 function parisAirportAnswers(): Pick<CanonicalPromoteAnswers, 'airport' | 'transfers'> {
@@ -793,6 +818,47 @@ function canonicalAnswersForSlug(slug: KitWaveSlug, ctx: HotelFaqContext): Canon
           en: 'Seventeen-metre indoor pool at CHI, The Spa, with Asian rituals — guest access by appointment or posted slots, children supervised per house rules.',
         },
         early_checkin: earlyCheckin,
+      };
+    case 'conrad-los-angeles':
+      return {
+        parking: {
+          fr: 'Voiturier (valet) à l’entrée de Grand Avenue — tarif à la nuitée. Pas de parking gratuit à Downtown ; la réception communique le tarif du jour.',
+          en: 'Valet parking at the Grand Avenue entrance — nightly rate. No free parking in Downtown; reception shares the current rate.',
+          featured: true,
+        },
+        breakfast: {
+          fr: 'Petit-déjeuner à San Laurel, la table de José Andrés au 10e étage face au Walt Disney Concert Hall, ou en chambre — carte d’inspiration espagnole et californienne. Supplément selon tarif.',
+          en: 'Breakfast at San Laurel, José Andrés’s 10th-floor table facing the Walt Disney Concert Hall, or in-room — a Spanish-Californian menu. Supplement per rate.',
+          featured: true,
+        },
+        wifi,
+        pets: { fr: ctx.petsNoteFr, en: ctx.petsNoteEn, featured: true },
+        airport: {
+          fr: 'Los Angeles International (LAX) est le hub principal — environ trente kilomètres, quarante à soixante minutes selon le trafic. Hollywood Burbank (BUR) est souvent plus rapide pour les vols intérieurs (vingt à trente minutes).',
+          en: 'Los Angeles International (LAX) is the main hub — about thirty kilometres, forty to sixty minutes depending on traffic. Hollywood Burbank (BUR) is often faster for domestic flights (twenty to thirty minutes).',
+        },
+        pool: {
+          fr: 'Piscine extérieure sur le pool deck en rooftop, cabanas face à Downtown — accès clients selon les horaires affichés ; la conciergerie confirme cabana et service au bord du bassin.',
+          en: 'Outdoor pool on the rooftop pool deck, cabanas facing Downtown — guest access during posted hours; the concierge confirms cabana and poolside service.',
+        },
+        early_checkin: earlyCheckin,
+        transfers: {
+          fr: 'Pas de navette régulière. La conciergerie réserve voiture privée, chauffeur ou house car selon le trajet, avec suivi de vol — à commander vingt-quatre à quarante-huit heures avant quand c’est possible.',
+          en: 'No scheduled shuttle. The concierge books a private car, chauffeur or house car depending on the trip, with flight tracking — order twenty-four to forty-eight hours ahead when possible.',
+          featured: true,
+          tipFr:
+            'Mon conseil : pour un vol intérieur, visez Burbank (BUR) plutôt que LAX — la conciergerie cale le départ sur le trafic du jour.',
+          tipEn:
+            'My tip: for a domestic flight, aim for Burbank (BUR) over LAX — the concierge times departure to the day’s traffic.',
+        },
+        cancellation: {
+          fr: 'La politique dépend du tarif et du canal de réservation. Les tarifs flexibles permettent une annulation sans frais jusqu’à vingt-quatre ou quarante-huit heures avant l’arrivée ; les tarifs prépayés sont non remboursables. La conciergerie communique les conditions exactes avant confirmation.',
+          en: 'Policy depends on rate and booking channel. Flexible rates allow free cancellation until twenty-four or forty-eight hours before arrival; prepaid rates are non-refundable. The concierge states exact terms before confirmation.',
+        },
+        taxes: {
+          fr: 'La taxe de séjour de Los Angeles (Transient Occupancy Tax) s’applique au tarif chambre, perçue à l’enregistrement. Le détail TTC pour la clientèle française est confirmé sur le devis.',
+          en: 'The Los Angeles Transient Occupancy Tax applies to the room rate, collected at check-in. The all-inclusive detail for French guests is confirmed on the quote.',
+        },
       };
     default: {
       const _exhaustive: never = slug;
@@ -1085,6 +1151,63 @@ const WAVE_PROMOTE_EXTRAS: Readonly<Record<KitWaveSlug, readonly PromoteFaqItem[
         'Station Iéna (ligne 9) à deux minutes — ligne 9 vers Trocadéro, Opéra et Grands Magasins.',
       answer_en:
         'Iéna station (Line 9) two minutes away — Line 9 toward Trocadéro, Opéra and department stores.',
+    },
+  ],
+  'conrad-los-angeles': [
+    {
+      category: 'during',
+      group_fr: 'Restauration',
+      group_en: 'Dining',
+      question_fr: 'Comment réserver une table au San Laurel ?',
+      question_en: 'How do I book a table at San Laurel?',
+      answer_fr:
+        'San Laurel, la table signature de José Andrés au 10e étage, se remplit vite le week-end — réservez une à deux semaines à l’avance ; la conciergerie transmet la demande et confirme la table.',
+      answer_en:
+        'San Laurel, José Andrés’s signature 10th-floor table, fills quickly on weekends — book one to two weeks ahead; the concierge forwards the request and confirms the table.',
+    },
+    {
+      category: 'during',
+      group_fr: 'Chambres & Équipements',
+      group_en: 'Rooms & Amenities',
+      question_fr: 'Quelle chambre le Concierge recommande-t-il ?',
+      question_en: 'Which room does the Concierge recommend?',
+      answer_fr:
+        'Une Premium View King orientée ouest entre le 12e et le 15e étage — la vue la plus nette sur le Walt Disney Concert Hall ; le pick du Concierge pour une première venue.',
+      answer_en:
+        'A west-facing Premium View King between the 12th and 15th floor — the clearest Walt Disney Concert Hall view; the Concierge pick for a first stay.',
+    },
+    {
+      category: 'before',
+      group_fr: 'Adresse',
+      group_en: 'Address',
+      question_fr: "Quelle est l'adresse exacte du Conrad Los Angeles ?",
+      question_en: 'What is the exact address of Conrad Los Angeles?',
+      answer_fr:
+        '100 South Grand Avenue, Los Angeles, CA 90012 — tour Frank Gehry de The Grand LA, face au Walt Disney Concert Hall. Voiturier à l’entrée de Grand Avenue.',
+      answer_en:
+        '100 South Grand Avenue, Los Angeles, CA 90012 — The Grand LA’s Frank Gehry tower, facing the Walt Disney Concert Hall. Valet at the Grand Avenue entrance.',
+    },
+    {
+      category: 'during',
+      group_fr: 'Activités & Loisirs',
+      group_en: 'Activities & Leisure',
+      question_fr: 'Quels musées et salles sont accessibles à pied ?',
+      question_en: 'Which museums and venues are within walking distance?',
+      answer_fr:
+        'Le Walt Disney Concert Hall (1 min), The Broad (2 min), le MOCA (3 min) et le Music Center (2 min) bordent Grand Avenue — la conciergerie réserve billets horodatés et concerts.',
+      answer_en:
+        'The Walt Disney Concert Hall (1 min), The Broad (2 min), MOCA (3 min) and the Music Center (2 min) line Grand Avenue — the concierge books timed tickets and concerts.',
+    },
+    {
+      category: 'during',
+      group_fr: 'Spa & Bien-être',
+      group_en: 'Spa & Wellness',
+      question_fr: 'La piscine rooftop est-elle accessible toute l’année ?',
+      question_en: 'Is the rooftop pool open year-round?',
+      answer_fr:
+        'La piscine extérieure du pool deck accueille les clients selon les horaires affichés ; des cabanas se réservent en nombre limité. La conciergerie confirme disponibilité et service au bord du bassin.',
+      answer_en:
+        'The outdoor pool deck welcomes guests during posted hours; cabanas are reserved in limited numbers. The concierge confirms availability and poolside service.',
     },
   ],
 };

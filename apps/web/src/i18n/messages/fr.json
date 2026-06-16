@@ -2915,6 +2915,8 @@
     },
     "legal": "Prix observés à titre indicatif, susceptibles de varier. Tous les tarifs sont affichés TTC.",
     "cachedNotice": "Valeurs en cache (mise à jour récente indisponible).",
+    "conciergeLabel": "Tarif Concierge",
+    "bestRateBadge": "Meilleur tarif",
     "tableHeader": {
       "provider": "Plateforme",
       "price": "Prix total TTC"
