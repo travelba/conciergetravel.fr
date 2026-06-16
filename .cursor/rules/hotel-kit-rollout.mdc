@@ -23,6 +23,14 @@ Runbook : [`docs/runbooks/airelles-reference-fiche-plan.md`](mdc:docs/runbooks/a
 
 Chaque fiche pilote suivante **doit** passer la checklist du skill avant validation PO.
 
+> **Portée (Décision PO 2026-06-16)** : `les-airelles-gordes` est le **modèle
+> universel** de **tout** le catalogue, pas un cas pilote isolé. Le statut
+> pilote ne fait que **séquencer** le rollout — il n'exempte aucune fiche du
+> niveau cible. Toute fiche publiée doit atteindre la parité Gordes (15 blocs
+> CDC + `golden` + `structure` + gates `kit.*` verts). Une fiche en-dessous
+> est « en cours », jamais « livrée ». Cf. [Principe directeur](mdc:.cursor/rules/hotel-detail-page.mdc)
+> en tête du CDC fiche.
+
 ## Règles PO — rappel express
 
 | # | Règle |
