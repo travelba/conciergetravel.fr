@@ -46,6 +46,11 @@ const KIT_PILOT_DINING_SLOTS: Readonly<Record<string, Readonly<Record<string, nu
   },
 };
 
+/** Kit pilot spa hero — decouple wellness block from signature experience slides. */
+const KIT_PILOT_SPA_HERO_SLOTS: Readonly<Record<string, number>> = {
+  'prince-de-galles-paris': 17,
+};
+
 /** Normalized venue name → press slot (1–30). */
 const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, number>>>> = {
   'cheval-blanc-paris': {
@@ -122,6 +127,10 @@ export function resolveKitWaveDiningPublicId(
 }
 
 export function resolveKitWaveSpaHeroPublicId(hotelSlug: string): string | undefined {
+  const pilotSlot = KIT_PILOT_SPA_HERO_SLOTS[hotelSlug];
+  if (pilotSlot !== undefined) {
+    return kitHotelPressPublicId(hotelSlug, pilotSlot);
+  }
   if (!isKitWaveSlug(hotelSlug)) return undefined;
   const slot = WAVE_SPA_HERO_SLOTS[hotelSlug];
   if (slot === undefined) return undefined;

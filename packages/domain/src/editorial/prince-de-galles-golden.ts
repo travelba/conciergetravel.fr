@@ -1088,7 +1088,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'akira-back-comptoir',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-13`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-15`,
     title_fr: 'Comptoir Akira Back',
     title_en: 'Akira Back counter seats',
     description_fr:
@@ -1141,7 +1141,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'art-deco-tour',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-1`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-8`,
     title_fr: 'Parcours Art déco du palace',
     title_en: 'Art Deco palace walk-through',
     description_fr:

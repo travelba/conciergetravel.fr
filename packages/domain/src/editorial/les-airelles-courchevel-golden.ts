@@ -705,7 +705,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ski-in-first-run',
-    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-6`,
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-2`,
     title_fr: 'Première descente ski-in',
     title_en: 'First ski-in run',
     description_fr:
