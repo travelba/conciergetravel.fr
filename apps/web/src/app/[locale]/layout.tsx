@@ -11,6 +11,8 @@ import {
   ConditionalSiteFooter,
   ConditionalSiteHeader,
 } from '@/components/layout/conditional-site-chrome';
+import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteHeader } from '@/components/layout/site-header';
 import { SiteSeoJsonLd } from '@/components/seo/site-json-ld';
 import { Toaster } from '@mch/ui';
 import { getPathname } from '@/i18n/navigation';
@@ -95,7 +97,9 @@ export default async function LocaleLayout({
         <SiteSeoJsonLd locale={locale} nonce={nonce} />
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col overflow-x-clip">
           <NextIntlClientProvider messages={messages}>
-            <ConditionalSiteHeader />
+            <ConditionalSiteHeader>
+              <SiteHeader />
+            </ConditionalSiteHeader>
             {/*
             Visible fil d'ariane (ADR-0014 §2.4) — mirror of the per-page
             `BreadcrumbList` JSON-LD. Returns `null` on the home page.
@@ -110,7 +114,9 @@ export default async function LocaleLayout({
             <div id="main" tabIndex={-1} className="flex-1 outline-none">
               {children}
             </div>
-            <ConditionalSiteFooter />
+            <ConditionalSiteFooter>
+              <SiteFooter />
+            </ConditionalSiteFooter>
             <ConsentBanner />
             {/* Global toast surface (sober-luxe styled) — see @mch/ui Toaster. */}
             <Toaster />
