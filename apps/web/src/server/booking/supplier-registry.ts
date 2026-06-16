@@ -18,6 +18,10 @@ import { getTravelportCredentials } from '@/lib/travelport';
  */
 let cached: ReadonlyMap<Supplier, HotelSupplierConnector> | undefined;
 
+function envFlagEnabled(raw: unknown): boolean {
+  return raw === true || raw === 'true' || raw === '1';
+}
+
 export function getSupplierConnectors(): ReadonlyMap<Supplier, HotelSupplierConnector> {
   if (cached !== undefined) return cached;
 
@@ -32,7 +36,7 @@ export function getSupplierConnectors(): ReadonlyMap<Supplier, HotelSupplierConn
 
   // RateHawk — opt-in via RATEHAWK_ENABLED + creds.
   if (
-    env.RATEHAWK_ENABLED === true &&
+    envFlagEnabled(env.RATEHAWK_ENABLED) &&
     env.RATEHAWK_API_BASE !== undefined &&
     env.RATEHAWK_KEY_ID !== undefined &&
     env.RATEHAWK_API_KEY !== undefined

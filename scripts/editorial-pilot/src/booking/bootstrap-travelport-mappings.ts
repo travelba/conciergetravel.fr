@@ -14,6 +14,7 @@
  * Usage :
  *   pnpm --filter @mch/editorial-pilot travelport:bootstrap -- \
  *     --slug=prince-de-galles-paris [--dry-run] [--adults=1] [--radius=1]
+ *     [--chain-code=CN] [--property-code=G8912]
  *
  * Skills : editorial-rankings-matrix, api-integration, redis-caching,
  *          windows-dev-environment.
@@ -25,6 +26,7 @@ import {
   haversineMeters,
   normalizeName,
   searchByCoordinates,
+  searchByProperty,
   uniqueProperties,
   type PropertyItem,
   type SearchCompleteResponse,
@@ -39,6 +41,7 @@ const __dirname = dirname(__filename);
 
 loadDotenv({ path: resolve(__dirname, '../../../../.env.local') });
 loadDotenv({ path: resolve(__dirname, '../../../../.env') });
+loadDotenv({ path: resolve(__dirname, '../../../../apps/web/.env.local') });
 
 const EnvSchema = z.object({
   TRAVELPORT_AUTH_URL: z.string().url(),
@@ -218,6 +221,9 @@ async function main(): Promise<void> {
   const dryRun = flag('dry-run') === 'true';
   const adults = Number.parseInt(flag('adults') ?? '1', 10) || 1;
   const radius = Number.parseFloat(flag('radius') ?? '1') || 1;
+  const nights = Math.max(1, Number.parseInt(flag('nights') ?? '1', 10) || 1);
+  const forcedChainCode = flag('chain-code');
+  const forcedPropertyCode = flag('property-code');
   // Minimum shared distinctive tokens to auto-map a Travelport label to an
   // editorial room. >=2 avoids mapping on the lone generic token "suite"
   // (branded suites — Mosaïque, Macassar… — must be curated by a human via the
@@ -247,7 +253,7 @@ async function main(): Promise<void> {
   };
 
   const checkIn = todayPlus(30);
-  const checkOut = todayPlus(31);
+  const checkOut = todayPlus(30 + nights);
   const creds: TravelportCredentials = {
     authUrl: env.TRAVELPORT_AUTH_URL,
     apiBaseUrl: env.TRAVELPORT_API_BASE,
@@ -260,29 +266,66 @@ async function main(): Promise<void> {
     redis: createMemoryRedis(),
   };
 
-  console.log(
-    `[tp:bootstrap] recherche Travelport pour « ${hotel.name} » (${checkIn} → ${checkOut})…`,
-  );
-  const search = await searchByCoordinates(creds, {
-    latitude: hotel.latitude,
-    longitude: hotel.longitude,
-    radius,
-    unit: 'mi',
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
-    adults,
-    currency: env.TRAVELPORT_CURRENCY,
-  });
-  if (!search.ok) {
-    console.error('[tp:bootstrap] recherche KO :', JSON.stringify(search.error));
-    process.exitCode = 1;
-    return;
-  }
-  const property = bestMatch(hotel, search.value);
-  if (property === null) {
-    console.error('[tp:bootstrap] aucune propriété Travelport ne correspond (nom + proximité).');
-    process.exitCode = 1;
-    return;
+  let property: PropertyItem | null = null;
+
+  if (
+    forcedChainCode !== undefined &&
+    forcedChainCode.length > 0 &&
+    forcedPropertyCode !== undefined &&
+    forcedPropertyCode.length > 0
+  ) {
+    console.log(
+      `[tp:bootstrap] recherche Travelport forcée ${forcedChainCode}/${forcedPropertyCode} (${checkIn} → ${checkOut})…`,
+    );
+    const search = await searchByProperty(creds, {
+      propertyKeys: [{ chainCode: forcedChainCode, propertyCode: forcedPropertyCode }],
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      adults,
+      rooms: 1,
+      currency: env.TRAVELPORT_CURRENCY,
+    });
+    if (!search.ok) {
+      console.error('[tp:bootstrap] searchByProperty KO :', JSON.stringify(search.error));
+      process.exitCode = 1;
+      return;
+    }
+    property =
+      uniqueProperties(search.value).find(
+        (it) => it.chainCode === forcedChainCode && it.propertyCode === forcedPropertyCode,
+      ) ?? null;
+    if (property === null) {
+      console.error(
+        `[tp:bootstrap] propriété ${forcedChainCode}/${forcedPropertyCode} absente de la réponse Travelport.`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    console.log(
+      `[tp:bootstrap] recherche Travelport pour « ${hotel.name} » (${checkIn} → ${checkOut})…`,
+    );
+    const search = await searchByCoordinates(creds, {
+      latitude: hotel.latitude,
+      longitude: hotel.longitude,
+      radius,
+      unit: 'mi',
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      adults,
+      currency: env.TRAVELPORT_CURRENCY,
+    });
+    if (!search.ok) {
+      console.error('[tp:bootstrap] recherche KO :', JSON.stringify(search.error));
+      process.exitCode = 1;
+      return;
+    }
+    property = bestMatch(hotel, search.value);
+    if (property === null) {
+      console.error('[tp:bootstrap] aucune propriété Travelport ne correspond (nom + proximité).');
+      process.exitCode = 1;
+      return;
+    }
   }
   const labels = distinctLabels(property);
   console.log(
