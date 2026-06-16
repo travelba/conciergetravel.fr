@@ -22,9 +22,11 @@ import {
 import { CONRAD_LOS_ANGELES_CONCIERGE_QUESTIONS_KIT } from './conrad-los-angeles-concierge-questions';
 import {
   CONRAD_LOS_ANGELES_GALLERY_IMAGES,
+  CONRAD_LOS_ANGELES_GALLERY_SOURCE_URLS,
   CONRAD_LOS_ANGELES_HERO_IMAGE,
   CONRAD_LOS_ANGELES_IMAGE_PREFIX,
 } from './conrad-los-angeles-gallery';
+import { attachKitGallerySourceUrls } from './kit-gallery-promote';
 import { buildKitWaveFaqKit, buildKitWaveFaqPromote } from './kit-wave-faq-seed';
 
 export const CONRAD_LOS_ANGELES_PROMOTE_SLUG = 'conrad-los-angeles';
@@ -937,7 +939,10 @@ export function buildConradLosAngelesGoldenFields(
     meta_title_fr: CONRAD_LOS_ANGELES_META_TITLE_FR,
     meta_title_en: CONRAD_LOS_ANGELES_META_TITLE_EN,
     hero_image: CONRAD_LOS_ANGELES_HERO_IMAGE,
-    gallery_images: CONRAD_LOS_ANGELES_GALLERY_IMAGES,
+    gallery_images: attachKitGallerySourceUrls(
+      CONRAD_LOS_ANGELES_GALLERY_IMAGES,
+      CONRAD_LOS_ANGELES_GALLERY_SOURCE_URLS,
+    ),
     external_sources: CONRAD_LOS_ANGELES_EXTERNAL_SOURCES,
     official_url: 'https://www.hilton.com/en/hotels/laxglci-conrad-los-angeles/',
     phone_e164: CONRAD_LOS_ANGELES_PHONE_E164,
