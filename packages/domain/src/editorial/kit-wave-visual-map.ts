@@ -11,6 +11,7 @@ const PREFIX: Readonly<Record<KitWaveSlug, string>> = {
   'les-airelles-courchevel': 'cct/hotels/les-airelles-courchevel',
   'les-pres-deugenie': 'cct/hotels/les-pres-deugenie',
   'shangri-la-paris': 'cct/hotels/shangri-la-paris',
+  'conrad-los-angeles': 'cct/hotels/conrad-los-angeles',
 };
 
 function normalizeVenueName(name: string): string {
@@ -95,6 +96,9 @@ const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, nu
     'maison roland': 24,
     'les lounges': 15,
   },
+  // Conrad LA gallery uses Google Places `places-*` assets (no `press-*` slots);
+  // leave empty so the dining resolver falls back to the gallery `category` map.
+  'conrad-los-angeles': {},
 };
 
 /** Spa hero block — prefer pool/thermal over generic cabine when copy mentions piscine/eaux. */
