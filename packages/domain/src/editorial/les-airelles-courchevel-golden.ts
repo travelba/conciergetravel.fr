@@ -655,7 +655,7 @@ const LES_AIRELLES_COURCHEVEL_LONG_DESCRIPTION_SECTIONS = [
 export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   {
     key: 'table-des-airelles-festin',
-    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-10`,
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-4`,
     title_fr: 'Le Festin — La Table des Airelles',
     title_en: 'Le Festin — La Table des Airelles',
     description_fr:
@@ -672,7 +672,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'matsuhisa-black-cod',
-    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-11`,
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-13`,
     title_fr: 'Black Cod Miso à Matsuhisa',
     title_en: 'Black Cod Miso at Matsuhisa',
     description_fr:
@@ -705,7 +705,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ski-in-first-run',
-    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-9`,
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-8`,
     title_fr: 'Première descente ski-in',
     title_en: 'First ski-in run',
     description_fr:
@@ -735,7 +735,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'folie-douce-experience',
-    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-27`,
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-26`,
     title_fr: 'Déjeuner La Folie Douce',
     title_en: 'La Folie Douce lunch',
     description_fr:

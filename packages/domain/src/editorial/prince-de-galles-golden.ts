@@ -1068,7 +1068,7 @@ function princeDeGallesExternalScalar(field: PrinceDeGallesExternalScalarField):
 export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   {
     key: 'tea-time-19-20',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-11`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-5`,
     title_fr: 'Tea Time au 19.20',
     title_en: 'Tea Time at 19.20',
     description_fr:
@@ -1088,7 +1088,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'akira-back-comptoir',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-12`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-13`,
     title_fr: 'Comptoir Akira Back',
     title_en: 'Akira Back counter seats',
     description_fr:
@@ -1106,7 +1106,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'patio-brunch',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-10`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-18`,
     title_fr: 'Brunch dominical sur Le Patio',
     title_en: 'Sunday brunch on Le Patio',
     description_fr:
@@ -1123,7 +1123,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'wellness-suite-calma',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-17`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-14`,
     title_fr: 'Rituel CALMA PARIS en Wellness Suite',
     title_en: 'CALMA PARIS ritual in the Wellness Suite',
     description_fr:
@@ -1141,7 +1141,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'art-deco-tour',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-4`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-6`,
     title_fr: 'Parcours Art déco du palace',
     title_en: 'Art Deco palace walk-through',
     description_fr:
@@ -1156,7 +1156,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'balcony-ritual',
-    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-19`,
+    image_public_id: `${PRINCE_DE_GALLES_IMAGE_PREFIX}/press-22`,
     title_fr: 'Rituel balcon — bain Lalique et vue Paris',
     title_en: 'Balcony ritual — Lalique bath and Paris view',
     description_fr:
