@@ -104,6 +104,14 @@ const SharedEnvSchema = z.object({
   // Google Places
   GOOGLE_PLACES_API_KEY: z.string().min(1),
 
+  // GetYourGuide Partner API (Palier A — affiliate deeplink monetisation).
+  // Optional so the editorial-only build runs without the partner contract;
+  // the client throws a typed error if called while disabled / unconfigured.
+  GETYOURGUIDE_ENABLED: z.coerce.boolean().default(false),
+  GETYOURGUIDE_API_BASE: optionalUrl,
+  GETYOURGUIDE_ACCESS_TOKEN: z.string().optional(),
+  GETYOURGUIDE_PARTNER_ID: z.string().optional(),
+
   // Brevo
   BREVO_API_KEY: z.string().min(1),
   BREVO_SENDER_EMAIL: z.string().email(),

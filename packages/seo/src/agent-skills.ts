@@ -483,6 +483,32 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
       },
       endpoint: { method: 'GET', path: '/api/agent/hotel-sources/{slug}' },
     },
+    // ── Lieux à visiter (places vertical) ───────────────────────────────
+    {
+      name: 'get-places-nearby',
+      description:
+        "Lister les « lieux à visiter » canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre `hotelSlug`, via la table de proximité pré-calculée) OU d'une ville (paramètre `citySlug`). Chaque lieu a sa fiche SEO/GEO indexable `/lieux/{ville}/{slug}` (réservable via GetYourGuide ou en demandant au Concierge) — la réponse renvoie le nom, le type (kind), l'URL canonique, le résumé factuel et la distance à pied depuis l'hôtel. Aucune duplication de contenu : l'hôtel pointe vers la fiche canonique du lieu.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          hotelSlug: {
+            type: 'string',
+            description:
+              'Slug kebab-case de l’hôtel (FR ou EN) pour lister les lieux à proximité (ex. "ritz-paris").',
+          },
+          citySlug: {
+            type: 'string',
+            description:
+              'Clé de ville normalisée (ex. "paris") pour lister tous les lieux publiés de la ville. Alternatif à hotelSlug.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+      },
+      endpoint: { method: 'GET', path: '/api/agent/places-nearby' },
+    },
     // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
     {
       name: 'get-itinerary',

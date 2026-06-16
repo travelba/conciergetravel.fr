@@ -15,6 +15,7 @@
     "./makcorps": "./src/makcorps/index.ts",
     "./apify": "./src/apify/index.ts",
     "./google-places": "./src/google-places/index.ts",
+    "./getyourguide": "./src/getyourguide/index.ts",
     "./wikimedia-commons": "./src/wikimedia-commons/index.ts",
     "./overpass": "./src/overpass/index.ts",
     "./cloudinary": "./src/cloudinary/index.ts",

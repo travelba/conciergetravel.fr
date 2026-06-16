@@ -510,7 +510,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 27 compétences déclarées (dont 25 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-photos [hero+galerie Cloudinary], get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
+              'Catalogue machine-readable des 28 compétences déclarées (dont 26 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-photos [hero+galerie Cloudinary], get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], get-places-nearby [lieux à visiter par hôtel/ville], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
           },
           {
             url: `${origin}/.well-known/hotels.jsonl`,
@@ -553,9 +553,14 @@ export async function GET(): Promise<NextResponse> {
               "Exemple d'endpoint annuaire géolocalisé — renvoie la liste exhaustive des hôtels publiés d'une ville (scopée par pays) avec coordonnées GPS (latitude/longitude WGS84), distinction Palace et lien fiche. Variante pays : /api/agent/directory/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tout le catalogue d'une ville ou d'un pays. Aucun tarif (gel Phase 6).",
           },
           {
+            url: `${origin}/api/agent/places-nearby?hotelSlug=ritz-paris&locale=fr`,
+            description:
+              "Endpoint « lieux à visiter » — renvoie les lieux canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre hotelSlug, via la table de proximité pré-calculée) OU d'une ville (paramètre citySlug). Chaque lieu a sa fiche SEO/GEO /lieux/{ville}/{slug} réservable via GetYourGuide ou le Concierge. Renvoie nom, type, URL canonique, résumé factuel et distance à pied. Aucune duplication de contenu.",
+          },
+          {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires, lieux) — chaque sub-sitemap inclut les alternates FR/EN.',
           },
         ],
       },
