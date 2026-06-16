@@ -918,7 +918,7 @@ function leBristolParisExternalScalar(field: LeBristolParisExternalScalarField):
 export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
   {
     key: 'epicure-terrasse',
-    image_public_id: leBristolParisPoiImage('opera-garnier'),
+    image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-16`,
     title_fr: 'Déjeuner Epicure en terrasse jardin',
     title_en: 'Epicure lunch on the garden terrace',
     description_fr:
@@ -935,7 +935,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'afternoon-tea-jardin',
-    image_public_id: leBristolParisPoiImage('parc-monceau'),
+    image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-20`,
     title_fr: 'Afternoon tea au Jardin Français',
     title_en: 'Afternoon tea at Le Jardin Français',
     description_fr: 'Tea time 15 h–18 h dans le jardin intérieur — pâtisseries et thés rares.',
@@ -946,7 +946,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'pool-ritual',
-    image_public_id: leBristolParisPoiImage('jardin-des-tuileries'),
+    image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-11`,
     title_fr: 'Rituel piscine rooftop en acajou',
     title_en: 'Mahogany rooftop pool ritual',
     description_fr:
@@ -959,7 +959,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'spa-la-mer',
-    image_public_id: leBristolParisPoiImage('place-vendome'),
+    image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-23`,
     title_fr: 'Soin La Mer en cabine duo',
     title_en: 'La Mer treatment in couples suite',
     description_fr: 'Spa Le Bristol by La Mer, 9 h–21 h — rituels visage et corps sur rendez-vous.',
@@ -971,7 +971,7 @@ export const LE_BRISTOL_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'faubourg-114-bar',
-    image_public_id: leBristolParisPoiImage('faubourg-saint-honore'),
+    image_public_id: `${LE_BRISTOL_PARIS_IMAGE_PREFIX}/press-18`,
     title_fr: 'Comptoir 114 Faubourg après spectacle',
     title_en: '114 Faubourg counter after a show',
     description_fr:

@@ -32,6 +32,20 @@ function pressPublicId(slug: KitWaveSlug, slot: number): string {
   return `${PREFIX[slug]}/press-${String(slot)}`;
 }
 
+function kitHotelPressPublicId(slug: string, slot: number): string {
+  return `cct/hotels/${slug}/press-${String(slot)}`;
+}
+
+/** Kit pilot slugs outside wave 5 — venue → press slot (gallery-aligned). */
+const KIT_PILOT_DINING_SLOTS: Readonly<Record<string, Readonly<Record<string, number>>>> = {
+  'prince-de-galles-paris': {
+    'bar 19.20': 4,
+    'restaurant 19.20 by norbert tarayre': 30,
+    'akira back paris': 12,
+    'le patio & cabana bar': 10,
+  },
+};
+
 /** Normalized venue name → press slot (1–30). */
 const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, number>>>> = {
   'cheval-blanc-paris': {
@@ -44,11 +58,11 @@ const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, nu
     'bar le jardin': 17,
   },
   'le-bristol-paris': {
-    epicure: 10,
-    '114 faubourg': 11,
-    'le jardin francais': 12,
-    'cafe antonia': 24,
-    'le bar du bristol': 26,
+    epicure: 16,
+    '114 faubourg': 18,
+    'le jardin francais': 20,
+    'cafe antonia': 17,
+    'le bar du bristol': 19,
   },
   'les-airelles-courchevel': {
     'la table des airelles': 10,
@@ -69,28 +83,38 @@ const WAVE_DINING_SLOTS: Readonly<Record<KitWaveSlug, Readonly<Record<string, nu
     'loulous lounge bar': 5,
   },
   'shangri-la-paris': {
-    'shang palace': 10,
-    'la bauhinia': 11,
-    'le bar botaniste': 12,
-    'les salons du prince': 4,
-    'maison roland': 22,
-    'les lounges': 23,
+    'shang palace': 16,
+    'la bauhinia': 17,
+    'le bar botaniste': 18,
+    'les salons du prince': 25,
+    'maison roland': 24,
+    'les lounges': 15,
   },
 };
 
 /** Spa hero block — prefer pool/thermal over generic cabine when copy mentions piscine/eaux. */
 const WAVE_SPA_HERO_SLOTS: Readonly<Partial<Record<KitWaveSlug, number>>> = {
   'cheval-blanc-paris': 16,
-  'le-bristol-paris': 16,
+  'le-bristol-paris': 21,
   'les-airelles-courchevel': 15,
   'les-pres-deugenie': 13,
-  'shangri-la-paris': 16,
+  'shangri-la-paris': 21,
 };
+
+function resolvePilotDiningSlot(hotelSlug: string, venueName: string): number | undefined {
+  const slots = KIT_PILOT_DINING_SLOTS[hotelSlug];
+  if (slots === undefined) return undefined;
+  return slots[normalizeVenueName(venueName)];
+}
 
 export function resolveKitWaveDiningPublicId(
   hotelSlug: string,
   venueName: string,
 ): string | undefined {
+  const pilotSlot = resolvePilotDiningSlot(hotelSlug, venueName);
+  if (pilotSlot !== undefined) {
+    return kitHotelPressPublicId(hotelSlug, pilotSlot);
+  }
   if (!isKitWaveSlug(hotelSlug)) return undefined;
   const slot = WAVE_DINING_SLOTS[hotelSlug][normalizeVenueName(venueName)];
   if (slot === undefined) return undefined;

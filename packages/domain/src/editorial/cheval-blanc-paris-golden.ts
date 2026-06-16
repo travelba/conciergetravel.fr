@@ -848,7 +848,7 @@ const CHEVAL_BLANC_PARIS_LONG_DESCRIPTION_SECTIONS = [
 export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   {
     key: 'plenitude-degustation',
-    image_public_id: chevalBlancParisPoiImage('la-samaritaine'),
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-10`,
     title_fr: 'Dîner aux Absolues — Plénitude',
     title_en: 'Dinner with the Absolues — Plénitude',
     description_fr:
@@ -880,7 +880,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'dior-spa-ritual',
-    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-13`,
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-14`,
     title_fr: 'Rituel Dior Spa & piscine mosaïque',
     title_en: 'Dior Spa ritual & mosaic pool',
     description_fr: 'Soins Dior en suite exclusive, puis piscine à débordement — sur rendez-vous.',
@@ -891,7 +891,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'hakuba-omakase',
-    image_public_id: chevalBlancParisPoiImage('palais-royal'),
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-23`,
     title_fr: 'Omakase au comptoir Hakuba',
     title_en: 'Omakase at the Hakuba counter',
     description_fr:
@@ -906,7 +906,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'langosteria-seafood',
-    image_public_id: chevalBlancParisPoiImage('marche-fleurs-cite'),
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-12`,
     title_fr: 'Crudo & homard — Langosteria',
     title_en: 'Crudo & lobster — Langosteria',
     description_fr:
@@ -920,7 +920,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'seine-croisiere-privee',
-    image_public_id: chevalBlancParisPoiImage('croisiere-seine'),
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-2`,
     title_fr: 'Croisière privée sur la Seine',
     title_en: 'Private Seine cruise',
     description_fr:
@@ -1114,5 +1114,6 @@ export function buildChevalBlancParisGoldenFields(
     email_reservations: CHEVAL_BLANC_PARIS_EMAIL_RESERVATIONS,
     affiliations: CHEVAL_BLANC_PARIS_AFFILIATIONS,
     google_place_id: CHEVAL_BLANC_PARIS_GOOGLE_PLACE_ID,
+    booking_mode: 'display_only',
   };
 }

@@ -655,7 +655,7 @@ const LES_AIRELLES_COURCHEVEL_LONG_DESCRIPTION_SECTIONS = [
 export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   {
     key: 'table-des-airelles-festin',
-    image_public_id: lesAirellesCourchevelPoiImage('le-1947'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-10`,
     title_fr: 'Le Festin — La Table des Airelles',
     title_en: 'Le Festin — La Table des Airelles',
     description_fr:
@@ -672,7 +672,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'matsuhisa-black-cod',
-    image_public_id: lesAirellesCourchevelPoiImage('village-1850'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-11`,
     title_fr: 'Black Cod Miso à Matsuhisa',
     title_en: 'Black Cod Miso at Matsuhisa',
     description_fr:
@@ -688,7 +688,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'spa-la-mer-cryo',
-    image_public_id: lesAirellesCourchevelPoiImage('patinoire-olympique'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-14`,
     title_fr: 'Rituel spa La Mer + cryothérapie',
     title_en: 'La Mer spa ritual + cryotherapy',
     description_fr:
@@ -705,7 +705,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ski-in-first-run',
-    image_public_id: lesAirellesCourchevelPoiImage('ski-valet'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-9`,
     title_fr: 'Première descente ski-in',
     title_en: 'First ski-in run',
     description_fr:
@@ -720,7 +720,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'winter-camp-cinema',
-    image_public_id: lesAirellesCourchevelPoiImage('chiens-traineau'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-18`,
     title_fr: 'Winter Camp & cinéma privé',
     title_en: 'Winter Camp & private cinema',
     description_fr:
@@ -735,7 +735,7 @@ export const LES_AIRELLES_COURCHEVEL_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'folie-douce-experience',
-    image_public_id: lesAirellesCourchevelPoiImage('heli-ski'),
+    image_public_id: `${LES_AIRELLES_COURCHEVEL_IMAGE_PREFIX}/press-27`,
     title_fr: 'Déjeuner La Folie Douce',
     title_en: 'La Folie Douce lunch',
     description_fr:
@@ -1099,5 +1099,6 @@ export function buildLesAirellesCourchevelGoldenFields(
     opened_at: '1990-01-01',
     faq_content: buildKitWaveFaqPromote('les-airelles-courchevel'),
     faq_content_kit: buildKitWaveFaqKit('les-airelles-courchevel'),
+    booking_mode: 'display_only',
   };
 }

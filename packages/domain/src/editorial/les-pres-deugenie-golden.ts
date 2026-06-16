@@ -896,7 +896,7 @@ function lesPresDeugenieExternalScalar(field: LesPresDeugenieExternalScalarField
 export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   {
     key: 'michel-guerard-degustation',
-    image_public_id: lesPresDeugeniePoiImage('ecole-de-cuisine'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-10`,
     title_fr: 'Dîner aux Salons de l’Impératrice — Michel Guérard',
     title_en: 'Dinner at the Impératrice salons — Michel Guérard',
     description_fr:
@@ -913,7 +913,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'minceur-orangerie',
-    image_public_id: lesPresDeugeniePoiImage('dax-thermes'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-11`,
     title_fr: 'Déjeuner Grande Cuisine Minceur® — L’Orangerie',
     title_en: 'Grande Cuisine Minceur® lunch — L’Orangerie',
     description_fr:
@@ -927,7 +927,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'grille-orangerie',
-    image_public_id: lesPresDeugeniePoiImage('foret-des-landes'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-11`,
     title_fr: 'Grillades La Grille — cheminée L’Orangerie',
     title_en: 'La Grille hearth grillades — L’Orangerie',
     description_fr:
@@ -939,7 +939,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ferme-thermale-sisley',
-    image_public_id: lesPresDeugeniePoiImage('salies-de-bearn'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-14`,
     title_fr: 'Rituel Sisley — La Ferme Thermale',
     title_en: 'Sisley ritual — La Ferme Thermale',
     description_fr:
@@ -953,7 +953,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ferme-aux-grives',
-    image_public_id: lesPresDeugeniePoiImage('fermes-chalosse'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-12`,
     title_fr: 'Cochon de lait — La Ferme aux Grives',
     title_en: 'Suckling pig — La Ferme aux Grives',
     description_fr:
@@ -966,7 +966,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'barbagoa-ete',
-    image_public_id: lesPresDeugeniePoiImage('lac-de-leon'),
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-29`,
     title_fr: 'BarbaGoa — grillades & DJ set estival',
     title_en: 'BarbaGoa — summer grillades & DJ set',
     description_fr:

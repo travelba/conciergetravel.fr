@@ -1165,6 +1165,7 @@ export const PRINCE_DE_GALLES_SIGNATURE_EXPERIENCES = [
       'Twenty-six rooms and suites with a balcony or terrace: mosaic marble bath, robe and Lalique amenities, then coffee on the balcony at daybreak.',
     badge_fr: 'Sélection du Concierge',
     badge_en: 'Concierge pick',
+    booking_required: false,
     tip_fr:
       'Mon conseil : côté cour pour Le Patio au calme ; côté avenue George V pour l’animation du Triangle d’Or — je note votre préférence à la réservation.',
     tip_en:
@@ -1463,5 +1464,6 @@ export function buildPrinceDeGallesGoldenFields(
     email_reservations: PRINCE_DE_GALLES_EMAIL_RESERVATIONS,
     mice_info: PRINCE_DE_GALLES_MICE_INFO,
     affiliations: PRINCE_DE_GALLES_AFFILIATIONS,
+    booking_mode: 'display_only',
   };
 }
