@@ -83,6 +83,7 @@ export function HomeKitHeader(): ReactElement {
           <a href="#hotels">{t('hotels')}</a>
           <a href="#destinations">{t('destinations')}</a>
           <a href="#experiences">{t('experiences')}</a>
+          <Link href="/lieux">{t('places')}</Link>
           <Link href="/classements">{t('rankings')}</Link>
           <a href="#concierge">{t('concierge')}</a>
           <a href="#magazine">{t('magazine')}</a>
