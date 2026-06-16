@@ -347,6 +347,10 @@ async function uploadDataUri(
         folder,
         public_id: publicIdShort,
         overwrite: true,
+        // Purge the Cloudinary CDN copy when an existing public_id is
+        // re-uploaded with different pixels (re-source pass). Without this,
+        // the delivery URL keeps serving the stale image for up to ~24 h.
+        invalidate: true,
         resource_type: 'image',
         tags,
         context,
