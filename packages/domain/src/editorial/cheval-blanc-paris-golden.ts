@@ -880,7 +880,7 @@ export const CHEVAL_BLANC_PARIS_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'dior-spa-ritual',
-    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-14`,
+    image_public_id: `${CHEVAL_BLANC_PARIS_IMAGE_PREFIX}/press-18`,
     title_fr: 'Rituel Dior Spa & piscine mosaïque',
     title_en: 'Dior Spa ritual & mosaic pool',
     description_fr: 'Soins Dior en suite exclusive, puis piscine à débordement — sur rendez-vous.',
