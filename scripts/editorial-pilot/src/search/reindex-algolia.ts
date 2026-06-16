@@ -20,10 +20,17 @@
  *   pnpm --filter @mch/editorial-pilot search:reindex:dry        # build only
  *   pnpm --filter @mch/editorial-pilot search:reindex -- --hotels-only
  *   pnpm --filter @mch/editorial-pilot search:reindex -- --cities-only
+ *   pnpm --filter @mch/editorial-pilot search:reindex -- --rest   # read via PostgREST
+ *
+ * Data source: defaults to a direct `pg` connection. Pass `--rest` to read
+ * the published catalogue through the Supabase REST API instead — required
+ * on hosts where the direct DB endpoint (`db.<ref>.supabase.co`) is
+ * unreachable (IPv6-only), e.g. the Windows dev environment.
  *
  * Required env (root .env.local):
  *   NEXT_PUBLIC_ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY, ALGOLIA_INDEX_PREFIX
- *   DATABASE_URL | SUPABASE_DB_POOLER_URL | SUPABASE_DB_URL
+ *   pg mode:   DATABASE_URL | SUPABASE_DB_POOLER_URL | SUPABASE_DB_URL
+ *   --rest:    NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
 
 import { createHash } from 'node:crypto';
@@ -64,6 +71,7 @@ interface Cli {
   readonly dryRun: boolean;
   readonly hotelsOnly: boolean;
   readonly citiesOnly: boolean;
+  readonly rest: boolean;
 }
 
 function parseCli(argv: readonly string[]): Cli {
@@ -72,6 +80,7 @@ function parseCli(argv: readonly string[]): Cli {
     dryRun: set.has('--dry-run'),
     hotelsOnly: set.has('--hotels-only'),
     citiesOnly: set.has('--cities-only'),
+    rest: set.has('--rest'),
   };
 }
 
@@ -159,6 +168,42 @@ const HOTEL_COLUMNS = [
 ].join(', ');
 
 type RawHotel = Record<string, unknown>;
+
+/**
+ * REST fallback (`--rest`). Reads the published catalogue through the
+ * Supabase REST API (PostgREST) instead of a direct `pg` socket. Required
+ * on hosts where `db.<ref>.supabase.co` is IPv6-only / unreachable (the
+ * Windows dev environment). Mirrors the `pg` query: same columns, same
+ * `is_published = true` filter, same `priority asc, name asc` order.
+ */
+async function fetchPublishedHotelsViaRest(): Promise<readonly RawHotel[]> {
+  const base = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '';
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
+  if (base.length === 0 || key.length === 0) {
+    throw new Error(
+      '--rest mode requires NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in root .env.local.',
+    );
+  }
+  const select = HOTEL_COLUMNS.replace(/\s+/gu, '');
+  const out: RawHotel[] = [];
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const offset = page * PAGE_SIZE;
+    const url =
+      `${base}/rest/v1/hotels?select=${select}` +
+      `&is_published=eq.true&order=priority.asc,name.asc` +
+      `&limit=${PAGE_SIZE}&offset=${offset}`;
+    const res = await fetch(url, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
+    });
+    if (!res.ok) {
+      throw new Error(`[reindex] REST ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    }
+    const rows = (await res.json()) as RawHotel[];
+    out.push(...rows);
+    if (rows.length < PAGE_SIZE) break;
+  }
+  return out;
+}
 
 async function fetchPublishedHotels(): Promise<readonly RawHotel[]> {
   const pgModule = (await import('pg')) as typeof import('pg');
@@ -322,8 +367,10 @@ async function main(): Promise<void> {
   const cli = parseCli(process.argv.slice(2));
   const cfg = resolveAlgoliaConfig();
 
-  console.log('[reindex] reading published catalogue from Postgres…');
-  const rows = await fetchPublishedHotels();
+  console.log(
+    `[reindex] reading published catalogue via ${cli.rest ? 'Supabase REST (PostgREST)' : 'Postgres (pg)'}…`,
+  );
+  const rows = cli.rest ? await fetchPublishedHotelsViaRest() : await fetchPublishedHotels();
   console.log(`[reindex] fetched ${rows.length} published hotels.`);
 
   const built = buildRecords(rows);

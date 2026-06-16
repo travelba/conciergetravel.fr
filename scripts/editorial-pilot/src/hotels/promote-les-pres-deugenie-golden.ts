@@ -31,6 +31,7 @@ import {
 } from '@mch/domain/editorial';
 
 import type { SupabaseRestConfig } from './supabase-hotels.js';
+import { reindexHotelInAlgolia } from '../search/reindex-hotel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -198,6 +199,7 @@ async function main(): Promise<void> {
   console.log(
     `[promote-les-pres-deugenie] ✅ wrote ${Object.keys(fields).length} fields to ${row.slug}.`,
   );
+  await reindexHotelInAlgolia(cfg, row.slug);
 }
 
 main().catch((err) => {
