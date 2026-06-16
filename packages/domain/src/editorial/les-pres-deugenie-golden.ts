@@ -896,7 +896,7 @@ function lesPresDeugenieExternalScalar(field: LesPresDeugenieExternalScalarField
 export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   {
     key: 'michel-guerard-degustation',
-    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-8`,
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-2`,
     title_fr: 'Dîner aux Salons de l’Impératrice — Michel Guérard',
     title_en: 'Dinner at the Impératrice salons — Michel Guérard',
     description_fr:
@@ -939,7 +939,7 @@ export const LES_PRES_DEUGENIE_SIGNATURE_EXPERIENCES = [
   },
   {
     key: 'ferme-thermale-sisley',
-    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-17`,
+    image_public_id: `${LES_PRES_DEUGENIE_IMAGE_PREFIX}/press-14`,
     title_fr: 'Rituel Sisley — La Ferme Thermale',
     title_en: 'Sisley ritual — La Ferme Thermale',
     description_fr:
