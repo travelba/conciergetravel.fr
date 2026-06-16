@@ -173,6 +173,7 @@ export function PriceComparatorClient(props: PriceComparatorClientProps): ReactE
 
   useEffect(() => {
     if (!hasDates || checkIn === null || checkOut === null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset to idle when dates are missing
       setState({ status: 'idle' });
       return;
     }

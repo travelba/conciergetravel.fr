@@ -22,10 +22,10 @@ Invoke when:
 
 ## Two distinct offers — never conflate them
 
-| Offer                           | Audience                  | Nature                                          | Status                                |
-| ------------------------------- | ------------------------- | ----------------------------------------------- | ------------------------------------- |
-| **Concierge journey** (this)    | Every guest who booked    | Proactive, automated, event-driven, LLM-assisted | The site's ambition — to build        |
-| `whatsapp_concierge_24_7` perk  | Prestige members only     | On-demand 24/7 human concierge                  | ADR-0019 D4: Prestige-only, zero-ops  |
+| Offer                          | Audience               | Nature                                           | Status                               |
+| ------------------------------ | ---------------------- | ------------------------------------------------ | ------------------------------------ |
+| **Concierge journey** (this)   | Every guest who booked | Proactive, automated, event-driven, LLM-assisted | The site's ambition — to build       |
+| `whatsapp_concierge_24_7` perk | Prestige members only  | On-demand 24/7 human concierge                   | ADR-0019 D4: Prestige-only, zero-ops |
 
 The journey is automation-first, so it scales without breaking ADR-0019's
 **zero-ops** constraint. The Prestige perk adds a human SLA on top. A PR that
@@ -68,15 +68,15 @@ gives free-tier guests an on-demand human channel violates D4 — refuse it.
 
 Event-driven on the booking lifecycle — never cron-blasted marketing:
 
-| Trigger                  | Touchpoint (template)                                              |
-| ------------------------ | ------------------------------------------------------------------ |
-| Booking confirmed        | Welcome + concierge introduction + what to expect                  |
-| J-7 before check-in      | Préparation: transferts, restaurants à réserver, météo, demandes spéciales |
-| J-1                      | Infos check-in, horaires, coordonnées hôtel, "souhaitez-vous quelque chose à l'arrivée ?" |
-| Arrival day              | Welcome + "votre concierge reste joignable ici"                    |
-| Mid-stay (stays ≥ 3 nights) | Discreet check-in: "tout se passe-t-il comme vous le souhaitiez ?" |
-| J+1 after check-out      | Remerciement + demande d'avis                                      |
-| J+7                      | Post-stay: Club Prestige invitation (marketing template, separate opt-in) |
+| Trigger                     | Touchpoint (template)                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| Booking confirmed           | Welcome + concierge introduction + what to expect                                         |
+| J-7 before check-in         | Préparation: transferts, restaurants à réserver, météo, demandes spéciales                |
+| J-1                         | Infos check-in, horaires, coordonnées hôtel, "souhaitez-vous quelque chose à l'arrivée ?" |
+| Arrival day                 | Welcome + "votre concierge reste joignable ici"                                           |
+| Mid-stay (stays ≥ 3 nights) | Discreet check-in: "tout se passe-t-il comme vous le souhaitiez ?"                        |
+| J+1 after check-out         | Remerciement + demande d'avis                                                             |
+| J+7                         | Post-stay: Club Prestige invitation (marketing template, separate opt-in)                 |
 
 - Touchpoint content is grounded in the hotel fiche (concierge_advice,
   F&B, POI — same data as the site): the message must feel like it comes

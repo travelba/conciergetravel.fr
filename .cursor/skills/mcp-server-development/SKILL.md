@@ -28,11 +28,11 @@ Invoke when:
 The MCP server is a **thin protocol adapter** over the exact same domain code
 as the human UI and the ADR-0017 HTTP endpoints:
 
-| Capability      | Domain code (single source of truth)                   | HTTP (ADR-0017)           | MCP tool       |
-| --------------- | ------------------------------------------------------- | ------------------------- | -------------- |
-| Search hotels   | `searchHotelsCatalogOnServer` + `getBestOfferForHotel` | `POST /api/agent/search`  | `search_hotels`|
-| Hotel detail    | `getHotelBySlug`                                        | `GET /api/agent/hotel/…`  | `get_hotel`    |
-| Request a quote | `submitEmailBookingRequest`                             | `POST /api/agent/quote`   | `request_quote`|
+| Capability      | Domain code (single source of truth)                   | HTTP (ADR-0017)          | MCP tool        |
+| --------------- | ------------------------------------------------------ | ------------------------ | --------------- |
+| Search hotels   | `searchHotelsCatalogOnServer` + `getBestOfferForHotel` | `POST /api/agent/search` | `search_hotels` |
+| Hotel detail    | `getHotelBySlug`                                       | `GET /api/agent/hotel/…` | `get_hotel`     |
+| Request a quote | `submitEmailBookingRequest`                            | `POST /api/agent/quote`  | `request_quote` |
 
 - New MCP tool ⇒ the domain function lives in `apps/web/src/server/` or
   `packages/domain` first; the MCP handler only validates input, calls it,
