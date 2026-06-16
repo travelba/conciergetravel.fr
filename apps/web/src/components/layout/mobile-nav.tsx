@@ -457,6 +457,9 @@ export function MobileNav(): ReactElement {
                         );
                       })}
                     </ul>
+                    <Link href="/lieux" className={subLinkClass}>
+                      {t('primaryNav.placesToVisit')}
+                    </Link>
                     <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
                       {t('primaryNav.destinationsBrowseAll')}
                     </Link>

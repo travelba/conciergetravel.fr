@@ -34,6 +34,18 @@ export async function GET(): Promise<NextResponse> {
   try {
     const [params, cities] = await Promise.all([listPublishedPlaceParams(), listPlaceCityKeys()]);
 
+    // Hub index `/lieux` — the navigation entry point for the vertical.
+    {
+      const hrefForLocale = (l: Locale): string =>
+        `${origin}${getPathname({ locale: l, href: { pathname: '/lieux' } })}`;
+      entries.push({
+        loc: hrefForLocale('fr'),
+        changefreq: 'weekly',
+        priority: 0.8,
+        alternates: buildSitemapAlternates(hrefForLocale),
+      });
+    }
+
     for (const p of params) {
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({

@@ -551,13 +551,20 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
           </>
         </MegaColumn>
       </div>
-      <div className="border-border mt-3 border-t pt-2">
+      <div className="border-border mt-3 flex flex-wrap items-center gap-x-4 border-t pt-2">
         <Link
           role="menuitem"
           href="/destination"
           className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
         >
           {t('primaryNav.destinationsBrowseAll')}
+        </Link>
+        <Link
+          role="menuitem"
+          href="/lieux"
+          className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
+        >
+          {t('primaryNav.placesToVisit')}
         </Link>
       </div>
     </MegaTrigger>

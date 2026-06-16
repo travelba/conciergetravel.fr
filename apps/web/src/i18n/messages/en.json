@@ -26,7 +26,13 @@
     "sectionDo": "What to do",
     "viewPlace": "Discover",
     "noResults": "No published place yet.",
-    "openInMaps": "View on the map"
+    "openInMaps": "View on the map",
+    "hubTitle": "Places to visit",
+    "hubIntro": "Museums, monuments, gardens and exceptional activities, city by city — each place with its own page, curated by the Concierge.",
+    "hubCityCta": "See places in {city}",
+    "hubCount": "{count} places",
+    "hubCountVisitDo": "{visit} to see · {doCount} to do",
+    "hubEmpty": "The places-to-visit catalogue is coming very soon."
   },
   "common": {
     "siteName": "MyConciergeHotel",
@@ -439,6 +445,7 @@
     "primaryNav": {
       "label": "Primary navigation",
       "destinations": "Destinations",
+      "placesToVisit": "Places to visit",
       "search": "Search",
       "hotels": "Hotels",
       "hotelsAllAria": "View all hotels",
@@ -2746,6 +2753,7 @@
       "destinations": "All destinations",
       "hotels": "All hotels",
       "directoryFrance": "Directory — hotels in France",
+      "placesToVisit": "Places to visit",
       "rankings": "All rankings",
       "guides": "All guides",
       "inspiration": "Inspiration",

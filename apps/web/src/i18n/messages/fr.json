@@ -26,7 +26,13 @@
     "sectionDo": "Ce qu'on y fait",
     "viewPlace": "Découvrir",
     "noResults": "Aucun lieu publié pour le moment.",
-    "openInMaps": "Voir sur la carte"
+    "openInMaps": "Voir sur la carte",
+    "hubTitle": "Lieux à visiter",
+    "hubIntro": "Musées, monuments, jardins et activités d'exception, ville par ville — chaque lieu avec sa fiche, sélectionné par le Concierge.",
+    "hubCityCta": "Voir les lieux à {city}",
+    "hubCount": "{count} lieux",
+    "hubCountVisitDo": "{visit} à visiter · {doCount} à faire",
+    "hubEmpty": "Le catalogue des lieux à visiter arrive très bientôt."
   },
   "common": {
     "siteName": "MyConciergeHotel",
@@ -439,6 +445,7 @@
     "primaryNav": {
       "label": "Navigation principale",
       "destinations": "Destinations",
+      "placesToVisit": "Lieux à visiter",
       "search": "Rechercher",
       "hotels": "Hôtels",
       "hotelsAllAria": "Voir tous les hôtels",
@@ -2746,6 +2753,7 @@
       "destinations": "Toutes les destinations",
       "hotels": "Tous les hôtels",
       "directoryFrance": "Annuaire — hôtels en France",
+      "placesToVisit": "Lieux à visiter",
       "rankings": "Tous les classements",
       "guides": "Tous les guides",
       "inspiration": "Inspiration",

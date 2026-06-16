@@ -342,6 +342,7 @@ export const routing = defineRouting({
     // slugs are locale-invariant identifiers (EN alias resolved by the
     // data layer via `slug_en`). SEO equity lives on the slug, not the
     // container word.
+    '/lieux': '/lieux',
     '/lieux/[citySlug]': '/lieux/[citySlug]',
     '/lieux/[citySlug]/[placeSlug]': '/lieux/[citySlug]/[placeSlug]',
     '/ouvertures': {

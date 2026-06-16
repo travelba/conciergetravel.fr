@@ -111,6 +111,56 @@ export async function listPublishedPlaceParams(): Promise<readonly PublishedPlac
   }
 }
 
+/** A city that has at least one published place, with its counts. */
+export interface PlaceCitySummary {
+  readonly citySlug: string;
+  readonly cityName: string;
+  readonly total: number;
+  readonly visit: number;
+  readonly doCount: number;
+}
+
+/**
+ * Distinct published cities with per-bucket counts — powers the `/lieux`
+ * hub index. Aggregated in memory (the published-places volume is small),
+ * degrades to `[]` without Supabase env.
+ */
+export async function listPlaceCities(): Promise<readonly PlaceCitySummary[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('places')
+      .select('city_key, city, bucket')
+      .eq('is_published', true)
+      .limit(5000);
+    if (error || !Array.isArray(data)) return [];
+    const byCity = new Map<string, { name: string; visit: number; doCount: number }>();
+    for (const raw of data) {
+      const row = raw as { city_key?: unknown; city?: unknown; bucket?: unknown };
+      if (typeof row.city_key !== 'string' || row.city_key.length === 0) continue;
+      const entry = byCity.get(row.city_key) ?? {
+        name: typeof row.city === 'string' && row.city.length > 0 ? row.city : row.city_key,
+        visit: 0,
+        doCount: 0,
+      };
+      if (row.bucket === 'do') entry.doCount += 1;
+      else entry.visit += 1;
+      byCity.set(row.city_key, entry);
+    }
+    return [...byCity.entries()]
+      .map(([citySlug, v]) => ({
+        citySlug,
+        cityName: v.name,
+        total: v.visit + v.doCount,
+        visit: v.visit,
+        doCount: v.doCount,
+      }))
+      .sort((a, b) => b.total - a.total || a.cityName.localeCompare(b.cityName));
+  } catch {
+    return [];
+  }
+}
+
 /** Distinct published city keys that have at least one place. */
 export async function listPlaceCityKeys(): Promise<readonly string[]> {
   try {

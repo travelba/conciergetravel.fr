@@ -146,6 +146,11 @@ export async function SiteFooter(): Promise<ReactElement> {
                 </Link>
               </li>
               <li>
+                <Link href="/lieux" className="text-fg hover:underline">
+                  {t('links.placesToVisit')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/classements" className="text-fg hover:underline">
                   {t('links.rankings')}
                 </Link>
