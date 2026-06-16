@@ -1,8 +1,11 @@
 /**
- * Phase 3 — curated 25-image gallery manifest for `shangri-la-paris`.
+ * Phase 3 — honest gallery manifest for `shangri-la-paris` (23 slots).
  *
- * CDC §2.2 kit (2026-06-10) — 5 UI categories × 5 photos :
- * Vue, Chambres, Piscine, Restaurant, Spa. Hero Vue is separate (`hero`).
+ * 2026-06-16 — re-audited against the live Cloudinary pixels. Dropped press-5
+ * (Tower Bridge composite, foreign) and press-12 (generic « CBD OIL » stock);
+ * recategorised mislabelled salons/panoramas/desserts to their real subject.
+ * Categories without genuine pixels (only one true pool) shrink rather than
+ * being padded with mislabelled photos. Hero Vue is separate (`hero`).
  *
  * Upload sources live in
  * `scripts/editorial-pilot/src/photos/resource-shangri-la-paris-gallery-batch.ts`.
@@ -52,25 +55,17 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-4',
-    category: 'view',
-    alt_fr: 'Terrasse avec panorama Seine et Tour Eiffel, Shangri-La Paris',
-    alt_en: 'Terrace with Seine and Eiffel Tower panorama, Shangri-La Paris',
+    category: 'room',
+    alt_fr: 'Salon d’une suite signature avec vue Tour Eiffel, Shangri-La Paris',
+    alt_en: 'Signature suite living room with Eiffel Tower view, Shangri-La Paris',
     caption_fr:
-      'Depuis les terrasses des suites signatures, la Seine et la Tour Eiffel composent le tableau parisien.',
+      'Le salon des suites signatures ouvre par ses baies sur la Tour Eiffel — un séjour parisien sur mesure.',
     caption_en:
-      'From signature suite terraces, the Seine and Eiffel Tower compose the Parisian tableau.',
+      'The signature suite living room opens through its bays onto the Eiffel Tower — a bespoke Parisian stay.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
-  {
-    public_id: 'cct/hotels/shangri-la-paris/press-5',
-    category: 'view',
-    alt_fr: 'Vue nocturne sur la Tour Eiffel depuis le Shangri-La Paris',
-    alt_en: 'Night view of the Eiffel Tower from Shangri-La Paris',
-    caption_fr:
-      'Au crépuscule, les scintillements de la Tour Eiffel se lisent depuis les étages élevés du palace.',
-    caption_en: 'At dusk, the Eiffel Tower’s sparkles unfold from the palace upper floors.',
-    credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
-  },
+  /* press-5 retiré (2026-06-16) : visuel composite Tower Bridge (Londres) +
+   * Tour Eiffel — illustration étrangère au palace parisien. */
   /* ── Chambres ×5 (press-6…10) ── */
   {
     public_id: 'cct/hotels/shangri-la-paris/press-6',
@@ -108,12 +103,12 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/shangri-la-paris/press-9',
     category: 'room',
-    alt_fr: 'Salle de bain marbre d’une chambre Shangri-La Paris',
-    alt_en: 'Marble bathroom in a Shangri-La Paris guest room',
+    alt_fr: 'Chambre du Shangri-La Paris, lit habillé et œuvre encadrée',
+    alt_en: 'Guest room at Shangri-La Paris, dressed bed and framed artwork',
     caption_fr:
-      'Marbre, baignoire profonde et produits d’accueil de luxe composent la signature des salles de bain du palace.',
+      'Les chambres déclinent le confort feutré du palace — linge fin, lumière douce et patrimoine du Palais d’Iéna.',
     caption_en:
-      'Marble, deep bathtub and luxury amenities form the signature of the palace bathrooms.',
+      'The rooms reprise the palace’s hushed comfort — fine linen, soft light and Palais d’Iéna heritage.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
@@ -126,7 +121,7 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
     caption_en: 'From several room categories, the Eiffel Tower unfolds without leaving the bed.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
-  /* ── Piscine ×5 (press-11…15) ── */
+  /* ── Piscine (press-11 — seule piscine réelle : bassin intérieur 17 m du CHI Spa) ── */
   {
     public_id: 'cct/hotels/shangri-la-paris/press-11',
     category: 'pool',
@@ -138,46 +133,39 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
       'The 17-metre indoor pool, flooded with natural light, opens onto a landscaped terrace.',
     credit: 'Shangri-La Paris — CHI, The Spa',
   },
-  {
-    public_id: 'cct/hotels/shangri-la-paris/press-12',
-    category: 'pool',
-    alt_fr: 'Bassin du CHI Spa avec baies vitrées, Shangri-La Paris',
-    alt_en: 'CHI Spa pool with bay windows, Shangri-La Paris',
-    caption_fr:
-      'Les grandes baies vitrées du spa laissent entrer la lumière du 16e sur le bassin intérieur.',
-    caption_en: 'The spa’s large bay windows bring 16th-arrondissement light into the indoor pool.',
-    credit: 'Shangri-La Paris — CHI, The Spa',
-  },
+  /* press-12 retiré (2026-06-16) : flacon générique « CBD OIL » — visuel
+   * stock non représentatif du palace, retiré par honnêteté. */
   {
     public_id: 'cct/hotels/shangri-la-paris/press-13',
-    category: 'pool',
-    alt_fr: 'Terrasse végétalisée du spa CHI, Shangri-La Paris',
-    alt_en: 'Landscaped CHI Spa terrace, Shangri-La Paris',
+    category: 'view',
+    alt_fr: 'Panorama parisien et Tour Eiffel au crépuscule depuis le Shangri-La Paris',
+    alt_en: 'Parisian skyline and Eiffel Tower at dusk from Shangri-La Paris',
     caption_fr:
-      'La terrasse du spa prolonge le rituel bien-être à l’extérieur, entre verdure et calme du palace.',
+      'Depuis les étages élevés, Paris se déploie jusqu’à la Tour Eiffel — le panorama qui fait la réputation du palace.',
     caption_en:
-      'The spa terrace extends the wellness ritual outdoors, between greenery and palace calm.',
-    credit: 'Shangri-La Paris — CHI, The Spa',
+      'From the upper floors, Paris unfolds to the Eiffel Tower — the panorama that built the palace’s reputation.',
+    credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-14',
-    category: 'pool',
-    alt_fr: 'Accès au CHI Spa depuis les salons historiques, Shangri-La Paris',
-    alt_en: 'CHI Spa access from historic salons, Shangri-La Paris',
+    category: 'lobby',
+    alt_fr: 'Salon d’apparat du Shangri-La Paris, sol marbre et composition florale',
+    alt_en: 'Reception salon at Shangri-La Paris, marble floor and floral display',
     caption_fr:
-      'Les salons d’apparat mènent au niveau spa — piscine, hammam et cabines de soin sous le Palais d’Iéna.',
+      'Les salons d’apparat du Palais d’Iéna conservent marbres, dorures et compositions florales signées.',
     caption_en:
-      'The reception salons lead to the spa level — pool, hammam and treatment rooms under the Palais d’Iéna.',
+      'The Palais d’Iéna reception salons keep their marble, gilding and signature floral displays.',
     credit: 'Shangri-La Paris (Shangri-La Hotels & Resorts)',
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-15',
-    category: 'pool',
-    alt_fr: 'Les Lounges, détente après la piscine du Shangri-La Paris',
-    alt_en: 'Les Lounges, post-pool relaxation at Shangri-La Paris',
+    category: 'dining',
+    alt_fr: 'Les Lounges du Shangri-La Paris, pâtisseries et salon de thé',
+    alt_en: 'Les Lounges at Shangri-La Paris, pastries and tea salon',
     caption_fr:
-      'Les Lounges accueillent thés et pause après les longueurs — à deux pas du bassin du CHI Spa.',
-    caption_en: 'Les Lounges host tea and a pause after laps — steps from the CHI Spa pool.',
+      'Les Lounges servent thés et pâtisseries de la maison dans un salon feutré ouvert sur le palace.',
+    caption_en:
+      'Les Lounges serve house teas and pastries in a hushed salon opening onto the palace.',
     credit: 'Shangri-La Paris — Les Lounges',
   },
   /* ── Restaurant ×5 (press-16…20) ── */
@@ -270,24 +258,24 @@ export const SHANGRI_LA_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-24',
-    category: 'spa',
-    alt_fr: 'Salon Maison Roland, espace bien-être du Shangri-La Paris',
-    alt_en: 'Maison Roland salon, Shangri-La Paris wellness space',
+    category: 'dining',
+    alt_fr: 'Dessert glacé aux fruits rouges, restauration du Shangri-La Paris',
+    alt_en: 'Iced red-fruit dessert, dining at Shangri-La Paris',
     caption_fr:
-      'Maison Roland accueille rituels privés et expériences sensorielles complémentaires au CHI Spa.',
+      'La pâtisserie du palace signe desserts glacés et fruits rouges — une douceur servie en salle ou en suite.',
     caption_en:
-      'Maison Roland hosts private rituals and sensory experiences complementing CHI Spa.',
-    credit: 'Shangri-La Paris — Maison Roland',
+      'The palace pastry kitchen signs iced desserts and red fruits — a sweet served in the dining room or in-suite.',
+    credit: 'Shangri-La Paris',
   },
   {
     public_id: 'cct/hotels/shangri-la-paris/press-25',
-    category: 'spa',
-    alt_fr: 'Les Salons du Prince, réception privée bien-être, Shangri-La Paris',
-    alt_en: 'Les Salons du Prince, private wellness reception, Shangri-La Paris',
+    category: 'lobby',
+    alt_fr: 'Les Salons du Prince, salon historique boisé du Shangri-La Paris',
+    alt_en: 'Les Salons du Prince, panelled historic salon at Shangri-La Paris',
     caption_fr:
-      'Les Salons du Prince accueillent soirées privées et rituels sur mesure dans le cadre historique.',
+      'Les Salons du Prince conservent boiseries, miroirs et lustres du Palais d’Iéna — cadre des réceptions privées.',
     caption_en:
-      'Les Salons du Prince host private evenings and bespoke rituals in the historic setting.',
+      'Les Salons du Prince keep the Palais d’Iéna panelling, mirrors and chandeliers — the setting for private events.',
     credit: 'Shangri-La Paris — Les Salons du Prince',
   },
 ] as const;
@@ -335,14 +323,14 @@ export const SHANGRI_LA_PARIS_GALLERY_PRESS_SLOT_URLS = [
   SHANGRI_OFFICIAL.enchanted,
   SHANGRI_OFFICIAL.eiffelTerrace,
   SHANGRI_OFFICIAL.suiteShangri,
-  SHANGRI_OFFICIAL.twinOffer,
+  // press-5 retiré : composite Tower Bridge (Londres) — étranger au palace parisien.
   SHANGRI_OFFICIAL.superiorRoom,
   SHANGRI_OFFICIAL.deluxeRoom,
   SHANGRI_OFFICIAL.deluxeSuite,
   SHANGRI_OFFICIAL.juniorSuite,
   SHANGRI_OFFICIAL.womanRoomView,
   SHANGRI_OFFICIAL.chiSpaPool,
-  SHANGRI_OFFICIAL.chiSpaPoolAlt,
+  // press-12 retiré : flacon générique « CBD OIL » — visuel stock non représentatif.
   SHANGRI_OFFICIAL.parisianEscape,
   SHANGRI_OFFICIAL.lobby,
   SHANGRI_OFFICIAL.lounges,
@@ -363,10 +351,11 @@ export const SHANGRI_LA_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPer
   SHANGRI_LA_PARIS_HERO_SOURCE_URL,
 );
 
-/** Kit 5×5 filter categories represented in the manifest. */
+/** Honest filter categories represented in the manifest (no fabricated pool/spa padding). */
 export const SHANGRI_LA_PARIS_GALLERY_CDC_CATEGORIES = [
   'view',
   'room',
+  'lobby',
   'pool',
   'dining',
   'spa',

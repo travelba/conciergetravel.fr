@@ -5,7 +5,7 @@
 
 import {
   KIT_GALLERY_LEGACY_MIN,
-  KIT_GALLERY_SLOT_COUNT,
+  KIT_GALLERY_MIN_SLOT_COUNT,
 } from '../photos/gallery-filter-categories';
 import { normalizeGallerySourceUrlForDedup } from '../photos/gallery-source-url';
 
@@ -95,9 +95,9 @@ export function buildKitGallerySourceUrlsPerPressSlot(
   heroSourceUrl: string,
 ): readonly string[] {
   const slotCount = pressSlotUrls.length;
-  if (slotCount !== KIT_GALLERY_SLOT_COUNT && slotCount !== KIT_GALLERY_LEGACY_MIN) {
+  if (slotCount < KIT_GALLERY_MIN_SLOT_COUNT || slotCount > KIT_GALLERY_LEGACY_MIN) {
     throw new Error(
-      `buildKitGallerySourceUrlsPerPressSlot: expected ${KIT_GALLERY_SLOT_COUNT} or ${KIT_GALLERY_LEGACY_MIN} press slot urls, got ${slotCount}`,
+      `buildKitGallerySourceUrlsPerPressSlot: expected ${KIT_GALLERY_MIN_SLOT_COUNT}–${KIT_GALLERY_LEGACY_MIN} press slot urls, got ${slotCount}`,
     );
   }
   const hero = heroSourceUrl.trim();
