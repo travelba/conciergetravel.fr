@@ -38,6 +38,7 @@ import {
 } from '@mch/domain/editorial';
 
 import type { SupabaseRestConfig } from './supabase-hotels.js';
+import { reindexHotelInAlgolia } from '../search/reindex-hotel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -191,6 +192,7 @@ async function main(): Promise<void> {
 
   await patchRow(cfg, row.id, fields);
   console.log(`[promote-airelles] ✅ wrote ${Object.keys(fields).length} fields to ${row.slug}.`);
+  await reindexHotelInAlgolia(cfg, row.slug);
 }
 
 main().catch((err) => {

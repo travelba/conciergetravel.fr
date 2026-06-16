@@ -19,6 +19,7 @@ import {
 } from '@mch/domain/editorial';
 
 import type { SupabaseRestConfig } from './supabase-hotels.js';
+import { reindexHotelInAlgolia } from '../search/reindex-hotel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -159,6 +160,7 @@ async function promoteSlug(
   }
   await patchRow(cfg, row.id, fields);
   console.log('[promote-kit] ✓ written');
+  await reindexHotelInAlgolia(cfg, row.slug);
   return true;
 }
 

@@ -115,6 +115,7 @@
     "photos:backfill-url:dry": "tsx src/photos/backfill-official-url.ts --dry-run --limit=10",
     "search:reindex": "tsx src/search/reindex-algolia.ts",
     "search:reindex:dry": "tsx src/search/reindex-algolia.ts --dry-run",
+    "search:reindex:rest": "tsx src/search/reindex-algolia.ts --rest",
     "itineraries:check-db": "tsx src/itineraries/check-db.ts",
     "itineraries:run": "tsx src/itineraries/run-itinerary.ts",
     "itineraries:run:dry": "tsx src/itineraries/run-itinerary.ts --dry-run",
