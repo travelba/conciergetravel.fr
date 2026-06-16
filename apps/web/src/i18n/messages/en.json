@@ -2952,6 +2952,8 @@
     },
     "legal": "Prices observed for informational purposes only, subject to change. All rates are shown taxes included.",
     "cachedNotice": "Cached values (latest refresh unavailable).",
+    "conciergeLabel": "Concierge rate",
+    "bestRateBadge": "Best rate",
     "tableHeader": {
       "provider": "Platform",
       "price": "Total price incl. tax"

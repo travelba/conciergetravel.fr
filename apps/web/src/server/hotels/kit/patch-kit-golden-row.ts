@@ -8,6 +8,7 @@ import {
   buildChevalBlancParisGoldenFields,
   buildLeBristolParisGoldenFields,
   buildLesAirellesCourchevelGoldenFields,
+  buildConradLosAngelesGoldenFields,
   buildLesPresDeugenieGoldenFields,
   buildPrinceDeGallesGoldenFields,
   buildShangriLaParisGoldenFields,
@@ -34,6 +35,7 @@ const GOLDEN_BUILDERS: Readonly<Record<string, GoldenFieldsBuilder>> = {
   'le-bristol-paris': buildLeBristolParisGoldenFields,
   'les-pres-deugenie': buildLesPresDeugenieGoldenFields,
   'shangri-la-paris': buildShangriLaParisGoldenFields,
+  'conrad-los-angeles': buildConradLosAngelesGoldenFields,
 };
 
 /** EN kit slugs share the FR golden payload builder. */

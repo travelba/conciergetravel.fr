@@ -558,7 +558,14 @@ export async function prepareHotelKitModelUncached(
   const origin = siteOrigin();
   const canonicalUrl = `${origin}${canonicalPath}`;
   const cityHubSlug = citySlug(row.city);
-  const countryLabel = pickByLocale(kitLocale, 'France', 'France');
+  // Derive the country label from the row (kit was France-only originally, but
+  // the catalogue is now worldwide — e.g. Conrad Los Angeles = US). Keep
+  // 'France' as the ultimate fallback for legacy FR rows with null labels.
+  const countryLabel = pickByLocale(
+    kitLocale,
+    row.country_label_fr ?? row.country_label_en ?? 'France',
+    row.country_label_en ?? row.country_label_fr ?? 'France',
+  );
 
   // SSR must not await Travelport — `searchByCoordinates` blocks TTFB 3–10 s on
   // cold cache. Room cards keep editorial `indicative_price`; live GDS overlay
