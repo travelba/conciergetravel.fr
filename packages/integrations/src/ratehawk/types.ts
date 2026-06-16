@@ -62,6 +62,7 @@ export interface RateHawkHotelPageResponse {
 export interface RateHawkRoomGroup {
   readonly name?: string | undefined;
   readonly rg_ext?: RgExt | undefined;
+  readonly room_group_id?: number | undefined;
   readonly room_amenities?: readonly string[] | undefined;
   readonly images?: readonly string[] | undefined;
   readonly images_ext?: ReadonlyArray<{ readonly url?: string | undefined }> | undefined;
@@ -81,6 +82,20 @@ export interface RateHawkHotelContentResponse {
       }
     | null
     | undefined;
+}
+
+/** Static hotel payload from `POST /api/b2b/v3/hotel/info/` (single property, not SERP). */
+export interface RateHawkHotelInfoData {
+  readonly id?: string | undefined;
+  readonly hid?: number | undefined;
+  readonly name?: string | undefined;
+  readonly room_groups?: readonly RateHawkRoomGroup[] | undefined;
+}
+
+export interface RateHawkHotelInfoResponse {
+  readonly status?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly data?: RateHawkHotelInfoData | null | undefined;
 }
 
 const PaymentTypeSchema = z
@@ -127,6 +142,7 @@ const RoomGroupSchema = z
   .object({
     name: z.string().optional(),
     rg_ext: RgExtSchema.optional(),
+    room_group_id: z.number().optional(),
     room_amenities: z.array(z.string()).optional(),
     images: z.array(z.string()).optional(),
     images_ext: z.array(z.object({ url: z.string().optional() })).optional(),
@@ -148,6 +164,23 @@ export const HotelContentResponseSchema: z.ZodType<RateHawkHotelContentResponse>
           )
           .optional(),
       })
+      .nullable()
+      .optional(),
+  })
+  .passthrough();
+
+export const HotelInfoResponseSchema: z.ZodType<RateHawkHotelInfoResponse> = z
+  .object({
+    status: z.string().optional(),
+    error: z.string().nullable().optional(),
+    data: z
+      .object({
+        id: z.string().optional(),
+        hid: z.number().optional(),
+        name: z.string().optional(),
+        room_groups: z.array(RoomGroupSchema).optional(),
+      })
+      .passthrough()
       .nullable()
       .optional(),
   })

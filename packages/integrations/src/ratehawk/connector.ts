@@ -25,7 +25,7 @@ import type {
 } from '../supplier/types';
 
 import { book as bookOrder, cancel as cancelOrder, prebook as prebookRate } from './booking';
-import { fetchHotelContent, searchHotelPage, type RateHawkClientConfig } from './client';
+import { fetchRoomGroups, searchHotelPage, type RateHawkClientConfig } from './client';
 import type { RateHawkHpRate } from './types';
 
 function boardFromMeal(meal: string | undefined): { board: BoardType; breakfast: boolean | null } {
@@ -143,10 +143,9 @@ export function createRateHawkConnector(cfg: RateHawkClientConfig): BookingCapab
       if (input.propertyKey.supplier !== 'ratehawk') {
         return err({ kind: 'not_configured', details: 'property key is not a ratehawk key' });
       }
-      const res = await fetchHotelContent(cfg, [input.propertyKey.hotelId]);
+      const res = await fetchRoomGroups(cfg, input.propertyKey.hotelId);
       if (!res.ok) return err({ kind: 'parse_failure', details: `ratehawk: ${res.error.kind}` });
-      const hotel = res.value.data?.hotels?.[0];
-      const groups = hotel?.room_groups ?? [];
+      const groups = res.value;
       const out: NormalizedRoomStatic[] = [];
       for (const g of groups) {
         if (g.rg_ext === undefined) continue;

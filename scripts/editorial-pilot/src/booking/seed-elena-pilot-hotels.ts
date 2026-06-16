@@ -14,7 +14,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { fetchHotelContent, type RateHawkClientConfig } from '@mch/integrations/ratehawk';
+import { fetchRoomGroups, type RateHawkClientConfig } from '@mch/integrations/ratehawk';
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
@@ -276,11 +276,10 @@ async function fetchRhRoomNames(
   etgId: string,
 ): Promise<readonly string[]> {
   if (cfg === null) return [];
-  const content = await fetchHotelContent(cfg, [etgId], 'en');
-  if (!content.ok) return [];
-  const groups = content.value.data?.hotels?.[0]?.room_groups ?? [];
+  const groupsRes = await fetchRoomGroups(cfg, etgId, 'en');
+  if (!groupsRes.ok) return [];
   const names: string[] = [];
-  for (const g of groups) {
+  for (const g of groupsRes.value) {
     const name = g.name?.trim();
     if (name !== undefined && name.length > 0) names.push(name);
   }

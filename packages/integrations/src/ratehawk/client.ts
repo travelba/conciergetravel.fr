@@ -15,9 +15,12 @@ import { retryingJsonRequest } from '@mch/integrations/http';
 import type { RateHawkError } from './errors';
 import {
   HotelContentResponseSchema,
+  HotelInfoResponseSchema,
   HotelPageResponseSchema,
   type RateHawkHotelContentResponse,
+  type RateHawkHotelInfoResponse,
   type RateHawkHotelPageResponse,
+  type RateHawkRoomGroup,
 } from './types';
 
 export interface RateHawkClientConfig {
@@ -117,6 +120,49 @@ export async function fetchHotelContent(
     }
     return ok(parsed.data);
   });
+}
+
+/** Full static hotel card including `room_groups` (sandbox-friendly). */
+export async function fetchHotelInfo(
+  cfg: RateHawkClientConfig,
+  hotelId: string,
+  language = 'en',
+): Promise<Result<RateHawkHotelInfoResponse, RateHawkError>> {
+  const payload = { id: hotelId, language };
+  return postJson(cfg, '/api/b2b/v3/hotel/info/', payload, (raw) => {
+    const parsed = HotelInfoResponseSchema.safeParse(raw);
+    if (!parsed.success) return err({ kind: 'parse_failure', details: 'hotel info shape' });
+    if (parsed.data.status !== undefined && parsed.data.status !== 'ok') {
+      return err({
+        kind: 'api_error',
+        status: parsed.data.status,
+        details: parsed.data.error ?? 'hotel info error',
+      });
+    }
+    return ok(parsed.data);
+  });
+}
+
+/**
+ * Room groups for an ETG hotel — prefers `content/v1`, falls back to `hotel/info`
+ * when the content API is empty or unparsable (common on sandbox).
+ */
+export async function fetchRoomGroups(
+  cfg: RateHawkClientConfig,
+  hotelId: string,
+  language = 'en',
+): Promise<Result<readonly RateHawkRoomGroup[], RateHawkError>> {
+  const content = await fetchHotelContent(cfg, [hotelId], language);
+  if (content.ok) {
+    const fromContent = content.value.data?.hotels?.[0]?.room_groups ?? [];
+    if (fromContent.length > 0) return ok(fromContent);
+  }
+  const info = await fetchHotelInfo(cfg, hotelId, language);
+  if (!info.ok) {
+    if (content.ok) return ok([]);
+    return err(info.error);
+  }
+  return ok(info.value.data?.room_groups ?? []);
 }
 
 /** Build a client config from the shared env. Returns `not_configured` when

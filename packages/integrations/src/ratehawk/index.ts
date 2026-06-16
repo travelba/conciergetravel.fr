@@ -7,6 +7,8 @@ export type { RateHawkError } from './errors';
 export {
   searchHotelPage,
   fetchHotelContent,
+  fetchHotelInfo,
+  fetchRoomGroups,
   rateHawkConfigFromSharedEnv,
   type RateHawkClientConfig,
   type RateHawkStay,
@@ -18,6 +20,8 @@ export {
   type RateHawkRoomGroup,
   type RateHawkHotelPageResponse,
   type RateHawkHotelContentResponse,
+  type RateHawkHotelInfoResponse,
+  type RateHawkHotelInfoData,
 } from './types';
 export { createRateHawkConnector } from './connector';
 export {

@@ -187,6 +187,7 @@
     "ratehawk:probe": "tsx src/booking/probe-ratehawk.ts",
     "ratehawk:e2e": "tsx src/booking/ratehawk-e2e-sandbox.ts",
     "ratehawk:bootstrap": "tsx src/booking/bootstrap-ratehawk-mappings.ts",
+    "ratehawk:sync-rooms": "tsx src/booking/sync-ratehawk-rooms.ts",
     "seed:elena-pilot": "tsx src/booking/seed-elena-pilot-hotels.ts",
     "shop:rates": "tsx src/booking/shop-rates-probe.ts",
     "giata:sync": "tsx src/booking/sync-giata-hotel.ts",
