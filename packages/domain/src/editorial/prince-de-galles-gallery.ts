@@ -1,16 +1,13 @@
 /**
- * Phase 3 — curated 30-image gallery manifest for `prince-de-galles-paris`.
+ * Phase 3 — honest 30-image gallery manifest for `prince-de-galles-paris`.
  *
- * Mirrors the Airelles golden-template shape (`AIRELLES_GALLERY_IMAGES`).
+ * 2026-06-16 — re-audited against the live Cloudinary pixels (no drop, 30 kept).
+ * The palace has NO on-site pool, and the former `concierge`/`events` slots were
+ * padded with rooms, bathrooms and salons. Each slot is now categorised by its
+ * real subject: the `pool`, `concierge` and `events` categories are gone, the
+ * Piscine tab shrinks to nothing rather than showing a fabricated pool.
  * Upload sources live in
  * `scripts/editorial-pilot/src/photos/resource-prince-de-galles-gallery-batch.ts`.
- *
- * CDC §2.2 — 10 category floor: exterior, lobby, room, dining, spa, pool,
- * view, detail, concierge, events (3 images each).
- *
- * Pool: the heritage building has no on-site pool (reviews + Marriott copy);
- * press-16 → press-18 are metadata-only placeholders pending a PO decision
- * (skip category vs. honest “no pool” editorial note).
  */
 
 import { buildKitGallerySourceUrlsPerPressSlot } from './kit-gallery-promote';
@@ -219,13 +216,13 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-18',
-    category: 'pool',
-    alt_fr: 'Cour Le Patio du Prince de Galles Paris, refuge estival',
-    alt_en: 'Le Patio courtyard at Prince de Galles Paris, summer retreat',
+    category: 'room',
+    alt_fr: 'Suite du Prince de Galles Paris, salon sombre ouvert sur les toits de Paris',
+    alt_en: 'Prince de Galles Paris suite, dark living room opening onto the Paris rooftops',
     caption_fr:
-      'Le Patio mosaïqué offre fraîcheur et intimité au cœur du palace — le Concierge y installe petits déjeuners et cocktails loin de l’agitation de l’avenue.',
+      'Le salon de la suite ouvre par sa baie sur les toits du Triangle d’Or — le palace n’a pas de piscine, mais cultive ces échappées parisiennes.',
     caption_en:
-      'The mosaic Patio offers cool intimacy at the heart of the palace — the Concierge sets breakfast and cocktails away from avenue bustle.',
+      'The suite living room opens through its bay onto the Golden Triangle rooftops — the palace has no pool, but cultivates these Parisian vistas.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
@@ -275,90 +272,93 @@ export const PRINCE_DE_GALLES_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-23',
-    category: 'detail',
-    alt_fr: 'Détail de mosaïque Art déco de la salle de bain, Prince de Galles Paris',
-    alt_en: 'Art Deco mosaic bathroom detail, Prince de Galles Paris',
+    category: 'room',
+    alt_fr: 'Chambre du Prince de Galles Paris, tête de lit capitonnée et photographies encadrées',
+    alt_en: 'Guest room at Prince de Galles Paris, tufted headboard and framed photography',
     caption_fr:
-      'Les motifs géométriques de la mosaïque reprennent la grammaire décorative des années 1920, restaurée en 2014.',
+      'La chambre décline la palette feutrée du palace — tête de lit capitonnée, tons taupe et photographies encadrées.',
     caption_en:
-      'The mosaic’s geometric patterns echo the 1920s decorative grammar, restored in 2014.',
+      'The room reprises the palace’s hushed palette — tufted headboard, taupe tones and framed photography.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-24',
-    category: 'detail',
-    alt_fr: 'Détail de décoration en cristal Lalique de la suite signature, Prince de Galles Paris',
-    alt_en: 'Lalique crystal decorative detail of the signature suite, Prince de Galles Paris',
+    category: 'room',
+    alt_fr: 'Salon d’une suite signature du Prince de Galles Paris, miroir et fauteuils',
+    alt_en: 'Signature suite living room at Prince de Galles Paris, mirror and armchairs',
     caption_fr:
-      'Le cristal Lalique habille la Suite Patrick Hellmann, né d’une collaboration avec la maison Lalique.',
+      'Le salon de la suite signature réunit boiseries laquées, miroir d’apparat et fauteuils — l’esprit d’un appartement parisien des années 1920.',
     caption_en:
-      'Lalique crystal dresses the Patrick Hellmann Suite, born of a collaboration with Maison Lalique.',
+      'The signature suite living room gathers lacquered panelling, a statement mirror and armchairs — the spirit of a 1920s Parisian apartment.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-25',
-    category: 'concierge',
-    alt_fr: 'Lobby et conciergerie Clefs d’Or du Prince de Galles Paris',
-    alt_en: 'Lobby and Clefs d’Or concierge desk at Prince de Galles Paris',
+    category: 'room',
+    alt_fr: 'Chambre du Prince de Galles Paris, tête de lit dorée et chevets éclairés',
+    alt_en: 'Guest room at Prince de Galles Paris, golden headboard and lit bedside tables',
     caption_fr:
-      'La conciergerie Clefs d’Or ouvre sur le lobby : réservations, billets et accès privilégiés à Paris, de jour comme de nuit.',
+      'La chambre habille son lit d’une tête capitonnée dorée et de chevets éclairés — confort feutré derrière la façade Art déco.',
     caption_en:
-      'The Clefs d’Or concierge desk opens onto the lobby: reservations, tickets and privileged Paris access, day or night.',
+      'The room dresses its bed with a golden tufted headboard and lit bedside tables — hushed comfort behind the Art Deco facade.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-26',
-    category: 'concierge',
-    alt_fr: 'Salon d’accueil et conciergerie Clefs d’Or, Prince de Galles Paris',
-    alt_en: 'Reception lounge and Clefs d’Or concierge at Prince de Galles Paris',
+    category: 'detail',
+    alt_fr:
+      'Salle de bain en marbre d’une suite, baignoire et rideaux dorés, Prince de Galles Paris',
+    alt_en: 'Marble suite bathroom with bathtub and golden drapes, Prince de Galles Paris',
     caption_fr:
-      'Le salon d’accueil prolonge le lobby : fauteuils capitonnés, lumière tamisée et conciergerie Clefs d’Or joignable de jour comme de nuit.',
+      'La salle de bain de la suite déploie marbre, baignoire îlot et rideaux dorés — le rituel bien-être à domicile du palace.',
     caption_en:
-      'The reception lounge extends the lobby: tufted armchairs, soft light and Clefs d’Or concierge reachable day and night.',
+      'The suite bathroom unfolds marble, a freestanding bath and golden drapes — the palace’s in-room wellness ritual.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-27',
-    category: 'concierge',
-    alt_fr: 'Suite Prince avec salon privé, Prince de Galles Paris',
-    alt_en: 'Prince Suite with private lounge, Prince de Galles Paris',
+    category: 'view',
+    alt_fr: 'Balcon d’une suite du Prince de Galles Paris, table bistrot et vue sur les toits',
+    alt_en: 'Suite balcony at Prince de Galles Paris, bistro table and rooftop view',
     caption_fr:
-      'La Suite Prince illustre le service sur mesure du palace : salon séparé, art déco et accès direct à la conciergerie pour les demandes de dernière minute.',
+      'Le balcon de la suite installe une table bistrot face aux toits du Triangle d’Or — un petit déjeuner suspendu au-dessus de l’avenue George V.',
     caption_en:
-      'The Prince Suite illustrates bespoke palace service: separate lounge, Art Deco details and direct concierge access for last-minute requests.',
+      'The suite balcony sets a bistro table facing the Golden Triangle rooftops — breakfast suspended above Avenue George V.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-28',
-    category: 'events',
-    alt_fr: 'Espace de réception de la Suite Or, Prince de Galles Paris',
-    alt_en: 'Reception space of the Suite Or, Prince de Galles Paris',
+    category: 'room',
+    alt_fr: 'Salon d’une suite du Prince de Galles Paris, miroir rond et fauteuils Art déco',
+    alt_en: 'Suite living room at Prince de Galles Paris, round mirror and Art Deco armchairs',
     caption_fr:
-      'Le double salon de la Suite Or accueille réceptions privées et célébrations, jusqu’à quarante invités.',
+      'Le salon de la suite réunit miroir rond, fauteuils Art déco et œuvres encadrées — un séjour habillé comme un appartement privé.',
     caption_en:
-      'The Suite Or double living room hosts private receptions and celebrations, for up to forty guests.',
+      'The suite living room gathers a round mirror, Art Deco armchairs and framed works — a lounge dressed like a private apartment.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-29',
-    category: 'events',
-    alt_fr: 'Salon séparé de la Suite Mosaïque, Prince de Galles Paris',
-    alt_en: 'Separate living room of the Mosaic Suite, Prince de Galles Paris',
+    category: 'room',
+    alt_fr:
+      'Salon de la Suite Mosaïque, canapés clairs ouverts sur la verdure, Prince de Galles Paris',
+    alt_en: 'Mosaic Suite living room, pale sofas opening onto greenery, Prince de Galles Paris',
     caption_fr:
-      'Le salon de la Suite Mosaïque se prête aux dîners intimistes et aux réunions en petit comité, loin de l’agitation.',
+      'Le salon de la Suite Mosaïque aligne canapés clairs et baies ouvertes sur la verdure du Patio — un séjour au calme du cœur d’îlot.',
     caption_en:
-      'The Mosaic Suite living room suits intimate dinners and small meetings, away from the bustle.',
+      'The Mosaic Suite living room lines pale sofas and bays opening onto the Patio greenery — a stay in the quiet heart of the block.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
   {
     public_id: 'cct/hotels/prince-de-galles-paris/press-30',
-    category: 'events',
-    alt_fr: 'Suite Mosaïque du Prince de Galles Paris, salon pour réceptions privées',
-    alt_en: 'Mosaic Suite at Prince de Galles Paris, salon for private receptions',
+    category: 'detail',
+    alt_fr:
+      'Salle de bain en marbre d’une suite, baignoire et œuvre contemporaine, Prince de Galles Paris',
+    alt_en: 'Marble suite bathroom with bathtub and contemporary artwork, Prince de Galles Paris',
     caption_fr:
-      'La Suite Mosaïque accueille cocktails et dîners privés dans un décor Art déco — capacité jusqu’à douze convives.',
+      'La salle de bain de la Suite Mosaïque marie marbre, baignoire îlot et œuvre contemporaine — le bien-être en suite, signature du palace.',
     caption_en:
-      'The Mosaic Suite hosts cocktails and private dinners in an Art Deco setting — capacity up to twelve guests.',
+      'The Mosaic Suite bathroom marries marble, a freestanding bath and contemporary artwork — in-suite wellness, a palace signature.',
     credit: 'Prince de Galles, a Luxury Collection Hotel, Paris (Marriott)',
   },
 ] as const;
@@ -403,16 +403,13 @@ export const PRINCE_DE_GALLES_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPer
   PRINCE_DE_GALLES_HERO_SOURCE_URL,
 );
 
-/** CDC §2.2 category floor — 10 required categories. */
+/** Honest categories represented in the manifest (no pool — heritage building has none). */
 export const PRINCE_DE_GALLES_GALLERY_CDC_CATEGORIES = [
   'exterior',
   'lobby',
   'room',
   'dining',
   'spa',
-  'pool',
   'view',
   'detail',
-  'concierge',
-  'events',
 ] as const;

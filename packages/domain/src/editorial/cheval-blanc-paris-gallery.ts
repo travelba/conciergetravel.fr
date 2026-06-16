@@ -1,8 +1,12 @@
 /**
- * Phase 3 — curated 25-image gallery manifest for `cheval-blanc-paris`.
+ * Phase 3 — honest 25-image gallery manifest for `cheval-blanc-paris`.
  *
- * CDC §2.2 kit (2026-06-10) — 5 UI categories × 5 photos :
- * Vue, Chambres, Piscine, Restaurant, Spa. Hero Vue is separate (`hero`).
+ * 2026-06-16 — re-audited against the live Cloudinary pixels (no drop, 25 kept).
+ * Fixed mislabels where the category contradicted the photo: a brasserie room
+ * tagged "room"/lobby, the Suite Seine winter garden tagged "pool", a Dior Spa
+ * suite tagged "dining", a Plénitude dish tagged "pool", a suite detail and a
+ * turndown service tagged "spa". Categories now match the real subject; public
+ * salons fall under `lobby` (no Chambres-tab pollution). Hero Vue is separate.
  *
  * Upload sources live in
  * `scripts/editorial-pilot/src/photos/resource-cheval-blanc-paris-gallery-batch.ts`.
@@ -51,9 +55,9 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-4',
-    category: 'room',
-    alt_fr: 'Salon d’accueil du Cheval Blanc Paris, lumière tamisée',
-    alt_en: 'Reception lounge at Cheval Blanc Paris, soft light',
+    category: 'lobby',
+    alt_fr: 'Salon d’accueil du Cheval Blanc Paris, fauteuils jaunes et art contemporain',
+    alt_en: 'Reception lounge at Cheval Blanc Paris, yellow armchairs and contemporary art',
     caption_fr:
       'Le salon d’accueil accueille les arrivées dans un décor feutré signé Peter Marino, entre art contemporain et lumière dorée.',
     caption_en:
@@ -62,20 +66,20 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-5',
-    category: 'room',
-    alt_fr: 'Lobby du Cheval Blanc Paris, escalier et œuvres d’art',
-    alt_en: 'Cheval Blanc Paris lobby, staircase and artworks',
+    category: 'dining',
+    alt_fr: 'Salle du Tout-Paris, brasserie du Cheval Blanc Paris, fauteuils jaunes',
+    alt_en: 'Le Tout-Paris brasserie dining room at Cheval Blanc Paris, yellow chairs',
     caption_fr:
-      'Le lobby mêle marbre, bronze et pièces d’art choisies — la promenade commence dès l’entrée sur le quai du Louvre.',
+      'La salle du Tout-Paris, signée Édouard François, aligne fauteuils jaunes et baies sur Paris — brasserie étoilée du 7e étage.',
     caption_en:
-      'The lobby blends marble, bronze and selected artworks — the walk begins at the Quai du Louvre entrance.',
+      'Le Tout-Paris dining room, by Édouard François, lines yellow chairs and bays over Paris — the starred 7th-floor brasserie.',
     credit: 'Cheval Blanc Paris (LVMH)',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-6',
-    category: 'room',
-    alt_fr: 'Accueil familial au lobby du Cheval Blanc Paris',
-    alt_en: 'Family welcome at Cheval Blanc Paris lobby',
+    category: 'lobby',
+    alt_fr: 'Lobby sculptural du Cheval Blanc Paris, plafond miroitant',
+    alt_en: 'Sculptural lobby at Cheval Blanc Paris, mirrored ceiling',
     caption_fr:
       'Le Carrousel et la conciergerie prolongent l’accueil : la Maison cultive l’esprit famille au cœur du 1er arrondissement.',
     caption_en:
@@ -106,7 +110,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-9',
-    category: 'pool',
+    category: 'room',
     alt_fr: 'Suite Seine avec jardin d’hiver, Cheval Blanc Paris',
     alt_en: 'Seine Suite with winter garden, Cheval Blanc Paris',
     caption_fr:
@@ -118,12 +122,12 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-10',
     category: 'dining',
-    alt_fr: 'Salle du restaurant Plénitude, Cheval Blanc Paris',
-    alt_en: 'Plénitude restaurant dining room, Cheval Blanc Paris',
+    alt_fr: 'Chef dressant une assiette en cuisine, Plénitude, Cheval Blanc Paris',
+    alt_en: 'Chef plating a dish in the kitchen, Plénitude, Cheval Blanc Paris',
     caption_fr:
-      'Plénitude, trois étoiles MICHELIN : Arnaud Donckele assemble les Absolues au premier étage de la Maison.',
+      'Plénitude, trois étoiles MICHELIN : Arnaud Donckele et sa brigade dressent les Absolues au premier étage de la Maison.',
     caption_en:
-      'Plénitude, three MICHELIN Stars: Arnaud Donckele blends the Absolues on the Maison’s first floor.',
+      'Plénitude, three MICHELIN Stars: Arnaud Donckele and his brigade plate the Absolues on the Maison’s first floor.',
     credit: 'Cheval Blanc Paris (LVMH) — Ilya Food Stories',
   },
   {
@@ -139,14 +143,14 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-12',
-    category: 'dining',
-    alt_fr: 'Terrasse de Langosteria au Cheval Blanc Paris',
-    alt_en: 'Langosteria terrace at Cheval Blanc Paris',
+    category: 'spa',
+    alt_fr: 'Suite Sauvage du Dior Spa Cheval Blanc Paris, alcôve en matières naturelles',
+    alt_en: 'Sauvage suite at Dior Spa Cheval Blanc Paris, natural-material alcove',
     caption_fr:
-      'Langosteria décline l’Italie contemporaine sur la terrasse arborée — déjeuner du mercredi au dimanche, dîner tous les soirs.',
+      'La Suite Sauvage du Dior Spa enveloppe ses hôtes de matières naturelles et de lumière feutrée — un cocon de soins exclusif.',
     caption_en:
-      'Langosteria serves contemporary Italy on the planted terrace — lunch Wednesday to Sunday, dinner every evening.',
-    credit: 'Cheval Blanc Paris (LVMH) — Oliver Fly Photography',
+      'The Dior Spa Sauvage suite wraps guests in natural materials and soft light — an exclusive treatment cocoon.',
+    credit: 'Cheval Blanc Paris (LVMH) — Mathieu Salvaing',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-13',
@@ -238,57 +242,57 @@ export const CHEVAL_BLANC_PARIS_GALLERY_IMAGES = [
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-21',
-    category: 'pool',
-    alt_fr: 'Balcon du Le Tout-Paris, panorama sur la Seine',
-    alt_en: 'Le Tout-Paris balcony, panorama over the Seine',
+    category: 'dining',
+    alt_fr: 'Création signature de Plénitude dressée à l’assiette, Cheval Blanc Paris',
+    alt_en: 'Plénitude signature creation plated, Cheval Blanc Paris',
     caption_fr:
-      'Le balcon du Le Tout-Paris offre l’une des vues les plus nettes sur la Seine depuis le 1er arrondissement.',
+      'Les Absolues de Donckele se lisent à l’assiette — légumes, céleri et passion composés au gramme près, trois étoiles MICHELIN.',
     caption_en:
-      'Le Tout-Paris balcony offers one of the clearest Seine views from the 1st arrondissement.',
+      'Donckele’s Absolues read on the plate — vegetables, celery and passion fruit composed to the gram, three MICHELIN Stars.',
     credit: 'Cheval Blanc Paris (LVMH) — Ilya Food Stories',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-22',
     category: 'dining',
-    alt_fr: 'Création du chef à Plénitude, Cheval Blanc Paris',
-    alt_en: 'Chef’s creation at Plénitude, Cheval Blanc Paris',
+    alt_fr: 'Salle de restaurant feutrée du Cheval Blanc Paris, service en mouvement',
+    alt_en: 'Hushed restaurant room at Cheval Blanc Paris, service in motion',
     caption_fr:
-      'Les Absolues de Donckele se lisent en assiettes — partition maraîchère et sauces longuement travaillées.',
+      'Dans la pénombre chaleureuse de la salle, la brigade orchestre le service — l’art de recevoir signé Cheval Blanc.',
     caption_en:
-      'Donckele’s Absolues read on the plate — vegetable partitions and long-worked sauces.',
-    credit: 'Cheval Blanc Paris (LVMH) — Ilya Food Stories',
-  },
-  {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-23',
-    category: 'dining',
-    alt_fr: 'Salle du restaurant Hakuba, Cheval Blanc Paris',
-    alt_en: 'Hakuba restaurant room, Cheval Blanc Paris',
-    caption_fr:
-      'Hakuba, deux étoiles MICHELIN : Takuya Watanabe invite à un Japon ritualisé au cœur de la Samaritaine.',
-    caption_en:
-      'Hakuba, two MICHELIN Stars: Takuya Watanabe invites ritualised Japan at the heart of Samaritaine.',
+      'In the room’s warm half-light, the brigade orchestrates service — the art of hospitality, Cheval Blanc style.',
     credit: 'Cheval Blanc Paris (LVMH) — Caroline Dutrey',
   },
   {
-    public_id: 'cct/hotels/cheval-blanc-paris/press-24',
-    category: 'spa',
-    alt_fr: 'Suite L’Appartement, détail décoratif, Cheval Blanc Paris',
-    alt_en: 'L’Appartement Suite decorative detail, Cheval Blanc Paris',
+    public_id: 'cct/hotels/cheval-blanc-paris/press-23',
+    category: 'view',
+    alt_fr: 'Salon d’une suite ouvert sur les toits de Paris et un dôme, Cheval Blanc Paris',
+    alt_en: 'Suite lounge opening onto the Paris rooftops and a dome, Cheval Blanc Paris',
     caption_fr:
-      'Les suites L’Appartement déploient volumes généreux et finitions sur mesure — signature Peter Marino.',
+      'Le salon de la suite installe fauteuils et guéridon face aux toits du 1er arrondissement — Paris cadré comme un tableau.',
     caption_en:
-      'L’Appartement suites unfold generous volumes and bespoke finishes — Peter Marino signature.',
+      'The suite lounge sets armchairs and a pedestal table facing the 1st-arrondissement rooftops — Paris framed like a painting.',
+    credit: 'Cheval Blanc Paris (LVMH) — Vincent Leroux',
+  },
+  {
+    public_id: 'cct/hotels/cheval-blanc-paris/press-24',
+    category: 'room',
+    alt_fr: 'Détail décoratif d’une suite L’Appartement avec vue Tour Eiffel, Cheval Blanc Paris',
+    alt_en: 'L’Appartement suite decorative detail with Eiffel Tower view, Cheval Blanc Paris',
+    caption_fr:
+      'Sur le guéridon de la suite L’Appartement, une sculpture claire se découpe devant la Tour Eiffel — l’art au cœur du séjour.',
+    caption_en:
+      'On the L’Appartement suite’s pedestal table, a pale sculpture stands against the Eiffel Tower — art at the heart of the stay.',
     credit: 'Cheval Blanc Paris (LVMH) — Alexandre Tabaste',
   },
   {
     public_id: 'cct/hotels/cheval-blanc-paris/press-25',
-    category: 'spa',
-    alt_fr: 'Conciergerie du Cheval Blanc Paris',
-    alt_en: 'Concierge desk at Cheval Blanc Paris',
+    category: 'room',
+    alt_fr: 'Service de couverture en chambre par le personnel du Cheval Blanc Paris',
+    alt_en: 'In-room turndown service by the Cheval Blanc Paris staff',
     caption_fr:
-      'La conciergerie coordonne tables étoilées, billets Louvre et accès Dior Spa — de jour comme de nuit.',
+      'Le soir, la Maison prépare la chambre pour la nuit — service de couverture discret, signature du soin Cheval Blanc.',
     caption_en:
-      'The concierge coordinates starred tables, Louvre tickets and Dior Spa access — day or night.',
+      'In the evening, the Maison readies the room for the night — discreet turndown service, a Cheval Blanc hallmark.',
     credit: 'Cheval Blanc Paris (LVMH)',
   },
 ] as const;
@@ -333,6 +337,7 @@ export const CHEVAL_BLANC_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsP
 export const CHEVAL_BLANC_PARIS_GALLERY_CDC_CATEGORIES = [
   'view',
   'room',
+  'lobby',
   'pool',
   'dining',
   'spa',

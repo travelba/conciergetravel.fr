@@ -29,6 +29,14 @@ export const KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY = 5;
 /** Legacy kit wave-5 minimum until all fiches migrate to 25-slot model. */
 export const KIT_GALLERY_LEGACY_MIN = 30;
 
+/**
+ * Honest-gallery floor (2026-06-16). The 5×5 / 25 / 30 targets are aspirational;
+ * a kit fiche may ship fewer slots when re-sourcing honestly drops foreign or
+ * mislabelled pixels. Each category needs only one real photo for its mosaic
+ * tile — strict per-category counts are no longer a publish blocker.
+ */
+export const KIT_GALLERY_MIN_SLOT_COUNT = 5;
+
 export interface GalleryCategoryCarrier {
   readonly category?: string | null;
 }

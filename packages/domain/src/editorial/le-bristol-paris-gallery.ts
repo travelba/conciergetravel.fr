@@ -64,11 +64,12 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/le-bristol-paris/press-5',
     category: 'view',
-    alt_fr: 'Suite Azur terrasse, Le Bristol Paris',
-    alt_en: 'Suite Azur terrace, Le Bristol Paris',
+    alt_fr: 'Terrasse privée plantée de la Suite Azur, Le Bristol Paris',
+    alt_en: 'Planted private terrace of the Suite Azur, Le Bristol Paris',
     caption_fr:
-      'Depuis les étages élevés, la ligne des toits haussmanniens déroule jusqu’à la Tour Eiffel.',
-    caption_en: 'From upper floors, the Haussmann rooftops unfold to the Eiffel Tower.',
+      'La terrasse privée plantée de la Suite Azur ouvre sur le jardin du palace — un balcon de verdure en plein 8e.',
+    caption_en:
+      'The Suite Azur’s planted private terrace opens onto the palace garden — a green balcony in the 8th arrondissement.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   /* ── Chambres ×5 (press-6…10) ── */
@@ -127,60 +128,30 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
       'The Deluxe Suite with balcony offers a separate living room and a terrace over Paris rooftops.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
-  /* ── Piscine ×5 (press-11…15) ── */
-  {
-    public_id: 'cct/hotels/le-bristol-paris/press-11',
-    category: 'pool',
-    alt_fr: 'Piscine couverte du Le Bristol Paris, ponton en acajou',
-    alt_en: 'Indoor pool at Le Bristol Paris, mahogany deck',
-    caption_fr:
-      'Au 6e étage, la piscine couverte en acajou surplombe Paris — Tour Eiffel, Montmartre et Sacré-Cœur.',
-    caption_en:
-      'On the 6th floor, the mahogany-lined indoor pool overlooks Paris — Eiffel Tower, Montmartre and Sacré-Cœur.',
-    credit: 'Le Bristol Paris — Oetker Collection',
-  },
+  /* ── Piscine (press-12 — seule piscine réelle du palace : rooftop intérieure) ── */
   {
     public_id: 'cct/hotels/le-bristol-paris/press-12',
     category: 'pool',
-    alt_fr: 'Piscine rooftop Le Bristol Paris, vue sur les toits',
-    alt_en: 'Rooftop pool at Le Bristol Paris, rooftop views',
+    alt_fr: 'Piscine intérieure rooftop en acajou, Le Bristol Paris',
+    alt_en: 'Mahogany rooftop indoor pool, Le Bristol Paris',
     caption_fr:
-      'Réservée aux clients de la maison, la piscine ouvre 6 h 30–22 h 30 — le rituel matinal des habitués.',
+      'Au 6e étage, la piscine intérieure habillée d’acajou surplombe les toits — Tour Eiffel, Montmartre et Sacré-Cœur.',
     caption_en:
-      'Reserved for in-house guests, the pool opens 6:30 am–10:30 pm — a morning ritual for regulars.',
+      'On the 6th floor, the mahogany-lined indoor pool overlooks the rooftops — Eiffel Tower, Montmartre and Sacré-Cœur.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
-  {
-    public_id: 'cct/hotels/le-bristol-paris/press-13',
-    category: 'pool',
-    alt_fr: 'Cour intérieure et piscine, Le Bristol Paris',
-    alt_en: 'Interior courtyard and pool, Le Bristol Paris',
-    caption_fr:
-      'La cour intérieure encadre la piscine — un écrin de calme au cœur du Faubourg Saint-Honoré.',
-    caption_en:
-      'The interior courtyard frames the pool — a calm haven at the heart of Faubourg Saint-Honoré.',
-    credit: 'Le Bristol Paris — Oetker Collection',
-  },
-  {
-    public_id: 'cct/hotels/le-bristol-paris/press-14',
-    category: 'pool',
-    alt_fr: 'Piscine et jardin, Le Bristol Paris',
-    alt_en: 'Pool and garden, Le Bristol Paris',
-    caption_fr:
-      'Le jardin à la française prolonge l’expérience piscine — déjeuner en terrasse après la longueur de nage.',
-    caption_en:
-      'The French garden extends the pool experience — terrace lunch after the morning swim.',
-    credit: 'Le Bristol Paris — Oetker Collection',
-  },
+  /* press-11, press-13, press-14 retirés (2026-06-16) : piscines extérieures
+   * méditerranéennes mal attribuées — Le Bristol n’a qu’une piscine intérieure.
+   * Voir docs honnêteté galerie kit. */
   {
     public_id: 'cct/hotels/le-bristol-paris/press-15',
-    category: 'pool',
-    alt_fr: 'Suite Panoramique, panorama depuis la piscine Le Bristol Paris',
-    alt_en: 'Panoramic Suite, pool-level panorama at Le Bristol Paris',
+    category: 'view',
+    alt_fr: 'Vue aérienne du Le Bristol Paris et de son jardin à la française',
+    alt_en: 'Aerial view of Le Bristol Paris and its French garden',
     caption_fr:
-      'Depuis la piscine, la Suite Panoramique et les étages supérieurs offrent l’une des vues les plus secrètes du palace.',
+      'Vue aérienne du palace : la façade classique encadre les 1 200 m² du jardin à la française, rare en plein Paris.',
     caption_en:
-      'From the pool, the Panoramic Suite and upper floors offer one of the palace’s most private views.',
+      'Aerial view of the palace: the classical facade frames the 1,200 sq m French garden, rare in central Paris.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   /* ── Restaurant ×5 (press-16…20) ── */
@@ -239,59 +210,60 @@ export const LE_BRISTOL_PARIS_GALLERY_IMAGES = [
       'Le Jardin Français serves lunch, afternoon tea and dinner at the heart of the palace’s French garden.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
-  /* ── Spa ×5 (press-21…25) ── */
+  /* ── Spa + chambres signature (press-21…25) — un seul vrai espace bien-être ── */
   {
     public_id: 'cct/hotels/le-bristol-paris/press-21',
-    category: 'spa',
-    alt_fr: 'Suite Eden bien-être, Spa Le Bristol by La Mer',
-    alt_en: 'Suite Eden wellness, Spa Le Bristol by La Mer',
+    category: 'room',
+    alt_fr: 'Chambre Deluxe 102, Le Bristol Paris',
+    alt_en: 'Deluxe Room 102, Le Bristol Paris',
     caption_fr:
-      'La Suite Eden accueille les rituels bien-être en chambre ou en suite dédiée, pour un séjour hors du temps.',
-    caption_en: 'Suite Eden hosts in-room or in-suite wellness rituals for a timeless stay.',
+      'La chambre Deluxe 102 décline les codes du palace — tissus Pierre Frey, lit habillé et lumière du Faubourg.',
+    caption_en:
+      'Deluxe Room 102 reprises the palace codes — Pierre Frey fabrics, a dressed bed and Faubourg light.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   {
     public_id: 'cct/hotels/le-bristol-paris/press-22',
     category: 'spa',
-    alt_fr: 'Suite Eden, rituel bien-être Franck Bohbot, Le Bristol Paris',
-    alt_en: 'Suite Eden wellness ritual, Franck Bohbot, Le Bristol Paris',
+    alt_fr: 'Spa Le Bristol by La Mer — bassin et table de massage de la Suite Eden',
+    alt_en: 'Spa Le Bristol by La Mer — Suite Eden plunge pool and massage table',
     caption_fr:
-      'Les rituels La Mer et La Prairie s’installent dans la Suite Eden — hammam, sauna et cabines sur rendez-vous.',
+      'La Suite Eden abrite un espace bien-être privé : bassin de nage à contre-courant et table de massage face au jardin suspendu.',
     caption_en:
-      'La Mer and La Prairie rituals unfold in Suite Eden — hammam, sauna and treatment rooms by appointment.',
+      'Suite Eden holds a private wellness space: counter-current plunge pool and massage table facing the suspended garden.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   {
     public_id: 'cct/hotels/le-bristol-paris/press-23',
-    category: 'spa',
-    alt_fr: 'Chambre Deluxe 102, Le Bristol Paris — cadre bien-être',
-    alt_en: 'Deluxe Room 102, Le Bristol Paris — wellness setting',
+    category: 'lobby',
+    alt_fr: 'Salon du Le Bristol Paris, tapisserie et mobilier d’époque',
+    alt_en: 'Salon at Le Bristol Paris, tapestry and period furniture',
     caption_fr:
-      'Le spa by La Mer propose huit cabines de soin, dont une suite duo, dans la lumière naturelle du jardin.',
+      'Le salon du palace réunit tapisserie ancienne et mobilier d’époque — l’un des décors signés Castellane.',
     caption_en:
-      'Spa Le Bristol by La Mer offers eight treatment rooms, including a couples suite, in natural garden light.',
+      'The palace salon gathers an antique tapestry and period furniture — one of the Castellane settings.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   {
     public_id: 'cct/hotels/le-bristol-paris/press-24',
-    category: 'spa',
-    alt_fr: 'Lobby historique, accueil Spa Le Bristol Paris',
-    alt_en: 'Historic lobby, Spa Le Bristol Paris welcome',
+    category: 'room',
+    alt_fr: 'Coin salon d’une chambre du Le Bristol Paris',
+    alt_en: 'Sitting corner of a room at Le Bristol Paris',
     caption_fr:
-      'Hammam, sauna et espace détente complètent les rituels La Mer, ouverts 9 h–21 h sur rendez-vous.',
+      'Le coin salon de la chambre prolonge le confort feutré du palace — fauteuil, photographie et lumière tamisée.',
     caption_en:
-      'Hammam, sauna and a relaxation lounge complete La Mer rituals, open 9 am–9 pm by appointment.',
+      'The room’s sitting corner extends the palace’s hushed comfort — armchair, photograph and soft light.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
   {
     public_id: 'cct/hotels/le-bristol-paris/press-25',
-    category: 'spa',
-    alt_fr: 'Suite Penthouse, cadre bien-être Le Bristol Paris',
-    alt_en: 'Penthouse Suite, wellness setting at Le Bristol Paris',
+    category: 'room',
+    alt_fr: 'Suite Penthouse du Le Bristol Paris, balcon sur le Sacré-Cœur',
+    alt_en: 'Penthouse Suite at Le Bristol Paris, balcony over Sacré-Cœur',
     caption_fr:
-      'La Suite Penthouse prolonge l’expérience bien-être — terrasse et rituels spa sur mesure en étages élevés.',
+      'La Suite Penthouse coiffe le palace — salon, terrasse et balcon ouvert sur le Sacré-Cœur et les toits parisiens.',
     caption_en:
-      'The Penthouse Suite extends the wellness experience — terrace and bespoke spa rituals on upper floors.',
+      'The Penthouse Suite crowns the palace — living room, terrace and a balcony onto Sacré-Cœur and the Paris rooftops.',
     credit: 'Le Bristol Paris — Oetker Collection',
   },
 ] as const;
@@ -340,10 +312,9 @@ export const LE_BRISTOL_PARIS_GALLERY_PRESS_SLOT_URLS = [
   BRISTOL_OFFICIAL.roomDeluxeGarden,
   BRISTOL_OFFICIAL.roomSuperior,
   BRISTOL_OFFICIAL.deluxeSuiteBalcon,
-  BRISTOL_OFFICIAL.poolDeck,
+  // press-11/13/14 retirés : piscines extérieures méditerranéennes mal
+  // attribuées (Le Bristol n'a qu'une piscine intérieure = poolRooftop).
   BRISTOL_OFFICIAL.poolRooftop,
-  BRISTOL_OFFICIAL.poolCourtyard,
-  BRISTOL_OFFICIAL.poolGarden,
   BRISTOL_OFFICIAL.suitePanoramique,
   BRISTOL_OFFICIAL.epicure,
   BRISTOL_OFFICIAL.epicureDetail,
@@ -362,10 +333,11 @@ export const LE_BRISTOL_PARIS_GALLERY_SOURCE_URLS = buildKitGallerySourceUrlsPer
   LE_BRISTOL_PARIS_HERO_SOURCE_URL,
 );
 
-/** Kit 5×5 filter categories represented in the manifest. */
+/** Honest filter categories represented in the manifest (no fabricated pool/spa padding). */
 export const LE_BRISTOL_PARIS_GALLERY_CDC_CATEGORIES = [
   'view',
   'room',
+  'lobby',
   'pool',
   'dining',
   'spa',
