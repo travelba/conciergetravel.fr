@@ -27,6 +27,7 @@ import {
   hasKitGalleryFiveByFiveStructure,
   KIT_GALLERY_FILTER_UI_IDS,
   KIT_GALLERY_LEGACY_MIN,
+  KIT_GALLERY_MIN_SLOT_COUNT,
   KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
   KIT_GALLERY_SLOT_COUNT,
 } from '@mch/domain/photos';
@@ -460,8 +461,12 @@ export function evaluateKitAcceptanceGates(
   /* ── D12/D14 — galerie & correspondance sujet ── */
   const galleryRows = Array.isArray(input.gallery_images) ? input.gallery_images : [];
   const isFiveByFiveGallery = hasKitGalleryFiveByFiveStructure(galleryRows);
+  // 2026-06-16 PO decision: honesty over 5×5/30 padding. A gallery is valid
+  // from KIT_GALLERY_MIN_SLOT_COUNT honest pixels up to the legacy 30 ceiling.
+  // Categories without genuine pixels (e.g. no pool at the Prince de Galles)
+  // shrink the gallery instead of being filled with mislabelled room photos.
   const galleryMeetsKitMinimum =
-    galleryCount === KIT_GALLERY_SLOT_COUNT || galleryCount >= KIT_GALLERY_LEGACY_MIN;
+    galleryCount >= KIT_GALLERY_MIN_SLOT_COUNT && galleryCount <= KIT_GALLERY_LEGACY_MIN;
 
   pushCheck(
     checks,
@@ -470,15 +475,17 @@ export function evaluateKitAcceptanceGates(
     galleryCount === KIT_GALLERY_SLOT_COUNT
       ? `${galleryCount} gallery_images (CDC kit 5×5 = ${KIT_GALLERY_SLOT_COUNT} slots + hero Vue)`
       : galleryCount >= KIT_GALLERY_LEGACY_MIN
-        ? `${galleryCount} gallery_images (legacy ${KIT_GALLERY_LEGACY_MIN}-slot — migrate to ${KIT_GALLERY_SLOT_COUNT})`
-        : `${galleryCount} gallery_images — kit requires ${KIT_GALLERY_SLOT_COUNT} (5×5) or legacy ≥ ${KIT_GALLERY_LEGACY_MIN}`,
+        ? `${galleryCount} gallery_images (legacy ${KIT_GALLERY_LEGACY_MIN}-slot)`
+        : galleryMeetsKitMinimum
+          ? `${galleryCount} gallery_images (honest partial gallery — no fabricated category)`
+          : `${galleryCount} gallery_images — kit requires ≥ ${KIT_GALLERY_MIN_SLOT_COUNT} honest slots`,
   );
 
   pushCheck(
     checks,
     'kit.02.gallery_count',
     galleryMeetsKitMinimum,
-    `${galleryCount} gallery_images (kit target ${KIT_GALLERY_SLOT_COUNT} or legacy ≥ ${KIT_GALLERY_LEGACY_MIN})`,
+    `${galleryCount} gallery_images (honest ${KIT_GALLERY_MIN_SLOT_COUNT}…${KIT_GALLERY_LEGACY_MIN}; 5×5 = ${KIT_GALLERY_SLOT_COUNT})`,
   );
 
   pushCheck(
@@ -562,37 +569,39 @@ export function evaluateKitAcceptanceGates(
     );
   }
 
-  if (galleryCount === KIT_GALLERY_SLOT_COUNT) {
+  {
+    // 2026-06-16 PO decision: the 5-per-category target is advisory, not a
+    // blocker. Honest distribution (no padding) is reported but never fails.
     const filterCounts = countGalleryPhotosByFilterCategory(galleryRows);
     const underfilled = KIT_GALLERY_FILTER_UI_IDS.filter(
       (id) => filterCounts[id] < KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY,
     );
+    const distribution = KIT_GALLERY_FILTER_UI_IDS.map((id) => `${id}:${filterCounts[id]}`).join(
+      ' ',
+    );
     pushCheck(
       checks,
       'kit.02.gallery_five_per_filter_category',
-      underfilled.length === 0,
+      true,
       underfilled.length === 0
-        ? `each filter category carries ${KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY} photos (Chambres, Piscine, Restaurant, Spa, Vue)`
-        : `filter categories under ${KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY} photos: ${underfilled.join(', ')}`,
+        ? `each filter category carries ${KIT_GALLERY_PHOTOS_PER_FILTER_CATEGORY} photos (${distribution})`
+        : `honest distribution (no fabricated category) — ${distribution}`,
     );
   }
 
-  if (!isFiveByFiveGallery && galleryCount >= KIT_GALLERY_LEGACY_MIN) {
+  {
+    // Legacy 10-category floor is advisory too — a property without genuine
+    // pool/concierge/events pixels keeps an honest, shorter category set.
     const missingCats = KIT_LEGACY_GALLERY_CATEGORIES.filter((c) => !galleryCats.has(c));
     pushCheck(
       checks,
       'kit.02.gallery_required_categories',
-      missingCats.length === 0,
-      missingCats.length === 0
-        ? 'all legacy CDC photo categories represented'
-        : `missing gallery categories: ${missingCats.join(', ')}`,
-    );
-  } else if (isFiveByFiveGallery) {
-    pushCheck(
-      checks,
-      'kit.02.gallery_required_categories',
       true,
-      '5×5 filter categories satisfied (legacy 10-category floor waived)',
+      isFiveByFiveGallery
+        ? '5×5 filter categories satisfied'
+        : missingCats.length === 0
+          ? 'all legacy CDC photo categories represented'
+          : `honest category set — absent (no genuine pixel): ${missingCats.join(', ')}`,
     );
   }
 
