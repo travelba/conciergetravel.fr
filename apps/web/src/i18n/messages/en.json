@@ -2801,11 +2801,11 @@
     "noticePage": {
       "title": "Legal notice",
       "metaDescription": "MyConciergeHotel legal notice — publisher, hosting, intellectual property, travel agency licences.",
-      "draftBanner": "This page is being finalised — the legal identifiers (Trade Register number, SIREN/SIRET, VAT, Atout France registration, financial guarantee) will be completed before going live. The page is set to noindex until validated by our legal counsel.",
+      "draftBanner": "This page is being finalised — the Atout France registration, the financial guarantee and the professional civil-liability insurance still need to be completed before going live. The page is set to noindex until these are validated.",
       "sections": {
         "editor": {
           "title": "Publisher",
-          "body": "The myconciergehotel.com website is published by MyConciergeHotel, a French SAS with share capital of [TO BE COMPLETED: share capital] €, registered with the Paris Trade Register under number [TO BE COMPLETED: Trade Register number], whose registered office is at [TO BE COMPLETED: full registered address]. EU VAT number: [TO BE COMPLETED: FR + 11 digits]. Publication director: [TO BE COMPLETED: legal representative]."
+          "body": "The myconciergehotel.com website is published by TRAVEL BUSINESS AGENCY, a French SASU with share capital of €20,000, registered with the Nanterre Trade Register under number 991 614 694 (head-office SIRET: 991 614 694 00016, APE code 79.12Z), whose registered office is at 9 rue Greffulhe, 92300 Levallois-Perret, France. EU VAT number: FR79991614694. Publication director: Raphaël Zerdoun."
         },
         "contact": {
           "title": "Contact",
@@ -2835,7 +2835,7 @@
         },
         "controller": {
           "title": "Data controller",
-          "body": "MyConciergeHotel SAS, located in Paris, France. Data Protection Officer (DPO): dpo@myconciergehotel.com."
+          "body": "TRAVEL BUSINESS AGENCY (MyConciergeHotel brand), a SASU whose registered office is at 9 rue Greffulhe, 92300 Levallois-Perret, France. Data Protection Officer (DPO): dpo@myconciergehotel.com."
         },
         "purposes": {
           "title": "Purposes and legal bases",

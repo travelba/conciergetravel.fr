@@ -2801,11 +2801,11 @@
     "noticePage": {
       "title": "Mentions légales",
       "metaDescription": "Mentions légales de MyConciergeHotel — éditeur, hébergeur, propriété intellectuelle, licences agence de voyage.",
-      "draftBanner": "Page en cours de finalisation — les identifiants juridiques (RCS, SIREN/SIRET, TVA, immatriculation Atout France, garantie financière) seront complétés avant la mise en production. La page est noindex tant que ces informations ne sont pas validées par le responsable juridique.",
+      "draftBanner": "Page en cours de finalisation — l'immatriculation Atout France, la garantie financière et l'assurance responsabilité civile professionnelle restent à compléter avant la mise en production. La page est noindex tant que ces informations ne sont pas validées.",
       "sections": {
         "editor": {
           "title": "Éditeur du site",
-          "body": "Le site myconciergehotel.com est édité par la société MyConciergeHotel, SAS au capital de [À COMPLÉTER : capital social] €, immatriculée au RCS de Paris sous le numéro [À COMPLÉTER : numéro RCS], dont le siège social est situé à [À COMPLÉTER : adresse complète du siège]. Numéro de TVA intracommunautaire : [À COMPLÉTER : FR + 11 chiffres]. Directeur de la publication : [À COMPLÉTER : nom du représentant légal]."
+          "body": "Le site myconciergehotel.com est édité par la société TRAVEL BUSINESS AGENCY, SASU au capital de 20 000 €, immatriculée au RCS de Nanterre sous le numéro 991 614 694 (SIRET du siège : 991 614 694 00016, code APE 79.12Z), dont le siège social est situé 9 rue Greffulhe, 92300 Levallois-Perret. Numéro de TVA intracommunautaire : FR79991614694. Directeur de la publication : Raphaël Zerdoun."
         },
         "contact": {
           "title": "Contact",
@@ -2835,7 +2835,7 @@
         },
         "controller": {
           "title": "Responsable de traitement",
-          "body": "MyConciergeHotel SAS, située à Paris, France. Délégué à la protection des données (DPO) : dpo@myconciergehotel.com."
+          "body": "TRAVEL BUSINESS AGENCY (marque MyConciergeHotel), SASU dont le siège est situé 9 rue Greffulhe, 92300 Levallois-Perret, France. Délégué à la protection des données (DPO) : dpo@myconciergehotel.com."
         },
         "purposes": {
           "title": "Finalités et bases légales",
