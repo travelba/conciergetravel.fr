@@ -54,10 +54,10 @@
   },
   "homepage": {
     "metaTitle": "MyConciergeHotel — La sélection du Concierge, hôtels d'exception dans le monde",
-    "metaDesc": "2 193 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
+    "metaDesc": "2 221 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
     "eyebrow": "MyConciergeHotel — Réservez comme un concierge. Séjournez comme un hôte.",
     "title": "Nous vous attendions",
-    "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
+    "intlBadge": "{countries} pays · {hotels} adresses · 479 Relais & Châteaux",
     "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
     "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
     "subtitleSecondary": "Accédez aux surclassements et privilèges VIP réservés aux habitués des plus belles maisons.",
@@ -113,7 +113,7 @@
       },
       "q2": {
         "question": "En quoi diffère-t-on de Booking ou Hotels.com ?",
-        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 2 193 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
+        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 2 221 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
       },
       "q3": {
         "question": "Qu'est-ce que le Conseil du Concierge en bas de chaque fiche ?",
@@ -233,7 +233,7 @@
         },
         {
           "q": "Quels palaces ou Relais & Châteaux figurent parmi les ouvertures récentes ?",
-          "a": "Notre catalogue couvre 2 193 hôtels d'exception dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
+          "a": "Notre catalogue couvre 2 221 hôtels d'exception dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
         },
         {
           "q": "Puis-je réserver via le Concierge un hôtel récemment ouvert ?",
@@ -704,7 +704,7 @@
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
-    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 2 193 hôtels d'exception dans 127 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 2 221 hôtels d'exception dans 127 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
     "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
     "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
@@ -754,7 +754,7 @@
         },
         {
           "q": "Quel est votre périmètre géographique ?",
-          "a": "Notre sélection couvre 2 193 adresses dans 127 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
+          "a": "Notre sélection couvre 2 221 adresses dans 127 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
         },
         {
           "q": "Combien coûte votre service ?",
@@ -2428,7 +2428,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Notre méthode éditoriale — Comment nous composons la sélection du Concierge | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel sélectionne 2 193 hôtels d'exception dans 127 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "metaDesc": "MyConciergeHotel sélectionne 2 221 hôtels d'exception dans 127 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
     "breadcrumbHome": "Accueil",
     "breadcrumbConcierge": "Le Concierge",
     "eyebrow": "EEAT — méthode éditoriale",
@@ -4499,8 +4499,8 @@
       "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les hôtels d'exception du monde — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
       "philosophyTitle": "Philosophie",
       "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, WhatsApp Concierge) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
-      "numbersTitle": "Catalogue (mai 2026)",
-      "numbersBody": "2 193 fiches hôtels publiées dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. 290 classements éditoriaux, 86 guides destinations, 20 itinéraires luxe France + international.",
+      "numbersTitle": "Catalogue (juin 2026)",
+      "numbersBody": "2 221 fiches hôtels publiées dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. 633 classements éditoriaux, 82 guides destinations, 23 itinéraires luxe France + international.",
       "complianceTitle": "Conformité",
       "complianceBody": "Programme conforme aux exigences DGCCRF et au Digital Services Act. Aucun indicateur d'urgence fabriqué (Atout France §2.8). Voix Concierge éditoriale (ADR-0011) : phrases ≤ 25 mots, lexique sourcé, aucun superlatif générique."
     },
