@@ -68,7 +68,7 @@ export async function HomeKitFooter({
               <Link
                 href={{
                   pathname: '/categorie/[categorySlug]',
-                  params: { categorySlug: 'palace' },
+                  params: { categorySlug: 'palaces-france' },
                 }}
               >
                 {t('cataloguePalaces')}

@@ -571,7 +571,7 @@ export function MobileNav(): ReactElement {
                     <Link href="/ouvertures" className={subLinkClass}>
                       {t('primaryNav.conciergeOpenings')}
                     </Link>
-                    <Link href="/guides" className={subLinkClass}>
+                    <Link href="/destination" className={subLinkClass}>
                       {t('primaryNav.conciergeGuides')}
                     </Link>
                     <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>

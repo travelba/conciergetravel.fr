@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
-import { loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
+import { HomeAeoFaq, loadHomeAeoEntries } from '@/components/home/home-aeo-faq';
 import { HomeClubRibbon } from '@/components/home/home-club-ribbon';
 import { HomeConciergeFeature } from '@/components/home/home-concierge-feature';
 import { HomeDestinationGrid } from '@/components/home/home-destination-grid';
@@ -217,6 +217,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <HomeTopRankings locale={locale} rankings={rankings} />
         <HomeClubRibbon locale={locale} />
         <HomeEditorLetter locale={locale} />
+        <HomeAeoFaq locale={locale} entries={aeoEntries} />
         <HomeKitFooter locale={locale} />
       </main>
     </HomeKitReveal>

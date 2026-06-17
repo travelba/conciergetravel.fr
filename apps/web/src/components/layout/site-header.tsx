@@ -776,7 +776,7 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
                 2026-05-28: surfaces the existing `/ouvertures` page
                 that was reachable from the home strip only). */}
             <MegaLink href="/ouvertures" label={t('primaryNav.conciergeOpenings')} />
-            <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
+            <MegaLink href="/destination" label={t('primaryNav.conciergeGuides')} />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>
