@@ -408,6 +408,41 @@ non-obvious bits to re-use:
    (src/srcset/og:image/`ImageObject`) — OTA names in the price comparator
    are plain text (legal) and the official-site link is a legitimate anchor.
 
+## Pattern — Tier B backfill: APPEND from Google Places, never `sync` overwrite (2026-06-18)
+
+**Trap.** `sync-hotel-photos.ts` ends with
+`updateHotelPhotos(id, { hero_image, gallery_images })` — it **replaces**
+both columns wholesale with the freshly-fetched Commons/Places set. That
+is correct for _stubs_ (0 photos / missing hero) but **destructive** for
+Tier B hotels (3-9 curated photos + a good hero): running it would clobber
+the existing curation and re-introduce un-Vision-checked subjects. Never
+point `sync-hotel-photos` at hotels that already have a hero you want to keep.
+
+**Safe backfill path (append + Vision-curated):**
+
+1. `gen-places-discovery.ts --slugs-file=runs/tier-b-cohort.json --per-hotel=14`
+   — sources from the **Google Places Photo API** (geo-tagged to the
+   hotel's `place_id`, so subject contamination is far lower than a Tavily
+   corporate-root crawl) and writes discovery JSON in the **exact**
+   `DiscoveryReportSchema` shape that `upload-press-kit-images.ts` consumes.
+2. `upload-press-kit-images.ts --discovery-dir=runs --slugs=<same> --limit=8`
+   — Vision-curates each candidate (category + alt FR/EN + caption +
+   quality + keep), uploads to Cloudinary, and **APPENDS** to
+   `gallery_images` (preserves existing rows; promotes a hero **only**
+   when none exists, so a curated hero is never touched).
+
+**Why it works.** Google Places photo URLs resolve to
+`lh3.googleusercontent.com`, now in `HOSTNAME_WHITELIST_GLOBAL`
+(`parent-group-mapping.ts`), so the upload's safe-by-default source filter
+accepts them. The R&C portal (Tavily-blind, JS-rendered) and Four Seasons
+DAM (egress-blocked) no longer matter — Places covers every chain.
+
+**Result (2026-06-18 Tier B cohort):** 23 → 2 Tier B; DONE 2095 → 2116.
+The 2 residuals (`royal-chundu-luxury-zambezi-lodges`, `yihe-mansions`)
+have **0 Google Places photos** → need Tavily/manual. Don't store the
+Places `downloadUrl` as `source_url` — it's a signed, expiring URL;
+provenance lives in the `google_places`/`attributed` tags instead.
+
 ## Finding — the 10-category coverage floor is structurally unreachable (2026-06-02)
 
 `photo-quality.mdc` frames "10/10 distinct categories" as a non-negotiable

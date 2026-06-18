@@ -404,6 +404,9 @@ export const HOSTNAME_BLOCKLIST_GLOBAL: readonly string[] = [
  * Substring-matched. Order is alphabetical for diffability.
  */
 export const HOSTNAME_WHITELIST_GLOBAL: readonly string[] = [
+  // Google Places Photo API (trusted, attributed source — already used by
+  // sync-hotel-photos.ts tier 2). Resolves to lh3/lh5.googleusercontent.com.
+  'googleusercontent.com',
   // Generic CDNs used by the hotel industry
   'akamaihd.net',
   'akamaized.net',
