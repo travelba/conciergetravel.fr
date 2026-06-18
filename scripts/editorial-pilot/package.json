@@ -145,6 +145,7 @@
     "audit:kit-visiteur": "tsx src/hotels/audit-kit-visiteur.ts",
     "audit:photo-subject": "tsx src/photos/audit-photo-subject-correspondence.ts",
     "audit:photo-subject:published": "tsx src/photos/audit-photo-subject-correspondence.ts --published-only",
+    "audit:wave": "tsx src/quality/audit-wave.ts",
     "report:hotel-fiches-cdc": "tsx src/hotels/report-hotel-fiche-cdc.ts",
     "report:hotel-fiches-cdc:full": "tsx src/hotels/audit-hotel-fiche-cdc.ts && tsx src/hotels/report-hotel-fiche-cdc.ts",
     "promote:airelles-golden": "tsx src/hotels/promote-airelles-golden.ts",

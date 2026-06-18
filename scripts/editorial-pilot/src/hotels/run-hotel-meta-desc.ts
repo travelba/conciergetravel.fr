@@ -33,6 +33,9 @@ import { z } from 'zod';
 
 import { loadEnv, resolveProvider } from '../env.js';
 import { buildLlmClient } from '../llm.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import { groundHotel } from '../grounding/hotel-grounding.js';
+import type { DataForSeoClientConfig } from '@mch/integrations/dataforseo';
 import {
   listHotelsForMetaDesc,
   projectHotelForLlm,
@@ -133,12 +136,14 @@ interface PerHotelResult {
 async function runOnHotel(
   client: ReturnType<typeof buildLlmClient>,
   supabase: SupabaseRestConfig,
+  dfsCfg: DataForSeoClientConfig | null,
   row: HotelRow,
   options: { dryRun: boolean },
 ): Promise<PerHotelResult> {
   const input = projectHotelForLlm(row);
   try {
-    const result = await generateMetaDesc(client, input);
+    const { block } = await groundHotel(dfsCfg, input);
+    const result = await generateMetaDesc(client, input, { groundingBlock: block });
     if (!options.dryRun) {
       await updateHotelMetaDesc(supabase, row.id, {
         meta_desc_fr: result.output.fr,
@@ -227,7 +232,10 @@ async function main(): Promise<void> {
     serviceRoleKey: supabaseEnv.SUPABASE_SERVICE_ROLE_KEY,
   };
 
-  console.log(`[meta-desc] provider=${provider} model=${client.model}`);
+  const dfsCfg = loadDfsConfig();
+  console.log(
+    `[meta-desc] provider=${provider} model=${client.model} grounding=${dfsCfg !== null ? 'on' : 'off'}`,
+  );
   console.log(
     `[meta-desc] mode dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} includeAll=${args.includeAll} includeDrafts=${args.includeDrafts}`,
   );
@@ -264,7 +272,7 @@ async function main(): Promise<void> {
   const results = await withConcurrency(
     rows,
     args.concurrency,
-    (row) => runOnHotel(client, supabase, row, { dryRun: args.dryRun }),
+    (row) => runOnHotel(client, supabase, dfsCfg, row, { dryRun: args.dryRun }),
     (done, total, last) => {
       const status = last.success
         ? `OK (${last.attempts}x, ${last.fr?.length}c/${last.en?.length}c)`

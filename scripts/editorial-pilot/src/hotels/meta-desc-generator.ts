@@ -176,12 +176,26 @@ export interface GenerateMetaDescResult {
   readonly outputTokens: number;
 }
 
+export interface GenerateMetaDescOptions {
+  /**
+   * DataForSEO grounding block (from `groundHotel`). Injects the high-volume
+   * keyword phrasing so the meta description tracks real SERP demand (better
+   * CTR). Empty/undefined → LLM-only (degrade-safe).
+   */
+  readonly groundingBlock?: string;
+}
+
 export async function generateMetaDesc(
   client: LlmClient,
   hotel: HotelLlmInput,
+  options: GenerateMetaDescOptions = {},
 ): Promise<GenerateMetaDescResult> {
   const systemPrompt = await loadPrompt();
-  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}`;
+  const grounding =
+    options.groundingBlock !== undefined && options.groundingBlock.length > 0
+      ? `\n\n${options.groundingBlock}`
+      : '';
+  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}${grounding}`;
 
   const attempts: Array<{ raw: string; reason: string }> = [];
   let totalInput = 0;

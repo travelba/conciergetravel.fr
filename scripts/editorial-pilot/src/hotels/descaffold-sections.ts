@@ -49,6 +49,7 @@ import { z } from 'zod';
 
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
+import { hasLeak } from '../enrichment/scaffolding-gate.js';
 import type { SupabaseRestConfig } from './supabase-hotels.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -103,19 +104,11 @@ function parseArgs(argv: readonly string[]): CliArgs {
 }
 
 // ---------------------------------------------------------------------------
-// Leak detection — shared by candidate selection AND post-validation.
+// Leak detection — `hasLeak` is imported from the shared anti-scaffolding
+// gate (`enrichment/scaffolding-gate.ts`, ADR-0029 invariant I1) so the
+// cleaner and every audit agree on what "clean" means (single source of
+// truth — the local copy used to drift silently).
 // ---------------------------------------------------------------------------
-
-/**
- * Markers of leaked brief / pipeline meta-commentary. A backtick in prose is
- * itself a strong signal (real descriptions never carry code-fenced tokens).
- */
-const LEAK_MARKERS =
-  /\ble brief\b|\bbrief\b(?=[^.]*\b(?:confirme|fournit|signale|indique|incomplet|notes?|mention)\b)|AUTO_DRAFT|niveau de confiance|\bconfidence\b|`[^`]*`|reste à (?:vérifier|revalider)|à revalider|sans revalidation|non vérifiée?s?|wikidata|entité\s+Q\d|\bQ\d{5,}\b|matière publiable|ne peut être retenue?|statut\s+pending|\bpending\b|selon les sources publiques|note interne/iu;
-
-function hasLeak(text: string | null | undefined): boolean {
-  return typeof text === 'string' && LEAK_MARKERS.test(text);
-}
 
 function wordCount(text: string): number {
   return text.split(/\s+/u).filter(Boolean).length;

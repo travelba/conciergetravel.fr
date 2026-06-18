@@ -165,6 +165,12 @@ export interface GenerateFactualSummaryOptions {
    * §2.3 ideal-band tightening passes.
    */
   readonly idealBand?: { readonly min: number; readonly max: number };
+  /**
+   * DataForSEO grounding block (from `groundHotel`). When present, the
+   * high-volume keyword phrasing is injected so the summary tracks real
+   * search demand. Empty/undefined → LLM-only (degrade-safe).
+   */
+  readonly groundingBlock?: string;
 }
 
 export async function generateFactualSummary(
@@ -173,7 +179,11 @@ export async function generateFactualSummary(
   options: GenerateFactualSummaryOptions = {},
 ): Promise<GenerateFactualSummaryResult> {
   const systemPrompt = await loadPrompt();
-  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}`;
+  const grounding =
+    options.groundingBlock !== undefined && options.groundingBlock.length > 0
+      ? `\n\n${options.groundingBlock}`
+      : '';
+  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}${grounding}`;
 
   const attempts: Array<{ raw: string; reason: string }> = [];
   let totalInput = 0;
