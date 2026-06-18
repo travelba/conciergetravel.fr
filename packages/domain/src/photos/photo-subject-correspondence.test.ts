@@ -4,6 +4,7 @@ import {
   evaluateGalleryAltCategoryCorrespondence,
   evaluatePhotoSlotExpectations,
   evaluatePoiStructuralCorrespondence,
+  evaluateRoomPhotoCoverage,
   isDedicatedPoiImagePublicId,
   isRecycledHotelGalleryPublicId,
   poiAltMatchesName,
@@ -86,5 +87,37 @@ describe('evaluatePhotoSlotExpectations', () => {
     );
     expect(mismatches).toHaveLength(1);
     expect(mismatches[0]?.block).toBe('spa');
+  });
+});
+
+describe('evaluateRoomPhotoCoverage', () => {
+  it('passes rooms with a hero_image or images[]', () => {
+    const r = evaluateRoomPhotoCoverage([
+      { slug: 'suite-prestige', name_fr: 'Suite Prestige', hero_image: 'cct/hotels/x/room-suite' },
+      { slug: 'deluxe', name_fr: 'Deluxe', images: [{ public_id: 'cct/hotels/x/room-deluxe' }] },
+    ]);
+    expect(r.total).toBe(2);
+    expect(r.ok).toBe(2);
+    expect(r.issues).toHaveLength(0);
+  });
+
+  it('flags a room with no photo (generic-fallback risk)', () => {
+    const r = evaluateRoomPhotoCoverage([
+      { slug: 'suite-prestige', name_fr: 'Suite Prestige', hero_image: 'cct/hotels/x/room-suite' },
+      { slug: 'orphan', name_fr: 'Chambre Orpheline', images: [] },
+    ]);
+    expect(r.ok).toBe(1);
+    expect(r.issues).toHaveLength(1);
+    expect(r.issues[0]?.code).toBe('no_photo');
+    expect(r.issues[0]?.slug).toBe('orphan');
+  });
+
+  it('ignores image entries without a public_id', () => {
+    const r = evaluateRoomPhotoCoverage([{ slug: 'x', images: [{ alt_fr: 'no id' }] }]);
+    expect(r.issues).toHaveLength(1);
+  });
+
+  it('handles a non-array input gracefully', () => {
+    expect(evaluateRoomPhotoCoverage(null).total).toBe(0);
   });
 });
