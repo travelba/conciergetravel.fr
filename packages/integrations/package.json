@@ -18,6 +18,7 @@
     "./getyourguide": "./src/getyourguide/index.ts",
     "./wikimedia-commons": "./src/wikimedia-commons/index.ts",
     "./overpass": "./src/overpass/index.ts",
+    "./dataforseo": "./src/dataforseo/index.ts",
     "./cloudinary": "./src/cloudinary/index.ts",
     "./brevo": "./src/brevo/index.ts",
     "./algolia-admin": "./src/algolia-admin/index.ts",

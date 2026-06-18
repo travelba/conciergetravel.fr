@@ -104,6 +104,16 @@ const SharedEnvSchema = z.object({
   // Google Places
   GOOGLE_PLACES_API_KEY: z.string().min(1),
 
+  // DataForSEO — keyword research + SERP/PAA + search-intent + AI-Optimization
+  // grounding for the editorial pipelines (FAQ, titles, GEO, internal links).
+  // HTTP Basic auth (username:password). Optional so the editorial-only build
+  // runs without the contract; the client returns a typed `disabled` error
+  // when off/unconfigured. Local-only — not provisioned on Vercel.
+  DATAFORSEO_ENABLED: z.coerce.boolean().default(false),
+  DATAFORSEO_API_BASE: optionalUrl, // default https://api.dataforseo.com
+  DATAFORSEO_USERNAME: z.string().optional(),
+  DATAFORSEO_PASSWORD: z.string().optional(),
+
   // GetYourGuide Partner API (Palier A — affiliate deeplink monetisation).
   // Optional so the editorial-only build runs without the partner contract;
   // the client throws a typed error if called while disabled / unconfigured.
