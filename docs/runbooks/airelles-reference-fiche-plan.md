@@ -111,3 +111,48 @@ Avant validation PO sur tout nouveau pilote : checklist skill §Rule 2 + walk-th
 - [ ] Garde-fous : 1 `FAQPage`, `#factual-summary`, `#en-bref`, JSON-LD Hotel+Restaurant+Breadcrumb+FAQ valides, axe clean.
 - [ ] Aucune donnée fabriquée ; aucun hotlink illégal.
 - [ ] **PO : « validé »**.
+
+## Gate 4 — rapport image & présentation (pilote `les-airelles-gordes`, 2026-06-17)
+
+> Grille : [`gate4-design-challenge-rubric.md`](gate4-design-challenge-rubric.md).
+> Captures FR/EN desktop + mobile via harness Playwright (Chromium bundled).
+> A11y mesurée (pas constatée) via `@axe-core/playwright` (wcag2a/2aa/21aa/22aa).
+
+| Axe                      | Note /5 | Justification                                                                                 |
+| ------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| Données / tableaux       | 5       | Aucune table brute : chambres en carrousel-cartes, note en chip, comparateur en carte dédiée. |
+| Hiérarchie visuelle      | 5       | Eyebrow → H1 serif → note → sections rythmées, blancs maîtrisés.                              |
+| Art direction photo      | 5       | Mosaïque hero ratios cohérents, overlay `+25`, cadrage soigné, pas d'étirement.               |
+| Typographie & espacement | 5       | Échelle serif/sans cohérente, interlignes premium.                                            |
+| Cohérence catalogue      | 4       | Langage kit constant ; cohérence inter-fiches à revalider en R2.                              |
+| Mobile                   | 5       | Parité desktop, mosaïque 2-col adaptée, tabs scrollables, H1 lisible.                         |
+| Accessibilité visuelle   | 4       | Contraste accent **corrigé** (cf. ci-dessous) ; 2 dettes résiduelles hors-fiche documentées.  |
+
+**Moyenne ≈ 4.71 — aucun axe < 3 → PASS.**
+
+### Correctifs composant/token livrés (catalogue-wide)
+
+- **Contraste accent (70 nœuds axe → 0)** — token taupe `#8c7b5a` (3.66:1 sur
+  crème, < 4.5:1 AA) assombri en `#6f5f3c` (5.5:1 crème, 4.6:1 crème-3) dans
+  **deux** sources de vérité tenues en lock-step :
+  `apps/web/src/styles/kit.css` (`--or` / `--accent`, fiche kit) et
+  `packages/ui/src/tokens.css` (`--color-accent-gold`, Tailwind `text-accent` /
+  `border-accent` site-wide). Le seul `bg-accent` rempli (CTA carte
+  `hotel-location`) est en `text-white` → 6.1:1 (amélioré). Ramp décoratif
+  `--color-gold-50…900` + `--color-gold` brut **intacts** (hairlines luminosité
+  préservée). DA validée par re-capture hero : eyebrow/«DISTINCTION PALACE»
+  identiques à l'œil.
+- **Lien en ligne `mentions-legales`** (footer) : `hover:underline` →
+  `underline` permanent (indice non-coloré, WCAG link-in-text).
+- **Footer agentique** : `text-muted/70` + `/60` → `text-muted` (≥ 4.5:1).
+
+### Dettes a11y résiduelles (composant ciblé pour refonte dédiée — hors gabarit fiche)
+
+- **`target-size` (20 nœuds)** — liens de nav secondaire du `site-footer.tsx`
+  (~15px de haut). Fix = passe tap-target footer (≥ 24px) sur toutes les listes
+  de liens. Chantier footer dédié, pas un défaut DA de la fiche.
+- **`nested-interactive` (1 nœud)** — carte Mapbox (`.mapboxgl-map` a des
+  descendants focusables). Fix = config a11y Mapbox dans `hotel-location.tsx`.
+
+Régression à ajouter (master plan §7) : un test axe ciblé sur la fiche kit
+asserrant **0 violation color-contrast** pour verrouiller le token.

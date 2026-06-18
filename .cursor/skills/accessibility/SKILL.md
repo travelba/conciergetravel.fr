@@ -37,6 +37,34 @@ Invoke when:
 - Focus ring **always visible** (`outline: 2px solid var(--color-accent-gold); outline-offset: 2px;`) — never `outline: none` without a replacement.
 - Never communicate by color alone (price comparator scenarios show text + icon, not just color).
 
+#### The accent taupe is a dual-use token — there are TWO sources of truth
+
+The brand accent (`--accent` / `--or` in `apps/web/src/styles/kit.css`,
+`--color-accent-gold` in `packages/ui/src/tokens.css`) drives **both**
+decorative chrome (hairlines, borders, fills — no contrast floor) **and**
+accent-coloured TEXT (eyebrows, labels, in-text links — needs 4.5:1). The
+original `#8c7b5a` only reached **3.66:1** on the `--creme #f6f1e7` base
+(worse, ~3:1, on the darker `--creme-3 #e8e0d0` panels), so every eyebrow on
+every page failed AA (Gate 4, 2026-06-17 — 70 axe nodes on one fiche). Fixed
+by darkening the shared token to **`#6f5f3c`** (5.5:1 / 4.6:1).
+
+Rules when touching the accent:
+
+- Change it in **both** files in lock-step — the kit fiche reads `kit.css`,
+  the rest of the app reads `tokens.css`. Fixing one leaves the other failing.
+- Do **not** darken the gold _ramp_ (`--color-gold-50…900`) or raw
+  `--color-gold` — keep those for luminous decoration; only the **text/UI
+  accent alias** moves. Darkening the ramp would break its monotonic ordering.
+- An opacity modifier silently kills contrast: `text-muted/70` on cream is
+  ~2.7:1 even though `text-muted` alone passes. Never use `/60`–`/80` opacity
+  on small text — drop the modifier or pick a darker token.
+- In-text links must carry a **non-colour** cue: persistent `underline`, not
+  `hover:underline` (WCAG 2.4.x link-in-text-block needs ≥ 3:1 vs surrounding
+  text OR an always-on distinguisher).
+- Verify empirically, not by eye: `@axe-core/playwright` with tags
+  `['wcag2a','wcag2aa','wcag21aa','wcag22aa']` against the rendered page — the
+  eyeball under-counts low-contrast gold-on-cream.
+
 ### Keyboard
 
 - All interactive elements reachable via Tab in logical order.

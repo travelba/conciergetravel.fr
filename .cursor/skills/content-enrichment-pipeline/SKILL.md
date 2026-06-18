@@ -779,6 +779,7 @@ shape — a root-level key probe on an array column is a false negative.
 ## References
 
 - `llm-output-robustness` — generation pipeline that consumes the enriched briefs.
+- `keyword-grounding-dataforseo` — the search-demand counterpart to this factual cascade: grounds FAQ/titles/GEO on real PAA + keyword volumes (DataForSEO), complementary to the facts sourced here.
 - `windows-dev-environment` — PowerShell `$Args` automatic-variable collision (silent no-op in overnight orchestrators) + Supabase `pg` SSL gotcha.
 - `api-integration` — base HTTP / Zod / retry pattern.
 - `supabase-postgres-rls` — destination tables and migrations.

@@ -1174,4 +1174,5 @@ schema bound. The fix is content-aware (LLM-side) instead of structural
 - **`content-enrichment-pipeline`** — the multi-source brief that feeds generation.
 - **`editorial-long-read-rendering`** — how the generated JSON renders.
 - **`concierge-voice-pipeline`** — pass 8 (Concierge voice), bloc ConciergeAdvice, shortener phrases > 25 mots, contraintes ADR-0011.
+- **`keyword-grounding-dataforseo`** — same per-item tolerance philosophy applied to a vendor API (DataForSEO PAA/keywords/intent), plus the per-item try/catch crash-resilience rule for batch editorial loops.
 - Reference impls: `scripts/editorial-pilot/src/guides/generate-guide-v2.ts`, `…/rankings/generate-ranking-v2.ts`, `…/enrichment/llm-extract.ts`.

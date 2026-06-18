@@ -1,5 +1,9 @@
 # Cap — « Fermer le site éditorial à 100 % » (2026-06)
 
+> ⚠️ **Superseded par [`PROJET-MASTER-PLAN.md`](PROJET-MASTER-PLAN.md)**
+> (17 juin, post-challenge) — source de vérité unique. Les Lots 0/1 de ce cap
+> = cartes R0/R1 du plan maître.
+
 - Statut : **actif**
 - Démarré : 2026-06-17
 - Décision PO : Cap A (audit global 2026-06-17). Le contenu est l'actif mûr ;
