@@ -163,6 +163,7 @@ export interface CdcHotelAuditRow extends HotelAuditRow {
   readonly concierge_pick: unknown;
   readonly concierge_hook: unknown;
   readonly external_sources: unknown;
+  readonly geo_qa: unknown;
 }
 
 export interface CdcAuditContext {
@@ -2009,6 +2010,7 @@ export function evaluateCdcHotelFiche(
       concierge_questions: row.concierge_questions,
       signature_experiences: row.signature_experiences,
       points_of_interest: row.points_of_interest,
+      geo_qa: row.geo_qa,
       rooms: pilotRoomCtx?.rooms ?? ctx.kitRoomRows,
       ...(pilotRoomCtx?.orderedRoomSlugs !== undefined
         ? { orderedRoomSlugs: pilotRoomCtx.orderedRoomSlugs }

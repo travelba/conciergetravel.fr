@@ -538,6 +538,36 @@ export function renderKitFactualSummary(model: HotelKitModel): string {
   return `<p id="factual-summary" data-aeo="factual-summary" data-llm-summary class="htl-factual">${escapeHtml(text)}</p>`;
 }
 
+/**
+ * GEO / AEO answer-engine block (data-driven from `hotels.geo_qa`, migration
+ * 0072). Mirrors the standard-page `<HotelGeoSection>` (placed right after the
+ * factual summary): each PAA-anchored question renders as its own H2 with 2-3
+ * short concierge-voice paragraphs, inside a `data-geo="hotel-qa"` section so
+ * answer engines (AI Overviews, Perplexity) can extract the Q&A pairs. Self-
+ * elides when the row carries no `geo_qa`.
+ */
+export function renderKitGeoQa(model: HotelKitModel): string {
+  if (model.geoBlocks.length === 0) return '';
+  const label =
+    model.locale === 'en'
+      ? `Key questions about ${model.name}`
+      : `Questions clés sur ${model.name}`;
+  const blocks = model.geoBlocks
+    .map((block) => {
+      const paras = block.paragraphs
+        .map((p) => `<p class="htl-prose">${escapeProseHtml(p)}</p>`)
+        .join('\n        ');
+      return `<div class="geo-qa__item" id="${escapeHtml(block.id)}">
+        <h2>${escapeHtml(block.question)}</h2>
+        ${paras}
+      </div>`;
+    })
+    .join('\n      ');
+  return `<section class="htl-section geo-qa" id="questions-cles" data-geo="hotel-qa" aria-label="${escapeHtml(label)}">
+      ${blocks}
+    </section>`;
+}
+
 export function renderKitApropos(model: HotelKitModel): string {
   const hook =
     model.conciergeHook !== null
@@ -1878,6 +1908,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitFeats(model),
     renderKitSectionNav(model),
     renderKitFactualSummary(model),
+    renderKitGeoQa(model),
     renderKitApropos(model),
     renderKitChambres(model),
     renderKitBref(model),

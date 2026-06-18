@@ -6,6 +6,11 @@ import {
   getHotelBySlug,
   readConciergeAdvice,
   readFactualSummary,
+  readGeoQa,
+  readLocationByBucket,
+  readRestaurants,
+  readSignatureExperiences,
+  type LocalisedPointOfInterest,
 } from '@/server/hotels/get-hotel-by-slug';
 
 export const runtime = 'nodejs';
@@ -24,6 +29,17 @@ export const dynamic = 'force-dynamic';
  *   - canonical URLs (FR + EN)
  *   - booking mode + Amadeus property id
  *
+ * Concierge lens (post-booking recommendation surface, master plan
+ * INFRA GEO) — included by default so a WhatsApp/LLM concierge can
+ * recommend without a second round-trip:
+ *   - `dining`       on-property F&B venues (chef, must-order, tip…)
+ *   - `nearby`       POIs bucketed visit / do / eat / shop (capped)
+ *   - `experiences`  signature on-property programmes
+ *   - `geoQa`        data-driven answer-engine Q&A blocks (AEO)
+ *
+ * Pass `?lens=off` to drop the concierge lens for a lean identity-only
+ * payload. Heavy POI buckets are capped at `NEARBY_CAP` per bucket.
+ *
  * Does NOT include the long-form description (multi-KB) by default —
  * the agent should follow `canonicalUrl` for a full render. Query
  * param `?body=long` opts into the full description for agents that
@@ -34,6 +50,36 @@ export const dynamic = 'force-dynamic';
 const QuerySchema = z.object({
   locale: z.enum(['fr', 'en']).default('fr'),
   body: z.enum(['short', 'long']).default('short'),
+  lens: z.enum(['on', 'off']).default('on'),
+});
+
+/** Max POIs returned per bucket — keeps the envelope under LLM tool-call limits. */
+const NEARBY_CAP = 10;
+
+interface AgentNearbyPoi {
+  readonly name: string;
+  readonly type: string;
+  readonly category: string | null;
+  readonly distanceMeters: number;
+  readonly walkMinutes: number | null;
+  readonly description: string | null;
+  readonly website: string | null;
+  readonly reservationUrl: string | null;
+  readonly address: string | null;
+  readonly phone: string | null;
+}
+
+const toAgentPoi = (p: LocalisedPointOfInterest): AgentNearbyPoi => ({
+  name: p.name,
+  type: p.type,
+  category: p.category,
+  distanceMeters: p.distanceMeters,
+  walkMinutes: p.walkMinutes,
+  description: p.description,
+  website: p.website,
+  reservationUrl: p.reservationUrl,
+  address: p.address,
+  phone: p.phone,
 });
 
 export async function GET(
@@ -53,6 +99,7 @@ export async function GET(
   const parsedQuery = QuerySchema.safeParse({
     locale: url.searchParams.get('locale') ?? undefined,
     body: url.searchParams.get('body') ?? undefined,
+    lens: url.searchParams.get('lens') ?? undefined,
   });
   if (!parsedQuery.success) {
     return NextResponse.json(
@@ -60,7 +107,7 @@ export async function GET(
       { status: 400, headers: { 'Cache-Control': 'no-store' } },
     );
   }
-  const { locale, body: bodyMode } = parsedQuery.data;
+  const { locale, body: bodyMode, lens } = parsedQuery.data;
 
   const { slug } = await params;
   if (typeof slug !== 'string' || slug.length === 0) {
@@ -95,6 +142,76 @@ export async function GET(
         : descriptionRaw.length > 500
           ? `${descriptionRaw.slice(0, 497)}…`
           : descriptionRaw;
+
+  // ── Concierge lens (post-booking recommendation surface) ────────────
+  // Built once, attached only when `lens=on` (the default). Each branch
+  // self-elides to `null` / `[]` when the row carries no data, so the
+  // envelope shape is stable regardless of editorial completeness.
+  const dining = lens === 'on' ? readRestaurants(row, locale) : null;
+  const byBucket = lens === 'on' ? readLocationByBucket(row, locale) : null;
+  const experiences = lens === 'on' ? readSignatureExperiences(row, locale) : [];
+  const geoQa = lens === 'on' ? readGeoQa(row, locale) : [];
+
+  const conciergeLens =
+    lens === 'on'
+      ? {
+          dining:
+            dining === null
+              ? null
+              : {
+                  count: dining.count,
+                  michelinStars: dining.michelinStars,
+                  venues: dining.venues.map((v) => ({
+                    name: v.name,
+                    type: v.type,
+                    michelinStars: v.michelinStars,
+                    chef: v.chef,
+                    sommelier: v.sommelier,
+                    hours: v.hours,
+                    priceNote: v.priceNote,
+                    mustOrder: v.mustOrder,
+                    tip: v.tip,
+                    reservationUrl: v.reservationUrl,
+                    website: v.website,
+                    phone: v.phone,
+                    address: v.address,
+                    kidFriendly: v.kidFriendly,
+                  })),
+                },
+          nearby:
+            byBucket === null
+              ? null
+              : {
+                  visit: byBucket.visit.slice(0, NEARBY_CAP).map(toAgentPoi),
+                  do: byBucket.do.slice(0, NEARBY_CAP).map(toAgentPoi),
+                  eat: byBucket.eat.slice(0, NEARBY_CAP).map(toAgentPoi),
+                  shop: byBucket.shop.slice(0, NEARBY_CAP).map(toAgentPoi),
+                  transports: byBucket.transports.map((t) => ({
+                    mode: t.mode,
+                    line: t.line,
+                    station: t.station,
+                    distanceMeters: t.distanceMeters,
+                    walkMinutes: t.walkMinutes,
+                  })),
+                },
+          experiences: experiences.map((e) => ({
+            key: e.key,
+            kind: e.kind,
+            title: e.title,
+            description: e.description,
+            badge: e.badge,
+            bookingRequired: e.bookingRequired,
+            priceNote: e.priceNote,
+            tip: e.tip,
+            website: e.website,
+          })),
+          geoQa: geoQa.map((g) => ({
+            id: g.id,
+            question: g.question,
+            paragraphs: g.paragraphs,
+          })),
+        }
+      : null;
 
   return NextResponse.json(
     {
@@ -131,6 +248,7 @@ export async function GET(
         canonicalUrl:
           locale === 'en' ? `/en/hotel/${row.slug_en ?? row.slug}` : `/fr/hotel/${row.slug}`,
         updatedAt: row.updated_at,
+        ...(conciergeLens !== null ? { conciergeLens } : {}),
       },
     },
     {

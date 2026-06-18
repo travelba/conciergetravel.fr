@@ -199,6 +199,29 @@ function baseCdcRow(overrides: Partial<CdcHotelAuditRow> = {}): CdcHotelAuditRow
         confidence: 'high',
       },
     ],
+    geo_qa: [
+      {
+        id: 'geo-q-0',
+        question_fr: 'Combien de chambres ?',
+        question_en: 'How many rooms?',
+        paragraphs_fr: ['Le palace compte 160 chambres.'],
+        paragraphs_en: ['The palace has 160 rooms.'],
+      },
+      {
+        id: 'geo-q-1',
+        question_fr: 'Quelle table ?',
+        question_en: 'Which restaurant?',
+        paragraphs_fr: ['Restaurant signé Ducasse.'],
+        paragraphs_en: ['Restaurant by Ducasse.'],
+      },
+      {
+        id: 'geo-q-2',
+        question_fr: 'Quel quartier ?',
+        question_en: 'Which area?',
+        paragraphs_fr: ['Au cœur de Paris, près du Louvre.'],
+        paragraphs_en: ['In central Paris, near the Louvre.'],
+      },
+    ],
     updated_at: '2026-05-28T00:00:00Z',
   };
   return { ...row, ...overrides };

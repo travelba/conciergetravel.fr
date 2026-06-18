@@ -48,6 +48,7 @@ import {
   readFeaturedReviews,
   filterPublicHotelGalleryImages,
   readGallery,
+  readGeoQa,
   readHeroImage,
   readHighlights,
   readHotelHistoryDates,
@@ -246,6 +247,7 @@ export interface HotelKitModel {
   readonly conciergeHook: string | null;
   readonly descriptionParagraphs: readonly string[];
   readonly storySections: ReturnType<typeof readHotelStory>;
+  readonly geoBlocks: ReturnType<typeof readGeoQa>;
   readonly factualSummary: HotelFactualSummary | null;
   readonly galleryHero: HotelKitGalleryTile | null;
   readonly galleryThumbs: readonly HotelKitGalleryTile[];
@@ -864,6 +866,7 @@ export async function prepareHotelKitModelUncached(
     conciergeHook: readConciergeHook(row, kitLocale),
     descriptionParagraphs,
     storySections: readKitStorySections(row, kitLocale),
+    geoBlocks: readGeoQa(row, kitLocale),
     factualSummary: readFactualSummary(row, kitLocale),
     galleryHero: mosaicHero,
     galleryThumbs: mosaicThumbs,
