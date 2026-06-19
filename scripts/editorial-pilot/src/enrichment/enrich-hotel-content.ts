@@ -25,6 +25,7 @@ import { z } from 'zod';
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
 import { selectHotels, patchHotelById, type SupabaseRestConfig } from '../photos/supabase-rest.js';
+import { hasLeak } from './scaffolding-gate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -149,11 +150,14 @@ function loadRestConfig(): SupabaseRestConfig {
 async function listHotels(
   cfg: SupabaseRestConfig,
   slug: string | null,
+  slugs: readonly string[],
   force: boolean,
 ): Promise<readonly HotelInput[]> {
   const filters: string[] = ['is_published=eq.true'];
   if (slug !== null) filters.push(`slug=eq.${slug}`);
-  if (!force && slug === null) filters.push('long_description_sections=is.null');
+  else if (slugs.length > 0) filters.push(`slug=in.(${slugs.join(',')})`);
+  if (!force && slug === null && slugs.length === 0)
+    filters.push('long_description_sections=is.null');
   return selectHotels<HotelInput>(cfg, {
     columns: HOTEL_COLS,
     filters,
@@ -192,6 +196,11 @@ Anti-hallucination critique :
 - Si tu n'es pas certain d'un fait précis, OMETS-LE ou utilise un terme générique ("un chef étoilé Michelin" plutôt qu'un nom inventé).
 - Tu peux te baser sur le contexte donné et tes connaissances générales VÉRIFIABLES (Wikipédia niveau).
 - Pour les dates : préfère un siècle/décennie sauf si l'année est dans le brief.
+
+INTERDICTION ABSOLUE (rejet automatique de la fiche) :
+- Ne JAMAIS écrire de méta-commentaire sur les données ou le processus : pas de "le brief", "AUTO_DRAFT", "pending", "statut pending", "niveau de confiance", "selon les sources publiques", "à vérifier", "non vérifié", "non confirmé", ni d'identifiant Wikidata (Qxxxxx), ni de backticks \`...\`.
+- Tu écris UNIQUEMENT de la prose éditoriale publiable, comme si elle paraissait demain dans un magazine. Le lecteur ne doit jamais soupçonner l'existence d'un brief ou d'un pipeline.
+- N'écris une section QUE si tu as de la matière réelle. Si une dimension (spa, restauration, chambres…) manque de données exploitables, NE PRODUIS PAS de section pour elle — réduis le nombre de sections plutôt que de narrer l'absence.
 
 Format de sortie : JSON strict.`;
 
@@ -286,13 +295,29 @@ async function generateEnrichment(h: HotelInput): Promise<EnrichmentOutput> {
       `[enrich ${h.slug}] schema-fail:\n${validation.error.issues.map((i) => `- ${i.path.join('.')}: ${i.message}`).join('\n')}`,
     );
   }
-  return validation.data;
+
+  // I1 anti-scaffolding gate (ADR-0029) — this generator has no Tavily fact
+  // pinning, so on a thin-source hotel the LLM narrates the brief ("le brief
+  // résume…", "section pending", "niveau de confiance low"). Without this gate
+  // it is the very tool that polluted 817 fiches (2026-06-19 audit). Drop any
+  // leaking section; if fewer than the schema floor survive, REFUSE the whole
+  // write so the fiche stays clean-thin rather than re-polluted.
+  const cleanSections = validation.data.long_description_sections.filter(
+    (s) => !hasLeak(s.body_fr) && !hasLeak(s.body_en),
+  );
+  if (cleanSections.length < 5) {
+    throw new Error(
+      `[enrich ${h.slug}] leak-gate: only ${cleanSections.length}/${validation.data.long_description_sections.length} sections are leak-free (min 5) — refusing to persist (thin-source hotel narrating the brief).`,
+    );
+  }
+  return { ...validation.data, long_description_sections: cleanSections };
 }
 
 // ─── CLI ─────────────────────────────────────────────────────────────
 
 interface Args {
   readonly slug: string | null;
+  readonly slugs: readonly string[];
   readonly all: boolean;
   readonly force: boolean;
   readonly concurrency: number;
@@ -301,6 +326,7 @@ interface Args {
 function parseArgs(): Args {
   const a = process.argv.slice(2);
   let slug: string | null = null;
+  let slugs: string[] = [];
   let all = false;
   let force = false;
   let concurrency = 4;
@@ -308,24 +334,30 @@ function parseArgs(): Args {
     if (arg === '--all') all = true;
     else if (arg === '--force') force = true;
     else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length).trim();
-    else if (arg.startsWith('--concurrency=')) {
+    else if (arg.startsWith('--slugs=')) {
+      slugs = arg
+        .slice('--slugs='.length)
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    } else if (arg.startsWith('--concurrency=')) {
       const n = Number.parseInt(arg.slice('--concurrency='.length), 10);
       if (Number.isFinite(n) && n >= 1 && n <= 16) concurrency = n;
     }
   }
-  return { slug, all, force, concurrency };
+  return { slug, slugs, all, force, concurrency };
 }
 
 async function main(): Promise<void> {
   const args = parseArgs();
-  if (args.slug === null && !args.all) {
+  if (args.slug === null && args.slugs.length === 0 && !args.all) {
     console.error(
-      'Usage: tsx src/enrichment/enrich-hotel-content.ts --slug=<slug> | --all [--force] [--concurrency=N]',
+      'Usage: tsx src/enrichment/enrich-hotel-content.ts --slug=<slug> | --slugs=a,b,c | --all [--force] [--concurrency=N]',
     );
     process.exit(1);
   }
   const cfg = loadRestConfig();
-  const hotels = await listHotels(cfg, args.slug, args.force);
+  const hotels = await listHotels(cfg, args.slug, args.slugs, args.force);
   console.log(`Found ${hotels.length} hotel(s) to enrich (concurrency=${args.concurrency}).`);
 
   let ok = 0;
