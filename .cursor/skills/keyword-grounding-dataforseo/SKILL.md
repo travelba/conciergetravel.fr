@@ -52,11 +52,26 @@ The pipelines (`enrich-places-editorial.ts`, hotel FAQ/title generators) call
 
 `groundHotel(cfg, hotelLlmInput)` (`hotel-grounding.ts`) derives the seeds and
 the DataForSEO locale **from the hotel itself**: FR hotels → `France/fr` seeds
-(`hôtel <name>`, `<name> <city>`); non-FR → the property's country / `en`
-(`<name> hotel`, `<name> <city>`) because international demand is English. The
-country→`location_name` map covers the catalogue's top countries with a
-`country_label_en` fallback (a bad location just yields an empty grounding —
-degrade-safe). It returns `{ grounding, block, locale }`.
+(`hôtel <name>`, `<name> <city>`); non-FR → the property's country in its
+**native language** (`Italy/it`, `Greece/el`, `Hungary/hu`, …). It walks an
+ordered list of locale candidates — `[native, France/fr]` — and keeps the
+**first that returns real PAA**, so a country missing from the map or absent
+from the DFS Labs registry still grounds on the `France/fr` fallback (also our
+primary francophone audience). It returns `{ grounding, block, locale }`.
+
+> ⚠ **DataForSEO Labs quirk — never force `en` on a non-English location.**
+> `related_keywords` validates the `(location_name, language_code)` pair and
+> rejects unsupported combos with `40501 Invalid Field: 'language_code'`
+> (e.g. `Italy/en`, `Spain/en`, `Portugal/en` — English is NOT a valid
+> language for most non-English Google domains). The OLD map forced `en` for
+> every non-FR country and silently returned zero PAA → `skip_no_paa` for
+> ~160 international hotels (geo_qa stuck at 90.7 %). Worse, some countries
+> (`Turkey`, `China`) are absent from the Labs registry entirely →
+> `40501 Invalid Field: 'location_name'` for ANY language. The fix is
+> native-language-first + `France/fr` fallback (2026-06-19, commit
+> `98db716` → coverage 97.3 %). Validate a new country with `probe-dfs.ts`
+> before adding it to `COUNTRY_DFS_LOCALE`; if it 40501s on location_name,
+> leave it out — the fallback handles it.
 
 Wired into every hotel generator (all degrade-safe — empty block when DFS off):
 
@@ -185,17 +200,18 @@ before spending tokens on a wave. Creds live in `.env.local`
 
 ## Anti-patterns
 
-| Anti-pattern                                    | Why it fails                                            | Correct path                                                                |
-| ----------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Making the pipeline hard-depend on DFS          | breaks the editorial-only Vercel build                  | `loadDfsConfig() → null` + `--no-grounding` fallback (Rule 1)               |
-| Feeding raw PAA into the FAQ verbatim           | celebrity/biography noise pollutes the fiche            | instruct the LLM to select on-topic PAA only (Rule 2)                       |
-| One DFS call per seed                           | burns the pay-per-request budget                        | cluster + disk cache (Rule 3)                                               |
-| Batch loop without per-item try/catch           | one network blip aborts the whole run, no resume        | isolate per item, idempotent re-run filter (Rule 4)                         |
-| Strict Zod that fails on one bad item           | a single deformed vendor row kills the cluster          | permissive schema + per-item `safeParse` (Rule 5)                           |
-| Enrich then assume it's live                    | enrich never sets `is_published`                        | run `publish-places.ts` + `resolve-proximity.ts` (Rule 6)                   |
-| geo_qa answer says "the brief doesn't provide…" | internal scaffolding word leaks to the public page      | prompt ban + `META_REFERENCE_PATTERNS` gate; redirect to Concierge (Rule 7) |
-| `run-hotel-geo-qa --refresh` on a golden fiche  | overwrites hand-seeded Airelles/Prince de Galles geo_qa | validate on a non-golden fiche; `--refresh` only when intentional (Rule 7)  |
-| Fabricating a geo_qa answer when DFS is off     | generic invented questions defeat the GEO purpose       | geo_qa requires PAA — skip the hotel, no LLM-only fallback (Rule 7)         |
+| Anti-pattern                                               | Why it fails                                                             | Correct path                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Making the pipeline hard-depend on DFS                     | breaks the editorial-only Vercel build                                   | `loadDfsConfig() → null` + `--no-grounding` fallback (Rule 1)                    |
+| Feeding raw PAA into the FAQ verbatim                      | celebrity/biography noise pollutes the fiche                             | instruct the LLM to select on-topic PAA only (Rule 2)                            |
+| One DFS call per seed                                      | burns the pay-per-request budget                                         | cluster + disk cache (Rule 3)                                                    |
+| Batch loop without per-item try/catch                      | one network blip aborts the whole run, no resume                         | isolate per item, idempotent re-run filter (Rule 4)                              |
+| Strict Zod that fails on one bad item                      | a single deformed vendor row kills the cluster                           | permissive schema + per-item `safeParse` (Rule 5)                                |
+| Enrich then assume it's live                               | enrich never sets `is_published`                                         | run `publish-places.ts` + `resolve-proximity.ts` (Rule 6)                        |
+| geo_qa answer says "the brief doesn't provide…"            | internal scaffolding word leaks to the public page                       | prompt ban + `META_REFERENCE_PATTERNS` gate; redirect to Concierge (Rule 7)      |
+| `run-hotel-geo-qa --refresh` on a golden fiche             | overwrites hand-seeded Airelles/Prince de Galles geo_qa                  | validate on a non-golden fiche; `--refresh` only when intentional (Rule 7)       |
+| Fabricating a geo_qa answer when DFS is off                | generic invented questions defeat the GEO purpose                        | geo_qa requires PAA — skip the hotel, no LLM-only fallback (Rule 7)              |
+| Forcing `en` as the DFS language for a non-English country | `40501 Invalid Field: 'language_code'` → zero PAA → silent `skip_no_paa` | native-language locale + `France/fr` fallback; `probe-dfs.ts` to validate a pair |
 
 ## References
 
