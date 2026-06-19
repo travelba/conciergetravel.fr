@@ -469,6 +469,44 @@ shared `hasLeak()` gate on its output AND refuse-rather-than-persist when too
 little survives — a generator without the gate silently re-pollutes everything
 the cleanup tools just fixed.
 
+**7th wave — EN parity backfill on `long_description_sections` (2026-06-19, commit `ace6506`)**
+
+A data-driven gap audit found the biggest editorial hole left: **747 published
+fiches rendered ZERO English section bodies** (pure FR on `/en` via the
+`pickLocalizedText` fallback) and 417 more were partial — ~52 % of the
+catalogue. `enrich-hotel-content.ts` generates the long-read FR-first and
+leaves `_en` optional, so the gap was structural. EN is a V1 locale → real
+GEO/SEO hole.
+
+**New tool `hotels/translate-sections-en.ts`** — faithful FR→EN-GB rewrite of
+the missing `title_en`/`body_en` per section (numbers / proper nouns / prices
+preserved, no invented facts), keyed by `anchor`, FR fields untouched.
+`--slug` / `--slugs` / `--all [--limit=N]` / `--concurrency` / `--dry-run`.
+Mirrors the `enrich-kit-faq-en.ts` pattern (gpt-4o-mini, json_object, temp 0.3)
+and runs the shared `hasLeak()` gate on the EN output — a translation that
+re-introduces scaffolding is dropped, never persisted.
+
+**Two robustness fixes capitalised** (both surfaced on the first 10-fiche
+pilot — 4/10 returned `EN+0`):
+
+1. **Batch sections (`SECTIONS_PER_CALL=4`)** — a single call translating a
+   9-10 section fiche overflowed 16k output tokens → truncated JSON →
+   `JSON.parse` failed 3×. Chunking guarantees the response never truncates.
+2. **Per-section tolerant parse** — `SectionsEnSchema.parse` (all-or-nothing)
+   sank a whole batch when ONE section had an over-long `title_en`. Replaced
+   with `extractSections()` (defensive shape pull) + per-item `safeParse` +
+   `clampTitle` self-heal; one malformed section is skipped, not fatal. This is
+   the llm-output-robustness §post-validation pattern — never let one bad item
+   reject a good batch.
+
+**Result:** full `--all` run = 1157 fiches, 6432 sections translated, 0 fiche
+failed, 29 EN sections leak-dropped by the gate. EN parity went
+**full 1057 → 2086 (94 %), partial 417 → 135, FR-only 747 → 0.** The 135
+residual partials are sections the model can't cleanly translate (persistent
+leak-drop / borderline FR) — diminishing returns, FR fallback renders fine.
+Prod walk on `/en/hotel/25hours-hotel-dubai-one-central` (cache MISS, fresh):
+55 anchors, English prose, 0 leak markers, FR page untouched.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
