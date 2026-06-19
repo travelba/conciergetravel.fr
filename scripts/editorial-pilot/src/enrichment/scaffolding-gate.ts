@@ -20,8 +20,15 @@
  * code-fenced tokens. Extend here (and only here) when a new leak shape is
  * discovered in the wild.
  */
+// NOTE on `confidence`: the bare English word is ordinary editorial prose
+// ("an air of quiet confidence", "a framework of confidence"). It is ONLY a
+// scaffolding leak when followed by a pipeline level (`confidence low/medium/
+// high`, or backtick-fenced `confidence \`low\``). Match that shape, not the
+// bare word — a 2026-06-19 catalogue audit false-flagged dozens of legit EN
+// long-descriptions on the bare token. The FR equivalent `niveau de confiance`
+// stays an exact phrase and the backtick rule still catches `` `low` ``.
 export const LEAK_MARKERS =
-  /\ble brief\b|\bbrief\b(?=[^.]*\b(?:confirme|fournit|signale|indique|incomplet|notes?|mention)\b)|AUTO_DRAFT|niveau de confiance|\bconfidence\b|`[^`]*`|reste à (?:vérifier|revalider)|à revalider|sans revalidation|non vérifiée?s?|wikidata|entité\s+Q\d|\bQ\d{5,}\b|matière publiable|ne peut être retenue?|statut\s+pending|\bpending\b|selon les sources publiques|note interne/iu;
+  /\ble brief\b|\bbrief\b(?=[^.]*\b(?:confirme|fournit|signale|indique|incomplet|notes?|mention)\b)|AUTO_DRAFT|niveau de confiance|\bconfidence[\s:`]+(?:low|medium|high)\b|`[^`]*`|reste à (?:vérifier|revalider)|à revalider|sans revalidation|non vérifiée?s?|wikidata|entité\s+Q\d|\bQ\d{5,}\b|matière publiable|ne peut être retenue?|statut\s+pending|\bpending\b|selon les sources publiques|note interne/iu;
 
 /** True when `text` carries any scaffolding/meta-commentary marker. */
 export function hasLeak(text: string | null | undefined): boolean {
