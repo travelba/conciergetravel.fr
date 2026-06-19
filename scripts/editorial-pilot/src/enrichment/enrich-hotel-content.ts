@@ -22,9 +22,14 @@ import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
+import type { DataForSeoClientConfig } from '@mch/integrations/dataforseo';
+
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
 import { selectHotels, patchHotelById, type SupabaseRestConfig } from '../photos/supabase-rest.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import { groundHotel } from '../grounding/hotel-grounding.js';
+import type { HotelLlmInput } from '../hotels/supabase-hotels.js';
 import { hasLeak } from './scaffolding-gate.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -110,10 +115,12 @@ interface HotelInput {
   readonly id: string;
   readonly slug: string;
   readonly name: string;
+  readonly name_en: string | null;
   readonly stars: number | null;
   readonly is_palace: boolean;
   readonly city: string;
   readonly region: string | null;
+  readonly country_code: string | null;
   readonly description_fr: string | null;
   readonly long_description_sections: unknown;
   readonly signature_experiences: unknown;
@@ -124,8 +131,33 @@ interface HotelInput {
 }
 
 const HOTEL_COLS =
-  'id,slug,name,stars,is_palace,city,region,description_fr,long_description_sections,' +
+  'id,slug,name,name_en,stars,is_palace,city,region,country_code,description_fr,long_description_sections,' +
   'signature_experiences,highlights,amenities,restaurant_info,spa_info';
+
+/** Minimal `HotelLlmInput` for `groundHotel` (it only reads name / name_en /
+ * city / country_code to derive the DataForSEO seeds + locale). */
+function toLlmInput(h: HotelInput): HotelLlmInput {
+  return {
+    slug: h.slug,
+    name: h.name,
+    name_en: h.name_en,
+    city: h.city,
+    district: null,
+    country_code: h.country_code,
+    country_label_fr: null,
+    country_label_en: null,
+    stars: h.stars,
+    is_palace: h.is_palace,
+    description_fr_excerpt: null,
+    description_en_excerpt: null,
+    points_of_interest: null,
+    restaurant_info: h.restaurant_info,
+    spa_info: h.spa_info,
+    amenities: h.amenities,
+    signature_experiences: h.signature_experiences,
+    awards: null,
+  };
+}
 
 function loadRestConfig(): SupabaseRestConfig {
   const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
@@ -204,7 +236,7 @@ INTERDICTION ABSOLUE (rejet automatique de la fiche) :
 
 Format de sortie : JSON strict.`;
 
-function buildUserPrompt(h: HotelInput): string {
+function buildUserPrompt(h: HotelInput, groundingBlock: string): string {
   const lines: string[] = [];
   lines.push(`Hôtel : ${h.name}`);
   lines.push(`Statut : ${h.is_palace ? 'Palace Atout France' : `${h.stars ?? 5}★`}`);
@@ -238,6 +270,15 @@ function buildUserPrompt(h: HotelInput): string {
     lines.push(JSON.stringify(h.amenities).slice(0, 800));
     lines.push('');
   }
+  if (groundingBlock.length > 0) {
+    lines.push(groundingBlock);
+    lines.push('');
+    lines.push(
+      '### Ancrage SEO/GEO (DataForSEO)',
+      "Le bloc ci-dessus liste la demande de recherche RÉELLE (mots-clés à volume, questions People-Also-Ask, intentions). Ancre les titres de section (title_fr/title_en) et le corps sur ces requêtes quand c'est naturel : reprends le vocabulaire exact des recherches à fort volume, et traite les questions People-Also-Ask dans le fil du texte. JAMAIS de bourrage de mots-clés ni de liste — la prose reste fluide et éditoriale.",
+      '',
+    );
+  }
   lines.push('### Travail demandé');
   lines.push('Produis un JSON STRICT avec deux clés :');
   lines.push('');
@@ -269,13 +310,19 @@ function buildUserPrompt(h: HotelInput): string {
   return lines.join('\n');
 }
 
-async function generateEnrichment(h: HotelInput): Promise<EnrichmentOutput> {
+async function generateEnrichment(
+  h: HotelInput,
+  dfsCfg: DataForSeoClientConfig | null,
+): Promise<EnrichmentOutput> {
   const env = loadEnv();
   const provider = resolveProvider(env);
   const client = buildLlmClient(env, provider);
+  // DataForSEO grounding — anchors section titles + prose on real search demand
+  // (high-volume keywords + People-Also-Ask). Degrade-safe: empty block on DFS-off.
+  const { block } = await groundHotel(dfsCfg, toLlmInput(h));
   const result = await client.call({
     systemPrompt: SYSTEM_PROMPT,
-    userPrompt: buildUserPrompt(h),
+    userPrompt: buildUserPrompt(h, block),
     temperature: 0.5,
     maxOutputTokens: 16000,
     responseFormat: 'json',
@@ -357,8 +404,11 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   const cfg = loadRestConfig();
+  const dfsCfg = loadDfsConfig();
   const hotels = await listHotels(cfg, args.slug, args.slugs, args.force);
-  console.log(`Found ${hotels.length} hotel(s) to enrich (concurrency=${args.concurrency}).`);
+  console.log(
+    `Found ${hotels.length} hotel(s) to enrich (concurrency=${args.concurrency}, grounding=${dfsCfg !== null ? 'on' : 'off'}).`,
+  );
 
   let ok = 0;
   let fail = 0;
@@ -374,7 +424,7 @@ async function main(): Promise<void> {
       const tag = `[${idx}/${total} ${h.slug}]`;
       try {
         const t0 = Date.now();
-        const out = await generateEnrichment(h);
+        const out = await generateEnrichment(h, dfsCfg);
         const wordsFr = out.long_description_sections.reduce(
           (acc, s) => acc + s.body_fr.split(/\s+/u).length,
           0,
