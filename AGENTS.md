@@ -385,6 +385,58 @@ TLD** (never `.com`, where Langham/Taj keep real property subdomains).
 The handful of `.com` geo-squatters are a finite set NULLed by hand.
 84 fixtures in `toxic-official-url.test.ts` lock both directions.
 
+**5th wave — published scaffolding-leak P0 remediation (2026-06-19)**
+
+A catalogue-wide run of the Airelles wave-gates audit (`quality/audit-wave.ts`,
+force PostgREST via `MCH_AUDIT_FORCE_REST=1` — the direct-pg path auth-fails on
+this machine) surfaced a **P0 that trumped every other editorial lever**:
+**817 / 2221 published fiches (36.8%) still rendered raw pipeline scaffolding
+live in prod** — `AUTO_DRAFT`, "niveau de confiance low", "statut pending",
+"Le brief confirme…", Wikidata Q-ids — inside `long_description_sections` and
+`concierge_advice`. Confirmed by fetching the live `chelsea-pines-inn` page
+(the bare prose, not a draft). This is the residual of the leak documented in
+`hotels/descaffold-sections.ts` (originally ~1795 fiches).
+
+**Detector false-positive fixed first (commit `879f11f`)**: the shared
+`enrichment/scaffolding-gate.ts` `LEAK_MARKERS` matched the bare English word
+`confidence` ("a framework of confidence"), inflating the `body_en` count.
+Narrowed to `confidence (low|medium|high)` / backtick-fenced levels; FR
+`niveau de confiance` + the backtick rule untouched. New `scaffolding-gate.test.ts`
+(10 leak + 6 clean fixtures) locks it. **Lesson:** a shared write-gate regex
+must never match an ordinary dictionary word — anchor it to the leak's actual
+shape (token + pipeline level), or it false-fails legit prose AND blocks
+generators that use the same gate.
+
+**3-stage remediation** (PO-approved "staged-full"):
+
+1. `descaffold-sections.ts --all` — surgical LLM strip of _mixed_ leaks
+   (scaffolding woven into real prose). 561 s → cleaned=76, partial=102,
+   review=322 (pure-scaffolding kept as-is, never emptied).
+2. `enrich-residual-sections.ts --auto` — regenerate pure-scaffolding sections
+   from Tavily/Wikidata facts, EEAT-gated (writes only with ≥2 sourced facts).
+   **Low ROI at scale + hang-prone**: ~7% write rate (2/28) and the process
+   **hung on an un-timed Tavily/LLM call after 28 fiches** (had to be killed).
+   Salvaged the few real wins (e.g. `anse-chastanet` histoire, 3 facts) then
+   pivoted. **Lesson:** treat `enrich-residual --auto` as a small supervised
+   batch tool (`--limit=20`), never an unattended catalogue run.
+3. **New tool `hotels/remove-scaffold-sections.ts`** (deterministic, non-LLM,
+   the reliable leak-stop). Per fiche: drop any `long_description_sections[i]`
+   whose `body_fr` leaks (FR canonical; descaffold already saved salvageable
+   ones); blank only `body_en` when FR is clean but EN leaks; null
+   `concierge_advice` when either locale body leaks (block self-elides,
+   regenerable). `--dry-run` default + a rollback snapshot
+   (`runs/scaffold-removal-backup-*.json`) before `--apply`. Run: 788 fiches,
+   1041 sections dropped, 344 EN bodies blanked, 325 concierge cleared, and
+   **0 fiches fell below 3 sections** (no indexability regression). Re-scan =
+   **leaking=0 / 2221**. Prod walk on `chelsea-pines-inn` confirms the three
+   markers gone (the surviving `Q122595825` is the legit Wikidata `sameAs`
+   URL in JSON-LD, not a prose leak).
+
+**Follow-ups (non-blocking, additive — no rework):** the 344 blanked `body_en`
+fields and the flagship leakers worth real content (Claridge's, Cheval Blanc,
+Aman, Armani) can be re-enriched later via the section-adding pipeline /
+supervised `enrich-residual` batches; an empty/removed slot is backfillable.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
