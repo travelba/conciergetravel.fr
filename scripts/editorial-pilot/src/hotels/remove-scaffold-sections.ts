@@ -86,8 +86,14 @@ function planFor(row: Row): Plan | null {
       continue;
     }
     if (hasLeak(s.body_en)) {
+      // Drop the leaking EN translation by REMOVING the key (not "" — an
+      // empty string fails the renderer's `body_en: z.string().min(1)` and
+      // nukes the whole long_description_sections array parse, hiding the
+      // entire story block. Omitting the key falls back to FR on /en.
       blankedEn += 1;
-      newSections.push({ ...s, body_en: '' });
+      const { body_en: _drop, ...rest } = s;
+      void _drop;
+      newSections.push(rest);
     } else {
       newSections.push(s);
     }
