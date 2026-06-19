@@ -437,6 +437,38 @@ fields and the flagship leakers worth real content (Claridge's, Cheval Blanc,
 Aman, Armani) can be re-enriched later via the section-adding pipeline /
 supervised `enrich-residual` batches; an empty/removed slot is backfillable.
 
+**6th wave — re-enrich the thinned fiches + ROOT-CAUSE fix (2026-06-19, commit `ef4aae9`)**
+
+After the 3-stage stop-leak, 67 published fiches had dropped to ≤5
+`long_description_sections` (dist `{2:1, 3:4, 4:18, 5:44}`). Re-enriching them
+via the section-adding pipeline `enrichment/enrich-hotel-content.ts --force`
+**re-introduced leaks** on the first pilot: `janu-tokyo` came back with 5/8
+sections narrating the brief ("Le brief le résume simplement…"). **Root cause
+found:** this generator had **no `hasLeak` gate at all** and injects the raw
+brief into the prompt — it is almost certainly the original source of the
+817-fiche pollution. Every other tool gates; this one didn't.
+
+**Fix (two-part, ADR-0029 invariant I1):**
+
+1. `SYSTEM_PROMPT` now hard-bans pipeline meta-commentary (`le brief`,
+   `AUTO_DRAFT`, `pending`, `niveau de confiance`, Wikidata Q-ids, backticks)
+   and tells the model to **omit** a section rather than narrate a data gap.
+2. `generateEnrichment` drops any section failing the shared `hasLeak()` gate
+   and **refuses the whole write** if < 5 leak-free sections survive — a
+   thin-source hotel stays clean-thin instead of re-polluted.
+   Also added `--slugs=a,b,c` batch selection.
+
+**Result:** re-pilot `janu-tokyo` → 7 clean sections, `leaks=NONE` (was 5/8).
+Batch of all 67 (`--force --concurrency=4`, 35 min): catalogue re-scan =
+**leaking=0 / 2221**, section-count dist ≤6 collapsed from 67 thin fiches to
+`{5:1, 6:97}` — every thinned fiche lifted to 6-8 sections, **0 below 4**, and
+even obscure hotels (`andon-ryokan` 4→7) produced clean publishable prose. The
+single residual 5-section fiche is a partial leak-gate refusal (clean, ≥ floor).
+**Lesson:** any LLM generator that writes to a public column MUST run the
+shared `hasLeak()` gate on its output AND refuse-rather-than-persist when too
+little survives — a generator without the gate silently re-pollutes everything
+the cleanup tools just fixed.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
