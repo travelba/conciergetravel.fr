@@ -221,7 +221,7 @@ async function genForHotel(
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const env = loadPhotoEnv();
-  requirePhotoEnv(env, { needsGooglePlaces: true });
+  requirePhotoEnv(env, { needsCloudinary: false, needsGooglePlaces: true });
   if (env.GOOGLE_PLACES_API_KEY === undefined) {
     throw new Error('GOOGLE_PLACES_API_KEY required');
   }
