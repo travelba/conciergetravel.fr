@@ -85,6 +85,27 @@ const TOXIC_OFFICIAL_URL_RE: RegExp = new RegExp(
     String.raw`(?:^|[./])hotels-[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])[a-z0-9]+-hotels-[a-z]{2}\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])hotelsof[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
+    // `hotels-in-<geo>` / `hotels-of-<geo>` aggregator SLDs. Unambiguous:
+    // no legitimate brand registers `hotels-in-X` / `hotels-of-X`
+    // (`asiana-capella-suites.hotels-in-hochiminh.com`, `www.hotels-in-it.com`).
+    String.raw`(?:^|[./])hotels-(?:in|of)-[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
+    // `hotels<geo>` / `<geo>hotels` aggregator registrable domains that glue
+    // the hotel name into a NON-www subdomain on a `.net`/`.org`/`.info` TLD
+    // (`the-st-regis-chengdu.chengduhotels.net`, `palais-...hotelsvienna.org`,
+    // `margutta-19.italyromehotels.net`). TWO safety guards stacked:
+    //   (1) the mandatory glued non-www subdomain skips `www.`/bare brand
+    //       domains (`www.hotelsbarriere.com`, `www.hotelsquare.com`,
+    //       `historichotels.org`, `rosewoodhotels.com`, `comohotels.com`);
+    //   (2) `.com` is EXCLUDED so legit brands that DO use property
+    //       subdomains stay safe (`pasadena.langhamhotels.com`,
+    //       `taj.tajhotels.com`). The squatters in this family all use
+    //       `.net`/`.org`/`.info`. The few `.com` geo-squatters are a finite
+    //       set NULLed by hand — adding `.com` here would silently drop real
+    //       Langham/Taj official subdomains.
+    String.raw`//(?!www\.)[a-z0-9-]+\.(?:hotels[a-z]{3,}|[a-z]{3,}hotels)\.(?:net|org|info)(?:[/:?#]|$)`,
+    // `<region>online` regional-aggregator family (`berkshiresonline.com`,
+    // `hospitalityonline.com`) that fronts a non-official landing page.
+    String.raw`(?:^|[./])[a-z]+online\.(?:com|net|org|info)(?:[/:?#]|$)`,
     // OTAs + meta-search.
     String.raw`(?:^|[./])(?:${OTA_HOSTS})(?:[/:?#]|$)`,
   ].join('|'),

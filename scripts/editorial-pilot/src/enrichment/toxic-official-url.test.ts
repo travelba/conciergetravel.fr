@@ -29,6 +29,19 @@ describe('isToxicOfficialUrl', () => {
     'https://www.hotels-dubai.org/en/property/slshotel-residences/reviews.html',
     'https://the-st-regis.riyadh-hotels-sa.com/en',
     'https://grace-santorini.hotelsofsantorini.com/en',
+    // 2026-06-19 backfill sweep — newly discovered squatter families
+    // (hotel-name glued into a non-www subdomain of an aggregator domain).
+    'https://asiana-capella-suites.hotels-in-hochiminh.com/fr',
+    'https://citizenm-bankside.hotels-of-london.com/en',
+    'https://etereo-auberge-resorts-collection.hotelsplayadelcarmen.net/en',
+    'https://margutta-19.italyromehotels.net/en',
+    'https://coworth-park-dorchester-collection-hotel-ascot.berkshiresonline.com/en',
+    'https://the-st-regis-chengdu.chengduhotels.net/en',
+    'https://rosewood.luangprabanghotels.net/en',
+    'https://eilertsmith.hotelstavanger.net/en',
+    'https://palais-hansen-kempinski-vienna.hotelsvienna.org/en',
+    'https://www.hotels-in-it.com/en/h/boutiquedon1890.html',
+    'https://www.hospitalityonline.com/andaz-5th',
     // OTAs
     'https://www.trivago.com/en-US/oar/hotel-las-ventanas',
     'https://www.booking.com/hotel/it/londra-palace.html',
@@ -72,6 +85,29 @@ describe('isToxicOfficialUrl', () => {
     'https://www.comogroup.com/property/como-alpina-dolomites',
     'https://theromeocollection.com/en/romeo-napoli',
     'https://portofino.eighthotels.it/en',
+    // `<brand>hotels.com` SUFFIX brands the new `.net/.org/.info`-only rule
+    // must NOT catch (the AGENTS.md 2026-06-02 near-miss list).
+    'https://www.rosewoodhotels.com/en/rosewood-mayakoba',
+    'https://www.bulgarihotels.com/en_US/dubai',
+    'https://www.comohotels.com/the-halkin',
+    'https://www.tajhotels.com/en-in/taj/taj-lake-palace-udaipur',
+    // backfill keepers (deep property pages on brand/consortium domains)
+    'https://www.fourseasons.com/abudhabi',
+    'https://www.jumeirah.com/en/stay/guangzhou/jumeirah-guangzhou',
+    'https://www.kempinski.com/en/hotel-gold-coast-city',
+    'https://sofitel.accor.com/en/hotels/3569.html',
+    'https://mayakoba.com/hotels-overview/rosewood-mayakoba',
+    // `hotels`-containing REGISTRABLE domains that are genuine brands/hotels
+    // — caught by the old broad rule, MUST survive the subdomain-anchored one.
+    'https://www.hotelsbarriere.com/fr/paris/le-fouquets.html',
+    'https://www.hotelsbarriere.com/en/la-baule/le-royal',
+    'https://www.historichotels.org/us/hotels-resorts/castle-hot-springs',
+    'https://www.hotelsquare.com/en',
+    'https://hotelsahrai.com',
+    // legit brand domains that DO use a property subdomain — the `.com`
+    // exclusion on the aggregator rule must keep these valid.
+    'https://pasadena.langhamhotels.com/',
+    'https://taj.tajhotels.com/en-in/taj-boston/',
   ];
 
   it.each(TOXIC)('flags toxic url %s', (url) => {

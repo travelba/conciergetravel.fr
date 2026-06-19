@@ -349,6 +349,42 @@ The Phase 1.5 `external_sources` backfill was completed and de-polluted:
   re-source a real one (Tavily extract / Wikidata P856) before
   re-projecting.
 
+**4th wave — official_url Tavily backfill + squatter-detector extension (2026-06-19)**
+
+Ran `photos/backfill-official-url.ts --only-null` (Tavily search + the
+`isToxicOfficialUrl` veto) across the **102 published hotels with a NULL
+`official_url`** (the e5 squatter-NULLed cohort + ~80 scaffold drafts
+promoted without Wikidata). Result: **38 candidates accepted, 64 left
+NULL** (skips = OTA blocklist 13, low-confidence 48, corporate-root /
+trivial-path / not-a-landing-page 3 — every skip is a non-regression).
+Projected the hits into `external_sources` via
+`convert-wikidata-to-external-sources.ts --slugs=…`.
+
+**Acceptance walk caught a real quality regression** before it stuck: a
+DB spot-check of the 38 showed the backfill confidence ruleset had
+accepted **7 bad hits** — 5 SEO-squatter families unknown to the
+detector (`<hotel>.hotels-in-hochiminh.com`, `…hotels-of-london.com`,
+`…hotelsplayadelcarmen.net`, `margutta-19.italyromehotels.net`,
+`…berkshiresonline.com`), 1 corporate press release (`rosewood-doha` →
+`rosewoodhotelgroup.com/news-and-media/…`), and 1 wrong-entity
+(`address-sky-view` → `skyviewsdubai.com`, the observation deck). Those
+7 were reverted to NULL; **31 genuine dedicated/property-deep-link wins
+kept** (incl. `fourseasons.com/abudhabi`, `ritzcarlton.com/…`,
+`relaischateaux.com/…`, `mayakoba.com/hotels-overview/rosewood-mayakoba`).
+
+`isToxicOfficialUrl` was then extended with the 5 new families AND a
+catalogue re-scan NULLed **12 more pre-existing squatters** of the same
+shape. **Hard-won regex lesson (re-confirming the 2026-06-02 trap):**
+the squatter signature is a hotel-name glued into a **non-www subdomain**
+of a `hotels<geo>` / `<geo>hotels` aggregator domain — but legit brands
+(`langhamhotels.com`, `tajhotels.com`, `rosewoodhotels.com`,
+`comohotels.com`, Groupe Barrière `hotelsbarriere.com`, `historichotels.org`,
+`hotelsquare.com`, `hotelsahrai.com`) share that surface. The safe rule
+requires **(1) a glued non-www subdomain AND (2) a `.net`/`.org`/`.info`
+TLD** (never `.com`, where Langham/Taj keep real property subdomains).
+The handful of `.com` geo-squatters are a finite set NULLed by hand.
+84 fixtures in `toxic-official-url.test.ts` lock both directions.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
