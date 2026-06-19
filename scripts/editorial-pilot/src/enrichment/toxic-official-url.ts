@@ -97,6 +97,16 @@ const TOXIC_OFFICIAL_URL_RE: RegExp = new RegExp(
  *
  * Defensive: a malformed URL is treated as non-toxic (the caller's other
  * validation will reject it) — we only flag URLs we positively recognise.
+ *
+ * ⚠ SCOPE — this detector is for the `official_url` FIELD only. Do NOT apply
+ * it verbatim when cleaning the `external_sources` provenance array: there the
+ * OTA review/booking hosts (TripAdvisor, Booking.com, …) are LEGITIMATE EEAT
+ * references rendered in the page footer (AGENTS.md Phase 5). A 2026-06-19
+ * external_sources sweep that reused this helper flagged 129 hotels but 107
+ * were valid TripAdvisor citations — only the 22 SEO-squatter entries
+ * (reserve-online / hotel-dir / hotels-<geo> / ae-<city> …) were genuinely
+ * toxic. When de-polluting provenance, exclude the OTA hosts first (keep them)
+ * and strip only the squatter families.
  */
 export function isToxicOfficialUrl(url: string): boolean {
   if (typeof url !== 'string' || url.length === 0) return false;
