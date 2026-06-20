@@ -160,7 +160,12 @@ function clampTitle(v: unknown): unknown {
 const SectionEnSchema = z.object({
   anchor: z.string().min(1),
   title_en: z.preprocess(clampTitle, z.string().min(3).max(140)),
-  body_en: z.string().min(80),
+  // Min 10 (not 80): many real sections are short factual stubs — an
+  // "en-pratique" address block or a one-line "Classement 5 étoiles." note.
+  // A min-80 floor silently rejected their (legitimately short) EN
+  // translation, leaving ~120 fiches stuck at EN+0 (2026-06-20 diagnosis).
+  // hasLeak() + the faithful-translation prompt guard quality instead.
+  body_en: z.string().min(10),
 });
 
 /** Defensively pull the section array out of whatever shape the model returned

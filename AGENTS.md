@@ -579,6 +579,44 @@ over HTTPS) — that's why `translate-sections-en.ts` and the new
 `pg`-based pipeline is needed, fix the pooler URL first
 (`postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres`).
 
+**10th wave — parallel multitask: EN-section recovery + bounded photo backfill (2026-06-20)**
+
+ÉCRIT + VISUEL in parallel, both bounded and verified live.
+
+| Stream                           | Surface                                        | Before                                   | After                                                         |
+| -------------------------------- | ---------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------- |
+| ÉCRIT — sections EN parity       | `long_description_sections.{title_en,body_en}` | 130 fiches with ≥1 FR section missing EN | **23** (-82 %); 121 sections translated, **0 EN leak**        |
+| VISUEL — under-10 photo backfill | `gallery_images` (Google Places APPEND)        | 24 hotels < 10 photos (`DONE`=2197)      | **17** (`DONE`=2204); 63 photos uploaded, 0 supplier-URL leak |
+
+Root-cause fix capitalised (the reason the "127 hard residual" from the 9th
+wave was overstated): `translate-sections-en.ts`'s `SectionEnSchema.body_en`
+carried a **`min(80)`** floor. Many real sections are legitimately short
+factual stubs — an `en-pratique` address block, a one-line
+"Classement 5 étoiles." note (body_fr 60-85 chars). Their faithful EN
+translation is < 80 chars, so `safeParse` rejected the whole section →
+the fiche logged `EN+0` and looked like a "hard residual". Lowering the
+floor to **`min(10)`** (quality still guarded by `hasLeak()` + the
+faithful-translation prompt) recovered **112 / 130 fiches in one pass**.
+Lesson: a Zod `min()` length floor sized for _prose_ silently strands
+_structured/stub_ content — size validation gates to the **shortest
+legitimate** instance of the field, not the typical one.
+
+The true EN-section residual is now **23 fiches** where the EN output
+re-trips `hasLeak()` (borderline FR phrasing the translator echoes) —
+genuinely hard, deferred to a manual sweep (low ROI).
+
+Photo residual = **17 hotels** with 0 Google Places photos: pre-opening
+properties (`six-senses-bangkok`, `six-senses-milan`), 0-Places R&C
+lodges (`royal-chundu-luxury-zambezi-lodges`, `yihe-mansions`), and
+obscure independents (`babuino-181`, `fouquet-s-mykonos`, `margutta-19`…).
+They need Tavily/official-site or manual sourcing (Places is exhausted).
+
+Acceptance (prod, curl — no Chrome on this box for the browser MCP):
+`/en/hotel/four-seasons-madrid` renders the new EN sections ("rare
+spaciousness", "People come here for Madrid"); `/hotel/la-residencia-a-belmond-hotel-mallorca`
+serves 37 `cct/hotels/la-residencia…` Cloudinary refs with **0** raw
+`place-photos` URLs (no supplier hotlink leak). ISR already fresh.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
