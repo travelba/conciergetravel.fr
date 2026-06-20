@@ -545,6 +545,40 @@ walk on `https://myconciergehotel.com/hotel/the-berkeley` confirmed the
 regenerated FR summary ("…982 m du Palais de Buckingham…") renders live,
 no content leak (the single `placeholder=` match is the search-box attribute).
 
+**9th wave — parallel multitask backfill: concierge_advice + EN parity (2026-06-20)**
+
+Three disjoint-column backfills run in parallel (no write races):
+
+| Stream                 | Column                      | Before      | After                                              |
+| ---------------------- | --------------------------- | ----------- | -------------------------------------------------- |
+| A — concierge_advice   | `concierge_advice`          | 325 NULL    | **0 NULL** (318 + 7 retried, success=325/325)      |
+| B — sections EN parity | `long_description_sections` | 135 partial | 8 newly translated; **127 hard residual deferred** |
+| C — description EN     | `description_en`            | 172 NULL    | **0 NULL** (172/172, 0 leak)                       |
+
+Leak scan post-run = **0 leaking / 2221** (description_en + concierge_advice
+bodies, both shapes). Acceptance: brenners EN page renders the new English
+description verbatim; casa-monti FR page renders the new "Conseil du
+Concierge" block (was NULL before). The 127 stream-B residuals are the same
+hard set flagged in the 7th wave — sections whose FR carries borderline /
+scaffolding-ish text that the `hasLeak()` gate rejects on translation; they
+need FR cleanup first, not translation (FR fallback renders fine, low ROI).
+
+**New tool `hotels/translate-description-en.ts`** (REST/PostgREST sibling of
+`translate-sections-en.ts`) — faithful FR→EN-GB rewrite of `description_en`
+only, `hasLeak()`-gated, `--slug/--slugs/--all/--limit/--concurrency/--dry-run`.
+
+**Gotcha capitalised — pg-based scripts can't connect on the Windows dev box.**
+`i18n/translate-hotels-en.ts` (and the other `pg`-based i18n scripts) target
+`SUPABASE_DB_POOLER_URL`/`SUPABASE_DB_URL`, but BOTH point to the direct host
+`db.<ref>.supabase.co` (IPv6-only → `getaddrinfo ENOENT` on this machine; the
+"pooler" var is mislabeled — it is NOT `aws-0-*.pooler.supabase.com`). The
+direct host doesn't resolve, so any `pg.Client` connect throws immediately.
+**Use the PostgREST path** (`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`
+over HTTPS) — that's why `translate-sections-en.ts` and the new
+`translate-description-en.ts` work where `translate-hotels-en.ts` fails. When a
+`pg`-based pipeline is needed, fix the pooler URL first
+(`postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres`).
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
