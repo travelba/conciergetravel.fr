@@ -958,14 +958,14 @@ is the number to surface first; the all-in global is secondary.
 | Phase                                           | Weight | Completion (2026-06-21) |
 | ----------------------------------------------- | ------ | ----------------------- |
 | 1 — Editorial-only on published catalogue       | 25 %   | ~97 %                   |
-| 1.5 — Known gaps to close                       | 8 %    | ~85 %                   |
+| 1.5 — Known gaps to close                       | 8 %    | ~90 %                   |
 | 2 — Photo pipeline                              | 17 %   | ~45 %                   |
 | 3 — Editorial pages (guides + rankings + itin.) | 12 %   | ~80 %                   |
 | 4 — Multilingual V2/V3                          | 10 %   | ~18 %                   |
 | 5 — Observability & GSC                         | 5 %    | ~30 %                   |
 | 6 — Booking APIs (frozen, last brick)           | 23 %   | ~2 %                    |
 
-→ **all-in global ≈ 52 %** · **hors-booking ≈ 67 %** (Phases 1-5 re-normalised).
+→ **all-in global ≈ 52 %** · **hors-booking ≈ 68 %** (Phases 1-5 re-normalised).
 
 **Report format** (mini-table per task): re-print the table above with the
 updated completion column + a one-line `Δ` of what the task advanced, leading
