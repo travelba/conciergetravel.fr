@@ -776,6 +776,59 @@ populated `answer_fr` (and the FAQ renders fine in prod). Before
 launching a remediation pipeline off an audit "gap", confirm the field
 shape — a root-level key probe on an array column is a false negative.
 
+## Gotcha — "data-gap narration" leaks come in many phrasings (anti-whack-a-mole)
+
+When the brief is thin, the generation LLM narrates its own data gap
+instead of staying silent. This surfaces as user-visible prose and is the
+single most recurrent leak class. The phrasings are diverse — a verb-by-verb
+marker chase never converges. Catalogue the **whole family** in one pass in
+`scripts/editorial-pilot/src/enrichment/scaffolding-gate.ts`:
+
+- FR: `reste/encore à documenter|confirmer|préciser`, bare `à documenter`,
+  `aucune information … n'est … disponible`, `n'est actuellement disponible`,
+  `aucun fait vérifié`, `non documenté`, `… dans ce brief`,
+  `sous réserve de confirmer … la fiche`, `rubrique … en attente`.
+- EN mirror: `yet to be documented`, `to be documented here`,
+  `remains to be confirmed/documented`, `no precise information … available`,
+  `not specified in the brief`.
+
+Two hard-won rules when editing `LEAK_MARKERS`:
+
+1. **Scope cross-clause lookaheads to a single line** — use `[^.\n]*`, never
+   `[^.]*`. `[^.]` matches newlines, so `\brubrique\b(?=[^.]*\ben attente\b)`
+   silently matches across a whole bullet block and triggers false whole-section
+   drops downstream.
+2. **Don't over-broaden into legitimate field states.** `non renseignée`
+   ("field unspecified") is NOT a leak — it is normal in the `en-pratique`
+   block. Only the meta tail (`… dans ce brief`) makes it one. We added then
+   removed `non renseignée` after it nuked 154 real address bullets.
+
+## Gotcha — strip leaks WITHOUT dropping structured blocks
+
+`strip-leak-sentences.ts` must be structure-preserving, or it destroys the
+`en-pratique` address / GPS / classification block to remove one meta tail.
+The blast radius of a naïve "split on sentences, drop the section if it
+leaks" was **191 fiches / 165 dropped sections** (154 of them `en-pratique`).
+The surgical version (`cleanLeakBody`):
+
+1. **phrase pre-clean** — strip meta TAILS in place first
+   (`,? sous réserve de confirmer …`, ` dans ce brief`), so a bullet keeps
+   its real data and only loses the hedge;
+2. **line/paragraph-aware** — process `\n`-split units; a leaking paragraph
+   is **sentence-stripped in place** (keep its clean sentences), never dropped
+   wholesale;
+3. drop a unit only when nothing clean ≥ `min-keep` survives (genuine stub).
+
+For `description_fr` (out of strip scope — it touches sections + signatures
+only) use `descaffold-sections.ts --all` (LLM rewrite). After it rewrites FR,
+**blank `description_en`** for the changed rows (it does not) and re-run
+`translate-description-en --all`, else FR/EN desync. `needsEn()` only re-fills
+empty/short EN — it will NOT re-translate stale-but-clean EN.
+
+End state of one full sweep: `frLeak 0 / enLeak 0 / thin<6 0 / enBlank 0`
+across 2221 published fiches, residual thin/blank fiches closed by
+`enrich-hotel-content --force` (regenerates ≥6 clean bilingual sections).
+
 ## References
 
 - `llm-output-robustness` — generation pipeline that consumes the enriched briefs.
