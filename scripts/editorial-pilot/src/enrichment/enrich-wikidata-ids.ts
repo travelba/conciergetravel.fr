@@ -340,6 +340,10 @@ async function main(): Promise<void> {
       const tag = `[${hotel.slug}]`;
       try {
         let qid = hotel.wikidata_id;
+        // `isNewMatch` gates the stricter corroboration guard below — an
+        // editor-pinned / previously-validated `wikidata_id` is trusted as-is.
+        const isNewMatch = hotel.wikidata_id === null;
+        let matchedDesc: string | null = null;
         if (qid === null) {
           const found = await findHotelMulti(hotel.name, hotel.city);
           if (found === null) {
@@ -350,6 +354,7 @@ async function main(): Promise<void> {
             continue;
           }
           qid = found.qid;
+          matchedDesc = found.description;
           console.log(
             `${tag} → matched ${qid} ("${found.label}" — ${found.description ?? 'no desc'})`,
           );
@@ -360,6 +365,7 @@ async function main(): Promise<void> {
         // Geographic sanity check — rejects "matches" where Wikidata
         // entity is in a different city/region than the editorial fiche.
         // Skipped when either coords side is missing (rare in practice).
+        let geoValidated = false;
         const lat = hotel.latitude !== null ? Number(hotel.latitude) : null;
         const lng = hotel.longitude !== null ? Number(hotel.longitude) : null;
         if (lat !== null && lng !== null && Number.isFinite(lat) && Number.isFinite(lng)) {
@@ -373,9 +379,32 @@ async function main(): Promise<void> {
               skipped += 1;
               continue;
             }
+            geoValidated = true;
             console.log(`${tag}   ✓ geo-validated (${dist.toFixed(2)} km)`);
           }
           await new Promise((r) => setTimeout(r, 600));
+        }
+
+        // Entity-type corroboration guard (2026-06-22): the search scorer
+        // can accept a non-accommodation entity whose label happens to
+        // contain the hotel's name tokens (e.g. "Rosa Alpina" the hotel
+        // matched Q87641905 "Rosa alpina", a plant species). The geo check
+        // above only fires when the entity carries coordinates — taxa,
+        // films, people and other abstract entities have none, so they slip
+        // through. For a NEW match we therefore require corroboration by
+        // EITHER a passing geo-validation OR a Wikidata description that
+        // reads like an accommodation/building. Neither → reject. A trusted
+        // pre-existing `wikidata_id` is exempt.
+        if (isNewMatch) {
+          const descLooksLikeAccommodation =
+            matchedDesc !== null && HOTEL_DESC_RE.test(matchedDesc);
+          if (!geoValidated && !descLooksLikeAccommodation) {
+            console.log(
+              `${tag} ✗ type-rejected ${qid}: not geo-validated and description "${matchedDesc ?? 'none'}" is not an accommodation`,
+            );
+            skipped += 1;
+            continue;
+          }
         }
 
         // Polite throttle (< 1 req/s on the SPARQL endpoint)

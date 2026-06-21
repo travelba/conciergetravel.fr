@@ -46,6 +46,10 @@ describe('isToxicOfficialUrl', () => {
     'https://etereo-auberge-resorts-collection.hotels-quintana-roo.com/en',
     'https://fairmontthenorfolk.hotelsmixnairobi.com/en',
     'https://hotelsmix.com/en/some-property',
+    // 2026-06-22 backfill sweep — `hotels<geo><digits>.com` aggregator
+    // (glued non-www subdomain + trailing digits → `.com` is safe here).
+    'https://h10waterloo.hotelslondon24.com/es',
+    'https://some-hotel.madridhotels24.net/en',
     // OTAs
     'https://www.trivago.com/en-US/oar/hotel-las-ventanas',
     'https://www.booking.com/hotel/it/londra-palace.html',
@@ -116,6 +120,10 @@ describe('isToxicOfficialUrl', () => {
     // domain with a property subdomain. The targeted `hotelsmix` rule and
     // the `.com` exclusion on the glued-subdomain rule must keep it valid.
     'https://booking.hotelsantacaterina.com/en',
+    // legit hotel domains carrying digits — the 2026-06-22 digit-anchored
+    // aggregator rule must NOT catch these (no glued-subdomain aggregator shape).
+    'https://www.h10hotels.com/en/london-hotels/h10-london-waterloo',
+    'https://41hotel.com/discover/stay-local/the-history-of-hotel-41',
   ];
 
   it.each(TOXIC)('flags toxic url %s', (url) => {

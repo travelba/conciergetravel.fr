@@ -96,6 +96,14 @@ const TOXIC_OFFICIAL_URL_RE: RegExp = new RegExp(
     // `.com` rule would false-positive on legit `booking.hotelsantacaterina.com`
     // ("Hotel Santa Caterina"), which is exactly why `.com` is excluded below.
     String.raw`(?:^|[./])hotelsmix[a-z0-9-]*\.(?:com|org|net|info)(?:[/:?#]|$)`,
+    // `hotels<geo><digits>` / `<geo>hotels<digits>` aggregator network that
+    // glues the hotel name into a NON-www subdomain on ANY TLD incl. `.com`
+    // (`h10waterloo.hotelslondon24.com`, 2026-06-22 backfill). The trailing
+    // DIGITS are the safe discriminator: they let this rule include `.com`
+    // (which the digit-less glued-subdomain rule below must exclude to spare
+    // `booking.hotelsantacaterina.com`, `pasadena.langhamhotels.com`). A
+    // legit brand never registers `hotels<word><digits>.com`.
+    String.raw`//(?!www\.)[a-z0-9-]+\.(?:hotels[a-z]+|[a-z]+hotels)\d+\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])[a-z0-9]+-hotels-[a-z]{2}\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])hotelsof[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
     // `hotels-in-<geo>` / `hotels-of-<geo>` aggregator SLDs. Unambiguous:
