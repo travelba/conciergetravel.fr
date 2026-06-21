@@ -898,6 +898,34 @@ end of the project**. Until then, the site ships as an editorial-only
 property. When an agent considers proposing or implementing any
 booking-side work, **stop** and reread this section first.
 
+### Project progress metric — report at the end of every task (PO request 2026-06-21)
+
+The PO wants a **global progress %** appended at the end of each completed task.
+To keep it reproducible across sessions (not a per-session vibe), it is anchored
+to the phase matrix below with fixed weights. **Method:** `global = Σ (weight ×
+phase_completion)`. The **piloting reference is the "hors-booking" figure**
+(global re-normalised over Phases 1-5, i.e. excluding the frozen Phase 6) — that
+is the number to surface first; the all-in global is secondary.
+
+| Phase                                           | Weight | Completion (2026-06-21) |
+| ----------------------------------------------- | ------ | ----------------------- |
+| 1 — Editorial-only on published catalogue       | 25 %   | ~97 %                   |
+| 1.5 — Known gaps to close                       | 8 %    | ~85 %                   |
+| 2 — Photo pipeline                              | 17 %   | ~45 %                   |
+| 3 — Editorial pages (guides + rankings + itin.) | 12 %   | ~80 %                   |
+| 4 — Multilingual V2/V3                          | 10 %   | ~18 %                   |
+| 5 — Observability & GSC                         | 5 %    | ~30 %                   |
+| 6 — Booking APIs (frozen, last brick)           | 23 %   | ~2 %                    |
+
+→ **all-in global ≈ 52 %** · **hors-booking ≈ 67 %** (Phases 1-5 re-normalised).
+
+**Report format** (mini-table per task): re-print the table above with the
+updated completion column + a one-line `Δ` of what the task advanced, leading
+with the hors-booking figure. Update the weights/completion here only when a
+phase materially moves, so the number stays a single source of truth. Weights
+are the PO's call — revisit if the editorial-first horizon shifts (e.g. lower
+Phase 6 to ~12 % if booking stays out of scope long-term).
+
 ### Phasing matrix (top-down) — single source of truth for sequencing
 
 Aligns the §4bis content-completion ladder with the API-last decision.
