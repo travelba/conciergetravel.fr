@@ -166,6 +166,22 @@ export async function GET(): Promise<NextResponse> {
             description:
               'Destinations hub: Paris, French Riviera, Bordeaux region, Alps, Provence…',
           },
+          // Lieux à visiter — vertical éditoriale GEO/AEO : musées,
+          // monuments, jardins et activités d'exception classés ville par
+          // ville, chaque lieu avec sa fiche canonique
+          // /lieux/{ville}/{slug} (TouristAttraction + FAQ JSON-LD,
+          // hôtels à proximité, réservation via le Concierge ou
+          // GetYourGuide). Hub d'entrée de la verticale.
+          {
+            url: `${origin}/fr/lieux`,
+            description:
+              'Lieux à visiter — hub de la verticale : musées, monuments, jardins et activités d’exception sélectionnés par le Concierge, classés ville par ville. Chaque lieu a sa fiche /lieux/{ville}/{slug} avec résumé factuel, Conseil du Concierge, FAQ et hôtels à proximité.',
+          },
+          {
+            url: `${origin}/en/lieux`,
+            description:
+              'Places to visit — vertical hub: museums, landmarks, gardens and outstanding activities curated by the Concierge, grouped city by city. Each place has its own /lieux/{city}/{slug} fiche with factual summary, Concierge tip, FAQ and nearby hotels.',
+          },
           {
             url: `${origin}/fr/recherche`,
             description:
@@ -536,6 +552,11 @@ export async function GET(): Promise<NextResponse> {
             url: `${origin}/llms-full.txt`,
             description:
               'Corpus LLM verbeux — préambule éditorial EEAT (agence IATA/APST) puis une section FR et une section EN par hôtel indexable (résumé factuel, faits clés, fraîcheur). Complément rédactionnel de hotels.jsonl.',
+          },
+          {
+            url: `${origin}/api/agent/hotel/les-airelles-gordes?locale=fr`,
+            description:
+              "Endpoint fiche hôtel MCP — identité, résumé factuel, « Conseil du Concierge », et la « lentille concierge » pour recommander après réservation : restaurants de l'hôtel (chef, plat signature, lien de réservation, horaires), lieux à proximité classés visiter / faire / manger / shopping (distance, marche, site web), expériences signature, et blocs questions-réponses GEO/AEO. Paramètres : slug (requis), locale (fr|en), body (short|long), lens (on|off).",
           },
           {
             url: `${origin}/api/agent/hotel-photos?slug=les-airelles-gordes&locale=fr`,
