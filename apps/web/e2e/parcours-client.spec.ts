@@ -74,6 +74,44 @@ test.describe('parcours client A→Z — funnel integrity', () => {
     expect(channels, 'contact page must surface at least one lead channel').toBeGreaterThan(0);
   });
 
+  test('contact page is discoverable from the footer (FR, ≤ 1 click)', async ({ page }) => {
+    // 2026-05-26 regression guard: a perfect page nobody can reach is an
+    // invisible page. The global SiteFooter is rendered site-wide via the
+    // root layout, so a user landing anywhere reaches the concierge lead
+    // page from the footer in a single click. We scope to the `<footer>`
+    // element (its implicit contentinfo role can degrade to generic
+    // depending on the host page's sectioning, so we match the tag).
+    await page.goto('/');
+    const footer = page.locator('footer');
+    await expect(footer).toBeVisible();
+
+    const contactLink = footer.locator('a[href="/le-concierge/contact"]');
+    await expect(
+      contactLink.first(),
+      'footer should link to the concierge contact page',
+    ).toBeVisible();
+
+    // Follow the link to prove the path resolves end-to-end (not a dead href).
+    await contactLink.first().click();
+    await expect(page).toHaveURL(/\/le-concierge\/contact$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByTestId('contact-form')).toBeVisible();
+  });
+
+  test('contact page is discoverable from the footer (EN, ≤ 1 click)', async ({ page }) => {
+    // The footer `<Link href="/le-concierge/contact">` is localized by
+    // next-intl, so on the EN tree it renders `/en/le-concierge/contact`.
+    await page.goto('/en');
+    const footer = page.locator('footer');
+    await expect(footer).toBeVisible();
+
+    const contactLink = footer.locator('a[href="/en/le-concierge/contact"]');
+    await expect(
+      contactLink.first(),
+      'EN footer should link to the localized concierge contact page',
+    ).toBeVisible();
+  });
+
   test('lead is captured: fill + submit the contact form (FR)', async ({ page }) => {
     const res = await page.goto(CONTACT_FR);
     expect(res?.status()).toBe(200);
