@@ -690,6 +690,38 @@ patched specific verb collocations and still left 300 fiches live; the noun-leve
 rule with a lookahead allow-list is the durable shape (same pattern as
 `the brief`). Captured in `concierge-voice-pipeline` / `llm-output-robustness`.
 
+**13th wave — re-enrich the fiches thinned by the 12th-wave strip (2026-06-21)**
+
+The 12th-wave `strip-leak-sentences` dropped 117 pure-meta sections, leaving
+**21 published fiches at exactly 5 `long_description_sections`** (the catalogue
+floor is 6-8; dist `{5:21, 6:105, 7:583, 8:1192, 9:243, 10:77}`). Forward fix =
+re-enrich them with real facts rather than ship clean-but-thin. Reused the
+6th-wave-hardened `enrichment/enrich-hotel-content.ts --force --slugs=…`
+(DataForSEO grounding on + `hasLeak()` gate + refuse-if-<5-clean): 21 / 21 OK,
+0 failed, every fiche lifted to **6-8 clean bilingual sections** (~3 100-4 450
+words FR each). `the-augustine-hotel` hit a transient DataForSEO SERP
+`api_error` mid-run but degraded gracefully to 6 grounded-less sections (still
+clean). `translate-sections-en --all` then confirmed the re-enriched set ships
+full EN (bilingual generation populated `body_en` directly — they don't even
+re-surface in the needs-EN selection).
+
+| Metric                          | Before | After |
+| ------------------------------- | ------ | ----- |
+| Published fiches < 6 sections   | **21** | **0** |
+| Re-enriched fiches with full EN | 0/21   | 21/21 |
+| FR leak / EN leak (catalogue)   | 0 / 0  | 0 / 0 |
+
+Acceptance (curl): `/hotel/mount-nelson` + `/en/hotel/mount-nelson` +
+`/en/hotel/como-alpina` → 30 `<h2>` each, ~880-930 KB rendered, 0 leak markers
+(ISR already refreshed). Residual: **37 fiches keep ≥ 1 EN section in FR
+fallback** — the genuinely thin-source hotels (Belmond / Ritz-Carlton APAC
+profile) where the translator keeps echoing meta on sparse FR; the `hasLeak`
+gate blanks → FR fallback, which renders fine. Lifting those needs FR _source_
+enrichment (more Tavily facts), not another translation pass — deferred as
+diminishing returns. Lesson: **after a deterministic strip that can drop whole
+sections, always re-measure the section-count floor and re-enrich the fiches
+that fell below it** — a leak-free catalogue can still be a thinned one.
+
 **10th wave — parallel multitask: EN-section recovery + bounded photo backfill (2026-06-20)**
 
 ÉCRIT + VISUEL in parallel, both bounded and verified live.
