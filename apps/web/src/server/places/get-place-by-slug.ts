@@ -39,6 +39,22 @@ const ConciergeAdviceSchema = z.object({
   en: z.object({ title: z.string().nullish(), body: z.string() }).nullish(),
 });
 
+/**
+ * One `gallery_images` item, mirroring the shape the photo pipeline
+ * writes via `toGalleryRow` (@mch/integrations/cloudinary): a Cloudinary
+ * `public_id` plus enriched alt text (FR + EN) and the place `kind`
+ * category. Width/height are NOT persisted — the delivery transform is
+ * authoritative for the rendered dimensions (Hard Rule 16).
+ */
+const GalleryImageRowSchema = z.object({
+  public_id: z.string(),
+  alt_fr: z.string().nullish(),
+  alt_en: z.string().nullish(),
+  category: z.string().nullish(),
+});
+
+export type PlaceGalleryImageRow = z.infer<typeof GalleryImageRowSchema>;
+
 const PlaceRowSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -60,6 +76,7 @@ const PlaceRowSchema = z.object({
   concierge_advice: ConciergeAdviceSchema.nullish(),
   faq: z.array(FaqEntrySchema).nullish(),
   hero_image: z.string().nullish(),
+  gallery_images: z.array(GalleryImageRowSchema).nullish(),
   meta_title_fr: z.string().nullish(),
   meta_title_en: z.string().nullish(),
   meta_desc_fr: z.string().nullish(),
@@ -70,7 +87,7 @@ const PlaceRowSchema = z.object({
 export type PlaceDetail = z.infer<typeof PlaceRowSchema>;
 
 const PLACE_COLUMNS =
-  'id, slug, slug_en, city_key, city, country_code, bucket, kind, latitude, longitude, address, name, name_en, factual_summary_fr, factual_summary_en, description_fr, description_en, concierge_advice, faq, hero_image, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, is_published';
+  'id, slug, slug_en, city_key, city, country_code, bucket, kind, latitude, longitude, address, name, name_en, factual_summary_fr, factual_summary_en, description_fr, description_en, concierge_advice, faq, hero_image, gallery_images, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, is_published';
 
 /**
  * Resolve a place by city + slug. Matches the FR slug first, then the

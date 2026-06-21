@@ -11,6 +11,7 @@ import {
   PlaceGygBlock,
   PlaceNearbyHotels,
 } from '@/components/lieux/place-blocks';
+import { PlaceGallery } from '@/components/lieux/place-gallery';
 import { JsonLdScript } from '@/components/seo/json-ld';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
@@ -22,7 +23,17 @@ import {
   getPlaceBySlug,
 } from '@/server/places/get-place-by-slug';
 import { listPublishedPlaceParams } from '@/server/places/list-places';
-import { pickPlaceLocalized, placeHeroSrc } from '@/server/places/place-view';
+import {
+  PLACE_GALLERY_HEIGHT,
+  PLACE_GALLERY_TRANSFORM,
+  PLACE_GALLERY_WIDTH,
+  PLACE_HERO_HEIGHT,
+  PLACE_HERO_TRANSFORM,
+  PLACE_HERO_WIDTH,
+  pickPlaceGallery,
+  pickPlaceLocalized,
+  placeHeroSrc,
+} from '@/server/places/place-view';
 
 // JSON-LD via headers() nonce read forces dynamic; align with the hotel /
 // classement precedent (force-dynamic) until hash-based CSP (ADR-0027).
@@ -133,12 +144,39 @@ export default async function PlacePage({
     href: { pathname: '/lieux/[citySlug]', params: { citySlug } },
   });
 
-  const hero = placeHeroSrc(place.hero_image ?? null, 'c_fill,w_1600,h_700,f_auto,q_auto');
+  const hero = placeHeroSrc(place.hero_image ?? null, PLACE_HERO_TRANSFORM);
+  const gallery = pickPlaceGallery(place, locale);
+  const cloudName = env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '';
   const schemaType = isPlaceKind(place.kind)
     ? placeKindToSchemaClass(place.kind)
     : 'TouristAttraction';
 
   // ---- JSON-LD ----
+  // ImageObject[] (Hard Rule 16): hero (representativeOfPage) + gallery, with
+  // dimensions that match the delivered Cloudinary transform.
+  const imageObjects: NonNullable<
+    Parameters<typeof JsonLd.touristAttractionJsonLd>[0]['image']
+  >[number][] = [];
+  if (hero !== null) {
+    imageObjects.push({
+      contentUrl: hero,
+      caption: view.name,
+      width: PLACE_HERO_WIDTH,
+      height: PLACE_HERO_HEIGHT,
+      representativeOfPage: true,
+    });
+  }
+  for (const img of gallery) {
+    const src = placeHeroSrc(img.publicId, PLACE_GALLERY_TRANSFORM);
+    if (src === null) continue;
+    imageObjects.push({
+      contentUrl: src,
+      caption: img.alt,
+      width: PLACE_GALLERY_WIDTH,
+      height: PLACE_GALLERY_HEIGHT,
+    });
+  }
+
   const attractionNode = JsonLd.touristAttractionJsonLd({
     schemaType,
     name: view.name,
@@ -152,7 +190,7 @@ export default async function PlacePage({
       : {}),
     addressLocality: place.city,
     addressCountry: place.country_code,
-    ...(hero !== null ? { image: [hero] } : {}),
+    ...(imageObjects.length > 0 ? { image: imageObjects } : {}),
   });
 
   const breadcrumbNode = JsonLd.breadcrumbJsonLd([
@@ -232,6 +270,8 @@ export default async function PlacePage({
           <img src={hero} alt={view.name} className="h-[42vh] w-full object-cover" />
         </div>
       ) : null}
+
+      <PlaceGallery images={gallery} cloudName={cloudName} heading={t('galleryHeading')} />
 
       {view.description !== null ? (
         <section aria-labelledby="about-heading" className="mt-12">

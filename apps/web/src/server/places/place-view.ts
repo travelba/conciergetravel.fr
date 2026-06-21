@@ -85,6 +85,48 @@ export function placeHeroSrc(heroImage: string | null, transforms?: string): str
   });
 }
 
+// ---------------------------------------------------------------------------
+// Gallery — shared delivery transforms so the rendered <img>/<Image> and the
+// JSON-LD `ImageObject.contentUrl` agree on the exact URL + dimensions
+// (Hard Rule 16: declared width/height must match the delivered transform).
+// ---------------------------------------------------------------------------
+
+/** Hero (above-the-fold, `priority`). */
+export const PLACE_HERO_TRANSFORM = 'c_fill,w_1600,h_700,f_auto,q_auto';
+export const PLACE_HERO_WIDTH = 1600;
+export const PLACE_HERO_HEIGHT = 700;
+
+/** Gallery tile (lazy). 4:3 landscape, sized for a 3-col desktop grid. */
+export const PLACE_GALLERY_TRANSFORM = 'c_fill,w_800,h_600,f_auto,q_auto';
+export const PLACE_GALLERY_WIDTH = 800;
+export const PLACE_GALLERY_HEIGHT = 600;
+
+/** A gallery image ready to render (Cloudinary public_id + localised alt). */
+export interface PlaceGalleryImage {
+  readonly publicId: string;
+  readonly alt: string;
+  readonly category: string | null;
+}
+
+/**
+ * Localised, render-ready gallery for a place fiche. Drops entries with an
+ * empty `public_id`; falls back to the place name when no localised alt is
+ * stored. Returns `[]` (caller self-elides) when the column is unset.
+ */
+export function pickPlaceGallery(place: PlaceDetail, locale: Locale): readonly PlaceGalleryImage[] {
+  const out: PlaceGalleryImage[] = [];
+  for (const item of place.gallery_images ?? []) {
+    const publicId = typeof item.public_id === 'string' ? item.public_id.trim() : '';
+    if (publicId.length === 0) continue;
+    out.push({
+      publicId,
+      alt: pick(item.alt_fr, item.alt_en, locale) ?? place.name,
+      category: item.category ?? null,
+    });
+  }
+  return out;
+}
+
 /** Localised display name for a list item (ranking cards). */
 export function pickListName(item: PlaceListItem, locale: Locale): string {
   return pick(item.name, item.name_en, locale) ?? item.name;
