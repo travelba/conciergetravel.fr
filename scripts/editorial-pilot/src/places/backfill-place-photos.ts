@@ -37,6 +37,11 @@
  *   --per-place=N     gallery photos kept beyond the hero (default 6)
  *   --force           re-process places that already have a hero_image
  *   --throttle-ms=N   sleep between places (default 400; Places QPM guard)
+ *   --include-unpublished  also select rows with is_published=false
+ *                     (the "lieux" scaffolds are sourced as drafts first;
+ *                     photos are backfilled BEFORE editorial enrichment +
+ *                     publication, so the default published-only filter
+ *                     would match 0 rows on a freshly-scaffolded city).
  *   --dry-run         source + print, skip Cloudinary upload + DB write
  *
  * Examples
@@ -86,6 +91,7 @@ interface CliArgs {
   readonly force: boolean;
   readonly throttleMs: number;
   readonly allowParis: boolean;
+  readonly includeUnpublished: boolean;
   readonly dryRun: boolean;
 }
 
@@ -96,6 +102,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let force = false;
   let throttleMs = 400;
   let allowParis = false;
+  let includeUnpublished = false;
   let dryRun = false;
   for (const arg of argv) {
     if (arg.startsWith('--city=')) city = arg.slice('--city='.length).trim().toLowerCase();
@@ -106,6 +113,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
       throttleMs = Number.parseInt(arg.slice('--throttle-ms='.length), 10);
     } else if (arg === '--force') force = true;
     else if (arg === '--allow-paris') allowParis = true;
+    else if (arg === '--include-unpublished') includeUnpublished = true;
     else if (arg === '--dry-run') dryRun = true;
     else if (arg === '--help' || arg === '-h') {
       printHelp();
@@ -117,7 +125,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
   }
   if (!Number.isFinite(limit) || limit <= 0) limit = 50;
   if (!Number.isFinite(perPlace) || perPlace < 0) perPlace = 6;
-  return { city, limit, perPlace, force, throttleMs, allowParis, dryRun };
+  return { city, limit, perPlace, force, throttleMs, allowParis, includeUnpublished, dryRun };
 }
 
 function printHelp(): void {
@@ -131,6 +139,7 @@ Options
   --force          re-process places that already have a hero_image
   --throttle-ms=N  sleep between places (default 400)
   --allow-paris    explicit opt-in to touch city_key=paris (loop-drained only)
+  --include-unpublished  also select is_published=false rows (scaffold backfill)
   --dry-run        source + print, skip Cloudinary upload + DB write`);
 }
 
@@ -405,7 +414,9 @@ async function main(): Promise<void> {
   console.log(`[backfill-place-photos] args: ${JSON.stringify(args)}`);
   console.log(`Runlog: ${runlogPath}\n`);
 
-  const filters = [`city_key=eq.${args.city}`, 'is_published=eq.true'];
+  const filters = args.includeUnpublished
+    ? [`city_key=eq.${args.city}`]
+    : [`city_key=eq.${args.city}`, 'is_published=eq.true'];
   const places = await selectTable<PlaceRow>(supa, 'places', {
     columns: PLACE_COLS,
     filters,
@@ -413,7 +424,8 @@ async function main(): Promise<void> {
     limit: args.limit,
   });
   if (places.length === 0) {
-    console.log(`No published places matched city_key=${args.city}. Done.`);
+    const scope = args.includeUnpublished ? '' : 'published ';
+    console.log(`No ${scope}places matched city_key=${args.city}. Done.`);
     return;
   }
   console.log(`Selected ${String(places.length)} place(s) for city_key=${args.city}.`);
