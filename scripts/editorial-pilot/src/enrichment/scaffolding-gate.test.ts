@@ -52,6 +52,16 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'Le rattachement exact est indiqué sous réserve de confirmer la fiche.',
     'No verified fact confirms the languages spoken or the airport transfer.',
     'The wellness offering remains undocumented.',
+    'This hotel is not selected for a grand heritage narrative, yet to be documented here.',
+    // data-gap narration class (2026-06-21 fifth sweep — "reste à documenter").
+    'L’histoire détaillée du Domaine reste à documenter.',
+    'Le spa du Domaine reste à documenter avec précision.',
+    'Aucune information précise sur l’architecture n’est actuellement disponible.',
+    'Les précisions sur les langues parlées restent à confirmer.',
+    'The architectural details remain to be confirmed.',
+    'No precise information is available on the spa facilities.',
+    'Le spa, encore à documenter, promet un espace de bien-être raffiné.',
+    'Les prestations restent encore à préciser pour ce Palace.',
   ];
 
   // Legitimate editorial prose that MUST NOT be flagged.
@@ -79,6 +89,15 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'La carte propose une rubrique végétarienne complète et inventive.',
     'Un savoir-faire documenté depuis 1850 se perpétue dans chaque suite.',
     'The history is well documented in the hotel’s private archive.',
+    // "non renseignée" alone is a legitimate "field unspecified" state in the
+    // en-pratique block — only the "…dans ce brief" tail makes it a leak.
+    'Année de première distinction Palace : non renseignée.',
+    'Classement : 5 étoiles ; Palace, date de première distinction non renseignée.',
+    // data-gap guards: legit "available"/"reste" phrasings stay clean.
+    'Le room service n’est pas disponible la nuit, mais un plateau froid attend en chambre.',
+    'Le petit-déjeuner reste à la carte, servi jusqu’à 11 heures.',
+    'Twenty-four-hour room service is available throughout the stay.',
+    'A detailed spa menu is available at reception on arrival.',
   ];
 
   it.each(LEAKS)('flags leak: %s', (text) => {

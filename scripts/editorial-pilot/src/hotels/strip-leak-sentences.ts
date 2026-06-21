@@ -87,11 +87,54 @@ function headers(key: string, extra: Record<string, string> = {}): Record<string
 
 const asStr = (v: unknown): string => (typeof v === 'string' ? v : '');
 
-/** Drop only the leaking sentences; return the cleaned text (may be empty). */
-function stripLeakSentences(text: string): string {
-  return splitSentences(text)
+/**
+ * Phrase-level pre-clean of scaffolding TAILS that attach to otherwise-real
+ * data (chiefly the `en-pratique` structured bullet block). Removing the tail
+ * in place preserves the address / GPS / classification on the same line —
+ * far better than dropping the whole bullet. Order matters: longest tails
+ * first. (2026-06-21 data-gap surgery.)
+ */
+function phrasePreClean(text: string): string {
+  return text
+    .replace(/\s*,?\s*sous r[ée]serve de confirmer[^.\n]*/giu, '')
+    .replace(/\s+dans ce brief\b/giu, '')
+    .replace(/[ \t]{2,}/gu, ' ')
+    .replace(/[ \t]+([;,.])/gu, '$1');
+}
+
+/**
+ * Remove leaking content while preserving everything legitimate:
+ *   1. phrase pre-clean (strip meta tails in place);
+ *   2. if the result no longer leaks, keep it verbatim (structured blocks);
+ *   3. else, for multi-line (bullet) bodies, drop ONLY the leaking lines;
+ *   4. else, for single-line prose, drop ONLY the leaking sentences.
+ * May return an empty string (a genuine pure-scaffolding stub → caller drops).
+ */
+function sentenceStrip(line: string): string {
+  return splitSentences(line)
     .filter((s) => !hasLeak(s))
     .join(' ')
+    .trim();
+}
+
+function cleanLeakBody(text: string): string {
+  const pre = phrasePreClean(text);
+  if (!hasLeak(pre)) return pre.trim();
+  // Process line/paragraph by line: a leaking paragraph is sentence-stripped
+  // in place (keep its clean sentences) — never dropped wholesale. Empty lines
+  // are preserved to keep the paragraph/bullet structure intact.
+  const out: string[] = [];
+  for (const line of pre.split(/\r?\n/)) {
+    if (line.trim() === '' || !hasLeak(line)) {
+      out.push(line);
+      continue;
+    }
+    const cleaned = sentenceStrip(line);
+    if (cleaned.length > 0 && !hasLeak(cleaned)) out.push(cleaned);
+  }
+  return out
+    .join('\n')
+    .replace(/\n{3,}/gu, '\n\n')
     .trim();
 }
 
@@ -135,7 +178,7 @@ function planRow(row: Row, minKeep: number): RowPlan {
       secPlans.push({ anchor, action: 'drop-section', beforeLen: bodyFr.length, afterLen: 0 });
       continue;
     }
-    const cleaned = stripLeakSentences(bodyFr);
+    const cleaned = cleanLeakBody(bodyFr);
     if (cleaned.length >= minKeep && !hasLeak(cleaned)) {
       // Surgery succeeded: keep the rich remainder, force EN re-translation.
       outSections.push({ ...sec, body_fr: cleaned, body_en: '' });
@@ -165,7 +208,7 @@ function planRow(row: Row, minKeep: number): RowPlan {
       continue;
     }
     if (hasLeak(titleFr)) continue; // drop the experience entirely
-    const cleaned = stripLeakSentences(summaryFr);
+    const cleaned = cleanLeakBody(summaryFr);
     if (cleaned.length >= 40 && !hasLeak(cleaned))
       outSignatures.push({ ...sig, summary_fr: cleaned, summary_en: '' });
     // else drop the experience
