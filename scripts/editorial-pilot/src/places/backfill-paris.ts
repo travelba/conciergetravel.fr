@@ -20,8 +20,22 @@
  *
  * CLI
  * ---
- *   --city=<key>      city_key (default paris)
- *   --city-match=<s>  hotels.city ILIKE filter (default Paris)
+ *   --city=<key>      city_key (default paris) — the canonical URL slug
+ *   --city-match=<s>  hotels.city ILIKE substring filter (default Paris).
+ *                     Use a common stem to capture fragmented source
+ *                     display names, e.g. `--city-match=Lond` matches both
+ *                     "London" and "Londres", `--city-match=Duba` matches
+ *                     "Dubai" and "Dubaï".
+ *   --city-name=<s>   display name stored in places.city (default =
+ *                     --city-match). Set this when the match is a stem so
+ *                     the stored label stays canonical (e.g.
+ *                     `--city-match=Lond --city-name=Londres`).
+ *   --max-radius-km=N geo-fence: drop embedded POIs farther than N km from
+ *                     the matched-hotels centroid (default 0 = disabled).
+ *                     Guards against cross-city contamination — some hotels
+ *                     carry POIs from another city in points_of_interest
+ *                     (e.g. a London hotel embedding Paris monuments). Pass
+ *                     e.g. `--max-radius-km=30` for any non-Paris rollout.
  *   --max-meters=N    proximity cutoff metres (default 1500)
  *   --limit-per=N     max hotels linked per place (default 8)
  *   --publish-thin    legacy: auto-publish on coords + summary (off by
@@ -35,10 +49,12 @@
  * --------
  *   pnpm places:backfill-paris --dry-run
  *   pnpm places:backfill-paris
- *   pnpm places:backfill-paris --city=londres --city-match=London --no-publish
+ *   pnpm places:backfill-paris --city=londres --city-match=Lond --city-name=Londres --dry-run
+ *   pnpm places:backfill-paris --city=dubai --city-match=Duba --city-name=Dubaï
  */
 import {
   defaultBucketForKind,
+  haversineMeters,
   rankByProximity,
   toGeoPoint,
   type GeoPoint,
@@ -104,6 +120,8 @@ interface PlaceScaffold {
 interface CliArgs {
   readonly cityKey: string;
   readonly cityMatch: string;
+  readonly cityName: string;
+  readonly maxRadiusKm: number;
   readonly maxMeters: number;
   readonly limitPer: number;
   readonly publish: boolean;
@@ -115,6 +133,12 @@ interface CliArgs {
 function parseArgs(argv: readonly string[]): CliArgs {
   let cityKey = 'paris';
   let cityMatch = 'Paris';
+  // Stored display label. Defaults to cityMatch (back-compat for paris /
+  // gordes); set explicitly when --city-match is a stem.
+  let cityName: string | null = null;
+  // Geo-fence radius (km) around the matched-hotels centroid. 0 = disabled
+  // (preserves the legacy paris/gordes behaviour for the running loop).
+  let maxRadiusKm = 0;
   let maxMeters = 1500;
   let limitPer = 8;
   // Default: scaffolds stay unpublished. A bare OSM one-liner is not a
@@ -127,6 +151,8 @@ function parseArgs(argv: readonly string[]): CliArgs {
   for (const a of argv) {
     if (a.startsWith('--city=')) cityKey = a.slice('--city='.length);
     else if (a.startsWith('--city-match=')) cityMatch = a.slice('--city-match='.length);
+    else if (a.startsWith('--city-name=')) cityName = a.slice('--city-name='.length);
+    else if (a.startsWith('--max-radius-km=')) maxRadiusKm = Number.parseFloat(a.slice(16));
     else if (a.startsWith('--max-meters=')) maxMeters = Number.parseInt(a.slice(13), 10);
     else if (a.startsWith('--limit-per=')) limitPer = Number.parseInt(a.slice(12), 10);
     else if (a === '--publish-thin') publish = true;
@@ -135,7 +161,18 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (a === '--gyg') gyg = true;
     else if (a === '--dry-run') dryRun = true;
   }
-  return { cityKey, cityMatch, maxMeters, limitPer, publish, proximity, gyg, dryRun };
+  return {
+    cityKey,
+    cityMatch,
+    cityName: cityName ?? cityMatch,
+    maxRadiusKm: Number.isFinite(maxRadiusKm) && maxRadiusKm > 0 ? maxRadiusKm : 0,
+    maxMeters,
+    limitPer,
+    publish,
+    proximity,
+    gyg,
+    dryRun,
+  };
 }
 
 function str(v: unknown): string | null {
@@ -219,12 +256,37 @@ function dedupeKey(slug: string): string {
   return slug.replace(/^(les|le|la|l|the)-/u, '');
 }
 
+/**
+ * Robust city centre from the matched hotels: the median lat/lng (median,
+ * not mean, so a single mis-geocoded hotel can't drag the centroid). Used
+ * by the geo-fence to reject embedded POIs that belong to another city.
+ */
+function hotelCentroid(hotels: readonly HotelRow[]): GeoPoint | null {
+  const lats: number[] = [];
+  const lngs: number[] = [];
+  for (const h of hotels) {
+    const p = toGeoPoint(h.latitude, h.longitude);
+    if (p !== null) {
+      lats.push(p.latitude);
+      lngs.push(p.longitude);
+    }
+  }
+  if (lats.length === 0) return null;
+  const median = (xs: number[]): number => {
+    const sorted = [...xs].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? (sorted[mid - 1]! + sorted[mid]!) / 2 : sorted[mid]!;
+  };
+  return { latitude: median(lats), longitude: median(lngs) };
+}
+
 function poiToScaffold(
   poi: EmbeddedPoi,
   publish: boolean,
   usedSlugs: Set<string>,
   dedupeKeys: Set<string>,
   cityKey: string,
+  geoFence: { centroid: GeoPoint; maxMeters: number } | null,
 ): PlaceScaffold | null {
   const name = str(poi.name);
   if (name === null) return null;
@@ -232,6 +294,13 @@ function poiToScaffold(
   const lat = num(poi.latitude);
   const lng = num(poi.longitude);
   if (lat === null || lng === null) return null;
+
+  // Geo-fence: a POI farther than maxMeters from the city centroid belongs
+  // to another city (cross-city contamination in hotels.points_of_interest).
+  if (geoFence !== null) {
+    const dist = haversineMeters(geoFence.centroid, { latitude: lat, longitude: lng });
+    if (dist > geoFence.maxMeters) return null;
+  }
 
   const km = inferKindBucket(poi);
   if (km === null) return null;
@@ -349,7 +418,7 @@ async function main(): Promise<void> {
   };
 
   console.log(
-    `[backfill-paris] city_key=${args.cityKey} match=ILIKE *${args.cityMatch}* ` +
+    `[backfill-paris] city_key=${args.cityKey} name="${args.cityName}" match=ILIKE *${args.cityMatch}* ` +
       `publish=${String(args.publish)} proximity=${String(args.proximity)} dry=${String(args.dryRun)}`,
   );
 
@@ -359,6 +428,20 @@ async function main(): Promise<void> {
     order: 'id.asc',
   });
   console.log(`[backfill-paris] ${String(hotels.length)} hotels matched.`);
+
+  // Build the optional geo-fence from the matched-hotels centroid.
+  let geoFence: { centroid: GeoPoint; maxMeters: number } | null = null;
+  if (args.maxRadiusKm > 0) {
+    const centroid = hotelCentroid(hotels);
+    if (centroid === null) {
+      console.warn('[backfill-paris] --max-radius-km set but no hotel coords — geo-fence skipped.');
+    } else {
+      geoFence = { centroid, maxMeters: args.maxRadiusKm * 1000 };
+      console.log(
+        `[backfill-paris] geo-fence centroid=${centroid.latitude.toFixed(4)},${centroid.longitude.toFixed(4)} radius=${String(args.maxRadiusKm)}km`,
+      );
+    }
+  }
 
   const usedSlugs = new Set<string>();
   const dedupeKeys = new Set<string>();
@@ -378,7 +461,7 @@ async function main(): Promise<void> {
       // referenced by 5 hotels yields ONE place).
       const osmId = str(poi.osm_id);
       if (osmId !== null && bySourceRef.has(`osm/${osmId}`)) continue;
-      const sc = poiToScaffold(poi, args.publish, usedSlugs, dedupeKeys, args.cityKey);
+      const sc = poiToScaffold(poi, args.publish, usedSlugs, dedupeKeys, args.cityKey, geoFence);
       if (sc === null) continue;
       if (sc.source_ref !== null) bySourceRef.set(sc.source_ref, sc);
       scaffolds.push(sc);
@@ -415,7 +498,7 @@ async function main(): Promise<void> {
           slug: s.slug,
           source_ref: s.source_ref,
           city_key: args.cityKey,
-          city: args.cityMatch,
+          city: args.cityName,
           country_code: countryCode,
           bucket: s.bucket,
           kind: s.kind,
