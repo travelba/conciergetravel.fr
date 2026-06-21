@@ -7,9 +7,13 @@
  *   2. Dedupe across hotels (by osm_id, then by slug) into canonical
  *      `places` scaffolds — seeded with the POI editorial fields
  *      (description → factual_summary, tip → concierge_advice, photo).
- *   3. UPSERT `places` (on_conflict city_key,slug). Publishes a place
- *      when it has coordinates + a factual summary (the minimal
- *      eligibility envelope) unless `--no-publish`.
+ *   3. UPSERT `places` (on_conflict city_key,slug) — always as
+ *      `is_published=false` scaffolds. A one-line OSM summary is NOT a
+ *      publishable fiche: the dedicated strict gate `publish-places.ts`
+ *      is the SOLE publisher and only flips rows that clear the full
+ *      editorial envelope (faq + rich description + concierge advice).
+ *      `--publish-thin` opts back into the legacy minimal auto-publish
+ *      (coords + summary) for throwaway pilots only.
  *   4. Resolve `place_hotel_links` proximity in-memory (haversine) and
  *      UPSERT — so the maillage hôtel ↔ lieu works immediately.
  *   5. (optional) Match GetYourGuide products when GYG is configured.
@@ -20,7 +24,9 @@
  *   --city-match=<s>  hotels.city ILIKE filter (default Paris)
  *   --max-meters=N    proximity cutoff metres (default 1500)
  *   --limit-per=N     max hotels linked per place (default 8)
- *   --no-publish      keep places is_published=false (review in Payload first)
+ *   --publish-thin    legacy: auto-publish on coords + summary (off by
+ *                     default — the strict gate publish-places.ts is the
+ *                     canonical publisher)
  *   --no-proximity    skip the place_hotel_links resolve
  *   --gyg             match GetYourGuide products (needs GYG env)
  *   --dry-run         compute + print, write nothing
@@ -111,7 +117,10 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let cityMatch = 'Paris';
   let maxMeters = 1500;
   let limitPer = 8;
-  let publish = true;
+  // Default: scaffolds stay unpublished. A bare OSM one-liner is not a
+  // publishable fiche — the strict gate `publish-places.ts` is the sole
+  // publisher. `--publish-thin` re-enables the legacy minimal auto-publish.
+  let publish = false;
   let proximity = true;
   let gyg = false;
   let dryRun = false;
@@ -120,6 +129,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (a.startsWith('--city-match=')) cityMatch = a.slice('--city-match='.length);
     else if (a.startsWith('--max-meters=')) maxMeters = Number.parseInt(a.slice(13), 10);
     else if (a.startsWith('--limit-per=')) limitPer = Number.parseInt(a.slice(12), 10);
+    else if (a === '--publish-thin') publish = true;
     else if (a === '--no-publish') publish = false;
     else if (a === '--no-proximity') proximity = false;
     else if (a === '--gyg') gyg = true;
@@ -152,7 +162,7 @@ function inferKindBucket(poi: EmbeddedPoi): { kind: PlaceKind; bucket: PlaceBuck
 
   // Hard exclusions — food / shopping-as-commerce / lodging / transit.
   if (
-    /(restaurant|bar|cafe|caf\u00e9|food|bistro|brasserie|hotel|lodging|station|metro|airport)/u.test(
+    /(restaurant|bar|cafe|caf\u00e9|food|bistro|brasserie|hotel|h\u00f4tel|lodging|station|metro|m\u00e9tro|airport|a\u00e9roport|parking|gare)/u.test(
       type,
     )
   ) {
@@ -187,13 +197,38 @@ function inferKindBucket(poi: EmbeddedPoi): { kind: PlaceKind; bucket: PlaceBuck
   return { kind, bucket };
 }
 
+/**
+ * Name-level exclusions the `type`/`bucket` signal misses. The embedded
+ * POIs are hotel-authored: lodging (chambres d'hôtes, gîte, table d'hôtes)
+ * leaks in mislabelled as an activity, and meta entries (access roads,
+ * parking) are not visitable places. Excluded so /lieux never ships a
+ * thin fiche for a B&B or a footpath.
+ */
+function isExcludedByName(name: string): boolean {
+  return /(chambres?\s+d['’]?\s*h[oô]tes|g[iî]tes?|table\s+d['’]?\s*h[oô]tes|maison\s+d['’]?\s*h[oô]tes|bed\s+and\s+breakfast|b&b|guesthouse|chemin\s+d['’]?\s*acc[eè]s|^\s*acc[eè]s\b|parking|navette)/iu.test(
+    name,
+  );
+}
+
+/**
+ * Collapse near-duplicate slugs that differ only by a leading article
+ * ("les-caves-…" ⇄ "caves-…") so the same place referenced under two
+ * phrasings yields ONE canonical fiche (no SEO near-duplicate).
+ */
+function dedupeKey(slug: string): string {
+  return slug.replace(/^(les|le|la|l|the)-/u, '');
+}
+
 function poiToScaffold(
   poi: EmbeddedPoi,
   publish: boolean,
   usedSlugs: Set<string>,
+  dedupeKeys: Set<string>,
+  cityKey: string,
 ): PlaceScaffold | null {
   const name = str(poi.name);
   if (name === null) return null;
+  if (isExcludedByName(name)) return null;
   const lat = num(poi.latitude);
   const lng = num(poi.longitude);
   if (lat === null || lng === null) return null;
@@ -203,11 +238,17 @@ function poiToScaffold(
 
   const slug = slugify(name);
   if (slug.length === 0) return null;
+  // Skip the city-self-named meta entry ("Gordes" inside Gordes) — it
+  // collides with the city_key and is never a distinct visitable place.
+  if (slug === cityKey) return null;
   // One canonical fiche per base slug — first occurrence wins (collapses
   // the same place referenced by multiple hotels and across buckets, so
-  // SEO never sees two near-duplicate fiches for the same monument).
-  if (usedSlugs.has(slug)) return null;
+  // SEO never sees two near-duplicate fiches for the same monument). The
+  // dedupe key is article-insensitive so "les-caves-…" ⇄ "caves-…" merge.
+  const dk = dedupeKey(slug);
+  if (usedSlugs.has(slug) || dedupeKeys.has(dk)) return null;
   usedSlugs.add(slug);
+  dedupeKeys.add(dk);
 
   const osmId = str(poi.osm_id);
   const summaryFr = str(poi.description_fr);
@@ -239,7 +280,9 @@ function poiToScaffold(
     description_en: summaryEn,
     concierge_advice: conciergeAdvice,
     hero_image: str(poi.image_public_id),
-    // Minimal eligibility: coords (guaranteed above) + a factual summary.
+    // Default false: a one-line OSM summary is a scaffold, not a fiche.
+    // Only `--publish-thin` (legacy) flips on coords + summary; the strict
+    // gate `publish-places.ts` is otherwise the sole publisher.
     is_published: publish && summaryFr !== null,
   };
 }
@@ -318,6 +361,7 @@ async function main(): Promise<void> {
   console.log(`[backfill-paris] ${String(hotels.length)} hotels matched.`);
 
   const usedSlugs = new Set<string>();
+  const dedupeKeys = new Set<string>();
   const bySourceRef = new Map<string, PlaceScaffold>();
   const scaffolds: PlaceScaffold[] = [];
   let countryCode = 'FR';
@@ -334,7 +378,7 @@ async function main(): Promise<void> {
       // referenced by 5 hotels yields ONE place).
       const osmId = str(poi.osm_id);
       if (osmId !== null && bySourceRef.has(`osm/${osmId}`)) continue;
-      const sc = poiToScaffold(poi, args.publish, usedSlugs);
+      const sc = poiToScaffold(poi, args.publish, usedSlugs, dedupeKeys, args.cityKey);
       if (sc === null) continue;
       if (sc.source_ref !== null) bySourceRef.set(sc.source_ref, sc);
       scaffolds.push(sc);
