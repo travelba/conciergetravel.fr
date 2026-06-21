@@ -644,6 +644,52 @@ Acceptance (prod, curl — no Chrome on this box): `/hotel/aman-new-york` →
 preserved; `/en/hotel/a-quinta-da-auga-hotel-spa` spa section re-translated
 leak-free (ISR refreshes per-page within the 3600 s TTL).
 
+**12th wave — generalise the `dossier`/`file` marker (2026-06-21, second sweep)**
+
+The 11th-wave gate reported FR `hasLeak` = 0, but a per-section re-inspection of
+the residual EN leak-drops exposed a **gate blind spot, not a content fix**: the
+FR `dossier` rule only matched `le dossier <specific-verb>` (`reçu|reste|demande
+|tient…`). It silently MISSED every other live shape — `ce dossier tient`,
+`le dossier **historique** reste incomplet`, `le dossier **manque**`, `lire
+entre les lignes **du dossier**` — so ~300 FR fiches and 48 EN fiches were still
+narrating the data file in production while the scan read clean.
+
+Fix = treat `dossier`/`file` like the 11th-wave `the brief`-as-noun rule:
+
+- **FR**: `\b(?:le|ce|du|au) dossier\b` with a negative-lookahead allow-list
+  (`dossier de presse|de réservation|de candidature|de mariage|de soins|
+client|événementiel|médical` stay clean — the global "dossier de presse"
+  press-kit link must not trip).
+- **EN**: added `\bthis dossier\b` and `\b(?:the|this) (?:historical|source|
+data )?file\b` gated by a lookahead on narration verbs (`remains|incomplete|
+lacks|requires|confirms|mentions|notes|documented`) so "the file at reception
+  holds your preferences" stays clean while "the historical file remains
+  incomplete" is caught.
+
+| Surface (generalised gate)         | Before (11th-wave gate) | After |
+| ---------------------------------- | ----------------------- | ----- |
+| FR fiches leaking `dossier`/`file` | **300**                 | **0** |
+| EN fiches leaking `dossier`/`file` | **48**                  | **0** |
+
+Remediation reused the existing tools, no new code path:
+`strip-leak-sentences.ts --apply` (300 fiches → 285 sentences stripped, 117
+pure-meta sections dropped, **0 fiches < 3 sections**) for sections +
+signatures; a deterministic 1-sentence strip on the 11 residual `description_fr`
+(all stayed > 860 c); then `translate-description-en --all` (17 fiches, 0
+leak-dropped) + `translate-sections-en --all` (self-heals — re-translated the
+blanked bodies, blanked 41 stubborn ones → FR fallback). Final scan across all
+2221 published fiches: **FR_dirty = 0, EN_dirty = 0**. 54 unit cases now pin the
+generalised rule (incl. "dossier de presse" / "the file at reception" as CLEAN).
+Acceptance (curl): `/hotel/le-maybourne-riviera` FR → only match is the legit
+global "dossier de presse" link (allow-listed); `/en/hotel/maison-proust` +
+`/en/hotel/hotel-adlon-kempinski` → 0.
+
+Lesson capitalised: **when a noun leaks, generalise to all determiners +
+prepositions in one pass, with an allow-list — not verb-by-verb.** The 11th wave
+patched specific verb collocations and still left 300 fiches live; the noun-level
+rule with a lookahead allow-list is the durable shape (same pattern as
+`the brief`). Captured in `concierge-voice-pipeline` / `llm-output-robustness`.
+
 **10th wave — parallel multitask: EN-section recovery + bounded photo backfill (2026-06-20)**
 
 ÉCRIT + VISUEL in parallel, both bounded and verified live.

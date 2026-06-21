@@ -35,6 +35,13 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'The wellness area pending confirmation in the current sources.',
     'The conviviality mentioned in the brief finds an obvious expression here.',
     'The dining outlets listed in the brief include two Michelin tables.',
+    // generalised "dossier"/"file" narration (2026-06-21 second sweep).
+    'Le dossier historique reste incomplet sur l’architecture.',
+    'Ce dossier tient sur peu de certitudes de repérage.',
+    'Il faut lire entre les lignes du dossier pour situer la maison.',
+    'Le dossier manque encore de profondeur sur le voisinage.',
+    'This dossier relies more on location than on atmosphere.',
+    'The historical file remains incomplete on the architecture.',
   ];
 
   // Legitimate editorial prose that MUST NOT be flagged.
@@ -54,6 +61,10 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'The suites confirm a sense of calm rare in the city centre.',
     'In this brief overview, the property reveals its quiet confidence.',
     'In the brief moment between courses, the sommelier returns.',
+    // legit "dossier"/"file" uses must stay clean.
+    'Le dossier de presse est disponible sur demande à la conciergerie.',
+    'Votre dossier de réservation sera confirmé par email sous 24 heures.',
+    'The file at reception holds your dining preferences for each visit.',
   ];
 
   it.each(LEAKS)('flags leak: %s', (text) => {
