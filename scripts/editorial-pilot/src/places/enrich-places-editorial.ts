@@ -215,6 +215,141 @@ function hasLongSentence(text: string, maxWords = 25): boolean {
   return sentences.some((s) => countWords(s) > maxWords);
 }
 
+function capitaliseFirst(text: string): string {
+  const t = text.trimStart();
+  if (t.length === 0) return t;
+  return t.charAt(0).toLocaleUpperCase('fr-FR') + t.slice(1);
+}
+
+/** Coordinating conjunctions dropped when they immediately follow the comma we
+ * split on ("…, et il faut …" → "… . Il faut …"). */
+const DROP_LEADING_CONJ = /^(et|ou)\s+/iu;
+
+/**
+ * Split one over-length sentence in two at the natural coordinating boundary
+ * (em-dash, semicolon or comma) whose left half is closest to the word
+ * midpoint. Both halves must keep >= 4 words, else the boundary is skipped.
+ * Recurses so a very long sentence can be split more than once. Returns the
+ * sentence unchanged when no safe boundary exists (stays rejected upstream).
+ */
+function splitOneSentence(sentence: string, maxWords: number): readonly string[] {
+  const s = sentence.trim();
+  const total = countWords(s);
+  if (total <= maxWords) return [s];
+  const cands: { left: string; right: string }[] = [];
+  const consider = (cutStart: number, cutEnd: number): void => {
+    const left = s.slice(0, cutStart).replace(/[\s,;—–]+$/u, '');
+    const right = s.slice(cutEnd).trimStart().replace(DROP_LEADING_CONJ, '');
+    if (left.length === 0 || right.length === 0) return;
+    if (countWords(left) < 4 || countWords(right) < 4) return;
+    cands.push({ left, right: capitaliseFirst(right) });
+  };
+  for (const m of s.matchAll(/\s*[;—–]\s+/gu)) {
+    if (m.index !== undefined) consider(m.index, m.index + m[0].length);
+  }
+  for (const m of s.matchAll(/,\s+/gu)) {
+    if (m.index !== undefined) consider(m.index, m.index + m[0].length);
+  }
+  // Coordinating-conjunction boundaries WITHOUT a preceding comma. The
+  // conjunction stays on the right half (capitalised, or dropped for et/ou via
+  // DROP_LEADING_CONJ) so both halves read as independent sentences. Only
+  // coordinators are used — subordinators (qui/que/dont/où) would leave a
+  // dangling fragment.
+  for (const m of s.matchAll(
+    /(\s+)(?:et|mais|puis|ensuite|car|donc|alors|cependant|toutefois)\s+/giu,
+  )) {
+    if (m.index !== undefined && m[1] !== undefined) consider(m.index, m.index + m[1].length);
+  }
+  const first = cands[0];
+  if (first === undefined) return [s];
+  const target = total / 2;
+  let best = first;
+  let bestDelta = Math.abs(countWords(best.left) - target);
+  for (const c of cands.slice(1)) {
+    const d = Math.abs(countWords(c.left) - target);
+    if (d < bestDelta) {
+      best = c;
+      bestDelta = d;
+    }
+  }
+  return [...splitOneSentence(best.left, maxWords), ...splitOneSentence(best.right, maxWords)];
+}
+
+/** Shorten every over-length sentence while preserving paragraph breaks. */
+function shortenSentences(text: string, maxWords = 25): string {
+  return text
+    .split(/\n{2,}/u)
+    .map((para) => {
+      const sentences = para
+        .split(/(?<=[.!?…])\s+/u)
+        .map((x) => x.trim())
+        .filter((x) => x.length > 0);
+      const out: string[] = [];
+      for (const sentence of sentences) {
+        for (const part of splitOneSentence(sentence, maxWords)) {
+          out.push(/[.!?…]$/u.test(part) ? part : `${part}.`);
+        }
+      }
+      return out.join(' ');
+    })
+    .join('\n\n');
+}
+
+/** Trim a SERP summary to `max` chars at a word boundary, no dangling punctuation. */
+function clampSummary(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const slice = text.slice(0, max + 1);
+  const lastSpace = slice.lastIndexOf(' ');
+  const cut = lastSpace > 80 ? slice.slice(0, lastSpace) : text.slice(0, max);
+  return cut.replace(/[\s,;:—–.!?…]+$/u, '');
+}
+
+/**
+ * Always-on, pre-parse clamp of the two SERP summaries to their documented
+ * char limits at a word boundary. The LLM routinely overshoots by a few
+ * characters; clamping here turns a hard schema rejection (no `data`, so the
+ * envelope salvage can never fire) into a clean parse. Mirrors the rankings
+ * `justification` clamp documented in AGENTS.md. Vocabulary is untouched.
+ */
+function clampRawSummaries(raw: unknown): unknown {
+  if (raw === null || typeof raw !== 'object') return raw;
+  const obj = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = { ...obj };
+  if (typeof obj.factual_summary_fr === 'string') {
+    out.factual_summary_fr = clampSummary(obj.factual_summary_fr, 165);
+  }
+  if (typeof obj.factual_summary_en === 'string') {
+    out.factual_summary_en = clampSummary(obj.factual_summary_en, 180);
+  }
+  return out;
+}
+
+/**
+ * Deterministic last-resort salvage, applied ONLY after every LLM pass failed.
+ * Splits over-length sentences at natural boundaries and clamps the summaries.
+ * Vocabulary is never touched, so the banned-lexicon linter verdict is
+ * preserved — only sentence rhythm changes. The caller MUST re-run the full
+ * gate (schema + envelope) and reject the row if the salvage did not clear it.
+ */
+function salvageEditorial(value: PlaceEditorial): PlaceEditorial {
+  return {
+    ...value,
+    factual_summary_fr: clampSummary(value.factual_summary_fr, 165),
+    factual_summary_en: clampSummary(value.factual_summary_en, 180),
+    description_fr: shortenSentences(value.description_fr),
+    description_en: shortenSentences(value.description_en),
+    concierge_advice: {
+      fr: { ...value.concierge_advice.fr, body: shortenSentences(value.concierge_advice.fr.body) },
+      en: { ...value.concierge_advice.en, body: shortenSentences(value.concierge_advice.en.body) },
+    },
+    faq: value.faq.map((f) => ({
+      ...f,
+      a_fr: shortenSentences(f.a_fr),
+      a_en: shortenSentences(f.a_en),
+    })),
+  };
+}
+
 function validateEditorialEnvelope(value: PlaceEditorial): readonly string[] {
   const failures: string[] = [];
   const texts = [
@@ -345,7 +480,7 @@ function validateAttemptResult(result: {
   readonly content: string;
   readonly usage: { readonly inputTokens: number; readonly outputTokens: number };
 }): GenerationAttempt {
-  const raw = extractJsonObject(result.content);
+  const raw = clampRawSummaries(extractJsonObject(result.content));
   const parsed = PlaceEditorialSchema.safeParse(raw);
   if (!parsed.success) {
     return {
@@ -507,14 +642,28 @@ export async function enrichPlacesEditorial(
         );
         attempt = await applyFixPasses(llm, provider, place, attempt);
       }
-      if (!attempt.ok || attempt.data === undefined) {
+      // Last-resort deterministic salvage: only fires when the LLM never
+      // produced a clean draft. Re-run the FULL gate on the salvaged copy so a
+      // row only ships when it genuinely clears schema + envelope.
+      let finalData = attempt.ok ? attempt.data : undefined;
+      let salvaged = false;
+      if (finalData === undefined && attempt.data !== undefined) {
+        const candidate = salvageEditorial(attempt.data);
+        const reparsed = PlaceEditorialSchema.safeParse(candidate);
+        if (reparsed.success && validateEditorialEnvelope(reparsed.data).length === 0) {
+          finalData = reparsed.data;
+          salvaged = true;
+        }
+      }
+      if (finalData === undefined) {
         console.warn(`  [enrich] ${place.name}: rejected - ${attempt.issues.join(', ')}`);
         return false;
       }
-      const e = attempt.data;
+      const e = finalData;
+      const salvageTag = salvaged ? ' (salvaged)' : '';
       if (options.dryRun === true) {
         console.log(
-          `  [enrich] ${place.name} ok DRY ` +
+          `  [enrich] ${place.name} ok DRY${salvageTag} ` +
             `summary=${String(e.factual_summary_fr.length)}c faq=${String(e.faq.length)} ` +
             `tokens=${String(attempt.tokens.input)}/${String(attempt.tokens.output)}`,
         );
@@ -528,7 +677,7 @@ export async function enrichPlacesEditorial(
           faq: e.faq,
         });
         console.log(
-          `  [enrich] ${place.name} ok ` +
+          `  [enrich] ${place.name} ok${salvageTag} ` +
             `faq=${String(e.faq.length)} tokens=${String(attempt.tokens.input)}/${String(
               attempt.tokens.output,
             )}`,
