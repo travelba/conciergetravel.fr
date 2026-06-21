@@ -42,6 +42,10 @@ describe('isToxicOfficialUrl', () => {
     'https://palais-hansen-kempinski-vienna.hotelsvienna.org/en',
     'https://www.hotels-in-it.com/en/h/boutiquedon1890.html',
     'https://www.hospitalityonline.com/andaz-5th',
+    // 2026-06-21 backfill sweep — hyphenated geo-aggregator + HotelsMix family
+    'https://etereo-auberge-resorts-collection.hotels-quintana-roo.com/en',
+    'https://fairmontthenorfolk.hotelsmixnairobi.com/en',
+    'https://hotelsmix.com/en/some-property',
     // OTAs
     'https://www.trivago.com/en-US/oar/hotel-las-ventanas',
     'https://www.booking.com/hotel/it/londra-palace.html',
@@ -108,6 +112,10 @@ describe('isToxicOfficialUrl', () => {
     // exclusion on the aggregator rule must keep these valid.
     'https://pasadena.langhamhotels.com/',
     'https://taj.tajhotels.com/en-in/taj-boston/',
+    // "Hotel Santa Caterina" — a `hotels...`-prefixed REGISTRABLE `.com`
+    // domain with a property subdomain. The targeted `hotelsmix` rule and
+    // the `.com` exclusion on the glued-subdomain rule must keep it valid.
+    'https://booking.hotelsantacaterina.com/en',
   ];
 
   it.each(TOXIC)('flags toxic url %s', (url) => {

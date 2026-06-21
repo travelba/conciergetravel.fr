@@ -82,7 +82,20 @@ const TOXIC_OFFICIAL_URL_RE: RegExp = new RegExp(
     // for hard-to-source chains (`hotels-riyadh.com`, `hotels-dubai.org`,
     // `riyadh-hotels-sa.com`, `hotelsofsantorini.com`). They embed the
     // hotel/brand name in a subdomain so they pass "name-in-host".
-    String.raw`(?:^|[./])hotels-[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
+    // The `[a-z0-9-]+` (hyphens allowed) covers multiword geos like
+    // `hotels-quintana-roo.com` (2026-06-21 backfill —
+    // `etereo-auberge-resorts-collection.hotels-quintana-roo.com`). Safe:
+    // the mandatory `hotels-` hyphen-prefix never appears in a legit brand
+    // domain (`hotelsbarriere.com`, `historichotels.org` have no hyphen there).
+    String.raw`(?:^|[./])hotels-[a-z0-9-]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
+    // `hotelsmix<geo>` aggregator network (HotelsMix) — glues the hotel
+    // name into a non-www subdomain on a `.com` TLD, so it escapes the
+    // `.net/.org/.info`-only glued-subdomain rule below
+    // (`fairmontthenorfolk.hotelsmixnairobi.com`, 2026-06-21 backfill).
+    // Targeted to the `hotelsmix` brand specifically — a broad `hotels<geo>`
+    // `.com` rule would false-positive on legit `booking.hotelsantacaterina.com`
+    // ("Hotel Santa Caterina"), which is exactly why `.com` is excluded below.
+    String.raw`(?:^|[./])hotelsmix[a-z0-9-]*\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])[a-z0-9]+-hotels-[a-z]{2}\.(?:com|org|net|info)(?:[/:?#]|$)`,
     String.raw`(?:^|[./])hotelsof[a-z0-9]+\.(?:com|org|net|info)(?:[/:?#]|$)`,
     // `hotels-in-<geo>` / `hotels-of-<geo>` aggregator SLDs. Unambiguous:
