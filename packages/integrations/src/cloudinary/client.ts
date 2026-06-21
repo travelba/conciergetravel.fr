@@ -298,6 +298,7 @@ interface UploadPayloadInput {
   readonly source: CloudinaryUploadInput['source'];
   readonly index: number;
   readonly publicIdShort?: string;
+  readonly folder?: string;
   readonly altFr: string;
   readonly altEn?: string;
   readonly category?: string;
@@ -316,7 +317,7 @@ async function uploadDataUri(
   uploadPayload: string,
   input: UploadPayloadInput,
 ): Promise<Result<CloudinaryUploadResult, CloudinaryError>> {
-  const folder = `cct/hotels/${input.hotelSlug}`;
+  const folder = input.folder ?? `cct/hotels/${input.hotelSlug}`;
   const publicIdShort = input.publicIdShort ?? `${input.source}-${input.index}`;
 
   const altFr = stripHtml(input.altFr).slice(0, 200);
