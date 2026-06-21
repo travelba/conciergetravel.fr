@@ -747,8 +747,106 @@ display `city`. See `content-modeling` for the slug/label model and
 `londres/centre-pompidou` is a thin near-duplicate that pollutes the
 sitemap and the GEO citation graph).
 
+## Rule 16 — Backfill never publishes; a single gate is the only publisher; a reconciler re-aligns live state
+
+Rule 15(c) states the principle ("everything lands as `is_published=false`").
+This rule is the **enforcement contract** that closes the loop, paid for by a
+real prod incident (2026-06-21, commit `08bb0f2` then a hardening wave).
+
+### The incident
+
+`scripts/editorial-pilot/src/places/backfill-paris.ts` originally auto-published
+each scaffold with the test `is_published = publish && summaryFr !== null` —
+where `publish` defaulted to `true`. A scaffold is a one-line OSM summary with
+no rich description, no FAQ, no concierge advice. The result: **199 "thin
+stubs" Paris places shipped live** to `/lieux/paris`, bypassing the editorial
+quality envelope entirely.
+
+### The three-part fix (capitalise this exact shape)
+
+**1. The backfill defaults to NOT publishing.** Auto-publish is gated behind an
+explicit, named-as-legacy flag — never the default:
+
+```ts
+// backfill-paris.ts
+let publish = false;            // default: scaffold only, never publish
+// ...
+else if (a === '--publish-thin') publish = true; // legacy escape hatch only
+```
+
+**2. ONE gate is the sole publisher, and it exports its gate logic.**
+`scripts/editorial-pilot/src/places/publish-places.ts` re-validates the
+persisted row (summary length both locales, `description_fr/en` ≥ 250/200,
+`faq ≥ 5`, `concierge_advice` present) and only then flips `is_published=true`.
+It **exports** the gate so the reconciler reuses the identical rule — the two
+can never disagree:
+
+```ts
+export const PLACE_GATE_COLUMNS = 'id,slug,name,is_published,factual_summary_fr,…,faq';
+export function gateFailures(row: PlaceGateRow): readonly string[] {
+  /* … */
+}
+```
+
+**3. An idempotent reconciler re-aligns the live state onto the gate.**
+`scripts/editorial-pilot/src/places/reconcile-places-publish.ts` imports
+`gateFailures` + `PLACE_GATE_COLUMNS`, scans every `is_published=true` row, and
+**unpublishes** any that no longer clears the gate. It is **dry-run by default**
+(`--apply` to write), never deletes (only flips the flag, so the row stays
+enrich-eligible), and tallies failure families for the operator. On Paris it
+took the live count from **229 → 102 published** (the gap was later re-earned
+honestly by real enrichment, not by lowering the gate).
+
+```powershell
+npx tsx src/places/reconcile-places-publish.ts                     # dry-run, all cities
+npx tsx src/places/reconcile-places-publish.ts --city=paris --apply # write
+```
+
+### The transverse lesson
+
+Any backfill / scaffold / import pipeline MUST create rows as
+`is_published=false`. Publication flows through **one** quality gate that is
+tested and shared. Always ship an **idempotent reconciler** so the live state
+can be re-aligned onto the gate after any drift (legacy auto-publish, a manual
+SQL flip, a bad migration). The gate, the publisher and the reconciler are the
+**same** code path — export the gate, never re-implement it.
+
+### Gotcha — a module that BOTH exports gate logic AND has a `main()` needs a run-guard
+
+Because the reconciler `import`s from `publish-places.ts` to reuse `gateFailures`,
+the module's top-level `main()` would **execute on import** — a reconciliation
+dry-run accidentally published 72 rows this exact way before the guard landed.
+Protect the entry point with a `process.argv[1]` check so `main()` only runs
+when the file is the invoked script, not when it is imported as a module:
+
+```ts
+// publish-places.ts — bottom of file
+if (process.argv[1]?.endsWith('publish-places.ts') === true) {
+  main().catch((e: unknown) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
+```
+
+This is the Node/tsx equivalent of Python's `if __name__ == '__main__':`. Apply
+it to **every** script that doubles as an importable library (the sibling
+`enrich-places-editorial.ts` carries the same guard).
+
 ## Anti-patterns
 
+- ❌ A backfill / scaffold / import script that auto-publishes (e.g.
+  `is_published = publish && summaryFr !== null` with `publish` defaulting to
+  `true`) — it bypasses the quality gate. 2026-06-21: shipped **199 thin Paris
+  stubs** live. Default to `is_published=false`; gate auto-publish behind an
+  explicit legacy flag (`--publish-thin`). See Rule 16.
+- ❌ Re-implementing the publish gate inside the reconciler (or anywhere) —
+  the two drift. Export `gateFailures` + the column projection from the **one**
+  publisher and import it. See Rule 16.
+- ❌ A module that exports gate logic AND has a top-level `main()` without a
+  `process.argv[1]` run-guard — importing it to reuse the gate executes the
+  publisher (a dry-run reconciliation accidentally published 72 rows this way).
+  See Rule 16.
 - ❌ Backfilling `places` from `hotels.points_of_interest` with a naïve
   `city = '<exact>'` filter — `hotels.city` is fragmented
   (`Londres`/`London`, `Dubai`/`Dubaï`). Use `--city-match=<stem>` and
@@ -930,6 +1028,9 @@ across 2221 published fiches, residual thin/blank fiches closed by
   — canonical examples of the Rule 12 remediation pattern.
 - POI pipeline: `scripts/editorial-pilot/src/pois/{sync-hotel-pois,merge-pois,llm-describe-pois}.ts` + `packages/integrations/src/overpass/`.
 - POI → `places` backfill + geo-fence (Rule 15): `scripts/editorial-pilot/src/places/backfill-paris.ts` (`hotelCentroid`, `poiToScaffold`) + strict publisher `scripts/editorial-pilot/src/places/publish-places.ts`.
+- Publish-gate discipline + module run-guard (Rule 16): `scripts/editorial-pilot/src/places/{backfill-paris,publish-places,reconcile-places-publish}.ts` (`gateFailures`, `PLACE_GATE_COLUMNS`, `--publish-thin`, `--apply`, the `process.argv[1]` guard) — commit `08bb0f2`.
+- `keyword-grounding-dataforseo` §Rule 6 — the same "enrich never publishes; `publish-places.ts` is the gate" sequence from the grounding angle.
+- `backoffice-cms` — the Payload publish discipline (direct SQL bypasses `afterChange`); the same "one tested publish path" principle for CMS content.
 - `content-modeling` — `places.city_key` ↔ `/lieux/[citySlug]` slug/label model (kebab-case ASCII localised FR).
 - `seo-technical` — indexability impact of aberrant cross-city scaffolds (thin near-duplicates polluting sitemap + GEO citation graph).
 - POI JSON-LD: `packages/seo/src/jsonld/place-amenity.ts` (`osmToSchemaClass`, `buildOpeningHoursSpecification`).

@@ -190,6 +190,14 @@ on pass. Then `resolve-proximity.ts --city=<key>` builds the `place_hotel_links`
 places:backfill (scaffold) → enrich (grounded) → publish-places → resolve-proximity → walk
 ```
 
+The backfill/gate/reconciler **publish-gate discipline** (a backfill must never
+auto-publish; the gate is the sole publisher; an idempotent reconciler
+unpublishes hors-gate rows; export the gate behind a `process.argv[1]` run-guard)
+is documented end-to-end in
+[`content-enrichment-pipeline` §Rule 16](../content-enrichment-pipeline/SKILL.md)
+— commit `08bb0f2`, which fixed 199 thin Paris stubs shipped live and brought
+the count from 229 → 102 published.
+
 ## Validating live (do this before any wave)
 
 `npx tsx src/grounding/probe-dfs.ts "hôtel Gordes"` prints the related
@@ -216,7 +224,9 @@ before spending tokens on a wave. Creds live in `.env.local`
 ## References
 
 - `.cursor/skills/content-enrichment-pipeline/SKILL.md` — the factual
-  enrichment cascade that grounding complements (facts vs search-demand).
+  enrichment cascade that grounding complements (facts vs search-demand); also
+  §Rule 16 for the full publish-gate discipline (backfill never publishes, one
+  gate, idempotent reconciler, module run-guard).
 - `.cursor/skills/llm-output-robustness/SKILL.md` — the same per-item
   tolerance philosophy applied to LLM JSON output.
 - `.cursor/skills/geo-llm-optimization/SKILL.md` — where the grounded GEO/AEO
