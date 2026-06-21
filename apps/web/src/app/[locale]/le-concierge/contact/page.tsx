@@ -294,6 +294,7 @@ export default async function ConciergeContactPage({
         ) : null}
         {status === 'rate_limited' ? (
           <div
+            id="contact-form-error"
             data-testid="contact-error"
             role="alert"
             className="mt-6 rounded-md border border-amber-600/30 bg-amber-600/10 p-4 text-sm text-amber-800 dark:text-amber-300"
@@ -303,6 +304,7 @@ export default async function ConciergeContactPage({
         ) : null}
         {status === 'error' ? (
           <div
+            id="contact-form-error"
             data-testid="contact-error"
             role="alert"
             className="mt-6 rounded-md border border-red-600/30 bg-red-600/10 p-4 text-sm text-red-800 dark:text-red-300"
@@ -315,6 +317,9 @@ export default async function ConciergeContactPage({
           action={submitContactAction}
           data-testid="contact-form"
           className="mt-6 grid grid-cols-1 gap-4"
+          {...(status === 'rate_limited' || status === 'error'
+            ? { 'aria-describedby': 'contact-form-error' }
+            : {})}
         >
           {/* Honeypot — visually hidden, off the tab order. Bots fill it. */}
           <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
@@ -325,52 +330,76 @@ export default async function ConciergeContactPage({
           </div>
 
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{t('form.namePlaceholder')}</span>
+            <span className="text-fg font-medium">
+              {t('form.namePlaceholder')}{' '}
+              <span aria-hidden="true" className="text-red-700">
+                *
+              </span>
+            </span>
             <input
               type="text"
               name="name"
               required
+              aria-required="true"
               maxLength={120}
               data-testid="contact-name"
               placeholder={t('form.namePlaceholder')}
-              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
+              className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{t('form.emailPlaceholder')}</span>
+            <span className="text-fg font-medium">
+              {t('form.emailPlaceholder')}{' '}
+              <span aria-hidden="true" className="text-red-700">
+                *
+              </span>
+            </span>
             <input
               type="email"
               name="email"
               required
+              aria-required="true"
               maxLength={200}
               data-testid="contact-email"
               placeholder={t('form.emailPlaceholder')}
-              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
+              className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{t('form.subjectPlaceholder')}</span>
+            <span className="text-fg font-medium">
+              {t('form.subjectPlaceholder')}{' '}
+              <span aria-hidden="true" className="text-red-700">
+                *
+              </span>
+            </span>
             <input
               type="text"
               name="subject"
               required
+              aria-required="true"
               maxLength={200}
               data-testid="contact-subject"
               placeholder={t('form.subjectPlaceholder')}
-              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
+              className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{t('form.messagePlaceholder')}</span>
+            <span className="text-fg font-medium">
+              {t('form.messagePlaceholder')}{' '}
+              <span aria-hidden="true" className="text-red-700">
+                *
+              </span>
+            </span>
             <textarea
               name="message"
               required
+              aria-required="true"
               minLength={10}
               maxLength={4000}
               rows={5}
               data-testid="contact-message"
               placeholder={t('form.messagePlaceholder')}
-              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
+              className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2"
             />
           </label>
           <p className="text-muted text-xs">{t('form.consent')}</p>

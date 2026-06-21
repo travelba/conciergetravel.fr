@@ -68,8 +68,8 @@ export function PlaceGygBlock({ products, locale, labels }: GygBlockProps): Reac
                 ) : null}
                 <div className="mt-3 flex items-center gap-3 text-sm">
                   {p.rating !== null ? (
-                    <span className="font-medium text-amber-600">
-                      ★ {p.rating.toFixed(1)}
+                    <span className="font-medium text-amber-800">
+                      <span aria-hidden="true">★</span> {p.rating.toFixed(1)}
                       {p.reviewCount !== null ? (
                         <span className="text-muted-foreground font-normal">
                           {' '}
@@ -167,7 +167,7 @@ export function PlaceNearbyHotels({ hotels, labels }: NearbyHotelsProps): ReactE
             >
               <Link
                 href={{ pathname: '/hotel/[slug]', params: { slug: h.slug } }}
-                className="block focus-visible:outline-none"
+                className="focus-visible:ring-ring block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               >
                 {src !== null ? (
                   // eslint-disable-next-line @next/next/no-img-element -- Cloudinary, intrinsic dims not needed here
@@ -214,14 +214,14 @@ export function PlaceRankingCard({
           pathname: '/lieux/[citySlug]/[placeSlug]',
           params: { citySlug: item.city_key, placeSlug: slug },
         }}
-        className="block focus-visible:outline-none"
+        className="focus-visible:ring-ring block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       >
         {src !== null ? (
           // eslint-disable-next-line @next/next/no-img-element -- Cloudinary, intrinsic dims not needed here
           <img src={src} alt={name} loading="lazy" className="h-44 w-full object-cover" />
         ) : null}
         <div className="p-5">
-          <p className="text-sm font-semibold text-amber-600">N°{position}</p>
+          <p className="text-sm font-semibold text-amber-800">N°{position}</p>
           <h3 className="mt-1 text-lg font-medium leading-snug">{name}</h3>
           {summary !== null ? (
             <p className="text-muted-foreground mt-2 line-clamp-3 text-sm">{summary}</p>

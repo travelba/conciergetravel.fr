@@ -106,7 +106,9 @@ export default async function PlacesHubPage({ params }: { params: Promise<{ loca
             </a>
           </li>
           <li aria-hidden>/</li>
-          <li className="text-foreground font-medium">{t('hubTitle')}</li>
+          <li className="text-foreground font-medium" aria-current="page">
+            {t('hubTitle')}
+          </li>
         </ol>
       </nav>
 

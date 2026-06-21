@@ -188,7 +188,9 @@ export default async function CityPlacesPage({
             </a>
           </li>
           <li aria-hidden>/</li>
-          <li className="text-foreground font-medium">{t('breadcrumbLieux')}</li>
+          <li className="text-foreground font-medium" aria-current="page">
+            {t('breadcrumbLieux')}
+          </li>
         </ol>
       </nav>
 

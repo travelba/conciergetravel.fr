@@ -251,7 +251,9 @@ export default async function PlacePage({
             </a>
           </li>
           <li aria-hidden>/</li>
-          <li className="text-foreground font-medium">{view.name}</li>
+          <li className="text-foreground font-medium" aria-current="page">
+            {view.name}
+          </li>
         </ol>
       </nav>
 
@@ -290,7 +292,8 @@ export default async function PlacePage({
           className="mt-12 rounded-lg border-l-4 border-amber-500 bg-amber-50/60 p-6"
         >
           <h2 id="concierge-heading" className="text-xl font-semibold tracking-tight">
-            ⭐ {view.conciergeTitle ?? t('conciergeAdviceHeading')}
+            <span aria-hidden="true">⭐ </span>
+            {view.conciergeTitle ?? t('conciergeAdviceHeading')}
           </h2>
           <p className="mt-3 text-base leading-relaxed">{view.conciergeBody}</p>
         </section>

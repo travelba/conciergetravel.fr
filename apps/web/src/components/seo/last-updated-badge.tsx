@@ -47,7 +47,7 @@ export async function LastUpdatedBadge({
   if (variant === 'block') {
     return (
       <aside
-        className="border-border/60 text-muted/90 bg-bg/40 my-3 inline-flex items-center gap-2 rounded border px-3 py-1 text-xs"
+        className="border-border text-muted bg-bg/40 my-3 inline-flex items-center gap-2 rounded border px-3 py-1 text-xs"
         aria-label={label}
       >
         <span aria-hidden="true">🕓</span>
@@ -56,7 +56,7 @@ export async function LastUpdatedBadge({
     );
   }
   return (
-    <p className="text-muted/80 mt-3 text-xs" aria-label={label}>
+    <p className="text-muted mt-3 text-xs" aria-label={label}>
       <time dateTime={isoDate.slice(0, 10)}>{label}</time>
     </p>
   );
