@@ -3723,6 +3723,13 @@
       "category": "Category",
       "schemaTypeAria": "Schema.org type: {type}"
     },
+    "nearbyPlaces": {
+      "title": "Places to visit nearby",
+      "lead": "The sights, landmarks and walks I recommend around {hotelName} — each place has its own detailed guide.",
+      "walkMinutes": "{count, plural, one {# min walk} other {# min walk}}",
+      "distanceMeters": "{meters, plural, =0 {on site} other {{meters} m away}}",
+      "viewPlace": "Explore this place →"
+    },
     "events": {
       "title": "What’s happening during your stay",
       "lead": "The dates I slip into my guests’ programme in {city} — concerts, exhibitions, festivals a few steps from {hotelName}.",
