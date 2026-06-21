@@ -36,7 +36,7 @@ import { config as loadDotenv } from 'dotenv';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-import { hasLeak } from '../enrichment/scaffolding-gate.js';
+import { hasLeak, splitSentences } from '../enrichment/scaffolding-gate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,6 +65,20 @@ interface HotelRow {
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 const nonEmpty = (v: unknown): boolean => typeof v === 'string' && v.trim().length > 0;
+
+/**
+ * Drop only the leaking sentence(s) from an EN translation, keep the rest.
+ * The FR source is clean; the model occasionally hallucinates ONE meta
+ * sentence ("…the dossier confirms…") in an otherwise-faithful translation.
+ * Salvaging the clean remainder beats blanking the whole section to FR
+ * fallback (2026-06-21 EN salvage — mirrors `strip-leak-sentences.ts`).
+ */
+function stripLeakSentences(text: string): string {
+  return splitSentences(text)
+    .filter((s) => !hasLeak(s))
+    .join(' ')
+    .trim();
+}
 
 /**
  * A section needs EN work if it has an FR body and its EN is missing OR LEAKY.
@@ -315,9 +329,22 @@ async function translateOne(
       if (target === undefined) return;
       // Anti-scaffolding gate — never persist a leaking EN translation.
       if (hasLeak(out.title_en) || hasLeak(out.body_en)) {
+        // Salvage first: strip only the hallucinated meta sentence(s) and
+        // keep the clean remainder. A leaky title → blank (FR fallback) but
+        // the body can still be saved if enough clean prose survives.
+        const cleanTitle = hasLeak(out.title_en) ? '' : str(out.title_en);
+        const strippedBody = hasLeak(out.body_en)
+          ? stripLeakSentences(str(out.body_en))
+          : str(out.body_en);
+        if (strippedBody.length >= 100 && !hasLeak(strippedBody)) {
+          target.title_en = cleanTitle;
+          target.body_en = strippedBody;
+          translated += 1;
+          return;
+        }
         leakDropped += 1;
-        // A failed re-translation must not leave a pre-existing leaky EN live:
-        // blank it so the page falls back to the (clean) FR canonical.
+        // Unsalvageable: don't leave a pre-existing leaky EN live — blank it
+        // so the page falls back to the (clean) FR canonical.
         if (hasLeak(str(target.title_en))) {
           target.title_en = '';
           blanked += 1;

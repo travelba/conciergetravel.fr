@@ -579,6 +579,54 @@ over HTTPS) — that's why `translate-sections-en.ts` and the new
 `pg`-based pipeline is needed, fix the pooler URL first
 (`postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres`).
 
+**14th wave — EN sentence-salvage + "data-gap narration" marker class (2026-06-21, fourth sweep)**
+
+Attacking the 13th-wave residual ("37 fiches with ≥1 EN section in FR fallback")
+revealed two distinct sub-problems, not one. First, **27 of the 37 were not
+thin-source at all** — the FR section was clean and the _translator_ had
+hallucinated a single meta sentence ("…the dossier confirms…") into an otherwise
+faithful EN body, which the `hasLeak()` write-gate then dropped wholesale →
+FR fallback. Fix capitalised in `translate-sections-en.ts`: when the EN trips
+the gate, **strip only the leaking sentence(s) and keep the clean remainder**
+(`stripLeakSentences`, mirrors `strip-leak-sentences.ts`) instead of blanking
+the whole section; a leaky title still blanks (FR fallback) but a ≥100-char
+clean body survives. One `--all` pass salvaged **27/37** (29 sections).
+
+The last **10** were a genuinely new leak shape the gate still missed: **pure
+"data-gap narration" stubs** — "Aucun fait vérifié ne permet de confirmer le
+spa…", "Le bien-être reste non documenté", "La rubrique de voisinage est en
+attente", "…dans **ce brief**", "non renseignée dans ce brief". The 12th-wave
+gate had `le/du/au brief` but not `ce brief`, and no marker for the negative
+"no verified fact / not documented / pending section" family. Hardened
+`scaffolding-gate.ts`: added `ce brief`, `aucun fait v[ée]rifi[ée]`, `aucune
+(donnée|information) vérifiée`, `non document[ée]`, `non renseign[ée]`, `sous
+réserve de confirmer`, `rubrique…(?=en attente)`, plus EN `no verified
+fact/data`, `(un)documented`, `not specified in (this|the) brief`. 64/64 gate
+tests green (10 new LEAK + 3 new CLEAN guards: a legit "rubrique végétarienne",
+"savoir-faire documenté", "well documented" stay clean). These 10 stub sections
+are pure meta with no salvageable content → the next strip pass drops them
+(fiches stay ≥6 except `hotel-claris` 6→5, queued for re-enrich).
+
+⚠ **Blocked mid-wave by a Supabase platform outage (HTTP 522 / Cloudflare
+origin timeout).** The code (gate + salvage + tests) is committed and green;
+the remaining DB steps — re-run `strip-leak-sentences` on the 10 stubs,
+re-translate, re-enrich any fiche that fell <6, and the final catalogue
+verification scan — are **deferred until the REST endpoint recovers**. All
+prior writes (27/37 salvage) are persisted.
+
+| Metric                      | Before       | After (code) | Pending (DB, post-outage) |
+| --------------------------- | ------------ | ------------ | ------------------------- |
+| EN sections in FR fallback  | 37           | **10**       | → 0 (strip+enrich)        |
+| Gate marker classes covered | dossier/file | + data-gap   | —                         |
+| Gate unit tests             | 54           | **64**       | —                         |
+
+Lesson: a write-gate that **drops** on any leak silently converts a one-sentence
+LLM hallucination into a whole-section locale regression — prefer
+**sentence-level salvage** over wholesale drop when the source is clean. And the
+"negative data-gap" phrasing ("no verified fact", "section pending") is its own
+leak class, distinct from the "dossier/brief narration" class — both are the
+generator narrating its own input poverty into live prose.
+
 **11th wave — catalogue-wide "dossier-narration" scaffolding leak, FR + EN (2026-06-21)**
 
 The 10th-wave "23 hard EN residual" turned out to be the visible tip of a far

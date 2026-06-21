@@ -42,6 +42,16 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'Le dossier manque encore de profondeur sur le voisinage.',
     'This dossier relies more on location than on atmosphere.',
     'The historical file remains incomplete on the architecture.',
+    // data-gap narration class (2026-06-21 third sweep).
+    'Aucun fait vérifié ne permet de confirmer le spa ou la piscine.',
+    'Aucune donnée vérifiée n’est disponible sur le service de majordome.',
+    'Le bien-être reste non documenté dans cette fiche.',
+    'La rubrique de voisinage est en attente.',
+    'Le Grand Hyatt présente dans ce brief un profil factuel centré sur trois points.',
+    'Année de première distinction Palace : non renseignée dans ce brief.',
+    'Le rattachement exact est indiqué sous réserve de confirmer la fiche.',
+    'No verified fact confirms the languages spoken or the airport transfer.',
+    'The wellness offering remains undocumented.',
   ];
 
   // Legitimate editorial prose that MUST NOT be flagged.
@@ -65,6 +75,10 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'Le dossier de presse est disponible sur demande à la conciergerie.',
     'Votre dossier de réservation sera confirmé par email sous 24 heures.',
     'The file at reception holds your dining preferences for each visit.',
+    // data-gap guards: "rubrique"/"documenté" without the meta context stay clean.
+    'La carte propose une rubrique végétarienne complète et inventive.',
+    'Un savoir-faire documenté depuis 1850 se perpétue dans chaque suite.',
+    'The history is well documented in the hotel’s private archive.',
   ];
 
   it.each(LEAKS)('flags leak: %s', (text) => {
