@@ -579,6 +579,71 @@ over HTTPS) — that's why `translate-sections-en.ts` and the new
 `pg`-based pipeline is needed, fix the pooler URL first
 (`postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres`).
 
+**11th wave — catalogue-wide "dossier-narration" scaffolding leak, FR + EN (2026-06-21)**
+
+The 10th-wave "23 hard EN residual" turned out to be the visible tip of a far
+larger, previously-undetected leak class. Diagnosing why those 23 EN
+translations kept tripping `hasLeak()` revealed that their FR sources were
+themselves narrating the internal **data dossier** — live, on major fiches:
+"Aman New York avance ici avec un **dossier encore incomplet**", "les
+équipements **connus du brief**", "plusieurs rubriques attendent une
+**vérification manuelle**", "Date de consultation des sources **du brief** :
+2026-05-20". The canonical `LEAK_MARKERS` missed all of it: it matched
+`\ble brief\b` but NOT the genitive **`du brief`** / `au brief`, and had no
+pattern for `dossier (incomplet|reste…)`, `contrôle/vérification manuel(le)`,
+`en attente d'enrichissement`, `recherche Wikipédia`, `placeholder`, etc.
+
+| Surface                                                                           | Before                         | After                                                         |
+| --------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------- |
+| FR sections/desc carrying the leak (canonical `hasLeak`)                          | **457 fiches**                 | **0**                                                         |
+| EN section bodies narrating the brief (`the brief`/`in the brief`/`the dossier`…) | **953 fiches / 2164 sections** | **0** (re-translated from clean FR, or blanked → FR fallback) |
+
+Pipeline (forward-only, ADR-0029 staged remediation):
+
+1. **Hardened the shared gate** [`scaffolding-gate.ts`](scripts/editorial-pilot/src/enrichment/scaffolding-gate.ts):
+   added the FR genitive `du/au brief`, the full `dossier`/`en attente`/
+   `contrôle manuel`/`placeholder`/`recherche Wikipédia` family, AND an EN
+   layer (`the dossier`, `manual check`, `still to be confirmed`,
+   `pending verification`, and a robust **`(?:the|this) brief`-as-noun** rule
+   with a negative-lookahead allow-list for adjectival use — "the brief
+   stroll/encounter/overview" stay clean). 43 unit cases in
+   `scaffolding-gate.test.ts` (FR + EN leaks + EN false-positive guards).
+2. **`descaffold-sections.ts --all` ×2** (LLM surgical rewrite): 457 → 78 → 63.
+3. **NEW `strip-leak-sentences.ts`** (deterministic, sentence-level): the
+   residual was NOT pure-meta stubs but **rich 3 000-4 000-char "services"
+   sections with ONE leaked sentence** (Fairmont, Mandarin Oriental,
+   Ritz-Carlton…). `descaffold` (whole-chunk LLM rewrite) fails its
+   "no-longer-than-input" gate on such long chunks, and `remove-scaffold`
+   would drop the WHOLE rich section. The new tool splits into sentences,
+   drops only the leaking ones, keeps the rest; if every sentence leaks the
+   section collapses and is dropped. Result: 54 sections surgically cleaned,
+   11 pure-meta dropped, **0 fiches < 3 sections** → FR `hasLeak` = **0**.
+4. **EN re-translation**: `translate-sections-en.ts` now treats a _leaking_
+   `body_en`/`title_en` as "needs EN work" (not just empty), and a failed
+   re-translation **blanks** the stale leaky EN instead of leaving it live
+   (FR fallback). A plain `--all` therefore self-heals the 953 fiches with
+   no separate blanking pass.
+
+Two capitalised lessons:
+
+- **Size leak markers to the genitive, not just the nominative.** `le brief`
+  without `du/au brief` left ~424 fiches leaking for weeks. When adding a
+  scaffolding marker, enumerate the case/preposition variants.
+- **A Zod/LLM "no-longer" rewrite gate strands long sections with a single
+  bad sentence.** For surgically removing a phrase from otherwise-publishable
+  long-form prose, a deterministic sentence-level strip beats both an LLM
+  rewrite (fails to reproduce length) and a whole-section drop (loses facts).
+- **The same leak vocabulary leaks in EN too**, in different grammar
+  ("noted in the brief", "the dossier confirms"). The gate runs on both
+  locales; EN markers must be precise enough to spare adjectival "a/the brief
+  X" while catching "the brief" as a document noun.
+
+Acceptance (prod, curl — no Chrome on this box): `/hotel/aman-new-york` →
+"dossier encore incomplet" = 0, "fondamentaux solides" + "83 suites" present;
+`/hotel/altstadt-vienna` → "contrôle manuel" = 0, "Silvio Nickol" (2★ Michelin)
+preserved; `/en/hotel/a-quinta-da-auga-hotel-spa` spa section re-translated
+leak-free (ISR refreshes per-page within the 3600 s TTL).
+
 **10th wave — parallel multitask: EN-section recovery + bounded photo backfill (2026-06-20)**
 
 ÉCRIT + VISUEL in parallel, both bounded and verified live.
@@ -592,12 +657,12 @@ Root-cause fix capitalised (the reason the "127 hard residual" from the 9th
 wave was overstated): `translate-sections-en.ts`'s `SectionEnSchema.body_en`
 carried a **`min(80)`** floor. Many real sections are legitimately short
 factual stubs — an `en-pratique` address block, a one-line
-"Classement 5 étoiles." note (body_fr 60-85 chars). Their faithful EN
+"Classement 5 étoiles." note (body*fr 60-85 chars). Their faithful EN
 translation is < 80 chars, so `safeParse` rejected the whole section →
 the fiche logged `EN+0` and looked like a "hard residual". Lowering the
 floor to **`min(10)`** (quality still guarded by `hasLeak()` + the
 faithful-translation prompt) recovered **112 / 130 fiches in one pass**.
-Lesson: a Zod `min()` length floor sized for _prose_ silently strands
+Lesson: a Zod `min()` length floor sized for \_prose* silently strands
 _structured/stub_ content — size validation gates to the **shortest
 legitimate** instance of the field, not the typical one.
 

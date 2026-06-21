@@ -27,8 +27,19 @@
 // bare word — a 2026-06-19 catalogue audit false-flagged dozens of legit EN
 // long-descriptions on the bare token. The FR equivalent `niveau de confiance`
 // stays an exact phrase and the backtick rule still catches `` `low` ``.
+// NOTE on the "dossier narration" class (2026-06-21 catalogue audit): an
+// earlier generation pass, fed a thin data dossier, narrated the dossier's
+// OWN incompleteness into live prose on ~424 published fiches — "Aman New York
+// avance ici avec un dossier encore incomplet", "les équipements connus du
+// brief", "plusieurs rubriques attendent une vérification manuelle", "Date de
+// consultation des sources du brief : 2026-05-20". The original `\ble brief\b`
+// missed the genitive/dative "du brief" / "au brief" (English never produces
+// those, so they are safe to match even though the gate runs on EN too). The
+// markers below are all multi-word scaffolding signatures — never legitimate
+// hotel prose. Keep them high-precision: a bare "dossier"/"brief"/"en attente"
+// would false-flag real copy (cf. the CLEAN cases in scaffolding-gate.test.ts).
 export const LEAK_MARKERS =
-  /\ble brief\b|\bbrief\b(?=[^.]*\b(?:confirme|fournit|signale|indique|incomplet|notes?|mention)\b)|AUTO_DRAFT|niveau de confiance|\bconfidence[\s:`]+(?:low|medium|high)\b|`[^`]*`|reste à (?:vérifier|revalider)|à revalider|sans revalidation|non vérifiée?s?|wikidata|entité\s+Q\d|\bQ\d{5,}\b|matière publiable|ne peut être retenue?|statut\s+pending|\bpending\b|selon les sources publiques|note interne/iu;
+  /\ble brief\b|\b(?:du|au) brief\b|\bbrief\b(?=[^.]*\b(?:confirme|fournit|signale|indique|incomplet|notes?|mention)\b)|AUTO_DRAFT|niveau de confiance|\bconfidence[\s:`]+(?:low|medium|high)\b|`[^`]*`|reste à (?:vérifier|revalider)|à revalider|sans revalidation|non vérifiée?s?|wikidata|entité\s+Q\d|\bQ\d{5,}\b|matière publiable|ne peut être retenue?|statut\s+pending|\bpending\b|selon les sources publiques|note interne|contr[ôo]le manuel|v[ée]rification manuelle|le dossier (?:re[çc]u|reste|demande|appelle|place|v[ée]rifi[ée]|tient|ne documente)|dossier (?:encore )?(?:incomplet|lacunaire|mince)|dossier re[çc]u|en attente d['’]enrichissement|en attente de (?:v[ée]rification|confirmation|recoupement|contr[ôo]le|consolidation|sourcing)|(?:reste|restent|demeure|demeurent|encore) en attente\b|\bplaceholder\b|recherche Wikip[ée]dia|page d['’]homonymie|doivent? [êe]tre enrichis?|enrichissement (?:manuel|substantiel)|date de consultation des sources|pr[ée]-ouverture [ée]ditoriale|\bthe dossier\b|\bincomplete dossier\b|\bdossier (?:confirms?|remains?)\b|still to be confirmed|pending (?:verification|enrichment|confirmation)|manual (?:check|verification)\b|awaiting (?:enrichment|verification|confirmation)|Wikipedia (?:search|research)|disambiguation page|no verified information|\b(?:the|this) brief\b(?!\s+(?:moment|interval|interlude|while|period|stay|stroll|walk|pause|window|spell|space|overview|summary|introduction|history|account|chapter|visit|encounter|glimpse|respite|lull|break|calm|silence|quiet|but|yet|list|note|description|mention|exchange|conversation|chat|aside|remark|comment|detour|digression|interruption|tour|moments|episodes?))/iu;
 
 /** True when `text` carries any scaffolding/meta-commentary marker. */
 export function hasLeak(text: string | null | undefined): boolean {

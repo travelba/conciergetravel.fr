@@ -66,9 +66,21 @@ interface HotelRow {
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 const nonEmpty = (v: unknown): boolean => typeof v === 'string' && v.trim().length > 0;
 
-/** A section needs EN work if it has FR body but is missing EN title or body. */
+/**
+ * A section needs EN work if it has an FR body and its EN is missing OR LEAKY.
+ * Treating a leaking `body_en`/`title_en` as "needs work" lets a plain
+ * `--all` re-translate the ~950 fiches whose stored EN narrates the pipeline
+ * brief ("noted in the brief", "the dossier confirms…") — no separate blanking
+ * pass required (2026-06-21 EN scaffolding sweep).
+ */
 function sectionNeedsEn(s: Section): boolean {
-  return nonEmpty(s.body_fr) && (!nonEmpty(s.body_en) || !nonEmpty(s.title_en));
+  return (
+    nonEmpty(s.body_fr) &&
+    (!nonEmpty(s.body_en) ||
+      !nonEmpty(s.title_en) ||
+      hasLeak(str(s.body_en)) ||
+      hasLeak(str(s.title_en)))
+  );
 }
 
 /* ── PostgREST ──────────────────────────────────────────────────────────── */
@@ -267,6 +279,7 @@ async function translateOne(
 
   let translated = 0;
   let leakDropped = 0;
+  let blanked = 0;
   let parseFails = 0;
   // Batch sections so a single LLM response never overflows 16k output tokens.
   const batches = chunk(missing, SECTIONS_PER_CALL);
@@ -303,6 +316,16 @@ async function translateOne(
       // Anti-scaffolding gate — never persist a leaking EN translation.
       if (hasLeak(out.title_en) || hasLeak(out.body_en)) {
         leakDropped += 1;
+        // A failed re-translation must not leave a pre-existing leaky EN live:
+        // blank it so the page falls back to the (clean) FR canonical.
+        if (hasLeak(str(target.title_en))) {
+          target.title_en = '';
+          blanked += 1;
+        }
+        if (hasLeak(str(target.body_en))) {
+          target.body_en = '';
+          blanked += 1;
+        }
         return;
       }
       target.title_en = out.title_en;
@@ -311,7 +334,7 @@ async function translateOne(
     });
   }
 
-  if (!dryRun && translated > 0) {
+  if (!dryRun && (translated > 0 || blanked > 0)) {
     await patchHotel(env, hotel.slug, { long_description_sections: sections });
   }
   return {
@@ -319,7 +342,7 @@ async function translateOne(
     translated,
     leakDropped,
     total: sections.length,
-    ok: translated > 0 && parseFails === 0,
+    ok: (translated > 0 || blanked > 0) && parseFails === 0,
   };
 }
 
