@@ -672,8 +672,94 @@ sourcing pass fills the seed — extending coverage = add hotel blocks to
 / `quote_en` (falls back to the other locale) with a source emblem +
 `<cite>` link.
 
+## Rule 15 — Geo-fence is mandatory when backfilling POIs from `hotels.points_of_interest`
+
+`scripts/editorial-pilot/src/places/backfill-paris.ts` extracts the POIs
+embedded in `hotels.points_of_interest` (buckets `visit` / `do`) to create
+canonical `places` fiches for `/lieux/[citySlug]`. It was generalised
+beyond Paris (commit `4d0edae`) with two flags — `--city-match` and
+`--max-radius-km` — precisely because the source data is dirty in two
+independent ways:
+
+1. **`hotels.city` is fragmented** — the same city appears under multiple
+   display spellings (`"Londres"` vs `"London"`, `"Dubai"` vs `"Dubaï"`,
+   `"Geneva"` vs `"Genève"`). A naïve `city = 'Londres'` filter misses
+   half the hotels; a too-broad one over-captures.
+2. **Hotels embed POIs from another city** — encountered live: several
+   "London" hotels carried Paris monuments (Centre Pompidou, Hôtel de
+   Ville de Paris) inside their `points_of_interest`. Without a guard the
+   backfill creates aberrant fiches such as `londres/centre-pompidou`.
+
+The proven fix is a **two-part decoupling + a geo-fence**:
+
+### (a) Decouple the match filter from the stored label
+
+`--city-match` is a substring stem used only for the `hotels.city ILIKE
+*<stem>*` query; the canonical stored values come from separate flags:
+
+```powershell
+# match BOTH "London" and "Londres", store the canonical FR label + slug
+pnpm places:backfill-paris --city=londres --city-match=Lond --city-name=Londres
+# match BOTH "Dubai" and "Dubaï"
+pnpm places:backfill-paris --city=dubai  --city-match=Duba --city-name=Dubaï
+```
+
+So `city_key="londres"` (the URL slug), `city="Londres"` (the display
+label), and `--city-match=Lond` (the ILIKE stem) are three distinct
+values. `--city-name` defaults to `--city-match` for back-compat
+(`paris` / `gordes` legacy loop), so always set it when the match is a
+stem.
+
+### (b) Geo-fence on the matched-hotels median centroid
+
+`--max-radius-km=N` computes the **median** lat/lng of the matched hotels
+(`hotelCentroid` — median, not mean, so one mis-geocoded hotel can't drag
+the centre) and rejects any embedded POI whose haversine distance from
+that centroid exceeds `N` km. On the London rollout this filtered
+**42 → 34** scaffolds — the 8 ejected rows were the leaked Paris POIs.
+
+```ts
+// backfill-paris.ts — poiToScaffold()
+if (geoFence !== null) {
+  const dist = haversineMeters(geoFence.centroid, { latitude: lat, longitude: lng });
+  if (dist > geoFence.maxMeters) return null; // belongs to another city
+}
+```
+
+`--max-radius-km` defaults to `0` (disabled, preserves the Paris/Gordes
+loop). **Pass it on every non-Paris rollout** (e.g. `--max-radius-km=30`).
+
+### (c) Everything lands as `is_published=false`
+
+The backfill is a scaffold generator, never a publisher: a one-line OSM
+summary is not a fiche. The strict gate `publish-places.ts` (full
+editorial envelope: rich description + FAQ + concierge advice) stays the
+**sole** publisher. `--publish-thin` re-enables the legacy minimal
+auto-publish for throwaway pilots only.
+
+### Routing convention (do not break)
+
+`/lieux/[citySlug]` resolves on `places.city_key === citySlug`. `city_key`
+is kebab-case ASCII, **localised FR** (`paris`, `gordes`, `londres`,
+`dubai`, `rome`) — it is the canonical URL slug, decoupled from the
+display `city`. See `content-modeling` for the slug/label model and
+`seo-technical` for the indexability impact (an aberrant
+`londres/centre-pompidou` is a thin near-duplicate that pollutes the
+sitemap and the GEO citation graph).
+
 ## Anti-patterns
 
+- ❌ Backfilling `places` from `hotels.points_of_interest` with a naïve
+  `city = '<exact>'` filter — `hotels.city` is fragmented
+  (`Londres`/`London`, `Dubai`/`Dubaï`). Use `--city-match=<stem>` and
+  store the canonical label via `--city-name`. See Rule 15.
+- ❌ Running a non-Paris POI backfill without `--max-radius-km` — some
+  hotels embed another city's monuments in `points_of_interest`, so the
+  run mints aberrant fiches like `londres/centre-pompidou`. Always
+  geo-fence on the median centroid (Rule 15).
+- ❌ Flipping backfilled `places` scaffolds to `is_published=true` from
+  the backfill itself — a one-line OSM summary is not a publishable
+  fiche. Let the strict gate `publish-places.ts` be the sole publisher.
 - ❌ Calling `fetch()` directly on a third-party hotel website — bot
   protection, JS rendering, dirty HTML. Use Tavily.
 - ❌ Generating `featured_reviews` (or any third-party-attributed quote)
@@ -843,6 +929,9 @@ across 2221 published fiches, residual thin/blank fiches closed by
 - Migration `0040_fr_residuals_quick_wins.sql` + `0041_fr_residuals_translations.sql`
   — canonical examples of the Rule 12 remediation pattern.
 - POI pipeline: `scripts/editorial-pilot/src/pois/{sync-hotel-pois,merge-pois,llm-describe-pois}.ts` + `packages/integrations/src/overpass/`.
+- POI → `places` backfill + geo-fence (Rule 15): `scripts/editorial-pilot/src/places/backfill-paris.ts` (`hotelCentroid`, `poiToScaffold`) + strict publisher `scripts/editorial-pilot/src/places/publish-places.ts`.
+- `content-modeling` — `places.city_key` ↔ `/lieux/[citySlug]` slug/label model (kebab-case ASCII localised FR).
+- `seo-technical` — indexability impact of aberrant cross-city scaffolds (thin near-duplicates polluting sitemap + GEO citation graph).
 - POI JSON-LD: `packages/seo/src/jsonld/place-amenity.ts` (`osmToSchemaClass`, `buildOpeningHoursSpecification`).
 - Events pipeline: `scripts/editorial-pilot/src/events/{sync-hotel-events,llm-describe-events}.ts` + `scripts/editorial-pilot/src/enrichment/datatourisme.ts` (`fetchEventsAround`).
 - Events JSON-LD: `packages/seo/src/jsonld/event.ts` (`eventJsonLd`, `buildEventListJsonLd`).

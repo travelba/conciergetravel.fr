@@ -350,3 +350,7 @@ cache to invalidate.
   field will be consumed by a React component (front-end rendering).
 - **`concierge-voice-pipeline`** — `concierge_advice` field shape (Payload
   collection + validation + Zod schema + publication blocker hook).
+- **`content-enrichment-pipeline` §Rule 15** — geo-fence guard when
+  backfilling `places` from `hotels.points_of_interest`; relies on the
+  `places.city_key` ↔ `/lieux/[citySlug]` slug/label convention modelled
+  here (kebab-case ASCII localised FR, decoupled from the display `city`).

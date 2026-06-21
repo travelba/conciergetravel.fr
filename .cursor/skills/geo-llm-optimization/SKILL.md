@@ -154,6 +154,10 @@ Hard rules:
 - **`llm-output-robustness`** — allowlist post-validation patterns used
   by the editorial pipelines to guarantee EEAT signals (no hallucinated
   sources reach the DB).
+- **`content-enrichment-pipeline` §Rule 15** — geo-fence guard on
+  `places` backfill; without it, cross-city POI leaks (a London hotel
+  embedding Paris monuments) mint aberrant `/lieux` fiches that become
+  thin near-duplicates polluting the sitemap and the GEO citation graph.
 - [ADR-0019 Le Concierge Club](../../../docs/adr/0019-le-concierge-club-architecture.md) +
   [`membership-program`](../membership-program/SKILL.md) — three new
   `agent-skills.json` entries (`loyalty`, `join-concierge-club`,
