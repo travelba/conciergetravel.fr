@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
 
 import { JsonLd } from '@mch/seo';
@@ -12,6 +12,7 @@ import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
+import { submitContactRequest } from '@/server/contact/contact-request';
 
 /**
  * `/le-concierge/contact` — institutional contact page (Vague 5 P0
@@ -71,16 +72,73 @@ interface FaqItem {
   readonly a: string;
 }
 
+type ContactStatus = 'sent' | 'rate_limited' | 'error';
+
+function parseStatus(value: string | string[] | undefined): ContactStatus | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return raw === 'sent' || raw === 'rate_limited' || raw === 'error' ? raw : null;
+}
+
 export default async function ConciergeContactPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }): Promise<ReactElement> {
   const { locale: raw } = await params;
   if (!isRoutingLocale(raw)) notFound();
   const locale = raw;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'conciergeContact' });
+
+  const sp = await searchParams;
+  const status = parseStatus(sp['status']);
+  const submittedRef = typeof sp['ref'] === 'string' ? sp['ref'] : undefined;
+
+  const contactPath = getPathname({ locale, href: '/le-concierge/contact' });
+
+  /**
+   * Server action — progressive-enhancement submit (works without client JS).
+   * Validates + persists via `submitContactRequest`, then redirects back with
+   * a `status` (+`ref`) query so the banner renders. Honeypot `website` is
+   * silently treated as success. See R1.5 in PROJET-MASTER-PLAN.md.
+   */
+  async function submitContactAction(formData: FormData): Promise<void> {
+    'use server';
+    const honeypot = String(formData.get('website') ?? '');
+    if (honeypot.length > 0) {
+      redirect(`${contactPath}?status=sent`);
+    }
+
+    const hdrs = await headers();
+    const forwarded = hdrs.get('x-forwarded-for') ?? '';
+    const clientIp = forwarded.split(',')[0]?.trim();
+
+    const phoneRaw = String(formData.get('phone') ?? '').trim();
+
+    const result = await submitContactRequest({
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      subject: String(formData.get('subject') ?? ''),
+      message: String(formData.get('message') ?? ''),
+      locale,
+      source: 'contact_page',
+      ...(phoneRaw.length > 0 ? { phone: phoneRaw } : {}),
+      ...(clientIp !== undefined && clientIp.length > 0 ? { clientIp } : {}),
+    });
+
+    if (result.ok) {
+      redirect(`${contactPath}?status=sent&ref=${encodeURIComponent(result.value.requestRef)}`);
+    }
+    if (result.error.kind === 'duplicate') {
+      redirect(`${contactPath}?status=sent&ref=${encodeURIComponent(result.error.requestRef)}`);
+    }
+    if (result.error.kind === 'rate_limited') {
+      redirect(`${contactPath}?status=rate_limited`);
+    }
+    redirect(`${contactPath}?status=error`);
+  }
 
   const origin = siteOrigin();
   const nonce = (await headers()).get('x-nonce') ?? undefined;
@@ -210,7 +268,7 @@ export default async function ConciergeContactPage({
         </div>
       </section>
 
-      {/* Form placeholder */}
+      {/* Contact form — live (R1.5) */}
       <section
         aria-labelledby="form-title"
         className="border-border bg-muted/5 mb-14 rounded-lg border p-6 md:p-8"
@@ -219,31 +277,63 @@ export default async function ConciergeContactPage({
           {t('form.title')}
         </h2>
         <p className="text-muted mt-2 text-sm">{t('form.lede')}</p>
-        {/*
-          Disabled form — surfaces the fields a future server action
-          will accept, but does not submit. Submission lands in PR11
-          when the `/api/agent/contact` endpoint ships with Brevo
-          relay + idempotency (skill `email-workflow-automation` +
-          `api-integration`). Until then, the email fallback below is
-          the canonical channel — surfaced as a clear disclaimer so
-          users aren't left wondering why the button doesn't work.
-        */}
-        {/*
-          `aria-disabled` is not a valid attribute on the implicit
-          `form` role per WAI-ARIA. Each input carries its own
-          `disabled` attribute (announced by AT) and the explanatory
-          `t('form.wip')` paragraph below makes the WIP state explicit
-          to sighted users.
-        */}
-        <form className="mt-6 grid grid-cols-1 gap-4 opacity-80">
+
+        {status === 'sent' ? (
+          <div
+            data-testid="contact-success"
+            role="status"
+            className="mt-6 rounded-md border border-green-600/30 bg-green-600/10 p-4 text-sm text-green-800 dark:text-green-300"
+          >
+            <p className="font-medium">{t('form.success')}</p>
+            {submittedRef !== undefined ? (
+              <p className="mt-1 font-mono text-xs tracking-wide">
+                {t('form.successRef', { ref: submittedRef })}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+        {status === 'rate_limited' ? (
+          <div
+            data-testid="contact-error"
+            role="alert"
+            className="mt-6 rounded-md border border-amber-600/30 bg-amber-600/10 p-4 text-sm text-amber-800 dark:text-amber-300"
+          >
+            {t('form.rateLimited')}
+          </div>
+        ) : null}
+        {status === 'error' ? (
+          <div
+            data-testid="contact-error"
+            role="alert"
+            className="mt-6 rounded-md border border-red-600/30 bg-red-600/10 p-4 text-sm text-red-800 dark:text-red-300"
+          >
+            {t('form.error')}
+          </div>
+        ) : null}
+
+        <form
+          action={submitContactAction}
+          data-testid="contact-form"
+          className="mt-6 grid grid-cols-1 gap-4"
+        >
+          {/* Honeypot — visually hidden, off the tab order. Bots fill it. */}
+          <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+            <label>
+              Website
+              <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-fg font-medium">{t('form.namePlaceholder')}</span>
             <input
               type="text"
               name="name"
-              disabled
+              required
+              maxLength={120}
+              data-testid="contact-name"
               placeholder={t('form.namePlaceholder')}
-              className="border-border bg-bg/60 text-fg rounded-md border px-3 py-2 outline-none disabled:cursor-not-allowed"
+              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
@@ -251,9 +341,11 @@ export default async function ConciergeContactPage({
             <input
               type="email"
               name="email"
-              disabled
+              required
+              maxLength={200}
+              data-testid="contact-email"
               placeholder={t('form.emailPlaceholder')}
-              className="border-border bg-bg/60 text-fg rounded-md border px-3 py-2 outline-none disabled:cursor-not-allowed"
+              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
@@ -261,22 +353,34 @@ export default async function ConciergeContactPage({
             <input
               type="text"
               name="subject"
-              disabled
+              required
+              maxLength={200}
+              data-testid="contact-subject"
               placeholder={t('form.subjectPlaceholder')}
-              className="border-border bg-bg/60 text-fg rounded-md border px-3 py-2 outline-none disabled:cursor-not-allowed"
+              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-fg font-medium">{t('form.messagePlaceholder')}</span>
             <textarea
               name="message"
-              disabled
+              required
+              minLength={10}
+              maxLength={4000}
               rows={5}
+              data-testid="contact-message"
               placeholder={t('form.messagePlaceholder')}
-              className="border-border bg-bg/60 text-fg rounded-md border px-3 py-2 outline-none disabled:cursor-not-allowed"
+              className="border-border bg-bg text-fg focus:ring-current/20 rounded-md border px-3 py-2 outline-none focus:ring-2"
             />
           </label>
-          <p className="text-muted mt-2 text-xs italic">{t('form.wip')}</p>
+          <p className="text-muted text-xs">{t('form.consent')}</p>
+          <button
+            type="submit"
+            data-testid="contact-submit"
+            className="bg-fg text-bg hover:bg-fg/90 inline-flex w-fit items-center justify-center rounded-md px-5 py-2.5 text-sm font-medium transition"
+          >
+            {t('form.submit')}
+          </button>
         </form>
       </section>
 

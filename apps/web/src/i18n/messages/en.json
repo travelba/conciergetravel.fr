@@ -2660,7 +2660,11 @@
       "messagePlaceholder": "Your message…",
       "consent": "I accept that my data is used to process my request (privacy policy).",
       "submit": "Send my request",
-      "wip": "Form is being commissioned — in the meantime, write to us directly at contact@myconciergehotel.com."
+      "wip": "Form is being commissioned — in the meantime, write to us directly at contact@myconciergehotel.com.",
+      "success": "Your message has been received. Our concierge replies within 24 business hours.",
+      "successRef": "Reference: {ref}",
+      "rateLimited": "You have sent several messages recently. Please wait before trying again, or write to us directly at contact@myconciergehotel.com.",
+      "error": "Sending failed. Please try again, or write to us directly at contact@myconciergehotel.com."
     },
     "legal": {
       "title": "Editor identity",

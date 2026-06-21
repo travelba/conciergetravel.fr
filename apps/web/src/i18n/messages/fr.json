@@ -2660,7 +2660,11 @@
       "messagePlaceholder": "Votre message…",
       "consent": "J'accepte que mes données soient utilisées pour traiter ma demande (politique de confidentialité).",
       "submit": "Envoyer ma demande",
-      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com."
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com.",
+      "success": "Votre message a bien été reçu. Notre conciergerie vous répond sous 24h ouvrées.",
+      "successRef": "Référence : {ref}",
+      "rateLimited": "Vous avez envoyé plusieurs messages récemment. Merci de patienter avant de réessayer, ou écrivez-nous directement à contact@myconciergehotel.com.",
+      "error": "L'envoi a échoué. Merci de réessayer, ou écrivez-nous directement à contact@myconciergehotel.com."
     },
     "legal": {
       "title": "Identité de l'éditeur",

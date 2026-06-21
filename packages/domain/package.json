@@ -16,7 +16,8 @@
     "./photos": "./src/photos/index.ts",
     "./reviews": "./src/reviews/index.ts",
     "./pois": "./src/pois/index.ts",
-    "./places": "./src/places/index.ts"
+    "./places": "./src/places/index.ts",
+    "./contact": "./src/contact/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
