@@ -13,12 +13,21 @@
  *
  *   npx tsx src/places/enrich-places-editorial.ts --city=paris --limit=5 --dry-run
  *   npx tsx src/places/enrich-places-editorial.ts --city=paris --kind=museum --limit=20
+ *   npx tsx src/places/enrich-places-editorial.ts --city=paris --concurrency=4
  *
- * The runner never flips `is_published` to true.
+ * `--concurrency=N` runs N places in parallel (default 1). Each place is
+ * independent + idempotent, so a pool never collides. The runner never
+ * flips `is_published` to true.
  */
 import { z } from 'zod';
 
 import { loadEnv, resolveProvider } from '../env.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import {
+  groundKeywords,
+  renderGroundingForPrompt,
+  type GroundingLocale,
+} from '../grounding/keyword-grounding.js';
 import { buildLlmClient, type LlmClient } from '../llm.js';
 import { lintConciergeSummary } from '../linter.js';
 import { loadPhotoEnv } from '../photos/env-photos.js';
@@ -76,6 +85,14 @@ interface EnrichOptions {
   readonly slug?: string;
   readonly sourcePrefix?: string;
   readonly dryRun?: boolean;
+  /** Disable DataForSEO grounding (FAQ/titles fall back to LLM heuristics). */
+  readonly noGrounding?: boolean;
+  /** Country-only location name for grounding. Default "France". */
+  readonly locationName?: string;
+  /** Language code for grounding. Default "fr". */
+  readonly languageCode?: string;
+  /** Parallel workers (default 1). Each place is independent + idempotent. */
+  readonly concurrency?: number;
 }
 
 interface CliArgs extends EnrichOptions {
@@ -129,6 +146,10 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let slug: string | undefined;
   let sourcePrefix: string | undefined;
   let dryRun = false;
+  let noGrounding = false;
+  let locationName: string | undefined;
+  let languageCode: string | undefined;
+  let concurrency: number | undefined;
 
   for (const arg of argv) {
     if (arg.startsWith('--city=')) city = arg.slice('--city='.length);
@@ -140,15 +161,28 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (arg.startsWith('--source-prefix='))
       sourcePrefix = arg.slice('--source-prefix='.length);
     else if (arg === '--dry-run') dryRun = true;
+    else if (arg === '--no-grounding') noGrounding = true;
+    else if (arg.startsWith('--location-name='))
+      locationName = arg.slice('--location-name='.length);
+    else if (arg.startsWith('--language-code='))
+      languageCode = arg.slice('--language-code='.length);
+    else if (arg.startsWith('--concurrency=')) {
+      const n = Number.parseInt(arg.slice('--concurrency='.length), 10);
+      if (Number.isFinite(n) && n > 0) concurrency = n;
+    }
   }
 
   return {
     city,
     dryRun,
+    noGrounding,
     ...(limit !== undefined ? { limit } : {}),
     ...(kind !== undefined ? { kind } : {}),
     ...(slug !== undefined ? { slug } : {}),
     ...(sourcePrefix !== undefined ? { sourcePrefix } : {}),
+    ...(locationName !== undefined ? { locationName } : {}),
+    ...(languageCode !== undefined ? { languageCode } : {}),
+    ...(concurrency !== undefined ? { concurrency } : {}),
   };
 }
 
@@ -211,8 +245,9 @@ function isActivityRouteMisclassified(place: PlaceRow): boolean {
   );
 }
 
-function buildUserPrompt(place: PlaceRow): string {
-  return JSON.stringify(
+function buildUserPrompt(place: PlaceRow, groundingBlock = ''): string {
+  const grounded = groundingBlock.length > 0;
+  const base = JSON.stringify(
     {
       task: 'Generate the editorial envelope for this place page.',
       place: {
@@ -232,23 +267,31 @@ function buildUserPrompt(place: PlaceRow): string {
         description_en: '150-230 words. Natural English, same facts, no literal translation.',
         concierge_advice:
           'FR + EN. 65-90 mots chacun. Commence par un conseil opérationnel concret : horaire, accès, ordre de visite, météo ou affluence. EN doit faire au moins 55 mots.',
-        faq: '6 à 8 questions/réponses bilingues. Réponses 40-80 mots. Orientées AEO : durée, accès, meilleur moment, hôtel proche, réservation, famille.',
+        faq: grounded
+          ? "6 à 8 questions/réponses bilingues. Réponses 40-80 mots. PRIORITÉ ABSOLUE : sélectionne dans les 'Questions réellement posées' (ci-dessous) celles qui concernent VRAIMENT ce lieu (séjour, visite, accès, durée, meilleur moment, famille) et reformule-les naturellement. IGNORE le bruit hors-sujet (people, célébrités, biographies). Complète si besoin avec les angles AEO classiques."
+          : '6 à 8 questions/réponses bilingues. Réponses 40-80 mots. Orientées AEO : durée, accès, meilleur moment, hôtel proche, réservation, famille.',
       },
       hard_constraints: [
         'Never invent exact opening hours, ticket prices, dates, named collections, architects or Michelin/Atout France claims.',
         'If the place is obscure, be honest and operational instead of decorative.',
         'Do not publish call-to-action copy. Do not mention GetYourGuide unless a product is provided.',
         'All sentences <= 25 words.',
+        ...(grounded
+          ? [
+              'Use the high-volume keyword phrasing (below) in factual_summary and description when it is natural — never force an off-topic keyword, never fabricate a fact to match one.',
+            ]
+          : []),
       ],
     },
     null,
     2,
   );
+  return grounded ? `${base}\n\n${groundingBlock}` : base;
 }
 
-function buildRetryPrompt(place: PlaceRow, issues: readonly string[]): string {
+function buildRetryPrompt(place: PlaceRow, issues: readonly string[], groundingBlock = ''): string {
   return [
-    buildUserPrompt(place),
+    buildUserPrompt(place, groundingBlock),
     '',
     '---',
     'TENTATIVE PRECEDENTE REFUSEE.',
@@ -334,12 +377,15 @@ async function generatePlaceEditorial(
   llm: LlmClient,
   provider: string,
   place: PlaceRow,
+  groundingBlock: string,
   retryIssues: readonly string[] = [],
 ): Promise<GenerationAttempt> {
   const result = await llm.call({
     systemPrompt: SYSTEM_PROMPT,
     userPrompt:
-      retryIssues.length > 0 ? buildRetryPrompt(place, retryIssues) : buildUserPrompt(place),
+      retryIssues.length > 0
+        ? buildRetryPrompt(place, retryIssues, groundingBlock)
+        : buildUserPrompt(place, groundingBlock),
     temperature: retryIssues.length > 0 ? 0.25 : 0.45,
     maxOutputTokens: 5500,
     responseFormat: provider === 'openai' ? 'json' : 'text',
@@ -387,7 +433,12 @@ export async function enrichPlacesEditorial(
   cityKey: string,
   options: EnrichOptions = {},
 ): Promise<number> {
-  const filters = [`city_key=eq.${cityKey}`, 'is_published=eq.false', 'factual_summary_fr=is.null'];
+  // Target scaffolds lacking the FULL editorial envelope. `faq IS NULL` is
+  // the reliable signal: the backfill seeds `factual_summary_fr` from the
+  // embedded POI description, so the legacy `factual_summary_fr IS NULL`
+  // filter wrongly skipped every backfilled scaffold. The enrich is always
+  // city-scoped, so published cities (e.g. Paris) are never touched.
+  const filters = [`city_key=eq.${cityKey}`, 'is_published=eq.false', 'faq=is.null'];
   if (options.kind !== undefined) filters.push(`kind=eq.${encodeURIComponent(options.kind)}`);
   if (options.slug !== undefined) filters.push(`slug=eq.${encodeURIComponent(options.slug)}`);
   if (options.sourcePrefix !== undefined) {
@@ -408,51 +459,108 @@ export async function enrichPlacesEditorial(
   const env = loadEnv();
   const provider = resolveProvider(env);
   const llm = buildLlmClient(env, provider);
-  let enriched = 0;
 
-  for (const place of places) {
+  const dfsCfg = options.noGrounding === true ? null : loadDfsConfig();
+  const locale: GroundingLocale = {
+    locationName: options.locationName ?? 'France',
+    languageCode: options.languageCode ?? 'fr',
+  };
+  console.log(
+    `[enrich] grounding: ${dfsCfg === null ? 'OFF (LLM-only)' : `ON (DataForSEO, ${locale.locationName}/${locale.languageCode})`}`,
+  );
+  // Enrich a single place. Returns true when the row was (or would be)
+  // written. Per-place isolation: a transient failure (OpenAI/DFS blip,
+  // rate-limit) must never abort the batch — rejected/failed rows keep
+  // `faq IS NULL` and are picked up on re-run. Each place is independent
+  // and the PATCH is idempotent, so workers never collide.
+  const processPlace = async (place: PlaceRow): Promise<boolean> => {
     if (isActivityRouteMisclassified(place)) {
       console.warn(
         `  [enrich] ${place.name}: skipped — activity route needs outdoor reclassification.`,
       );
-      continue;
+      return false;
     }
+    try {
+      // Cluster grounding: PAA + high-volume keywords for this place. Cached on
+      // disk; degrades to an empty block (LLM-only) on any vendor failure.
+      const grounding = await groundKeywords(
+        dfsCfg,
+        [place.name, `${place.name} ${place.city}`],
+        locale,
+      );
+      const groundingBlock = renderGroundingForPrompt(grounding);
+      if (grounding.grounded) {
+        console.log(
+          `  [enrich] ${place.name}: grounded PAA=${String(grounding.peopleAlsoAsk.length)} kw=${String(grounding.topKeywords.length)}`,
+        );
+      }
 
-    let attempt = await generatePlaceEditorial(llm, provider, place);
-    attempt = await applyFixPasses(llm, provider, place, attempt);
-    if (!attempt.ok) {
-      attempt = await generatePlaceEditorial(llm, provider, place, attempt.issues);
+      let attempt = await generatePlaceEditorial(llm, provider, place, groundingBlock);
       attempt = await applyFixPasses(llm, provider, place, attempt);
-    }
-    if (!attempt.ok || attempt.data === undefined) {
-      console.warn(`  [enrich] ${place.name}: rejected - ${attempt.issues.join(', ')}`);
-      continue;
-    }
-    const e = attempt.data;
-    if (options.dryRun === true) {
-      console.log(
-        `  [enrich] ${place.name} ok DRY ` +
-          `summary=${String(e.factual_summary_fr.length)}c faq=${String(e.faq.length)} ` +
-          `tokens=${String(attempt.tokens.input)}/${String(attempt.tokens.output)}`,
+      if (!attempt.ok) {
+        attempt = await generatePlaceEditorial(
+          llm,
+          provider,
+          place,
+          groundingBlock,
+          attempt.issues,
+        );
+        attempt = await applyFixPasses(llm, provider, place, attempt);
+      }
+      if (!attempt.ok || attempt.data === undefined) {
+        console.warn(`  [enrich] ${place.name}: rejected - ${attempt.issues.join(', ')}`);
+        return false;
+      }
+      const e = attempt.data;
+      if (options.dryRun === true) {
+        console.log(
+          `  [enrich] ${place.name} ok DRY ` +
+            `summary=${String(e.factual_summary_fr.length)}c faq=${String(e.faq.length)} ` +
+            `tokens=${String(attempt.tokens.input)}/${String(attempt.tokens.output)}`,
+        );
+      } else {
+        await patchById(cfg, 'places', place.id, {
+          factual_summary_fr: e.factual_summary_fr,
+          factual_summary_en: e.factual_summary_en,
+          description_fr: e.description_fr,
+          description_en: e.description_en,
+          concierge_advice: e.concierge_advice,
+          faq: e.faq,
+        });
+        console.log(
+          `  [enrich] ${place.name} ok ` +
+            `faq=${String(e.faq.length)} tokens=${String(attempt.tokens.input)}/${String(
+              attempt.tokens.output,
+            )}`,
+        );
+      }
+      return true;
+    } catch (err) {
+      console.warn(
+        `  [enrich] ${place.name}: error (skipped, will retry on re-run) - ${err instanceof Error ? err.message : String(err)}`,
       );
-    } else {
-      await patchById(cfg, 'places', place.id, {
-        factual_summary_fr: e.factual_summary_fr,
-        factual_summary_en: e.factual_summary_en,
-        description_fr: e.description_fr,
-        description_en: e.description_en,
-        concierge_advice: e.concierge_advice,
-        faq: e.faq,
-      });
-      console.log(
-        `  [enrich] ${place.name} ok ` +
-          `faq=${String(e.faq.length)} tokens=${String(attempt.tokens.input)}/${String(
-            attempt.tokens.output,
-          )}`,
-      );
+      return false;
     }
-    enriched += 1;
-  }
+  };
+
+  // Bounded worker pool: `concurrency` workers pull from a shared cursor.
+  // Default 1 = the previous sequential behaviour.
+  const concurrency = Math.max(1, options.concurrency ?? 1);
+  console.log(`[enrich] concurrency: ${String(concurrency)}`);
+  let cursor = 0;
+  let enriched = 0;
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const index = cursor;
+      cursor += 1;
+      if (index >= places.length) return;
+      const place = places[index];
+      if (place === undefined) return;
+      const ok = await processPlace(place);
+      if (ok) enriched += 1;
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, places.length) }, () => worker()));
 
   console.log(`[enrich] done - ${String(enriched)}/${String(places.length)} enriched.`);
   return enriched;
