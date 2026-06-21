@@ -48,7 +48,7 @@ function cityLabel(places: readonly PlaceListItem[], citySlug: string): string {
   if (first !== undefined && first.city.length > 0) return first.city;
   return citySlug
     .split('-')
-    .map((s) => (s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : s))
+    .map((s) => (s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s))
     .join(' ');
 }
 

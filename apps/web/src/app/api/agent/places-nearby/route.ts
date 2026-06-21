@@ -112,7 +112,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const places = await listPublishedPlacesForCity(citySlug!).catch(() => []);
+  if (citySlug === undefined || citySlug.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'invalid_query' },
+      { status: 400, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+
+  const places = await listPublishedPlacesForCity(citySlug).catch(() => []);
   return NextResponse.json(
     {
       ok: true,
