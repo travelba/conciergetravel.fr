@@ -6,7 +6,8 @@ import { getMapboxAccessToken } from '@/lib/maps/mapbox-access';
 import { buildMapboxExternalMapHref } from '@/lib/maps/mapbox-static';
 import type { LocalisedPointOfInterest } from '@/server/hotels/get-hotel-by-slug';
 
-import { HotelInteractiveMap, type HotelMapPoi } from './hotel-interactive-map';
+import type { HotelMapPoi } from './hotel-interactive-map';
+import { HotelInteractiveMapLazy } from './hotel-interactive-map-lazy';
 import { HotelStaticMap } from './hotel-static-map';
 
 interface HotelLocationMapProps {
@@ -117,7 +118,7 @@ export async function HotelLocationMap({
         />
       </div>
       <div className="hidden lg:block">
-        <HotelInteractiveMap
+        <HotelInteractiveMapLazy
           accessToken={accessToken}
           hotelName={hotelName}
           latitude={latitude}
@@ -128,7 +129,7 @@ export async function HotelLocationMap({
           viewMapLabel={t('viewMap')}
         >
           {attribution}
-        </HotelInteractiveMap>
+        </HotelInteractiveMapLazy>
       </div>
     </div>
   );

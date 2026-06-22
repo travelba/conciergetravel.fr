@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { POI_HOVER_EVENT, type PoiHoverDetail } from '@/components/hotel/hotel-interactive-map';
+import { POI_HOVER_EVENT, type PoiHoverDetail } from '@/components/hotel/poi-hover-events';
 
 /**
  * Client behaviours from `DA/assets/app.js` for kit hotel fiches:

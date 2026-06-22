@@ -18,11 +18,9 @@ import {
   MCH_MAPBOX_STYLE,
 } from '@/lib/maps/mapbox-theme';
 
-export const POI_HOVER_EVENT = 'mch:poi-hover';
+import { POI_HOVER_EVENT, type PoiHoverDetail } from './poi-hover-events';
 
-export interface PoiHoverDetail {
-  readonly poiId: string | null;
-}
+export { POI_HOVER_EVENT, type PoiHoverDetail };
 
 export interface HotelMapPoi {
   readonly id: string;
