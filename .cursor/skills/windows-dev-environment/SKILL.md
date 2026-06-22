@@ -458,6 +458,47 @@ never start two workers on the same file set. See Rule 9 quinquies (pathspec
 commits) and the photo-pipeline §JS-SPA sourcing note for the parallel-worker
 disjointness lesson.
 
+## Rule 9 septies — a peer's park-stash / `reset --hard` can silently wipe YOUR uncommitted edits mid-task
+
+In the shared-tree multitask pattern, a peer worker that "parks" its WIP
+(`git stash -u` under a label, or `git reset --hard` to sync) stashes/discards
+**every uncommitted change in the tree — including files it does not own**. This
+bites even when a running script has _already consumed_ your edits: 2026-06-22,
+the intl-ranking wave edited `axes.ts` + `combinator.ts` + `push-ranking-v2.ts`,
+the matrix generator + REST push read them and shipped 39 rankings live to prod,
+then a peer's `ranking-hero-worker-park-2` stash + a `reset: moving to HEAD`
+reverted all three files back to HEAD. `git status` showed a clean tree; the
+work looked lost.
+
+**Mitigations (in order):**
+
+1. **Commit immediately after a verified run** — the only durable lock. Don't
+   leave edits uncommitted across a long LLM/generation step in a shared tree;
+   the window between "script succeeded" and "I commit" is exactly when a peer
+   reset wipes you. Use the Rule 9 quinquies pathspec form.
+2. **Recover from the peer's stash** — `git stash list` (look for worker labels
+   like `*-worker-park-*`), then `git stash show --name-only "stash@{N}"` to find
+   your files. ⚠ `git stash show --name-only` diffs against the stash's _own
+   older base_, so it can list files whose content actually equals current HEAD
+   — verify with `git diff "stash@{N}" HEAD -- <file>` (empty = your edits are
+   NOT in there) before trusting it.
+3. **Re-derive from surviving scratch** — `tmp-*.ts` scratch scripts are
+   gitignored + outside the typecheck perimeter (Rule 9 sexies), so a `reset
+--hard` does NOT delete them. Keep the data-generating scratch (e.g.
+   `tmp-city-strings.ts`, `tmp-intl-coverage.ts`) until the real code is
+   committed — they let you regenerate the exact payload deterministically
+   instead of hand-reconstructing from memory.
+4. **The DB write survives regardless** — a `reset --hard` only touches the
+   working tree, never Supabase. Content already pushed/published stays live;
+   only the _source_ that produced it is at risk. Prioritise re-committing the
+   source over re-pushing data.
+
+Cross-signal: peers leave breadcrumbs. A sibling comment `// (Marrakech deferred
+— its LieuDef lives in the concurrent intl-wave branch, unstable in the shared
+tree)` is the peer telling you it is coordinating around your unstable
+uncommitted work — commit it to unblock them. See Rule 9 sexies (push-lock) and
+Rule 12 (the REST-push fallback this incident also produced).
+
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle
 
 `packages/config/src/env-web.ts` uses `createEnv` from `@t3-oss/env-nextjs`. The `skipValidation` flag reads `process.env.SKIP_ENV_VALIDATION`, which is **server-only** — it is not inlined into the client bundle (only `NEXT_PUBLIC_*` vars are). So:
