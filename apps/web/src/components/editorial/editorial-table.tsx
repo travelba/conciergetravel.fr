@@ -92,7 +92,7 @@ export function EditorialTable({ table, locale }: Props): ReactElement {
       <figcaption className="text-fg/90 border-border bg-bg/60 border-b px-4 py-3 font-serif text-base font-light">
         {title}
       </figcaption>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={title}>
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-border border-b">

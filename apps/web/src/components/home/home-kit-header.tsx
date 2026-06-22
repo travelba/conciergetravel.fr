@@ -98,7 +98,7 @@ export function HomeKitHeader(): ReactElement {
           <span className="sep" aria-hidden />
           <HomeKitLocaleLink />
           <span className="sep" aria-hidden />
-          <Link href="/compte" className="hr-item">
+          <Link href="/compte" className="hr-item" aria-label={tHeader('account.myAccount')}>
             <svg className="icon" viewBox="0 0 24 24" aria-hidden>
               <circle cx="12" cy="8" r="4" />
               <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
