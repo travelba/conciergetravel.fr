@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -188,7 +190,11 @@ const RANKING_COLUMNS =
   'tables, glossary, external_sources, editorial_callouts, toc_anchors, editorial_sections, ' +
   'axes, factual_summary_fr, factual_summary_en';
 
-export async function getRankingBySlug(slug: string): Promise<RankingRow | null> {
+// `cache()`-wrapped so `generateMetadata` (og:image derivation) and the
+// page render share a single fetch per request — the page is
+// `force-dynamic`, so without this the row + entries would be queried
+// twice. Mirrors the `get-hotel-by-slug.ts` precedent.
+export const getRankingBySlug = cache(async (slug: string): Promise<RankingRow | null> => {
   if (typeof slug !== 'string' || slug.length === 0) return null;
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
@@ -201,9 +207,11 @@ export async function getRankingBySlug(slug: string): Promise<RankingRow | null>
   const parsed = RankingRowSchema.safeParse(data);
   if (!parsed.success) return null;
   return parsed.data;
-}
+});
 
-export async function getRankingEntries(rankingId: string): Promise<readonly RankingEntry[]> {
+export const getRankingEntries = cache(_getRankingEntries);
+
+async function _getRankingEntries(rankingId: string): Promise<readonly RankingEntry[]> {
   const supabase = getSupabaseAdminClient();
   // Two-step query: entries → hotels (RLS keeps the join read-only).
   const { data: entries, error: entriesErr } = await supabase

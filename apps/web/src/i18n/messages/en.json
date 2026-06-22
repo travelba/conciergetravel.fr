@@ -4301,7 +4301,9 @@
   },
   "rankingPage": {
     "tldrTitle": "The verdict at a glance",
-    "tldrAriaLabel": "The verdict at a glance: the top three"
+    "tldrAriaLabel": "The verdict at a glance: the top three",
+    "podiumAriaLabel": "The ranking podium in pictures",
+    "podiumHeading": "The top of the ranking in pictures"
   },
   "hotelTldr": {
     "eyebrow": "The Concierge's essentials",

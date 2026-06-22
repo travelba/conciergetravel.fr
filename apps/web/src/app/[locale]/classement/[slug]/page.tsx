@@ -28,6 +28,8 @@ import {
   getRankingBySlug,
   getRankingEntries,
   listPublishedRankings,
+  type RankingEntry,
+  type RankingRow,
 } from '@/server/rankings/get-ranking-by-slug';
 
 // Emits per-request nonce'd JSON-LD (json-ld.tsx CSP contract + ADR-0013).
@@ -94,39 +96,80 @@ const T = {
 } as const;
 
 /**
- * Resolves a deterministic, render-time year for the title/H1 freshness
- * stamp (P0-1). Prefers the freshest editorial date when it is recent
- * (this year or last year), otherwise falls back to the current year so
- * evergreen rankings never advertise a stale year. Purely render-time —
- * never mutated back into the DB.
+ * Single source of truth for the page's freshness year (P0-3). Returns
+ * both the year used for the title/H1 stamp AND the ISO date the badge
+ * should display, so the `<title>`, `og:title`, H1 and `LastUpdatedBadge`
+ * never diverge.
+ *
+ * Prefers the freshest editorial date when it is recent (this year or
+ * last) and exposes that same ISO to the badge. When no candidate is
+ * recent (stale or null dates), the year falls back to the current year
+ * and `iso` is `null` so the badge self-elides rather than render a date
+ * that contradicts the stamped year. Purely render-time — never mutated
+ * back into the DB.
  */
-function resolveStampYear(candidates: readonly (string | null)[]): number {
+interface RankingFreshness {
+  readonly year: number;
+  readonly iso: string | null;
+}
+function resolveFreshness(candidates: readonly (string | null)[]): RankingFreshness {
   const currentYear = new Date().getUTCFullYear();
   for (const iso of candidates) {
     if (iso === null) continue;
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) continue;
     const y = d.getUTCFullYear();
-    if (y <= currentYear && y >= currentYear - 1) return y;
+    if (y <= currentYear && y >= currentYear - 1) return { year: y, iso };
   }
-  return currentYear;
+  return { year: currentYear, iso: null };
 }
 
 /**
- * Appends a deterministic « en {YYYY} » / « in {YYYY} » suffix to a title
- * (P0-1). Idempotent — a title that already carries a 20xx year is
- * returned unchanged (double-stamp guard). When the title has a trailing
- * « | brand » segment, the year is inserted before it so the brand stays
- * last.
+ * Deterministic year reconciliation for the title/H1 (P0-3). The single
+ * source of truth is `year` (from `resolveFreshness`).
+ *
+ *  - `awarded` rankings carry an *award-edition* year in their title
+ *    (e.g. « Travel + Leisure World's Best 2025 ») that is a fact, not a
+ *    freshness stamp → never touched.
+ *  - Other kinds: a stale freshness year already in the title is replaced
+ *    with `year` (this fixes « …sélection 2025 » diverging from a 2026
+ *    badge); when the title carries no year, the suffix « en {year} » /
+ *    « in {year} » is appended before any trailing « | brand » segment.
+ *
+ * Idempotent — a title already carrying the target year is returned
+ * unchanged.
  */
-function stampYear(text: string, year: number, locale: Locale): string {
-  if (/\b20\d{2}\b/.test(text)) return text;
+function stampYear(text: string, year: number, locale: Locale, kind: RankingRow['kind']): string {
+  if (kind === 'awarded') return text;
+  const yearRe = /\b20\d{2}\b/;
+  const match = yearRe.exec(text);
+  if (match !== null) {
+    return match[0] === String(year) ? text : text.replace(yearRe, String(year));
+  }
   const suffix = pickByLocale(locale, `en ${year}`, `in ${year}`);
   const pipeIdx = text.lastIndexOf(' | ');
   if (pipeIdx !== -1) {
     return `${text.slice(0, pipeIdx)} ${suffix}${text.slice(pipeIdx)}`;
   }
   return `${text} ${suffix}`;
+}
+
+/**
+ * Resolves the ranking's hero Cloudinary public_id (P0-1 / P0-2). Prefers
+ * a dedicated editorial `hero_image` when present, otherwise derives it
+ * from the best-ranked entry that carries a hotel hero image. Returns
+ * `null` only when neither exists — the og:image tag and the
+ * above-the-fold block both self-elide in that case.
+ */
+function resolveRankingHeroPublicId(
+  ranking: RankingRow,
+  entries: readonly RankingEntry[],
+): string | null {
+  if (ranking.hero_image !== null && ranking.hero_image !== '') return ranking.hero_image;
+  for (const e of entries) {
+    if (e.hotel_hero_image !== null && e.hotel_hero_image !== '') return e.hotel_hero_image;
+  }
+  return null;
 }
 
 /**
@@ -164,13 +207,11 @@ export async function generateMetadata({
     ranking.meta_title_fr ?? `${ranking.title_fr} | MyConciergeHotel`,
     ranking.meta_title_en ?? `${ranking.title_en ?? ranking.title_fr} | MyConciergeHotel`,
   );
-  // P0-1 — render-time year stamp (deterministic, never mutates the DB
-  // meta_title). Idempotent guard skips titles that already carry a year.
-  const title = stampYear(
-    baseTitle,
-    resolveStampYear([ranking.reviewed_at, ranking.updated_at]),
-    locale,
-  );
+  // P0-3 — render-time year stamp (deterministic, never mutates the DB
+  // meta_title). Single source of truth = reviewed_at/updated_at, else the
+  // current year. `og:title` reuses the same stamped `title`.
+  const { year: stampYearValue } = resolveFreshness([ranking.reviewed_at, ranking.updated_at]);
+  const title = stampYear(baseTitle, stampYearValue, locale, ranking.kind);
   const description = pickByLocale(
     locale,
     ranking.meta_desc_fr ?? ranking.intro_fr.slice(0, 160),
@@ -181,6 +222,27 @@ export async function generateMetadata({
       locale: l,
       href: { pathname: '/classement/[slug]', params: { slug } },
     });
+
+  // P0-2 — social share image derived from the top-1 hotel hero (or a
+  // dedicated editorial `hero_image` when one exists). `getRankingEntries`
+  // is `cache()`-wrapped, so this fetch is shared with the page render at
+  // no extra DB cost. Cloudinary serves a canonical 1200×630 JPEG that
+  // LinkedIn / X / WhatsApp / Slack / iMessage all crop predictably.
+  const entries = await getRankingEntries(ranking.id);
+  const heroPublicId = resolveRankingHeroPublicId(ranking, entries);
+  const ogImageUrl =
+    heroPublicId !== null
+      ? buildCloudinarySrc({
+          cloudName: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+          publicId: heroPublicId,
+          transforms: 'f_jpg,q_auto,c_fill,g_auto,w_1200,h_630',
+        })
+      : undefined;
+  const ogImages =
+    ogImageUrl !== undefined
+      ? [{ url: ogImageUrl, width: 1200, height: 630, alt: title, type: 'image/jpeg' as const }]
+      : undefined;
+
   return {
     title,
     description,
@@ -193,6 +255,16 @@ export async function generateMetadata({
       description,
       type: 'article',
       locale: ogLocale(locale),
+      siteName: 'MyConciergeHotel',
+      ...(ogImages !== undefined ? { images: ogImages } : {}),
+    },
+    twitter: {
+      // `summary_large_image` gives the ranking hero a true large preview
+      // in DMs and timelines — the share canal these acquisition pages live on.
+      card: 'summary_large_image',
+      title,
+      description,
+      ...(ogImageUrl !== undefined ? { images: [ogImageUrl] } : {}),
     },
   };
 }
@@ -253,11 +325,12 @@ export default async function RankingPage({
   // Title/intro/outro/factual selection stays locale-aware (data layer) — see ADR-0012.
   // V2 locales fall back to FR until migration 0034.
   const title = pickByLocale(locale, ranking.title_fr, ranking.title_en ?? ranking.title_fr);
-  // P0-1 — render-time year stamp applied to the visible H1 only. The
+  // P0-3 — render-time year stamp applied to the visible H1 only. The
   // structural JSON-LD (breadcrumb / article headline / ItemList name)
-  // keeps the canonical, unstamped title.
-  const stampYearValue = resolveStampYear([ranking.reviewed_at, ranking.updated_at]);
-  const titleWithYear = stampYear(title, stampYearValue, locale);
+  // keeps the canonical, unstamped title. `freshness.iso` feeds the badge
+  // so the H1 year and the badge year are the same single source of truth.
+  const freshness = resolveFreshness([ranking.reviewed_at, ranking.updated_at]);
+  const titleWithYear = stampYear(title, freshness.year, locale, ranking.kind);
   // P0-2 — TL;DR verdict labels via i18n (no hardcoded UI strings).
   const tRank = await getTranslations({ locale, namespace: 'rankingPage' });
   const intro = pickByLocale(locale, ranking.intro_fr, ranking.intro_en ?? ranking.intro_fr);
@@ -428,13 +501,10 @@ export default async function RankingPage({
                 </p>
               ) : null}
               <div className="rk-meta">
-                {/* P0-1 — full-words freshness badge: « Mis à jour en juin 2026 ».
-                    Derived from reviewed_at first (the editorial review date). */}
-                <LastUpdatedBadge
-                  isoDate={ranking.reviewed_at ?? ranking.updated_at}
-                  locale={locale}
-                  variant="monthYear"
-                />
+                {/* P0-3 — full-words freshness badge: « Mis à jour en juin 2026 ».
+                    Uses the SAME resolved freshness date as the H1 year stamp,
+                    so badge-year and title-year never diverge. */}
+                <LastUpdatedBadge isoDate={freshness.iso} locale={locale} variant="monthYear" />
                 {/* Keep legacy "Classement révisé le …" for assistive context when distinct. */}
                 {reviewedDate !== null && ranking.reviewed_at !== ranking.updated_at ? (
                   <span>{t.updatedOn(reviewedDate)}</span>
@@ -442,6 +512,99 @@ export default async function RankingPage({
               </div>
             </div>
           </header>
+
+          {/* P0-A — Above-the-fold hero/podium. Renders the best-ranked
+              entries (top-1 large + up to 2 podium tiles) using the hotel
+              hero image already joined for the ItemList — 0 sourcing. The
+              first image is the LCP target (`fetchPriority="high"` +
+              eager); tiles lazy-load. Every image has reserved dimensions
+              (width/height + CSS aspect-ratio) so CLS stays 0. The whole
+              block self-elides when no entry carries an image. */}
+          {(() => {
+            const podium = entries
+              .filter((e) => e.hotel_hero_image !== null && e.hotel_hero_image !== '')
+              .slice(0, 3);
+            if (podium.length === 0) return null;
+            const layoutClass =
+              podium.length === 1
+                ? ' rk-podium--solo'
+                : podium.length === 2
+                  ? ' rk-podium--duo'
+                  : '';
+            return (
+              <section className="mch-kit mb-12" aria-label={tRank('podiumAriaLabel')}>
+                <h2 className="sr-only">{tRank('podiumHeading')}</h2>
+                <div className={`rk-podium${layoutClass}`}>
+                  {podium.map((e, idx) => {
+                    const isFeature = idx === 0;
+                    // Non-null asserted by the filter above; narrow for TS.
+                    const heroPublicId = e.hotel_hero_image ?? '';
+                    const podiumSlug = pickByLocale(
+                      locale,
+                      e.hotel_slug,
+                      e.hotel_slug_en ?? e.hotel_slug,
+                    );
+                    const podiumName = pickByLocale(
+                      locale,
+                      e.hotel_name,
+                      e.hotel_name_en ?? e.hotel_name,
+                    );
+                    const locLabel =
+                      e.hotel_region.length > 0
+                        ? `${e.hotel_city} · ${e.hotel_region}`
+                        : e.hotel_city;
+                    // Hard Rule 16 — alt enriched with name + city keyword.
+                    const podiumAlt = pickByLocale(
+                      locale,
+                      `${podiumName}, ${e.hotel_city}`,
+                      `${podiumName}, ${e.hotel_city}`,
+                    );
+                    const podiumSrc = buildCloudinarySrc({
+                      cloudName,
+                      publicId: heroPublicId,
+                      transforms: isFeature
+                        ? 'f_auto,q_auto,c_fill,g_auto,w_1280,h_800'
+                        : 'f_auto,q_auto,c_fill,g_auto,w_680,h_510',
+                    });
+                    const starLabel = e.hotel_is_palace
+                      ? t.palace
+                      : '★'.repeat(Math.max(0, Math.min(5, e.hotel_stars)));
+                    return (
+                      <Link
+                        key={`podium-${e.rank}-${e.hotel_slug}`}
+                        href={{ pathname: '/hotel/[slug]', params: { slug: podiumSlug } }}
+                        className={isFeature ? 'rk-podium-feature' : 'rk-podium-tile'}
+                        aria-label={`${t.rankLabel(e.rank)} — ${podiumName}, ${locLabel}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={podiumSrc}
+                          alt={podiumAlt}
+                          width={isFeature ? 1280 : 680}
+                          height={isFeature ? 800 : 510}
+                          decoding="async"
+                          {...(isFeature
+                            ? { loading: 'eager' as const, fetchPriority: 'high' as const }
+                            : { loading: 'lazy' as const })}
+                        />
+                        <span className="rk-podium-scrim" aria-hidden="true" />
+                        <span className="rk-podium-rank" aria-hidden="true">
+                          {t.rankLabel(e.rank)}
+                        </span>
+                        <span className="rk-podium-cap">
+                          <span className="rk-podium-stars" aria-hidden="true">
+                            {starLabel}
+                          </span>
+                          <span className="rk-podium-name">{podiumName}</span>
+                          <span className="rk-podium-loc">{locLabel}</span>
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* P0-2 — « Le verdict en bref » TL;DR block. Extractable top-3
               summary anchored at #tldr (speakable target). Deterministic:

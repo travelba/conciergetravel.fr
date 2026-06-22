@@ -4301,7 +4301,9 @@
   },
   "rankingPage": {
     "tldrTitle": "Le verdict en bref",
-    "tldrAriaLabel": "Le verdict en bref : le trio de tête"
+    "tldrAriaLabel": "Le verdict en bref : le trio de tête",
+    "podiumAriaLabel": "Le podium du classement en images",
+    "podiumHeading": "Le haut du classement en images"
   },
   "hotelTldr": {
     "eyebrow": "L'essentiel du Concierge",
