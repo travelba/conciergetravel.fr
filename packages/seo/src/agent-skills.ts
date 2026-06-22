@@ -94,7 +94,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-hotel',
       description:
-        'Récupérer la fiche complète d’un hôtel par son slug : chapeau Concierge, chambres, restaurants, spa, localisation, conditions, distinctions, FAQ, rating Amadeus, et surtout le « Conseil du Concierge » (un secret opérationnel concret) + JSON-LD Hotel. URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
+        'Récupérer la fiche d’un hôtel par son slug : identité, résumé factuel, distinctions, équipements, et le « Conseil du Concierge » (un secret opérationnel concret). Inclut par défaut la « lentille concierge » pour recommander après réservation : restaurants de l’hôtel (chef, plat signature, lien de réservation), lieux à proximité classés visiter / faire / manger / shopping (distance, marche, site web), expériences signature, et blocs questions-réponses GEO/AEO. URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -105,6 +105,16 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           locale: {
             type: 'string',
             description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+          body: {
+            type: 'string',
+            description:
+              'Longueur de la description : "short" (par défaut, ~500 car.) ou "long" (description complète, plafonnée à 4 Ko).',
+          },
+          lens: {
+            type: 'string',
+            description:
+              'Lentille concierge (restaurants / lieux à proximité / expériences / Q&R GEO) : "on" (par défaut) ou "off" pour un payload identité seule.',
           },
         },
         required: ['slug'],
