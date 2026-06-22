@@ -443,6 +443,79 @@ have **0 Google Places photos** → need Tavily/manual. Don't store the
 Places `downloadUrl` as `source_url` — it's a signed, expiring URL;
 provenance lives in the `google_places`/`attributed` tags instead.
 
+### Update — the real hotel `<10`-photo residual is ~15, not ~87 (2026-06-22)
+
+The "87 hotels < 10 photos" figure in `AGENTS.md` is **stale history**. After
+the June append waves the live residual is **~15** hotels, of which **~10/15
+are NOT addressable by Google Places** (the source has 0 photos for them —
+pre-opening properties, JS-rendered R&C lodges, obscure independents). Those
+need Tavily / official-site / manual sourcing, not another Places run. Always
+re-count from the live DB (`gallery_images` length) before scoping a "close the
+gap" chantier — don't trust a count baked into prose.
+
+## The hotel APPEND path DEPENDS on OpenAI Vision — no OpenAI, no clean append (2026-06-22)
+
+There is **no hotel photo APPEND pipeline that runs without OpenAI**. This is
+a hard dependency, not a convenience, and it bites the moment the OpenAI quota
+is down or the key is absent:
+
+- **`upload-press-kit-images.ts`** (the only Vision-curated append path, used by
+  the Tier B Google-Places backfill above) calls `visionAnalyse()`
+  **unconditionally** — it **throws** when `OPENAI_API_KEY` is missing. Vision
+  is what produces `alt_fr` + `alt_en` + `category` + the keep/quality filter,
+  so the append cannot be made "OpenAI-optional" without dropping those columns
+  (which would violate Hard Rule 16 alt enrichment + the category contract).
+- The **only** OpenAI-free hotel→Places path, `sync-hotel-photos.ts
+--tier=places`, **overwrites `gallery_images` wholesale** (the destructive
+  trap documented in "Tier B backfill: APPEND … never `sync` overwrite",
+  2026-06-18) **and** emits neither `alt_en` nor `category`. It is safe only for
+  0-photo stubs, never for a hotel with curated photos to preserve.
+
+**Consequence for agents:** when OpenAI is unavailable, a hotel photo _append_
+chantier is **blocked** — do the written-content chantier instead (§Sequencing
+decision), or queue the append for when Vision is back. Do **not** reach for
+`sync-hotel-photos --tier=places` as a fallback: it destroys curation and
+ships un-Vision-checked subjects. (Contrast: the **places/lieux** pipeline
+`backfill-place-photos.ts` below is genuinely OpenAI-free — it derives alt text
+deterministically from `kind` + `city`, so the lieux vertical keeps moving when
+the hotel append path is blocked.)
+
+## Lieux (places) photo backfill — `backfill-place-photos.ts` has NO `hero_image is null` filter and NO offset (2026-06-22)
+
+`scripts/editorial-pilot/src/places/backfill-place-photos.ts` is the
+sister-pipeline of the hotel orchestrator, scoped to the **`public.places`
+"lieux à visiter"** vertical (Cloudinary folder `cct/places/{cityKey}/{slug}`,
+Google-Places-sourced, **OpenAI-free** — alt text is built deterministically
+from `kind` + `city`, see `buildAlt`). Its row selection is:
+
+```ts
+// filters = [`city_key=eq.${city}`] (+ `is_published=eq.true` unless --include-unpublished)
+const places = await selectTable(supa, 'places', {
+  columns: PLACE_COLS,
+  filters,
+  order: 'slug.asc',
+  limit: args.limit,
+});
+```
+
+The trap: there is **no `hero_image=is.null` filter and no `offset`**. The SELECT
+always returns the **first `--limit` slugs alphabetically**; the
+already-hydrated ones are then skipped _in memory_ inside `processPlace`
+(`if (!args.force && place.hero_image !== null) return 'skip'`) at near-zero
+cost. So a loop with a small `--limit` (e.g. `--limit=10`) **re-scans the same
+first-10 alphabetical slugs every iteration and never advances** past them —
+the already-done ones keep getting skipped and the tail of the city is never
+reached.
+
+**Fix:** pass a `--limit` large enough to cover the **whole city in one pass**
+(count the city's `places` rows first, then `--limit=<that count>`). The skips
+are cheap, so a single oversized-limit run is correct and idempotent. (A durable
+code fix would add a `hero_image=is.null` filter or an `offset` cursor; until
+then, size the limit to the city.) Note the **`--allow-paris` isolation guard**:
+the script refuses `--city=paris` unless explicitly opted in, because a
+continuous Paris enrichment + auto-publish loop runs in parallel — validate new
+rollouts on `--city=gordes` first.
+
 ## Finding — the 10-category coverage floor is structurally unreachable (2026-06-02)
 
 `photo-quality.mdc` frames "10/10 distinct categories" as a non-negotiable
@@ -854,6 +927,26 @@ genuinely unsourceable left NULL. Always **dry-run + eyeball the
 proposed hosts** before a live `official_url` backfill on a hard
 cohort — iterate the ruleset until the toxic/aggregator scan returns
 zero, then write.
+
+#### New squatter family — `hotels<geo><digits>` glued non-www subdomain (2026-06-22, commit `fd451b75`)
+
+A backfill surfaced `h10waterloo.hotelslondon24.com` — an aggregator that glues
+the property name into a **non-www subdomain** of a `hotels<geo><digits>` /
+`<geo>hotels<digits>` domain. The existing glued-subdomain rule had to **exclude
+`.com`** to spare legit brands (`pasadena.langhamhotels.com`,
+`booking.hotelsantacaterina.com`), so this one slipped through. The safe
+discriminator is the **trailing digits**: a real brand never registers
+`hotels<word><digits>.com`, so a digit-suffixed rule can safely include `.com`.
+The veto added to `isToxicOfficialUrl` (`toxic-official-url.ts`, +4 fixtures):
+
+```ts
+String.raw`//(?!www\.)[a-z0-9-]+\.(?:hotels[a-z]+|[a-z]+hotels)\d+\.(?:com|org|net|info)(?:[/:?#]|$)`;
+```
+
+Lesson (re-confirming the 2026-06-02 trap): when a squatter shape forces you to
+exclude `.com`, look for a second discriminator (here: terminal digits) that
+re-admits `.com` without catching the legit brands — don't leave the whole
+`.com` surface unguarded.
 
 Provenance note: `official_url` is a scalar column whose discovery
 channel is not recorded, so the converter attributes it as

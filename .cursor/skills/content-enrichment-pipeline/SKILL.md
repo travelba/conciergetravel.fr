@@ -316,6 +316,40 @@ batch enrichment script (`enrich-wikidata-ids.ts`) writes them to
 dedicated columns on `public.hotels` — those columns then power
 booking, reviews, image fallback, JSON-LD `sameAs[]`, …
 
+### Rule 9 bis — a NEW Wikidata match MUST be corroborated (geo OR accommodation description)
+
+The name-token search scorer in `enrich-wikidata-ids.ts` will happily accept a
+**non-accommodation** entity whose label contains the hotel's name tokens. The
+canonical failure (2026-06-22, commit `fd451b75`): the hotel **Rosa Alpina**
+matched `Q87641905` — _Rosa alpina_, a **plant species**. The geographic sanity
+check (`haversine(hotel, entity) < threshold`) does **not** save you here,
+because taxa, films, people and other abstract entities carry **no
+coordinates**, so the geo guard is skipped entirely and the bad match slips
+through.
+
+The fix: for a **NEW** match (`hotel.wikidata_id === null`) require corroboration
+by **EITHER** a passing geo-validation **OR** a Wikidata description that reads
+like an accommodation/building (`HOTEL_DESC_RE`). Neither → **reject** (skip,
+don't write). A pre-existing / editor-pinned `wikidata_id` is trusted as-is
+(`isNewMatch === false` exempts it).
+
+```ts
+const isNewMatch = hotel.wikidata_id === null;
+// … after the optional geo check sets geoValidated …
+if (isNewMatch) {
+  const descLooksLikeAccommodation = matchedDesc !== null && HOTEL_DESC_RE.test(matchedDesc);
+  if (!geoValidated && !descLooksLikeAccommodation) {
+    skipped += 1; // ✗ type-rejected: not geo-validated AND not an accommodation
+    continue;
+  }
+}
+```
+
+General lesson: a geo guard that **only fires when both sides carry
+coordinates** is a no-op against coordinate-less false positives (taxa, works,
+people). Pair it with a **type/description** corroboration so an abstract
+entity can never win on name overlap alone.
+
 ## Rule 10 — POI enrichment: DT for patrimony, Overpass for daily-life
 
 The "À proximité" block on a hotel page has **three editorial buckets**
@@ -709,6 +743,19 @@ label), and `--city-match=Lond` (the ILIKE stem) are three distinct
 values. `--city-name` defaults to `--city-match` for back-compat
 (`paris` / `gordes` legacy loop), so always set it when the match is a
 stem.
+
+**Gotcha — a too-short stem contaminates HOMONYM cities (2026-06-22).** The
+stem is a substring `ILIKE *<stem>*`, so an over-short stem captures unrelated
+cities that merely share the prefix. Observed: `--city-match=Floren` (meant for
+**Florence**) also matched **Saint-Florent** (Corsica), pulling Corsican hotels
+into the Florence batch. The downstream geo-fence (§(b)) _does_ eject the
+out-of-radius rows afterwards, but the contaminating hotels are still used to
+compute the **median centroid** — so they can skew the very fence meant to
+catch them. **Exclude the homonym at the source**: use the most specific stem
+that still covers the spelling variants you need (`--city-match=Florence` exact,
+not `Floren`). Verify the matched-hotel set (`SELECT slug, city FROM hotels
+WHERE city ILIKE '%<stem>%'`) before the run when the city name has common
+prefixes.
 
 ### (b) Geo-fence on the matched-hotels median centroid
 
