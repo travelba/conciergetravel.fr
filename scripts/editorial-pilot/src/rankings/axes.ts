@@ -735,6 +735,75 @@ export const LIEUX: readonly LieuDef[] = [
     scope: 'ville',
     hotelCityKeys: ['prague'],
   },
+
+  // ─── 2026-06-22 — International destination expansion (wave 1).
+  // Data-driven head rankings for non-FR countries + iconic cities that
+  // carry ≥ 3 published hotels but had no managed matrix seed. Country
+  // scope uses `countryCodes`; city scope uses `hotelCityKeys` matched
+  // against the exact raw `city` strings in the catalogue (see
+  // `tmp-city-strings.ts`). The 39 head slugs are emitted via
+  // `INTL_DESTINATION_OVERRIDES` in combinator.ts.
+  { slug: 'italie', label: 'Italie', scope: 'pays', hotelCityKeys: [], countryCodes: ['IT'] },
+  { slug: 'espagne', label: 'Espagne', scope: 'pays', hotelCityKeys: [], countryCodes: ['ES'] },
+  {
+    slug: 'royaume-uni',
+    label: 'Royaume-Uni',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['GB'],
+  },
+  { slug: 'japon', label: 'Japon', scope: 'pays', hotelCityKeys: [], countryCodes: ['JP'] },
+  { slug: 'grece', label: 'Grèce', scope: 'pays', hotelCityKeys: [], countryCodes: ['GR'] },
+  {
+    slug: 'etats-unis',
+    label: 'États-Unis',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['US'],
+  },
+  { slug: 'chine', label: 'Chine', scope: 'pays', hotelCityKeys: [], countryCodes: ['CN'] },
+  { slug: 'thailande', label: 'Thaïlande', scope: 'pays', hotelCityKeys: [], countryCodes: ['TH'] },
+  { slug: 'suisse', label: 'Suisse', scope: 'pays', hotelCityKeys: [], countryCodes: ['CH'] },
+  { slug: 'indonesie', label: 'Indonésie', scope: 'pays', hotelCityKeys: [], countryCodes: ['ID'] },
+  { slug: 'maroc', label: 'Maroc', scope: 'pays', hotelCityKeys: [], countryCodes: ['MA'] },
+  { slug: 'portugal', label: 'Portugal', scope: 'pays', hotelCityKeys: [], countryCodes: ['PT'] },
+  { slug: 'autriche', label: 'Autriche', scope: 'pays', hotelCityKeys: [], countryCodes: ['AT'] },
+  { slug: 'turquie', label: 'Turquie', scope: 'pays', hotelCityKeys: [], countryCodes: ['TR'] },
+  { slug: 'allemagne', label: 'Allemagne', scope: 'pays', hotelCityKeys: [], countryCodes: ['DE'] },
+  { slug: 'maldives', label: 'Maldives', scope: 'pays', hotelCityKeys: [], countryCodes: ['MV'] },
+  { slug: 'londres', label: 'Londres', scope: 'ville', hotelCityKeys: ['londres', 'london'] },
+  {
+    slug: 'new-york',
+    label: 'New York',
+    scope: 'ville',
+    hotelCityKeys: ['new york', 'new york city'],
+  },
+  { slug: 'tokyo', label: 'Tokyo', scope: 'ville', hotelCityKeys: ['tokyo'] },
+  { slug: 'kyoto', label: 'Kyoto', scope: 'ville', hotelCityKeys: ['kyoto'] },
+  { slug: 'istanbul', label: 'Istanbul', scope: 'ville', hotelCityKeys: ['istanbul'] },
+  { slug: 'berlin', label: 'Berlin', scope: 'ville', hotelCityKeys: ['berlin'] },
+  { slug: 'hong-kong', label: 'Hong Kong', scope: 'ville', hotelCityKeys: ['hong kong'] },
+  { slug: 'shanghai', label: 'Shanghai', scope: 'ville', hotelCityKeys: ['shanghai'] },
+  { slug: 'pekin', label: 'Pékin', scope: 'ville', hotelCityKeys: ['beijing', 'pékin', 'pekin'] },
+  { slug: 'barcelone', label: 'Barcelone', scope: 'ville', hotelCityKeys: ['barcelone'] },
+  { slug: 'madrid', label: 'Madrid', scope: 'ville', hotelCityKeys: ['madrid'] },
+  { slug: 'bangkok', label: 'Bangkok', scope: 'ville', hotelCityKeys: ['bangkok'] },
+  { slug: 'marrakech', label: 'Marrakech', scope: 'ville', hotelCityKeys: ['marrakech'] },
+  { slug: 'mykonos', label: 'Mykonos', scope: 'ville', hotelCityKeys: ['mykonos'] },
+  { slug: 'santorin', label: 'Santorin', scope: 'ville', hotelCityKeys: ['santorin'] },
+  { slug: 'florence', label: 'Florence', scope: 'ville', hotelCityKeys: ['florence'] },
+  { slug: 'milan', label: 'Milan', scope: 'ville', hotelCityKeys: ['milan'] },
+  {
+    slug: 'bali',
+    label: 'Bali',
+    scope: 'cluster',
+    hotelCityKeys: ['bali', 'ubud', 'ubud, bali', 'uluwatu, bali', 'nusa dua, bali'],
+  },
+  { slug: 'dubai', label: 'Dubaï', scope: 'ville', hotelCityKeys: ['dubai', 'dubaï'] },
+  { slug: 'abu-dhabi', label: 'Abu Dhabi', scope: 'ville', hotelCityKeys: ['abu dhabi'] },
+  { slug: 'doha', label: 'Doha', scope: 'ville', hotelCityKeys: ['doha'] },
+  { slug: 'budapest', label: 'Budapest', scope: 'ville', hotelCityKeys: ['budapest'] },
+  { slug: 'singapour', label: 'Singapour', scope: 'ville', hotelCityKeys: ['singapore'] },
 ];
 
 export const LIEU_SLUGS = LIEUX.map((l) => l.slug) as readonly string[];

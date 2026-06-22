@@ -386,6 +386,309 @@ const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
   kind: 'geographic',
 }));
 
+// ─── 2026-06-22 — International destination head rankings (wave 1) ─────────
+// Data-driven `meilleurs-hotels-<dest>` heads for non-FR countries + iconic
+// cities carrying ≥ 3 published hotels (see `tmp-intl-coverage.ts`). Each
+// references a LieuDef added in axes.ts (country → `countryCodes`, city →
+// `hotelCityKeys`). Forced as MANUAL_OVERRIDES so the heads always emit;
+// `type×lieu` / `theme×lieu` sub-combos are deferred to a later wave.
+const INTL_DESTINATIONS: readonly {
+  readonly lieuSlug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly label: string;
+}[] = [
+  // Countries.
+  {
+    lieuSlug: 'italie',
+    titleFr: "Les meilleurs hôtels d'Italie",
+    titleEn: 'The best hotels in Italy',
+    scope: 'pays',
+    label: 'Italie',
+  },
+  {
+    lieuSlug: 'espagne',
+    titleFr: "Les meilleurs hôtels d'Espagne",
+    titleEn: 'The best hotels in Spain',
+    scope: 'pays',
+    label: 'Espagne',
+  },
+  {
+    lieuSlug: 'royaume-uni',
+    titleFr: 'Les meilleurs hôtels du Royaume-Uni',
+    titleEn: 'The best hotels in the United Kingdom',
+    scope: 'pays',
+    label: 'Royaume-Uni',
+  },
+  {
+    lieuSlug: 'japon',
+    titleFr: 'Les meilleurs hôtels du Japon',
+    titleEn: 'The best hotels in Japan',
+    scope: 'pays',
+    label: 'Japon',
+  },
+  {
+    lieuSlug: 'grece',
+    titleFr: 'Les meilleurs hôtels de Grèce',
+    titleEn: 'The best hotels in Greece',
+    scope: 'pays',
+    label: 'Grèce',
+  },
+  {
+    lieuSlug: 'etats-unis',
+    titleFr: 'Les meilleurs hôtels des États-Unis',
+    titleEn: 'The best hotels in the United States',
+    scope: 'pays',
+    label: 'États-Unis',
+  },
+  {
+    lieuSlug: 'chine',
+    titleFr: 'Les meilleurs hôtels de Chine',
+    titleEn: 'The best hotels in China',
+    scope: 'pays',
+    label: 'Chine',
+  },
+  {
+    lieuSlug: 'thailande',
+    titleFr: 'Les meilleurs hôtels de Thaïlande',
+    titleEn: 'The best hotels in Thailand',
+    scope: 'pays',
+    label: 'Thaïlande',
+  },
+  {
+    lieuSlug: 'suisse',
+    titleFr: 'Les meilleurs hôtels de Suisse',
+    titleEn: 'The best hotels in Switzerland',
+    scope: 'pays',
+    label: 'Suisse',
+  },
+  {
+    lieuSlug: 'indonesie',
+    titleFr: "Les meilleurs hôtels d'Indonésie",
+    titleEn: 'The best hotels in Indonesia',
+    scope: 'pays',
+    label: 'Indonésie',
+  },
+  {
+    lieuSlug: 'maroc',
+    titleFr: 'Les meilleurs hôtels du Maroc',
+    titleEn: 'The best hotels in Morocco',
+    scope: 'pays',
+    label: 'Maroc',
+  },
+  {
+    lieuSlug: 'portugal',
+    titleFr: 'Les meilleurs hôtels du Portugal',
+    titleEn: 'The best hotels in Portugal',
+    scope: 'pays',
+    label: 'Portugal',
+  },
+  {
+    lieuSlug: 'autriche',
+    titleFr: "Les meilleurs hôtels d'Autriche",
+    titleEn: 'The best hotels in Austria',
+    scope: 'pays',
+    label: 'Autriche',
+  },
+  {
+    lieuSlug: 'turquie',
+    titleFr: 'Les meilleurs hôtels de Turquie',
+    titleEn: 'The best hotels in Turkey',
+    scope: 'pays',
+    label: 'Turquie',
+  },
+  {
+    lieuSlug: 'allemagne',
+    titleFr: "Les meilleurs hôtels d'Allemagne",
+    titleEn: 'The best hotels in Germany',
+    scope: 'pays',
+    label: 'Allemagne',
+  },
+  {
+    lieuSlug: 'maldives',
+    titleFr: 'Les meilleurs hôtels des Maldives',
+    titleEn: 'The best hotels in the Maldives',
+    scope: 'pays',
+    label: 'Maldives',
+  },
+  // Iconic cities.
+  {
+    lieuSlug: 'londres',
+    titleFr: 'Les meilleurs hôtels de Londres',
+    titleEn: 'The best hotels in London',
+    scope: 'ville',
+    label: 'Londres',
+  },
+  {
+    lieuSlug: 'new-york',
+    titleFr: 'Les meilleurs hôtels de New York',
+    titleEn: 'The best hotels in New York',
+    scope: 'ville',
+    label: 'New York',
+  },
+  {
+    lieuSlug: 'tokyo',
+    titleFr: 'Les meilleurs hôtels de Tokyo',
+    titleEn: 'The best hotels in Tokyo',
+    scope: 'ville',
+    label: 'Tokyo',
+  },
+  {
+    lieuSlug: 'kyoto',
+    titleFr: 'Les meilleurs hôtels de Kyoto',
+    titleEn: 'The best hotels in Kyoto',
+    scope: 'ville',
+    label: 'Kyoto',
+  },
+  {
+    lieuSlug: 'istanbul',
+    titleFr: "Les meilleurs hôtels d'Istanbul",
+    titleEn: 'The best hotels in Istanbul',
+    scope: 'ville',
+    label: 'Istanbul',
+  },
+  {
+    lieuSlug: 'berlin',
+    titleFr: 'Les meilleurs hôtels de Berlin',
+    titleEn: 'The best hotels in Berlin',
+    scope: 'ville',
+    label: 'Berlin',
+  },
+  {
+    lieuSlug: 'hong-kong',
+    titleFr: 'Les meilleurs hôtels de Hong Kong',
+    titleEn: 'The best hotels in Hong Kong',
+    scope: 'ville',
+    label: 'Hong Kong',
+  },
+  {
+    lieuSlug: 'shanghai',
+    titleFr: 'Les meilleurs hôtels de Shanghai',
+    titleEn: 'The best hotels in Shanghai',
+    scope: 'ville',
+    label: 'Shanghai',
+  },
+  {
+    lieuSlug: 'pekin',
+    titleFr: 'Les meilleurs hôtels de Pékin',
+    titleEn: 'The best hotels in Beijing',
+    scope: 'ville',
+    label: 'Pékin',
+  },
+  {
+    lieuSlug: 'barcelone',
+    titleFr: 'Les meilleurs hôtels de Barcelone',
+    titleEn: 'The best hotels in Barcelona',
+    scope: 'ville',
+    label: 'Barcelone',
+  },
+  {
+    lieuSlug: 'madrid',
+    titleFr: 'Les meilleurs hôtels de Madrid',
+    titleEn: 'The best hotels in Madrid',
+    scope: 'ville',
+    label: 'Madrid',
+  },
+  {
+    lieuSlug: 'bangkok',
+    titleFr: 'Les meilleurs hôtels de Bangkok',
+    titleEn: 'The best hotels in Bangkok',
+    scope: 'ville',
+    label: 'Bangkok',
+  },
+  {
+    lieuSlug: 'marrakech',
+    titleFr: 'Les meilleurs hôtels de Marrakech',
+    titleEn: 'The best hotels in Marrakech',
+    scope: 'ville',
+    label: 'Marrakech',
+  },
+  {
+    lieuSlug: 'mykonos',
+    titleFr: 'Les meilleurs hôtels de Mykonos',
+    titleEn: 'The best hotels in Mykonos',
+    scope: 'ville',
+    label: 'Mykonos',
+  },
+  {
+    lieuSlug: 'santorin',
+    titleFr: 'Les meilleurs hôtels de Santorin',
+    titleEn: 'The best hotels in Santorini',
+    scope: 'ville',
+    label: 'Santorin',
+  },
+  {
+    lieuSlug: 'florence',
+    titleFr: 'Les meilleurs hôtels de Florence',
+    titleEn: 'The best hotels in Florence',
+    scope: 'ville',
+    label: 'Florence',
+  },
+  {
+    lieuSlug: 'milan',
+    titleFr: 'Les meilleurs hôtels de Milan',
+    titleEn: 'The best hotels in Milan',
+    scope: 'ville',
+    label: 'Milan',
+  },
+  {
+    lieuSlug: 'bali',
+    titleFr: 'Les meilleurs hôtels de Bali',
+    titleEn: 'The best hotels in Bali',
+    scope: 'cluster',
+    label: 'Bali',
+  },
+  {
+    lieuSlug: 'dubai',
+    titleFr: 'Les meilleurs hôtels de Dubaï',
+    titleEn: 'The best hotels in Dubai',
+    scope: 'ville',
+    label: 'Dubaï',
+  },
+  {
+    lieuSlug: 'abu-dhabi',
+    titleFr: "Les meilleurs hôtels d'Abu Dhabi",
+    titleEn: 'The best hotels in Abu Dhabi',
+    scope: 'ville',
+    label: 'Abu Dhabi',
+  },
+  {
+    lieuSlug: 'doha',
+    titleFr: 'Les meilleurs hôtels de Doha',
+    titleEn: 'The best hotels in Doha',
+    scope: 'ville',
+    label: 'Doha',
+  },
+  {
+    lieuSlug: 'budapest',
+    titleFr: 'Les meilleurs hôtels de Budapest',
+    titleEn: 'The best hotels in Budapest',
+    scope: 'ville',
+    label: 'Budapest',
+  },
+  {
+    lieuSlug: 'singapour',
+    titleFr: 'Les meilleurs hôtels de Singapour',
+    titleEn: 'The best hotels in Singapore',
+    scope: 'ville',
+    label: 'Singapour',
+  },
+];
+const INTL_DESTINATION_OVERRIDES: readonly ManualOverride[] = INTL_DESTINATIONS.map((d) => ({
+  slug: `meilleurs-hotels-${d.lieuSlug}`,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
 // ─── 2026-06-22 — G5 absurd theme×lieu combos (audit §G5) ─────────────────
 // The auto matrix emits semantically impossible pages (no mountains / ski /
 // seaside / vineyards inside Paris). The live rows were unpublished
@@ -402,6 +705,8 @@ const SLUG_BLOCKLIST: ReadonlySet<string> = new Set<string>([
 
 const MANUAL_OVERRIDES: readonly ManualOverride[] = [
   ...LUXE_CITY_OVERRIDES,
+  // 2026-06-22 — international destination head rankings (wave 1).
+  ...INTL_DESTINATION_OVERRIDES,
   // Pillar national rankings — high volume search.
   {
     slug: 'meilleurs-palaces-france',
