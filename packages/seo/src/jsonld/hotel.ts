@@ -1,3 +1,4 @@
+import { isToxicOfficialUrl } from '@mch/domain/url';
 import type { Hotel } from 'schema-dts';
 
 import { aggregateRatingJsonLd, type AggregateRatingInput } from './aggregate-rating';
@@ -1069,7 +1070,14 @@ export const hotelJsonLd = (input: HotelJsonLdInput): HotelNode => {
           author: { '@type': 'Organization', name: 'Guide MICHELIN' },
         };
       }
-      if (isHttpsUrl(venue.url)) node.url = venue.url;
+      // HTTPS-validated AND vetoed against the squatter / booking-engine /
+      // OTA detector — a toxic value (e.g. `*hotelslondon24.com`, a
+      // `.com-hotel.com` net, a Booking.com listing) must never be emitted as
+      // a `Restaurant.url`. We OMIT the field rather than the whole node: the
+      // `Restaurant` stays valid without `url`. This is the single emission-
+      // time veto shared by both callers (`apps/web` hotel page + kit builder),
+      // a defence-in-depth backstop to the write-time guard in the pipeline.
+      if (isHttpsUrl(venue.url) && !isToxicOfficialUrl(venue.url)) node.url = venue.url;
       if (venue.telephone !== undefined && venue.telephone.trim().length > 0) {
         node.telephone = venue.telephone.trim();
       }
