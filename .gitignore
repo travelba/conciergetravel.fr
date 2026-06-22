@@ -147,4 +147,5 @@ apps/admin/src/app/(payload)/admin/importMap.js
 /pdg-booking-rail.png
 scripts/editorial-pilot/_scratch/
 scripts/editorial-pilot/tmp-*/
+scripts/editorial-pilot/src/**/tmp-*.ts
 apps/web/e2e/tmp-*.spec.ts
