@@ -60,6 +60,36 @@ Invoke when:
 - Wrap independent server fetches in `<Suspense>` so initial paint doesn't wait on Amadeus.
 - Skeletons must reserve exact pixel space (no CLS).
 
+### Client-island placeholder height mismatch (sitewide CLS) — 2026-06-22
+
+A client island whose loading placeholder is **shorter than its resolved
+content** causes CLS the moment it hydrates. Reference case: `auth-area.tsx`
+(`variant="header"`) reserved an `h-9` (36px) placeholder, but the resolved
+signed-out CTAs (`Connexion` + `Créer un compte`) had **no `whitespace-nowrap`
+/ `shrink-0`**, so the shared header flex row (`nav` is `flex-1`) shrank the
+`Créer un compte` button to its widest-word width → the text **wrapped to 3
+lines (72px)**. That 36px under-reservation grew the `SiteHeader` 84→105px on
+every signed-out desktop inner page (home uses a different kit header) → CLS
+**~0.95**. EN was spared (`Sign up` wraps to only 2 lines = 52px, ~0 CLS).
+
+Lessons:
+
+- **The header height is driven by its tallest child** (here the 51px nav).
+  CLS magnitude = how much a hydrating island _exceeds_ that tallest stable
+  child. Keep every header island **≤ the nav height in both placeholder and
+  resolved states** and the row height never moves. Fix was just
+  `whitespace-nowrap` on the CTAs + `shrink-0` on their container (CSS-only, no
+  JS, zero LCP/TBT impact).
+- **Diagnose SSR-vs-hydrated layout with two Playwright contexts**, not timing
+  games: load once with `javaScriptEnabled: false` (pure SSR DOM + webfonts),
+  once with JS on, and diff the suspect element's `getBoundingClientRect()`
+  height. The delta is the exact CLS source. A `PerformanceObserver('layout-shift')`
+  trace + a per-child height timeline pinpoints _which_ child grows.
+- A loading placeholder's job is to match the **resolved** height, but if the
+  resolved height is itself a wrapping/shrink bug, fix the wrap (restores the
+  intended single-row design the `h-9` placeholder already encoded) rather than
+  inflating the placeholder to a fragile, viewport-dependent tall value.
+
 ### Third-party scripts
 
 - Loaded with `next/script` `strategy="afterInteractive"` (analytics) or `strategy="lazyOnload"` (non-critical).
@@ -77,6 +107,7 @@ Invoke when:
 - Marking marketing pages as `force-dynamic`.
 - `'use client'` on entire pages because of one interactive button.
 - Inline styles built dynamically from props (CSS-in-JS at runtime) on hot paths — use Tailwind classes / static CSS.
+- A client-island loading placeholder shorter than its resolved content (header/auth/locale islands) — match heights or keep the island ≤ the row's tallest stable child (see §Client-island placeholder height mismatch).
 
 ## CI gates
 
