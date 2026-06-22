@@ -33,9 +33,9 @@ Invoke when:
 ### `llms.txt` (root)
 
 - Title `# MyConciergeHotel.com — La sélection du Concierge, hôtels d'exception dans le monde` (cf. [ADR-0021](../../docs/adr/0021-pivot-scope-mondial.md)).
-- One-line description. **Never** mention « en France » or « France's Palaces » as a geographic boundary — the catalogue spans 91 countries.
+- One-line description. **Never** mention « en France » or « France's Palaces » as a geographic boundary — the catalogue spans 127 countries.
 - "## Pages stratégiques" with 5–10 curated links + 40–60 word descriptions each.
-- "## À propos" with IATA / ASPST credentials, value proposition (`Conseil du Concierge` opérationnel sur chaque fiche), freshness, scope (`615 adresses dans 91 pays`).
+- "## À propos" with IATA / ASPST credentials, value proposition (`Conseil du Concierge` opérationnel sur chaque fiche), freshness, scope (`2221 adresses dans 127 pays`).
 - Keep < 50 KB. Validate weekly.
 
 ### `llms-full.txt`

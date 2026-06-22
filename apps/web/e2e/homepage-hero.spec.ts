@@ -9,7 +9,7 @@ import { setConsentCookie } from './fixtures/consent';
  *   - Carries the "La sélection du Concierge" tagline in FR and the
  *     "The Concierge's Selection" mirror in EN.
  *   - **Never** mentions « en France » / "France's Palaces" as a
- *     geographic boundary (the catalogue spans 91 countries).
+ *     geographic boundary (the catalogue spans 127 countries).
  *   - Renders an actual hero visual (Cloudinary video poster OR the
  *     fallback gradient) — the bug we're guarding against is the
  *     "austère text-only hero" reported during the 2026-05-27 walk-prod.

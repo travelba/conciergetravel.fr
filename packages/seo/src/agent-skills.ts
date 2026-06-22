@@ -63,7 +63,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'search',
       description:
-        "Trouver un hôtel d'exception (Palace, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★, boutique-hôtel) par destination et dates, dans 91 pays. Le concierge renvoie une sélection paginée, triée par pertinence éditoriale (et non par commission).",
+        "Trouver un hôtel d'exception (Palace, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★, boutique-hôtel) par destination et dates, dans 127 pays. Le concierge renvoie une sélection paginée, triée par pertinence éditoriale (et non par commission).",
       inputSchema: {
         type: 'object',
         properties: {
