@@ -62,6 +62,14 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'No precise information is available on the spa facilities.',
     'Le spa, encore à documenter, promet un espace de bien-être raffiné.',
     'Les prestations restent encore à préciser pour ce Palace.',
+    // word-count bookkeeping class (2026-06-22 editorial_guides audit).
+    'Une escale hors du temps face à la baie. Compte mots: 434',
+    'Le terroir breton se savoure lentement. Compteur de mots: 435',
+    'La côte atlantique au crépuscule. Compte: 479 mots.',
+    'Une enfilade de châteaux ligériens. Compteur mots: 510',
+    'Le littoral mauricien invite au repos. Nombre de mots: 600',
+    'The harbour glows at dusk over the bay. Word count: 512',
+    'A slow loop through the Rockies. Estimated word count: 473.',
   ];
 
   // Legitimate editorial prose that MUST NOT be flagged.
@@ -98,6 +106,14 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'Le petit-déjeuner reste à la carte, servi jusqu’à 11 heures.',
     'Twenty-four-hour room service is available throughout the stay.',
     'A detailed spa menu is available at reception on arrival.',
+    // word-count guards: a bona-fide count of words in prose stays clean —
+    // only the label keyword ("compte/compteur/nombre de mots", "word count")
+    // marks the bookkeeping artefact.
+    'Le concierge rédige un récit de 434 mots sur l’histoire du domaine.',
+    'Compte tenu de la saison, mieux vaut réserver tôt sur la presqu’île.',
+    'On compte près de 500 chambres réparties dans les trois ailes.',
+    'Le livre d’or recense quelques mots manuscrits des grands habitués.',
+    'The tasting menu spans five words of Breton on each handwritten card.',
   ];
 
   it.each(LEAKS)('flags leak: %s', (text) => {
