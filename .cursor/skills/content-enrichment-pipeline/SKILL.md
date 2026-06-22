@@ -1075,6 +1075,7 @@ across 2221 published fiches, residual thin/blank fiches closed by
   — canonical examples of the Rule 12 remediation pattern.
 - POI pipeline: `scripts/editorial-pilot/src/pois/{sync-hotel-pois,merge-pois,llm-describe-pois}.ts` + `packages/integrations/src/overpass/`.
 - POI → `places` backfill + geo-fence (Rule 15): `scripts/editorial-pilot/src/places/backfill-paris.ts` (`hotelCentroid`, `poiToScaffold`) + strict publisher `scripts/editorial-pilot/src/places/publish-places.ts`.
+- [ADR-0030 — Vertical « Lieux à visiter »](../../docs/adr/0030-lieux-a-visiter-vertical.md) — architecture complète du vertical `/lieux` (modèle `public.places`, pipeline scaffold→photos→enrich→publish gate, maillage hôtel ↔ lieu, JSON-LD `TouristAttraction`). `enrich-places-editorial.ts` est la couche texte (OpenAI + DataForSEO grounding) de ce pipeline.
 - Publish-gate discipline + module run-guard (Rule 16): `scripts/editorial-pilot/src/places/{backfill-paris,publish-places,reconcile-places-publish}.ts` (`gateFailures`, `PLACE_GATE_COLUMNS`, `--publish-thin`, `--apply`, the `process.argv[1]` guard) — commit `08bb0f2`.
 - `keyword-grounding-dataforseo` §Rule 6 — the same "enrich never publishes; `publish-places.ts` is the gate" sequence from the grounding angle.
 - `backoffice-cms` — the Payload publish discipline (direct SQL bypasses `afterChange`); the same "one tested publish path" principle for CMS content.

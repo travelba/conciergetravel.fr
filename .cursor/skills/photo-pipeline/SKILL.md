@@ -1065,3 +1065,9 @@ isn't guaranteed-sorted.
 - `scripts/editorial-pilot/src/photos/parent-group-mapping.ts` → single
   source of truth for `ParentGroup`, `PARENT_DOMAINS_BY_GROUP`,
   `HOSTNAME_BLOCKLIST_GLOBAL`, `HOSTNAME_WHITELIST_GLOBAL`.
+- [ADR-0030 — Vertical « Lieux à visiter »](../../docs/adr/0030-lieux-a-visiter-vertical.md)
+  - `scripts/editorial-pilot/src/places/backfill-place-photos.ts` → the
+    place-photo pipeline (sister of `sync-hotel-photos.ts`, no OpenAI):
+    Google Places source → Cloudinary `cct/places/{cityKey}/{placeSlug}`,
+    alt FR+EN, PATCH only `hero_image` + `gallery_images`, `--allow-paris`
+    isolation guard.
