@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 import { AuthArea } from './auth-area';
-import { HeaderQuickSearch } from './header-quick-search';
 import { LocaleSwitcher } from './locale-switcher';
 import { MobileNav } from './mobile-nav';
 
@@ -85,7 +84,7 @@ export async function SiteHeader(): Promise<ReactElement> {
 
           <nav
             aria-label={t('primaryNav.label')}
-            className="ml-4 hidden flex-1 items-center gap-0.5 md:flex"
+            className="ml-4 hidden flex-1 items-center gap-0.5 xl:flex"
           >
             <PalacesHotelsMegaMenu locale={locale} t={t} />
             <DestinationsMegaMenu locale={locale} t={t} />
@@ -94,13 +93,11 @@ export async function SiteHeader(): Promise<ReactElement> {
             <ConciergeMegaMenu locale={locale} t={t} />
           </nav>
 
-          <HeaderQuickSearch locale={locale} />
-
           <div className="ml-auto flex items-center gap-2">
             <Link
               href="/recherche"
               aria-label={t('primaryNav.search')}
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 md:hidden"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2"
             >
               <svg
                 aria-hidden
@@ -163,7 +160,7 @@ function MegaTrigger({
         href={href}
         aria-haspopup="menu"
         aria-label={triggerAria}
-        className="text-fg hover:text-gold-700 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[13px] uppercase tracking-[0.12em] transition-colors focus-visible:outline-none focus-visible:ring-2"
+        className="text-fg hover:text-gold-700 focus-visible:ring-ring inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] uppercase tracking-[0.11em] transition-colors focus-visible:outline-none focus-visible:ring-2"
       >
         {label}
         <svg

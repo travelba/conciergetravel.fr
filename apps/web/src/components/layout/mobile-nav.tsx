@@ -149,7 +149,7 @@ export function MobileNav(): ReactElement {
         aria-controls={labelId}
         aria-label={open ? t('menu.close') : t('menu.open')}
         onClick={() => setOpen((v) => !v)}
-        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden"
+        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 xl:hidden"
       >
         {open ? (
           <svg
@@ -177,7 +177,7 @@ export function MobileNav(): ReactElement {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 xl:hidden">
           {/* Backdrop */}
           <button
             type="button"
