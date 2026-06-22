@@ -41,6 +41,19 @@ export type PlaceListItem = z.infer<typeof PlaceListRowSchema>;
 const LIST_COLUMNS =
   'slug, slug_en, city_key, city, bucket, kind, name, name_en, latitude, longitude, factual_summary_fr, factual_summary_en, hero_image, priority';
 
+/**
+ * Supabase enforces a server-side `db_max_rows` cap (default `1000` in our
+ * project) that silently truncates `.limit(N)` calls to that cap regardless
+ * of the value the client passes. The `lieux` catalogue crossed 1 000
+ * published rows (1 106 on 2026-06-22 after the Paris/Dubai/Tokyo/… wave),
+ * so the catalogue-wide readers below must page with `.range()` until
+ * exhaustion — otherwise the sitemap and the `/lieux` hub silently drop
+ * every row beyond the first 1 000. Same fix as `destinations/cities.ts`.
+ * The hard `MAX_PAGES` ceiling avoids a runaway loop on a misconfigured env.
+ */
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 12;
+
 /** Published places for a city, optionally filtered by bucket. */
 export async function listPublishedPlacesForCity(
   citySlug: string,
@@ -81,29 +94,36 @@ export interface PublishedPlaceParam {
 export async function listPublishedPlaceParams(): Promise<readonly PublishedPlaceParam[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('places')
-      .select('slug, slug_en, city_key, updated_at')
-      .eq('is_published', true)
-      .order('city_key', { ascending: true })
-      .limit(5000);
-    if (error || !Array.isArray(data)) return [];
     const out: PublishedPlaceParam[] = [];
-    for (const raw of data) {
-      const r = raw as {
-        slug?: unknown;
-        slug_en?: unknown;
-        city_key?: unknown;
-        updated_at?: unknown;
-      };
-      if (typeof r.slug === 'string' && typeof r.city_key === 'string') {
-        out.push({
-          citySlug: r.city_key,
-          slugFr: r.slug,
-          slugEn: typeof r.slug_en === 'string' ? r.slug_en : null,
-          updatedAt: typeof r.updated_at === 'string' ? r.updated_at : null,
-        });
+    // Page by `(city_key, slug)` — a total order so pagination never skips
+    // or duplicates a row across the `db_max_rows` boundary.
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('places')
+        .select('slug, slug_en, city_key, updated_at')
+        .eq('is_published', true)
+        .order('city_key', { ascending: true })
+        .order('slug', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const r = raw as {
+          slug?: unknown;
+          slug_en?: unknown;
+          city_key?: unknown;
+          updated_at?: unknown;
+        };
+        if (typeof r.slug === 'string' && typeof r.city_key === 'string') {
+          out.push({
+            citySlug: r.city_key,
+            slugFr: r.slug,
+            slugEn: typeof r.slug_en === 'string' ? r.slug_en : null,
+            updatedAt: typeof r.updated_at === 'string' ? r.updated_at : null,
+          });
+        }
       }
+      if (data.length < PAGE_SIZE) break;
     }
     return out;
   } catch {
@@ -128,24 +148,29 @@ export interface PlaceCitySummary {
 export async function listPlaceCities(): Promise<readonly PlaceCitySummary[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('places')
-      .select('city_key, city, bucket')
-      .eq('is_published', true)
-      .limit(5000);
-    if (error || !Array.isArray(data)) return [];
     const byCity = new Map<string, { name: string; visit: number; doCount: number }>();
-    for (const raw of data) {
-      const row = raw as { city_key?: unknown; city?: unknown; bucket?: unknown };
-      if (typeof row.city_key !== 'string' || row.city_key.length === 0) continue;
-      const entry = byCity.get(row.city_key) ?? {
-        name: typeof row.city === 'string' && row.city.length > 0 ? row.city : row.city_key,
-        visit: 0,
-        doCount: 0,
-      };
-      if (row.bucket === 'do') entry.doCount += 1;
-      else entry.visit += 1;
-      byCity.set(row.city_key, entry);
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('places')
+        .select('city_key, city, bucket')
+        .eq('is_published', true)
+        .order('slug', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const row = raw as { city_key?: unknown; city?: unknown; bucket?: unknown };
+        if (typeof row.city_key !== 'string' || row.city_key.length === 0) continue;
+        const entry = byCity.get(row.city_key) ?? {
+          name: typeof row.city === 'string' && row.city.length > 0 ? row.city : row.city_key,
+          visit: 0,
+          doCount: 0,
+        };
+        if (row.bucket === 'do') entry.doCount += 1;
+        else entry.visit += 1;
+        byCity.set(row.city_key, entry);
+      }
+      if (data.length < PAGE_SIZE) break;
     }
     return [...byCity.entries()]
       .map(([citySlug, v]) => ({
@@ -165,16 +190,21 @@ export async function listPlaceCities(): Promise<readonly PlaceCitySummary[]> {
 export async function listPlaceCityKeys(): Promise<readonly string[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('places')
-      .select('city_key')
-      .eq('is_published', true)
-      .limit(5000);
-    if (error || !Array.isArray(data)) return [];
     const set = new Set<string>();
-    for (const raw of data) {
-      const ck = (raw as { city_key?: unknown }).city_key;
-      if (typeof ck === 'string' && ck.length > 0) set.add(ck);
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('places')
+        .select('city_key')
+        .eq('is_published', true)
+        .order('slug', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const ck = (raw as { city_key?: unknown }).city_key;
+        if (typeof ck === 'string' && ck.length > 0) set.add(ck);
+      }
+      if (data.length < PAGE_SIZE) break;
     }
     return [...set].sort();
   } catch {
