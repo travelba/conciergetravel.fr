@@ -228,12 +228,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
 }
 .mch-kit .brand {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 10px;
 }
 .mch-kit .brand-mono {
   font-family: var(--kit-serif);
@@ -255,15 +255,16 @@
 }
 .mch-kit .nav {
   display: flex;
-  gap: 30px;
+  gap: 16px;
 }
 .mch-kit .nav a {
   font-size: 13px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--texte);
   font-weight: 300;
   transition: 0.2s;
+  white-space: nowrap;
 }
 .mch-kit .nav a:hover {
   color: var(--accent);
@@ -271,7 +272,7 @@
 .mch-kit .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   color: var(--texte);
 }
 .mch-kit .header-right .hr-item {
@@ -1205,7 +1206,29 @@
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1000px) {
+/* Tight desktop band (1024–1339px): the 7-item home nav competes with the
+   brand wordmark + right cluster inside the 92vw `.wrap`. Hide the wordmark
+   (the MC monogram stays — mirrors the standard header which drops its
+   wordmark ≥ lg) so the full nav + right icons fit on one uncut row.
+   PO decision 2026-06-22 — full nav from 1024px without clipping. */
+@media (min-width: 1024px) and (max-width: 1339.98px) {
+  .mch-kit .header--overlay .brand-name {
+    display: none;
+  }
+}
+/* Narrow desktop band (1024–1279px): also drop the "Mon compte" label
+   text (the account icon + its aria-label remain) so the row clears the
+   942px wrap at 1024px. The FR locale chip keeps its text. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .mch-kit .header--overlay .header-right .hr-item:last-of-type span {
+    display: none;
+  }
+}
+/* Nav hides below the Tailwind `lg` breakpoint (1024px) so the home
+   overlay header matches the standard header: full nav from 1024px, the
+   shared MobileNav burger (`lg:hidden`) only below 1024px. PO decision
+   2026-06-22 — keeps the two headers in lockstep at the 1024px boundary. */
+@media (max-width: 1023.98px) {
   .mch-kit .nav {
     display: none;
   }
@@ -1283,6 +1306,15 @@
 }
 @media (max-width: 640px) {
   .mch-kit .header-right .hr-item span {
+    display: none;
+  }
+  /* Drop the brand wordmark on phones (the MC monogram stays) so the
+     overlay header clears the right cluster (heart + locale + account +
+     burger) inside the 92vw wrap at 390px — mirrors the standard header
+     (`sm:inline lg:hidden`) which also shows only the monogram on mobile.
+     Without this the wordmark pushed the shared MobileNav burger off the
+     right edge (the home-390 innerClip). PO decision 2026-06-22. */
+  .mch-kit .header .brand-name {
     display: none;
   }
   .mch-kit .hero {

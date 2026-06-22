@@ -157,7 +157,7 @@
       "hotels": "Hôtels",
       "destinations": "Destinations",
       "experiences": "Expériences",
-      "places": "Lieux à visiter",
+      "places": "Lieux",
       "rankings": "Classements",
       "concierge": "Le Concierge",
       "magazine": "Magazine",
@@ -511,7 +511,7 @@
     },
     "account": {
       "signIn": "Connexion",
-      "signUp": "Créer un compte",
+      "signUp": "S'inscrire",
       "myAccount": "Mon compte"
     },
     "menu": {

@@ -45,7 +45,7 @@ type AuthState = 'loading' | 'signed-in' | 'signed-out';
 // height stays nav-driven and identical between SSR and hydration — the
 // fix for the sitewide ~0.95 desktop CLS where "Créer un compte" used to
 // wrap to 3 lines (72px) and push `#main` down.
-const HEADER_CONTAINER = 'flex shrink-0 items-center gap-1 xl:flex' as const;
+const HEADER_CONTAINER = 'flex shrink-0 items-center gap-1 lg:flex' as const;
 const MOBILE_CONTAINER = 'border-border mt-auto flex flex-col gap-2 border-t pt-5' as const;
 
 const HEADER_BUTTON_PRIMARY =
@@ -111,7 +111,7 @@ export function AuthArea({ variant }: AuthAreaProps): ReactElement {
       return (
         <div
           aria-hidden
-          className="bg-muted/30 hidden h-9 w-[12rem] animate-pulse rounded-md xl:block"
+          className="bg-muted/30 hidden h-9 w-[12rem] animate-pulse rounded-md lg:block"
         />
       );
     }

@@ -18,9 +18,10 @@ import type { Locale } from '@/i18n/routing';
  * follow-up). Without JS, users still get the same submit-to-search
  * experience.
  *
- * Layout target (md ≥): the input sits between the primary nav and the
- * auth area. On smaller viewports, the input is hidden — the search
- * icon link in the header takes over.
+ * Layout target (xl ≥): the input sits between the primary nav and the
+ * auth area. Below xl (incl. the 1024–1279px desktop band), the input
+ * is hidden — the compact search icon link in the header takes over so
+ * the nav + auth CTAs keep a single uncluttered row.
  *
  * @see docs/adr/0014-menu-architecture-v2.md
  */
@@ -39,7 +40,7 @@ export async function HeaderQuickSearch({
       role="search"
       action={action}
       method="get"
-      className="border-border bg-bg focus-within:border-gold-400 focus-within:ring-ring ml-3 hidden h-9 items-center rounded-md border focus-within:ring-2 md:flex"
+      className="border-border bg-bg focus-within:border-gold-400 focus-within:ring-ring ml-3 hidden h-9 shrink-0 items-center rounded-md border focus-within:ring-2 xl:flex"
       aria-label={t('label')}
     >
       <label className="sr-only" htmlFor="header-quick-search-destination">
@@ -50,7 +51,7 @@ export async function HeaderQuickSearch({
         inputId="header-quick-search-destination"
         placeholder={t('destinationPlaceholder')}
         wrapperClassName="relative"
-        inputClassName="text-fg placeholder:text-muted h-9 w-44 rounded-l-md bg-transparent px-3 text-sm focus:outline-none xl:w-56"
+        inputClassName="text-fg placeholder:text-muted h-9 w-44 rounded-l-md bg-transparent px-3 text-sm focus:outline-none"
       />
       <button
         type="submit"
