@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
@@ -93,6 +93,60 @@ const T = {
   },
 } as const;
 
+/**
+ * Resolves a deterministic, render-time year for the title/H1 freshness
+ * stamp (P0-1). Prefers the freshest editorial date when it is recent
+ * (this year or last year), otherwise falls back to the current year so
+ * evergreen rankings never advertise a stale year. Purely render-time —
+ * never mutated back into the DB.
+ */
+function resolveStampYear(candidates: readonly (string | null)[]): number {
+  const currentYear = new Date().getUTCFullYear();
+  for (const iso of candidates) {
+    if (iso === null) continue;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) continue;
+    const y = d.getUTCFullYear();
+    if (y <= currentYear && y >= currentYear - 1) return y;
+  }
+  return currentYear;
+}
+
+/**
+ * Appends a deterministic « en {YYYY} » / « in {YYYY} » suffix to a title
+ * (P0-1). Idempotent — a title that already carries a 20xx year is
+ * returned unchanged (double-stamp guard). When the title has a trailing
+ * « | brand » segment, the year is inserted before it so the brand stays
+ * last.
+ */
+function stampYear(text: string, year: number, locale: Locale): string {
+  if (/\b20\d{2}\b/.test(text)) return text;
+  const suffix = pickByLocale(locale, `en ${year}`, `in ${year}`);
+  const pipeIdx = text.lastIndexOf(' | ');
+  if (pipeIdx !== -1) {
+    return `${text.slice(0, pipeIdx)} ${suffix}${text.slice(pipeIdx)}`;
+  }
+  return `${text} ${suffix}`;
+}
+
+/**
+ * Deterministic first-sentence extractor for the TL;DR verdict block
+ * (P0-2). Returns the first sentence of the entry justification, truncated
+ * on a word boundary to ~`maxLen` chars. No LLM — pure string ops.
+ */
+function firstSentence(text: string, maxLen = 160): string {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return '';
+  const match = trimmed.match(/^[\s\S]*?[.!?…](?=\s|$)/u);
+  let sentence = (match !== null ? match[0] : trimmed).trim();
+  if (sentence.length > maxLen) {
+    const cut = sentence.slice(0, maxLen);
+    const lastSpace = cut.lastIndexOf(' ');
+    sentence = `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+  }
+  return sentence;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -105,10 +159,17 @@ export async function generateMetadata({
   const locale = raw;
   // Title/description selection stays locale-aware (data layer) — see ADR-0012.
   // V2 locales fall back to FR until migration 0034.
-  const title = pickByLocale(
+  const baseTitle = pickByLocale(
     locale,
     ranking.meta_title_fr ?? `${ranking.title_fr} | MyConciergeHotel`,
     ranking.meta_title_en ?? `${ranking.title_en ?? ranking.title_fr} | MyConciergeHotel`,
+  );
+  // P0-1 — render-time year stamp (deterministic, never mutates the DB
+  // meta_title). Idempotent guard skips titles that already carry a year.
+  const title = stampYear(
+    baseTitle,
+    resolveStampYear([ranking.reviewed_at, ranking.updated_at]),
+    locale,
   );
   const description = pickByLocale(
     locale,
@@ -192,6 +253,13 @@ export default async function RankingPage({
   // Title/intro/outro/factual selection stays locale-aware (data layer) — see ADR-0012.
   // V2 locales fall back to FR until migration 0034.
   const title = pickByLocale(locale, ranking.title_fr, ranking.title_en ?? ranking.title_fr);
+  // P0-1 — render-time year stamp applied to the visible H1 only. The
+  // structural JSON-LD (breadcrumb / article headline / ItemList name)
+  // keeps the canonical, unstamped title.
+  const stampYearValue = resolveStampYear([ranking.reviewed_at, ranking.updated_at]);
+  const titleWithYear = stampYear(title, stampYearValue, locale);
+  // P0-2 — TL;DR verdict labels via i18n (no hardcoded UI strings).
+  const tRank = await getTranslations({ locale, namespace: 'rankingPage' });
   const intro = pickByLocale(locale, ranking.intro_fr, ranking.intro_en ?? ranking.intro_fr);
   const outro = pickByLocale(
     locale,
@@ -248,6 +316,19 @@ export default async function RankingPage({
         // Hotel name + slug selection stays locale-aware (data layer) — see ADR-0012.
         // V2 locales fall back to FR until migration 0034.
         const hotelSlug = pickByLocale(locale, e.hotel_slug, e.hotel_slug_en ?? e.hotel_slug);
+        // P0-3 — enrich each item with an absolute Cloudinary image +
+        // GeoCoordinates so the ItemList carousel carries a thumbnail and
+        // a map pin (vs competitors). Gated on real values: no image when
+        // hero is absent, no geo unless BOTH coordinates are finite.
+        const itemImage =
+          e.hotel_hero_image !== null && e.hotel_hero_image !== ''
+            ? buildCloudinarySrc({
+                cloudName,
+                publicId: e.hotel_hero_image,
+                transforms: 'f_auto,q_auto,c_fill,g_auto,w_1200,h_800',
+              })
+            : undefined;
+        const hasGeo = e.hotel_latitude !== null && e.hotel_longitude !== null;
         return {
           name: pickByLocale(locale, e.hotel_name, e.hotel_name_en ?? e.hotel_name),
           url: `${origin}${getPathname({
@@ -255,7 +336,13 @@ export default async function RankingPage({
             href: { pathname: '/hotel/[slug]', params: { slug: hotelSlug } },
           })}`,
           position: e.rank,
-          hotel: { starRating: e.hotel_stars as 1 | 2 | 3 | 4 | 5 },
+          hotel: {
+            starRating: e.hotel_stars as 1 | 2 | 3 | 4 | 5,
+            ...(itemImage !== undefined ? { image: itemImage } : {}),
+            ...(hasGeo && e.hotel_latitude !== null && e.hotel_longitude !== null
+              ? { latitude: e.hotel_latitude, longitude: e.hotel_longitude }
+              : {}),
+          },
         };
       }),
     }),
@@ -333,7 +420,7 @@ export default async function RankingPage({
                 {/* TODO i18n Phase 1c-β: migrate hardcoded UI labels to next-intl messages. */}
                 {pickByLocale(locale, 'Classement éditorial', 'Editorial ranking')}
               </span>
-              <h1>{title}</h1>
+              <h1>{titleWithYear}</h1>
               {/* CDC §2.3 — IA-ready factual summary (AEO surface). */}
               {factualSummary !== null && factualSummary.length > 0 ? (
                 <p data-aeo="factual-summary" className="rk-summary">
@@ -341,10 +428,12 @@ export default async function RankingPage({
                 </p>
               ) : null}
               <div className="rk-meta">
+                {/* P0-1 — full-words freshness badge: « Mis à jour en juin 2026 ».
+                    Derived from reviewed_at first (the editorial review date). */}
                 <LastUpdatedBadge
-                  isoDate={ranking.updated_at ?? ranking.reviewed_at}
+                  isoDate={ranking.reviewed_at ?? ranking.updated_at}
                   locale={locale}
-                  variant="inline"
+                  variant="monthYear"
                 />
                 {/* Keep legacy "Classement révisé le …" for assistive context when distinct. */}
                 {reviewedDate !== null && ranking.reviewed_at !== ranking.updated_at ? (
@@ -353,6 +442,55 @@ export default async function RankingPage({
               </div>
             </div>
           </header>
+
+          {/* P0-2 — « Le verdict en bref » TL;DR block. Extractable top-3
+              summary anchored at #tldr (speakable target). Deterministic:
+              first sentence of each justification, no LLM. */}
+          {entries.length > 0 ? (
+            <section
+              id="tldr"
+              className="border-border bg-bg/40 mb-12 scroll-mt-24 rounded-lg border p-5"
+              aria-label={tRank('tldrAriaLabel')}
+            >
+              <h2 className="text-fg mb-4 font-serif text-xl md:text-2xl">{tRank('tldrTitle')}</h2>
+              <ol className="ml-5 list-decimal space-y-2">
+                {entries.slice(0, 3).map((e) => {
+                  // Locale-aware slug/name/justification (data layer) — see ADR-0012.
+                  const tldrSlug = pickByLocale(
+                    locale,
+                    e.hotel_slug,
+                    e.hotel_slug_en ?? e.hotel_slug,
+                  );
+                  const tldrName = pickByLocale(
+                    locale,
+                    e.hotel_name,
+                    e.hotel_name_en ?? e.hotel_name,
+                  );
+                  const verdict = firstSentence(
+                    pickByLocale(
+                      locale,
+                      e.justification_fr,
+                      e.justification_en ?? e.justification_fr,
+                    ),
+                  );
+                  return (
+                    <li
+                      key={`tldr-${e.rank}-${e.hotel_slug}`}
+                      className="text-fg/90 leading-relaxed"
+                    >
+                      <Link
+                        href={{ pathname: '/hotel/[slug]', params: { slug: tldrSlug } }}
+                        className="font-medium underline-offset-2 hover:underline"
+                      >
+                        {tldrName}
+                      </Link>
+                      {verdict.length > 0 ? <span className="text-fg/80"> — {verdict}</span> : null}
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ) : null}
 
           {/* Intro (méthodologie) — long-form, auto-linked entities */}
           <section id="introduction" className="mb-12 scroll-mt-24">

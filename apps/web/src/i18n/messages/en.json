@@ -4296,7 +4296,12 @@
   },
   "lastUpdated": {
     "inline": "Updated on {date}",
-    "block": "Updated on {date}"
+    "block": "Updated on {date}",
+    "monthYear": "Updated {date}"
+  },
+  "rankingPage": {
+    "tldrTitle": "The verdict at a glance",
+    "tldrAriaLabel": "The verdict at a glance: the top three"
   },
   "hotelTldr": {
     "eyebrow": "The Concierge's essentials",

@@ -7,7 +7,7 @@ interface LastUpdatedBadgeProps {
   /** ISO 8601 date or `YYYY-MM-DD`. */
   readonly isoDate: string | null | undefined;
   readonly locale: Locale;
-  readonly variant?: 'inline' | 'block';
+  readonly variant?: 'inline' | 'block' | 'monthYear';
 }
 
 /**
@@ -31,13 +31,16 @@ export async function LastUpdatedBadge({
   if (typeof isoDate !== 'string' || isoDate.length === 0) return null;
   const d = new Date(isoDate);
   if (Number.isNaN(d.getTime())) return null;
+  // `monthYear` deliberately drops the day so the freshness signal reads
+  // « Mis à jour en juin 2026 » — the durable form competitors use on
+  // evergreen ranking pages (no day-precision implied).
+  const dateOptions: Intl.DateTimeFormatOptions =
+    variant === 'monthYear'
+      ? { month: 'long', year: 'numeric' }
+      : { day: 'numeric', month: 'long', year: 'numeric' };
   let formatted: string;
   try {
-    formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(d);
+    formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), dateOptions).format(d);
   } catch {
     formatted = isoDate.slice(0, 10);
   }

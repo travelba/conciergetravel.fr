@@ -4296,7 +4296,12 @@
   },
   "lastUpdated": {
     "inline": "Mise à jour le {date}",
-    "block": "Mise à jour le {date}"
+    "block": "Mise à jour le {date}",
+    "monthYear": "Mis à jour en {date}"
+  },
+  "rankingPage": {
+    "tldrTitle": "Le verdict en bref",
+    "tldrAriaLabel": "Le verdict en bref : le trio de tête"
   },
   "hotelTldr": {
     "eyebrow": "L'essentiel du Concierge",
