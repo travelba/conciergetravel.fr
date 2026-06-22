@@ -112,7 +112,7 @@ export async function SiteFooter(): Promise<ReactElement> {
             </ul>
             <p className="text-muted mt-4 text-xs leading-relaxed">
               {t('trust.engagements')}{' '}
-              <Link href="/mentions-legales" className="text-fg hover:underline">
+              <Link href="/mentions-legales" className="text-fg underline underline-offset-2">
                 {t('trust.engagementsCta')} →
               </Link>
             </p>
@@ -478,10 +478,10 @@ export async function SiteFooter(): Promise<ReactElement> {
               libellés = nom de fichier brut, taille réduite, teinte atténuée.
             */}
             <nav aria-label={t('headings.agentic')} className="mt-6">
-              <h2 className="text-muted/70 mb-2 text-[10px] font-medium uppercase tracking-wider">
+              <h2 className="text-muted mb-2 text-[10px] font-medium uppercase tracking-wider">
                 {t('headings.agentic')}
               </h2>
-              <ul className="text-muted/60 flex flex-col gap-1 text-[10px]">
+              <ul className="text-muted flex flex-col gap-1 text-[10px]">
                 <li>
                   {/*
                     Plain `<a>` (no `<Link>`) — these are absolute file

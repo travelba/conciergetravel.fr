@@ -19,9 +19,15 @@
 :root {
   --noir: #3a352d;
   --anthracite: #4a4439;
-  --or: #8c7b5a;
+  /* Accent taupe — darkened from #8c7b5a to #6f5f3c so accent-coloured copy
+     (eyebrows, links, labels) clears WCAG 2.2 AA 4.5:1 on every cream surface
+     (--creme #f6f1e7 → 5.5:1, --creme-3 #e8e0d0 → 4.6:1). The old #8c7b5a was
+     3.66:1 (70 axe contrast nodes on the kit fiche). The shared token also
+     drives decorative hairlines/borders/fills, which simply gain definition
+     at the deeper value — on-brand "taupe sobre". Gate 4 / accessibility. */
+  --or: #6f5f3c;
   --or-clair: #a89671;
-  --accent: #8c7b5a;
+  --accent: #6f5f3c;
   --creme: #f6f1e7;
   --creme-2: #efe8da;
   --creme-3: #e8e0d0;
