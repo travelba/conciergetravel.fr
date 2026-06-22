@@ -38,15 +38,22 @@ interface AuthAreaProps {
 
 type AuthState = 'loading' | 'signed-in' | 'signed-out';
 
-const HEADER_CONTAINER = 'flex items-center gap-1 md:flex' as const;
+// `shrink-0` keeps the auth cluster at its natural width so the flex row
+// can't squeeze the CTAs; `whitespace-nowrap` (on each button below) keeps
+// them on a single line. Together they pin the resolved auth area to the
+// same ~36px row height as the loading placeholder (`h-9`), so the header
+// height stays nav-driven and identical between SSR and hydration — the
+// fix for the sitewide ~0.95 desktop CLS where "Créer un compte" used to
+// wrap to 3 lines (72px) and push `#main` down.
+const HEADER_CONTAINER = 'flex shrink-0 items-center gap-1 md:flex' as const;
 const MOBILE_CONTAINER = 'border-border mt-auto flex flex-col gap-2 border-t pt-5' as const;
 
 const HEADER_BUTTON_PRIMARY =
-  'bg-fg text-bg focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2';
+  'bg-fg text-bg focus-visible:ring-ring whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2';
 const HEADER_BUTTON_GHOST =
-  'text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2';
+  'text-fg hover:bg-muted/10 focus-visible:ring-ring whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2';
 const HEADER_BUTTON_OUTLINE =
-  'border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2';
+  'border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring whitespace-nowrap rounded-md border px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2';
 
 const MOBILE_BUTTON_PRIMARY =
   'bg-fg text-bg focus-visible:ring-ring rounded-md px-3 py-2 text-center text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2';
