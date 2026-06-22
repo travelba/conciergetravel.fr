@@ -47,7 +47,7 @@ export async function ConciergeAdvice({
         role="note"
         aria-label={eyebrow}
       >
-        <p className="text-fg/60 mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider">
+        <p className="text-fg/75 mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider">
           <span aria-hidden className="text-gold-600 dark:text-gold-400">
             ★
           </span>

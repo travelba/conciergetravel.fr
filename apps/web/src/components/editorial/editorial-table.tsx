@@ -139,7 +139,7 @@ export function EditorialTable({ table, locale }: Props): ReactElement {
         </table>
       </div>
       {note.length > 0 ? (
-        <p className="text-fg/60 border-border bg-bg/40 border-t px-4 py-2 text-xs italic">
+        <p className="text-fg/75 border-border bg-bg/40 border-t px-4 py-2 text-xs italic">
           {note}
         </p>
       ) : null}

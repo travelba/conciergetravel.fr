@@ -33,7 +33,14 @@
   --creme-3: #e8e0d0;
   --blanc: #ffffff;
   --texte: #2b2722;
-  --texte-doux: #6f675b;
+  /* Muted body text — darkened from #6f675b to #665e52 so soft copy (footer
+     columns + .foot-brand, card sub-labels, captions) clears WCAG 2.2 AA
+     4.5:1 on every cream surface: 4.87:1 on the darkest common ground
+     --creme-3 #e8e0d0 (the footer), higher on --creme/--creme-2/white. The
+     old #6f675b was only 4.25:1 on --creme-3 (footer color-contrast nodes).
+     The token only ever paints text on light grounds, so darkening strictly
+     improves contrast everywhere. Gate 4 / accessibility. */
+  --texte-doux: #665e52;
   --ligne: rgba(140, 123, 90, 0.28);
   --kit-serif: var(--font-serif), 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
   --kit-sans: var(--font-sans), 'Outfit', 'Jost', system-ui, sans-serif;

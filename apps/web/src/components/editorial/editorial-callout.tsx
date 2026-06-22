@@ -76,7 +76,7 @@ export async function EditorialCallout({ callout, locale }: Props): Promise<Reac
   const body = pickLocalizedText(locale, callout.body_fr, callout.body_en) ?? '';
   return (
     <aside className={`my-6 rounded-r-lg px-5 py-4 ${tone}`} role="note" aria-label={eyebrow}>
-      <p className="text-fg/60 mb-1 text-xs font-medium uppercase tracking-wider">{eyebrow}</p>
+      <p className="text-fg/75 mb-1 text-xs font-medium uppercase tracking-wider">{eyebrow}</p>
       <h4 className="text-fg mb-1.5 font-medium">{title}</h4>
       <p className="text-fg/85 text-sm leading-relaxed">{body}</p>
     </aside>

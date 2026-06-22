@@ -184,7 +184,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/destination/[citySlug]',
                       params: { citySlug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -210,7 +210,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                         pathname: '/destination/[citySlug]',
                         params: { citySlug },
                       }}
-                      className="text-muted hover:text-fg hover:underline"
+                      className="text-muted hover:text-fg inline-block py-1 hover:underline"
                     >
                       {pickEntryLabel(entry, locale)}
                     </Link>
@@ -310,7 +310,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/classement/[slug]',
                       params: { slug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -333,7 +333,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/label/[facetSlug]',
                       params: { facetSlug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -489,19 +489,22 @@ export async function SiteFooter(): Promise<ReactElement> {
                     tree. Skill `geo-llm-optimization` §LLM-actionable
                     surfaces.
                   */}
-                  <a href="/sitemap.xml" className="hover:text-fg hover:underline">
+                  <a
+                    href="/sitemap.xml"
+                    className="hover:text-fg inline-block py-1.5 hover:underline"
+                  >
                     {t('links.sitemap')}
                   </a>
                 </li>
                 <li>
-                  <a href="/llms.txt" className="hover:text-fg hover:underline">
+                  <a href="/llms.txt" className="hover:text-fg inline-block py-1.5 hover:underline">
                     {t('links.llmsTxt')}
                   </a>
                 </li>
                 <li>
                   <a
                     href="/.well-known/agent-skills.json"
-                    className="hover:text-fg hover:underline"
+                    className="hover:text-fg inline-block py-1.5 hover:underline"
                   >
                     {t('links.agentSkills')}
                   </a>
@@ -533,7 +536,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                     pathname: '/classements/[axe]/[valeur]',
                     params: { axe: 'lieu', valeur: entry.slug },
                   }}
-                  className="text-muted hover:text-fg hover:underline"
+                  className="text-muted hover:text-fg inline-block py-1 hover:underline"
                 >
                   {pickEntryLabel(entry, locale)}
                 </Link>
