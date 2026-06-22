@@ -161,6 +161,22 @@ export async function updateRankingSectionsAndFaq(
   await patchRanking(cfg, rankingId, body);
 }
 
+/**
+ * Patch ONLY the `faq` column of a ranking row — the surgical path for
+ * the grounded-FAQ enricher (`enrich-ranking-faq-grounded.ts`). Touches
+ * neither `editorial_sections`, `intro/outro`, `meta_*` nor — crucially —
+ * the curated `editorial_ranking_entries` (a separate table). Used to
+ * re-anchor the FAQ of strategic rankings on real DataForSEO People-Also-Ask
+ * demand without any risk to the manually-ordered entries.
+ */
+export async function updateRankingFaq(
+  cfg: SupabaseRestConfig,
+  rankingId: string,
+  faq: unknown,
+): Promise<void> {
+  await patchRanking(cfg, rankingId, { faq });
+}
+
 async function patchRanking(
   cfg: SupabaseRestConfig,
   rankingId: string,
