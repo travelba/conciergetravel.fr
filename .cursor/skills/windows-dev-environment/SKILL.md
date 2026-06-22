@@ -437,6 +437,27 @@ the commit-conventions rule
 [`commit-conventions.mdc`](../../rules/commit-conventions.mdc) §Concurrent /
 multi-agent commits.
 
+## Rule 9 sexies — shared-tree push-lock: one worker's scratch file blocks EVERY worker's push
+
+Background workers share **one** working tree, so they also share the `pre-push`
+hook (`turbo run typecheck` over the **whole** repo + `validate:skills`). A
+single scratch file from worker A — e.g. `scripts/editorial-pilot/src/places/tmp-drafts.ts`
+captured by `tsconfig.json` `include: ["src/**/*.ts"]` — fails the typecheck and
+**blocks the push of every worker** (and tempts a risky `--no-verify`). Fix
+(commit `1dbcb9d9`): exclude `src/**/tmp-*.ts` in
+`scripts/editorial-pilot/tsconfig.json` **and** add it to `.gitignore`. General
+rule: **any per-worker scratch file must live outside the typecheck + commit
+perimeter** (`tmp-*` naming + gitignore), never inside an `include` glob.
+
+Related — **survivor workers after a near-crash**: after a machine hiccup, old
+background workers can keep running while you relaunch duplicates → two workers
+editing the **same** files = collision. Before relaunching, check `git log
+origin/<branch>` for the real remote state, keep file sets **disjoint** (ideally
+disjoint DB tables + an isolated worktree for anything running `next dev`), and
+never start two workers on the same file set. See Rule 9 quinquies (pathspec
+commits) and the photo-pipeline §JS-SPA sourcing note for the parallel-worker
+disjointness lesson.
+
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle
 
 `packages/config/src/env-web.ts` uses `createEnv` from `@t3-oss/env-nextjs`. The `skipValidation` flag reads `process.env.SKIP_ENV_VALIDATION`, which is **server-only** — it is not inlined into the client bundle (only `NEXT_PUBLIC_*` vars are). So:

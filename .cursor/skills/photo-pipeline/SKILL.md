@@ -453,6 +453,22 @@ need Tavily / official-site / manual sourcing, not another Places run. Always
 re-count from the live DB (`gallery_images` length) before scoping a "close the
 gap" chantier — don't trust a count baked into prose.
 
+### Anti-pattern — Tavily-extract is near-useless on the Tier-C residual (JS-SPA + multi-property chrome, 2026-06-22)
+
+On the `<10`-photo traîne, Tavily extraction of official sites enriched **only
+1 hotel of 15** (`royal-chundu` 6→11, via the server-rendered, property-scoped
+`relaischateaux.com` CloudFront DAM). Modern luxury sites are **JS-SPAs** whose
+galleries sit behind a lightbox Tavily never crawls; multi-property brand
+domains return **chrome/sibling** images Vision can't disambiguate (a Bhutan
+pool vs a Milan pool). It only works on (a) server-rendered property-scoped
+pages on a whitelisted CDN, distinguishing (b) property gallery URLs
+(`/transform/<uuid>`) from shared CMS chrome (`/images/media/<uuid>`).
+**Recommendation:** stop investing Tavily-extract here — use a headless browser
+(Playwright loads the SPA + extracts gallery image URLs) or manual sourcing.
+Reusable tool already committed: `scripts/editorial-pilot/src/photos/discover-official-site-images.ts`
+(commit `db45721`). See also `windows-dev-environment` §Rule 9 sexies for the
+shared-tree push-lock + disjoint-worker discipline this parallel run surfaced.
+
 ## The hotel APPEND path DEPENDS on OpenAI Vision — no OpenAI, no clean append (2026-06-22)
 
 There is **no hotel photo APPEND pipeline that runs without OpenAI**. This is
