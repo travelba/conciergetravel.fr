@@ -304,7 +304,104 @@ interface ManualOverride {
   readonly kind?: MatrixSeed['kind'];
 }
 
+// ─── 2026-06-22 — « Hôtel de luxe {ville} » acquisition pages ─────────────
+// Audit `docs/audits/rankings-seo-geo-audit-2026-06-22.md` (G2): the
+// « hôtel de luxe {ville} » intent draws 10-30× the volume of « meilleurs
+// hôtels {ville} » (Paris ≈ 2 900/mo) yet only ONE `luxe` slug existed
+// catalogue-wide (`meilleurs-hotels-luxe-france`). These bare-lieu
+// (`type=all` → a BROAD luxury selection, not only Atout-France palaces)
+// head terms target the highest-demand servable French cities (≥ ~5
+// published hotels). Differentiated from the `meilleurs-palaces-*` /
+// `5-etoiles-*` angle. Eligibility relies on the LieuDef in `axes.ts`.
+// (Marrakech deferred — its LieuDef lives in the concurrent intl-wave
+// branch, unstable in the shared tree on 2026-06-22.)
+const LUXE_CITIES: readonly {
+  readonly slug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly lieuSlug: string;
+  readonly label: string;
+}[] = [
+  {
+    slug: 'hotel-de-luxe-paris',
+    titleFr: 'Les meilleurs hôtels de luxe à Paris',
+    titleEn: 'The best luxury hotels in Paris',
+    scope: 'ville',
+    lieuSlug: 'paris',
+    label: 'Paris',
+  },
+  {
+    slug: 'hotel-de-luxe-cote-d-azur',
+    titleFr: "Les meilleurs hôtels de luxe sur la Côte d'Azur",
+    titleEn: 'The best luxury hotels on the French Riviera',
+    scope: 'cluster',
+    lieuSlug: 'cote-d-azur',
+    label: "Côte d'Azur",
+  },
+  {
+    slug: 'hotel-de-luxe-nice',
+    titleFr: 'Les meilleurs hôtels de luxe à Nice',
+    titleEn: 'The best luxury hotels in Nice',
+    scope: 'ville',
+    lieuSlug: 'nice',
+    label: 'Nice',
+  },
+  {
+    slug: 'hotel-de-luxe-saint-tropez',
+    titleFr: 'Les meilleurs hôtels de luxe à Saint-Tropez',
+    titleEn: 'The best luxury hotels in Saint-Tropez',
+    scope: 'ville',
+    lieuSlug: 'saint-tropez',
+    label: 'Saint-Tropez',
+  },
+  {
+    slug: 'hotel-de-luxe-courchevel',
+    titleFr: 'Les meilleurs hôtels de luxe à Courchevel',
+    titleEn: 'The best luxury hotels in Courchevel',
+    scope: 'station',
+    lieuSlug: 'courchevel',
+    label: 'Courchevel',
+  },
+  {
+    slug: 'hotel-de-luxe-megeve',
+    titleFr: 'Les meilleurs hôtels de luxe à Megève',
+    titleEn: 'The best luxury hotels in Megève',
+    scope: 'station',
+    lieuSlug: 'megeve',
+    label: 'Megève',
+  },
+];
+const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
+  slug: d.slug,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
+// ─── 2026-06-22 — G5 absurd theme×lieu combos (audit §G5) ─────────────────
+// The auto matrix emits semantically impossible pages (no mountains / ski /
+// seaside / vineyards inside Paris). The live rows were unpublished
+// 2026-06-22 (backup in `runs/`); blocklisted here so a future bulk run
+// never regenerates them. Applied as a final filter in `buildMatrix`.
+const SLUG_BLOCKLIST: ReadonlySet<string> = new Set<string>([
+  'meilleurs-hotels-vignobles-paris',
+  'meilleurs-hotels-montagne-paris',
+  'meilleurs-hotels-ski-paris',
+  'meilleurs-hotels-bord-de-mer-paris',
+  'meilleurs-hotels-montagne-paris-1',
+  'meilleurs-hotels-bord-de-mer-paris-8',
+]);
+
 const MANUAL_OVERRIDES: readonly ManualOverride[] = [
+  ...LUXE_CITY_OVERRIDES,
   // Pillar national rankings — high volume search.
   {
     slug: 'meilleurs-palaces-france',
@@ -1154,7 +1251,9 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     seedsBySlug.set(seed.slug, seed);
   }
 
-  const seeds = [...seedsBySlug.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+  const seeds = [...seedsBySlug.values()]
+    .filter((s) => !SLUG_BLOCKLIST.has(s.slug))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
 
   const bySource: Record<MatrixSource, number> = { auto: 0, yonder: 0, manual: 0 };
   const byTemplate: Record<string, number> = {};
