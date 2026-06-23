@@ -1,5 +1,6 @@
 import 'server-only';
 
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
@@ -47,14 +48,20 @@ export async function HomeHero({
   return (
     <div className="mch-kit">
       <section aria-labelledby="home-hero-title" className="hero">
-        {/* Painted "Concierge" hero — decorative; the copy below is the
-            accessible label. Plain <img> + fetchPriority for LCP. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        {/* Painted "Concierge" hero — the LCP element. `next/image` with
+            `fill` + `priority` preloads the asset and serves AVIF/WebP +
+            a responsive srcset (the source is a local public JPEG; not on
+            Cloudinary yet — Phase 2). Positioning/`object-fit` come from
+            the `.hero-bg` kit class; `.hero` is the `position: relative`
+            ancestor `fill` requires. */}
+        <Image
           className="hero-bg"
           src="/kit/img/hero.jpg"
           alt={tHero('posterAlt')}
-          fetchPriority="high"
+          fill
+          priority
+          sizes="100vw"
+          quality={70}
         />
         <div aria-hidden className="hero-overlay" />
 
