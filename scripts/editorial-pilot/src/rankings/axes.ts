@@ -804,6 +804,118 @@ export const LIEUX: readonly LieuDef[] = [
   { slug: 'doha', label: 'Doha', scope: 'ville', hotelCityKeys: ['doha'] },
   { slug: 'budapest', label: 'Budapest', scope: 'ville', hotelCityKeys: ['budapest'] },
   { slug: 'singapour', label: 'Singapour', scope: 'ville', hotelCityKeys: ['singapore'] },
+
+  // ─── 2026-06-23 — Competitive gap destinations (travellers-society /
+  // yonder audit `docs/audits/competitor-travellers-yonder-audit-2026-06-23.md`).
+  // Secondary geography both competitors cover and we did not. Each carries
+  // ≥ 4 published hotels. City lieus that share a name with a homonym in
+  // another country pin `countryCodes` too, so the new combinator AND-gate
+  // (country + city) excludes the homonym (e.g. Vienna/AT vs Vienne/FR;
+  // Geneva/CH). Island / archipelago destinations scope by `countryCodes`
+  // either alone (the whole country IS the destination — Seychelles,
+  // Maurice, Saint-Barthélemy) or AND a city-key list (the country has more
+  // than the island — Crète/GR, Sicile/IT, Majorque & Ibiza/ES).
+  {
+    slug: 'vienne',
+    label: 'Vienne',
+    scope: 'ville',
+    hotelCityKeys: ['vienne', 'vienna', 'wien'],
+    countryCodes: ['AT'],
+  },
+  {
+    slug: 'crete',
+    label: 'Crète',
+    scope: 'region',
+    hotelCityKeys: [
+      'crete',
+      'crète',
+      'heraklion',
+      'chania',
+      'elounda',
+      'rethymno',
+      'rethymnon',
+      'agios nikolaos',
+    ],
+    countryCodes: ['GR'],
+  },
+  {
+    slug: 'rajasthan',
+    label: 'Rajasthan',
+    scope: 'region',
+    hotelCityKeys: [
+      'rajasthan',
+      'jaipur',
+      'udaipur',
+      'jodhpur',
+      'jaisalmer',
+      'ranthambore',
+      'jawai',
+    ],
+    countryCodes: ['IN'],
+  },
+  {
+    slug: 'seychelles',
+    label: 'Seychelles',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['SC'],
+  },
+  {
+    slug: 'geneve',
+    label: 'Genève',
+    scope: 'ville',
+    hotelCityKeys: ['geneve', 'genève', 'geneva'],
+    countryCodes: ['CH'],
+  },
+  {
+    slug: 'lisbonne',
+    label: 'Lisbonne',
+    scope: 'ville',
+    hotelCityKeys: ['lisbonne', 'lisbon', 'lisboa'],
+    countryCodes: ['PT'],
+  },
+  {
+    slug: 'los-angeles',
+    label: 'Los Angeles',
+    scope: 'ville',
+    hotelCityKeys: ['los angeles'],
+    countryCodes: ['US'],
+  },
+  {
+    slug: 'ile-maurice',
+    label: 'Île Maurice',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['MU'],
+  },
+  {
+    slug: 'majorque',
+    label: 'Majorque',
+    scope: 'region',
+    hotelCityKeys: ['majorque', 'mallorca', 'palma', 'deia', 'deià', 'soller', 'pollensa'],
+    countryCodes: ['ES'],
+  },
+  {
+    slug: 'ibiza',
+    label: 'Ibiza',
+    scope: 'region',
+    hotelCityKeys: ['ibiza', 'eivissa'],
+    countryCodes: ['ES'],
+  },
+  {
+    slug: 'saint-barthelemy',
+    label: 'Saint-Barthélemy',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['BL'],
+  },
+  {
+    slug: 'sicile',
+    label: 'Sicile',
+    scope: 'region',
+    hotelCityKeys: ['sicile', 'sicily', 'taormina', 'palerme', 'palermo', 'siracusa', 'noto'],
+    countryCodes: ['IT'],
+  },
 ];
 
 export const LIEU_SLUGS = LIEUX.map((l) => l.slug) as readonly string[];
