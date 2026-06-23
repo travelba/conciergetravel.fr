@@ -292,26 +292,36 @@ async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]
       .order('kind', { ascending: true })
       .order('title_fr', { ascending: true });
     if (error !== null || data === null) return [];
-    const ids = data.map((r) => r.id as string);
     const counts = new Map<string, number>();
-    if (ids.length > 0) {
-      // Supabase REST caps each `.select()` at 1000 rows by default.
-      // At 2026-05-28 the catalogue holds 2260 entries across 190
-      // rankings, so a single fetch silently truncates and under-counts
-      // the biggest lists (50 Best, Gold List). We paginate explicitly
-      // with `.range()` until the batch is shorter than the page size.
+    {
+      // Count entries per ranking by scanning the WHOLE entries table,
+      // not by filtering on the published ids. With ~688 published
+      // rankings, a `.in('ranking_id', ids)` filter builds a ~25 KB
+      // PostgREST URL that trips the server URL-length cap (414) — the
+      // request fails and, when the error is swallowed, every card shows
+      // "0 hôtels". The catalogue holds ~5.5k entries (6 pages of 1000),
+      // so a full scan is cheap and URL-safe. The `counts` map is only
+      // read for published ids (`counts.get(r.id) ?? 0`), so counting
+      // entries of non-published rankings is harmless (never rendered).
+      // Supabase REST caps each `.select()` at 1000 rows by default, so
+      // we paginate with `.range()` until a batch is shorter than the
+      // page size.
       const PAGE_SIZE = 1000;
       let from = 0;
       // Hard ceiling so a runaway query can never hammer the DB —
-      // 20k entries = 10× the current catalogue, well above any
+      // 20k entries = ~4× the current catalogue, well above any
       // realistic 24-month growth.
       const SAFETY_CEILING = 20000;
       while (from < SAFETY_CEILING) {
-        const { data: entries } = await supabase
+        const { data: entries, error: entriesErr } = await supabase
           .from('editorial_ranking_entries')
           .select('ranking_id')
-          .in('ranking_id', ids)
           .range(from, from + PAGE_SIZE - 1);
+        if (entriesErr !== null) {
+          // Surface the failure instead of silently under-counting to 0.
+          console.error('[listPublishedRankings] entry count query failed:', entriesErr.message);
+          break;
+        }
         if (entries === null || entries.length === 0) break;
         for (const e of entries) {
           const k = e.ranking_id as string;
