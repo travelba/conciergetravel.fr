@@ -339,6 +339,43 @@ pnpm rankings:bulk --source=yonder --draft
 | [`rankings/push-ranking-via-rest.mjs`](../../scripts/editorial-pilot/src/rankings/push-ranking-via-rest.mjs) | Push d'un ranking en DB via PostgREST (ratchet + truncation + TOC).         |
 | [`rankings/verify-chain-rankings.mjs`](../../scripts/editorial-pilot/src/rankings/verify-chain-rankings.mjs) | Check existence + statut publish des chain slugs.                           |
 
+## Enriching per-entry justifications (beat-yonder, 2026-06-23)
+
+The N1 gap vs yonder.fr is per-entry justification richness
+(`editorial_ranking_entries.justification_fr/_en`): yonder names the architect,
+the Michelin table (chef + star count), the suite to book, a dated distinction.
+The surgical enricher is
+[`enrich-ranking-justifications.ts`](../../scripts/editorial-pilot/src/rankings/enrich-ranking-justifications.ts)
+(PATCHes only `justification_*` by `(ranking_id, hotel_id)`, grounded on the
+hotel row, `hasLeak()`-gated, PostgREST-only). Lessons capitalised:
+
+- **EN length is NOT a quality proxy.** After the EN-parity backfill, ~all
+  published entries already have `justification_en >= 120`, so the original
+  `--min-en` selection (rewrite where EN is short) skips every generic-but-long
+  entry. The catalogue heads (`hotel-de-luxe-<ville>`, `meilleurs-palaces-*`,
+  benchmarked city heads) are already concrete; the residual generic prose is in
+  the **chain rankings** (`top-*-monde`) and tail/secondary cities (~810 entries
+  / 237 rankings as of 2026-06-23). Use the new `--generic-only` flag, which
+  targets entries naming no hard fact (architect/Michelin/dated distinction/year/
+  suite/dimension) OR omitting a starred table the row actually carries.
+- **`restaurant_info` / `spa_info` were fetched but never rendered** into the
+  grounding facts. `restaurant_info.venues[]` carries `name` + `chef` +
+  `michelin_stars` (e.g. "Seta by Antonio Guida", 2 stars) — exactly the
+  named-table signal yonder leads with. `buildHotelFacts` now renders both
+  (hotel's own structured data, zero invention). Always audit which fetched
+  columns actually reach the prompt before assuming the LLM "ignored" a fact.
+- **LLM-provider blocker (2026-06-23):** the OpenAI key returns `429
+insufficient_quota` (account billing exhausted, all models incl. `-mini`),
+  and the only `ANTHROPIC_API_KEY` slot in `.env.local` is empty. This is a
+  hard external block, not a throttle — probe-and-resume does not help; the
+  enrichment run waits on a funded provider key.
+- **Shared-working-tree commit race:** a parallel worker edits
+  `editorial-table.tsx` / `get-ranking-by-slug.ts` (the `tables` concern) in
+  the SAME tree. `git add <my-file>` then commit can sweep in their staged
+  files. Commit by pathspec (`git commit -F msg -- <my-file>`) and expect the
+  repo-wide `pre-push` typecheck to fail on their in-progress syntax errors;
+  wait and retry rather than `--no-verify`.
+
 ## References
 
 - [`editorial-long-read-rendering`](../editorial-long-read-rendering/SKILL.md) — comment le seed (`MatrixSeed`) devient un long-read rendu (sticky TOC, callouts, EEAT footer). La matrice produit le seed ; cette skill rend la page.

@@ -25,7 +25,6 @@ import {
   isAirellesLocalOverrideEnabled,
 } from '@/server/hotels/dev-override-airelles';
 import { enrichAirellesRooms, isAirellesHotelSlug } from '@/server/hotels/enrich-airelles-rooms';
-import { isHotelIndexable } from '@/server/hotels/indexability';
 
 export type { SupportedLocale };
 
@@ -3761,13 +3760,28 @@ export async function listPublishedHotelSlugs(): Promise<readonly PublishedHotel
  * the shared `isHotelIndexable` helper guarantees that.
  *
  * Cap raised from 500 → 5000 (May 2026, post Phase 1 publish flip:
- * 615 → 2134 published rows). 2026-06-23: `.limit(5000)` was silently
- * truncated to Supabase's `db_max_rows=1000` cap, so the sitemap only
- * emitted the first 1 000 of 2 219 published hotels. Switched to
- * `.range()` pagination until exhaustion (same fix as the places sitemap,
- * commit `6dfb1bb`). The hard `MAX_PAGES` ceiling avoids a runaway loop
- * on a misconfigured env. Ordered by `(priority, slug)` — a total order
- * so pagination never skips or duplicates a row across the page boundary.
+ * 615 → 2134 published rows).
+ *
+ * 2026-06-23: rebuilt on a server-side RPC (`list_indexable_hotel_slugs`,
+ * migration 0078). The previous PostgREST table select had two failure
+ * modes over the 2 219-row catalogue:
+ *   1. `.limit(5000)` was silently clamped to Supabase `db_max_rows=1000`,
+ *      so the sitemap emitted only the first 1 000 hotels.
+ *   2. Paginating that same select with `.range()` transferred ~100 MB of
+ *      `long_description_sections` / `faq_content` / `gallery_images`
+ *      bodies across 3 round-trips just to evaluate indexability in JS; a
+ *      later page threw, the outer catch returned [], and the sitemap
+ *      rendered an EMPTY `<urlset>` in prod.
+ * The RPC evaluates the `isHotelIndexable` predicate in Postgres and
+ * returns only `slug, slug_en, updated_at` — a few hundred KB. PostgREST
+ * still caps a table-returning RPC at `db_max_rows`, so we page the RPC
+ * with `.range()` (cheap now that the payload is light), checking `error`
+ * per page and bailing on a short batch. The hard `MAX_PAGES` ceiling
+ * avoids a runaway loop on a misconfigured env.
+ *
+ * The RPC predicate MUST stay in lockstep with `isHotelIndexable`
+ * (apps/web/src/server/hotels/indexability.ts) — see migration 0078's
+ * header for the contract.
  */
 const INDEXABLE_HOTELS_PAGE_SIZE = 1000;
 const INDEXABLE_HOTELS_MAX_PAGES = 20;
@@ -3779,31 +3793,24 @@ export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotel
     for (let page = 0; page < INDEXABLE_HOTELS_MAX_PAGES; page += 1) {
       const from = page * INDEXABLE_HOTELS_PAGE_SIZE;
       const { data, error } = await supabase
-        .from('hotels')
-        .select(
-          'slug, slug_en, hero_image, gallery_images, long_description_sections, description_fr, factual_summary_fr, concierge_advice, faq_content, updated_at',
-        )
-        .eq('is_published', true)
-        .order('priority', { ascending: true })
-        .order('slug', { ascending: true })
+        .rpc('list_indexable_hotel_slugs')
         .range(from, from + INDEXABLE_HOTELS_PAGE_SIZE - 1);
-      if (error || !Array.isArray(data)) break;
+      if (error !== null) {
+        console.error('[sitemap.hotels] list_indexable_hotel_slugs RPC failed', {
+          page,
+          message: error.message,
+        });
+        break;
+      }
+      if (!Array.isArray(data)) break;
       for (const raw of data) {
         const r = raw as {
           slug?: unknown;
           slug_en?: unknown;
-          hero_image?: unknown;
-          gallery_images?: unknown;
-          long_description_sections?: unknown;
-          description_fr?: unknown;
-          factual_summary_fr?: unknown;
-          concierge_advice?: unknown;
-          faq_content?: unknown;
           updated_at?: unknown;
         };
         const slug = r.slug;
         if (typeof slug !== 'string' || !isValidSlug(slug)) continue;
-        if (!isHotelIndexable(r)) continue;
         out.push({
           slugFr: slug,
           slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,
