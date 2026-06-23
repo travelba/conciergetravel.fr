@@ -13,20 +13,19 @@
 > bordeaux/laiton/aquarelle : les lire en appliquant la table de
 > correspondance ci-dessous jusqu'à leur réécriture complète.
 >
-> | Ancien (vintage) | Nouveau (crème/taupe) |
-> | --- | --- |
-> | Cream ivoire `#f5ebd4` (fond) | Crème `#f6f1e7` (fond) |
-> | Bordeaux `#6b2331` (accent fort, boutons) | Taupe `#8c7b5a` / noir taupe `#3a352d` (boutons pleins) |
-> | Laiton `#b88a4d` (filets, focus) | Taupe `#8c7b5a` (filets, focus, étoiles) |
-> | Marbre `#ece5d9` (surfaces) | Crème-2 `#efe8da` / crème-3 `#e8e0d0` |
-> | Noto Serif (titres) | EB Garamond (titres) |
-> | Inter (corps) | Outfit (corps) |
-> | Illustrations aquarelle Concierge | **Vraies photos de luxe** (pas d'illustration de remplissage) |
-> | Charcoal `#1a1a1a` (texte) | Texte `#2b2722`, titres `#3a352d` |
+> | Ancien (vintage)                          | Nouveau (crème/taupe)                                         |
+> | ----------------------------------------- | ------------------------------------------------------------- |
+> | Cream ivoire `#f5ebd4` (fond)             | Crème `#f6f1e7` (fond)                                        |
+> | Bordeaux `#6b2331` (accent fort, boutons) | Taupe `#8c7b5a` / noir taupe `#3a352d` (boutons pleins)       |
+> | Laiton `#b88a4d` (filets, focus)          | Taupe `#8c7b5a` (filets, focus, étoiles)                      |
+> | Marbre `#ece5d9` (surfaces)               | Crème-2 `#efe8da` / crème-3 `#e8e0d0`                         |
+> | Noto Serif (titres)                       | EB Garamond (titres)                                          |
+> | Inter (corps)                             | Outfit (corps)                                                |
+> | Illustrations aquarelle Concierge         | **Vraies photos de luxe** (pas d'illustration de remplissage) |
+> | Charcoal `#1a1a1a` (texte)                | Texte `#2b2722`, titres `#3a352d`                             |
 >
 > **Règle d'or inchangée** : SEO/GEO priment toujours sur le graphique.
 > Pas de fond sombre, pas d'or jaune, un seul accent.
-
 
 > Prompts prêts à coller dans **Stitch (Google Labs)** pour générer
 > les maquettes graphiques des pages stratégiques de

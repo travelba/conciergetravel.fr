@@ -81,8 +81,12 @@ export function HotelInteractiveMap({
   const poisRef = useRef(pois);
   const [hoveredPoiId, setHoveredPoiId] = useState<string | null>(null);
 
-  poisRef.current = pois;
-  poiByIdRef.current = new Map(pois.map((poi) => [poi.id, poi]));
+  // Keep latest POIs in refs for the long-lived Mapbox event callbacks.
+  // Syncing in an effect (not during render) satisfies react-hooks/refs.
+  useEffect(() => {
+    poisRef.current = pois;
+    poiByIdRef.current = new Map(pois.map((poi) => [poi.id, poi]));
+  });
 
   useEffect(() => {
     const handler = (event: Event): void => {
@@ -194,6 +198,7 @@ export function HotelInteractiveMap({
       popupRef.current = null;
       hotelMarkerRef.current?.remove();
       hotelMarkerRef.current = null;
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- ref holds a stable Map instance (never reassigned)
       for (const marker of poiMarkersRef.current.values()) marker.remove();
       poiMarkersRef.current.clear();
       map.remove();

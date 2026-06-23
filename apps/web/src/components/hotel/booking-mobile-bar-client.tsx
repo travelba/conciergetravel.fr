@@ -107,6 +107,7 @@ export function BookingMobileBarClient({
   const showDockPrice = variant !== 'coming_soon' && editorialPrice !== null;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount guard for SSR hydration
     setMounted(true);
   }, []);
 
@@ -115,6 +116,7 @@ export function BookingMobileBarClient({
 
     const anchor = document.querySelector('[data-booking-mobile-reveal-anchor]');
     if (!anchor) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fallback reveal when the scroll anchor is absent
       setRevealed(true);
       return undefined;
     }

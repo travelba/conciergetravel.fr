@@ -25,9 +25,9 @@ Invoke when:
 All durations and easings are tokens — never literals in components:
 
 ```css
---motion-fast: 150ms;      /* hover states, focus rings */
---motion-base: 250ms;      /* card lifts, overlays, dropdowns */
---motion-slow: 400ms;      /* photo zooms, reveals — never above 500ms */
+--motion-fast: 150ms; /* hover states, focus rings */
+--motion-base: 250ms; /* card lifts, overlays, dropdowns */
+--motion-slow: 400ms; /* photo zooms, reveals — never above 500ms */
 --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1); /* ease-out-quint — fast start, soft landing */
 ```
 
@@ -65,7 +65,10 @@ effects must not force `'use client'` on a Server Component host.
   }
 }
 @keyframes reveal-up {
-  from { opacity: 0; transform: translateY(16px); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
 }
 ```
 

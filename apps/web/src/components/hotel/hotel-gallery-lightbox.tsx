@@ -647,6 +647,7 @@ export function HotelGalleryLightbox({
 
   useEffect(() => {
     if (!availableFilters.includes(activeFilter)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset to 'all' when the active filter is no longer available
       setActiveFilter('all');
     }
   }, [activeFilter, availableFilters]);

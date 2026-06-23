@@ -21,6 +21,7 @@ export function HotelKitMapPortal({
     const el = document.getElementById(KIT_MAP_SLOT_ID);
     if (el instanceof HTMLElement) {
       el.removeAttribute('aria-hidden');
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- capture the portal slot element after hydration
       setSlot(el);
     }
   }, []);

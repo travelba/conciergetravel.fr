@@ -1,5 +1,5 @@
 ---
-description: Mandatory 15-block architecture for the hotel detail page (CDC v3.0 §2). Checklist for PR review and component composition.
+description: Mandatory 15-block architecture for the hotel detail page (CDC v3.0 §2). Checklist for PR review and component composition. La fiche les-airelles-gordes est le MODÈLE UNIVERSEL de référence — toutes les fiches du catalogue doivent atteindre ce niveau (parité Gordes), pas seulement les pilotes.
 globs: "apps/web/src/app/[locale]/hotel/[slug]/**/*.{ts,tsx}"
 alwaysApply: false
 ---
@@ -7,6 +7,37 @@ alwaysApply: false
 # Hotel detail page — CDC §2 architecture (15 blocs)
 
 This page is the **strategic surface** that competes against Booking, Hotels.com and the official hotel website. CDC v3.0 §2 defines 15 mandatory blocks. A PR that touches `/hotel/[slug]/page.tsx` must visit this checklist.
+
+## Principe directeur — Les Airelles de Gordes = modèle universel du catalogue
+
+> **Décision PO (2026-06-16)** : la fiche `les-airelles-gordes` n'est **pas**
+> un cas pilote isolé — c'est le **modèle de référence que TOUTES les fiches
+> hôtels du catalogue doivent atteindre**. « Conforme au CDC » signifie
+> « au niveau de Gordes ». Il n'y a pas de palier intermédiaire toléré comme
+> état **cible** : une fiche en-dessous de Gordes est « en cours », jamais
+> « livrée ».
+
+- **Portée = tout le catalogue** : les **2219** fiches publiées (et tout futur
+  ajout), pas uniquement les `HOTEL_KIT_SLUGS` pilotes. Le statut pilote sert
+  seulement à **séquencer** le rollout — il n'exempte jamais une fiche du
+  niveau cible.
+- **Niveau cible = parité Gordes** = les 15 blocs CDC §2 **+** les 2 dimensions
+  d'exemplarité (`golden` handoff concierge + `structure` anti-cannibalisation)
+  **+** la parité photo kit (galerie **25** en 5×5 ou **≥ 30** catégorisées,
+  hero **Vue** hors galerie, POI **`poi-{slug}` dédiés**, spa / F&B sourcés
+  officiels) **+** FAQ Perplexity (40–60 kit / 20–30 concierge) **+** avis
+  Google GMB datés **+** voix Concierge (`<ConciergeAdvice>`).
+- **Mesure unique** : `audit:hotel-fiches-cdc` sur tout le catalogue. Cible =
+  `score_cdc ≥ 95 %` **ET** tous les gates `kit.*` verts (**exit 0**). Un score
+  CDC élevé avec un seul gate `kit.*` rouge = **non conforme** (cf. D19,
+  skill `hotel-kit-rollout`).
+- **Compromis temporaire ≠ état cible** : un gate laissé « amber » (ex. Conrad
+  Los Angeles publié avec 9 photos Google au lieu de 25–30 officielles → gates
+  `kit.02.*` rouges) est un **état transitoire** explicitement à résorber, pas
+  une dérogation au standard.
+- **Rollout** : séquencement pilotes → vagues catalogue (par `parent_group` /
+  tier photo) dans [`hotel-kit-rollout`](../skills/hotel-kit-rollout/SKILL.md)
+  + rule [`hotel-kit-rollout.mdc`](hotel-kit-rollout.mdc).
 
 ## Decisions (do not relitigate without an ADR)
 
@@ -105,7 +136,7 @@ Implémentation : `kit-fiche-acceptance-gates.ts` — `audit:hotel-fiches-cdc` *
 
 ## Golden template & audit catalogue
 
-La fiche **`les-airelles-gordes`** est la fiche **exemplaire** de référence (« golden template »). Au-delà des 15 blocs CDC, l'exemplarité ajoute deux dimensions, mesurées sur **tout le catalogue** par l'audit :
+La fiche **`les-airelles-gordes`** est le **modèle universel** du catalogue (« golden template ») — voir le [Principe directeur](#principe-directeur--les-airelles-de-gordes--modèle-universel-du-catalogue) en tête de ce CDC : **toute** fiche publiée doit l'atteindre, pas seulement les pilotes. Au-delà des 15 blocs CDC, l'exemplarité ajoute deux dimensions **obligatoires** (pas optionnelles), mesurées sur **tout le catalogue** par l'audit :
 
 - **Golden template** (dimension `golden`) — le « handoff concierge » : chaque restaurant/POI cité porte de quoi réserver (contact : `website`/`reservation_url`/`phone`) **et** un `tip_fr`/`tip_en` (l'info qu'un concierge enverrait au client) ; les POI sont rangés en 3 buckets `visit` / `do` / `shop` ; dossier spa complet (description + horaires + contact + tip) ; `upcoming_events` avec `image_url` ; `instagram` (1-3 posts mirrorés Cloudinary) ; `concierge_pick` (suite recommandée) ; `concierge_hook` (accroche héro voix concierge ≤ 25 mots).
 - **Restructuration** (dimension `structure`) — anti-cannibalisation : une section long-read ne « cannibalise » un bloc que si **le bloc structuré correspondant est réellement peuplé** (resto `restaurant_info.venues`, spa `spa_info.description`, lieu = POIs avec handoff complet). Sur une fiche nue (blocs vides), la section « Restauration/Spa/À deux pas » est le **seul** porteur du contenu → la supprimer = perte de contenu, pas du dédoublonnage. Le dédoublonnage est donc un nettoyage **post-Golden** (`dropCannibalizingSections`), pas une passe de masse. Idem distinction fabriquée : une étoile Michelin sans award `verified` est flaggée, mais ~94 % de ces cas sont des claims **sourcés légitimes** dont l'award n'a jamais été structuré → la remédiation est de **structurer + vérifier l'award** (`extract:michelin-awards`), **jamais** d'effacer la phrase.

@@ -117,9 +117,14 @@ export function DirectoryMapboxCanvas({
   const pointsRef = useRef(points);
   const popupLabelRef = useRef(popupViewLabel);
 
-  pointsRef.current = points;
-  popupLabelRef.current = popupViewLabel;
-  modeRef.current = cluster ? 'cluster' : 'markers';
+  // Keep latest props in refs for the long-lived Mapbox event callbacks
+  // (registered once in the init effect). Syncing in an effect rather than
+  // during render satisfies react-hooks/refs with no behaviour change.
+  useEffect(() => {
+    pointsRef.current = points;
+    popupLabelRef.current = popupViewLabel;
+    modeRef.current = cluster ? 'cluster' : 'markers';
+  });
 
   useEffect(() => {
     const token = getMapboxAccessToken();
