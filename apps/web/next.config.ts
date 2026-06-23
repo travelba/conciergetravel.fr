@@ -174,6 +174,22 @@ const nextConfig: NextConfig = {
         destination: '/en/the-concierge-club#prestige',
         permanent: true,
       },
+      // Anti-cannibalisation: `/marque/dorchester` is a transitional alias
+      // (migration 0063) of the canonical `/marque/dorchester-collection`.
+      // Both used to render the same brand with a self-referential canonical
+      // → duplicate indexable URLs. The alias is now excluded from
+      // generateStaticParams + the sitemap (`BRAND_ALIAS_TO_CANONICAL`); this
+      // 308 resolves any remaining inbound link to the canonical slug.
+      {
+        source: '/:locale(fr|en)/marque/dorchester',
+        destination: '/:locale/marque/dorchester-collection',
+        permanent: true,
+      },
+      {
+        source: '/marque/dorchester',
+        destination: '/marque/dorchester-collection',
+        permanent: true,
+      },
     ];
   },
 };
