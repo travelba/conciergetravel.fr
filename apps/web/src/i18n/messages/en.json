@@ -1890,7 +1890,8 @@
       "emailPlaceholder": "Email address",
       "consent": "I accept to receive the MyConciergeHotel newsletter and to receive a validation email (GDPR double opt-in).",
       "submit": "Receive the newsletter",
-      "wip": "Subscription form being commissioned (Brevo integration). In the meantime, write to contact@myconciergehotel.com with subject [NEWSLETTER] — we'll add you to the list manually.",
+      "wip": "Subscription form being commissioned (Brevo integration). In the meantime, write to us with the subject [NEWSLETTER] — we'll add you to the list manually, in one message.",
+      "ctaContact": "Write to us to subscribe",
       "successMessage": "Validation email sent — click the link within 48h to confirm."
     },
     "rgpd": {

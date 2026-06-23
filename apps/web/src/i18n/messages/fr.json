@@ -1890,7 +1890,8 @@
       "emailPlaceholder": "Adresse e-mail",
       "consent": "J'accepte de recevoir la newsletter MyConciergeHotel et de recevoir un e-mail de validation (double opt-in RGPD).",
       "submit": "Recevoir la newsletter",
-      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez à contact@myconciergehotel.com avec sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement.",
+      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez-nous avec le sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement, en un message.",
+      "ctaContact": "Nous écrire pour s'abonner",
       "successMessage": "Validation par e-mail envoyée — cliquez sur le lien dans les 48h pour confirmer."
     },
     "rgpd": {
