@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-static';
 
@@ -32,6 +33,9 @@ function Frame({ title, description, bg, children }: FrameProps): React.ReactEle
 }
 
 export default function LogoPreviewPage(): React.ReactElement {
+  // Internal dev tool — never reachable in production (noindex + unlinked,
+  // but the route still resolves by direct URL otherwise). Cluster 1 audit.
+  if (process.env.NODE_ENV === 'production') notFound();
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <header className="mb-8">

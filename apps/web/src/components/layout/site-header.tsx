@@ -69,7 +69,7 @@ export async function SiteHeader(): Promise<ReactElement> {
       </a>
 
       <header className="border-outline-variant bg-bg/95 sticky top-0 z-40 border-b backdrop-blur">
-        <div className="container mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-4">
+        <div className="container mx-auto flex max-w-screen-xl items-center gap-3 px-4 py-4">
           <Link
             href="/"
             className="focus-visible:ring-ring flex items-center gap-2.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
@@ -78,14 +78,19 @@ export async function SiteHeader(): Promise<ReactElement> {
             <span className="text-primary-heritage font-serif text-[1.7rem] font-medium leading-none tracking-[0.04em]">
               M<span className="text-gold-700">C</span>
             </span>
-            <span className="text-primary-heritage hidden font-serif text-lg leading-none tracking-[0.01em] sm:inline">
+            {/* Wordmark shows on tablet (sm–lg, where the nav is a burger
+                and the row has ample room) and is hidden on desktop full-nav
+                (≥ lg) so the 5 mega-menus + search box + both auth CTAs fit
+                inside the max-w-screen-xl cap without clipping the auth
+                cluster. The MC monogram remains the brand mark on desktop. */}
+            <span className="text-primary-heritage hidden font-serif text-lg leading-none tracking-[0.01em] sm:inline lg:hidden">
               {t('brand')}
             </span>
           </Link>
 
           <nav
             aria-label={t('primaryNav.label')}
-            className="ml-4 hidden flex-1 items-center gap-0.5 md:flex"
+            className="ml-2 hidden flex-1 items-center gap-0 lg:flex"
           >
             <PalacesHotelsMegaMenu locale={locale} t={t} />
             <DestinationsMegaMenu locale={locale} t={t} />
@@ -94,13 +99,17 @@ export async function SiteHeader(): Promise<ReactElement> {
             <ConciergeMegaMenu locale={locale} t={t} />
           </nav>
 
+          {/* Quick-search: visible inline box on large screens (≥ xl),
+              compact magnifier icon below xl. PO decision 2026-06-22 —
+              restore the searchable box on desktop while keeping the
+              1024–1279px band uncluttered (the icon stands in there). */}
           <HeaderQuickSearch locale={locale} />
 
           <div className="ml-auto flex items-center gap-2">
             <Link
               href="/recherche"
               aria-label={t('primaryNav.search')}
-              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 md:hidden"
+              className="text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 xl:hidden"
             >
               <svg
                 aria-hidden
@@ -163,7 +172,7 @@ function MegaTrigger({
         href={href}
         aria-haspopup="menu"
         aria-label={triggerAria}
-        className="text-fg hover:text-gold-700 focus-visible:ring-ring inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[13px] uppercase tracking-[0.12em] transition-colors focus-visible:outline-none focus-visible:ring-2"
+        className="text-fg hover:text-gold-700 focus-visible:ring-ring inline-flex items-center gap-0.5 whitespace-nowrap rounded-md px-1.5 py-1.5 text-[13px] uppercase tracking-[0.05em] transition-colors focus-visible:outline-none focus-visible:ring-2"
       >
         {label}
         <svg
@@ -551,13 +560,20 @@ function DestinationsMegaMenu({ locale, t }: MegaMenuProps): ReactElement {
           </>
         </MegaColumn>
       </div>
-      <div className="border-border mt-3 border-t pt-2">
+      <div className="border-border mt-3 flex flex-wrap items-center gap-x-4 border-t pt-2">
         <Link
           role="menuitem"
           href="/destination"
           className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
         >
           {t('primaryNav.destinationsBrowseAll')}
+        </Link>
+        <Link
+          role="menuitem"
+          href="/lieux"
+          className="text-muted hover:bg-muted/10 hover:text-fg focus-visible:ring-ring block rounded-md px-2.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-2"
+        >
+          {t('primaryNav.placesToVisit')}
         </Link>
       </div>
     </MegaTrigger>
@@ -769,7 +785,7 @@ function ConciergeMegaMenu({ t }: MegaMenuProps): ReactElement {
                 2026-05-28: surfaces the existing `/ouvertures` page
                 that was reachable from the home strip only). */}
             <MegaLink href="/ouvertures" label={t('primaryNav.conciergeOpenings')} />
-            <MegaLink href="/guides" label={t('primaryNav.conciergeGuides')} />
+            <MegaLink href="/destination" label={t('primaryNav.conciergeGuides')} />
           </>
         </MegaColumn>
         <MegaColumn heading={t('primaryNav.conciergePro')}>

@@ -63,7 +63,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'search',
       description:
-        "Trouver un hôtel d'exception (Palace, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★, boutique-hôtel) par destination et dates, dans 91 pays. Le concierge renvoie une sélection paginée, triée par pertinence éditoriale (et non par commission).",
+        "Trouver un hôtel d'exception (Palace, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, 5★, boutique-hôtel) par destination et dates, dans 127 pays. Le concierge renvoie une sélection paginée, triée par pertinence éditoriale (et non par commission).",
       inputSchema: {
         type: 'object',
         properties: {
@@ -94,7 +94,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
     {
       name: 'get-hotel',
       description:
-        'Récupérer la fiche complète d’un hôtel par son slug : chapeau Concierge, chambres, restaurants, spa, localisation, conditions, distinctions, FAQ, rating Amadeus, et surtout le « Conseil du Concierge » (un secret opérationnel concret) + JSON-LD Hotel. URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
+        'Récupérer la fiche d’un hôtel par son slug : identité, résumé factuel, distinctions, équipements, et le « Conseil du Concierge » (un secret opérationnel concret). Inclut par défaut la « lentille concierge » pour recommander après réservation : restaurants de l’hôtel (chef, plat signature, lien de réservation), lieux à proximité classés visiter / faire / manger / shopping (distance, marche, site web), expériences signature, et blocs questions-réponses GEO/AEO. URL canonique : /fr/hotel/{slug} ou /en/hotel/{slug}.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -105,6 +105,16 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           locale: {
             type: 'string',
             description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+          body: {
+            type: 'string',
+            description:
+              'Longueur de la description : "short" (par défaut, ~500 car.) ou "long" (description complète, plafonnée à 4 Ko).',
+          },
+          lens: {
+            type: 'string',
+            description:
+              'Lentille concierge (restaurants / lieux à proximité / expériences / Q&R GEO) : "on" (par défaut) ou "off" pour un payload identité seule.',
           },
         },
         required: ['slug'],
@@ -482,6 +492,32 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         required: ['slug'],
       },
       endpoint: { method: 'GET', path: '/api/agent/hotel-sources/{slug}' },
+    },
+    // ── Lieux à visiter (places vertical) ───────────────────────────────
+    {
+      name: 'get-places-nearby',
+      description:
+        "Lister les « lieux à visiter » canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre `hotelSlug`, via la table de proximité pré-calculée) OU d'une ville (paramètre `citySlug`). Chaque lieu a sa fiche SEO/GEO indexable `/lieux/{ville}/{slug}` (réservable via GetYourGuide ou en demandant au Concierge) — la réponse renvoie le nom, le type (kind), l'URL canonique, le résumé factuel et la distance à pied depuis l'hôtel. Aucune duplication de contenu : l'hôtel pointe vers la fiche canonique du lieu.",
+      inputSchema: {
+        type: 'object',
+        properties: {
+          hotelSlug: {
+            type: 'string',
+            description:
+              'Slug kebab-case de l’hôtel (FR ou EN) pour lister les lieux à proximité (ex. "ritz-paris").',
+          },
+          citySlug: {
+            type: 'string',
+            description:
+              'Clé de ville normalisée (ex. "paris") pour lister tous les lieux publiés de la ville. Alternatif à hotelSlug.',
+          },
+          locale: {
+            type: 'string',
+            description: 'Locale demandée — "fr" (par défaut) ou "en".',
+          },
+        },
+      },
+      endpoint: { method: 'GET', path: '/api/agent/places-nearby' },
     },
     // ── CDC itinéraires §6.1 — feature SEO/GEO acquisition ──────────────
     {

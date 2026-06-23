@@ -12,7 +12,7 @@ export default function NotFound() {
         href="/"
         className="border-border bg-bg hover:bg-muted/10 mt-4 inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm"
       >
-        ←&nbsp;Retour à l'accueil
+        <span aria-hidden>←</span> {t('backHome')}
       </Link>
     </main>
   );

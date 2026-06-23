@@ -110,6 +110,34 @@ Cross-skill: `structured-data-schema-org` §CSP-nonce-contract,
 - HMAC validated using `crypto.timingSafeEqual`.
 - Replay protection via timestamp tolerance ±5 min and nonce stored in Redis 10 min.
 
+### Defence-in-depth: re-validate at every trust boundary
+
+A one-off data sweep cleans the **present** state; it never guarantees the
+**next emit**. A value that pre-dates a guard, or is added by hand later, will
+re-reach the surface unless every consumer re-validates. **Validate at write
+time AND at emission/render time — they are independent layers, not
+alternatives.**
+
+Worked example (2026-06 EEAT hardening): SEO-squatter / booking-engine / OTA
+URLs (`*hotels<geo><digits>.com`, `*.com-hotel.com`, Booking.com listings)
+that masquerade as a hotel's official site. The pipeline already vetoed them at
+the **write** boundary (`scripts/editorial-pilot/src/photos/backfill-official-url.ts`,
+`convert-wikidata-to-external-sources.ts`), but a residual toxic value could
+still surface in `Restaurant.url` / `Hotel.sameAs` JSON-LD or a rendered "Site
+officiel" link. The fix hoisted the detector into the pure
+[`@mch/domain/url`](../../../packages/domain/src/url/toxic-official-url.ts)
+`isToxicOfficialUrl` (one regex, re-exported by the pipeline so write + emission
+pin the same rules) and applied it at **every** emission site: the seo builder
+(`Restaurant.url`, centralised once for both callers) and the apps/web reader
+(`official_url → sameAs` + the EEAT-footer `official` reference). When a URL is
+toxic, **omit the field** — the node/link stays valid without it.
+
+Generalise: a regex/allow-list guard that lives only in a one-shot script is a
+latent re-pollution vector. Put the predicate in a shared pure module and call
+it at the write boundary, the JSON-LD emission boundary, AND the render
+boundary. See `structured-data-schema-org` §"URL hygiene — veto squatter URLs
+at the emission boundary".
+
 ## Anti-patterns to refuse
 
 - Using the Supabase service role key in client code.
@@ -121,6 +149,7 @@ Cross-skill: `structured-data-schema-org` §CSP-nonce-contract,
 - Inline `<script type="application/ld+json">` without the `JsonLdScript` wrapper — bypasses nonce, browser drops the tag.
 - Reading `headers()` inside a leaf RSC instead of the page boundary — invisible dynamic-API call.
 - Re-enabling `revalidate = N` on a JSON-LD-emitting page — strips the nonce.
+- Cleaning a DB column with a one-off sweep and then trusting that data at emission/render instead of re-validating with the shared predicate (a sweep is not a guard).
 
 ## References
 

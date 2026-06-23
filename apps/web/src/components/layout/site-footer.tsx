@@ -112,7 +112,7 @@ export async function SiteFooter(): Promise<ReactElement> {
             </ul>
             <p className="text-muted mt-4 text-xs leading-relaxed">
               {t('trust.engagements')}{' '}
-              <Link href="/mentions-legales" className="text-fg hover:underline">
+              <Link href="/mentions-legales" className="text-fg underline underline-offset-2">
                 {t('trust.engagementsCta')} →
               </Link>
             </p>
@@ -143,6 +143,11 @@ export async function SiteFooter(): Promise<ReactElement> {
                   className="text-fg hover:underline"
                 >
                   {t('links.directoryFrance')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/lieux" className="text-fg hover:underline">
+                  {t('links.placesToVisit')}
                 </Link>
               </li>
               <li>
@@ -179,7 +184,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/destination/[citySlug]',
                       params: { citySlug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -205,7 +210,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                         pathname: '/destination/[citySlug]',
                         params: { citySlug },
                       }}
-                      className="text-muted hover:text-fg hover:underline"
+                      className="text-muted hover:text-fg inline-block py-1 hover:underline"
                     >
                       {pickEntryLabel(entry, locale)}
                     </Link>
@@ -305,7 +310,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/classement/[slug]',
                       params: { slug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -328,7 +333,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                       pathname: '/label/[facetSlug]',
                       params: { facetSlug: entry.slug },
                     }}
-                    className="text-muted hover:text-fg hover:underline"
+                    className="text-muted hover:text-fg inline-block py-1 hover:underline"
                   >
                     {pickEntryLabel(entry, locale)}
                   </Link>
@@ -473,10 +478,10 @@ export async function SiteFooter(): Promise<ReactElement> {
               libellés = nom de fichier brut, taille réduite, teinte atténuée.
             */}
             <nav aria-label={t('headings.agentic')} className="mt-6">
-              <h2 className="text-muted/70 mb-2 text-[10px] font-medium uppercase tracking-wider">
+              <h2 className="text-muted mb-2 text-[10px] font-medium uppercase tracking-wider">
                 {t('headings.agentic')}
               </h2>
-              <ul className="text-muted/60 flex flex-col gap-1 text-[10px]">
+              <ul className="text-muted flex flex-col gap-1 text-[10px]">
                 <li>
                   {/*
                     Plain `<a>` (no `<Link>`) — these are absolute file
@@ -484,19 +489,22 @@ export async function SiteFooter(): Promise<ReactElement> {
                     tree. Skill `geo-llm-optimization` §LLM-actionable
                     surfaces.
                   */}
-                  <a href="/sitemap.xml" className="hover:text-fg hover:underline">
+                  <a
+                    href="/sitemap.xml"
+                    className="hover:text-fg inline-block py-1.5 hover:underline"
+                  >
                     {t('links.sitemap')}
                   </a>
                 </li>
                 <li>
-                  <a href="/llms.txt" className="hover:text-fg hover:underline">
+                  <a href="/llms.txt" className="hover:text-fg inline-block py-1.5 hover:underline">
                     {t('links.llmsTxt')}
                   </a>
                 </li>
                 <li>
                   <a
                     href="/.well-known/agent-skills.json"
-                    className="hover:text-fg hover:underline"
+                    className="hover:text-fg inline-block py-1.5 hover:underline"
                   >
                     {t('links.agentSkills')}
                   </a>
@@ -528,7 +536,7 @@ export async function SiteFooter(): Promise<ReactElement> {
                     pathname: '/classements/[axe]/[valeur]',
                     params: { axe: 'lieu', valeur: entry.slug },
                   }}
-                  className="text-muted hover:text-fg hover:underline"
+                  className="text-muted hover:text-fg inline-block py-1 hover:underline"
                 >
                   {pickEntryLabel(entry, locale)}
                 </Link>

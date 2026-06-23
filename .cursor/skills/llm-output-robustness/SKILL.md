@@ -1141,6 +1141,132 @@ schema bound. The fix is content-aware (LLM-side) instead of structural
 - `scripts/editorial-pilot/src/hotels/description-extend-generator.ts` —
   `isOscillating` + `openingRule` toggle + example block.
 
+## Rule 19 — Deterministic salvage for LENGTH constraints, never for LEXICON
+
+A generator under **hard length rules** (`factual_summary ≤ 165c`, every
+sentence `≤ 25 mots`) burns tokens when it relies on LLM correction passes
+alone: empirically ~37-50 % of rows still failed the length gate after 2-4
+LLM retries, each retry a full round-trip. The fix is to do the
+**mechanical** part of the work deterministically — length is a
+character/word-boundary problem a regex solves perfectly — and reserve LLM
+budget for the part only a model can do (lexicon, factual phrasing, voice).
+
+The rule has two clamps and one inviolable guardrail. Reference impl:
+[`scripts/editorial-pilot/src/places/enrich-places-editorial.ts`](mdc:scripts/editorial-pilot/src/places/enrich-places-editorial.ts).
+
+### 19a — Pre-clamp length fields BEFORE the Zod parse
+
+A `factual_summary` that overshoots by a few chars makes `safeParse` fail
+**with no `data`** — so a later salvage step can never even fire (it has
+nothing to repair). Clamp the SERP-summary fields to their documented max at
+the last word boundary _before_ parsing. This converts 100 % of
+schema-length rejections into a clean parse:
+
+```ts
+/** Trim a SERP summary to `max` chars at a word boundary, no dangling punctuation. */
+function clampSummary(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const slice = text.slice(0, max + 1);
+  const lastSpace = slice.lastIndexOf(' ');
+  const cut = lastSpace > 80 ? slice.slice(0, lastSpace) : text.slice(0, max);
+  return cut.replace(/[\s,;:—–.!?…]+$/u, '');
+}
+
+// Always-on, runs inside validateAttemptResult before PlaceEditorialSchema.safeParse:
+function clampRawSummaries(raw: unknown): unknown {
+  if (raw === null || typeof raw !== 'object') return raw;
+  const obj = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = { ...obj };
+  if (typeof obj.factual_summary_fr === 'string')
+    out.factual_summary_fr = clampSummary(obj.factual_summary_fr, 165);
+  if (typeof obj.factual_summary_en === 'string')
+    out.factual_summary_en = clampSummary(obj.factual_summary_en, 180);
+  return out;
+}
+```
+
+This generalises the precedent already documented in `AGENTS.md`: the
+rankings pipeline clamps `justification_fr/_en ≤ 1200c` at a sentence
+boundary in `postValidateEntries` (DB CHECK
+`editorial_ranking_entries_justification_fr_ck = 40..1200`) — the LLM's
+160-200 word target occasionally overshot and failed the whole push.
+
+### 19b — Last-resort sentence-split salvage, then RE-RUN the full gate
+
+When every LLM pass (generate → fix → regenerate-with-issues → fix) still
+leaves a `phrase > 25 mots` violation, a deterministic splitter cuts each
+over-length sentence at natural boundaries: em-dash / semicolon / comma
+first, **then** coordinating conjunctions (`et / mais / puis / car / donc /
+ensuite / alors / cependant / toutefois`), picking the boundary closest to
+the word midpoint and keeping ≥ 4 words on each half. Subordinators
+(`qui/que/dont/où`) are deliberately excluded — they leave a dangling
+fragment.
+
+```ts
+let finalData = attempt.ok ? attempt.data : undefined;
+let salvaged = false;
+if (finalData === undefined && attempt.data !== undefined) {
+  const candidate = salvageEditorial(attempt.data); // clampSummary + shortenSentences
+  const reparsed = PlaceEditorialSchema.safeParse(candidate);
+  // ↓↓↓ THE non-negotiable step: re-run schema + the FULL editorial gate.
+  if (reparsed.success && validateEditorialEnvelope(reparsed.data).length === 0) {
+    finalData = reparsed.data;
+    salvaged = true;
+  }
+}
+if (finalData === undefined) {
+  console.warn(`  [enrich] ${place.name}: rejected - ${attempt.issues.join(', ')}`);
+  return false; // row keeps `faq IS NULL`, retried fresh on re-run
+}
+```
+
+A salvage that is _accepted without re-validation_ is a silent quality
+regression. The salvaged copy MUST pass the same `safeParse` +
+`validateEditorialEnvelope` as a clean LLM output, or the row is rejected and
+left for a fresh-sampled retry on the next pass.
+
+### 19c — The guardrail: salvage touches RHYTHM, never VOCABULARY
+
+This is the line that keeps the pattern honest. The splitter and the clamp
+only move sentence boundaries and trim trailing chars — they **never add,
+remove, or substitute a word**. So the banned-lexicon / brand-voice linter
+(`lintConciergeSummary`, see `concierge-voice-pipeline`) stays the **sole
+authority** on vocabulary:
+
+```ts
+function validateEditorialEnvelope(value: PlaceEditorial): readonly string[] {
+  const failures: string[] = [];
+  for (const text of texts) {
+    if (hasLongSentence(text)) failures.push('phrase > 25 mots'); // ← salvageable
+    const lint = lintConciergeSummary(text);
+    if (!lint.clean) failures.push(`linter: ${String(lint.blocker)} blocker(s)`); // ← NOT salvageable
+  }
+  // …word-count envelope checks…
+  return failures;
+}
+```
+
+Consequence: a `linter: blocker` failure (a banned superlative, a forbidden
+tic) is **never** cleared by the deterministic salvage, because the salvage
+cannot change a word. Those rows stay rejected and are re-attempted on the
+next pass with fresh sampling — exactly as before. Only the purely
+structural `phrase > 25 mots` failures are deterministically recoverable.
+
+**The split of responsibilities:**
+
+| Failure class                               | Owner             | Mechanism                                                     |
+| ------------------------------------------- | ----------------- | ------------------------------------------------------------- |
+| Length (chars over max, sentence > N words) | **Deterministic** | `clampSummary` + `splitOneSentence` regex                     |
+| Lexicon (banned superlative, tic, calque)   | **LLM + linter**  | retry/fix passes, `lintConciergeSummary` verdict is sovereign |
+
+**When to reach for this:** any LLM pipeline whose gate combines a hard
+length envelope with a lexicon/voice gate. Do the length part with a regex
+clamp before the parse + a last-resort splitter after the LLM passes; keep
+the lexicon part 100 % LLM-driven and linter-judged. Contrast with Rule 18c
+(oscillation detector): that fix is _content-aware_ and asks the LLM to hold
+both constraints at once; Rule 19 is the complementary _structure-only_ lever
+for the length half when the LLM has already given up.
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -1164,6 +1290,8 @@ schema bound. The fix is content-aware (LLM-side) instead of structural
 - ❌ Forking the prompt + generator + gate for a new collection that shares the SERP-card optimisation function with an existing one → triples the maintenance surface. Project the new row into the existing input shape and reuse the generator (Rule 17). Fork only when banned-word list, format anchor, or audience signal genuinely diverges.
 - ❌ Shipping a Zod `max(N)` that contradicts what the prompt explicitly asks for (e.g. schema `max(800)` while prompt says "60-180 mots" = ~1100 chars). The LLM follows the prompt, the schema rejects, retries burn 5×. Always cross-check the `max_chars ≈ max_words × 6.5` table when designing a pipeline (Rule 18a).
 - ❌ Combining a length plafond, a sentence-length cap, a banlist, and a "must extend with new factual content" instruction on factually dense rows (Palaces, R&C, 5★) → constraints become co-non-satisfiable → all attempts fail. Hand-write the target on the densest 5 rows before shipping; if you can't, relax ONE constraint (usually the length plafond) (Rule 18b).
+- ❌ Burning 2-4 LLM correction passes on a pure LENGTH overshoot (`factual_summary` a few chars over max, one sentence > 25 mots) → tokens wasted on a problem a regex solves deterministically. Pre-clamp summaries before the Zod parse and split over-length sentences at natural boundaries (Rule 19a/19b).
+- ❌ Letting a deterministic length-salvage step also rewrite/substitute words, OR accepting the salvaged copy without re-running the full gate → it silently overrides the banned-lexicon/voice linter verdict and ships brand-voice regressions. Salvage must touch rhythm only, and the salvaged row must clear `safeParse` + the editorial envelope or be rejected (Rule 19c).
 
 ## References
 
@@ -1173,5 +1301,6 @@ schema bound. The fix is content-aware (LLM-side) instead of structural
 - **`editorial-rankings-matrix`** — when to use a deterministic classifier (slugs structurés) vs an LLM classifier (titres libres), `LIEU_SLUG_ALIASES` pattern.
 - **`content-enrichment-pipeline`** — the multi-source brief that feeds generation.
 - **`editorial-long-read-rendering`** — how the generated JSON renders.
-- **`concierge-voice-pipeline`** — pass 8 (Concierge voice), bloc ConciergeAdvice, shortener phrases > 25 mots, contraintes ADR-0011.
+- **`concierge-voice-pipeline`** — pass 8 (Concierge voice), bloc ConciergeAdvice, shortener phrases > 25 mots, contraintes ADR-0011. Owns the banned-lexicon / sentence-length linter (`lintConciergeSummary`) whose verdict Rule 19c keeps sovereign over the deterministic length-salvage.
+- **`keyword-grounding-dataforseo`** — same per-item tolerance philosophy applied to a vendor API (DataForSEO PAA/keywords/intent), plus the per-item try/catch crash-resilience rule for batch editorial loops.
 - Reference impls: `scripts/editorial-pilot/src/guides/generate-guide-v2.ts`, `…/rankings/generate-ranking-v2.ts`, `…/enrichment/llm-extract.ts`.

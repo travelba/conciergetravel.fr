@@ -337,6 +337,14 @@ export const routing = defineRouting({
     },
     '/itineraires': '/itineraires',
     '/itineraire/[slug]': '/itineraire/[slug]',
+    // Lieux à visiter (ADR — places vertical). Container kept identical
+    // across locales (like /destination, /guide) — the city + place
+    // slugs are locale-invariant identifiers (EN alias resolved by the
+    // data layer via `slug_en`). SEO equity lives on the slug, not the
+    // container word.
+    '/lieux': '/lieux',
+    '/lieux/[citySlug]': '/lieux/[citySlug]',
+    '/lieux/[citySlug]/[placeSlug]': '/lieux/[citySlug]/[placeSlug]',
     '/ouvertures': {
       fr: '/ouvertures',
       en: '/openings',

@@ -15,7 +15,10 @@
     "./consent": "./src/consent/index.ts",
     "./photos": "./src/photos/index.ts",
     "./reviews": "./src/reviews/index.ts",
-    "./pois": "./src/pois/index.ts"
+    "./pois": "./src/pois/index.ts",
+    "./places": "./src/places/index.ts",
+    "./contact": "./src/contact/index.ts",
+    "./url": "./src/url/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

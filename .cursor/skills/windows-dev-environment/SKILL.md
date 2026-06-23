@@ -136,6 +136,40 @@ Get-WmiObject Win32_Process -Filter "Name='node.exe'" `
 
 Best of all: track the parent PID printed by the Shell tool when you back-ground a job (e.g. `PID: 26896`), and `Stop-Process -Id 26896` plus its direct children only.
 
+### 6b — `2>&1 | Tee-Object` fakes a `NativeCommandError` / exit 1 — use `*>` instead
+
+**Bug pattern proven 2026-06-21:** an editorial batch
+`npx tsx some-pipeline.ts ... 2>&1 | Tee-Object -FilePath log.txt` ended with
+`exit_code: 1` even though the script ran flawlessly (dozens of items processed,
+written to DB). The non-zero exit was **entirely spurious** — it nearly
+triggered useless re-runs of work that had already succeeded.
+
+Root cause: `2>&1` redirects the native command's stderr into the PowerShell
+pipeline; combined with `$ErrorActionPreference` and the `Tee-Object` pipe,
+PowerShell wraps **any** line a native command writes to stderr as a
+`RemoteException` and raises `NativeCommandError` → the pipeline exits non-zero.
+A perfectly benign stderr log line (e.g. the script printing `[skip] rejected
+row 42`) is enough to flip the exit code, with zero relation to the script's
+real result.
+
+```powershell
+# ❌ WRONG — one benign stderr line ⇒ NativeCommandError ⇒ misleading exit 1
+npx tsx scripts/editorial-pilot/src/some-pipeline.ts --all 2>&1 | Tee-Object -FilePath log.txt
+
+# ✅ RIGHT — PowerShell redirect operator: ALL streams → file, no pipeline, no fake error
+npx tsx scripts/editorial-pilot/src/some-pipeline.ts --all *> scripts\editorial-pilot\out\log.txt
+```
+
+`*>` merges every stream (1 stdout … 6 information) to the file without ever
+constructing a pipeline object, so PowerShell never reinterprets stderr as a
+terminating error. Read the file afterwards with the `Read` tool.
+
+Alternative when you don't need a log file: don't pipe at all — let the output
+stream to the terminal file (Rule 6) and `Read` it. The failure signature to
+recognise: a backgrounded `tsx`/`node` job reports `exit_code: 1` but the log
+body shows the work completed and `Tee-Object` / `2>&1` is in the command. Trust
+the log body over the exit code in that exact case, then re-run with `*>`.
+
 ## Rule 7 — `dotenv` loads `.env.local` before `.env`
 
 The repo uses two env files (`.env` for committed defaults, `.env.local` for secrets). Always load both in this order in scripts:
@@ -356,6 +390,114 @@ git reset --mixed origin/main
 The critical invariant: **never `git push --force` to `origin/main`**. The mystery commit only lived locally, so a non-force rewind is safe.
 
 Reference incident: editorial-pilot `description-from-wiki` files (commit `49953e2`, May 2026) — saved on `feat/hotel-description-from-wikipedia` and rewound from local `main` before the four PR series #68–#71 was split.
+
+## Rule 9 quinquies — multi-agent / background subagents: commit with an explicit pathspec, never `git add -A`
+
+When several background subagents run in the **same working tree** (the common
+multitask pattern on this repo), they all share **one Git index**. A
+`git add -A` / `git add .` from agent A stages the whole tree, then a
+`git commit` from agent B sweeps those files into B's commit —
+**cross-contamination**: a commit ends up carrying files another agent was still
+editing or never meant to ship. On top of that, two agents staging at the same
+instant collide on `.git/index.lock`.
+
+**Pattern proven this session (2026-06-21 — 10+ parallel commits, zero
+incident):** every agent commits with the **explicit pathspec** form, which
+commits ONLY the listed paths and ignores the rest of the shared index:
+
+```powershell
+# ✅ RIGHT — commits ONLY these paths, ignores whatever else is staged by peers
+git commit path\to\file-a.ts path\to\file-b.md -m "feat(scope): ..."
+
+# ❌ WRONG in a shared tree — stages everything, lets a peer's commit grab it
+git add -A
+git commit -m "feat(scope): ..."
+```
+
+`git commit <pathspec>` performs an implicit, **scoped** add+commit of exactly
+those tracked paths (it does NOT touch the index for other files), so two agents
+committing disjoint path sets never contaminate each other.
+
+Handling the lock when commits genuinely race:
+
+```powershell
+# Retry ~3s on a transient index.lock held by a peer's in-flight commit.
+for ($i = 0; $i -lt 5; $i++) {
+  git commit path\to\file.ts -m "docs(scope): ..." ; if ($?) { break }
+  Start-Sleep -Seconds 3
+}
+```
+
+Caveats: the pathspec form only commits **already-tracked** files unless you
+pass paths explicitly (it does pick up new paths you name), and it will NOT pick
+up an unrelated peer's files — which is exactly the point. Never delete a
+`.git/index.lock` you didn't create: a peer commit may be mid-write; wait and
+retry instead. See also Rule 9 ter (`commit -F` for special-char messages) and
+the commit-conventions rule
+[`commit-conventions.mdc`](../../rules/commit-conventions.mdc) §Concurrent /
+multi-agent commits.
+
+## Rule 9 sexies — shared-tree push-lock: one worker's scratch file blocks EVERY worker's push
+
+Background workers share **one** working tree, so they also share the `pre-push`
+hook (`turbo run typecheck` over the **whole** repo + `validate:skills`). A
+single scratch file from worker A — e.g. `scripts/editorial-pilot/src/places/tmp-drafts.ts`
+captured by `tsconfig.json` `include: ["src/**/*.ts"]` — fails the typecheck and
+**blocks the push of every worker** (and tempts a risky `--no-verify`). Fix
+(commit `1dbcb9d9`): exclude `src/**/tmp-*.ts` in
+`scripts/editorial-pilot/tsconfig.json` **and** add it to `.gitignore`. General
+rule: **any per-worker scratch file must live outside the typecheck + commit
+perimeter** (`tmp-*` naming + gitignore), never inside an `include` glob.
+
+Related — **survivor workers after a near-crash**: after a machine hiccup, old
+background workers can keep running while you relaunch duplicates → two workers
+editing the **same** files = collision. Before relaunching, check `git log
+origin/<branch>` for the real remote state, keep file sets **disjoint** (ideally
+disjoint DB tables + an isolated worktree for anything running `next dev`), and
+never start two workers on the same file set. See Rule 9 quinquies (pathspec
+commits) and the photo-pipeline §JS-SPA sourcing note for the parallel-worker
+disjointness lesson.
+
+## Rule 9 septies — a peer's park-stash / `reset --hard` can silently wipe YOUR uncommitted edits mid-task
+
+In the shared-tree multitask pattern, a peer worker that "parks" its WIP
+(`git stash -u` under a label, or `git reset --hard` to sync) stashes/discards
+**every uncommitted change in the tree — including files it does not own**. This
+bites even when a running script has _already consumed_ your edits: 2026-06-22,
+the intl-ranking wave edited `axes.ts` + `combinator.ts` + `push-ranking-v2.ts`,
+the matrix generator + REST push read them and shipped 39 rankings live to prod,
+then a peer's `ranking-hero-worker-park-2` stash + a `reset: moving to HEAD`
+reverted all three files back to HEAD. `git status` showed a clean tree; the
+work looked lost.
+
+**Mitigations (in order):**
+
+1. **Commit immediately after a verified run** — the only durable lock. Don't
+   leave edits uncommitted across a long LLM/generation step in a shared tree;
+   the window between "script succeeded" and "I commit" is exactly when a peer
+   reset wipes you. Use the Rule 9 quinquies pathspec form.
+2. **Recover from the peer's stash** — `git stash list` (look for worker labels
+   like `*-worker-park-*`), then `git stash show --name-only "stash@{N}"` to find
+   your files. ⚠ `git stash show --name-only` diffs against the stash's _own
+   older base_, so it can list files whose content actually equals current HEAD
+   — verify with `git diff "stash@{N}" HEAD -- <file>` (empty = your edits are
+   NOT in there) before trusting it.
+3. **Re-derive from surviving scratch** — `tmp-*.ts` scratch scripts are
+   gitignored + outside the typecheck perimeter (Rule 9 sexies), so a `reset
+--hard` does NOT delete them. Keep the data-generating scratch (e.g.
+   `tmp-city-strings.ts`, `tmp-intl-coverage.ts`) until the real code is
+   committed — they let you regenerate the exact payload deterministically
+   instead of hand-reconstructing from memory.
+4. **The DB write survives regardless** — a `reset --hard` only touches the
+   working tree, never Supabase. Content already pushed/published stays live;
+   only the _source_ that produced it is at risk. Prioritise re-committing the
+   source over re-pushing data.
+
+Cross-signal: peers leave breadcrumbs. A sibling comment `// (Marrakech deferred
+— its LieuDef lives in the concurrent intl-wave branch, unstable in the shared
+tree)` is the peer telling you it is coordinating around your unstable
+uncommitted work — commit it to unblock them. See Rule 9 sexies (push-lock) and
+Rule 12 (the REST-push fallback this incident also produced).
 
 ## Rule 10 — `@t3-oss/env-nextjs` `skipValidation` does NOT cover the client bundle
 

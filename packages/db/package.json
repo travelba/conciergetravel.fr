@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "migrate": "tsx scripts/migrate.ts",
+    "migrate:one": "tsx scripts/apply-migration-file.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "seed:peninsula": "tsx scripts/seed-peninsula-paris.ts",
     "teardown:peninsula": "tsx scripts/teardown-peninsula-paris.ts",

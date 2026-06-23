@@ -135,3 +135,17 @@ tmp-tavily/
 
 # Payload auto-generated import map (dev server regenerates it)
 apps/admin/src/app/(payload)/admin/importMap.js
+
+# Throwaway audit / probe artifacts (manual browser dumps, visual sheets, scratch scripts)
+# Kept local-only; reproducible from scripts and never imported by the app.
+/tmp-*
+/.playwright-mcp/
+/tmp-audit/
+/sheet-*.png
+/eugenie-*.png
+/conrad-preview-*.jpeg
+/pdg-booking-rail.png
+scripts/editorial-pilot/_scratch/
+scripts/editorial-pilot/tmp-*/
+scripts/editorial-pilot/src/**/tmp-*.ts
+apps/web/e2e/tmp-*.spec.ts

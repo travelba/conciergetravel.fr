@@ -69,7 +69,7 @@ export function TocSidebar({ anchors, locale }: Props): ReactElement | null {
       aria-label={heading}
       className="border-border bg-bg/60 hidden rounded-lg border p-4 lg:sticky lg:top-24 lg:block"
     >
-      <p className="text-fg/60 mb-2 text-xs font-medium uppercase tracking-wider">{heading}</p>
+      <p className="text-fg/75 mb-2 text-xs font-medium uppercase tracking-wider">{heading}</p>
       <ul className="space-y-1.5 text-sm">
         {anchors.map((a) => {
           // Data-layer pick — author-curated FR/EN columns.

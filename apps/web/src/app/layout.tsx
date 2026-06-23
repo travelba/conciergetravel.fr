@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   applicationName: 'MyConciergeHotel',
   authors: [{ name: 'MyConciergeHotel' }],
   formatDetection: { email: false, address: false, telephone: false },
+  // Brand SVG favicon (modern browsers); no legacy `.ico` shipped — the
+  // SVG covers tab, bookmark and Apple touch surfaces. `/manifest.webmanifest`
+  // is wired automatically by the `app/manifest.ts` file convention.
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/icon.svg'],
+    apple: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+  },
 };
 
 export const viewport: Viewport = {

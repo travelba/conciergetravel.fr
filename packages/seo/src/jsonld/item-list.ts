@@ -29,6 +29,13 @@ export interface ItemListHotelDetails {
   readonly aggregateRating?: AggregateRatingInput;
   readonly latitude?: number;
   readonly longitude?: number;
+  /**
+   * Absolute (https) image URL for the hotel — forwarded to `Hotel.image`.
+   * Lets list / ranking carousels carry a thumbnail that Google + AI
+   * Overviews can render. Emitted only when it is a non-empty https URL
+   * (no relative paths, no fabrication).
+   */
+  readonly image?: string;
 }
 
 export interface ItemListEntry {
@@ -72,6 +79,13 @@ function buildListItem(entry: ItemListEntry, index: number): ListItemNode {
 
   const hasGeo = details.latitude !== undefined && details.longitude !== undefined;
   const hasRichSignals = details.starRating !== undefined || details.aggregateRating !== undefined;
+  // Image gate: emit only a non-empty https URL (no relative paths, no
+  // fabrication). Mirrors the HTTPS-only discipline of the hotel builder.
+  const image =
+    details.image !== undefined && /^https:\/\/[^\s<>]+$/iu.test(details.image)
+      ? details.image
+      : undefined;
+  const hasImage = image !== undefined;
 
   // Rich path (star rating / aggregate rating) → reuse the canonical
   // `hotelJsonLd` builder so the nested shape stays in lock-step with
@@ -91,28 +105,36 @@ function buildListItem(entry: ItemListEntry, index: number): ListItemNode {
         ...(hasGeo && details.latitude !== undefined && details.longitude !== undefined
           ? { geo: { latitude: details.latitude, longitude: details.longitude } }
           : {}),
+        ...(hasImage ? { images: [image] } : {}),
       }),
     };
   }
 
-  // Lean geo-only path → a minimal `Hotel` node carrying just name + url
-  // + GeoCoordinates. Used by the exhaustive directory pages (hundreds
-  // of entries) where reusing the full hotel builder would inject
-  // page-level fields (speakable, mainEntityOfPage, payment constants)
-  // that are meaningless per list-item and would bloat the envelope.
-  // Geo gate: emit only when BOTH coordinates are present (no half-pin,
-  // no fabricated 0,0).
-  if (hasGeo && details.latitude !== undefined && details.longitude !== undefined) {
+  // Lean path → a minimal `Hotel` node carrying name + url plus whichever
+  // of GeoCoordinates / image is available. Used by the exhaustive
+  // directory pages (hundreds of entries) where reusing the full hotel
+  // builder would inject page-level fields (speakable, mainEntityOfPage,
+  // payment constants) that are meaningless per list-item and would bloat
+  // the envelope. Geo gate: emit only when BOTH coordinates are present
+  // (no half-pin, no fabricated 0,0); image gate handled above.
+  if (hasGeo || hasImage) {
     const hotelNode: HotelNode = {
       '@type': 'Hotel',
       name: entry.name,
       url: entry.url,
-      geo: {
+    };
+    if (hasGeo && details.latitude !== undefined && details.longitude !== undefined) {
+      hotelNode.geo = {
         '@type': 'GeoCoordinates',
         latitude: details.latitude,
         longitude: details.longitude,
-      },
-    };
+      };
+    }
+    if (hasImage) {
+      // `Hotel.image` is typed `string | string[]` in schema-dts — a bare
+      // URL string is the compact, valid shape for a list thumbnail.
+      hotelNode.image = image;
+    }
     return {
       '@type': 'ListItem',
       position: index + 1,

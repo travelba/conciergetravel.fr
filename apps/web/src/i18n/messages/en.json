@@ -1,4 +1,40 @@
 {
+  "lieux": {
+    "breadcrumbHome": "Home",
+    "breadcrumbLieux": "Places to visit",
+    "aboutHeading": "About",
+    "galleryHeading": "In pictures",
+    "conciergeAdviceHeading": "The Concierge's Tip",
+    "faqHeading": "Frequently asked questions",
+    "bookHeading": "Book this experience",
+    "bookVia": "Book on GetYourGuide",
+    "fromPrice": "From",
+    "reviews": "reviews",
+    "askConciergeHeading": "Ask the Concierge",
+    "askConciergeBody": "Our Concierge arranges your visit: skip-the-line tickets, a private guide, off-hours access.",
+    "askConciergeCta": "Ask the Concierge",
+    "nearbyHotelsHeading": "Hotels nearby",
+    "nearbyHotelsIntro": "Our selection of extraordinary hotels a short walk from this place.",
+    "walkMinutes": "{min} min walk",
+    "distanceMeters": "{m} m away",
+    "rankingTitleVisit": "The best things to see in {city}",
+    "rankingTitleDo": "What to do in {city}",
+    "rankingIndexTitle": "Places to visit in {city}",
+    "rankingIntroVisit": "Our pick of the essential cultural visits in {city}: museums, monuments, gardens.",
+    "rankingIntroDo": "The best activities in {city}: guided tours, theatres, shopping, the outdoors.",
+    "rankingIndexIntro": "Everything to see and do in {city}, curated by the Concierge.",
+    "sectionVisit": "What to see in the neighbourhood",
+    "sectionDo": "What to do",
+    "viewPlace": "Discover",
+    "noResults": "No published place yet.",
+    "openInMaps": "View on the map",
+    "hubTitle": "Places to visit",
+    "hubIntro": "Museums, monuments, gardens and exceptional activities, city by city — each place with its own page, curated by the Concierge.",
+    "hubCityCta": "See places in {city}",
+    "hubCount": "{count} places",
+    "hubCountVisitDo": "{visit} to see · {doCount} to do",
+    "hubEmpty": "The places-to-visit catalogue is coming very soon."
+  },
   "common": {
     "siteName": "MyConciergeHotel",
     "tagline": "The Concierge's Selection — extraordinary hotels around the world",
@@ -19,10 +55,10 @@
   },
   "homepage": {
     "metaTitle": "MyConciergeHotel — The Concierge's Selection of extraordinary hotels worldwide",
-    "metaDesc": "2,193 curated addresses across 127 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
+    "metaDesc": "2,221 curated addresses across 127 countries — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutique hotels. Every page closes with a Concierge's Tip — the operational secret guidebooks never share. IATA-accredited agency.",
     "eyebrow": "MyConciergeHotel — Book like a concierge. Stay like a guest.",
     "title": "We were waiting for you",
-    "intlBadge": "{countries} countries · {hotels} addresses · 434 Relais & Châteaux",
+    "intlBadge": "{countries} countries · {hotels} addresses · 479 Relais & Châteaux",
     "stats": "{countries} countries · {hotels} extraordinary addresses, hand-picked one by one",
     "subtitle": "A worldwide selection of extraordinary hotels, signed by our concierge desk.",
     "subtitleSecondary": "Access the upgrades and VIP privileges reserved for regulars of the world's finest houses.",
@@ -78,7 +114,7 @@
       },
       "q2": {
         "question": "How are you different from Booking or Hotels.com?",
-        "answer": "MyConciergeHotel is an IATA agency, not a price comparison engine. Our catalogue is curated to 2,193 addresses against hundreds of thousands, and every page is written by our concierge desk — not by the hotels themselves. No fabricated urgency, no struck-through prices, no « only X rooms left » banner. The price displayed in Phase 6 will be the Amadeus GDS net rate, with no agency surcharge."
+        "answer": "MyConciergeHotel is an IATA agency, not a price comparison engine. Our catalogue is curated to 2,221 addresses against hundreds of thousands, and every page is written by our concierge desk — not by the hotels themselves. No fabricated urgency, no struck-through prices, no « only X rooms left » banner. The price displayed in Phase 6 will be the Amadeus GDS net rate, with no agency surcharge."
       },
       "q3": {
         "question": "What is the Concierge's Tip at the bottom of each page?",
@@ -121,6 +157,7 @@
       "hotels": "Hotels",
       "destinations": "Destinations",
       "experiences": "Experiences",
+      "places": "Places",
       "rankings": "Rankings",
       "concierge": "The Concierge",
       "magazine": "Magazine",
@@ -132,6 +169,7 @@
       "exploreTitle": "Explore",
       "exploreHotels": "Hotels & Palaces",
       "exploreDestinations": "Destinations",
+      "explorePlaces": "Places to visit",
       "exploreOccasions": "By occasion",
       "exploreRankings": "Rankings",
       "exploreMagazine": "Magazine",
@@ -196,7 +234,7 @@
         },
         {
           "q": "Which palaces or Relais & Châteaux feature among the recent openings?",
-          "a": "Our catalogue covers 2,193 extraordinary hotels in 127 countries, including 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best and 18 Atout France Palaces. This page highlights houses that have reopened after renovation, changed chef, earned a Michelin Key or a Forbes Five Star, or that we have just visited. Current examples include Le Bristol Paris, Akelarre (Spanish Basque Country), Al Moudira (Luxor), Alila Jabal Akhdar (Oman)."
+          "a": "Our catalogue covers 2,221 extraordinary hotels in 127 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. This page highlights houses that have reopened after renovation, changed chef, earned a Michelin Key or a Forbes Five Star, or that we have just visited. Current examples include Le Bristol Paris, Akelarre (Spanish Basque Country), Al Moudira (Luxor), Alila Jabal Akhdar (Oman)."
         },
         {
           "q": "Can I book a recently opened hotel through the Concierge?",
@@ -410,6 +448,7 @@
     "primaryNav": {
       "label": "Primary navigation",
       "destinations": "Destinations",
+      "placesToVisit": "Places to visit",
       "search": "Search",
       "hotels": "Hotels",
       "hotelsAllAria": "View all hotels",
@@ -472,7 +511,7 @@
     },
     "account": {
       "signIn": "Sign in",
-      "signUp": "Create account",
+      "signUp": "Sign up",
       "myAccount": "My account"
     },
     "menu": {
@@ -668,7 +707,7 @@
     "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
     "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks extraordinary hotels across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
-    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,193 extraordinary hotels across 127 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
+    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,221 extraordinary hotels across 127 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
     "trust": {
       "title": "Our commitments",
       "iataTitle": "IATA / APST agency",
@@ -716,7 +755,7 @@
         },
         {
           "q": "What is your geographical scope?",
-          "a": "Our selection spans 2,193 properties across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
+          "a": "Our selection spans 2,221 properties across 127 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
         },
         {
           "q": "How much does your service cost?",
@@ -1851,7 +1890,8 @@
       "emailPlaceholder": "Email address",
       "consent": "I accept to receive the MyConciergeHotel newsletter and to receive a validation email (GDPR double opt-in).",
       "submit": "Receive the newsletter",
-      "wip": "Subscription form being commissioned (Brevo integration). In the meantime, write to contact@myconciergehotel.com with subject [NEWSLETTER] — we'll add you to the list manually.",
+      "wip": "Subscription form being commissioned (Brevo integration). In the meantime, write to us with the subject [NEWSLETTER] — we'll add you to the list manually, in one message.",
+      "ctaContact": "Write to us to subscribe",
       "successMessage": "Validation email sent — click the link within 48h to confirm."
     },
     "rgpd": {
@@ -2390,7 +2430,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Our Editorial Method — How we curate the Concierge's Selection | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel curates 2,193 extraordinary hotels across 127 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
+    "metaDesc": "MyConciergeHotel curates 2,221 extraordinary hotels across 127 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
     "breadcrumbHome": "Home",
     "breadcrumbConcierge": "The Concierge",
     "eyebrow": "EEAT — Editorial method",
@@ -2622,7 +2662,11 @@
       "messagePlaceholder": "Your message…",
       "consent": "I accept that my data is used to process my request (privacy policy).",
       "submit": "Send my request",
-      "wip": "Form is being commissioned — in the meantime, write to us directly at contact@myconciergehotel.com."
+      "wip": "Form is being commissioned — in the meantime, write to us directly at contact@myconciergehotel.com.",
+      "success": "Your message has been received. Our concierge replies within 24 business hours.",
+      "successRef": "Reference: {ref}",
+      "rateLimited": "You have sent several messages recently. Please wait before trying again, or write to us directly at contact@myconciergehotel.com.",
+      "error": "Sending failed. Please try again, or write to us directly at contact@myconciergehotel.com."
     },
     "legal": {
       "title": "Editor identity",
@@ -2717,6 +2761,7 @@
       "destinations": "All destinations",
       "hotels": "All hotels",
       "directoryFrance": "Directory — hotels in France",
+      "placesToVisit": "Places to visit",
       "rankings": "All rankings",
       "guides": "All guides",
       "inspiration": "Inspiration",
@@ -2762,11 +2807,11 @@
     "noticePage": {
       "title": "Legal notice",
       "metaDescription": "MyConciergeHotel legal notice — publisher, hosting, intellectual property, travel agency licences.",
-      "draftBanner": "This page is being finalised — the legal identifiers (Trade Register number, SIREN/SIRET, VAT, Atout France registration, financial guarantee) will be completed before going live. The page is set to noindex until validated by our legal counsel.",
+      "draftBanner": "This page is being finalised — the Atout France registration, the financial guarantee and the professional civil-liability insurance still need to be completed before going live. The page is set to noindex until these are validated.",
       "sections": {
         "editor": {
           "title": "Publisher",
-          "body": "The myconciergehotel.com website is published by MyConciergeHotel, a French SAS with share capital of [TO BE COMPLETED: share capital] €, registered with the Paris Trade Register under number [TO BE COMPLETED: Trade Register number], whose registered office is at [TO BE COMPLETED: full registered address]. EU VAT number: [TO BE COMPLETED: FR + 11 digits]. Publication director: [TO BE COMPLETED: legal representative]."
+          "body": "The myconciergehotel.com website is published by TRAVEL BUSINESS AGENCY, a French SASU with share capital of €20,000, registered with the Nanterre Trade Register under number 991 614 694 (head-office SIRET: 991 614 694 00016, APE code 79.12Z), whose registered office is at 9 rue Greffulhe, 92300 Levallois-Perret, France. EU VAT number: FR79991614694. Publication director: Raphaël Zerdoun."
         },
         "contact": {
           "title": "Contact",
@@ -2796,7 +2841,7 @@
         },
         "controller": {
           "title": "Data controller",
-          "body": "MyConciergeHotel SAS, located in Paris, France. Data Protection Officer (DPO): dpo@myconciergehotel.com."
+          "body": "TRAVEL BUSINESS AGENCY (MyConciergeHotel brand), a SASU whose registered office is at 9 rue Greffulhe, 92300 Levallois-Perret, France. Data Protection Officer (DPO): dpo@myconciergehotel.com."
         },
         "purposes": {
           "title": "Purposes and legal bases",
@@ -3679,6 +3724,13 @@
       "category": "Category",
       "schemaTypeAria": "Schema.org type: {type}"
     },
+    "nearbyPlaces": {
+      "title": "Places to visit nearby",
+      "lead": "The sights, landmarks and walks I recommend around {hotelName} — each place has its own detailed guide.",
+      "walkMinutes": "{count, plural, one {# min walk} other {# min walk}}",
+      "distanceMeters": "{meters, plural, =0 {on site} other {{meters} m away}}",
+      "viewPlace": "Explore this place →"
+    },
     "events": {
       "title": "What’s happening during your stay",
       "lead": "The dates I slip into my guests’ programme in {city} — concerts, exhibitions, festivals a few steps from {hotelName}.",
@@ -3949,6 +4001,7 @@
   "errors": {
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The requested page does not exist or has been moved.",
+    "backHome": "Back to home",
     "errorTitle": "Something went wrong",
     "errorDescription": "Our team has been notified. Please try again shortly.",
     "tryAgain": "Try again"
@@ -4245,7 +4298,14 @@
   },
   "lastUpdated": {
     "inline": "Updated on {date}",
-    "block": "Updated on {date}"
+    "block": "Updated on {date}",
+    "monthYear": "Updated {date}"
+  },
+  "rankingPage": {
+    "tldrTitle": "The verdict at a glance",
+    "tldrAriaLabel": "The verdict at a glance: the top three",
+    "podiumAriaLabel": "The ranking podium in pictures",
+    "podiumHeading": "The top of the ranking in pictures"
   },
   "hotelTldr": {
     "eyebrow": "The Concierge's essentials",
@@ -4365,8 +4425,8 @@
         "body": "An in-room attention on arrival, chosen by the hotel (champagne, flowers, tasting)."
       },
       "whatsapp_concierge_24_7": {
-        "title": "WhatsApp Concierge 24/7",
-        "body": "A direct line to our concierge before, during and after your stay."
+        "title": "WhatsApp Concierge (from Phase 6)",
+        "body": "A direct WhatsApp line to our concierge before, during and after your stay — channel currently being set up, rolling out from Phase 6."
       },
       "gm_introduction": {
         "title": "GM introduction",
@@ -4398,7 +4458,7 @@
         "name": "The Concierge Club Prestige",
         "price": "€99",
         "priceSuffix": "/ year — 30-day free trial",
-        "body": "All perks negotiated with our Little partner hotels: complimentary breakfast, confirmed upgrade, hotel credit, 4 pm late check-out, 24/7 WhatsApp Concierge.",
+        "body": "All perks negotiated with our Little partner hotels: complimentary breakfast, confirmed upgrade, hotel credit, 4 pm late check-out, WhatsApp Concierge (from Phase 6).",
         "cta": "Join the waitlist ↓"
       }
     },
@@ -4423,7 +4483,7 @@
         },
         {
           "q": "What changes with Prestige?",
-          "a": "Prestige (€99/year, 30-day free trial) activates the full set of benefits negotiated with our Little partner hotels: breakfast, upgrade, hotel credit, late check-out, welcome gift, 24/7 Concierge WhatsApp."
+          "a": "Prestige (€99/year, 30-day free trial) activates the full set of benefits negotiated with our Little partner hotels: breakfast, upgrade, hotel credit, late check-out, welcome gift, WhatsApp Concierge (from Phase 6)."
         }
       ]
     },
@@ -4459,9 +4519,9 @@
       "identityTitle": "Programme identity",
       "identityBody": "Le Concierge Club is the loyalty programme of MyConciergeHotel.com, an IATA agency specialising in extraordinary hotels worldwide — Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Two tiers: Le Concierge Club (free, no credit card, no commitment) and Le Concierge Club Prestige (€99/year, 30-day trial, Phase 6 rollout). Phase 1 launch: May 2026.",
       "philosophyTitle": "Philosophy",
-      "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, WhatsApp Concierge) and, from Phase 6, a negotiated rate below the public price.",
-      "numbersTitle": "Catalogue (May 2026)",
-      "numbersBody": "2,193 published hotel pages across 127 countries, including 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best and 18 Atout France Palaces. 290 editorial rankings, 86 destination guides, 20 luxury itineraries (France + international).",
+      "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, and the WhatsApp Concierge from Phase 6) and, from Phase 6, a negotiated rate below the public price.",
+      "numbersTitle": "Catalogue (June 2026)",
+      "numbersBody": "2,221 published hotel pages across 127 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. 633 editorial rankings, 82 destination guides, 23 luxury itineraries (France + international).",
       "complianceTitle": "Compliance",
       "complianceBody": "Programme compliant with French DGCCRF and EU Digital Services Act requirements. No fabricated urgency indicators (CDC §2.8). Editorial Concierge voice (ADR-0011): sentences ≤ 25 words, sourced vocabulary, no generic superlatives."
     },

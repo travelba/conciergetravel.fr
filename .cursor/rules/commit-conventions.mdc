@@ -64,6 +64,31 @@ refactor(domain): extract Booking state machine into dedicated module
 - Reference ADRs in body when relevant: `Refs: docs/adr/0003-payload-cms.md`.
 - Breaking changes flagged with `!` and `BREAKING CHANGE:` footer.
 
+## Concurrent / multi-agent commits — pathspec, never `git add -A`
+
+When several agents (background subagents in multitask mode) share **one
+working tree**, they share **one Git index**. A `git add -A` / `git add .`
+from one agent stages the whole tree; a peer's `git commit` then sweeps those
+files into the wrong commit (cross-contamination), and simultaneous staging
+collides on `.git/index.lock`.
+
+**Always commit with an explicit pathspec** — it commits ONLY the named paths
+and ignores the rest of the shared index:
+
+```powershell
+# ✅ scoped to these files only
+git commit path/to/file-a.ts path/to/file-b.md -m "feat(scope): ..."
+
+# ❌ in a shared tree — stages everything, a peer commit can grab it
+git add -A
+git commit -m "feat(scope): ..."
+```
+
+Retry ~3s on a transient `index.lock` held by a peer's in-flight commit; never
+delete a lock you didn't create. Full operational recipe (PowerShell retry
+loop, caveats) in the `windows-dev-environment` skill §Rule 9 quinquies
+(`.cursor/skills/windows-dev-environment/SKILL.md`).
+
 ## `Tested:` footer (mandatory for user-visible changes)
 
 When the commit modifies a user-visible surface (route, UI block, copy,

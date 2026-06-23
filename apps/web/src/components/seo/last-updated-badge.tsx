@@ -7,7 +7,7 @@ interface LastUpdatedBadgeProps {
   /** ISO 8601 date or `YYYY-MM-DD`. */
   readonly isoDate: string | null | undefined;
   readonly locale: Locale;
-  readonly variant?: 'inline' | 'block';
+  readonly variant?: 'inline' | 'block' | 'monthYear';
 }
 
 /**
@@ -31,13 +31,16 @@ export async function LastUpdatedBadge({
   if (typeof isoDate !== 'string' || isoDate.length === 0) return null;
   const d = new Date(isoDate);
   if (Number.isNaN(d.getTime())) return null;
+  // `monthYear` deliberately drops the day so the freshness signal reads
+  // « Mis à jour en juin 2026 » — the durable form competitors use on
+  // evergreen ranking pages (no day-precision implied).
+  const dateOptions: Intl.DateTimeFormatOptions =
+    variant === 'monthYear'
+      ? { month: 'long', year: 'numeric' }
+      : { day: 'numeric', month: 'long', year: 'numeric' };
   let formatted: string;
   try {
-    formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(d);
+    formatted = new Intl.DateTimeFormat(intlLocaleTag(locale), dateOptions).format(d);
   } catch {
     formatted = isoDate.slice(0, 10);
   }
@@ -47,7 +50,7 @@ export async function LastUpdatedBadge({
   if (variant === 'block') {
     return (
       <aside
-        className="border-border/60 text-muted/90 bg-bg/40 my-3 inline-flex items-center gap-2 rounded border px-3 py-1 text-xs"
+        className="border-border text-muted bg-bg/40 my-3 inline-flex items-center gap-2 rounded border px-3 py-1 text-xs"
         aria-label={label}
       >
         <span aria-hidden="true">🕓</span>
@@ -56,7 +59,7 @@ export async function LastUpdatedBadge({
     );
   }
   return (
-    <p className="text-muted/80 mt-3 text-xs" aria-label={label}>
+    <p className="text-muted mt-3 text-xs" aria-label={label}>
       <time dateTime={isoDate.slice(0, 10)}>{label}</time>
     </p>
   );

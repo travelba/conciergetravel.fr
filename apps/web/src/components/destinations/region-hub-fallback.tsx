@@ -4,6 +4,7 @@ import type { ReactElement } from 'react';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import type { RegionHubContent } from '@/server/destinations/region-hubs';
 
 /**
@@ -67,7 +68,11 @@ export async function RegionHubFallback({
             {content.guides.map((g) => (
               <li key={g.slug}>
                 <Link
-                  href={{ pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }}
+                  href={
+                    isHandBuiltCountrySlug(g.slug)
+                      ? { pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }
+                      : { pathname: '/destination/[citySlug]', params: { citySlug: g.slug } }
+                  }
                   className="border-border bg-bg hover:border-fg/40 focus-visible:ring-ring block h-full rounded-lg border p-4 transition focus-visible:outline-none focus-visible:ring-2"
                 >
                   <h4 className="text-fg font-serif text-base">{g.name}</h4>

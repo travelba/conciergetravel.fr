@@ -90,6 +90,29 @@ Aucun changement de schéma DB, aucune mutation côté `agent-skills.json` qui p
 - **Sentry** : taux d'erreur 5xx sur `/api/agent/*` doit rester < 0.5% à J+7.
 - **Vercel Analytics** : tracker p95 latency `/api/agent/search` < 800ms (Algolia + Supabase + Amadeus en parallèle).
 
+## Mise à jour 2026-06-17 — lentille concierge sur `get-hotel`
+
+La surface a grossi de 3 → **26 endpoints HTTP exécutables** (mirror du
+catalogue `agent-skills.json`, voir `/.well-known/agent-skills.json`).
+Dans le cadre du chantier INFRA GEO (master plan, « lentille
+concierge-consumable »), `GET /api/agent/hotel/[slug]` expose désormais,
+**par défaut**, le bloc `conciergeLens` — la moitié exposition de la
+recommandation post-réservation pour un concierge WhatsApp / LLM :
+
+| Clé `conciergeLens.*` | Source (reader `get-hotel-by-slug.ts`) | Contenu                                                                                                     |
+| --------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `dining`              | `readRestaurants`                      | Restaurants de l'hôtel : chef, plat signature, horaires, note de prix, lien de réservation, site, téléphone |
+| `nearby`              | `readLocationByBucket`                 | Lieux à proximité classés `visit` / `do` / `eat` / `shop` (cap `NEARBY_CAP` = 10 / bucket) + transports     |
+| `experiences`         | `readSignatureExperiences`             | Programmes signature on-property                                                                            |
+| `geoQa`               | `readGeoQa`                            | Blocs questions-réponses GEO/AEO (migration 0072)                                                           |
+
+Contraintes : aucune duplication de logique (réutilise les readers de la
+fiche humaine, donc même validation Zod), chaque branche s'auto-élide en
+`null` / `[]` quand la donnée est absente (forme d'enveloppe stable), et
+`?lens=off` retombe sur un payload identité-seule. Le contrat existant
+(identité + résumé + conseil + canonicalUrl) est **inchangé** — ajout
+purement additif, aucun consommateur cassé.
+
 ## Notes
 
 - Les endpoints ne sont **pas** versionnés (`/v1/`) parce que le contrat est encore en phase d'observation. Une fois un consommateur externe identifié, on basculera vers `/v1/agent/*` avec un alias 308 → la version courante.

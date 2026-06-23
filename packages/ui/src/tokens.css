@@ -49,7 +49,14 @@
   /* Legacy aliases (kept for backward-compat with existing Tailwind classes) */
   --color-bg: var(--color-off-white);
   --color-fg: var(--color-charcoal);
-  --color-accent-gold: var(--color-gold);
+  /* Interactive/text accent — darkened from #8c7b5a to #6f5f3c so Tailwind
+     `text-accent` / `border-accent` clear WCAG 2.2 AA 4.5:1 on every cream
+     surface (5.5:1 on --color-bg, 4.6:1 on --color-surface-container-high).
+     Kept in lock-step with kit.css `--accent`. The lone `bg-accent` fill
+     (hotel-location map CTA) pairs with white text → 6.1:1, improved. The
+     decorative gold ramp (--color-gold-50…900) and raw --color-gold are
+     untouched, so hairlines/washes keep their luminosity. Gate 4 / a11y. */
+  --color-accent-gold: #6f5f3c;
   --color-accent-fg: var(--color-charcoal);
 
   /* Status colors (consistent with DS error token) */
@@ -60,24 +67,24 @@
   /* =========================================================================
    * 2b. Material Design 3 named tokens ÔÇö warm cream surfaces (taupe-tinted)
    * ======================================================================= */
-  --color-surface: #f6f1e7;          /* --creme  */
+  --color-surface: #f6f1e7; /* --creme  */
   --color-surface-bright: #fffefb;
   --color-surface-container-lowest: #ffffff; /* --blanc ÔÇö cards */
-  --color-surface-container-low: #efe8da;    /* --creme-2 ÔÇö alternate section */
+  --color-surface-container-low: #efe8da; /* --creme-2 ÔÇö alternate section */
   --color-surface-container: #efe8da;
-  --color-surface-container-high: #e8e0d0;   /* --creme-3 ÔÇö footer, bandeaux */
+  --color-surface-container-high: #e8e0d0; /* --creme-3 ÔÇö footer, bandeaux */
   --color-surface-container-highest: #e1d8c4;
   --color-surface-dim: #ddd3bd;
   --color-surface-tint: #6f675b;
   --color-surface-variant: #e8e0d0;
 
-  --color-on-surface: #2b2722;       /* --texte */
+  --color-on-surface: #2b2722; /* --texte */
   --color-on-surface-variant: #6f675b; /* --texte-doux */
   --color-inverse-surface: #3a352d;
   --color-inverse-on-surface: #f6f1e7;
 
   --color-outline: #6f675b;
-  --color-outline-variant: #d8cfbc;  /* --ligne (opaque equivalent) */
+  --color-outline-variant: #d8cfbc; /* --ligne (opaque equivalent) */
 
   /* Legacy `muted` and `border` mapped to nearest M3 tokens */
   --color-muted: var(--color-on-surface-variant);

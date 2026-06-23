@@ -3,6 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 
 import { selectGoogleReviewsForAccesWithApiCapFallback } from '@mch/domain/reviews';
+import { isToxicOfficialUrl } from '@mch/domain/url';
 import { parseAffiliationsLenient, type HotelAffiliation } from '@mch/db';
 import { z } from 'zod';
 
@@ -349,7 +350,13 @@ export function readExternalIds(row: HotelDetailRow): HotelExternalIds {
 
   const wikipediaUrlFr = safeHttps(row.wikipedia_url_fr);
   const wikipediaUrlEn = safeHttps(row.wikipedia_url_en);
-  const officialUrl = safeHttps(row.official_url);
+  // HTTPS-validated AND vetoed against the squatter / booking-engine / OTA
+  // detector: a toxic `official_url` (residual of a pre-guard write or a manual
+  // edit) must never feed `sameAs[]` (JSON-LD) nor the rendered "Site officiel"
+  // link. Treated as absent — the page renders cleanly without it.
+  const officialUrlRaw = safeHttps(row.official_url);
+  const officialUrl =
+    officialUrlRaw !== null && !isToxicOfficialUrl(officialUrlRaw) ? officialUrlRaw : null;
 
   const emailRaw = takeStringOrNull(row.email_reservations);
   const emailReservations = emailRaw !== null && EXT_EMAIL_REGEX.test(emailRaw) ? emailRaw : null;
@@ -2900,6 +2907,13 @@ export function readExternalSourcesProvenance(
 
     const kind = refKindForField(entry.field);
     if (kind !== null && entry.source_url !== undefined) {
+      // Veto a toxic `official` URL before it becomes a rendered "Site
+      // officiel" link in the EEAT footer. The provenance reader trusts the
+      // `external_sources` data, so this is the render-side backstop to the
+      // write-time guard in `convert-wikidata-to-external-sources.ts`. Only the
+      // `official` kind carries official-site semantics; the OTA references
+      // (TripAdvisor / Booking.com) are LEGITIMATE EEAT citations and stay.
+      if (kind === 'official' && isToxicOfficialUrl(entry.source_url)) continue;
       // First entry wins (stable ordering = ingestion order). Subsequent
       // entries for the same kind are dropped silently — the convertor
       // is idempotent, so duplicates only happen when an editor adds a

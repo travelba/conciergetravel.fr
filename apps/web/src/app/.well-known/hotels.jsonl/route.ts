@@ -28,7 +28,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
  *
  * `country` / `country_en` / `country_code` are read from the DB
  * (migration 0033, ISO-3166-1 alpha-2), NOT hardcoded — the catalogue
- * spans 91+ countries (ADR-0021). Legacy FR-only rows with a NULL code
+ * spans 127 countries (ADR-0021). Legacy FR-only rows with a NULL code
  * fall back to FR / France. `summary_*` prefers the 150-char IA-ready
  * `factual_summary_*` and falls back to a truncated description.
  *   schema_org_type ("LodgingBusiness" | "Hotel"),

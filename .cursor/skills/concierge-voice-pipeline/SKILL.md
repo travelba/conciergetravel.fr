@@ -596,7 +596,7 @@ instancier `new OpenAI({ apiKey })` sans options.
 - Style guide : [`docs/editorial/style-guide.md`](../../docs/editorial/style-guide.md) §9 (sentence length amendée)
 - Brand : [`EDITORIAL_VOICE.md`](../../EDITORIAL_VOICE.md) §6 (arbitrages C1/C2/C3)
 - Skills liées :
-  - `llm-output-robustness` — multi-call pipelines, Zod drift, retry strategy (cadre du pass 8).
+  - `llm-output-robustness` — multi-call pipelines, Zod drift, retry strategy (cadre du pass 8). Voir §Rule 19 : le salvage déterministe des contraintes de LONGUEUR (clamp `factual_summary`, découpe phrases > 25 mots aux frontières naturelles) précède la validation, mais ne touche JAMAIS au lexique — le verdict du linter `lintConciergeSummary` (voix de marque) reste souverain.
   - `editorial-long-read-rendering` — rendering pattern pour guides / rankings, callouts `concierge_tip`.
   - `content-modeling` — Payload `concierge_advice` field shape + validation.
   - `structured-data-schema-org` — FAQ JSON-LD 10-15 entries (préservé).

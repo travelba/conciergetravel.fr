@@ -2,7 +2,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 
-import { POI_HOVER_EVENT, type PoiHoverDetail } from './hotel-interactive-map';
+import { POI_HOVER_EVENT, type PoiHoverDetail } from './poi-hover-events';
 
 interface PoiHoverTargetProps {
   readonly poiId: string;

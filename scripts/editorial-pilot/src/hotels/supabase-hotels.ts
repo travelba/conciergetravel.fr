@@ -403,6 +403,19 @@ export async function updateHotelGeoContext(
   await patchHotel(cfg, hotelId, body);
 }
 
+/**
+ * GEO/AEO answer-engine blocks (migration 0072 `hotels.geo_qa`). jsonb array
+ * of `{ id, question_fr, question_en, paragraphs_fr[], paragraphs_en[] }`
+ * matching the web reader `GeoQaEntrySchema`.
+ */
+export async function updateHotelGeoQa(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+  geoQa: readonly unknown[],
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { geo_qa: geoQa });
+}
+
 export interface DescriptionUpdate {
   readonly description_fr: string;
   readonly description_en: string;

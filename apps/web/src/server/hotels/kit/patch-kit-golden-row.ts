@@ -120,11 +120,33 @@ function mergeGoldenRow(row: HotelDetailRow, golden: Record<string, unknown>): H
 }
 
 /**
+ * Slugs migrated to a DB-driven render — the golden in-memory patch is a no-op
+ * for these because the Supabase row now carries the full bilingual kit
+ * (FAQ + concierge + restaurants + POI + spa + signature experiences + gallery,
+ * EN parity included). This is the RFICHE "freeze a reproducible gabarit"
+ * switch: `les-airelles-gordes` renders the kit DA shell fed entirely by the
+ * DB so the same path scales to the R2 catalogue. See ADR-0007 / hotel-kit-rollout.
+ *
+ * The golden constants stay in `@mch/domain/editorial` as the seed-of-record
+ * for the other pilot slugs (still patched) and for regression diffing.
+ */
+const DB_DRIVEN_KIT_SLUGS: ReadonlySet<string> = new Set([
+  'les-airelles-gordes',
+  'les-airelles-gordes-en',
+]);
+
+function isDbDrivenKitSlug(row: HotelDetailRow): boolean {
+  if (DB_DRIVEN_KIT_SLUGS.has(row.slug)) return true;
+  return row.slug_en !== null && row.slug_en !== '' && DB_DRIVEN_KIT_SLUGS.has(row.slug_en);
+}
+
+/**
  * Merge the golden editorial payload for kit pilot slugs so the DA renderer
  * always has complete restaurants, spa, POI, FAQ, photos, etc. — independent
  * of `MCH_LOCAL_FIXTURE` (prod preview must match the reference).
  */
 function resolveGoldenPatchSlug(row: HotelDetailRow): string | null {
+  if (isDbDrivenKitSlug(row)) return null;
   if (resolveGoldenBuilder(row.slug) !== null) return row.slug;
   if (row.slug_en !== null && row.slug_en !== '' && resolveGoldenBuilder(row.slug_en) !== null) {
     return row.slug_en;

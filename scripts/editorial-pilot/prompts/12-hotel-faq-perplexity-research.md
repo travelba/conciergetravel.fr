@@ -12,6 +12,25 @@ Use Perplexity to do exhaustive research on the hotel **{{HOTEL_NAME}}** in **{{
 
 Search across: official hotel website, TripAdvisor, Booking.com, Expedia, Hotels.com, Michelin Guide, luxury travel press, travel blogs, and Google reviews. Cross-validate all answers — only include verified, accurate information.
 
+## Real search demand (DataForSEO) — anchor the FAQ on these
+
+Before listing the categories below, **prioritise the questions people actually
+ask**. Paste the grounding block printed by:
+
+```bash
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug={{SLUG}}
+```
+
+```
+{{REAL_QUERIES_PAA}}
+```
+
+Rule: every relevant People-Also-Ask question above MUST be covered (reformulated
+naturally and specific to this hotel). Ignore off-topic noise (celebrities,
+unrelated trivia). Use the high-volume keyword phrasing inside the answers when
+it reads naturally — never force an off-topic keyword, never fabricate a fact to
+match one. These real queries take priority over the generic category checklist.
+
 Generate two JSON outputs for MyConciergeHotel.com:
 
 ## 1. faq

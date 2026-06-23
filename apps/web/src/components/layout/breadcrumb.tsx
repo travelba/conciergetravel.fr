@@ -1,18 +1,23 @@
-import { getLocale, getTranslations } from 'next-intl/server';
-import { headers } from 'next/headers';
+'use client';
+
+import { useTranslations } from 'next-intl';
 import type { ReactElement } from 'react';
 
-import { Link } from '@/i18n/navigation';
-import { isRoutingLocale, type Locale } from '@/i18n/routing';
+import { Link, usePathname } from '@/i18n/navigation';
 
 /**
  * `<Breadcrumb>` — visible fil d'ariane mirror of the `BreadcrumbList`
  * JSON-LD (ADR-0014 §2.4).
  *
  * Rendering contract:
- * - Server Component, reads the current pathname from the `x-pathname`
- *   request header (set by `proxy.ts`).
- * - Renders **nothing** on the home page (`/` or `/<locale>`).
+ * - **Client Component**, derives the current route from `usePathname()`
+ *   (next-intl, locale-stripped). It MUST be client-driven because it
+ *   lives in the shared `[locale]/layout.tsx`, which the App Router does
+ *   NOT re-render on client-side (soft) navigation. A server `headers()`
+ *   read would freeze the crumb at the first hard load — e.g. landing on
+ *   the home from an inner page would keep showing "Accueil › Classements".
+ *   `usePathname()` re-evaluates on every navigation.
+ * - Renders **nothing** on the home page (`/`).
  * - On every other page, emits a sober `<nav aria-label="Fil d'ariane">`
  *   with up to 3 levels: Home → (Section) → Current.
  * - The deepest segment carries `aria-current="page"`.
@@ -23,10 +28,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
  *   but does NOT resolve dynamic params (`[slug]`, `[citySlug]`, etc.)
  *   to a human-readable label. Pages that need the deepest label
  *   (`/hotel/<slug>`, `/destination/<city>`, `/classement/<slug>`)
- *   should keep their own page-level breadcrumb (already in place).
- * - For these pages, this global Breadcrumb stays hidden (returns
- *   `null`) so we don't show a generic placeholder. The decision to
- *   show/hide is made by the per-segment map below.
+ *   keep their own page-level breadcrumb (already in place).
  *
  * Accessibility:
  * - `<nav aria-label>` for the landmark.
@@ -35,40 +37,18 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
  *
  * @see docs/adr/0014-menu-architecture-v2.md
  */
-export async function Breadcrumb(): Promise<ReactElement | null> {
-  const headersList = await headers();
-  const rawPath = headersList.get('x-pathname') ?? '/';
-  const locale = (await getLocale()) as Locale;
-  if (!isRoutingLocale(locale)) return null;
-
-  // Strip the leading `/<locale>` prefix to get the bare path. For
-  // the default locale (fr) next-intl doesn't add the prefix to the
-  // URL but the proxy header still uses the raw URL — we handle
-  // both shapes.
-  const localePrefix = `/${locale}`;
-  const bare =
-    rawPath === localePrefix
-      ? '/'
-      : rawPath.startsWith(`${localePrefix}/`)
-        ? rawPath.slice(localePrefix.length)
-        : rawPath;
+export function Breadcrumb(): ReactElement | null {
+  // next-intl `usePathname()` returns the locale-stripped pathname
+  // (`/classements`, `/`, …) and re-renders on every soft navigation.
+  const bare = usePathname();
+  const t = useTranslations('breadcrumb');
 
   // Skip the home page.
-  if (bare === '/' || bare === '') return null;
+  if (bare === '/') return null;
 
   const segments = bare.split('/').filter((s) => s.length > 0);
   if (segments.length === 0) return null;
 
-  // Namespace was promoted from `header.breadcrumb` → top-level `breadcrumb`
-  // in commit 28a6c63 (`fix(i18n): promote breadcrumb namespace to top-level`).
-  // Reading the legacy path after that move triggered `MISSING_MESSAGE:
-  // header.breadcrumb.*` and a 500 on every non-hotel section page in prod
-  // (the early-return below for `/hotel/*` had masked the issue at QA time).
-  const t = await getTranslations('breadcrumb');
-
-  // Map the first segment (the top-level entry) to a label + href.
-  // Dynamic params (`[slug]`, `[citySlug]`, …) live at index 1+ and
-  // are intentionally NOT resolved here — see component docstring.
   const TOP_LEVEL_LABEL: Record<string, { label: string; href: string } | undefined> = {
     hotel: { label: t('hotels'), href: '/hotels' },
     hotels: { label: t('hotels'), href: '/hotels' },

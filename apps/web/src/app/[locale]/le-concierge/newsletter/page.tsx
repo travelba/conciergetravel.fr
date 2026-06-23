@@ -18,9 +18,11 @@ import { env } from '@/lib/env';
  * promise (Vague 5 P1).
  *
  * Lightweight page positioning the editorial cadence and the
- * RGPD-clean sign-up flow. Form is a placeholder (disabled inputs)
- * — Brevo double opt-in integration ships in a follow-up dedicated
- * PR (skill `email-workflow-automation`).
+ * RGPD-clean sign-up flow. The sign-up surface is an honest
+ * manual-subscribe CTA (link to `/le-concierge/contact`) until the
+ * Brevo double opt-in integration ships in Phase 6 (skill
+ * `email-workflow-automation`) — we never render a live-looking form
+ * over the dry-run endpoint that drops submissions.
  *
  * JSON-LD: `Service` typed editorial publication + `BreadcrumbList`.
  */
@@ -205,7 +207,13 @@ export default async function ConciergeNewsletterPage({
         </ul>
       </section>
 
-      {/* Form (placeholder) */}
+      {/* Sign-up CTA — the Brevo double opt-in integration is Phase 6
+          (skill `email-workflow-automation`); the dry-run API endpoint
+          (`/api/agent/newsletter`) drops submissions, so rendering a
+          live-looking form here would falsely confirm a sign-up that
+          never lands (DGCCRF — no misleading commitment). Until Brevo is
+          provisioned we surface an honest manual-subscribe path via the
+          working `/le-concierge/contact` route. */}
       <section
         aria-labelledby="newsletter-form-title"
         className="border-border bg-bg mb-14 rounded-lg border p-6 md:p-8"
@@ -214,32 +222,13 @@ export default async function ConciergeNewsletterPage({
           {t('form.title')}
         </h2>
         <p className="text-muted mt-2 text-sm">{t('form.lede')}</p>
-        <form className="mt-6 flex flex-col gap-4 opacity-80">
-          {/* Disabled placeholder — Brevo double opt-in integration
-              ships in a follow-up PR (skill `email-workflow-automation`).
-              Email fallback surfaced via the WIP disclaimer. */}
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-fg font-medium">{t('form.emailPlaceholder')}</span>
-            <input
-              type="email"
-              disabled
-              placeholder={t('form.emailPlaceholder')}
-              className="border-border bg-bg/60 text-fg rounded-md border px-3 py-2 outline-none disabled:cursor-not-allowed"
-            />
-          </label>
-          <label className="text-muted flex items-start gap-2 text-xs">
-            <input type="checkbox" disabled className="mt-0.5 disabled:cursor-not-allowed" />
-            <span>{t('form.consent')}</span>
-          </label>
-          <button
-            type="button"
-            disabled
-            className="bg-fg/40 text-bg w-fit rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed"
-          >
-            {t('form.submit')}
-          </button>
-          <p className="text-muted mt-2 text-xs italic">{t('form.wip')}</p>
-        </form>
+        <p className="text-muted mt-4 text-sm">{t('form.wip')}</p>
+        <Link
+          href="/le-concierge/contact"
+          className="bg-fg text-bg mt-6 inline-flex w-fit items-center rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
+        >
+          {t('form.ctaContact')}
+        </Link>
       </section>
 
       {/* RGPD */}

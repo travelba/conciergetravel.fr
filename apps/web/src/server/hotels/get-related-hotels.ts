@@ -113,8 +113,31 @@ export function detectBrand(name: string): { slug: string; label: string } | nul
   return null;
 }
 
-/** All known brand families — surfaced by the `/marque/[slug]` index. */
-export const KNOWN_BRANDS = BRAND_FAMILIES.map((f) => ({ slug: f.slug, label: f.label }));
+/**
+ * Transitional duplicate slugs that resolve to the SAME brand entity as a
+ * canonical sibling (written by migration 0063). They stay in
+ * `BRAND_FAMILIES` so affiliation/`detectBrand` resolution keeps treating
+ * them as synonyms, but they must NOT be pre-rendered, sitemapped, or
+ * indexed — `/marque/<alias>` 308-redirects to the canonical slug
+ * (`next.config.ts`). Maps alias → canonical slug.
+ */
+export const BRAND_ALIAS_TO_CANONICAL: Readonly<Record<string, string>> = {
+  dorchester: 'dorchester-collection',
+};
+
+export function isBrandAliasSlug(slug: string): boolean {
+  return Object.prototype.hasOwnProperty.call(BRAND_ALIAS_TO_CANONICAL, slug);
+}
+
+/**
+ * All known brand families surfaced by the `/marque/[slug]` index —
+ * **excluding** transitional alias slugs (`BRAND_ALIAS_TO_CANONICAL`) so a
+ * single brand entity never produces two indexable URLs.
+ */
+export const KNOWN_BRANDS = BRAND_FAMILIES.filter((f) => !isBrandAliasSlug(f.slug)).map((f) => ({
+  slug: f.slug,
+  label: f.label,
+}));
 
 const RelatedHotelRowSchema = z.object({
   slug: z.string(),

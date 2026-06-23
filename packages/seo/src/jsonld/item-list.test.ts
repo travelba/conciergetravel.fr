@@ -57,6 +57,76 @@ describe('itemListJsonLd', () => {
     });
   });
 
+  it('forwards image + geo onto the nested rich Hotel item', () => {
+    const node = itemListJsonLd({
+      name: 'Provence',
+      items: [
+        {
+          name: 'Hôtel D',
+          url: 'https://example.com/d',
+          hotel: {
+            starRating: 5,
+            latitude: 43.8,
+            longitude: 5.1,
+            image: 'https://res.cloudinary.com/demo/image/upload/d-hero.jpg',
+          },
+        },
+      ],
+    });
+    const hotel = (node.itemListElement?.[0] as { item: Record<string, unknown> }).item;
+    expect(hotel).toMatchObject({
+      '@type': 'Hotel',
+      name: 'Hôtel D',
+      url: 'https://example.com/d',
+      starRating: { '@type': 'Rating', ratingValue: 5 },
+      geo: { '@type': 'GeoCoordinates', latitude: 43.8, longitude: 5.1 },
+    });
+    // `Hotel.image[]` carries the forwarded thumbnail.
+    expect(hotel['image']).toEqual(['https://res.cloudinary.com/demo/image/upload/d-hero.jpg']);
+  });
+
+  it('builds a lean Hotel node from image alone (no rich signals, no geo)', () => {
+    const node = itemListJsonLd({
+      items: [
+        {
+          name: 'Hôtel E',
+          url: 'https://example.com/e',
+          hotel: { image: 'https://res.cloudinary.com/demo/image/upload/e-hero.jpg' },
+        },
+      ],
+    });
+    const li = node.itemListElement?.[0];
+    expect(li).toHaveProperty('item');
+    const hotel = (li as { item: Record<string, unknown> }).item;
+    expect(hotel).toMatchObject({
+      '@type': 'Hotel',
+      name: 'Hôtel E',
+      url: 'https://example.com/e',
+      image: 'https://res.cloudinary.com/demo/image/upload/e-hero.jpg',
+    });
+    expect(hotel).not.toHaveProperty('geo');
+    expect(hotel).not.toHaveProperty('starRating');
+  });
+
+  it('drops a non-https / relative image URL (no fabrication)', () => {
+    const node = itemListJsonLd({
+      items: [
+        {
+          name: 'Hôtel F',
+          url: 'https://example.com/f',
+          hotel: { image: '/relative/path.jpg' },
+        },
+      ],
+    });
+    // No usable signal (image rejected, no geo, no rating) → navigational.
+    expect(node.itemListElement?.[0]).not.toHaveProperty('item');
+    expect(node.itemListElement?.[0]).toMatchObject({
+      '@type': 'ListItem',
+      url: 'https://example.com/f',
+      name: 'Hôtel F',
+    });
+  });
+
   it('keeps the simple shape when no `hotel` payload is provided (mixed list)', () => {
     const node = itemListJsonLd({
       items: [

@@ -170,6 +170,13 @@ describe('evaluateKitAcceptanceGates', () => {
           image_public_id: `cct/hotels/prince-de-galles-paris/press-${i + 1}`,
         })),
         points_of_interest: [],
+        geo_qa: Array.from({ length: 3 }, (_, i) => ({
+          id: `geo-q-${i}`,
+          question_fr: `Question ${i} ?`,
+          question_en: `Question ${i}?`,
+          paragraphs_fr: ['Réponse courte.'],
+          paragraphs_en: ['Short answer.'],
+        })),
         orderedRoomSlugs: ['chambre-art-deco-deluxe-balcon', 'suite-or', 'chambre-art-deco-deluxe'],
         rooms: [
           { slug: 'chambre-art-deco-deluxe-balcon', imageCount: 2 },
@@ -189,6 +196,7 @@ describe('evaluateKitAcceptanceGates', () => {
       'kit.10.gmb_review_recency',
       'kit.10.gmb_sync_fresh',
       'kit.10.gmb_display_triplet_fresh',
+      'kit.05.geo_qa_count',
     ];
     for (const id of roomGmbIds) {
       expect(checks.find((c) => c.id === id)?.passed).toBe(true);

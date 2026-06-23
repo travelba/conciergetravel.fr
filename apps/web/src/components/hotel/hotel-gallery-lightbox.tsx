@@ -620,6 +620,19 @@ export function HotelGalleryLightbox({
     setCurrentIndex((i) => (i + 1 + total) % total);
   }, [total]);
 
+  // Resolve a tile's position inside the full `allImages` catalogue. The
+  // visible grid renders a *representative, non-contiguous* subset
+  // (`pickKitMosaicRepresentativeThumbnails`), so the positional index of a
+  // thumbnail tile does NOT equal its index in `allImages`. Matching by
+  // `publicId` guarantees the lightbox opens the photo the user clicked.
+  const globalIndexForImage = useCallback(
+    (img: GalleryLightboxImage, fallback: number): number => {
+      const found = allImages.findIndex((candidate) => candidate.publicId === img.publicId);
+      return found >= 0 ? found : fallback;
+    },
+    [allImages],
+  );
+
   // Sync the React `isOpen` state with the native <dialog> show/close API.
   // Direct DOM calls are required because <dialog> has no controlled prop.
   useEffect(() => {
@@ -959,7 +972,7 @@ export function HotelGalleryLightbox({
                     imageClassName: KIT_MOSAIC_IMAGE_CLASS,
                   })}
                   {thumbnails.slice(0, MOSAIC_SIDE_TILES).map((img, idx) => {
-                    const galleryIndex = idx + 1;
+                    const galleryIndex = globalIndexForImage(img, idx + 1);
                     const isLast = idx === thumbnails.length - 1;
                     const overflowLabel = isLast && overflowCount > 0 ? overflowCount : 0;
                     return (
@@ -1047,7 +1060,7 @@ export function HotelGalleryLightbox({
         >
           {thumbnails.map((img, idx) => {
             const isOverflowSlot = idx === thumbnails.length - 1 && overflowCount > 0;
-            const galleryIndex = hero !== null ? idx + 1 : idx;
+            const galleryIndex = globalIndexForImage(img, hero !== null ? idx + 1 : idx);
             return (
               <li key={img.publicId} className="relative aspect-square overflow-hidden rounded-md">
                 {renderTileButton(img, galleryIndex, {
@@ -1167,6 +1180,35 @@ export function HotelGalleryLightbox({
                 reveal="always"
                 size="lg"
               />
+              {/* Preload the adjacent frames so arrow navigation swaps
+                  instantly. Rendering hidden `<HotelImage priority>` re-uses
+                  the exact `next/image` pipeline (same `/_next/image` URL,
+                  transforms and sizes as the visible frame) → guaranteed
+                  browser-cache hit on the next ←/→ instead of a fresh fetch. */}
+              {total > 1
+                ? [(currentIndex + 1) % total, (currentIndex - 1 + total) % total].map(
+                    (neighbourIndex) => {
+                      const neighbour = allImages[neighbourIndex];
+                      if (neighbour === undefined || neighbour.publicId === current.publicId) {
+                        return null;
+                      }
+                      return (
+                        <HotelImage
+                          key={`preload-${neighbour.publicId}-${neighbourIndex}`}
+                          cloudName={cloudName}
+                          publicId={neighbour.publicId}
+                          alt=""
+                          width={1600}
+                          height={1067}
+                          transforms={MAX_DIALOG_TRANSFORMS}
+                          sizes="(max-width: 768px) 100vw, 80vw"
+                          priority
+                          className="pointer-events-none invisible absolute left-0 top-0 h-px w-px opacity-0"
+                        />
+                      );
+                    },
+                  )
+                : null}
             </figure>
 
             <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm">

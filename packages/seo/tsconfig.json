@@ -1,7 +1,7 @@
 {
   "extends": "@mch/config/tsconfig/library.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": "../..",
     "outDir": "./dist",
     "noEmit": true
   },

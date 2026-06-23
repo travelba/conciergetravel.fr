@@ -15,3 +15,9 @@ export type { EmailRequestOpsProps } from './templates/email-request-ops';
 
 export { default as BookingConfirmationGuest } from './templates/booking-confirmation-guest';
 export type { BookingConfirmationGuestProps } from './templates/booking-confirmation-guest';
+
+export { default as ContactRequestOps } from './templates/contact-request-ops';
+export type { ContactRequestOpsProps } from './templates/contact-request-ops';
+
+export { default as ContactRequestGuest } from './templates/contact-request-guest';
+export type { ContactRequestGuestProps } from './templates/contact-request-guest';

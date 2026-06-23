@@ -316,6 +316,40 @@ batch enrichment script (`enrich-wikidata-ids.ts`) writes them to
 dedicated columns on `public.hotels` — those columns then power
 booking, reviews, image fallback, JSON-LD `sameAs[]`, …
 
+### Rule 9 bis — a NEW Wikidata match MUST be corroborated (geo OR accommodation description)
+
+The name-token search scorer in `enrich-wikidata-ids.ts` will happily accept a
+**non-accommodation** entity whose label contains the hotel's name tokens. The
+canonical failure (2026-06-22, commit `fd451b75`): the hotel **Rosa Alpina**
+matched `Q87641905` — _Rosa alpina_, a **plant species**. The geographic sanity
+check (`haversine(hotel, entity) < threshold`) does **not** save you here,
+because taxa, films, people and other abstract entities carry **no
+coordinates**, so the geo guard is skipped entirely and the bad match slips
+through.
+
+The fix: for a **NEW** match (`hotel.wikidata_id === null`) require corroboration
+by **EITHER** a passing geo-validation **OR** a Wikidata description that reads
+like an accommodation/building (`HOTEL_DESC_RE`). Neither → **reject** (skip,
+don't write). A pre-existing / editor-pinned `wikidata_id` is trusted as-is
+(`isNewMatch === false` exempts it).
+
+```ts
+const isNewMatch = hotel.wikidata_id === null;
+// … after the optional geo check sets geoValidated …
+if (isNewMatch) {
+  const descLooksLikeAccommodation = matchedDesc !== null && HOTEL_DESC_RE.test(matchedDesc);
+  if (!geoValidated && !descLooksLikeAccommodation) {
+    skipped += 1; // ✗ type-rejected: not geo-validated AND not an accommodation
+    continue;
+  }
+}
+```
+
+General lesson: a geo guard that **only fires when both sides carry
+coordinates** is a no-op against coordinate-less false positives (taxa, works,
+people). Pair it with a **type/description** corroboration so an abstract
+entity can never win on name overlap alone.
+
 ## Rule 10 — POI enrichment: DT for patrimony, Overpass for daily-life
 
 The "À proximité" block on a hotel page has **three editorial buckets**
@@ -672,8 +706,205 @@ sourcing pass fills the seed — extending coverage = add hotel blocks to
 / `quote_en` (falls back to the other locale) with a source emblem +
 `<cite>` link.
 
+## Rule 15 — Geo-fence is mandatory when backfilling POIs from `hotels.points_of_interest`
+
+`scripts/editorial-pilot/src/places/backfill-paris.ts` extracts the POIs
+embedded in `hotels.points_of_interest` (buckets `visit` / `do`) to create
+canonical `places` fiches for `/lieux/[citySlug]`. It was generalised
+beyond Paris (commit `4d0edae`) with two flags — `--city-match` and
+`--max-radius-km` — precisely because the source data is dirty in two
+independent ways:
+
+1. **`hotels.city` is fragmented** — the same city appears under multiple
+   display spellings (`"Londres"` vs `"London"`, `"Dubai"` vs `"Dubaï"`,
+   `"Geneva"` vs `"Genève"`). A naïve `city = 'Londres'` filter misses
+   half the hotels; a too-broad one over-captures.
+2. **Hotels embed POIs from another city** — encountered live: several
+   "London" hotels carried Paris monuments (Centre Pompidou, Hôtel de
+   Ville de Paris) inside their `points_of_interest`. Without a guard the
+   backfill creates aberrant fiches such as `londres/centre-pompidou`.
+
+The proven fix is a **two-part decoupling + a geo-fence**:
+
+### (a) Decouple the match filter from the stored label
+
+`--city-match` is a substring stem used only for the `hotels.city ILIKE
+*<stem>*` query; the canonical stored values come from separate flags:
+
+```powershell
+# match BOTH "London" and "Londres", store the canonical FR label + slug
+pnpm places:backfill-paris --city=londres --city-match=Lond --city-name=Londres
+# match BOTH "Dubai" and "Dubaï"
+pnpm places:backfill-paris --city=dubai  --city-match=Duba --city-name=Dubaï
+```
+
+So `city_key="londres"` (the URL slug), `city="Londres"` (the display
+label), and `--city-match=Lond` (the ILIKE stem) are three distinct
+values. `--city-name` defaults to `--city-match` for back-compat
+(`paris` / `gordes` legacy loop), so always set it when the match is a
+stem.
+
+**Gotcha — a too-short stem contaminates HOMONYM cities (2026-06-22).** The
+stem is a substring `ILIKE *<stem>*`, so an over-short stem captures unrelated
+cities that merely share the prefix. Observed: `--city-match=Floren` (meant for
+**Florence**) also matched **Saint-Florent** (Corsica), pulling Corsican hotels
+into the Florence batch. The downstream geo-fence (§(b)) _does_ eject the
+out-of-radius rows afterwards, but the contaminating hotels are still used to
+compute the **median centroid** — so they can skew the very fence meant to
+catch them. **Exclude the homonym at the source**: use the most specific stem
+that still covers the spelling variants you need (`--city-match=Florence` exact,
+not `Floren`). Verify the matched-hotel set (`SELECT slug, city FROM hotels
+WHERE city ILIKE '%<stem>%'`) before the run when the city name has common
+prefixes.
+
+### (b) Geo-fence on the matched-hotels median centroid
+
+`--max-radius-km=N` computes the **median** lat/lng of the matched hotels
+(`hotelCentroid` — median, not mean, so one mis-geocoded hotel can't drag
+the centre) and rejects any embedded POI whose haversine distance from
+that centroid exceeds `N` km. On the London rollout this filtered
+**42 → 34** scaffolds — the 8 ejected rows were the leaked Paris POIs.
+
+```ts
+// backfill-paris.ts — poiToScaffold()
+if (geoFence !== null) {
+  const dist = haversineMeters(geoFence.centroid, { latitude: lat, longitude: lng });
+  if (dist > geoFence.maxMeters) return null; // belongs to another city
+}
+```
+
+`--max-radius-km` defaults to `0` (disabled, preserves the Paris/Gordes
+loop). **Pass it on every non-Paris rollout** (e.g. `--max-radius-km=30`).
+
+### (c) Everything lands as `is_published=false`
+
+The backfill is a scaffold generator, never a publisher: a one-line OSM
+summary is not a fiche. The strict gate `publish-places.ts` (full
+editorial envelope: rich description + FAQ + concierge advice) stays the
+**sole** publisher. `--publish-thin` re-enables the legacy minimal
+auto-publish for throwaway pilots only.
+
+### Routing convention (do not break)
+
+`/lieux/[citySlug]` resolves on `places.city_key === citySlug`. `city_key`
+is kebab-case ASCII, **localised FR** (`paris`, `gordes`, `londres`,
+`dubai`, `rome`) — it is the canonical URL slug, decoupled from the
+display `city`. See `content-modeling` for the slug/label model and
+`seo-technical` for the indexability impact (an aberrant
+`londres/centre-pompidou` is a thin near-duplicate that pollutes the
+sitemap and the GEO citation graph).
+
+## Rule 16 — Backfill never publishes; a single gate is the only publisher; a reconciler re-aligns live state
+
+Rule 15(c) states the principle ("everything lands as `is_published=false`").
+This rule is the **enforcement contract** that closes the loop, paid for by a
+real prod incident (2026-06-21, commit `08bb0f2` then a hardening wave).
+
+### The incident
+
+`scripts/editorial-pilot/src/places/backfill-paris.ts` originally auto-published
+each scaffold with the test `is_published = publish && summaryFr !== null` —
+where `publish` defaulted to `true`. A scaffold is a one-line OSM summary with
+no rich description, no FAQ, no concierge advice. The result: **199 "thin
+stubs" Paris places shipped live** to `/lieux/paris`, bypassing the editorial
+quality envelope entirely.
+
+### The three-part fix (capitalise this exact shape)
+
+**1. The backfill defaults to NOT publishing.** Auto-publish is gated behind an
+explicit, named-as-legacy flag — never the default:
+
+```ts
+// backfill-paris.ts
+let publish = false;            // default: scaffold only, never publish
+// ...
+else if (a === '--publish-thin') publish = true; // legacy escape hatch only
+```
+
+**2. ONE gate is the sole publisher, and it exports its gate logic.**
+`scripts/editorial-pilot/src/places/publish-places.ts` re-validates the
+persisted row (summary length both locales, `description_fr/en` ≥ 250/200,
+`faq ≥ 5`, `concierge_advice` present) and only then flips `is_published=true`.
+It **exports** the gate so the reconciler reuses the identical rule — the two
+can never disagree:
+
+```ts
+export const PLACE_GATE_COLUMNS = 'id,slug,name,is_published,factual_summary_fr,…,faq';
+export function gateFailures(row: PlaceGateRow): readonly string[] {
+  /* … */
+}
+```
+
+**3. An idempotent reconciler re-aligns the live state onto the gate.**
+`scripts/editorial-pilot/src/places/reconcile-places-publish.ts` imports
+`gateFailures` + `PLACE_GATE_COLUMNS`, scans every `is_published=true` row, and
+**unpublishes** any that no longer clears the gate. It is **dry-run by default**
+(`--apply` to write), never deletes (only flips the flag, so the row stays
+enrich-eligible), and tallies failure families for the operator. On Paris it
+took the live count from **229 → 102 published** (the gap was later re-earned
+honestly by real enrichment, not by lowering the gate).
+
+```powershell
+npx tsx src/places/reconcile-places-publish.ts                     # dry-run, all cities
+npx tsx src/places/reconcile-places-publish.ts --city=paris --apply # write
+```
+
+### The transverse lesson
+
+Any backfill / scaffold / import pipeline MUST create rows as
+`is_published=false`. Publication flows through **one** quality gate that is
+tested and shared. Always ship an **idempotent reconciler** so the live state
+can be re-aligned onto the gate after any drift (legacy auto-publish, a manual
+SQL flip, a bad migration). The gate, the publisher and the reconciler are the
+**same** code path — export the gate, never re-implement it.
+
+### Gotcha — a module that BOTH exports gate logic AND has a `main()` needs a run-guard
+
+Because the reconciler `import`s from `publish-places.ts` to reuse `gateFailures`,
+the module's top-level `main()` would **execute on import** — a reconciliation
+dry-run accidentally published 72 rows this exact way before the guard landed.
+Protect the entry point with a `process.argv[1]` check so `main()` only runs
+when the file is the invoked script, not when it is imported as a module:
+
+```ts
+// publish-places.ts — bottom of file
+if (process.argv[1]?.endsWith('publish-places.ts') === true) {
+  main().catch((e: unknown) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
+```
+
+This is the Node/tsx equivalent of Python's `if __name__ == '__main__':`. Apply
+it to **every** script that doubles as an importable library (the sibling
+`enrich-places-editorial.ts` carries the same guard).
+
 ## Anti-patterns
 
+- ❌ A backfill / scaffold / import script that auto-publishes (e.g.
+  `is_published = publish && summaryFr !== null` with `publish` defaulting to
+  `true`) — it bypasses the quality gate. 2026-06-21: shipped **199 thin Paris
+  stubs** live. Default to `is_published=false`; gate auto-publish behind an
+  explicit legacy flag (`--publish-thin`). See Rule 16.
+- ❌ Re-implementing the publish gate inside the reconciler (or anywhere) —
+  the two drift. Export `gateFailures` + the column projection from the **one**
+  publisher and import it. See Rule 16.
+- ❌ A module that exports gate logic AND has a top-level `main()` without a
+  `process.argv[1]` run-guard — importing it to reuse the gate executes the
+  publisher (a dry-run reconciliation accidentally published 72 rows this way).
+  See Rule 16.
+- ❌ Backfilling `places` from `hotels.points_of_interest` with a naïve
+  `city = '<exact>'` filter — `hotels.city` is fragmented
+  (`Londres`/`London`, `Dubai`/`Dubaï`). Use `--city-match=<stem>` and
+  store the canonical label via `--city-name`. See Rule 15.
+- ❌ Running a non-Paris POI backfill without `--max-radius-km` — some
+  hotels embed another city's monuments in `points_of_interest`, so the
+  run mints aberrant fiches like `londres/centre-pompidou`. Always
+  geo-fence on the median centroid (Rule 15).
+- ❌ Flipping backfilled `places` scaffolds to `is_published=true` from
+  the backfill itself — a one-line OSM summary is not a publishable
+  fiche. Let the strict gate `publish-places.ts` be the sole publisher.
 - ❌ Calling `fetch()` directly on a third-party hotel website — bot
   protection, JS rendering, dirty HTML. Use Tavily.
 - ❌ Generating `featured_reviews` (or any third-party-attributed quote)
@@ -776,9 +1007,63 @@ populated `answer_fr` (and the FAQ renders fine in prod). Before
 launching a remediation pipeline off an audit "gap", confirm the field
 shape — a root-level key probe on an array column is a false negative.
 
+## Gotcha — "data-gap narration" leaks come in many phrasings (anti-whack-a-mole)
+
+When the brief is thin, the generation LLM narrates its own data gap
+instead of staying silent. This surfaces as user-visible prose and is the
+single most recurrent leak class. The phrasings are diverse — a verb-by-verb
+marker chase never converges. Catalogue the **whole family** in one pass in
+`scripts/editorial-pilot/src/enrichment/scaffolding-gate.ts`:
+
+- FR: `reste/encore à documenter|confirmer|préciser`, bare `à documenter`,
+  `aucune information … n'est … disponible`, `n'est actuellement disponible`,
+  `aucun fait vérifié`, `non documenté`, `… dans ce brief`,
+  `sous réserve de confirmer … la fiche`, `rubrique … en attente`.
+- EN mirror: `yet to be documented`, `to be documented here`,
+  `remains to be confirmed/documented`, `no precise information … available`,
+  `not specified in the brief`.
+
+Two hard-won rules when editing `LEAK_MARKERS`:
+
+1. **Scope cross-clause lookaheads to a single line** — use `[^.\n]*`, never
+   `[^.]*`. `[^.]` matches newlines, so `\brubrique\b(?=[^.]*\ben attente\b)`
+   silently matches across a whole bullet block and triggers false whole-section
+   drops downstream.
+2. **Don't over-broaden into legitimate field states.** `non renseignée`
+   ("field unspecified") is NOT a leak — it is normal in the `en-pratique`
+   block. Only the meta tail (`… dans ce brief`) makes it one. We added then
+   removed `non renseignée` after it nuked 154 real address bullets.
+
+## Gotcha — strip leaks WITHOUT dropping structured blocks
+
+`strip-leak-sentences.ts` must be structure-preserving, or it destroys the
+`en-pratique` address / GPS / classification block to remove one meta tail.
+The blast radius of a naïve "split on sentences, drop the section if it
+leaks" was **191 fiches / 165 dropped sections** (154 of them `en-pratique`).
+The surgical version (`cleanLeakBody`):
+
+1. **phrase pre-clean** — strip meta TAILS in place first
+   (`,? sous réserve de confirmer …`, ` dans ce brief`), so a bullet keeps
+   its real data and only loses the hedge;
+2. **line/paragraph-aware** — process `\n`-split units; a leaking paragraph
+   is **sentence-stripped in place** (keep its clean sentences), never dropped
+   wholesale;
+3. drop a unit only when nothing clean ≥ `min-keep` survives (genuine stub).
+
+For `description_fr` (out of strip scope — it touches sections + signatures
+only) use `descaffold-sections.ts --all` (LLM rewrite). After it rewrites FR,
+**blank `description_en`** for the changed rows (it does not) and re-run
+`translate-description-en --all`, else FR/EN desync. `needsEn()` only re-fills
+empty/short EN — it will NOT re-translate stale-but-clean EN.
+
+End state of one full sweep: `frLeak 0 / enLeak 0 / thin<6 0 / enBlank 0`
+across 2221 published fiches, residual thin/blank fiches closed by
+`enrich-hotel-content --force` (regenerates ≥6 clean bilingual sections).
+
 ## References
 
 - `llm-output-robustness` — generation pipeline that consumes the enriched briefs.
+- `keyword-grounding-dataforseo` — the search-demand counterpart to this factual cascade: grounds FAQ/titles/GEO on real PAA + keyword volumes (DataForSEO), complementary to the facts sourced here.
 - `windows-dev-environment` — PowerShell `$Args` automatic-variable collision (silent no-op in overnight orchestrators) + Supabase `pg` SSL gotcha.
 - `api-integration` — base HTTP / Zod / retry pattern.
 - `supabase-postgres-rls` — destination tables and migrations.
@@ -789,6 +1074,13 @@ shape — a root-level key probe on an array column is a false negative.
 - Migration `0040_fr_residuals_quick_wins.sql` + `0041_fr_residuals_translations.sql`
   — canonical examples of the Rule 12 remediation pattern.
 - POI pipeline: `scripts/editorial-pilot/src/pois/{sync-hotel-pois,merge-pois,llm-describe-pois}.ts` + `packages/integrations/src/overpass/`.
+- POI → `places` backfill + geo-fence (Rule 15): `scripts/editorial-pilot/src/places/backfill-paris.ts` (`hotelCentroid`, `poiToScaffold`) + strict publisher `scripts/editorial-pilot/src/places/publish-places.ts`.
+- [ADR-0030 — Vertical « Lieux à visiter »](../../docs/adr/0030-lieux-a-visiter-vertical.md) — architecture complète du vertical `/lieux` (modèle `public.places`, pipeline scaffold→photos→enrich→publish gate, maillage hôtel ↔ lieu, JSON-LD `TouristAttraction`). `enrich-places-editorial.ts` est la couche texte (OpenAI + DataForSEO grounding) de ce pipeline.
+- Publish-gate discipline + module run-guard (Rule 16): `scripts/editorial-pilot/src/places/{backfill-paris,publish-places,reconcile-places-publish}.ts` (`gateFailures`, `PLACE_GATE_COLUMNS`, `--publish-thin`, `--apply`, the `process.argv[1]` guard) — commit `08bb0f2`.
+- `keyword-grounding-dataforseo` §Rule 6 — the same "enrich never publishes; `publish-places.ts` is the gate" sequence from the grounding angle.
+- `backoffice-cms` — the Payload publish discipline (direct SQL bypasses `afterChange`); the same "one tested publish path" principle for CMS content.
+- `content-modeling` — `places.city_key` ↔ `/lieux/[citySlug]` slug/label model (kebab-case ASCII localised FR).
+- `seo-technical` — indexability impact of aberrant cross-city scaffolds (thin near-duplicates polluting sitemap + GEO citation graph).
 - POI JSON-LD: `packages/seo/src/jsonld/place-amenity.ts` (`osmToSchemaClass`, `buildOpeningHoursSpecification`).
 - Events pipeline: `scripts/editorial-pilot/src/events/{sync-hotel-events,llm-describe-events}.ts` + `scripts/editorial-pilot/src/enrichment/datatourisme.ts` (`fetchEventsAround`).
 - Events JSON-LD: `packages/seo/src/jsonld/event.ts` (`eventJsonLd`, `buildEventListJsonLd`).

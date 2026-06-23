@@ -18,6 +18,7 @@
  */
 
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 import { buildCloudinarySrc } from '@mch/ui';
 
@@ -123,6 +124,9 @@ function imgUrl(publicId: string, transforms: string): string {
 }
 
 export default function PhotoFilterPreviewPage(): React.ReactElement {
+  // Internal dev tool — never reachable in production (noindex + unlinked,
+  // but the route still resolves by direct URL otherwise). Cluster 1 audit.
+  if (process.env.NODE_ENV === 'production') notFound();
   return (
     <main className="mx-auto max-w-[1600px] px-4 py-10 lg:px-8">
       <header className="mb-8 space-y-4">

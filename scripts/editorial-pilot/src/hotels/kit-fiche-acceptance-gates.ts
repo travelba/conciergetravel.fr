@@ -107,6 +107,8 @@ export interface KitAcceptanceInput {
   readonly concierge_questions: unknown;
   readonly signature_experiences: unknown;
   readonly points_of_interest: unknown;
+  /** GEO/AEO answer-engine blocks (`hotels.geo_qa`, migration 0072). */
+  readonly geo_qa?: unknown;
   /** Room slugs in render order (post `order*KitRoomCards`). Falls back to DB order. */
   readonly orderedRoomSlugs?: readonly string[];
   readonly rooms: readonly KitRoomAuditRow[];
@@ -125,6 +127,8 @@ const GMB_MIN_DISPLAY_REVIEWS = 3;
 const GMB_RECENCY_MAX_DAYS = 90;
 const GMB_SYNC_MAX_DAYS = 30;
 const SIG_EXP_MIN_COUNT = 4;
+/** GEO/AEO answer-engine blocks required on a reference/kit fiche (PAA-anchored). */
+const GEO_QA_MIN_COUNT = 3;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -356,6 +360,27 @@ function pushCheck(
   message: string,
 ): void {
   checks.push({ id, passed, message });
+}
+
+/** Count `geo_qa` blocks that carry a complete bilingual Q&A (question + ≥1 paragraph per locale). */
+function countValidGeoQaBlocks(raw: unknown): number {
+  if (!Array.isArray(raw)) return 0;
+  let valid = 0;
+  for (const item of raw) {
+    if (!isRecord(item)) continue;
+    const qFr = item['question_fr'];
+    const qEn = item['question_en'];
+    const pFr = item['paragraphs_fr'];
+    const pEn = item['paragraphs_en'];
+    const hasQ =
+      typeof qFr === 'string' &&
+      qFr.trim().length > 0 &&
+      typeof qEn === 'string' &&
+      qEn.trim().length > 0;
+    const hasP = Array.isArray(pFr) && pFr.length > 0 && Array.isArray(pEn) && pEn.length > 0;
+    if (hasQ && hasP) valid += 1;
+  }
+  return valid;
 }
 
 /** All kit acceptance checks for one hotel row + per-room audit rows. */
@@ -620,6 +645,17 @@ export function evaluateKitAcceptanceGates(
     sigExp.withoutImage === 0
       ? 'all signature experiences carry image_public_id'
       : `${sigExp.withoutImage}/${sigExp.count} experiences without image_public_id (wrong gallery fallback risk)`,
+  );
+
+  /* ── GEO/AEO — geo_qa answer-engine blocks (PAA-anchored, migration 0072) ── */
+  const geoQaValid = countValidGeoQaBlocks(input.geo_qa);
+  pushCheck(
+    checks,
+    'kit.05.geo_qa_count',
+    geoQaValid >= GEO_QA_MIN_COUNT,
+    geoQaValid >= GEO_QA_MIN_COUNT
+      ? `${geoQaValid} geo_qa answer-engine blocks (PAA-anchored, target ≥ ${GEO_QA_MIN_COUNT})`
+      : `${geoQaValid} geo_qa blocks — kit/reference fiche needs ≥ ${GEO_QA_MIN_COUNT} bilingual PAA-anchored Q&A (run run-hotel-geo-qa)`,
   );
 
   /* ── D9/D13 — POI ── */

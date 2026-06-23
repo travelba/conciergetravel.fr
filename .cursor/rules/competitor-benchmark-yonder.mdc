@@ -1,0 +1,51 @@
+---
+description: Benchmark obligatoire MCH vs yonder.fr (+ travellers-society.com, même éditeur) sur tout travail SEO/GEO/classements/acquisition. Toujours expliciter ce qui manque côté MCH.
+alwaysApply: true
+---
+
+# Benchmark concurrent — MCH vs yonder.fr (règle PO, 2026-06-23)
+
+> **Décision PO** : « À chaque fois, compare MCH à yonder.fr, et vois ce
+> qu'il manque. »
+
+yonder.fr (et son site jumeau **travellers-society.com** — même éditeur)
+sont les concurrents de référence : ils trustent le **top 1-2 SEO** en
+France sur les requêtes « meilleurs / plus beaux hôtels {ville} ». Ils
+sont le mètre-étalon à battre.
+
+## La règle
+
+Sur **tout** travail touchant classements, SEO, GEO/AEO, acquisition,
+contenu éditorial hôtelier ou pages destination, l'agent **doit** :
+
+1. **Comparer explicitement MCH à yonder.fr** (et travellers-society si
+   pertinent) — couverture (villes/requêtes), patron éditorial, richesse
+   par hôtel, structured data, hooks (le « Club » -25 % ≈ Concierge Club).
+2. **Lister ce qui manque côté MCH** — gaps de couverture (villes qu'ils
+   couvrent et pas nous, gated sur inventaire ≥ 4 hôtels), gaps éditoriaux
+   (richesse/concrétude des justifications, parité FR↔EN), gaps d'autorité
+   (indexation GSC, backlinks — le vrai écart identifié).
+3. **Conclure par un delta actionnable** : ce qu'on doit créer, améliorer,
+   et ce qu'on fait *en plus pour se distinguer* (catalogue 2219 hôtels /
+   127 pays, conseils du Concierge, FAQ PAA, JSON-LD supérieur, maillage
+   vers les ~1147 lieux, matrice multi-axes).
+
+## Ce qu'on sait déjà (ne pas re-dériver à chaque fois)
+
+- **On sur-structure** yonder côté machine (≈10 blocs JSON-LD : ItemList +
+  Hotel par entrée + FAQPage + Speakable + hreflang, vs ~6 chez eux).
+- **On perd** sur : autorité/indexation (absents du top-20), richesse
+  éditoriale concrète par hôtel (architecte nommé, « chambre à booker »,
+  table Michelin, anecdote vérifiable), parité EN, photos/og:image.
+- Le **volume** est sur « hôtel de luxe {ville} » (10-30× « meilleurs
+  hôtels {ville} »), pas sur le phrasé qu'on avait industrialisé.
+
+## Références
+
+- Audit fondateur : `docs/audits/competitor-travellers-yonder-audit-2026-06-23.md`
+- Audits antérieurs : `docs/audits/rankings-seo-geo-audit-2026-06-22.md`,
+  `docs/audits/rankings-appearance-photo-audit-2026-06-22.md`
+- Skills : `.cursor/skills/editorial-rankings-matrix/SKILL.md`,
+  `.cursor/skills/keyword-grounding-dataforseo/SKILL.md`,
+  `.cursor/skills/geo-llm-optimization/SKILL.md`
+- Pipeline : `scripts/editorial-pilot/src/rankings/combinator.ts`

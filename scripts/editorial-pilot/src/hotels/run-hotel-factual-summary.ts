@@ -35,6 +35,9 @@ import { z } from 'zod';
 
 import { loadEnv, resolveProvider } from '../env.js';
 import { buildLlmClient } from '../llm.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import { groundHotel } from '../grounding/hotel-grounding.js';
+import type { DataForSeoClientConfig } from '@mch/integrations/dataforseo';
 import {
   listHotelsForFactualSummary,
   projectHotelForLlm,
@@ -147,27 +150,30 @@ interface PerHotelResult {
 async function runOnHotel(
   client: ReturnType<typeof buildLlmClient>,
   supabase: SupabaseRestConfig,
+  dfsCfg: DataForSeoClientConfig | null,
   row: HotelRow,
   options: { dryRun: boolean; cdcTightening: boolean },
 ): Promise<PerHotelResult> {
   const input = projectHotelForLlm(row);
   try {
+    // Anchor the summary phrasing on real search demand (degrade-safe:
+    // empty block when DFS is off).
+    const { block } = await groundHotel(dfsCfg, input);
     // When the runner is in `--cdc-tightening` mode, pass the CDC §2.3
     // ideal band [130, 150] to the generator so retries push toward
     // the AEO citability sweet spot instead of just landing inside the
     // looser production envelope [110, 165].
-    const result = await generateFactualSummary(
-      client,
-      input,
-      options.cdcTightening
+    const result = await generateFactualSummary(client, input, {
+      groundingBlock: block,
+      ...(options.cdcTightening
         ? {
             idealBand: {
               min: CDC_FACTUAL_SUMMARY_IDEAL_MIN,
               max: CDC_FACTUAL_SUMMARY_IDEAL_MAX,
             },
           }
-        : {},
-    );
+        : {}),
+    });
     if (!options.dryRun) {
       await updateHotelFactualSummary(supabase, row.id, {
         factual_summary_fr: result.output.fr,
@@ -256,7 +262,10 @@ async function main(): Promise<void> {
     serviceRoleKey: supabaseEnv.SUPABASE_SERVICE_ROLE_KEY,
   };
 
-  console.log(`[factual-summary] provider=${provider} model=${client.model}`);
+  const dfsCfg = loadDfsConfig();
+  console.log(
+    `[factual-summary] provider=${provider} model=${client.model} grounding=${dfsCfg !== null ? 'on' : 'off'}`,
+  );
   console.log(
     `[factual-summary] mode dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'}`,
   );
@@ -307,7 +316,7 @@ async function main(): Promise<void> {
     rows,
     args.concurrency,
     (row) =>
-      runOnHotel(client, supabase, row, {
+      runOnHotel(client, supabase, dfsCfg, row, {
         dryRun: args.dryRun,
         cdcTightening: args.cdcTightening,
       }),

@@ -92,7 +92,7 @@ export function EditorialTable({ table, locale }: Props): ReactElement {
       <figcaption className="text-fg/90 border-border bg-bg/60 border-b px-4 py-3 font-serif text-base font-light">
         {title}
       </figcaption>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={title}>
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-border border-b">
@@ -139,7 +139,7 @@ export function EditorialTable({ table, locale }: Props): ReactElement {
         </table>
       </div>
       {note.length > 0 ? (
-        <p className="text-fg/60 border-border bg-bg/40 border-t px-4 py-2 text-xs italic">
+        <p className="text-fg/75 border-border bg-bg/40 border-t px-4 py-2 text-xs italic">
           {note}
         </p>
       ) : null}

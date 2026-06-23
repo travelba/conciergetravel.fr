@@ -13,6 +13,7 @@
  * Skill: photo-pipeline §Photo-subject correspondence · hotel-kit-rollout D13–D14.
  */
 
+import { readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +24,9 @@ import { z } from 'zod';
 import {
   evaluateGalleryAltCategoryCorrespondence,
   evaluatePoiStructuralCorrespondence,
+  evaluateRoomPhotoCoverage,
   type PoiStructuralIssue,
+  type RoomPhotoIssue,
 } from '@mch/domain/photos';
 
 import { loadPhotoEnv } from './env-photos.js';
@@ -42,13 +45,48 @@ const PoiVisionSchema = z.object({
   reason: z.string().min(5).max(300),
 });
 
+const CategoryVisionSchema = z.object({
+  matches_category: z.boolean(),
+  detected_category: z.string().min(2).max(40),
+  confidence: z.enum(['high', 'medium', 'low']),
+  reason: z.string().min(5).max(300),
+});
+
+/**
+ * Gallery categories whose section binding is pixel-sensitive: the spa block,
+ * dining block, pool/view tiles and room cards filter the gallery by
+ * `category`, so a mislabeled photo surfaces the wrong subject. These are the
+ * ones worth a Vision pixel re-check. (`lobby`, `exterior`, `detail`,
+ * `concierge`, `events` are lower-risk / less section-bound.)
+ */
+const VISION_CHECKED_CATEGORIES = ['spa', 'dining', 'pool', 'view', 'room'] as const;
+/** Cap Vision calls per category per hotel to keep cohort audits cheap. */
+const MAX_VISION_PER_CATEGORY = 3;
+
 interface HotelRow {
+  readonly id: string;
   readonly slug: string;
   readonly name: string;
   readonly city: string | null;
   readonly is_published: boolean;
   readonly points_of_interest: unknown;
   readonly gallery_images: unknown;
+}
+
+interface RoomRow {
+  readonly slug: string | null;
+  readonly name_fr: string | null;
+  readonly name_en: string | null;
+  readonly hero_image: string | null;
+  readonly images: unknown;
+}
+
+interface GalleryVisionIssue {
+  readonly publicId: string;
+  readonly declaredCategory: string;
+  readonly detectedCategory: string;
+  readonly confidence: string;
+  readonly reason: string;
 }
 
 interface PoiVisionIssue {
@@ -68,6 +106,9 @@ interface HotelPhotoSubjectReport {
   readonly poiIssues: readonly PoiStructuralIssue[];
   readonly galleryAltIssues: number;
   readonly poiVisionIssues: readonly PoiVisionIssue[];
+  readonly roomTotal: number;
+  readonly roomPhotoIssues: readonly RoomPhotoIssue[];
+  readonly galleryVisionIssues: readonly GalleryVisionIssue[];
 }
 
 function buildCloudinaryUrl(cloudName: string, publicId: string): string {
@@ -76,6 +117,7 @@ function buildCloudinaryUrl(cloudName: string, publicId: string): string {
 
 function parseArgs(argv: readonly string[]): {
   slug?: string;
+  slugsFile?: string;
   publishedOnly: boolean;
   vision: boolean;
   limit?: number;
@@ -90,12 +132,34 @@ function parseArgs(argv: readonly string[]): {
   const limitRaw = map.get('limit');
   return {
     ...(typeof map.get('slug') === 'string' ? { slug: map.get('slug') as string } : {}),
+    ...(typeof map.get('slugs-file') === 'string'
+      ? { slugsFile: map.get('slugs-file') as string }
+      : {}),
     publishedOnly: map.has('published-only'),
     vision: map.has('vision'),
     ...(typeof limitRaw === 'string' && Number.isFinite(Number(limitRaw))
       ? { limit: Number(limitRaw) }
       : {}),
   };
+}
+
+/**
+ * Read a newline-delimited or JSON-array slug list from disk. Used by the
+ * `--slugs-file` flag to scope a Vision pass on a precise cohort (e.g. the
+ * hotels flagged by the structural gallery-alt heuristic) in one aggregated
+ * run instead of clobbering the dated JSON report once per `--slug`.
+ */
+function readSlugsFile(path: string): string[] {
+  const raw = readFileSync(path, 'utf8').trim();
+  if (raw.startsWith('[')) {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((s): s is string => typeof s === 'string' && s.trim().length > 0);
+  }
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('#'));
 }
 
 function readPoiName(poi: Record<string, unknown>): string {
@@ -155,16 +219,105 @@ Return JSON only:
   };
 }
 
+/**
+ * Vision pixel re-check: does the photo actually depict its declared
+ * `category`? Catches the "category=spa but the pixels are a bedroom" failure
+ * that the section renderers cannot see (they trust `category`).
+ */
+async function verifyGalleryCategoryWithVision(
+  client: OpenAI,
+  cloudName: string,
+  publicId: string,
+  declaredCategory: string,
+): Promise<GalleryVisionIssue | null> {
+  const url = buildCloudinaryUrl(cloudName, publicId);
+  const prompt = `You verify a luxury-hotel gallery photo's category.
+Declared category: "${declaredCategory}".
+Allowed categories: exterior, lobby, room, dining, spa, pool, view, detail, concierge, events.
+Does the image clearly depict the declared category (e.g. spa = wellness/treatment/hammam/sauna; room = bedroom/suite/bathroom; dining = restaurant/bar/table; pool = swimming pool; view = panorama/landscape from the property)?
+Return JSON only:
+{ "matches_category": boolean, "detected_category": string, "confidence": "high"|"medium"|"low", "reason": string }`;
+
+  const response = await client.chat.completions.create({
+    model: VISION_MODEL,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url, detail: 'low' } },
+        ],
+      },
+    ],
+    response_format: { type: 'json_object' },
+    max_tokens: 250,
+  });
+
+  const raw = response.choices[0]?.message?.content;
+  if (typeof raw !== 'string') return null;
+  const parsed = CategoryVisionSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) return null;
+  // Only flag confident mismatches — low-confidence noise is not actionable.
+  if (parsed.data.matches_category || parsed.data.confidence === 'low') return null;
+  return {
+    publicId,
+    declaredCategory,
+    detectedCategory: parsed.data.detected_category,
+    confidence: parsed.data.confidence,
+    reason: parsed.data.reason,
+  };
+}
+
+function readGalleryByCategory(gallery: unknown): Map<string, string[]> {
+  const byCat = new Map<string, string[]>();
+  const items = Array.isArray(gallery) ? gallery : [];
+  for (const item of items) {
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) continue;
+    const rec = item as Record<string, unknown>;
+    const publicId = rec['public_id'];
+    const category = rec['category'];
+    if (typeof publicId !== 'string' || publicId.trim().length === 0) continue;
+    if (typeof category !== 'string' || category.trim().length === 0) continue;
+    const cat = category.toLowerCase().trim();
+    if (!(VISION_CHECKED_CATEGORIES as readonly string[]).includes(cat)) continue;
+    const list = byCat.get(cat) ?? [];
+    if (list.length < MAX_VISION_PER_CATEGORY) list.push(publicId.trim());
+    byCat.set(cat, list);
+  }
+  return byCat;
+}
+
+async function fetchHotelRooms(cfg: SupabaseRestConfig, hotelId: string): Promise<RoomRow[]> {
+  const params = new URLSearchParams();
+  params.set('select', 'slug,name_fr,name_en,hero_image,images');
+  params.set('hotel_id', `eq.${hotelId}`);
+  const res = await fetch(`${cfg.url}/rest/v1/hotel_rooms?${params.toString()}`, {
+    headers: {
+      apikey: cfg.serviceRoleKey,
+      Authorization: `Bearer ${cfg.serviceRoleKey}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!res.ok) return [];
+  const json: unknown = await res.json();
+  return Array.isArray(json) ? (json as RoomRow[]) : [];
+}
+
 async function auditHotel(
   row: HotelRow,
   vision: boolean,
   openai: OpenAI | null,
   cloudName: string | null,
+  cfg: SupabaseRestConfig,
 ): Promise<HotelPhotoSubjectReport> {
   const poiStructural = evaluatePoiStructuralCorrespondence(row.points_of_interest);
   const galleryStructural = evaluateGalleryAltCategoryCorrespondence(row.gallery_images);
 
+  const rooms = await fetchHotelRooms(cfg, row.id);
+  const roomCoverage = evaluateRoomPhotoCoverage(rooms);
+
   const poiVisionIssues: PoiVisionIssue[] = [];
+  const galleryVisionIssues: GalleryVisionIssue[] = [];
   if (vision && openai !== null && cloudName !== null) {
     const pois = Array.isArray(row.points_of_interest) ? row.points_of_interest : [];
     for (const item of pois) {
@@ -181,6 +334,14 @@ async function auditHotel(
       );
       if (issue !== null) poiVisionIssues.push(issue);
     }
+
+    const byCategory = readGalleryByCategory(row.gallery_images);
+    for (const [category, publicIds] of byCategory) {
+      for (const publicId of publicIds) {
+        const issue = await verifyGalleryCategoryWithVision(openai, cloudName, publicId, category);
+        if (issue !== null) galleryVisionIssues.push(issue);
+      }
+    }
   }
 
   return {
@@ -191,6 +352,9 @@ async function auditHotel(
     poiIssues: poiStructural.issues,
     galleryAltIssues: galleryStructural.issues.length,
     poiVisionIssues,
+    roomTotal: roomCoverage.total,
+    roomPhotoIssues: roomCoverage.issues,
+    galleryVisionIssues,
   };
 }
 
@@ -206,9 +370,19 @@ async function main(): Promise<void> {
   const filters: string[] = [];
   if (args.publishedOnly) filters.push('is_published=eq.true');
   if (args.slug !== undefined) filters.push(`slug=eq.${args.slug}`);
+  if (args.slugsFile !== undefined) {
+    const slugs = readSlugsFile(args.slugsFile);
+    if (slugs.length === 0) {
+      console.error(`[audit:photo-subject] --slugs-file ${args.slugsFile} yielded no slugs.`);
+      process.exitCode = 1;
+      return;
+    }
+    filters.push(`slug=in.(${slugs.join(',')})`);
+    console.log(`[audit:photo-subject] scoping ${slugs.length} slugs from ${args.slugsFile}`);
+  }
 
   const rows = await selectHotels<HotelRow>(cfg, {
-    columns: 'slug,name,city,is_published,points_of_interest,gallery_images',
+    columns: 'id,slug,name,city,is_published,points_of_interest,gallery_images',
     filters,
     ...(args.limit !== undefined ? { limit: args.limit } : {}),
   });
@@ -233,12 +407,16 @@ async function main(): Promise<void> {
 
   const reports: HotelPhotoSubjectReport[] = [];
   for (const row of rows) {
-    const report = await auditHotel(row, args.vision, openai, cloudName);
+    const report = await auditHotel(row, args.vision, openai, cloudName, cfg);
     reports.push(report);
 
     const poiFail = report.poiIssues.filter((i) => i.code !== 'alt_name_mismatch');
     const hasFail =
-      poiFail.length > 0 || report.galleryAltIssues > 0 || report.poiVisionIssues.length > 0;
+      poiFail.length > 0 ||
+      report.galleryAltIssues > 0 ||
+      report.poiVisionIssues.length > 0 ||
+      report.roomPhotoIssues.length > 0 ||
+      report.galleryVisionIssues.length > 0;
 
     if (hasFail || args.slug !== undefined) {
       console.log(`\n── ${report.slug} (${report.name}) ──`);
@@ -248,12 +426,20 @@ async function main(): Promise<void> {
         }
       }
       if (report.galleryAltIssues > 0) {
-        console.log(`  [GALLERY] ${report.galleryAltIssues} alt/category mismatch(es)`);
+        console.log(`  [GALLERY-ALT] ${report.galleryAltIssues} alt/category mismatch(es)`);
       }
       for (const v of report.poiVisionIssues) {
         console.log(
-          `  [VISION] ${v.poiName}: detected "${v.detectedSubject}" (${v.confidence}) — ${v.reason}`,
+          `  [POI-VISION] ${v.poiName}: detected "${v.detectedSubject}" (${v.confidence}) — ${v.reason}`,
         );
+      }
+      for (const v of report.galleryVisionIssues) {
+        console.log(
+          `  [GALLERY-VISION] ${v.publicId}: declared "${v.declaredCategory}" but pixels look like "${v.detectedCategory}" (${v.confidence}) — ${v.reason}`,
+        );
+      }
+      for (const r of report.roomPhotoIssues) {
+        console.log(`  [ROOM] no_photo: ${r.name ?? r.slug ?? '?'} — ${r.detail}`);
       }
       if (!hasFail) console.log('  ✅ structural + vision OK');
     }
@@ -264,12 +450,18 @@ async function main(): Promise<void> {
   ).length;
   const galleryFails = reports.filter((r) => r.galleryAltIssues > 0).length;
   const visionFails = reports.filter((r) => r.poiVisionIssues.length > 0).length;
+  const galleryVisionFails = reports.filter((r) => r.galleryVisionIssues.length > 0).length;
+  const roomFails = reports.filter((r) => r.roomPhotoIssues.length > 0).length;
 
   console.log('\n=== Photo-subject correspondence audit ===');
-  console.log(`Hotels scanned     : ${reports.length}`);
-  console.log(`POI structural fail: ${poiStructuralFails}`);
-  console.log(`Gallery alt fail   : ${galleryFails}`);
-  if (args.vision) console.log(`POI vision fail    : ${visionFails}`);
+  console.log(`Hotels scanned       : ${reports.length}`);
+  console.log(`POI structural fail  : ${poiStructuralFails}`);
+  console.log(`Gallery alt fail     : ${galleryFails}`);
+  console.log(`Room no-photo fail   : ${roomFails}`);
+  if (args.vision) {
+    console.log(`POI vision fail      : ${visionFails}`);
+    console.log(`Gallery vision fail  : ${galleryVisionFails}`);
+  }
 
   await mkdir(RUNS_DIR, { recursive: true });
   const stamp = new Date().toISOString().slice(0, 10);
@@ -280,7 +472,13 @@ async function main(): Promise<void> {
   );
   console.log(`JSON → ${outPath}`);
 
-  if (poiStructuralFails > 0 || galleryFails > 0 || visionFails > 0) {
+  if (
+    poiStructuralFails > 0 ||
+    galleryFails > 0 ||
+    visionFails > 0 ||
+    galleryVisionFails > 0 ||
+    roomFails > 0
+  ) {
     process.exitCode = 1;
   }
 }

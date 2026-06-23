@@ -10,7 +10,7 @@
 
 - **Nom** : MyConciergeHotel.com
 - **Positionnement** : **La sélection du Concierge** — hôtels d'exception dans le monde (Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales)
-- **Périmètre catalogue** : 615 hôtels publiés dans 91 pays (snapshot 2026-05-27) — voir [ADR-0021](docs/adr/0021-pivot-scope-mondial.md)
+- **Périmètre catalogue** : 2221 hôtels publiés dans 127 pays (snapshot 2026-06-22) — voir [ADR-0021](docs/adr/0021-pivot-scope-mondial.md)
 - **Promesse unique** : un **Conseil du Concierge** opérationnel concret sur chaque fiche — le secret que les guides ne donnent jamais
 - **Ton** : expert complice, jamais commercial, toujours précis
 

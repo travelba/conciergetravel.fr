@@ -28,6 +28,12 @@ export interface CloudinaryUploadInput {
   readonly index: number;
   /** When set, replaces `{source}-{index}` as the Cloudinary asset name within the hotel folder. */
   readonly publicIdShort?: string;
+  /**
+   * Destination folder override. Defaults to `cct/hotels/{hotelSlug}`. Set
+   * this for non-hotel entities reusing this uploader, e.g.
+   * `cct/places/{cityKey}/{placeSlug}` for the "lieux à visiter" vertical.
+   */
+  readonly folder?: string;
   /** Alt text (French). Surfaced in `<HotelImage alt>`. */
   readonly altFr: string;
   /** Alt text (English). Falls back to `altFr` when omitted. */
@@ -46,6 +52,7 @@ export interface CloudinaryLocalUploadInput {
   readonly source: 'commons' | 'places' | 'press' | 'manual';
   readonly index: number;
   readonly publicIdShort?: string;
+  readonly folder?: string;
   readonly altFr: string;
   readonly altEn?: string;
   readonly category?: string;

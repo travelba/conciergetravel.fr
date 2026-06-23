@@ -112,19 +112,25 @@ const nextConfig: NextConfig = {
     // Anti-cannibalisation 301 redirects (cf. CDC arborescence + ADR seo).
     // Final list managed via Payload `Redirects` collection in Phase 8.
     return [
+      // Legacy `/selection/*` deep links (external/social/SEO). The
+      // `/selection/*` route tree never shipped, so these used to 301 to
+      // pages that 404'd. Re-pointed to live editorial taxonomy targets
+      // whose slugs are recognised by `/classements/[axe]/[valeur]`
+      // (known occasion/theme values render at worst a noindex empty
+      // state, never a 404) or to a real `/categorie/*` editorial hub.
       {
         source: '/:locale(fr|en)/selection/lune-de-miel',
-        destination: '/:locale/selection/romantiques-et-lune-de-miel',
+        destination: '/:locale/classements/occasion/lune-de-miel',
         permanent: true,
       },
       {
         source: '/:locale(fr|en)/selection/ski',
-        destination: '/:locale/selection/montagne',
+        destination: '/:locale/classements/theme/sport-ski',
         permanent: true,
       },
       {
         source: '/:locale(fr|en)/selection/plage-privee',
-        destination: '/:locale/selection/bord-de-mer-et-plage',
+        destination: '/:locale/categorie/palaces-bord-de-mer',
         permanent: true,
       },
       // The bare `/itineraire` was a coming-soon stub; the canonical hub
@@ -166,6 +172,22 @@ const nextConfig: NextConfig = {
       {
         source: '/en/the-concierge-club/prestige',
         destination: '/en/the-concierge-club#prestige',
+        permanent: true,
+      },
+      // Anti-cannibalisation: `/marque/dorchester` is a transitional alias
+      // (migration 0063) of the canonical `/marque/dorchester-collection`.
+      // Both used to render the same brand with a self-referential canonical
+      // → duplicate indexable URLs. The alias is now excluded from
+      // generateStaticParams + the sitemap (`BRAND_ALIAS_TO_CANONICAL`); this
+      // 308 resolves any remaining inbound link to the canonical slug.
+      {
+        source: '/:locale(fr|en)/marque/dorchester',
+        destination: '/:locale/marque/dorchester-collection',
+        permanent: true,
+      },
+      {
+        source: '/marque/dorchester',
+        destination: '/marque/dorchester-collection',
         permanent: true,
       },
     ];

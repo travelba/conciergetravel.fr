@@ -91,6 +91,39 @@ explaining the PR #56/#57 regressions). See also
 - Optional but encouraged: `award[]` (CDC §2.13), `containedInPlace` (Place — city), `nearbyAttraction` (POIs from `pois` collection).
 - Each `image` is rendered as `ImageObject` with `caption` (mot-clé + contexte — example: `"piscine extérieure chauffée Hôtel X Nice"`).
 
+### URL hygiene — veto squatter URLs at the emission boundary, not just at write time
+
+A data sweep that strips SEO-squatter / booking-engine / OTA URLs from the DB
+(`restaurant_info.venues[].website`, `external_sources` `official_url`, the
+scalar `hotels.official_url`) cleans the **present** state — it does not stop a
+residual or hand-edited toxic value from re-reaching a JSON-LD node or a
+rendered "Site officiel" link on the next emit. **Every emission site must
+re-veto, not trust the data.** This is defence-in-depth: the write-time guard
+in the pipeline and the emission-time guard at render are independent layers.
+
+- **Single source of truth**: the detector is `isToxicOfficialUrl` in
+  [`@mch/domain/url`](../../../packages/domain/src/url/toxic-official-url.ts)
+  (pure, no-I/O — importable by every layer). The editorial-pilot pipeline
+  re-exports it so the write boundary and the emission boundary pin the SAME
+  regex (no drift). Forward-only: a new squatter family gets one clause + one
+  fixture in `toxic-official-url.test.ts`.
+- **Centralise the veto in the builder, not in each caller.** `Restaurant.url`
+  is gated **once** inside `hotelJsonLd` (`packages/seo/src/jsonld/hotel.ts`:
+  `isHttpsUrl(venue.url) && !isToxicOfficialUrl(venue.url)`), so both callers
+  (`apps/web` hotel page + the kit builder) inherit it from a single point.
+- **Omit the field, keep the node.** A toxic `url` is dropped — the
+  `Restaurant` (or `Hotel`) node stays valid without it. Never emit a node
+  carrying a squatter URL, and never drop the whole node over one bad field.
+- **Render-side too.** `apps/web` re-vetoes the scalar `official_url` before it
+  feeds `Hotel.sameAs[]` AND before the `official` provenance reference becomes
+  a footer link (`get-hotel-by-slug.ts` — `readExternalIds` +
+  `readExternalSourcesProvenance`). The OTA references (TripAdvisor / Booking)
+  in the EEAT footer are LEGITIMATE citations and stay — only the `official`
+  kind carries official-site semantics, so only it is vetoed there.
+
+See `security-engineering` §"Defence-in-depth: re-validate at every trust
+boundary" and `photo-pipeline` §toxic-official-url for the squatter taxonomy.
+
 ### Room (sub-page `/hotel/[slug]/chambres/[room-slug]`)
 
 - `@type: "HotelRoom"` (preferred) or `Room` (fallback).
@@ -228,6 +261,7 @@ matching on-page rating (or on a different scale) is a Google policy violation.
 - `Offer` without `priceValidUntil` (CDC §2.8 mandatory).
 - Room sub-page emitting a canonical that points to the parent hotel (kills its indexability).
 - `ImageObject` without `caption` (loses the SEO + a11y signal).
+- Trusting a "cleaned" DB column and emitting a `Restaurant.url` / `Hotel.sameAs` / "Site officiel" link without re-running `isToxicOfficialUrl` at the emission/render site (a data sweep is not a substitute for an emission veto).
 
 ## References
 

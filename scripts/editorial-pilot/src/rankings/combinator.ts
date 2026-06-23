@@ -60,10 +60,21 @@ function lieuMatches(h: HotelCatalogRow, lieu: LieuDef): boolean {
   // 2026-05-31 — country scope: a hotel matches when its `country_code`
   // is in the lieu's `countryCodes` list. Used by international country
   // rankings (`meilleurs-hotels-mexique`, `-emirats-arabes-unis`, …).
-  // City keys are ignored when a country list is set.
-  if (lieu.countryCodes !== undefined && lieu.countryCodes.length > 0) {
+  //
+  // 2026-06-23 — country + city AND-semantics: when a lieu sets BOTH a
+  // non-empty `countryCodes` AND non-empty `hotelCityKeys`, the hotel must
+  // satisfy BOTH (country gate, then city match). This disambiguates a city
+  // ranking from a homonym in another country (e.g. `vienne` = Vienna/AT,
+  // not the French Vienne; `geneve` = Geneva/CH). A country-only lieu keeps
+  // its empty `hotelCityKeys` and short-circuits below (unchanged behaviour).
+  const countryCodes = lieu.countryCodes;
+  if (countryCodes !== undefined && countryCodes.length > 0) {
     const cc = (h.country_code ?? '').toUpperCase();
-    return lieu.countryCodes.some((target) => target.toUpperCase() === cc);
+    const countryOk = countryCodes.some((target) => target.toUpperCase() === cc);
+    if (!countryOk) return false;
+    // Country-only scope: no city keys → the country gate is the whole test.
+    if (lieu.hotelCityKeys.length === 0) return true;
+    // Else fall through to the city match (AND).
   }
   const c = lc(h.city);
   const cityMatch = lieu.hotelCityKeys.some((k) => c === lc(k) || c.includes(lc(k)));
@@ -304,7 +315,601 @@ interface ManualOverride {
   readonly kind?: MatrixSeed['kind'];
 }
 
+// ─── 2026-06-22 — « Hôtel de luxe {ville} » acquisition pages ─────────────
+// Audit `docs/audits/rankings-seo-geo-audit-2026-06-22.md` (G2): the
+// « hôtel de luxe {ville} » intent draws 10-30× the volume of « meilleurs
+// hôtels {ville} » (Paris ≈ 2 900/mo) yet only ONE `luxe` slug existed
+// catalogue-wide (`meilleurs-hotels-luxe-france`). These bare-lieu
+// (`type=all` → a BROAD luxury selection, not only Atout-France palaces)
+// head terms target the highest-demand servable French cities (≥ ~5
+// published hotels). Differentiated from the `meilleurs-palaces-*` /
+// `5-etoiles-*` angle. Eligibility relies on the LieuDef in `axes.ts`.
+// 2026-06-23 expansion (wave 2): Marrakech / Monaco / Dubaï added now
+// that their LieuDefs landed in axes.ts from the intl wave. Each gate-
+// checked against the live catalogue via `eligibilityFor` (the predicate
+// re-resolves the lieu by SLUG through `resolveLieu`, so only registered
+// LIEUX slugs yield a precise count): Marrakech 16, Monaco 4, Dubaï 53 —
+// all ≥ the 4-hotel feasibility floor. Cannes (Carlton dup → 3 distinct),
+// Biarritz (3), Lyon (3), Bordeaux (cannibalises the existing cluster
+// head) and Aix-en-Provence (3 city hotels — the 17 count was a polluted
+// Provence-cluster resolution) are deliberately NOT created. See
+// `docs/audits/rankings-seo-geo-audit-2026-06-22.md` §1.
+const LUXE_CITIES: readonly {
+  readonly slug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly lieuSlug: string;
+  readonly label: string;
+}[] = [
+  {
+    slug: 'hotel-de-luxe-paris',
+    titleFr: 'Les meilleurs hôtels de luxe à Paris',
+    titleEn: 'The best luxury hotels in Paris',
+    scope: 'ville',
+    lieuSlug: 'paris',
+    label: 'Paris',
+  },
+  {
+    slug: 'hotel-de-luxe-cote-d-azur',
+    titleFr: "Les meilleurs hôtels de luxe sur la Côte d'Azur",
+    titleEn: 'The best luxury hotels on the French Riviera',
+    scope: 'cluster',
+    lieuSlug: 'cote-d-azur',
+    label: "Côte d'Azur",
+  },
+  {
+    slug: 'hotel-de-luxe-nice',
+    titleFr: 'Les meilleurs hôtels de luxe à Nice',
+    titleEn: 'The best luxury hotels in Nice',
+    scope: 'ville',
+    lieuSlug: 'nice',
+    label: 'Nice',
+  },
+  {
+    slug: 'hotel-de-luxe-saint-tropez',
+    titleFr: 'Les meilleurs hôtels de luxe à Saint-Tropez',
+    titleEn: 'The best luxury hotels in Saint-Tropez',
+    scope: 'ville',
+    lieuSlug: 'saint-tropez',
+    label: 'Saint-Tropez',
+  },
+  {
+    slug: 'hotel-de-luxe-courchevel',
+    titleFr: 'Les meilleurs hôtels de luxe à Courchevel',
+    titleEn: 'The best luxury hotels in Courchevel',
+    scope: 'station',
+    lieuSlug: 'courchevel',
+    label: 'Courchevel',
+  },
+  {
+    slug: 'hotel-de-luxe-megeve',
+    titleFr: 'Les meilleurs hôtels de luxe à Megève',
+    titleEn: 'The best luxury hotels in Megève',
+    scope: 'station',
+    lieuSlug: 'megeve',
+    label: 'Megève',
+  },
+  // ── Wave 2 (2026-06-23) — high-volume, gate-cleared luxe heads ──────────
+  {
+    slug: 'hotel-de-luxe-marrakech',
+    titleFr: 'Les meilleurs hôtels de luxe à Marrakech',
+    titleEn: 'The best luxury hotels in Marrakech',
+    scope: 'ville',
+    lieuSlug: 'marrakech',
+    label: 'Marrakech',
+  },
+  {
+    slug: 'hotel-de-luxe-monaco',
+    titleFr: 'Les meilleurs hôtels de luxe à Monaco',
+    titleEn: 'The best luxury hotels in Monaco',
+    scope: 'ville',
+    lieuSlug: 'monaco',
+    label: 'Monaco',
+  },
+  {
+    slug: 'hotel-de-luxe-dubai',
+    titleFr: 'Les meilleurs hôtels de luxe à Dubaï',
+    titleEn: 'The best luxury hotels in Dubai',
+    scope: 'ville',
+    lieuSlug: 'dubai',
+    label: 'Dubaï',
+  },
+  // ── Wave 3 (2026-06-23) — top-volume intl cities NOT already covered ────
+  // Picked by DataForSEO `hôtel de luxe {ville}` search volume, gate-checked
+  // ≥ 4 published hotels each (competitor gap audit 2026-06-23). LieuDefs
+  // already exist in axes.ts (intl wave 1).
+  {
+    slug: 'hotel-de-luxe-new-york',
+    titleFr: 'Les meilleurs hôtels de luxe à New York',
+    titleEn: 'The best luxury hotels in New York',
+    scope: 'ville',
+    lieuSlug: 'new-york',
+    label: 'New York',
+  },
+  {
+    slug: 'hotel-de-luxe-barcelone',
+    titleFr: 'Les meilleurs hôtels de luxe à Barcelone',
+    titleEn: 'The best luxury hotels in Barcelona',
+    scope: 'ville',
+    lieuSlug: 'barcelone',
+    label: 'Barcelone',
+  },
+  {
+    slug: 'hotel-de-luxe-londres',
+    titleFr: 'Les meilleurs hôtels de luxe à Londres',
+    titleEn: 'The best luxury hotels in London',
+    scope: 'ville',
+    lieuSlug: 'londres',
+    label: 'Londres',
+  },
+  {
+    slug: 'hotel-de-luxe-venise',
+    titleFr: 'Les meilleurs hôtels de luxe à Venise',
+    titleEn: 'The best luxury hotels in Venice',
+    scope: 'ville',
+    lieuSlug: 'venise',
+    label: 'Venise',
+  },
+  {
+    slug: 'hotel-de-luxe-rome',
+    titleFr: 'Les meilleurs hôtels de luxe à Rome',
+    titleEn: 'The best luxury hotels in Rome',
+    scope: 'ville',
+    lieuSlug: 'rome',
+    label: 'Rome',
+  },
+];
+const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
+  slug: d.slug,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
+// ─── 2026-06-22 — International destination head rankings (wave 1) ─────────
+// Data-driven `meilleurs-hotels-<dest>` heads for non-FR countries + iconic
+// cities carrying ≥ 3 published hotels (see `tmp-intl-coverage.ts`). Each
+// references a LieuDef added in axes.ts (country → `countryCodes`, city →
+// `hotelCityKeys`). Forced as MANUAL_OVERRIDES so the heads always emit;
+// `type×lieu` / `theme×lieu` sub-combos are deferred to a later wave.
+const INTL_DESTINATIONS: readonly {
+  readonly lieuSlug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly label: string;
+}[] = [
+  // Countries.
+  {
+    lieuSlug: 'italie',
+    titleFr: "Les meilleurs hôtels d'Italie",
+    titleEn: 'The best hotels in Italy',
+    scope: 'pays',
+    label: 'Italie',
+  },
+  {
+    lieuSlug: 'espagne',
+    titleFr: "Les meilleurs hôtels d'Espagne",
+    titleEn: 'The best hotels in Spain',
+    scope: 'pays',
+    label: 'Espagne',
+  },
+  {
+    lieuSlug: 'royaume-uni',
+    titleFr: 'Les meilleurs hôtels du Royaume-Uni',
+    titleEn: 'The best hotels in the United Kingdom',
+    scope: 'pays',
+    label: 'Royaume-Uni',
+  },
+  {
+    lieuSlug: 'japon',
+    titleFr: 'Les meilleurs hôtels du Japon',
+    titleEn: 'The best hotels in Japan',
+    scope: 'pays',
+    label: 'Japon',
+  },
+  {
+    lieuSlug: 'grece',
+    titleFr: 'Les meilleurs hôtels de Grèce',
+    titleEn: 'The best hotels in Greece',
+    scope: 'pays',
+    label: 'Grèce',
+  },
+  {
+    lieuSlug: 'etats-unis',
+    titleFr: 'Les meilleurs hôtels des États-Unis',
+    titleEn: 'The best hotels in the United States',
+    scope: 'pays',
+    label: 'États-Unis',
+  },
+  {
+    lieuSlug: 'chine',
+    titleFr: 'Les meilleurs hôtels de Chine',
+    titleEn: 'The best hotels in China',
+    scope: 'pays',
+    label: 'Chine',
+  },
+  {
+    lieuSlug: 'thailande',
+    titleFr: 'Les meilleurs hôtels de Thaïlande',
+    titleEn: 'The best hotels in Thailand',
+    scope: 'pays',
+    label: 'Thaïlande',
+  },
+  {
+    lieuSlug: 'suisse',
+    titleFr: 'Les meilleurs hôtels de Suisse',
+    titleEn: 'The best hotels in Switzerland',
+    scope: 'pays',
+    label: 'Suisse',
+  },
+  {
+    lieuSlug: 'indonesie',
+    titleFr: "Les meilleurs hôtels d'Indonésie",
+    titleEn: 'The best hotels in Indonesia',
+    scope: 'pays',
+    label: 'Indonésie',
+  },
+  {
+    lieuSlug: 'maroc',
+    titleFr: 'Les meilleurs hôtels du Maroc',
+    titleEn: 'The best hotels in Morocco',
+    scope: 'pays',
+    label: 'Maroc',
+  },
+  {
+    lieuSlug: 'portugal',
+    titleFr: 'Les meilleurs hôtels du Portugal',
+    titleEn: 'The best hotels in Portugal',
+    scope: 'pays',
+    label: 'Portugal',
+  },
+  {
+    lieuSlug: 'autriche',
+    titleFr: "Les meilleurs hôtels d'Autriche",
+    titleEn: 'The best hotels in Austria',
+    scope: 'pays',
+    label: 'Autriche',
+  },
+  {
+    lieuSlug: 'turquie',
+    titleFr: 'Les meilleurs hôtels de Turquie',
+    titleEn: 'The best hotels in Turkey',
+    scope: 'pays',
+    label: 'Turquie',
+  },
+  {
+    lieuSlug: 'allemagne',
+    titleFr: "Les meilleurs hôtels d'Allemagne",
+    titleEn: 'The best hotels in Germany',
+    scope: 'pays',
+    label: 'Allemagne',
+  },
+  {
+    lieuSlug: 'maldives',
+    titleFr: 'Les meilleurs hôtels des Maldives',
+    titleEn: 'The best hotels in the Maldives',
+    scope: 'pays',
+    label: 'Maldives',
+  },
+  // Iconic cities.
+  {
+    lieuSlug: 'londres',
+    titleFr: 'Les meilleurs hôtels de Londres',
+    titleEn: 'The best hotels in London',
+    scope: 'ville',
+    label: 'Londres',
+  },
+  {
+    lieuSlug: 'new-york',
+    titleFr: 'Les meilleurs hôtels de New York',
+    titleEn: 'The best hotels in New York',
+    scope: 'ville',
+    label: 'New York',
+  },
+  {
+    lieuSlug: 'tokyo',
+    titleFr: 'Les meilleurs hôtels de Tokyo',
+    titleEn: 'The best hotels in Tokyo',
+    scope: 'ville',
+    label: 'Tokyo',
+  },
+  {
+    lieuSlug: 'kyoto',
+    titleFr: 'Les meilleurs hôtels de Kyoto',
+    titleEn: 'The best hotels in Kyoto',
+    scope: 'ville',
+    label: 'Kyoto',
+  },
+  {
+    lieuSlug: 'istanbul',
+    titleFr: "Les meilleurs hôtels d'Istanbul",
+    titleEn: 'The best hotels in Istanbul',
+    scope: 'ville',
+    label: 'Istanbul',
+  },
+  {
+    lieuSlug: 'berlin',
+    titleFr: 'Les meilleurs hôtels de Berlin',
+    titleEn: 'The best hotels in Berlin',
+    scope: 'ville',
+    label: 'Berlin',
+  },
+  {
+    lieuSlug: 'hong-kong',
+    titleFr: 'Les meilleurs hôtels de Hong Kong',
+    titleEn: 'The best hotels in Hong Kong',
+    scope: 'ville',
+    label: 'Hong Kong',
+  },
+  {
+    lieuSlug: 'shanghai',
+    titleFr: 'Les meilleurs hôtels de Shanghai',
+    titleEn: 'The best hotels in Shanghai',
+    scope: 'ville',
+    label: 'Shanghai',
+  },
+  {
+    lieuSlug: 'pekin',
+    titleFr: 'Les meilleurs hôtels de Pékin',
+    titleEn: 'The best hotels in Beijing',
+    scope: 'ville',
+    label: 'Pékin',
+  },
+  {
+    lieuSlug: 'barcelone',
+    titleFr: 'Les meilleurs hôtels de Barcelone',
+    titleEn: 'The best hotels in Barcelona',
+    scope: 'ville',
+    label: 'Barcelone',
+  },
+  {
+    lieuSlug: 'madrid',
+    titleFr: 'Les meilleurs hôtels de Madrid',
+    titleEn: 'The best hotels in Madrid',
+    scope: 'ville',
+    label: 'Madrid',
+  },
+  {
+    lieuSlug: 'bangkok',
+    titleFr: 'Les meilleurs hôtels de Bangkok',
+    titleEn: 'The best hotels in Bangkok',
+    scope: 'ville',
+    label: 'Bangkok',
+  },
+  {
+    lieuSlug: 'marrakech',
+    titleFr: 'Les meilleurs hôtels de Marrakech',
+    titleEn: 'The best hotels in Marrakech',
+    scope: 'ville',
+    label: 'Marrakech',
+  },
+  {
+    lieuSlug: 'mykonos',
+    titleFr: 'Les meilleurs hôtels de Mykonos',
+    titleEn: 'The best hotels in Mykonos',
+    scope: 'ville',
+    label: 'Mykonos',
+  },
+  {
+    lieuSlug: 'santorin',
+    titleFr: 'Les meilleurs hôtels de Santorin',
+    titleEn: 'The best hotels in Santorini',
+    scope: 'ville',
+    label: 'Santorin',
+  },
+  {
+    lieuSlug: 'florence',
+    titleFr: 'Les meilleurs hôtels de Florence',
+    titleEn: 'The best hotels in Florence',
+    scope: 'ville',
+    label: 'Florence',
+  },
+  {
+    lieuSlug: 'milan',
+    titleFr: 'Les meilleurs hôtels de Milan',
+    titleEn: 'The best hotels in Milan',
+    scope: 'ville',
+    label: 'Milan',
+  },
+  {
+    lieuSlug: 'bali',
+    titleFr: 'Les meilleurs hôtels de Bali',
+    titleEn: 'The best hotels in Bali',
+    scope: 'cluster',
+    label: 'Bali',
+  },
+  {
+    lieuSlug: 'dubai',
+    titleFr: 'Les meilleurs hôtels de Dubaï',
+    titleEn: 'The best hotels in Dubai',
+    scope: 'ville',
+    label: 'Dubaï',
+  },
+  {
+    lieuSlug: 'abu-dhabi',
+    titleFr: "Les meilleurs hôtels d'Abu Dhabi",
+    titleEn: 'The best hotels in Abu Dhabi',
+    scope: 'ville',
+    label: 'Abu Dhabi',
+  },
+  {
+    lieuSlug: 'doha',
+    titleFr: 'Les meilleurs hôtels de Doha',
+    titleEn: 'The best hotels in Doha',
+    scope: 'ville',
+    label: 'Doha',
+  },
+  {
+    lieuSlug: 'budapest',
+    titleFr: 'Les meilleurs hôtels de Budapest',
+    titleEn: 'The best hotels in Budapest',
+    scope: 'ville',
+    label: 'Budapest',
+  },
+  {
+    lieuSlug: 'singapour',
+    titleFr: 'Les meilleurs hôtels de Singapour',
+    titleEn: 'The best hotels in Singapore',
+    scope: 'ville',
+    label: 'Singapour',
+  },
+];
+const INTL_DESTINATION_OVERRIDES: readonly ManualOverride[] = INTL_DESTINATIONS.map((d) => ({
+  slug: `meilleurs-hotels-${d.lieuSlug}`,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
+// ─── 2026-06-23 — Competitive gap destinations (wave 3) ───────────────────
+// Secondary geography both travellers-society.com and yonder.fr cover and we
+// did not (`docs/audits/competitor-travellers-yonder-audit-2026-06-23.md`).
+// Each references a LieuDef added in axes.ts pinned by `countryCodes` (+ city
+// keys for region/city scope so a homonym in another country is excluded).
+// All ≥ 4 published hotels per the catalogue snapshot. `meilleurs-hotels-*`
+// phrasing, consistent with the 39 intl heads already shipped.
+const GAP_DESTINATIONS: readonly {
+  readonly lieuSlug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly label: string;
+}[] = [
+  {
+    lieuSlug: 'vienne',
+    titleFr: 'Les meilleurs hôtels de Vienne',
+    titleEn: 'The best hotels in Vienna',
+    scope: 'ville',
+    label: 'Vienne',
+  },
+  {
+    lieuSlug: 'crete',
+    titleFr: 'Les meilleurs hôtels de Crète',
+    titleEn: 'The best hotels in Crete',
+    scope: 'region',
+    label: 'Crète',
+  },
+  {
+    lieuSlug: 'rajasthan',
+    titleFr: 'Les meilleurs hôtels du Rajasthan',
+    titleEn: 'The best hotels in Rajasthan',
+    scope: 'region',
+    label: 'Rajasthan',
+  },
+  {
+    lieuSlug: 'seychelles',
+    titleFr: 'Les meilleurs hôtels des Seychelles',
+    titleEn: 'The best hotels in the Seychelles',
+    scope: 'pays',
+    label: 'Seychelles',
+  },
+  {
+    lieuSlug: 'geneve',
+    titleFr: 'Les meilleurs hôtels de Genève',
+    titleEn: 'The best hotels in Geneva',
+    scope: 'ville',
+    label: 'Genève',
+  },
+  {
+    lieuSlug: 'lisbonne',
+    titleFr: 'Les meilleurs hôtels de Lisbonne',
+    titleEn: 'The best hotels in Lisbon',
+    scope: 'ville',
+    label: 'Lisbonne',
+  },
+  {
+    lieuSlug: 'los-angeles',
+    titleFr: 'Les meilleurs hôtels de Los Angeles',
+    titleEn: 'The best hotels in Los Angeles',
+    scope: 'ville',
+    label: 'Los Angeles',
+  },
+  {
+    lieuSlug: 'ile-maurice',
+    titleFr: "Les meilleurs hôtels de l'île Maurice",
+    titleEn: 'The best hotels in Mauritius',
+    scope: 'pays',
+    label: 'Île Maurice',
+  },
+  {
+    lieuSlug: 'majorque',
+    titleFr: 'Les meilleurs hôtels de Majorque',
+    titleEn: 'The best hotels in Mallorca',
+    scope: 'region',
+    label: 'Majorque',
+  },
+  {
+    lieuSlug: 'ibiza',
+    titleFr: "Les meilleurs hôtels d'Ibiza",
+    titleEn: 'The best hotels in Ibiza',
+    scope: 'region',
+    label: 'Ibiza',
+  },
+  {
+    lieuSlug: 'saint-barthelemy',
+    titleFr: 'Les meilleurs hôtels de Saint-Barthélemy',
+    titleEn: 'The best hotels in Saint Barthélemy',
+    scope: 'pays',
+    label: 'Saint-Barthélemy',
+  },
+  {
+    lieuSlug: 'sicile',
+    titleFr: 'Les meilleurs hôtels de Sicile',
+    titleEn: 'The best hotels in Sicily',
+    scope: 'region',
+    label: 'Sicile',
+  },
+];
+const GAP_DESTINATION_OVERRIDES: readonly ManualOverride[] = GAP_DESTINATIONS.map((d) => ({
+  slug: `meilleurs-hotels-${d.lieuSlug}`,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
+// ─── 2026-06-22 — G5 absurd theme×lieu combos (audit §G5) ─────────────────
+// The auto matrix emits semantically impossible pages (no mountains / ski /
+// seaside / vineyards inside Paris). The live rows were unpublished
+// 2026-06-22 (backup in `runs/`); blocklisted here so a future bulk run
+// never regenerates them. Applied as a final filter in `buildMatrix`.
+const SLUG_BLOCKLIST: ReadonlySet<string> = new Set<string>([
+  'meilleurs-hotels-vignobles-paris',
+  'meilleurs-hotels-montagne-paris',
+  'meilleurs-hotels-ski-paris',
+  'meilleurs-hotels-bord-de-mer-paris',
+  'meilleurs-hotels-montagne-paris-1',
+  'meilleurs-hotels-bord-de-mer-paris-8',
+]);
+
 const MANUAL_OVERRIDES: readonly ManualOverride[] = [
+  ...LUXE_CITY_OVERRIDES,
+  // 2026-06-22 — international destination head rankings (wave 1).
+  ...INTL_DESTINATION_OVERRIDES,
+  // 2026-06-23 — competitive gap destinations (wave 3).
+  ...GAP_DESTINATION_OVERRIDES,
   // Pillar national rankings — high volume search.
   {
     slug: 'meilleurs-palaces-france',
@@ -1154,7 +1759,9 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
     seedsBySlug.set(seed.slug, seed);
   }
 
-  const seeds = [...seedsBySlug.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+  const seeds = [...seedsBySlug.values()]
+    .filter((s) => !SLUG_BLOCKLIST.has(s.slug))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
 
   const bySource: Record<MatrixSource, number> = { auto: 0, yonder: 0, manual: 0 };
   const byTemplate: Record<string, number> = {};

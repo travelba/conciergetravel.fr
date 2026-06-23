@@ -192,6 +192,14 @@ export function DestinationAutocomplete({
           ref={inputRef}
           id={inputId}
           type="search"
+          // Password managers / form-fillers (Dashlane, LastPass, Bitwarden…)
+          // inject an inline `style` (notably `caret-color`) onto search inputs
+          // before React hydrates this client island, producing an unavoidable
+          // attribute hydration mismatch on this single node. Scoped here only:
+          // it silences the node's own attribute/text diff, does not disable
+          // hydration, adds no inline style (CSP-safe), and leaves the search
+          // suggest flow untouched. See react.dev/link/hydration-mismatch.
+          suppressHydrationWarning
           role="combobox"
           aria-expanded={dropdownOpen}
           aria-controls={listboxId}

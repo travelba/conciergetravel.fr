@@ -25,10 +25,15 @@
  *                CATALOGUE_SMALL_LUXURY and CATALOGUE_WORLD_50_BEST stay
  *                pinned to their historical values pending a re-ingestion
  *                pass — see `scripts/editorial-pilot/src/global-sources/`).
+ *   2026-06-17 — 2221 / 127 / 479 (live DB re-count via Supabase MCP).
+ *                Affiliations are now backfilled: Relais & Châteaux 479,
+ *                Small Luxury 224, World's 50 Best 127, Atout France
+ *                Palaces 39. Counts derived from `affiliations[].facet_slug`
+ *                on `is_published = true` rows.
  */
-export const CATALOGUE_PUBLISHED = 2219;
+export const CATALOGUE_PUBLISHED = 2221;
 export const CATALOGUE_COUNTRIES = 127;
-export const CATALOGUE_RELAIS_CHATEAUX = 435;
-export const CATALOGUE_SMALL_LUXURY = 197;
+export const CATALOGUE_RELAIS_CHATEAUX = 479;
+export const CATALOGUE_SMALL_LUXURY = 224;
 export const CATALOGUE_WORLD_50_BEST = 127;
-export const CATALOGUE_LAST_UPDATED = '2026-05-31';
+export const CATALOGUE_LAST_UPDATED = '2026-06-17';

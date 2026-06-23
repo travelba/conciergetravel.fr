@@ -33,6 +33,7 @@ export async function HomeKitFooter({
               <h4>{t('exploreTitle')}</h4>
               <a href="#hotels">{t('exploreHotels')}</a>
               <a href="#destinations">{t('exploreDestinations')}</a>
+              <Link href="/lieux">{t('explorePlaces')}</Link>
               <a href="#experiences">{t('exploreOccasions')}</a>
               <Link href="/classements">{t('exploreRankings')}</Link>
               <a href="#magazine">{t('exploreMagazine')}</a>
@@ -67,7 +68,7 @@ export async function HomeKitFooter({
               <Link
                 href={{
                   pathname: '/categorie/[categorySlug]',
-                  params: { categorySlug: 'palace' },
+                  params: { categorySlug: 'palaces-france' },
                 }}
               >
                 {t('cataloguePalaces')}

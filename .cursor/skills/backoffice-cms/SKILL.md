@@ -133,3 +133,8 @@ for the editorial side of the same incident.
 - CDC v3.0 §11.1, §11.2, §15.
 - ADR 0003 (Payload CMS).
 - `content-modeling`, `auth-role-management`, `search-engineering`, `seo-technical` skills.
+- `content-enrichment-pipeline` §Rule 16 — publish-gate discipline for
+  script-driven content (backfill never auto-publishes; one tested gate is the
+  sole publisher; an idempotent reconciler re-aligns live state; export the gate
+  behind a `process.argv[1]` run-guard). The same "one publish path" principle
+  the Payload `afterChange` hook enforces for CMS content.

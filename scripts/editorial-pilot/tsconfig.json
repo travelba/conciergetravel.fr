@@ -18,5 +18,6 @@
     "noEmit": true,
     "types": ["node", "pg"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/tmp-*.ts", "src/**/*.tmp.ts"]
 }

@@ -149,7 +149,7 @@ export function MobileNav(): ReactElement {
         aria-controls={labelId}
         aria-label={open ? t('menu.close') : t('menu.open')}
         onClick={() => setOpen((v) => !v)}
-        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 md:hidden"
+        className="border-border bg-bg text-fg hover:bg-muted/10 focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 lg:hidden"
       >
         {open ? (
           <svg
@@ -177,7 +177,7 @@ export function MobileNav(): ReactElement {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <button
             type="button"
@@ -457,6 +457,9 @@ export function MobileNav(): ReactElement {
                         );
                       })}
                     </ul>
+                    <Link href="/lieux" className={subLinkClass}>
+                      {t('primaryNav.placesToVisit')}
+                    </Link>
                     <Link href="/destination" className={`${subLinkClass} text-muted text-xs`}>
                       {t('primaryNav.destinationsBrowseAll')}
                     </Link>
@@ -568,7 +571,7 @@ export function MobileNav(): ReactElement {
                     <Link href="/ouvertures" className={subLinkClass}>
                       {t('primaryNav.conciergeOpenings')}
                     </Link>
-                    <Link href="/guides" className={subLinkClass}>
+                    <Link href="/destination" className={subLinkClass}>
                       {t('primaryNav.conciergeGuides')}
                     </Link>
                     <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>

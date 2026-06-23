@@ -538,6 +538,36 @@ export function renderKitFactualSummary(model: HotelKitModel): string {
   return `<p id="factual-summary" data-aeo="factual-summary" data-llm-summary class="htl-factual">${escapeHtml(text)}</p>`;
 }
 
+/**
+ * GEO / AEO answer-engine block (data-driven from `hotels.geo_qa`, migration
+ * 0072). Mirrors the standard-page `<HotelGeoSection>` (placed right after the
+ * factual summary): each PAA-anchored question renders as its own H2 with 2-3
+ * short concierge-voice paragraphs, inside a `data-geo="hotel-qa"` section so
+ * answer engines (AI Overviews, Perplexity) can extract the Q&A pairs. Self-
+ * elides when the row carries no `geo_qa`.
+ */
+export function renderKitGeoQa(model: HotelKitModel): string {
+  if (model.geoBlocks.length === 0) return '';
+  const label =
+    model.locale === 'en'
+      ? `Key questions about ${model.name}`
+      : `Questions clés sur ${model.name}`;
+  const blocks = model.geoBlocks
+    .map((block) => {
+      const paras = block.paragraphs
+        .map((p) => `<p class="htl-prose">${escapeProseHtml(p)}</p>`)
+        .join('\n        ');
+      return `<div class="geo-qa__item" id="${escapeHtml(block.id)}">
+        <h2>${escapeHtml(block.question)}</h2>
+        ${paras}
+      </div>`;
+    })
+    .join('\n      ');
+  return `<section class="htl-section geo-qa" id="questions-cles" data-geo="hotel-qa" aria-label="${escapeHtml(label)}">
+      ${blocks}
+    </section>`;
+}
+
 export function renderKitApropos(model: HotelKitModel): string {
   const hook =
     model.conciergeHook !== null
@@ -1586,6 +1616,76 @@ export function renderKitEventList(model: HotelKitModel): string {
     </section>`;
 }
 
+/**
+ * Canonical "lieux à visiter" sub-block: short cards linking to the
+ * standalone place fiche (`/lieux/<ville>/<slug>`). Anti-cannibalisation
+ * (plan §3.2) — the hotel page shows a factual teaser + link, never the
+ * long description owned by the canonical fiche. Returns '' when no
+ * canonical place is linked, so the caller falls back to the legacy
+ * embedded JSONB rendering (`renderAroundBucket`).
+ */
+function renderCanonicalPlaceBucket(
+  model: HotelKitModel,
+  bucket: 'visit' | 'do',
+  title: string,
+): string {
+  const places = model.canonicalPlaces[bucket];
+  if (places.length === 0) return '';
+  const p = localePrefix(model.locale);
+  const discover = model.locale === 'en' ? 'Discover →' : 'Découvrir →';
+  const walkLabel = (min: number): string =>
+    model.locale === 'en' ? `${min} min walk` : `à ${min} min à pied`;
+
+  const items = places
+    .map((place) => {
+      const slug = model.locale === 'en' && place.slugEn ? place.slugEn : place.slug;
+      const href = `${p}/lieux/${encodeURIComponent(place.citySlug)}/${encodeURIComponent(slug)}`;
+      const name = model.locale === 'en' && place.nameEn ? place.nameEn : place.name;
+      const summary =
+        (model.locale === 'en' ? place.factualSummaryEn : place.factualSummaryFr) ??
+        place.factualSummaryFr ??
+        place.factualSummaryEn;
+      const dist =
+        place.walkMinutes !== null
+          ? `<span class="around-cat">${escapeHtml(walkLabel(place.walkMinutes))}</span>`
+          : '';
+      const img =
+        place.heroImage !== null && place.heroImage !== ''
+          ? `<div class="around-img"><img src="${escapeHtml(
+              /^https?:\/\//u.test(place.heroImage)
+                ? place.heroImage
+                : buildCloudinarySrc({
+                    cloudName: model.cloudName,
+                    publicId: place.heroImage,
+                    transforms: 'f_auto,q_auto,c_fill,g_auto,w_520,h_400',
+                  }),
+            )}" alt="${escapeHtml(name)}" loading="lazy"></div>`
+          : '';
+      const hasImgClass = img !== '' ? ' has-img' : '';
+      return `<a class="around-item around-item--canonical${hasImgClass}" href="${href}">
+            ${img}
+            <div class="around-body">
+              ${dist}
+              <h5>${escapeHtml(name)}</h5>
+              ${summary !== null && summary !== undefined ? `<p>${escapeHtml(summary)}</p>` : ''}
+              <span class="link-or around-link">${escapeHtml(discover)}</span>
+            </div>
+          </a>`;
+    })
+    .join('\n          ');
+
+  const nav = places.length > 1 ? renderKitCarouselNav(model.locale) : '';
+  return `<div class="around-sub around-sub--carousel">
+        <h3>${escapeHtml(title)}</h3>
+        <div class="carousel around-carousel" data-kit-carousel>
+          <div class="carousel-track">
+            ${items}
+          </div>
+          ${nav}
+        </div>
+      </div>`;
+}
+
 export function renderKitAutour(model: HotelKitModel): string {
   const bucketTitles = {
     visit: { fr: "Ce qu'on visite dans le quartier", en: 'What to visit nearby' },
@@ -1594,9 +1694,22 @@ export function renderKitAutour(model: HotelKitModel): string {
     shop: { fr: 'Commerces à proximité', en: 'Shopping nearby' },
   } as const;
 
+  // Anti-cannibalisation: prefer canonical place fiches for visit/do when
+  // links exist, otherwise fall back to the legacy embedded JSONB cards.
+  const canonicalVisit = renderCanonicalPlaceBucket(
+    model,
+    'visit',
+    bucketTitles.visit[model.locale],
+  );
+  const canonicalDo = renderCanonicalPlaceBucket(model, 'do', bucketTitles.do[model.locale]);
+
   const subs = [
-    renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale], 'carousel'),
-    renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'carousel'),
+    canonicalVisit.length > 0
+      ? canonicalVisit
+      : renderAroundBucket(model, 'visit', bucketTitles.visit[model.locale], 'carousel'),
+    canonicalDo.length > 0
+      ? canonicalDo
+      : renderAroundBucket(model, 'do', bucketTitles.do[model.locale], 'carousel'),
     renderAroundBucket(model, 'eat', bucketTitles.eat[model.locale], 'disclosure-grid'),
     renderAroundBucket(model, 'shop', bucketTitles.shop[model.locale], 'disclosure-grid'),
   ]
@@ -1795,6 +1908,7 @@ export function assembleHotelKitShell(model: HotelKitModel): {
     renderKitFeats(model),
     renderKitSectionNav(model),
     renderKitFactualSummary(model),
+    renderKitGeoQa(model),
     renderKitApropos(model),
     renderKitChambres(model),
     renderKitBref(model),

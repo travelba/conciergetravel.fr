@@ -253,7 +253,7 @@ export default async function ConciergeClubLandingPage({
           <ul className="text-fg mt-4 flex flex-col gap-1.5 text-sm">
             {clubBenefitCodes.slice(0, 4).map((label) => (
               <li key={label} className="flex items-start gap-2">
-                <span aria-hidden className="text-fg/60 mt-1 text-xs">
+                <span aria-hidden className="text-fg/75 mt-1 text-xs">
                   ●
                 </span>
                 <span>{label}</span>
@@ -291,7 +291,7 @@ export default async function ConciergeClubLandingPage({
           <ul className="text-fg mt-4 flex flex-col gap-1.5 text-sm">
             {prestigeBenefitCodes.slice(0, 4).map((label) => (
               <li key={label} className="flex items-start gap-2">
-                <span aria-hidden className="text-fg/60 mt-1 text-xs">
+                <span aria-hidden className="text-fg/75 mt-1 text-xs">
                   ●
                 </span>
                 <span>{label}</span>

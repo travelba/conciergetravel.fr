@@ -100,6 +100,17 @@ export async function pushRankingV2(
     readonly axes?: RankingAxes;
   } = { publish: true },
 ): Promise<void> {
+  // PostgREST fallback for environments where the direct `pg` connection
+  // is unusable (Windows dev box: SUPABASE_DB_URL / _POOLER_URL point at
+  // the IPv6-only direct host `db.<ref>.supabase.co` and/or carry a stale
+  // postgres password → "password authentication failed for user postgres";
+  // the real pooler is aws-0-eu-west-1.pooler.supabase.com — see
+  // windows-dev-environment SKILL Rule 12). Set MCH_PUSH_VIA_REST=1 to
+  // write through the service-role REST API instead.
+  if (process.env['MCH_PUSH_VIA_REST'] === '1') {
+    await pushRankingV2ViaRest(seed, ranking, options);
+    return;
+  }
   const pgModule = (await import('pg')) as typeof import('pg');
   const cleaned = resolveConnectionString().replace(/[?&]sslmode=[^&]*/giu, '');
   const isLocal = cleaned.includes('localhost') || cleaned.includes('127.0.0.1');
@@ -222,5 +233,125 @@ export async function pushRankingV2(
     throw err;
   } finally {
     await client.end();
+  }
+}
+
+// ─── PostgREST push path (service-role) ──────────────────────────────────
+// Faithful re-implementation of the pg upsert above over PostgREST. Used
+// when MCH_PUSH_VIA_REST=1. Two differences from the pg path, both safe
+// here: (1) the upsert is NOT transactional with the entries rewrite —
+// acceptable because a brand-new ranking is published only after both
+// steps succeed, and a re-push overwrites idempotently; (2) the
+// `is_published = (existing OR excluded)` ratchet becomes a plain set to
+// `options.publish`. Since the bulk runner always pushes with
+// publish=true, this never downgrades a live page. An explicit
+// is_published=false admin op must still go through the pg/admin path.
+
+interface RestCfg {
+  readonly url: string;
+  readonly key: string;
+}
+
+function resolveRestCfg(): RestCfg {
+  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? process.env['SUPABASE_URL'] ?? null;
+  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? null;
+  if (url === null || key === null) {
+    throw new Error(
+      'MCH_PUSH_VIA_REST=1 requires NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.',
+    );
+  }
+  return { url: url.replace(/\/$/u, ''), key };
+}
+
+async function pushRankingV2ViaRest(
+  seed: RankingSeed,
+  ranking: GeneratedRankingV2,
+  options: { readonly publish: boolean; readonly axes?: RankingAxes },
+): Promise<void> {
+  const cfg = resolveRestCfg();
+  const headers = {
+    apikey: cfg.key,
+    Authorization: `Bearer ${cfg.key}`,
+    'Content-Type': 'application/json',
+  } as const;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tocAnchors = buildTocAnchors(ranking);
+
+  const row: Record<string, unknown> = {
+    slug: seed.slug,
+    title_fr: seed.titleFr,
+    title_en: seed.titleEn,
+    kind: seed.kind,
+    intro_fr: ranking.intro_fr,
+    intro_en: ranking.intro_en,
+    outro_fr: ranking.outro_fr,
+    outro_en: ranking.outro_en,
+    faq: ranking.faq,
+    hero_image: seed.heroImage ?? null,
+    meta_title_fr: ranking.meta_title_fr,
+    meta_title_en: ranking.meta_title_en,
+    meta_desc_fr: ranking.meta_desc_fr,
+    meta_desc_en: ranking.meta_desc_en,
+    reviewed_at: todayIso,
+    author_name: 'MyConciergeHotel Éditorial',
+    author_url: '/equipe/editorial',
+    is_published: options.publish,
+    tables: ranking.tables,
+    glossary: ranking.glossary,
+    external_sources: ranking.external_sources,
+    editorial_callouts: ranking.editorial_callouts,
+    toc_anchors: tocAnchors,
+    editorial_sections: ranking.editorial_sections,
+    axes: options.axes ?? {},
+    factual_summary_fr: ranking.factual_summary_fr.length > 0 ? ranking.factual_summary_fr : null,
+    factual_summary_en: ranking.factual_summary_en.length > 0 ? ranking.factual_summary_en : null,
+  };
+
+  const upsertRes = await fetch(`${cfg.url}/rest/v1/editorial_rankings?on_conflict=slug`, {
+    method: 'POST',
+    headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(row),
+  });
+  if (!upsertRes.ok) {
+    throw new Error(
+      `[push-rest] upsert failed (${upsertRes.status}): ${(await upsertRes.text()).slice(0, 400)}`,
+    );
+  }
+  const upserted = (await upsertRes.json()) as ReadonlyArray<{ id?: string }>;
+  const rankingId = upserted[0]?.id;
+  if (rankingId === undefined) {
+    throw new Error('[push-rest] upsert did not return an id.');
+  }
+
+  const delRes = await fetch(
+    `${cfg.url}/rest/v1/editorial_ranking_entries?ranking_id=eq.${encodeURIComponent(rankingId)}`,
+    { method: 'DELETE', headers: { ...headers, Prefer: 'return=minimal' } },
+  );
+  if (!delRes.ok) {
+    throw new Error(
+      `[push-rest] entries delete failed (${delRes.status}): ${(await delRes.text()).slice(0, 400)}`,
+    );
+  }
+
+  if (ranking.entries.length > 0) {
+    const entryRows = ranking.entries.map((e) => ({
+      ranking_id: rankingId,
+      hotel_id: e.hotel_id,
+      rank: e.rank,
+      justification_fr: e.justification_fr,
+      justification_en: e.justification_en === '' ? null : e.justification_en,
+      badge_fr: e.badge_fr ?? null,
+      badge_en: e.badge_en ?? null,
+    }));
+    const insRes = await fetch(`${cfg.url}/rest/v1/editorial_ranking_entries`, {
+      method: 'POST',
+      headers: { ...headers, Prefer: 'return=minimal' },
+      body: JSON.stringify(entryRows),
+    });
+    if (!insRes.ok) {
+      throw new Error(
+        `[push-rest] entries insert failed (${insRes.status}): ${(await insRes.text()).slice(0, 400)}`,
+      );
+    }
   }
 }

@@ -10,6 +10,7 @@ import { ClubEligibility } from './collections/club-eligibility';
 import { HotelMemberBenefits } from './collections/hotel-member-benefits';
 import { HotelRooms } from './collections/hotel-rooms';
 import { Hotels } from './collections/hotels';
+import { Places } from './collections/places';
 import { Users } from './collections/users';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,7 +41,7 @@ export default buildConfig({
     },
   },
   editor: lexicalEditor({}),
-  collections: [Users, Hotels, HotelRooms, HotelMemberBenefits, ClubEligibility],
+  collections: [Users, Hotels, HotelRooms, HotelMemberBenefits, ClubEligibility, Places],
   plugins: [
     /**
      * MCP server exposed at `/api/mcp` (port 3001 in dev).
@@ -72,6 +73,11 @@ export default buildConfig({
         },
         club_eligibility: {
           description: 'Club eligibility rules for the loyalty programme.',
+          enabled: { find: true, create: true, update: true, delete: false },
+        },
+        places: {
+          description:
+            'Editorial catalogue of "lieux à visiter" (cms.places, synced to public.places). Buckets visit/do.',
           enabled: { find: true, create: true, update: true, delete: false },
         },
       },

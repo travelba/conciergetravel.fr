@@ -1,8 +1,26 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+
+/**
+ * Coerces a Postgres `numeric` column to a finite `number | null`.
+ * PostgREST serialises `numeric` as a string, so a bare `z.number()`
+ * would reject `latitude`/`longitude` and drop the whole entry. Mirrors
+ * the `numberOrNull` helper in `get-hotel-by-slug.ts`.
+ */
+const numberOrNull = z
+  .union([z.number(), z.string()])
+  .nullish()
+  .transform((v) => {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  });
 
 const FaqSchema = z.object({
   question_fr: z.string().optional().default(''),
@@ -157,6 +175,11 @@ export const RankingEntrySchema = z.object({
   hotel_hero_image: z.string().nullable(),
   hotel_description_fr: z.string().nullable(),
   hotel_description_en: z.string().nullable(),
+  // Geo signal forwarded to the ItemList JSON-LD (P0-3). Both must be
+  // present + finite for the `geo` node to be emitted (no half-pin).
+  // PostgREST returns `numeric` as a string → coerce defensively.
+  hotel_latitude: numberOrNull,
+  hotel_longitude: numberOrNull,
 });
 export type RankingEntry = z.infer<typeof RankingEntrySchema>;
 
@@ -167,7 +190,11 @@ const RANKING_COLUMNS =
   'tables, glossary, external_sources, editorial_callouts, toc_anchors, editorial_sections, ' +
   'axes, factual_summary_fr, factual_summary_en';
 
-export async function getRankingBySlug(slug: string): Promise<RankingRow | null> {
+// `cache()`-wrapped so `generateMetadata` (og:image derivation) and the
+// page render share a single fetch per request — the page is
+// `force-dynamic`, so without this the row + entries would be queried
+// twice. Mirrors the `get-hotel-by-slug.ts` precedent.
+export const getRankingBySlug = cache(async (slug: string): Promise<RankingRow | null> => {
   if (typeof slug !== 'string' || slug.length === 0) return null;
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
@@ -180,9 +207,11 @@ export async function getRankingBySlug(slug: string): Promise<RankingRow | null>
   const parsed = RankingRowSchema.safeParse(data);
   if (!parsed.success) return null;
   return parsed.data;
-}
+});
 
-export async function getRankingEntries(rankingId: string): Promise<readonly RankingEntry[]> {
+export const getRankingEntries = cache(_getRankingEntries);
+
+async function _getRankingEntries(rankingId: string): Promise<readonly RankingEntry[]> {
   const supabase = getSupabaseAdminClient();
   // Two-step query: entries → hotels (RLS keeps the join read-only).
   const { data: entries, error: entriesErr } = await supabase
@@ -196,7 +225,7 @@ export async function getRankingEntries(rankingId: string): Promise<readonly Ran
   const { data: hotels, error: hotelsErr } = await supabase
     .from('hotels')
     .select(
-      'id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, description_fr, description_en',
+      'id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, description_fr, description_en, latitude, longitude',
     )
     .in('id', hotelIds);
   if (hotelsErr !== null || hotels === null) return [];
@@ -223,6 +252,8 @@ export async function getRankingEntries(rankingId: string): Promise<readonly Ran
       hotel_hero_image: h.hero_image,
       hotel_description_fr: h.description_fr,
       hotel_description_en: h.description_en,
+      hotel_latitude: h.latitude,
+      hotel_longitude: h.longitude,
     });
     if (parsed.success) out.push(parsed.data);
   }
@@ -242,7 +273,14 @@ export interface PublishedRankingCard {
   readonly updatedAt: string | null;
 }
 
-export async function listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
+// `cache()`-wrapped (like `getRankingBySlug`/`getRankingEntries`): on
+// `/classements/[axe]/[valeur]` this full catalogue scan is invoked from
+// `generateMetadata` (axe resolution), the page body, and the related-axes
+// block — 2-3× per request on a `force-dynamic` route. Request-scoped
+// memoisation dedupes them to a single scan without touching the logic.
+export const listPublishedRankings = cache(_listPublishedRankings);
+
+async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase

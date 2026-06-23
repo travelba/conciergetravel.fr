@@ -166,6 +166,22 @@ export async function GET(): Promise<NextResponse> {
             description:
               'Destinations hub: Paris, French Riviera, Bordeaux region, Alps, Provence…',
           },
+          // Lieux à visiter — vertical éditoriale GEO/AEO : musées,
+          // monuments, jardins et activités d'exception classés ville par
+          // ville, chaque lieu avec sa fiche canonique
+          // /lieux/{ville}/{slug} (TouristAttraction + FAQ JSON-LD,
+          // hôtels à proximité, réservation via le Concierge ou
+          // GetYourGuide). Hub d'entrée de la verticale.
+          {
+            url: `${origin}/fr/lieux`,
+            description:
+              'Lieux à visiter — hub de la verticale : musées, monuments, jardins et activités d’exception sélectionnés par le Concierge, classés ville par ville. Chaque lieu a sa fiche /lieux/{ville}/{slug} avec résumé factuel, Conseil du Concierge, FAQ et hôtels à proximité.',
+          },
+          {
+            url: `${origin}/en/lieux`,
+            description:
+              'Places to visit — vertical hub: museums, landmarks, gardens and outstanding activities curated by the Concierge, grouped city by city. Each place has its own /lieux/{city}/{slug} fiche with factual summary, Concierge tip, FAQ and nearby hotels.',
+          },
           {
             url: `${origin}/fr/recherche`,
             description:
@@ -510,7 +526,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/.well-known/agent-skills.json`,
             description:
-              'Catalogue machine-readable des 27 compétences déclarées (dont 25 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-photos [hero+galerie Cloudinary], get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
+              'Catalogue machine-readable des 28 compétences déclarées (dont 26 endpoints HTTP exécutables ; `filter` et `booking` sont des intentions UI sans endpoint dédié) : search, get-hotel, get-hotel-photos [hero+galerie Cloudinary], get-hotel-room, get-concierge-tip, get-hotel-sources [EEAT/provenance], get-places-nearby [lieux à visiter par hôtel/ville], list-directory-country, list-directory-city [annuaire géolocalisé], list-categories, list-themes, list-occasions, list-brands, get-country-guide, get-itinerary, list-itineraries, list-rankings, get-ranking, compare-prices, request-quote, join-concierge-club, join-concierge-club-prestige-waitlist, loyalty, contact, newsletter, list-cities…',
           },
           {
             url: `${origin}/.well-known/hotels.jsonl`,
@@ -538,6 +554,11 @@ export async function GET(): Promise<NextResponse> {
               'Corpus LLM verbeux — préambule éditorial EEAT (agence IATA/APST) puis une section FR et une section EN par hôtel indexable (résumé factuel, faits clés, fraîcheur). Complément rédactionnel de hotels.jsonl.',
           },
           {
+            url: `${origin}/api/agent/hotel/les-airelles-gordes?locale=fr`,
+            description:
+              "Endpoint fiche hôtel MCP — identité, résumé factuel, « Conseil du Concierge », et la « lentille concierge » pour recommander après réservation : restaurants de l'hôtel (chef, plat signature, lien de réservation, horaires), lieux à proximité classés visiter / faire / manger / shopping (distance, marche, site web), expériences signature, et blocs questions-réponses GEO/AEO. Paramètres : slug (requis), locale (fr|en), body (short|long), lens (on|off).",
+          },
+          {
             url: `${origin}/api/agent/hotel-photos?slug=les-airelles-gordes&locale=fr`,
             description:
               'Endpoint photos MCP — renvoie hero + galerie catégorisée avec URLs Cloudinary, alt bilingue et captions pour une fiche hôtel. Paramètres : slug (requis), locale (fr|en), category (optionnel), limit (1–50).',
@@ -553,9 +574,14 @@ export async function GET(): Promise<NextResponse> {
               "Exemple d'endpoint annuaire géolocalisé — renvoie la liste exhaustive des hôtels publiés d'une ville (scopée par pays) avec coordonnées GPS (latitude/longitude WGS84), distinction Palace et lien fiche. Variante pays : /api/agent/directory/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tout le catalogue d'une ville ou d'un pays. Aucun tarif (gel Phase 6).",
           },
           {
+            url: `${origin}/api/agent/places-nearby?hotelSlug=ritz-paris&locale=fr`,
+            description:
+              "Endpoint « lieux à visiter » — renvoie les lieux canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre hotelSlug, via la table de proximité pré-calculée) OU d'une ville (paramètre citySlug). Chaque lieu a sa fiche SEO/GEO /lieux/{ville}/{slug} réservable via GetYourGuide ou le Concierge. Renvoie nom, type, URL canonique, résumé factuel et distance à pied. Aucune duplication de contenu.",
+          },
+          {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires, lieux) — chaque sub-sitemap inclut les alternates FR/EN.',
           },
         ],
       },

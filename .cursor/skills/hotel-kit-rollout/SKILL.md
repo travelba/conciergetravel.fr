@@ -297,24 +297,52 @@ Hard rule [`.cursor/rules/user-acceptance-before-commit.mdc`](../../rules/user-a
 
 ## Anti-patterns
 
-| Anti-pattern                                           | Correctif                                            |
-| ------------------------------------------------------ | ---------------------------------------------------- |
-| Remapper metadata spa sans changer l'asset Cloudinary  | Rule 1 — Tavily + upload officiel                    |
-| 1 seul restaurant alors que le site liste bar + resto  | D7 — éclater `venues[]`                              |
-| Presse Forbes dans « Avis voyageurs »                  | D8 — `reviews:sync` only                             |
-| POI sans vignette                                      | D9 — `image_public_id` Cloudinary                    |
-| POI avec photo chambre / galerie `press-*`             | D13 — `resource-{slug}-poi-images.ts` + `poi-{slug}` |
-| « Je réserve… » dans `#concierge-questions`            | D10 — réécriture 3ᵉ personne                         |
-| Label « Airelles » sur une autre fiche                 | D11 — i18n + titres dynamiques                       |
-| « Tests passent, ship » sans walk navigateur           | Rule 5 + Rule 6                                      |
-| « Score CDC 95 % » avec gates `kit.*` rouges           | D19 — `audit:hotel-fiches-cdc` exit 1                |
-| Réutiliser ordering/images Airelles pour autre slug    | D16 — `kit-{slug}-display.ts` dédié                  |
-| Hero réutilisé dans `gallery_images[]`                 | D20 — slot hero séparé ; Rule 7 §1                   |
-| POI généré IA sans sourcing réel                       | D21 — Commons / officiel / Places d’abord            |
-| `FAQ_CONTENT_KIT = FAQ_CONTENT_PROMOTE`                | D17 — `kit.11.faq_kit_not_stub`                      |
-| Enchaîner 5× POI + OpenAI dans un shell (~50 min)      | D22 — Rule 8 : phases séparées ; Commons avant IA    |
-| `?mchPress=` sur URL Contentful                        | Rule 8 §3 — variantes `w±1` ou 30 URLs uniques       |
-| `reviews:sync` sans audit `kit.10.gmb_display_triplet` | Rule 8 §4 — triplet ≤ 90 j = qualité avis Google     |
+| Anti-pattern                                            | Correctif                                                         |
+| ------------------------------------------------------- | ----------------------------------------------------------------- |
+| Remapper metadata spa sans changer l'asset Cloudinary   | Rule 1 — Tavily + upload officiel                                 |
+| 1 seul restaurant alors que le site liste bar + resto   | D7 — éclater `venues[]`                                           |
+| Presse Forbes dans « Avis voyageurs »                   | D8 — `reviews:sync` only                                          |
+| POI sans vignette                                       | D9 — `image_public_id` Cloudinary                                 |
+| POI avec photo chambre / galerie `press-*`              | D13 — `resource-{slug}-poi-images.ts` + `poi-{slug}`              |
+| « Je réserve… » dans `#concierge-questions`             | D10 — réécriture 3ᵉ personne                                      |
+| Label « Airelles » sur une autre fiche                  | D11 — i18n + titres dynamiques                                    |
+| « Tests passent, ship » sans walk navigateur            | Rule 5 + Rule 6                                                   |
+| « Score CDC 95 % » avec gates `kit.*` rouges            | D19 — `audit:hotel-fiches-cdc` exit 1                             |
+| Réutiliser ordering/images Airelles pour autre slug     | D16 — `kit-{slug}-display.ts` dédié                               |
+| Hero réutilisé dans `gallery_images[]`                  | D20 — slot hero séparé ; Rule 7 §1                                |
+| POI généré IA sans sourcing réel                        | D21 — Commons / officiel / Places d’abord                         |
+| `FAQ_CONTENT_KIT = FAQ_CONTENT_PROMOTE`                 | D17 — `kit.11.faq_kit_not_stub`                                   |
+| Enchaîner 5× POI + OpenAI dans un shell (~50 min)       | D22 — Rule 8 : phases séparées ; Commons avant IA                 |
+| `?mchPress=` sur URL Contentful                         | Rule 8 §3 — variantes `w±1` ou 30 URLs uniques                    |
+| `reviews:sync` sans audit `kit.10.gmb_display_triplet`  | Rule 8 §4 — triplet ≤ 90 j = qualité avis Google                  |
+| Éditer la DB d'un slug golden et croire le rendu changé | Rule 10 — golden-patch masque la DB ; migrer ou patcher le golden |
+
+---
+
+## Rule 10 — Contrat golden-patch ⇄ DB (gotcha rendu, 2026-06-17)
+
+Un slug « golden » est intercepté par `patchKitGoldenRow`
+(`apps/web/src/server/hotels/kit/patch-kit-golden-row.ts`) qui **écrase la
+ligne Supabase par le fixture hardcodé** (`{slug}-golden.ts`) — en dev **et en
+prod**. Conséquence piège : toute correction écrite en base (FAQ, EN parity,
+concierge_questions…) est **invisible** sur la page live tant que le patch est
+actif, et `audit:wave` — qui lit la **DB** — affiche un faux vert.
+
+- Symptôme 2026-06-17 : `les-airelles-gordes` rendait ~67/77 FAQ + 28 concierge
+  questions en **français sur `/en`** alors que la DB portait déjà l'EN complet.
+  Les correctifs A–E étaient en base mais le golden FR-only les masquait.
+- Avant de « combler des gaps » sur un slug pilote, vérifier s'il est golden :
+  chercher le slug dans `resolveGoldenPatchSlug`. Si oui, **deux** options :
+  1. **Migrer vers la DB** (préféré quand la DB est complète) — ajouter le slug
+     (+ son `slug_en`) à `DB_DRIVEN_KIT_SLUGS` ; `resolveGoldenPatchSlug`
+     court-circuite (`return null`) et la fiche rend 100 % depuis Supabase.
+     C'est le contrat retenu pour `les-airelles-gordes` : gabarit reproductible.
+  2. **Mettre à jour le golden TS** si on veut garder le fixture canonique.
+- `audit:wave` est durci : bannière `⚠ FIXTURE-DRIVEN RENDER` + champ JSON
+  `fixtureDrivenSlugs` pour les slugs encore golden — un vert sur ces slugs ne
+  prouve PAS la page live (`scripts/editorial-pilot/src/quality/audit-wave.ts`).
+- Toujours conclure par un walk navigateur **FR + EN** (Rule 5/6) : c'est le
+  seul moyen de voir le rendu réel, pas la DB.
 
 ---
 

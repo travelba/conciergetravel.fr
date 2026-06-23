@@ -47,11 +47,13 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 | **FAQ Perplexity** (obligatoire toutes fiches : 40–60 kit + 20–30 concierge, MCP, two-tier promote/kit)                                                     | Rule [`.cursor/rules/hotel-faq-perplexity.mdc`](.cursor/rules/hotel-faq-perplexity.mdc) + skill [`hotel-faq-perplexity-enrichment`](.cursor/skills/hotel-faq-perplexity-enrichment/SKILL.md)                                         |
 | **LLM extraction from web content (Tavily)**                                                                                                                | `.cursor/skills/content-enrichment-pipeline/SKILL.md` + `llm-output-robustness` §rule-9                                                                                                                                              |
 | **Multi-source factual enrichment**                                                                                                                         | `.cursor/skills/content-enrichment-pipeline/SKILL.md`                                                                                                                                                                                |
+| **Keyword/SERP/intent grounding** (DataForSEO → FAQ + titres + GEO/AEO ancrés sur la demande réelle ; PAA select, cluster cache, places publish gate)       | `.cursor/skills/keyword-grounding-dataforseo/SKILL.md` + `packages/integrations/src/dataforseo/` + `scripts/editorial-pilot/src/grounding/`                                                                                          |
 | **Photo pipeline / hero / alt enrichment / Pinterest hotlink risk**                                                                                         | `.cursor/skills/photo-pipeline/SKILL.md`                                                                                                                                                                                             |
 | **Photo ↔ sujet (POI, spa, galerie — correspondance pixels)**                                                                                               | `@mch/domain/photos` · `audit:photo-subject` · `photo-pipeline` §Photo-subject correspondence · `hotel-kit-rollout` D13–D14                                                                                                          |
 | **Zod schema → React props**                                                                                                                                | `.cursor/skills/typescript-strict-zod-interop/SKILL.md`                                                                                                                                                                              |
 | **PowerShell / Windows dev commands**                                                                                                                       | `.cursor/skills/windows-dev-environment/SKILL.md`                                                                                                                                                                                    |
 | New public route                                                                                                                                            | `apps/web/src/app/[locale]/` + `.cursor/rules/nextjs-app-router.mdc`                                                                                                                                                                 |
+| **Vertical « Lieux à visiter »** (`/lieux`, `public.places`, scaffold→photos→enrich→publish gate, JSON-LD `TouristAttraction`, maillage hôtel ↔ lieu)       | [ADR-0030](docs/adr/0030-lieux-a-visiter-vertical.md) + `scripts/editorial-pilot/src/places/` + skill `content-enrichment-pipeline`                                                                                                  |
 | **JSON-LD page → must be `force-dynamic`**                                                                                                                  | `.cursor/skills/structured-data-schema-org/SKILL.md` §CSP-nonce-contract                                                                                                                                                             |
 | **Hotel detail page** (15 blocks)                                                                                                                           | `.cursor/rules/hotel-detail-page.mdc` (CDC §2 checklist + ADR-0007/0008/0009)                                                                                                                                                        |
 | **Hotel kit rollout** (template 9 sections, consignes PO PdG → catalogue : F&B, GMB, POI photos, ton concierge, re-source photo, **gates `kit.*` D15–D19**) | [`hotel-kit-rollout`](.cursor/skills/hotel-kit-rollout/SKILL.md) + `kit-fiche-acceptance-gates.ts` + [runbook](docs/runbooks/airelles-reference-fiche-plan.md) + rule [`hotel-kit-rollout.mdc`](.cursor/rules/hotel-kit-rollout.mdc) |
@@ -71,14 +73,15 @@ Lower layers **never** import from higher layers. See `.cursor/rules/architectur
 
 ### Structural decisions already taken (don't relitigate without an ADR)
 
-| Decision                                                                                                                  | Reference                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Hotel URL = `/hotel/<slug>` (flat slug, against CDC §3.3)                                                                 | [ADR-0008](docs/adr/0008-url-structure-hotel-flat.md)                                                          |
-| Room sub-pages `/hotel/<slug>/chambres/<room-slug>` indexable                                                             | [ADR-0009](docs/adr/0009-hotel-room-subpages-indexable.md)                                                     |
-| ISR via auth client island (hotel + destination = `revalidate = 3600`)                                                    | [ADR-0007](docs/adr/0007-isr-via-auth-client-island.md)                                                        |
-| Locales V1 = `fr` + `en` ; V2 = +es/de/it ; V3 = +ar/zh/ja                                                                | `.cursor/skills/seo-technical/SKILL.md`                                                                        |
-| International hotels (`country_code != 'FR'`, `region` nullable, `luxury_tier` CHECK on 19 awards/brands)                 | `packages/db/migrations/0033_hotels_country_support.sql` + `docs/editorial/yonder-intl-expansion-wakeup.md`    |
-| `hotels.affiliations jsonb` séparée d'`external_sources` (brands / labels / rankings cumulables, JSON-LD `Hotel.award[]`) | [ADR-0023](docs/adr/0023-hotel-affiliations-vs-external-sources.md) + `packages/db/src/schema/affiliations.ts` |
+| Decision                                                                                                                                     | Reference                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Hotel URL = `/hotel/<slug>` (flat slug, against CDC §3.3)                                                                                    | [ADR-0008](docs/adr/0008-url-structure-hotel-flat.md)                                                          |
+| Room sub-pages `/hotel/<slug>/chambres/<room-slug>` indexable                                                                                | [ADR-0009](docs/adr/0009-hotel-room-subpages-indexable.md)                                                     |
+| ISR via auth client island (hotel + destination = `revalidate = 3600`)                                                                       | [ADR-0007](docs/adr/0007-isr-via-auth-client-island.md)                                                        |
+| Locales V1 = `fr` + `en` ; V2 = +es/de/it ; V3 = +ar/zh/ja                                                                                   | `.cursor/skills/seo-technical/SKILL.md`                                                                        |
+| International hotels (`country_code != 'FR'`, `region` nullable, `luxury_tier` CHECK on 19 awards/brands)                                    | `packages/db/migrations/0033_hotels_country_support.sql` + `docs/editorial/yonder-intl-expansion-wakeup.md`    |
+| `hotels.affiliations jsonb` séparée d'`external_sources` (brands / labels / rankings cumulables, JSON-LD `Hotel.award[]`)                    | [ADR-0023](docs/adr/0023-hotel-affiliations-vs-external-sources.md) + `packages/db/src/schema/affiliations.ts` |
+| Vertical « Lieux à visiter » `/lieux` (`public.places`, buckets visit/do, gate strict unique publieur, maillage hôtel ↔ lieu bidirectionnel) | [ADR-0030](docs/adr/0030-lieux-a-visiter-vertical.md) + `packages/db/migrations/0076_places_visit_catalog.sql` |
 
 ## 4. Hard rules (non-negotiable)
 
@@ -239,15 +242,15 @@ between effort and impact):
 > [`editorial-pilot/SKILL.md`](.cursor/skills/editorial-pilot/SKILL.md)
 > §"Audit metric vs production validator".
 
-| Rank | Field                                                                                                                                                                              | Envelope conforming (prod Zod)                                                                                                                                                                                                                                                         | CDC ideal conforming                                                                                                                                                                                                                                                                                                                                                                                                                                   | Pipeline outillé ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes / wifi)                                                                                                          | **2219 / 2219 (100%)** policies present, **2218 / 2219 with real source-derived data** (only 1 row still flagged `_synthetic: true` after the catalogue flip; the rest carry concrete check-in/out / pet fees / wifi scope from the enrichment pipeline)                               | (same — the field has no separate CDC ideal beyond "non-synthetic")                                                                                                                                                                                                                                                                                                                                                                                    | ✅ migration `0055_hotels_policies_safe_defaults.sql` + ongoing enrichment via Tavily/Google Places when the source emits a real value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| 2    | `factual_summary_fr/en` (envelope 110-165 chars; CDC §2.3 = 130-150)                                                                                                               | **2219 / 2219 (100%)** envelope                                                                                                                                                                                                                                                        | **FR 2151 / 2219 (96.9 %) and EN 2113 / 2219 (95.2 %)** after the 2026-06-01 Phase-1.5 tightening run (169 off-band candidates re-touched, +38 FR / +54 EN landed in [130, 150], **0 rows out of envelope**). 68 FR / 106 EN remain at 110–129 because the LLM auto-censors on very thin source data (Belmond/Ritz-Carlton APAC, citizenM, etc.); they stay inside envelope so they render fine — deferred to a manual editorial sweep (ROI dropping). | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts --cdc-tightening`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 3    | `meta_desc_fr/en` (generator envelope 140-170 chars in `meta-desc-generator.ts`; renderer has a graceful fallback chain so the band is an SEO quality gate, NOT a publish blocker) | **2219 / 2219 (100 %)** both locales (FR + EN) in the [140, 170] SEO band (last off-band row `akelarre-restaurant-hotel` regenerated 2026-06-01 → 149c/152c)                                                                                                                           | (same — band is the only target)                                                                                                                                                                                                                                                                                                                                                                                                                       | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-meta-desc.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 4    | `description_fr` (NO production envelope — renderer accepts any non-null string; CDC §2.4 = 600-1000 words ideal)                                                                  | renderer accepts all 2219 / 2219                                                                                                                                                                                                                                                       | **2218 / 2219 (99.95 %)** at ≥ 600 chars after 2026-05-31 voice-gate fix (oscillation detector + opening-split hint hoisted to top). The 4 iconic outliers were reduced to **1 residual** (Hôtel du Cap-Eden-Roc 534 c — gpt-5.4 holds 1602 c FR and refuses to cut below 1500). The 3 others extended: Sources de Cheverny 494 → 1309 c, Airelles Saint-Tropez 368 → 1343 c, Hôtel des Berges 597 → 1404 c.                                           | ⚠ `run-hotel-description-extend.ts` exists and extends descriptions correctly, **but the Pass 8 voice gate (≤ 28 mots/phrase) rejects long opening lines** of these 4 fiches (e.g. "Dominant les collines tropéziennes, l'Airelles Saint-Tropez Château de la Messardière, classé Palace par Atout France, s'étend sur 12,5 hectares…" = 33 mots). The preserve-opening rule and the shortener rule are in tension. Fix path: (a) re-author the 4 openings manually under 28 mots, (b) add an `--allow-open-cut` flag bypassing preserve-opening on sentence 1, or (c) accept the 4 outliers (already published, renderable). Decision deferred — low ROI, CDC ideal is aspirational on this field. |
-| ✅   | `long_description_sections` ≥ 3                                                                                                                                                    | **2219 / 2219 (100 %)** since 2026-05-31 closure — the last 4 R&C / Marriott scaffold rows (Akelarre, Borgo San Felice, Ritz-Carlton Astana, St. Regis Hong Kong) were enriched with 7-8 sections + ~3700 mots FR/EN each. Walked Akelarre live = 5 H2 sections + sticky TOC rendered. | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ✅ `scripts/editorial-pilot/src/enrichment/enrich-hotel-content.ts` — auto-filters `long_description_sections=is.null`. Requires `EDITORIAL_PILOT_OPENAI_TIMEOUT_MS=600000` (heavy LLM call: 6-8 sections × ≥ 350 mots FR + EN + 6 signature experiences). Patched 2026-05-31 to preserve pre-existing `signature_experiences` instead of overwriting them.                                                                                                                                                                                                                                                                                                                                         |
-| ✅   | `faq_content` ≥ 10                                                                                                                                                                 | 2219 / 2219 (100 %)                                                                                                                                                                                                                                                                    | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                                 | already done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ✅   | `concierge_advice`                                                                                                                                                                 | 2219 / 2219 (100 %)                                                                                                                                                                                                                                                                    | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                                 | already done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Rank | Field                                                                                                                                                                              | Envelope conforming (prod Zod)                                                                                                                                                                                                                                                         | CDC ideal conforming                                                                                                                                                                                                                                                                                                                                                                                                                   | Pipeline outillé ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | `policies` (CDC §2.9 hard rule — check-in / pets / cancel / taxes / wifi)                                                                                                          | **2219 / 2219 (100%)** policies present, **2218 / 2219 with real source-derived data** (only 1 row still flagged `_synthetic: true` after the catalogue flip; the rest carry concrete check-in/out / pet fees / wifi scope from the enrichment pipeline)                               | (same — the field has no separate CDC ideal beyond "non-synthetic")                                                                                                                                                                                                                                                                                                                                                                    | ✅ migration `0055_hotels_policies_safe_defaults.sql` + ongoing enrichment via Tavily/Google Places when the source emits a real value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 2    | `factual_summary_fr/en` (envelope 110-165 chars; CDC §2.3 = 130-150)                                                                                                               | **2219 / 2219 (100%)** envelope                                                                                                                                                                                                                                                        | **FR 2178 / 2221 (98.1 %) and EN 2161 / 2221 (97.3 %)** after the 2026-06-19 grounded CDC tightening re-run on the 113 out-of-band rows (101/101 success, leak=0, **0 rows out of envelope**). 43 FR / 60 EN remain at 110–129 because the LLM auto-censors on very thin source data (Belmond/Ritz-Carlton APAC, citizenM, etc.); they stay inside envelope so they render fine — deferred to a manual editorial sweep (ROI dropping). | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-factual-summary.ts --cdc-tightening`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 3    | `meta_desc_fr/en` (generator envelope 140-170 chars in `meta-desc-generator.ts`; renderer has a graceful fallback chain so the band is an SEO quality gate, NOT a publish blocker) | **2219 / 2219 (100 %)** both locales (FR + EN) in the [140, 170] SEO band (last off-band row `akelarre-restaurant-hotel` regenerated 2026-06-01 → 149c/152c)                                                                                                                           | (same — band is the only target)                                                                                                                                                                                                                                                                                                                                                                                                       | ✅ `scripts/editorial-pilot/src/hotels/run-hotel-meta-desc.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 4    | `description_fr` (NO production envelope — renderer accepts any non-null string; CDC §2.4 = 600-1000 words ideal)                                                                  | renderer accepts all 2219 / 2219                                                                                                                                                                                                                                                       | **2218 / 2219 (99.95 %)** at ≥ 600 chars after 2026-05-31 voice-gate fix (oscillation detector + opening-split hint hoisted to top). The 4 iconic outliers were reduced to **1 residual** (Hôtel du Cap-Eden-Roc 534 c — gpt-5.4 holds 1602 c FR and refuses to cut below 1500). The 3 others extended: Sources de Cheverny 494 → 1309 c, Airelles Saint-Tropez 368 → 1343 c, Hôtel des Berges 597 → 1404 c.                           | ⚠ `run-hotel-description-extend.ts` exists and extends descriptions correctly, **but the Pass 8 voice gate (≤ 28 mots/phrase) rejects long opening lines** of these 4 fiches (e.g. "Dominant les collines tropéziennes, l'Airelles Saint-Tropez Château de la Messardière, classé Palace par Atout France, s'étend sur 12,5 hectares…" = 33 mots). The preserve-opening rule and the shortener rule are in tension. Fix path: (a) re-author the 4 openings manually under 28 mots, (b) add an `--allow-open-cut` flag bypassing preserve-opening on sentence 1, or (c) accept the 4 outliers (already published, renderable). Decision deferred — low ROI, CDC ideal is aspirational on this field. |
+| ✅   | `long_description_sections` ≥ 3                                                                                                                                                    | **2219 / 2219 (100 %)** since 2026-05-31 closure — the last 4 R&C / Marriott scaffold rows (Akelarre, Borgo San Felice, Ritz-Carlton Astana, St. Regis Hong Kong) were enriched with 7-8 sections + ~3700 mots FR/EN each. Walked Akelarre live = 5 H2 sections + sticky TOC rendered. | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                 | ✅ `scripts/editorial-pilot/src/enrichment/enrich-hotel-content.ts` — auto-filters `long_description_sections=is.null`. Requires `EDITORIAL_PILOT_OPENAI_TIMEOUT_MS=600000` (heavy LLM call: 6-8 sections × ≥ 350 mots FR + EN + 6 signature experiences). Patched 2026-05-31 to preserve pre-existing `signature_experiences` instead of overwriting them.                                                                                                                                                                                                                                                                                                                                         |
+| ✅   | `faq_content` ≥ 10                                                                                                                                                                 | 2219 / 2219 (100 %)                                                                                                                                                                                                                                                                    | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                 | already done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ✅   | `concierge_advice`                                                                                                                                                                 | 2219 / 2219 (100 %)                                                                                                                                                                                                                                                                    | (same)                                                                                                                                                                                                                                                                                                                                                                                                                                 | already done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Then the 924 draft hotels need the same 4 blocks (they already have
 long_description_sections + faq + concierge_advice → only #1-4 separate
@@ -348,6 +351,465 @@ The Phase 1.5 `external_sources` backfill was completed and de-polluted:
   re-source a real one (Tavily extract / Wikidata P856) before
   re-projecting.
 
+**4th wave — official_url Tavily backfill + squatter-detector extension (2026-06-19)**
+
+Ran `photos/backfill-official-url.ts --only-null` (Tavily search + the
+`isToxicOfficialUrl` veto) across the **102 published hotels with a NULL
+`official_url`** (the e5 squatter-NULLed cohort + ~80 scaffold drafts
+promoted without Wikidata). Result: **38 candidates accepted, 64 left
+NULL** (skips = OTA blocklist 13, low-confidence 48, corporate-root /
+trivial-path / not-a-landing-page 3 — every skip is a non-regression).
+Projected the hits into `external_sources` via
+`convert-wikidata-to-external-sources.ts --slugs=…`.
+
+**Acceptance walk caught a real quality regression** before it stuck: a
+DB spot-check of the 38 showed the backfill confidence ruleset had
+accepted **7 bad hits** — 5 SEO-squatter families unknown to the
+detector (`<hotel>.hotels-in-hochiminh.com`, `…hotels-of-london.com`,
+`…hotelsplayadelcarmen.net`, `margutta-19.italyromehotels.net`,
+`…berkshiresonline.com`), 1 corporate press release (`rosewood-doha` →
+`rosewoodhotelgroup.com/news-and-media/…`), and 1 wrong-entity
+(`address-sky-view` → `skyviewsdubai.com`, the observation deck). Those
+7 were reverted to NULL; **31 genuine dedicated/property-deep-link wins
+kept** (incl. `fourseasons.com/abudhabi`, `ritzcarlton.com/…`,
+`relaischateaux.com/…`, `mayakoba.com/hotels-overview/rosewood-mayakoba`).
+
+`isToxicOfficialUrl` was then extended with the 5 new families AND a
+catalogue re-scan NULLed **12 more pre-existing squatters** of the same
+shape. **Hard-won regex lesson (re-confirming the 2026-06-02 trap):**
+the squatter signature is a hotel-name glued into a **non-www subdomain**
+of a `hotels<geo>` / `<geo>hotels` aggregator domain — but legit brands
+(`langhamhotels.com`, `tajhotels.com`, `rosewoodhotels.com`,
+`comohotels.com`, Groupe Barrière `hotelsbarriere.com`, `historichotels.org`,
+`hotelsquare.com`, `hotelsahrai.com`) share that surface. The safe rule
+requires **(1) a glued non-www subdomain AND (2) a `.net`/`.org`/`.info`
+TLD** (never `.com`, where Langham/Taj keep real property subdomains).
+The handful of `.com` geo-squatters are a finite set NULLed by hand.
+84 fixtures in `toxic-official-url.test.ts` lock both directions.
+
+**5th wave — published scaffolding-leak P0 remediation (2026-06-19)**
+
+A catalogue-wide run of the Airelles wave-gates audit (`quality/audit-wave.ts`,
+force PostgREST via `MCH_AUDIT_FORCE_REST=1` — the direct-pg path auth-fails on
+this machine) surfaced a **P0 that trumped every other editorial lever**:
+**817 / 2221 published fiches (36.8%) still rendered raw pipeline scaffolding
+live in prod** — `AUTO_DRAFT`, "niveau de confiance low", "statut pending",
+"Le brief confirme…", Wikidata Q-ids — inside `long_description_sections` and
+`concierge_advice`. Confirmed by fetching the live `chelsea-pines-inn` page
+(the bare prose, not a draft). This is the residual of the leak documented in
+`hotels/descaffold-sections.ts` (originally ~1795 fiches).
+
+**Detector false-positive fixed first (commit `879f11f`)**: the shared
+`enrichment/scaffolding-gate.ts` `LEAK_MARKERS` matched the bare English word
+`confidence` ("a framework of confidence"), inflating the `body_en` count.
+Narrowed to `confidence (low|medium|high)` / backtick-fenced levels; FR
+`niveau de confiance` + the backtick rule untouched. New `scaffolding-gate.test.ts`
+(10 leak + 6 clean fixtures) locks it. **Lesson:** a shared write-gate regex
+must never match an ordinary dictionary word — anchor it to the leak's actual
+shape (token + pipeline level), or it false-fails legit prose AND blocks
+generators that use the same gate.
+
+**3-stage remediation** (PO-approved "staged-full"):
+
+1. `descaffold-sections.ts --all` — surgical LLM strip of _mixed_ leaks
+   (scaffolding woven into real prose). 561 s → cleaned=76, partial=102,
+   review=322 (pure-scaffolding kept as-is, never emptied).
+2. `enrich-residual-sections.ts --auto` — regenerate pure-scaffolding sections
+   from Tavily/Wikidata facts, EEAT-gated (writes only with ≥2 sourced facts).
+   **Low ROI at scale + hang-prone**: ~7% write rate (2/28) and the process
+   **hung on an un-timed Tavily/LLM call after 28 fiches** (had to be killed).
+   Salvaged the few real wins (e.g. `anse-chastanet` histoire, 3 facts) then
+   pivoted. **Lesson:** treat `enrich-residual --auto` as a small supervised
+   batch tool (`--limit=20`), never an unattended catalogue run.
+3. **New tool `hotels/remove-scaffold-sections.ts`** (deterministic, non-LLM,
+   the reliable leak-stop). Per fiche: drop any `long_description_sections[i]`
+   whose `body_fr` leaks (FR canonical; descaffold already saved salvageable
+   ones); blank only `body_en` when FR is clean but EN leaks; null
+   `concierge_advice` when either locale body leaks (block self-elides,
+   regenerable). `--dry-run` default + a rollback snapshot
+   (`runs/scaffold-removal-backup-*.json`) before `--apply`. Run: 788 fiches,
+   1041 sections dropped, 344 EN bodies blanked, 325 concierge cleared, and
+   **0 fiches fell below 3 sections** (no indexability regression). Re-scan =
+   **leaking=0 / 2221**. Prod walk on `chelsea-pines-inn` confirms the three
+   markers gone (the surviving `Q122595825` is the legit Wikidata `sameAs`
+   URL in JSON-LD, not a prose leak).
+
+**Follow-ups (non-blocking, additive — no rework):** the 344 blanked `body_en`
+fields and the flagship leakers worth real content (Claridge's, Cheval Blanc,
+Aman, Armani) can be re-enriched later via the section-adding pipeline /
+supervised `enrich-residual` batches; an empty/removed slot is backfillable.
+
+**6th wave — re-enrich the thinned fiches + ROOT-CAUSE fix (2026-06-19, commit `ef4aae9`)**
+
+After the 3-stage stop-leak, 67 published fiches had dropped to ≤5
+`long_description_sections` (dist `{2:1, 3:4, 4:18, 5:44}`). Re-enriching them
+via the section-adding pipeline `enrichment/enrich-hotel-content.ts --force`
+**re-introduced leaks** on the first pilot: `janu-tokyo` came back with 5/8
+sections narrating the brief ("Le brief le résume simplement…"). **Root cause
+found:** this generator had **no `hasLeak` gate at all** and injects the raw
+brief into the prompt — it is almost certainly the original source of the
+817-fiche pollution. Every other tool gates; this one didn't.
+
+**Fix (two-part, ADR-0029 invariant I1):**
+
+1. `SYSTEM_PROMPT` now hard-bans pipeline meta-commentary (`le brief`,
+   `AUTO_DRAFT`, `pending`, `niveau de confiance`, Wikidata Q-ids, backticks)
+   and tells the model to **omit** a section rather than narrate a data gap.
+2. `generateEnrichment` drops any section failing the shared `hasLeak()` gate
+   and **refuses the whole write** if < 5 leak-free sections survive — a
+   thin-source hotel stays clean-thin instead of re-polluted.
+   Also added `--slugs=a,b,c` batch selection.
+
+**Result:** re-pilot `janu-tokyo` → 7 clean sections, `leaks=NONE` (was 5/8).
+Batch of all 67 (`--force --concurrency=4`, 35 min): catalogue re-scan =
+**leaking=0 / 2221**, section-count dist ≤6 collapsed from 67 thin fiches to
+`{5:1, 6:97}` — every thinned fiche lifted to 6-8 sections, **0 below 4**, and
+even obscure hotels (`andon-ryokan` 4→7) produced clean publishable prose. The
+single residual 5-section fiche is a partial leak-gate refusal (clean, ≥ floor).
+**Lesson:** any LLM generator that writes to a public column MUST run the
+shared `hasLeak()` gate on its output AND refuse-rather-than-persist when too
+little survives — a generator without the gate silently re-pollutes everything
+the cleanup tools just fixed.
+
+**7th wave — EN parity backfill on `long_description_sections` (2026-06-19, commit `ace6506`)**
+
+A data-driven gap audit found the biggest editorial hole left: **747 published
+fiches rendered ZERO English section bodies** (pure FR on `/en` via the
+`pickLocalizedText` fallback) and 417 more were partial — ~52 % of the
+catalogue. `enrich-hotel-content.ts` generates the long-read FR-first and
+leaves `_en` optional, so the gap was structural. EN is a V1 locale → real
+GEO/SEO hole.
+
+**New tool `hotels/translate-sections-en.ts`** — faithful FR→EN-GB rewrite of
+the missing `title_en`/`body_en` per section (numbers / proper nouns / prices
+preserved, no invented facts), keyed by `anchor`, FR fields untouched.
+`--slug` / `--slugs` / `--all [--limit=N]` / `--concurrency` / `--dry-run`.
+Mirrors the `enrich-kit-faq-en.ts` pattern (gpt-4o-mini, json_object, temp 0.3)
+and runs the shared `hasLeak()` gate on the EN output — a translation that
+re-introduces scaffolding is dropped, never persisted.
+
+**Two robustness fixes capitalised** (both surfaced on the first 10-fiche
+pilot — 4/10 returned `EN+0`):
+
+1. **Batch sections (`SECTIONS_PER_CALL=4`)** — a single call translating a
+   9-10 section fiche overflowed 16k output tokens → truncated JSON →
+   `JSON.parse` failed 3×. Chunking guarantees the response never truncates.
+2. **Per-section tolerant parse** — `SectionsEnSchema.parse` (all-or-nothing)
+   sank a whole batch when ONE section had an over-long `title_en`. Replaced
+   with `extractSections()` (defensive shape pull) + per-item `safeParse` +
+   `clampTitle` self-heal; one malformed section is skipped, not fatal. This is
+   the llm-output-robustness §post-validation pattern — never let one bad item
+   reject a good batch.
+
+**Result:** full `--all` run = 1157 fiches, 6432 sections translated, 0 fiche
+failed, 29 EN sections leak-dropped by the gate. EN parity went
+**full 1057 → 2086 (94 %), partial 417 → 135, FR-only 747 → 0.** The 135
+residual partials are sections the model can't cleanly translate (persistent
+leak-drop / borderline FR) — diminishing returns, FR fallback renders fine.
+Prod walk on `/en/hotel/25hours-hotel-dubai-one-central` (cache MISS, fresh):
+55 anchors, English prose, 0 leak markers, FR page untouched.
+
+**8th wave — DataForSEO grounding wired into long-read sections + factual-summary CDC tightening re-run (2026-06-19, commit `312c6ee`)**
+
+Two complementary moves answered the PO's question "as-tu bien re-analysé
+chaque fiche avec DataForSEO ?".
+
+1. **Grounding wired into `enrich-hotel-content.ts`** (the long-read section
+   generator that had no SEO anchoring) — imports `loadDfsConfig` +
+   `groundHotel`, maps `HotelInput → HotelLlmInput` via a new `toLlmInput`,
+   and injects the keyword/PAA/intent block into the user prompt under an
+   "### Ancrage SEO/GEO (DataForSEO)" heading. The runner logs
+   `grounding=on/off`. Same `groundHotel` cache (`data/dfs-cache/`) the
+   factual-summary / meta-desc / geo-qa generators already use — zero extra
+   API spend when a hotel was grounded before. **Not run globally** on
+   purpose: re-generating all sections would have destroyed the fresh 7th-wave
+   EN parity. It's now the default for any future thin-fiche re-enrich.
+2. **Factual-summary CDC tightening re-run (grounded) on the 113 out-of-band
+   rows.** A lightweight slug query (heavy-column full-catalogue selects time
+   out at 500 — always pre-filter to slugs, then `--slugs=`) found 113 rows
+   outside the CDC ideal band; 101 were still actionable. Run = **101/101
+   success, 0 fail**, leak-check on all 113 = **0 leaking**.
+
+**Result (whole published catalogue, 2221 fiches):**
+
+| Band                               | FR                       | EN                       |
+| ---------------------------------- | ------------------------ | ------------------------ |
+| envelope [110-165] (hard Zod gate) | **2221 / 2221 (100 %)**  | **2221 / 2221 (100 %)**  |
+| CDC ideal [130-150]                | **2178 / 2221 (98.1 %)** | **2161 / 2221 (97.3 %)** |
+| out of envelope                    | **0**                    | **0**                    |
+| below 130 (in-envelope)            | 43                       | 60                       |
+
+Up from FR 96.9 % / EN 95.2 % ideal documented on 2026-06-01. The 43 FR /
+60 EN residuals sit at 110-129 — structurally thin-source hotels (Belmond,
+Ritz-Carlton APAC, citizenM) where the model auto-censors; they render fine,
+deferred to a manual sweep (ROI ~0 for another LLM pass). Acceptance: prod
+walk on `https://myconciergehotel.com/hotel/the-berkeley` confirmed the
+regenerated FR summary ("…982 m du Palais de Buckingham…") renders live,
+no content leak (the single `placeholder=` match is the search-box attribute).
+
+**9th wave — parallel multitask backfill: concierge_advice + EN parity (2026-06-20)**
+
+Three disjoint-column backfills run in parallel (no write races):
+
+| Stream                 | Column                      | Before      | After                                              |
+| ---------------------- | --------------------------- | ----------- | -------------------------------------------------- |
+| A — concierge_advice   | `concierge_advice`          | 325 NULL    | **0 NULL** (318 + 7 retried, success=325/325)      |
+| B — sections EN parity | `long_description_sections` | 135 partial | 8 newly translated; **127 hard residual deferred** |
+| C — description EN     | `description_en`            | 172 NULL    | **0 NULL** (172/172, 0 leak)                       |
+
+Leak scan post-run = **0 leaking / 2221** (description_en + concierge_advice
+bodies, both shapes). Acceptance: brenners EN page renders the new English
+description verbatim; casa-monti FR page renders the new "Conseil du
+Concierge" block (was NULL before). The 127 stream-B residuals are the same
+hard set flagged in the 7th wave — sections whose FR carries borderline /
+scaffolding-ish text that the `hasLeak()` gate rejects on translation; they
+need FR cleanup first, not translation (FR fallback renders fine, low ROI).
+
+**New tool `hotels/translate-description-en.ts`** (REST/PostgREST sibling of
+`translate-sections-en.ts`) — faithful FR→EN-GB rewrite of `description_en`
+only, `hasLeak()`-gated, `--slug/--slugs/--all/--limit/--concurrency/--dry-run`.
+
+**Gotcha capitalised — pg-based scripts can't connect on the Windows dev box.**
+`i18n/translate-hotels-en.ts` (and the other `pg`-based i18n scripts) target
+`SUPABASE_DB_POOLER_URL`/`SUPABASE_DB_URL`, but BOTH point to the direct host
+`db.<ref>.supabase.co` (IPv6-only → `getaddrinfo ENOENT` on this machine; the
+"pooler" var is mislabeled — it is NOT `aws-0-*.pooler.supabase.com`). The
+direct host doesn't resolve, so any `pg.Client` connect throws immediately.
+**Use the PostgREST path** (`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`
+over HTTPS) — that's why `translate-sections-en.ts` and the new
+`translate-description-en.ts` work where `translate-hotels-en.ts` fails. When a
+`pg`-based pipeline is needed, fix the pooler URL first
+(`postgresql://postgres.<ref>:<pwd>@aws-0-<region>.pooler.supabase.com:6543/postgres`).
+
+**14th wave — EN sentence-salvage + "data-gap narration" marker class (2026-06-21, fourth sweep)**
+
+Attacking the 13th-wave residual ("37 fiches with ≥1 EN section in FR fallback")
+revealed two distinct sub-problems, not one. First, **27 of the 37 were not
+thin-source at all** — the FR section was clean and the _translator_ had
+hallucinated a single meta sentence ("…the dossier confirms…") into an otherwise
+faithful EN body, which the `hasLeak()` write-gate then dropped wholesale →
+FR fallback. Fix capitalised in `translate-sections-en.ts`: when the EN trips
+the gate, **strip only the leaking sentence(s) and keep the clean remainder**
+(`stripLeakSentences`, mirrors `strip-leak-sentences.ts`) instead of blanking
+the whole section; a leaky title still blanks (FR fallback) but a ≥100-char
+clean body survives. One `--all` pass salvaged **27/37** (29 sections).
+
+The last **10** were a genuinely new leak shape the gate still missed: **pure
+"data-gap narration" stubs** — "Aucun fait vérifié ne permet de confirmer le
+spa…", "Le bien-être reste non documenté", "La rubrique de voisinage est en
+attente", "…dans **ce brief**", "non renseignée dans ce brief". The 12th-wave
+gate had `le/du/au brief` but not `ce brief`, and no marker for the negative
+"no verified fact / not documented / pending section" family. Hardened
+`scaffolding-gate.ts`: added `ce brief`, `aucun fait v[ée]rifi[ée]`, `aucune
+(donnée|information) vérifiée`, `non document[ée]`, `non renseign[ée]`, `sous
+réserve de confirmer`, `rubrique…(?=en attente)`, plus EN `no verified
+fact/data`, `(un)documented`, `not specified in (this|the) brief`. 64/64 gate
+tests green (10 new LEAK + 3 new CLEAN guards: a legit "rubrique végétarienne",
+"savoir-faire documenté", "well documented" stay clean). These 10 stub sections
+are pure meta with no salvageable content → the next strip pass drops them
+(fiches stay ≥6 except `hotel-claris` 6→5, queued for re-enrich).
+
+⚠ **Blocked mid-wave by a Supabase platform outage (HTTP 522 / Cloudflare
+origin timeout).** The code (gate + salvage + tests) is committed and green;
+the remaining DB steps — re-run `strip-leak-sentences` on the 10 stubs,
+re-translate, re-enrich any fiche that fell <6, and the final catalogue
+verification scan — are **deferred until the REST endpoint recovers**. All
+prior writes (27/37 salvage) are persisted.
+
+| Metric                      | Before       | After (code) | Pending (DB, post-outage) |
+| --------------------------- | ------------ | ------------ | ------------------------- |
+| EN sections in FR fallback  | 37           | **10**       | → 0 (strip+enrich)        |
+| Gate marker classes covered | dossier/file | + data-gap   | —                         |
+| Gate unit tests             | 54           | **64**       | —                         |
+
+Lesson: a write-gate that **drops** on any leak silently converts a one-sentence
+LLM hallucination into a whole-section locale regression — prefer
+**sentence-level salvage** over wholesale drop when the source is clean. And the
+"negative data-gap" phrasing ("no verified fact", "section pending") is its own
+leak class, distinct from the "dossier/brief narration" class — both are the
+generator narrating its own input poverty into live prose.
+
+**11th wave — catalogue-wide "dossier-narration" scaffolding leak, FR + EN (2026-06-21)**
+
+The 10th-wave "23 hard EN residual" turned out to be the visible tip of a far
+larger, previously-undetected leak class. Diagnosing why those 23 EN
+translations kept tripping `hasLeak()` revealed that their FR sources were
+themselves narrating the internal **data dossier** — live, on major fiches:
+"Aman New York avance ici avec un **dossier encore incomplet**", "les
+équipements **connus du brief**", "plusieurs rubriques attendent une
+**vérification manuelle**", "Date de consultation des sources **du brief** :
+2026-05-20". The canonical `LEAK_MARKERS` missed all of it: it matched
+`\ble brief\b` but NOT the genitive **`du brief`** / `au brief`, and had no
+pattern for `dossier (incomplet|reste…)`, `contrôle/vérification manuel(le)`,
+`en attente d'enrichissement`, `recherche Wikipédia`, `placeholder`, etc.
+
+| Surface                                                                           | Before                         | After                                                         |
+| --------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------- |
+| FR sections/desc carrying the leak (canonical `hasLeak`)                          | **457 fiches**                 | **0**                                                         |
+| EN section bodies narrating the brief (`the brief`/`in the brief`/`the dossier`…) | **953 fiches / 2164 sections** | **0** (re-translated from clean FR, or blanked → FR fallback) |
+
+Pipeline (forward-only, ADR-0029 staged remediation):
+
+1. **Hardened the shared gate** [`scaffolding-gate.ts`](scripts/editorial-pilot/src/enrichment/scaffolding-gate.ts):
+   added the FR genitive `du/au brief`, the full `dossier`/`en attente`/
+   `contrôle manuel`/`placeholder`/`recherche Wikipédia` family, AND an EN
+   layer (`the dossier`, `manual check`, `still to be confirmed`,
+   `pending verification`, and a robust **`(?:the|this) brief`-as-noun** rule
+   with a negative-lookahead allow-list for adjectival use — "the brief
+   stroll/encounter/overview" stay clean). 43 unit cases in
+   `scaffolding-gate.test.ts` (FR + EN leaks + EN false-positive guards).
+2. **`descaffold-sections.ts --all` ×2** (LLM surgical rewrite): 457 → 78 → 63.
+3. **NEW `strip-leak-sentences.ts`** (deterministic, sentence-level): the
+   residual was NOT pure-meta stubs but **rich 3 000-4 000-char "services"
+   sections with ONE leaked sentence** (Fairmont, Mandarin Oriental,
+   Ritz-Carlton…). `descaffold` (whole-chunk LLM rewrite) fails its
+   "no-longer-than-input" gate on such long chunks, and `remove-scaffold`
+   would drop the WHOLE rich section. The new tool splits into sentences,
+   drops only the leaking ones, keeps the rest; if every sentence leaks the
+   section collapses and is dropped. Result: 54 sections surgically cleaned,
+   11 pure-meta dropped, **0 fiches < 3 sections** → FR `hasLeak` = **0**.
+4. **EN re-translation**: `translate-sections-en.ts` now treats a _leaking_
+   `body_en`/`title_en` as "needs EN work" (not just empty), and a failed
+   re-translation **blanks** the stale leaky EN instead of leaving it live
+   (FR fallback). A plain `--all` therefore self-heals the 953 fiches with
+   no separate blanking pass.
+
+Two capitalised lessons:
+
+- **Size leak markers to the genitive, not just the nominative.** `le brief`
+  without `du/au brief` left ~424 fiches leaking for weeks. When adding a
+  scaffolding marker, enumerate the case/preposition variants.
+- **A Zod/LLM "no-longer" rewrite gate strands long sections with a single
+  bad sentence.** For surgically removing a phrase from otherwise-publishable
+  long-form prose, a deterministic sentence-level strip beats both an LLM
+  rewrite (fails to reproduce length) and a whole-section drop (loses facts).
+- **The same leak vocabulary leaks in EN too**, in different grammar
+  ("noted in the brief", "the dossier confirms"). The gate runs on both
+  locales; EN markers must be precise enough to spare adjectival "a/the brief
+  X" while catching "the brief" as a document noun.
+
+Acceptance (prod, curl — no Chrome on this box): `/hotel/aman-new-york` →
+"dossier encore incomplet" = 0, "fondamentaux solides" + "83 suites" present;
+`/hotel/altstadt-vienna` → "contrôle manuel" = 0, "Silvio Nickol" (2★ Michelin)
+preserved; `/en/hotel/a-quinta-da-auga-hotel-spa` spa section re-translated
+leak-free (ISR refreshes per-page within the 3600 s TTL).
+
+**12th wave — generalise the `dossier`/`file` marker (2026-06-21, second sweep)**
+
+The 11th-wave gate reported FR `hasLeak` = 0, but a per-section re-inspection of
+the residual EN leak-drops exposed a **gate blind spot, not a content fix**: the
+FR `dossier` rule only matched `le dossier <specific-verb>` (`reçu|reste|demande
+|tient…`). It silently MISSED every other live shape — `ce dossier tient`,
+`le dossier **historique** reste incomplet`, `le dossier **manque**`, `lire
+entre les lignes **du dossier**` — so ~300 FR fiches and 48 EN fiches were still
+narrating the data file in production while the scan read clean.
+
+Fix = treat `dossier`/`file` like the 11th-wave `the brief`-as-noun rule:
+
+- **FR**: `\b(?:le|ce|du|au) dossier\b` with a negative-lookahead allow-list
+  (`dossier de presse|de réservation|de candidature|de mariage|de soins|
+client|événementiel|médical` stay clean — the global "dossier de presse"
+  press-kit link must not trip).
+- **EN**: added `\bthis dossier\b` and `\b(?:the|this) (?:historical|source|
+data )?file\b` gated by a lookahead on narration verbs (`remains|incomplete|
+lacks|requires|confirms|mentions|notes|documented`) so "the file at reception
+  holds your preferences" stays clean while "the historical file remains
+  incomplete" is caught.
+
+| Surface (generalised gate)         | Before (11th-wave gate) | After |
+| ---------------------------------- | ----------------------- | ----- |
+| FR fiches leaking `dossier`/`file` | **300**                 | **0** |
+| EN fiches leaking `dossier`/`file` | **48**                  | **0** |
+
+Remediation reused the existing tools, no new code path:
+`strip-leak-sentences.ts --apply` (300 fiches → 285 sentences stripped, 117
+pure-meta sections dropped, **0 fiches < 3 sections**) for sections +
+signatures; a deterministic 1-sentence strip on the 11 residual `description_fr`
+(all stayed > 860 c); then `translate-description-en --all` (17 fiches, 0
+leak-dropped) + `translate-sections-en --all` (self-heals — re-translated the
+blanked bodies, blanked 41 stubborn ones → FR fallback). Final scan across all
+2221 published fiches: **FR_dirty = 0, EN_dirty = 0**. 54 unit cases now pin the
+generalised rule (incl. "dossier de presse" / "the file at reception" as CLEAN).
+Acceptance (curl): `/hotel/le-maybourne-riviera` FR → only match is the legit
+global "dossier de presse" link (allow-listed); `/en/hotel/maison-proust` +
+`/en/hotel/hotel-adlon-kempinski` → 0.
+
+Lesson capitalised: **when a noun leaks, generalise to all determiners +
+prepositions in one pass, with an allow-list — not verb-by-verb.** The 11th wave
+patched specific verb collocations and still left 300 fiches live; the noun-level
+rule with a lookahead allow-list is the durable shape (same pattern as
+`the brief`). Captured in `concierge-voice-pipeline` / `llm-output-robustness`.
+
+**13th wave — re-enrich the fiches thinned by the 12th-wave strip (2026-06-21)**
+
+The 12th-wave `strip-leak-sentences` dropped 117 pure-meta sections, leaving
+**21 published fiches at exactly 5 `long_description_sections`** (the catalogue
+floor is 6-8; dist `{5:21, 6:105, 7:583, 8:1192, 9:243, 10:77}`). Forward fix =
+re-enrich them with real facts rather than ship clean-but-thin. Reused the
+6th-wave-hardened `enrichment/enrich-hotel-content.ts --force --slugs=…`
+(DataForSEO grounding on + `hasLeak()` gate + refuse-if-<5-clean): 21 / 21 OK,
+0 failed, every fiche lifted to **6-8 clean bilingual sections** (~3 100-4 450
+words FR each). `the-augustine-hotel` hit a transient DataForSEO SERP
+`api_error` mid-run but degraded gracefully to 6 grounded-less sections (still
+clean). `translate-sections-en --all` then confirmed the re-enriched set ships
+full EN (bilingual generation populated `body_en` directly — they don't even
+re-surface in the needs-EN selection).
+
+| Metric                          | Before | After |
+| ------------------------------- | ------ | ----- |
+| Published fiches < 6 sections   | **21** | **0** |
+| Re-enriched fiches with full EN | 0/21   | 21/21 |
+| FR leak / EN leak (catalogue)   | 0 / 0  | 0 / 0 |
+
+Acceptance (curl): `/hotel/mount-nelson` + `/en/hotel/mount-nelson` +
+`/en/hotel/como-alpina` → 30 `<h2>` each, ~880-930 KB rendered, 0 leak markers
+(ISR already refreshed). Residual: **37 fiches keep ≥ 1 EN section in FR
+fallback** — the genuinely thin-source hotels (Belmond / Ritz-Carlton APAC
+profile) where the translator keeps echoing meta on sparse FR; the `hasLeak`
+gate blanks → FR fallback, which renders fine. Lifting those needs FR _source_
+enrichment (more Tavily facts), not another translation pass — deferred as
+diminishing returns. Lesson: **after a deterministic strip that can drop whole
+sections, always re-measure the section-count floor and re-enrich the fiches
+that fell below it** — a leak-free catalogue can still be a thinned one.
+
+**10th wave — parallel multitask: EN-section recovery + bounded photo backfill (2026-06-20)**
+
+ÉCRIT + VISUEL in parallel, both bounded and verified live.
+
+| Stream                           | Surface                                        | Before                                   | After                                                         |
+| -------------------------------- | ---------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------- |
+| ÉCRIT — sections EN parity       | `long_description_sections.{title_en,body_en}` | 130 fiches with ≥1 FR section missing EN | **23** (-82 %); 121 sections translated, **0 EN leak**        |
+| VISUEL — under-10 photo backfill | `gallery_images` (Google Places APPEND)        | 24 hotels < 10 photos (`DONE`=2197)      | **17** (`DONE`=2204); 63 photos uploaded, 0 supplier-URL leak |
+
+Root-cause fix capitalised (the reason the "127 hard residual" from the 9th
+wave was overstated): `translate-sections-en.ts`'s `SectionEnSchema.body_en`
+carried a **`min(80)`** floor. Many real sections are legitimately short
+factual stubs — an `en-pratique` address block, a one-line
+"Classement 5 étoiles." note (body*fr 60-85 chars). Their faithful EN
+translation is < 80 chars, so `safeParse` rejected the whole section →
+the fiche logged `EN+0` and looked like a "hard residual". Lowering the
+floor to **`min(10)`** (quality still guarded by `hasLeak()` + the
+faithful-translation prompt) recovered **112 / 130 fiches in one pass**.
+Lesson: a Zod `min()` length floor sized for \_prose* silently strands
+_structured/stub_ content — size validation gates to the **shortest
+legitimate** instance of the field, not the typical one.
+
+The true EN-section residual is now **23 fiches** where the EN output
+re-trips `hasLeak()` (borderline FR phrasing the translator echoes) —
+genuinely hard, deferred to a manual sweep (low ROI).
+
+Photo residual = **17 hotels** with 0 Google Places photos: pre-opening
+properties (`six-senses-bangkok`, `six-senses-milan`), 0-Places R&C
+lodges (`royal-chundu-luxury-zambezi-lodges`, `yihe-mansions`), and
+obscure independents (`babuino-181`, `fouquet-s-mykonos`, `margutta-19`…).
+They need Tavily/official-site or manual sourcing (Places is exhausted).
+
+Acceptance (prod, curl — no Chrome on this box for the browser MCP):
+`/en/hotel/four-seasons-madrid` renders the new EN sections ("rare
+spaciousness", "People come here for Madrid"); `/hotel/la-residencia-a-belmond-hotel-mallorca`
+serves 37 `cct/hotels/la-residencia…` Cloudinary refs with **0** raw
+`place-photos` URLs (no supplier hotlink leak). ISR already fresh.
+
 **Tooling capitalised** (now reusable across the project):
 
 - New flag `--cdc-tightening` on `run-hotel-factual-summary.ts` —
@@ -437,9 +899,10 @@ documented in
 
 **What's still gappy** (carry-over for the next Phase 1.5 pass):
 
-- 68 FR / 106 EN `factual_summary` rows remain in the production
+- 43 FR / 60 EN `factual_summary` rows remain in the production
   envelope [110, 165] but outside the CDC ideal [130, 150] (down from
-  702 / 670 after the 2026-06-01 Phase-1.5 tightening run). They all
+  68 / 106 after the 2026-06-19 grounded re-run on the 113 out-of-band
+  rows). They all
   cluster in [110, 129] (LLM under-shot — the EN side is structurally
   shorter than FR). A 3rd LLM pass is exhausted: the run already
   spends 5 retries/row chasing the band and falls back to the best
@@ -484,6 +947,34 @@ availability data is sourced from APIs that will only be wired at the
 end of the project**. Until then, the site ships as an editorial-only
 property. When an agent considers proposing or implementing any
 booking-side work, **stop** and reread this section first.
+
+### Project progress metric — report at the end of every task (PO request 2026-06-21)
+
+The PO wants a **global progress %** appended at the end of each completed task.
+To keep it reproducible across sessions (not a per-session vibe), it is anchored
+to the phase matrix below with fixed weights. **Method:** `global = Σ (weight ×
+phase_completion)`. The **piloting reference is the "hors-booking" figure**
+(global re-normalised over Phases 1-5, i.e. excluding the frozen Phase 6) — that
+is the number to surface first; the all-in global is secondary.
+
+| Phase                                           | Weight | Completion (2026-06-21) |
+| ----------------------------------------------- | ------ | ----------------------- |
+| 1 — Editorial-only on published catalogue       | 25 %   | ~97 %                   |
+| 1.5 — Known gaps to close                       | 8 %    | ~90 %                   |
+| 2 — Photo pipeline                              | 17 %   | ~45 %                   |
+| 3 — Editorial pages (guides + rankings + itin.) | 12 %   | ~80 %                   |
+| 4 — Multilingual V2/V3                          | 10 %   | ~18 %                   |
+| 5 — Observability & GSC                         | 5 %    | ~30 %                   |
+| 6 — Booking APIs (frozen, last brick)           | 23 %   | ~2 %                    |
+
+→ **all-in global ≈ 52 %** · **hors-booking ≈ 68 %** (Phases 1-5 re-normalised).
+
+**Report format** (mini-table per task): re-print the table above with the
+updated completion column + a one-line `Δ` of what the task advanced, leading
+with the hors-booking figure. Update the weights/completion here only when a
+phase materially moves, so the number stays a single source of truth. Weights
+are the PO's call — revisit if the editorial-first horizon shifts (e.g. lower
+Phase 6 to ~12 % if booking stays out of scope long-term).
 
 ### Phasing matrix (top-down) — single source of truth for sequencing
 
@@ -565,7 +1056,8 @@ Phase 6**. They describe the target architecture, not the next sprint.
   - ✅ **Operational**: `user-supabase` (DB schema + SQL exec), `plugin-vercel-vercel` (deployments + build logs), `plugin-sanity-Sanity` (CMS docs, OAuth `contact@travelba.fr`), `plugin-cloudinary-cloudinary-asset-mgmt` (27 tools — upload, search, transform), `plugin-cloudinary-cloudinary-env-config` (26 tools — presets, transformations, triggers), `plugin-cloudinary-cloudinary-smd` (11 tools — Structured Metadata fields + rules), `cursor-app-control`, `cursor-backend-control`, `cursor-ide-browser`.
   - ⚠️ **Auth claimed but tools not yet exposed**: `plugin-cloudinary-cloudinary-analysis` — `mcp_auth` returned success but no tools surface in the available list. Possibly a lazy-load quirk. Retry `mcp_auth` if the next call still fails.
   - ⚠️ **Needs OAuth click** (only expose `mcp_auth`): `plugin-opsera-devsecops-opsera`. Authenticate when the task actually needs it — the OAuth popup must be clicked in the IDE within 2 min.
-  - ❌ **Broken credentials**: `plugin-tavily-tavily` (token expired — "Not connected"; reconnect via Cursor → Settings → Tools & Integrations → MCP → Tavily → Reconnect), `plugin-resend-resend` ("API key is invalid" — regenerate at `resend.com/api-keys` with Full Access then paste in Cursor MCP settings).
+  - ✅ **Operational (re-verified 2026-06-19)**: `plugin-tavily-tavily` — the 2026-05-25 "token expired" status is stale; `tavily_search`/`tavily_extract` return live results via the MCP (a fresh `TAVILY_API_KEY` is in `.env.local`). No `tvly` CLI on this machine (no Python/pip), so use the MCP tools, not the CLI.
+  - ❌ **Broken credentials**: `plugin-resend-resend` ("API key is invalid" — regenerate at `resend.com/api-keys` with Full Access then paste in Cursor MCP settings).
   - 🚫 **Mentioned in past sessions but NOT configured on this machine**: Datadog, GitHub, Superhuman, shadcn — either install them or stop referencing them in agent prompts.
 
   **Gotcha — Cloudinary is exposed as 5 separate MCPs in Cursor**:

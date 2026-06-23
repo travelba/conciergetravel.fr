@@ -31,8 +31,9 @@ async function main(): Promise<void> {
     logPrefix: LOG,
     heroImage: LES_PRES_DEUGENIE_HERO_IMAGE,
     heroSourceUrl: LES_PRES_DEUGENIE_HERO_SOURCE_URL,
-    heroAltFr: 'Domaine Les Prés d’Eugénie au crépuscule, vallée des Landes — vue d’ensemble',
-    heroAltEn: 'Les Prés d’Eugénie estate at dusk, Landes valley — property overview',
+    heroAltFr:
+      'Façade de la Maison Rose et allée de palmiers, Les Prés d’Eugénie, Eugénie-les-Bains',
+    heroAltEn: 'Maison Rose façade and palm-lined drive, Les Prés d’Eugénie, Eugénie-les-Bains',
     galleryImages: LES_PRES_DEUGENIE_GALLERY_IMAGES,
     gallerySourceUrls: LES_PRES_DEUGENIE_GALLERY_SOURCE_URLS,
     cdcCategories: LES_PRES_DEUGENIE_GALLERY_CDC_CATEGORIES,

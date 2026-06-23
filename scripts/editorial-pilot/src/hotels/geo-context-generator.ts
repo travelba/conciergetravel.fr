@@ -195,7 +195,8 @@ Règles dures :
 - en-GB obligatoire sur label_en (traduction directe, pas un calque mot-à-mot du FR).
 - Format de sortie : JSON strict { "highlights": [ { "label_fr", "label_en" }, ... ] }.`;
 
-function buildHighlightsPrompt(hotel: HotelLlmInput): string {
+function buildHighlightsPrompt(hotel: HotelLlmInput, groundingBlock = ''): string {
+  const grounding = groundingBlock.length > 0 ? `\n${groundingBlock}\n` : '';
   return [
     '=== HOTEL ===',
     JSON.stringify(
@@ -216,7 +217,7 @@ function buildHighlightsPrompt(hotel: HotelLlmInput): string {
       null,
       2,
     ),
-    '',
+    grounding,
     `Produis ${HIGHLIGHTS_MIN} à ${HIGHLIGHTS_MAX} highlights. Retourne UNIQUEMENT le JSON.`,
   ].join('\n');
 }
@@ -246,10 +247,17 @@ function stripCodeFences(s: string): string {
   return s;
 }
 
+export interface GenerateHighlightsOptions {
+  /** DataForSEO grounding block (from `groundHotel`); '' → LLM-only. */
+  readonly groundingBlock?: string;
+}
+
 export async function generateHighlights(
   client: LlmClient,
   hotel: HotelLlmInput,
+  options: GenerateHighlightsOptions = {},
 ): Promise<GenerateHighlightsResult> {
+  const groundingBlock = options.groundingBlock ?? '';
   const attempts: Array<{ raw: string; reason: string }> = [];
   let totalInput = 0;
   let totalOutput = 0;
@@ -263,7 +271,7 @@ export async function generateHighlights(
 
     const result = await client.call({
       systemPrompt: HIGHLIGHTS_SYSTEM_PROMPT,
-      userPrompt: `${buildHighlightsPrompt(hotel)}${corrective}`,
+      userPrompt: `${buildHighlightsPrompt(hotel, groundingBlock)}${corrective}`,
       temperature: 0.5,
       maxOutputTokens: 1200,
       responseFormat: 'json',

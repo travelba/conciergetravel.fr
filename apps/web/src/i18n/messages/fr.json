@@ -1,4 +1,40 @@
 {
+  "lieux": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbLieux": "Lieux à visiter",
+    "aboutHeading": "À propos",
+    "galleryHeading": "En images",
+    "conciergeAdviceHeading": "Le Conseil du Concierge",
+    "faqHeading": "Questions fréquentes",
+    "bookHeading": "Réserver cette expérience",
+    "bookVia": "Réserver sur GetYourGuide",
+    "fromPrice": "À partir de",
+    "reviews": "avis",
+    "askConciergeHeading": "Demander au Concierge",
+    "askConciergeBody": "Notre Concierge organise votre visite sur mesure : billets coupe-file, guide privé, horaires confidentiels.",
+    "askConciergeCta": "Demander au Concierge",
+    "nearbyHotelsHeading": "Hôtels à proximité",
+    "nearbyHotelsIntro": "Notre sélection d'hôtels d'exception à quelques pas de ce lieu.",
+    "walkMinutes": "à {min} min à pied",
+    "distanceMeters": "à {m} m",
+    "rankingTitleVisit": "Les meilleures visites à {city}",
+    "rankingTitleDo": "Que faire à {city}",
+    "rankingIndexTitle": "Lieux à visiter à {city}",
+    "rankingIntroVisit": "Notre sélection des visites culturelles incontournables à {city} : musées, monuments, jardins.",
+    "rankingIntroDo": "Les meilleures activités à {city} : visites guidées, théâtres, shopping, plein air.",
+    "rankingIndexIntro": "Tout ce qu'il faut voir et faire à {city}, sélectionné par le Concierge.",
+    "sectionVisit": "Ce qu'on visite dans le quartier",
+    "sectionDo": "Ce qu'on y fait",
+    "viewPlace": "Découvrir",
+    "noResults": "Aucun lieu publié pour le moment.",
+    "openInMaps": "Voir sur la carte",
+    "hubTitle": "Lieux à visiter",
+    "hubIntro": "Musées, monuments, jardins et activités d'exception, ville par ville — chaque lieu avec sa fiche, sélectionné par le Concierge.",
+    "hubCityCta": "Voir les lieux à {city}",
+    "hubCount": "{count} lieux",
+    "hubCountVisitDo": "{visit} à visiter · {doCount} à faire",
+    "hubEmpty": "Le catalogue des lieux à visiter arrive très bientôt."
+  },
   "common": {
     "siteName": "MyConciergeHotel",
     "tagline": "La sélection du Concierge — hôtels d'exception dans le monde",
@@ -19,10 +55,10 @@
   },
   "homepage": {
     "metaTitle": "MyConciergeHotel — La sélection du Concierge, hôtels d'exception dans le monde",
-    "metaDesc": "2 193 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
+    "metaDesc": "2 221 adresses sélectionnées dans 127 pays — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World et pépites éditoriales. Chaque fiche se termine par un Conseil du Concierge, signé par notre conciergerie. Agence IATA accréditée.",
     "eyebrow": "MyConciergeHotel — Réservez comme un concierge. Séjournez comme un hôte.",
     "title": "Nous vous attendions",
-    "intlBadge": "{countries} pays · {hotels} adresses · 434 Relais & Châteaux",
+    "intlBadge": "{countries} pays · {hotels} adresses · 479 Relais & Châteaux",
     "stats": "{countries} pays · {hotels} adresses d'exception, choisies une par une",
     "subtitle": "Une sélection mondiale d'hôtels d'exception, signée par notre conciergerie.",
     "subtitleSecondary": "Accédez aux surclassements et privilèges VIP réservés aux habitués des plus belles maisons.",
@@ -78,7 +114,7 @@
       },
       "q2": {
         "question": "En quoi diffère-t-on de Booking ou Hotels.com ?",
-        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 2 193 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
+        "answer": "MyConciergeHotel est une agence IATA, pas un comparateur. Notre catalogue est curé à 2 221 adresses contre des centaines de milliers, et chaque fiche est écrite par notre conciergerie — pas par les hôteliers eux-mêmes. Pas d'indicateur d'urgence fabriqué, pas d'ancien prix barré, pas de bandeau « stock restant ». Le tarif affiché en Phase 6 sera le tarif net GDS Amadeus, sans supplément agence."
       },
       "q3": {
         "question": "Qu'est-ce que le Conseil du Concierge en bas de chaque fiche ?",
@@ -121,6 +157,7 @@
       "hotels": "Hôtels",
       "destinations": "Destinations",
       "experiences": "Expériences",
+      "places": "Lieux",
       "rankings": "Classements",
       "concierge": "Le Concierge",
       "magazine": "Magazine",
@@ -132,6 +169,7 @@
       "exploreTitle": "Explorer",
       "exploreHotels": "Hôtels & Palaces",
       "exploreDestinations": "Destinations",
+      "explorePlaces": "Lieux à visiter",
       "exploreOccasions": "Par occasion",
       "exploreRankings": "Classements",
       "exploreMagazine": "Magazine",
@@ -196,7 +234,7 @@
         },
         {
           "q": "Quels palaces ou Relais & Châteaux figurent parmi les ouvertures récentes ?",
-          "a": "Notre catalogue couvre 2 193 hôtels d'exception dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
+          "a": "Notre catalogue couvre 2 221 hôtels d'exception dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. Cette page met en avant celles qui ont rouvert après rénovation, changé de chef, gagné une Clef Michelin ou un Forbes Five Star, ou que nous venons simplement de visiter. Quelques exemples actuels : Le Bristol Paris, Akelarre (Pays basque espagnol), Al Moudira (Louxor), Alila Jabal Akhdar (Oman)."
         },
         {
           "q": "Puis-je réserver via le Concierge un hôtel récemment ouvert ?",
@@ -410,6 +448,7 @@
     "primaryNav": {
       "label": "Navigation principale",
       "destinations": "Destinations",
+      "placesToVisit": "Lieux à visiter",
       "search": "Rechercher",
       "hotels": "Hôtels",
       "hotelsAllAria": "Voir tous les hôtels",
@@ -472,7 +511,7 @@
     },
     "account": {
       "signIn": "Connexion",
-      "signUp": "Créer un compte",
+      "signUp": "S'inscrire",
       "myAccount": "Mon compte"
     },
     "menu": {
@@ -666,7 +705,7 @@
     "title": "Le Concierge",
     "lede": "MyConciergeHotel est l'agence IATA en ligne qui vous ouvre les portes des Palaces et hôtels d'exception. Chaque fiche est rédigée par nos conseillers et se termine par un Conseil du Concierge — un secret opérationnel (chambre, table, horaire, accès) que les guides généralistes omettent.",
     "metaTitle": "Le Concierge — Notre métier, nos engagements | MyConciergeHotel",
-    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 2 193 hôtels d'exception dans 127 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
+    "metaDesc": "Découvrez MyConciergeHotel : agence IATA en ligne — la sélection du Concierge couvre 2 221 hôtels d'exception dans 127 pays (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Conseils opérationnels, tarifs nets GDS, paiement sécurisé Amadeus, programme de fidélité.",
     "aeoQuestion": "Pourquoi réserver un Palace ou un hôtel 5★ via MyConciergeHotel plutôt qu'en direct ou sur un agrégateur ?",
     "aeoAnswer": "MyConciergeHotel est une agence IATA / APST française qui ouvre l'accès aux tarifs nets GDS Amadeus (identiques au tarif officiel de l'hôtel, sans commission ajoutée) et conclut chaque fiche par un Conseil du Concierge — un secret opérationnel concret (numéro de chambre, table cachée, accès, timing) que ni l'hôtel ni les agrégateurs ne publient. Paiement sécurisé PCI-DSS Amadeus, programme de fidélité dès la première nuit. Mise à jour {date}.",
     "trust": {
@@ -716,7 +755,7 @@
         },
         {
           "q": "Quel est votre périmètre géographique ?",
-          "a": "Notre sélection couvre 2 193 adresses dans 127 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
+          "a": "Notre sélection couvre 2 221 adresses dans 127 pays — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutiques-hôtels et pépites éditoriales. Le maillage s'étend chaque trimestre (Italie, Suisse, Maroc, Émirats, Asie, Amériques)."
         },
         {
           "q": "Combien coûte votre service ?",
@@ -1851,7 +1890,8 @@
       "emailPlaceholder": "Adresse e-mail",
       "consent": "J'accepte de recevoir la newsletter MyConciergeHotel et de recevoir un e-mail de validation (double opt-in RGPD).",
       "submit": "Recevoir la newsletter",
-      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez à contact@myconciergehotel.com avec sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement.",
+      "wip": "Formulaire d'inscription en cours de mise en service (intégration Brevo). En attendant, écrivez-nous avec le sujet [NEWSLETTER] — nous vous ajoutons à la liste manuellement, en un message.",
+      "ctaContact": "Nous écrire pour s'abonner",
       "successMessage": "Validation par e-mail envoyée — cliquez sur le lien dans les 48h pour confirmer."
     },
     "rgpd": {
@@ -2390,7 +2430,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Notre méthode éditoriale — Comment nous composons la sélection du Concierge | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel sélectionne 2 193 hôtels d'exception dans 127 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
+    "metaDesc": "MyConciergeHotel sélectionne 2 221 hôtels d'exception dans 127 pays selon une méthode transparente : label Palace Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, audit interne. Sources nommées, scoring détaillé, aucun pay-to-play.",
     "breadcrumbHome": "Accueil",
     "breadcrumbConcierge": "Le Concierge",
     "eyebrow": "EEAT — méthode éditoriale",
@@ -2622,7 +2662,11 @@
       "messagePlaceholder": "Votre message…",
       "consent": "J'accepte que mes données soient utilisées pour traiter ma demande (politique de confidentialité).",
       "submit": "Envoyer ma demande",
-      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com."
+      "wip": "Formulaire en cours de mise en service — en attendant, écrivez-nous directement à contact@myconciergehotel.com.",
+      "success": "Votre message a bien été reçu. Notre conciergerie vous répond sous 24h ouvrées.",
+      "successRef": "Référence : {ref}",
+      "rateLimited": "Vous avez envoyé plusieurs messages récemment. Merci de patienter avant de réessayer, ou écrivez-nous directement à contact@myconciergehotel.com.",
+      "error": "L'envoi a échoué. Merci de réessayer, ou écrivez-nous directement à contact@myconciergehotel.com."
     },
     "legal": {
       "title": "Identité de l'éditeur",
@@ -2717,6 +2761,7 @@
       "destinations": "Toutes les destinations",
       "hotels": "Tous les hôtels",
       "directoryFrance": "Annuaire — hôtels en France",
+      "placesToVisit": "Lieux à visiter",
       "rankings": "Tous les classements",
       "guides": "Tous les guides",
       "inspiration": "Inspiration",
@@ -2762,11 +2807,11 @@
     "noticePage": {
       "title": "Mentions légales",
       "metaDescription": "Mentions légales de MyConciergeHotel — éditeur, hébergeur, propriété intellectuelle, licences agence de voyage.",
-      "draftBanner": "Page en cours de finalisation — les identifiants juridiques (RCS, SIREN/SIRET, TVA, immatriculation Atout France, garantie financière) seront complétés avant la mise en production. La page est noindex tant que ces informations ne sont pas validées par le responsable juridique.",
+      "draftBanner": "Page en cours de finalisation — l'immatriculation Atout France, la garantie financière et l'assurance responsabilité civile professionnelle restent à compléter avant la mise en production. La page est noindex tant que ces informations ne sont pas validées.",
       "sections": {
         "editor": {
           "title": "Éditeur du site",
-          "body": "Le site myconciergehotel.com est édité par la société MyConciergeHotel, SAS au capital de [À COMPLÉTER : capital social] €, immatriculée au RCS de Paris sous le numéro [À COMPLÉTER : numéro RCS], dont le siège social est situé à [À COMPLÉTER : adresse complète du siège]. Numéro de TVA intracommunautaire : [À COMPLÉTER : FR + 11 chiffres]. Directeur de la publication : [À COMPLÉTER : nom du représentant légal]."
+          "body": "Le site myconciergehotel.com est édité par la société TRAVEL BUSINESS AGENCY, SASU au capital de 20 000 €, immatriculée au RCS de Nanterre sous le numéro 991 614 694 (SIRET du siège : 991 614 694 00016, code APE 79.12Z), dont le siège social est situé 9 rue Greffulhe, 92300 Levallois-Perret. Numéro de TVA intracommunautaire : FR79991614694. Directeur de la publication : Raphaël Zerdoun."
         },
         "contact": {
           "title": "Contact",
@@ -2796,7 +2841,7 @@
         },
         "controller": {
           "title": "Responsable de traitement",
-          "body": "MyConciergeHotel SAS, située à Paris, France. Délégué à la protection des données (DPO) : dpo@myconciergehotel.com."
+          "body": "TRAVEL BUSINESS AGENCY (marque MyConciergeHotel), SASU dont le siège est situé 9 rue Greffulhe, 92300 Levallois-Perret, France. Délégué à la protection des données (DPO) : dpo@myconciergehotel.com."
         },
         "purposes": {
           "title": "Finalités et bases légales",
@@ -3679,6 +3724,13 @@
       "category": "Catégorie",
       "schemaTypeAria": "Type Schema.org : {type}"
     },
+    "nearbyPlaces": {
+      "title": "Lieux à visiter à proximité",
+      "lead": "Les sites, monuments et balades que je recommande autour du {hotelName} — chaque lieu a sa fiche détaillée.",
+      "walkMinutes": "{count, plural, one {# min à pied} other {# min à pied}}",
+      "distanceMeters": "{meters, plural, =0 {sur place} other {à {meters} m}}",
+      "viewPlace": "Découvrir le lieu →"
+    },
     "events": {
       "title": "Ce qui se passe pendant votre séjour",
       "lead": "Les rendez-vous que je glisse dans les programmes de mes clients à {city} — concerts, expos, festivals à deux pas du {hotelName}.",
@@ -3808,6 +3860,7 @@
   "errors": {
     "notFoundTitle": "Page introuvable",
     "notFoundDescription": "La page demandée n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil",
     "errorTitle": "Une erreur est survenue",
     "errorDescription": "Nos équipes sont prévenues. Vous pouvez réessayer dans un instant.",
     "tryAgain": "Réessayer"
@@ -4245,7 +4298,14 @@
   },
   "lastUpdated": {
     "inline": "Mise à jour le {date}",
-    "block": "Mise à jour le {date}"
+    "block": "Mise à jour le {date}",
+    "monthYear": "Mis à jour en {date}"
+  },
+  "rankingPage": {
+    "tldrTitle": "Le verdict en bref",
+    "tldrAriaLabel": "Le verdict en bref : le trio de tête",
+    "podiumAriaLabel": "Le podium du classement en images",
+    "podiumHeading": "Le haut du classement en images"
   },
   "hotelTldr": {
     "eyebrow": "L'essentiel du Concierge",
@@ -4365,8 +4425,8 @@
         "body": "Une attention dans la chambre à votre arrivée, choisie par l'hôtel (champagne, fleurs, dégustation)."
       },
       "whatsapp_concierge_24_7": {
-        "title": "Concierge WhatsApp 24/7",
-        "body": "Une ligne directe avec notre concierge avant, pendant et après votre séjour."
+        "title": "Concierge WhatsApp (dès la Phase 6)",
+        "body": "Une ligne WhatsApp directe avec notre concierge avant, pendant et après votre séjour — canal en cours d'ouverture, déployé dès la Phase 6."
       },
       "gm_introduction": {
         "title": "Présentation au directeur",
@@ -4398,7 +4458,7 @@
         "name": "Le Concierge Club Prestige",
         "price": "99 €",
         "priceSuffix": "/ an — essai 30 jours gratuit",
-        "body": "Tous les avantages négociés avec nos hôtels Little partenaires : petit-déjeuner offert, surclassement confirmé, crédit hôtel, late check-out 16h, WhatsApp Concierge 24/7.",
+        "body": "Tous les avantages négociés avec nos hôtels Little partenaires : petit-déjeuner offert, surclassement confirmé, crédit hôtel, late check-out 16h, WhatsApp Concierge (dès la Phase 6).",
         "cta": "Rejoindre la liste d'attente ↓"
       }
     },
@@ -4423,7 +4483,7 @@
         },
         {
           "q": "Qu'est-ce qui change avec Prestige ?",
-          "a": "Prestige (€99/an, essai gratuit 30 jours) activera l'ensemble des avantages négociés avec nos hôtels Little partenaires : petit-déjeuner, surclassement, crédit hôtel, late check-out, cadeau de bienvenue, WhatsApp Concierge 24/7."
+          "a": "Prestige (€99/an, essai gratuit 30 jours) activera l'ensemble des avantages négociés avec nos hôtels Little partenaires : petit-déjeuner, surclassement, crédit hôtel, late check-out, cadeau de bienvenue, WhatsApp Concierge (dès la Phase 6)."
         }
       ]
     },
@@ -4459,9 +4519,9 @@
       "identityTitle": "Identité du programme",
       "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les hôtels d'exception du monde — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
       "philosophyTitle": "Philosophie",
-      "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, WhatsApp Concierge) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
-      "numbersTitle": "Catalogue (mai 2026)",
-      "numbersBody": "2 193 fiches hôtels publiées dans 127 pays, dont 434 Relais & Châteaux, 197 Small Luxury Hotels, 127 World 50 Best et 18 Palaces Atout France. 290 classements éditoriaux, 86 guides destinations, 20 itinéraires luxe France + international.",
+      "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, et le WhatsApp Concierge dès la Phase 6) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
+      "numbersTitle": "Catalogue (juin 2026)",
+      "numbersBody": "2 221 fiches hôtels publiées dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. 633 classements éditoriaux, 82 guides destinations, 23 itinéraires luxe France + international.",
       "complianceTitle": "Conformité",
       "complianceBody": "Programme conforme aux exigences DGCCRF et au Digital Services Act. Aucun indicateur d'urgence fabriqué (Atout France §2.8). Voix Concierge éditoriale (ADR-0011) : phrases ≤ 25 mots, lexique sourcé, aucun superlatif générique."
     },

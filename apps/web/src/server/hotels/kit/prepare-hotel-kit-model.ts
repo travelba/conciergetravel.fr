@@ -19,6 +19,10 @@ import { citySlug } from '@/server/destinations/cities';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
 import { getAmadeusHotelSentiment } from '@/server/hotels/get-amadeus-sentiment';
 import { buildHotelGalleryViewModel } from '@/server/hotels/build-hotel-gallery-view-model';
+import {
+  getCanonicalPlacesForHotel,
+  type HotelCanonicalPlaces,
+} from '@/server/places/get-canonical-places-for-hotel';
 import type { HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
 import { getPathname } from '@/i18n/navigation';
 import { env } from '@/lib/env';
@@ -44,6 +48,7 @@ import {
   readFeaturedReviews,
   filterPublicHotelGalleryImages,
   readGallery,
+  readGeoQa,
   readHeroImage,
   readHighlights,
   readHotelHistoryDates,
@@ -242,6 +247,7 @@ export interface HotelKitModel {
   readonly conciergeHook: string | null;
   readonly descriptionParagraphs: readonly string[];
   readonly storySections: ReturnType<typeof readHotelStory>;
+  readonly geoBlocks: ReturnType<typeof readGeoQa>;
   readonly factualSummary: HotelFactualSummary | null;
   readonly galleryHero: HotelKitGalleryTile | null;
   readonly galleryThumbs: readonly HotelKitGalleryTile[];
@@ -262,6 +268,7 @@ export interface HotelKitModel {
   readonly restaurants: ReturnType<typeof readRestaurants>;
   readonly spa: ReturnType<typeof readSpa>;
   readonly locationBuckets: ReturnType<typeof readLocationByBucket>;
+  readonly canonicalPlaces: HotelCanonicalPlaces;
   readonly transports: readonly LocalisedTransport[];
   readonly phone: string | null;
   readonly emailReservations: string | null;
@@ -469,6 +476,10 @@ export async function prepareHotelKitModelUncached(
   const policies = readPolicies(row, kitLocale);
   const inventory = readInventoryCounts(row);
   const historyDates = readHotelHistoryDates(row);
+  // Canonical "lieux à visiter" linked to this hotel (anti-cannibalisation:
+  // render short cards + links, never the long description). Falls back to
+  // the legacy embedded `points_of_interest` JSONB when empty.
+  const canonicalPlaces = await getCanonicalPlacesForHotel(row.id);
 
   const amadeusRating = amadeusSentiment.aggregate;
   const resolvedRating: HotelKitResolvedRating | null =
@@ -855,6 +866,7 @@ export async function prepareHotelKitModelUncached(
     conciergeHook: readConciergeHook(row, kitLocale),
     descriptionParagraphs,
     storySections: readKitStorySections(row, kitLocale),
+    geoBlocks: readGeoQa(row, kitLocale),
     factualSummary: readFactualSummary(row, kitLocale),
     galleryHero: mosaicHero,
     galleryThumbs: mosaicThumbs,
@@ -870,6 +882,7 @@ export async function prepareHotelKitModelUncached(
     restaurants: readRestaurants(row, kitLocale),
     spa: readSpa(row, kitLocale),
     locationBuckets,
+    canonicalPlaces,
     transports: locationBuckets.transports,
     phone: readPhoneE164(row),
     emailReservations: externalIds.emailReservations,

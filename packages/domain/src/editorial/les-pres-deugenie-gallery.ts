@@ -1,391 +1,397 @@
 /**
  * Phase 3 — curated 30-image gallery manifest for `les-pres-deugenie`.
  *
+ * Re-sourced 2026-06-16 (full re-source pass): every pixel verified against
+ * lespresdeugenie.com and captioned to match the photographed content. The
+ * previous manifest had scrambled categories, an offsite beach-house aerial,
+ * two logo plates and a broken hero (children on a bed). All slots are now
+ * authentic estate imagery covering the five UI filter tabs
+ * (Vue / Chambres / Piscine / Restaurant / Spa) plus a concierge pair.
+ *
  * Upload sources live in
  * `scripts/editorial-pilot/src/photos/resource-les-pres-deugenie-gallery-batch.ts`.
- *
- * CDC §2.2 — 10 category floor: exterior, lobby, room, dining, spa, pool,
- * view, detail, concierge, events (3 images each).
  */
 
 export const LES_PRES_DEUGENIE_HERO_IMAGE = 'cct/hotels/les-pres-deugenie/hero';
 
-/** Official source for dedicated hero upload — exterior overview (Rule 7). */
+/** Official source for dedicated hero upload — Maison Rose façade + palm drive (Rule 7). */
 export const LES_PRES_DEUGENIE_HERO_SOURCE_URL =
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/2501-01_13_lpde_heurebleue_bd-edited.jpg';
+  'https://lespresdeugenie.com/wp-content/uploads/2019/09/lespresdeugenie_maisonrose_facade_ete-min.jpg';
 
 /** Parallel to {@link LES_PRES_DEUGENIE_GALLERY_IMAGES} — provenance for kit audit gates. */
 export const LES_PRES_DEUGENIE_GALLERY_SOURCE_URLS = [
-  'https://lespresdeugenie.com/wp-content/uploads/2024/02/LPDE_nouvelle-reception_2024.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2018/10/EUG-FERME-THERMALE-VUE-EXT-059-YOAN-CHEVOJON-BD.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/02/imperatrice-eugenie_romantique.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/01/IMG2-edited.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/10/LPDE_vignette_chambre_couvent.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/08/eugenie_chambre_boutondor-600x600.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/86.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/72.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/76.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/07/tarte-tomate_lpde.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/61.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2018/10/2106-02_01_lpde_yoga_bd.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG9.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/07/70-1-2048x1152.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/07/IMG2-2048x1152.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG2.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG23.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/maison-rose-jardins-sejour-vacances.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/pres-eugenie-les-bains-palace-maison-guerard-nouvelle-aquitaine.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/02/Les-pres-dEugenie-00522.jpg',
   'https://lespresdeugenie.com/wp-content/uploads/2018/10/chateau-de-bachen-1.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/07/boucherie_lpde.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/07/IMG2-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/IMG23-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2024/02/LPDE_nouvelle-reception_2024-768x1356.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/86-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/72-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2026/05/Barbagoa-2026-Logo.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/76-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/61-1536x864.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/02/2501-01_13_lpde_heurebleue_bd-edited-1536x1536.jpg',
-  'https://lespresdeugenie.com/wp-content/uploads/2026/05/Barbagoa-2026-Logo.jpg?context=barbagoa-soiree',
-  'https://lespresdeugenie.com/wp-content/uploads/2025/01/IMG2-edited-2048x2048.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/08/DSC07115.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/03/Eugenie_chambres_CVTSUI_01.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/07/chambre-princiere-temps-cerise-jardins-eugenie-sud-ouest.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/06/pres-eugenie-suite-relais-chateaux-nouvelle-aquitaine-salons.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/07/imperatrice-suite-imperiale-petit-dejeuner-eugenie-sud-ouest.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2022/12/pres-d-eugenie_couvent_2022-15.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/03/Eugenie_chambres_LOGSUI_001.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2021/07/44AB6149-B6C2-476D-959C-EA53AD683C0A-scaled.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/08/Les-Pres-dEugenie-2025-@JoannPai-05870.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/03/Eugenie_chambres_GMJAC_03.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2021/07/2106-02_03_lpde_piscine_bd.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/11/1906-06_lamaisonrose_02_piscine_bd.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2020/09/8A5FD616-C640-47AC-82D7-6E19F516EDAD-scaled.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2021/05/les-pres-d-eugenie_cuisine-etoilee_012.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2021/05/les-pres-d-eugenie_cuisine-etoilee_03.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/Les-pres-dEugenie-00485.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/Les-pres-dEugenie-00245.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2020/04/1906-07_lespresdeugenie_08_terrasse_bd.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2023/01/les-pres-d-eugenie_orangerie_03-1-edited.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/2106-02_01_lpde_yoga_bd.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2018/10/pres-eugenie-ferme-thermale-soin-spa-jardins-nouvelle-aquitaine.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/08/Eugenie-La-Ferme-Thermale-E-Silobre-13.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/08/Eugenie-La-Ferme-Thermale-M-Hurstel.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2025/08/Les-Pres-dEugenie-2025-@JoannPai-06525.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/DSC06045.jpg',
+  'https://lespresdeugenie.com/wp-content/uploads/2024/07/Les-pres-dEugenie-00373.jpg',
 ] as const;
 
 export const LES_PRES_DEUGENIE_GALLERY_IMAGES = [
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-1',
-    category: 'exterior',
-    alt_fr: 'Façade de la Grande Maison, Les Prés d’Eugénie, Eugénie-les-Bains',
-    alt_en: 'Grande Maison facade, Les Prés d’Eugénie, Eugénie-les-Bains',
+    category: 'view',
+    alt_fr: 'Allée de palmiers vers la Maison Rose, Les Prés d’Eugénie, Eugénie-les-Bains',
+    alt_en: 'Palm-lined drive to the Maison Rose, Les Prés d’Eugénie, Eugénie-les-Bains',
     caption_fr:
-      'La Grande Maison coloniale domine le domaine de 8 hectares : 45 chambres, trois restaurants étoilés et La Ferme Thermale au cœur des Landes.',
+      'L’allée de palmiers mène à la Maison Rose, cœur du domaine de Michel et Christine Guérard à Eugénie-les-Bains.',
     caption_en:
-      'The colonial Grande Maison overlooks the eight-hectare estate: 45 rooms, three starred restaurants and La Ferme Thermale in the heart of the Landes.',
+      'The palm-lined drive leads to the Maison Rose, heart of Michel and Christine Guérard’s estate at Eugénie-les-Bains.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-2',
-    category: 'exterior',
-    alt_fr: 'Domaine Les Prés d’Eugénie au crépuscule, vallée des Landes',
-    alt_en: 'Les Prés d’Eugénie estate at dusk, Landes valley',
+    category: 'view',
+    alt_fr: 'Façade de la Maison Rose illuminée à l’heure bleue, Les Prés d’Eugénie',
+    alt_en: 'Maison Rose façade lit at blue hour, Les Prés d’Eugénie',
     caption_fr:
-      'Au crépuscule, le petit palace landais se fond dans la vallée de Gascogne — lumière dorée sur les jardins et les toitures coloniales.',
+      'À l’heure bleue, la verrière et la véranda coloniale de la Maison Rose s’illuminent au-dessus des jardins taillés.',
     caption_en:
-      'At dusk, the Landes palace blends into the Gascogne valley — golden light on the gardens and colonial rooftops.',
+      'At blue hour, the Maison Rose conservatory and colonial veranda glow above the clipped gardens.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-3',
-    category: 'exterior',
-    alt_fr: 'La Ferme Thermale vue extérieure, Les Prés d’Eugénie',
-    alt_en: 'La Ferme Thermale exterior, Les Prés d’Eugénie',
+    category: 'view',
+    alt_fr: 'Pergola en fer forgé vert de l’Orangerie, Les Prés d’Eugénie',
+    alt_en: 'Green wrought-iron Orangerie pergola, Les Prés d’Eugénie',
     caption_fr:
-      'L’ancienne ferme landaise du XVIIIe siècle abrite La Ferme Thermale — 1 000 m² de soins aux sources millénaires, partenaire Sisley.',
+      'La pergola verte de l’Orangerie ouvre sur les jardins ; l’été, on y dîne lors des soirées Al Fresco.',
     caption_en:
-      'The 18th-century Landes farm houses La Ferme Thermale — 1,000 sq m of treatments at millennia-old springs, Sisley partner.',
-    credit: 'Les Prés d’Eugénie — Yoan Chevojon (lespresdeugenie.com)',
+      'The Orangerie’s green pergola opens onto the gardens; in summer it hosts the Al Fresco dinners.',
+    credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-4',
-    category: 'lobby',
-    alt_fr: 'Réception des Prés d’Eugénie, style colonial et boiseries',
-    alt_en: 'Les Prés d’Eugénie reception, colonial wood panelling',
+    category: 'exterior',
+    alt_fr: 'Allée d’arbres du Château de Bachen, vignoble des Guérard',
+    alt_en: 'Tree-lined alley at Château de Bachen, the Guérard vineyard',
     caption_fr:
-      'La réception accueille les arrivées dans un décor colonial : bois ciré, lumière tamisée et vue sur les jardins poétiques.',
+      'À vingt minutes, le Château de Bachen produit le Baron de Bachen ; la conciergerie organise la visite du chai.',
     caption_en:
-      'The reception welcomes arrivals in a colonial setting: polished wood, soft light and views over the poetic gardens.',
+      'Twenty minutes away, Château de Bachen makes the Baron de Bachen; the concierge arranges the cellar visit.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-5',
-    category: 'lobby',
-    alt_fr: 'Salons Historiques de l’Impératrice, Les Prés d’Eugénie',
-    alt_en: 'Salons Historiques de l’Impératrice, Les Prés d’Eugénie',
+    category: 'exterior',
+    alt_fr: 'Auberge landaise en pierre parmi les prairies fleuries, Les Prés d’Eugénie',
+    alt_en: 'Stone Landes auberge among wildflower meadows, Les Prés d’Eugénie',
     caption_fr:
-      'Les Salons de l’Impératrice, musée vivant de la Maison, abritent le restaurant Michel Guérard triplement étoilé depuis 1977.',
+      'L’ancienne ferme landaise abrite La Ferme aux Grives, l’auberge de campagne de Michel Guérard, entourée de prairies fleuries.',
     caption_en:
-      'The Impératrice salons, a living museum of the house, host the Michel Guérard restaurant, three MICHELIN Stars since 1977.',
+      'The old Landes farmhouse holds La Ferme aux Grives, Michel Guérard’s country inn, ringed by wildflower meadows.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-6',
-    category: 'lobby',
-    alt_fr: 'Hall d’accueil de la Grande Maison, Eugénie-les-Bains',
-    alt_en: 'Grande Maison entrance hall, Eugénie-les-Bains',
+    category: 'room',
+    alt_fr: 'Lit à baldaquin et toile de Jouy jaune, chambre du Couvent aux Herbes',
+    alt_en: 'Canopy bed with yellow toile de Jouy, Couvent aux Herbes room',
     caption_fr:
-      'Platanes, bananiers et boiseries coloniales composent le hall — première impression avant les sept jardins.',
+      'Baldaquin, toile de Jouy jaune et petit-déjeuner servi en chambre : le couvent restauré cultive l’esprit maison de campagne.',
     caption_en:
-      'Plane trees, banana plants and colonial panelling shape the hall — the first impression before the seven gardens.',
+      'Canopy, yellow toile de Jouy and breakfast in the room: the restored convent keeps a country-house spirit.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-7',
     category: 'room',
-    alt_fr: 'Chambre Bouton d’Or, mobilier ancien, Les Prés d’Eugénie',
-    alt_en: 'Bouton d’Or room with antique furniture, Les Prés d’Eugénie',
+    alt_fr: 'Chambre Princière en toile rose côté jardins, Les Prés d’Eugénie',
+    alt_en: 'Princière room in pink toile facing the gardens, Les Prés d’Eugénie',
     caption_fr:
-      'Chaque chambre porte un nom poétique et un mobilier d’époque : tapis persans, linge fin et vue sur les roseraies.',
+      'La chambre Princière, toile rose et vue sur les jardins, compte parmi les chambres romantiques de la Maison Rose.',
     caption_en:
-      'Each room carries a poetic name and period furniture: Persian rugs, fine linen and views over the rose gardens.',
+      'The Princière room, in pink toile with garden views, is among the romantic rooms of the Maison Rose.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-8',
     category: 'room',
-    alt_fr: 'Chambre au Couvent des Herbes, Les Prés d’Eugénie',
-    alt_en: 'Room at Couvent des Herbes, Les Prés d’Eugénie',
+    alt_fr: 'Salon de la suite Impératrice, Les Prés d’Eugénie',
+    alt_en: 'Salon of the Impératrice suite, Les Prés d’Eugénie',
     caption_fr:
-      'Au Couvent des Herbes, poutres apparentes, lits à baldaquin et jardins ombragés composent une retraite champêtre.',
+      'La suite Impératrice ajoute un salon indépendant à la chambre ; idéale pour une cure de plusieurs jours.',
     caption_en:
-      'At Couvent des Herbes, exposed beams, four-poster beds and shaded gardens form a country retreat.',
+      'The Impératrice suite adds a separate salon to the bedroom — ideal for a multi-day cure stay.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-9',
     category: 'room',
-    alt_fr: 'Suite avec salon séparé, Les Prés d’Eugénie',
-    alt_en: 'Suite with separate lounge, Les Prés d’Eugénie',
+    alt_fr: 'Petit-déjeuner dans la Suite Impériale, Eugénie-les-Bains',
+    alt_en: 'Breakfast in the Imperial Suite, Eugénie-les-Bains',
     caption_fr:
-      'Les suites déploient salon indépendant, salle de bains en marbre et banquette pour un enfant jusqu’à 12 ans.',
+      'Petit-déjeuner minceur ou gourmand servi dans la Suite Impériale ; la cuisine de Guérard décline les deux cartes.',
     caption_en:
-      'Suites offer a separate lounge, marble bathroom and sofa bed for a child up to 12.',
+      'A light or indulgent breakfast served in the Imperial Suite; the Guérard kitchen offers both menus.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-10',
-    category: 'dining',
-    alt_fr: 'Restaurant Michel Guérard trois étoiles, Eugénie-les-Bains',
-    alt_en: 'Michel Guérard three-star restaurant, Eugénie-les-Bains',
+    category: 'room',
+    alt_fr: 'Chambre du Couvent aux poutres apparentes, Les Prés d’Eugénie',
+    alt_en: 'Beamed Couvent room, Les Prés d’Eugénie',
     caption_fr:
-      'Hugo Souchet et la brigade prolongent la cuisine naturaliste de Michel Guérard dans les Salons Historiques.',
+      'Le Couvent aux Herbes, ancien couvent du XVIIIe siècle, offre des chambres à poutres apparentes parmi les jardins d’aromatiques.',
     caption_en:
-      'Hugo Souchet and the brigade extend Michel Guérard’s naturalist cuisine in the historic salons.',
+      'Le Couvent aux Herbes, an 18th-century convent, offers beamed rooms set among the herb gardens.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-11',
-    category: 'dining',
-    alt_fr: 'L’Orangerie, jardin d’hiver et cheminée, Les Prés d’Eugénie',
-    alt_en: 'L’Orangerie winter garden and fireplace, Les Prés d’Eugénie',
+    category: 'room',
+    alt_fr: 'Chambre à baldaquin drapé jaune, Les Logis de la Ferme aux Grives',
+    alt_en: 'Yellow draped four-poster room, Les Logis de la Ferme aux Grives',
     caption_fr:
-      'L’Orangerie, une étoile MICHELIN depuis 2025, sert la Grande Cuisine Minceur® et des grillades en terrasse l’été.',
+      'Les Logis de la Ferme aux Grives, baldaquins drapés et bois peint, prolongent l’auberge côté campagne.',
     caption_en:
-      'L’Orangerie, one MICHELIN Star since 2025, serves Grande Cuisine Minceur® and terrace grillades in summer.',
+      'Les Logis de la Ferme aux Grives — draped four-posters and painted wood — extend the country inn.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-12',
-    category: 'dining',
-    alt_fr: 'La Ferme aux Grives, cheminée et cuisine landaise',
-    alt_en: 'La Ferme aux Grives, fireplace and Landes cooking',
+    category: 'detail',
+    alt_fr: 'Bouquet de roses et lion en faïence, décor des Prés d’Eugénie',
+    alt_en: 'Rose bouquet and faience lion, Les Prés d’Eugénie decor',
     caption_fr:
-      'Dans l’auberge du XVIIIe siècle, cochons de lait et pintades de Saint-Sever mijotent autour de la cheminée.',
+      'Bouquets champêtres et faïences chinées signent la décoration de Christine Guérard, pièce après pièce.',
     caption_en:
-      'In the 18th-century inn, suckling pigs and Saint-Sever guinea fowl simmer around the fireplace.',
+      'Country bouquets and antique faience define Christine Guérard’s decoration, room after room.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-13',
-    category: 'spa',
-    alt_fr: 'Cabine de soins thermaux, La Ferme Thermale d’Eugénie',
-    alt_en: 'Thermal treatment cabin, La Ferme Thermale d’Eugénie',
+    category: 'room',
+    alt_fr: 'Chambre aux poutres et tissus fleuris, Les Prés d’Eugénie',
+    alt_en: 'Beamed room with floral fabrics, Les Prés d’Eugénie',
     caption_fr:
-      'Vingt-et-une cabines individuelles accueillent cures et soins aux eaux captées à grande profondeur.',
+      'Poutres patinées, tissus fleuris et lumière landaise : chaque chambre est meublée d’ancien, sans deux décors identiques.',
     caption_en:
-      'Twenty-one individual cabins host cures and treatments with deeply sourced thermal water.',
-    credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
+      'Patinated beams, floral fabrics and Landes light: every room is furnished with antiques, no two alike.',
+    credit: 'Les Prés d’Eugénie — JoannPai (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-14',
-    category: 'spa',
-    alt_fr: 'Yoga dans les jardins, Les Prés d’Eugénie',
-    alt_en: 'Yoga in the gardens, Les Prés d’Eugénie',
+    category: 'pool',
+    alt_fr: 'Bassin privatif et transats sur la terrasse d’une suite, Les Prés d’Eugénie',
+    alt_en: 'Private plunge pool and loungers on a suite terrace, Les Prés d’Eugénie',
     caption_fr:
-      'Le programme Mind Body & Soul inclut yoga et marche méditative entre potagers et roseraies.',
+      'Certaines suites jardin disposent d’un bassin privatif et de transats face aux prairies — demandez-le à la conciergerie.',
     caption_en:
-      'The Mind Body & Soul programme includes yoga and mindful walks between vegetable plots and rose beds.',
+      'Some garden suites have a private plunge pool and loungers facing the meadows — ask the concierge.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-15',
-    category: 'spa',
-    alt_fr: 'Institut beauté Sisley, La Ferme Thermale',
-    alt_en: 'Sisley beauty institute, La Ferme Thermale',
+    category: 'pool',
+    alt_fr: 'Piscine extérieure bordée de pierre, vue aérienne, Les Prés d’Eugénie',
+    alt_en: 'Stone-edged outdoor pool, aerial view, Les Prés d’Eugénie',
     caption_fr:
-      'Deux cabines Sisley déploient les Soins Phyto-Aromatiques exclusifs aux Prés d’Eugénie.',
+      'La piscine extérieure, bordée de pierre et de parasols, se niche entre les jardins de la Maison Rose.',
     caption_en:
-      'Two Sisley cabins offer Phyto-Aromatic treatments exclusive to Les Prés d’Eugénie.',
+      'The stone-edged outdoor pool, framed by parasols, nestles among the Maison Rose gardens.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-16',
     category: 'pool',
-    alt_fr: 'Piscine extérieure chauffée 26 °C, Les Prés d’Eugénie',
-    alt_en: 'Heated outdoor pool at 26 °C, Les Prés d’Eugénie',
+    alt_fr: 'Piscine et transats devant la façade rose de la Maison Rose',
+    alt_en: 'Pool and loungers before the pink Maison Rose façade',
     caption_fr:
-      'La piscine chauffée s’installe entre les massifs — ouverte toute l’année, encas healthy en juillet-août.',
+      'Au pied de la Maison Rose, la piscine et ses transats jaunes prolongent la détente après La Ferme Thermale.',
     caption_en:
-      'The heated pool sits among the shrubbery — open year-round, healthy snacks in July and August.',
+      'At the foot of the Maison Rose, the pool and its yellow loungers extend the calm after La Ferme Thermale.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-17',
-    category: 'pool',
-    alt_fr: 'Bord de piscine et jardins ombragés, Eugénie-les-Bains',
-    alt_en: 'Poolside and shaded gardens, Eugénie-les-Bains',
+    category: 'dining',
+    alt_fr: 'Plat signature aux langoustines, restaurant Michel Guérard',
+    alt_en: 'Langoustine signature dish, Michel Guérard restaurant',
     caption_fr:
-      'Entre deux soins ou avant un déjeuner à L’Orangerie, la piscine offre une pause estivale paisible.',
+      'Au restaurant trois étoiles Michel Guérard, les langoustines illustrent grande cuisine et cuisine minceur réunies.',
     caption_en:
-      'Between treatments or before lunch at L’Orangerie, the pool offers a peaceful summer break.',
+      'At the three-star Michel Guérard restaurant, langoustines embody grande cuisine and cuisine minceur together.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-18',
-    category: 'pool',
-    alt_fr: 'Piscine, bain nordique et sauna extérieur en prairie',
-    alt_en: 'Pool, Nordic bath and outdoor sauna in the meadow',
+    category: 'dining',
+    alt_fr: 'Brigade en cuisine, restaurant étoilé Michel Guérard',
+    alt_en: 'Brigade plating in the Michel Guérard starred kitchen',
     caption_fr:
-      'Le rituel estival enchaîne piscine, bain nordique et sauna extérieur — inclus pour les hôtes du domaine.',
+      'La brigade dresse en cuisine ; l’École de Cuisine Minceur ouvre ces fourneaux aux hôtes plusieurs fois par an.',
     caption_en:
-      'The summer ritual links pool, Nordic bath and outdoor sauna — included for estate guests.',
+      'The brigade plates in the kitchen; the Cuisine Minceur school opens these stoves to guests several times a year.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-19',
-    category: 'view',
-    alt_fr: 'Jardins de roses et d’eau, domaine Les Prés d’Eugénie',
-    alt_en: 'Rose and water gardens, Les Prés d’Eugénie estate',
-    caption_fr: 'Sept jardins poétiques ponctuent les 8 hectares entre Landes, Gers et Béarn.',
-    caption_en: 'Seven poetic gardens mark the eight hectares between Landes, Gers and Béarn.',
+    category: 'dining',
+    alt_fr: 'Dôme au caviar, table trois étoiles d’Eugénie',
+    alt_en: 'Caviar dome, the three-star table at Eugénie',
+    caption_fr:
+      'Le menu dégustation alterne créations minceur et plats de fête, comme ce dôme au caviar dressé à l’assiette.',
+    caption_en:
+      'The tasting menu alternates light creations and festive plates, like this caviar dome served to the plate.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-20',
-    category: 'view',
-    alt_fr: 'Terrasse et jardins vus depuis une chambre',
-    alt_en: 'Terrace and gardens seen from a guest room',
+    category: 'dining',
+    alt_fr: 'Assiette gastronomique, restaurant Les Prés d’Eugénie',
+    alt_en: 'Gastronomic plate, Les Prés d’Eugénie restaurant',
     caption_fr:
-      'Depuis les balcons, la roseraie et le jardin d’eau se dévoilent au rythme de l’angélus du village.',
+      'Légumes du potager, foie gras de Lafitte et produits landais composent la carte des Prés d’Eugénie.',
     caption_en:
-      'From balconies, the rose garden and water garden unfold to the rhythm of the village angelus.',
+      'Kitchen-garden vegetables, Lafitte foie gras and Landes produce shape the Prés d’Eugénie menu.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-21',
-    category: 'view',
-    alt_fr: 'Vallée landaise autour d’Eugénie-les-Bains',
-    alt_en: 'Landes valley around Eugénie-les-Bains',
+    category: 'dining',
+    alt_fr: 'Tartelette aux fruits sur planche de bois, Les Prés d’Eugénie',
+    alt_en: 'Fruit tartlet on a wooden board, Les Prés d’Eugénie',
     caption_fr:
-      'Blotti dans une vallée de Gascogne, le domaine ouvre sur la forêt des Landes — déconnexion assurée.',
+      'Les desserts, hérités de la nouvelle cuisine, jouent l’acidité des fruits du Sud-Ouest plutôt que le sucre.',
     caption_en:
-      'Nestled in a Gascogne valley, the estate opens onto the Landes forest — guaranteed disconnection.',
+      'The desserts, born of nouvelle cuisine, favour the acidity of South-West fruit over sugar.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-22',
-    category: 'detail',
-    alt_fr: 'Dressage gastronomique, Restaurant Michel Guérard',
-    alt_en: 'Gastronomic plating, Michel Guérard restaurant',
+    category: 'dining',
+    alt_fr: 'Terrasse de restaurant aux fauteuils blancs, jardins d’Eugénie',
+    alt_en: 'Restaurant terrace with white chairs, Eugénie gardens',
     caption_fr:
-      'La partition naturaliste célèbre le terroir aquitain — patience, entrée, plat et dessert comme des bijoux.',
+      'Aux beaux jours, le déjeuner se prend en terrasse, fauteuils blancs et nappes safran sous les arbres.',
     caption_en:
-      'The naturalist score celebrates Aquitaine terroir — amuse-bouche, starter, main and dessert like jewels.',
+      'In fine weather lunch moves to the terrace — white chairs and saffron linen under the trees.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-23',
-    category: 'detail',
-    alt_fr: 'Produits du potager du domaine, Les Prés d’Eugénie',
-    alt_en: 'Estate kitchen garden produce, Les Prés d’Eugénie',
+    category: 'dining',
+    alt_fr: 'Table dressée à l’Orangerie, faïences et bouquet, Les Prés d’Eugénie',
+    alt_en: 'Set table at the Orangerie, faience and bouquet, Les Prés d’Eugénie',
     caption_fr:
-      'Asperges des Landes, foie gras Lafitte et légumes de Monsieur Bastelica nourrissent les fourneaux.',
+      'À l’Orangerie, les tables dressées de faïences anciennes accueillent petits-déjeuners et déjeuners face aux jardins.',
     caption_en:
-      'Landes asparagus, Lafitte foie gras and Monsieur Bastelica’s vegetables feed the kitchens.',
+      'At the Orangerie, tables laid with antique faience host breakfasts and lunches facing the gardens.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-24',
-    category: 'detail',
-    alt_fr: 'Pâtisseries du Café Mère Poule',
-    alt_en: 'Café Mère Poule pastries',
+    category: 'spa',
+    alt_fr: 'Séance de yoga en plein air dans les jardins, La Ferme Thermale',
+    alt_en: 'Outdoor yoga in the gardens, La Ferme Thermale',
     caption_fr:
-      'Gâteaux de grand-mère, samovar et chocolat chaud composent le goûter au Café Mère Poule.',
-    caption_en: 'Grandmother’s cakes, samovar and hot chocolate make tea time at Café Mère Poule.',
+      'Le programme bien-être ajoute yoga et marche aux jardins ; les séances matinales se réservent à La Ferme Thermale.',
+    caption_en:
+      'The wellness programme adds yoga and walks in the gardens; morning sessions book at La Ferme Thermale.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-25',
-    category: 'concierge',
-    alt_fr: 'Conciergerie 24h/24, Les Prés d’Eugénie',
-    alt_en: '24-hour concierge, Les Prés d’Eugénie',
+    category: 'spa',
+    alt_fr: 'La Ferme Thermale dans ses jardins, Eugénie-les-Bains',
+    alt_en: 'La Ferme Thermale in its gardens, Eugénie-les-Bains',
     caption_fr:
-      'La conciergerie coordonne tables étoilées, cures thermales et transferts Pau-Biarritz.',
+      'La Ferme Thermale, 1 000 m² de soins partenaires Sisley, puise aux sources thermales d’Eugénie-les-Bains.',
     caption_en:
-      'The concierge coordinates starred tables, thermal cures and Pau-Biarritz transfers.',
+      'La Ferme Thermale — 1,000 sq m of Sisley-partner treatments — draws on the Eugénie-les-Bains thermal springs.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-26',
-    category: 'concierge',
-    alt_fr: 'Accueil à la réception, Eugénie-les-Bains',
-    alt_en: 'Reception welcome, Eugénie-les-Bains',
+    category: 'spa',
+    alt_fr: 'Bain thermal rond en bois en extérieur, La Ferme Thermale',
+    alt_en: 'Round outdoor wooden thermal bath, La Ferme Thermale',
     caption_fr:
-      'Check-in dès 15h : la réception note préférences de table et créneaux spa avant l’installation.',
+      'Les bains en bois, en plein air face aux prairies, ponctuent le parcours sensoriel de La Ferme Thermale.',
     caption_en:
-      'Check-in from 3 pm: reception notes table preferences and spa slots before settling in.',
-    credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
+      'Outdoor wooden baths, facing the meadows, punctuate La Ferme Thermale’s sensory circuit.',
+    credit: 'Les Prés d’Eugénie — Emilie Silobre (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-27',
-    category: 'concierge',
-    alt_fr: 'Chambre Indigo terrasse Onzen privatif',
-    alt_en: 'Indigo room private Onzen terrace',
+    category: 'spa',
+    alt_fr: 'Bain bouillonnant en bois, soins de La Ferme Thermale',
+    alt_en: 'Wooden hot tub, La Ferme Thermale treatments',
     caption_fr:
-      'La conciergerie recommande la chambre Indigo pour une première venue en couple — terrasse 85 m².',
+      'Entre deux soins, le bain bouillonnant prolonge la cure ; serviettes et tisanerie attendent au calme.',
     caption_en:
-      'The concierge recommends the Indigo room for a first couple’s stay — 85 sq m terrace.',
-    credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
+      'Between treatments, the hot tub extends the cure; towels and a herbal-tea room wait nearby.',
+    credit: 'Les Prés d’Eugénie — M. Hurstel (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-28',
-    category: 'events',
-    alt_fr: 'Réception privée dans les jardins',
-    alt_en: 'Private reception in the gardens',
+    category: 'spa',
+    alt_fr: 'Salle de repos et massage, La Ferme Thermale',
+    alt_en: 'Relaxation and massage room, La Ferme Thermale',
     caption_fr:
-      'Mariages et séminaires se privatise dans les jardins — evenements@lespresdeugenie.com.',
+      'Les cabines de soins et la salle de repos closent le parcours ; réservez les massages signature à l’arrivée.',
     caption_en:
-      'Weddings and seminars can be privatised in the gardens — evenements@lespresdeugenie.com.',
-    credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
+      'Treatment cabins and the relaxation room close the circuit; book the signature massages on arrival.',
+    credit: 'Les Prés d’Eugénie — JoannPai (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-29',
-    category: 'events',
-    alt_fr: 'Soirée BarbaGoa barbecue et DJ, L’Orangerie',
-    alt_en: 'BarbaGoa barbecue and DJ evening, L’Orangerie',
+    category: 'concierge',
+    alt_fr: 'Michel Guérard en cuisine avec son chef, Les Prés d’Eugénie',
+    alt_en: 'Michel Guérard in the kitchen with his chef, Les Prés d’Eugénie',
     caption_fr:
-      'L’été, L’Orangerie accueille BarbaGoa : grillades, champagne sous les arbres et DJ ElectroChill.',
+      'Michel Guérard, père de la cuisine minceur, a façonné ici une table trois étoiles que sa brigade perpétue.',
     caption_en:
-      'In summer, L’Orangerie hosts BarbaGoa: grillades, champagne under the trees and an ElectroChill DJ.',
+      'Michel Guérard, father of cuisine minceur, shaped a three-star table here that his brigade still upholds.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
   {
     public_id: 'cct/hotels/les-pres-deugenie/press-30',
-    category: 'events',
-    alt_fr: 'Dîner Al Fresco en terrasse, L’Orangerie',
-    alt_en: 'Al Fresco terrace dinner, L’Orangerie',
+    category: 'concierge',
+    alt_fr: 'Maître d’hôtel en livrée, service des Prés d’Eugénie',
+    alt_en: 'Maître d’hôtel in livery, Les Prés d’Eugénie service',
     caption_fr:
-      'Dîners Al Fresco et événements œnologiques ponctuent la saison — dates via la conciergerie.',
-    caption_en: 'Al Fresco dinners and wine events mark the season — dates through the concierge.',
+      'Le maître d’hôtel coordonne tables étoilées, créneaux de cure et transferts depuis Pau ou Mont-de-Marsan.',
+    caption_en:
+      'The maître d’hôtel coordinates starred tables, cure slots and transfers from Pau or Mont-de-Marsan.',
     credit: 'Les Prés d’Eugénie — Maison Guérard (lespresdeugenie.com)',
   },
 ] as const;
 
 export const LES_PRES_DEUGENIE_GALLERY_CDC_CATEGORIES = [
+  'view',
   'exterior',
-  'lobby',
   'room',
+  'detail',
+  'pool',
   'dining',
   'spa',
-  'pool',
-  'view',
-  'detail',
   'concierge',
-  'events',
 ] as const;

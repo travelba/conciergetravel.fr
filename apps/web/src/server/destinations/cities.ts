@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { z } from 'zod';
 
 import { pickByLocale, pickLocalizedText, type SupportedLocale } from '@/i18n/supported-locale';
@@ -111,7 +113,14 @@ const PRIORITY_RANK: Record<HotelGroupRow['priority'], number> = { P0: 0, P1: 1,
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 8;
 
-async function fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
+// `cache()`-wrapped: the whole published catalogue (up to 8×1000 rows) is
+// scanned by both `getDestinationBySlug` (called in `generateMetadata` AND
+// the page body of `destination/[citySlug]`) and `listPublishedCities` on a
+// `force-dynamic` route. Request-scoped memoisation collapses those repeated
+// scans to one per request without changing the logic.
+const fetchAllPublished = cache(_fetchAllPublished);
+
+async function _fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
   // Both env-construction (build without secrets) and the network call may
   // throw; the destination pages tolerate an empty catalog so we coerce all
   // failure modes to `[]` here rather than scattering try/catch at every
@@ -327,7 +336,11 @@ export function isValidCitySlug(candidate: string): boolean {
   return SLUG_RE.test(candidate);
 }
 
-export async function getDestinationBySlug(
+// `cache()`-wrapped so the `generateMetadata` ↔ page-body pair on
+// `destination/[citySlug]` resolves a single computation per (slug, locale).
+export const getDestinationBySlug = cache(_getDestinationBySlug);
+
+async function _getDestinationBySlug(
   slug: string,
   locale: SupportedLocale,
 ): Promise<DestinationDetail | null> {

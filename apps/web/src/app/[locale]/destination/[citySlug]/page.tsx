@@ -30,6 +30,8 @@ import { getDestinationBySlug, listPublishedCities } from '@/server/destinations
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getGuideBySlug } from '@/server/guides/get-guide-by-slug';
 import { findItinerariesForCity } from '@/server/itineraries/find-itineraries-for-context';
+import { listPublishedPlacesForCity } from '@/server/places/list-places';
+import { pickListName } from '@/server/places/place-view';
 import { findRankingsForCity } from '@/server/rankings/find-related-rankings';
 
 /**
@@ -327,11 +329,12 @@ export default async function DestinationHubPage({
   // in a thin shim that returns an empty Map when no guide is loaded —
   // saves the Supabase round-trip on the hot path of FR cities that
   // don't yet have a long-read.
-  const [t, relatedRankings, relatedItineraries, guide] = await Promise.all([
+  const [t, relatedRankings, relatedItineraries, guide, cityPlaces] = await Promise.all([
     getTranslations('destinationPage'),
     findRankingsForCity({ citySlug, limit: 6 }),
     findItinerariesForCity({ citySlug, limit: 4 }),
     getGuideBySlug(citySlug),
+    listPublishedPlacesForCity(citySlug),
   ]);
   // Build the link map only when a guide will actually render — keeps
   // the Supabase budget on hub-only cities at zero extra reads.
@@ -650,6 +653,54 @@ export default async function DestinationHubPage({
                 itineraries={relatedItineraries}
                 cta={pickByLocale(locale, "Voir l'itinéraire", 'View the itinerary')}
               />
+            </div>
+          ) : null}
+
+          {cityPlaces.length > 0 ? (
+            <div className="mt-12 rounded-2xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
+              <h2 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
+                {pickByLocale(
+                  locale,
+                  `Lieux à visiter à ${destination.name}`,
+                  `Places to visit in ${destination.name}`,
+                )}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-neutral-600">
+                {pickByLocale(
+                  locale,
+                  `Visites culturelles, monuments, jardins et activités sélectionnés par le Concierge — ${String(cityPlaces.length)} lieux avec leur fiche, réservables via nos partenaires ou la conciergerie.`,
+                  `Cultural visits, monuments, gardens and activities curated by the Concierge — ${String(cityPlaces.length)} places with their own page, bookable via our partners or the concierge desk.`,
+                )}
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {cityPlaces.slice(0, 8).map((p) => (
+                  <li key={p.slug}>
+                    <Link
+                      href={{
+                        pathname: '/lieux/[citySlug]/[placeSlug]',
+                        params: {
+                          citySlug,
+                          placeSlug: locale === 'en' && p.slug_en ? p.slug_en : p.slug,
+                        },
+                      }}
+                      className="inline-flex rounded-full border border-neutral-300 bg-white px-3 py-1 text-sm text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-900"
+                    >
+                      {pickListName(p, locale)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={{ pathname: '/lieux/[citySlug]', params: { citySlug } }}
+                className="mt-5 inline-flex items-center gap-1 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700"
+              >
+                {pickByLocale(
+                  locale,
+                  `Découvrir tous les lieux à visiter à ${destination.name}`,
+                  `Discover all the places to visit in ${destination.name}`,
+                )}
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           ) : null}
 

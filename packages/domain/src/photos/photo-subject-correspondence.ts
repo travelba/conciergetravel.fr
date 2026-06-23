@@ -332,6 +332,84 @@ export function evaluatePhotoSlotExpectations(
   return mismatches;
 }
 
+/** Room row shape consumed by the room-photo coverage gate. */
+export interface RoomLike {
+  readonly slug?: string | null;
+  readonly name_fr?: string | null;
+  readonly name_en?: string | null;
+  readonly name?: string | null;
+  readonly hero_image?: string | null;
+  readonly images?: unknown;
+}
+
+export interface RoomPhotoIssue {
+  readonly index: number;
+  readonly slug: string | null;
+  readonly name: string | null;
+  readonly code: 'no_photo';
+  readonly detail: string;
+}
+
+export interface RoomPhotoCoverage {
+  readonly total: number;
+  readonly ok: number;
+  readonly issues: readonly RoomPhotoIssue[];
+}
+
+/** Count valid Cloudinary image entries on a room `images` JSONB array. */
+function countRoomImages(images: unknown): number {
+  if (!Array.isArray(images)) return 0;
+  let valid = 0;
+  for (const item of images) {
+    const rec = asRecord(item);
+    if (rec === null) continue;
+    const publicId = rec['public_id'] ?? rec['publicId'];
+    if (nonEmptyString(publicId)) valid += 1;
+  }
+  return valid;
+}
+
+function readRoomName(room: Record<string, unknown>): string | null {
+  if (nonEmptyString(room['name_fr'])) return room['name_fr'].trim();
+  if (nonEmptyString(room['name'])) return room['name'].trim();
+  if (nonEmptyString(room['name_en'])) return room['name_en'].trim();
+  return null;
+}
+
+/**
+ * Room-photo binding contract (CDC §2.2bis · ADR-0009 room sub-pages):
+ * every published room must carry at least one dedicated photo (a non-empty
+ * `hero_image` public_id OR ≥ 1 valid entry in `images[]`). A room with zero
+ * photos falls back to a generic kit asset on its sub-page — the exact
+ * "spa photo is not the spa" failure mode, applied to rooms: the rendered
+ * picture is then NOT this specific room. This is a structural (no-Vision)
+ * gate; pixel-level "is this really a bedroom" lives in the Vision audit.
+ */
+export function evaluateRoomPhotoCoverage(rooms: unknown): RoomPhotoCoverage {
+  const items = Array.isArray(rooms) ? (rooms as unknown[]) : [];
+  const issues: RoomPhotoIssue[] = [];
+
+  items.forEach((item, index) => {
+    const rec = asRecord(item);
+    if (rec === null) return;
+    const hero = rec['hero_image'] ?? rec['heroImage'];
+    const hasHero = nonEmptyString(hero);
+    const galleryCount = countRoomImages(rec['images']);
+    if (!hasHero && galleryCount === 0) {
+      const slug = nonEmptyString(rec['slug']) ? rec['slug'].trim() : null;
+      issues.push({
+        index,
+        slug,
+        name: readRoomName(rec),
+        code: 'no_photo',
+        detail: 'room has no hero_image and no images[] — sub-page falls back to a generic asset',
+      });
+    }
+  });
+
+  return { total: items.length, ok: items.length - issues.length, issues };
+}
+
 export interface PoiDedicatedImageCoverage {
   readonly total: number;
   readonly dedicated: number;

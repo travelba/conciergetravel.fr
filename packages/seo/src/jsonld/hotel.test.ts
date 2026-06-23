@@ -666,6 +666,36 @@ describe('hotelJsonLd', () => {
     }
   });
 
+  it('omits Restaurant.url when the URL is a squatter / OTA host (EEAT veto)', () => {
+    const node = hotelJsonLd({
+      name: 'Palace',
+      url: 'https://example.com/p',
+      restaurants: [
+        // Squatter: `hotels<geo><digits>.com` glued-subdomain aggregator → omitted.
+        { name: 'Squatter Resto', url: 'https://h10waterloo.hotelslondon24.com/es' },
+        // Squatter: Booking.com OTA listing → omitted.
+        { name: 'OTA Resto', url: 'https://www.booking.com/hotel/it/londra-palace.html' },
+        // Legitimate brand official site → kept.
+        {
+          name: 'Legit Resto',
+          url: 'https://www.ritzcarlton.com/en/hotels/dxbrz-the-ritz-carlton-dubai/overview',
+        },
+      ],
+    });
+    if (Array.isArray(node.containsPlace)) {
+      expect(node.containsPlace).toHaveLength(3);
+      const byName = new Map(
+        node.containsPlace.map((n) => [(n as { name: string }).name, n] as const),
+      );
+      expect(byName.get('Squatter Resto')).not.toHaveProperty('url');
+      expect(byName.get('OTA Resto')).not.toHaveProperty('url');
+      expect(byName.get('Legit Resto')).toHaveProperty(
+        'url',
+        'https://www.ritzcarlton.com/en/hotels/dxbrz-the-ritz-carlton-dubai/overview',
+      );
+    }
+  });
+
   it('caps eventSpaces to 30 entries', () => {
     const spaces = Array.from({ length: 50 }, (_, i) => ({
       name: `Salon ${String(i + 1)}`,

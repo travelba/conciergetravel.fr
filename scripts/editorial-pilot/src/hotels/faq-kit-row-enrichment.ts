@@ -111,8 +111,54 @@ function parseConciergeItems(raw: unknown): NormalisedConciergeQuestion[] {
   return out;
 }
 
+/**
+ * Parse the promote / `faq_content` tier (the 10 CDC canonical questions).
+ *
+ * The promote tier is NOT a kit slice: `run-faq-canonical.ts` + the humanizer
+ * emit `{ question_fr, answer_fr, question_en, answer_en, featured,
+ * concierge_tip_fr }` WITHOUT the kit `category` / `group_fr` / `group_en`
+ * taxonomy. Parsing it with `parseKitItems` (which requires that taxonomy)
+ * silently dropped every canonical item → a false `promote.count 0 < 10` +
+ * `promote.canonical missing` on every fiche whose FAQ went through the
+ * canonical pipeline. The promote tier is identified by `question_fr`
+ * (`isFaqCanonicalSet`), so we parse it leniently and synthesize neutral
+ * kit-shape fields to satisfy the shared `NormalisedFaqKitItem` type.
+ *
+ * Gotcha captured 2026-06-17 (RFICHE pilot): gate ↔ pipeline shape contract.
+ */
 function parsePromoteItems(raw: unknown): NormalisedFaqKitItem[] {
-  return parseKitItems(raw);
+  if (!Array.isArray(raw)) return [];
+  const out: NormalisedFaqKitItem[] = [];
+  for (const item of raw) {
+    if (!isRecord(item)) continue;
+    const question_fr = item['question_fr'];
+    const answer_fr = item['answer_fr'];
+    if (typeof question_fr !== 'string' || typeof answer_fr !== 'string') continue;
+    const rawCategory = item['category'];
+    const category: NormalisedFaqKitItem['category'] =
+      rawCategory === 'before' ||
+      rawCategory === 'during' ||
+      rawCategory === 'after' ||
+      rawCategory === 'agency'
+        ? rawCategory
+        : 'before';
+    const group_fr = typeof item['group_fr'] === 'string' ? item['group_fr'] : 'promote';
+    const group_en = typeof item['group_en'] === 'string' ? item['group_en'] : 'promote';
+    const question_en = item['question_en'];
+    const answer_en = item['answer_en'];
+    const featured = item['featured'];
+    out.push({
+      category,
+      group_fr,
+      group_en,
+      question_fr,
+      answer_fr,
+      ...(typeof question_en === 'string' && question_en.length > 0 ? { question_en } : {}),
+      ...(typeof answer_en === 'string' && answer_en.length > 0 ? { answer_en } : {}),
+      ...(featured === true ? { featured: true } : {}),
+    });
+  }
+  return out;
 }
 
 /** Prohibited first-person concierge commitment (CDC D10 — informative tone). */

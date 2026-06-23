@@ -19,15 +19,28 @@
 :root {
   --noir: #3a352d;
   --anthracite: #4a4439;
-  --or: #8c7b5a;
+  /* Accent taupe — darkened from #8c7b5a to #6f5f3c so accent-coloured copy
+     (eyebrows, links, labels) clears WCAG 2.2 AA 4.5:1 on every cream surface
+     (--creme #f6f1e7 → 5.5:1, --creme-3 #e8e0d0 → 4.6:1). The old #8c7b5a was
+     3.66:1 (70 axe contrast nodes on the kit fiche). The shared token also
+     drives decorative hairlines/borders/fills, which simply gain definition
+     at the deeper value — on-brand "taupe sobre". Gate 4 / accessibility. */
+  --or: #6f5f3c;
   --or-clair: #a89671;
-  --accent: #8c7b5a;
+  --accent: #6f5f3c;
   --creme: #f6f1e7;
   --creme-2: #efe8da;
   --creme-3: #e8e0d0;
   --blanc: #ffffff;
   --texte: #2b2722;
-  --texte-doux: #6f675b;
+  /* Muted body text — darkened from #6f675b to #665e52 so soft copy (footer
+     columns + .foot-brand, card sub-labels, captions) clears WCAG 2.2 AA
+     4.5:1 on every cream surface: 4.87:1 on the darkest common ground
+     --creme-3 #e8e0d0 (the footer), higher on --creme/--creme-2/white. The
+     old #6f675b was only 4.25:1 on --creme-3 (footer color-contrast nodes).
+     The token only ever paints text on light grounds, so darkening strictly
+     improves contrast everywhere. Gate 4 / accessibility. */
+  --texte-doux: #665e52;
   --ligne: rgba(140, 123, 90, 0.28);
   --kit-serif: var(--font-serif), 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
   --kit-sans: var(--font-sans), 'Outfit', 'Jost', system-ui, sans-serif;
@@ -215,12 +228,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
 }
 .mch-kit .brand {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 10px;
 }
 .mch-kit .brand-mono {
   font-family: var(--kit-serif);
@@ -242,15 +255,16 @@
 }
 .mch-kit .nav {
   display: flex;
-  gap: 30px;
+  gap: 16px;
 }
 .mch-kit .nav a {
   font-size: 13px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--texte);
   font-weight: 300;
   transition: 0.2s;
+  white-space: nowrap;
 }
 .mch-kit .nav a:hover {
   color: var(--accent);
@@ -258,7 +272,7 @@
 .mch-kit .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   color: var(--texte);
 }
 .mch-kit .header-right .hr-item {
@@ -1192,7 +1206,29 @@
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1000px) {
+/* Tight desktop band (1024–1339px): the 7-item home nav competes with the
+   brand wordmark + right cluster inside the 92vw `.wrap`. Hide the wordmark
+   (the MC monogram stays — mirrors the standard header which drops its
+   wordmark ≥ lg) so the full nav + right icons fit on one uncut row.
+   PO decision 2026-06-22 — full nav from 1024px without clipping. */
+@media (min-width: 1024px) and (max-width: 1339.98px) {
+  .mch-kit .header--overlay .brand-name {
+    display: none;
+  }
+}
+/* Narrow desktop band (1024–1279px): also drop the "Mon compte" label
+   text (the account icon + its aria-label remain) so the row clears the
+   942px wrap at 1024px. The FR locale chip keeps its text. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .mch-kit .header--overlay .header-right .hr-item:last-of-type span {
+    display: none;
+  }
+}
+/* Nav hides below the Tailwind `lg` breakpoint (1024px) so the home
+   overlay header matches the standard header: full nav from 1024px, the
+   shared MobileNav burger (`lg:hidden`) only below 1024px. PO decision
+   2026-06-22 — keeps the two headers in lockstep at the 1024px boundary. */
+@media (max-width: 1023.98px) {
   .mch-kit .nav {
     display: none;
   }
@@ -1270,6 +1306,15 @@
 }
 @media (max-width: 640px) {
   .mch-kit .header-right .hr-item span {
+    display: none;
+  }
+  /* Drop the brand wordmark on phones (the MC monogram stays) so the
+     overlay header clears the right cluster (heart + locale + account +
+     burger) inside the 92vw wrap at 390px — mirrors the standard header
+     (`sm:inline lg:hidden`) which also shows only the monogram on mobile.
+     Without this the wordmark pushed the shared MobileNav burger off the
+     right edge (the home-390 innerClip). PO decision 2026-06-22. */
+  .mch-kit .header .brand-name {
     display: none;
   }
   .mch-kit .hero {
@@ -1409,6 +1454,116 @@
 }
 .mch-kit .rk-meta .dot {
   color: var(--ligne);
+}
+/* Above-the-fold hero/podium — top-1 feature + up to 2 tiles.
+   Each cell reserves height via `aspect-ratio` so CLS stays 0 even
+   before the image loads. */
+.mch-kit .rk-podium {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  margin: 26px 0 0;
+}
+.mch-kit .rk-podium--solo {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+}
+.mch-kit .rk-podium--duo {
+  grid-template-rows: auto;
+}
+.mch-kit .rk-podium-feature,
+.mch-kit .rk-podium-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+.mch-kit .rk-podium-feature {
+  grid-row: span 2;
+  aspect-ratio: 16 / 10;
+}
+.mch-kit .rk-podium--solo .rk-podium-feature,
+.mch-kit .rk-podium--duo .rk-podium-feature {
+  grid-row: auto;
+}
+.mch-kit .rk-podium-tile {
+  aspect-ratio: 16 / 9;
+}
+.mch-kit .rk-podium-feature img,
+.mch-kit .rk-podium-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.mch-kit .rk-podium-feature:hover img,
+.mch-kit .rk-podium-tile:hover img {
+  transform: scale(1.05);
+}
+.mch-kit .rk-podium-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.72) 100%);
+  pointer-events: none;
+}
+.mch-kit .rk-podium-rank {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--kit-serif);
+  font-size: 15px;
+  line-height: 1;
+  padding: 7px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.mch-kit .rk-podium-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px 18px;
+  color: #fff;
+}
+.mch-kit .rk-podium-stars {
+  color: var(--or);
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.mch-kit .rk-podium-name {
+  font-family: var(--kit-serif);
+  line-height: 1.12;
+}
+.mch-kit .rk-podium-feature .rk-podium-name {
+  font-size: 26px;
+}
+.mch-kit .rk-podium-tile .rk-podium-name {
+  font-size: 19px;
+}
+.mch-kit .rk-podium-loc {
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  opacity: 0.92;
+  text-transform: uppercase;
+}
+@media (max-width: 1000px) {
+  .mch-kit .rk-podium,
+  .mch-kit .rk-podium--duo,
+  .mch-kit .rk-podium--solo {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .mch-kit .rk-podium-feature {
+    grid-row: auto;
+    aspect-ratio: 16 / 10;
+  }
 }
 .mch-kit .rk-list-sec {
   padding-top: 50px;

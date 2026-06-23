@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import { Link } from '@/i18n/navigation';
 import type { SupportedLocale } from '@/i18n/supported-locale';
+import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import type { GuideTeaser } from '@/server/guides/get-guide-teaser';
 
 interface LocalGuideTeaserProps {
@@ -17,8 +18,10 @@ interface LocalGuideTeaserProps {
  * Anti-cannibalisation contract (`seo-geo.mdc` §Anti-cannibalisation):
  *  - the teaser **must NOT** duplicate the guide body. It carries the
  *    guide title + a short summary + a link only.
- *  - the link uses the canonical `/guide/[citySlug]` pathname so
- *    Google Search consolidates equity on the guide page itself.
+ *  - the link uses the canonical `/destination/[citySlug]` pathname
+ *    (ADR-0015 guide↔destination merge) so Google consolidates equity
+ *    on the canonical URL without a 308 hop. The 8 hand-built country
+ *    guides stay canonical at `/guide/<slug>` (static page wins).
  *
  * Renders `null` when no guide is published for the city — the bloc
  * appears automatically the next time the hotel ISR revalidates after
@@ -51,7 +54,11 @@ export async function LocalGuideTeaser({
       <p className="text-muted mt-3 max-w-prose text-sm">{guide.summary}</p>
       <p className="mt-4">
         <Link
-          href={{ pathname: '/guide/[citySlug]', params: { citySlug: guide.slug } }}
+          href={
+            isHandBuiltCountrySlug(guide.slug)
+              ? { pathname: '/guide/[citySlug]', params: { citySlug: guide.slug } }
+              : { pathname: '/destination/[citySlug]', params: { citySlug: guide.slug } }
+          }
           className="text-fg inline-flex items-center gap-1 text-sm font-medium underline-offset-2 hover:underline"
           aria-label={t('cta', { name: guide.name })}
         >

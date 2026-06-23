@@ -42,6 +42,7 @@ import { HotelInstagram } from '@/components/hotel/hotel-instagram';
 import HotelEvents from '@/components/hotel/hotel-events';
 import { HotelLocation, HotelNeighbourhoodBuckets } from '@/components/hotel/hotel-location';
 import { HotelMiceEvents } from '@/components/hotel/hotel-mice-events';
+import { HotelNearbyPlaces } from '@/components/hotel/hotel-nearby-places';
 import { HotelPolicies } from '@/components/hotel/hotel-policies';
 import { HotelRestaurants } from '@/components/hotel/hotel-restaurants';
 import { HotelRoomsGrid, type HotelRoomCardVM } from '@/components/hotel/hotel-rooms-grid';
@@ -131,6 +132,7 @@ import {
 } from '@/server/hotels/get-hotel-by-slug';
 import { HotelPageKit } from '@/components/hotel/kit/hotel-page-kit';
 import { getRelatedHotels } from '@/server/hotels/get-related-hotels';
+import { getNearbyPlacesForHotel } from '@/server/hotels/get-nearby-places-for-hotel';
 import { shouldRenderHotelKitPage } from '@/server/hotels/kit/is-hotel-kit-slug';
 import { buildHotelKitMetadata } from '@/server/hotels/kit/build-hotel-kit-metadata';
 import { getRankingsForHotel } from '@/server/rankings/get-rankings-for-hotel';
@@ -1229,7 +1231,7 @@ async function renderHotelPage(
   // No live offer fetch in Phase 1 (editorial site, ADR-0024). The
   // booking funnel — and with it the `Offer` JSON-LD + `priceValidUntil`
   // — returns in Phase 6 when the Amadeus / Little adapters are wired.
-  const [relatedHotels, featuredInRankings, guideTeaser] = await Promise.all([
+  const [relatedHotels, featuredInRankings, guideTeaser, nearbyPlaces] = await Promise.all([
     getRelatedHotels({
       currentSlug: row.slug,
       city: row.city,
@@ -1241,6 +1243,15 @@ async function renderHotelPage(
     }),
     getRankingsForHotel(row.id, { limit: 6 }),
     getGuideTeaserForCity(cityHubSlug, locale),
+    // Reverse maillage into the "lieux" vertical (skill seo-technical
+    // §Maillage). Curated `place_hotel_links` first, geo fallback in the
+    // same city second. Self-elides when no published place is nearby.
+    getNearbyPlacesForHotel({
+      hotelId: row.id,
+      citySlug: cityHubSlug,
+      latitude: row.latitude,
+      longitude: row.longitude,
+    }),
   ]);
 
   // VideoObject JSON-LD (B8 / CDC §2 bloc 2). Emitted only when the
@@ -1630,6 +1641,10 @@ async function renderHotelPage(
                 {t('sections.around')}
               </h2>
               <HotelNeighbourhoodBuckets locale={locale} location={location} />
+              {/* Reverse maillage → "lieux" vertical (internal mesh). Curated
+                  place_hotel_links first, geo fallback second; self-elides when
+                  no published place is nearby. */}
+              <HotelNearbyPlaces locale={locale} hotelName={name} places={nearbyPlaces.items} />
               <HotelEvents
                 locale={locale}
                 hotelName={name}

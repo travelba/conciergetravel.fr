@@ -408,6 +408,162 @@ non-obvious bits to re-use:
    (src/srcset/og:image/`ImageObject`) — OTA names in the price comparator
    are plain text (legal) and the official-site link is a legitimate anchor.
 
+## Pattern — Tier B backfill: APPEND from Google Places, never `sync` overwrite (2026-06-18)
+
+**Trap.** `sync-hotel-photos.ts` ends with
+`updateHotelPhotos(id, { hero_image, gallery_images })` — it **replaces**
+both columns wholesale with the freshly-fetched Commons/Places set. That
+is correct for _stubs_ (0 photos / missing hero) but **destructive** for
+Tier B hotels (3-9 curated photos + a good hero): running it would clobber
+the existing curation and re-introduce un-Vision-checked subjects. Never
+point `sync-hotel-photos` at hotels that already have a hero you want to keep.
+
+**Safe backfill path (append + Vision-curated):**
+
+1. `gen-places-discovery.ts --slugs-file=runs/tier-b-cohort.json --per-hotel=14`
+   — sources from the **Google Places Photo API** (geo-tagged to the
+   hotel's `place_id`, so subject contamination is far lower than a Tavily
+   corporate-root crawl) and writes discovery JSON in the **exact**
+   `DiscoveryReportSchema` shape that `upload-press-kit-images.ts` consumes.
+2. `upload-press-kit-images.ts --discovery-dir=runs --slugs=<same> --limit=8`
+   — Vision-curates each candidate (category + alt FR/EN + caption +
+   quality + keep), uploads to Cloudinary, and **APPENDS** to
+   `gallery_images` (preserves existing rows; promotes a hero **only**
+   when none exists, so a curated hero is never touched).
+
+**Why it works.** Google Places photo URLs resolve to
+`lh3.googleusercontent.com`, now in `HOSTNAME_WHITELIST_GLOBAL`
+(`parent-group-mapping.ts`), so the upload's safe-by-default source filter
+accepts them. The R&C portal (Tavily-blind, JS-rendered) and Four Seasons
+DAM (egress-blocked) no longer matter — Places covers every chain.
+
+**Result (2026-06-18 Tier B cohort):** 23 → 2 Tier B; DONE 2095 → 2116.
+The 2 residuals (`royal-chundu-luxury-zambezi-lodges`, `yihe-mansions`)
+have **0 Google Places photos** → need Tavily/manual. Don't store the
+Places `downloadUrl` as `source_url` — it's a signed, expiring URL;
+provenance lives in the `google_places`/`attributed` tags instead.
+
+### Update — the real hotel `<10`-photo residual is ~15, not ~87 (2026-06-22)
+
+The "87 hotels < 10 photos" figure in `AGENTS.md` is **stale history**. After
+the June append waves the live residual is **~15** hotels, of which **~10/15
+are NOT addressable by Google Places** (the source has 0 photos for them —
+pre-opening properties, JS-rendered R&C lodges, obscure independents). Those
+need Tavily / official-site / manual sourcing, not another Places run. Always
+re-count from the live DB (`gallery_images` length) before scoping a "close the
+gap" chantier — don't trust a count baked into prose.
+
+### Anti-pattern — Tavily-extract is near-useless on the Tier-C residual (JS-SPA + multi-property chrome, 2026-06-22)
+
+On the `<10`-photo traîne, Tavily extraction of official sites enriched **only
+1 hotel of 15** (`royal-chundu` 6→11, via the server-rendered, property-scoped
+`relaischateaux.com` CloudFront DAM). Modern luxury sites are **JS-SPAs** whose
+galleries sit behind a lightbox Tavily never crawls; multi-property brand
+domains return **chrome/sibling** images Vision can't disambiguate (a Bhutan
+pool vs a Milan pool). It only works on (a) server-rendered property-scoped
+pages on a whitelisted CDN, distinguishing (b) property gallery URLs
+(`/transform/<uuid>`) from shared CMS chrome (`/images/media/<uuid>`).
+**Recommendation:** stop investing Tavily-extract here — use a headless browser
+(Playwright loads the SPA + extracts gallery image URLs) or manual sourcing.
+Reusable tool already committed: `scripts/editorial-pilot/src/photos/discover-official-site-images.ts`
+(commit `db45721`). See also `windows-dev-environment` §Rule 9 sexies for the
+shared-tree push-lock + disjoint-worker discipline this parallel run surfaced.
+
+### Verdict — headless browser cracks img/srcset DAMs, NOT canvas/WebGL SPAs (2026-06-22)
+
+Built + ran `discover-spa-gallery-images.ts` (Playwright headless Chromium,
+loaded from `apps/web`'s e2e dep via `createRequire`; renders → consent →
+open-gallery → scroll lazy-load → harvest `img/srcset`+`source`+CSS-bg+`a-href`+
+`__NEXT_DATA__`; property-scope + dedup; emits the press-kit discovery JSON that
+`upload-press-kit-images.ts` consumes). On the 10-hotel Tier-C residual it
+**unblocked 3 / 10**: `yihe-mansions` 4→12 (R&C CloudFront, ≥10 ✅),
+`kempinski-hybernska` 0→7 +hero, `kempinski-residences-and-suites-doha` 0→4
++hero — **19 real photos, 0 hotlink leak (prod FR+EN curl: only `cct/hotels`
+refs, image HEAD 200 image/jpeg)**. The other 7 returned **raw=0** harvestable
+images: Six Senses / Cheval Blanc / Marriott / Barrière render galleries in
+**canvas/WebGL or JS-driven `<div background>` swappers** that expose no `<img>`
+URL even after scroll; `margutta-19` = anti-bot `ERR_CONNECTION_RESET`.
+**So: headless helps ONLY for sites whose DAM still emits real `<img src/srcset>`
+(R&C, Kempinski) — for canvas/WebGL luxury SPAs it's no better than Tavily; those
+need manual sourcing.** Three reusable gotchas captured below.
+
+Gotchas (all bit during this run):
+
+- **esbuild `__name` in `page.evaluate`.** tsx's `keepNames` wraps named fns in
+  a `__name(fn,…)` helper that's undefined in the browser → `ReferenceError`.
+  Shim it first: `await page.evaluate(()=>{(globalThis as any).__name=(f:any)=>f})`.
+- **Playwright `chromium` is a non-enumerable getter.** `'chromium' in mod` /
+  `Object.keys` miss it — read `mod.chromium` directly and check `.launch`.
+- **Hotlink-blocked origin vs open CDN.** `www.kempinski.com/ki-cms-prod/...`
+  403s third-party fetch → OpenAI Vision 400 "unsupported image"; the SAME asset
+  on `storage.kempinski.com/cdn-cgi/image/w=2000,…/` is open. Rewrite origin→CDN
+  before discovery so candidates are actually fetchable downstream.
+- **PowerShell `--slugs=a,b,c` arrives space-joined** (one token) — split CLI
+  list args on `/[\s,]+/` AND quote the arg (`'--slugs=a,b,c'`).
+
+## The hotel APPEND path DEPENDS on OpenAI Vision — no OpenAI, no clean append (2026-06-22)
+
+There is **no hotel photo APPEND pipeline that runs without OpenAI**. This is
+a hard dependency, not a convenience, and it bites the moment the OpenAI quota
+is down or the key is absent:
+
+- **`upload-press-kit-images.ts`** (the only Vision-curated append path, used by
+  the Tier B Google-Places backfill above) calls `visionAnalyse()`
+  **unconditionally** — it **throws** when `OPENAI_API_KEY` is missing. Vision
+  is what produces `alt_fr` + `alt_en` + `category` + the keep/quality filter,
+  so the append cannot be made "OpenAI-optional" without dropping those columns
+  (which would violate Hard Rule 16 alt enrichment + the category contract).
+- The **only** OpenAI-free hotel→Places path, `sync-hotel-photos.ts
+--tier=places`, **overwrites `gallery_images` wholesale** (the destructive
+  trap documented in "Tier B backfill: APPEND … never `sync` overwrite",
+  2026-06-18) **and** emits neither `alt_en` nor `category`. It is safe only for
+  0-photo stubs, never for a hotel with curated photos to preserve.
+
+**Consequence for agents:** when OpenAI is unavailable, a hotel photo _append_
+chantier is **blocked** — do the written-content chantier instead (§Sequencing
+decision), or queue the append for when Vision is back. Do **not** reach for
+`sync-hotel-photos --tier=places` as a fallback: it destroys curation and
+ships un-Vision-checked subjects. (Contrast: the **places/lieux** pipeline
+`backfill-place-photos.ts` below is genuinely OpenAI-free — it derives alt text
+deterministically from `kind` + `city`, so the lieux vertical keeps moving when
+the hotel append path is blocked.)
+
+## Lieux (places) photo backfill — `backfill-place-photos.ts` has NO `hero_image is null` filter and NO offset (2026-06-22)
+
+`scripts/editorial-pilot/src/places/backfill-place-photos.ts` is the
+sister-pipeline of the hotel orchestrator, scoped to the **`public.places`
+"lieux à visiter"** vertical (Cloudinary folder `cct/places/{cityKey}/{slug}`,
+Google-Places-sourced, **OpenAI-free** — alt text is built deterministically
+from `kind` + `city`, see `buildAlt`). Its row selection is:
+
+```ts
+// filters = [`city_key=eq.${city}`] (+ `is_published=eq.true` unless --include-unpublished)
+const places = await selectTable(supa, 'places', {
+  columns: PLACE_COLS,
+  filters,
+  order: 'slug.asc',
+  limit: args.limit,
+});
+```
+
+The trap: there is **no `hero_image=is.null` filter and no `offset`**. The SELECT
+always returns the **first `--limit` slugs alphabetically**; the
+already-hydrated ones are then skipped _in memory_ inside `processPlace`
+(`if (!args.force && place.hero_image !== null) return 'skip'`) at near-zero
+cost. So a loop with a small `--limit` (e.g. `--limit=10`) **re-scans the same
+first-10 alphabetical slugs every iteration and never advances** past them —
+the already-done ones keep getting skipped and the tail of the city is never
+reached.
+
+**Fix:** pass a `--limit` large enough to cover the **whole city in one pass**
+(count the city's `places` rows first, then `--limit=<that count>`). The skips
+are cheap, so a single oversized-limit run is correct and idempotent. (A durable
+code fix would add a `hero_image=is.null` filter or an `offset` cursor; until
+then, size the limit to the city.) Note the **`--allow-paris` isolation guard**:
+the script refuses `--city=paris` unless explicitly opted in, because a
+continuous Paris enrichment + auto-publish loop runs in parallel — validate new
+rollouts on `--city=gordes` first.
+
 ## Finding — the 10-category coverage floor is structurally unreachable (2026-06-02)
 
 `photo-quality.mdc` frames "10/10 distinct categories" as a non-negotiable
@@ -820,6 +976,26 @@ proposed hosts** before a live `official_url` backfill on a hard
 cohort — iterate the ruleset until the toxic/aggregator scan returns
 zero, then write.
 
+#### New squatter family — `hotels<geo><digits>` glued non-www subdomain (2026-06-22, commit `fd451b75`)
+
+A backfill surfaced `h10waterloo.hotelslondon24.com` — an aggregator that glues
+the property name into a **non-www subdomain** of a `hotels<geo><digits>` /
+`<geo>hotels<digits>` domain. The existing glued-subdomain rule had to **exclude
+`.com`** to spare legit brands (`pasadena.langhamhotels.com`,
+`booking.hotelsantacaterina.com`), so this one slipped through. The safe
+discriminator is the **trailing digits**: a real brand never registers
+`hotels<word><digits>.com`, so a digit-suffixed rule can safely include `.com`.
+The veto added to `isToxicOfficialUrl` (`toxic-official-url.ts`, +4 fixtures):
+
+```ts
+String.raw`//(?!www\.)[a-z0-9-]+\.(?:hotels[a-z]+|[a-z]+hotels)\d+\.(?:com|org|net|info)(?:[/:?#]|$)`;
+```
+
+Lesson (re-confirming the 2026-06-02 trap): when a squatter shape forces you to
+exclude `.com`, look for a second discriminator (here: terminal digits) that
+re-admits `.com` without catching the legit brands — don't leave the whole
+`.com` surface unguarded.
+
 Provenance note: `official_url` is a scalar column whose discovery
 channel is not recorded, so the converter attributes it as
 `source: 'official_site'` / `confidence: 'medium'` — NOT `'wikidata'`
@@ -937,3 +1113,9 @@ isn't guaranteed-sorted.
 - `scripts/editorial-pilot/src/photos/parent-group-mapping.ts` → single
   source of truth for `ParentGroup`, `PARENT_DOMAINS_BY_GROUP`,
   `HOSTNAME_BLOCKLIST_GLOBAL`, `HOSTNAME_WHITELIST_GLOBAL`.
+- [ADR-0030 — Vertical « Lieux à visiter »](../../docs/adr/0030-lieux-a-visiter-vertical.md)
+  - `scripts/editorial-pilot/src/places/backfill-place-photos.ts` → the
+    place-photo pipeline (sister of `sync-hotel-photos.ts`, no OpenAI):
+    Google Places source → Cloudinary `cct/places/{cityKey}/{placeSlug}`,
+    alt FR+EN, PATCH only `hero_image` + `gallery_images`, `--allow-paris`
+    isolation guard.
