@@ -46,6 +46,15 @@ export interface EditorialTableData {
   readonly note_en?: string;
   readonly headers: readonly EditorialTableHeader[];
   readonly rows: readonly Readonly<Record<string, TableCell>>[];
+  /**
+   * EN parity for the row body. When the locale is EN and this parallel
+   * array is present (same length + keys as `rows`, textual cells
+   * translated), the renderer uses it so the table body is no longer
+   * FR-only on `/en`. Absent/empty → fall back to `rows` (backward
+   * compatible). Backfilled by the editorial-pilot
+   * `translate-rankings-tables-en` tool.
+   */
+  readonly rows_en?: readonly Readonly<Record<string, TableCell>>[];
 }
 
 interface Props {
@@ -87,6 +96,13 @@ function renderCell(cell: TableCell, locale: SupportedLocale): ReactElement | st
 export function EditorialTable({ table, locale }: Props): ReactElement {
   const title = pickLocalized(table.title_fr, table.title_en, locale);
   const note = pickLocalized(table.note_fr, table.note_en, locale);
+  // Locale-aware row body: on EN, prefer the translated `rows_en` when it
+  // covers the same number of rows; otherwise fall back to the FR `rows`
+  // (a table not yet backfilled renders exactly as before).
+  const rows =
+    locale === 'en' && Array.isArray(table.rows_en) && table.rows_en.length === table.rows.length
+      ? table.rows_en
+      : table.rows;
   return (
     <figure className="border-border bg-bg/30 my-8 overflow-hidden rounded-lg border">
       <figcaption className="text-fg/90 border-border bg-bg/60 border-b px-4 py-3 font-serif text-base font-light">
@@ -114,7 +130,7 @@ export function EditorialTable({ table, locale }: Props): ReactElement {
             </tr>
           </thead>
           <tbody>
-            {table.rows.map((row, idx) => (
+            {rows.map((row, idx) => (
               <tr
                 key={idx}
                 className="border-border/50 hover:bg-bg/50 border-b transition-colors last:border-b-0"
