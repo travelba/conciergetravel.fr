@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import type { GuideLookup } from '@/server/itineraries/get-related-data';
 
 interface RelatedGuidesProps {
@@ -29,7 +30,11 @@ export async function RelatedGuides({ locale, guides }: RelatedGuidesProps) {
           return (
             <li key={g.slug}>
               <Link
-                href={{ pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }}
+                href={
+                  isHandBuiltCountrySlug(g.slug)
+                    ? { pathname: '/guide/[citySlug]', params: { citySlug: g.slug } }
+                    : { pathname: '/destination/[citySlug]', params: { citySlug: g.slug } }
+                }
                 className="border-border bg-bg group flex flex-col gap-2 rounded-md border p-4 hover:border-amber-400"
               >
                 <span className="text-fg text-sm font-medium">{name}</span>

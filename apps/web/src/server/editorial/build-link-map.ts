@@ -1,6 +1,7 @@
 import 'server-only';
 
 import type { EditorialLink, EditorialLinkMap } from '@/components/editorial/enriched-text';
+import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -98,10 +99,13 @@ export async function buildEditorialLinkMap(options: {
   if (guidesRes.data !== null) {
     for (const row of guidesRes.data as unknown as GuideRow[]) {
       if (options.excludeGuideSlug === row.slug) continue;
-      const href: EditorialLink = {
-        pathname: '/guide/[citySlug]',
-        params: { citySlug: row.slug },
-      };
+      // Canonical landing is `/destination/<slug>` post ADR-0015 (guide↔
+      // destination merge) — link there directly to avoid a 308 hop in the
+      // body mesh. The 8 hand-built country guides stay canonical at
+      // `/guide/<slug>` (static page wins, DB row unpublished).
+      const href: EditorialLink = isHandBuiltCountrySlug(row.slug)
+        ? { pathname: '/guide/[citySlug]', params: { citySlug: row.slug } }
+        : { pathname: '/destination/[citySlug]', params: { citySlug: row.slug } };
       if (!map.has(row.name_fr)) map.set(row.name_fr, href);
       if (
         row.name_en !== null &&
