@@ -1,0 +1,932 @@
+{
+  "finishedAt": "2026-06-23T10:30:17.985Z",
+  "args": {
+    "slugs": [],
+    "all": true,
+    "limit": 0,
+    "concurrency": 4,
+    "dryRun": false
+  },
+  "results": [
+    {
+      "slug": "classement-conde-nast-gold-list-2026",
+      "introChars": 0,
+      "fsChars": 130,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "classement-leading-hotels-of-the-world-selection",
+      "introChars": 0,
+      "fsChars": 151,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "classement-ritz-carlton-reserve-hotels",
+      "introChars": 0,
+      "fsChars": 126,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "classement-small-luxury-hotels-of-the-world-selection",
+      "introChars": 0,
+      "fsChars": 130,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "classement-travel-leisure-worlds-best-2025",
+      "introChars": 0,
+      "fsChars": 130,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "classement-worlds-50-best-hotels-2025",
+      "introChars": 0,
+      "fsChars": 123,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-5-etoiles-alpes",
+      "introChars": 2046,
+      "fsChars": 117,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-5-etoiles-cote-d-azur",
+      "introChars": 2954,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-5-etoiles-courchevel",
+      "introChars": 3140,
+      "fsChars": 114,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-5-etoiles-paris",
+      "introChars": 3405,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-alsace",
+      "introChars": 2009,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-australie",
+      "introChars": 0,
+      "fsChars": 127,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-bord-de-mer-cote-d-azur",
+      "introChars": 1919,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-bord-de-mer-france",
+      "introChars": 3407,
+      "fsChars": 110,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-boston",
+      "introChars": 0,
+      "fsChars": 156,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-brisbane",
+      "introChars": 0,
+      "fsChars": 132,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-alpes",
+      "introChars": 3566,
+      "fsChars": 139,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-corse",
+      "introChars": 4036,
+      "fsChars": 123,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-courchevel",
+      "introChars": 3631,
+      "fsChars": 121,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-france",
+      "introChars": 3469,
+      "fsChars": 116,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-lac-leman",
+      "introChars": 4956,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-loire",
+      "introChars": 3589,
+      "fsChars": 123,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-charme-paris",
+      "introChars": 3800,
+      "fsChars": 120,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-corse",
+      "introChars": 2014,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-design-france",
+      "introChars": 3614,
+      "fsChars": 123,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-escapade-france",
+      "introChars": 2946,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-famille-alpes",
+      "introChars": 3538,
+      "fsChars": 119,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-famille-cote-d-azur",
+      "introChars": 3357,
+      "fsChars": 139,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-famille-courchevel",
+      "introChars": 2886,
+      "fsChars": 114,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-famille-france",
+      "introChars": 3190,
+      "fsChars": 116,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-fes",
+      "introChars": 0,
+      "fsChars": 119,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-fetes-france",
+      "introChars": 3327,
+      "fsChars": 113,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-florence",
+      "introChars": 4820,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-gastronomie-alpes",
+      "introChars": 3718,
+      "fsChars": 129,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-gastronomie-courchevel",
+      "introChars": 3658,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-gastronomie-france",
+      "introChars": 3404,
+      "fsChars": 124,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-gastronomie-paris",
+      "introChars": 3675,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-inde",
+      "introChars": 0,
+      "fsChars": 105,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-kids-friendly-alpes",
+      "introChars": 3255,
+      "fsChars": 123,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-kids-friendly-courchevel",
+      "introChars": 2731,
+      "fsChars": 127,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-kids-friendly-france",
+      "introChars": 3867,
+      "fsChars": 117,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-kids-friendly-paris",
+      "introChars": 3727,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-london",
+      "introChars": 0,
+      "fsChars": 141,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-lune-de-miel-france",
+      "introChars": 1981,
+      "fsChars": 109,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-mariage-france",
+      "introChars": 3840,
+      "fsChars": 118,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-minceur-france",
+      "introChars": 3202,
+      "fsChars": 121,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-montagne-alpes",
+      "introChars": 3546,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-montagne-courchevel",
+      "introChars": 3345,
+      "fsChars": 125,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-montagne-france",
+      "introChars": 3450,
+      "fsChars": 109,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-montagne-loire",
+      "introChars": 3424,
+      "fsChars": 131,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-palace-france",
+      "introChars": 3082,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-piscine-alpes",
+      "introChars": 3540,
+      "fsChars": 106,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-piscine-courchevel",
+      "introChars": 3560,
+      "fsChars": 121,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-piscine-france",
+      "introChars": 3567,
+      "fsChars": 115,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-playa-del-carmen",
+      "introChars": 0,
+      "fsChars": 131,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-romantiques-alpes",
+      "introChars": 3489,
+      "fsChars": 119,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-romantiques-cote-d-azur",
+      "introChars": 3761,
+      "fsChars": 117,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-romantiques-courchevel",
+      "introChars": 3625,
+      "fsChars": 121,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-romantiques-france",
+      "introChars": 2938,
+      "fsChars": 120,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-romantiques-paris",
+      "introChars": 3925,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-seminaire-france",
+      "introChars": 4114,
+      "fsChars": 114,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-ski-alpes",
+      "introChars": 3700,
+      "fsChars": 148,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-ski-courchevel",
+      "introChars": 3642,
+      "fsChars": 138,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-ski-france",
+      "introChars": 3214,
+      "fsChars": 136,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-spa-alpes",
+      "introChars": 3654,
+      "fsChars": 122,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-spa-cote-d-azur",
+      "introChars": 3713,
+      "fsChars": 105,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-spa-courchevel",
+      "introChars": 3540,
+      "fsChars": 115,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-spa-paris",
+      "introChars": 3532,
+      "fsChars": 115,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-staycation-france",
+      "introChars": 3728,
+      "fsChars": 117,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-tchequie",
+      "introChars": 0,
+      "fsChars": 122,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-urbains-france",
+      "introChars": 1799,
+      "fsChars": 111,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-urbains-paris",
+      "introChars": 3606,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-week-end-france",
+      "introChars": 3082,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-hotels-week-end-proche-paris-les-meilleurs-hotels",
+      "introChars": 1903,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-palaces-alpes",
+      "introChars": 3299,
+      "fsChars": 133,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-palaces-courchevel",
+      "introChars": 3594,
+      "fsChars": 124,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-palaces-france",
+      "introChars": 3210,
+      "fsChars": 109,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "meilleurs-palaces-paris",
+      "introChars": 3352,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "palaces-familles",
+      "introChars": 3489,
+      "fsChars": 119,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "palaces-gastronomie",
+      "introChars": 0,
+      "fsChars": 128,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "palaces-gastronomie-michelin",
+      "introChars": 3680,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "palaces-romantiques",
+      "introChars": 0,
+      "fsChars": 156,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "palaces-romantiques-france",
+      "introChars": 3260,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "palaces-spa-bien-etre",
+      "introChars": 3513,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    },
+    {
+      "slug": "palaces-spa-detente",
+      "introChars": 0,
+      "fsChars": 132,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": false,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-5-etoiles-france",
+      "introChars": 3751,
+      "fsChars": 110,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-alpes",
+      "introChars": 3517,
+      "fsChars": 107,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-cote-d-azur",
+      "introChars": 3405,
+      "fsChars": 127,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-courchevel",
+      "introChars": 3952,
+      "fsChars": 124,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-france",
+      "introChars": 3152,
+      "fsChars": 125,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-hotels-paris",
+      "introChars": 3033,
+      "fsChars": 118,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": true,
+      "ok": true
+    },
+    {
+      "slug": "plus-beaux-palaces-france",
+      "introChars": 3406,
+      "fsChars": 0,
+      "introLeak": false,
+      "fsLeak": false,
+      "wroteIntro": true,
+      "wroteFs": false,
+      "ok": true
+    }
+  ]
+}
