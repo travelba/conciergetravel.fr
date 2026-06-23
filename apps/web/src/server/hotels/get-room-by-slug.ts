@@ -398,75 +398,90 @@ export interface PublishedRoomSlug {
 /**
  * Service-role read for build-time static-params generation.
  * Pre-renders every room of every published hotel, in FR + EN.
+ *
+ * 2026-06-23: `.limit(2000)` was silently truncated to Supabase's
+ * `db_max_rows=1000` cap, so the rooms sub-sitemap only saw the first
+ * 1 000 of ~10 000 published rooms. Switched to `.range()` pagination
+ * until exhaustion (same fix as the hotels + places sitemaps, commit
+ * `6dfb1bb`). Ordered by `id` — a stable total order so pagination never
+ * skips or duplicates a row across the page boundary. The hard
+ * `MAX_PAGES` ceiling avoids a runaway loop on a misconfigured env.
  */
+const ROOMS_PAGE_SIZE = 1000;
+const ROOMS_MAX_PAGES = 30;
+
 export async function listPublishedRoomSlugs(): Promise<readonly PublishedRoomSlug[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('hotel_rooms')
-      .select(
-        'slug, updated_at, images, hero_image, long_description_fr, description_fr, hotel:hotels!inner(slug, slug_en, is_published, updated_at)',
-      )
-      .eq('hotel.is_published', true)
-      .limit(2000);
-    if (error || !Array.isArray(data)) return [];
-
     const out: PublishedRoomSlug[] = [];
-    for (const raw of data) {
-      const rec = raw as {
-        slug?: unknown;
-        updated_at?: unknown;
-        images?: unknown;
-        hero_image?: unknown;
-        long_description_fr?: unknown;
-        description_fr?: unknown;
-        hotel?: unknown;
-      };
-      const roomSlug = rec.slug;
-      const hotel = rec.hotel as
-        | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }
-        | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }[]
-        | undefined;
-      const hotelRow = Array.isArray(hotel) ? hotel[0] : hotel;
-      if (typeof roomSlug !== 'string' || !isValidSlug(roomSlug)) continue;
-      if (hotelRow === undefined) continue;
-      const hotelSlug = hotelRow.slug;
-      const hotelSlugEn = hotelRow.slug_en;
-      if (typeof hotelSlug !== 'string' || !isValidSlug(hotelSlug)) continue;
-      // Pick the later of room.updated_at vs hotel.updated_at — a
-      // hotel-level change (new photos, FAQ rewrite) is a legitimate
-      // freshness signal for every sub-page below it.
-      const roomUpdated =
-        typeof rec.updated_at === 'string' && rec.updated_at.length > 0 ? rec.updated_at : null;
-      const hotelUpdated =
-        typeof hotelRow.updated_at === 'string' && hotelRow.updated_at.length > 0
-          ? hotelRow.updated_at
-          : null;
-      const updatedAt =
-        roomUpdated !== null && hotelUpdated !== null
-          ? roomUpdated > hotelUpdated
-            ? roomUpdated
-            : hotelUpdated
-          : (roomUpdated ?? hotelUpdated);
-      // Mirror `isRoomSubpageIndexable` on the raw row (FR primary locale):
-      // ≥ 5 photos (gallery + hero) AND ≥ 200 words (long + short FR).
-      const gallerySize =
-        (Array.isArray(rec.images) ? rec.images.length : 0) +
-        (typeof rec.hero_image === 'string' && rec.hero_image.length > 0 ? 1 : 0);
-      const longWords =
-        typeof rec.long_description_fr === 'string' ? countWords(rec.long_description_fr) : 0;
-      const shortWords =
-        typeof rec.description_fr === 'string' ? countWords(rec.description_fr) : 0;
-      const indexable = gallerySize >= 5 && longWords + shortWords >= 200;
+    for (let page = 0; page < ROOMS_MAX_PAGES; page += 1) {
+      const from = page * ROOMS_PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('hotel_rooms')
+        .select(
+          'slug, updated_at, images, hero_image, long_description_fr, description_fr, hotel:hotels!inner(slug, slug_en, is_published, updated_at)',
+        )
+        .eq('hotel.is_published', true)
+        .order('id', { ascending: true })
+        .range(from, from + ROOMS_PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const rec = raw as {
+          slug?: unknown;
+          updated_at?: unknown;
+          images?: unknown;
+          hero_image?: unknown;
+          long_description_fr?: unknown;
+          description_fr?: unknown;
+          hotel?: unknown;
+        };
+        const roomSlug = rec.slug;
+        const hotel = rec.hotel as
+          | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }
+          | { slug?: unknown; slug_en?: unknown; updated_at?: unknown }[]
+          | undefined;
+        const hotelRow = Array.isArray(hotel) ? hotel[0] : hotel;
+        if (typeof roomSlug !== 'string' || !isValidSlug(roomSlug)) continue;
+        if (hotelRow === undefined) continue;
+        const hotelSlug = hotelRow.slug;
+        const hotelSlugEn = hotelRow.slug_en;
+        if (typeof hotelSlug !== 'string' || !isValidSlug(hotelSlug)) continue;
+        // Pick the later of room.updated_at vs hotel.updated_at — a
+        // hotel-level change (new photos, FAQ rewrite) is a legitimate
+        // freshness signal for every sub-page below it.
+        const roomUpdated =
+          typeof rec.updated_at === 'string' && rec.updated_at.length > 0 ? rec.updated_at : null;
+        const hotelUpdated =
+          typeof hotelRow.updated_at === 'string' && hotelRow.updated_at.length > 0
+            ? hotelRow.updated_at
+            : null;
+        const updatedAt =
+          roomUpdated !== null && hotelUpdated !== null
+            ? roomUpdated > hotelUpdated
+              ? roomUpdated
+              : hotelUpdated
+            : (roomUpdated ?? hotelUpdated);
+        // Mirror `isRoomSubpageIndexable` on the raw row (FR primary locale):
+        // ≥ 5 photos (gallery + hero) AND ≥ 200 words (long + short FR).
+        const gallerySize =
+          (Array.isArray(rec.images) ? rec.images.length : 0) +
+          (typeof rec.hero_image === 'string' && rec.hero_image.length > 0 ? 1 : 0);
+        const longWords =
+          typeof rec.long_description_fr === 'string' ? countWords(rec.long_description_fr) : 0;
+        const shortWords =
+          typeof rec.description_fr === 'string' ? countWords(rec.description_fr) : 0;
+        const indexable = gallerySize >= 5 && longWords + shortWords >= 200;
 
-      out.push({
-        hotelSlugFr: hotelSlug,
-        hotelSlugEn:
-          typeof hotelSlugEn === 'string' && isValidSlug(hotelSlugEn) ? hotelSlugEn : null,
-        roomSlug,
-        updatedAt,
-        indexable,
-      });
+        out.push({
+          hotelSlugFr: hotelSlug,
+          hotelSlugEn:
+            typeof hotelSlugEn === 'string' && isValidSlug(hotelSlugEn) ? hotelSlugEn : null,
+          roomSlug,
+          updatedAt,
+          indexable,
+        });
+      }
+      if (data.length < ROOMS_PAGE_SIZE) break;
     }
     return out;
   } catch {

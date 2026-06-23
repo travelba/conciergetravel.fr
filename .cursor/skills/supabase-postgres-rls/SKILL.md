@@ -315,16 +315,23 @@ const { data } = await supabase
 
 // ✅ Explicit pagination via `.range(from, to)` until the batch is
 // shorter than the page size. Add a SAFETY_CEILING so a runaway
-// query can never hammer the DB.
+// query can never hammer the DB. NOTE: there is deliberately NO
+// `.in('ranking_id', ids)` filter here — scan the WHOLE table and
+// aggregate in JS. A large `.in(...)` list explodes the URL → 414
+// (see the next section). Counting entries of rankings you don't
+// render is harmless; the map is read only for published ids.
 const PAGE_SIZE = 1000;
 const SAFETY_CEILING = 20000;
 let from = 0;
 while (from < SAFETY_CEILING) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('editorial_ranking_entries')
     .select('ranking_id')
-    .in('ranking_id', ids)
     .range(from, from + PAGE_SIZE - 1);
+  if (error !== null) {
+    console.error('count query failed:', error.message);
+    break;
+  }
   if (!data || data.length === 0) break;
   for (const row of data) /* aggregate */ ;
   if (data.length < PAGE_SIZE) break;
@@ -364,7 +371,75 @@ group by r.slug
 order by actual_entries desc;
 ```
 
+## PostgREST `.in('col', [big id list])` explodes the URL → 414 (and the silent-`data`-only trap)
+
+PostgREST encodes a `.in('col', ids)` filter **into the query string**
+(`?col=in.(uuid1,uuid2,…)`). A UUID is 36 chars; ~688 of them build a
+**~25 KB URL**, well past the server / proxy URL-length cap. The request
+fails with **414 URI Too Long** — and because the call site destructured
+only `data`, the error vanished and `data` came back `null`.
+
+```ts
+// ❌ Reference incident (2026-06-23, `/classements` showed "0 hôtels"
+// on every card). With ~688 published rankings:
+const ids = published.map((r) => r.id); // 688 UUIDs
+const { data: entries } = await supabase // ← `error` NOT destructured
+  .from('editorial_ranking_entries')
+  .select('ranking_id')
+  .in('ranking_id', ids) // → ?ranking_id=in.(…25 KB…)
+  .range(from, from + PAGE_SIZE - 1);
+// 414 URI Too Long → entries = null → `if (!entries) break;` → counts
+// map empty → every card's entryCount falls back to 0. Invisible.
+```
+
+Two independent bugs compounded here. Fix **both**:
+
+**1 — Don't grow `.in(...)` without bound.** Pick one:
+
+- **Full table scan + JS aggregation** (the fix that shipped, `53eb7e8`):
+  drop the filter, `.range()`-paginate the whole table, count per id in a
+  `Map`. Reading counts for rows you never render is harmless. Best when
+  you need _every_ group anyway (a hub counter).
+- **Chunk the ids** into bounded batches (~100 per call) and merge — when
+  you genuinely need to filter and the id set is naturally small.
+- **Push aggregation to the DB** via a view/RPC
+  (`select ranking_id, count(*) … group by ranking_id`) — one row per
+  group, no URL bloat, no pagination loop. Best at scale.
+
+**2 — ALWAYS destructure and check `error`.** Destructuring only `data`
+turns a 414 / timeout / RLS denial into a silent `null` that flows
+downstream as "empty result" and renders a plausible-but-wrong value
+(here `0`).
+
+```ts
+// ✅ Always pull `error`, log it, and stop — never mask it as null.
+const { data, error } = await supabase.from('…').select('…').range(from, to);
+if (error !== null) {
+  console.error('[listPublishedRankings] entry count query failed:', error.message);
+  break; // or return [] — but NEVER pretend the query returned no rows
+}
+```
+
+This is the **sister lesson** to [§"Supabase REST silently caps
+`.select()` at 1000 rows"](#supabase-rest-silently-caps-select-at-1000-rows)
+above and to [`content-enrichment-pipeline` §"PostgREST caps an unbounded
+SELECT at 1000 rows"](../content-enrichment-pipeline/SKILL.md). All three
+are the same **"PostgREST scaling"** family: the 1000-row default cap and
+the `.in()` URL-length ceiling are two limits a query silently hits as the
+catalogue grows — `.range()` pagination + a bounded/no `.in()` + a checked
+`error` are the shared cure. A 1000-row sister case is the places sitemap
+truncated at 1000 lines, also fixed with `.range()` pagination (`6dfb1bb`).
+
+**Acceptance link** — this class of bug renders a wrong _value_ on a 200
+page, so it slips past status-only audits. The acceptance counter-measure
+lives in [`user-acceptance-loop` §"Assert VALUES, not just HTTP 200"]
+(../user-acceptance-loop/SKILL.md): grep the rendered counter motif
+(`\b([1-9]\d*)\s+hôtels\b`) and fail when every value is the degenerate
+one.
+
 ## References
 
 - CDC v3.0 §4 (data model), §11 (security), addendum v3.2 (price_comparisons + makcorps_hotel_id).
 - `auth-role-management`, `security-engineering` skills.
+- PostgREST scaling sister lesson: [`content-enrichment-pipeline` §"PostgREST caps an unbounded SELECT at 1000 rows"](../content-enrichment-pipeline/SKILL.md).
+- Why a wrong value escapes a status-only walk: [`user-acceptance-loop` §"Assert VALUES, not just HTTP 200"](../user-acceptance-loop/SKILL.md).

@@ -3761,43 +3761,57 @@ export async function listPublishedHotelSlugs(): Promise<readonly PublishedHotel
  * the shared `isHotelIndexable` helper guarantees that.
  *
  * Cap raised from 500 → 5000 (May 2026, post Phase 1 publish flip:
- * 615 → 2134 published rows).
+ * 615 → 2134 published rows). 2026-06-23: `.limit(5000)` was silently
+ * truncated to Supabase's `db_max_rows=1000` cap, so the sitemap only
+ * emitted the first 1 000 of 2 219 published hotels. Switched to
+ * `.range()` pagination until exhaustion (same fix as the places sitemap,
+ * commit `6dfb1bb`). The hard `MAX_PAGES` ceiling avoids a runaway loop
+ * on a misconfigured env. Ordered by `(priority, slug)` — a total order
+ * so pagination never skips or duplicates a row across the page boundary.
  */
+const INDEXABLE_HOTELS_PAGE_SIZE = 1000;
+const INDEXABLE_HOTELS_MAX_PAGES = 20;
+
 export async function listIndexableHotelSlugs(): Promise<readonly PublishedHotelSlug[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('hotels')
-      .select(
-        'slug, slug_en, hero_image, gallery_images, long_description_sections, description_fr, factual_summary_fr, concierge_advice, faq_content, updated_at',
-      )
-      .eq('is_published', true)
-      .order('priority', { ascending: true })
-      .limit(5000);
-    if (error || !Array.isArray(data)) return [];
     const out: PublishedHotelSlug[] = [];
-    for (const raw of data) {
-      const r = raw as {
-        slug?: unknown;
-        slug_en?: unknown;
-        hero_image?: unknown;
-        gallery_images?: unknown;
-        long_description_sections?: unknown;
-        description_fr?: unknown;
-        factual_summary_fr?: unknown;
-        concierge_advice?: unknown;
-        faq_content?: unknown;
-        updated_at?: unknown;
-      };
-      const slug = r.slug;
-      if (typeof slug !== 'string' || !isValidSlug(slug)) continue;
-      if (!isHotelIndexable(r)) continue;
-      out.push({
-        slugFr: slug,
-        slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,
-        updatedAt:
-          typeof r.updated_at === 'string' && r.updated_at.length > 0 ? r.updated_at : null,
-      });
+    for (let page = 0; page < INDEXABLE_HOTELS_MAX_PAGES; page += 1) {
+      const from = page * INDEXABLE_HOTELS_PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('hotels')
+        .select(
+          'slug, slug_en, hero_image, gallery_images, long_description_sections, description_fr, factual_summary_fr, concierge_advice, faq_content, updated_at',
+        )
+        .eq('is_published', true)
+        .order('priority', { ascending: true })
+        .order('slug', { ascending: true })
+        .range(from, from + INDEXABLE_HOTELS_PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const r = raw as {
+          slug?: unknown;
+          slug_en?: unknown;
+          hero_image?: unknown;
+          gallery_images?: unknown;
+          long_description_sections?: unknown;
+          description_fr?: unknown;
+          factual_summary_fr?: unknown;
+          concierge_advice?: unknown;
+          faq_content?: unknown;
+          updated_at?: unknown;
+        };
+        const slug = r.slug;
+        if (typeof slug !== 'string' || !isValidSlug(slug)) continue;
+        if (!isHotelIndexable(r)) continue;
+        out.push({
+          slugFr: slug,
+          slugEn: typeof r.slug_en === 'string' && isValidSlug(r.slug_en) ? r.slug_en : null,
+          updatedAt:
+            typeof r.updated_at === 'string' && r.updated_at.length > 0 ? r.updated_at : null,
+        });
+      }
+      if (data.length < INDEXABLE_HOTELS_PAGE_SIZE) break;
     }
     return out;
   } catch {
@@ -3904,58 +3918,73 @@ export async function listPublishedHotelsForIndex(
   const safeLimit = Math.max(1, Math.min(3000, limit));
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('hotels')
-      .select(
-        'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en, country_code, country_label_fr, country_label_en, affiliations',
-      )
-      .eq('is_published', true)
-      .order('priority', { ascending: true })
-      .order('name', { ascending: true })
-      .limit(safeLimit);
-    if (error || !Array.isArray(data)) return [];
-
     const out: PublishedHotelIndexCard[] = [];
-    for (const raw of data) {
-      const parsed = HotelIndexRowSchema.safeParse(raw);
-      if (!parsed.success) continue;
-      const row = parsed.data;
-      if (!isValidSlug(row.slug)) continue;
-      const affs = parseAffiliationsLenient(row.affiliations).filter((a) => a.verified === true);
-      const brandSlugs: string[] = [];
-      const labelSlugs: string[] = [];
-      const rankingSlugs: string[] = [];
-      for (const a of affs) {
-        if (typeof a.facet_slug !== 'string' || a.facet_slug.length === 0) continue;
-        if (a.kind === 'brand' && !brandSlugs.includes(a.facet_slug)) brandSlugs.push(a.facet_slug);
-        else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug))
-          labelSlugs.push(a.facet_slug);
-        else if (a.kind === 'ranking' && !rankingSlugs.includes(a.facet_slug))
-          rankingSlugs.push(a.facet_slug);
+    // 2026-06-23: `.limit(safeLimit)` (up to 3000) was silently truncated to
+    // Supabase's `db_max_rows=1000` cap, so any caller asking for > 1000 rows
+    // (e.g. the hubs.xml category/brand/label emptiness guards over 2 219
+    // published hotels) only saw the first 1 000 — wrongly dropping facets
+    // whose hotels all sort past row 1000. Page with `.range()` until we've
+    // consumed `safeLimit` raw rows or the catalogue is exhausted. Ordered by
+    // `(priority, name)` — a total order so pagination never skips/duplicates.
+    const PAGE_SIZE = 1000;
+    let fetched = 0;
+    while (fetched < safeLimit) {
+      const to = Math.min(fetched + PAGE_SIZE, safeLimit) - 1;
+      const { data, error } = await supabase
+        .from('hotels')
+        .select(
+          'slug, slug_en, name, name_en, city, region, stars, is_palace, priority, hero_image, description_fr, description_en, country_code, country_label_fr, country_label_en, affiliations',
+        )
+        .eq('is_published', true)
+        .order('priority', { ascending: true })
+        .order('name', { ascending: true })
+        .range(fetched, to);
+      if (error || !Array.isArray(data)) break;
+      const requested = to - fetched + 1;
+      for (const raw of data) {
+        const parsed = HotelIndexRowSchema.safeParse(raw);
+        if (!parsed.success) continue;
+        const row = parsed.data;
+        if (!isValidSlug(row.slug)) continue;
+        const affs = parseAffiliationsLenient(row.affiliations).filter((a) => a.verified === true);
+        const brandSlugs: string[] = [];
+        const labelSlugs: string[] = [];
+        const rankingSlugs: string[] = [];
+        for (const a of affs) {
+          if (typeof a.facet_slug !== 'string' || a.facet_slug.length === 0) continue;
+          if (a.kind === 'brand' && !brandSlugs.includes(a.facet_slug))
+            brandSlugs.push(a.facet_slug);
+          else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug))
+            labelSlugs.push(a.facet_slug);
+          else if (a.kind === 'ranking' && !rankingSlugs.includes(a.facet_slug))
+            rankingSlugs.push(a.facet_slug);
+        }
+        out.push({
+          slugFr: row.slug,
+          slugEn:
+            row.slug_en !== null && row.slug_en.length > 0 && isValidSlug(row.slug_en)
+              ? row.slug_en
+              : null,
+          nameFr: row.name,
+          nameEn: row.name_en !== null && row.name_en.length > 0 ? row.name_en : null,
+          city: row.city,
+          region: row.region,
+          stars: row.stars,
+          isPalace: row.is_palace,
+          priority: row.priority,
+          heroPublicId: row.hero_image,
+          descriptionFr: row.description_fr,
+          descriptionEn: row.description_en,
+          countryCode: row.country_code,
+          countryLabelFr: row.country_label_fr,
+          countryLabelEn: row.country_label_en,
+          affiliationBrandSlugs: brandSlugs,
+          affiliationLabelSlugs: labelSlugs,
+          affiliationRankingSlugs: rankingSlugs,
+        });
       }
-      out.push({
-        slugFr: row.slug,
-        slugEn:
-          row.slug_en !== null && row.slug_en.length > 0 && isValidSlug(row.slug_en)
-            ? row.slug_en
-            : null,
-        nameFr: row.name,
-        nameEn: row.name_en !== null && row.name_en.length > 0 ? row.name_en : null,
-        city: row.city,
-        region: row.region,
-        stars: row.stars,
-        isPalace: row.is_palace,
-        priority: row.priority,
-        heroPublicId: row.hero_image,
-        descriptionFr: row.description_fr,
-        descriptionEn: row.description_en,
-        countryCode: row.country_code,
-        countryLabelFr: row.country_label_fr,
-        countryLabelEn: row.country_label_en,
-        affiliationBrandSlugs: brandSlugs,
-        affiliationLabelSlugs: labelSlugs,
-        affiliationRankingSlugs: rankingSlugs,
-      });
+      fetched += data.length;
+      if (data.length < requested) break;
     }
     return out;
   } catch {

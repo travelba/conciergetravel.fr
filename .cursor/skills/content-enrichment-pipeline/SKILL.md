@@ -997,6 +997,12 @@ Watch out: scripts with their **own** un-paginated query (`geocode`,
 `pois:sync`) still cap at 1000 — they need a second run or their own
 pagination. The shared `listHotels` (supabase-hotels.ts) is fixed.
 
+Sister lesson (same "PostgREST scaling" family) — a large
+`.in('col', [ids])` filter explodes the query string past the URL-length
+cap (414), and destructuring only `data` masks it as a silent `null`. See
+[`supabase-postgres-rls` §PostgREST `.in(...)` URL explosion]
+(../supabase-postgres-rls/SKILL.md).
+
 ## Gotcha — the CDC audit reports false gaps on jsonb-array fields
 
 `faq_content` is a jsonb **array** of `{question_fr, answer_fr,

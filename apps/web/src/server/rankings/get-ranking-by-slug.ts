@@ -54,6 +54,12 @@ const TableSchema = z.object({
   note_en: z.string().optional().default(''),
   headers: z.array(TableHeaderSchema).default([]),
   rows: z.array(z.record(z.string(), TableCellSchema)).default([]),
+  // EN parity for the row body: a parallel rows array with the same keys
+  // whose textual cells are translated (backfilled by
+  // scripts/editorial-pilot/src/rankings/translate-rankings-tables-en.ts).
+  // Optional + defaults to []: a table without it renders the FR `rows`
+  // exactly as before. The renderer picks `rows_en` only on the EN locale.
+  rows_en: z.array(z.record(z.string(), TableCellSchema)).optional().default([]),
 });
 export type RankingTable = z.infer<typeof TableSchema>;
 

@@ -261,17 +261,76 @@ Report `Tested:` must cite audit exit 0 + screenshots of the 5 sections FR+EN.
 5. Paste a single payload into the Google Rich Results validator (manual)
 ```
 
+## Assert VALUES, not just HTTP 200 + element presence
+
+A walk that only checks "the page responds 200" and "the card/section is
+in the DOM" passes even when every **dynamic value** the page renders is
+wrong. On pages with counters, lists, aggregates, or any number derived
+from a query, acceptance MUST assert a **non-trivial value** — not the
+mere existence of the element that should hold it.
+
+What to assert on a value-bearing page:
+
+- A counter shows a **plausible non-zero number** (`X hôtels` with
+  `X > 0`), not `0` and not a placeholder.
+- A list renders the **expected number of cards/rows** (e.g. a ranking
+  hub with ~688 rankings shows ~688 cards, not 12).
+- Totals are **internally coherent** (sum of children = parent count).
+- The value matches a **DB ground-truth** query when one is cheap to run
+  (a `select count(*) ... group by` against Supabase — see
+  [`supabase-postgres-rls` §PostgREST `.in(...)` URL explosion]
+  (../supabase-postgres-rls/SKILL.md)).
+
+### Curl-only mode (no Chrome) — grep the value pattern, fail on all-null
+
+When there is no browser MCP (curl-only on this box), the walk still
+asserts values: fetch the rendered HTML / RSC payload and grep for the
+**value motif**, then fail if every occurrence is the degenerate value.
+
+```powershell
+# /classements card counter — expect at least one "N hôtels" with N > 0.
+$html = (Invoke-WebRequest -UseBasicParsing 'https://myconciergehotel.com/classements').Content
+# Count the non-zero matches. `\b([1-9]\d*)\s+h(ô|&#244;|&ocirc;)tels?\b`
+# (HTML may entity-encode "ô"). If this is 0, EVERY card shows "0 hôtels".
+$nonZero = ([regex]::Matches($html, '\b([1-9]\d*)\s+h(ô|&#244;|&ocirc;)tels?\b')).Count
+if ($nonZero -eq 0) { Write-Error 'ACCEPTANCE FAIL: every counter renders 0'; exit 1 }
+"$nonZero non-zero counters found"   # ✅ proof for the chat report
+```
+
+The grep must target the **value**, not the label: matching the literal
+string `hôtels` proves nothing (the word ships even when the count is 0).
+Anchor the regex on `[1-9]\d*` so an all-zero page fails loudly.
+
+### Reference case — `/classements` "0 hôtels" (2026-06-23)
+
+Every ranking card on `/classements` displayed « 0 hôtels ».
+`_listPublishedRankings` passed `.in('ranking_id', [~688 UUID])` to
+PostgREST → a ~25 KB URL → **414 URI Too Long**. The error was never
+checked (`const { data: entries } = await ...`) → `entries = null` →
+`break` → empty counts map → every `entryCount` fell back to `0`. The
+Go-Live re-audit **missed it** because it only verified HTTP 200 + the
+presence of structural markers, never the **rendered value**, and ran
+curl-only (no browser). Root-cause + the DB-scaling fix:
+[`supabase-postgres-rls` §PostgREST `.in(...)` URL explosion]
+(../supabase-postgres-rls/SKILL.md). Fix commit `53eb7e8`.
+
+Had the acceptance grepped `\b([1-9]\d*)\s+hôtels\b` on the `/classements`
+HTML and failed on zero matches, the bug would have blocked the Go-Live
+sign-off instead of reaching production.
+
 ## Anti-patterns
 
-| Anti-pattern                                          | Symptom                                                | Fix                                             |
-| ----------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- |
-| "tsc + lint passed → shipping"                        | Invisible features in production                       | Add the walk                                    |
-| Walking only the new route, not the entry path        | User can't find the page from `/`                      | Walk the home + click path                      |
-| Skipping the mobile viewport                          | Burger menu out-of-sync with desktop mega-menu         | Always test 375x812                             |
-| Walking only `fr`                                     | EN locale ships with raw i18n keys                     | Walk both locales                               |
-| "I'll add the nav entry in a follow-up"               | The follow-up never lands; users are confused for days | Block the original commit, ship both at once    |
-| Screenshot taken at the wrong viewport / browser size | False positive: looks fine but real users see overflow | Match user viewports (desktop 1280, mobile 375) |
-| Confirming the page renders, not that it's reachable  | Reachability gap                                       | Score 4/4 includes Discoverability              |
+| Anti-pattern                                          | Symptom                                                                 | Fix                                                                                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **"The route responds 200 → it's correct"**           | Page renders but every dynamic value is wrong (`0 hôtels` on all cards) | Assert a **non-trivial value** (counter > 0, expected card count, coherent total); grep the value motif in curl-only mode |
+| **"The card/section exists in the DOM → done"**       | The container ships; the number inside is `0`/placeholder               | Check the **value**, not the element that holds it                                                                        |
+| "tsc + lint passed → shipping"                        | Invisible features in production                                        | Add the walk                                                                                                              |
+| Walking only the new route, not the entry path        | User can't find the page from `/`                                       | Walk the home + click path                                                                                                |
+| Skipping the mobile viewport                          | Burger menu out-of-sync with desktop mega-menu                          | Always test 375x812                                                                                                       |
+| Walking only `fr`                                     | EN locale ships with raw i18n keys                                      | Walk both locales                                                                                                         |
+| "I'll add the nav entry in a follow-up"               | The follow-up never lands; users are confused for days                  | Block the original commit, ship both at once                                                                              |
+| Screenshot taken at the wrong viewport / browser size | False positive: looks fine but real users see overflow                  | Match user viewports (desktop 1280, mobile 375)                                                                           |
+| Confirming the page renders, not that it's reachable  | Reachability gap                                                        | Score 4/4 includes Discoverability                                                                                        |
 
 ## Reference cases (capitalised lessons)
 
@@ -280,6 +339,12 @@ Report `Tested:` must cite audit exit 0 + screenshots of the 5 sections FR+EN.
   references to them. Follow-up `87caf8b` added the entries. The rule
   this skill enforces would have caught it at step 4 (Score) of the
   walk-through.
+- **2026-06-23 — `/classements` "0 hôtels" on every card** — `53eb7e8`.
+  A PostgREST 414 (`.in(688 UUIDs)`) returned `null` silently; every
+  counter rendered `0`. The Go-Live re-audit verified HTTP 200 + marker
+  presence but never the value. The "Assert VALUES" rule above would have
+  failed the sign-off. DB root cause: [`supabase-postgres-rls` §PostgREST
+  `.in(...)` URL explosion](../supabase-postgres-rls/SKILL.md).
 
 ## References
 
@@ -292,5 +357,9 @@ Report `Tested:` must cite audit exit 0 + screenshots of the 5 sections FR+EN.
   on Windows): [`windows-dev-environment`](../windows-dev-environment/SKILL.md).
 - Membership funnel context (the 2026-05-26 case study above):
   [`membership-program`](../membership-program/SKILL.md).
+- Value-correctness root cause (PostgREST 414 + silent `null`):
+  [`supabase-postgres-rls` §PostgREST `.in(...)` URL explosion]
+  (../supabase-postgres-rls/SKILL.md) — the DB-scaling lesson that the
+  "Assert VALUES" rule above complements.
 - Cursor browser MCP descriptors: `mcps/cursor-ide-browser/` folder.
 - Browser-use subagent: see the Task tool prompt at session start.
