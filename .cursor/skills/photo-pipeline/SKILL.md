@@ -469,6 +469,38 @@ Reusable tool already committed: `scripts/editorial-pilot/src/photos/discover-of
 (commit `db45721`). See also `windows-dev-environment` §Rule 9 sexies for the
 shared-tree push-lock + disjoint-worker discipline this parallel run surfaced.
 
+### Verdict — headless browser cracks img/srcset DAMs, NOT canvas/WebGL SPAs (2026-06-22)
+
+Built + ran `discover-spa-gallery-images.ts` (Playwright headless Chromium,
+loaded from `apps/web`'s e2e dep via `createRequire`; renders → consent →
+open-gallery → scroll lazy-load → harvest `img/srcset`+`source`+CSS-bg+`a-href`+
+`__NEXT_DATA__`; property-scope + dedup; emits the press-kit discovery JSON that
+`upload-press-kit-images.ts` consumes). On the 10-hotel Tier-C residual it
+**unblocked 3 / 10**: `yihe-mansions` 4→12 (R&C CloudFront, ≥10 ✅),
+`kempinski-hybernska` 0→7 +hero, `kempinski-residences-and-suites-doha` 0→4
++hero — **19 real photos, 0 hotlink leak (prod FR+EN curl: only `cct/hotels`
+refs, image HEAD 200 image/jpeg)**. The other 7 returned **raw=0** harvestable
+images: Six Senses / Cheval Blanc / Marriott / Barrière render galleries in
+**canvas/WebGL or JS-driven `<div background>` swappers** that expose no `<img>`
+URL even after scroll; `margutta-19` = anti-bot `ERR_CONNECTION_RESET`.
+**So: headless helps ONLY for sites whose DAM still emits real `<img src/srcset>`
+(R&C, Kempinski) — for canvas/WebGL luxury SPAs it's no better than Tavily; those
+need manual sourcing.** Three reusable gotchas captured below.
+
+Gotchas (all bit during this run):
+
+- **esbuild `__name` in `page.evaluate`.** tsx's `keepNames` wraps named fns in
+  a `__name(fn,…)` helper that's undefined in the browser → `ReferenceError`.
+  Shim it first: `await page.evaluate(()=>{(globalThis as any).__name=(f:any)=>f})`.
+- **Playwright `chromium` is a non-enumerable getter.** `'chromium' in mod` /
+  `Object.keys` miss it — read `mod.chromium` directly and check `.launch`.
+- **Hotlink-blocked origin vs open CDN.** `www.kempinski.com/ki-cms-prod/...`
+  403s third-party fetch → OpenAI Vision 400 "unsupported image"; the SAME asset
+  on `storage.kempinski.com/cdn-cgi/image/w=2000,…/` is open. Rewrite origin→CDN
+  before discovery so candidates are actually fetchable downstream.
+- **PowerShell `--slugs=a,b,c` arrives space-joined** (one token) — split CLI
+  list args on `/[\s,]+/` AND quote the arg (`'--slugs=a,b,c'`).
+
 ## The hotel APPEND path DEPENDS on OpenAI Vision — no OpenAI, no clean append (2026-06-22)
 
 There is **no hotel photo APPEND pipeline that runs without OpenAI**. This is

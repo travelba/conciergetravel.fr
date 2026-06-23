@@ -188,9 +188,11 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (arg === '--backup-only') backupOnly = true;
     else if (arg.startsWith('--slug=')) slugs = [arg.slice('--slug='.length).trim()];
     else if (arg.startsWith('--slugs=')) {
+      // PowerShell turns an unquoted `a,b,c` value into a space-joined token,
+      // so split on commas AND whitespace to be robust to both forms.
       slugs = arg
         .slice('--slugs='.length)
-        .split(',')
+        .split(/[\s,]+/u)
         .map((s) => s.trim())
         .filter(Boolean);
     } else if (arg.startsWith('--max-scroll=')) {
@@ -244,11 +246,14 @@ async function fetchHotelMeta(
   cfg: SupabaseRestConfig,
   slugs: readonly string[],
 ): Promise<readonly HotelRow[]> {
-  const inFilter = `slug=in.(${slugs.map((s) => encodeURIComponent(s)).join(',')})`;
-  const raws = await selectHotels<RawHotelRow>(cfg, {
+  // PostgREST `in.()` filtering via the tiny helper proved brittle with the
+  // raw query-string append; fetch the catalogue and filter slugs in JS —
+  // robust and the target set is tiny anyway.
+  const wanted = new Set(slugs);
+  const all = await selectHotels<RawHotelRow>(cfg, {
     columns: 'id,slug,name,city,luxury_tier,official_url,hero_image,gallery_images',
-    filters: [inFilter],
   });
+  const raws = all.filter((row) => typeof row.slug === 'string' && wanted.has(row.slug));
   return raws.map((row) => {
     const gallery = Array.isArray(row.gallery_images)
       ? (row.gallery_images as Array<Record<string, unknown>>)
