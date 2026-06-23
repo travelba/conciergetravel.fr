@@ -97,7 +97,11 @@ export const config = {
   // `kit` covers the HTML-kit static art direction assets in `public/kit/*`
   // (hero, mosaic, concierge portrait…) — same trap: without it next-intl
   // rewrites `/kit/img/hero.jpg` to `/fr/kit/img/hero.jpg` which 404s.
+  // `icon.svg` / `apple-icon` / `apple-touch-icon` are static favicon assets in
+  // `public/` (referenced via `<link rel="icon" href="/icon.svg">`). Same trap
+  // as `manifest.webmanifest`: without the explicit exclusion next-intl rewrites
+  // `/icon.svg` to `/fr/icon.svg` which 404s, leaving the tab without a favicon.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.*|apple-touch-icon.*|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit).*)',
   ],
 };
