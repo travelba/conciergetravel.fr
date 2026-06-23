@@ -112,19 +112,25 @@ const nextConfig: NextConfig = {
     // Anti-cannibalisation 301 redirects (cf. CDC arborescence + ADR seo).
     // Final list managed via Payload `Redirects` collection in Phase 8.
     return [
+      // Legacy `/selection/*` deep links (external/social/SEO). The
+      // `/selection/*` route tree never shipped, so these used to 301 to
+      // pages that 404'd. Re-pointed to live editorial taxonomy targets
+      // whose slugs are recognised by `/classements/[axe]/[valeur]`
+      // (known occasion/theme values render at worst a noindex empty
+      // state, never a 404) or to a real `/categorie/*` editorial hub.
       {
         source: '/:locale(fr|en)/selection/lune-de-miel',
-        destination: '/:locale/selection/romantiques-et-lune-de-miel',
+        destination: '/:locale/classements/occasion/lune-de-miel',
         permanent: true,
       },
       {
         source: '/:locale(fr|en)/selection/ski',
-        destination: '/:locale/selection/montagne',
+        destination: '/:locale/classements/theme/sport-ski',
         permanent: true,
       },
       {
         source: '/:locale(fr|en)/selection/plage-privee',
-        destination: '/:locale/selection/bord-de-mer-et-plage',
+        destination: '/:locale/categorie/palaces-bord-de-mer',
         permanent: true,
       },
       // The bare `/itineraire` was a coming-soon stub; the canonical hub
