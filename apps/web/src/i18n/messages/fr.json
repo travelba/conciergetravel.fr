@@ -3859,6 +3859,7 @@
   "errors": {
     "notFoundTitle": "Page introuvable",
     "notFoundDescription": "La page demandée n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil",
     "errorTitle": "Une erreur est survenue",
     "errorDescription": "Nos équipes sont prévenues. Vous pouvez réessayer dans un instant.",
     "tryAgain": "Réessayer"

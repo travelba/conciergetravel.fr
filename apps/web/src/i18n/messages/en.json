@@ -4000,6 +4000,7 @@
   "errors": {
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The requested page does not exist or has been moved.",
+    "backHome": "Back to home",
     "errorTitle": "Something went wrong",
     "errorDescription": "Our team has been notified. Please try again shortly.",
     "tryAgain": "Try again"
