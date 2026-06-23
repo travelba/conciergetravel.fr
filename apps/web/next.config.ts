@@ -133,6 +133,25 @@ const nextConfig: NextConfig = {
         destination: '/:locale/categorie/palaces-bord-de-mer',
         permanent: true,
       },
+      // `localePrefix: 'as-needed'` serves FR without a prefix, so the bare
+      // canonical paths (`/selection/lune-de-miel`, the real shape of legacy
+      // deep-links) need their own redirect — the `(fr|en)` rules above only
+      // match the prefixed variants and the bare FR path would 404 otherwise.
+      {
+        source: '/selection/lune-de-miel',
+        destination: '/classements/occasion/lune-de-miel',
+        permanent: true,
+      },
+      {
+        source: '/selection/ski',
+        destination: '/classements/theme/sport-ski',
+        permanent: true,
+      },
+      {
+        source: '/selection/plage-privee',
+        destination: '/categorie/palaces-bord-de-mer',
+        permanent: true,
+      },
       // The bare `/itineraire` was a coming-soon stub; the canonical hub
       // is now plural `/itineraires` (parity with `/classements`,
       // `/guides`, `/hotels`). Permanent 308s for both prefixed (`/en/`)
