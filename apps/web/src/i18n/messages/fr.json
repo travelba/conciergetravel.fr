@@ -4425,8 +4425,8 @@
         "body": "Une attention dans la chambre à votre arrivée, choisie par l'hôtel (champagne, fleurs, dégustation)."
       },
       "whatsapp_concierge_24_7": {
-        "title": "Concierge WhatsApp 24/7",
-        "body": "Une ligne directe avec notre concierge avant, pendant et après votre séjour."
+        "title": "Concierge WhatsApp (dès la Phase 6)",
+        "body": "Une ligne WhatsApp directe avec notre concierge avant, pendant et après votre séjour — canal en cours d'ouverture, déployé dès la Phase 6."
       },
       "gm_introduction": {
         "title": "Présentation au directeur",
@@ -4458,7 +4458,7 @@
         "name": "Le Concierge Club Prestige",
         "price": "99 €",
         "priceSuffix": "/ an — essai 30 jours gratuit",
-        "body": "Tous les avantages négociés avec nos hôtels Little partenaires : petit-déjeuner offert, surclassement confirmé, crédit hôtel, late check-out 16h, WhatsApp Concierge 24/7.",
+        "body": "Tous les avantages négociés avec nos hôtels Little partenaires : petit-déjeuner offert, surclassement confirmé, crédit hôtel, late check-out 16h, WhatsApp Concierge (dès la Phase 6).",
         "cta": "Rejoindre la liste d'attente ↓"
       }
     },
@@ -4483,7 +4483,7 @@
         },
         {
           "q": "Qu'est-ce qui change avec Prestige ?",
-          "a": "Prestige (€99/an, essai gratuit 30 jours) activera l'ensemble des avantages négociés avec nos hôtels Little partenaires : petit-déjeuner, surclassement, crédit hôtel, late check-out, cadeau de bienvenue, WhatsApp Concierge 24/7."
+          "a": "Prestige (€99/an, essai gratuit 30 jours) activera l'ensemble des avantages négociés avec nos hôtels Little partenaires : petit-déjeuner, surclassement, crédit hôtel, late check-out, cadeau de bienvenue, WhatsApp Concierge (dès la Phase 6)."
         }
       ]
     },
@@ -4519,7 +4519,7 @@
       "identityTitle": "Identité du programme",
       "identityBody": "Le Concierge Club est le programme de fidélité de MyConciergeHotel.com, agence IATA spécialisée dans les hôtels d'exception du monde — Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Deux tiers : Le Concierge Club (gratuit, sans CB, sans engagement) et Le Concierge Club Prestige (€99/an, essai 30 jours, déploiement Phase 6). Lancement de la phase 1 : mai 2026.",
       "philosophyTitle": "Philosophie",
-      "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, WhatsApp Concierge) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
+      "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, et le WhatsApp Concierge dès la Phase 6) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
       "numbersTitle": "Catalogue (juin 2026)",
       "numbersBody": "2 221 fiches hôtels publiées dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. 633 classements éditoriaux, 82 guides destinations, 23 itinéraires luxe France + international.",
       "complianceTitle": "Conformité",

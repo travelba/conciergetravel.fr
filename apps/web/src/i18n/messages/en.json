@@ -4425,8 +4425,8 @@
         "body": "An in-room attention on arrival, chosen by the hotel (champagne, flowers, tasting)."
       },
       "whatsapp_concierge_24_7": {
-        "title": "WhatsApp Concierge 24/7",
-        "body": "A direct line to our concierge before, during and after your stay."
+        "title": "WhatsApp Concierge (from Phase 6)",
+        "body": "A direct WhatsApp line to our concierge before, during and after your stay — channel currently being set up, rolling out from Phase 6."
       },
       "gm_introduction": {
         "title": "GM introduction",
@@ -4458,7 +4458,7 @@
         "name": "The Concierge Club Prestige",
         "price": "€99",
         "priceSuffix": "/ year — 30-day free trial",
-        "body": "All perks negotiated with our Little partner hotels: complimentary breakfast, confirmed upgrade, hotel credit, 4 pm late check-out, 24/7 WhatsApp Concierge.",
+        "body": "All perks negotiated with our Little partner hotels: complimentary breakfast, confirmed upgrade, hotel credit, 4 pm late check-out, WhatsApp Concierge (from Phase 6).",
         "cta": "Join the waitlist ↓"
       }
     },
@@ -4483,7 +4483,7 @@
         },
         {
           "q": "What changes with Prestige?",
-          "a": "Prestige (€99/year, 30-day free trial) activates the full set of benefits negotiated with our Little partner hotels: breakfast, upgrade, hotel credit, late check-out, welcome gift, 24/7 Concierge WhatsApp."
+          "a": "Prestige (€99/year, 30-day free trial) activates the full set of benefits negotiated with our Little partner hotels: breakfast, upgrade, hotel credit, late check-out, welcome gift, WhatsApp Concierge (from Phase 6)."
         }
       ]
     },
@@ -4519,7 +4519,7 @@
       "identityTitle": "Programme identity",
       "identityBody": "Le Concierge Club is the loyalty programme of MyConciergeHotel.com, an IATA agency specialising in extraordinary hotels worldwide — Atout France Palaces, Relais & Châteaux, Forbes Five Star, Michelin Keys, Leading Hotels of the World. Two tiers: Le Concierge Club (free, no credit card, no commitment) and Le Concierge Club Prestige (€99/year, 30-day trial, Phase 6 rollout). Phase 1 launch: May 2026.",
       "philosophyTitle": "Philosophy",
-      "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, WhatsApp Concierge) and, from Phase 6, a negotiated rate below the public price.",
+      "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, and the WhatsApp Concierge from Phase 6) and, from Phase 6, a negotiated rate below the public price.",
       "numbersTitle": "Catalogue (June 2026)",
       "numbersBody": "2,221 published hotel pages across 127 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. 633 editorial rankings, 82 destination guides, 23 luxury itineraries (France + international).",
       "complianceTitle": "Compliance",
