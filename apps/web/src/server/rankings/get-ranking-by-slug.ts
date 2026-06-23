@@ -273,7 +273,14 @@ export interface PublishedRankingCard {
   readonly updatedAt: string | null;
 }
 
-export async function listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
+// `cache()`-wrapped (like `getRankingBySlug`/`getRankingEntries`): on
+// `/classements/[axe]/[valeur]` this full catalogue scan is invoked from
+// `generateMetadata` (axe resolution), the page body, and the related-axes
+// block — 2-3× per request on a `force-dynamic` route. Request-scoped
+// memoisation dedupes them to a single scan without touching the logic.
+export const listPublishedRankings = cache(_listPublishedRankings);
+
+async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
   try {
     const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
