@@ -45,6 +45,12 @@
  *   --min-en=N                 only rewrite entries whose justification_en is shorter
  *                              than N chars (default 120). Use with --force to ignore.
  *   --force                    rewrite every entry regardless of current EN length
+ *   --generic-only             rewrite only entries whose justification_fr names
+ *                              NO hard fact (no architect/Michelin/dated distinction/
+ *                              year/suite/dimension), OR omits its starred table
+ *                              while the hotel row carries chef/Michelin data. The
+ *                              right target now that EN length is no longer a proxy
+ *                              for quality (the catalogue is already EN-rich).
  *   --entry-concurrency=N      parallel entries within a ranking (default 3, max 5)
  *   --dry-run                  generate + validate, print, do NOT persist
  *
@@ -343,6 +349,76 @@ function namesFromArray(value: unknown, keys: readonly string[], max: number): s
   return out.join(' · ');
 }
 
+interface RestaurantVenue {
+  readonly name?: unknown;
+  readonly chef?: unknown;
+  readonly michelin_stars?: unknown;
+  readonly type_fr?: unknown;
+  readonly features?: unknown;
+}
+
+interface RestaurantInfo {
+  readonly michelin_stars?: unknown;
+  readonly venues?: unknown;
+}
+
+/**
+ * Render the named dining surface — the single richest "beat yonder" signal.
+ * Each venue can carry a chef and a Michelin star count; surfacing them lets
+ * the LLM name the starred table instead of writing generic prose. Hotel's own
+ * structured data, so no invention.
+ */
+function restaurantBlock(info: unknown): string {
+  if (typeof info !== 'object' || info === null) return '';
+  const ri = info as RestaurantInfo;
+  if (!Array.isArray(ri.venues)) return '';
+  const venues: string[] = [];
+  for (const v of ri.venues) {
+    if (typeof v !== 'object' || v === null) continue;
+    const venue = v as RestaurantVenue;
+    const name = str(venue.name);
+    if (name.length === 0) continue;
+    const chef = str(venue.chef);
+    const stars = num(venue.michelin_stars);
+    const type = str(venue.type_fr);
+    const qual: string[] = [];
+    if (chef.length > 0) qual.push(`chef ${chef}`);
+    if (stars !== null && stars > 0) qual.push(`${stars}★ Michelin`);
+    const suffix = qual.length > 0 ? ` (${qual.join(', ')})` : type.length > 0 ? ` [${type}]` : '';
+    venues.push(`${name}${suffix}`);
+    if (venues.length >= 6) break;
+  }
+  if (venues.length === 0) return '';
+  return `Restauration : ${venues.join(' · ')}`;
+}
+
+interface SpaInfo {
+  readonly name?: unknown;
+  readonly surface_m2?: unknown;
+  readonly partner_brand?: unknown;
+  readonly features_fr?: unknown;
+  readonly signature_treatments?: unknown;
+}
+
+/** Render the named wellness surface (brand, surface, facilities) from the row. */
+function spaBlock(info: unknown): string {
+  if (typeof info !== 'object' || info === null) return '';
+  const si = info as SpaInfo;
+  const name = str(si.name);
+  const bits: string[] = [];
+  const surface = num(si.surface_m2);
+  if (surface !== null && surface > 0) bits.push(`${surface} m²`);
+  const brand = str(si.partner_brand);
+  if (brand.length > 0) bits.push(`partenaire ${brand}`);
+  if (Array.isArray(si.features_fr)) {
+    const feats = si.features_fr.filter((f): f is string => typeof f === 'string' && f.length > 0);
+    if (feats.length > 0) bits.push(feats.slice(0, 5).join(', '));
+  }
+  if (name.length === 0 && bits.length === 0) return '';
+  const head = name.length > 0 ? name : 'Spa';
+  return `Spa : ${head}${bits.length > 0 ? ` — ${bits.join(' · ')}` : ''}`;
+}
+
 /** Build the compact grounded fact-sheet for one hotel. */
 function buildHotelFacts(h: HotelFacts): string {
   const lines: string[] = [];
@@ -376,6 +452,10 @@ function buildHotelFacts(h: HotelFacts): string {
   if (aw.length > 0) lines.push(`Distinctions : ${aw}`);
   const af = affiliationsLine(h.affiliations);
   if (af.length > 0) lines.push(`Affiliations : ${af}`);
+  const resto = restaurantBlock(h.restaurant_info);
+  if (resto.length > 0) lines.push(resto);
+  const spa = spaBlock(h.spa_info);
+  if (spa.length > 0) lines.push(spa);
   const sig = namesFromArray(h.signature_experiences, ['title_fr', 'title', 'name', 'name_fr'], 5);
   if (sig.length > 0) lines.push(`Expériences signature : ${sig}`);
   const poi = namesFromArray(h.points_of_interest, ['name', 'name_fr', 'title'], 6);
@@ -473,6 +553,49 @@ function cleanLocale(raw: string): string | null {
   v = clampToSentence(v, MAX_CHARS);
   if (v.length < MIN_CHARS) return null;
   return v;
+}
+
+/* ── Generic-entry detection (targeting for --generic-only) ────────────────*/
+
+/**
+ * A justification is "concrete enough" when it names at least one hard fact:
+ * architect/designer, a Michelin table/star/key, a dated distinction, an open
+ * year, a named suite/room, or a measured dimension. Entries that name none of
+ * these read as generic prose and are the targets for a grounded rewrite.
+ */
+const CONCRETE_MARKER =
+  /(architect|designer|sign[ée]\s+par|con[çc]u par|dessin[ée]|\bMichelin\b|[ée]toil|\bclés?\b|Three Keys|Trois Cl[ée]s|Atout France|Relais\s*&|Forbes|Leading Hotels|World'?s 50|ouvert(?:e)? en\s+\d|inaugur[ée]\s+en\s+\d|cr[ée][ée]\s+en\s+\d|r[ée]nov|\b1[5-9]\d\d\b|\b20[0-2]\d\b|\bm²\b|\bm2\b|\d+\s*m[èe]tres?\b|\d+\s*(?:chambres|suites|cabines)|suite\s+[A-ZÉ])/u;
+
+function hasConcreteMarkers(fr: string): boolean {
+  return fr.length >= 250 && CONCRETE_MARKER.test(fr);
+}
+
+/** True when the hotel row carries dining facts (chef / Michelin) the prose could surface. */
+function hasSurfaceableDining(h: HotelFacts | null): boolean {
+  if (h === null || typeof h.restaurant_info !== 'object' || h.restaurant_info === null) {
+    return false;
+  }
+  const ri = h.restaurant_info as RestaurantInfo;
+  const top = num(ri.michelin_stars);
+  if (top !== null && top > 0) return true;
+  if (!Array.isArray(ri.venues)) return false;
+  for (const v of ri.venues) {
+    if (typeof v !== 'object' || v === null) continue;
+    const venue = v as RestaurantVenue;
+    if (str(venue.chef).length > 0) return true;
+    const s = num(venue.michelin_stars);
+    if (s !== null && s > 0) return true;
+  }
+  return false;
+}
+
+/** Whether an entry should be rewritten in --generic-only mode. */
+function isGenericTarget(e: EntryRow): boolean {
+  const fr = e.justification_fr ?? '';
+  if (!hasConcreteMarkers(fr)) return true;
+  // Concrete-ish but never mentions its starred table while the row has one.
+  if (!/Michelin|[ée]toil/u.test(fr) && hasSurfaceableDining(e.hotels)) return true;
+  return false;
 }
 
 /* ── Concurrency ───────────────────────────────────────────────────────────*/
@@ -591,6 +714,7 @@ interface CliArgs {
   readonly limit: number;
   readonly minEn: number;
   readonly force: boolean;
+  readonly genericOnly: boolean;
   readonly entryConcurrency: number;
   readonly dryRun: boolean;
 }
@@ -602,6 +726,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let limit = 0;
   let minEn = 120;
   let force = false;
+  let genericOnly = false;
   let entryConcurrency = 3;
   let dryRun = false;
   for (const a of argv) {
@@ -609,6 +734,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (a === '--priority') priority = true;
     else if (a === '--all') all = true;
     else if (a === '--force') force = true;
+    else if (a === '--generic-only') genericOnly = true;
     else if (a.startsWith('--slug=')) slugs = [a.slice('--slug='.length)];
     else if (a.startsWith('--slugs=')) {
       slugs = a
@@ -627,7 +753,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
       if (Number.isFinite(n) && n > 0) entryConcurrency = Math.min(5, Math.floor(n));
     }
   }
-  return { slugs, priority, all, limit, minEn, force, entryConcurrency, dryRun };
+  return { slugs, priority, all, limit, minEn, force, genericOnly, entryConcurrency, dryRun };
 }
 
 async function main(): Promise<void> {
@@ -656,7 +782,7 @@ async function main(): Promise<void> {
   if (args.limit > 0) rankings = rankings.slice(0, args.limit);
 
   console.log(
-    `[enrich-ranking-justifications] rankings=${rankings.length} minEn=${args.minEn} force=${args.force} entryConcurrency=${args.entryConcurrency} dryRun=${args.dryRun} provider=${provider} model=${llm.model}`,
+    `[enrich-ranking-justifications] rankings=${rankings.length} minEn=${args.minEn} force=${args.force} genericOnly=${args.genericOnly} entryConcurrency=${args.entryConcurrency} dryRun=${args.dryRun} provider=${provider} model=${llm.model}`,
   );
   if (rankings.length === 0) {
     console.log('Nothing to do.');
@@ -678,7 +804,9 @@ async function main(): Promise<void> {
 
     const targets = args.force
       ? entries
-      : entries.filter((e) => (e.justification_en ?? '').length < args.minEn);
+      : args.genericOnly
+        ? entries.filter(isGenericTarget)
+        : entries.filter((e) => (e.justification_en ?? '').length < args.minEn);
 
     if (targets.length === 0) {
       console.log(
