@@ -313,8 +313,16 @@ interface ManualOverride {
 // head terms target the highest-demand servable French cities (≥ ~5
 // published hotels). Differentiated from the `meilleurs-palaces-*` /
 // `5-etoiles-*` angle. Eligibility relies on the LieuDef in `axes.ts`.
-// (Marrakech deferred — its LieuDef lives in the concurrent intl-wave
-// branch, unstable in the shared tree on 2026-06-22.)
+// 2026-06-23 expansion (wave 2): Marrakech / Monaco / Dubaï added now
+// that their LieuDefs landed in axes.ts from the intl wave. Each gate-
+// checked against the live catalogue via `eligibilityFor` (the predicate
+// re-resolves the lieu by SLUG through `resolveLieu`, so only registered
+// LIEUX slugs yield a precise count): Marrakech 16, Monaco 4, Dubaï 53 —
+// all ≥ the 4-hotel feasibility floor. Cannes (Carlton dup → 3 distinct),
+// Biarritz (3), Lyon (3), Bordeaux (cannibalises the existing cluster
+// head) and Aix-en-Provence (3 city hotels — the 17 count was a polluted
+// Provence-cluster resolution) are deliberately NOT created. See
+// `docs/audits/rankings-seo-geo-audit-2026-06-22.md` §1.
 const LUXE_CITIES: readonly {
   readonly slug: string;
   readonly titleFr: string;
@@ -370,6 +378,31 @@ const LUXE_CITIES: readonly {
     scope: 'station',
     lieuSlug: 'megeve',
     label: 'Megève',
+  },
+  // ── Wave 2 (2026-06-23) — high-volume, gate-cleared luxe heads ──────────
+  {
+    slug: 'hotel-de-luxe-marrakech',
+    titleFr: 'Les meilleurs hôtels de luxe à Marrakech',
+    titleEn: 'The best luxury hotels in Marrakech',
+    scope: 'ville',
+    lieuSlug: 'marrakech',
+    label: 'Marrakech',
+  },
+  {
+    slug: 'hotel-de-luxe-monaco',
+    titleFr: 'Les meilleurs hôtels de luxe à Monaco',
+    titleEn: 'The best luxury hotels in Monaco',
+    scope: 'ville',
+    lieuSlug: 'monaco',
+    label: 'Monaco',
+  },
+  {
+    slug: 'hotel-de-luxe-dubai',
+    titleFr: 'Les meilleurs hôtels de luxe à Dubaï',
+    titleEn: 'The best luxury hotels in Dubai',
+    scope: 'ville',
+    lieuSlug: 'dubai',
+    label: 'Dubaï',
   },
 ];
 const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
