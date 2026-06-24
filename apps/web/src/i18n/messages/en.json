@@ -3821,7 +3821,7 @@
   },
   "roomPage": {
     "meta": {
-      "titleFallback": "{roomName} — {hotelName} | MyConciergeHotel",
+      "titleFallback": "{roomName} — {hotelName}",
       "signatureSuffix": "{base} · Signature suite",
       "descriptionFallback": "{roomName} at {hotelName}, {city}. Details, amenities and photos. Book direct with MyConciergeHotel, IATA agency."
     },
