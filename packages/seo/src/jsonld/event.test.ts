@@ -51,40 +51,38 @@ describe('eventJsonLd', () => {
     expect((node.description as string).endsWith('…')).toBe(true);
   });
 
-  it('omits offers entirely when pricing is not provided', () => {
+  it('never emits an Offer node when pricing is not provided (Phase 6 freeze)', () => {
     const node = eventJsonLd(BASE_INPUT) as Record<string, unknown>;
     expect(node.offers).toBeUndefined();
+    expect(node.isAccessibleForFree).toBeUndefined();
   });
 
-  it('emits a free Offer with price=0 and priceValidUntil', () => {
+  it('flags a free event with isAccessibleForFree and NO Offer (Phase 6 freeze)', () => {
     const node = eventJsonLd({
       ...BASE_INPUT,
       pricing: { type: 'free', amountEur: null },
     }) as Record<string, unknown>;
-    const offer = node.offers as Record<string, unknown>;
-    expect(offer['@type']).toBe('Offer');
-    expect(offer.price).toBe('0');
-    expect(offer.priceCurrency).toBe('EUR');
-    expect(offer.priceValidUntil).toBe('2026-09-15');
+    expect(node.offers).toBeUndefined();
+    expect(node.isAccessibleForFree).toBe(true);
   });
 
-  it('emits a paid Offer with amountEur as string', () => {
+  it('drops the price of a paid event entirely — no Offer / priceValidUntil (Phase 6 freeze)', () => {
     const node = eventJsonLd({
       ...BASE_INPUT,
       pricing: { type: 'paid', amountEur: 18 },
     }) as Record<string, unknown>;
-    const offer = node.offers as Record<string, unknown>;
-    expect(offer.price).toBe('18');
+    expect(node.offers).toBeUndefined();
+    expect(node.isAccessibleForFree).toBeUndefined();
   });
 
-  it('uses startDate as priceValidUntil for single-day paid events', () => {
-    const node = eventJsonLd({
+  it('never surfaces priceValidUntil anywhere on the node (Phase 6 freeze)', () => {
+    const single = eventJsonLd({
       ...BASE_INPUT,
       endDate: undefined,
       pricing: { type: 'paid', amountEur: 25 },
     }) as Record<string, unknown>;
-    const offer = node.offers as Record<string, unknown>;
-    expect(offer.priceValidUntil).toBe('2026-06-12');
+    expect(JSON.stringify(single)).not.toContain('priceValidUntil');
+    expect(JSON.stringify(single)).not.toContain('Offer');
   });
 
   it('omits PostalAddress when venueAddress is null', () => {

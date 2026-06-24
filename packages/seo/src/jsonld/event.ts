@@ -24,10 +24,20 @@
  *   - `eventStatus: EventScheduled` (DT does not flag cancellations;
  *     we'd need a Brevo-style webhook to flip to `EventCancelled`)
  *   - `description` truncated to 280 chars
- *   - `offers.price=0` for free events (Google requires the offer to be
- *     present even for free events)
+ *   - `isAccessibleForFree: true` for free events — the canonical
+ *     Schema.org free-event signal that does NOT require an `Offer`
  *   - `url` to the official source
  *   - `sameAs` to the DATAtourisme URI for provenance
+ *
+ * Phase 6 booking-freeze contract (AGENTS.md §4ter)
+ * -------------------------------------------------
+ * This builder MUST NOT emit any `Offer` / `priceValidUntil` node. The
+ * booking layer (pricing, availability, offers) is frozen until Phase 6,
+ * and the hotel detail page that embeds these `Event` nodes must expose
+ * zero `Offer` (a third-party event ticket price on a palace fiche risks
+ * a misleading Google rich-result + contradicts the freeze). The
+ * `pricing` input is therefore only used to flag free events via
+ * `isAccessibleForFree`; paid-event prices are intentionally dropped.
  */
 
 import type {
@@ -107,9 +117,9 @@ export type EventNode =
  * 1. We never fabricate `endDate` when missing — Google tolerates a
  *    single-day event by inferring `endDate = startDate`.
  * 2. `description` is truncated to 280 chars (Google snippet ceiling).
- * 3. We omit `offers` entirely when pricing is unknown — sending a
- *    half-formed Offer triggers the "Insufficient offer information"
- *    warning in Rich Results Test.
+ * 3. We never emit an `Offer` / `priceValidUntil` (Phase 6 freeze). A
+ *    free event is signalled with `isAccessibleForFree: true`; a paid
+ *    event surfaces no price at all until the booking layer ships.
  */
 /**
  * Plain-shaped object used internally — schema-dts unions are too
@@ -130,7 +140,6 @@ interface MutableEventNode {
   url?: string;
   sameAs?: string;
   isAccessibleForFree?: boolean;
-  offers?: MutableOfferNode;
 }
 
 interface MutablePlaceNode {
@@ -144,15 +153,6 @@ interface MutablePlaceNode {
     addressRegion?: string;
     addressCountry: 'FR';
   };
-}
-
-interface MutableOfferNode {
-  '@type': 'Offer';
-  availability: string;
-  priceCurrency: 'EUR';
-  price?: string;
-  priceValidUntil: string;
-  url?: string;
 }
 
 export function eventJsonLd(input: EventInput): EventNode {
@@ -217,28 +217,11 @@ export function eventJsonLd(input: EventInput): EventNode {
   if (input.sameAs !== undefined && input.sameAs.length > 0) {
     node.sameAs = input.sameAs;
   }
-  if (input.pricing !== undefined) {
-    const offer: MutableOfferNode = {
-      '@type': 'Offer',
-      availability: 'https://schema.org/InStock',
-      priceCurrency: 'EUR',
-      // Google requires `priceValidUntil` — use the event's end date
-      // (or start date for single-day events).
-      priceValidUntil: input.endDate ?? input.startDate,
-    };
-    if (input.pricing.type === 'free') {
-      offer.price = '0';
-      // `isAccessibleForFree: true` is the canonical Schema.org signal for a
-      // free public event (markets, open-air festivals). Google reads it
-      // alongside the price-0 offer to mark the event free in the rich result.
-      node.isAccessibleForFree = true;
-    } else if (input.pricing.amountEur !== null) {
-      offer.price = String(input.pricing.amountEur);
-    }
-    if (input.officialUrl !== undefined && input.officialUrl.length > 0) {
-      offer.url = input.officialUrl;
-    }
-    node.offers = offer;
+  // Phase 6 freeze: we never emit an `Offer` / `priceValidUntil` here. A
+  // free event keeps the `isAccessibleForFree` flag (not an Offer); a paid
+  // event surfaces no price until the booking layer ships.
+  if (input.pricing !== undefined && input.pricing.type === 'free') {
+    node.isAccessibleForFree = true;
   }
 
   return node as unknown as EventNode;
