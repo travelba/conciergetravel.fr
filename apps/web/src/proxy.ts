@@ -101,7 +101,11 @@ export const config = {
   // `public/` (referenced via `<link rel="icon" href="/icon.svg">`). Same trap
   // as `manifest.webmanifest`: without the explicit exclusion next-intl rewrites
   // `/icon.svg` to `/fr/icon.svg` which 404s, leaving the tab without a favicon.
+  // `og` covers the static social share cards in `public/og/*` (e.g.
+  // `/og/default.jpg`, the 1200x630 home/site-wide fallback) — same trap:
+  // without it next-intl rewrites `/og/default.jpg` to `/fr/og/default.jpg`
+  // which 404s, leaving every social/LLM share preview with a broken image.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.*|apple-touch-icon.*|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.*|apple-touch-icon.*|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit|og).*)',
   ],
 };
