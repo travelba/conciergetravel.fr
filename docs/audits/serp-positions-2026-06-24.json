@@ -1,0 +1,193 @@
+{
+  "collectedAt": "2026-06-24T14:30:00.000Z",
+  "engine": "google",
+  "locationName": "France",
+  "languageCode": "fr",
+  "device": "desktop",
+  "depth": 20,
+  "source": "DataForSEO serp/google/organic/live/advanced + dataforseo_labs/google/domain_rank_overview, via MCP user-dfs",
+  "trackedDomains": ["myconciergehotel.com", "yonder.fr", "travellers-society.com"],
+  "queries": [
+    {
+      "query": "palaces paris",
+      "volume": 12100,
+      "mchPage": "/classement/meilleurs-palaces-paris",
+      "positions": {
+        "myconciergehotel.com": null,
+        "yonder.fr": null,
+        "travellers-society.com": null
+      },
+      "top3": [
+        { "rank": 4, "domain": "5starhotels.paris" },
+        { "rank": 6, "domain": "atout-france.fr" },
+        { "rank": 7, "domain": "fr.wikipedia.org" }
+      ],
+      "error": null
+    },
+    {
+      "query": "hôtel romantique paris",
+      "volume": 1600,
+      "mchPage": "/classement/meilleurs-hotels-romantiques-paris",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 6, "travellers-society.com": null },
+      "top3": [
+        { "rank": 3, "domain": "booking.com" },
+        { "rank": 4, "domain": "letsgomylove.com" },
+        { "rank": 5, "domain": "hotelparisjadore.com" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels marrakech",
+      "volume": 1300,
+      "mchPage": "/classement/meilleurs-hotels-marrakech",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 5, "travellers-society.com": 3 },
+      "top3": [
+        { "rank": 3, "domain": "travellers-society.com" },
+        { "rank": 4, "domain": "tripadvisor.fr" },
+        { "rank": 5, "domain": "yonder.fr" }
+      ],
+      "error": null
+    },
+    {
+      "query": "palaces courchevel",
+      "volume": 880,
+      "mchPage": "/classement/meilleurs-palaces-courchevel",
+      "positions": {
+        "myconciergehotel.com": null,
+        "yonder.fr": null,
+        "travellers-society.com": null
+      },
+      "top3": [
+        { "rank": 3, "domain": "excellencecourchevel.com" },
+        { "rank": 4, "domain": "airelles.com" },
+        { "rank": 5, "domain": "chevalblanc.com" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels paris",
+      "volume": 590,
+      "mchPage": "/classement/plus-beaux-hotels-paris",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 4, "travellers-society.com": null },
+      "top3": [
+        { "rank": 3, "domain": "tripadvisor.fr" },
+        { "rank": 4, "domain": "yonder.fr" },
+        { "rank": 5, "domain": "timeout.fr" }
+      ],
+      "error": null
+    },
+    {
+      "query": "hôtel de luxe paris",
+      "volume": 390,
+      "mchPage": "/classement/hotel-de-luxe-paris",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 4, "travellers-society.com": null },
+      "top3": [
+        { "rank": 4, "domain": "yonder.fr" },
+        { "rank": 5, "domain": "tripadvisor.fr" },
+        { "rank": 6, "domain": "hotelaparis.com" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels rome",
+      "volume": 320,
+      "mchPage": "/classement/meilleurs-hotels-rome",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 1, "travellers-society.com": null },
+      "top3": [
+        { "rank": 1, "domain": "yonder.fr" },
+        { "rank": 2, "domain": "guide.michelin.com" },
+        { "rank": 3, "domain": "voyage-prive.com" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels dubai",
+      "volume": 320,
+      "mchPage": "/classement/meilleurs-hotels-dubai",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 1, "travellers-society.com": 3 },
+      "top3": [
+        { "rank": 1, "domain": "yonder.fr" },
+        { "rank": 3, "domain": "travellers-society.com" },
+        { "rank": 4, "domain": "tripadvisor.fr" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels venise",
+      "volume": 210,
+      "mchPage": "/classement/meilleurs-hotels-venise",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 1, "travellers-society.com": 2 },
+      "top3": [
+        { "rank": 1, "domain": "yonder.fr" },
+        { "rank": 2, "domain": "travellers-society.com" },
+        { "rank": 3, "domain": "tripadvisor.fr" }
+      ],
+      "error": null
+    },
+    {
+      "query": "meilleurs hôtels nice",
+      "volume": 140,
+      "mchPage": "/classement/meilleurs-hotels-nice",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 3, "travellers-society.com": null },
+      "top3": [
+        { "rank": 3, "domain": "yonder.fr" },
+        { "rank": 4, "domain": "tripadvisor.fr" },
+        { "rank": 5, "domain": "lefigaro.fr" }
+      ],
+      "error": null
+    },
+    {
+      "query": "hôtel de luxe megève",
+      "volume": 110,
+      "mchPage": "/classement/hotel-de-luxe-megeve",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 3, "travellers-society.com": 7 },
+      "top3": [
+        { "rank": 3, "domain": "yonder.fr" },
+        { "rank": 4, "domain": "booking.com" },
+        { "rank": 5, "domain": "mdemegeve.com" }
+      ],
+      "error": null
+    },
+    {
+      "query": "hôtel de luxe marrakech",
+      "volume": 90,
+      "mchPage": "/classement/hotel-de-luxe-marrakech",
+      "positions": { "myconciergehotel.com": null, "yonder.fr": 5, "travellers-society.com": 3 },
+      "top3": [
+        { "rank": 3, "domain": "travellers-society.com" },
+        { "rank": 4, "domain": "royalmansour.com" },
+        { "rank": 5, "domain": "yonder.fr" }
+      ],
+      "error": null
+    }
+  ],
+  "overview": [
+    {
+      "domain": "myconciergehotel.com",
+      "rankedKeywords": 2,
+      "etv": 2.496,
+      "pos1": 0,
+      "pos2to3": 0,
+      "pos4to10": 0,
+      "error": null
+    },
+    {
+      "domain": "yonder.fr",
+      "rankedKeywords": 15568,
+      "etv": 437537.783,
+      "pos1": 642,
+      "pos2to3": 1534,
+      "pos4to10": 5304,
+      "error": null
+    },
+    {
+      "domain": "travellers-society.com",
+      "rankedKeywords": 1317,
+      "etv": 84327.413,
+      "pos1": 40,
+      "pos2to3": 142,
+      "pos4to10": 633,
+      "error": null
+    }
+  ]
+}

@@ -227,6 +227,8 @@
     "faq:perplexity:validate": "tsx src/hotels/run-hotel-faq-perplexity.ts",
     "faq:perplexity:push": "tsx src/hotels/push-hotel-faq-perplexity.ts",
     "faq:perplexity:sync-ts": "tsx src/hotels/sync-hotel-faq-perplexity-to-ts.ts",
+    "serp:track": "tsx src/grounding/track-serp-positions.ts",
+    "serp:track:no-overview": "tsx src/grounding/track-serp-positions.ts --no-overview",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run"
   },
