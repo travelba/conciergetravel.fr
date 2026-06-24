@@ -199,26 +199,210 @@ export async function findRankingsForCity(args: {
   return cached();
 }
 
+// ─── In-memory scoring index (B1 — cross-link by theme/type/chain) ─────────
+//
+// The lieu-only sibling helper (`queryRankingsByLieuSlug`) returns `[]`
+// for the 102 published rankings that carry no `axes.lieu` (chains
+// `top-<brand>-…-monde`, curated awards `classement-worlds-50-best-*`,
+// and a handful of lieu-less geographic rankings). Those pages had NO
+// "related rankings" block at all. Worse, the lieu-less rows also ship
+// `axes: {}` — themes/types are empty in the DB today — so a pure
+// axes-theme/type heuristic can't rescue them either.
+//
+// The fix scores every published ranking against the current one along
+// three signals: shared lieu (kept identical to the legacy behaviour),
+// shared themes/types (future-proof — fires the day the pipeline starts
+// populating them), and a **slug family** derived purely from the slug
+// shape (chain collection / curated award / "best-of place"). The family
+// signal only contributes when the current ranking has no lieu, so city
+// rankings stay lieu-homogeneous and the "Autres classements {ville}"
+// heading remains accurate.
+
+type RankingFamily = 'chain-collection' | 'curated-award' | 'geo-best';
+
+/**
+ * Derives a cross-link family from the slug alone — the only reliable
+ * signal on the lieu-less cohort (their `axes` is `{}`). Returns `null`
+ * for slugs that don't belong to a recognised family (those keep the
+ * lieu/theme/type signals only).
+ */
+function familyForSlug(slug: string): RankingFamily | null {
+  if (/^top-[a-z0-9-]+-(?:hotels|palaces|resorts)-monde$/u.test(slug)) return 'chain-collection';
+  if (/-toutes-les-maisons$/u.test(slug)) return 'chain-collection';
+  if (
+    /^classement-(?:ritz-carlton-reserve|leading-hotels-of-the-world|small-luxury-hotels)/u.test(
+      slug,
+    )
+  ) {
+    return 'chain-collection';
+  }
+  if (/^classement-(?:worlds-50-best|travel-leisure|conde-nast)/u.test(slug))
+    return 'curated-award';
+  if (/^palaces-(?:de-france|gastronomie|romantiques|spa-detente)/u.test(slug)) {
+    return 'curated-award';
+  }
+  if (/^meilleurs-(?:hotels|palaces)-/u.test(slug)) return 'geo-best';
+  return null;
+}
+
+interface RankingIndexEntry {
+  readonly id: string;
+  readonly slug: string;
+  readonly titleFr: string;
+  readonly titleEn: string | null;
+  readonly factualSummaryFr: string | null;
+  readonly factualSummaryEn: string | null;
+  readonly kind: string;
+  readonly lieuSlug: string | null;
+  readonly themes: readonly string[];
+  readonly types: readonly string[];
+  readonly family: RankingFamily | null;
+}
+
+const IndexRowSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  title_fr: z.string(),
+  title_en: z.string().nullable(),
+  factual_summary_fr: z.string().nullable(),
+  factual_summary_en: z.string().nullable(),
+  kind: z.string(),
+  axes: z
+    .object({
+      lieu: z.object({ slug: z.string() }).optional(),
+      themes: z.array(z.string()).default([]),
+      types: z.array(z.string()).default([]),
+    })
+    .default({ themes: [], types: [] }),
+});
+
+async function _loadRankingScoreIndex(): Promise<readonly RankingIndexEntry[]> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('editorial_rankings')
+      .select('id, slug, title_fr, title_en, factual_summary_fr, factual_summary_en, kind, axes')
+      .eq('is_published', true);
+    if (error !== null || !Array.isArray(data)) {
+      if (error !== null) {
+        console.error('[find-related-rankings] index query failed:', error.message);
+      }
+      return [];
+    }
+    const out: RankingIndexEntry[] = [];
+    for (const raw of data) {
+      const parsed = IndexRowSchema.safeParse(raw);
+      if (!parsed.success) continue;
+      const { axes } = parsed.data;
+      out.push({
+        id: parsed.data.id,
+        slug: parsed.data.slug,
+        titleFr: parsed.data.title_fr,
+        titleEn: parsed.data.title_en,
+        factualSummaryFr: parsed.data.factual_summary_fr,
+        factualSummaryEn: parsed.data.factual_summary_en,
+        kind: parsed.data.kind,
+        lieuSlug: axes.lieu?.slug ?? null,
+        themes: axes.themes,
+        types: axes.types,
+        family: familyForSlug(parsed.data.slug),
+      });
+    }
+    return out;
+  } catch (e) {
+    console.error(
+      '[find-related-rankings] index threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
+}
+
+/**
+ * Request-deduped + 1 h ISR-cached snapshot of the published-ranking
+ * scoring index (~560 rows, no entry-count scan → cheap). Tagged
+ * `related-rankings:index` so a Payload publish hook can invalidate it.
+ */
+const loadRankingScoreIndex = (): Promise<readonly RankingIndexEntry[]> =>
+  unstable_cache(_loadRankingScoreIndex, ['ranking-score-index'], {
+    revalidate: 3600,
+    tags: ['related-rankings:index'],
+  })();
+
+interface CurrentRankingSignals {
+  readonly lieuSlug: string | null;
+  readonly themes: readonly string[];
+  readonly types: readonly string[];
+  readonly family: RankingFamily | null;
+  readonly kind: string;
+}
+
+function scoreCandidate(current: CurrentRankingSignals, cand: RankingIndexEntry): number {
+  let score = 0;
+  if (current.lieuSlug !== null && cand.lieuSlug === current.lieuSlug) score += 4;
+  for (const th of current.themes) if (cand.themes.includes(th)) score += 2;
+  for (const ty of current.types) if (cand.types.includes(ty)) score += 1;
+  // Family / kind cross-links contribute ONLY when the current ranking
+  // has no lieu (chain / curated / global). This keeps city rankings
+  // lieu-homogeneous so the "Autres classements {ville}" heading on the
+  // detail page never lists an off-lieu ranking.
+  if (current.lieuSlug === null) {
+    if (current.family !== null && cand.family === current.family) score += 2;
+    if (current.kind === cand.kind) score += 0.5;
+  }
+  return score;
+}
+
+function toLookup(e: RankingIndexEntry): RankingLookup {
+  return {
+    id: e.id,
+    slug: e.slug,
+    titleFr: e.titleFr,
+    titleEn: e.titleEn,
+    factualSummaryFr: e.factualSummaryFr,
+    factualSummaryEn: e.factualSummaryEn,
+  };
+}
+
 /**
  * Resolves the sibling rankings to cross-link from a ranking detail
  * page. Excludes the current ranking from the result.
  *
- * Used by `/classement/[slug]` to point at sibling rankings on the
- * same `lieu` (best PageRank distribution along the editorial mesh).
+ * Used by `/classement/[slug]`. Unlike the legacy lieu-only behaviour,
+ * this now scores by lieu **and** theme/type/chain family, so the 102
+ * lieu-less rankings (chains, curated awards, lieu-less geographic) get
+ * a populated "related rankings" block for the first time (B1).
  */
 export async function findSiblingRankings(args: {
   readonly currentSlug: string;
   readonly lieuSlug: string | null;
+  readonly themes?: readonly string[];
+  readonly types?: readonly string[];
   readonly limit?: number;
 }): Promise<readonly RankingLookup[]> {
-  if (args.lieuSlug === null) return [];
   const limit = args.limit ?? 3;
-  const lieuSlug = args.lieuSlug;
-  const currentSlug = args.currentSlug;
-  const cached = unstable_cache(
-    () => queryRankingsByLieuSlug(lieuSlug, limit, currentSlug),
-    [`sibling-rankings-${lieuSlug}-${currentSlug}-${limit}`],
-    { revalidate: 3600, tags: [`related-rankings:${lieuSlug}`] },
-  );
-  return cached();
+  try {
+    const index = await loadRankingScoreIndex();
+    if (index.length === 0) return [];
+    const current: CurrentRankingSignals = {
+      lieuSlug: args.lieuSlug,
+      themes: args.themes ?? [],
+      types: args.types ?? [],
+      family: familyForSlug(args.currentSlug),
+      kind: index.find((e) => e.slug === args.currentSlug)?.kind ?? '',
+    };
+    return index
+      .filter((e) => e.slug !== args.currentSlug)
+      .map((e) => ({ e, score: scoreCandidate(current, e) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || a.e.titleFr.localeCompare(b.e.titleFr))
+      .slice(0, Math.max(1, limit))
+      .map((x) => toLookup(x.e));
+  } catch (e) {
+    console.error(
+      '[findSiblingRankings] threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
 }

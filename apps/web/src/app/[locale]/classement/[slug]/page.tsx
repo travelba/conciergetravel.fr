@@ -323,7 +323,13 @@ export default async function RankingPage({
   const [entries, linkMap, siblingRankings, lateralItineraries] = await Promise.all([
     getRankingEntries(ranking.id),
     buildEditorialLinkMap({ excludeRankingSlug: slug }),
-    findSiblingRankings({ currentSlug: slug, lieuSlug, limit: 3 }),
+    findSiblingRankings({
+      currentSlug: slug,
+      lieuSlug,
+      themes: ranking.axes.themes,
+      types: ranking.axes.types,
+      limit: 3,
+    }),
     lieuSlug !== null
       ? findItinerariesForCity({ citySlug: lieuSlug, limit: 3 })
       : Promise.resolve([] as Awaited<ReturnType<typeof findItinerariesForCity>>),
