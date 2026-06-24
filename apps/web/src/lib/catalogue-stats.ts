@@ -30,10 +30,17 @@
  *                Small Luxury 224, World's 50 Best 127, Atout France
  *                Palaces 39. Counts derived from `affiliations[].facet_slug`
  *                on `is_published = true` rows.
+ *   2026-06-24 — 2219 / 127 / 479 (health audit reconciliation). The raw
+ *                `is_published = true` count is 2221, but the public surface
+ *                (sitemap `/sitemaps/hotels.xml`) and what Google indexes is
+ *                2219 — 2 published rows are non-indexable (indexability
+ *                gate). We pin the public-facing copy + llms.txt to the
+ *                indexable count so the advertised number matches the
+ *                crawlable catalogue. See docs/audits/health-2026-06-24-*.md.
  */
-export const CATALOGUE_PUBLISHED = 2221;
+export const CATALOGUE_PUBLISHED = 2219;
 export const CATALOGUE_COUNTRIES = 127;
 export const CATALOGUE_RELAIS_CHATEAUX = 479;
 export const CATALOGUE_SMALL_LUXURY = 224;
 export const CATALOGUE_WORLD_50_BEST = 127;
-export const CATALOGUE_LAST_UPDATED = '2026-06-17';
+export const CATALOGUE_LAST_UPDATED = '2026-06-24';

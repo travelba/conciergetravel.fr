@@ -100,7 +100,8 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         properties: {
           slug: {
             type: 'string',
-            description: 'Slug kebab-case de la fiche (ex. "ritz-paris", "hotel-du-cap-eden-roc").',
+            description:
+              'Slug kebab-case de la fiche (ex. "hotel-ritz-paris", "hotel-du-cap-eden-roc").',
           },
           locale: {
             type: 'string',
@@ -162,7 +163,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           hotelSlug: {
             type: 'string',
             description:
-              'Slug kebab-case de l’hôtel (ex. "peninsula-paris", "hotel-du-cap-eden-roc").',
+              'Slug kebab-case de l’hôtel (ex. "hotel-the-peninsula-paris", "hotel-du-cap-eden-roc").',
           },
           roomSlug: {
             type: 'string',
@@ -460,7 +461,8 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
         properties: {
           slug: {
             type: 'string',
-            description: 'Slug kebab-case de l’hôtel (ex. "ritz-paris", "hotel-du-cap-eden-roc").',
+            description:
+              'Slug kebab-case de l’hôtel (ex. "hotel-ritz-paris", "hotel-du-cap-eden-roc").',
           },
           locale: {
             type: 'string',
@@ -481,7 +483,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           slug: {
             type: 'string',
             description:
-              'Slug kebab-case de l’hôtel (FR ou EN, ex. "ritz-paris", "hotel-du-cap-eden-roc").',
+              'Slug kebab-case de l’hôtel (FR ou EN, ex. "hotel-ritz-paris", "hotel-du-cap-eden-roc").',
           },
           locale: {
             type: 'string',
@@ -504,7 +506,7 @@ export const DEFAULT_AGENT_SKILLS: AgentSkillsDocument = {
           hotelSlug: {
             type: 'string',
             description:
-              'Slug kebab-case de l’hôtel (FR ou EN) pour lister les lieux à proximité (ex. "ritz-paris").',
+              'Slug kebab-case de l’hôtel (FR ou EN) pour lister les lieux à proximité (ex. "hotel-ritz-paris").',
           },
           citySlug: {
             type: 'string',

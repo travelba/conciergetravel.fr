@@ -17,6 +17,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
+import { stripBrandSuffix } from '@/lib/seo/brand-title';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { getItineraryBySlug, type ItineraryRow } from '@/server/itineraries/get-itinerary-by-slug';
@@ -161,6 +162,11 @@ export async function generateMetadata({
   const title =
     pickByLocale(locale, itinerary.meta_title_fr, itinerary.meta_title_en) ??
     pickByLocale(locale, itinerary.title_fr, itinerary.title_en ?? itinerary.title_fr);
+  // The document `<title>` runs through the root template
+  // `%s · MyConciergeHotel`; strip any brand suffix already baked into the
+  // stored `meta_title_*` so the brand is not duplicated (SEO P1-1). OG
+  // keeps the original (no template applied to it).
+  const documentTitle = stripBrandSuffix(title);
   const description =
     pickByLocale(locale, itinerary.meta_desc_fr, itinerary.meta_desc_en) ??
     pickByLocale(locale, itinerary.intro_fr ?? '', itinerary.intro_en ?? itinerary.intro_fr ?? '');
@@ -187,7 +193,7 @@ export async function generateMetadata({
   );
 
   return {
-    title,
+    title: documentTitle,
     description,
     alternates: {
       canonical: buildCanonicalPath(locale),

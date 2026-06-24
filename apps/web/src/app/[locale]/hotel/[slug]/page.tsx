@@ -69,6 +69,7 @@ import {
   buildHotelSeoTitle,
   pickHotelJsonLdFaqEntries,
 } from '@/lib/seo/hotel-page-seo';
+import { stripBrandSuffix } from '@/lib/seo/brand-title';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { buildHotelGalleryViewModel } from '@/server/hotels/build-hotel-gallery-view-model';
 import { citySlug } from '@/server/destinations/cities';
@@ -265,6 +266,11 @@ export async function generateMetadata({
   // clean `absolute` title that bypasses the template; every other hotel keeps
   // the templated string, so no non-golden page changes. Data-driven via
   // `hasGoldenHero` — no per-slug flag.
+  // Golden fiches emit a curated `absolute` title (bypasses the template,
+  // so it carries the brand exactly once). Every other fiche passes a
+  // plain string through the root template `%s · MyConciergeHotel`; we
+  // strip any brand suffix already baked into `meta_title_*` / the i18n
+  // fallback so the brand is not duplicated (SEO P1-1).
   const metadataTitle: NonNullable<Metadata['title']> = hasGoldenHero(row)
     ? {
         absolute: buildHotelSeoTitle({
@@ -277,7 +283,7 @@ export async function generateMetadata({
           locale,
         }),
       }
-    : title;
+    : stripBrandSuffix(title);
   const desc =
     descOverride !== null && descOverride !== ''
       ? descOverride

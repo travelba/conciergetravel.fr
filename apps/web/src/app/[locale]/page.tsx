@@ -24,6 +24,7 @@ import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
+import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_ALT } from '@/lib/seo/og-defaults';
 import { env } from '@/lib/env';
 import { getDestinationHeroImages, pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
@@ -81,6 +82,16 @@ export async function generateMetadata({
       type: 'website',
       locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
+      // The home declares its own `openGraph`, which fully replaces the
+      // layout-level default — so it must re-state the brand share image
+      // (SEO P1-4: `og:image` was absent on `/` and `/en`).
+      images: [{ ...DEFAULT_OG_IMAGE, alt: DEFAULT_OG_IMAGE_ALT[locale] }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('metaTitle'),
+      description: t('metaDesc'),
+      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 }

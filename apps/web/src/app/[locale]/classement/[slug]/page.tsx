@@ -19,6 +19,7 @@ import { LastUpdatedBadge } from '@/components/seo/last-updated-badge';
 import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
+import { buildRankingMetaDescription } from '@/lib/seo/ranking-meta-description';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
@@ -212,11 +213,18 @@ export async function generateMetadata({
   // current year. `og:title` reuses the same stamped `title`.
   const { year: stampYearValue } = resolveFreshness([ranking.reviewed_at, ranking.updated_at]);
   const title = stampYear(baseTitle, stampYearValue, locale, ranking.kind);
-  const description = pickByLocale(
+  // SEO P1-5 — prefer a same-locale source that clears the 140-170 SERP
+  // band (AEO factual summary, then intro) over an under-sized DB
+  // `meta_desc_*`; word-boundary truncation; FR only as a last resort.
+  const description = buildRankingMetaDescription({
     locale,
-    ranking.meta_desc_fr ?? ranking.intro_fr.slice(0, 160),
-    ranking.meta_desc_en ?? ranking.intro_en?.slice(0, 160) ?? ranking.intro_fr.slice(0, 160),
-  );
+    metaDescFr: ranking.meta_desc_fr,
+    metaDescEn: ranking.meta_desc_en,
+    factualSummaryFr: ranking.factual_summary_fr ?? null,
+    factualSummaryEn: ranking.factual_summary_en ?? null,
+    introFr: ranking.intro_fr,
+    introEn: ranking.intro_en,
+  });
   const buildCanonicalPath = (l: Locale): string =>
     getPathname({
       locale: l,

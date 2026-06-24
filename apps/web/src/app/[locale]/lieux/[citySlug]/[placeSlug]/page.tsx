@@ -16,6 +16,7 @@ import { JsonLdScript } from '@/components/seo/json-ld';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { stripBrandSuffix } from '@/lib/seo/brand-title';
 import { env } from '@/lib/env';
 import {
   getGygProductsForPlace,
@@ -74,6 +75,10 @@ export async function generateMetadata({
   const view = pickPlaceLocalized(place, locale);
 
   const title = view.metaTitle ?? `${view.name} | MyConciergeHotel`;
+  // Document `<title>` runs through the root template `%s · MyConciergeHotel`;
+  // strip any brand suffix so it is not duplicated (SEO P1-1). OG keeps the
+  // brand (no template applied to it).
+  const documentTitle = stripBrandSuffix(title);
   const description = view.metaDesc ?? view.factualSummary ?? undefined;
 
   // Use the canonical FR/EN slugs so hreflang points at the localized URL.
@@ -92,7 +97,7 @@ export async function generateMetadata({
   const hero = placeHeroSrc(place.hero_image ?? null, 'c_fill,w_1200,h_630,f_auto,q_auto');
 
   return {
-    title,
+    title: documentTitle,
     ...(description !== undefined ? { description } : {}),
     alternates: {
       canonical: buildPath(locale),

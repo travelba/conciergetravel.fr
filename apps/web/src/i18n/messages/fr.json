@@ -3821,7 +3821,7 @@
   },
   "roomPage": {
     "meta": {
-      "titleFallback": "{roomName} — {hotelName} | MyConciergeHotel",
+      "titleFallback": "{roomName} — {hotelName}",
       "signatureSuffix": "{base} · Suite signature",
       "descriptionFallback": "{roomName} à {hotelName}, {city}. Détails, équipements et photos. Réservez en direct avec MyConciergeHotel, agence IATA."
     },
@@ -4521,7 +4521,7 @@
       "philosophyTitle": "Philosophie",
       "philosophyBody": "Pas de gating éditorial : tout le contenu reste public et indexable. Le membre paie pour une expérience opérationnelle (attentions, surclassements, late check-out, et le WhatsApp Concierge dès la Phase 6) et, à partir de la Phase 6, un tarif négocié inférieur au prix public.",
       "numbersTitle": "Catalogue (juin 2026)",
-      "numbersBody": "2 221 fiches hôtels publiées dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. 633 classements éditoriaux, 82 guides destinations, 23 itinéraires luxe France + international.",
+      "numbersBody": "2 219 fiches hôtels publiées dans 127 pays, dont 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best et 39 Palaces Atout France. 704 classements éditoriaux, 99 guides destinations, 23 itinéraires luxe France + international.",
       "complianceTitle": "Conformité",
       "complianceBody": "Programme conforme aux exigences DGCCRF et au Digital Services Act. Aucun indicateur d'urgence fabriqué (Atout France §2.8). Voix Concierge éditoriale (ADR-0011) : phrases ≤ 25 mots, lexique sourcé, aucun superlatif générique."
     },

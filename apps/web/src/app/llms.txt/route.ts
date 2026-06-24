@@ -134,6 +134,26 @@ export async function GET(): Promise<NextResponse> {
     description: `${b.label} — adresses du groupe ${b.label} dans notre catalogue éditorial MyConciergeHotel.`,
   }));
 
+  // llms.txt must stay a concise index (best-practice budget < 50 KB; the
+  // full inline catalogue blew it to ~400 KB). Every list below has an
+  // exhaustive machine-readable counterpart — /.well-known/*.jsonl + the
+  // sitemaps — already linked in its own section, so we cap the
+  // human-readable "extrait priorisé" to the editorial-priority head and
+  // let crawlers follow the JSONL for the complete set. No discoverability
+  // is lost (sitemaps remain the canonical URL-discovery surface). The
+  // section titles keep the TRUE totals so the advertised counts stay
+  // accurate. See docs/audits/health-2026-06-24-geo.md (P2 — taille).
+  // Head caps tuned to keep the rendered body comfortably under the 50 KB
+  // GEO budget (measured 2026-06-24: 30/25/20 landed at ~57 KB — over). The
+  // full sets stay exhaustively available in the linked /.well-known/*.jsonl,
+  // so trimming the human-readable heads loses no discoverability.
+  const LLMS_CATALOG_HOTEL_HEADS = 14; // ×2 lines (FR+EN) per hotel
+  const LLMS_RANKING_HEADS = 12;
+  const LLMS_GUIDE_HEADS = 8;
+  const catalogHead = catalogItems.slice(0, LLMS_CATALOG_HOTEL_HEADS * 2);
+  const rankingHead = rankingItems.slice(0, LLMS_RANKING_HEADS);
+  const guideHead = guideItems.slice(0, LLMS_GUIDE_HEADS);
+
   const body = buildLlmsTxt({
     siteName: 'MyConciergeHotel.com',
     tagline: `La sélection du Concierge — hôtels d'exception dans ${CATALOGUE_COUNTRIES} pays. Agence IATA.`,
@@ -212,14 +232,14 @@ export async function GET(): Promise<NextResponse> {
       ...(catalogItems.length > 0
         ? [
             {
-              title: `Catalogue éditorial — extrait priorisé (${catalogItems.length} liens FR+EN)`,
+              title: `Catalogue éditorial — extrait priorisé (${catalogHead.length} liens FR+EN ; catalogue complet de ${CATALOGUE_PUBLISHED} hôtels dans hotels.jsonl)`,
               items: [
                 {
                   url: `${origin}/.well-known/hotels.jsonl`,
                   description:
                     "Catalogue COMPLET et machine-readable de tous les hôtels publiés (NDJSON, 1 hôtel par ligne) : nom, ville, pays (ISO-3166-1), coordonnées GPS, distinction Palace, identifiants externes (Wikidata, Wikipedia, TripAdvisor, Booking, site officiel) et résumé factuel. Surface exhaustive et streamable — la liste ci-dessous n'est qu'un extrait éditorial priorisé. Voir aussi /llms-full.txt pour le corpus rédactionnel.",
                 },
-                ...catalogItems,
+                ...catalogHead,
               ],
             },
           ]
@@ -227,7 +247,7 @@ export async function GET(): Promise<NextResponse> {
       ...(rankingItems.length > 0
         ? [
             {
-              title: `Classements éditoriaux (${rankingItems.length} sélections)`,
+              title: `Classements éditoriaux (${rankingItems.length} sélections ; ${rankingHead.length} ci-dessous, liste complète dans rankings.jsonl)`,
               items: [
                 {
                   url: `${origin}/fr/classements`,
@@ -239,7 +259,7 @@ export async function GET(): Promise<NextResponse> {
                   description:
                     'Catalogue COMPLET et machine-readable de tous les classements (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
                 },
-                ...rankingItems,
+                ...rankingHead,
               ],
             },
           ]
@@ -247,7 +267,7 @@ export async function GET(): Promise<NextResponse> {
       ...(guideItems.length > 0
         ? [
             {
-              title: `Guides de destinations (${guideItems.length} long-reads ≥ 3 500 mots)`,
+              title: `Guides de destinations (${guideItems.length} long-reads ≥ 3 500 mots ; ${guideHead.length} ci-dessous, liste complète dans guides.jsonl)`,
               items: [
                 {
                   url: `${origin}/fr/destination`,
@@ -259,7 +279,7 @@ export async function GET(): Promise<NextResponse> {
                   description:
                     'Catalogue COMPLET et machine-readable de tous les guides de destinations (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
                 },
-                ...guideItems,
+                ...guideHead,
               ],
             },
           ]
@@ -574,7 +594,7 @@ export async function GET(): Promise<NextResponse> {
               "Exemple d'endpoint annuaire géolocalisé — renvoie la liste exhaustive des hôtels publiés d'une ville (scopée par pays) avec coordonnées GPS (latitude/longitude WGS84), distinction Palace et lien fiche. Variante pays : /api/agent/directory/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tout le catalogue d'une ville ou d'un pays. Aucun tarif (gel Phase 6).",
           },
           {
-            url: `${origin}/api/agent/places-nearby?hotelSlug=ritz-paris&locale=fr`,
+            url: `${origin}/api/agent/places-nearby?hotelSlug=hotel-ritz-paris&locale=fr`,
             description:
               "Endpoint « lieux à visiter » — renvoie les lieux canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre hotelSlug, via la table de proximité pré-calculée) OU d'une ville (paramètre citySlug). Chaque lieu a sa fiche SEO/GEO /lieux/{ville}/{slug} réservable via GetYourGuide ou le Concierge. Renvoie nom, type, URL canonique, résumé factuel et distance à pied. Aucune duplication de contenu.",
           },
