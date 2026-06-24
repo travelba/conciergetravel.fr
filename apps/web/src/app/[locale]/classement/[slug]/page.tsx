@@ -220,8 +220,8 @@ export async function generateMetadata({
     locale,
     metaDescFr: ranking.meta_desc_fr,
     metaDescEn: ranking.meta_desc_en,
-    factualSummaryFr: ranking.factual_summary_fr,
-    factualSummaryEn: ranking.factual_summary_en,
+    factualSummaryFr: ranking.factual_summary_fr ?? null,
+    factualSummaryEn: ranking.factual_summary_en ?? null,
     introFr: ranking.intro_fr,
     introEn: ranking.intro_en,
   });
