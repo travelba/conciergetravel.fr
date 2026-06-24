@@ -258,6 +258,20 @@ Symptom: route handler exists, build log shows it as static prerendered
 the matcher when you add a new top-level folder that should bypass i18n
 routing (e.g. `/api/health`, `/sitemaps/`, `/.well-known/`).
 
+The same trap applies to **every static asset folder under `public/`**:
+the matcher already lists `logos`, `kit`, `icon.svg`, … and each one was
+paid for in a 404. **2026-06-24 — the `og` case**: the "add a default
+1200×630 og:image" SEO fix shipped `public/og/default.jpg` and wired the
+`og:image` meta tag onto the home + the site-wide fallback, but forgot to
+add `og` to the matcher. next-intl rewrote `/og/default.jpg` →
+`/fr/og/default.jpg` → 404, so the live meta tag pointed at a broken
+share image on the most-shared URL — and the page itself was 200, so the
+miss was invisible without curling the **asset** directly. The lesson
+generalises: **when you add a `public/<folder>/asset` AND reference it
+from metadata, curl the asset URL itself in acceptance, not just the page
+that links it** — a 200 page can carry a 404 `og:image`/`icon`/`manifest`.
+Fix was a one-token matcher addition (`…|logos|kit|og).*)`).
+
 ### Rule 9 — Vercel env vars are **scoped per environment**; preview ≠ production
 
 Each env var in the Vercel dashboard has three independent toggles:
@@ -357,6 +371,35 @@ How to recover:
 
 - Push a real change in the `@mch/web` graph (anything under `apps/web/src/`,
   or any `packages/*` that `apps/web` depends on per `pnpm why`).
+
+### Rule 11 — Run `typecheck` BEFORE you commit, not at `pre-push`
+
+The repo's `pre-push` hook runs `pnpm turbo run typecheck` + `pnpm
+validate:skills`. That is the **last** gate, not the first. A worker who
+commits a batch and only discovers a type error at push time has to
+amend / add a fix commit across an already-stacked history — and on a
+shared long-lived branch (`feat/lieux-a-visiter-vertical`) that means
+either an ugly `fixup` or a risky rebase.
+
+2026-06-24 reference: a batch of 8 health-fix commits was pushed and the
+`pre-push` typecheck caught a TS error that had ridden along on
+**un-typechecked** commits — the whole stack had to be touched again to
+land the fix. The cost is entirely avoidable.
+
+Discipline for every code change before `git commit`:
+
+```powershell
+pnpm --filter @mch/web typecheck   # fast: ~6 s incremental, single package
+```
+
+- Scope the typecheck to the package you touched (`@mch/web`, `@mch/seo`,
+  …) for a ~6 s loop instead of the full `turbo run typecheck`.
+- Run it **per commit**, not once at the end of the batch — that way a
+  type error is isolated to (and fixed in) the commit that introduced it.
+- `pre-push` stays the safety net; never rely on it as the discovery
+  mechanism. `validate:skills` must also stay at **0 errors** (warnings
+  like a skill > 700 lines are tolerated but should be trimmed when you
+  next touch that skill).
 
 ## References
 
