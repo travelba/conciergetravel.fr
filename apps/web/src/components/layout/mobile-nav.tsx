@@ -16,6 +16,7 @@ import {
   INTL_DESTINATION_NAV_ENTRIES,
   intlNavSlugToIso,
   LABEL_NAV_ENTRIES,
+  navHotelTypeToAxisValue,
   OCCASION_NAV_ENTRIES,
   pickCategoryLabel,
   pickEntryLabel,
@@ -523,6 +524,38 @@ export function MobileNav(): ReactElement {
                         </li>
                       ))}
                     </ul>
+                    {/* B4 — parité desktop : sous-hubs « par type » et
+                        « par destination » (mega-menu `ClassementsMegaMenu`
+                        dans `site-header.tsx`) qui manquaient au drawer
+                        mobile. `navHotelTypeToAxisValue` mappe le slug menu
+                        vers la valeur d'axe canonique (`axes.ts`). */}
+                    <p className={subHeadingClass}>{t('primaryNav.rankingsByType')}</p>
+                    <ul className="flex flex-col gap-0.5">
+                      {HOTEL_TYPE_NAV_ENTRIES.slice(0, 6).map((entry) => {
+                        const axisValue = navHotelTypeToAxisValue(entry.slug);
+                        if (axisValue === null) return null;
+                        return (
+                          <li key={entry.slug}>
+                            <Link
+                              href={{
+                                pathname: '/classements/[axe]/[valeur]',
+                                params: { axe: 'type', valeur: axisValue },
+                              }}
+                              className={subLinkClass}
+                            >
+                              {pickEntryLabel(entry, locale)}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className={subHeadingClass}>{t('primaryNav.rankingsByDestination')}</p>
+                    <AxisLinkList
+                      entries={TOP_DESTINATION_NAV_ENTRIES.slice(0, 6)}
+                      locale={locale}
+                      axe="lieu"
+                      linkClass={subLinkClass}
+                    />
                     <Link href="/classements" className={`${subLinkClass} text-muted text-xs`}>
                       {t('primaryNav.rankingsBrowseAll')}
                     </Link>

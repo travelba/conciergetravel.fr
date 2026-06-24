@@ -49,35 +49,63 @@ interface MatchRange {
   readonly href: EditorialLink;
 }
 
+/**
+ * Pre-compiled link-map entry. The corpus grew from ~200 to ~3000+
+ * entries (B4 — full-catalogue auto-link map), so the regex compile +
+ * entry sort MUST happen once per render, not once per paragraph.
+ * `findMatches` previously rebuilt both for every paragraph, making the
+ * cost O(entries × paragraphs × compile); hoisting them makes it
+ * O(entries) compiles + O(entries × paragraphs) cheap `.exec` calls.
+ */
+interface CompiledEntry {
+  readonly name: string;
+  readonly lower: string;
+  readonly pattern: RegExp;
+  readonly href: EditorialLink;
+}
+
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
+
+/**
+ * Compiles the link map once per render: drops sub-3-char names, sorts by
+ * descending name length so longer strings match first ("Plaza Athénée"
+ * before "Plaza"), and pre-builds each Unicode-aware word-boundary regex.
+ */
+function compileEntries(linkMap: EditorialLinkMap): readonly CompiledEntry[] {
+  const compiled: CompiledEntry[] = [];
+  for (const [name, href] of linkMap) {
+    if (name.length < 3) continue;
+    compiled.push({
+      name,
+      lower: name.toLowerCase(),
+      pattern: new RegExp(`(?<=^|[^\\p{L}\\p{N}])${escapeRegex(name)}(?=[^\\p{L}\\p{N}]|$)`, 'iu'),
+      href,
+    });
+  }
+  return compiled.sort((a, b) => b.name.length - a.name.length);
 }
 
 /**
  * Find all candidate matches in a paragraph. Each entity is matched
  * case-INSENSITIVELY but its surface form keeps the original casing
  * from the text. Word-boundary check uses Unicode-aware delimiters
- * (handles French accents, hyphens, apostrophes).
+ * (handles French accents, hyphens, apostrophes). `entries` is the
+ * render-scoped pre-compiled list (see `compileEntries`).
  */
-function findMatches(paragraph: string, linkMap: EditorialLinkMap): MatchRange[] {
+function findMatches(paragraph: string, entries: readonly CompiledEntry[]): MatchRange[] {
   const results: MatchRange[] = [];
   const used = new Set<string>();
 
-  // Sort entries by descending name length so we match longer strings
-  // first ("Plaza Athénée" before "Plaza").
-  const entries = Array.from(linkMap.entries()).sort((a, b) => b[0].length - a[0].length);
-
-  for (const [name, href] of entries) {
-    if (used.has(name.toLowerCase())) continue;
-    if (name.length < 3) continue;
-    const pattern = new RegExp(
-      `(?<=^|[^\\p{L}\\p{N}])${escapeRegex(name)}(?=[^\\p{L}\\p{N}]|$)`,
-      'iu',
-    );
-    const m = pattern.exec(paragraph);
+  for (const entry of entries) {
+    if (used.has(entry.lower)) continue;
+    // Non-global regex: `.exec` always scans from index 0, so reusing the
+    // pre-compiled instance across paragraphs is safe (no lastIndex state).
+    const m = entry.pattern.exec(paragraph);
     if (m === null) continue;
     const start = m.index;
-    const end = start + name.length;
+    const end = start + entry.name.length;
 
     // Skip if overlaps an already-claimed range.
     let overlap = false;
@@ -89,8 +117,8 @@ function findMatches(paragraph: string, linkMap: EditorialLinkMap): MatchRange[]
     }
     if (overlap) continue;
 
-    results.push({ start, end, text: paragraph.slice(start, end), href });
-    used.add(name.toLowerCase());
+    results.push({ start, end, text: paragraph.slice(start, end), href: entry.href });
+    used.add(entry.lower);
   }
 
   return results.sort((a, b) => a.start - b.start);
@@ -98,11 +126,11 @@ function findMatches(paragraph: string, linkMap: EditorialLinkMap): MatchRange[]
 
 function renderParagraph(
   paragraph: string,
-  linkMap: EditorialLinkMap,
+  entries: readonly CompiledEntry[],
   maxLinks: number,
   keyBase: string,
 ): ReactNode {
-  const matches = findMatches(paragraph, linkMap).slice(0, maxLinks);
+  const matches = findMatches(paragraph, entries).slice(0, maxLinks);
   if (matches.length === 0) return paragraph;
 
   const out: ReactNode[] = [];
@@ -135,6 +163,9 @@ export function EnrichedText({
   // the current locale via the next-intl request context, so we no longer
   // need to thread it down to each individual link.
   void _locale;
+  // Compile the link map ONCE per render (not per paragraph) — see
+  // `compileEntries`. Critical now the map carries the full catalogue.
+  const entries = compileEntries(linkMap);
   // Split on blank lines to render proper paragraphs.
   const paragraphs = body
     .split(/\n{2,}/u)
@@ -144,7 +175,7 @@ export function EnrichedText({
   return (
     <div className="text-fg/90 space-y-4 leading-relaxed">
       {paragraphs.map((p, i) => (
-        <p key={i}>{renderParagraph(p, linkMap, maxLinksPerParagraph, `p${i}`)}</p>
+        <p key={i}>{renderParagraph(p, entries, maxLinksPerParagraph, `p${i}`)}</p>
       ))}
     </div>
   );
