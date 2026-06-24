@@ -459,6 +459,144 @@ const LUXE_CITIES: readonly {
     lieuSlug: 'rome',
     label: 'Rome',
   },
+  // ── Wave 4 (2026-06-24) — acquisition expansion vs yonder.fr /
+  // travellers-society.com. `hôtel de luxe {ville}` head term (10-30× the
+  // `meilleurs hôtels {ville}` volume per audit G2) for high-inventory
+  // cities both competitors cover and MCH had no `luxe` head for. Each
+  // gate-checked ≥ 4 published hotels via the live catalogue (city/country
+  // inventory query 2026-06-24). LieuDefs already registered in axes.ts.
+  // Differentiated from the parallel `meilleurs-hotels-{ville}` head (a
+  // distinct keyword intent, not cannibalisation). Cannes (3 distinct after
+  // Carlton/Le Carlton dedup) and Reims (4 with Crayères dedup, thin FR
+  // `luxe` volume) deliberately NOT created.
+  {
+    slug: 'hotel-de-luxe-tokyo',
+    titleFr: 'Les meilleurs hôtels de luxe à Tokyo',
+    titleEn: 'The best luxury hotels in Tokyo',
+    scope: 'ville',
+    lieuSlug: 'tokyo',
+    label: 'Tokyo',
+  },
+  {
+    slug: 'hotel-de-luxe-istanbul',
+    titleFr: 'Les meilleurs hôtels de luxe à Istanbul',
+    titleEn: 'The best luxury hotels in Istanbul',
+    scope: 'ville',
+    lieuSlug: 'istanbul',
+    label: 'Istanbul',
+  },
+  {
+    slug: 'hotel-de-luxe-bangkok',
+    titleFr: 'Les meilleurs hôtels de luxe à Bangkok',
+    titleEn: 'The best luxury hotels in Bangkok',
+    scope: 'ville',
+    lieuSlug: 'bangkok',
+    label: 'Bangkok',
+  },
+  {
+    slug: 'hotel-de-luxe-berlin',
+    titleFr: 'Les meilleurs hôtels de luxe à Berlin',
+    titleEn: 'The best luxury hotels in Berlin',
+    scope: 'ville',
+    lieuSlug: 'berlin',
+    label: 'Berlin',
+  },
+  {
+    slug: 'hotel-de-luxe-prague',
+    titleFr: 'Les meilleurs hôtels de luxe à Prague',
+    titleEn: 'The best luxury hotels in Prague',
+    scope: 'ville',
+    lieuSlug: 'prague',
+    label: 'Prague',
+  },
+  {
+    slug: 'hotel-de-luxe-bali',
+    titleFr: 'Les meilleurs hôtels de luxe à Bali',
+    titleEn: 'The best luxury hotels in Bali',
+    scope: 'cluster',
+    lieuSlug: 'bali',
+    label: 'Bali',
+  },
+  {
+    slug: 'hotel-de-luxe-mykonos',
+    titleFr: 'Les meilleurs hôtels de luxe à Mykonos',
+    titleEn: 'The best luxury hotels in Mykonos',
+    scope: 'ville',
+    lieuSlug: 'mykonos',
+    label: 'Mykonos',
+  },
+  {
+    slug: 'hotel-de-luxe-santorin',
+    titleFr: 'Les meilleurs hôtels de luxe à Santorin',
+    titleEn: 'The best luxury hotels in Santorini',
+    scope: 'ville',
+    lieuSlug: 'santorin',
+    label: 'Santorin',
+  },
+  {
+    slug: 'hotel-de-luxe-florence',
+    titleFr: 'Les meilleurs hôtels de luxe à Florence',
+    titleEn: 'The best luxury hotels in Florence',
+    scope: 'ville',
+    lieuSlug: 'florence',
+    label: 'Florence',
+  },
+  {
+    slug: 'hotel-de-luxe-milan',
+    titleFr: 'Les meilleurs hôtels de luxe à Milan',
+    titleEn: 'The best luxury hotels in Milan',
+    scope: 'ville',
+    lieuSlug: 'milan',
+    label: 'Milan',
+  },
+  {
+    slug: 'hotel-de-luxe-madrid',
+    titleFr: 'Les meilleurs hôtels de luxe à Madrid',
+    titleEn: 'The best luxury hotels in Madrid',
+    scope: 'ville',
+    lieuSlug: 'madrid',
+    label: 'Madrid',
+  },
+  {
+    slug: 'hotel-de-luxe-lisbonne',
+    titleFr: 'Les meilleurs hôtels de luxe à Lisbonne',
+    titleEn: 'The best luxury hotels in Lisbon',
+    scope: 'ville',
+    lieuSlug: 'lisbonne',
+    label: 'Lisbonne',
+  },
+  {
+    slug: 'hotel-de-luxe-vienne',
+    titleFr: 'Les meilleurs hôtels de luxe à Vienne',
+    titleEn: 'The best luxury hotels in Vienna',
+    scope: 'ville',
+    lieuSlug: 'vienne',
+    label: 'Vienne',
+  },
+  {
+    slug: 'hotel-de-luxe-abu-dhabi',
+    titleFr: 'Les meilleurs hôtels de luxe à Abu Dhabi',
+    titleEn: 'The best luxury hotels in Abu Dhabi',
+    scope: 'ville',
+    lieuSlug: 'abu-dhabi',
+    label: 'Abu Dhabi',
+  },
+  {
+    slug: 'hotel-de-luxe-doha',
+    titleFr: 'Les meilleurs hôtels de luxe à Doha',
+    titleEn: 'The best luxury hotels in Doha',
+    scope: 'ville',
+    lieuSlug: 'doha',
+    label: 'Doha',
+  },
+  {
+    slug: 'hotel-de-luxe-kyoto',
+    titleFr: 'Les meilleurs hôtels de luxe à Kyoto',
+    titleEn: 'The best luxury hotels in Kyoto',
+    scope: 'ville',
+    lieuSlug: 'kyoto',
+    label: 'Kyoto',
+  },
 ];
 const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
   slug: d.slug,
