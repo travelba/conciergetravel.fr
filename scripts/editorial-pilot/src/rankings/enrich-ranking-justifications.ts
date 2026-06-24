@@ -598,24 +598,80 @@ function isGenericTarget(e: EntryRow): boolean {
   return false;
 }
 
+/* ── Timeouts (every LLM call inside the batch loop MUST be bounded) ────────*/
+
+/**
+ * Hard ceiling for a single grounded LLM rewrite. A run on 2026-06-23 froze
+ * for ~8 h on ONE unbounded LLM call (`top-relais-chateaux-allemagne`): the
+ * provider socket hung, `callLlm` never settled, and the enclosing concurrency
+ * map waited on that `await` forever — freezing the whole run. Any LLM /
+ * network call inside a batch loop MUST be bounded so a single stuck request
+ * degrades to a skipped entry, never a frozen run. Override via env if a slow
+ * model legitimately needs more headroom.
+ * Cf. `.cursor/skills/llm-output-robustness/SKILL.md`.
+ */
+const LLM_TIMEOUT_MS: number = (() => {
+  const raw = Number(process.env['ENRICH_JUSTIF_LLM_TIMEOUT_MS']);
+  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 120_000;
+})();
+
+class TimeoutError extends Error {
+  constructor(label: string, ms: number) {
+    super(`${label} timed out after ${ms}ms`);
+    this.name = 'TimeoutError';
+  }
+}
+
+/**
+ * Race a promise against a timer that rejects with a `TimeoutError`. The timer
+ * is unref'd so it never keeps the process alive, and is always cleared so a
+ * fast settle does not leak a pending handle. The underlying promise may still
+ * settle later (the provider SDK has its own socket timeout) — we simply stop
+ * awaiting it, which unblocks the batch.
+ */
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new TimeoutError(label, ms)), ms);
+    timer.unref?.();
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 /* ── Concurrency ───────────────────────────────────────────────────────────*/
 
+/**
+ * Bounded-parallel map that ISOLATES per-item failures: a rejected `fn` is
+ * routed to `onError` (which must synthesise a fallback result) so one bad
+ * entry can never poison its siblings, and `Promise.allSettled` guarantees the
+ * batch always resolves even if a worker rejects unexpectedly. Combined with
+ * `withTimeout`, this is what stops a single stuck call from freezing the run.
+ */
 async function runWithConcurrency<T, R>(
   items: readonly T[],
   concurrency: number,
   fn: (t: T, i: number) => Promise<R>,
+  onError: (t: T, i: number, err: unknown) => R,
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let next = 0;
-  await Promise.all(
-    Array.from({ length: Math.max(1, concurrency) }).map(async () => {
-      for (;;) {
-        const i = next++;
-        if (i >= items.length) return;
-        results[i] = await fn(items[i] as T, i);
+  const workers = Array.from({ length: Math.max(1, concurrency) }).map(async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      const item = items[i] as T;
+      try {
+        results[i] = await fn(item, i);
+      } catch (err) {
+        results[i] = onError(item, i, err);
       }
-    }),
-  );
+    }
+  });
+  await Promise.allSettled(workers);
   return results;
 }
 
@@ -667,14 +723,13 @@ async function enrichEntry(
     currentFr: entry.justification_fr ?? '',
   });
 
+  const label = `justif ${hotelSlug}#${entry.rank}`;
   let parsed: z.infer<typeof JustificationSchema>;
   try {
-    parsed = await callLlm(
-      llm,
-      SYSTEM_PROMPT,
-      userPrompt,
-      JustificationSchema,
-      `justif ${hotelSlug}#${entry.rank}`,
+    parsed = await withTimeout(
+      callLlm(llm, SYSTEM_PROMPT, userPrompt, JustificationSchema, label),
+      LLM_TIMEOUT_MS,
+      label,
     );
   } catch (err) {
     return {
@@ -693,10 +748,20 @@ async function enrichEntry(
   }
 
   if (!dryRun) {
-    await patchEntry(env, rankingId, entry.hotel_id, {
-      justification_fr: fr,
-      justification_en: en,
-    });
+    try {
+      await patchEntry(env, rankingId, entry.hotel_id, {
+        justification_fr: fr,
+        justification_en: en,
+      });
+    } catch (err) {
+      return {
+        ...base,
+        enAfter: enBefore,
+        frAfter: frBefore,
+        status: 'error',
+        detail: err instanceof Error ? err.message.slice(0, 160) : String(err),
+      };
+    }
   } else {
     console.log(`\n  ── DRY-RUN ${hotelSlug} #${entry.rank} ──`);
     console.log(`  FR (${fr.length}c): ${fr}`);
@@ -819,8 +884,21 @@ async function main(): Promise<void> {
       `  [${i + 1}/${rankings.length}] ${ranking.slug} — ${targets.length}/${entries.length} entries to enrich…`,
     );
 
-    const results = await runWithConcurrency(targets, args.entryConcurrency, (entry) =>
-      enrichEntry(llm, pg, ranking.id, ranking.title_fr, entry, args.dryRun),
+    const results = await runWithConcurrency(
+      targets,
+      args.entryConcurrency,
+      (entry) => enrichEntry(llm, pg, ranking.id, ranking.title_fr, entry, args.dryRun),
+      (entry, _i, err): EntryResult => ({
+        hotelId: entry.hotel_id,
+        rank: entry.rank,
+        hotelSlug: str(entry.hotels?.slug),
+        enBefore: (entry.justification_en ?? '').length,
+        enAfter: (entry.justification_en ?? '').length,
+        frBefore: (entry.justification_fr ?? '').length,
+        frAfter: (entry.justification_fr ?? '').length,
+        status: 'error',
+        detail: err instanceof Error ? err.message.slice(0, 160) : String(err),
+      }),
     );
 
     let updated = 0;

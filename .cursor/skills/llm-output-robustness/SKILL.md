@@ -1267,6 +1267,93 @@ the lexicon part 100 % LLM-driven and linter-judged. Contrast with Rule 18c
 both constraints at once; Rule 19 is the complementary _structure-only_ lever
 for the length half when the LLM has already given up.
 
+## Rule 20 — Every LLM / network call inside a batch loop MUST be timeout-bounded AND failure-isolated
+
+A run on 2026-06-23 (`enrich-ranking-justifications.ts --generic-only`) enriched
+1 347 entries across 629 rankings, then **froze for ~8 h on ONE LLM call**
+(`top-relais-chateaux-allemagne`). Root cause: the provider socket hung, the
+inner `callLlm` never settled, the worker's `await` blocked forever, and the
+enclosing concurrency map (`Promise.all` over the ranking's entries) waited on
+that one stuck worker indefinitely. The whole run was dead — no progress, no
+error, no exit. `Promise.allSettled` would **not** have helped: an unsettled
+promise is not a rejected one. Only a timeout unblocks a hung socket.
+
+Two independent guards are mandatory for any LLM/Tavily/fetch call in a loop:
+
+### 20a — Bound the call with a `Promise.race` timer
+
+```ts
+const LLM_TIMEOUT_MS = Number(process.env['ENRICH_JUSTIF_LLM_TIMEOUT_MS']) || 120_000;
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    timer.unref?.(); // never keep the process alive on the timer alone
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer); // never leak a pending handle
+  }
+}
+
+// at the call site, INSIDE the existing per-entry try/catch:
+parsed = await withTimeout(callLlm(llm, SYS, user, Schema, label), LLM_TIMEOUT_MS, label);
+```
+
+The timeout rejection is caught by the per-entry `try/catch` → the entry is
+recorded as `status: 'error'` and **skipped**, never fatal. The underlying
+promise may still settle later (the provider SDK has its own socket timeout);
+we simply stop awaiting it, which unblocks the batch. Note the OpenAI SDK
+already sets a 120 s `timeout` (`llm.ts`), but the **Anthropic** client sets
+none — so the application-level `withTimeout` is the only universal guard.
+
+### 20b — Isolate per-item failure with `allSettled`, never bare `Promise.all`
+
+The concurrency helper must route a rejected `fn` to a fallback result (so one
+bad item can never poison its siblings) and use `Promise.allSettled` on the
+workers (so a stray worker rejection can never reject the whole batch):
+
+```ts
+async function runWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (t: T, i: number) => Promise<R>,
+  onError: (t: T, i: number, err: unknown) => R, // synthesises a fallback result
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.max(1, concurrency) }).map(async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      const item = items[i] as T;
+      try {
+        results[i] = await fn(item, i);
+      } catch (err) {
+        results[i] = onError(item, i, err); // no holes in results[]
+      }
+    }
+  });
+  await Promise.allSettled(workers);
+  return results;
+}
+```
+
+Also wrap any **persistence** call (PostgREST `PATCH`, DB write) in its own
+`try/catch` inside the per-item function — a transient 5xx on one write must
+degrade to a skipped item, not crash the run.
+
+**Rule of thumb:** in a batch editorial loop, a single hung or throwing call
+should cost you ONE skipped item (re-attempted on the next idempotent re-run),
+never the whole multi-hour run. Timeout = liveness; allSettled + per-item
+try/catch = isolation. You need both. See `keyword-grounding-dataforseo`
+§per-item try/catch for the sibling rule on vendor-API batch loops.
+
+**Reference impl:** `scripts/editorial-pilot/src/rankings/enrich-ranking-justifications.ts`
+(`withTimeout`, `LLM_TIMEOUT_MS`, hardened `runWithConcurrency` with `onError`).
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -1292,6 +1379,7 @@ for the length half when the LLM has already given up.
 - ❌ Combining a length plafond, a sentence-length cap, a banlist, and a "must extend with new factual content" instruction on factually dense rows (Palaces, R&C, 5★) → constraints become co-non-satisfiable → all attempts fail. Hand-write the target on the densest 5 rows before shipping; if you can't, relax ONE constraint (usually the length plafond) (Rule 18b).
 - ❌ Burning 2-4 LLM correction passes on a pure LENGTH overshoot (`factual_summary` a few chars over max, one sentence > 25 mots) → tokens wasted on a problem a regex solves deterministically. Pre-clamp summaries before the Zod parse and split over-length sentences at natural boundaries (Rule 19a/19b).
 - ❌ Letting a deterministic length-salvage step also rewrite/substitute words, OR accepting the salvaged copy without re-running the full gate → it silently overrides the banned-lexicon/voice linter verdict and ships brand-voice regressions. Salvage must touch rhythm only, and the salvaged row must clear `safeParse` + the editorial envelope or be rejected (Rule 19c).
+- ❌ Calling an LLM / Tavily / `fetch` inside a batch loop WITHOUT a `Promise.race` timeout → one hung provider socket freezes the entire run for hours (2026-06-23: ~8 h dead on a single `callLlm`). `Promise.allSettled` does not rescue an _unsettled_ promise — only a timeout does. Bound every call AND isolate failures with `allSettled` + per-item try/catch (Rule 20).
 
 ## References
 
