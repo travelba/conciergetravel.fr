@@ -8,6 +8,10 @@ import { buildCloudinarySrc } from '@mch/ui';
 
 import { RelatedItinerariesList } from '@/components/cross-links/related-itineraries-list';
 import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
+import {
+  TOP_DESTINATION_NAV_ENTRIES,
+  TOP_INTL_DESTINATION_NAV_ENTRIES,
+} from '@/components/layout/nav-data';
 import { EditorialCallout } from '@/components/editorial/editorial-callout';
 import { EditorialGlossary } from '@/components/editorial/editorial-glossary';
 import { EditorialTable } from '@/components/editorial/editorial-table';
@@ -64,6 +68,18 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
 function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
+
+/**
+ * City slugs that resolve to a real `/destination/[citySlug]` hub (or its
+ * graceful menu empty-state) — mirrors `KNOWN_MENU_CITY_SLUGS` in the
+ * destination route. The "Découvrir {ville}" CTA below only links to
+ * `/destination/*` for a lieu in this set, so the classement page never
+ * emits a link that hard-404s (B2).
+ */
+const KNOWN_DESTINATION_CITY_SLUGS = new Set<string>([
+  ...TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug),
+  ...TOP_INTL_DESTINATION_NAV_ENTRIES.map((e) => e.slug),
+]);
 
 const T = {
   fr: {
@@ -909,6 +925,55 @@ export default async function RankingPage({
               ) : null}
             </section>
           ) : null}
+
+          {/* B2 — lieu mesh: link the ranking back up to its sub-hub
+              (`/classements/lieu/<slug>`, always resolvable since the
+              current ranking itself matches) and across to the city
+              destination hub when one exists. Gated on a real lieu so
+              chain / curated rankings (lieu null) skip the block. */}
+          {ranking.axes.lieu !== undefined
+            ? (() => {
+                const lieu = ranking.axes.lieu;
+                const lieuLabel = lieu.label;
+                const hasDestinationHub = KNOWN_DESTINATION_CITY_SLUGS.has(lieu.slug);
+                return (
+                  <nav
+                    aria-label={pickByLocale(
+                      locale,
+                      'Explorer ce lieu',
+                      'Explore this destination',
+                    )}
+                    className="border-border mt-12 flex flex-wrap gap-3 border-t pt-8"
+                  >
+                    <Link
+                      href={{
+                        pathname: '/classements/[axe]/[valeur]',
+                        params: { axe: 'lieu', valeur: lieu.slug },
+                      }}
+                      className="border-border text-fg hover:border-fg/40 focus-visible:ring-ring rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2"
+                    >
+                      {pickByLocale(
+                        locale,
+                        `Tous les classements ${lieuLabel}`,
+                        `All rankings in ${lieuLabel}`,
+                      )}{' '}
+                      →
+                    </Link>
+                    {hasDestinationHub ? (
+                      <Link
+                        href={{
+                          pathname: '/destination/[citySlug]',
+                          params: { citySlug: lieu.slug },
+                        }}
+                        className="bg-fg text-bg focus-visible:ring-ring rounded-md px-4 py-2 text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2"
+                      >
+                        {pickByLocale(locale, `Découvrir ${lieuLabel}`, `Discover ${lieuLabel}`)} →
+                      </Link>
+                    ) : null}
+                  </nav>
+                );
+              })()
+            : null}
 
           {/* External sources (EEAT signal) */}
           <ExternalSourcesFooter sources={ranking.external_sources} locale={locale} />

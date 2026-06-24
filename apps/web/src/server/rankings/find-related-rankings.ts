@@ -176,27 +176,106 @@ export async function findRankingsForItinerary(args: {
 }
 
 /**
- * Resolves the rankings to cross-link from a destination (city) page.
- * Matches by `axes.lieu.slug = citySlug`. Returns at most `limit`
- * results, never throws.
+ * Maps an FR city slug to its broader lieu ancestors (region / cluster)
+ * so a destination hub can also surface the cluster + national rankings
+ * that cover it (B2). `france` is appended automatically for every city.
+ * The fallback is applied by `findRankingsForCity` only when the
+ * destination's `countryCode === 'FR'`, so the national `france` ancestor
+ * never leaks onto an international hub.
  *
- * Examples (2026-05-26 catalogue):
- *   - `paris` → 15 rankings
- *   - `cote-d-azur` → 13 rankings
- *   - `bordeaux` → 0 rankings (returns empty, the page should hide
- *     the block in that case)
+ * Keys are the `citySlug(city)` outputs; values are ranking `axes.lieu.
+ * slug` values (HERO-region slugs). Unknown FR cities still get the
+ * `france` fallback via `fallbackLieusForCity`.
+ */
+const CITY_LIEU_ANCESTORS: Readonly<Record<string, readonly string[]>> = {
+  paris: ['ile-de-france'],
+  versailles: ['ile-de-france'],
+  cannes: ['cote-d-azur'],
+  nice: ['cote-d-azur'],
+  antibes: ['cote-d-azur'],
+  'saint-jean-cap-ferrat': ['cote-d-azur'],
+  menton: ['cote-d-azur'],
+  monaco: ['cote-d-azur'],
+  'saint-tropez': ['cote-d-azur', 'provence'],
+  ramatuelle: ['cote-d-azur', 'provence'],
+  'aix-en-provence': ['provence'],
+  avignon: ['provence'],
+  gordes: ['provence'],
+  'les-baux-de-provence': ['provence'],
+  arles: ['provence'],
+  courchevel: ['alpes'],
+  megeve: ['alpes'],
+  'val-d-isere': ['alpes'],
+  chamonix: ['alpes'],
+  tignes: ['alpes'],
+  'saint-emilion': ['bordeaux'],
+  reims: ['champagne'],
+  epernay: ['champagne'],
+  biarritz: ['pays-basque'],
+  'saint-jean-de-luz': ['pays-basque'],
+  bidart: ['pays-basque'],
+  'porto-vecchio': ['corse'],
+  ajaccio: ['corse'],
+  bonifacio: ['corse'],
+  calvi: ['corse'],
+  'cote-d-azur': ['provence'],
+};
+
+function fallbackLieusForCity(citySlug: string): readonly string[] {
+  const explicit = CITY_LIEU_ANCESTORS[citySlug] ?? [];
+  return explicit.includes('france') ? explicit : [...explicit, 'france'];
+}
+
+/**
+ * Resolves the rankings to cross-link from a destination (city) page.
+ * Primary match is `axes.lieu.slug = citySlug`; B2 adds a region/country
+ * fallback so a city with few (or zero) dedicated rankings still surfaces
+ * its cluster + national classements (e.g. `reims` → champagne → france,
+ * `paris` → france). Primary matches always rank ahead of fallbacks.
+ *
+ * **Conservative international policy** (mirrors `findRankingsForItinerary`):
+ * the region/country fallback fires ONLY for FR destinations. An
+ * international hub (`countryCode !== 'FR'`) keeps the legacy strict
+ * `lieu.slug = citySlug` behaviour so a Tokyo / Dubai page never pulls in
+ * France-focused rankings via the `france` ancestor. When `countryCode` is
+ * omitted the fallback is skipped too (safe default).
+ *
+ * Returns at most `limit` results, never throws.
  */
 export async function findRankingsForCity(args: {
   readonly citySlug: string;
+  readonly countryCode?: string;
   readonly limit?: number;
 }): Promise<readonly RankingLookup[]> {
-  const limit = args.limit ?? 4;
-  const cached = unstable_cache(
-    () => queryRankingsByLieuSlug(args.citySlug, limit, null),
-    [`city-related-rankings-${args.citySlug}-${limit}`],
-    { revalidate: 3600, tags: [`related-rankings:${args.citySlug}`] },
-  );
-  return cached();
+  const limit = Math.max(1, args.limit ?? 4);
+  try {
+    const index = await loadRankingScoreIndex();
+    if (index.length === 0) return [];
+    const citySlug = args.citySlug;
+    const byTitle = (a: RankingIndexEntry, b: RankingIndexEntry): number =>
+      a.titleFr.localeCompare(b.titleFr);
+    const primary = index.filter((e) => e.lieuSlug === citySlug).sort(byTitle);
+    const seen = new Set(primary.map((e) => e.slug));
+    const secondary: RankingIndexEntry[] = [];
+    if (args.countryCode === 'FR') {
+      for (const fallback of fallbackLieusForCity(citySlug)) {
+        const matches = index
+          .filter((e) => e.lieuSlug === fallback && !seen.has(e.slug))
+          .sort(byTitle);
+        for (const m of matches) {
+          seen.add(m.slug);
+          secondary.push(m);
+        }
+      }
+    }
+    return [...primary, ...secondary].slice(0, limit).map(toLookup);
+  } catch (e) {
+    console.error(
+      '[findRankingsForCity] threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
 }
 
 // ─── In-memory scoring index (B1 — cross-link by theme/type/chain) ─────────

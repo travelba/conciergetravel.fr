@@ -331,7 +331,7 @@ export default async function DestinationHubPage({
   // don't yet have a long-read.
   const [t, relatedRankings, relatedItineraries, guide, cityPlaces] = await Promise.all([
     getTranslations('destinationPage'),
-    findRankingsForCity({ citySlug, limit: 6 }),
+    findRankingsForCity({ citySlug, countryCode: destination.countryCode, limit: 6 }),
     findItinerariesForCity({ citySlug, limit: 4 }),
     getGuideBySlug(citySlug),
     listPublishedPlacesForCity(citySlug),
