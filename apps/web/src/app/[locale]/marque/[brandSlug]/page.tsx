@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
 import { HubAeoSection } from '@/components/seo/hub-aeo-section';
 import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -25,6 +26,7 @@ import {
   listPublishedHotelsForIndex,
 } from '@/server/hotels/get-hotel-by-slug';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
+import { findRankingsForBrand } from '@/server/rankings/find-related-rankings';
 
 export const dynamic = 'force-dynamic';
 
@@ -400,10 +402,13 @@ export default async function BrandPage({
   setRequestLocale(activeLocale);
 
   // Same two-source resolution as `generateMetadata` — see comments
-  // there for the rationale. The two queries run in parallel.
-  const [affiliated, paged] = await Promise.all([
+  // there for the rationale. The queries run in parallel; the curated
+  // chain-ranking lookup (B3) joins them so `/marque/<brand>` links to
+  // `top-<brand>-…-monde` when that ranking is published.
+  const [affiliated, paged, relatedRankings] = await Promise.all([
     listPublishedHotelsByAffiliation({ facetSlug: brand.slug, kind: 'brand' }),
     listPublishedHotelsForIndex(2500),
+    findRankingsForBrand({ brandSlug: brand.slug, limit: 4 }),
   ]);
   const namesMatched = paged.filter((h) => detectBrand(h.nameFr)?.slug === brand.slug);
   const dedup = new Map<string, (typeof affiliated)[number]>();
@@ -621,6 +626,25 @@ export default async function BrandPage({
           {faqItems.length > 0 ? <HubFaqSection heading={t.faqTitle} items={faqItems} /> : null}
         </>
       )}
+
+      {/* B3 — brand → curated rankings. Self-elides when no `top-<brand>-…`
+          ranking is published, so the link is never broken. */}
+      <RelatedRankingsList
+        locale={activeLocale}
+        className="mt-12"
+        heading={pickByLocale(
+          activeLocale,
+          `${brand.label} dans nos classements`,
+          `${brand.label} in our rankings`,
+        )}
+        intro={pickByLocale(
+          activeLocale,
+          `Les sélections éditoriales du Concierge qui distinguent les adresses ${brand.label}.`,
+          `The Concierge's editorial selections featuring ${brand.label} addresses.`,
+        )}
+        rankings={relatedRankings}
+        cta={pickByLocale(activeLocale, 'Voir le classement', 'View the ranking')}
+      />
     </main>
   );
 }

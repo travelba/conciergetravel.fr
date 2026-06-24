@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
 
+import { RelatedRankingsList } from '@/components/cross-links/related-rankings-list';
 import { HubAeoSection } from '@/components/seo/hub-aeo-section';
 import { HubFaqSection } from '@/components/seo/hub-faq-section';
 import { JsonLdScript } from '@/components/seo/json-ld';
@@ -16,6 +17,7 @@ import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { listPublishedHotelsByAffiliation } from '@/server/hotels/get-hotel-by-slug';
 import { findKnownLabel, KNOWN_LABELS, type KnownLabel } from '@/server/hotels/known-labels';
+import { findRankingsForLabel } from '@/server/rankings/find-related-rankings';
 
 /**
  * `/label/[facetSlug]` — collection page for one editorial label or
@@ -212,11 +214,14 @@ export default async function LabelPage({
   const activeLocale: Locale = raw;
   setRequestLocale(activeLocale);
 
-  // Same DB-filtered read as `generateMetadata`.
-  const hotels = await listPublishedHotelsByAffiliation({
-    facetSlug: label.slug,
-    kind: label.kind,
-  });
+  // Same DB-filtered read as `generateMetadata`, joined with the curated
+  // ranking lookup (B3) so a label hub links to the editorial classements
+  // that distinguish it (e.g. `/label/world-50-best` →
+  // `classement-worlds-50-best-2025`).
+  const [hotels, relatedRankings] = await Promise.all([
+    listPublishedHotelsByAffiliation({ facetSlug: label.slug, kind: label.kind }),
+    findRankingsForLabel({ labelSlug: label.slug, limit: 4 }),
+  ]);
   const isEmpty = hotels.length === 0;
 
   const t = T[activeLocale];
@@ -394,6 +399,25 @@ export default async function LabelPage({
           {faqs.length > 0 ? <HubFaqSection heading={t.faqTitle} items={faqs} /> : null}
         </>
       )}
+
+      {/* B3 — label → curated rankings. Self-elides when no matching
+          classement is published, so the link is never broken. */}
+      <RelatedRankingsList
+        locale={activeLocale}
+        className="mt-12"
+        heading={pickByLocale(
+          activeLocale,
+          `${label.label} dans nos classements`,
+          `${label.label} in our rankings`,
+        )}
+        intro={pickByLocale(
+          activeLocale,
+          `Les sélections éditoriales du Concierge liées à la distinction ${label.label}.`,
+          `The Concierge's editorial selections tied to the ${label.label} distinction.`,
+        )}
+        rankings={relatedRankings}
+        cta={pickByLocale(activeLocale, 'Voir le classement', 'View the ranking')}
+      />
     </main>
   );
 }

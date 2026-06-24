@@ -485,3 +485,106 @@ export async function findSiblingRankings(args: {
     return [];
   }
 }
+
+// ─── B3 — Brand / label → curated rankings ─────────────────────────────────
+//
+// `/marque/<brand>` and `/label/<facet>` carried zero links to the curated
+// chain / award rankings that cover them, even though those rankings exist
+// (`top-aman-hotels-monde`, `classement-worlds-50-best-2025`, …). Both
+// helpers resolve candidate rankings against the in-memory index so a link
+// is emitted ONLY when the target ranking is actually published — the block
+// self-elides otherwise (no broken link, no empty section).
+
+/**
+ * Slug suffixes used by the chain-ranking batch runner
+ * (`scripts/editorial-pilot/src/rankings/run-chain-rankings-batch.ts`):
+ * `top-<brand>-hotels-monde`, `top-<brand>-resorts-monde`,
+ * `top-<brand>-palaces-monde`. The `<brand>-toutes-les-maisons` form
+ * covers the legacy collection rankings.
+ */
+const CHAIN_RANKING_SUFFIXES: readonly string[] = [
+  'hotels-monde',
+  'resorts-monde',
+  'palaces-monde',
+];
+
+/**
+ * Resolves the curated chain rankings to cross-link from a brand hub
+ * (`/marque/[brandSlug]`). Matches the exact published slugs
+ * `top-<brandSlug>-{hotels,resorts,palaces}-monde` +
+ * `<brandSlug>-toutes-les-maisons`. Returns at most `limit`, never throws.
+ */
+export async function findRankingsForBrand(args: {
+  readonly brandSlug: string;
+  readonly limit?: number;
+}): Promise<readonly RankingLookup[]> {
+  const limit = Math.max(1, args.limit ?? 4);
+  try {
+    const index = await loadRankingScoreIndex();
+    if (index.length === 0) return [];
+    const candidates = new Set<string>([
+      ...CHAIN_RANKING_SUFFIXES.map((suffix) => `top-${args.brandSlug}-${suffix}`),
+      `${args.brandSlug}-toutes-les-maisons`,
+    ]);
+    return index
+      .filter((e) => candidates.has(e.slug))
+      .sort((a, b) => a.titleFr.localeCompare(b.titleFr))
+      .slice(0, limit)
+      .map(toLookup);
+  } catch (e) {
+    console.error(
+      '[findRankingsForBrand] threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
+}
+
+/**
+ * Maps a `/label/<facetSlug>` (KNOWN_LABELS) to the slug tokens that
+ * identify its curated award / consortium rankings. A label links to a
+ * ranking when the published slug contains any token. Tokens are specific
+ * enough to avoid cross-label false positives (e.g. `worlds-50-best` never
+ * matches a Condé Nast ranking).
+ */
+const LABEL_RANKING_TOKENS: Readonly<Record<string, readonly string[]>> = {
+  'world-50-best': ['worlds-50-best', 'world-50-best'],
+  'travel-leisure-worlds-best': ['travel-leisure'],
+  'conde-nast-gold-list': ['conde-nast'],
+  'relais-chateaux': ['relais-chateaux'],
+  'leading-hotels-of-the-world': ['leading-hotels-of-the-world', 'leading-hotels'],
+  'small-luxury-hotels': ['small-luxury-hotels'],
+  'forbes-5-star': ['forbes'],
+  'michelin-3-keys': ['michelin'],
+  'palace-atout-france': ['palaces-de-france', 'palace-atout-france'],
+};
+
+/**
+ * Resolves the curated rankings to cross-link from a label hub
+ * (`/label/[facetSlug]`). Token-containment match against the published
+ * index — emits a link only for rankings that actually exist. Returns at
+ * most `limit`, never throws.
+ */
+export async function findRankingsForLabel(args: {
+  readonly labelSlug: string;
+  readonly limit?: number;
+}): Promise<readonly RankingLookup[]> {
+  const limit = Math.max(1, args.limit ?? 4);
+  const tokens = LABEL_RANKING_TOKENS[args.labelSlug];
+  if (tokens === undefined || tokens.length === 0) return [];
+  try {
+    const index = await loadRankingScoreIndex();
+    if (index.length === 0) return [];
+    return index
+      .filter((e) => tokens.some((tok) => e.slug.includes(tok)))
+      .sort((a, b) => a.titleFr.localeCompare(b.titleFr))
+      .slice(0, limit)
+      .map(toLookup);
+  } catch (e) {
+    console.error(
+      '[findRankingsForLabel] threw:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
+}
