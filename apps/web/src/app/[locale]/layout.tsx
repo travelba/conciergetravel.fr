@@ -18,6 +18,7 @@ import { Toaster } from '@mch/ui';
 import { getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, routing } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
+import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_ALT } from '@/lib/seo/og-defaults';
 import '@/styles/globals.css';
 import '@/styles/kit.css';
 
@@ -65,8 +66,15 @@ export async function generateMetadata({
       type: 'website',
       locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
+      // Site-wide default share image (SEO P1-4). Pages with a hero-derived
+      // `og:image` (hotel, ranking, lieu, itinerary) re-declare `openGraph`
+      // and override this; pages without one inherit the brand card.
+      images: [{ ...DEFAULT_OG_IMAGE, alt: DEFAULT_OG_IMAGE_ALT[locale] }],
     },
-    twitter: { card: 'summary_large_image' },
+    twitter: {
+      card: 'summary_large_image',
+      images: [DEFAULT_OG_IMAGE.url],
+    },
   };
 }
 
