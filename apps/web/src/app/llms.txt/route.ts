@@ -143,9 +143,13 @@ export async function GET(): Promise<NextResponse> {
   // is lost (sitemaps remain the canonical URL-discovery surface). The
   // section titles keep the TRUE totals so the advertised counts stay
   // accurate. See docs/audits/health-2026-06-24-geo.md (P2 — taille).
-  const LLMS_CATALOG_HOTEL_HEADS = 20; // ×2 lines (FR+EN) per hotel
-  const LLMS_RANKING_HEADS = 30;
-  const LLMS_GUIDE_HEADS = 25;
+  // Head caps tuned to keep the rendered body comfortably under the 50 KB
+  // GEO budget (measured 2026-06-24: 30/25/20 landed at ~57 KB — over). The
+  // full sets stay exhaustively available in the linked /.well-known/*.jsonl,
+  // so trimming the human-readable heads loses no discoverability.
+  const LLMS_CATALOG_HOTEL_HEADS = 14; // ×2 lines (FR+EN) per hotel
+  const LLMS_RANKING_HEADS = 12;
+  const LLMS_GUIDE_HEADS = 8;
   const catalogHead = catalogItems.slice(0, LLMS_CATALOG_HOTEL_HEADS * 2);
   const rankingHead = rankingItems.slice(0, LLMS_RANKING_HEADS);
   const guideHead = guideItems.slice(0, LLMS_GUIDE_HEADS);
