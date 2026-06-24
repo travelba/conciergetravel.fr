@@ -94,6 +94,26 @@ describe('agent-skills', () => {
    * endpoint OR add it to the allowlist below with a documented reason.
    * A drift would surface here as a CI failure.
    */
+  /**
+   * GEO P1.1 (2026-06-24 audit) — the example hotel slugs documented in the
+   * manifest must resolve on prod. `ritz-paris` and `peninsula-paris` were
+   * shipped as examples but 404 (the real slugs are `hotel-ritz-paris` and
+   * `hotel-the-peninsula-paris`), so any LLM copying the documented example
+   * hit a dead endpoint. This guard pins the regression: the known-404 bare
+   * forms must never reappear in any skill description.
+   */
+  it('never documents a known-404 example hotel slug (GEO P1.1)', () => {
+    const KNOWN_404_EXAMPLES = ['"ritz-paris"', '"peninsula-paris"'];
+    const offenders: { skill: string; badExample: string }[] = [];
+    for (const skill of DEFAULT_AGENT_SKILLS.skills) {
+      const haystack = `${skill.description} ${JSON.stringify(skill.inputSchema ?? {})}`;
+      for (const bad of KNOWN_404_EXAMPLES) {
+        if (haystack.includes(bad)) offenders.push({ skill: skill.name, badExample: bad });
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('every callable skill (with inputSchema or required params) ships an executable endpoint', () => {
     const ALLOWED_DECLARATIVE_ONLY = new Set(['filter', 'booking']);
     const missingEndpoints: string[] = [];

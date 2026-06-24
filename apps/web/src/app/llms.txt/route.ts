@@ -574,7 +574,7 @@ export async function GET(): Promise<NextResponse> {
               "Exemple d'endpoint annuaire géolocalisé — renvoie la liste exhaustive des hôtels publiés d'une ville (scopée par pays) avec coordonnées GPS (latitude/longitude WGS84), distinction Palace et lien fiche. Variante pays : /api/agent/directory/{pays}. Permet à l'agent de cartographier, clusteriser ou trier par localisation tout le catalogue d'une ville ou d'un pays. Aucun tarif (gel Phase 6).",
           },
           {
-            url: `${origin}/api/agent/places-nearby?hotelSlug=ritz-paris&locale=fr`,
+            url: `${origin}/api/agent/places-nearby?hotelSlug=hotel-ritz-paris&locale=fr`,
             description:
               "Endpoint « lieux à visiter » — renvoie les lieux canoniques (visites culturelles : musées, monuments, jardins ; activités : théâtres, shopping, plein air) à proximité d'un hôtel (paramètre hotelSlug, via la table de proximité pré-calculée) OU d'une ville (paramètre citySlug). Chaque lieu a sa fiche SEO/GEO /lieux/{ville}/{slug} réservable via GetYourGuide ou le Concierge. Renvoie nom, type, URL canonique, résumé factuel et distance à pied. Aucune duplication de contenu.",
           },
