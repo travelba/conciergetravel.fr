@@ -80,23 +80,35 @@ function clampText(max: number): (v: unknown) => unknown {
   };
 }
 
+/**
+ * Lenient EN string (llm-output-robustness Rule 3c). `.min(N).optional()
+ * .default('')` does NOT bypass `.min(N)` — an empty/short LLM EN field
+ * fails the whole hotel (observed 2026-06-25: hotel-costes lost all 7
+ * sections to `body_en min(100)`). EN parity is backfilled downstream by
+ * `translate-sections-en.ts` (the canonical 7th/9th-wave tool), so we accept
+ * empty/short EN here and never reject a good FR generation because of it.
+ */
+const EnString = (maxLen: number): z.ZodEffects<z.ZodDefault<z.ZodString>, string, unknown> =>
+  z.preprocess((v) => {
+    if (v === null || v === undefined) return '';
+    if (typeof v !== 'string') return v;
+    return v;
+  }, z.string().max(maxLen).default(''));
+
 const LongSectionSchema = z.object({
   anchor: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(4).max(120),
-  title_en: z.string().min(4).max(120).optional().default(''),
+  title_en: EnString(120),
   body_fr: z.string().min(300),
-  body_en: z.string().min(100).optional().default(''),
+  body_en: EnString(8000),
 });
 
 const SignatureExperienceSchema = z.object({
   key: z.preprocess(slugifyKey, z.string().regex(/^[a-z0-9-]+$/u)),
   title_fr: z.string().min(3).max(120),
-  title_en: z.string().min(3).max(120).optional().default(''),
+  title_en: EnString(120),
   description_fr: z.preprocess(clampText(1200), z.string().min(40).max(1200)),
-  description_en: z.preprocess(
-    clampText(1200),
-    z.string().min(20).max(1200).optional().default(''),
-  ),
+  description_en: z.preprocess(clampText(1200), EnString(1200)),
   badge_fr: z.string().max(40).optional().nullable(),
   badge_en: z.string().max(40).optional().nullable(),
   booking_required: z.boolean().default(false),
