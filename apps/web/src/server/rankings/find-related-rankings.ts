@@ -355,37 +355,55 @@ const IndexRowSchema = z.object({
     .default({ themes: [], types: [] }),
 });
 
+// Supabase REST caps an unpaginated `.select()` at `db_max_rows`
+// (1 000 here). The published-ranking catalogue (816 on 2026-06-25) is
+// closing on that cap, so the legacy single select would silently drop
+// every ranking past row 1 000 from the related-rankings scoring index
+// once crossed — under-linking the freshest rankings. Page with
+// `.range()` over a stable total order (slug), bounded by `MAX_PAGES`.
+const INDEX_PAGE_SIZE = 1000;
+const INDEX_MAX_PAGES = 12;
+
 async function _loadRankingScoreIndex(): Promise<readonly RankingIndexEntry[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('editorial_rankings')
-      .select('id, slug, title_fr, title_en, factual_summary_fr, factual_summary_en, kind, axes')
-      .eq('is_published', true);
-    if (error !== null || !Array.isArray(data)) {
-      if (error !== null) {
-        console.error('[find-related-rankings] index query failed:', error.message);
-      }
-      return [];
-    }
     const out: RankingIndexEntry[] = [];
-    for (const raw of data) {
-      const parsed = IndexRowSchema.safeParse(raw);
-      if (!parsed.success) continue;
-      const { axes } = parsed.data;
-      out.push({
-        id: parsed.data.id,
-        slug: parsed.data.slug,
-        titleFr: parsed.data.title_fr,
-        titleEn: parsed.data.title_en,
-        factualSummaryFr: parsed.data.factual_summary_fr,
-        factualSummaryEn: parsed.data.factual_summary_en,
-        kind: parsed.data.kind,
-        lieuSlug: axes.lieu?.slug ?? null,
-        themes: axes.themes,
-        types: axes.types,
-        family: familyForSlug(parsed.data.slug),
-      });
+    for (let page = 0; page < INDEX_MAX_PAGES; page += 1) {
+      const from = page * INDEX_PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('editorial_rankings')
+        .select('id, slug, title_fr, title_en, factual_summary_fr, factual_summary_en, kind, axes')
+        .eq('is_published', true)
+        .order('slug', { ascending: true })
+        .range(from, from + INDEX_PAGE_SIZE - 1);
+      if (error !== null || !Array.isArray(data)) {
+        if (error !== null) {
+          console.error('[find-related-rankings] index query failed:', {
+            page,
+            message: error.message,
+          });
+        }
+        break;
+      }
+      for (const raw of data) {
+        const parsed = IndexRowSchema.safeParse(raw);
+        if (!parsed.success) continue;
+        const { axes } = parsed.data;
+        out.push({
+          id: parsed.data.id,
+          slug: parsed.data.slug,
+          titleFr: parsed.data.title_fr,
+          titleEn: parsed.data.title_en,
+          factualSummaryFr: parsed.data.factual_summary_fr,
+          factualSummaryEn: parsed.data.factual_summary_en,
+          kind: parsed.data.kind,
+          lieuSlug: axes.lieu?.slug ?? null,
+          themes: axes.themes,
+          types: axes.types,
+          family: familyForSlug(parsed.data.slug),
+        });
+      }
+      if (data.length < INDEX_PAGE_SIZE) break;
     }
     return out;
   } catch (e) {

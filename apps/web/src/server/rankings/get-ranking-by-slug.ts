@@ -286,18 +286,48 @@ export interface PublishedRankingCard {
 // memoisation dedupes them to a single scan without touching the logic.
 export const listPublishedRankings = cache(_listPublishedRankings);
 
+// Supabase REST caps every `.select()` at `db_max_rows` (1 000 in our
+// project) when no `.range()` is supplied. The published-ranking
+// catalogue has grown fast (≈560 → 816 on 2026-06-25) and powers the
+// `/classements` index, `sitemaps/rankings.xml`, the agent corpus and
+// the homepage strip — so the moment it crosses 1 000 an unpaginated
+// select would silently orphan every ranking beyond the cap from all
+// of those surfaces at once. We page with `.range()` until exhaustion,
+// ordered by a stable total order (kind, title_fr, id) so the slice
+// boundary never skips or duplicates a row, bounded by `MAX_PAGES`.
+const RANKINGS_PAGE_SIZE = 1000;
+const RANKINGS_MAX_PAGES = 12;
+
 async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('editorial_rankings')
-      .select(
-        'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
-      )
-      .eq('is_published', true)
-      .order('kind', { ascending: true })
-      .order('title_fr', { ascending: true });
-    if (error !== null || data === null) return [];
+    const data: Array<Record<string, unknown>> = [];
+    for (let page = 0; page < RANKINGS_MAX_PAGES; page += 1) {
+      const from = page * RANKINGS_PAGE_SIZE;
+      const { data: pageData, error } = await supabase
+        .from('editorial_rankings')
+        .select(
+          'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
+        )
+        .eq('is_published', true)
+        .order('kind', { ascending: true })
+        .order('title_fr', { ascending: true })
+        .order('id', { ascending: true })
+        .range(from, from + RANKINGS_PAGE_SIZE - 1);
+      if (error !== null || !Array.isArray(pageData)) {
+        // Surface the failure but keep whatever pages already loaded —
+        // a partial index beats an empty hub on a transient error.
+        if (error !== null) {
+          console.error('[listPublishedRankings] page query failed:', {
+            page,
+            message: error.message,
+          });
+        }
+        break;
+      }
+      for (const row of pageData) data.push(row as Record<string, unknown>);
+      if (pageData.length < RANKINGS_PAGE_SIZE) break;
+    }
     const counts = new Map<string, number>();
     {
       // Count entries per ranking by scanning the WHOLE entries table,
@@ -338,18 +368,18 @@ async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]
       }
     }
     return data.map((r) => {
-      const axesParsed = AxesSchema.safeParse(r.axes ?? {});
+      const axesParsed = AxesSchema.safeParse(r['axes'] ?? {});
       return {
-        slug: r.slug as string,
-        titleFr: r.title_fr as string,
-        titleEn: (r.title_en as string | null) ?? null,
-        kind: r.kind as 'best_of' | 'awarded' | 'thematic' | 'geographic',
-        entryCount: counts.get(r.id as string) ?? 0,
-        heroImage: (r.hero_image as string | null) ?? null,
-        factualSummaryFr: (r.factual_summary_fr as string | null) ?? null,
-        factualSummaryEn: (r.factual_summary_en as string | null) ?? null,
+        slug: r['slug'] as string,
+        titleFr: r['title_fr'] as string,
+        titleEn: (r['title_en'] as string | null) ?? null,
+        kind: r['kind'] as 'best_of' | 'awarded' | 'thematic' | 'geographic',
+        entryCount: counts.get(r['id'] as string) ?? 0,
+        heroImage: (r['hero_image'] as string | null) ?? null,
+        factualSummaryFr: (r['factual_summary_fr'] as string | null) ?? null,
+        factualSummaryEn: (r['factual_summary_en'] as string | null) ?? null,
         axes: axesParsed.success ? axesParsed.data : { types: [], themes: [], occasions: [] },
-        updatedAt: (r.updated_at as string | null) ?? null,
+        updatedAt: (r['updated_at'] as string | null) ?? null,
       };
     });
   } catch (e) {
