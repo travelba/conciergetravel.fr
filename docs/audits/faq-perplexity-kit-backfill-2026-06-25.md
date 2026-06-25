@@ -39,9 +39,11 @@
 Pipeline now DataForSEO-grounded (commit `77d33bce`): each fiche injects real
 PAA/keywords and logs `grounding=on dfs_paa_coverage=<pct>`. Grounded wave log:
 
-| Wave   | Segment | Enriched | Grounded | avg PAA cov | Perplexity $ | Notes                                   |
-| ------ | ------- | -------- | -------- | ----------- | ------------ | --------------------------------------- |
-| g-nn-1 | netnew  | 52/60    | 44       | 42 %        | 7.88         | 9 grounding=off (no DFS cache), 0 quota |
+| Wave      | Segment | Enriched | Grounded | avg PAA cov | Perplexity $ | Notes                                                  |
+| --------- | ------- | -------- | -------- | ----------- | ------------ | ------------------------------------------------------ |
+| g-nn-1    | netnew  | 52/60    | 44       | 42 %        | 7.88         | 9 grounding=off (no DFS cache), 0 quota                |
+| g-nn-2    | netnew  | 0/1      | 0        | —           | 0.25         | netnew drained; `seda-club` stuck on promote.canonical |
+| g-heads-1 | heads   | 59/60    | 58       | 57 %        | 6.83         | 98 % grounded, 0 quota                                 |
 
 `grounding=off` rate ≈ 15 % (hotels with no DataForSEO cache) — non-blocking
 per PO, flagged for a later DFS cache backfill on those slugs.
