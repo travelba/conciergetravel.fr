@@ -113,6 +113,7 @@ logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
 | g2             | netnew  | 42/43    | 40       | 54 %        | 5.92         | 0.18 | 14.25        |
 | g3             | heads   | 58/60    | 58       | 53 %        | 7.00         | 0.25 | 21.50        |
 | g4             | heads   | 57/60    | 55       | 59 %        | 7.09         | 0.25 | 28.83        |
+| g5             | heads   | 57/60    | 55       | 49 %        | 7.26         | 0.25 | 36.34        |
 
 `grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
 (DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
@@ -120,8 +121,9 @@ warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
 questions) not legitimately FAQ-able for the property. 6 skips this wave
 (`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
 
-**Shard-3 counter: `shard3: 298/746`** (100 → 154 → 182 → 240 → 298; netnew
-exhausted, grinding `heads`). Prod acceptance after g4: `mama-shelter-lille`
-200, `FAQPage` JSON-LD + `acceptedAnswer` rendered, concierge block present,
-no `Offer` leak (Phase 6 respected). Resume continues `--segment=heads` then
-`--segment=rest`, all `--shard=3 --shards=4 --grounded --concurrency=3`.
+**Shard-3 counter: `shard3: 354/746`** (100 → 154 → 182 → 240 → 298 → 354;
+netnew exhausted, grinding `heads`). Prod acceptance after g4:
+`mama-shelter-lille` 200, `FAQPage` JSON-LD + `acceptedAnswer` rendered,
+concierge block present, no `Offer` leak (Phase 6 respected). Resume continues
+`--segment=heads` then `--segment=rest`, all
+`--shard=3 --shards=4 --grounded --concurrency=3`.
