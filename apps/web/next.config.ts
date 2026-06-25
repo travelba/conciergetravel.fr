@@ -209,6 +209,21 @@ const nextConfig: NextConfig = {
         destination: '/marque/dorchester-collection',
         permanent: true,
       },
+      // Carlton Cannes dedup (2026-06-25): `le-carlton` was a duplicate row of
+      // the canonical `carlton-cannes` fiche (same property — Carlton Cannes on
+      // La Croisette). The dup was unpublished + purged from every editorial
+      // ranking; this 301 preserves any inbound link / index entry that still
+      // points at the old slug. Prefixed (`/en/`) + bare FR variants.
+      {
+        source: '/:locale(fr|en)/hotel/le-carlton',
+        destination: '/:locale/hotel/carlton-cannes',
+        permanent: true,
+      },
+      {
+        source: '/hotel/le-carlton',
+        destination: '/hotel/carlton-cannes',
+        permanent: true,
+      },
     ];
   },
 };
