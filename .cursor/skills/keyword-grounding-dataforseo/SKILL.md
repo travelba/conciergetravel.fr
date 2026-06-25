@@ -158,6 +158,23 @@ stopwords stripped — found inside a single Q&A blob). It returns
   and the canonical-coverage gate are untouched and stay the hard blockers.
 - `coveragePct` is `null` when not grounded (DFS off / zero PAA) — no false
   warning.
+- **Denominator excludes editorially off-topic PAA noise** (capitalised
+  2026-06-25). DataForSEO returns real SERP demand the FAQ prompt is _told to
+  ignore by design_ (Rule 2): celebrity/people stays ("Where does Kim
+  Kardashian stay in Dubai?", "Quelle star habite à Gordes ?"), staff salaries
+  ("Quel est le salaire d'une femme de chambre ?", "How much do hotel staff
+  earn?"), ownership/biography/wealth ("Who owns…", "net worth", "richest"),
+  and attraction free-admission ("Is entry to Palm Jumeirah free?"). Counting
+  these in the denominator dragged the KPI falsely low (0-15 % on good fiches),
+  which would have mis-steered the audit of the remaining 70 % of the catalogue.
+  `evaluatePaaCoverage` now filters them via `isEditoriallyRelevantPaa(question)`
+  **before** the ratio. The filter is **conservative** — it only drops the
+  clearly off-topic families and keeps everything touching room price, services,
+  access, dining, spa, family, pets, accessibility, sustainability, location
+  (e.g. "wifi gratuit", "parking gratuit", "how much is a room" all stay). It
+  touches the logged metric / analysis only — **never** generation or
+  publication. Extend `PAA_NOISE_PATTERNS` (not the matcher) when a new noise
+  family surfaces, and add a CLEAN guard test so a legit question never regresses.
 
 > ⚠ **PAA strings carry no per-question volume.** DataForSEO `peopleAlsoAsk`
 > is a deduped string array, not `{question, volume}`. "PAA à fort volume"

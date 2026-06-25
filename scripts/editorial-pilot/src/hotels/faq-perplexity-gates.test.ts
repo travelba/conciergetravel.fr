@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { evaluateFaqKitCoverage, parsePerplexityHotelFaqResearch } from './faq-perplexity-gates.js';
+import {
+  evaluateFaqKitCoverage,
+  evaluatePaaCoverage,
+  isEditoriallyRelevantPaa,
+  parsePerplexityHotelFaqResearch,
+} from './faq-perplexity-gates.js';
 import { transformPerplexityHotelFaq } from './faq-perplexity-transform.js';
 import {
   FAQ_FACTUAL_CATEGORIES_FR,
@@ -68,5 +73,73 @@ describe('evaluateFaqKitCoverage', () => {
     const gate = evaluateFaqKitCoverage([], [], 'Test Palace', []);
     expect(gate.ok).toBe(false);
     expect(gate.issues.some((i) => i.code === 'promote.count')).toBe(true);
+  });
+});
+
+describe('isEditoriallyRelevantPaa', () => {
+  const NOISE = [
+    'Where does Kim Kardashian stay in Dubai?',
+    "Quel est le salaire d'une femme de chambre chez Ritz Paris ?",
+    'Is entry to Palm Jumeirah free?',
+    'Who owns the Ritz Paris?',
+    'What is the net worth of the owner?',
+    'Quelle star habite à Gordes ?',
+    'Où séjourne Brad Pitt à Paris ?',
+    'How much do hotel staff earn in Dubai?',
+  ];
+  const EDITORIAL = [
+    'Combien coûte une nuit au Ritz Paris ?',
+    'Le petit-déjeuner est-il inclus ?',
+    "L'hôtel accepte-t-il les animaux ?",
+    'Is there a spa at the hotel?',
+    'How much is a room at Burj Al Arab?',
+    "Y a-t-il un parking gratuit à l'hôtel ?",
+    'Le wifi est-il gratuit dans les chambres ?',
+    "Où se situe l'hôtel par rapport à la plage ?",
+  ];
+
+  it.each(NOISE)('excludes off-topic PAA noise: %s', (q) => {
+    expect(isEditoriallyRelevantPaa(q)).toBe(false);
+  });
+
+  it.each(EDITORIAL)('keeps editorial PAA: %s', (q) => {
+    expect(isEditoriallyRelevantPaa(q)).toBe(true);
+  });
+});
+
+describe('evaluatePaaCoverage', () => {
+  it('returns degraded (grounded=false) when no PAA were supplied', () => {
+    const r = evaluatePaaCoverage(['Le petit-déjeuner est inclus.'], []);
+    expect(r.grounded).toBe(false);
+    expect(r.coveragePct).toBe(100);
+  });
+
+  it('coverage rises once PAA noise is excluded from the denominator', () => {
+    // A good fiche that answers every editorial question but none of the noise.
+    const faqBlobs = [
+      'Combien coûte une nuit au Ritz Paris ? Une nuit débute autour de 1500 euros.',
+      'Le petit-déjeuner est-il inclus ? Le petit-déjeuner est servi en supplément.',
+      "L'hôtel accepte-t-il les animaux ? Les animaux sont acceptés sur demande.",
+    ];
+    const editorialPaa = [
+      'Combien coûte une nuit au Ritz Paris ?',
+      'Le petit-déjeuner est-il inclus ?',
+      "L'hôtel accepte-t-il les animaux ?",
+    ];
+    const noisePaa = [
+      'Where does Kim Kardashian stay in Dubai?',
+      "Quel est le salaire d'une femme de chambre chez Ritz Paris ?",
+      'Who owns the Ritz Paris?',
+    ];
+
+    const withNoise = evaluatePaaCoverage(faqBlobs, [...editorialPaa, ...noisePaa]);
+    const filteredOnly = evaluatePaaCoverage(faqBlobs, editorialPaa);
+
+    // Noise is dropped from the denominator → same total as editorial-only.
+    expect(withNoise.total).toBe(filteredOnly.total);
+    expect(withNoise.total).toBe(editorialPaa.length);
+    // KPI is no longer dragged down by the 3 ignored noise questions.
+    expect(withNoise.coveragePct).toBe(filteredOnly.coveragePct);
+    expect(withNoise.coveragePct).toBeGreaterThanOrEqual(66);
   });
 });
