@@ -84,3 +84,23 @@ pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=netnew --li
 Residual: 2557 published fiches still without kit (incl. 344 net-new). Lower
 total concurrency (4 shards × 5 = 20 simultaneous Perplexity calls) burns the
 quota fast — consider concurrency=3/shard on resume to smooth spend.
+
+## ▶ RESUME — grounded pipeline (DataForSEO PAA) — shard 3 log
+
+Pipeline now grounds on DataForSEO (commit `77d33bce`): real PAA/intent injected
+into the Perplexity prompt, per-fiche `grounding=on dfs_paa_coverage=<pct>`
+logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
+
+| Wave (shard 3) | Segment | Enriched | grounded | avg PAA cov | Perplexity $ | EN $ | Cumulative $ |
+| -------------- | ------- | -------- | -------- | ----------- | ------------ | ---- | ------------ |
+| g1             | netnew  | 54/60    | 51       | 58 %        | 7.91         | 0.24 | 8.15         |
+
+`grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
+(DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
+warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
+questions) not legitimately FAQ-able for the property. 6 skips this wave
+(`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
+
+**Shard-3 counter: `shard3: 154/746`** (100 → 154). Resume continues
+`--segment=netnew` then `--segment=heads` then `--segment=rest`, all
+`--shard=3 --shards=4 --grounded --concurrency=3`.
