@@ -46,6 +46,13 @@ const HotelRowSchema = z.object({
   // `src/guides/export-hotels-catalog-rest.ts` to populate them.
   luxury_tier: z.string().nullable().optional(),
   affiliations: z.array(AffiliationSnapshotSchema).nullable().optional(),
+  // 2026-06-25: compact gastronomy signal derived from `restaurant_info`
+  // (max Michelin stars across the hotel's venues + any top-level count). Lets
+  // the `gastronomie` theme match starred-table hotels whose description text
+  // never mentions "michelin" (e.g. Tokyo). `.optional()` so a pre-field
+  // snapshot still parses (treated as null). Regenerate via
+  // `src/guides/export-hotels-catalog-rest.ts`.
+  michelin_stars: z.number().int().nullable().optional(),
   description_fr: z.string().nullable(),
   address: z.string().nullable(),
   postal_code: z.string().nullable(),

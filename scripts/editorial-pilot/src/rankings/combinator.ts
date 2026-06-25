@@ -213,7 +213,15 @@ function themeMatches(h: HotelCatalogRow, theme: Theme): boolean {
       // Most palaces have spa — be permissive.
       return h.is_palace || /spa|wellness|bien-?[ée]tre/iu.test(hay);
     case 'gastronomie':
-      return h.is_palace || /michelin|gastronomique|restaurant.*[ée]toil/iu.test(hay);
+      // Structured signal first (2026-06-25): hotels with a Michelin-starred
+      // venue in `restaurant_info` qualify even when the description text never
+      // says "michelin" (e.g. Tokyo's Okura/Peninsula). Falls back to the
+      // palace flag + keyword heuristic for hotels without the structured field.
+      return (
+        (h.michelin_stars ?? 0) > 0 ||
+        h.is_palace ||
+        /michelin|gastronomique|restaurant.*[ée]toil/iu.test(hay)
+      );
     case 'design':
       return /design|architect/iu.test(hay);
     case 'patrimoine':

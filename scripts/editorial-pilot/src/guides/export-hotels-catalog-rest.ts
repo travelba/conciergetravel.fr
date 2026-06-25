@@ -67,6 +67,7 @@ interface CatalogRow {
   readonly country_code: string | null;
   readonly luxury_tier: string | null;
   readonly affiliations: ReadonlyArray<Record<string, unknown>> | null;
+  readonly michelin_stars: number | null;
   readonly description_fr: string | null;
   readonly address: string | null;
   readonly postal_code: string | null;
@@ -81,6 +82,32 @@ function toAffiliations(v: unknown): ReadonlyArray<Record<string, unknown>> | nu
     if (typeof entry === 'object' && entry !== null) out.push(entry as Record<string, unknown>);
   }
   return out;
+}
+
+/**
+ * Compact gastronomy signal: the MAX Michelin stars the hotel holds, taken
+ * across any top-level `restaurant_info.michelin_stars` and every
+ * `restaurant_info.venues[].michelin_stars`. Returns null when the hotel has
+ * no starred venue (keeps the snapshot clean — `themeMatches` reads `?? 0`).
+ * The bulky raw `restaurant_info` is intentionally NOT persisted to the
+ * snapshot — only this derived integer.
+ */
+function deriveMichelinStars(ri: unknown): number | null {
+  if (typeof ri !== 'object' || ri === null) return null;
+  const o = ri as Record<string, unknown>;
+  let max = 0;
+  const top = o['michelin_stars'];
+  if (typeof top === 'number' && Number.isFinite(top)) max = Math.max(max, top);
+  const venues = o['venues'];
+  if (Array.isArray(venues)) {
+    for (const v of venues) {
+      if (typeof v === 'object' && v !== null) {
+        const s = (v as Record<string, unknown>)['michelin_stars'];
+        if (typeof s === 'number' && Number.isFinite(s)) max = Math.max(max, s);
+      }
+    }
+  }
+  return max > 0 ? Math.trunc(max) : null;
 }
 
 function toRow(raw: unknown): CatalogRow {
@@ -99,6 +126,7 @@ function toRow(raw: unknown): CatalogRow {
     country_code: str(o['country_code']),
     luxury_tier: str(o['luxury_tier']),
     affiliations: toAffiliations(o['affiliations']),
+    michelin_stars: deriveMichelinStars(o['restaurant_info']),
     description_fr: str(o['description_fr']),
     address: str(o['address']),
     postal_code: str(o['postal_code']),
@@ -122,8 +150,10 @@ async function main(): Promise<void> {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.');
   }
 
+  // `restaurant_info` is fetched only to derive the compact `michelin_stars`
+  // integer (see deriveMichelinStars) — it is NOT written to the snapshot.
   const select =
-    'id,slug,slug_en,name,name_en,stars,is_palace,city,region,country_code,luxury_tier,affiliations,description_fr,address,postal_code,latitude,longitude';
+    'id,slug,slug_en,name,name_en,stars,is_palace,city,region,country_code,luxury_tier,affiliations,restaurant_info,description_fr,address,postal_code,latitude,longitude';
   // Match list-hotels-for-rankings.ts ordering exactly.
   const order = 'is_palace.desc,stars.desc,name.asc';
   const pageSize = 1000;

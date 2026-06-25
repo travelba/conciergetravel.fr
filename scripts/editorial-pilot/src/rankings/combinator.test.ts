@@ -23,6 +23,7 @@ function mk(partial: Partial<HotelCatalogRow> & { slug: string; city: string }):
     country_code: partial.country_code ?? null,
     luxury_tier: partial.luxury_tier ?? null,
     affiliations: partial.affiliations ?? null,
+    michelin_stars: partial.michelin_stars ?? null,
     description_fr: partial.description_fr ?? null,
     address: null,
     postal_code: partial.postal_code ?? null,
@@ -141,6 +142,46 @@ describe('eligibilityFor — divergent city spellings resolve to one ranking', (
   it('matches Dubai, Dubaï (diacritic) and the Palm Jumeirah compound for the dubai lieu', () => {
     const eligible = catalog.filter(eligibilityFor(axes('dubai', 'ville'))).map((h) => h.slug);
     expect(eligible).toEqual(['bulgari-dubai', 'one-only-mirage', 'one-only-palm']);
+  });
+});
+
+// ─── eligibilityFor — gastronomie via structured Michelin signal (item 5) ────
+// Tokyo's starred hotels (Okura, Peninsula, Bulgari…) never say "michelin" in
+// their FR description — the keyword heuristic missed them, so the city's
+// gastronomie ranking sat below MIN_ELIGIBLE=3. The compact `michelin_stars`
+// integer (derived in export-hotels-catalog-rest.ts) now drives eligibility.
+describe('eligibilityFor — gastronomie matches starred hotels with no keyword', () => {
+  const catalog: readonly HotelCatalogRow[] = [
+    // Starred, but the description is silent on Michelin → must still match.
+    mk({ slug: 'okura-tokyo', city: 'Tokyo', country_code: 'JP', michelin_stars: 2 }),
+    mk({ slug: 'bulgari-tokyo', city: 'Tokyo', country_code: 'JP', michelin_stars: 4 }),
+    // No star, no keyword, not a palace → must NOT match on gastronomie.
+    mk({ slug: 'plain-tokyo', city: 'Tokyo', country_code: 'JP', michelin_stars: null }),
+    // Legacy keyword path still works.
+    mk({
+      slug: 'kw-tokyo',
+      city: 'Tokyo',
+      country_code: 'JP',
+      description_fr: 'Table gastronomique étoilée au guide Michelin.',
+    }),
+  ];
+
+  function gastronomieAxes(): RankingAxes {
+    return {
+      types: ['all'],
+      lieu: { scope: 'ville', slug: 'tokyo', label: 'Tokyo' },
+      themes: ['gastronomie'],
+      occasions: [],
+      saison: 'toute-annee',
+    };
+  }
+
+  it('includes starred hotels via michelin_stars and excludes the plain one', () => {
+    const eligible = catalog.filter(eligibilityFor(gastronomieAxes())).map((h) => h.slug);
+    expect(eligible).toContain('okura-tokyo');
+    expect(eligible).toContain('bulgari-tokyo');
+    expect(eligible).toContain('kw-tokyo');
+    expect(eligible).not.toContain('plain-tokyo');
   });
 });
 
