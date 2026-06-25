@@ -283,3 +283,36 @@ select netnew, count(*) n,
                      and jsonb_array_length(gallery_images)>=1) gal1
 from c group by netnew;
 ```
+
+## Remédiation exécutée (2026-06-25) — template A-Z, hors photos
+
+Cohorte traitée en 1 vague de 70 (concurrence 5) + 5 super-vagues de
+~130 (concurrence 8) via `enrich-hotel-content.ts --slugs-file=` (flag
+ajouté ce jour), Wikidata résolu en parallèle (0 LLM, **gate de
+corroboration de nom strict ajouté** — rejette une entité même-catégorie
+ne partageant qu'un token générique : « Les Invalides » pour
+« L'Hôtel des Remparts », « Maison Doucet » pour « Maison Douce Époque »,
+Stockholm « Grand Hôtel » pour « …Soleil d'Or »), puis converti en
+`external_sources`. Blocs légers (meta/factual/policies) lancés en
+décalage par vague pour éviter la contention OpenAI.
+
+| Bloc                                    | Avant | Après                  | Note                                                                                                        |
+| --------------------------------------- | ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `long_description_sections` ≥ 6 (FR+EN) | 79    | **764 / 764 (100 %)**  | 7-8 sections, ~3300-4400 mots FR, 0 fuite `hasLeak`                                                         |
+| `meta_desc_fr` 140-170                  | 162   | **764 / 764 (100 %)**  |                                                                                                             |
+| `meta_desc_en` 140-170                  | 123   | **764 / 764 (100 %)**  |                                                                                                             |
+| `factual_summary_fr` envelope [110-165] | —     | **764 / 764 (100 %)**  | idéal [130-150] : 747 (97,8 %)                                                                              |
+| `factual_summary_en` idéal [130-150]    | —     | **744 / 764 (97,4 %)** | reste in-envelope, rend bien                                                                                |
+| `policies` réelles (non-synthétiques)   | 79    | **762 / 764 (99,7 %)** | 2 thin-source sans signal Tavily                                                                            |
+| `external_sources` ≥ 1                  | 42    | **294 / 764 (38,5 %)** | plafond structurel : 470 fiches sans entité Wikidata (boutique/récentes) — provenance non fabricable (EEAT) |
+| `luxury_tier`                           | 764   | **764 / 764 (100 %)**  | déjà fait                                                                                                   |
+
+Acceptance prod (curl) : `auberge-ostape`, `le-coucou-meribel`,
+`burgenstock-resort` FR+EN → 200, long-read rendu (h3 = 34-37), 0 `Offer`,
+0 fuite prose (le seul match `placeholder=` est l'attribut du champ
+recherche). Poids 660-710 Ko, comparable à `le-meurice`.
+
+Résidu structurel assumé (non comblable sans inventer / sans source) :
+470 `external_sources` (pas d'entité Wikidata), 2 `policies` thin-source,
+17 FR / 20 EN `factual_summary` in-envelope mais hors bande idéale
+(le LLM s'auto-censure sur source pauvre — ROI ~0 d'une passe de plus).
