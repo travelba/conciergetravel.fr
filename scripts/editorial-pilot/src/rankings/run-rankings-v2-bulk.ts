@@ -23,6 +23,7 @@
  *     [--dry-run] \
  *     [--draft] \
  *     [--no-push] \
+ *     [--strict] \   # fail (and never push) a seed under its targetLength
  *     [--only=slug-a,slug-b]
  */
 
@@ -31,6 +32,7 @@ import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isComplete } from './completeness.js';
 import { generateRankingV2, type GeneratedRankingV2 } from './generate-ranking-v2.js';
 import { GeneratedRankingV2Schema } from './generate-ranking-v2.js';
 import { loadRankingsV2, matrixSeedToRankingSeed } from './rankings-catalog-v2.js';
@@ -56,6 +58,7 @@ interface CliArgs {
   readonly publish: boolean;
   readonly noPush: boolean;
   readonly only: ReadonlySet<string> | null;
+  readonly strict: boolean;
 }
 
 function parseArgs(): CliArgs {
@@ -68,11 +71,13 @@ function parseArgs(): CliArgs {
   let publish = true;
   let noPush = false;
   let only: Set<string> | null = null;
+  let strict = false;
   for (const a of args) {
     if (a === '--force') force = true;
     else if (a === '--dry-run') dryRun = true;
     else if (a === '--draft') publish = false;
     else if (a === '--no-push') noPush = true;
+    else if (a === '--strict') strict = true;
     else if (a.startsWith('--concurrency=')) {
       const v = Number(a.slice('--concurrency='.length));
       if (Number.isFinite(v) && v > 0 && v <= 10) concurrency = Math.floor(v);
@@ -108,7 +113,7 @@ function parseArgs(): CliArgs {
       only = new Set([...(only ?? []), ...slugs]);
     }
   }
-  return { concurrency, limit, sources, force, dryRun, publish, noPush, only };
+  return { concurrency, limit, sources, force, dryRun, publish, noPush, only, strict };
 }
 
 // ─── Cache helpers ───────────────────────────────────────────────────────
@@ -287,6 +292,28 @@ async function processSeed(
     console.warn(`${tag} ⚠ words=${words.total} < 3500 target`);
   }
 
+  // C2 completeness gate — fail (and never push) a ranking whose entry
+  // count is below the combinator target when running in --strict mode.
+  if (args.strict && !isComplete(ranking.entries.length, seed.targetLength)) {
+    const msg = `incomplete: ${ranking.entries.length} entries < target ${seed.targetLength}`;
+    console.error(`${tag} ✗ strict gate: ${msg}`);
+    await appendRunLog({
+      ts: new Date().toISOString(),
+      slug: seed.slug,
+      source: seed.source,
+      templateKey: seed.templateKey,
+      status: 'failed',
+      eligibleCount: seed.eligibleCount,
+      targetLength: seed.targetLength,
+      durationMs: Date.now() - t0,
+      wordsTotal: words.total,
+      entriesCount: ranking.entries.length,
+      faqCount: ranking.faq.length,
+      error: msg,
+    });
+    return { slug: seed.slug, ok: false, status: 'failed', error: msg };
+  }
+
   // Dry-run safety gate: the earlier guard (around line 243) only fires
   // when `ranking === null` (no cached output). A cached seed has a valid
   // `ranking` and would otherwise fall through to `pushRankingV2`, which
@@ -425,7 +452,7 @@ async function main(): Promise<void> {
   if (args.limit !== null) targets = targets.slice(0, args.limit);
 
   console.log(
-    `\n→ Will process ${targets.length} ranking(s) — concurrency=${args.concurrency}, force=${args.force}, dry-run=${args.dryRun}, publish=${args.publish}, push=${!args.noPush}`,
+    `\n→ Will process ${targets.length} ranking(s) — concurrency=${args.concurrency}, force=${args.force}, dry-run=${args.dryRun}, publish=${args.publish}, push=${!args.noPush}, strict=${args.strict}`,
   );
   console.log('');
 
