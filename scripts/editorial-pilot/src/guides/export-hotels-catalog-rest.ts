@@ -65,11 +65,22 @@ interface CatalogRow {
   readonly city: string;
   readonly region: string | null;
   readonly country_code: string | null;
+  readonly luxury_tier: string | null;
+  readonly affiliations: ReadonlyArray<Record<string, unknown>> | null;
   readonly description_fr: string | null;
   readonly address: string | null;
   readonly postal_code: string | null;
   readonly latitude: string | number | null;
   readonly longitude: string | number | null;
+}
+
+function toAffiliations(v: unknown): ReadonlyArray<Record<string, unknown>> | null {
+  if (!Array.isArray(v)) return null;
+  const out: Record<string, unknown>[] = [];
+  for (const entry of v) {
+    if (typeof entry === 'object' && entry !== null) out.push(entry as Record<string, unknown>);
+  }
+  return out;
 }
 
 function toRow(raw: unknown): CatalogRow {
@@ -86,6 +97,8 @@ function toRow(raw: unknown): CatalogRow {
     city: String(o['city'] ?? ''),
     region: str(o['region']),
     country_code: str(o['country_code']),
+    luxury_tier: str(o['luxury_tier']),
+    affiliations: toAffiliations(o['affiliations']),
     description_fr: str(o['description_fr']),
     address: str(o['address']),
     postal_code: str(o['postal_code']),
@@ -110,7 +123,7 @@ async function main(): Promise<void> {
   }
 
   const select =
-    'id,slug,slug_en,name,name_en,stars,is_palace,city,region,country_code,description_fr,address,postal_code,latitude,longitude';
+    'id,slug,slug_en,name,name_en,stars,is_palace,city,region,country_code,luxury_tier,affiliations,description_fr,address,postal_code,latitude,longitude';
   // Match list-hotels-for-rankings.ts ordering exactly.
   const order = 'is_palace.desc,stars.desc,name.asc';
   const pageSize = 1000;

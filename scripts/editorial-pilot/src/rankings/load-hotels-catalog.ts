@@ -6,6 +6,28 @@ import { z } from 'zod';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Minimal, tolerant view of a `hotels.affiliations[]` entry (migration 0062 —
+ * see `packages/db/src/schema/affiliations.ts` for the canonical contract and
+ * ADR-0023). We only need the two slug fields for ranking eligibility:
+ *   - `source`     : snake_case, mirrors `luxury_tier` values (e.g.
+ *                    `relais_chateaux`, `four_seasons`, `world_50_best`).
+ *   - `facet_slug` : kebab-case, the `/label/<slug>` / `/marque/<slug>` URL key.
+ * `.passthrough()` keeps the rest of the payload intact; both slugs are
+ * optional so a partially-formed entry never rejects the whole snapshot.
+ */
+const AffiliationSnapshotSchema = z
+  .object({
+    kind: z.string().optional(),
+    source: z.string().optional(),
+    facet_slug: z.string().optional(),
+    display_name: z.string().optional(),
+    verified: z.boolean().optional(),
+  })
+  .passthrough();
+
+export type AffiliationSnapshot = z.infer<typeof AffiliationSnapshotSchema>;
+
 const HotelRowSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -17,6 +39,13 @@ const HotelRowSchema = z.object({
   city: z.string(),
   region: z.string().nullable(),
   country_code: z.string().nullable(),
+  // C1 (2026-06-25): `luxury_tier` + `affiliations` enable precise eligibility
+  // (brand / label / ranking filters) instead of name heuristics. Both are
+  // `.optional()` so a stale snapshot generated before this field landed still
+  // parses (treated as null / empty downstream). Regenerate the snapshot via
+  // `src/guides/export-hotels-catalog-rest.ts` to populate them.
+  luxury_tier: z.string().nullable().optional(),
+  affiliations: z.array(AffiliationSnapshotSchema).nullable().optional(),
   description_fr: z.string().nullable(),
   address: z.string().nullable(),
   postal_code: z.string().nullable(),

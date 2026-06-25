@@ -55,6 +55,75 @@ const TARGET_LENGTH_BY_LIEU_SCOPE: Readonly<Record<LieuDef['scope'], number>> = 
 
 const lc = (s: string): string => s.toLowerCase();
 
+/**
+ * Normalize a city / key string for whole-word matching: lowercase, strip
+ * diacritics, and collapse every non-alphanumeric run (spaces, hyphens,
+ * apostrophes) into a single space. This turns "Les Baux-de-Provence" and the
+ * key "baux-de-provence" into the comparable token streams "les baux de
+ * provence" and "baux de provence".
+ */
+function normForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/gu, '')
+    .replace(/[^a-z0-9]+/gu, ' ')
+    .trim();
+}
+
+/**
+ * C1 (2026-06-25) — whole-word / whole-phrase city match.
+ *
+ * Replaces the permissive `city.includes(key)` that produced cross-country
+ * false positives ("nice" ⊂ "venice", "paris" ⊂ "st mary's parish", "arles" ⊂
+ * "charleston", "roma" ⊂ "punta maroma"). A key matches only when it equals
+ * the city or appears as a contiguous run of whole tokens inside it. Token
+ * boundaries are enforced by padding both sides with a space, so a multi-token
+ * key ("baux-de-provence", "porto-vecchio") still matches the city that
+ * contains that exact phrase ("Les Baux-de-Provence", "Lecci de Porto-Vecchio")
+ * while a partial token never does.
+ */
+export function cityMatchesKey(city: string, key: string): boolean {
+  const c = normForMatch(city);
+  const k = normForMatch(key);
+  if (c.length === 0 || k.length === 0) return false;
+  if (c === k) return true;
+  return ` ${c} `.includes(` ${k} `);
+}
+
+/**
+ * C1 (2026-06-25) — optional precise filters applied on top of the
+ * type/lieu/theme axes. Used to select hotels by their `luxury_tier` (brand /
+ * label enum, e.g. `relais_chateaux`, `four_seasons`) or by an `affiliations[]`
+ * facet (snake_case `source` or kebab-case `facet_slug`), instead of fragile
+ * name heuristics. All values are matched case-insensitively; an empty / absent
+ * list means "no constraint on that dimension".
+ */
+export interface EligibilityFilter {
+  readonly luxuryTiers?: readonly string[];
+  readonly affiliationFacets?: readonly string[];
+}
+
+function tierMatches(h: HotelCatalogRow, tiers: ReadonlySet<string>): boolean {
+  const t = h.luxury_tier;
+  return typeof t === 'string' && t.length > 0 && tiers.has(t.toLowerCase());
+}
+
+function affiliationMatches(h: HotelCatalogRow, facets: ReadonlySet<string>): boolean {
+  const affs = h.affiliations ?? [];
+  for (const a of affs) {
+    const source = typeof a.source === 'string' ? a.source.toLowerCase() : '';
+    const facet = typeof a.facet_slug === 'string' ? a.facet_slug.toLowerCase() : '';
+    // Cross-match both conventions: a snake_case facet target also matches a
+    // kebab-case facet_slug and vice-versa (relais_chateaux ↔ relais-chateaux).
+    if (source.length > 0 && (facets.has(source) || facets.has(source.replace(/_/gu, '-'))))
+      return true;
+    if (facet.length > 0 && (facets.has(facet) || facets.has(facet.replace(/-/gu, '_'))))
+      return true;
+  }
+  return false;
+}
+
 function lieuMatches(h: HotelCatalogRow, lieu: LieuDef): boolean {
   if (lieu.slug === 'france') return true;
   // 2026-05-31 — country scope: a hotel matches when its `country_code`
@@ -76,8 +145,7 @@ function lieuMatches(h: HotelCatalogRow, lieu: LieuDef): boolean {
     if (lieu.hotelCityKeys.length === 0) return true;
     // Else fall through to the city match (AND).
   }
-  const c = lc(h.city);
-  const cityMatch = lieu.hotelCityKeys.some((k) => c === lc(k) || c.includes(lc(k)));
+  const cityMatch = lieu.hotelCityKeys.some((k) => cityMatchesKey(h.city, k));
   if (!cityMatch) return false;
   // A2 (May 19, 2026): refine eligibility for arrondissement / quartier
   // lieus by matching on postal_code. A hotel located in "Paris" but with
@@ -183,9 +251,25 @@ function themeMatches(h: HotelCatalogRow, theme: Theme): boolean {
   }
 }
 
-/** Combined eligibility predicate from an axes set. */
-export function eligibilityFor(axes: RankingAxes): (h: HotelCatalogRow) => boolean {
+/**
+ * Combined eligibility predicate from an axes set, with an optional precise
+ * `filter` (luxury_tier / affiliation facet — C1, 2026-06-25). When the filter
+ * is omitted the behaviour is identical to the pre-C1 type/lieu/theme gate, so
+ * every existing caller is unaffected.
+ */
+export function eligibilityFor(
+  axes: RankingAxes,
+  filter?: EligibilityFilter,
+): (h: HotelCatalogRow) => boolean {
   const lieu = resolveLieu(axes.lieu.slug);
+  const tiers =
+    filter?.luxuryTiers && filter.luxuryTiers.length > 0
+      ? new Set(filter.luxuryTiers.map((t) => t.toLowerCase()))
+      : null;
+  const facets =
+    filter?.affiliationFacets && filter.affiliationFacets.length > 0
+      ? new Set(filter.affiliationFacets.map((f) => f.toLowerCase()))
+      : null;
   return (h) => {
     if (lieu !== null && !lieuMatches(h, lieu)) return false;
     const type = axes.types[0] ?? 'all';
@@ -193,6 +277,8 @@ export function eligibilityFor(axes: RankingAxes): (h: HotelCatalogRow) => boole
     for (const th of axes.themes) {
       if (!themeMatches(h, th)) return false;
     }
+    if (tiers !== null && !tierMatches(h, tiers)) return false;
+    if (facets !== null && !affiliationMatches(h, facets)) return false;
     return true;
   };
 }
@@ -262,6 +348,8 @@ interface BuildSeedInput {
   readonly slugOverride?: string | null;
   readonly titleFrOverride?: string | null;
   readonly titleEnOverride?: string | null;
+  /** Optional precise eligibility filter (luxury_tier / affiliation facet). */
+  readonly eligibilityFilter?: EligibilityFilter | undefined;
 }
 
 function buildSeed(input: BuildSeedInput): MatrixSeed | null {
@@ -273,7 +361,7 @@ function buildSeed(input: BuildSeedInput): MatrixSeed | null {
   const titleEn = input.titleEnOverride ?? rendered!.titleEn;
   const templateKey = rendered?.templateKey ?? 'manual';
 
-  const predicate = eligibilityFor(input.axes);
+  const predicate = eligibilityFor(input.axes, input.eligibilityFilter);
   const eligibleHotelIds: string[] = [];
   for (const h of input.catalog) {
     if (predicate(h)) eligibleHotelIds.push(h.id);
@@ -313,6 +401,15 @@ interface ManualOverride {
   readonly titleEn: string;
   readonly axes: RankingAxes;
   readonly kind?: MatrixSeed['kind'];
+  /**
+   * Optional precise eligibility filter (C1, 2026-06-25). When set, the seed's
+   * eligible-hotel set is narrowed to hotels carrying one of these
+   * `luxury_tier` values and/or `affiliations[]` facets — the supported path
+   * for brand / label rankings (e.g. Relais & Châteaux on
+   * `luxury_tier='relais_chateaux'`) instead of a name heuristic.
+   */
+  readonly luxuryTiers?: readonly string[];
+  readonly affiliationFacets?: readonly string[];
 }
 
 // ─── 2026-06-22 — « Hôtel de luxe {ville} » acquisition pages ─────────────
@@ -1767,6 +1864,15 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
   //    when underfilled) because they're flagship pages we need.
   for (const m of MANUAL_OVERRIDES) {
     totalCandidates += 1;
+    const eligibilityFilter: EligibilityFilter | undefined =
+      m.luxuryTiers !== undefined || m.affiliationFacets !== undefined
+        ? {
+            ...(m.luxuryTiers !== undefined ? { luxuryTiers: m.luxuryTiers } : {}),
+            ...(m.affiliationFacets !== undefined
+              ? { affiliationFacets: m.affiliationFacets }
+              : {}),
+          }
+        : undefined;
     const seed = buildSeed({
       axes: m.axes,
       source: 'manual',
@@ -1774,6 +1880,7 @@ export function buildMatrix(options: BuildMatrixOptions): BuildMatrixResult {
       slugOverride: m.slug,
       titleFrOverride: m.titleFr,
       titleEnOverride: m.titleEn,
+      eligibilityFilter,
     });
     if (seed === null) continue;
     const final: MatrixSeed = m.kind ? { ...seed, kind: m.kind } : seed;
