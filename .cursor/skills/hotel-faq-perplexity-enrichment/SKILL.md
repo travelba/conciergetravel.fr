@@ -121,6 +121,18 @@ by acquisition priority). Flags: `--model=sonar-pro|sonar` (sonar under-delivers
 the 48-item kit — sonar-pro is the reliable default), `--skip-en` (FR-only push,
 EN left to a follow-up), `--dry-run`.
 
+**Parallel workers (`--shard=K --shards=N`):** run N workers on `main`
+collision-free. Each worker owns the slugs whose rank — computed over **all
+published slugs sorted ascending** (a stable set, NOT the shrinking incomplete
+worklist) — satisfies `rank % N === K`. Already-enriched fiches in the shard
+are dropped by the `faq_content_kit=is.null` filter, so the partition stays
+disjoint and idempotent for the whole run. Example 4-way split:
+
+```bash
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --shard=0 --shards=4 --segment=netnew --limit=150 --concurrency=5
+# workers 1..3 run the same command with --shard=1|2|3
+```
+
 **Cost (observed 2026-06-25):** ~$0.085–0.13/fiche (`sonar-pro` $0.08–0.19 +
 EN $0.004). A canonical-coverage miss costs one extra Perplexity attempt — the
 prompt injects the 10 verbatim CDC canonical questions + forbids the model from

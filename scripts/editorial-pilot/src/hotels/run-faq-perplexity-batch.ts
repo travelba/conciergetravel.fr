@@ -29,6 +29,16 @@
  *   --slugs=a,b,c                     explicit slug list (overrides segment)
  *   --dry-run                         generate + gate, do NOT write DB
  *   --skip-en                         FR-only push (EN parity left to follow-up)
+ *   --shards=M --shard=N              parallel-worker partition (anti-collision):
+ *                                     rank ALL published slugs sorted ASC; this
+ *                                     worker owns only `rank % M === N` (0-based).
+ *                                     The partition basis is the STABLE full
+ *                                     published set (not the shrinking worklist),
+ *                                     so every worker agrees byte-for-byte and 4
+ *                                     workers never touch the same fiche. Already-
+ *                                     enriched fiches in the shard are dropped by
+ *                                     the `faq_content_kit=is.null` candidate
+ *                                     filter (idempotent). See `computeShardSlugs`.
  *
  * Examples
  * --------
@@ -895,6 +905,8 @@ interface CliArgs {
   readonly slugs: readonly string[];
   readonly dryRun: boolean;
   readonly skipEn: boolean;
+  readonly shard: number;
+  readonly shards: number;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -905,6 +917,8 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let slugs: string[] = [];
   let dryRun = false;
   let skipEn = false;
+  let shard = 0;
+  let shards = 1;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--skip-en') skipEn = true;
@@ -919,6 +933,12 @@ function parseArgs(argv: readonly string[]): CliArgs {
       if (Number.isFinite(n) && n > 0) concurrency = Math.min(8, Math.floor(n));
     } else if (a.startsWith('--model=')) {
       model = a.slice('--model='.length);
+    } else if (a.startsWith('--shard=')) {
+      const n = Number(a.slice('--shard='.length));
+      if (Number.isFinite(n) && n >= 0) shard = Math.floor(n);
+    } else if (a.startsWith('--shards=')) {
+      const n = Number(a.slice('--shards='.length));
+      if (Number.isFinite(n) && n > 0) shards = Math.floor(n);
     } else if (a.startsWith('--slugs=')) {
       slugs = a
         .slice('--slugs='.length)
@@ -927,7 +947,35 @@ function parseArgs(argv: readonly string[]): CliArgs {
         .filter((s) => s.length > 0);
     }
   }
-  return { segment, limit, concurrency, model, slugs, dryRun, skipEn };
+  if (shard >= shards) shard = 0;
+  return { segment, limit, concurrency, model, slugs, dryRun, skipEn, shard, shards };
+}
+
+/**
+ * Stable, collision-free shard partition for parallel workers.
+ *
+ * Rank is computed over ALL published slugs sorted ascending (a stable set that
+ * does not shrink as fiches get enriched), so `rank % shards === shard` assigns
+ * every slug to exactly one worker for the whole run — unlike indexing the
+ * *incomplete* worklist, which shifts as rows complete and would cause two
+ * workers to grab the same slug. Already-enriched fiches in this shard are then
+ * dropped downstream by the `faq_content_kit=is.null` candidate filter.
+ */
+async function computeShardSlugs(
+  cfg: SupabaseRestConfig,
+  shard: number,
+  shards: number,
+): Promise<ReadonlySet<string>> {
+  const rows = await selectHotels<{ slug: string }>(cfg, {
+    columns: 'slug',
+    filters: ['is_published=eq.true'],
+    order: 'slug.asc',
+  });
+  const set = new Set<string>();
+  rows.forEach((r, i) => {
+    if (i % shards === shard) set.add(r.slug);
+  });
+  return set;
 }
 
 async function main(): Promise<void> {
@@ -950,11 +998,25 @@ async function main(): Promise<void> {
   const openai = new OpenAI({ apiKey: openaiKey });
 
   console.log(
-    `[faq-batch] segment=${args.segment} limit=${args.limit} concurrency=${args.concurrency} model=${args.model} dryRun=${args.dryRun} skipEn=${args.skipEn}`,
+    `[faq-batch] segment=${args.segment} limit=${args.limit} concurrency=${args.concurrency} model=${args.model} dryRun=${args.dryRun} skipEn=${args.skipEn} shard=${args.shard}/${args.shards}`,
   );
 
-  const candidates = (await selectCandidates(cfg, args.segment, args.slugs)).slice(0, args.limit);
-  console.log(`[faq-batch] candidates this wave: ${candidates.length}`);
+  const shardSet =
+    args.shards > 1 && args.slugs.length === 0
+      ? await computeShardSlugs(cfg, args.shard, args.shards)
+      : null;
+  if (shardSet) {
+    console.log(
+      `[faq-batch] shard ${args.shard}/${args.shards} owns ${shardSet.size} published slugs`,
+    );
+  }
+
+  const selected = await selectCandidates(cfg, args.segment, args.slugs);
+  const partitioned = shardSet ? selected.filter((c) => shardSet.has(c.slug)) : selected;
+  const candidates = partitioned.slice(0, args.limit);
+  console.log(
+    `[faq-batch] candidates this wave: ${candidates.length} (shard pool ${partitioned.length})`,
+  );
   if (candidates.length === 0) {
     console.log('[faq-batch] nothing to do — segment exhausted.');
     return;
