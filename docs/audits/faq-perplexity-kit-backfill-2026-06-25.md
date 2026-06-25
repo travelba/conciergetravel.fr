@@ -32,6 +32,19 @@
 | After waves 1–2 (1 worker)  | 2985      | 195      | 6.5 %     |
 | After 4-shard wave (HALTED) | 2985      | 428      | 14.3 %    |
 | PO STOP — DataForSEO pivot  | 2985      | 438      | 14.7 %    |
+| Grounded resume (shard 0)   | 2985      | —        | (running) |
+
+## ▶ GROUNDED resume (2026-06-25 ~21:12) — shard 0, concurrency 3
+
+Pipeline now DataForSEO-grounded (commit `77d33bce`): each fiche injects real
+PAA/keywords and logs `grounding=on dfs_paa_coverage=<pct>`. Grounded wave log:
+
+| Wave   | Segment | Enriched | Grounded | avg PAA cov | Perplexity $ | Notes                                   |
+| ------ | ------- | -------- | -------- | ----------- | ------------ | --------------------------------------- |
+| g-nn-1 | netnew  | 52/60    | 44       | 42 %        | 7.88         | 9 grounding=off (no DFS cache), 0 quota |
+
+`grounding=off` rate ≈ 15 % (hotels with no DataForSEO cache) — non-blocking
+per PO, flagged for a later DFS cache backfill on those slugs.
 
 ## ⏸ STOP — pipeline pivot to DataForSEO grounding (2026-06-25 ~20:52)
 
