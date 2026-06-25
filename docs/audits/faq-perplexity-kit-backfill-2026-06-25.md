@@ -26,30 +26,46 @@
 
 ## Coverage
 
-| Checkpoint       | Published | With kit | % covered |
-| ---------------- | --------- | -------- | --------- |
-| Baseline (audit) | 2985      | 8        | 0.27 %    |
-| After waves 1–2  | 2985      | 195      | 6.5 %     |
+| Checkpoint                  | Published | With kit | % covered |
+| --------------------------- | --------- | -------- | --------- |
+| Baseline (audit)            | 2985      | 8        | 0.27 %    |
+| After waves 1–2 (1 worker)  | 2985      | 195      | 6.5 %     |
+| After 4-shard wave (HALTED) | 2985      | 428      | 14.3 %    |
 
 ## Wave log
 
-| Wave  | Segment       | Enriched | Perplexity $ | EN $  | Total $ | Cumulative $ |
-| ----- | ------------- | -------- | ------------ | ----- | ------- | ------------ |
-| smoke | 1898-the-post | 1        | 0.19         | 0.004 | 0.19    | 0.19         |
-| 1     | netnew        | 40/40    | 4.11         | 0.17  | 4.28    | 4.47         |
-| 2     | netnew        | 146/150  | 18.72        | 0.63  | 19.35   | 23.82        |
+| Wave         | Segment | Enriched | Perplexity $ | EN $  | Total $ | Cumulative $ |
+| ------------ | ------- | -------- | ------------ | ----- | ------- | ------------ |
+| smoke        | 1898    | 1        | 0.19         | 0.004 | 0.19    | 0.19         |
+| 1            | netnew  | 40/40    | 4.11         | 0.17  | 4.28    | 4.47         |
+| 2            | netnew  | 146/150  | 18.72        | 0.63  | 19.35   | 23.82        |
+| s0-1 (4-way) | netnew  | 52/134   | 6.68         | 0.23  | 6.91    | 30.73¹       |
 
-Wave-2 deferred (4): 3× `kit.en_parity` row-gate, 1× `promote.canonical`
-(`eden-lodge`) — kept null kit, auto-retried next wave (idempotent). Avg cost
-≈ $0.127/fiche. Acceptance (prod, wave-1 fiche `ashford-castle`): FR + EN both
-render **16 `Question` + `FAQPage`**, 0 content leak (the single FR "dossier"
-hit is the allow-listed "dossier **de presse**" loyalty link).
+¹ Shard-0 spend only. Shards 1-3 ran in parallel and spent comparably — the
+combined 4-worker burst lifted the catalogue 195 → **428 with kit** before the
+shared Perplexity key hit its billing quota.
 
-## Resume command
+## ⛔ HALT — Perplexity quota exhausted (2026-06-25 ~20:55)
+
+The 4 parallel shards drained the shared Perplexity credit. Shard-0 wave s0-1
+enriched 52/134 then every remaining FR call returned **HTTP 401 "You exceeded
+your current quota, please check your plan and billing details"** (fails in
+0.3 s, `pplx=$0`). This is the hard stop condition (quota épuisé), not a
+transient 429 — the runner did not hang, it logged each 401 and exited cleanly.
+Deferred this wave: ~28 `kit.en_parity` row-gate (retriable) + ~54 quota-401.
+
+**Resume once the Perplexity plan is topped up** (idempotent — re-skips the 428
+already done; `--shard`/`--shards` keep the 4 workers collision-free):
 
 ```bash
-# continue net-new, then heads, then rest
+# Shard 0 of 4 (workers 1..3 use --shard=1|2|3) — netnew first, then heads, then rest
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --shard=0 --shards=4 --segment=netnew --limit=150 --concurrency=5
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --shard=0 --shards=4 --segment=heads  --limit=150 --concurrency=5
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --shard=0 --shards=4 --segment=rest   --limit=150 --concurrency=5
+# single worker fallback (no parallelism)
 pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=netnew --limit=150 --concurrency=4
-pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=heads  --limit=150 --concurrency=4
-pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=rest   --limit=150 --concurrency=4
 ```
+
+Residual: 2557 published fiches still without kit (incl. 344 net-new). Lower
+total concurrency (4 shards × 5 = 20 simultaneous Perplexity calls) burns the
+quota fast — consider concurrency=3/shard on resume to smooth spend.
