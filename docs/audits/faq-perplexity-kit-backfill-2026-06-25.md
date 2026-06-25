@@ -31,6 +31,21 @@
 | Baseline (audit)            | 2985      | 8        | 0.27 %    |
 | After waves 1–2 (1 worker)  | 2985      | 195      | 6.5 %     |
 | After 4-shard wave (HALTED) | 2985      | 428      | 14.3 %    |
+| PO STOP — DataForSEO pivot  | 2985      | 438      | 14.7 %    |
+
+## ⏸ STOP — pipeline pivot to DataForSEO grounding (2026-06-25 ~20:52)
+
+PO directive: **all content creation must be anchored + verified by DataForSEO
+(PAA / intent / volume)**. The current FAQ pipeline does not ground on
+DataForSEO, so the chantier is paused after the quota resume. Shard 0 stopped
+its runner mid-wave (no new fiche started — concurrency-3 in-flight ≤3 were
+interrupted, idempotent → will be regenerated with grounding). A dedicated
+worker will add DataForSEO grounding to the FAQ generator before relaunch.
+
+**Counter at stop — `shard0: 119/747`** (PO ref 746; actual partition 747).
+Global **438/2985** with kit. Resume (post-grounding) reuses the same
+collision-free flags: `--shard=0 --shards=4 --segment=netnew|heads|rest
+--concurrency=3`.
 
 ## Wave log
 
