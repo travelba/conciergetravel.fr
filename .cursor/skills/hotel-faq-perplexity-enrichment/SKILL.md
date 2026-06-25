@@ -75,6 +75,8 @@ JSON-LD uses `pickHotelJsonLdFaqEntries` on **promote** items only (`HOTEL_JSON_
 
 ## Rule 4 — CLI pipeline
 
+### 4a — Manual single-fiche (MCP Perplexity → JSON file → validate → push)
+
 ```bash
 # 1. Validate schema + coverage gates
 pnpm --filter @mch/editorial-pilot faq:perplexity:validate -- \
@@ -89,6 +91,41 @@ pnpm --filter @mch/editorial-pilot faq:perplexity:push -- \
 # 3. Humanizer Top 5 featured (optional post-push)
 pnpm --filter @mch/editorial-pilot concierge:humanize:faq -- --slug=le-bristol-paris
 ```
+
+### 4b — Catalogue-wide batch runner (the remediation workhorse)
+
+`faq:perplexity:batch` (`src/hotels/run-faq-perplexity-batch.ts`) generates
+FR (Perplexity **API** `sonar-pro`, web-grounded, JSON-schema structured
+output) + EN (`gpt-4o-mini`, faithful + informative tone) + promote subset,
+runs the coverage / row-enrichment / `hasLeak()` gates, and pushes the full
+bilingual two-tier payload via PostgREST. Idempotent (the candidate query
+excludes any fiche whose `faq_content_kit` is already non-null). Every
+network/LLM call is `withTimeout`-wrapped (Rule 20) and per-fiche work runs
+under `Promise.allSettled` so a wave can never hang. Cost is summed from the
+Perplexity API's own `usage.cost` + a gpt-4o-mini estimate, logged per wave to
+`runs/faq-perplexity/wave-*.json`.
+
+```bash
+# net-new P2 cohort, wave of 120, concurrency 4
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=netnew --limit=120 --concurrency=4
+# acquisition heads (palaces + ranked) then the rest
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=heads --limit=150 --concurrency=4
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --segment=rest  --limit=150 --concurrency=4
+# single fiche / dry-run
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --slugs=le-bristol-paris --dry-run
+```
+
+Segments: `netnew` (764 P2 onboarded 2026-06-25) · `heads` (palaces + ranked
+hotels, ordered by best rank) · `rest` (everything else) · `all` (all, ordered
+by acquisition priority). Flags: `--model=sonar-pro|sonar` (sonar under-delivers
+the 48-item kit — sonar-pro is the reliable default), `--skip-en` (FR-only push,
+EN left to a follow-up), `--dry-run`.
+
+**Cost (observed 2026-06-25):** ~$0.085–0.13/fiche (`sonar-pro` $0.08–0.19 +
+EN $0.004). A canonical-coverage miss costs one extra Perplexity attempt — the
+prompt injects the 10 verbatim CDC canonical questions + forbids the model from
+echoing the question as its answer to keep attempt-1 pass-rate high. The runner
+drops any item whose answer merely echoes the question (`answerEchoesQuestion`).
 
 ## Rule 5 — Catalogue remediation (2219+ fiches)
 
