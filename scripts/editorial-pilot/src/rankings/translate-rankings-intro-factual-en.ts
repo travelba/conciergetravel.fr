@@ -56,6 +56,16 @@ const MODEL = 'gpt-4o-mini-2024-07-18';
 /** EN field below this many chars counts as "missing" (stubs included). */
 const INTRO_EN_MIN_CHARS = 80;
 const FS_EN_MIN_CHARS = 20;
+/**
+ * factual_summary envelope floor (mirrors generate-ranking-v2 / AGENTS.md §1.5).
+ * A non-empty `factual_summary_en` BELOW this is "present but sub-envelope" — it
+ * renders fine but fails the 110-char AEO/JSON-LD floor, so it must be
+ * re-translated to land back in band (2026-06-25: `meilleurs-hotels-spa-barcelone`
+ * was 108c). We only attempt the refresh when the FR canonical is long enough to
+ * faithfully reach the floor (no padding / invented facts).
+ */
+const FS_EN_ENVELOPE_MIN = 110;
+const FS_FR_REFRESH_MIN = 115;
 /** A French field shorter than this isn't worth translating. */
 const INTRO_FR_MIN_CHARS = 200;
 const FS_FR_MIN_CHARS = 40;
@@ -80,10 +90,14 @@ function needsIntroEn(r: RankingRow): boolean {
 }
 
 function needsFsEn(r: RankingRow): boolean {
-  return (
-    (r.factual_summary_fr ?? '').trim().length >= FS_FR_MIN_CHARS &&
-    (r.factual_summary_en ?? '').trim().length < FS_EN_MIN_CHARS
-  );
+  const frLen = (r.factual_summary_fr ?? '').trim().length;
+  const enLen = (r.factual_summary_en ?? '').trim().length;
+  // (a) Missing/stub EN — the original parity gap (FR worth translating, EN empty).
+  if (frLen >= FS_FR_MIN_CHARS && enLen < FS_EN_MIN_CHARS) return true;
+  // (b) Present-but-sub-envelope EN — refresh only when the FR canonical is long
+  //     enough to faithfully reach the 110-char floor without inventing facts.
+  if (frLen >= FS_FR_REFRESH_MIN && enLen > 0 && enLen < FS_EN_ENVELOPE_MIN) return true;
+  return false;
 }
 
 function needsWork(r: RankingRow): boolean {
@@ -284,7 +298,10 @@ async function translateOne(
       if (ok.success) {
         const introOk = !wantIntro || ok.data.intro_en.trim().length >= INTRO_EN_MIN_CHARS;
         const fsRaw = ok.data.factual_summary_en.trim();
-        const fsOk = !wantFs || (fsRaw.length >= FS_EN_MIN_CHARS && fsRaw.length <= FS_MAX_CHARS);
+        // Enforce the 110-char envelope floor so a refresh never re-persists a
+        // sub-envelope summary; retries chase the band (no invented facts).
+        const fsOk =
+          !wantFs || (fsRaw.length >= FS_EN_ENVELOPE_MIN && fsRaw.length <= FS_MAX_CHARS);
         if (introOk && fsOk) parsed = ok.data;
       }
     } catch {
