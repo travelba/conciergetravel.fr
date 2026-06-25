@@ -114,6 +114,36 @@ describe('eligibilityFor — lieu eligibility no longer leaks across countries',
   });
 });
 
+// ─── eligibilityFor — divergent city spellings unified (item 2, 2026-06-25) ──
+// London hotels carry city='Londres' (FR) OR 'London' (EN); Dubai hotels carry
+// 'Dubai', 'Dubaï' (diacritic) or the compound 'Palm Jumeirah, Dubai'. None must
+// be missed by the city ranking purely on spelling. `normForMatch` strips
+// diacritics (Dubaï→dubai) and the registered LieuDef lists BOTH London keys, so
+// every variant resolves to the one canonical city ranking.
+describe('eligibilityFor — divergent city spellings resolve to one ranking', () => {
+  const catalog: readonly HotelCatalogRow[] = [
+    mk({ slug: 'claridges', city: 'Londres', country_code: 'GB' }),
+    mk({ slug: 'the-savoy', city: 'London', country_code: 'GB' }),
+    mk({ slug: 'bulgari-dubai', city: 'Dubai', country_code: 'AE' }),
+    mk({ slug: 'one-only-mirage', city: 'Dubaï', country_code: 'AE' }),
+    mk({ slug: 'one-only-palm', city: 'Palm Jumeirah, Dubai', country_code: 'AE' }),
+    // A non-member that must never leak in on a substring.
+    mk({ slug: 'londonderry-arms', city: 'Londonderry', country_code: 'GB' }),
+  ];
+
+  it('matches both Londres (FR) and London (EN) for the londres lieu', () => {
+    const eligible = catalog.filter(eligibilityFor(axes('londres', 'ville'))).map((h) => h.slug);
+    expect(eligible).toContain('claridges');
+    expect(eligible).toContain('the-savoy');
+    expect(eligible).not.toContain('londonderry-arms'); // "london" ⊄ "londonderry" whole-word
+  });
+
+  it('matches Dubai, Dubaï (diacritic) and the Palm Jumeirah compound for the dubai lieu', () => {
+    const eligible = catalog.filter(eligibilityFor(axes('dubai', 'ville'))).map((h) => h.slug);
+    expect(eligible).toEqual(['bulgari-dubai', 'one-only-mirage', 'one-only-palm']);
+  });
+});
+
 // ─── eligibilityFor — luxury_tier / affiliation filters ──────────────────────
 
 describe('eligibilityFor — luxury_tier and affiliation eligibility', () => {
