@@ -77,48 +77,70 @@ interface CountryAggregate {
   hotelCount: number;
 }
 
+/**
+ * Supabase enforces a server-side `db_max_rows` cap (default `1000` in
+ * our project) that silently truncates a `.limit(N)` call to that cap
+ * regardless of the value passed. The international catalogue crossed
+ * 1 000 published rows long ago (2 243 on 2026-06-25), so the legacy
+ * `.limit(5000)` only aggregated the first 1 000 hotels — an estimated
+ * ~23 of the 127 countries (those whose rows all sort past row 1 000)
+ * silently vanished from the `/destination` directory hub, leaving
+ * their country entry points under-linked. We page with `.range()`
+ * until exhaustion (same fix as `cities.ts` / `list-places.ts`), with
+ * a hard `MAX_PAGES` ceiling as a runaway guard. Ordering by
+ * `country_code` is a stable total order so pagination never skips or
+ * duplicates a row across the `db_max_rows` boundary.
+ */
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 12;
+
 async function fetchInternationalDestinations(): Promise<readonly CountryAggregate[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from('hotels')
-      .select('country_code, country_label_fr, country_label_en')
-      .eq('is_published', true)
-      .neq('country_code', 'FR')
-      .limit(5000);
-    if (error !== null) {
-      console.error('[destinations.intl-directory] Supabase error on hotels:', {
-        message: error.message,
-        code: error.code,
-      });
-      return [];
-    }
-    if (!Array.isArray(data)) return [];
-
     const aggregates = new Map<string, CountryAggregate>();
-    for (const raw of data) {
-      const parsed = HotelCountryRowSchema.safeParse(raw);
-      if (!parsed.success) continue;
-      const row = parsed.data;
-      const existing = aggregates.get(row.country_code);
-      if (existing === undefined) {
-        aggregates.set(row.country_code, {
-          code: row.country_code,
-          labelFr: row.country_label_fr,
-          labelEn: row.country_label_en,
-          hotelCount: 1,
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      const { data, error } = await supabase
+        .from('hotels')
+        .select('country_code, country_label_fr, country_label_en')
+        .eq('is_published', true)
+        .neq('country_code', 'FR')
+        .order('country_code', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error !== null) {
+        console.error('[destinations.intl-directory] Supabase error on hotels:', {
+          message: error.message,
+          code: error.code,
+          page,
         });
-      } else {
-        existing.hotelCount += 1;
-        // Backfill labels lazily so a missing translation on one row
-        // doesn't drop the whole country off the directory.
-        if (existing.labelFr === null && row.country_label_fr !== null) {
-          existing.labelFr = row.country_label_fr;
-        }
-        if (existing.labelEn === null && row.country_label_en !== null) {
-          existing.labelEn = row.country_label_en;
+        break;
+      }
+      if (!Array.isArray(data)) break;
+      for (const raw of data) {
+        const parsed = HotelCountryRowSchema.safeParse(raw);
+        if (!parsed.success) continue;
+        const row = parsed.data;
+        const existing = aggregates.get(row.country_code);
+        if (existing === undefined) {
+          aggregates.set(row.country_code, {
+            code: row.country_code,
+            labelFr: row.country_label_fr,
+            labelEn: row.country_label_en,
+            hotelCount: 1,
+          });
+        } else {
+          existing.hotelCount += 1;
+          // Backfill labels lazily so a missing translation on one row
+          // doesn't drop the whole country off the directory.
+          if (existing.labelFr === null && row.country_label_fr !== null) {
+            existing.labelFr = row.country_label_fr;
+          }
+          if (existing.labelEn === null && row.country_label_en !== null) {
+            existing.labelEn = row.country_label_en;
+          }
         }
       }
+      if (data.length < PAGE_SIZE) break;
     }
     return [...aggregates.values()];
   } catch (e) {
