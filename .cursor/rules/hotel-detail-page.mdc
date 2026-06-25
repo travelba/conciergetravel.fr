@@ -39,6 +39,28 @@ This page is the **strategic surface** that competes against Booking, Hotels.com
   tier photo) dans [`hotel-kit-rollout`](../skills/hotel-kit-rollout/SKILL.md)
   + rule [`hotel-kit-rollout.mdc`](hotel-kit-rollout.mdc).
 
+## Principe directeur — toute création de contenu est ancrée DataForSEO
+
+> **Décision PO (2026-06-25)** : « Toute la création de contenu ou de fiche
+> doit être *check par data seo*. » Aucun texte généré (FAQ kit/concierge,
+> `description_*`, `long_description_sections`, `meta_desc_*`, `factual_summary_*`,
+> GEO/AEO, justifications de classement) n'est livré sans **ancrage DataForSEO**
+> sur la demande réelle.
+
+- **Avant génération** : charger le grounding DataForSEO de l'hôtel via
+  `groundHotel(...)` (cache `data/dfs-cache/` → zéro surcoût API si déjà
+  grounded) et injecter mots-clés / volume / intent / People-Also-Ask dans le
+  prompt sous une section « Ancrage SEO/GEO (DataForSEO) ».
+- **Après génération, avant persistance** : vérifier la **couverture PAA/intent**
+  (les questions à forte demande ont une Q&A correspondante) en plus du gate
+  `hasLeak()`. Couverture insuffisante = passe ciblée ou warning structuré
+  `dfs_paa_coverage=<pct>`, jamais une livraison silencieuse non ancrée.
+- **Dégradation propre** : si DataForSEO est indisponible, logguer
+  `grounding=off` et marquer le résultat comme non-grounded (à re-grounder),
+  ne jamais publier en se faisant passer pour ancré.
+- **Règle transverse** : voir [`dataforseo-content-grounding.mdc`](dataforseo-content-grounding.mdc)
+  (always-apply) et le skill [`keyword-grounding-dataforseo`](../skills/keyword-grounding-dataforseo/SKILL.md).
+
 ## Decisions (do not relitigate without an ADR)
 
 | Décision | Référence |
