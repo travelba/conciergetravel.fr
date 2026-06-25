@@ -46,6 +46,13 @@ PAA/keywords and logs `grounding=on dfs_paa_coverage=<pct>`. Grounded wave log:
 | g-heads-1 | heads   | 59/60    | 58       | 57 %        | 6.83         | 98 % grounded, 0 quota                                 |
 | g-heads-2 | heads   | 137/150  | 130      | 51 %        | 19.18        | 0 quota, 13 gate-deferred                              |
 | g-heads-3 | heads   | 138/150  | 140      | 55 %        | 18.40        | 0 quota                                                |
+| g-heads-4 | heads   | 80/89    | 79       | 55 %        | 11.13        | heads drained; 0 quota                                 |
+
+**Checkpoint after heads (all shards):** `shard0: 603/746` · global
+**2277/2985 (76 %)** with kit. Acceptance (prod, grounded fiche
+`anantara-koh-samui-resort`, PAA cov 100 %): FR + EN render \*\*16 `Question`
+
+- `FAQPage`\*\*, 0 leak. Next: `rest` segment (143 left in shard 0).
 
 `grounding=off` rate ≈ 15 % (hotels with no DataForSEO cache) — non-blocking
 per PO, flagged for a later DFS cache backfill on those slugs.
