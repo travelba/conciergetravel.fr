@@ -55,17 +55,17 @@ Sur **tout** pipeline qui génère ou régénère du contenu éditorial, l'agent
 | `geo_qa` | `hotels/geo-qa-generator.ts` | ✅ **requiert** PAA (skip si zéro) | structurel (PAA-anchored) |
 | `long_description_sections` | `enrichment/enrich-hotel-content.ts` | ✅ `groundHotel` (8th wave) | non |
 | **`faq_content_kit` / `faq_content` / `concierge_questions`** | `hotels/run-faq-perplexity-batch.ts` | ✅ **`groundHotel` (2026-06-25)** | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>`** |
-| Rankings FAQ (curated) | `rankings/enrich-ranking-faq-grounded.ts` | ✅ `groundKeywords` | log PAA count |
-| Rankings v2 (sections + FAQ + meta) | `rankings/generate-ranking-v2.ts` | ✅ `groundKeywords` | non |
+| Rankings FAQ (curated) | `rankings/enrich-ranking-faq-grounded.ts` | ✅ `groundKeywords` | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>` (2026-06-25)** |
+| Rankings v2 (sections + FAQ + meta) | `rankings/generate-ranking-v2.ts` | ✅ `groundKeywords` (self-ground via `loadDfsConfig` + seeds, injectable/disableable via `GenerateRankingV2Options`) | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>` (2026-06-25)** |
 | Lieux / POI éditorial | `places/enrich-places-editorial.ts` | ✅ `groundKeywords` | non |
 | `premium-section-generator.ts` | premium sections | ✅ `groundHotel` | non |
 
 ### Reste à câbler / renforcer (backlog)
 
 - Étendre le gate `evaluatePaaCoverage` (matching souple, `data seo` check)
-  au-delà de la FAQ kit vers `long_description_sections`, rankings v2 et lieux
-  (aujourd'hui grounded à l'entrée mais sans vérification de couverture en
-  sortie).
+  au-delà de la FAQ kit + classements (FAQ v2 + curated, câblés 2026-06-25)
+  vers `long_description_sections` et lieux (aujourd'hui grounded à l'entrée
+  mais sans vérification de couverture en sortie).
 - Tout **nouveau** pipeline de contenu démarre **grounded par défaut** — ne pas
   livrer un générateur LLM-only sans `groundHotel`/`groundKeywords` + le flag
   `--no-grounding` de secours.

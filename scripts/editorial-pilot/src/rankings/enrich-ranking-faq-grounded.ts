@@ -73,6 +73,7 @@ import {
   type KeywordGrounding,
 } from '../grounding/keyword-grounding.js';
 import { hasLeak, maxSentenceWords } from '../enrichment/scaffolding-gate.js';
+import { evaluatePaaCoverage } from '../hotels/faq-perplexity-gates.js';
 import type { RankingSeed, RankingKind } from './rankings-catalog.js';
 import type { HotelCatalogRow } from './load-hotels-catalog.js';
 import {
@@ -458,6 +459,29 @@ async function processSlug(
   const sanitized = sanitizeFaq(cleaned, anchors, slug);
   console.log(`[${slug}]    faq: ${sanitized.length} entries (post-gate).`);
 
+  // Output gate (hard rule §4) — verify the regenerated FAQ actually covers
+  // the real PAA demand it was grounded on. NON-blocking: logged as
+  // `dfs_paa_coverage=<pct>`, never blocks the PATCH (shares the single
+  // soft-token matcher with the FAQ kit + rankings v2 generators).
+  const coverage = evaluatePaaCoverage(
+    sanitized.map((f) => `${f.question_fr} ${f.answer_fr}`),
+    grounding.peopleAlsoAsk,
+  );
+  if (coverage.grounded) {
+    const low = coverage.coveragePct < 50;
+    const uncovered =
+      low && coverage.uncovered.length > 0
+        ? ` — uncovered: ${coverage.uncovered.slice(0, 5).join(' | ')}`
+        : '';
+    console.log(
+      `[${slug}]    ${low ? '⚠' : 'ℹ'} dfs_paa_coverage=${coverage.coveragePct}% (${coverage.matched}/${coverage.total} PAA covered)${low ? ' [LOW]' : ''}${uncovered}`,
+    );
+  } else {
+    console.log(
+      `[${slug}]    ℹ dfs_paa_coverage=n/a (grounding=${grounding.grounded ? 'on' : 'off'}, no PAA).`,
+    );
+  }
+
   if (sanitized.length < 8) {
     // Safety: never overwrite a healthy FAQ with a thin one.
     console.warn(
@@ -478,6 +502,7 @@ async function processSlug(
     faqCount: sanitized.length,
     seeds,
     grounded: grounding.grounded,
+    dfsPaaCoverage: coverage.grounded ? coverage.coveragePct : null,
   });
   console.log(`[${slug}] ✓ PATCHed faq (${sanitized.length} entries, ${paaCount} PAA grounded).`);
   return { slug, status: 'patched', paa: paaCount, faqCount: sanitized.length };

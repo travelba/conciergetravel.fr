@@ -172,6 +172,27 @@ run-faq-perplexity-batch --slugs=les-airelles-gordes --dry-run --skip-en --groun
 # → ✓ les-airelles-gordes kit=49 concierge=26 promote=15 grounding=on dfs_paa_coverage=70%(10PAA)
 ```
 
+### Output gate now covers FAQ kit **+ rankings** (extended 2026-06-25)
+
+The same `evaluatePaaCoverage(faqBlobs, peopleAlsoAsk)` is now the single
+output-coverage gate for **two surfaces**:
+
+1. **FAQ kit** — `run-faq-perplexity-batch.ts` (original wiring).
+2. **Rankings** — both `rankings/generate-ranking-v2.ts` (FAQ Q&A +
+   entry justifications, fed by the generator's own grounding) and the
+   curated `rankings/enrich-ranking-faq-grounded.ts` (FAQ-only re-anchor,
+   fed by its already-loaded `grounding.peopleAlsoAsk`). Both log the same
+   `dfs_paa_coverage=<pct>% (matched/total PAA covered)` line, NON-blocking,
+   and degrade to `dfs_paa_coverage=n/a` when DFS is off / zero PAA.
+
+`generate-ranking-v2.ts` self-grounds at entry via `loadDfsConfig()` + seeds
+derived from the ranking title (or accepts a pre-loaded `grounding` /
+`disableGrounding` via `GenerateRankingV2Options`), injects the block into the
+FAQ + factual-summary prompts under `### Ancrage SEO/GEO (DataForSEO)`, then
+runs the gate. **Never duplicate the soft-token matcher** — always import
+`evaluatePaaCoverage` from `hotels/faq-perplexity-gates.ts`. Still TODO:
+`long_description_sections` and lieux (grounded at entry, no output gate yet).
+
 ## Rule 1 — Grounding is OPTIONAL and degrade-safe, never a hard dependency
 
 `loadDfsConfig()` returns `null` when `DATAFORSEO_ENABLED` is false or creds

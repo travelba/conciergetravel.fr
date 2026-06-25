@@ -36,6 +36,14 @@ import {
   describeAllowlistForPrompt,
   matchAllowlist,
 } from '../guides/external-sources-allowlist.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import {
+  groundKeywords,
+  renderGroundingForPrompt,
+  type GroundingLocale,
+  type KeywordGrounding,
+} from '../grounding/keyword-grounding.js';
+import { evaluatePaaCoverage } from '../hotels/faq-perplexity-gates.js';
 import type { HotelCatalogRow } from './load-hotels-catalog.js';
 import type { RankingSeed } from './rankings-catalog.js';
 
@@ -1119,6 +1127,122 @@ function postValidateEntries(
   return out.map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
+// ─── DataForSEO grounding (entry) + PAA coverage gate (output) ─────────
+//
+// Hard rule (PO 2026-06-25, `.cursor/rules/dataforseo-content-grounding.mdc`):
+// every content generator must (a) ground on real demand BEFORE the LLM
+// call and (b) verify PAA/intent coverage AFTER generation, before
+// persistence. The FAQ kit pipeline already does both; the rankings v2
+// generator now mirrors that contract. DFS stays an *enhancer*: when
+// `loadDfsConfig()` returns null (Vercel build, dev box without
+// `DATAFORSEO_ENABLED`) the generator degrades to LLM-only and logs
+// `grounding=off`. The disk cache (`data/dfs-cache/`) means a re-grounded
+// cluster costs zero extra API. See `.cursor/skills/keyword-grounding-dataforseo`.
+
+export interface GenerateRankingV2Options {
+  /**
+   * Pre-loaded DataForSEO grounding (PAA + keywords). When omitted, the
+   * generator self-grounds via `loadDfsConfig()` + seeds derived from the
+   * `RankingSeed`, unless `disableGrounding` is set.
+   */
+  readonly grounding?: KeywordGrounding;
+  /** DFS locale used when self-grounding (default France / fr). */
+  readonly groundingLocale?: GroundingLocale;
+  /** Skip grounding entirely (`--no-grounding`). */
+  readonly disableGrounding?: boolean;
+}
+
+const DEFAULT_GROUNDING_LOCALE: GroundingLocale = {
+  locationName: 'France',
+  languageCode: 'fr',
+};
+
+/**
+ * Derive a small set of DFS search seeds from the ranking's editorial
+ * title scope (e.g. "Les plus beaux Palaces de Paris" → "meilleurs hôtels
+ * Paris"). Mirrors the title-stripping logic used by the curated FAQ
+ * re-anchor pipeline (`enrich-ranking-faq-grounded.ts`).
+ */
+function deriveGroundingSeeds(seed: RankingSeed): string[] {
+  const scope = seed.titleFr
+    .replace(
+      /^(les\s+)?(meilleurs?|meilleures?|plus\s+beaux|plus\s+belles|top|notre\s+sélection)\s+/iu,
+      '',
+    )
+    .replace(
+      /^(palaces?|hôtels?|villas?|chalets?|resorts?|châteaux[-\s]?hôtels?|maisons?\s+d['’]hôtes?)\s+/iu,
+      '',
+    )
+    .replace(/^(de\s+la|de\s+l['’]|du|des|de|d['’]|en|à|au|aux)\s+/iu, '')
+    .trim();
+  const candidates = [`meilleurs hôtels ${scope}`, seed.titleFr];
+  const seeds = candidates.map((s) => s.replace(/\s+/gu, ' ').trim()).filter((s) => s.length > 0);
+  return [...new Set(seeds)];
+}
+
+/**
+ * Resolve the grounding for a ranking generation: caller-provided wins,
+ * else self-ground when DFS is configured, else `null` (LLM-only). Never
+ * throws — `groundKeywords` degrades to an empty grounding on any vendor
+ * failure.
+ */
+async function resolveGrounding(
+  seed: RankingSeed,
+  options: GenerateRankingV2Options,
+): Promise<KeywordGrounding | null> {
+  if (options.disableGrounding === true) return null;
+  if (options.grounding !== undefined) return options.grounding;
+  const cfg = loadDfsConfig();
+  if (cfg === null) return null;
+  const seeds = deriveGroundingSeeds(seed);
+  if (seeds.length === 0) return null;
+  return groundKeywords(cfg, seeds, options.groundingLocale ?? DEFAULT_GROUNDING_LOCALE);
+}
+
+/** Append the real-demand grounding block to a base prompt (no-op when off). */
+function appendGroundingDirective(basePrompt: string, grounding: KeywordGrounding | null): string {
+  if (grounding === null || !grounding.grounded) return basePrompt;
+  const block = renderGroundingForPrompt(grounding);
+  if (block.length === 0) return basePrompt;
+  return `${basePrompt}\n\n### Ancrage SEO/GEO (DataForSEO)\n${block}`;
+}
+
+/**
+ * Output gate — measure how much of the REAL People-Also-Ask demand the
+ * generated FAQ + justifications cover, and log a structured, NON-blocking
+ * `dfs_paa_coverage=<pct>` signal. Reuses the shared soft-token matcher
+ * `evaluatePaaCoverage` (single source of truth, also used by the FAQ kit
+ * pipeline) — never duplicates the matching logic. Degrades to
+ * `dfs_paa_coverage=n/a` when DFS was off or returned zero PAA.
+ */
+function logPaaCoverage(
+  slug: string,
+  grounding: KeywordGrounding | null,
+  faq: ReadonlyArray<z.infer<typeof FaqSchema>>,
+  entries: ReadonlyArray<z.infer<typeof EntrySchema>>,
+): void {
+  const peopleAlsoAsk = grounding?.peopleAlsoAsk ?? [];
+  const faqBlobs = [
+    ...faq.map((f) => `${f.question_fr} ${f.answer_fr}`),
+    ...entries.map((e) => e.justification_fr),
+  ];
+  const coverage = evaluatePaaCoverage(faqBlobs, peopleAlsoAsk);
+  if (!coverage.grounded) {
+    console.warn(
+      `  ℹ [${slug}] grounding=${grounding?.grounded ? 'on' : 'off'} dfs_paa_coverage=n/a (no PAA available).`,
+    );
+    return;
+  }
+  const low = coverage.coveragePct < 50;
+  const uncovered =
+    low && coverage.uncovered.length > 0
+      ? ` — uncovered: ${coverage.uncovered.slice(0, 5).join(' | ')}`
+      : '';
+  console.warn(
+    `  ${low ? '⚠' : 'ℹ'} [${slug}] grounding=on dfs_paa_coverage=${coverage.coveragePct}% (${coverage.matched}/${coverage.total} PAA covered)${low ? ' [LOW]' : ''}${uncovered}`,
+  );
+}
+
 // ─── Public entry point ──────────────────────────────────────────────
 
 /**
@@ -1172,6 +1296,7 @@ async function generateEntries(
 export async function generateRankingV2(
   seed: RankingSeed,
   eligible: ReadonlyArray<HotelCatalogRow>,
+  options: GenerateRankingV2Options = {},
 ): Promise<GeneratedRankingV2> {
   if (eligible.length < 3) {
     throw new Error(
@@ -1181,6 +1306,13 @@ export async function generateRankingV2(
   const env = loadEnv();
   const provider = resolveProvider(env);
   const client = buildLlmClient(env, provider);
+
+  // (a) Ground on real demand BEFORE the LLM calls (hard rule §1). Never
+  // throws; degrades to LLM-only when DFS is off.
+  const grounding = await resolveGrounding(seed, options);
+  console.log(
+    `  • [${seed.slug}] grounding=${grounding?.grounded ? 'on' : 'off'}${grounding?.grounded ? ` (PAA=${grounding.peopleAlsoAsk.length})` : ''}`,
+  );
 
   // Phase 1 — meta plan + focused intro/outro, in parallel.
   const [callMMeta, callMIntro] = await Promise.all([
@@ -1241,14 +1373,14 @@ export async function generateRankingV2(
       callLlm(
         client,
         SYSTEM_PROMPT,
-        buildPromptCallFaq(seed, sectionAnchors),
+        appendGroundingDirective(buildPromptCallFaq(seed, sectionAnchors), grounding),
         CallFaqSchema,
         `v2 ${seed.slug} call-FAQ (pass 8)`,
       ),
       callLlm(
         client,
         SYSTEM_PROMPT,
-        buildPromptCallFactualSummary(seed),
+        appendGroundingDirective(buildPromptCallFactualSummary(seed), grounding),
         CallFactualSummarySchema,
         `v2 ${seed.slug} call-FACTUAL_SUMMARY (pass 9)`,
       ),
@@ -1292,6 +1424,12 @@ export async function generateRankingV2(
 
   // Drop sub-floor glossary entries to keep render quality high.
   const cleanedB = postValidateRichBlocks(callB, seed.slug);
+
+  // (b) Output gate — measure PAA coverage of the FAQ + justifications
+  // against the real demand and log `dfs_paa_coverage=<pct>` (hard rule
+  // §4). NON-blocking: the existing gates (length clamps, allowlist,
+  // canonical-coverage warn) stay authoritative for persistence.
+  logPaaCoverage(seed.slug, grounding, cleanedFaq, cleanedEntries);
 
   return {
     intro_fr: callMIntro.intro_fr,
