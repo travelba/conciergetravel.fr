@@ -29,12 +29,21 @@
 | Checkpoint       | Published | With kit | % covered |
 | ---------------- | --------- | -------- | --------- |
 | Baseline (audit) | 2985      | 8        | 0.27 %    |
+| After waves 1–2  | 2985      | 195      | 6.5 %     |
 
 ## Wave log
 
 | Wave  | Segment       | Enriched | Perplexity $ | EN $  | Total $ | Cumulative $ |
 | ----- | ------------- | -------- | ------------ | ----- | ------- | ------------ |
 | smoke | 1898-the-post | 1        | 0.19         | 0.004 | 0.19    | 0.19         |
+| 1     | netnew        | 40/40    | 4.11         | 0.17  | 4.28    | 4.47         |
+| 2     | netnew        | 146/150  | 18.72        | 0.63  | 19.35   | 23.82        |
+
+Wave-2 deferred (4): 3× `kit.en_parity` row-gate, 1× `promote.canonical`
+(`eden-lodge`) — kept null kit, auto-retried next wave (idempotent). Avg cost
+≈ $0.127/fiche. Acceptance (prod, wave-1 fiche `ashford-castle`): FR + EN both
+render **16 `Question` + `FAQPage`**, 0 content leak (the single FR "dossier"
+hit is the allow-listed "dossier **de presse**" loyalty link).
 
 ## Resume command
 
