@@ -45,6 +45,7 @@ PAA/keywords and logs `grounding=on dfs_paa_coverage=<pct>`. Grounded wave log:
 | g-nn-2    | netnew  | 0/1      | 0        | —           | 0.25         | netnew drained; `seda-club` stuck on promote.canonical |
 | g-heads-1 | heads   | 59/60    | 58       | 57 %        | 6.83         | 98 % grounded, 0 quota                                 |
 | g-heads-2 | heads   | 137/150  | 130      | 51 %        | 19.18        | 0 quota, 13 gate-deferred                              |
+| g-heads-3 | heads   | 138/150  | 140      | 55 %        | 18.40        | 0 quota                                                |
 
 `grounding=off` rate ≈ 15 % (hotels with no DataForSEO cache) — non-blocking
 per PO, flagged for a later DFS cache backfill on those slugs.
