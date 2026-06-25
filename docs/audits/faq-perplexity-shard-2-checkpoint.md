@@ -7,7 +7,7 @@
 
 ## État (grounded run)
 
-- **shard2 : 190 / 746** fiches dotées du kit FAQ Perplexity.
+- **shard2 : 429 / 746** fiches dotées du kit FAQ Perplexity.
 - Pipeline : **grounded DataForSEO** (commit `77d33bce`) — `grounding=on`,
   couverture PAA moyenne ~51 % par vague.
 - Concurrency 3 (4 shards × 3 = 12 simultanés max, respecté).
