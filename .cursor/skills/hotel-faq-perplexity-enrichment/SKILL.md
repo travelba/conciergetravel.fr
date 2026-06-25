@@ -189,10 +189,25 @@ Any improvement validated on a **pilot fiche** (Airelles, Prince de Galles, …)
 | Pilot-only gate / render fix            | 2219 fiches must share the same contract                            | Rule 7 — extract to shared module + CDC audit                                      |
 | Titre concierge kit = nom pilote en dur | Prince de Galles affichait « Airelles Gordes » avec bon contenu PdG | `t('conciergeQuestions.title', { hotel: name })` dans `prepare-hotel-kit-model.ts` |
 
+## DataForSEO grounding (mandatory — PO directive 2026-06-25)
+
+The batch runner `run-faq-perplexity-batch.ts` is **DataForSEO-grounded**: it
+calls `groundHotel` before Perplexity, injects the People-Also-Ask + top
+keywords under a `### Ancrage SEO/GEO (DataForSEO)` prompt section, and runs a
+soft `evaluatePaaCoverage` gate after generation that logs
+`dfs_paa_coverage=<pct>` (non-blocking; `hasLeak()` + canonical gates stay the
+hard blockers). Flag `--grounded` (default ON) / `--no-grounding`. The full
+inject + verify recipe lives in
+[`keyword-grounding-dataforseo`](../keyword-grounding-dataforseo/SKILL.md)
+§FAQ kit grounding, and the permanent policy is
+[`.cursor/rules/dataforseo-content-grounding.mdc`](../../rules/dataforseo-content-grounding.mdc).
+
 ## References
 
 - Rule: [`.cursor/rules/hotel-faq-perplexity.mdc`](../../rules/hotel-faq-perplexity.mdc)
+- Rule: [`.cursor/rules/dataforseo-content-grounding.mdc`](../../rules/dataforseo-content-grounding.mdc) — tout contenu ancré DataForSEO
 - CDC bloc 11: [`.cursor/rules/hotel-detail-page.mdc`](../../rules/hotel-detail-page.mdc)
+- [`keyword-grounding-dataforseo`](../keyword-grounding-dataforseo/SKILL.md) — FAQ kit grounding + gate de couverture PAA
 - [`geo-llm-optimization`](../geo-llm-optimization/SKILL.md) — FAQ extraction / GEO
 - [`content-enrichment-pipeline`](../content-enrichment-pipeline/SKILL.md) — cross-source validation
 - [`concierge-voice-pipeline`](../concierge-voice-pipeline/SKILL.md) — voix « Je » Top 5

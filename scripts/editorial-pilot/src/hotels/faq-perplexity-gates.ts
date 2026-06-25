@@ -106,3 +106,187 @@ export function evaluateFaqKitCoverage(
   const blockers = issues.filter((i) => i.severity === 'blocker');
   return { ok: blockers.length === 0, issues };
 }
+
+/* ── DataForSEO PAA coverage gate (PO directive — "check par data seo") ───── */
+
+export interface PaaCoverageResult {
+  /** false when DFS was off / returned zero PAA (coverage is then 100, no warn). */
+  readonly grounded: boolean;
+  /** Number of PAA questions evaluated (those carrying ≥ 1 content token). */
+  readonly total: number;
+  /** PAA questions covered by ≥ 1 generated Q&A. */
+  readonly matched: number;
+  /** matched / total × 100 (rounded). 100 when nothing to evaluate. */
+  readonly coveragePct: number;
+  /** PAA questions left uncovered (capped for logging). */
+  readonly uncovered: readonly string[];
+}
+
+/**
+ * FR + EN stopwords stripped before token-overlap matching. Kept short and
+ * high-frequency — the goal is to leave the *content* words (subject of the
+ * question) so a soft overlap match is meaningful.
+ */
+const PAA_STOPWORDS: ReadonlySet<string> = new Set([
+  // fr
+  'le',
+  'la',
+  'les',
+  'un',
+  'une',
+  'des',
+  'de',
+  'du',
+  'dans',
+  'et',
+  'ou',
+  'à',
+  'au',
+  'aux',
+  'en',
+  'est',
+  'sont',
+  'que',
+  'qui',
+  'quoi',
+  'quel',
+  'quelle',
+  'quels',
+  'quelles',
+  'quand',
+  'comment',
+  'combien',
+  'pourquoi',
+  'où',
+  'ce',
+  'cet',
+  'cette',
+  'ces',
+  'son',
+  'sa',
+  'ses',
+  'leur',
+  'leurs',
+  'pour',
+  'par',
+  'sur',
+  'avec',
+  'sans',
+  'plus',
+  'moins',
+  'peut',
+  'on',
+  'y',
+  'il',
+  'elle',
+  'ils',
+  'elles',
+  'vous',
+  'nous',
+  'se',
+  'ne',
+  'pas',
+  'faut',
+  'faire',
+  'y-a-t-il',
+  'y-a',
+  'a-t-il',
+  // en
+  'the',
+  'a',
+  'an',
+  'of',
+  'in',
+  'on',
+  'at',
+  'to',
+  'for',
+  'and',
+  'or',
+  'is',
+  'are',
+  'do',
+  'does',
+  'can',
+  'what',
+  'which',
+  'who',
+  'whom',
+  'when',
+  'how',
+  'many',
+  'much',
+  'why',
+  'where',
+  'this',
+  'that',
+  'these',
+  'those',
+  'with',
+  'without',
+  'their',
+  'its',
+  'you',
+  'we',
+  'it',
+  'they',
+  'there',
+  'near',
+  'best',
+  'good',
+]);
+
+function paaContentTokens(s: string): string[] {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(' ')
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 3 && !PAA_STOPWORDS.has(t));
+}
+
+/**
+ * Evaluate how well the generated FAQ + concierge Q&A cover the REAL
+ * People-Also-Ask demand pulled from DataForSEO.
+ *
+ * Soft matching: a PAA question is "covered" when at least
+ * `minTokenOverlap` (default 60 %) of its content tokens appear inside a
+ * single generated Q&A blob (`question_fr` + `answer_fr`). This is
+ * intentionally lenient — the gate is an observability signal logged as
+ * `dfs_paa_coverage=<pct>`, never a hard publish blocker (PO: "le moins
+ * destructif mais trace-le"). Skill: keyword-grounding-dataforseo §FAQ kit.
+ */
+export function evaluatePaaCoverage(
+  faqBlobs: readonly string[],
+  peopleAlsoAsk: readonly string[],
+  options: { readonly minTokenOverlap?: number; readonly maxUncovered?: number } = {},
+): PaaCoverageResult {
+  if (peopleAlsoAsk.length === 0) {
+    return { grounded: false, total: 0, matched: 0, coveragePct: 100, uncovered: [] };
+  }
+  const threshold = options.minTokenOverlap ?? 0.6;
+  const maxUncovered = options.maxUncovered ?? 8;
+  const haystacks = faqBlobs.map((t) => new Set(paaContentTokens(t)));
+
+  let total = 0;
+  let matched = 0;
+  const uncovered: string[] = [];
+  for (const paa of peopleAlsoAsk) {
+    const tokens = paaContentTokens(paa);
+    if (tokens.length === 0) continue;
+    total += 1;
+    const need = Math.max(1, Math.ceil(tokens.length * threshold));
+    const covered = haystacks.some((hs) => {
+      let hit = 0;
+      for (const tok of tokens) if (hs.has(tok)) hit += 1;
+      return hit >= need;
+    });
+    if (covered) matched += 1;
+    else if (uncovered.length < maxUncovered) uncovered.push(paa);
+  }
+
+  const coveragePct = total === 0 ? 100 : Math.round((matched / total) * 100);
+  return { grounded: true, total, matched, coveragePct, uncovered };
+}

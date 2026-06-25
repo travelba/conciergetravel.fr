@@ -1,0 +1,83 @@
+---
+description: Directive PO permanente — toute création de contenu/fiche (FAQ, descriptions, meta, GEO/AEO, factual-summary, premium, rankings) DOIT charger un grounding DataForSEO (mots-clés, volume, intent, People-Also-Ask) et vérifier la couverture PAA/intent avant persistance. Liste les pipelines déjà câblés et ceux qui restent à câbler.
+alwaysApply: true
+---
+
+# Ancrage DataForSEO du contenu — MyConciergeHotel.com (règle PO, 2026-06-25)
+
+> **Décision PO (permanente, prioritaire)** : « Attention toute la création de
+> contenu ou de fiche doit être check par data seo. »
+
+Autrement dit : **TOUTE** génération de contenu user-facing (FAQ, descriptions,
+meta, blocs GEO/AEO, factual summary, sections premium, rankings, guides, lieux)
+doit être **ancrée sur la demande réelle** via DataForSEO (mots-clés + volume,
+search intent, **People-Also-Ask**) **ET** vérifiée contre ces données avant
+écriture en base. On répond aux questions que les gens tapent réellement, jamais
+à des questions inventées par le LLM.
+
+## La règle
+
+Sur **tout** pipeline qui génère ou régénère du contenu éditorial, l'agent
+**doit** :
+
+1. **Charger un grounding DataForSEO AVANT l'appel LLM** — via
+   `groundHotel(cfg, hotelLlmInput)` (hôtels) ou `groundKeywords(cfg, seeds,
+   locale)` (rankings/guides/lieux). Réutilise le **cache disque
+   `data/dfs-cache/`** : zéro dépense API supplémentaire si l'entité a déjà été
+   grounded. `loadDfsConfig()` renvoie la config (ou `null` si DFS off).
+2. **Injecter le bloc dans le prompt** sous une section explicite
+   (`### Ancrage SEO/GEO (DataForSEO)`) via `renderGroundingForPrompt(grounding)`,
+   pour que le LLM couvre **en priorité** les PAA + mots-clés à fort volume.
+   Instruire le LLM de **sélectionner** les PAA pertinents et d'**ignorer** le
+   bruit (people/célébrité/biographie) — voir `keyword-grounding-dataforseo`
+   §Rule 2. Ne JAMAIS fabriquer un fait pour matcher un mot-clé.
+3. **Dégrader proprement** — DFS est un *enhancer*, jamais une dépendance dure.
+   Si `loadDfsConfig() === null` ou si le grounding échoue, le pipeline continue
+   en LLM-only et logue `grounding=off`. Le build éditorial Vercel tourne DFS
+   off : il ne doit jamais casser. Chaque runner expose un flag
+   `--grounded`/`--no-grounding` (défaut ON).
+4. **Vérifier la couverture PAA APRÈS génération, AVANT persistance** — calculer
+   le % de PAA réels couverts par le contenu généré (matching souple par
+   mots-clés) et le tracer (`dfs_paa_coverage=<pct>`). Comportement **le moins
+   destructif mais tracé** : logue un warning structuré quand la couverture est
+   basse ; ne bloque pas la persistance sur ce seul critère (sauf décision
+   explicite). Le gate `hasLeak()` anti-scaffolding reste **inchangé** et
+   prioritaire.
+5. **Logger `grounding=on/off` par entité** dans le runlog + la ligne par fiche.
+
+## État des pipelines (source de vérité du câblage)
+
+| Surface / pipeline | Générateur | Grounding | Gate couverture PAA |
+| --- | --- | --- | --- |
+| `factual_summary_{fr,en}` | `hotels/factual-summary-generator.ts` | ✅ `groundHotel` (`options.groundingBlock`) | implicite (phrasing fort volume) |
+| `meta_desc_{fr,en}` | `hotels/meta-desc-generator.ts` | ✅ `groundHotel` | implicite |
+| `highlights` / contexte | `hotels/geo-context-generator.ts` | ✅ `groundHotel` | implicite |
+| `geo_qa` | `hotels/geo-qa-generator.ts` | ✅ **requiert** PAA (skip si zéro) | structurel (PAA-anchored) |
+| `long_description_sections` | `enrichment/enrich-hotel-content.ts` | ✅ `groundHotel` (8th wave) | non |
+| **`faq_content_kit` / `faq_content` / `concierge_questions`** | `hotels/run-faq-perplexity-batch.ts` | ✅ **`groundHotel` (2026-06-25)** | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>`** |
+| Rankings FAQ (curated) | `rankings/enrich-ranking-faq-grounded.ts` | ✅ `groundKeywords` | log PAA count |
+| Rankings v2 (sections + FAQ + meta) | `rankings/generate-ranking-v2.ts` | ✅ `groundKeywords` | non |
+| Lieux / POI éditorial | `places/enrich-places-editorial.ts` | ✅ `groundKeywords` | non |
+| `premium-section-generator.ts` | premium sections | ✅ `groundHotel` | non |
+
+### Reste à câbler / renforcer (backlog)
+
+- Étendre le gate `evaluatePaaCoverage` (matching souple, `data seo` check)
+  au-delà de la FAQ kit vers `long_description_sections`, rankings v2 et lieux
+  (aujourd'hui grounded à l'entrée mais sans vérification de couverture en
+  sortie).
+- Tout **nouveau** pipeline de contenu démarre **grounded par défaut** — ne pas
+  livrer un générateur LLM-only sans `groundHotel`/`groundKeywords` + le flag
+  `--no-grounding` de secours.
+
+## Références
+
+- Skill `.cursor/skills/keyword-grounding-dataforseo/SKILL.md` — implémentation,
+  inject pattern, quirks DFS Labs, §FAQ kit grounding (gate de couverture PAA).
+- Skill `.cursor/skills/hotel-faq-perplexity-enrichment/SKILL.md` — pipeline FAQ
+  que ce grounding ancre.
+- Code : `scripts/editorial-pilot/src/grounding/` (`env-dfs.ts`,
+  `keyword-grounding.ts`, `hotel-grounding.ts`) +
+  `packages/integrations/src/dataforseo/`.
+- Gate : `scripts/editorial-pilot/src/hotels/faq-perplexity-gates.ts`
+  (`evaluatePaaCoverage`).

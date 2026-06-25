@@ -75,13 +75,14 @@ primary francophone audience). It returns `{ grounding, block, locale }`.
 
 Wired into every hotel generator (all degrade-safe — empty block when DFS off):
 
-| Surface                   | Generator                                                 | Runner                                | DFS aspect                               |
-| ------------------------- | --------------------------------------------------------- | ------------------------------------- | ---------------------------------------- |
-| `factual_summary_{fr,en}` | `factual-summary-generator.ts` (`options.groundingBlock`) | `run-hotel-factual-summary.ts`        | B — high-volume phrasing                 |
-| `meta_desc_{fr,en}`       | `meta-desc-generator.ts` (`options.groundingBlock`)       | `run-hotel-meta-desc.ts`              | B — SERP CTR phrasing                    |
-| `highlights`              | `geo-context-generator.ts` (`options.groundingBlock`)     | (geo-context runner)                  | B — demand-aligned labels                |
-| **`geo_qa`** (NEW)        | `geo-qa-generator.ts`                                     | `run-hotel-geo-qa.ts`                 | A + C — PAA-anchored answer-engine block |
-| `faq_content*`            | Perplexity research template `{{REAL_QUERIES_PAA}}`       | paste from `print-hotel-grounding.ts` | A — PAA-prioritised research             |
+| Surface                                 | Generator                                                                            | Runner                                | DFS aspect                                        |
+| --------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------------------- |
+| `factual_summary_{fr,en}`               | `factual-summary-generator.ts` (`options.groundingBlock`)                            | `run-hotel-factual-summary.ts`        | B — high-volume phrasing                          |
+| `meta_desc_{fr,en}`                     | `meta-desc-generator.ts` (`options.groundingBlock`)                                  | `run-hotel-meta-desc.ts`              | B — SERP CTR phrasing                             |
+| `highlights`                            | `geo-context-generator.ts` (`options.groundingBlock`)                                | (geo-context runner)                  | B — demand-aligned labels                         |
+| **`geo_qa`** (NEW)                      | `geo-qa-generator.ts`                                                                | `run-hotel-geo-qa.ts`                 | A + C — PAA-anchored answer-engine block          |
+| **`faq_content_kit*`** (NEW 2026-06-25) | `run-faq-perplexity-batch.ts` (`groundHotel` → prompt block + `evaluatePaaCoverage`) | `run-faq-perplexity-batch.ts`         | A — PAA-prioritised kit + `dfs_paa_coverage` gate |
+| `faq_content*` (curated)                | Perplexity research template `{{REAL_QUERIES_PAA}}`                                  | paste from `print-hotel-grounding.ts` | A — PAA-prioritised research                      |
 
 ## Rule 7 — geo_qa REQUIRES grounding + never leaks the source
 
@@ -113,6 +114,62 @@ Validation that works:
 run-hotel-geo-qa --slug=<x> --dry-run   # inspect entries in runs/geo-qa-dry-*.json
 run-hotel-geo-qa --slug=<x>             # live write
 # walk /fr|/en/hotel/<x> → section [data-geo="hotel-qa"] renders FR+EN
+```
+
+## FAQ kit grounding (Perplexity two-tier kit) — wired 2026-06-25
+
+The catalogue-wide Perplexity FAQ kit
+(`scripts/editorial-pilot/src/hotels/run-faq-perplexity-batch.ts`) is now
+DataForSEO-grounded, closing the gap flagged by the PO directive ("toute la
+création de contenu ou de fiche doit être check par data seo"). The voisin
+reference is `rankings/enrich-ranking-faq-grounded.ts`.
+
+**Inject (step 0, before Perplexity):**
+
+```typescript
+const dfsCfg = args.grounded ? loadDfsConfig() : null; // null → degrade-safe
+const { block, grounding } = await groundHotel(dfsCfg, toHotelLlmInput(hotel));
+// buildUserPrompt(hotel, block) appends the block under
+// "### Ancrage SEO/GEO (DataForSEO)" so the ~40 long-tail FAQ track real PAA.
+```
+
+- The `CandidateHotel` row (id/slug/name/city/region/country_code) is projected
+  to `HotelLlmInput` via `toHotelLlmInput` — `groundHotel` only reads
+  `name`/`name_en`/`city`/`country_code` for seed + locale derivation, the rest
+  are null.
+- Disk cache (`data/dfs-cache/`) is shared with every other hotel generator, so
+  a fiche already grounded for `meta_desc`/`geo_qa` costs **zero** extra DFS
+  calls here.
+- `--grounded` (default ON) / `--no-grounding`. Per-fiche log:
+  `grounding=on dfs_paa_coverage=70%(10PAA)`; runlog summary carries
+  `grounded` + `avgPaaCoverage`.
+
+**Verify (post-generation, before DB write) — `evaluatePaaCoverage`:**
+
+`faq-perplexity-gates.ts` exports `evaluatePaaCoverage(faqBlobs, peopleAlsoAsk)`.
+It computes the % of real PAA covered by the generated kit + concierge Q&A via
+**soft token-overlap matching** (≥ 60 % of a PAA's content tokens — FR+EN
+stopwords stripped — found inside a single Q&A blob). It returns
+`{ grounded, total, matched, coveragePct, uncovered }`.
+
+- **Non-blocking by design** (PO: "le moins destructif mais trace-le"): low
+  coverage logs `⚠ dfs_paa_coverage=<pct>% (matched/total)` + the uncovered
+  PAA, but never fails the push. The existing `hasLeak()` anti-scaffolding gate
+  and the canonical-coverage gate are untouched and stay the hard blockers.
+- `coveragePct` is `null` when not grounded (DFS off / zero PAA) — no false
+  warning.
+
+> ⚠ **PAA strings carry no per-question volume.** DataForSEO `peopleAlsoAsk`
+> is a deduped string array, not `{question, volume}`. "PAA à fort volume"
+> therefore means _the PAA set DFS returned for the seed_ (already SERP-ranked
+> by relevance); don't try to weight by volume per question — that signal does
+> not exist in the SERP-questions endpoint.
+
+Validation that works (real Perplexity + cached DFS, FR-only to skip OpenAI):
+
+```
+run-faq-perplexity-batch --slugs=les-airelles-gordes --dry-run --skip-en --grounded
+# → ✓ les-airelles-gordes kit=49 concierge=26 promote=15 grounding=on dfs_paa_coverage=70%(10PAA)
 ```
 
 ## Rule 1 — Grounding is OPTIONAL and degrade-safe, never a hard dependency

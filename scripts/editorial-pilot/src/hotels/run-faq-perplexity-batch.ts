@@ -3,12 +3,19 @@
  *
  * Closes the catalogue-wide gap (audit 2026-06-25: only 8/2985 published
  * fiches carry the two-tier Perplexity kit). For each candidate hotel it:
+ *   0. grounds on REAL search demand via DataForSEO (`groundHotel`, disk-cached
+ *      `data/dfs-cache/` — zero extra API spend if already grounded) and injects
+ *      the People-Also-Ask + top keywords block into the Perplexity prompt under
+ *      a "### Ancrage SEO/GEO (DataForSEO)" section (PO directive: toute création
+ *      de contenu doit être ancrée/checked par data seo). Degrade-safe: when DFS
+ *      is off the block is '' and grounding=off is logged (generation proceeds);
  *   1. generates the FR factual kit (40–60) + concierge Q&A (20–30) via the
  *      Perplexity API (sonar, web-grounded, JSON-schema structured output);
  *   2. translates each item to EN (gpt-4o-mini, faithful, informative tone);
  *   3. transforms → kit / promote (10 CDC canonical) / concierge payloads;
- *   4. runs the coverage + row-enrichment gates and the shared `hasLeak()`
- *      anti-scaffolding gate on every generated string;
+ *   4. runs the coverage + row-enrichment gates, the shared `hasLeak()`
+ *      anti-scaffolding gate on every generated string, AND a soft DataForSEO
+ *      PAA-coverage check logged as `dfs_paa_coverage=<pct>` (non-blocking);
  *   5. pushes `faq_content_kit` + `faq_content` + `concierge_questions` to
  *      Supabase via PostgREST (service-role).
  *
@@ -29,6 +36,8 @@
  *   --slugs=a,b,c                     explicit slug list (overrides segment)
  *   --dry-run                         generate + gate, do NOT write DB
  *   --skip-en                         FR-only push (EN parity left to follow-up)
+ *   --grounded                        ground on DataForSEO PAA/keywords (DEFAULT ON)
+ *   --no-grounding                    disable DataForSEO grounding (LLM-only)
  *   --shards=M --shard=N              parallel-worker partition (anti-collision):
  *                                     rank ALL published slugs sorted ASC; this
  *                                     worker owns only `rank % M === N` (0-based).
@@ -45,7 +54,8 @@
  *   pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-faq-perplexity-batch.ts -- --segment=netnew --limit=1 --dry-run
  *   pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-faq-perplexity-batch.ts -- --segment=netnew --limit=120 --concurrency=4
  *
- * Skill: hotel-faq-perplexity-enrichment, llm-output-robustness, geo-llm-optimization.
+ * Skill: hotel-faq-perplexity-enrichment, keyword-grounding-dataforseo,
+ *        llm-output-robustness, geo-llm-optimization.
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -56,11 +66,16 @@ import { config as loadDotenv } from 'dotenv';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
+import type { DataForSeoClientConfig } from '@mch/integrations/dataforseo';
+
 import { hasLeak } from '../enrichment/scaffolding-gate.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import { groundHotel } from '../grounding/hotel-grounding.js';
 import { patchHotelById, selectHotels, type SupabaseRestConfig } from '../photos/supabase-rest.js';
 import { CANONICAL_FAQ_QUESTIONS } from './canonical-faq-questions.js';
-import { evaluateFaqKitCoverage } from './faq-perplexity-gates.js';
+import { evaluateFaqKitCoverage, evaluatePaaCoverage } from './faq-perplexity-gates.js';
 import { evaluateFaqKitRowEnrichment } from './faq-kit-row-enrichment.js';
+import type { HotelLlmInput } from './supabase-hotels.js';
 import {
   CONCIERGE_CATEGORY_EN,
   CONCIERGE_QUESTION_CATEGORIES_FR,
@@ -217,14 +232,14 @@ function buildSystemPrompt(): string {
   ].join('\n');
 }
 
-function buildUserPrompt(hotel: CandidateHotel): string {
+function buildUserPrompt(hotel: CandidateHotel, groundingBlock = ''): string {
   const loc = [hotel.city, hotel.region, hotel.country_code]
     .filter((s) => s && s.length > 0)
     .join(', ');
   const canonicalVerbatim = CANONICAL_FAQ_QUESTIONS.map(
     (q) => `« ${q.question_fr.replaceAll('{{name}}', hotel.name)} »`,
   );
-  return [
+  const lines: string[] = [
     `Hôtel : « ${hotel.name} »${loc.length > 0 ? ` à ${loc}` : ''}.`,
     '',
     '1) "faq" : EXACTEMENT 50 questions FACTUELLES (jamais moins de 48) qu’un client se pose avant et pendant son séjour.',
@@ -238,9 +253,52 @@ function buildUserPrompt(hotel: CandidateHotel): string {
     `   Catégories (libellés exacts) : ${CONCIERGE_QUESTION_CATEGORIES_FR.join(', ')}.`,
     '   Réponses CONCISES : 1 à 2 phrases, ≤ 45 mots.',
     '   TON INFORMATIF OBLIGATOIRE : ne JAMAIS commencer une réponse par « Je », « J’ », « Nous » ou « On ». Commence par le fait/sujet : « La conciergerie peut… », « Il est recommandé de… », « Les réservations s’effectuent… ».',
-    '',
-    'Renvoie UNIQUEMENT le JSON { "faq": [...], "concierge_questions": [...] }.',
-  ].join('\n');
+  ];
+  // Anchor the generated questions on REAL search demand (PO directive — toute
+  // création de contenu doit être ancrée/checked par DataForSEO). The block is
+  // empty when DFS is off, so the prompt degrades cleanly to LLM-only.
+  if (groundingBlock.trim().length > 0) {
+    lines.push(
+      '',
+      '### Ancrage SEO/GEO (DataForSEO)',
+      'COUVRE EN PRIORITÉ la demande réelle ci-dessous : les People-Also-Ask de « hôtel <ville> » et « ' +
+        hotel.name +
+        ' avis/prix/petit-déjeuner ». Reformule les ~40 variations longue traîne pour matcher ces questions réelles quand le sujet recoupe une catégorie, sans inventer aucun fait ni copier un mot-clé hors-sujet (people/célébrité/biographie).',
+      '',
+      groundingBlock,
+    );
+  }
+  lines.push('', 'Renvoie UNIQUEMENT le JSON { "faq": [...], "concierge_questions": [...] }.');
+  return lines.join('\n');
+}
+
+/**
+ * Project the lightweight FAQ candidate row into the `HotelLlmInput` shape that
+ * `groundHotel` consumes. Only `name` / `name_en` / `city` / `country_code` are
+ * read for seed + locale derivation; the rest are null (the grounding layer
+ * does not use them).
+ */
+function toHotelLlmInput(hotel: CandidateHotel): HotelLlmInput {
+  return {
+    slug: hotel.slug,
+    name: hotel.name,
+    name_en: null,
+    city: hotel.city,
+    district: null,
+    country_code: hotel.country_code,
+    country_label_fr: null,
+    country_label_en: null,
+    stars: null,
+    is_palace: null,
+    description_fr_excerpt: null,
+    description_en_excerpt: null,
+    points_of_interest: null,
+    restaurant_info: null,
+    spa_info: null,
+    amenities: null,
+    signature_experiences: null,
+    awards: null,
+  };
 }
 
 interface PerplexityUsage {
@@ -344,6 +402,7 @@ async function generateFaqFr(
   client: OpenAI,
   model: string,
   hotel: CandidateHotel,
+  groundingBlock: string,
 ): Promise<PerplexityResult> {
   const res = await withTimeout(
     client.chat.completions.create({
@@ -354,7 +413,7 @@ async function generateFaqFr(
       max_tokens: 16000,
       messages: [
         { role: 'system', content: buildSystemPrompt() },
-        { role: 'user', content: buildUserPrompt(hotel) },
+        { role: 'user', content: buildUserPrompt(hotel, groundingBlock) },
       ],
       // Perplexity-specific structured-output passthrough (OpenAI-compatible API).
       response_format: {
@@ -557,6 +616,12 @@ interface FicheResult {
   readonly enCostUsd: number;
   readonly skipped: boolean;
   readonly reason?: string;
+  /** DataForSEO grounding active (PAA injected) for this fiche. */
+  readonly grounded: boolean;
+  /** % of real PAA covered by the generated FAQ kit; null when not grounded. */
+  readonly dfsPaaCoverage: number | null;
+  /** Number of PAA questions pulled from DataForSEO for this fiche. */
+  readonly dfsPaaCount: number;
 }
 
 function isFactualCategory(v: string): v is FaqFactualCategoryFr {
@@ -646,10 +711,31 @@ async function processFiche(
   model: string,
   hotel: CandidateHotel,
   cfg: SupabaseRestConfig,
-  opts: { readonly dryRun: boolean; readonly skipEn: boolean },
+  dfsCfg: DataForSeoClientConfig | null,
+  opts: { readonly dryRun: boolean; readonly skipEn: boolean; readonly grounded: boolean },
 ): Promise<FicheResult> {
   let perplexityCostUsd = 0;
   let enCostUsd = 0;
+
+  // 0. DataForSEO grounding (PO directive — toute création de contenu doit être
+  //    ancrée/checked par data seo). Disk-cached (`data/dfs-cache/`): zero extra
+  //    API spend if the hotel was already grounded. Degrade-safe: `groundHotel`
+  //    never throws; when DFS is off the block is '' and we mark grounding=off.
+  let groundingBlock = '';
+  let dfsPaa: readonly string[] = [];
+  let grounded = false;
+  if (opts.grounded) {
+    try {
+      const g = await groundHotel(dfsCfg, toHotelLlmInput(hotel));
+      groundingBlock = g.block;
+      dfsPaa = g.grounding.peopleAlsoAsk;
+      grounded = g.grounding.grounded && dfsPaa.length > 0;
+    } catch (err: unknown) {
+      console.warn(
+        `  [grounding] ${hotel.slug}: failed (degrading to LLM-only) — ${err instanceof Error ? err.message.slice(0, 100) : String(err)}`,
+      );
+    }
+  }
 
   // 1. Generate FR + validate coverage (incl. promote.canonical) IN the loop,
   //    so a thin output or a canonical gap is retried cheaply BEFORE the EN
@@ -660,7 +746,7 @@ async function processFiche(
   let lastErr = '';
   for (let attempt = 0; attempt < 3 && !accepted; attempt += 1) {
     try {
-      const gen = await generateFaqFr(perplexity, model, hotel);
+      const gen = await generateFaqFr(perplexity, model, hotel, groundingBlock);
       perplexityCostUsd += gen.costUsd;
       const payloads = buildFrPayloads(gen.research);
       const promoteFr = selectPromoteSubset(payloads.kit, { hotelName: hotel.name });
@@ -697,7 +783,29 @@ async function processFiche(
       enCostUsd,
       skipped: true,
       reason: `not accepted${lastErr ? ` — ${lastErr}` : ''}`,
+      grounded,
+      dfsPaaCoverage: null,
+      dfsPaaCount: dfsPaa.length,
     };
+  }
+
+  // 1bis. DATA-SEO VERIFICATION GATE — does the generated kit cover the REAL
+  //       PAA demand? Soft, non-blocking (PO: "le moins destructif mais
+  //       trace-le"). The shared hasLeak() gate above stays untouched.
+  const paaCoverage = evaluatePaaCoverage(
+    [
+      ...kit.map((i) => `${i.question_fr} ${i.answer_fr}`),
+      ...concierge.map((i) => `${i.question_fr} ${i.reply_fr}`),
+    ],
+    dfsPaa,
+  );
+  const dfsPaaCoverage = paaCoverage.grounded ? paaCoverage.coveragePct : null;
+  if (paaCoverage.grounded && paaCoverage.coveragePct < 50) {
+    console.warn(
+      `  ⚠ [${hotel.slug}] dfs_paa_coverage=${paaCoverage.coveragePct}% ` +
+        `(${paaCoverage.matched}/${paaCoverage.total} PAA matched) — uncovered: ` +
+        `${paaCoverage.uncovered.slice(0, 4).join(' | ')}`,
+    );
   }
 
   // 2. EN translation (faithful, informative).
@@ -736,6 +844,9 @@ async function processFiche(
       enCostUsd,
       skipped: true,
       reason: `row gate: ${fatal.map((i) => i.code).join(',')}`,
+      grounded,
+      dfsPaaCoverage,
+      dfsPaaCount: dfsPaa.length,
     };
   }
 
@@ -762,6 +873,9 @@ async function processFiche(
     perplexityCostUsd,
     enCostUsd,
     skipped: false,
+    grounded,
+    dfsPaaCoverage,
+    dfsPaaCount: dfsPaa.length,
   };
 }
 
@@ -905,6 +1019,7 @@ interface CliArgs {
   readonly slugs: readonly string[];
   readonly dryRun: boolean;
   readonly skipEn: boolean;
+  readonly grounded: boolean;
   readonly shard: number;
   readonly shards: number;
 }
@@ -917,11 +1032,16 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let slugs: string[] = [];
   let dryRun = false;
   let skipEn = false;
+  // DataForSEO grounding is ON by default (PO directive). Disable with
+  // `--no-grounding` or `--grounded=false`.
+  let grounded = true;
   let shard = 0;
   let shards = 1;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--skip-en') skipEn = true;
+    else if (a === '--no-grounding' || a === '--grounded=false') grounded = false;
+    else if (a === '--grounded' || a === '--grounded=true') grounded = true;
     else if (a.startsWith('--segment=')) {
       const s = a.slice('--segment='.length);
       if (s === 'netnew' || s === 'heads' || s === 'rest' || s === 'all') segment = s;
@@ -948,7 +1068,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     }
   }
   if (shard >= shards) shard = 0;
-  return { segment, limit, concurrency, model, slugs, dryRun, skipEn, shard, shards };
+  return { segment, limit, concurrency, model, slugs, dryRun, skipEn, grounded, shard, shards };
 }
 
 /**
@@ -997,9 +1117,23 @@ async function main(): Promise<void> {
   const perplexity = new OpenAI({ apiKey: perplexityKey, baseURL: PERPLEXITY_BASE_URL });
   const openai = new OpenAI({ apiKey: openaiKey });
 
+  // DataForSEO grounding (PO directive — toute création de contenu doit être
+  // ancrée/checked par data seo). Null when DFS off/unconfigured → degrade-safe.
+  const dfsCfg = args.grounded ? loadDfsConfig() : null;
+  const dfsState = !args.grounded
+    ? 'off (--no-grounding)'
+    : dfsCfg === null
+      ? 'off (unconfigured)'
+      : 'on';
+
   console.log(
-    `[faq-batch] segment=${args.segment} limit=${args.limit} concurrency=${args.concurrency} model=${args.model} dryRun=${args.dryRun} skipEn=${args.skipEn} shard=${args.shard}/${args.shards}`,
+    `[faq-batch] segment=${args.segment} limit=${args.limit} concurrency=${args.concurrency} model=${args.model} dryRun=${args.dryRun} skipEn=${args.skipEn} grounding=${dfsState} shard=${args.shard}/${args.shards}`,
   );
+  if (args.grounded && dfsCfg === null) {
+    console.warn(
+      '[faq-batch] ⚠ DataForSEO OFF/unconfigured — FAQ will generate WITHOUT real PAA grounding. Set DATAFORSEO_ENABLED/USERNAME/PASSWORD in .env.local to anchor on real demand.',
+    );
+  }
 
   const shardSet =
     args.shards > 1 && args.slugs.length === 0
@@ -1026,13 +1160,19 @@ async function main(): Promise<void> {
   const results = await runWithConcurrency(candidates, args.concurrency, async (hotel) => {
     const tf = Date.now();
     try {
-      const r = await processFiche(perplexity, openai, args.model, hotel, cfg, {
+      const r = await processFiche(perplexity, openai, args.model, hotel, cfg, dfsCfg, {
         dryRun: args.dryRun,
         skipEn: args.skipEn,
+        grounded: args.grounded,
       });
+      const groundingTag =
+        `grounding=${r.grounded ? 'on' : 'off'}` +
+        (r.dfsPaaCoverage !== null
+          ? ` dfs_paa_coverage=${r.dfsPaaCoverage}%(${r.dfsPaaCount}PAA)`
+          : '');
       console.log(
         `  ${r.ok ? '✓' : '✗'} ${r.slug} kit=${r.kit} concierge=${r.concierge} promote=${r.promote} ` +
-          `pplx=$${r.perplexityCostUsd.toFixed(4)} en=$${r.enCostUsd.toFixed(4)} (${((Date.now() - tf) / 1000).toFixed(1)}s)` +
+          `${groundingTag} pplx=$${r.perplexityCostUsd.toFixed(4)} en=$${r.enCostUsd.toFixed(4)} (${((Date.now() - tf) / 1000).toFixed(1)}s)` +
           (r.ok ? '' : ` — ${r.reason ?? ''}`),
       );
       return r;
@@ -1049,6 +1189,9 @@ async function main(): Promise<void> {
         enCostUsd: 0,
         skipped: true,
         reason,
+        grounded: false,
+        dfsPaaCoverage: null,
+        dfsPaaCount: 0,
       };
       return failed;
     }
@@ -1058,6 +1201,13 @@ async function main(): Promise<void> {
   const perplexityCost = results.reduce((s, r) => s + r.perplexityCostUsd, 0);
   const enCost = results.reduce((s, r) => s + r.enCostUsd, 0);
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+
+  const groundedResults = results.filter((r) => r.grounded && r.dfsPaaCoverage !== null);
+  const groundedCount = groundedResults.length;
+  const avgPaaCoverage =
+    groundedCount > 0
+      ? Math.round(groundedResults.reduce((s, r) => s + (r.dfsPaaCoverage ?? 0), 0) / groundedCount)
+      : null;
 
   const RUNLOG_DIR = resolve(__dirname, '../../runs/faq-perplexity');
   mkdirSync(RUNLOG_DIR, { recursive: true });
@@ -1073,6 +1223,8 @@ async function main(): Promise<void> {
           attempted: results.length,
           enriched: ok.length,
           failed: results.length - ok.length,
+          grounded: groundedCount,
+          avgPaaCoverage,
           perplexityCallsUsd: Number(perplexityCost.toFixed(4)),
           enCostUsd: Number(enCost.toFixed(4)),
           totalUsd: Number((perplexityCost + enCost).toFixed(4)),
@@ -1088,6 +1240,7 @@ async function main(): Promise<void> {
   console.log('');
   console.log(
     `[faq-batch] DONE enriched=${ok.length}/${results.length} ` +
+      `grounded=${groundedCount}${avgPaaCoverage !== null ? ` avg_dfs_paa_coverage=${avgPaaCoverage}%` : ''} ` +
       `cost: perplexity=$${perplexityCost.toFixed(4)} en=$${enCost.toFixed(4)} total=$${(perplexityCost + enCost).toFixed(4)} ` +
       `elapsed=${elapsed}s`,
   );
