@@ -260,6 +260,41 @@ const HOTEL_DESC_RE =
   /h[oô]tel|palace|h[ée]bergement|building|b[aâ]timent|hostellerie|auberge|relais|ch[aâ]teau|villa|resort/iu;
 
 /**
+ * Generic accommodation tokens that carry NO disambiguating power — a match
+ * on these alone (e.g. "Grand Hôtel" for "Grand Hôtel du Soleil d'Or") is a
+ * false positive. Used by `nameCorroborates`.
+ */
+const GENERIC_NAME_TOKEN_RE =
+  /^(?:h[oô]tel|hotels?|le|la|les|the|and|de|du|des|spa|grand|palace|resort|resorts|chalet|maison|villa|relais|ch[aâ]teau|auberge|hostellerie|collection|saint|mont)$/u;
+
+function distinctiveTokens(name: string): ReadonlySet<string> {
+  return new Set(
+    name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/gu, '')
+      .toLowerCase()
+      .split(/[^a-z0-9]+/u)
+      .filter((t) => t.length > 3 && !GENERIC_NAME_TOKEN_RE.test(t)),
+  );
+}
+
+/**
+ * Strict entity-name corroboration (2026-06-25): the scorer happily accepts
+ * a same-category entity whose label only shares GENERIC tokens with the
+ * hotel — "Chalet des Roses" matched "Chalet des Planes", "Grand Hôtel"
+ * (Stockholm) matched "Grand Hôtel du Soleil d'Or" (Megève). Require that the
+ * Wikidata label and the hotel name share at least one DISTINCTIVE token.
+ * Returns false when the hotel name is all-generic (cannot corroborate).
+ */
+function nameCorroborates(hotelName: string, label: string): boolean {
+  const h = distinctiveTokens(hotelName);
+  if (h.size === 0) return false;
+  const l = distinctiveTokens(label);
+  for (const tok of h) if (l.has(tok)) return true;
+  return false;
+}
+
+/**
  * Score a candidate against the hotel name + city.
  *  - +10  description looks like an accommodation
  *  - +5   label matches a significant token of the name
@@ -344,6 +379,7 @@ async function main(): Promise<void> {
         // editor-pinned / previously-validated `wikidata_id` is trusted as-is.
         const isNewMatch = hotel.wikidata_id === null;
         let matchedDesc: string | null = null;
+        let matchedLabel: string | null = null;
         if (qid === null) {
           const found = await findHotelMulti(hotel.name, hotel.city);
           if (found === null) {
@@ -355,6 +391,7 @@ async function main(): Promise<void> {
           }
           qid = found.qid;
           matchedDesc = found.description;
+          matchedLabel = found.label;
           console.log(
             `${tag} → matched ${qid} ("${found.label}" — ${found.description ?? 'no desc'})`,
           );
@@ -398,10 +435,17 @@ async function main(): Promise<void> {
         if (isNewMatch) {
           const descLooksLikeAccommodation =
             matchedDesc !== null && HOTEL_DESC_RE.test(matchedDesc);
-          if (!geoValidated && !descLooksLikeAccommodation) {
-            console.log(
-              `${tag} ✗ type-rejected ${qid}: not geo-validated and description "${matchedDesc ?? 'none'}" is not an accommodation`,
-            );
+          const nameOk = matchedLabel !== null && nameCorroborates(hotel.name, matchedLabel);
+          // Non-geo-validated NEW matches must clear BOTH the type guard AND
+          // the strict name-corroboration gate — a same-category entity that
+          // only shares generic tokens (Stockholm "Grand Hôtel", "Chalet des
+          // Roses") is rejected. Geo-validated matches (coords within 5 km)
+          // are trusted without the name check.
+          if (!geoValidated && !(descLooksLikeAccommodation && nameOk)) {
+            const reason = !descLooksLikeAccommodation
+              ? `description "${matchedDesc ?? 'none'}" is not an accommodation`
+              : `label "${matchedLabel ?? 'none'}" does not corroborate name "${hotel.name}"`;
+            console.log(`${tag} ✗ entity-rejected ${qid}: not geo-validated and ${reason}`);
             skipped += 1;
             continue;
           }
