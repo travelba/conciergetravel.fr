@@ -33,7 +33,12 @@
     "hubCityCta": "See places in {city}",
     "hubCount": "{count} places",
     "hubCountVisitDo": "{visit} to see · {doCount} to do",
-    "hubEmpty": "The places-to-visit catalogue is coming very soon."
+    "hubEmpty": "The places-to-visit catalogue is coming very soon.",
+    "paginationAriaLabel": "Places pagination",
+    "paginationPrevious": "Previous",
+    "paginationNext": "Next",
+    "paginationTitleSuffix": "Page {page}",
+    "paginationStatus": "Page {page} of {totalPages} · {total} places"
   },
   "common": {
     "siteName": "MyConciergeHotel",

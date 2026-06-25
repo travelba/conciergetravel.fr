@@ -54,28 +54,45 @@ const LIST_COLUMNS =
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 12;
 
-/** Published places for a city, optionally filtered by bucket. */
+/**
+ * Published places for a city, optionally filtered by bucket.
+ *
+ * Returns the *full* published set for the city (no arbitrary cap): the
+ * city `/lieux/[citySlug]` page paginates the result in memory and renders
+ * crawlable numbered pages, so every published POI is reachable by a
+ * crawler from the maillage. The old `.limit(200)` silently orphaned every
+ * POI beyond the 200th (alpha order) — Paris alone has 779 published POIs,
+ * so 579 were never linked. We page with `.range()` until exhaustion to
+ * also bypass Supabase's `db_max_rows` cap (1000) should a single city
+ * ever cross it. Ordering is stable (priority asc, name asc) so the
+ * in-memory pagination never skips or duplicates a row across pages.
+ */
 export async function listPublishedPlacesForCity(
   citySlug: string,
   bucket?: 'visit' | 'do',
 ): Promise<readonly PlaceListItem[]> {
   try {
     const supabase = getSupabaseAdminClient();
-    let q = supabase
-      .from('places')
-      .select(LIST_COLUMNS)
-      .eq('city_key', citySlug)
-      .eq('is_published', true);
-    if (bucket !== undefined) q = q.eq('bucket', bucket);
-    const { data, error } = await q
-      .order('priority', { ascending: true })
-      .order('name', { ascending: true })
-      .limit(200);
-    if (error || !Array.isArray(data)) return [];
     const out: PlaceListItem[] = [];
-    for (const raw of data) {
-      const parsed = PlaceListRowSchema.safeParse(raw);
-      if (parsed.success) out.push(parsed.data);
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const from = page * PAGE_SIZE;
+      let q = supabase
+        .from('places')
+        .select(LIST_COLUMNS)
+        .eq('city_key', citySlug)
+        .eq('is_published', true);
+      if (bucket !== undefined) q = q.eq('bucket', bucket);
+      const { data, error } = await q
+        .order('priority', { ascending: true })
+        .order('name', { ascending: true })
+        .order('slug', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const raw of data) {
+        const parsed = PlaceListRowSchema.safeParse(raw);
+        if (parsed.success) out.push(parsed.data);
+      }
+      if (data.length < PAGE_SIZE) break;
     }
     return out;
   } catch {
