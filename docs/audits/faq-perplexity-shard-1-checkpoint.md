@@ -7,12 +7,14 @@
 
 ## État (grounded run)
 
-- **shard1 : 181 / 746** fiches dotées du kit FAQ Perplexity.
+- **shard1 : 241 / 746** fiches dotées du kit FAQ Perplexity (505 restantes).
+- Vagues grounded : netnew (+53, PAA 51 %), heads #1 (+111 traitées, PAA 57 %).
 - Pipeline : **grounded DataForSEO** (commit `77d33bce`) — `grounding=on`,
-  couverture PAA moyenne ~51 % par vague (non-bloquant si PAA hors-sujet).
+  couverture PAA moyenne ~51-57 % par vague (non-bloquant si PAA hors-sujet).
 - Concurrency 3 (4 shards × 3 = 12 simultanés max, respecté).
 - Idempotent : re-skippe les fiches déjà dotées (filtre `faq_content_kit=is.null`).
-- Quota Perplexity sain (0 × `401` sur la dernière vague netnew grounded).
+- Quota Perplexity sain (0 × `401` sur les vagues grounded netnew + heads).
+- Coût Perplexity cumulé (session grounded) : ~$22,6.
 
 ## Séquence
 
@@ -24,5 +26,5 @@ Arrêt propre sur `401` quota Perplexity (termine la vague, pas de spin sur 401)
 ## Reprise
 
 ```powershell
-pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-faq-perplexity-batch.ts -- --segment=heads --shards=4 --shard=1 --grounded --limit=120 --concurrency=3
+pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-faq-perplexity-batch.ts -- --segment=rest --shards=4 --shard=1 --grounded --limit=120 --concurrency=3
 ```
