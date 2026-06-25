@@ -110,6 +110,7 @@ logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
 | -------------- | ------- | -------- | -------- | ----------- | ------------ | ---- | ------------ |
 | g1             | netnew  | 54/60    | 51       | 58 %        | 7.91         | 0.24 | 8.15         |
 | g2             | netnew  | 42/43    | 40       | 54 %        | 5.92         | 0.18 | 14.25        |
+| g3             | heads   | 58/60    | 58       | 53 %        | 7.00         | 0.25 | 21.50        |
 
 `grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
 (DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
@@ -117,7 +118,7 @@ warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
 questions) not legitimately FAQ-able for the property. 6 skips this wave
 (`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
 
-**Shard-3 counter: `shard3: 182/746`** (100 → 154 → 182; netnew segment now
-exhausted bar 1 persistent `promote.canonical` skip). Resume continues
+**Shard-3 counter: `shard3: 240/746`** (100 → 154 → 182 → 240; netnew
+exhausted, now grinding `heads` pool of 449). Resume continues
 `--segment=heads` then `--segment=rest`, all
 `--shard=3 --shards=4 --grounded --concurrency=3`.
