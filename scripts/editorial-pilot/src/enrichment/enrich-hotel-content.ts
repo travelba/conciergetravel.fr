@@ -18,6 +18,7 @@
  */
 
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
@@ -382,6 +383,19 @@ interface Args {
   readonly concurrency: number;
 }
 
+/**
+ * Reads a slug list from disk (comma- or newline-separated). Lets a large
+ * cohort run (e.g. the 685 net-new fiches, 2026-06-25) avoid a 14 KB
+ * `--slugs=` command literal that is brittle to shell quoting on Windows.
+ */
+function readSlugsFile(filePath: string): readonly string[] {
+  const raw = readFileSync(filePath, 'utf8');
+  return raw
+    .split(/[\n,]/u)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
 function parseArgs(): Args {
   const a = process.argv.slice(2);
   let slug: string | null = null;
@@ -399,6 +413,8 @@ function parseArgs(): Args {
         .split(',')
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
+    } else if (arg.startsWith('--slugs-file=')) {
+      slugs = [...slugs, ...readSlugsFile(arg.slice('--slugs-file='.length).trim())];
     } else if (arg.startsWith('--concurrency=')) {
       const n = Number.parseInt(arg.slice('--concurrency='.length), 10);
       if (Number.isFinite(n) && n >= 1 && n <= 16) concurrency = n;
