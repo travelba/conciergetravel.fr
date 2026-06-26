@@ -11,6 +11,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadDotenv } from 'dotenv';
 
+import { hasLeak } from '../enrichment/scaffolding-gate.js';
+
 import type { GeneratedRankingV2 } from './generate-ranking-v2.js';
 import type { RankingSeed } from './rankings-catalog.js';
 import type { RankingAxes } from './axes.js';
@@ -62,6 +64,54 @@ export function resolveEffectivePublish(
   floor: number = MIN_PUBLISHABLE_ENTRIES,
 ): boolean {
   return requestedPublish && entryCount >= floor;
+}
+
+/**
+ * Scaffolding leak gate (defense-in-depth at the write boundary). Mirrors the
+ * catalogue-wide hotel-fiche lesson (AGENTS waves 5/6): ANY generator writing
+ * to a public column must run the shared `hasLeak()` gate, and the publisher
+ * must refuse to publish leaked prose. The 2026-06-26 audit found 66 published
+ * rankings leaking brief/dossier scaffolding because the bulk path skipped this
+ * gate. Scans every rendered prose field (intro/outro/factual summary +
+ * section titles/bodies + FAQ Q/A) in both locales. Pure + exported for tests.
+ */
+interface RankingProse {
+  readonly intro_fr: string;
+  readonly intro_en: string;
+  readonly outro_fr: string;
+  readonly outro_en: string;
+  readonly factual_summary_fr: string;
+  readonly factual_summary_en: string;
+  readonly editorial_sections: ReadonlyArray<{
+    readonly title_fr: string;
+    readonly title_en: string;
+    readonly body_fr: string;
+    readonly body_en: string;
+  }>;
+  readonly faq: ReadonlyArray<{
+    readonly question_fr: string;
+    readonly question_en: string;
+    readonly answer_fr: string;
+    readonly answer_en: string;
+  }>;
+}
+
+export function rankingProseLeaks(ranking: RankingProse): boolean {
+  const parts: Array<string | null | undefined> = [
+    ranking.intro_fr,
+    ranking.intro_en,
+    ranking.outro_fr,
+    ranking.outro_en,
+    ranking.factual_summary_fr,
+    ranking.factual_summary_en,
+  ];
+  for (const s of ranking.editorial_sections) {
+    parts.push(s.title_fr, s.title_en, s.body_fr, s.body_en);
+  }
+  for (const f of ranking.faq) {
+    parts.push(f.question_fr, f.question_en, f.answer_fr, f.answer_en);
+  }
+  return parts.some((p) => hasLeak(p));
 }
 
 interface TocAnchor {
@@ -138,14 +188,23 @@ export async function pushRankingV2(
   // Publish gate (root-cause fix for the 2026-06-26 "0 hôtels" incident):
   // never let a thin/empty ranking go live, regardless of the caller's intent.
   const floor = resolveMinEntries();
-  const effectivePublish = resolveEffectivePublish(options.publish, ranking.entries.length, floor);
-  if (options.publish && !effectivePublish) {
+  const entryGatePublish = resolveEffectivePublish(options.publish, ranking.entries.length, floor);
+  if (options.publish && !entryGatePublish) {
     console.warn(
       `[push-ranking-v2] "${seed.slug}" has ${ranking.entries.length} entr${
         ranking.entries.length === 1 ? 'y' : 'ies'
       } (< ${floor}) — forcing is_published=false (zero/thin ranking gate).`,
     );
   }
+  // Scaffolding leak gate — never publish prose that leaks brief/dossier
+  // meta-commentary (the shared hasLeak() gate, same as hotel fiches).
+  const leaks = rankingProseLeaks(ranking);
+  if (entryGatePublish && leaks) {
+    console.warn(
+      `[push-ranking-v2] "${seed.slug}" leaks pipeline scaffolding in its prose — forcing is_published=false (leak gate).`,
+    );
+  }
+  const effectivePublish = entryGatePublish && !leaks;
   const gatedOptions = { ...options, publish: effectivePublish };
 
   // PostgREST fallback for environments where the direct `pg` connection
