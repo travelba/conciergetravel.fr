@@ -60,13 +60,22 @@ tooling) and is governed by the DataForSEO grounding hard-rule + the content
 gates. Proposed forward-only plan:
 
 1. **Unpublish the 51 zero-entry rankings** (`is_published=false`). Cleanest fix
-   — an empty ranking has no editorial value and should never be live. Mirror it
-   into `combinator.ts` (eligibility gate ≥ 3 hotels) so the next bulk run can't
-   re-publish them. Same approach as the prior 13-slug unpublish.
+   — an empty ranking has no editorial value and should never be live.
+   **Operator-run tool ready** (dry-run by default, needs
+   `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`):
+   ```bash
+   pnpm --filter @mch/editorial-pilot rankings:remediate-empty        # preview
+   pnpm --filter @mch/editorial-pilot rankings:remediate-empty:apply  # unpublish
+   ```
+   Recurrence is already prevented in code: `push-ranking-v2.ts`
+   `resolveEffectivePublish` (write-time entry-count gate, §Rule 9 of the
+   editorial-rankings-matrix skill).
 2. **Descaffold the 66 leaking rankings** via the existing tooling
    (`descaffold-sections.ts` / `strip-leak-sentences.ts` analogues for
    `editorial_rankings`), re-grounding via DataForSEO when sections are
    regenerated (hard rule `.cursor/rules/dataforseo-content-grounding.mdc`).
+   Recurrence is already prevented in code: `push-ranking-v2.ts`
+   `rankingProseLeaks` (write-time `hasLeak()` gate).
 3. **Acceptance**: re-run the crawler on the `rankings` group → expect
    `list-value` + `scaffolding-leak` = 0.
 4. **(Separate, lower priority)** the 805 `title > 70` warns — tighten the
