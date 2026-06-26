@@ -18,6 +18,7 @@ import {
   extractJsonLdBlocks,
   extractMetaDescription,
   extractTitle,
+  hasRobotsNoindex,
   visibleText,
   type Alternate,
 } from './lib/html.js';
@@ -136,6 +137,16 @@ export function runStaticChecks(
 
   // 6 — hreflang parity (only when the page declares alternates at all).
   findings.push(...checkHreflang(extractAlternates(html), config));
+
+  // 6bis — a sitemap'd URL that emits robots `noindex` is a real
+  // contradiction (sitemap invites indexing; the page forbids it).
+  if (hasRobotsNoindex(html)) {
+    findings.push({
+      check: 'noindex',
+      severity: 'warn',
+      message: 'page emits robots "noindex" — a URL listed in the sitemap should be indexable',
+    });
+  }
 
   // 7 — scaffolding leak in visible prose (NOT in JSON-LD, where Q-ids live).
   if (pageHasLeak(visibleText(html))) {

@@ -116,6 +116,20 @@ describe('runStaticChecks — list-page value (anti "0 hôtels")', () => {
   });
 });
 
+describe('runStaticChecks — noindex contradiction', () => {
+  it('warns when a (sitemap) page emits robots noindex', () => {
+    const html = HEALTHY.replace('<head>', '<head><meta name="robots" content="noindex, follow">');
+    expect(find(runStaticChecks({ url: URL, status: 200, html }), 'noindex')?.severity).toBe(
+      'warn',
+    );
+  });
+  it('does not flag an indexable page', () => {
+    expect(
+      find(runStaticChecks({ url: URL, status: 200, html: HEALTHY }), 'noindex'),
+    ).toBeUndefined();
+  });
+});
+
 describe('runStaticChecks — hreflang parity', () => {
   it('warns when alternates exist but a V1 locale is missing', () => {
     const html = HEALTHY.replace(/<link rel="alternate" hreflang="en"[^>]*>/u, '');

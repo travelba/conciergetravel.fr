@@ -117,6 +117,16 @@ export function extractImageUrls(html: string): readonly string[] {
   return [...out];
 }
 
+/**
+ * True when the page declares `noindex` via a `robots` / `googlebot` meta tag.
+ * A URL present in the sitemap that also emits `noindex` is a real SEO
+ * contradiction (the sitemap invites indexing; the page forbids it).
+ */
+export function hasRobotsNoindex(html: string): boolean {
+  const tags = html.match(/<meta\b[^>]*\bname=["'](?:robots|googlebot)["'][^>]*>/giu) ?? [];
+  return tags.some((t) => /\bcontent=["'][^"']*\bnoindex\b/iu.test(t));
+}
+
 /** Raw inner text of every `<script type="application/ld+json">` block. */
 export function extractJsonLdBlocks(html: string): readonly string[] {
   const out: string[] = [];

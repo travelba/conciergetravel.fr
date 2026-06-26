@@ -10,6 +10,7 @@ import {
   extractJsonLdBlocks,
   extractMetaDescription,
   extractTitle,
+  hasRobotsNoindex,
   visibleText,
 } from './html.js';
 
@@ -91,6 +92,22 @@ describe('extractJsonLdBlocks', () => {
     const blocks = extractJsonLdBlocks(html);
     expect(blocks).toHaveLength(2);
     expect(blocks[0]).toContain('Hotel');
+  });
+});
+
+describe('hasRobotsNoindex', () => {
+  it('detects noindex via robots meta', () => {
+    expect(hasRobotsNoindex('<meta name="robots" content="noindex, nofollow">')).toBe(true);
+    expect(hasRobotsNoindex('<meta name="robots" content="noindex">')).toBe(true);
+  });
+  it('detects noindex via googlebot meta', () => {
+    expect(hasRobotsNoindex('<meta name="googlebot" content="noindex">')).toBe(true);
+  });
+  it('does not flag an index,follow page or absent robots meta', () => {
+    expect(hasRobotsNoindex('<meta name="robots" content="index, follow">')).toBe(false);
+    expect(hasRobotsNoindex('<head><title>x</title></head>')).toBe(false);
+    // the word "noindex" elsewhere (not in a robots meta content) is not flagged
+    expect(hasRobotsNoindex('<p>We never noindex our hotel pages.</p>')).toBe(false);
   });
 });
 

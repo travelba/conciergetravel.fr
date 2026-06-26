@@ -57,21 +57,22 @@ in `scripts/site-audit/runs/site-audit-<ts>.{json,html}` (git-ignored).
 
 ## What it checks (per URL)
 
-| Check                        | Severity             | Catches                                              |
-| ---------------------------- | -------------------- | ---------------------------------------------------- |
-| `http-status`                | fail                 | 404 / 500 / unexpected redirect                      |
-| `h1`                         | fail (0) / warn (>1) | missing or duplicate H1                              |
-| `title` / `meta-description` | warn                 | missing / out-of-band SEO copy                       |
-| `canonical`                  | warn                 | missing / non-self-referential                       |
-| `hreflang`                   | warn                 | alternates present but fr/en missing                 |
-| `scaffolding-leak`           | fail                 | pipeline/brief prose leaked live                     |
-| `jsonld-parse`               | fail                 | malformed JSON-LD                                    |
-| `jsonld-offer-frozen`        | fail                 | `Offer` emitted (Phase 6 frozen)                     |
-| `jsonld-rating-scale`        | fail                 | `AggregateRating.bestRating ≠ "5"` (Hard Rule 11)    |
-| `broken-links`               | fail                 | internal `<a>` → 4xx/5xx                             |
-| `broken-images`              | fail                 | `<img>` / srcset → 4xx/5xx                           |
-| `unreachable-{links,images}` | warn                 | probe failed twice (flaky/WAF, not a hard breakage)  |
-| `list-value`                 | fail                 | listing renders "0 hôtels" (anti the 2026-06-23 bug) |
+| Check                        | Severity             | Catches                                               |
+| ---------------------------- | -------------------- | ----------------------------------------------------- |
+| `http-status`                | fail                 | 404 / 500 / unexpected redirect                       |
+| `h1`                         | fail (0) / warn (>1) | missing or duplicate H1                               |
+| `title` / `meta-description` | warn                 | missing / out-of-band SEO copy                        |
+| `canonical`                  | warn                 | missing / non-self-referential                        |
+| `hreflang`                   | warn                 | alternates present but fr/en missing                  |
+| `noindex`                    | warn                 | sitemap'd page emits robots `noindex` (contradiction) |
+| `scaffolding-leak`           | fail                 | pipeline/brief prose leaked live                      |
+| `jsonld-parse`               | fail                 | malformed JSON-LD                                     |
+| `jsonld-offer-frozen`        | fail                 | `Offer` emitted (Phase 6 frozen)                      |
+| `jsonld-rating-scale`        | fail                 | `AggregateRating.bestRating ≠ "5"` (Hard Rule 11)     |
+| `broken-links`               | fail                 | internal `<a>` → 4xx/5xx                              |
+| `broken-images`              | fail                 | `<img>` / srcset → 4xx/5xx                            |
+| `unreachable-{links,images}` | warn                 | probe failed twice (flaky/WAF, not a hard breakage)   |
+| `list-value`                 | fail                 | listing renders "0 hôtels" (anti the 2026-06-23 bug)  |
 
 ## Hard-won lessons (false-positive traps — keep the tool trusted)
 
