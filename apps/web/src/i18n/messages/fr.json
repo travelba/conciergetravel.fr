@@ -3018,7 +3018,7 @@
     },
     "country": {
       "metaTitle": "Tous les hôtels en {country} — annuaire complet",
-      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} répartis dans {cities, plural, one {# ville} other {# villes}} en {country}. L'annuaire complet de notre sélection, ville par ville.",
+      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} répartis dans {cities, plural, one {# ville} other {# villes}} en {country} — Palaces, 5★ et adresses de charme. L'annuaire complet de notre sélection, ville par ville.",
       "h1": "Hôtels en {country}",
       "subtitle": "{count, plural, one {# adresse} other {# adresses}} dans {cities, plural, one {# ville} other {# villes}} — l'annuaire exhaustif de notre sélection en {country}.",
       "byCity": "Par ville",

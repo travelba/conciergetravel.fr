@@ -3018,7 +3018,7 @@
     },
     "country": {
       "metaTitle": "All hotels in {country} — full directory",
-      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} across {cities, plural, one {# city} other {# cities}} in {country}. The complete directory of our selection, city by city.",
+      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} across {cities, plural, one {# city} other {# cities}} in {country} — Palaces, 5★ and characterful addresses. The complete directory of our selection, city by city.",
       "h1": "Hotels in {country}",
       "subtitle": "{count, plural, one {# address} other {# addresses}} across {cities, plural, one {# city} other {# cities}} — the exhaustive directory of our selection in {country}.",
       "byCity": "By city",

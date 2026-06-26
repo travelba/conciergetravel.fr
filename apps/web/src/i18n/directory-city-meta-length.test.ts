@@ -78,6 +78,44 @@ function renderCityMetaDesc(template: string, locale: string, s: Sample): string
   return out.replace(/\{city\}/gu, s.city).replace(/\{country\}/gu, s.country);
 }
 
+interface CountrySample {
+  readonly count: number;
+  readonly cities: number;
+  readonly country: string;
+}
+
+/** Same as above but resolves BOTH the {count} and {cities} plural blocks. */
+function renderCountryMetaDesc(template: string, locale: string, s: CountrySample): string {
+  const fmt = (n: number): string => new Intl.NumberFormat(locale).format(n);
+  const countRe = /\{count,\s*plural,\s*one\s*\{([^}]*)\}\s*other\s*\{([^}]*)\}\}/u;
+  const citiesRe = /\{cities,\s*plural,\s*one\s*\{([^}]*)\}\s*other\s*\{([^}]*)\}\}/u;
+  const out = template
+    .replace(countRe, (_f, one: string, other: string) =>
+      (s.count === 1 ? one : other).replace(/#/gu, fmt(s.count)),
+    )
+    .replace(citiesRe, (_f, one: string, other: string) =>
+      (s.cities === 1 ? one : other).replace(/#/gu, fmt(s.cities)),
+    );
+  return out.replace(/\{country\}/gu, s.country);
+}
+
+// Country directory pages (`/hotels/<country>`) — smallest (1 hotel / 1 city in
+// a short-named country) to largest (a big catalogue country).
+const FR_COUNTRY_SAMPLES: readonly CountrySample[] = [
+  { count: 1, cities: 1, country: 'Inde' },
+  { count: 2, cities: 1, country: 'Chili' },
+  { count: 3, cities: 2, country: 'Grèce' },
+  { count: 40, cities: 12, country: 'États-Unis' },
+  { count: 600, cities: 150, country: 'France' }, // catalogue-scale extreme
+];
+const EN_COUNTRY_SAMPLES: readonly CountrySample[] = [
+  { count: 1, cities: 1, country: 'India' },
+  { count: 2, cities: 1, country: 'Chile' },
+  { count: 3, cities: 2, country: 'Greece' },
+  { count: 40, cities: 12, country: 'United States' },
+  { count: 600, cities: 150, country: 'France' },
+];
+
 describe('directoryPage.city.metaDesc — SEO length band', () => {
   it('FR template stays within [110, 170] for real + extreme name lengths', () => {
     const template = frMessages.directoryPage.city.metaDesc;
@@ -105,6 +143,36 @@ describe('directoryPage.city.metaDesc — SEO length band', () => {
       expect(
         text.length,
         `EN "${s.city}, ${s.country}" (count ${s.count}) → ${text.length} chars: "${text}"`,
+      ).toBeLessThanOrEqual(BAND_MAX);
+    }
+  });
+
+  it('FR country template stays within [110, 170]', () => {
+    const template = frMessages.directoryPage.country.metaDesc;
+    for (const s of FR_COUNTRY_SAMPLES) {
+      const text = renderCountryMetaDesc(template, 'fr', s);
+      expect(
+        text.length,
+        `FR country "${s.country}" (${s.count}h/${s.cities}v) → ${text.length}: "${text}"`,
+      ).toBeGreaterThanOrEqual(BAND_MIN);
+      expect(
+        text.length,
+        `FR country "${s.country}" (${s.count}h/${s.cities}v) → ${text.length}: "${text}"`,
+      ).toBeLessThanOrEqual(BAND_MAX);
+    }
+  });
+
+  it('EN country template stays within [110, 170]', () => {
+    const template = enMessages.directoryPage.country.metaDesc;
+    for (const s of EN_COUNTRY_SAMPLES) {
+      const text = renderCountryMetaDesc(template, 'en', s);
+      expect(
+        text.length,
+        `EN country "${s.country}" (${s.count}h/${s.cities}v) → ${text.length}: "${text}"`,
+      ).toBeGreaterThanOrEqual(BAND_MIN);
+      expect(
+        text.length,
+        `EN country "${s.country}" (${s.count}h/${s.cities}v) → ${text.length}: "${text}"`,
       ).toBeLessThanOrEqual(BAND_MAX);
     }
   });
