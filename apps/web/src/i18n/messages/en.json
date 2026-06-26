@@ -3044,7 +3044,7 @@
     },
     "city": {
       "metaTitle": "All hotels in {city} — full directory",
-      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} in {city}, {country}. The complete, factual directory of our selection.",
+      "metaDesc": "{count, plural, one {# exceptional hotel} other {# exceptional hotels}} in {city}, {country} — Palaces, 5★ and characterful addresses. The complete, factual directory of our selection.",
       "h1": "Hotels in {city}",
       "subtitle": "{count, plural, one {# address} other {# addresses}} in {city}, {country} — the exhaustive list of our selection.",
       "exploreLabel": "Keep exploring",

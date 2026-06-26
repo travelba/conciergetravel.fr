@@ -3044,7 +3044,7 @@
     },
     "city": {
       "metaTitle": "Tous les hôtels à {city} — annuaire complet",
-      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} à {city}, {country}. L'annuaire complet et factuel de notre sélection.",
+      "metaDesc": "{count, plural, one {# hôtel d'exception} other {# hôtels d'exception}} à {city}, {country} — Palaces, 5★ et adresses de charme. L'annuaire complet et factuel de notre sélection.",
       "h1": "Hôtels à {city}",
       "subtitle": "{count, plural, one {# adresse} other {# adresses}} à {city}, {country} — la liste exhaustive de notre sélection.",
       "exploreLabel": "Continuer l'exploration",
