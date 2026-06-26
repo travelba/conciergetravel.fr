@@ -232,6 +232,40 @@ Anti-pattern associé : tester avec `--draft` "pour être prudent" sur un corpus
 qui contient des slugs déjà publiés. **Avec le ratchet en place, `--draft` est
 sûr**. Sans le ratchet, c'est un fusil à pompe.
 
+## Rule 9 — Publish-gate au write-time (`entries.length`), pas seulement l'eligibility floor
+
+**Incident 2026-06-26 — 51 classements « 0 hôtels » live en prod**, surfacés par
+le crawler L3 ([`site-audit-crawler`](../site-audit-crawler/SKILL.md),
+`docs/audits/rankings-health-crawl-2026-06-26.md`) : des pages comme
+`meilleurs-hotels-montagne-saint-tropez` rendaient « Classement éditorial de 0
+hôtels à la montagne ».
+
+La Rule 5 (eligibility floor `MIN_ELIGIBLE = 3`) agit à la **génération**, mais
+elle ne suffit pas :
+
+- les **`MANUAL_OVERRIDES` sont émis TOUJOURS**, même underfilled (Rule 5) ;
+- `eligibleCount` (au scan de la matrice) peut **diverger** de `entries.length`
+  final (résolution d'entrées vide alors que le comptage d'éligibilité était > 0) ;
+- le ratchet (Rule 6) **n'aide pas** : une fois ces lignes publiées, un re-push
+  ne les redescend pas.
+
+**Fix = un garde-fou au write-time dans
+[`push-ranking-v2.ts`](../../scripts/editorial-pilot/src/rankings/push-ranking-v2.ts)** :
+`resolveEffectivePublish(requestedPublish, entries.length, floor)` force
+`is_published=false` quand `entries.length < MIN_PUBLISHABLE_ENTRIES` (3 par
+défaut, override `MCH_RANKING_MIN_ENTRIES`). Couvre les DEUX chemins (pg + REST).
+
+```ts
+const effectivePublish = resolveEffectivePublish(options.publish, ranking.entries.length, floor);
+// → un classement vide/mince ne peut JAMAIS partir en prod, même via override.
+```
+
+**Leçon** : un floor d'éligibilité à la génération est nécessaire mais pas
+suffisant. La **publication elle-même** doit re-vérifier le compte d'entrées
+réel — c'est la seule barrière que ni `skipUnderfilled` ni le ratchet ne
+fournissent. (Le garde-fou ne dépublie pas les 51 lignes déjà live : ça reste
+une op admin explicite, en attente d'accès DB + GO PO.)
+
 ## Rule 8 — Chain rankings hors matrice (workflow PostgREST direct)
 
 Quand on veut produire un **cross-chain ranking** (`Top 25 Aman`, `Top 30
@@ -384,3 +418,4 @@ insufficient_quota` (account billing exhausted, all models incl. `-mini`),
 - [`content-enrichment-pipeline`](../content-enrichment-pipeline/SKILL.md) — enrichissement factuel des hôtels (DATAtourisme, Wikidata) qui débloque l'éligibilité des seeds.
 - [`seo-technical`](../seo-technical/SKILL.md) — anti-cannibalisation entre slugs proches (`meilleurs-hotels-corse` vs `plus-beaux-hotels-corse`).
 - [`supabase-postgres-rls`](../supabase-postgres-rls/SKILL.md) — la table `editorial_rankings` où les seeds générés atterrissent.
+- [`site-audit-crawler`](../site-audit-crawler/SKILL.md) — le crawler L3 qui a surfacé l'incident « 0 hôtels » (Rule 9) en auditant le groupe `rankings` du sitemap en prod.

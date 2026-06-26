@@ -102,8 +102,8 @@ on the first prod run; do not regress them:
    text false-positived on every fiche with the (correct) provenance footer.
    `src/page-leak.ts` keeps only the **high-precision PROSE** signatures
    (brief/dossier narration, "non renseigné", "vérification manuelle",
-   word-count bookkeeping, AUTO_DRAFT…) and drops the lexical/source tokens.
-   Both detectors share intent; they differ because their _input context_
+   word-count bookkeeping, AUTO*DRAFT…) and drops the lexical/source tokens.
+   Both detectors share intent; they differ because their \_input context*
    differs (DB field vs rendered DOM). Tested both directions in
    `page-leak.test.ts` (Wikidata footer = clean; "le brief confirme" = leak).
 
@@ -149,3 +149,6 @@ validated end-to-end against prod.
   shared `scaffolding-gate.ts` whose markers the page-leak detector derives.
 - [`structured-data-schema-org`](../structured-data-schema-org/SKILL.md) — the
   JSON-LD contracts the crawler verifies (no Offer, AggregateRating on /5).
+- [`editorial-rankings-matrix`](../editorial-rankings-matrix/SKILL.md) — §Rule 9
+  (publish-gate) is the root-cause fix for the "0 hôtels" rankings this crawler
+  surfaced (`docs/audits/rankings-health-crawl-2026-06-26.md`).
