@@ -140,6 +140,7 @@ logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
 | g10            | heads   | 52/53    | 50       | 58 %        | 6.39         | 0.22 | 73.46        |
 | g11            | rest    | 57/60    | 55       | 59 %        | 7.74         | 0.24 | 81.45        |
 | g12            | rest    | 56/59    | 53       | 60 %        | 8.04         | 0.25 | 89.73        |
+| g13            | retry   | 3/3      | 3        | 46 %        | 0.36         | 0.01 | 90.11        |
 
 `grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
 (DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
@@ -147,12 +148,25 @@ warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
 questions) not legitimately FAQ-able for the property. 6 skips this wave
 (`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
 
-**Shard-3 counter: `shard3: 743/746`** (100 → … → 687 → 743; netnew + heads +
-rest all drained). 3 residual P2 fiches (`santa-monica-proper`,
-`the-st-regis-chengdu`, `villa-cadaques-cap-de-creus`) keep failing a row gate
-on every attempt (thin-source → kit can't reach the canonical promote/parity
-floor); attempting a targeted retry. Prod acceptance g9: `lord-elgin-hotel`
-200, `FAQPage` + `acceptedAnswer`, no `Offer` leak. Prod acceptance after g4:
+**✅ Shard-3 COMPLETE — `shard3: 746/746` (candidates: 0).** Grounded session
+g1→g13 enriched 613 fiches (100 → 746) for **\$90.11** (pplx \$87.27 + EN
+\$2.84), grounding=on throughout (avg DFS PAA coverage ~54 %, only sporadic
+`grounding=off` where DataForSEO returned no PAA — degrade-safe). Global
+catalogue **2966 / 2984 with kit (99.4 %)** — the ~18 residuals belong to
+sibling shards.
+
+The 3 last fiches (`santa-monica-proper`, `the-st-regis-chengdu`,
+`villa-cadaques-cap-de-creus`) were **not** gate-failures: they sit in shard 3
+by SQL `row_number(order by slug)` but in a sibling's partition under
+PostgREST `order=slug.asc` (a boundary collation nuance), so my sharded waves
+never selected them. A targeted `--slugs=` retry then silently returned
+`candidates: 0` twice because **PowerShell splits an unquoted comma list into
+an array** (`--slugs=a,b,c` → 3 separate argv tokens) — quoting the whole
+value (`"--slugs=a,b,c"`) fixed it and all 3 enriched (grounded=3, \$0.38).
+
+Prod acceptance (g4 + g9): `mama-shelter-lille` & `lord-elgin-hotel` → 200,
+`FAQPage` JSON-LD + `acceptedAnswer` rendered, concierge block present, **no
+`Offer` leak** (Phase 6 respected). Prod acceptance after g4:
 `mama-shelter-lille` 200, `FAQPage` JSON-LD + `acceptedAnswer` rendered,
 concierge block present, no `Offer` leak (Phase 6 respected). Resume continues
 `--segment=heads` then `--segment=rest`, all

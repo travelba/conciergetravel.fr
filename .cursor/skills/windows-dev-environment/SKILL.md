@@ -35,6 +35,16 @@ pnpm --filter @mch/editorial-pilot exec tsx run.ts "--slug=alpes,biarritz,bordea
 
 The double-quotes are passed through to the child process unchanged.
 
+**Watch for the _silent_ failure mode** (2026-06-25, FAQ-kit shard retry): when
+the mangled list feeds a runner whose arg-parser only keeps the first token
+(`--slugs=a` and drops the bare `b`, `c`), the run does not error — it simply
+selects fewer rows, or **zero** if `a` was already processed. The FAQ batch
+runner logged `candidates this wave: 0 — nothing to do` twice on a 3-slug retry
+before the cause (unquoted commas) was spotted; quoting the whole value
+(`"--slugs=a,b,c"`) returned the expected 3 candidates. **When a `--slugs=` /
+`--filter=` run mysteriously finds 0 candidates on Windows, suspect comma
+array-splitting before anything else.**
+
 ## Rule 2 — Forbidden Unix-only commands
 
 These do **not** exist on stock PowerShell:
