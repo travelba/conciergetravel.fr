@@ -39,20 +39,31 @@
 Pipeline now DataForSEO-grounded (commit `77d33bce`): each fiche injects real
 PAA/keywords and logs `grounding=on dfs_paa_coverage=<pct>`. Grounded wave log:
 
-| Wave      | Segment | Enriched | Grounded | avg PAA cov | Perplexity $ | Notes                                                  |
-| --------- | ------- | -------- | -------- | ----------- | ------------ | ------------------------------------------------------ |
-| g-nn-1    | netnew  | 52/60    | 44       | 42 %        | 7.88         | 9 grounding=off (no DFS cache), 0 quota                |
-| g-nn-2    | netnew  | 0/1      | 0        | —           | 0.25         | netnew drained; `seda-club` stuck on promote.canonical |
-| g-heads-1 | heads   | 59/60    | 58       | 57 %        | 6.83         | 98 % grounded, 0 quota                                 |
-| g-heads-2 | heads   | 137/150  | 130      | 51 %        | 19.18        | 0 quota, 13 gate-deferred                              |
-| g-heads-3 | heads   | 138/150  | 140      | 55 %        | 18.40        | 0 quota                                                |
-| g-heads-4 | heads   | 80/89    | 79       | 55 %        | 11.13        | heads drained; 0 quota                                 |
+| Wave       | Segment | Enriched | Grounded | avg PAA cov | Perplexity $ | Notes                                                  |
+| ---------- | ------- | -------- | -------- | ----------- | ------------ | ------------------------------------------------------ |
+| g-nn-1     | netnew  | 52/60    | 44       | 42 %        | 7.88         | 9 grounding=off (no DFS cache), 0 quota                |
+| g-nn-2     | netnew  | 0/1      | 0        | —           | 0.25         | netnew drained; `seda-club` stuck on promote.canonical |
+| g-heads-1  | heads   | 59/60    | 58       | 57 %        | 6.83         | 98 % grounded, 0 quota                                 |
+| g-heads-2  | heads   | 137/150  | 130      | 51 %        | 19.18        | 0 quota, 13 gate-deferred                              |
+| g-heads-3  | heads   | 138/150  | 140      | 55 %        | 18.40        | 0 quota                                                |
+| g-heads-4  | heads   | 80/89    | 79       | 55 %        | 11.13        | heads drained; 0 quota                                 |
+| g-rest-1   | rest    | 137/143  | 128      | 61 %        | 16.29        | 0 quota                                                |
+| g-rest-mop | rest    | 4/6      | 4        | 50 %        | 1.09         | mop-up; 2 hard residuals left                          |
 
-**Checkpoint after heads (all shards):** `shard0: 603/746` · global
-**2277/2985 (76 %)** with kit. Acceptance (prod, grounded fiche
-`anantara-koh-samui-resort`, PAA cov 100 %): FR + EN render \*\*16 `Question`
+Acceptance (prod, grounded fiche `anantara-koh-samui-resort`, PAA cov 100 %):
+FR + EN render **16 `Question` + `FAQPage`**, 0 leak.
 
-- `FAQPage`\*\*, 0 leak. Next: `rest` segment (143 left in shard 0).
+### ✅ Shard 0 partition COMPLETE — `shard0: 744/746` (99.7 %)
+
+All segments drained (netnew → heads → rest). Global with kit:
+**2851/2984 (95.5 %)** across the 4 shards. Grounded Perplexity spend
+(shard 0, this resume) ≈ **$81** (g-nn-1 → g-rest-mop). 0 quota walls on the
+grounded resume — concurrency 3 smoothed the spend.
+
+**2 hard residuals** (deterministic `promote.canonical` — the grounded model
+can't assemble all 10 CDC canonical questions from these thin-source fiches,
+fails after 3 attempts): `pikaia-lodge`, `quisisana-resort`. Need a relaxed
+canonical gate or a manual editorial pass, not a re-run.
 
 `grounding=off` rate ≈ 15 % (hotels with no DataForSEO cache) — non-blocking
 per PO, flagged for a later DFS cache backfill on those slugs.
