@@ -210,6 +210,21 @@ top-small-luxury-hotels-grece
 top-small-luxury-hotels-royaume-uni
 ```
 
+## Scoping: hubs group is clean (400-sample)
+
+A follow-up crawl of the `hubs` group (destinations, `/hotels/<country>/<city>`
+directory, categories, brands, labels — 3 059 URLs, 400 random sampled,
+`--budget-only`) returned **0 fails**: no scaffolding leak, no "0 hôtels", no
+broken status/h1/JSON-LD. Only SEO copy warns — **208/400 short
+meta-descriptions** (90-100 chars, below the 110 floor) on the
+`/hotels/<country>/<city>` directory pages, plus 53 long titles.
+
+**Conclusion: the content breakage is scoped to the `rankings` group.** The
+guide/destination publishers do NOT exhibit the empty/leak class (so no
+`push-guide-v2.ts` gate was added — it would be speculative). The directory
+short-meta-desc warns are a separate, non-blocking SEO-copy tightening that
+needs DB access + DataForSEO grounding to regenerate (deferred).
+
 ## Notes
 
 - The crawler reports `guides.xml` returns 0 `<loc>`. **This is by design, not
