@@ -159,7 +159,7 @@ export function gateConciergeAdviceFormat(out: ConciergeAdviceOutput): string | 
     ['en.title', out.en.title],
     ['en.body', out.en.body],
   ] as const) {
-    if (hasLeak(value)) failed.push(`${locale} contains scaffolding/dossier leak`);
+    if (hasLeak(value)) failed.push(`${locale} carries scaffolding/dossier leak`);
   }
 
   // EN must not be a literal translation of FR — first 40 chars
@@ -206,6 +206,16 @@ export interface GenerateConciergeAdviceResult {
   readonly outputTokens: number;
 }
 
+export interface GenerateConciergeAdviceOptions {
+  /**
+   * DataForSEO grounding block (from `groundHotel`). When present, the
+   * People-Also-Ask / high-volume keyword phrasing is injected so the
+   * concierge tip anchors on real search demand (hard rule 8ter).
+   * Empty/undefined → LLM-only (degrade-safe).
+   */
+  readonly groundingBlock?: string;
+}
+
 function stripCodeFences(s: string): string {
   const fenced = /^```(?:json)?\n([\s\S]*?)\n```$/u.exec(s.trim());
   if (fenced && fenced[1] !== undefined) return fenced[1];
@@ -215,9 +225,14 @@ function stripCodeFences(s: string): string {
 export async function generateConciergeAdvice(
   client: LlmClient,
   hotel: HotelLlmInput,
+  options: GenerateConciergeAdviceOptions = {},
 ): Promise<GenerateConciergeAdviceResult> {
   const systemPrompt = await loadPrompt();
-  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}`;
+  const grounding =
+    options.groundingBlock !== undefined && options.groundingBlock.length > 0
+      ? `\n\n${options.groundingBlock}`
+      : '';
+  const userBase = `=== HOTEL ===\n${JSON.stringify(hotel, null, 2)}${grounding}`;
 
   const attempts: Array<{ raw: string; reason: string }> = [];
   let totalInput = 0;

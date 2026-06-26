@@ -376,6 +376,19 @@ export async function updateHotelConciergeAdvice(
   await patchHotel(cfg, hotelId, { concierge_advice: payload });
 }
 
+/**
+ * Null the `concierge_advice` block (regenerable). Used by the leak
+ * remediation pass when a source too thin to regenerate clean prose
+ * would otherwise leave a scaffolding/dossier leak live — refuse to
+ * persist a leak, prefer an empty block (the page self-elides it).
+ */
+export async function clearHotelConciergeAdvice(
+  cfg: SupabaseRestConfig,
+  hotelId: string,
+): Promise<void> {
+  await patchHotel(cfg, hotelId, { concierge_advice: null });
+}
+
 export interface MetaDescUpdate {
   readonly meta_desc_fr: string;
   readonly meta_desc_en: string;
