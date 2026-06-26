@@ -261,6 +261,69 @@ the room-page indexability check: ≥ 5 photos AND ≥ 200 words).
 - A `<RelatedLinks />` component requires explicit pillar/parent/children inputs to render — empty arrays trigger a build warning.
 - Breadcrumbs visible + JSON-LD on every page.
 
+#### Filter a facet in the database BEFORE any `.limit(N)` — never `.limit(N)` global + in-memory filter
+
+> **Hard rule (2026-06-26 maillage audit).** When a maillage cluster needs
+> the rows matching a facet (brand, city, label, tier, theme …), the facet
+> **must** be filtered **in the database** (PostgREST `.eq` / `.ilike` /
+> `.or` / affiliation RPC / JSONB `@>`), and the `.limit(N)` cap applied
+> **after**. Never fetch a globally-ordered `.limit(N)` page of the whole
+> catalogue and filter the facet in memory.
+
+**Why** — with 2 219+ published hotels, a `.order('priority').order('name').limit(100)`
+window only sees the first 100 rows of the _whole_ catalogue. Any facet whose
+first matching row sorts past row N is **silently and completely dropped**, and
+the block self-elides with zero error — the worst kind of bug (looks fine, is
+empty). This is the same failure mode as the orphan-page incidents (a global
+cap hiding rows that exist).
+
+**Reference incident** — `apps/web/src/server/hotels/get-related-hotels.ts`
+`sameBrand` cluster did `.limit(100)` over all published hotels then matched the
+brand with `detectBrand` in memory. Measured global rank of the **first** sibling
+per brand (over 2 219 rows, ordered `priority, name`): Aman **109**, Six Senses
+**328**, Ritz-Carlton **390**, Waldorf Astoria **489**, St. Regis **2436** →
+**0 siblings inside the first 100** for every brand → "Autres {marque}" empty for
+almost the entire catalogue (confirmed on prod: `/hotel/aman-le-melezin` rendered
+the related section with no Aman brand block).
+
+**The fix pattern** (`buildBrandNameOrFilter` + `.or(...)`):
+
+```ts
+// Superset ILIKE patterns (the `*` wildcard form for `.or`) live on each
+// BRAND_FAMILIES entry; spaces → `*` to tolerate hyphenation like `\s*` does.
+const orFilter = buildBrandNameOrFilter(brand.slug); // 'name.ilike.aman*' etc.
+let q = supabase.from('hotels').select(COLS).eq('is_published', true).neq('slug', self);
+if (orFilter !== null) q = q.or(orFilter); // ← facet filtered IN DB
+if (region !== '') q = q.eq('region', region); // ← other facets too
+const { data } = await q.order('priority').order('name').limit(BRAND_CANDIDATE_LIMIT);
+// Confirm each DB candidate with the regex source-of-truth, then cap AFTER:
+for (const row of data ?? []) {
+  if (detectBrand(row.name)?.slug === brand.slug) {
+    out.push(row);
+    if (out.length >= CAP) break;
+  }
+}
+```
+
+Key points:
+
+- The DB filter is a **superset** of the in-memory matcher (ILIKE is looser than
+  the `detectBrand` regex). Keep the in-memory pass as the **confirmation** step
+  so false positives (`*st*regis*` matching "East Regis") are dropped — DB
+  filter for completeness, regex for precision.
+- For facets already keyed by a structured column, prefer the exact path:
+  `.eq('city', …)` / `.eq('region', …)` (geographic clusters already do this),
+  or the affiliation RPC `published_hotels_by_affiliation` /
+  `listPublishedHotelsByAffiliation` (GIN-indexed `@>`, used by `/marque/[slug]`)
+  which bypasses PostgREST's 1000-row cap entirely.
+- The `db_max_rows = 1000` PostgREST cap is a related trap: a `.range()`-paged
+  read (`listPublishedHotelsForIndex`) is required when you genuinely must scan
+  > 1000 rows. See its header comment.
+- Audit checklist for any reader: for **each** cluster, is its facet a DB
+  predicate _before_ the `.limit`? Geographic (`city`/`department`/`region`) and
+  bounding-box (`nearby`) clusters in `get-related-hotels.ts` already comply;
+  only `sameBrand` had the bug.
+
 ### ISR contract
 
 - Marketing/editorial revalidate per the rendering matrix (cf. `nextjs-app-router`).
@@ -282,6 +345,11 @@ the room-page indexability check: ≥ 5 photos AND ≥ 200 words).
 - Room sub-page with canonical pointing to the parent hotel (would erase its own indexability).
 - Fabricated urgency indicators ("X personnes consultent" without Amadeus signal).
 - `bestRating: '10'` in `AggregateRating` JSON-LD (Google renders /5 anyway).
+- Filtering a maillage facet (brand/city/label/tier) **in memory** after a
+  global `.order().limit(N)` over the whole catalogue — rows past row N are
+  silently dropped and the block self-elides empty. Filter the facet **in the
+  DB** before any cap (see §Internal linking → "Filter a facet in the database
+  BEFORE any `.limit(N)`").
 - Adding ES/DE/IT/AR/ZH/JA locales without going through the i18n roadmap (V1/V2/V3) — partial coverage is worse than honest scoping.
 - **Starting V2 content production (DE/ES/IT) before clearing the 8 structural blockers** documented in §"V2 multilingual rollout — état réel". The shell is ready; the application code and DB schema are not. Activating `'de'` in `routing.locales` today produces `/de/...` URLs that render French content under `<html lang="de">` — unintentional cloaking and a SEO disaster.
 
