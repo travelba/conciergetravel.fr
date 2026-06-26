@@ -21,10 +21,21 @@
  * destroy curated entry ordering). It never touches `combinator.ts`, never
  * creates slugs, never edits sections/intro/outro/meta.
  *
- * Grounding: the LLM is fed the hotel's own facts (description_fr/en,
- * long_description_sections, awards, affiliations, concierge_advice, scalar
- * specifics). It is told to invent nothing — if the architect/chef/suite is
- * not in the source, it must not state it.
+ * Grounding (two layers, hard rule 8ter):
+ *   1. DataForSEO demand — per ranking, `groundKeywords` pulls the real
+ *      People-Also-Ask / high-volume keywords for the city/scope cluster
+ *      ("hôtel de luxe {ville}", "meilleurs hôtels {ville}") from the shared
+ *      disk cache (`data/dfs-cache/`). The rendered block is injected into
+ *      every entry prompt under "### Ancrage SEO/GEO (DataForSEO)" so the
+ *      rewrite prioritises the angles people actually search. After the
+ *      ranking is enriched, `evaluatePaaCoverage` traces `dfs_paa_coverage`
+ *      (non-blocking, the single shared soft-token matcher). `--grounded`
+ *      (default ON) / `--no-grounding`; degrades to LLM-only when DFS is off.
+ *   2. Hotel facts — the LLM is fed the hotel's own facts (description_fr/en,
+ *      long_description_sections, awards, affiliations, concierge_advice,
+ *      restaurant_info, spa_info, scalar specifics). It is told to invent
+ *      nothing — if the architect/chef/suite is not in the source, it must
+ *      not state it. The DFS block never licenses fabrication.
  *
  * Anti-scaffolding: every output runs through the shared `hasLeak()` gate; a
  * leaking sentence is stripped, and if the remainder is too thin the entry is
@@ -72,6 +83,14 @@ import { z } from 'zod';
 import { loadEnv, resolveProvider } from '../env.js';
 import { buildLlmClient, type LlmClient } from '../llm.js';
 import { hasLeak, splitSentences } from '../enrichment/scaffolding-gate.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import {
+  groundKeywords,
+  renderGroundingForPrompt,
+  type GroundingLocale,
+  type KeywordGrounding,
+} from '../grounding/keyword-grounding.js';
+import { evaluatePaaCoverage } from '../hotels/faq-perplexity-gates.js';
 import { callLlm } from './generate-ranking-v2.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -103,6 +122,64 @@ function priorityIndex(slug: string): number {
     if (slug.includes(PRIORITY_TOKENS[i] as string)) return i;
   }
   return Number.POSITIVE_INFINITY;
+}
+
+/* ── DataForSEO grounding seeds (per ranking — city/scope demand) ──────────── */
+
+/** Strip the leading editorial framing from a title for a clean place anchor. */
+function scopeLabelFromTitle(title: string): string {
+  return title
+    .replace(/\s*[:–—-].*$/u, '')
+    .replace(
+      /^(les\s+)?(meilleurs|meilleures|plus\s+beaux|plus\s+belles|top|notre\s+sélection)\s+/iu,
+      '',
+    )
+    .replace(
+      /^(palaces?|h[ôo]tels?(?:\s+de\s+luxe)?|villas?|chalets?|resorts?|ch[âa]teaux[-\s]?h[ôo]tels?|maisons?\s+d['’]h[ôo]tes?)\s+/iu,
+      '',
+    )
+    .replace(/^(de\s+la|de\s+l['’]|du|des|de|d['’]|en|[àa]|au|aux)\s+/iu, '')
+    .trim();
+}
+
+/** Theme term used as a grounding seed prefix, derived from the slug. */
+function themeTermFromSlug(slug: string): string {
+  const t: ReadonlyArray<readonly [RegExp, string]> = [
+    [/palace/u, 'palaces'],
+    [/5-etoiles|cinq-etoiles/u, 'hôtels 5 étoiles'],
+    [/chateaux/u, 'châteaux-hôtels'],
+    [/maisons-hotes/u, "maisons d'hôtes"],
+    [/chalet/u, 'chalets de luxe'],
+    [/villa/u, 'villas de luxe'],
+    [/resort/u, 'resorts de luxe'],
+    [/spa/u, 'hôtels spa'],
+    [/romantique/u, 'hôtels romantiques'],
+    [/famille|kids/u, 'hôtels famille'],
+    [/gastronomie/u, 'hôtels gastronomiques'],
+    [/piscine/u, 'hôtels avec piscine'],
+    [/bord-de-mer/u, 'hôtels bord de mer'],
+    [/ski|montagne/u, 'hôtels montagne'],
+    [/design/u, 'hôtels design'],
+    [/charme/u, 'hôtels de charme'],
+  ];
+  for (const [re, term] of t) if (re.test(slug)) return term;
+  return 'hôtels de luxe';
+}
+
+/**
+ * Derive the demand-grounding cluster for a ranking. Anchored on the real
+ * "hôtel de luxe {ville}" / "meilleurs hôtels {ville}" keyword families the
+ * acquisition audit flags as the dominant-volume queries (10-30× the editorial
+ * phrasing). Returns 1-3 deduped seeds.
+ */
+function buildRankingSeeds(row: RankingRow): string[] {
+  const lieu = scopeLabelFromTitle(row.title_fr);
+  if (lieu.length === 0) return [];
+  const theme = themeTermFromSlug(row.slug);
+  const seeds = [`hôtel de luxe ${lieu}`, `meilleurs hôtels ${lieu}`, `${theme} ${lieu}`].map((s) =>
+    s.replace(/\s+/gu, ' ').trim(),
+  );
+  return [...new Set(seeds)];
 }
 
 /* ── PostgREST ─────────────────────────────────────────────────────────────*/
@@ -495,7 +572,12 @@ function buildUserPrompt(input: {
   readonly rank: number;
   readonly facts: string;
   readonly currentFr: string;
+  readonly groundingBlock: string;
 }): string {
+  const grounding =
+    input.groundingBlock.length > 0
+      ? `\n### Ancrage SEO/GEO (DataForSEO)\nCe classement répond à une demande réelle. Privilégie les angles ci-dessous (services, accès, table, spa, vue, quartier) QUAND ils concernent CET hôtel et figurent dans les FAITS. Ne fabrique JAMAIS un fait pour matcher un mot-clé ; ignore le bruit (célébrité, salaire, biographie).\n${input.groundingBlock}\n`
+      : '';
   return `CLASSEMENT : « ${input.rankingTitle} »
 RANG de cet hôtel : #${input.rank}
 
@@ -504,7 +586,7 @@ ${input.currentFr.length > 0 ? input.currentFr : '(vide)'}
 
 FAITS VÉRIFIÉS SUR L'HÔTEL (source unique de vérité — n'invente rien au-delà) :
 ${input.facts}
-
+${grounding}
 Réécris maintenant justification_fr (concrète, nommée, voix Concierge, ≤25 mots/phrase) et produis justification_en (anglais britannique fidèle, même richesse). JSON strict.`;
 }
 
@@ -686,6 +768,8 @@ interface EntryResult {
   readonly frBefore: number;
   readonly frAfter: number;
   readonly status: 'updated' | 'skipped' | 'leak-skip' | 'no-facts' | 'error';
+  /** The FR justification that ends up live (new if updated, else existing) — fed to the PAA coverage gate. */
+  readonly frText: string;
   readonly detail?: string;
 }
 
@@ -696,6 +780,7 @@ async function enrichEntry(
   rankingTitle: string,
   entry: EntryRow,
   dryRun: boolean,
+  groundingBlock: string,
 ): Promise<EntryResult> {
   const hotelSlug = str(entry.hotels?.slug);
   const enBefore = (entry.justification_en ?? '').length;
@@ -706,6 +791,7 @@ async function enrichEntry(
     hotelSlug,
     enBefore,
     frBefore,
+    frText: entry.justification_fr ?? '',
   } as const;
 
   if (entry.hotels === null) {
@@ -721,6 +807,7 @@ async function enrichEntry(
     rank: entry.rank,
     facts,
     currentFr: entry.justification_fr ?? '',
+    groundingBlock,
   });
 
   const label = `justif ${hotelSlug}#${entry.rank}`;
@@ -767,7 +854,7 @@ async function enrichEntry(
     console.log(`  FR (${fr.length}c): ${fr}`);
     console.log(`  EN (${en.length}c): ${en}\n`);
   }
-  return { ...base, enAfter: en.length, frAfter: fr.length, status: 'updated' };
+  return { ...base, enAfter: en.length, frAfter: fr.length, frText: fr, status: 'updated' };
 }
 
 /* ── CLI ───────────────────────────────────────────────────────────────────*/
@@ -782,6 +869,7 @@ interface CliArgs {
   readonly genericOnly: boolean;
   readonly entryConcurrency: number;
   readonly dryRun: boolean;
+  readonly grounded: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -794,12 +882,15 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let genericOnly = false;
   let entryConcurrency = 3;
   let dryRun = false;
+  let grounded = true;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--priority') priority = true;
     else if (a === '--all') all = true;
     else if (a === '--force') force = true;
     else if (a === '--generic-only') genericOnly = true;
+    else if (a === '--no-grounding') grounded = false;
+    else if (a === '--grounded') grounded = true;
     else if (a.startsWith('--slug=')) slugs = [a.slice('--slug='.length)];
     else if (a.startsWith('--slugs=')) {
       slugs = a
@@ -818,7 +909,18 @@ function parseArgs(argv: readonly string[]): CliArgs {
       if (Number.isFinite(n) && n > 0) entryConcurrency = Math.min(5, Math.floor(n));
     }
   }
-  return { slugs, priority, all, limit, minEn, force, genericOnly, entryConcurrency, dryRun };
+  return {
+    slugs,
+    priority,
+    all,
+    limit,
+    minEn,
+    force,
+    genericOnly,
+    entryConcurrency,
+    dryRun,
+    grounded,
+  };
 }
 
 async function main(): Promise<void> {
@@ -827,6 +929,16 @@ async function main(): Promise<void> {
   const provider = resolveProvider(env);
   const llm = buildLlmClient(env, provider);
   const pg = loadPgEnv();
+
+  // DataForSEO grounding (hard rule 8ter — content is anchored on real demand).
+  // Degrade-safe: null config / disabled DFS → LLM-only with hotel facts.
+  const dfsCfg = args.grounded ? loadDfsConfig() : null;
+  const dfsLocale: GroundingLocale = { locationName: 'France', languageCode: 'fr' };
+  if (args.grounded && dfsCfg === null) {
+    console.warn(
+      '⚠ DataForSEO OFF/unconfigured — justifications regenerate WITHOUT real PAA grounding (hotel facts only). Set DATAFORSEO_ENABLED=true to ground.',
+    );
+  }
 
   // Resolve target rankings.
   let rankings = await fetchRankings(pg, args.slugs.length > 0 ? { slugs: args.slugs } : {});
@@ -847,7 +959,7 @@ async function main(): Promise<void> {
   if (args.limit > 0) rankings = rankings.slice(0, args.limit);
 
   console.log(
-    `[enrich-ranking-justifications] rankings=${rankings.length} minEn=${args.minEn} force=${args.force} genericOnly=${args.genericOnly} entryConcurrency=${args.entryConcurrency} dryRun=${args.dryRun} provider=${provider} model=${llm.model}`,
+    `[enrich-ranking-justifications] rankings=${rankings.length} minEn=${args.minEn} force=${args.force} genericOnly=${args.genericOnly} grounded=${dfsCfg !== null} entryConcurrency=${args.entryConcurrency} dryRun=${args.dryRun} provider=${provider} model=${llm.model}`,
   );
   if (rankings.length === 0) {
     console.log('Nothing to do.');
@@ -855,6 +967,7 @@ async function main(): Promise<void> {
   }
 
   const allResults: Array<EntryResult & { ranking: string }> = [];
+  const coverageBySlug: Record<string, number | null> = {};
   let rankingsTouched = 0;
 
   for (let i = 0; i < rankings.length; i += 1) {
@@ -880,14 +993,28 @@ async function main(): Promise<void> {
       continue;
     }
 
+    // Ground this ranking's demand cluster once (disk-cached, shared seeds).
+    let grounding: KeywordGrounding | null = null;
+    if (dfsCfg !== null) {
+      const seeds = buildRankingSeeds(ranking);
+      try {
+        grounding = await groundKeywords(dfsCfg, seeds, dfsLocale);
+      } catch (err) {
+        console.warn(`      ⚠ grounding failed for ${ranking.slug}: ${(err as Error).message}`);
+      }
+    }
+    const groundingBlock = grounding !== null ? renderGroundingForPrompt(grounding) : '';
+    const paaCount = grounding?.peopleAlsoAsk.length ?? 0;
+
     console.log(
-      `  [${i + 1}/${rankings.length}] ${ranking.slug} — ${targets.length}/${entries.length} entries to enrich…`,
+      `  [${i + 1}/${rankings.length}] ${ranking.slug} — ${targets.length}/${entries.length} entries to enrich… grounding=${grounding?.grounded ? 'on' : 'off'} PAA=${paaCount}`,
     );
 
     const results = await runWithConcurrency(
       targets,
       args.entryConcurrency,
-      (entry) => enrichEntry(llm, pg, ranking.id, ranking.title_fr, entry, args.dryRun),
+      (entry) =>
+        enrichEntry(llm, pg, ranking.id, ranking.title_fr, entry, args.dryRun, groundingBlock),
       (entry, _i, err): EntryResult => ({
         hotelId: entry.hotel_id,
         rank: entry.rank,
@@ -896,6 +1023,7 @@ async function main(): Promise<void> {
         enAfter: (entry.justification_en ?? '').length,
         frBefore: (entry.justification_fr ?? '').length,
         frAfter: (entry.justification_fr ?? '').length,
+        frText: entry.justification_fr ?? '',
         status: 'error',
         detail: err instanceof Error ? err.message.slice(0, 160) : String(err),
       }),
@@ -923,6 +1051,32 @@ async function main(): Promise<void> {
         console.log(`      ✓ ${ranking.slug}: ${updated} updated (verify re-read failed)`);
       }
     }
+
+    // PAA coverage gate (hard rule 8ter §4) — does the ranking's final
+    // justification set cover the real demand it was grounded on? NON-blocking:
+    // logged as `dfs_paa_coverage=<pct>`, never blocks the PATCH. Uses the
+    // single shared soft-token matcher (never re-implement it).
+    if (grounding !== null && grounding.grounded) {
+      const blobs = entries.map((e) => {
+        const r = results.find((x) => x.hotelId === e.hotel_id);
+        return r !== undefined ? r.frText : (e.justification_fr ?? '');
+      });
+      const coverage = evaluatePaaCoverage(blobs, grounding.peopleAlsoAsk);
+      coverageBySlug[ranking.slug] = coverage.grounded ? coverage.coveragePct : null;
+      if (coverage.grounded) {
+        const low = coverage.coveragePct < 50;
+        const uncovered =
+          low && coverage.uncovered.length > 0
+            ? ` — uncovered: ${coverage.uncovered.slice(0, 4).join(' | ')}`
+            : '';
+        console.log(
+          `      ${low ? '⚠' : 'ℹ'} ${ranking.slug} dfs_paa_coverage=${coverage.coveragePct}% (${coverage.matched}/${coverage.total} PAA)${low ? ' [LOW]' : ''}${uncovered}`,
+        );
+      }
+    } else {
+      coverageBySlug[ranking.slug] = null;
+      console.log(`      ℹ ${ranking.slug} dfs_paa_coverage=n/a (grounding=off)`);
+    }
     rankingsTouched += 1;
   }
 
@@ -945,7 +1099,13 @@ async function main(): Promise<void> {
   writeFileSync(
     resolve(RUNLOG_DIR, `enrich-ranking-justifications-${ts}.json`),
     `${JSON.stringify(
-      { finishedAt: new Date().toISOString(), args, rankingsTouched, results: allResults },
+      {
+        finishedAt: new Date().toISOString(),
+        args,
+        rankingsTouched,
+        coverageBySlug,
+        results: allResults,
+      },
       null,
       2,
     )}\n`,

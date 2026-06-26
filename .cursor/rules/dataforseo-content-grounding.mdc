@@ -58,14 +58,18 @@ Sur **tout** pipeline qui génère ou régénère du contenu éditorial, l'agent
 | Rankings FAQ (curated) | `rankings/enrich-ranking-faq-grounded.ts` | ✅ `groundKeywords` | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>` (2026-06-25)** |
 | Rankings v2 (sections + FAQ + meta) | `rankings/generate-ranking-v2.ts` | ✅ `groundKeywords` (self-ground via `loadDfsConfig` + seeds, injectable/disableable via `GenerateRankingV2Options`) | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>` (2026-06-25)** |
 | Lieux / POI éditorial | `places/enrich-places-editorial.ts` | ✅ `groundKeywords` | non |
-| `premium-section-generator.ts` | premium sections | ✅ `groundHotel` | non |
+| **Guides éditoriaux (long-read destination)** | `guides/generate-guide-v2.ts` | ✅ **`groundKeywords` (2026-06-26)** — self-ground via `loadDfsConfig` + seeds `meilleurs hôtels {ville}` / `que faire {ville}`, injecté dans Call M + Call S + Call FAQ, injectable/disableable via `GenerateGuideV2Options` | ✅ **`evaluatePaaCoverage` → `dfs_paa_coverage=<pct>` (2026-06-26)** |
+| `premium-section-generator.ts` | premium sections | ⚠️ **Tavily-only** (snippets `=== SOURCES ===` extraits par Tavily — **PAS** DataForSEO/`groundHotel`) | non |
 
 ### Reste à câbler / renforcer (backlog)
 
 - Étendre le gate `evaluatePaaCoverage` (matching souple, `data seo` check)
-  au-delà de la FAQ kit + classements (FAQ v2 + curated, câblés 2026-06-25)
+  au-delà de la FAQ kit + classements + guides (câblés 2026-06-25 / 2026-06-26)
   vers `long_description_sections` et lieux (aujourd'hui grounded à l'entrée
   mais sans vérification de couverture en sortie).
+- **`premium-section-generator.ts` n'est PAS DataForSEO-grounded** — il ne
+  reçoit qu'un bloc Tavily (`=== SOURCES ===` de snippets extraits). Le câbler
+  sur `groundHotel` (mots-clés/PAA) reste à faire pour être conforme à la règle.
 - Tout **nouveau** pipeline de contenu démarre **grounded par défaut** — ne pas
   livrer un générateur LLM-only sans `groundHotel`/`groundKeywords` + le flag
   `--no-grounding` de secours.

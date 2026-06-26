@@ -147,6 +147,12 @@ export interface ListHotelsOptions {
   /** Restrict to an explicit list of slugs (comma-separated in CLI). */
   readonly slugs?: readonly string[];
   /**
+   * Restrict to a single ISO 3166-1 alpha-2 country code (e.g. `FR`).
+   * Used by the geo_qa re-grounding pass to target the FR-biased gap
+   * (404 FR fiches sans geo_qa, 2026-06-26) without touching the rest.
+   */
+  readonly countryCode?: string;
+  /**
    * Order: default `updated_at.desc`. Pass `priority.asc.nullslast` to
    * surface high-priority hotels first when running a partial batch.
    */
@@ -249,6 +255,10 @@ export async function listHotels(
   // therefore a no-op on the server query, but kept on the options
   // type for API parity with the factual_summary / concierge_advice
   // helpers.
+
+  if (opts.countryCode !== undefined && opts.countryCode.length > 0) {
+    filterParts.push(`country_code=eq.${encodeURIComponent(opts.countryCode)}`);
+  }
 
   if (opts.slug !== undefined) {
     filterParts.push(`slug=eq.${encodeURIComponent(opts.slug)}`);

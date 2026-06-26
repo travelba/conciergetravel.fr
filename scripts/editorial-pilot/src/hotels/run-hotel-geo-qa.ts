@@ -5,6 +5,7 @@
  * Modes:
  *   --slug=<slug>            single hotel (debug / pilot)
  *   --slugs=a,b,c            explicit list
+ *   --country=FR             restrict to one ISO country code (e.g. the FR gap)
  *   --limit=<N>              cap to N hotels
  *   --dry-run                generate + print, do NOT write to Supabase
  *   --refresh                re-generate even if a hotel already has geo_qa
@@ -52,6 +53,7 @@ const SupabaseEnvSchema = z.object({
 interface Args {
   readonly slug?: string;
   readonly slugs?: readonly string[];
+  readonly country?: string;
   readonly limit?: number;
   readonly dryRun: boolean;
   readonly refresh: boolean;
@@ -73,6 +75,7 @@ function parseArgs(argv: readonly string[]): Args {
   const out: {
     slug?: string;
     slugs?: readonly string[];
+    country?: string;
     limit?: number;
     dryRun: boolean;
     refresh: boolean;
@@ -88,8 +91,12 @@ function parseArgs(argv: readonly string[]): Args {
   };
   const slugRaw = map.get('slug');
   const slugsRaw = map.get('slugs');
+  const countryRaw = map.get('country');
   const limitRaw = map.get('limit');
   if (typeof slugRaw === 'string') out.slug = slugRaw;
+  if (typeof countryRaw === 'string' && countryRaw.length > 0) {
+    out.country = countryRaw.toUpperCase();
+  }
   if (typeof slugsRaw === 'string') {
     const list = slugsRaw
       .split(',')
@@ -252,7 +259,7 @@ async function main(): Promise<void> {
 
   console.log(`[geo-qa] provider=${provider} model=${client.model}`);
   console.log(
-    `[geo-qa] mode dryRun=${args.dryRun} refresh=${args.refresh} concurrency=${args.concurrency} limit=${args.limit ?? '∞'}`,
+    `[geo-qa] mode dryRun=${args.dryRun} refresh=${args.refresh} country=${args.country ?? 'all'} concurrency=${args.concurrency} limit=${args.limit ?? '∞'}`,
   );
 
   const listOpts: {
@@ -260,12 +267,14 @@ async function main(): Promise<void> {
     requireDescription: boolean;
     slug?: string;
     slugs?: readonly string[];
+    countryCode?: string;
   } = {
     onlyPublished: !args.includeDrafts,
     requireDescription: true,
   };
   if (args.slug !== undefined) listOpts.slug = args.slug;
   if (args.slugs !== undefined) listOpts.slugs = args.slugs;
+  if (args.country !== undefined) listOpts.countryCode = args.country;
   const allRows = await listHotels(supabase, listOpts);
 
   let candidates = allRows;

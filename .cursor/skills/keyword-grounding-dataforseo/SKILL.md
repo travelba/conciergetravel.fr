@@ -113,8 +113,21 @@ Validation that works:
 ```
 run-hotel-geo-qa --slug=<x> --dry-run   # inspect entries in runs/geo-qa-dry-*.json
 run-hotel-geo-qa --slug=<x>             # live write
+run-hotel-geo-qa --country=FR --concurrency=3   # target one country's gap
 # walk /fr|/en/hotel/<x> → section [data-geo="hotel-qa"] renders FR+EN
 ```
+
+> **FR geo_qa gap + `--country` filter (2026-06-26).** A coverage audit found
+> the catalogue skewed: only 337 / 741 published FR fiches had geo_qa (45.5 %)
+> vs ~81 % non-FR — the inverse of the international `skip_no_paa` problem the
+> native-locale fix solved. The runner gained a `--country=FR` flag (backed by
+> `ListHotelsOptions.countryCode`) to re-ground the 404-fiche FR gap without
+> touching the rest. **Expect a high `skip_no_paa` rate on FR**: hundreds of the
+> 404 are hotels in tiny villages (La Clusaz, Le Lavandou, Montazeau…) for which
+> DataForSEO returns **zero PAA** — geo_qa correctly skips them (Rule 7: no
+> LLM-only fallback). The pass produces geo_qa only for fiches in cities with
+> real long-tail demand (Paris, Nice, Cannes, Bordeaux…). A low FR coverage % is
+> therefore partly structural, not a pipeline failure.
 
 ## FAQ kit grounding (Perplexity two-tier kit) — wired 2026-06-25
 
@@ -209,6 +222,49 @@ FAQ + factual-summary prompts under `### Ancrage SEO/GEO (DataForSEO)`, then
 runs the gate. **Never duplicate the soft-token matcher** — always import
 `evaluatePaaCoverage` from `hotels/faq-perplexity-gates.ts`. Still TODO:
 `long_description_sections` and lieux (grounded at entry, no output gate yet).
+
+### Output gate now also covers editorial **guides** (extended 2026-06-26)
+
+The long-read destination guide generator
+(`scripts/editorial-pilot/src/guides/generate-guide-v2.ts`) was 100 % LLM-only
+(non-conforme à la directive PO). It now mirrors the rankings v2 contract:
+
+- **Seeds** derived from the destination: `meilleurs hôtels {ville}` +
+  `que faire {ville}` (+ `hôtel de luxe {ville}`). The two travel-intent seeds
+  come **first** because `groundKeywords` pulls PAA from `maxSerpSeeds=2` only.
+- **Self-grounds** at entry via `loadDfsConfig()` + `groundKeywords`, or accepts
+  a pre-loaded `grounding` / `disableGrounding` via `GenerateGuideV2Options`
+  (same shape as `GenerateRankingV2Options`). Default locale `France/fr`
+  (francophone audience) — the copy is FR-first even for foreign cities, so
+  France/fr PAA is the right primary signal (override via `groundingLocale`).
+- **Injects** the block under `### Ancrage SEO/GEO (DataForSEO)` into **Call M**
+  (meta + section plan + highlights), **every Call S** (each section body) and
+  **Call FAQ** — the three calls whose output must track real demand.
+- **Output gate** — `logGuidePaaCoverage` reuses the shared `evaluatePaaCoverage`
+  over FAQ + section bodies + highlights and logs `dfs_paa_coverage=<pct>`
+  (NON-blocking). Degrades to `grounding=off` / `dfs_paa_coverage=n/a` when DFS
+  is off.
+- **Runner flags** — `run-guides-v2.ts` gains `--no-grounding` (default ON) and
+  `--dry-run` (generate + print the injected DFS block + coverage, **no DB
+  write** — preserves the existing EN parity on the 99 published guides). Do
+  NOT mass-regenerate the catalogue: the capability is wired + validated on
+  1-2 guides in dry-run, full regen is a separate decision.
+
+Validation that works (real DFS + LLM, no persistence):
+
+```
+run-guides-v2 --slug=cannes --dry-run
+# → grounding=on (PAA=7); prints the ### Ancrage SEO/GEO block; then
+#   ℹ [cannes] grounding=on dfs_paa_coverage=71% (5/7 PAA covered)
+#   ✓ dry-run — NOT persisted
+```
+
+> ⚠ **`premium-section-generator.ts` is NOT DataForSEO-grounded** — it only
+> receives a **Tavily** `=== SOURCES ===` snippet block, not `groundHotel`
+> keyword/PAA grounding. The état table in
+> `.cursor/rules/dataforseo-content-grounding.mdc` previously mislabelled it as
+> `groundHotel`; corrected 2026-06-26. Wiring it on `groundHotel` is a remaining
+> backlog item.
 
 ## Rule 1 — Grounding is OPTIONAL and degrade-safe, never a hard dependency
 

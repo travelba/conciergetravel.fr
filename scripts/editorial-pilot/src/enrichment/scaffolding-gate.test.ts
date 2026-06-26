@@ -63,6 +63,12 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'Le spa, encore à documenter, promet un espace de bien-être raffiné.',
     'Les prestations restent encore à préciser pour ce Palace.',
     // word-count bookkeeping class (2026-06-22 editorial_guides audit).
+    // "field unspecified" data-gap class (2026-06-26 catalogue audit) — a bare
+    // `non renseigné(e)` admin token narrated into live en-pratique bullets.
+    'Année de première distinction Palace : non renseignée.',
+    'Classement : 5 étoiles ; Palace, date de première distinction non renseignée.',
+    'Capacité : non renseignée',
+    'Date de distinction Palace : non renseigné',
     'Une escale hors du temps face à la baie. Compte mots: 434',
     'Le terroir breton se savoure lentement. Compteur de mots: 435',
     'La côte atlantique au crépuscule. Compte: 479 mots.',
@@ -97,10 +103,10 @@ describe('hasLeak — scaffolding / pipeline meta-commentary detector', () => {
     'La carte propose une rubrique végétarienne complète et inventive.',
     'Un savoir-faire documenté depuis 1850 se perpétue dans chaque suite.',
     'The history is well documented in the hotel’s private archive.',
-    // "non renseignée" alone is a legitimate "field unspecified" state in the
-    // en-pratique block — only the "…dans ce brief" tail makes it a leak.
-    'Année de première distinction Palace : non renseignée.',
-    'Classement : 5 étoiles ; Palace, date de première distinction non renseignée.',
+    // "renseigné" stays clean when it is NOT the bare "non renseigné" gap token
+    // (the negation phrasing below is ordinary prose, not an admin placeholder).
+    'Le service de conciergerie vous a renseigné sur les meilleures tables du quartier.',
+    'Un majordome dédié vous tient renseigné des activités de la journée.',
     // data-gap guards: legit "available"/"reste" phrasings stay clean.
     'Le room service n’est pas disponible la nuit, mais un plateau froid attend en chambre.',
     'Le petit-déjeuner reste à la carte, servi jusqu’à 11 heures.',

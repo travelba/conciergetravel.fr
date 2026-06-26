@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { z } from 'zod';
 
+import { hasLeak } from '../enrichment/scaffolding-gate.js';
 import type { LlmClient } from '../llm.js';
 import type { HotelLlmInput } from './supabase-hotels.js';
 
@@ -145,6 +146,39 @@ export function gateConciergeAdviceFormat(out: ConciergeAdviceOutput): string | 
 
   checkLocale('fr', out.fr.body, out.fr.title, /^Mon\s+conseil\s*:/u, BANNED_LEXICON);
   checkLocale('en', out.en.body, out.en.title, /^My\s+tip\s*:/u, BANNED_LEXICON_EN_LOOSE);
+
+  // Anti-scaffolding gate (ADR-0029, invariant I1): never persist an advice that
+  // narrates the data dossier / brief / a "field unspecified" gap. Fed a thin
+  // brief, the LLM otherwise writes "traitez ce dossier comme une base
+  // administrative…" or "le reste du dossier est encore en enrichissement" —
+  // exactly the 110 live leaks the 2026-06-26 audit found. Refuse-rather-than-
+  // persist: the generation loop retries, then throws if it can't produce clean.
+  for (const [locale, value] of [
+    ['fr.title', out.fr.title],
+    ['fr.body', out.fr.body],
+    ['en.title', out.en.title],
+    ['en.body', out.en.body],
+  ] as const) {
+    if (hasLeak(value)) failed.push(`${locale} contains scaffolding/dossier leak`);
+  }
+
+  // Anti-scaffolding write-guard (ADR-0029 invariant I1). A thin-source hotel
+  // pushes the LLM to narrate the data dossier into the advice itself ("utilisez
+  // ce dossier comme un repère", "le reste est encore en enrichissement", "le
+  // seul bloc vraiment vérifié du dossier"). The 2026-06 audit found 110 such
+  // published advices. The shared `hasLeak()` gate rejects them so the retry
+  // loop re-prompts and, failing that, refuses to persist (a regenerable null
+  // beats a live leak).
+  for (const [locale, field, value] of [
+    ['fr', 'body', out.fr.body],
+    ['fr', 'title', out.fr.title],
+    ['en', 'body', out.en.body],
+    ['en', 'title', out.en.title],
+  ] as const) {
+    if (hasLeak(value)) {
+      failed.push(`${locale}.${field} carries scaffolding/meta-commentary (hasLeak)`);
+    }
+  }
 
   // EN must not be a literal translation of FR — first 40 chars
   // shouldn't be identical after stripping accents + lowercasing.

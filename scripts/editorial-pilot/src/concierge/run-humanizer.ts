@@ -33,6 +33,7 @@ import { config as loadDotenv } from 'dotenv';
 
 import { buildLlmClient } from '../llm.js';
 import { loadEnv, resolveProvider } from '../env.js';
+import { hasLeak } from '../enrichment/scaffolding-gate.js';
 import { ConciergePass8OutputSchema, type ConciergePass8Output } from '../schemas.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -314,6 +315,25 @@ async function runOne(
     return { slug, status: 'failed', reason: `schema validation failed:\n${issues}` };
   }
   const advice = parsed.data;
+
+  // Anti-scaffolding gate (ADR-0029, invariant I1): refuse-rather-than-persist.
+  // Pass 8 fed a thin synthetic brief regularly narrates the dossier itself
+  // ("le reste du dossier est encore en enrichissement", "traitez ce dossier
+  // comme une base administrative") — the exact leak the 2026-06-26 audit found
+  // live on 110 fiches. A leaking advice is dropped, never written; the row keeps
+  // its prior value (or stays null) and is retried on a later clean run.
+  const ca = advice.concierge_advice;
+  const leakField = (
+    [
+      ['fr.title', ca.fr.title],
+      ['fr.body', ca.fr.body],
+      ['en.title', ca.en.title],
+      ['en.body', ca.en.body],
+    ] as const
+  ).find(([, value]) => hasLeak(value));
+  if (leakField !== undefined) {
+    return { slug, status: 'failed', reason: `scaffolding/dossier leak in ${leakField[0]}` };
+  }
 
   if (args.dryRun) {
     return {
