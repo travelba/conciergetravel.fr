@@ -29,6 +29,41 @@ function resolveConnectionString(): string {
   return conn;
 }
 
+/**
+ * Minimum number of ranking entries below which a ranking must NEVER be
+ * published. Matches the combinator eligibility policy (≥ 3 hotels) and the
+ * documented 2026-05-31 precedent where 13 zero-inventory slugs were
+ * unpublished. Override with `MCH_RANKING_MIN_ENTRIES` for a deliberate small
+ * curated ranking.
+ *
+ * Root cause of the 2026-06-26 "0 hôtels" prod incident (51 published rankings
+ * rendering "Classement éditorial de 0 hôtels …", surfaced by the L3
+ * site-audit crawler — docs/audits/rankings-health-crawl-2026-06-26.md): the
+ * bulk pipeline pushed empty geographic×theme combos (e.g. montagne-saint-tropez)
+ * with `publish=true` and no entry-count gate. This guard closes that path so
+ * a thin/empty ranking can never go live again.
+ */
+export const MIN_PUBLISHABLE_ENTRIES = 3;
+
+function resolveMinEntries(): number {
+  const raw = process.env['MCH_RANKING_MIN_ENTRIES'];
+  if (raw === undefined) return MIN_PUBLISHABLE_ENTRIES;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : MIN_PUBLISHABLE_ENTRIES;
+}
+
+/**
+ * Publish gate: a ranking may only stay published if the caller asked to AND
+ * it carries at least `floor` entries. Pure + exported for unit testing.
+ */
+export function resolveEffectivePublish(
+  requestedPublish: boolean,
+  entryCount: number,
+  floor: number = MIN_PUBLISHABLE_ENTRIES,
+): boolean {
+  return requestedPublish && entryCount >= floor;
+}
+
 interface TocAnchor {
   readonly anchor: string;
   readonly label_fr: string;
@@ -100,6 +135,19 @@ export async function pushRankingV2(
     readonly axes?: RankingAxes;
   } = { publish: true },
 ): Promise<void> {
+  // Publish gate (root-cause fix for the 2026-06-26 "0 hôtels" incident):
+  // never let a thin/empty ranking go live, regardless of the caller's intent.
+  const floor = resolveMinEntries();
+  const effectivePublish = resolveEffectivePublish(options.publish, ranking.entries.length, floor);
+  if (options.publish && !effectivePublish) {
+    console.warn(
+      `[push-ranking-v2] "${seed.slug}" has ${ranking.entries.length} entr${
+        ranking.entries.length === 1 ? 'y' : 'ies'
+      } (< ${floor}) — forcing is_published=false (zero/thin ranking gate).`,
+    );
+  }
+  const gatedOptions = { ...options, publish: effectivePublish };
+
   // PostgREST fallback for environments where the direct `pg` connection
   // is unusable (Windows dev box: SUPABASE_DB_URL / _POOLER_URL point at
   // the IPv6-only direct host `db.<ref>.supabase.co` and/or carry a stale
@@ -108,7 +156,7 @@ export async function pushRankingV2(
   // windows-dev-environment SKILL Rule 12). Set MCH_PUSH_VIA_REST=1 to
   // write through the service-role REST API instead.
   if (process.env['MCH_PUSH_VIA_REST'] === '1') {
-    await pushRankingV2ViaRest(seed, ranking, options);
+    await pushRankingV2ViaRest(seed, ranking, gatedOptions);
     return;
   }
   const pgModule = (await import('pg')) as typeof import('pg');
@@ -188,7 +236,7 @@ export async function pushRankingV2(
         todayIso,
         'MyConciergeHotel Éditorial',
         '/equipe/editorial',
-        options.publish,
+        effectivePublish,
         JSON.stringify(ranking.tables),
         JSON.stringify(ranking.glossary),
         JSON.stringify(ranking.external_sources),
