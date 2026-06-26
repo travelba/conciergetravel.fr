@@ -1,0 +1,106 @@
+name: Site audit (prod health)
+
+# L3 site-wide health crawl (skill: site-audit-crawler). Walks the public
+# sitemap and audits every sampled URL — HTTP 200, single <h1>, title/meta/
+# canonical, hreflang parity, no scaffolding leak in prose, valid JSON-LD
+# (no frozen Offer, AggregateRating on /5), live internal links + images, and
+# the anti-"0 hôtels" list-value check.
+#
+# Read-only: the crawler only issues GET/HEAD against the PUBLIC site, so it
+# needs NO secrets and NO database. It runs against prod by default; pass a
+# preview URL via the `base` input to gate a deploy.
+#
+# Non-blocking by default (`fail_on=none`): this is monitoring, not a PR gate,
+# and prod currently has known content bugs (empty "0 hôtels" rankings) that
+# would otherwise keep the job permanently red. Flip `fail_on` to `fail` once
+# those are fixed to turn this into a true alert. The full JSON + HTML report
+# is always uploaded as an artifact and the summary printed to the run page.
+
+on:
+  schedule:
+    # Daily at 06:00 UTC — after the nightly editorial pipelines settle and
+    # within one ISR revalidation window (revalidate = 3600 s).
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Base URL to audit (default: production)"
+        required: false
+        default: "https://myconciergehotel.com"
+        type: string
+      sample:
+        description: "Random URL sample size across all sitemap groups"
+        required: false
+        default: "400"
+        type: string
+      fail_on:
+        description: "Exit-code threshold (none = report only)"
+        required: false
+        default: "none"
+        type: choice
+        options:
+          - none
+          - warn
+          - fail
+
+concurrency:
+  group: site-audit
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 20.19.4
+  COREPACK_ENABLE_STRICT: "0"
+  COREPACK_ENABLE_SIGNATURES: "0"
+  SKIP_ENV_VALIDATION: "true"
+
+jobs:
+  crawl:
+    name: Crawl + audit
+    runs-on: ubuntu-latest
+    # The crawl of a 400-URL sample with link/image probing runs in ~5 min;
+    # 20 min is a generous ceiling that flags a prod outage or a hung probe.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Upgrade corepack + activate pnpm
+        run: |
+          npm install -g corepack@latest
+          corepack enable
+          corepack prepare pnpm@10.33.2 --activate
+          pnpm --version
+      - run: pnpm install --frozen-lockfile
+      - name: Run site audit
+        env:
+          BASE: ${{ inputs.base || 'https://myconciergehotel.com' }}
+          SAMPLE: ${{ inputs.sample || '400' }}
+          FAIL_ON: ${{ inputs.fail_on || 'none' }}
+        run: |
+          set -o pipefail
+          echo "Auditing $BASE (sample=$SAMPLE, fail-on=$FAIL_ON)"
+          pnpm --filter @mch/site-audit crawl -- \
+            --base="$BASE" --sample="$SAMPLE" --fail-on="$FAIL_ON" | tee /tmp/site-audit.out
+      - name: Publish summary
+        if: always()
+        env:
+          BASE: ${{ inputs.base || 'https://myconciergehotel.com' }}
+        run: |
+          {
+            echo "## Site audit — ${BASE}"
+            echo ''
+            echo '```'
+            sed -n '/──────── Summary/,/Reports written/p' /tmp/site-audit.out || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-audit-report-${{ github.run_id }}
+          path: |
+            scripts/site-audit/runs/site-audit-*.json
+            scripts/site-audit/runs/site-audit-*.html
+          retention-days: 30
+          if-no-files-found: warn
