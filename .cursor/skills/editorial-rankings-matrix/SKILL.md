@@ -266,6 +266,17 @@ réel — c'est la seule barrière que ni `skipUnderfilled` ni le ratchet ne
 fournissent. (Le garde-fou ne dépublie pas les 51 lignes déjà live : ça reste
 une op admin explicite, en attente d'accès DB + GO PO.)
 
+**Même incident, 2e classe — 66 classements avec fuite de scaffolding live.**
+Le même audit a trouvé 66 pages rendant du méta-commentaire brief/dossier
+(ex. `top-anantara-hotels-monde`, `top-relais-chateaux-*`) : le bulk path
+n'exécutait **pas** le gate `hasLeak()` partagé. Fix = `rankingProseLeaks(ranking)`
+dans le même `pushRankingV2` — scanne intro/outro/factual_summary + sections
+(title/body) + FAQ (Q/R) dans les 2 locales et force `is_published=false` si
+fuite. C'est la déclinaison rankings de la leçon hotel-fiche (AGENTS wave 6) :
+**tout générateur écrivant une colonne publique DOIT passer `hasLeak()`, et le
+publisher doit refuser de publier de la prose qui fuit.** Les deux garde-fous
+(entries + leak) vivent désormais côte à côte au write-boundary.
+
 ## Rule 8 — Chain rankings hors matrice (workflow PostgREST direct)
 
 Quand on veut produire un **cross-chain ranking** (`Top 25 Aman`, `Top 30
