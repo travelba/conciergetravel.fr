@@ -127,6 +127,7 @@ logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
 | g8             | heads   | 55/60    | 52       | 56 %        | 7.54         | 0.24 | 58.75        |
 | g9             | heads   | 54/60    | 55       | 53 %        | 7.86         | 0.24 | 66.85        |
 | g10            | heads   | 52/53    | 50       | 58 %        | 6.39         | 0.22 | 73.46        |
+| g11            | rest    | 57/60    | 55       | 59 %        | 7.74         | 0.24 | 81.45        |
 
 `grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
 (DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
@@ -134,8 +135,8 @@ warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
 questions) not legitimately FAQ-able for the property. 6 skips this wave
 (`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
 
-**Shard-3 counter: `shard3: 630/746`** (100 → … → 578 → 630; netnew + heads
-both drained, now on `rest` segment). Prod acceptance g9: `lord-elgin-hotel`
+**Shard-3 counter: `shard3: 687/746`** (100 → … → 630 → 687; netnew + heads
+drained, on `rest` segment). Prod acceptance g9: `lord-elgin-hotel`
 200, `FAQPage` + `acceptedAnswer`, no `Offer` leak. Prod acceptance after g4:
 `mama-shelter-lille` 200, `FAQPage` JSON-LD + `acceptedAnswer` rendered,
 concierge block present, no `Offer` leak (Phase 6 respected). Resume continues
