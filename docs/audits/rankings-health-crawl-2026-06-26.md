@@ -234,14 +234,15 @@ complet et factuel de notre sélection."` → ~74 fixed chars. For short
 city+country (e.g. "3 hôtels … à Nice, France …") the rendered string lands at
 ~88-100 chars, below the 110 SEO floor.
 
-**Fix** = widen the fixed copy to ~100-108 chars (so short combos clear 110 and
-the longest combos — e.g. `Saint-Paul-de-Vence, Royaume-Uni` — stay ≤ 170).
-This is a pure i18n edit (FR + EN), but it **must be verified against the real
-city/country name distribution** by re-crawling after deploy
-(`--only=hubs --budget-only`) — a hand-tuned template can regress out the other
-side of the band (> 170) for long names. Deferred to a deploy-and-verify cycle
-rather than shipped blind (no live render available in this session to confirm
-the band across all names).
+**Fixed (2026-06-26)** — the FR + EN templates were widened (`+ Palaces, 5★ et
+adresses de charme` / `+ Palaces, 5★ and characterful addresses`) and the result
+is **verified deterministically** by `apps/web/src/i18n/directory-city-meta-length.test.ts`,
+which renders the SHIPPED template (faithful ICU plural + `Intl.NumberFormat`)
+for the crawl-observed pairs + the realistic short/long extremes and asserts
+every result lands in [110, 170]. Concrete: `Nice, France` 88→**121**,
+`Minorque, Espagne` 90→**127**, `Punta Cana, République dominicaine`→**144**,
+`Saint-Jean-Cap-Ferrat, France`→**140** (all with margin to 170). Final prod
+confirmation comes from the scheduled `hubs` re-crawl after the next deploy.
 
 ## Notes
 
