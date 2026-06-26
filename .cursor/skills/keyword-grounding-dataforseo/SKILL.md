@@ -250,14 +250,25 @@ The long-read destination guide generator
   NOT mass-regenerate the catalogue: the capability is wired + validated on
   1-2 guides in dry-run, full regen is a separate decision.
 
-Validation that works (real DFS + LLM, no persistence):
+Validation that works (real DFS + LLM, no persistence) — validated 2026-06-26
+(code wired + `tsc --noEmit` green; the §guide contract had been documented in
+a prior session whose code was lost on a cut, so the generator was still
+LLM-only until this run):
 
 ```
-run-guides-v2 --slug=cannes --dry-run
-# → grounding=on (PAA=7); prints the ### Ancrage SEO/GEO block; then
-#   ℹ [cannes] grounding=on dfs_paa_coverage=71% (5/7 PAA covered)
-#   ✓ dry-run — NOT persisted
+run-guides-v2 --slug=paris --dry-run
+# → [paris] grounding=on (PAA=7); prints the ### Ancrage SEO/GEO block (the 7
+#   real PAA + top keywords "que faire paris" 22200/mo, "meilleurs hôtels
+#   paris" 590/mo, …) injected into Call M + every Call S + Call FAQ; then
+#   ℹ [paris] grounding=on dfs_paa_coverage=100% (7/7 PAA covered)
+#   ✓ dry-run — NOT persisted (preserves the EN parity on the 99 guides)
 ```
+
+`resolveGuideGrounding(dest, options)` is exported so the runner can resolve +
+print the block once in `--dry-run` then hand the same `KeywordGrounding` back
+to `generateGuideV2(dest, { grounding })` — no second DFS round-trip. Live runs
+pass `{ disableGrounding: !grounded }` and let the generator self-ground (disk
+cache → free) and log the coverage line itself.
 
 > ⚠ **`premium-section-generator.ts` is NOT DataForSEO-grounded** — it only
 > receives a **Tavily** `=== SOURCES ===` snippet block, not `groundHotel`

@@ -36,6 +36,14 @@ import { z } from 'zod';
 
 import { loadEnv, resolveProvider } from '../env.js';
 import { buildLlmClient, type LlmClient } from '../llm.js';
+import { loadDfsConfig } from '../grounding/env-dfs.js';
+import {
+  groundKeywords,
+  renderGroundingForPrompt,
+  type GroundingLocale,
+  type KeywordGrounding,
+} from '../grounding/keyword-grounding.js';
+import { evaluatePaaCoverage } from '../hotels/faq-perplexity-gates.js';
 import type { DestinationGuideSeed } from './destinations-catalog.js';
 import {
   ALLOWLIST,
@@ -1042,6 +1050,114 @@ function postValidateSources(
   return out;
 }
 
+// ─── DataForSEO grounding (entry) + PAA coverage gate (output) ─────────
+//
+// Hard rule (PO 2026-06-25, `.cursor/rules/dataforseo-content-grounding.mdc`):
+// every content generator must (a) ground on real demand BEFORE the LLM
+// call and (b) verify PAA/intent coverage AFTER generation, before
+// persistence. The rankings v2 generator already does both; the guide v2
+// generator now mirrors that exact contract. DFS stays an *enhancer*: when
+// `loadDfsConfig()` returns null (Vercel build, dev box without
+// `DATAFORSEO_ENABLED`) the generator degrades to LLM-only and logs
+// `grounding=off`. The disk cache (`data/dfs-cache/`) means a re-grounded
+// destination costs zero extra API. See `keyword-grounding-dataforseo`.
+
+export interface GenerateGuideV2Options {
+  /**
+   * Pre-loaded DataForSEO grounding (PAA + keywords). When omitted, the
+   * generator self-grounds via `loadDfsConfig()` + seeds derived from the
+   * destination, unless `disableGrounding` is set.
+   */
+  readonly grounding?: KeywordGrounding;
+  /** DFS locale used when self-grounding (default France / fr). */
+  readonly groundingLocale?: GroundingLocale;
+  /** Skip grounding entirely (`--no-grounding`). */
+  readonly disableGrounding?: boolean;
+}
+
+const DEFAULT_GROUNDING_LOCALE: GroundingLocale = {
+  locationName: 'France',
+  languageCode: 'fr',
+};
+
+/**
+ * Derive the DFS search seeds for a destination. The two travel-intent
+ * seeds come FIRST because `groundKeywords` only scrapes PAA from the first
+ * `maxSerpSeeds` (=2) seeds — `meilleurs hôtels {ville}` + `que faire
+ * {ville}` are the queries whose People-Also-Ask we most want the guide to
+ * answer; `hôtel de luxe {ville}` rides the related-keyword expansion.
+ */
+function deriveGuideGroundingSeeds(dest: DestinationGuideSeed): string[] {
+  const place = dest.nameFr.replace(/\s+/gu, ' ').trim();
+  if (place.length === 0) return [];
+  const seeds = [`meilleurs hôtels ${place}`, `que faire ${place}`, `hôtel de luxe ${place}`];
+  return [...new Set(seeds)];
+}
+
+/**
+ * Resolve the grounding for a guide generation: caller-provided wins, else
+ * self-ground when DFS is configured, else `null` (LLM-only). Never throws —
+ * `groundKeywords` degrades to an empty grounding on any vendor failure.
+ */
+export async function resolveGuideGrounding(
+  dest: DestinationGuideSeed,
+  options: GenerateGuideV2Options,
+): Promise<KeywordGrounding | null> {
+  if (options.disableGrounding === true) return null;
+  if (options.grounding !== undefined) return options.grounding;
+  const cfg = loadDfsConfig();
+  if (cfg === null) return null;
+  const seeds = deriveGuideGroundingSeeds(dest);
+  if (seeds.length === 0) return null;
+  return groundKeywords(cfg, seeds, options.groundingLocale ?? DEFAULT_GROUNDING_LOCALE);
+}
+
+/** Append the real-demand grounding block to a base prompt (no-op when off). */
+function appendGroundingDirective(basePrompt: string, grounding: KeywordGrounding | null): string {
+  if (grounding === null || !grounding.grounded) return basePrompt;
+  const block = renderGroundingForPrompt(grounding);
+  if (block.length === 0) return basePrompt;
+  return `${basePrompt}\n\n### Ancrage SEO/GEO (DataForSEO)\n${block}`;
+}
+
+/**
+ * Output gate — measure how much of the REAL People-Also-Ask demand the
+ * generated FAQ + section bodies + highlights cover, and log a structured,
+ * NON-blocking `dfs_paa_coverage=<pct>` signal. Reuses the shared soft-token
+ * matcher `evaluatePaaCoverage` (single source of truth, also used by the FAQ
+ * kit + rankings pipelines) — never duplicates the matching logic. Degrades
+ * to `dfs_paa_coverage=n/a` when DFS was off or returned zero PAA.
+ */
+function logGuidePaaCoverage(
+  slug: string,
+  grounding: KeywordGrounding | null,
+  faq: ReadonlyArray<z.infer<typeof FaqSchema>>,
+  sections: ReadonlyArray<z.infer<typeof SectionSchema>>,
+  highlights: ReadonlyArray<z.infer<typeof HighlightSchema>>,
+): void {
+  const peopleAlsoAsk = grounding?.peopleAlsoAsk ?? [];
+  const faqBlobs = [
+    ...faq.map((f) => `${f.question_fr} ${f.answer_fr}`),
+    ...sections.map((s) => `${s.title_fr} ${s.body_fr}`),
+    ...highlights.map((h) => `${h.name_fr} ${h.description_fr}`),
+  ];
+  const coverage = evaluatePaaCoverage(faqBlobs, peopleAlsoAsk);
+  if (!coverage.grounded) {
+    console.warn(
+      `  ℹ [${slug}] grounding=${grounding?.grounded ? 'on' : 'off'} dfs_paa_coverage=n/a (no PAA available).`,
+    );
+    return;
+  }
+  const low = coverage.coveragePct < 50;
+  const uncovered =
+    low && coverage.uncovered.length > 0
+      ? ` — uncovered: ${coverage.uncovered.slice(0, 5).join(' | ')}`
+      : '';
+  console.warn(
+    `  ${low ? '⚠' : 'ℹ'} [${slug}] grounding=on dfs_paa_coverage=${coverage.coveragePct}% (${coverage.matched}/${coverage.total} PAA covered)${low ? ' [LOW]' : ''}${uncovered}`,
+  );
+}
+
 // ─── Public entry point ──────────────────────────────────────────────
 
 /**
@@ -1071,16 +1187,26 @@ async function runWithConcurrency<T, R>(
   return out;
 }
 
-export async function generateGuideV2(dest: DestinationGuideSeed): Promise<GeneratedGuideV2> {
+export async function generateGuideV2(
+  dest: DestinationGuideSeed,
+  options: GenerateGuideV2Options = {},
+): Promise<GeneratedGuideV2> {
   const env = loadEnv();
   const provider = resolveProvider(env);
   const client = buildLlmClient(env, provider);
+
+  // (a) Ground on real demand BEFORE the LLM calls (hard rule §1). Never
+  // throws; degrades to LLM-only when DFS is off.
+  const grounding = await resolveGuideGrounding(dest, options);
+  console.log(
+    `  • [${dest.slug}] grounding=${grounding?.grounded ? 'on' : 'off'}${grounding?.grounded ? ` (PAA=${grounding.peopleAlsoAsk.length})` : ''}`,
+  );
 
   // --- Call M ── skeleton: meta + section plan + practical + highlights.
   const callM = await callLlm(
     client,
     SYSTEM_PROMPT_BASE,
-    buildPromptCallM(dest),
+    appendGroundingDirective(buildPromptCallM(dest), grounding),
     CallMSchema,
     `v2 ${dest.slug} call-M`,
   );
@@ -1104,7 +1230,7 @@ export async function generateGuideV2(dest: DestinationGuideSeed): Promise<Gener
     return await callLlm(
       client,
       SYSTEM_PROMPT_BASE,
-      buildPromptCallS(dest, p, plan),
+      appendGroundingDirective(buildPromptCallS(dest, p, plan), grounding),
       CallSSchema,
       `v2 ${dest.slug} S/${p.key}`,
     );
@@ -1137,7 +1263,7 @@ export async function generateGuideV2(dest: DestinationGuideSeed): Promise<Gener
     callLlm(
       client,
       SYSTEM_PROMPT_BASE,
-      buildPromptCallFaq(dest, sectionAnchors),
+      appendGroundingDirective(buildPromptCallFaq(dest, sectionAnchors), grounding),
       CallFaqSchema,
       `v2 ${dest.slug} call-FAQ`,
     ),
@@ -1152,6 +1278,12 @@ export async function generateGuideV2(dest: DestinationGuideSeed): Promise<Gener
 
   // Post-validate external_sources against allowlist (drop hallucinations).
   const cleanedSources = postValidateSources(callSources.external_sources);
+
+  // (b) Output gate — measure PAA coverage of the FAQ + section bodies +
+  // highlights against the real demand and log `dfs_paa_coverage=<pct>`
+  // (hard rule §4). NON-blocking: the allowlist + schema gates stay
+  // authoritative for persistence.
+  logGuidePaaCoverage(dest.slug, grounding, callFaq.faq, sections, callM.highlights);
 
   return {
     summary_fr: callM.summary_fr,
