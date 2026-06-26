@@ -221,9 +221,27 @@ meta-descriptions** (90-100 chars, below the 110 floor) on the
 
 **Conclusion: the content breakage is scoped to the `rankings` group.** The
 guide/destination publishers do NOT exhibit the empty/leak class (so no
-`push-guide-v2.ts` gate was added — it would be speculative). The directory
-short-meta-desc warns are a separate, non-blocking SEO-copy tightening that
-needs DB access + DataForSEO grounding to regenerate (deferred).
+`push-guide-v2.ts` gate was added — it would be speculative).
+
+### Directory short-meta-desc — root cause + recommended fix (deferred)
+
+The 208/400 short metas are NOT a DB/LLM-content issue — they come from a
+**static i18n template** `directoryPage.city.metaDesc` (`apps/web/src/i18n/
+messages/{fr,en}.json`), so the DataForSEO grounding rule does not apply.
+
+Current FR: `"{count} hôtel(s) d'exception à {city}, {country}. L'annuaire
+complet et factuel de notre sélection."` → ~74 fixed chars. For short
+city+country (e.g. "3 hôtels … à Nice, France …") the rendered string lands at
+~88-100 chars, below the 110 SEO floor.
+
+**Fix** = widen the fixed copy to ~100-108 chars (so short combos clear 110 and
+the longest combos — e.g. `Saint-Paul-de-Vence, Royaume-Uni` — stay ≤ 170).
+This is a pure i18n edit (FR + EN), but it **must be verified against the real
+city/country name distribution** by re-crawling after deploy
+(`--only=hubs --budget-only`) — a hand-tuned template can regress out the other
+side of the band (> 170) for long names. Deferred to a deploy-and-verify cycle
+rather than shipped blind (no live render available in this session to confirm
+the band across all names).
 
 ## Notes
 
