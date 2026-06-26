@@ -162,24 +162,6 @@ export function gateConciergeAdviceFormat(out: ConciergeAdviceOutput): string | 
     if (hasLeak(value)) failed.push(`${locale} contains scaffolding/dossier leak`);
   }
 
-  // Anti-scaffolding write-guard (ADR-0029 invariant I1). A thin-source hotel
-  // pushes the LLM to narrate the data dossier into the advice itself ("utilisez
-  // ce dossier comme un repère", "le reste est encore en enrichissement", "le
-  // seul bloc vraiment vérifié du dossier"). The 2026-06 audit found 110 such
-  // published advices. The shared `hasLeak()` gate rejects them so the retry
-  // loop re-prompts and, failing that, refuses to persist (a regenerable null
-  // beats a live leak).
-  for (const [locale, field, value] of [
-    ['fr', 'body', out.fr.body],
-    ['fr', 'title', out.fr.title],
-    ['en', 'body', out.en.body],
-    ['en', 'title', out.en.title],
-  ] as const) {
-    if (hasLeak(value)) {
-      failed.push(`${locale}.${field} carries scaffolding/meta-commentary (hasLeak)`);
-    }
-  }
-
   // EN must not be a literal translation of FR — first 40 chars
   // shouldn't be identical after stripping accents + lowercasing.
   const stripAccent = (s: string): string =>
