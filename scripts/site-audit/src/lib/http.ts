@@ -71,13 +71,45 @@ export interface AssetProbe {
 }
 
 /**
+ * A minimal counting semaphore — bounds how many asset probes run at once.
+ * Without it, a crawl at concurrency C with up to L links + I images per page
+ * fires C×(L+I) parallel sockets to a single origin, which undici queues and
+ * times out, producing spurious `null` ("ERR") statuses on perfectly healthy
+ * URLs (observed against prod: `/marque/aman` returns 200 to curl but ERR'd
+ * under a 320-socket flood).
+ */
+class Semaphore {
+  private active = 0;
+  private readonly queue: Array<() => void> = [];
+  constructor(private readonly max: number) {}
+  async acquire(): Promise<void> {
+    if (this.active < this.max) {
+      this.active += 1;
+      return;
+    }
+    await new Promise<void>((res) => this.queue.push(res));
+    this.active += 1;
+  }
+  release(): void {
+    this.active -= 1;
+    const next = this.queue.shift();
+    if (next) next();
+  }
+}
+
+/**
  * Probe an asset/link URL for liveness, caching the result. Tries HEAD
  * first (cheap), falls back to a ranged GET when the origin rejects HEAD
- * (405 / 501) — Cloudinary and some CDNs only answer GET.
+ * (403 / 405 / 501) — Cloudinary and some CDNs only answer GET. Bounded by a
+ * shared semaphore and retried once on a network null to absorb undici jitter.
  */
-export function createAssetProber(timeoutMs: number): (url: string) => Promise<AssetProbe> {
+export function createAssetProber(
+  timeoutMs: number,
+  maxConcurrent = 16,
+): (url: string) => Promise<AssetProbe> {
   const cache = new Map<string, AssetProbe>();
   const inflight = new Map<string, Promise<AssetProbe>>();
+  const gate = new Semaphore(maxConcurrent);
 
   async function probe(url: string): Promise<AssetProbe> {
     const cached = cache.get(url);
@@ -86,11 +118,19 @@ export function createAssetProber(timeoutMs: number): (url: string) => Promise<A
     if (pending) return pending;
 
     const run = (async (): Promise<AssetProbe> => {
-      const status = await statusFor(url, timeoutMs);
-      const result: AssetProbe = { url, status };
-      cache.set(url, result);
-      inflight.delete(url);
-      return result;
+      await gate.acquire();
+      try {
+        let status = await statusFor(url, timeoutMs);
+        // One retry on a network null — distinguishes a flaky socket from a
+        // genuinely dead endpoint (which answers a real 4xx/5xx both times).
+        if (status === null) status = await statusFor(url, timeoutMs);
+        const result: AssetProbe = { url, status };
+        cache.set(url, result);
+        return result;
+      } finally {
+        gate.release();
+        inflight.delete(url);
+      }
     })();
     inflight.set(url, run);
     return run;

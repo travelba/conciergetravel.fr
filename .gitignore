@@ -102,6 +102,9 @@ scripts/editorial-pilot/*.mjs
 scripts/editorial-pilot/audit-pushed-drafts.json
 scripts/editorial-pilot/runs/
 
+# Site-audit crawler reports (JSON + HTML), kept local only
+scripts/site-audit/runs/
+
 # Overnight pipeline runtime artifacts (logs + queue files) — repo root
 /runs/
 

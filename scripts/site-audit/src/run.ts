@@ -7,13 +7,14 @@
  * Offer, AggregateRating on /5), live internal links + images, and the
  * anti-"0 hôtels" list-page value check.
  *
- * Usage (run from repo root):
- *   pnpm --filter @mch/site-audit audit -- --sample=50
- *   pnpm --filter @mch/site-audit audit -- --only=hotels,rankings --limit=200
- *   pnpm --filter @mch/site-audit audit -- --full --concurrency=12
- *   pnpm --filter @mch/site-audit audit -- --budget-only            # fast: status + h1 only
- *   pnpm --filter @mch/site-audit audit -- --base=https://<preview>.vercel.app
- *   pnpm --filter @mch/site-audit audit -- --urls=/,/hotel/le-meurice
+ * Usage (run from repo root — the script is `crawl`, NOT `audit`: `pnpm audit`
+ * is a pnpm built-in and would shadow a script of that name):
+ *   pnpm --filter @mch/site-audit crawl -- --sample=50
+ *   pnpm --filter @mch/site-audit crawl -- --only=hotels,rankings --limit=200
+ *   pnpm --filter @mch/site-audit crawl -- --full --concurrency=12
+ *   pnpm --filter @mch/site-audit crawl -- --budget-only            # fast: status + h1 only
+ *   pnpm --filter @mch/site-audit crawl -- --base=https://<preview>.vercel.app
+ *   pnpm --filter @mch/site-audit crawl -- --urls=/,/hotel/le-meurice
  *
  * Exit code: 1 when the crawl produces findings at/above `--fail-on`
  * (default `fail`), so CI / cron can hard-stop. Use `--fail-on=warn` to

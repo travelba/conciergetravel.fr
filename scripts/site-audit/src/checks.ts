@@ -4,13 +4,12 @@
  * liveness checks (which need HEAD requests) live in `crawl.ts` and reuse
  * the same `Finding` shape.
  *
- * Single source of truth for scaffolding leak detection is the shared
- * `scaffolding-gate.ts` in editorial-pilot — imported, never re-declared,
- * so a fiche the editorial pipeline deems clean can never be re-flagged here
- * (and vice-versa). See AGENTS.md waves 5/11/12 for that contract.
+ * Scaffolding leak detection on the rendered page uses `pageHasLeak` — a
+ * high-precision PROSE subset of the shared editorial gate. The full gate
+ * flags lexical tokens (`wikidata`, Q-ids, backticks) that are legitimate
+ * EEAT source attributions in a rendered page; see `page-leak.ts` for why
+ * the page context needs its own detector.
  */
-
-import { hasLeak } from '../../editorial-pilot/src/enrichment/scaffolding-gate.js';
 
 import {
   countOpeningTags,
@@ -22,6 +21,7 @@ import {
   visibleText,
   type Alternate,
 } from './lib/html.js';
+import { pageHasLeak } from './page-leak.js';
 
 export type Severity = 'fail' | 'warn' | 'info';
 
@@ -138,7 +138,7 @@ export function runStaticChecks(
   findings.push(...checkHreflang(extractAlternates(html), config));
 
   // 7 — scaffolding leak in visible prose (NOT in JSON-LD, where Q-ids live).
-  if (hasLeak(visibleText(html))) {
+  if (pageHasLeak(visibleText(html))) {
     findings.push({
       check: 'scaffolding-leak',
       severity: 'fail',

@@ -5,10 +5,10 @@
   "type": "module",
   "description": "Site-wide health crawler/auditor (L3). Walks the sitemap and asserts each published URL: 200, single <h1>, title/meta/canonical, hreflang parity, no scaffolding leak, valid JSON-LD (no Offer), live internal links + images, and list-page value (anti '0 hôtels').",
   "scripts": {
-    "audit": "tsx src/run.ts",
-    "audit:sample": "tsx src/run.ts --sample=50",
-    "audit:budget": "tsx src/run.ts --budget-only",
-    "audit:full": "tsx src/run.ts --full",
+    "crawl": "tsx src/run.ts",
+    "crawl:sample": "tsx src/run.ts --sample=50",
+    "crawl:budget": "tsx src/run.ts --budget-only",
+    "crawl:full": "tsx src/run.ts --full",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run"
   },

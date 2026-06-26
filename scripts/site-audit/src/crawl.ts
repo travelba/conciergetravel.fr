@@ -15,6 +15,8 @@ export interface CrawlOptions {
   readonly assetTimeoutMs: number;
   readonly checkLinks: boolean;
   readonly checkImages: boolean;
+  /** Global cap on simultaneous asset (link/image) probes across all pages. */
+  readonly assetConcurrency: number;
   /** Max distinct internal links probed per page. */
   readonly maxLinksPerPage: number;
   /** Max distinct images probed per page. */
@@ -40,6 +42,7 @@ export function defaultCrawlOptions(base: string): CrawlOptions {
     assetTimeoutMs: 12_000,
     checkLinks: true,
     checkImages: true,
+    assetConcurrency: 16,
     maxLinksPerPage: 25,
     maxImagesPerPage: 15,
     staticConfig: DEFAULT_CONFIG,
@@ -96,18 +99,42 @@ function resolveImages(html: string, pageUrl: string): readonly string[] {
   return [...out];
 }
 
-function summariseBroken(kind: string, probes: readonly AssetProbe[]): Finding | null {
-  const broken = probes.filter((p) => p.status === null || p.status >= 400);
-  if (broken.length === 0) return null;
-  const sample = broken
-    .slice(0, 5)
-    .map((p) => `${p.url} → ${p.status ?? 'ERR'}`)
-    .join('; ');
-  return {
-    check: kind,
-    severity: 'fail',
-    message: `${broken.length} broken ${kind === 'broken-links' ? 'internal link(s)' : 'image(s)'}: ${sample}${broken.length > 5 ? ' …' : ''}`,
-  };
+function sampleUrls(probes: readonly AssetProbe[]): string {
+  return (
+    probes
+      .slice(0, 5)
+      .map((p) => `${p.url} → ${p.status ?? 'ERR'}`)
+      .join('; ') + (probes.length > 5 ? ' …' : '')
+  );
+}
+
+/**
+ * Turn asset probes into findings. A real 4xx/5xx is a hard `fail` (the link
+ * or image is genuinely dead). A `null` status — after the prober already
+ * retried once — is reported as a softer `warn` ("unreachable"): it is most
+ * often probe jitter or a bot/WAF block rather than a user-facing breakage,
+ * so failing the whole crawl on it would erode trust in the tool.
+ */
+function assetFindings(noun: 'link' | 'image', probes: readonly AssetProbe[]): readonly Finding[] {
+  const findings: Finding[] = [];
+  const dead = probes.filter((p) => p.status !== null && p.status >= 400);
+  const unreachable = probes.filter((p) => p.status === null);
+  const plural = noun === 'link' ? 'internal link(s)' : 'image(s)';
+  if (dead.length > 0) {
+    findings.push({
+      check: `broken-${noun}s`,
+      severity: 'fail',
+      message: `${dead.length} broken ${plural}: ${sampleUrls(dead)}`,
+    });
+  }
+  if (unreachable.length > 0) {
+    findings.push({
+      check: `unreachable-${noun}s`,
+      severity: 'warn',
+      message: `${unreachable.length} unreachable ${plural} (probe failed twice — likely flaky/WAF): ${sampleUrls(unreachable)}`,
+    });
+  }
+  return findings;
 }
 
 async function auditOne(
@@ -138,14 +165,12 @@ async function auditOne(
         opts.maxLinksPerPage,
       );
       const probes = await Promise.all(links.map(probe));
-      const f = summariseBroken('broken-links', probes);
-      if (f) findings.push(f);
+      findings.push(...assetFindings('link', probes));
     }
     if (opts.checkImages) {
       const images = resolveImages(page.html, page.finalUrl).slice(0, opts.maxImagesPerPage);
       const probes = await Promise.all(images.map(probe));
-      const f = summariseBroken('broken-images', probes);
-      if (f) findings.push(f);
+      findings.push(...assetFindings('image', probes));
     }
   }
 
@@ -163,7 +188,7 @@ export async function crawl(
   urls: readonly string[],
   opts: CrawlOptions,
 ): Promise<readonly UrlResult[]> {
-  const probe = createAssetProber(opts.assetTimeoutMs);
+  const probe = createAssetProber(opts.assetTimeoutMs, opts.assetConcurrency);
   const results: UrlResult[] = new Array<UrlResult>(urls.length);
   let next = 0;
   let done = 0;

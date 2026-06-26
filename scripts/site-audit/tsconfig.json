@@ -18,6 +18,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "../editorial-pilot/src/enrichment/scaffolding-gate.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["src/**/tmp-*.ts", "src/**/*.tmp.ts"]
 }

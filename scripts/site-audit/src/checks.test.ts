@@ -63,6 +63,14 @@ describe('runStaticChecks — scaffolding leak', () => {
     const findings = runStaticChecks({ url: URL, status: 200, html });
     expect(find(findings, 'scaffolding-leak')).toBeUndefined();
   });
+  it('does NOT flag the visible EEAT provenance footer (Wikidata label)', () => {
+    const html = HEALTHY.replace(
+      '<p>Un palace parisien.</p>',
+      '<footer><h2>Références externes</h2><a href="https://www.wikidata.org/wiki/Q1234567">Wikidata</a><a href="#">Wikipédia (FR)</a></footer>',
+    );
+    const findings = runStaticChecks({ url: URL, status: 200, html });
+    expect(find(findings, 'scaffolding-leak')).toBeUndefined();
+  });
 });
 
 describe('runStaticChecks — JSON-LD', () => {

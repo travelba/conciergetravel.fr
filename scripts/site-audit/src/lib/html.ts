@@ -87,7 +87,10 @@ export function extractAnchorHrefs(html: string): readonly string[] {
   const re = /<a\b[^>]*\bhref=["']([^"']+)["']/giu;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
-    if (m[1] !== undefined) out.push(m[1]);
+    // Decode entities: in HTML, `&` is serialised as `&amp;`, so a raw
+    // extraction yields `/_next/image?url=…&amp;w=1920` which 400s when
+    // requested verbatim (Next reads `amp;w` instead of `w`).
+    if (m[1] !== undefined) out.push(decodeEntities(m[1]));
   }
   return out;
 }
@@ -102,11 +105,13 @@ export function extractImageUrls(html: string): readonly string[] {
   const tags = html.match(/<img\b[^>]*>/giu) ?? [];
   for (const tag of tags) {
     const src = tag.match(/\bsrc=["']([^"']+)["']/iu);
-    if (src && src[1] !== undefined && !src[1].startsWith('data:')) out.add(src[1]);
+    if (src && src[1] !== undefined && !src[1].startsWith('data:')) out.add(decodeEntities(src[1]));
     const ss = tag.match(/\bsrcset=["']([^"']+)["']/iu);
     if (ss && ss[1] !== undefined) {
       const first = ss[1].split(',')[0]?.trim().split(/\s+/u)[0];
-      if (first !== undefined && first.length > 0 && !first.startsWith('data:')) out.add(first);
+      if (first !== undefined && first.length > 0 && !first.startsWith('data:')) {
+        out.add(decodeEntities(first));
+      }
     }
   }
   return [...out];
