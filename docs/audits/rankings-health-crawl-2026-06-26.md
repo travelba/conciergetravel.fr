@@ -250,6 +250,27 @@ and added to the test (FR India 106→**142**, EN India 97→**138**, catalogue-
 `France 600h/150v`→**150/147**, all ≤ 170). Final prod confirmation comes from
 the scheduled `hubs` re-crawl after the next deploy.
 
+## Editorial-judgment warns (documented, NOT auto-fixed)
+
+Two non-blocking warn classes remain across the catalogue. Both are SEO
+copy-length judgment calls (not breakages) — trimming/rewriting keyword copy on
+hundreds of pages is an editorial/SEO decision (and meta copy falls under the
+DataForSEO grounding rule), so they are recorded here for the PO rather than
+churned blind:
+
+- **Titles > 70 chars** — 805/957 ranking titles + 53 sampled hub titles. The
+  ranking title template + descriptive suffix push past the ~60-70 SERP display
+  width. Google truncates display but does not penalise; shortening would drop
+  keywords. Decide per surface before trimming the title template.
+- **Meta descriptions > 170 chars** — e.g. `/label/forbes-5-star` (251),
+  `/categorie/hotels-5-etoiles` (177), `/destination/flayosc` (178). Over-long
+  metas are truncated in SERP. These are mostly static i18n strings / longer
+  templates; trimming is a copy edit best done with SEO intent, not mechanically.
+
+The **short** metas (below the 110 floor) WERE auto-fixed (directory city +
+country templates above) because a too-short meta is unambiguously
+under-optimised, deterministically verifiable, and carries no keyword-loss risk.
+
 ## Notes
 
 - The crawler reports `guides.xml` returns 0 `<loc>`. **This is by design, not
