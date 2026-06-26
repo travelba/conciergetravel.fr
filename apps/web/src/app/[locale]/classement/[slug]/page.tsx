@@ -24,6 +24,7 @@ import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { buildRankingMetaDescription } from '@/lib/seo/ranking-meta-description';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo/og-defaults';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
@@ -254,18 +255,32 @@ export async function generateMetadata({
   // LinkedIn / X / WhatsApp / Slack / iMessage all crop predictably.
   const entries = await getRankingEntries(ranking.id);
   const heroPublicId = resolveRankingHeroPublicId(ranking, entries);
-  const ogImageUrl =
+  // Fallback cascade (task « aucune image ne doit manquer ») :
+  //   1. ranking.hero_image (editorial cover)         ┐ resolved inside
+  //   2. best-ranked entry's hotel hero (n°1 → n°2 …) ┘ resolveRankingHeroPublicId
+  //   3. site-default brand card (/og/default.jpg).
+  // Step 3 is MANDATORY: a page-level `openGraph` object OVERRIDES the
+  // layout's default `images` (Next.js does NOT deep-merge `openGraph`), so
+  // without an explicit fallback a hero-less ranking would emit zero
+  // og:image — not even the brand card the layout intends as the floor.
+  const heroOgUrl =
     heroPublicId !== null
       ? buildCloudinarySrc({
           cloudName: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
           publicId: heroPublicId,
           transforms: 'f_jpg,q_auto,c_fill,g_auto,w_1200,h_630',
         })
-      : undefined;
-  const ogImages =
-    ogImageUrl !== undefined
-      ? [{ url: ogImageUrl, width: 1200, height: 630, alt: title, type: 'image/jpeg' as const }]
-      : undefined;
+      : null;
+  const ogImage =
+    heroOgUrl !== null
+      ? { url: heroOgUrl, width: 1200, height: 630, alt: title, type: 'image/jpeg' as const }
+      : {
+          url: `${siteOrigin()}${DEFAULT_OG_IMAGE.url}`,
+          width: DEFAULT_OG_IMAGE.width,
+          height: DEFAULT_OG_IMAGE.height,
+          alt: title,
+          type: DEFAULT_OG_IMAGE.type,
+        };
 
   return {
     title,
@@ -280,7 +295,7 @@ export async function generateMetadata({
       type: 'article',
       locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
-      ...(ogImages !== undefined ? { images: ogImages } : {}),
+      images: [ogImage],
     },
     twitter: {
       // `summary_large_image` gives the ranking hero a true large preview
@@ -288,7 +303,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      ...(ogImageUrl !== undefined ? { images: [ogImageUrl] } : {}),
+      images: [ogImage.url],
     },
   };
 }
