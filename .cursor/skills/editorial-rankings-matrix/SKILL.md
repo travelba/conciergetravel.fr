@@ -376,6 +376,42 @@ insufficient_quota` (account billing exhausted, all models incl. `-mini`),
   repo-wide `pre-push` typecheck to fail on their in-progress syntax errors;
   wait and retry rather than `--no-verify`.
 
+### Resume + head-term concretisation run (2026-06-26)
+
+The 2026-06-23 provider block cleared (OpenAI `gpt-5.4` funded again), so the
+run that was waiting finally executed. Targeting decision worth reusing:
+
+- **Top-volume acquisition set = the 30 `hotel-de-luxe-<ville>` slugs.** Per the
+  yonder audit, `hôtel de luxe {ville}` is the dominant-volume head-term family
+  (10-30× `meilleurs hôtels {ville}`), so those 30 slugs ARE the "top 20-30
+  acquisition cities" — no extra DataForSEO ranking call needed to pick them, the
+  slug family already encodes the demand. Run `--generic-only --grounded` over
+  the explicit `--slugs=` list; concrete cities report `0 need work (skip)` at
+  **zero LLM cost**, so the spend self-concentrates on the genuinely-generic
+  cities.
+- **Result:** 27/30 rankings touched, **73 entries updated, 0 leak-skip, 0
+  errors**. The generic residual on the heads was concentrated in a handful of
+  cities (`bali` 10/10, `santorin` 6/8, `bangkok` 6/8, `florence` 5/8, `vienne`
+  5/8, `marrakech`/`abu-dhabi`/`doha`/`mykonos` 4/8) — Paris/London/Monaco were
+  already fully concrete and skipped. So the 2026-06-23 claim "the heads are
+  already concrete" was **only ~80 % true**: ~16 % of head-podiums still shipped
+  generic brand-speak (e.g. `vienne #1` was live with the banned phrase
+  **"s'impose naturellement"** + an `exceptional` superlative in EN).
+- **`--generic-only` also restores EN parity for free.** Several heads shipped a
+  concrete-ish FR but a ~110-128-char EN _stub_ (the EN-parity backfill had
+  missed `bali`/`bangkok`/`florence`/`vienne`). Because the rewrite emits both
+  locales in one call, every generic entry it touched came back FR≈EN≈850 chars.
+  Residual gap: an entry with concrete FR + stub EN is NOT a `--generic-only`
+  target — for those, a second `--min-en=130` pass (no `--generic-only`) is the
+  follow-up (a few entries, e.g. `berlin #1`).
+- **PAA coverage reads LOW but is noise-dominated, not a quality miss.** Many
+  heads logged `dfs_paa_coverage` 13-43 % because the uncovered PAA are
+  out-of-scope by design: price ("combien coûte une nuit au Ritz", "prix d'une
+  nuit à Shangri-La" — frozen until Phase 6) and celebrity/wealth ("où logent
+  les milliardaires", "où vont les riches au ski", "seul hôtel 7 étoiles"). The
+  on-topic PAA (location/dining/access) ARE covered. Don't chase the headline %
+  on these head-terms — it's a denominator artefact, non-blocking by design.
+
 ## References
 
 - [`editorial-long-read-rendering`](../editorial-long-read-rendering/SKILL.md) — comment le seed (`MatrixSeed`) devient un long-read rendu (sticky TOC, callouts, EEAT footer). La matrice produit le seed ; cette skill rend la page.
