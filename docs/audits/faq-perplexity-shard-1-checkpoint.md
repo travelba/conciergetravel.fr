@@ -7,15 +7,15 @@
 
 ## État (grounded run)
 
-- **shard1 : 629 / 746** fiches dotées du kit FAQ Perplexity (117 restantes).
-- Vagues grounded : netnew (+53), heads #1-5 (+111/+110/+115/+117/+46) — PAA 48-62 %.
-- Segment `heads` épuisé → bascule sur `rest` pour les 117 restantes.
+- **shard1 : 732 / 746** fiches dotées du kit FAQ Perplexity (14 restantes).
+- Vagues grounded : netnew (+53), heads #1-5 (+111/+110/+115/+117/+46), rest #1 (+103) — PAA 48-62 %.
+- 14 restantes = ratés de gate transitoires (kit.en_parity / promote.canonical) → retry idempotent.
 - Pipeline : **grounded DataForSEO** (commit `77d33bce`) — `grounding=on`,
   couverture PAA moyenne ~51-57 % par vague (non-bloquant si PAA hors-sujet).
 - Concurrency 3 (4 shards × 3 = 12 simultanés max, respecté).
 - Idempotent : re-skippe les fiches déjà dotées (filtre `faq_content_kit=is.null`).
 - Quota Perplexity sain (0 × `401` sur les vagues grounded netnew + heads).
-- Coût Perplexity cumulé (session grounded) : ~$73,5.
+- Coût Perplexity cumulé (session grounded) : ~$88,9.
 
 ## Séquence
 
