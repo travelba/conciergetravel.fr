@@ -4,6 +4,7 @@ packages:
   - "tests"
   - "scripts/editorial-pilot"
   - "scripts/design-import"
+  - "scripts/site-audit"
 
 catalog:
   # Pinned shared dependency versions across the monorepo.
