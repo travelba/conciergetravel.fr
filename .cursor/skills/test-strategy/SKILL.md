@@ -101,6 +101,20 @@ Mandatory journeys:
 - `lighthouse-ci` runs on push to `main` and weekly on `production`.
 - Nightly job: smoke E2E against Amadeus test environment.
 
+## L3 — exhaustive site health (the layer E2E can't cover)
+
+E2E + axe + Lighthouse sample a curated set of journeys/URLs. They cannot prove
+that **all** ~8 200 published URLs (hotels + rankings + guides + places + rooms)
+actually work, click, and stay coherent. That exhaustive layer is the
+**site-audit crawler** ([`site-audit-crawler`](../site-audit-crawler/SKILL.md),
+`scripts/site-audit`): it walks the sitemap and asserts per URL — HTTP 200,
+single `<h1>`, title/meta/canonical, hreflang parity, no scaffolding leak in
+prose, valid JSON-LD (no frozen `Offer`, `AggregateRating` on /5), live internal
+links + images, and the anti-"0 hôtels" list-value check. Run it report-only
+against prod, or as a gate against a Vercel preview / scheduled cron (L6). It is
+the automated form of [`user-acceptance-loop`](../user-acceptance-loop/SKILL.md)
+§Assert VALUES, applied to the whole catalogue.
+
 ## References
 
 - CDC v3.0 §9.2 (Core Web Vitals), §12 (acceptance checklists).
