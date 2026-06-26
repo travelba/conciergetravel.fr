@@ -139,6 +139,7 @@ logged, non-blocking. Shard 3 relaunched `--grounded --concurrency=3`.
 | g9             | heads   | 54/60    | 55       | 53 %        | 7.86         | 0.24 | 66.85        |
 | g10            | heads   | 52/53    | 50       | 58 %        | 6.39         | 0.22 | 73.46        |
 | g11            | rest    | 57/60    | 55       | 59 %        | 7.74         | 0.24 | 81.45        |
+| g12            | rest    | 56/59    | 53       | 60 %        | 8.04         | 0.25 | 89.73        |
 
 `grounding=on` confirmed at wave + per-fiche level; only 2 `grounding=off`
 (DFS returned no PAA for that slug — degrade-safe, non-blocking). Low-coverage
@@ -146,8 +147,11 @@ warnings (<50 %) are dominated by off-topic PAA (celebrity / generic-price
 questions) not legitimately FAQ-able for the property. 6 skips this wave
 (`kit.en_parity` + `promote.canonical`) — idempotent, retried next run.
 
-**Shard-3 counter: `shard3: 687/746`** (100 → … → 630 → 687; netnew + heads
-drained, on `rest` segment). Prod acceptance g9: `lord-elgin-hotel`
+**Shard-3 counter: `shard3: 743/746`** (100 → … → 687 → 743; netnew + heads +
+rest all drained). 3 residual P2 fiches (`santa-monica-proper`,
+`the-st-regis-chengdu`, `villa-cadaques-cap-de-creus`) keep failing a row gate
+on every attempt (thin-source → kit can't reach the canonical promote/parity
+floor); attempting a targeted retry. Prod acceptance g9: `lord-elgin-hotel`
 200, `FAQPage` + `acceptedAnswer`, no `Offer` leak. Prod acceptance after g4:
 `mama-shelter-lille` 200, `FAQPage` JSON-LD + `acceptedAnswer` rendered,
 concierge block present, no `Offer` leak (Phase 6 respected). Resume continues
