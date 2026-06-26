@@ -63,7 +63,11 @@ function sameHost(a: string, b: string): boolean {
   }
 }
 
-function resolveInternalLinks(html: string, pageUrl: string, base: string): readonly string[] {
+export function resolveInternalLinks(
+  html: string,
+  pageUrl: string,
+  base: string,
+): readonly string[] {
   const out = new Set<string>();
   for (const href of extractAnchorHrefs(html)) {
     const trimmed = href.trim();
@@ -87,7 +91,7 @@ function resolveInternalLinks(html: string, pageUrl: string, base: string): read
   return [...out];
 }
 
-function resolveImages(html: string, pageUrl: string): readonly string[] {
+export function resolveImages(html: string, pageUrl: string): readonly string[] {
   const out = new Set<string>();
   for (const src of extractImageUrls(html)) {
     try {
