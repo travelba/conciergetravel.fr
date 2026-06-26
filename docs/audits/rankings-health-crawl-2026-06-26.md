@@ -241,8 +241,14 @@ which renders the SHIPPED template (faithful ICU plural + `Intl.NumberFormat`)
 for the crawl-observed pairs + the realistic short/long extremes and asserts
 every result lands in [110, 170]. Concrete: `Nice, France` 88→**121**,
 `Minorque, Espagne` 90→**127**, `Punta Cana, République dominicaine`→**144**,
-`Saint-Jean-Cap-Ferrat, France`→**140** (all with margin to 170). Final prod
-confirmation comes from the scheduled `hubs` re-crawl after the next deploy.
+`Saint-Jean-Cap-Ferrat, France`→**140** (all with margin to 170).
+
+A deterministic re-check then exposed the sibling **country** template
+(`/hotels/<country>`) had the same defect, **EN systematically below 110**
+(India 1h/1v = 97). Both `country.metaDesc` templates were widened the same way
+and added to the test (FR India 106→**142**, EN India 97→**138**, catalogue-scale
+`France 600h/150v`→**150/147**, all ≤ 170). Final prod confirmation comes from
+the scheduled `hubs` re-crawl after the next deploy.
 
 ## Notes
 
