@@ -203,6 +203,11 @@ top-small-luxury-hotels-royaume-uni
 
 ## Notes
 
-- The crawler also reports `guides.xml` returns 0 `<loc>` while 99 editorial
-  guides are published — a sitemap coverage gap to investigate separately.
+- The crawler reports `guides.xml` returns 0 `<loc>`. **This is by design, not
+  a bug**: ADR-0015 merged `/guide/[city]` into `/destination/[city]`, so the
+  guide long-reads are emitted via `hubs.xml` destination URLs (the
+  `guides.xml` route is an intentionally-empty stub kept to avoid a 404 for
+  search engines that fetched it before — see its route comment). The only
+  known guide-coverage caveat is the documented deferral of the 35 FR-only
+  `guide-*` country slugs (AGENTS.md §Phase 3), unrelated to this crawl.
 - Re-run any time: `pnpm --filter @mch/site-audit crawl -- --only=rankings --budget-only`.
