@@ -17,6 +17,8 @@
     "rankings:bulk:dry": "tsx src/rankings/run-rankings-v2-bulk.ts --dry-run",
     "rankings:bulk:manual": "tsx src/rankings/run-rankings-v2-bulk.ts --source=manual --concurrency=2",
     "rankings:matrix:inspect": "tsx src/rankings/inspect-matrix.ts",
+    "rankings:remediate-empty": "tsx src/rankings/remediate-empty-rankings.ts",
+    "rankings:remediate-empty:apply": "tsx src/rankings/remediate-empty-rankings.ts --apply",
     "rankings:tables:en": "tsx src/rankings/translate-rankings-tables-en.ts",
     "rankings:tables:en:dry": "tsx src/rankings/translate-rankings-tables-en.ts --dry-run",
     "rankings:tables:en:all": "tsx src/rankings/translate-rankings-tables-en.ts --all --concurrency=5",
