@@ -24,6 +24,7 @@ import { buildHotelKnowledgeGraphJsonLdFields } from '@/server/hotels/hotel-json
 import { readExternalIds } from '@/server/hotels/get-hotel-by-slug';
 import { buildOfferJsonLdInput } from '@/server/booking/prepare-hotel-booking-rail';
 import type { HotelBookingRailContext } from '@/server/booking/prepare-hotel-booking-rail';
+import { isPhase6BookingEnabled } from '@/lib/booking/phase-6-flags';
 
 import type { HotelKitModel } from './prepare-hotel-kit-model';
 
@@ -148,8 +149,14 @@ export function buildHotelKitJsonLd(
     ...model.locationBuckets.shop,
   ];
 
+  // `Offer` JSON-LD is FROZEN until Phase 6 (AGENTS.md §4ter, ADR-0026).
+  // The Phase 6 kill-switch short-circuits to `null` while
+  // `PHASE_6_BOOKING_ENABLED` is OFF, so the kit fiche never ships an Offer node
+  // regardless of `booking_mode` or supplier availability (Hard Rule 5).
   const liveOffer =
-    railContext !== undefined ? buildOfferJsonLdInput(railContext, model.canonicalUrl) : null;
+    isPhase6BookingEnabled() && railContext !== undefined
+      ? buildOfferJsonLdInput(railContext, model.canonicalUrl)
+      : null;
 
   const externalIds = readExternalIds(model.row);
   const knowledgeGraph = buildHotelKnowledgeGraphJsonLdFields({

@@ -37,10 +37,19 @@
  *                gate). We pin the public-facing copy + llms.txt to the
  *                indexable count so the advertised number matches the
  *                crawlable catalogue. See docs/audits/health-2026-06-24-*.md.
+ *   2026-06-26 — 2984 / 128 / 479 (live DB re-count via Supabase MCP — the
+ *                snapshot had drifted ~765 hotels behind after a fresh publish
+ *                wave). Affiliations unchanged on published rows: Relais &
+ *                Châteaux 479, Small Luxury 224, World's 50 Best 127. Sibling
+ *                editorial surfaces verified the same day (consumed dynamically,
+ *                not pinned here): rankings 816, guides 82, places/POI 1147,
+ *                itineraries 23 published. Counts are the raw `is_published`
+ *                figures (the 2026-06-24 indexable-pinning convention is
+ *                superseded by the explicit PO re-count).
  */
-export const CATALOGUE_PUBLISHED = 2219;
-export const CATALOGUE_COUNTRIES = 127;
+export const CATALOGUE_PUBLISHED = 2984;
+export const CATALOGUE_COUNTRIES = 128;
 export const CATALOGUE_RELAIS_CHATEAUX = 479;
 export const CATALOGUE_SMALL_LUXURY = 224;
 export const CATALOGUE_WORLD_50_BEST = 127;
-export const CATALOGUE_LAST_UPDATED = '2026-06-24';
+export const CATALOGUE_LAST_UPDATED = '2026-06-26';

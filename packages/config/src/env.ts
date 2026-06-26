@@ -146,6 +146,12 @@ const SharedEnvSchema = z.object({
   // Feature flags
   DATADOG_ENABLED: z.coerce.boolean().default(false),
   LOYALTY_PREMIUM_BILLING_ENABLED: z.coerce.boolean().default(false),
+  // Phase 6 booking master kill-switch (AGENTS.md §4ter, ADR-0026). OFF until
+  // the live booking APIs ship (the LAST brick of the project). While OFF, no
+  // public surface emits an `Offer`/`priceValidUntil` JSON-LD node, even if a
+  // hotel row flips `booking_mode` to amadeus/little or multi-supplier rate-
+  // shopping turns on. Flipping this ON is the single, deliberate Phase 6 gate.
+  PHASE_6_BOOKING_ENABLED: z.coerce.boolean().default(false),
 });
 
 export type SharedEnv = z.infer<typeof SharedEnvSchema>;

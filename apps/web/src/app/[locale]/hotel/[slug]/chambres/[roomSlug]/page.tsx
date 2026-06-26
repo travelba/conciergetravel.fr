@@ -17,6 +17,7 @@ import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import { defaultHotelStay } from '@/lib/booking/default-hotel-stay';
+import { canEmitRoomOfferJsonLd, isPhase6BookingEnabled } from '@/lib/booking/phase-6-flags';
 import { formatIndicativePriceParts } from '@/lib/format-indicative-price';
 import { isFakeOffersEnabled } from '@/server/booking/dev-fake-offer';
 import { getBestOfferForHotel } from '@/server/hotels/get-best-offer';
@@ -342,12 +343,19 @@ async function renderRoomPage(
         availabilityState: 'unknown' as const,
       };
 
-  // Offer JSON-LD (B3 / CDC §2.8). Emitted only when we have a live
-  // Amadeus rate — never fabricated. `priceValidUntil` defaults to
-  // today + 7 days to align with the parent hotel widget and avoid
-  // stale-offer warnings from Google Rich Results / DSA art. 25.
+  // Offer JSON-LD (B3 / CDC §2.8). FROZEN until Phase 6 (AGENTS.md §4ter,
+  // ADR-0026): `canEmitRoomOfferJsonLd` short-circuits to `false` while
+  // `PHASE_6_BOOKING_ENABLED` is OFF, so no Offer node ships even if a row
+  // flips to amadeus/little (SEO + DSA art. 25 — Hard Rule 5). Once Phase 6 is
+  // open, it is emitted only with a live, non-fabricated rate. `priceValidUntil`
+  // defaults to today + 7 days to align with the parent hotel widget.
   const offerJsonLd: Record<string, unknown> | null =
-    bestOffer.priceFrom !== null && bestOffer.offerId !== null
+    canEmitRoomOfferJsonLd({
+      phase6Enabled: isPhase6BookingEnabled(),
+      hasLiveOffer: bestOffer.priceFrom !== null && bestOffer.offerId !== null,
+    }) &&
+    bestOffer.priceFrom !== null &&
+    bestOffer.offerId !== null
       ? (JsonLd.withSchemaOrgContext(
           JsonLd.offerJsonLd({
             priceFromEUR: bestOffer.priceFrom.amount.fromMinor / 100,

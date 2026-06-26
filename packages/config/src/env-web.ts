@@ -92,6 +92,18 @@ export const env = createEnv({
      * always kit regardless of this flag. Flip on only after batch validation walks.
      */
     MCH_HOTEL_KIT_CATALOGUE_ROLLOUT: z.coerce.boolean().default(false),
+    /**
+     * Phase 6 booking master kill-switch (AGENTS.md §4ter + ADR-0026, rules
+     * 12-schema-ota / 31-hotel-page-blueprint). OFF until the live booking APIs
+     * (Amadeus / Little Hotelier / multi-supplier rate-shopping) ship — the LAST
+     * brick of the project. While OFF, NO public surface emits an `Offer` /
+     * `priceValidUntil` JSON-LD node, even if a row's `booking_mode` flips to
+     * `amadeus`/`little` or `MULTI_SUPPLIER_RATESHOPPING_ENABLED` turns on.
+     * Emitting an Offer without a real, currently-bookable rate is a SEO + DSA
+     * art. 25 violation (Hard Rule 5). Flipping this ON is the single,
+     * deliberate Phase 6 opening switch — no code re-add required.
+     */
+    PHASE_6_BOOKING_ENABLED: z.coerce.boolean().default(false),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.string().url(),

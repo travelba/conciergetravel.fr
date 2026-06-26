@@ -15,7 +15,7 @@ import { buildCloudinarySrc } from '@mch/ui';
 
 import { BookingSlot } from '@/components/hotel/booking-slot';
 import { TravelportLiveRooms } from '@/components/hotel/travelport-live-rooms';
-import { isPaidBookingMode } from '@/lib/booking/booking-mode-helpers';
+import { canEmitHotelOfferJsonLd, isPhase6BookingEnabled } from '@/lib/booking/phase-6-flags';
 import { getAggregatedRoomPrices } from '@/server/booking/aggregated-room-prices';
 import {
   buildOfferJsonLdInput,
@@ -1056,7 +1056,16 @@ async function renderHotelPage(
           },
         }
       : {}),
-    ...(railContext.supplierBookable || isPaidBookingMode(row.booking_mode)
+    // `Offer` JSON-LD is FROZEN until Phase 6 (AGENTS.md §4ter, ADR-0026).
+    // `canEmitHotelOfferJsonLd` short-circuits to `false` while
+    // `PHASE_6_BOOKING_ENABLED` is OFF, so a row flipped to amadeus/little or
+    // multi-supplier rate-shopping turning on can NEVER silently reintroduce an
+    // Offer node (SEO + DSA art. 25 — Hard Rule 5). See `phase-6-flags.ts`.
+    ...(canEmitHotelOfferJsonLd({
+      phase6Enabled: isPhase6BookingEnabled(),
+      supplierBookable: railContext.supplierBookable,
+      bookingMode: row.booking_mode,
+    })
       ? ((): { offer?: NonNullable<ReturnType<typeof buildOfferJsonLdInput>> } => {
           const offer = buildOfferJsonLdInput(railContext, canonicalUrl);
           return offer !== null ? { offer } : {};
