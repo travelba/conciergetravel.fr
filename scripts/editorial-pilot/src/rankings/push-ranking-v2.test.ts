@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   MIN_PUBLISHABLE_ENTRIES,
+  rankingAdmitsEmptySelection,
   rankingProseLeaks,
   resolveEffectivePublish,
 } from './push-ranking-v2.js';
@@ -108,5 +109,45 @@ describe('rankingProseLeaks — scaffolding leak gate', () => {
     expect(rankingProseLeaks(makeProse({ factual_summary_fr: 'AUTO_DRAFT placeholder' }))).toBe(
       true,
     );
+  });
+});
+
+describe('rankingAdmitsEmptySelection — empty/off-theme summary gate', () => {
+  it('flags the real 2026-06-26 incident summaries', () => {
+    expect(
+      rankingAdmitsEmptySelection(
+        'Classement éditorial de 0 hôtels à la montagne à Bordeaux, 2026 : aucune adresse de montagne, cluster urbain, sélection à réorienter.',
+        '',
+      ),
+    ).toBe(true);
+    expect(
+      rankingAdmitsEmptySelection(
+        'Sélection éditoriale de 4 hôtels en bord de mer à Champs-Élysées, 2026 : aucune adresse côtière, Paris 8e.',
+        '',
+      ),
+    ).toBe(true);
+    expect(
+      rankingAdmitsEmptySelection(
+        'Sélection éditoriale de 0 hôtels à la montagne en Île-de-France, 2026 : sélection vide.',
+        '',
+      ),
+    ).toBe(true);
+  });
+
+  it('flags an EN empty admission', () => {
+    expect(
+      rankingAdmitsEmptySelection('', 'Editorial selection of 0 hotels in the mountains.'),
+    ).toBe(true);
+  });
+
+  it('does NOT flag a healthy summary that mentions a real count', () => {
+    expect(
+      rankingAdmitsEmptySelection(
+        'Sélection éditoriale de 10 hôtels de luxe à Bali, 2026 : villas avec piscine, spas reconnus.',
+        'Editorial selection of 10 luxury hotels in Bali, 2026: pool villas, acclaimed spas.',
+      ),
+    ).toBe(false);
+    // "10 hôtels" contains "0 hôtel" as a substring but NOT as a standalone word
+    expect(rankingAdmitsEmptySelection('Sélection de 10 hôtels.', '')).toBe(false);
   });
 });

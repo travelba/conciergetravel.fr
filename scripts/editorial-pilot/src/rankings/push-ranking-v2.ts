@@ -96,6 +96,30 @@ interface RankingProse {
   }>;
 }
 
+/**
+ * Detects a ranking whose summary ADMITS its own emptiness / off-theme failure
+ * — "0 hôtels à la montagne", "aucune adresse côtière", "sélection vide", "no
+ * hotels". This is a distinct class from scaffolding leaks (no brief/dossier
+ * marker) and from the entry-count gate (these rankings carry OFF-theme
+ * entries, so `entries.length >= 3`). Root cause of the 2026-06-26 prod
+ * incident: 7 thematically-impossible combos (montagne × flat/coastal regions,
+ * bord-de-mer × landlocked Champs-Élysées) shipped live with a self-defeating
+ * summary that then leaked onto sibling pages via the related-rankings cards.
+ * Neither prior gate caught them — this one does.
+ */
+const EMPTY_SELECTION_MARKERS =
+  /\b0\s+h[ôo]tels?\b|aucune?\s+(?:adresse|h[ôo]tel|établissement)\b|s[ée]lection\s+(?:vide|à\s+réorienter)|\bno\s+(?:hotels?|properties|addresses)\b|\bnone\s+(?:retained|selected)\b/iu;
+
+export function rankingAdmitsEmptySelection(
+  factualSummaryFr: string | null | undefined,
+  factualSummaryEn: string | null | undefined,
+): boolean {
+  return (
+    (typeof factualSummaryFr === 'string' && EMPTY_SELECTION_MARKERS.test(factualSummaryFr)) ||
+    (typeof factualSummaryEn === 'string' && EMPTY_SELECTION_MARKERS.test(factualSummaryEn))
+  );
+}
+
 export function rankingProseLeaks(ranking: RankingProse): boolean {
   const parts: Array<string | null | undefined> = [
     ranking.intro_fr,
@@ -204,7 +228,19 @@ export async function pushRankingV2(
       `[push-ranking-v2] "${seed.slug}" leaks pipeline scaffolding in its prose — forcing is_published=false (leak gate).`,
     );
   }
-  const effectivePublish = entryGatePublish && !leaks;
+  // Empty-selection gate — a ranking whose summary admits it has no on-theme
+  // hotels ("0 hôtels à la montagne", "aucune adresse", "sélection vide") is a
+  // nonsensical combo that must never go live (2026-06-26 incident).
+  const admitsEmpty = rankingAdmitsEmptySelection(
+    ranking.factual_summary_fr,
+    ranking.factual_summary_en,
+  );
+  if (entryGatePublish && !leaks && admitsEmpty) {
+    console.warn(
+      `[push-ranking-v2] "${seed.slug}" summary admits an empty/off-theme selection — forcing is_published=false (empty-selection gate).`,
+    );
+  }
+  const effectivePublish = entryGatePublish && !leaks && !admitsEmpty;
   const gatedOptions = { ...options, publish: effectivePublish };
 
   // PostgREST fallback for environments where the direct `pg` connection
