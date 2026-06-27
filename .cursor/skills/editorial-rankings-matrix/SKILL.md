@@ -277,6 +277,26 @@ fuite. C'est la déclinaison rankings de la leçon hotel-fiche (AGENTS wave 6) :
 publisher doit refuser de publier de la prose qui fuit.** Les deux garde-fous
 (entries + leak) vivent désormais côte à côte au write-boundary.
 
+**3e classe — combos thématiquement impossibles (incident 2026-06-26, DB-vérifié).**
+Le crawler a flaggé ~51 pages « 0 hôtels » ; la cause racine réelle (après
+`execute_sql`) n'était PAS 51 classements à 0 entrée (0 publié sous 3 entrées !)
+mais **7 classements thème×région impossibles** — `montagne` × régions
+plates/côtières (Bordeaux, Côte Atlantique, Île-de-France, Loire, Saint-Tropez,
+ÉAU désertique) + `bord-de-mer` × Champs-Élysées. Ils portent des entrées
+**hors-thème** (4-10) donc le gate entries passe, et leur `factual_summary`
+**admet le vide** (« 0 hôtels à la montagne… sélection à réorienter ») sans
+marqueur scaffolding donc le gate leak passe aussi. Ces 7 résumés fuyaient sur
+les ~51 pages via les **cartes `findSiblingRankings`** (même lieu).
+Fix : 3e gate `rankingAdmitsEmptySelection(fs_fr, fs_en)` (regex `\b0 hôtels?\b`,
+`aucune adresse`, `sélection vide/à réorienter`, EN `no hotels`) → refuse la
+publication. Remédiation live : `update editorial_rankings set is_published=false`
+sur les 7 (pages → 404 ; cartes cross-link purgées par le TTL `unstable_cache`
+1h `related-rankings:index`).
+
+**Leçon générale** : un classement peut être « vide » de 3 façons indépendantes
+— 0 entrée, prose scaffolding, OU **résumé qui admet 0 hôtel on-thème malgré des
+entrées hors-thème**. Les 3 gates sont nécessaires ; aucun ne couvre les autres.
+
 ## Rule 8 — Chain rankings hors matrice (workflow PostgREST direct)
 
 Quand on veut produire un **cross-chain ranking** (`Top 25 Aman`, `Top 30
