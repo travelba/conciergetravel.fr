@@ -25,6 +25,17 @@ import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
 export const dynamic = 'force-dynamic';
 
 /**
+ * Hotel-index cap for the category emptiness check + listing. MUST cover the
+ * whole published catalogue (2219 on 2026-06-26), otherwise a category whose
+ * hotels sit beyond the cap is wrongly judged empty → `noindex` + empty render,
+ * while `hubs.xml` (which reads 2500) still lists the URL → a sitemap↔noindex
+ * contradiction (2026-06-26 menu audit: `boutique-hotels`, `chalets-luxe`).
+ * The default 200 was the silent culprit. 3000 = `listPublishedHotelsForIndex`
+ * hard ceiling, safely above the catalogue size.
+ */
+const CATEGORY_HOTEL_CAP = 3000;
+
+/**
  * Empty-state predicate — when the category exists but no published
  * hotel currently matches (catalogue not yet seeded, or all hotels for
  * the predicate are unpublished). We render the page with `noindex`
@@ -35,7 +46,7 @@ export const dynamic = 'force-dynamic';
  */
 async function categoryHasNoHotels(category: ReturnType<typeof findCategory>): Promise<boolean> {
   if (category === null) return true;
-  const allHotels = await listPublishedHotelsForIndex();
+  const allHotels = await listPublishedHotelsForIndex(CATEGORY_HOTEL_CAP);
   return filterCategory(allHotels, category).length === 0;
 }
 
@@ -451,7 +462,7 @@ export default async function CategoryPage({
   setRequestLocale(locale);
   const t = T[locale];
 
-  const allHotels = await listPublishedHotelsForIndex();
+  const allHotels = await listPublishedHotelsForIndex(CATEGORY_HOTEL_CAP);
   const hotels = filterCategory(allHotels, category);
   // Empty state: render `noindex` (set in `generateMetadata`) instead of
   // `notFound()`. The page advertises that no hotel matches yet and
