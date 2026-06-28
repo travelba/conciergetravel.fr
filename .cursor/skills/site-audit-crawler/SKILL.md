@@ -113,6 +113,26 @@ on the first prod run; do not regress them:
    markers are legitimate in that surface — a gate calibrated for one context
    silently false-fails another.
 
+4. **Marker precision on rendered pages (2026-06-28 full-site crawl).** The
+   editorial-gate markers over-fire on whole rendered pages, which legitimately
+   carry phrases the single-DB-field gate never sees. Four FP classes fixed in
+   `page-leak.ts` / `checks.ts` (re-validate before re-adding any):
+   - bare `(le|ce|du|au) dossier` → rankings boilerplate "la lecture humaine **du
+     dossier**" (= the customer's _booking case_). Keep only narration forms
+     (`dossier incomplet/lacunaire`, `le dossier reste incomplet`).
+   - `non document[ée]` → adjectival "un programme non documenté" in prose. Drop.
+   - `niveau de confiance` → legit "un niveau de confiance **utile/élevé**".
+     Require the pipeline score token (`niveau de confiance low|medium|high`).
+   - `jsonld-offer-frozen` flagging ANY `Offer` → the **live** Concierge Club
+     `MemberProgram` tiers (`OfferCatalog` + `eligibleCustomerType` on
+     `/le-concierge/*`). Flag only hotel-booking Offers: on a `/hotel/` ·
+     `/chambres/` surface OR carrying `priceValidUntil` / `availability`.
+
+   The crawl also found the previously un-scanned leak field
+   **`hotels.signature_experiences`** ("Moment signature … Le brief souligne …")
+   — the AGENTS de-leak waves covered description / sections / concierge_advice /
+   faq, not this one. Full write-up: `docs/audits/full-site-health-crawl-2026-06-28.md`.
+
 ## Real bugs it caught on day one
 
 - `/classements` and `/classements/lieu/ile-de-france` render **"Classement
