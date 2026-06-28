@@ -80,7 +80,7 @@ describe('runStaticChecks — JSON-LD', () => {
       'fail',
     );
   });
-  it('fails when a frozen Offer is emitted (Phase 6)', () => {
+  it('fails when a frozen booking Offer is emitted on a hotel page (Phase 6)', () => {
     const html = HEALTHY.replace(
       '<body>',
       '<script type="application/ld+json">{"@type":"Offer","price":"100"}</script><body>',
@@ -88,6 +88,26 @@ describe('runStaticChecks — JSON-LD', () => {
     expect(
       find(runStaticChecks({ url: URL, status: 200, html }), 'jsonld-offer-frozen')?.severity,
     ).toBe('fail');
+  });
+  it('fails when an Offer carries booking fields (priceValidUntil) on any page', () => {
+    const html = HEALTHY.replace(
+      '<body>',
+      '<script type="application/ld+json">{"@type":"Offer","price":"100","priceValidUntil":"2026-12-31"}</script><body>',
+    );
+    const url = 'https://myconciergehotel.com/recherche';
+    expect(find(runStaticChecks({ url, status: 200, html }), 'jsonld-offer-frozen')?.severity).toBe(
+      'fail',
+    );
+  });
+  it('does NOT flag Concierge Club membership-tier Offers (MemberProgram, not booking)', () => {
+    const html = HEALTHY.replace(
+      '<body>',
+      '<script type="application/ld+json">{"@type":"OfferCatalog","itemListElement":[{"@type":"Offer","name":"Essentiel","price":"0","eligibleCustomerType":"Registered"},{"@type":"Offer","name":"Prestige","eligibleCustomerType":"Subscriber"}]}</script><body>',
+    );
+    const url = 'https://myconciergehotel.com/le-concierge/fidelite';
+    expect(
+      find(runStaticChecks({ url, status: 200, html }), 'jsonld-offer-frozen'),
+    ).toBeUndefined();
   });
   it('fails when AggregateRating is not on the /5 scale', () => {
     const html = HEALTHY.replace('"bestRating":"5"', '"bestRating":"10"');

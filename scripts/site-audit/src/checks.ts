@@ -158,7 +158,7 @@ export function runStaticChecks(
   }
 
   // 8 — JSON-LD: parseable, no frozen Offer, AggregateRating on /5.
-  findings.push(...checkJsonLd(extractJsonLdBlocks(html)));
+  findings.push(...checkJsonLd(extractJsonLdBlocks(html), input.url));
 
   // 9 — list-page value (anti "0 hôtels").
   if (config.listingPathPattern.test(pathnameOf(input.url))) {
@@ -219,7 +219,25 @@ function typeMatches(type: unknown, target: string): boolean {
   return false;
 }
 
-function checkJsonLd(blocks: readonly string[]): readonly Finding[] {
+/**
+ * A `hotel-booking` Offer is what Phase 6 freezes: an `Offer` on a hotel /
+ * room page, OR any `Offer` carrying booking-specific fields (`priceValidUntil`
+ * / `availability` — the exact fields the rule names). It deliberately does NOT
+ * match the live Concierge Club `MemberProgram` membership tiers (Offer /
+ * OfferCatalog with `eligibleCustomerType` on `/le-concierge/*`), which are a
+ * legitimate, shipped feature — flagging those was a 2026-06-28 false positive.
+ */
+function isFrozenBookingOffer(node: JsonLdNode, url: string): boolean {
+  if (!typeMatches(node['@type'], 'Offer')) return false;
+  const onHotelSurface = /\/hotel\/|\/chambres\//u.test(url);
+  const hasBookingFields =
+    node['priceValidUntil'] !== undefined || node['availability'] !== undefined;
+  const isMembershipTier = node['eligibleCustomerType'] !== undefined;
+  if (isMembershipTier) return false;
+  return onHotelSurface || hasBookingFields;
+}
+
+function checkJsonLd(blocks: readonly string[], url: string): readonly Finding[] {
   const findings: Finding[] = [];
   for (const [i, block] of blocks.entries()) {
     let parsed: unknown;
@@ -236,12 +254,13 @@ function checkJsonLd(blocks: readonly string[]): readonly Finding[] {
     const nodes: JsonLdNode[] = [];
     collectNodes(parsed, nodes);
 
-    // Phase 6 booking is frozen — no Offer must ship on any public surface.
-    if (nodes.some((n) => typeMatches(n['@type'], 'Offer'))) {
+    // Phase 6 booking is frozen — no hotel-booking Offer must ship. Membership
+    // tier Offers (Concierge Club MemberProgram) are a live feature, not frozen.
+    if (nodes.some((n) => isFrozenBookingOffer(n, url))) {
       findings.push({
         check: 'jsonld-offer-frozen',
         severity: 'fail',
-        message: 'Offer JSON-LD present (Phase 6 booking is frozen — must not emit Offer)',
+        message: 'hotel-booking Offer JSON-LD present (Phase 6 booking is frozen)',
       });
     }
 
