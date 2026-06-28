@@ -8,6 +8,7 @@ import { JsonLd } from '@mch/seo';
 import {
   HOTEL_TYPE_NAV_ENTRIES,
   OCCASION_NAV_ENTRIES,
+  SAISON_NAV_ENTRIES,
   TOP_DESTINATION_NAV_ENTRIES,
   HERO_REGION_NAV_ENTRIES,
   THEME_NAV_ENTRIES,
@@ -84,6 +85,7 @@ const KNOWN_TYPE_VALUES = new Set<string>([
 ]);
 const KNOWN_THEME_VALUES = new Set<string>(THEME_NAV_ENTRIES.map((e) => e.slug));
 const KNOWN_OCCASION_VALUES = new Set<string>(OCCASION_NAV_ENTRIES.map((e) => e.slug));
+const KNOWN_SAISON_VALUES = new Set<string>(SAISON_NAV_ENTRIES.map((e) => e.slug));
 const KNOWN_LIEU_VALUES = new Set<string>([
   ...TOP_DESTINATION_NAV_ENTRIES.map((e) => e.slug),
   ...HERO_REGION_NAV_ENTRIES.map((e) => e.slug),
@@ -99,6 +101,15 @@ function isKnownTaxonomyValue(axe: Axe, valeur: string): boolean {
       return KNOWN_OCCASION_VALUES.has(valeur);
     case 'lieu':
       return KNOWN_LIEU_VALUES.has(valeur);
+    case 'saison':
+      // `saison` was added to ALLOWED_AXES + SAISON_NAV_ENTRIES surfaces it in
+      // the menu, but this switch never handled it → empty saisons (e.g.
+      // `printemps`, 0 published rankings) fell through to `notFound()`, which
+      // renders the generic not-found page (200, NO <h1>, generic title) that
+      // the menu links to. Treating saison values as known taxonomy makes the
+      // page render the proper empty-state (h1 + noindex,follow + same-axis
+      // cross-links), consistent with theme/occasion. 2026-06-26 menu audit.
+      return KNOWN_SAISON_VALUES.has(valeur);
     default:
       return false;
   }
