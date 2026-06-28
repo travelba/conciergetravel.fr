@@ -7,6 +7,7 @@ describe('pageHasLeak — flags prose scaffolding', () => {
     'Le brief confirme un positionnement palace.',
     'Aman New York avance ici avec un dossier encore incomplet.',
     'Niveau de confiance low sur cette rubrique.',
+    'niveau de confiance: medium',
     'Capacité de la salle : non renseignée.',
     'Plusieurs rubriques attendent une vérification manuelle.',
     'AUTO_DRAFT',
@@ -47,6 +48,11 @@ describe('pageHasLeak — does NOT flag legitimate rendered chrome', () => {
     'Sans promettre un programme spécifique non documenté, cette expérience valorise le lieu.',
     'Un check-in anticipé peut être proposé sous réserve de disponibilité.',
     'La lecture du dossier client se fait par un conseiller dédié.',
+    // "niveau de confiance" as legit prose (a useful level of trust) vs the
+    // pipeline "niveau de confiance low/medium/high" score — only the score
+    // form is a leak (2026-06-28 ranking FP: "ajoute un niveau de confiance utile").
+    'L’adossement à Waldorf Astoria ajoute un niveau de confiance utile.',
+    'Un niveau de confiance élevé règne dans cette maison familiale.',
   ])('keeps clean: %j', (text) => {
     expect(pageHasLeak(text)).toBe(false);
   });
