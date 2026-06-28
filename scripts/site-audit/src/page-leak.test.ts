@@ -16,6 +16,7 @@ describe('pageHasLeak — flags prose scaffolding', () => {
     'Estimated word count: 473.',
     'The dossier confirms a 1907 opening.',
     'still to be confirmed',
+    'Le dossier reste incomplet pour cet établissement.',
   ])('flags %j', (text) => {
     expect(pageHasLeak(text)).toBe(true);
   });
@@ -36,6 +37,16 @@ describe('pageHasLeak — does NOT flag legitimate rendered chrome', () => {
     'A brief stroll from the Tuileries gardens.',
     'The hotel keeps a record of your preferences at reception.',
     'Une cuisine bien documentée par les guides gastronomiques.',
+    // 2026-06-28 false positives fixed: rankings boilerplate "lecture
+    // humaine du dossier" (= the customer's booking case, NOT the data
+    // dossier) and an adjectival "non documenté" in legit prose. The bare
+    // `(le|du|ce) dossier` + `non document[ée]` markers were dropped from the
+    // page detector (they stay in the editorial DB gate, where the context
+    // is a single editorial field, not whole-page chrome).
+    'L’avantage face à une OTA est la lecture humaine du dossier.',
+    'Sans promettre un programme spécifique non documenté, cette expérience valorise le lieu.',
+    'Un check-in anticipé peut être proposé sous réserve de disponibilité.',
+    'La lecture du dossier client se fait par un conseiller dédié.',
   ])('keeps clean: %j', (text) => {
     expect(pageHasLeak(text)).toBe(false);
   });
