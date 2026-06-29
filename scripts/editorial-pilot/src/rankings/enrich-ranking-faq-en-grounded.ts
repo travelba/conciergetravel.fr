@@ -204,6 +204,48 @@ async function patchFaq(env: PostgrestEnv, slug: string, faq: readonly FaqItem[]
   if (!r.ok) throw new Error(`PATCH ${slug}: ${r.status} ${(await r.text()).slice(0, 200)}`);
 }
 
+interface TopEntry {
+  readonly rank: number;
+  readonly name: string;
+  readonly badgeEn: string | null;
+}
+
+/**
+ * Fetch the top-N ranked hotels (rank + name + badge) so the LLM can answer
+ * the dominant EN PAA families "what is the #1 / most luxurious hotel in X"
+ * with the real ranking leader instead of skipping them (the entries table is
+ * read-only here — never mutated).
+ */
+async function fetchTopEntries(
+  env: PostgrestEnv,
+  rankingId: string,
+  limit = 6,
+): Promise<TopEntry[]> {
+  const url =
+    `${env.restBase}/editorial_ranking_entries` +
+    `?select=rank,badge_en,hotels(name)&ranking_id=eq.${encodeURIComponent(rankingId)}` +
+    `&order=rank.asc&limit=${String(limit)}`;
+  const r = await fetch(url, { headers: pgHeaders(env) });
+  if (!r.ok) return [];
+  const arr = (await r.json()) as Array<{
+    rank?: unknown;
+    badge_en?: unknown;
+    hotels?: { name?: unknown } | null;
+  }>;
+  if (!Array.isArray(arr)) return [];
+  const out: TopEntry[] = [];
+  for (const e of arr) {
+    const name = e.hotels && typeof e.hotels.name === 'string' ? e.hotels.name : '';
+    if (name.length === 0) continue;
+    out.push({
+      rank: typeof e.rank === 'number' ? e.rank : out.length + 1,
+      name,
+      badgeEn: typeof e.badge_en === 'string' ? e.badge_en : null,
+    });
+  }
+  return out;
+}
+
 /** Parse the persisted `faq` jsonb into typed bilingual entries (tolerant). */
 function parseFaq(raw: unknown): FaqItem[] {
   if (!Array.isArray(raw)) return [];
@@ -251,8 +293,9 @@ Hard rules:
 - British English (en-GB), editorial concierge voice — precise, factual, never hollow superlatives ("incredible", "magical", "stunning").
 - Faithful to the FRENCH source: every number, price (euros incl. tax), hotel name, distinction (Michelin, Atout France, Relais & Châteaux, Forbes, Leading Hotels of the World) and claim must already exist in the French answer. Never invent a fact, a chef, a price or a ranking to match a keyword.
 - Answer-first: each answer opens with the direct answer (extractable by an LLM), then 1-2 sentences of context. NO sentence longer than 25 words.
-- Reformulate each English question to match a real People-Also-Ask verbatim WHEN the theme overlaps; otherwise keep a faithful English version of the French question.
-- Select ONLY on-topic People-Also-Ask (stay, location/area, price range, dining, spa, family, booking, season). IGNORE celebrity/people/biography/salary noise ("Where does Taylor Swift stay", "Where do celebrities stay", "What is the 15-5 rule") — never answer those.
+- Reformulate each English question to match a real People-Also-Ask verbatim WHEN the theme overlaps; otherwise keep a faithful English version of the French question. Echo the PAA's own wording ("most luxurious hotel", "best area to stay", "where to stay for first-timers") so an LLM extracts the answer.
+- When a People-Also-Ask asks for the BEST / #1 / MOST LUXURIOUS / HIGHEST-RATED hotel, answer by naming the rank-1 hotel from the supplied TOP HOTELS list (and 1-2 runners-up). Never invent a name or a rank.
+- Select ONLY on-topic People-Also-Ask (stay, location/area, price range, dining, spa, family, booking, season, best time). IGNORE celebrity/people/biography/salary noise ("Where does Taylor Swift stay", "Where did Kim Kardashian stay", "Where do rich people stay", "What is the 15-5 rule") — never answer those.
 - NO pipeline meta-commentary ever: never "the brief", "AUTO_DRAFT", "pending", "confidence level", a Wikidata id, or backticks. Publishable prose only. No HTML, no emoji.
 
 Output STRICT JSON only: { "rewritten": [{ "index": <int>, "question_en": "...", "answer_en": "..." }], "added": [{ "question_fr": "...", "answer_fr": "...", "question_en": "...", "answer_en": "..." }] }.`;
@@ -278,6 +321,7 @@ function buildUserPrompt(
   existing: readonly FaqItem[],
   grounding: KeywordGrounding,
   maxAdded: number,
+  topEntries: readonly TopEntry[],
 ): string {
   const paa = grounding.peopleAlsoAsk.slice(0, 12);
   const kws = grounding.topKeywords
@@ -290,6 +334,15 @@ function buildUserPrompt(
   const lines: string[] = [];
   lines.push(`Ranking: the best luxury hotels in ${cityEn}.`);
   lines.push('');
+  if (topEntries.length > 0) {
+    lines.push(
+      '### TOP HOTELS IN THIS RANKING (use to answer "#1 / most luxurious hotel" PAA — never invent)',
+    );
+    for (const e of topEntries) {
+      lines.push(`- #${String(e.rank)} ${e.name}${e.badgeEn ? ` — ${e.badgeEn}` : ''}`);
+    }
+    lines.push('');
+  }
   lines.push('### REAL ENGLISH SEARCH DEMAND (DataForSEO, en) — anchor the FAQ on this');
   if (paa.length > 0) {
     lines.push('People Also Ask (rewrite the EN questions to match the on-topic ones):');
@@ -315,7 +368,7 @@ function buildUserPrompt(
     `1. "rewritten": for EACH of the ${existing.length} entries above, output { index, question_en, answer_en }. Keep the same index. The EN answer must stay faithful to the FR answer (same facts), answer-first, 40-90 words, no sentence > 25 words. Reformulate question_en to match a real on-topic People-Also-Ask where the theme overlaps.`,
   );
   lines.push(
-    `2. "added": OPTIONALLY add up to ${maxAdded} NEW bilingual Q&A (question_fr, answer_fr, question_en, answer_en) that answer high-value on-topic People-Also-Ask NOT already covered (e.g. best area/neighbourhood to stay, best time to visit, must-see nearby). Keep them generic-but-accurate for ${cityEn} — no invented hotel-specific fact. If everything is already covered, return an empty "added" array.`,
+    `2. "added": add up to ${maxAdded} NEW bilingual Q&A (question_fr, answer_fr, question_en, answer_en) that answer the HIGHEST-VALUE on-topic People-Also-Ask NOT already covered above. Prioritise, in this order: (a) "what is the most luxurious / #1 / best-rated hotel in ${cityEn}?" — answer by naming the rank-1 hotel (and 1-2 runners-up) from the TOP HOTELS list; (b) "which area/neighbourhood is best to stay in ${cityEn}?" / "where do most tourists stay?"; (c) "where to stay in ${cityEn} for first-timers?"; (d) "what is the best time to visit ${cityEn}?". Keep (b)(c)(d) generic-but-accurate for ${cityEn} — no invented hotel-specific fact. Each new question_en MUST echo a real People-Also-Ask above. Return [] only if every on-topic PAA is already covered.`,
   );
   lines.push('');
   lines.push('Return ONLY the JSON object.');
@@ -424,7 +477,11 @@ async function processSlug(
   }
 
   const maxAdded = Math.max(0, FAQ_MAX - existing.length);
-  const llm = await callLlm(openai, buildUserPrompt(cityEn, existing, grounding, maxAdded));
+  const topEntries = await fetchTopEntries(env, row.id);
+  const llm = await callLlm(
+    openai,
+    buildUserPrompt(cityEn, existing, grounding, maxAdded, topEntries),
+  );
   if (llm === null) {
     console.warn(`[${slug}] ✗ LLM failed after retries — skipping (kept).`);
     return { ...base(slug, 'error'), faqCount: existing.length, note: 'llm-fail' };

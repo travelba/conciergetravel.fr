@@ -360,6 +360,60 @@ is documented end-to-end in
 — commit `08bb0f2`, which fixed 199 thin Paris stubs shipped live and brought
 the count from 229 → 102 published.
 
+## Rule 8 — EN-target content grounds in the EN locale, not the FR seed (2026-06-29)
+
+**Capitalised 2026-06-29.** The `hotel-de-luxe-{city}` / `meilleurs-hotels-{city}`
+ranking heads serve an `/en/classement/<slug>` page targeting `luxury hotels
+{city}` / `best hotels {city}`. The v2 generator and the FR FAQ re-ground tool
+both ground in `France/fr` with the FR seed (`hôtel de luxe {ville}`), which
+returns **zero People-Also-Ask for a foreign city** (LA, Singapore, Tokyo, NYC…)
+— so the EN FAQ was a faithful translation of the FR one, never verified against
+real anglophone demand, and `dfs_paa_coverage` came back **`n/a`**. The fix is a
+**locale-aware grounding path**:
+
+- `keyword-grounding.ts` exposes canonical locales (`GROUNDING_LOCALE_FR`,
+  `GROUNDING_LOCALE_EN_US`, `GROUNDING_LOCALE_EN_GB`) and `buildEnCitySeeds(cityEn)`
+  → `["luxury hotels {city}", "best hotels in {city}"]`. EN content grounds in
+  `United States/en` (US default, UK acceptable); FR content keeps `France/fr`.
+- The **disk cache key already includes the locale**, so EN and FR groundings of
+  the same city never collide — re-runs are free.
+- The targeted re-ground tool is
+  `scripts/editorial-pilot/src/rankings/enrich-ranking-faq-en-grounded.ts`. It
+  PATCHes **only** `editorial_rankings.faq` (never entries / intros / sections),
+  rewrites the `_en` fields in place (FR preserved verbatim as source of truth),
+  and is degrade-safe: DFS off / zero EN PAA → logs `grounding=off` /
+  `dfs_paa_coverage=n/a` and **skips** (keeps the existing EN FAQ). A
+  `--recompute-only` mode re-scores the current FAQ from cache (no LLM, no PATCH)
+  to report the true per-head coverage without churn or token cost.
+
+Two coverage levers learned the hard way on this wave:
+
+1. **Pass the ranking's top hotels into the prompt.** EN PAA is dominated by
+   "_what is the most luxurious / #1 / highest-rated hotel in {city}?_". Without
+   the rank-1 hotel name in the prompt the LLM (correctly) refuses to answer, so
+   it skips the highest-volume PAA. Fetch the top ~6 entries
+   (`editorial_ranking_entries?select=rank,badge_en,hotels(name)&order=rank.asc`)
+   and instruct the model to name the leader (never invent). This + mandating
+   `added` entries for the "best area / first-timers / where do tourists stay /
+   best time" PAA families lifted heads like Tokyo 25→75 %, Singapore 60→100 %,
+   Paris 20→60 %, NYC 44→67 %.
+2. **Size the PAA noise filter to the EN celebrity shapes.** `evaluatePaaCoverage`
+   (`faq-perplexity-gates.ts`) only excluded `Where does <Name> stay`; EN PAA
+   mostly returns `What/Which hotel did <Celebrity> stay in` (Kim Kardashian,
+   Meghan Markle, Taylor Swift, Kate Middleton), `Where **did** <Name> stay`
+   (past tense — the `do(?:es)?` regex missed it), `where do rich/billionaires
+stay`, and `what is the N-minute rule` trivia. Counting those in the
+   denominator deflated EN coverage by 15-30 pts. Extend `PAA_NOISE_PATTERNS` +
+   `PAA_PERSON_STAY_PATTERNS` (observability-only — never touches generation or
+   publish) and lock both directions with fixtures (a legit "What hotels should I
+   stay at for the first time?" / "most prestigious hotel" must stay counted).
+
+Some heads stay genuinely low — **Bali 38 %** — because their PAA is 5+
+paraphrases of one theme (_"nicest place / nicest part / where Americans stay /
+where to avoid / first-timers"_) and the per-question soft-token matcher can't
+credit one answer for every phrasing. That is an honest documented floor, not a
+content gap — log it, don't chase it with more LLM passes.
+
 ## Validating live (do this before any wave)
 
 `npx tsx src/grounding/probe-dfs.ts "hôtel Gordes"` prints the related
@@ -370,18 +424,21 @@ before spending tokens on a wave. Creds live in `.env.local`
 
 ## Anti-patterns
 
-| Anti-pattern                                               | Why it fails                                                             | Correct path                                                                     |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| Making the pipeline hard-depend on DFS                     | breaks the editorial-only Vercel build                                   | `loadDfsConfig() → null` + `--no-grounding` fallback (Rule 1)                    |
-| Feeding raw PAA into the FAQ verbatim                      | celebrity/biography noise pollutes the fiche                             | instruct the LLM to select on-topic PAA only (Rule 2)                            |
-| One DFS call per seed                                      | burns the pay-per-request budget                                         | cluster + disk cache (Rule 3)                                                    |
-| Batch loop without per-item try/catch                      | one network blip aborts the whole run, no resume                         | isolate per item, idempotent re-run filter (Rule 4)                              |
-| Strict Zod that fails on one bad item                      | a single deformed vendor row kills the cluster                           | permissive schema + per-item `safeParse` (Rule 5)                                |
-| Enrich then assume it's live                               | enrich never sets `is_published`                                         | run `publish-places.ts` + `resolve-proximity.ts` (Rule 6)                        |
-| geo_qa answer says "the brief doesn't provide…"            | internal scaffolding word leaks to the public page                       | prompt ban + `META_REFERENCE_PATTERNS` gate; redirect to Concierge (Rule 7)      |
-| `run-hotel-geo-qa --refresh` on a golden fiche             | overwrites hand-seeded Airelles/Prince de Galles geo_qa                  | validate on a non-golden fiche; `--refresh` only when intentional (Rule 7)       |
-| Fabricating a geo_qa answer when DFS is off                | generic invented questions defeat the GEO purpose                        | geo_qa requires PAA — skip the hotel, no LLM-only fallback (Rule 7)              |
-| Forcing `en` as the DFS language for a non-English country | `40501 Invalid Field: 'language_code'` → zero PAA → silent `skip_no_paa` | native-language locale + `France/fr` fallback; `probe-dfs.ts` to validate a pair |
+| Anti-pattern                                                   | Why it fails                                                                                         | Correct path                                                                                 |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Making the pipeline hard-depend on DFS                         | breaks the editorial-only Vercel build                                                               | `loadDfsConfig() → null` + `--no-grounding` fallback (Rule 1)                                |
+| Feeding raw PAA into the FAQ verbatim                          | celebrity/biography noise pollutes the fiche                                                         | instruct the LLM to select on-topic PAA only (Rule 2)                                        |
+| One DFS call per seed                                          | burns the pay-per-request budget                                                                     | cluster + disk cache (Rule 3)                                                                |
+| Batch loop without per-item try/catch                          | one network blip aborts the whole run, no resume                                                     | isolate per item, idempotent re-run filter (Rule 4)                                          |
+| Strict Zod that fails on one bad item                          | a single deformed vendor row kills the cluster                                                       | permissive schema + per-item `safeParse` (Rule 5)                                            |
+| Enrich then assume it's live                                   | enrich never sets `is_published`                                                                     | run `publish-places.ts` + `resolve-proximity.ts` (Rule 6)                                    |
+| geo_qa answer says "the brief doesn't provide…"                | internal scaffolding word leaks to the public page                                                   | prompt ban + `META_REFERENCE_PATTERNS` gate; redirect to Concierge (Rule 7)                  |
+| `run-hotel-geo-qa --refresh` on a golden fiche                 | overwrites hand-seeded Airelles/Prince de Galles geo_qa                                              | validate on a non-golden fiche; `--refresh` only when intentional (Rule 7)                   |
+| Fabricating a geo_qa answer when DFS is off                    | generic invented questions defeat the GEO purpose                                                    | geo_qa requires PAA — skip the hotel, no LLM-only fallback (Rule 7)                          |
+| Forcing `en` as the DFS language for a non-English country     | `40501 Invalid Field: 'language_code'` → zero PAA → silent `skip_no_paa`                             | native-language locale + `France/fr` fallback; `probe-dfs.ts` to validate a pair             |
+| Grounding an EN-target page with the FR seed/locale            | `hôtel de luxe {ville}` returns zero PAA for foreign cities → `dfs_paa_coverage=n/a`                 | EN seed `luxury/best hotels {city}` in `United States/en`; locale in the cache key (Rule 8)  |
+| Asking for "#1 / most luxurious hotel" PAA without the entries | LLM refuses to name a hotel → skips the highest-volume PAA                                           | pass top ranked hotels (`hotels(name)` embed) into the prompt; "name, never invent" (Rule 8) |
+| Person-stay noise regex that only matches "Where does X stay"  | EN PAA "What hotel did <Celebrity> stay" / "did X stay" stays in the denominator → coverage deflated | size the noise filter to the EN celebrity shapes + past tense (Rule 8)                       |
 
 ## References
 

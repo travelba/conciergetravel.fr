@@ -91,9 +91,13 @@ describe('isEditoriallyRelevantPaa', () => {
     'What hotel did Meghan Markle stay in London?',
     'What hotel does Taylor Swift stay in in London?',
     'What hotel did Kate Middleton stay in the night before her wedding?',
+    // "Where did <Name> stay" (past tense) — same celebrity gossip family.
+    'Where did Jeff Bezos stay in Venice?',
+    'Where did Kim Kardashian stay in the Maldives?',
     // Wealth-class gossip without a capitalised name.
     'Where do rich people stay in Paris?',
     'Where do the wealthy stay in Dubai?',
+    'In which resort do billionaires stay in Bali?',
     // Travel-etiquette trivia.
     'What is the 5 minute rule in Japan?',
     'What is the 15-5 rule?',

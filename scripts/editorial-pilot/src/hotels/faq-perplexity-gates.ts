@@ -302,10 +302,11 @@ const PAA_NOISE_PATTERNS: readonly RegExp[] = [
   /\bfree (entry|entrance|admission)\b/,
   /\b(entry|entrance|admission)\b[^?]*\bfree\b/,
   /\b(entree|visite) (gratuite|libre)\b/,
-  // "Where do (the) rich / wealthy / affluent people stay" — wealth-class
-  // gossip, not a lodging question (no capitalised name → not caught by the
-  // person-stay patterns below). "Où logent les riches".
-  /\bwhere do(?:es)?\s+(?:the\s+)?(?:rich|wealthy|affluent)\b/,
+  // "Where do (the) rich / wealthy / affluent / billionaires stay" — wealth-
+  // class gossip, not a lodging question (no capitalised name → not caught by
+  // the person-stay patterns below). "Où logent les riches".
+  /\bwhere do(?:es)?\s+(?:the\s+)?(?:rich|wealthy|affluent|billionaire)\b/,
+  /\b(?:rich|wealthy|billionaire|millionaire)s?\s+stay\b/,
   /\bou\s+(?:logent|sejournent|vont)\s+les\s+riches\b/,
   // Travel-etiquette trivia: "What is the 5 minute rule in Japan?", "the 15-5
   // rule" — onsen/queue folklore, outside a hotel ranking's editorial scope.
@@ -319,7 +320,7 @@ const PAA_NOISE_PATTERNS: readonly RegExp[] = [
  * near…" lodging question.
  */
 const PAA_PERSON_STAY_PATTERNS: readonly RegExp[] = [
-  /\b[Ww]here\s+do(?:es)?\s+(?:[A-Z][\p{L}.'-]+\s+){1,3}(?:stay|stays|sleep|sleeps|live|lives)\b/u,
+  /\b[Ww]here\s+(?:do|does|did)\s+(?:[A-Z][\p{L}.'-]+\s+){1,3}(?:stay|stays|stayed|sleep|sleeps|slept|live|lives|lived)\b/u,
   /\b[OoÔô]ù?\s+(?:sejourne|séjourne|loge|dort|vit|habite|reside|réside)\s+(?:[A-Z][\p{L}.'-]+\s*){1,3}/u,
   // EN dominant celebrity shape: "What/Which hotel did/does <Full Name>
   // stay/sleep (in)?" — Kim Kardashian, Meghan Markle, Taylor Swift, Kate
