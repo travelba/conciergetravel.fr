@@ -18,6 +18,7 @@ export * from './item-list';
 export * from './member-program';
 export * from './offer';
 export * from './place-amenity';
+export * from './speakable';
 export * from './tourist-attraction';
 export * from './travel-agency';
 export * from './video-object';

@@ -80,6 +80,18 @@ export async function GET(): Promise<NextResponse> {
         : `${r.titleFr} — classement éditorial MyConciergeHotel (${r.entryCount} hôtel${r.entryCount === 1 ? '' : 's'}).`,
   }));
 
+  // EN ranking surface (en-seo-geo-audit-2026-06-29 §3 — llms.txt was
+  // FR-only on classements, a blind spot for ChatGPT/Perplexity/Claude on
+  // English queries). One `/en/classement/<slug>` line per ranking, English
+  // title + EN factual summary (FR title only as a last-resort label).
+  const rankingItemsEn: LlmsTxtSectionItem[] = rankings.map((r) => ({
+    url: `${origin}/en/classement/${r.slug}`,
+    description:
+      r.factualSummaryEn !== null && r.factualSummaryEn.length > 0
+        ? r.factualSummaryEn
+        : `${r.titleEn ?? r.titleFr} — MyConciergeHotel editorial ranking (${r.entryCount} hotel${r.entryCount === 1 ? '' : 's'}).`,
+  }));
+
   // Destination guides (long-read 3500+ words, GEO-optimised).
   // Highest-value pages for AI Overviews and Perplexity citations
   // because they answer broad "où séjourner à X" queries with
@@ -93,6 +105,18 @@ export async function GET(): Promise<NextResponse> {
       g.summaryFr.length > 0
         ? g.summaryFr
         : `${g.nameFr} — guide éditorial long-format (palaces, gastronomie, art de vivre, infos pratiques) intégré à la page destination.`,
+  }));
+
+  // EN destination-guide surface (en-seo-geo-audit-2026-06-29 §3). One
+  // `/en/destination/<slug>` line per guide, English name + EN summary
+  // (FR name only as a last-resort label), so EN-targeting LLM crawlers
+  // discover the `/en/destination/*` long-read corpus.
+  const guideItemsEn: LlmsTxtSectionItem[] = guides.map((g) => ({
+    url: `${origin}/en/destination/${g.slug}`,
+    description:
+      g.summaryEn !== null && g.summaryEn.length > 0
+        ? g.summaryEn
+        : `${g.nameEn ?? g.nameFr} — long-form destination guide (Palaces, dining, lifestyle, practical info) embedded in the destination page.`,
   }));
 
   // Editorial itineraries (FR + EN). Each itinerary doubles as a
@@ -153,6 +177,10 @@ export async function GET(): Promise<NextResponse> {
   const catalogHead = catalogItems.slice(0, LLMS_CATALOG_HOTEL_HEADS * 2);
   const rankingHead = rankingItems.slice(0, LLMS_RANKING_HEADS);
   const guideHead = guideItems.slice(0, LLMS_GUIDE_HEADS);
+  // EN heads mirror the FR cap so the English surface is symmetric without
+  // blowing the 50 KB budget; the complete sets stay in the *.jsonl feeds.
+  const rankingHeadEn = rankingItemsEn.slice(0, LLMS_RANKING_HEADS);
+  const guideHeadEn = guideItemsEn.slice(0, LLMS_GUIDE_HEADS);
 
   const body = buildLlmsTxt({
     siteName: 'MyConciergeHotel.com',
@@ -264,6 +292,26 @@ export async function GET(): Promise<NextResponse> {
             },
           ]
         : []),
+      ...(rankingItemsEn.length > 0
+        ? [
+            {
+              title: `Editorial rankings — English (${rankingItemsEn.length} selections; ${rankingHeadEn.length} below, full list in rankings.jsonl)`,
+              items: [
+                {
+                  url: `${origin}/en/classements`,
+                  description:
+                    'Rankings hub (EN) — every editorial selection, filterable by type, place, theme and occasion.',
+                },
+                {
+                  url: `${origin}/.well-known/rankings.jsonl`,
+                  description:
+                    'COMPLETE machine-readable catalogue of every ranking (NDJSON, FR + EN titles and URLs per row) — exhaustive surface; the list below is the readable extract.',
+                },
+                ...rankingHeadEn,
+              ],
+            },
+          ]
+        : []),
       ...(guideItems.length > 0
         ? [
             {
@@ -280,6 +328,26 @@ export async function GET(): Promise<NextResponse> {
                     'Catalogue COMPLET et machine-readable de tous les guides de destinations (NDJSON) — surface exhaustive ; la liste ci-dessous en est l’extrait lisible.',
                 },
                 ...guideHead,
+              ],
+            },
+          ]
+        : []),
+      ...(guideItemsEn.length > 0
+        ? [
+            {
+              title: `Destination guides — English (${guideItemsEn.length} long-reads ≥ 3,500 words; ${guideHeadEn.length} below, full list in guides.jsonl)`,
+              items: [
+                {
+                  url: `${origin}/en/destination`,
+                  description:
+                    'Destinations hub (EN) — each destination page embeds the long-read guide (Palaces + lifestyle + practical info). See ADR-0015 (guide↔destination merge).',
+                },
+                {
+                  url: `${origin}/.well-known/guides.jsonl`,
+                  description:
+                    'COMPLETE machine-readable catalogue of every destination guide (NDJSON, FR + EN names, summaries and URLs per row) — exhaustive surface; the list below is the readable extract.',
+                },
+                ...guideHeadEn,
               ],
             },
           ]

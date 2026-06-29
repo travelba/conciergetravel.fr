@@ -175,6 +175,22 @@ export async function GET(): Promise<NextResponse> {
         'Filtres : type × lieu × thème × occasion',
       ],
     },
+    // EN parity (en-seo-geo-audit-2026-06-29 §3): expose the English
+    // rankings hub + `/en/classement/<slug>` corpus so EN-targeting LLM
+    // crawlers discover the surface. Per-ranking lines stay in llms.txt +
+    // the rankings.jsonl feed (FR + EN URLs per row).
+    {
+      url: `${origin}/en/classements`,
+      title: 'Editorial rankings — index',
+      summary:
+        "The Concierge's thematic selections (by type, place, theme, occasion). " +
+        `COMPLETE machine-readable catalogue: ${origin}/.well-known/rankings.jsonl — every ranking exposes FR/EN titles, axes, hotel count and factual summary, with both /fr/classement and /en/classement URLs.`,
+      keyFacts: [
+        `Full feed: ${origin}/.well-known/rankings.jsonl`,
+        'Filters: type × place × theme × occasion',
+        `EN ranking URLs: ${origin}/en/classement/<slug>`,
+      ],
+    },
   ];
 
   const body = buildLlmsFullTxt({

@@ -1,5 +1,7 @@
 import type { Article } from 'schema-dts';
 
+import { speakableSpecificationJsonLd } from './speakable';
+
 export type ArticleNode = Exclude<Article, string>;
 
 export interface ArticleAuthorInput {
@@ -26,6 +28,13 @@ export interface ArticleJsonLdInput {
    * per app locale.
    */
   readonly inLanguage?: string;
+  /**
+   * CSS selectors of the page's "speakable" sections (H1, factual summary,
+   * verdict, FAQ answers). Emitted as a `SpeakableSpecification` on the
+   * Article so voice assistants + AI Overviews read the answer aloud.
+   * Empty / omitted → no `speakable` property.
+   */
+  readonly speakableSelectors?: readonly string[];
 }
 
 /**
@@ -60,6 +69,12 @@ export const articleJsonLd = (input: ArticleJsonLdInput): ArticleNode => {
         ? { logo: { '@type': 'ImageObject', url: input.publisher.logoUrl } }
         : {}),
     };
+  }
+  if (input.speakableSelectors !== undefined) {
+    const speakable = speakableSpecificationJsonLd(input.speakableSelectors);
+    if (speakable !== null) {
+      article.speakable = speakable;
+    }
   }
 
   return article;

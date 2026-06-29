@@ -422,6 +422,12 @@ export default async function RankingPage({
       },
       publisher: { name: 'MyConciergeHotel', logoUrl: `${origin}/logo.png` },
       inLanguage: hreflangKey(locale),
+      // GEO/AEO (en-seo-geo-audit-2026-06-29 §8) — mark the dense answer
+      // blocks so voice assistants + AI Overviews read the verdict aloud:
+      // the H1, the AEO factual summary (`data-aeo`), the « verdict en
+      // bref » top-3 (`#tldr`) and the global FAQ (`#faq`). All four
+      // selectors resolve to real, visible DOM nodes rendered below.
+      speakableSelectors: ['.rk-page-head h1', '[data-aeo="factual-summary"]', '#tldr', '#faq'],
     }),
   );
 
