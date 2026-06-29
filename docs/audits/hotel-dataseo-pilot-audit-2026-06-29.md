@@ -10,6 +10,54 @@ fiche sur le catalogue hotels.
 Toute fiche hotel doit etre auditee avec DataSEO avant retouche des titres,
 meta descriptions, FAQ, `geo_qa`, `highlights` ou blocs AEO.
 
+DataSEO n'est pas un audit autonome. Il est le **signal de demande** qui doit
+etre croise avec les sources de verite du projet : skills, rules, CDC et code.
+Une recommandation DataSEO qui contredit une hard rule projet est rejetee.
+
+### Sources obligatoires avant chaque vague
+
+| Couche | Source | Ce que l'audit doit en retenir |
+| --- | --- | --- |
+| CDC fiche hotel | `.cursor/rules/hotel-detail-page.mdc` | Parite Gordes, 15 blocs, FAQ Perplexity, photos, EEAT, avis Google, JSON-LD |
+| SEO / GEO / AEO | `.cursor/rules/seo-geo.mdc` | metadata, canonical, hreflang, `llms.txt`, AEO, FAQ, factual summary |
+| DataSEO | `.cursor/skills/keyword-grounding-dataforseo/SKILL.md` | PAA, related keywords, volumes, intent, `dfs_paa_coverage` |
+| FAQ | `.cursor/rules/hotel-faq-perplexity.mdc` + skill FAQ | `faq_content_kit` 40-60, `faq_content` 10-15, `concierge_questions` 20-30 |
+| SEO technique | `.cursor/skills/seo-technical/SKILL.md` | title, meta, canonical, hreflang, slugs, anti-cannibalisation |
+| Schema.org | `.cursor/skills/structured-data-schema-org/SKILL.md` | `Hotel`, `FAQPage`, `ImageObject`, `AggregateRating /5`, pas d'`Offer` Phase 6 |
+| Voix concierge | `EDITORIAL_VOICE.md` + `concierge-voice-pipeline` | ton, phrases courtes, pas de superlatifs creux, conseil concret |
+| Benchmark | `.cursor/rules/competitor-benchmark-yonder.mdc` | comparer MCH a yonder/travellers quand la fiche touche SEO/acquisition |
+| Securite / CSP | `.cursor/rules/security-csp.mdc` | JSON-LD via nonce, pas de script brut, pas de secret ni PII |
+| Acceptation | `.cursor/rules/user-acceptance-before-commit.mdc` | toute modification visible doit etre marchee dans le navigateur avant commit |
+
+### Code source a utiliser, pas a contourner
+
+| Besoin | Fichier / runner |
+| --- | --- |
+| Appel API DataSEO | `packages/integrations/src/dataforseo/client.ts` |
+| Volumes, PAA, intent | `packages/integrations/src/dataforseo/keyword-research.ts` |
+| Config DataSEO | `scripts/editorial-pilot/src/grounding/env-dfs.ts` |
+| Grounding hotel | `scripts/editorial-pilot/src/grounding/hotel-grounding.ts` |
+| Grounding keywords / rendu prompt | `scripts/editorial-pilot/src/grounding/keyword-grounding.ts` |
+| Probe fiche | `scripts/editorial-pilot/src/grounding/print-hotel-grounding.ts` |
+| Coverage PAA | `scripts/editorial-pilot/src/hotels/faq-perplexity-gates.ts` |
+| FAQ kit batch | `scripts/editorial-pilot/src/hotels/run-faq-perplexity-batch.ts` |
+| Meta descriptions | `scripts/editorial-pilot/src/hotels/meta-desc-generator.ts` |
+| Factual summary | `scripts/editorial-pilot/src/hotels/factual-summary-generator.ts` |
+| GEO Q&A | `scripts/editorial-pilot/src/hotels/run-hotel-geo-qa.ts` |
+| Audit CDC / scores | `scripts/editorial-pilot/src/hotels/hotel-fiche-cdc-gates.ts` |
+| Rendu fiche | `apps/web/src/app/[locale]/hotel/[slug]/page.tsx` |
+| JSON-LD | `packages/seo/src/jsonld/*` + `apps/web/src/components/seo/json-ld.tsx` |
+| Agentique | `packages/seo/src/agent-skills.ts`, `/llms.txt`, `/api/agent/hotel-*` |
+
+### Regle de priorite
+
+1. **Hard rules projet** : securite, booking Phase 6, CSP, JSON-LD, FAQ, parite
+   EN, anti-scaffolding.
+2. **CDC / parite Gordes** : niveau cible catalogue.
+3. **DataSEO** : demande reelle, PAA, volumes, intent.
+4. **LLM / editorial** : uniquement apres grounding, jamais comme source de
+   questions ou de mots-cles inventes.
+
 Le workflow retenu est :
 
 1. Lire la fiche existante : `title`, `meta_desc`, `factual_summary`, FAQ,
@@ -186,7 +234,41 @@ photos, EEAT, et maillage vers `luxury hotels New York`.
 5. Les titres EN doivent etre audites pour les entites localisees : `London`,
    pas `Londres`, dans les surfaces EN.
 
-## 4. Definition of Done par fiche avant livraison
+## 4. Application par surface
+
+| Surface | Signal DataSEO | Gate projet |
+| --- | --- | --- |
+| `meta_title_fr/en` | Requete utile la plus forte + entite hotel | 30-70 chars, unique, pas de keyword stuffing |
+| `meta_desc_fr/en` | Intent commercial / informationnel + USP factuels | 140-170 chars, reflet exact de la page |
+| H1 | Nom officiel + positionnement, pas phrase SEO forcee | Un seul H1, coherent avec title |
+| H2 | Sous-intentions PAA utiles : restaurant, spa, acces, prix, quartier | Structure scannable, pas de H2 decoratif |
+| `factual_summary` | Formulation haute demande, 3 USP verifiables | 110-165 prod, ideal 130-150, format CDC |
+| `faq_content` | 10 canoniques + PAA utiles | 10-15, JSON-LD unique, first `<details open>` |
+| `faq_content_kit` | PAA + related questions detaillees | 40-60, taxonomy, EN parity |
+| `concierge_questions` | Intentions service / conciergerie utiles | 20-30, ton informatif, pas de "Je confirme" |
+| `geo_qa` | PAA reellement presentes | skip si zero PAA utile, pas de LLM-only |
+| `highlights` | Sous-intentions avec volume : spa, restaurant, vue, acces | pas de claims non sources |
+| POI / acces | PAA "near", airport, train, district | distances / GPS / Place JSON-LD |
+| EEAT | Requetes "owner", "chef", "Michelin", "reviews" | sources verifiables, external_sources >= 2 |
+| Photos | Requetes photos / spa / room / restaurant | alt enrichi, ImageObject, pas de hotlink |
+| JSON-LD | FAQ / rating / image / place visibles | nonce CSP, `bestRating: 5`, pas d'`Offer` Phase 6 |
+| Agentique | Questions citees par LLM + payload API | `hotel-sources`, `hotel-photos`, `llms-full` non vides |
+
+## 5. Benchmark concurrent obligatoire
+
+Pour chaque destination ou fiche a enjeu SEO, l'audit doit ajouter une ligne
+MCH vs yonder/travellers :
+
+| Axe | A verifier |
+| --- | --- |
+| Coverage | Yonder couvre-t-il deja la destination / l'angle ? |
+| Title / H1 | Leur pattern cible-t-il `hotel de luxe`, `best hotels`, `palace` ? |
+| Richesse par hotel | Ont-ils architecte, chef, chambre a booker, anecdote ? |
+| Structured data | Ont-ils moins de JSON-LD que MCH mais plus d'autorite ? |
+| Hook commercial | Ont-ils un club / avantage / prix ? MCH doit rester Phase 6-safe |
+| Delta MCH | Conseil du Concierge, FAQ PAA, JSON-LD superieur, catalogue mondial |
+
+## 6. Definition of Done par fiche avant livraison
 
 Une fiche ne doit pas etre marquee "livree" tant que :
 
@@ -203,7 +285,7 @@ Une fiche ne doit pas etre marquee "livree" tant que :
   renvoient pas un payload vide ;
 - pour les fiches kit, les gates `kit.*` sont verts et le walk Rule 6 est fait.
 
-## 5. Rollout recommande
+## 7. Rollout recommande
 
 ### Vague 1 — 50 fiches a fort potentiel
 
@@ -232,7 +314,7 @@ Traiter les petites fiches avec une regle de sobriete :
 - renforcer uniquement les informations pratiques, la provenance et le maillage
   destination.
 
-## 6. Commandes reproductibles
+## 8. Commandes reproductibles
 
 Test credentials DataSEO direct :
 
@@ -250,7 +332,7 @@ pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --slugs=<slug> --grou
 pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-hotel-geo-qa.ts --slug=<slug>
 ```
 
-## 7. Limites de ce pilote
+## 9. Limites de ce pilote
 
 - `node_modules` n'est pas installe dans ce Cloud, donc le CLI `tsx` du repo n'a
   pas ete execute.
