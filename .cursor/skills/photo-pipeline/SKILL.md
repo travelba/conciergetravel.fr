@@ -453,6 +453,31 @@ need Tavily / official-site / manual sourcing, not another Places run. Always
 re-count from the live DB (`gallery_images` length) before scoping a "close the
 gap" chantier — don't trust a count baked into prose.
 
+### Gotcha — the depth backfill is run by a `run-zero-photo-backfill` fleet; don't spawn a second orchestrator (2026-06-29)
+
+The `< 10`-photo DEPTH backfill is driven by **`run-zero-photo-backfill.ts` with
+range flags**, not only the "0-photo" case the name implies:
+`run-zero-photo-backfill.ts --worker=N --workers=3 --min-gallery=1 --max-gallery=10
+--skip-first=8 --chunk=10 --limit=4 --per-hotel=14` is the canonical **sub-10
+depth** fleet (checkpoints `runs/zero-photo-backfill-checkpoint-depth10-w{0,1,2}.json`).
+It uses the exact same Google-Places→Vision→Cloudinary APPEND path as
+`gen-places-discovery` + `upload-press-kit-images`.
+
+**Before launching ANY sub-10 / depth photo chantier, list the terminals folder
+and grep the running commands for `run-zero-photo-backfill`.** If a `depth10-w*`
+fleet is alive, a second independent orchestrator on the same cohort is a
+**collision**: both do a read-modify-write `PATCH gallery_images = [...existing,
+...new]`, so concurrent same-hotel writes are **last-writer-wins → the loser's
+uploaded photos are orphaned in Cloudinary and lost from the DB row**, plus you
+double-spend Google Places ($32/1k search + $7/1k photo) + Vision quota. A
+catalogue-wide audit (2026-06-29) showed **765 published fiches < 10 photos**
+(728 at 5-9, 15 at 1-4, 22 at 0) — far above the stale "~15" figure above —
+and the fleet was already closing it at ~100 fiches / 18 min. The right move
+when a fleet is active: **stand down, re-audit for the report, run acceptance
+curls on a few already-backfilled fiches, and hand the cohort back to the fleet**
+rather than racing it. The fleet's per-worker checkpoint makes it resumable and
+the selection (`--min-gallery=1 --max-gallery=10`) already targets the exact gap.
+
 ### Anti-pattern — Tavily-extract is near-useless on the Tier-C residual (JS-SPA + multi-property chrome, 2026-06-22)
 
 On the `<10`-photo traîne, Tavily extraction of official sites enriched **only
