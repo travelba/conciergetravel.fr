@@ -916,6 +916,158 @@ export const LIEUX: readonly LieuDef[] = [
     hotelCityKeys: ['sicile', 'sicily', 'taormina', 'palerme', 'palermo', 'siracusa', 'noto'],
     countryCodes: ['IT'],
   },
+
+  // ─── 2026-06-29 — Maillage coverage wave: country heads for countries
+  // carrying ≥ 5 published hotels but no geographic head ranking yet (audit
+  // of the 1005 fiches in zero ranking). Pure country gate (`countryCodes`
+  // + empty `hotelCityKeys`). Emitted via `NEW_COUNTRY_HEAD_OVERRIDES` in
+  // combinator.ts. Theme/type sub-combos deferred to a later wave.
+  { slug: 'canada', label: 'Canada', scope: 'pays', hotelCityKeys: [], countryCodes: ['CA'] },
+  {
+    slug: 'afrique-du-sud',
+    label: 'Afrique du Sud',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['ZA'],
+  },
+  {
+    slug: 'arabie-saoudite',
+    label: 'Arabie saoudite',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['SA'],
+  },
+  { slug: 'belgique', label: 'Belgique', scope: 'pays', hotelCityKeys: [], countryCodes: ['BE'] },
+  { slug: 'pays-bas', label: 'Pays-Bas', scope: 'pays', hotelCityKeys: [], countryCodes: ['NL'] },
+  { slug: 'vietnam', label: 'Vietnam', scope: 'pays', hotelCityKeys: [], countryCodes: ['VN'] },
+  { slug: 'malaisie', label: 'Malaisie', scope: 'pays', hotelCityKeys: [], countryCodes: ['MY'] },
+  { slug: 'chili', label: 'Chili', scope: 'pays', hotelCityKeys: [], countryCodes: ['CL'] },
+  { slug: 'argentine', label: 'Argentine', scope: 'pays', hotelCityKeys: [], countryCodes: ['AR'] },
+  { slug: 'egypte', label: 'Égypte', scope: 'pays', hotelCityKeys: [], countryCodes: ['EG'] },
+  { slug: 'irlande', label: 'Irlande', scope: 'pays', hotelCityKeys: [], countryCodes: ['IE'] },
+  {
+    slug: 'costa-rica',
+    label: 'Costa Rica',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['CR'],
+  },
+  { slug: 'kenya', label: 'Kenya', scope: 'pays', hotelCityKeys: [], countryCodes: ['KE'] },
+  { slug: 'perou', label: 'Pérou', scope: 'pays', hotelCityKeys: [], countryCodes: ['PE'] },
+  { slug: 'bresil', label: 'Brésil', scope: 'pays', hotelCityKeys: [], countryCodes: ['BR'] },
+  {
+    slug: 'nouvelle-zelande',
+    label: 'Nouvelle-Zélande',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['NZ'],
+  },
+  { slug: 'suede', label: 'Suède', scope: 'pays', hotelCityKeys: [], countryCodes: ['SE'] },
+  { slug: 'qatar', label: 'Qatar', scope: 'pays', hotelCityKeys: [], countryCodes: ['QA'] },
+  { slug: 'andorre', label: 'Andorre', scope: 'pays', hotelCityKeys: [], countryCodes: ['AD'] },
+  { slug: 'colombie', label: 'Colombie', scope: 'pays', hotelCityKeys: [], countryCodes: ['CO'] },
+  {
+    slug: 'luxembourg',
+    label: 'Luxembourg',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['LU'],
+  },
+  { slug: 'bhoutan', label: 'Bhoutan', scope: 'pays', hotelCityKeys: [], countryCodes: ['BT'] },
+  { slug: 'croatie', label: 'Croatie', scope: 'pays', hotelCityKeys: [], countryCodes: ['HR'] },
+  { slug: 'oman', label: 'Oman', scope: 'pays', hotelCityKeys: [], countryCodes: ['OM'] },
+  { slug: 'danemark', label: 'Danemark', scope: 'pays', hotelCityKeys: [], countryCodes: ['DK'] },
+  { slug: 'albanie', label: 'Albanie', scope: 'pays', hotelCityKeys: [], countryCodes: ['AL'] },
+  { slug: 'jordanie', label: 'Jordanie', scope: 'pays', hotelCityKeys: [], countryCodes: ['JO'] },
+  {
+    slug: 'coree-du-sud',
+    label: 'Corée du Sud',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['KR'],
+  },
+  { slug: 'sri-lanka', label: 'Sri Lanka', scope: 'pays', hotelCityKeys: [], countryCodes: ['LK'] },
+  {
+    slug: 'philippines',
+    label: 'Philippines',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['PH'],
+  },
+  {
+    slug: 'republique-dominicaine',
+    label: 'République dominicaine',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['DO'],
+  },
+  { slug: 'cambodge', label: 'Cambodge', scope: 'pays', hotelCityKeys: [], countryCodes: ['KH'] },
+  {
+    slug: 'polynesie-francaise',
+    label: 'Polynésie française',
+    scope: 'pays',
+    hotelCityKeys: [],
+    countryCodes: ['PF'],
+  },
+  { slug: 'israel', label: 'Israël', scope: 'pays', hotelCityKeys: [], countryCodes: ['IL'] },
+  { slug: 'norvege', label: 'Norvège', scope: 'pays', hotelCityKeys: [], countryCodes: ['NO'] },
+  { slug: 'tanzanie', label: 'Tanzanie', scope: 'pays', hotelCityKeys: [], countryCodes: ['TZ'] },
+  { slug: 'rwanda', label: 'Rwanda', scope: 'pays', hotelCityKeys: [], countryCodes: ['RW'] },
+  { slug: 'taiwan', label: 'Taïwan', scope: 'pays', hotelCityKeys: [], countryCodes: ['TW'] },
+
+  // ─── 2026-06-29 — French city / station heads with ≥ 4 published hotels
+  // and no existing head ranking (Lille 10, Honfleur 9, Marseille 6, La Baule
+  // 6, Val Thorens 6, Hyères 5, Avignon 5). Pin `countryCodes: ['FR']` so a
+  // homonym abroad never leaks into the city gate.
+  {
+    slug: 'lille',
+    label: 'Lille',
+    scope: 'ville',
+    hotelCityKeys: ['lille'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'honfleur',
+    label: 'Honfleur',
+    scope: 'ville',
+    hotelCityKeys: ['honfleur'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'marseille',
+    label: 'Marseille',
+    scope: 'ville',
+    hotelCityKeys: ['marseille'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'la-baule',
+    label: 'La Baule',
+    scope: 'ville',
+    hotelCityKeys: ['la baule', 'la baule-escoublac'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'val-thorens',
+    label: 'Val Thorens',
+    scope: 'station',
+    hotelCityKeys: ['val thorens', 'val-thorens'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'hyeres',
+    label: 'Hyères',
+    scope: 'ville',
+    hotelCityKeys: ['hyeres', 'hyères'],
+    countryCodes: ['FR'],
+  },
+  {
+    slug: 'avignon',
+    label: 'Avignon',
+    scope: 'ville',
+    hotelCityKeys: ['avignon'],
+    countryCodes: ['FR'],
+  },
 ];
 
 export const LIEU_SLUGS = LIEUX.map((l) => l.slug) as readonly string[];

@@ -305,6 +305,26 @@ type RankingFamily = 'chain-collection' | 'curated-award' | 'geo-best';
  * for slugs that don't belong to a recognised family (those keep the
  * lieu/theme/type signals only).
  */
+/**
+ * Anti-cannibalization reciprocal pin (2026-06-29). A city can carry BOTH
+ * a `meilleurs-hotels-<lieu>` (editorial "best") head and a
+ * `hotel-de-luxe-<lieu>` (prestige / price-tier) head — same lieu, related
+ * intent. `seo-geo.mdc` §anti-cannibalization wants the two pages to (a)
+ * differentiate intent (already done via distinct title / canonical /
+ * intro) AND (b) explicitly cross-link. The lateral "Autres classements
+ * {ville}" block is the rendered cross-link surface, but with `limit=3`
+ * and many same-lieu rankings tied at the lieu score, the *specific*
+ * sibling wasn't guaranteed to appear. `geoHeadKind` lets `scoreCandidate`
+ * pin the complementary head to the top so the reciprocal link always
+ * renders both ways.
+ */
+type GeoHeadKind = 'luxe' | 'meilleurs';
+function geoHeadKind(slug: string): GeoHeadKind | null {
+  if (/^hotel-de-luxe-/u.test(slug)) return 'luxe';
+  if (/^meilleurs-hotels-/u.test(slug)) return 'meilleurs';
+  return null;
+}
+
 function familyForSlug(slug: string): RankingFamily | null {
   if (/^top-[a-z0-9-]+-(?:hotels|palaces|resorts)-monde$/u.test(slug)) return 'chain-collection';
   if (/-toutes-les-maisons$/u.test(slug)) return 'chain-collection';
@@ -427,6 +447,7 @@ const loadRankingScoreIndex = (): Promise<readonly RankingIndexEntry[]> =>
   })();
 
 interface CurrentRankingSignals {
+  readonly slug: string;
   readonly lieuSlug: string | null;
   readonly themes: readonly string[];
   readonly types: readonly string[];
@@ -436,7 +457,16 @@ interface CurrentRankingSignals {
 
 function scoreCandidate(current: CurrentRankingSignals, cand: RankingIndexEntry): number {
   let score = 0;
-  if (current.lieuSlug !== null && cand.lieuSlug === current.lieuSlug) score += 4;
+  if (current.lieuSlug !== null && cand.lieuSlug === current.lieuSlug) {
+    score += 4;
+    // Anti-cannibalization reciprocal pin — when the current head and the
+    // candidate target the SAME lieu but the COMPLEMENTARY intent (one
+    // `meilleurs-hotels-*`, the other `hotel-de-luxe-*`), boost hard so the
+    // sibling always lands in the top-`limit` lateral block both ways.
+    const curHead = geoHeadKind(current.slug);
+    const candHead = geoHeadKind(cand.slug);
+    if (curHead !== null && candHead !== null && curHead !== candHead) score += 10;
+  }
   for (const th of current.themes) if (cand.themes.includes(th)) score += 2;
   for (const ty of current.types) if (cand.types.includes(ty)) score += 1;
   // Family / kind cross-links contribute ONLY when the current ranking
@@ -482,6 +512,7 @@ export async function findSiblingRankings(args: {
     const index = await loadRankingScoreIndex();
     if (index.length === 0) return [];
     const current: CurrentRankingSignals = {
+      slug: args.currentSlug,
       lieuSlug: args.lieuSlug,
       themes: args.themes ?? [],
       types: args.types ?? [],

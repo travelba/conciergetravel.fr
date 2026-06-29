@@ -1133,6 +1133,357 @@ const GAP_DESTINATION_OVERRIDES: readonly ManualOverride[] = GAP_DESTINATIONS.ma
   kind: 'geographic',
 }));
 
+// ─── 2026-06-29 — Maillage coverage wave (audit of the 1005 fiches in zero
+// ranking) ─────────────────────────────────────────────────────────────────
+// Country heads for every country carrying ≥ 5 published hotels but no
+// geographic head ranking, plus French city/station heads with ≥ 4 published
+// hotels and no existing head. Each references a LieuDef added in axes.ts
+// (country gate via `countryCodes`; FR cities pinned `countryCodes: ['FR']` +
+// `hotelCityKeys` so a homonym abroad never leaks in). `meilleurs-hotels-*`
+// phrasing, consistent with the 39 intl heads + gap destinations already
+// shipped. Eligibility is re-checked by `eligibilityFor` (re-resolves the
+// lieu by slug) and the MIN_ELIGIBLE=3 floor in `buildMatrix` drops any that
+// fall short — thin/sub-floor entities are never emitted.
+const COVERAGE_WAVE_DESTINATIONS: readonly {
+  readonly lieuSlug: string;
+  readonly titleFr: string;
+  readonly titleEn: string;
+  readonly scope: LieuDef['scope'];
+  readonly label: string;
+}[] = [
+  // Country heads.
+  {
+    lieuSlug: 'canada',
+    titleFr: 'Les meilleurs hôtels du Canada',
+    titleEn: 'The best hotels in Canada',
+    scope: 'pays',
+    label: 'Canada',
+  },
+  {
+    lieuSlug: 'afrique-du-sud',
+    titleFr: "Les meilleurs hôtels d'Afrique du Sud",
+    titleEn: 'The best hotels in South Africa',
+    scope: 'pays',
+    label: 'Afrique du Sud',
+  },
+  {
+    lieuSlug: 'arabie-saoudite',
+    titleFr: "Les meilleurs hôtels d'Arabie saoudite",
+    titleEn: 'The best hotels in Saudi Arabia',
+    scope: 'pays',
+    label: 'Arabie saoudite',
+  },
+  {
+    lieuSlug: 'belgique',
+    titleFr: 'Les meilleurs hôtels de Belgique',
+    titleEn: 'The best hotels in Belgium',
+    scope: 'pays',
+    label: 'Belgique',
+  },
+  {
+    lieuSlug: 'pays-bas',
+    titleFr: 'Les meilleurs hôtels des Pays-Bas',
+    titleEn: 'The best hotels in the Netherlands',
+    scope: 'pays',
+    label: 'Pays-Bas',
+  },
+  {
+    lieuSlug: 'vietnam',
+    titleFr: 'Les meilleurs hôtels du Vietnam',
+    titleEn: 'The best hotels in Vietnam',
+    scope: 'pays',
+    label: 'Vietnam',
+  },
+  {
+    lieuSlug: 'malaisie',
+    titleFr: 'Les meilleurs hôtels de Malaisie',
+    titleEn: 'The best hotels in Malaysia',
+    scope: 'pays',
+    label: 'Malaisie',
+  },
+  {
+    lieuSlug: 'chili',
+    titleFr: 'Les meilleurs hôtels du Chili',
+    titleEn: 'The best hotels in Chile',
+    scope: 'pays',
+    label: 'Chili',
+  },
+  {
+    lieuSlug: 'argentine',
+    titleFr: "Les meilleurs hôtels d'Argentine",
+    titleEn: 'The best hotels in Argentina',
+    scope: 'pays',
+    label: 'Argentine',
+  },
+  {
+    lieuSlug: 'egypte',
+    titleFr: "Les meilleurs hôtels d'Égypte",
+    titleEn: 'The best hotels in Egypt',
+    scope: 'pays',
+    label: 'Égypte',
+  },
+  {
+    lieuSlug: 'irlande',
+    titleFr: "Les meilleurs hôtels d'Irlande",
+    titleEn: 'The best hotels in Ireland',
+    scope: 'pays',
+    label: 'Irlande',
+  },
+  {
+    lieuSlug: 'costa-rica',
+    titleFr: 'Les meilleurs hôtels du Costa Rica',
+    titleEn: 'The best hotels in Costa Rica',
+    scope: 'pays',
+    label: 'Costa Rica',
+  },
+  {
+    lieuSlug: 'kenya',
+    titleFr: 'Les meilleurs hôtels du Kenya',
+    titleEn: 'The best hotels in Kenya',
+    scope: 'pays',
+    label: 'Kenya',
+  },
+  {
+    lieuSlug: 'perou',
+    titleFr: 'Les meilleurs hôtels du Pérou',
+    titleEn: 'The best hotels in Peru',
+    scope: 'pays',
+    label: 'Pérou',
+  },
+  {
+    lieuSlug: 'bresil',
+    titleFr: 'Les meilleurs hôtels du Brésil',
+    titleEn: 'The best hotels in Brazil',
+    scope: 'pays',
+    label: 'Brésil',
+  },
+  {
+    lieuSlug: 'nouvelle-zelande',
+    titleFr: 'Les meilleurs hôtels de Nouvelle-Zélande',
+    titleEn: 'The best hotels in New Zealand',
+    scope: 'pays',
+    label: 'Nouvelle-Zélande',
+  },
+  {
+    lieuSlug: 'suede',
+    titleFr: 'Les meilleurs hôtels de Suède',
+    titleEn: 'The best hotels in Sweden',
+    scope: 'pays',
+    label: 'Suède',
+  },
+  {
+    lieuSlug: 'qatar',
+    titleFr: 'Les meilleurs hôtels du Qatar',
+    titleEn: 'The best hotels in Qatar',
+    scope: 'pays',
+    label: 'Qatar',
+  },
+  {
+    lieuSlug: 'andorre',
+    titleFr: "Les meilleurs hôtels d'Andorre",
+    titleEn: 'The best hotels in Andorra',
+    scope: 'pays',
+    label: 'Andorre',
+  },
+  {
+    lieuSlug: 'colombie',
+    titleFr: 'Les meilleurs hôtels de Colombie',
+    titleEn: 'The best hotels in Colombia',
+    scope: 'pays',
+    label: 'Colombie',
+  },
+  {
+    lieuSlug: 'luxembourg',
+    titleFr: 'Les meilleurs hôtels du Luxembourg',
+    titleEn: 'The best hotels in Luxembourg',
+    scope: 'pays',
+    label: 'Luxembourg',
+  },
+  {
+    lieuSlug: 'bhoutan',
+    titleFr: 'Les meilleurs hôtels du Bhoutan',
+    titleEn: 'The best hotels in Bhutan',
+    scope: 'pays',
+    label: 'Bhoutan',
+  },
+  {
+    lieuSlug: 'croatie',
+    titleFr: 'Les meilleurs hôtels de Croatie',
+    titleEn: 'The best hotels in Croatia',
+    scope: 'pays',
+    label: 'Croatie',
+  },
+  {
+    lieuSlug: 'oman',
+    titleFr: "Les meilleurs hôtels d'Oman",
+    titleEn: 'The best hotels in Oman',
+    scope: 'pays',
+    label: 'Oman',
+  },
+  {
+    lieuSlug: 'danemark',
+    titleFr: 'Les meilleurs hôtels du Danemark',
+    titleEn: 'The best hotels in Denmark',
+    scope: 'pays',
+    label: 'Danemark',
+  },
+  {
+    lieuSlug: 'albanie',
+    titleFr: "Les meilleurs hôtels d'Albanie",
+    titleEn: 'The best hotels in Albania',
+    scope: 'pays',
+    label: 'Albanie',
+  },
+  {
+    lieuSlug: 'jordanie',
+    titleFr: 'Les meilleurs hôtels de Jordanie',
+    titleEn: 'The best hotels in Jordan',
+    scope: 'pays',
+    label: 'Jordanie',
+  },
+  {
+    lieuSlug: 'coree-du-sud',
+    titleFr: 'Les meilleurs hôtels de Corée du Sud',
+    titleEn: 'The best hotels in South Korea',
+    scope: 'pays',
+    label: 'Corée du Sud',
+  },
+  {
+    lieuSlug: 'sri-lanka',
+    titleFr: 'Les meilleurs hôtels du Sri Lanka',
+    titleEn: 'The best hotels in Sri Lanka',
+    scope: 'pays',
+    label: 'Sri Lanka',
+  },
+  {
+    lieuSlug: 'philippines',
+    titleFr: 'Les meilleurs hôtels des Philippines',
+    titleEn: 'The best hotels in the Philippines',
+    scope: 'pays',
+    label: 'Philippines',
+  },
+  {
+    lieuSlug: 'republique-dominicaine',
+    titleFr: 'Les meilleurs hôtels de République dominicaine',
+    titleEn: 'The best hotels in the Dominican Republic',
+    scope: 'pays',
+    label: 'République dominicaine',
+  },
+  {
+    lieuSlug: 'cambodge',
+    titleFr: 'Les meilleurs hôtels du Cambodge',
+    titleEn: 'The best hotels in Cambodia',
+    scope: 'pays',
+    label: 'Cambodge',
+  },
+  {
+    lieuSlug: 'polynesie-francaise',
+    titleFr: 'Les meilleurs hôtels de Polynésie française',
+    titleEn: 'The best hotels in French Polynesia',
+    scope: 'pays',
+    label: 'Polynésie française',
+  },
+  {
+    lieuSlug: 'israel',
+    titleFr: "Les meilleurs hôtels d'Israël",
+    titleEn: 'The best hotels in Israel',
+    scope: 'pays',
+    label: 'Israël',
+  },
+  {
+    lieuSlug: 'norvege',
+    titleFr: 'Les meilleurs hôtels de Norvège',
+    titleEn: 'The best hotels in Norway',
+    scope: 'pays',
+    label: 'Norvège',
+  },
+  {
+    lieuSlug: 'tanzanie',
+    titleFr: 'Les meilleurs hôtels de Tanzanie',
+    titleEn: 'The best hotels in Tanzania',
+    scope: 'pays',
+    label: 'Tanzanie',
+  },
+  {
+    lieuSlug: 'rwanda',
+    titleFr: 'Les meilleurs hôtels du Rwanda',
+    titleEn: 'The best hotels in Rwanda',
+    scope: 'pays',
+    label: 'Rwanda',
+  },
+  {
+    lieuSlug: 'taiwan',
+    titleFr: 'Les meilleurs hôtels de Taïwan',
+    titleEn: 'The best hotels in Taiwan',
+    scope: 'pays',
+    label: 'Taïwan',
+  },
+  // French city / station heads.
+  {
+    lieuSlug: 'lille',
+    titleFr: 'Les meilleurs hôtels de Lille',
+    titleEn: 'The best hotels in Lille',
+    scope: 'ville',
+    label: 'Lille',
+  },
+  {
+    lieuSlug: 'honfleur',
+    titleFr: 'Les meilleurs hôtels de Honfleur',
+    titleEn: 'The best hotels in Honfleur',
+    scope: 'ville',
+    label: 'Honfleur',
+  },
+  {
+    lieuSlug: 'marseille',
+    titleFr: 'Les meilleurs hôtels de Marseille',
+    titleEn: 'The best hotels in Marseille',
+    scope: 'ville',
+    label: 'Marseille',
+  },
+  {
+    lieuSlug: 'la-baule',
+    titleFr: 'Les meilleurs hôtels de La Baule',
+    titleEn: 'The best hotels in La Baule',
+    scope: 'ville',
+    label: 'La Baule',
+  },
+  {
+    lieuSlug: 'val-thorens',
+    titleFr: 'Les meilleurs hôtels de Val Thorens',
+    titleEn: 'The best hotels in Val Thorens',
+    scope: 'station',
+    label: 'Val Thorens',
+  },
+  {
+    lieuSlug: 'hyeres',
+    titleFr: "Les meilleurs hôtels d'Hyères",
+    titleEn: 'The best hotels in Hyères',
+    scope: 'ville',
+    label: 'Hyères',
+  },
+  {
+    lieuSlug: 'avignon',
+    titleFr: "Les meilleurs hôtels d'Avignon",
+    titleEn: 'The best hotels in Avignon',
+    scope: 'ville',
+    label: 'Avignon',
+  },
+];
+
+const COVERAGE_WAVE_OVERRIDES: readonly ManualOverride[] = COVERAGE_WAVE_DESTINATIONS.map((d) => ({
+  slug: `meilleurs-hotels-${d.lieuSlug}`,
+  titleFr: d.titleFr,
+  titleEn: d.titleEn,
+  axes: {
+    types: ['all'],
+    lieu: { scope: d.scope, slug: d.lieuSlug, label: d.label },
+    themes: [],
+    occasions: [],
+    saison: 'toute-annee',
+  },
+  kind: 'geographic',
+}));
+
 // ─── 2026-06-22 — G5 absurd theme×lieu combos (audit §G5) ─────────────────
 // The auto matrix emits semantically impossible pages (no mountains / ski /
 // seaside / vineyards inside Paris). The live rows were unpublished
@@ -1153,6 +1504,8 @@ const MANUAL_OVERRIDES: readonly ManualOverride[] = [
   ...INTL_DESTINATION_OVERRIDES,
   // 2026-06-23 — competitive gap destinations (wave 3).
   ...GAP_DESTINATION_OVERRIDES,
+  // 2026-06-29 — maillage coverage wave (country + FR city/station heads).
+  ...COVERAGE_WAVE_OVERRIDES,
   // Pillar national rankings — high volume search.
   {
     slug: 'meilleurs-palaces-france',
