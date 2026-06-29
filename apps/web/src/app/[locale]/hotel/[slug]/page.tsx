@@ -63,11 +63,12 @@ import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
 import {
+  buildDefaultOgImageUrl,
   buildHotelDiscoverRobots,
-  buildHotelOgImages,
   buildHotelOpenGraphAlternates,
   buildHotelSeoTitle,
   pickHotelJsonLdFaqEntries,
+  resolveHotelOgImages,
 } from '@/lib/seo/hotel-page-seo';
 import { stripBrandSuffix } from '@/lib/seo/brand-title';
 import { computeHotelPriceRange, formatIndicativePriceParts } from '@/lib/format-indicative-price';
@@ -306,24 +307,29 @@ export async function generateMetadata({
   const origin = siteOrigin();
   const absoluteUrl = `${origin}${canonical}`;
 
-  // Open Graph / Twitter Card image:
-  //   - Use the hotel hero (Cloudinary) when present, served at the
-  //     OG-recommended 1200×630 (1.91:1).
-  //   - We force `c_fill,g_auto` to keep the focal point centred and
-  //     `f_jpg,q_auto` because some social parsers (notably older
-  //     LinkedIn crawlers) still choke on WebP — JPEG is the safest
-  //     interchange format for share previews.
-  //   - Cap the URL string at the documented Facebook limit (no
-  //     practical risk with our public_id grammar, but we encode
-  //     defensively via `buildCloudinarySrc`).
-  //   - Fall back to undefined when no hero is set; Next.js drops the
-  //     `og:image` tag rather than emitting an empty one.
+  // Open Graph / Twitter Card image — fallback chain (`resolveHotelOgImages`):
+  //   1. hotel hero (Cloudinary), served at the OG-recommended 1200×630
+  //      (1.91:1) with `c_fill,g_auto` to keep the focal point centred and
+  //      `f_jpg,q_auto` because some social parsers (notably older LinkedIn
+  //      crawlers) still choke on WebP — JPEG is the safest interchange format.
+  //   2. first gallery photo when the row has no `hero_image` yet.
+  //   3. site brand card `/og/default.jpg` (1200×630) — guarantees the ~4
+  //      zero-photo fiches still emit a valid, non-empty `og:image` instead
+  //      of overriding the layout default with nothing (broken social preview).
   const heroPublicId = readHeroImage(row);
-  const ogImages =
-    heroPublicId !== null
-      ? buildHotelOgImages(env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, heroPublicId, name)
-      : undefined;
-  const firstOgImage = ogImages !== undefined ? ogImages[0] : undefined;
+  const ogFallbackGalleryPublicId = (() => {
+    const gallery = filterPublicHotelGalleryImages(readGallery(row, locale, name));
+    const first = gallery[0];
+    return first !== undefined ? first.publicId : null;
+  })();
+  const ogImages = resolveHotelOgImages({
+    cloudName: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    heroPublicId,
+    fallbackGalleryPublicId: ogFallbackGalleryPublicId,
+    alt: name,
+    origin,
+  });
+  const firstOgImage = ogImages[0];
   const ogImageUrl = firstOgImage !== undefined ? firstOgImage.url : undefined;
 
   // EEAT guard (Phase 1, May 2026 — `AGENTS.md §4ter`): a "stub" sheet
@@ -371,7 +377,7 @@ export async function generateMetadata({
       alternateLocale: [...buildHotelOpenGraphAlternates(locale)],
       siteName: 'MyConciergeHotel',
       url: absoluteUrl,
-      ...(ogImages !== undefined ? { images: ogImages } : {}),
+      images: ogImages,
     },
     twitter: {
       // `summary_large_image` is the only card type Twitter still
@@ -743,6 +749,20 @@ async function renderHotelPage(
     } else {
       jsonLdImages.push(url);
     }
+  }
+  // Zero-photo floor: a fiche with no hero AND no gallery (4 rows at
+  // 2026-06-29 — casa-labia, palais-leonia, villa-moon, six-senses-bangkok)
+  // would otherwise emit NO `ImageObject` and no image rich result. Emit the
+  // site brand card (1200×630) so the Hotel node always carries an `image`,
+  // mirroring the `og:image` fallback in `generateMetadata`.
+  if (jsonLdImages.length === 0) {
+    jsonLdImages.push({
+      url: buildDefaultOgImageUrl(origin),
+      caption: name,
+      width: 1200,
+      height: 630,
+      representativeOfPage: true,
+    });
   }
 
   // Award strings for JSON-LD — three independent sources merged here:

@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import type { Locale } from '@/i18n/routing';
 import { buildCloudinarySrc } from '@mch/ui';
 
+import { DEFAULT_OG_IMAGE } from './og-defaults';
+
 type HotelOgImage = {
   readonly url: string;
   readonly width: number;
@@ -37,6 +39,47 @@ export function buildHotelOgImages(
 ): HotelOgImage[] {
   const url = buildHotelOgImageUrl(cloudName, publicId);
   return [{ url, width: 1200, height: 630, alt, type: 'image/jpeg' }];
+}
+
+/**
+ * Open Graph / Twitter image fallback chain — guarantees a NON-empty
+ * `og:image` on EVERY hotel fiche, including the handful (4 at 2026-06-29)
+ * that carry zero photos. A page-level `openGraph` object fully overrides
+ * the root layout's default `images` (Next.js does NOT deep-merge it), so a
+ * photo-less fiche would otherwise emit zero `og:image` — not even the brand
+ * card the layout intends as the floor.
+ *
+ * Cascade:
+ *   1. hero photo (Cloudinary, OG-cropped 1200×630)            ┐ a real
+ *   2. first gallery photo (when the row has no `hero_image`)  ┘ property shot
+ *   3. site brand card `/og/default.jpg` (absolute via `origin`, 1200×630)
+ */
+export function resolveHotelOgImages(params: {
+  readonly cloudName: string;
+  readonly heroPublicId: string | null;
+  readonly fallbackGalleryPublicId: string | null;
+  readonly alt: string;
+  readonly origin: string;
+}): HotelOgImage[] {
+  const { cloudName, heroPublicId, fallbackGalleryPublicId, alt, origin } = params;
+  const publicId = heroPublicId ?? fallbackGalleryPublicId;
+  if (publicId !== null) {
+    return buildHotelOgImages(cloudName, publicId, alt);
+  }
+  return [
+    {
+      url: `${origin}${DEFAULT_OG_IMAGE.url}`,
+      width: DEFAULT_OG_IMAGE.width,
+      height: DEFAULT_OG_IMAGE.height,
+      alt,
+      type: DEFAULT_OG_IMAGE.type,
+    },
+  ];
+}
+
+/** Absolute URL of the site brand-card OG image (the zero-photo JSON-LD floor). */
+export function buildDefaultOgImageUrl(origin: string): string {
+  return `${origin}${DEFAULT_OG_IMAGE.url}`;
 }
 
 /** Google Discover + long AI snippets — indexable hotel fiches only. */
