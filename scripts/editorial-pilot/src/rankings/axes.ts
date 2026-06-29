@@ -917,6 +917,27 @@ export const LIEUX: readonly LieuDef[] = [
     countryCodes: ['IT'],
   },
 
+  // ─── 2026-06-29 — EN-volume city heads (en-seo-geo-audit broadening wave).
+  // High-volume anglophone `luxury/best hotels {city}` demand with ≥ 3
+  // published hotels and no pre-existing geographic head. Amsterdam (NL):
+  // best 3 600/mo, luxe 1 900/mo (KD 24), 12 hotels. Phuket (TH): best
+  // 1 600/mo, luxe 720/mo (KD 1), 7 hotels. Country+city AND-gate excludes
+  // homonyms; `pays-bas`/`thailande` country heads already exist separately.
+  {
+    slug: 'amsterdam',
+    label: 'Amsterdam',
+    scope: 'ville',
+    hotelCityKeys: ['amsterdam'],
+    countryCodes: ['NL'],
+  },
+  {
+    slug: 'phuket',
+    label: 'Phuket',
+    scope: 'ville',
+    hotelCityKeys: ['phuket'],
+    countryCodes: ['TH'],
+  },
+
   // ─── 2026-06-29 — Maillage coverage wave: country heads for countries
   // carrying ≥ 5 published hotels but no geographic head ranking yet (audit
   // of the 1005 fiches in zero ranking). Pure country gate (`countryCodes`

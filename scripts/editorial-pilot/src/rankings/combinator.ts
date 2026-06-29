@@ -737,6 +737,35 @@ const LUXE_CITIES: readonly {
     lieuSlug: 'hong-kong',
     label: 'Hong Kong',
   },
+  // ── Wave 5 (2026-06-29) — EN-volume luxe heads, next tier (en-seo-geo-audit
+  // broadening). Each gate-checked ≥ 3 published hotels. Amsterdam: luxe
+  // 1 900/mo KD24 (12 hotels); Phuket: luxe 720/mo KD1 (7 hotels); Maldives:
+  // luxe 480/mo KD2 (34 hotels — pays scope, complements the existing
+  // `meilleurs-hotels-maldives` best head). LieuDefs exist in axes.ts.
+  {
+    slug: 'hotel-de-luxe-amsterdam',
+    titleFr: 'Les meilleurs hôtels de luxe à Amsterdam',
+    titleEn: 'The best luxury hotels in Amsterdam',
+    scope: 'ville',
+    lieuSlug: 'amsterdam',
+    label: 'Amsterdam',
+  },
+  {
+    slug: 'hotel-de-luxe-phuket',
+    titleFr: 'Les meilleurs hôtels de luxe à Phuket',
+    titleEn: 'The best luxury hotels in Phuket',
+    scope: 'ville',
+    lieuSlug: 'phuket',
+    label: 'Phuket',
+  },
+  {
+    slug: 'hotel-de-luxe-maldives',
+    titleFr: 'Les meilleurs hôtels de luxe aux Maldives',
+    titleEn: 'The best luxury hotels in the Maldives',
+    scope: 'pays',
+    lieuSlug: 'maldives',
+    label: 'Maldives',
+  },
 ];
 const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
   slug: d.slug,
@@ -1075,6 +1104,22 @@ const GAP_DESTINATIONS: readonly {
     titleEn: 'The best hotels in Vienna',
     scope: 'ville',
     label: 'Vienne',
+  },
+  // ── EN-volume best-hotels heads, next tier (2026-06-29 broadening wave).
+  // Amsterdam: best 3 600/mo (12 hotels); Phuket: best 1 600/mo (7 hotels).
+  {
+    lieuSlug: 'amsterdam',
+    titleFr: "Les meilleurs hôtels d'Amsterdam",
+    titleEn: 'The best hotels in Amsterdam',
+    scope: 'ville',
+    label: 'Amsterdam',
+  },
+  {
+    lieuSlug: 'phuket',
+    titleFr: 'Les meilleurs hôtels de Phuket',
+    titleEn: 'The best hotels in Phuket',
+    scope: 'ville',
+    label: 'Phuket',
   },
   {
     lieuSlug: 'crete',
