@@ -342,3 +342,210 @@ pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-hotel-geo-qa.ts --slu
 - Les volumes sont des snapshots DataSEO au 2026-06-29.
 - L'AI keyword volume n'a pas ete teste dans ce pilote ; a ajouter si le compte
   DataSEO expose ce module.
+
+## 10. Demarrage vague 1 — 2026-06-29 14:02 UTC
+
+### Perimetre retenu
+
+Le premier lot operationnel reste volontairement court : 12 fiches a fort enjeu
+SEO/GEO, assez variees pour tester la methode sans consommer DataSEO a l'aveugle.
+
+| Slug | Raison prioritaire |
+| --- | --- |
+| `les-airelles-gordes` | fiche golden / parite Gordes |
+| `le-meurice` | palace Paris, fiche test canonique |
+| `hotel-ritz-paris` | marque Paris a tres forte demande |
+| `four-seasons-hotel-george-v` | Paris, volume avis Google tres fort |
+| `the-berkeley` | Londres, fiche test + cluster `luxury hotels London` |
+| `claridge-s-londres` | Londres, marque Mayfair / afternoon tea |
+| `aman-new-york` | New York, demande EN massive |
+| `the-plaza-hotel` | New York, icone Central Park |
+| `25hours-hotel-dubai-one-central` | Dubai lifestyle, fort volume avis |
+| `burj-al-arab` | Dubai, icone + requete "7 etoiles" a cadrer |
+| `hotel-de-russie-rocco-forte-collection` | Rome, luxe + aperitivo / jardin |
+| `bulgari-roma` | Rome, nouveau luxe + World's 50 Best |
+
+### Etat DataSEO de reprise
+
+Les credentials DataSEO n'ont pas ete persistes dans l'environnement, ni dans
+un fichier `.env`, par securite. La reprise de session ne permet donc pas de
+relancer les appels live sans reinjection temporaire des variables.
+
+| Statut | Fiches |
+| --- | --- |
+| DataSEO live deja verifie dans le pilote | `les-airelles-gordes`, `le-meurice`, `25hours-hotel-dubai-one-central`, `the-berkeley`, `aman-new-york` |
+| A sonder des reinjection credentials | `hotel-ritz-paris`, `four-seasons-hotel-george-v`, `claridge-s-londres`, `the-plaza-hotel`, `burj-al-arab`, `hotel-de-russie-rocco-forte-collection`, `bulgari-roma` |
+
+Aucune recommandation de volume n'est inventee pour les 7 fiches non sondees
+live. Elles sont auditees ci-dessous sur les gates projet + ecarts visibles,
+puis marquees comme `DataSEO pending`.
+
+### Snapshot Supabase du lot 1
+
+| Slug | SEO actuel | FAQ/GEO | Photos | EEAT | Lecture |
+| --- | --- | --- | ---: | ---: | --- |
+| `les-airelles-gordes` | title 63, meta 165, factual 130 | FAQ 10, GEO 3 | 30 / 11 cat. | 9 | conforme golden ; a garder stable |
+| `le-meurice` | title 44, meta 149, factual 141 | FAQ 15, GEO 3 | 10 / 5 cat. | 2 | DataSEO demande restaurant / tea time sous-exploitee |
+| `hotel-ritz-paris` | title 44, meta 150, factual 139 | FAQ 15, GEO 3 | 12 / 2 cat. | 13 | photos trop peu diversifiees ; libelle "Palace" a verifier |
+| `four-seasons-hotel-george-v` | title 61, meta 162, factual 138 | FAQ 15, GEO 3 | 11 / 2 cat. | 8 | contenu solide ; photo coverage faible |
+| `the-berkeley` | title 48, meta 144, factual 119 | FAQ 15, GEO 3 | 10 / 3 cat. | 4 | factual sous ideal ; "Palace Londres" a cadrer |
+| `claridge-s-londres` | title 44, meta 141, factual 132 | FAQ 15, GEO 3 | 10 / 3 cat. | 10 | meta trop generique pour Mayfair / afternoon tea |
+| `aman-new-york` | title 48, meta 148, factual 131 | FAQ 15, GEO 3 | 10 / 6 cat. | 3 | DataSEO EN massif ; title/meta trop prudents |
+| `the-plaza-hotel` | title 52, meta 158, factual 135 | FAQ 15, GEO 3 | 20 / 5 cat. | 10 | bonne base ; exploiter Central Park / Palm Court |
+| `25hours-hotel-dubai-one-central` | title 46, meta 167, factual 146 | FAQ 15, GEO 3 | 12 / 8 cat. | 8 | title casse (`|` final) ; bon sujet Dubai lifestyle |
+| `burj-al-arab` | title 53, meta 148, factual 141 | FAQ 15, GEO 3 | 10 / 3 cat. | 11 | GEO traite "7 etoiles" ; meta trop publicitaire |
+| `hotel-de-russie-rocco-forte-collection` | title 46, meta 168, factual 143 | FAQ 15, GEO 3 | 10 / 5 cat. | 1 | EEAT faible ; jardin / aperitivo a sourcer |
+| `bulgari-roma` | title 43, meta 161, factual 134 | FAQ 15, GEO 3 | 17 / 6 cat. | 6 | FAQ FR contient une question en italien |
+
+### Audit fiche par fiche
+
+#### `les-airelles-gordes`
+
+- **Decision** : ne pas retoucher la structure ; elle reste la reference.
+- **DataSEO verifie** : `airelles gordes` 2 400 FR, `hotel gordes` 880 FR,
+  `Airelles Gordes` 1 900 EN.
+- **Action** : uniquement enrichissement fin si une nouvelle vague FAQ est
+  lancee : chef, acces train/aeroport, spa Guerlain, restaurant.
+- **Gate** : photos 30 et 11 categories OK ; EEAT OK ; pas d'urgence.
+
+#### `le-meurice`
+
+- **DataSEO verifie** : `le meurice` 40 500 FR, `le meurice restaurant`
+  4 400 FR, `le meurice tea time` 4 400 FR, `luxury hotels Paris` 18 100 EN.
+- **Ecart** : FAQ operationnelle trop centree check-in / late check-out ; les
+  sous-intentions restaurant, tea time, dress code et chef meritent le kit FAQ.
+- **Action** : regenerer `faq_content_kit` / `geo_qa` avec PAA restaurant
+  et tea time ; renforcer photos restaurant/spa ; consolider EEAT au-dela de 2
+  sources.
+- **Gate** : ne pas donner de prix exact tant que Phase 6 booking est gelee.
+
+#### `hotel-ritz-paris`
+
+- **DataSEO** : pending live.
+- **Ecart** : `photo_count=12` mais seulement 2 categories ; la fiche ne peut
+  pas rivaliser visuellement avec les requetes photos / spa / chambre.
+- **Action** : sonder `ritz paris`, `ritz paris spa`, `ritz paris restaurant`,
+  `ritz paris bar hemingway`, puis aligner FAQ/GEO sur spa, table, Place
+  Vendome et acces.
+- **Gate** : verifier le mot `Palace` contre la source officielle avant de le
+  garder en title/meta si `is_palace=false`.
+
+#### `four-seasons-hotel-george-v`
+
+- **DataSEO** : pending live.
+- **Ecart** : title/meta/factual sont dans les bandes ; la faiblesse est photo
+  (`11` images, `2` categories) et la couverture F&B precise.
+- **Action** : sonder `george v paris`, `four seasons george v restaurant`,
+  `le cinq paris`, puis enrichir FAQ/PAA chef, Michelin, spa et Arc de
+  triomphe.
+- **Gate** : eviter le keyword stuffing "Michelin" ; garder uniquement les
+  faits sources.
+
+#### `the-berkeley`
+
+- **DataSEO verifie** : `luxury hotels London` 22 200 EN, `best hotels in
+  London` 9 900 EN, `The Berkeley London` 1 900 EN, `palace londres` 260 FR.
+- **Ecart** : `factual_summary_fr` 119 caracteres, dans l'enveloppe mais sous
+  l'ideal CDC ; photos et EEAT moyens ; label `Palace Londres` a cadrer.
+- **Action** : renforcer Knightsbridge, afternoon tea, restaurant, Surrenne spa
+  et maillage classement Londres.
+- **Gate** : EN doit dire `London`, pas `Londres`, dans title/meta visibles.
+
+#### `claridge-s-londres`
+
+- **DataSEO** : pending live.
+- **Ecart** : meta generique ("cadre raffine", "service de qualite") trop
+  faible face a Yonder ; manque Mayfair, Art Deco, afternoon tea, chef/bar.
+- **Action** : sonder `claridge's london`, `claridge's afternoon tea`,
+  `claridge's restaurant`, puis rewriter meta/FAQ sans superlatif.
+- **Gate** : ne pas conserver `palace_atout_france` comme signal public pour un
+  hotel londonien sans base Atout France.
+
+#### `aman-new-york`
+
+- **DataSEO verifie** : `luxury hotels New York` 110 000 EN, `Aman New York`
+  33 100 EN, `5 star hotel New York` 9 900 EN, `aman new york` 720 FR.
+- **Ecart** : title/meta trop generiques pour un actif EN majeur ; `external_sources=3`
+  seulement pour une fiche qui doit servir de pilier New York.
+- **Action** : renforcer spa, restaurant, jazz club, Fifth Avenue, World's 50
+  Best et maillage `luxury hotels New York`.
+- **Gate** : filtrer PAA celebrites / club prive generique.
+
+#### `the-plaza-hotel`
+
+- **DataSEO** : pending live.
+- **Ecart** : bonne base EEAT/photos, mais les categories photo restent limitees
+  et la FAQ doit capter Central Park, Palm Court, afternoon tea, Landmark.
+- **Action** : sonder `plaza hotel new york`, `the plaza afternoon tea`,
+  `plaza hotel central park`, puis reclasser les PAA utiles entre FAQ et GEO.
+- **Gate** : verifier `Palace New York` en title ; privilegier "hotel iconique"
+  si l'usage est non officiel.
+
+#### `25hours-hotel-dubai-one-central`
+
+- **DataSEO verifie** : `luxury hotels Dubai` 8 100 EN, `best hotels in Dubai`
+  4 400 EN, `25hours hotel Dubai One Central` 390 EN.
+- **Ecart** : title casse visuellement (`|` final) ; opportunite claire sur One
+  Central / DIFC / Museum of the Future / World Trade Centre.
+- **Action** : corriger title, renforcer FAQ "quartier", "accès", "design
+  lifestyle" et maillage Dubai.
+- **Gate** : ne pas laisser les PAA Burj Al Arab polluer cette fiche lifestyle.
+
+#### `burj-al-arab`
+
+- **DataSEO** : pending live.
+- **Ecart** : meta trop promotionnelle ("experience unique") ; photos peu
+  diversifiees ; GEO traite deja correctement "hotel 7 etoiles".
+- **Action** : sonder `burj al arab`, `burj al arab 7 star`, `burj al arab
+  restaurant`, `burj al arab visit`, puis enrichir les reponses "entrer sans
+  sejourner" et "budget" sans prix invente.
+- **Gate** : ne jamais valider "7 etoiles" comme classification officielle.
+
+#### `hotel-de-russie-rocco-forte-collection`
+
+- **DataSEO** : pending live.
+- **Ecart** : `external_sources=1`, trop bas pour Forbes Five-Star ; meta en
+  limite haute ; photos categories modestes.
+- **Action** : sonder `hotel de russie rome`, `hotel de russie garden`,
+  `hotel de russie aperitivo`, puis sourcer jardin, Stravinskij Bar, Piazza del
+  Popolo et Villa Borghese.
+- **Gate** : EEAT >= 2 sources avant toute retouche editorialisee.
+
+#### `bulgari-roma`
+
+- **DataSEO** : pending live.
+- **Ecart** : FAQ FR contient une question italienne (`Dove si trova Bulgari a
+  Roma?`) ; meta generique pour une fiche World's 50 Best.
+- **Action** : corriger la langue FAQ, sonder `bulgari hotel rome`, `bulgari
+  roma restaurant`, `bulgari rome spa`, puis renforcer design, restaurant et
+  localisation.
+- **Gate** : la parite FR/EN passe avant tout enrichissement SEO.
+
+### Benchmark yonder / travellers — lot 1
+
+Yonder couvre deja des angles Paris et Londres avec des pages tres narratives :
+Le Meurice dans "les plus beaux hotels du monde", palaces des Champs-Elysees,
+Cheval Blanc Paris, Mandarin Oriental Mayfair. Leur force est l'autorite
+editoriale et l'anecdote longue. MCH garde l'avantage machine : FAQ PAA, GEO
+Q&A, JSON-LD plus riche, `hotel-sources`, `hotel-photos`, maillage catalogue.
+
+Delta actionnable pour la vague 1 :
+
+1. **Battre Yonder sur les reponses** : PAA visibles, `geo_qa`, FAQ JSON-LD.
+2. **Rattraper Yonder sur le detail concret** : chef, spa, chambre a demander,
+   bar, quartier, acces.
+3. **Ne pas copier leur style magazine** : garder la voix Concierge, precise et
+   operationnelle.
+4. **Ne pas publier sans walk** : toute retouche title/meta/FAQ visible doit
+   etre verifiee depuis `/hotel/<slug>` et `/en/hotel/<slug>`.
+
+### Prochaine etape de production
+
+1. Reinjecter temporairement `DATAFORSEO_ENABLED=1`, `DATAFORSEO_USERNAME` et
+   `DATAFORSEO_PASSWORD` dans la session, sans ecriture fichier.
+2. Lancer `print-hotel-grounding.ts --slug=<slug> --refresh` sur les 7 fiches
+   `DataSEO pending`.
+3. Calculer `dfs_paa_coverage` avant tout rewrite.
+4. Ecrire un patch de contenu fiche par fiche, en commencant par les corrections
+   non ambigues : `25hours` title casse, `bulgari-roma` question italienne,
+   EEAT faible `hotel-de-russie`, photos categories faibles sur Ritz / George V.
