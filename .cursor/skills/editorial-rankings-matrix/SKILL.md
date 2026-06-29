@@ -412,6 +412,27 @@ run that was waiting finally executed. Targeting decision worth reusing:
   on-topic PAA (location/dining/access) ARE covered. Don't chase the headline %
   on these head-terms — it's a denominator artefact, non-blocking by design.
 
+## EN translation gate pitfalls (2026-06-29 — ranking EN-parity remediation)
+
+Two reusable lessons from closing the catalogue-wide EN-parity gap (795 `intro_en`
+stubs + 2,912 stub `justification_en` + 272 rankings missing EN sections, via the
+`translate-rankings-{intro-factual,justifications,sections}-en.ts` tools):
+
+- **An all-or-nothing `intro + factual_summary` gate silently discards a perfect
+  intro.** `translate-rankings-intro-factual-en.ts` validated `intro_en` AND
+  `factual_summary_en` together: when a thin FR `factual_summary` (~120c) produced
+  a faithful EN of ~108c — 2c under the 110c floor — the whole write (including the
+  ~4,800c long-read intro) was dropped to FR fallback. Fix: write the intro
+  independently of the factual_summary, or pre-seed a faithful >=110c
+  `factual_summary_en`. Size a coupled validation gate to the WEAKEST field, or
+  decouple the writes.
+- **FR-source scaffolding leaks block faithful EN translation.** A `ce dossier`
+  leak in `intro_fr` is inherited by the faithful EN translation and then
+  gate-dropped by `hasLeak()`. Unlike the sections/justifications tools (which
+  sentence-salvage), the intro tool dropped the whole body. Fix the FR source
+  first (strip the leaky sentence), or give the intro tool sentence-level salvage.
+  See `concierge-voice-pipeline` scaffolding-leak history.
+
 ## References
 
 - [`editorial-long-read-rendering`](../editorial-long-read-rendering/SKILL.md) — comment le seed (`MatrixSeed`) devient un long-read rendu (sticky TOC, callouts, EEAT footer). La matrice produit le seed ; cette skill rend la page.
