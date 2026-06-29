@@ -285,4 +285,39 @@ Convention : **Impact** = volume DFS adressable + probabilité de gain compte te
 - DataForSEO : `dataforseo_labs_google_keyword_overview` + `..._keyword_ideas` + `..._serp_competitors` + `..._related_keywords`, location US 2840, langue `en` (serveur `user-dfs`).
 - Contexte : `gsc-indexation-2026-06-29.md`, `hotel-fiche-grand-audit-2026-06-29.md`.
 
-_Fin de l'audit — lecture seule, aucun commit._
+---
+
+## 8. Suivi d'exécution — CT1 (`luxury hotels {city}`)
+
+**2026-06-29 — CT1 livré sur les 6 villes cibles.** Les heads
+`hotel-de-luxe-{ville}` (Paris, Londres, Rome, Venise, Dubai, Tokyo) étaient
+déjà publiés et grounded DataForSEO (FAQ EN 12-13/fiche, justifications EN,
+`factual_summary_en` en bande, `title_en` « The best luxury hotels in {City} »),
+mais portaient un **`intro_en` stub** (108-159 c, le « 1 short phrase » du
+générateur v2) qui passait le plancher 80 c de `translate-rankings-intro-factual-en.ts`
+→ `/en` rendait une intro d'une phrase au lieu du long-read.
+
+Actions :
+
+- **`intro_en` réécrit en long-read natif en-GB** sur les 6 (4 626-5 501 c,
+  parité avec `intro_fr`), via le nouveau flag `--force` de
+  `scripts/editorial-pilot/src/rankings/translate-rankings-intro-factual-en.ts`
+  (force la re-traduction d'un stub ≥ 80 c ; ignoré sous `--all`). Traduction
+  fidèle du FR grounded — facts/keywords préservés ; `hasLeak()` = 0.
+- **`meta_title_en` multi-pattern (G2/QW1)** : « Best Luxury Hotels in {City}
+  2026: 5-Star Stays » (45-47 c) — couvre `luxury hotels {city}` +
+  `best luxury hotels {city}` + `5 star hotels {city}`, et corrige le « 2025 »
+  périmé (Paris/Tokyo/Venise).
+- Anti-cannibalisation `hotel-de-luxe-*` ↔ `meilleurs-hotels-*` : pin
+  `geoHeadKind` déjà en place (`find-related-rankings.ts`).
+
+**Reste à faire (différé, non bloquant)** :
+
+- **G1/CT2 — `slug_en`** : les classements gardent le slug FR sur l'URL EN
+  (`/en/classement/hotel-de-luxe-rome`). Changement structurel (schéma +
+  resolver + redirects) — non traité ici. Canonical/hreflang corrects donc
+  pas de duplicate.
+- **QW1 — `meilleurs-hotels-rome`** (head « best hotels in rome », pos 40) :
+  même traitement meta multi-pattern + re-ground meta_desc à appliquer.
+
+_Fin de l'audit — la section 8 ci-dessus est le seul ajout post-lecture (suivi d'exécution CT1)._

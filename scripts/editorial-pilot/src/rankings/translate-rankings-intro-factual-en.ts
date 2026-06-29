@@ -28,6 +28,11 @@
  *   --slug=foo                 single ranking
  *   --slugs=a,b,c              explicit list
  *   --all                      every published ranking missing intro_en or factual_summary_en
+ *   --force                    with explicit --slug/--slugs, RE-translate intro_en even when a
+ *                              non-empty stub already passes the 80-char floor (closes the gate
+ *                              blind-spot where the v2 generator's 1-sentence EN intro — 108-159c —
+ *                              counts as "present" yet renders as a thin /en intro). Ignored with
+ *                              --all (never force a catalogue-wide re-translate).
  *   --limit=N                  cap the --all selection (default 0 = no cap)
  *   --concurrency=4            parallel rankings (default 4, max 8)
  *   --dry-run                  generate + validate, do NOT persist
@@ -82,11 +87,19 @@ interface RankingRow {
   factual_summary_en: string | null;
 }
 
+/**
+ * When set (via `--force` + explicit slugs), `needsIntroEn` ignores the
+ * 80-char "present" floor on the EXISTING `intro_en` so a v2-generator stub
+ * (the deliberate 1-sentence EN intro, 108-159c) is re-translated into the
+ * full long-read. Never set under `--all`.
+ */
+let forceIntroMode = false;
+
 function needsIntroEn(r: RankingRow): boolean {
-  return (
-    (r.intro_fr ?? '').trim().length >= INTRO_FR_MIN_CHARS &&
-    (r.intro_en ?? '').trim().length < INTRO_EN_MIN_CHARS
-  );
+  const frLongEnough = (r.intro_fr ?? '').trim().length >= INTRO_FR_MIN_CHARS;
+  if (!frLongEnough) return false;
+  if (forceIntroMode) return true;
+  return (r.intro_en ?? '').trim().length < INTRO_EN_MIN_CHARS;
 }
 
 function needsFsEn(r: RankingRow): boolean {
@@ -360,6 +373,7 @@ interface CliArgs {
   readonly limit: number;
   readonly concurrency: number;
   readonly dryRun: boolean;
+  readonly force: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -368,9 +382,11 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let limit = 0;
   let concurrency = 4;
   let dryRun = false;
+  let force = false;
   for (const a of argv) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--all') all = true;
+    else if (a === '--force') force = true;
     else if (a.startsWith('--slug=')) slugs = [a.slice('--slug='.length)];
     else if (a.startsWith('--slugs=')) {
       slugs = a
@@ -386,7 +402,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
       if (Number.isFinite(n) && n > 0) concurrency = Math.min(8, Math.floor(n));
     }
   }
-  return { slugs, all, limit, concurrency, dryRun };
+  return { slugs, all, limit, concurrency, dryRun, force };
 }
 
 async function main(): Promise<void> {
@@ -397,6 +413,12 @@ async function main(): Promise<void> {
 
   const env = loadPostgrestEnv();
   const openai = new OpenAI({ apiKey: process.env['OPENAI_API_KEY'] });
+
+  // `--force` only applies to explicit slugs — never a catalogue-wide re-translate.
+  forceIntroMode = args.force && !args.all;
+  if (args.force && args.all) {
+    console.warn('[translate-rankings-en] --force ignored under --all (safety guard).');
+  }
 
   let rankings = args.all
     ? await fetchAllNeedingEn(env, args.limit)
