@@ -90,6 +90,33 @@ export function HomeKitHeader(): ReactElement {
         </nav>
 
         <div className="header-right">
+          {/* Primary concierge-contact CTA (CRO) — the home overlay header
+              ships its own chrome (it is NOT the shared SiteHeader), so the
+              lead-form entry has to be surfaced here too. Visible on desktop
+              (≥ lg); mobile users reach the same entry from the top of the
+              shared MobileNav burger drawer. Routes to `/le-concierge/contact`. */}
+          <Link
+            href="/le-concierge/contact"
+            className="hr-item hidden lg:flex"
+            aria-label={tHeader('primaryNav.talkToConciergeAria')}
+          >
+            <svg
+              className="icon"
+              viewBox="0 0 24 24"
+              aria-hidden
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+            >
+              <path
+                d="M5 6.5h14a1.8 1.8 0 0 1 1.8 1.8v7.2a1.8 1.8 0 0 1-1.8 1.8H9.5L5 21v-3.2A1.8 1.8 0 0 1 3.2 16V8.3A1.8 1.8 0 0 1 5 6.5Z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>{tHeader('primaryNav.talkToConcierge')}</span>
+          </Link>
+          <span className="sep" aria-hidden />
           <Link href="/compte/favoris" className="hr-item" aria-label={t('favorites')}>
             <svg className="icon" viewBox="0 0 24 24" aria-hidden>
               <path d="M12 21s-7.5-4.6-10-9.2C.5 8.4 2 5 5.5 5c2 0 3.4 1.2 4.5 2.6C11.1 6.2 12.5 5 14.5 5 18 5 19.5 8.4 22 11.8 19.5 16.4 12 21 12 21z" />
