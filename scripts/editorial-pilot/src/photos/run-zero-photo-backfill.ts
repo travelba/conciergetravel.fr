@@ -79,6 +79,27 @@ interface CliArgs {
   readonly limit: number;
   readonly maxHotels: number | null;
   readonly dryRun: boolean;
+  /**
+   * Depth mode. When 0 (default) the orchestrator targets the original
+   * zero-photo / null-hero set. When > 0 it targets published hotels
+   * whose gallery has FEWER than `maxGallery` photos (the "raise the
+   * floor to ≥10" chantier) — a hero may already exist.
+   */
+  readonly maxGallery: number;
+  /**
+   * Depth-mode lower bound (exclusive of hotels below it). Lets the
+   * depth backfill target e.g. the 1-9 photo cohort (`--min-gallery=1`)
+   * and leave the 0-photo structural residual to the zero-photo mode
+   * (which seeds with skipFirst=0). Ignored when maxGallery === 0.
+   */
+  readonly minGallery: number;
+  /**
+   * Forwarded to gen-places-discovery: skip the first N Places photos
+   * (already considered by the initial seed) so only net-new tail
+   * photos are appended. Use 8 for the depth backfill of the 8-photo
+   * cohort.
+   */
+  readonly skipFirst: number;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -89,6 +110,9 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let limit = 8;
   let maxHotels: number | null = null;
   let dryRun = false;
+  let maxGallery = 0;
+  let minGallery = 0;
+  let skipFirst = 0;
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true;
     else if (arg.startsWith('--worker='))
@@ -101,6 +125,12 @@ function parseArgs(argv: readonly string[]): CliArgs {
     else if (arg.startsWith('--limit=')) limit = Number.parseInt(arg.slice('--limit='.length), 10);
     else if (arg.startsWith('--max-hotels='))
       maxHotels = Number.parseInt(arg.slice('--max-hotels='.length), 10);
+    else if (arg.startsWith('--max-gallery='))
+      maxGallery = Number.parseInt(arg.slice('--max-gallery='.length), 10);
+    else if (arg.startsWith('--min-gallery='))
+      minGallery = Number.parseInt(arg.slice('--min-gallery='.length), 10);
+    else if (arg.startsWith('--skip-first='))
+      skipFirst = Number.parseInt(arg.slice('--skip-first='.length), 10);
   }
   if (!Number.isFinite(worker) || worker < 0) worker = 0;
   if (!Number.isFinite(workers) || workers < 1) workers = 1;
@@ -108,7 +138,21 @@ function parseArgs(argv: readonly string[]): CliArgs {
   if (!Number.isFinite(chunk) || chunk < 1) chunk = 10;
   if (!Number.isFinite(perHotel) || perHotel < 1) perHotel = 14;
   if (!Number.isFinite(limit) || limit < 1) limit = 8;
-  return { worker, workers, chunk, perHotel, limit, maxHotels, dryRun };
+  if (!Number.isFinite(maxGallery) || maxGallery < 0) maxGallery = 0;
+  if (!Number.isFinite(minGallery) || minGallery < 0) minGallery = 0;
+  if (!Number.isFinite(skipFirst) || skipFirst < 0) skipFirst = 0;
+  return {
+    worker,
+    workers,
+    chunk,
+    perHotel,
+    limit,
+    maxHotels,
+    dryRun,
+    maxGallery,
+    minGallery,
+    skipFirst,
+  };
 }
 
 // ─── Stable partition ──────────────────────────────────────────────────────
@@ -141,11 +185,24 @@ function galleryLen(v: unknown): number {
   return Array.isArray(v) ? v.length : 0;
 }
 
-/** Live target: published, no hero, empty gallery. */
-async function loadTarget(cfg: SupabaseRestConfig): Promise<TargetRow[]> {
+/**
+ * Live target.
+ *   - maxGallery === 0 (default): published, no hero, empty gallery
+ *     (the original zero-photo set).
+ *   - maxGallery > 0 (depth mode): published hotels whose gallery has
+ *     fewer than `maxGallery` photos (a hero may already exist) — the
+ *     "raise the floor to ≥N" chantier.
+ */
+async function loadTarget(
+  cfg: SupabaseRestConfig,
+  maxGallery: number,
+  minGallery: number,
+): Promise<TargetRow[]> {
+  const filters =
+    maxGallery > 0 ? ['is_published=eq.true'] : ['is_published=eq.true', 'hero_image=is.null'];
   const raws = await selectHotels<RawRow>(cfg, {
     columns: 'slug,hero_image,gallery_images',
-    filters: ['is_published=eq.true', 'hero_image=is.null'],
+    filters,
     order: 'slug.asc',
   });
   return raws
@@ -154,7 +211,11 @@ async function loadTarget(cfg: SupabaseRestConfig): Promise<TargetRow[]> {
       galleryCount: galleryLen(r.gallery_images),
       hasHero: typeof r.hero_image === 'string' && r.hero_image.length > 0,
     }))
-    .filter((r) => !r.hasHero && r.galleryCount === 0);
+    .filter((r) =>
+      maxGallery > 0
+        ? r.galleryCount < maxGallery && r.galleryCount >= minGallery
+        : !r.hasHero && r.galleryCount === 0,
+    );
 }
 
 /** Verify a set of slugs against the DB (post-upload). */
@@ -190,21 +251,28 @@ interface CheckpointEntry {
 interface Checkpoint {
   worker: number;
   workers: number;
+  /** Filename tag isolating zero-photo vs depth-mode checkpoints. */
+  tag: string;
   startedAt: string;
   updatedAt: string;
   attempted: Record<string, CheckpointEntry>;
 }
 
-function checkpointPath(worker: number): string {
-  return resolve(RUNS_DIR, `zero-photo-backfill-checkpoint-w${worker}.json`);
+function checkpointTag(maxGallery: number): string {
+  return maxGallery > 0 ? `depth${maxGallery}` : 'zero';
+}
+
+function checkpointPath(worker: number, tag: string): string {
+  return resolve(RUNS_DIR, `zero-photo-backfill-checkpoint-${tag}-w${worker}.json`);
 }
 
 function loadCheckpoint(args: CliArgs): Checkpoint {
-  const path = checkpointPath(args.worker);
+  const tag = checkpointTag(args.maxGallery);
+  const path = checkpointPath(args.worker, tag);
   if (existsSync(path)) {
     try {
       const parsed = JSON.parse(readFileSync(path, 'utf8')) as Checkpoint;
-      if (parsed && typeof parsed.attempted === 'object') return parsed;
+      if (parsed && typeof parsed.attempted === 'object') return { ...parsed, tag };
     } catch {
       /* fall through to fresh */
     }
@@ -213,6 +281,7 @@ function loadCheckpoint(args: CliArgs): Checkpoint {
   return {
     worker: args.worker,
     workers: args.workers,
+    tag,
     startedAt: now,
     updatedAt: now,
     attempted: {},
@@ -221,7 +290,7 @@ function loadCheckpoint(args: CliArgs): Checkpoint {
 
 function saveCheckpoint(cp: Checkpoint): void {
   cp.updatedAt = new Date().toISOString();
-  writeFileSync(checkpointPath(cp.worker), JSON.stringify(cp, null, 2), 'utf8');
+  writeFileSync(checkpointPath(cp.worker, cp.tag), JSON.stringify(cp, null, 2), 'utf8');
 }
 
 // ─── Child process spawn ──────────────────────────────────────────────────────
@@ -281,8 +350,11 @@ async function main(): Promise<void> {
   mkdirSync(RUNS_DIR, { recursive: true });
   const cp = loadCheckpoint(args);
 
-  console.log(`[orchestrator] worker ${args.worker}/${args.workers} — deriving target from DB…`);
-  const target = await loadTarget(cfg);
+  console.log(
+    `[orchestrator] worker ${args.worker}/${args.workers} — deriving target from DB… ` +
+      `(mode=${args.maxGallery > 0 ? `depth[${args.minGallery},${args.maxGallery})` : 'zero-photo'}, skipFirst=${args.skipFirst})`,
+  );
+  const target = await loadTarget(cfg, args.maxGallery, args.minGallery);
   const mine = target.filter((t) => slugHash(t.slug) % args.workers === args.worker);
   const pending = mine.filter((t) => cp.attempted[t.slug] === undefined).map((t) => t.slug);
 
@@ -307,10 +379,9 @@ async function main(): Promise<void> {
     );
 
     // 1. Google Places discovery → JSON.
-    await runChild('src/photos/gen-places-discovery.ts', [
-      `--slugs=${slugs.join(',')}`,
-      `--per-hotel=${args.perHotel}`,
-    ]);
+    const genArgs = [`--slugs=${slugs.join(',')}`, `--per-hotel=${args.perHotel}`];
+    if (args.skipFirst > 0) genArgs.push(`--skip-first=${args.skipFirst}`);
+    await runChild('src/photos/gen-places-discovery.ts', genArgs);
 
     // 2. Split: slugs that produced a fresh discovery file → upload; others → empty.
     const withFiles = slugs.filter((s) => hasFreshDiscovery(s, sinceMs));

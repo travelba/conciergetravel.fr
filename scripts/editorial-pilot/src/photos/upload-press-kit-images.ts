@@ -130,6 +130,10 @@ const DiscoveryImageSchema = z.object({
   fromQueries: z.array(z.string()),
   hostname: z.string(),
   extension: z.string().nullable(),
+  // Optional — only emitted by gen-places-discovery (stable Places photo
+  // resource name). Persisted as `source_photo_name` for exact dedup on
+  // subsequent runs. Older discovery files (Tavily) omit it.
+  photoName: z.string().nullable().optional(),
 });
 
 const DiscoveryReportSchema = z.object({
@@ -545,11 +549,28 @@ async function processHotel(
       .filter((id): id is string => typeof id === 'string'),
   );
 
+  // Exact dedup: skip any candidate whose stable Places photo name is
+  // already recorded on an existing gallery row (`source_photo_name`).
+  // Guarantees re-runs never re-upload the same Places photo, even if
+  // the Places photo order drifts between runs.
+  const existingPhotoNames = new Set(
+    dbRow.gallery_images
+      .map((row) => row['source_photo_name'])
+      .filter((n): n is string => typeof n === 'string' && n.length > 0),
+  );
+  const deduped = filtered.filter(
+    (img) => !(typeof img.photoName === 'string' && existingPhotoNames.has(img.photoName)),
+  );
+  const skippedByName = filtered.length - deduped.length;
+  if (skippedByName > 0) {
+    console.log(`  ${skippedByName} candidate(s) skipped — source_photo_name already in gallery`);
+  }
+
   // Choose the next press index so we never collide with existing entries.
   let pressIndex = 1;
   while (existingPublicIds.has(`cct/hotels/${slug}/press-${pressIndex}`)) pressIndex += 1;
 
-  const toProcess = filtered.slice(0, limit);
+  const toProcess = deduped.slice(0, limit);
   let uploaded = 0;
   let skipped = 0;
   let errors = 0;
@@ -678,6 +699,9 @@ async function processImage(
       caption_fr: vision.caption_fr,
       caption_en: vision.caption_en,
       quality_score: vision.quality_score,
+      ...(typeof img.photoName === 'string' && img.photoName.length > 0
+        ? { source_photo_name: img.photoName }
+        : {}),
     });
     return {
       url: img.url,
@@ -720,6 +744,9 @@ async function processImage(
     quality_score: vision.quality_score,
     width: result.value.width,
     height: result.value.height,
+    ...(typeof img.photoName === 'string' && img.photoName.length > 0
+      ? { source_photo_name: img.photoName }
+      : {}),
   };
   RUN_ACCUMULATOR.set(`${slug}:${img.url}`, row);
 

@@ -62,6 +62,16 @@ interface CliArgs {
   readonly slugs: readonly string[];
   readonly perHotel: number;
   readonly throttleMs: number;
+  /**
+   * Skip the first N Places photos before fetching. Used for the
+   * "depth" backfill of hotels that already received an initial
+   * Places seed (typically the first 8): those first N photos were
+   * already considered, so skipping them yields only net-new tail
+   * photos (#9, #10) and avoids re-uploading duplicate pixels. The
+   * skip is applied to `search.value.photos` BEFORE resolving media
+   * URLs, so the skipped photos cost zero Place-Photo SKU calls.
+   */
+  readonly skipFirst: number;
 }
 
 function readSlugsFile(path: string): string[] {
@@ -81,26 +91,30 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let slugs: string[] = [];
   let perHotel = 14;
   let throttleMs = 400;
+  let skipFirst = 0;
   for (const arg of argv) {
     if (arg.startsWith('--slugs-file=')) {
       slugs = readSlugsFile(arg.slice('--slugs-file='.length));
     } else if (arg.startsWith('--slugs=')) {
       slugs = arg
         .slice('--slugs='.length)
-        .split(',')
+        .split(/[\s,]+/u)
         .map((s) => s.trim())
         .filter(Boolean);
     } else if (arg.startsWith('--per-hotel=')) {
       perHotel = Number.parseInt(arg.slice('--per-hotel='.length), 10);
     } else if (arg.startsWith('--throttle-ms=')) {
       throttleMs = Number.parseInt(arg.slice('--throttle-ms='.length), 10);
+    } else if (arg.startsWith('--skip-first=')) {
+      skipFirst = Number.parseInt(arg.slice('--skip-first='.length), 10);
     }
   }
   if (slugs.length === 0) {
     throw new Error('Pass --slugs=a,b or --slugs-file=<path>');
   }
   if (!Number.isFinite(perHotel) || perHotel <= 0) perHotel = 14;
-  return { slugs, perHotel, throttleMs };
+  if (!Number.isFinite(skipFirst) || skipFirst < 0) skipFirst = 0;
+  return { slugs, perHotel, throttleMs, skipFirst };
 }
 
 // ─── Supabase ────────────────────────────────────────────────────────────────
@@ -159,6 +173,13 @@ interface DiscoveryImage {
   readonly fromQueries: readonly string[];
   readonly hostname: string;
   readonly extension: string | null;
+  /**
+   * Stable Google Places photo resource name
+   * (`places/{placeId}/photos/{photoId}`). Persisted by the upload
+   * step as `source_photo_name` so subsequent runs dedup exactly
+   * instead of relying on a positional offset.
+   */
+  readonly photoName: string | null;
 }
 
 interface DiscoveryReport {
@@ -183,6 +204,7 @@ async function genForHotel(
   hotel: HotelMeta,
   placesCfg: GooglePlacesClientConfig,
   perHotel: number,
+  skipFirst: number,
 ): Promise<DiscoveryReport | null> {
   const search = await searchPlaceByNameAndCity(placesCfg, hotel.name, hotel.city);
   if (!search.ok) {
@@ -193,7 +215,16 @@ async function genForHotel(
     console.warn(`  [places] ${hotel.slug}: place ${search.value.id} has 0 photos`);
     return null;
   }
-  const photos = await fetchPlacePhotos(placesCfg, search.value.photos, perHotel);
+  // Skip the first N photos (already considered by a prior seed) BEFORE
+  // resolving their media URLs — the skipped photos cost no SKU calls.
+  const candidates = skipFirst > 0 ? search.value.photos.slice(skipFirst) : search.value.photos;
+  if (candidates.length === 0) {
+    console.warn(
+      `  [places] ${hotel.slug}: place has ${search.value.photos.length} photo(s), all within the first ${skipFirst} skipped — no net-new tail`,
+    );
+    return null;
+  }
+  const photos = await fetchPlacePhotos(placesCfg, candidates, perHotel);
   if (!photos.ok) {
     console.warn(`  [places] fetch failed for ${hotel.slug}: ${JSON.stringify(photos.error)}`);
     return null;
@@ -204,6 +235,7 @@ async function genForHotel(
     fromQueries: ['google-places'],
     hostname: hostnameOf(p.downloadUrl),
     extension: null,
+    photoName: p.photoName,
   }));
   return {
     slug: hotel.slug,
@@ -247,9 +279,10 @@ async function main(): Promise<void> {
     const hotel = bySlug.get(slug);
     if (hotel === undefined) continue;
     console.log(
-      `\n→ ${slug} (${hotel.name}, ${hotel.city}) — current gallery ${hotel.galleryCount}`,
+      `\n→ ${slug} (${hotel.name}, ${hotel.city}) — current gallery ${hotel.galleryCount}` +
+        (args.skipFirst > 0 ? ` — skipping first ${args.skipFirst} Places photo(s)` : ''),
     );
-    const report = await genForHotel(hotel, placesCfg, args.perHotel);
+    const report = await genForHotel(hotel, placesCfg, args.perHotel, args.skipFirst);
     if (report === null || report.images.length === 0) {
       empty += 1;
     } else {
