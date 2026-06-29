@@ -707,6 +707,36 @@ const LUXE_CITIES: readonly {
     lieuSlug: 'kyoto',
     label: 'Kyoto',
   },
+  // ── Wave 4 (2026-06-29) — EN-volume luxe heads (en-seo-geo-audit §CT1
+  // extension). Picked by DataForSEO `luxury hotels {city}` US volume +
+  // gate-checked inventory; each LieuDef already exists in axes.ts and has no
+  // pre-existing `hotel-de-luxe-{city}` head. LA: 12 100/mo KD9 (8 hotels);
+  // Singapore: 6 600/mo KD8 (10 hotels); Hong Kong: 1 600/mo KD16, best-hotels
+  // 1 600 KD3, +646 % YoY (23 hotels).
+  {
+    slug: 'hotel-de-luxe-los-angeles',
+    titleFr: 'Les meilleurs hôtels de luxe à Los Angeles',
+    titleEn: 'The best luxury hotels in Los Angeles',
+    scope: 'ville',
+    lieuSlug: 'los-angeles',
+    label: 'Los Angeles',
+  },
+  {
+    slug: 'hotel-de-luxe-singapour',
+    titleFr: 'Les meilleurs hôtels de luxe à Singapour',
+    titleEn: 'The best luxury hotels in Singapore',
+    scope: 'ville',
+    lieuSlug: 'singapour',
+    label: 'Singapour',
+  },
+  {
+    slug: 'hotel-de-luxe-hong-kong',
+    titleFr: 'Les meilleurs hôtels de luxe à Hong Kong',
+    titleEn: 'The best luxury hotels in Hong Kong',
+    scope: 'ville',
+    lieuSlug: 'hong-kong',
+    label: 'Hong Kong',
+  },
 ];
 const LUXE_CITY_OVERRIDES: readonly ManualOverride[] = LUXE_CITIES.map((d) => ({
   slug: d.slug,
