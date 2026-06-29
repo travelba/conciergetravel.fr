@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
 import type { Locale } from '@/i18n/routing';
+import { CATALOGUE_PUBLISHED, formatCatalogueCount } from '@/lib/catalogue-stats';
 
 /**
  * `<HomeAeoFaq>` — 4 Q&A AEO block on the home page.
@@ -27,9 +28,13 @@ export interface HomeAeoEntry {
 
 export async function loadHomeAeoEntries(locale: Locale): Promise<readonly HomeAeoEntry[]> {
   const t = await getTranslations({ locale, namespace: 'homepage.aeo' });
+  // `q2` cites the catalogue size — inject it from the single source of truth
+  // (`catalogue-stats`) so the FAQ answer (and its FAQPage JSON-LD twin) never
+  // drifts from the hero figure. Locale-aware thousands separators.
+  const hotels = formatCatalogueCount(CATALOGUE_PUBLISHED, locale);
   return [
     { key: 'q1', question: t('q1.question'), answer: t('q1.answer') },
-    { key: 'q2', question: t('q2.question'), answer: t('q2.answer') },
+    { key: 'q2', question: t('q2.question'), answer: t('q2.answer', { hotels }) },
     { key: 'q3', question: t('q3.question'), answer: t('q3.answer') },
     { key: 'q4', question: t('q4.question'), answer: t('q4.answer') },
   ];

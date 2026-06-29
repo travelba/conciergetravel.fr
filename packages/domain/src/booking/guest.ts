@@ -8,6 +8,12 @@ import type { BookingError } from './errors';
  * Lead guest captured at the `guest_collected` step (skill: booking-engine,
  * CDC §6). Email is normalised lowercase; phone is kept as the user typed it
  * but trimmed (Amadeus / Little tolerate either E.164 or local formats).
+ *
+ * Phone is optional for an editorial lead / quote request: the concierge desk
+ * replies by email by default (CRO — a mandatory phone field is a known
+ * conversion killer). When omitted it normalises to an empty string so the
+ * `phone` field stays a plain `string` for every downstream consumer; a
+ * *provided* phone must still look plausible (≥ 5 characters).
  */
 export interface Guest {
   readonly firstName: string;
@@ -22,7 +28,12 @@ const guestSchema = z.object({
   firstName: z.string().trim().min(1).max(60),
   lastName: z.string().trim().min(1).max(60),
   email: z.string().trim().toLowerCase().email().max(254),
-  phone: z.string().trim().min(5).max(30),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .refine((v) => v.length === 0 || v.length >= 5, 'expected at least 5 characters when provided')
+    .optional(),
   nationality: z
     .string()
     .trim()
@@ -44,7 +55,7 @@ export const parseGuest = (raw: unknown): Result<Guest, BookingError> => {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      phone: data.phone,
+      phone: data.phone ?? '',
       ...(data.nationality !== undefined ? { nationality: data.nationality } : {}),
       ...(data.specialRequests !== undefined ? { specialRequests: data.specialRequests } : {}),
     };

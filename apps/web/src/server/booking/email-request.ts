@@ -248,7 +248,7 @@ export async function submitEmailBookingRequest(
       guest_firstname: guest.firstName,
       guest_lastname: guest.lastName,
       guest_email: guest.email,
-      guest_phone: guest.phone,
+      guest_phone: guest.phone.length > 0 ? guest.phone : null,
       requested_checkin: input.checkIn,
       requested_checkout: input.checkOut,
       room_preference: input.roomPreference ?? null,

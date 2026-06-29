@@ -25,6 +25,11 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { pickByLocale } from '@/i18n/supported-locale';
 import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_ALT } from '@/lib/seo/og-defaults';
+import {
+  CATALOGUE_COUNTRIES,
+  CATALOGUE_PUBLISHED,
+  formatCatalogueCount,
+} from '@/lib/catalogue-stats';
 import { env } from '@/lib/env';
 import { getDestinationHeroImages, pickHomeDestinations } from '@/lib/home/featured-destinations';
 import { getHomeFeaturedHotels } from '@/lib/home/featured-hotels';
@@ -69,16 +74,24 @@ export async function generateMetadata({
   const locale = raw;
   const t = await getTranslations({ locale, namespace: 'homepage' });
   const buildCanonicalPath = (l: Locale): string => getPathname({ locale: l, href: '/' });
+  // Catalogue counts come from the single source of truth (`catalogue-stats`)
+  // and are injected as ICU placeholders so the meta description never drifts
+  // from the hero / FAQ figures. Locale-aware thousands separators match the
+  // hero formatting.
+  const metaDesc = t('metaDesc', {
+    hotels: formatCatalogueCount(CATALOGUE_PUBLISHED, locale),
+    countries: formatCatalogueCount(CATALOGUE_COUNTRIES, locale),
+  });
   return {
     title: t('metaTitle'),
-    description: t('metaDesc'),
+    description: metaDesc,
     alternates: {
       canonical: buildCanonicalPath(locale),
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
     openGraph: {
       title: t('metaTitle'),
-      description: t('metaDesc'),
+      description: metaDesc,
       type: 'website',
       locale: ogLocale(locale),
       siteName: 'MyConciergeHotel',
@@ -90,7 +103,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: t('metaTitle'),
-      description: t('metaDesc'),
+      description: metaDesc,
       images: [DEFAULT_OG_IMAGE.url],
     },
   };

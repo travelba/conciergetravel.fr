@@ -106,6 +106,31 @@ export async function SiteHeader(): Promise<ReactElement> {
           <HeaderQuickSearch locale={locale} />
 
           <div className="ml-auto flex items-center gap-2">
+            {/* Primary concierge-contact CTA (CRO) — routes to the lead form
+                `/le-concierge/contact`. Visible on desktop (≥ lg); mobile users
+                reach the same entry from the top of the burger drawer. */}
+            <Link
+              href="/le-concierge/contact"
+              aria-label={t('primaryNav.talkToConciergeAria')}
+              className="bg-fg text-bg hover:bg-fg/90 focus-visible:ring-ring hidden items-center gap-1.5 rounded-md px-3 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 lg:inline-flex"
+            >
+              <svg
+                aria-hidden
+                viewBox="0 0 20 20"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path
+                  d="M4 5.5h12a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5H8l-3.5 2.5V14.5H4A1.5 1.5 0 0 1 2.5 13V7A1.5 1.5 0 0 1 4 5.5Z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {t('primaryNav.talkToConcierge')}
+            </Link>
+
             <Link
               href="/recherche"
               aria-label={t('primaryNav.search')}

@@ -53,3 +53,15 @@ export const CATALOGUE_RELAIS_CHATEAUX = 479;
 export const CATALOGUE_SMALL_LUXURY = 224;
 export const CATALOGUE_WORLD_50_BEST = 127;
 export const CATALOGUE_LAST_UPDATED = '2026-06-26';
+
+/**
+ * Locale-aware thousands formatting for the catalogue counts surfaced in
+ * user-facing copy (hero stats, home FAQ answer, meta description). Keeping
+ * the formatter beside the constants makes `catalogue-stats` the single
+ * source of truth for both the value AND its rendering, so the homepage
+ * hero and FAQ can never drift apart again — the FAQ used to hard-code
+ * "2 221" while the hero rendered the live count.
+ */
+export function formatCatalogueCount(value: number, locale: 'fr' | 'en'): string {
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'fr-FR').format(value);
+}

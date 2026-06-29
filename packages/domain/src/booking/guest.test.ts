@@ -45,4 +45,22 @@ describe('parseGuest', () => {
       expect('specialRequests' in r.value).toBe(false);
     }
   });
+
+  it('accepts a guest without a phone (optional) and defaults it to an empty string', () => {
+    const r = parseGuest({ firstName: 'A', lastName: 'B', email: 'a@b.com' });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.phone).toBe('');
+  });
+
+  it('accepts an empty phone string and normalises it to empty', () => {
+    const r = parseGuest({ firstName: 'A', lastName: 'B', email: 'a@b.com', phone: '   ' });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.phone).toBe('');
+  });
+
+  it('rejects a too-short non-empty phone with guest_validation on phone', () => {
+    const r = parseGuest({ ...validRaw, phone: '12' });
+    expect(r.ok).toBe(false);
+    if (!r.ok && r.error.kind === 'guest_validation') expect(r.error.field).toBe('phone');
+  });
 });

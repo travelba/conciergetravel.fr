@@ -3,6 +3,7 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import type { ReactElement } from 'react';
 
+import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 /**
@@ -39,9 +40,9 @@ export async function HomeConciergeFeature({
                 </li>
               ))}
             </ul>
-            <a href="#le-concierge-club" className="btn btn-or">
+            <Link href="/le-concierge/contact" className="btn btn-or">
               {t('cta')}
-            </a>
+            </Link>
           </div>
           <div className="cf-visual">
             {/* eslint-disable-next-line @next/next/no-img-element */}

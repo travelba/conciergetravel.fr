@@ -115,6 +115,13 @@ function readClientIp(forwardedFor: string | null): string | undefined {
 async function submitAction(formData: FormData): Promise<void> {
   'use server';
 
+  // Honeypot — bots fill the hidden `website` field. Silently no-op (the page
+  // re-renders without creating a request) so spam never reaches the ops queue.
+  const honeypot = formData.get('website');
+  if (typeof honeypot === 'string' && honeypot.trim().length > 0) {
+    return;
+  }
+
   const localeRaw = formData.get('locale');
   const locale: Locale = isRoutingLocale(typeof localeRaw === 'string' ? localeRaw : undefined)
     ? (localeRaw as Locale)
@@ -256,6 +263,13 @@ export default async function ReservationStartPage({
       </section>
 
       <form action={submitAction} className="flex flex-col gap-5" noValidate>
+        {/* Honeypot — visually hidden, off the tab order. Bots fill it. */}
+        <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+          <label>
+            Website
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          </label>
+        </div>
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="hotelId" value={hotelId} />
         <input type="hidden" name="checkIn" value={checkIn} />
@@ -312,7 +326,6 @@ export default async function ReservationStartPage({
               <input
                 type="tel"
                 name="phone"
-                required
                 autoComplete="tel"
                 maxLength={30}
                 className="border-border bg-bg text-fg focus-visible:ring-ring rounded-md border px-3 py-2 outline-none focus-visible:ring-2"
