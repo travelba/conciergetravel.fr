@@ -817,6 +817,8 @@ export default async function RankingPage({
                 const starLabel = e.hotel_is_palace
                   ? t.palace
                   : '★'.repeat(Math.max(0, Math.min(5, e.hotel_stars)));
+                // Hard Rule 16 — alt enriched with name + city keyword (parity with the podium).
+                const photoAlt = e.hotel_city.length > 0 ? `${name}, ${e.hotel_city}` : name;
                 return (
                   <li
                     key={`${e.rank}-${e.hotel_slug}`}
@@ -830,7 +832,7 @@ export default async function RankingPage({
                       {photoSrc !== null ? (
                         <Link href={hotelHref} className="cr-photo" aria-label={name}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={photoSrc} alt={name} loading="lazy" />
+                          <img src={photoSrc} alt={photoAlt} loading="lazy" />
                         </Link>
                       ) : (
                         <span className="cr-photo" aria-hidden="true" />
