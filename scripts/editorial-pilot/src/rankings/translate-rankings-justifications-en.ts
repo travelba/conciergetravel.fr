@@ -39,6 +39,9 @@
  *   --all                        every published ranking (default when no slug)
  *   --min-en=N                   only entries whose justification_en < N chars
  *                                (default 130 — the audit stub threshold)
+ *   --min-ratio=R                ALSO target entries whose EN < R×FR while FR>200
+ *                                (default 0 = off). Catches condensed EN that
+ *                                clears the 130c stub bar but is not at FR parity.
  *   --limit=N                    cap target entries (default 0 = no cap)
  *   --batch=N                    entries per LLM call (default 6, max 10)
  *   --concurrency=N              parallel batches (default 4, max 8)
@@ -342,6 +345,7 @@ interface CliArgs {
   readonly slugs: readonly string[];
   readonly all: boolean;
   readonly minEn: number;
+  readonly minRatio: number;
   readonly limit: number;
   readonly batch: number;
   readonly concurrency: number;
@@ -352,6 +356,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
   let slugs: string[] = [];
   let all = false;
   let minEn = 130;
+  let minRatio = 0;
   let limit = 0;
   let batch = 6;
   let concurrency = 4;
@@ -369,6 +374,9 @@ function parseArgs(argv: readonly string[]): CliArgs {
     } else if (a.startsWith('--min-en=')) {
       const n = Number(a.slice('--min-en='.length));
       if (Number.isFinite(n) && n >= 0) minEn = Math.floor(n);
+    } else if (a.startsWith('--min-ratio=')) {
+      const n = Number(a.slice('--min-ratio='.length));
+      if (Number.isFinite(n) && n >= 0 && n <= 1) minRatio = n;
     } else if (a.startsWith('--limit=')) {
       const n = Number(a.slice('--limit='.length));
       if (Number.isFinite(n) && n >= 0) limit = Math.floor(n);
@@ -380,7 +388,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
       if (Number.isFinite(n) && n > 0) concurrency = Math.min(8, Math.floor(n));
     }
   }
-  return { slugs, all, minEn, limit, batch, concurrency, dryRun };
+  return { slugs, all, minEn, minRatio, limit, batch, concurrency, dryRun };
 }
 
 async function main(): Promise<void> {
@@ -397,7 +405,11 @@ async function main(): Promise<void> {
     .filter((e) => {
       const fr = (e.justification_fr ?? '').trim();
       const enLen = (e.justification_en ?? '').trim().length;
-      return fr.length >= MIN_CHARS && enLen < args.minEn;
+      if (fr.length < MIN_CHARS) return false;
+      if (enLen < args.minEn) return true;
+      // Condensed-EN parity gap: clears the stub bar but is far shorter than FR.
+      if (args.minRatio > 0 && fr.length > 200 && enLen < fr.length * args.minRatio) return true;
+      return false;
     })
     .map((e) => ({
       rankingId: e.ranking_id,
@@ -410,7 +422,7 @@ async function main(): Promise<void> {
   if (args.limit > 0) targets = targets.slice(0, args.limit);
 
   console.log(
-    `[translate-rankings-justifications-en] entries=${entries.length} targets=${targets.length} (en<${args.minEn}) batch=${args.batch} concurrency=${args.concurrency} dryRun=${args.dryRun} grounding=inherited(translation)`,
+    `[translate-rankings-justifications-en] entries=${entries.length} targets=${targets.length} (en<${args.minEn}${args.minRatio > 0 ? ` or en<${args.minRatio}×fr` : ''}) batch=${args.batch} concurrency=${args.concurrency} dryRun=${args.dryRun} grounding=inherited(translation)`,
   );
   if (targets.length === 0) {
     console.log('Nothing to do.');
