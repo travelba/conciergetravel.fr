@@ -10,6 +10,12 @@
  * ---
  *   --slug=<slug>       single hotel
  *   --all-published     all `is_published = true` rows
+ *   --with-place-id     restrict --all-published to rows that already carry a
+ *                       `google_place_id` (skips the costly geocode round-trip
+ *                       — the catalogue-wide AggregateRating roll-out target)
+ *   --resume            skip slugs already recorded `ok`/`skip` in any
+ *                       out/google-reviews-runlog-*.jsonl (retries `fail`)
+ *   --limit=<n>         process at most N hotels (wave batching)
  *   --dry-run           skip PATCH, print preview
  *
  * Examples
@@ -17,9 +23,10 @@
  *   pnpm reviews:sync --slug=les-airelles-gordes
  *   pnpm reviews:sync --slug=les-airelles-gordes --dry-run
  *   pnpm reviews:sync --all-published
+ *   pnpm reviews:sync --all-published --with-place-id --resume --limit=500
  */
 
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -51,19 +58,35 @@ const HOTEL_COLUMNS = 'id, slug, name, city, country_code, google_place_id, goog
 interface CliArgs {
   readonly slug: string | null;
   readonly allPublished: boolean;
+  readonly withPlaceId: boolean;
+  readonly resume: boolean;
+  readonly limit: number | null;
   readonly dryRun: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
   let slug: string | null = null;
   let allPublished = false;
+  let withPlaceId = false;
+  let resume = false;
+  let limit: number | null = null;
   let dryRun = false;
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true;
     else if (arg === '--all-published') allPublished = true;
-    else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
+    else if (arg === '--with-place-id') withPlaceId = true;
+    else if (arg === '--resume') resume = true;
+    else if (arg.startsWith('--limit=')) {
+      const parsed = Number.parseInt(arg.slice('--limit='.length), 10);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        throw new Error(`--limit must be a positive integer (got "${arg}").`);
+      }
+      limit = parsed;
+    } else if (arg.startsWith('--slug=')) slug = arg.slice('--slug='.length);
     else if (arg === '--help' || arg === '-h') {
-      console.log('Usage: pnpm reviews:sync --slug=<slug> | --all-published [--dry-run]');
+      console.log(
+        'Usage: pnpm reviews:sync --slug=<slug> | --all-published [--with-place-id] [--resume] [--limit=<n>] [--dry-run]',
+      );
       process.exit(0);
     } else {
       console.warn(`Ignoring unknown CLI arg: ${arg}`);
@@ -75,7 +98,50 @@ function parseArgs(argv: readonly string[]): CliArgs {
   if (slug !== null && allPublished) {
     throw new Error('Use only one of --slug or --all-published.');
   }
-  return { slug, allPublished, dryRun };
+  return { slug, allPublished, withPlaceId, resume, limit, dryRun };
+}
+
+/**
+ * Build the set of already-processed slugs from every daily runlog so a
+ * killed wave can resume losslessly. We treat `ok` (written) and `skip`
+ * (Google returned no rating/reviews — deterministic, no point retrying)
+ * as done, and deliberately leave `fail` out so transient HTTP / quota
+ * errors are retried on the next wave.
+ */
+function loadProcessedSlugs(outDir: string): Set<string> {
+  const done = new Set<string>();
+  let files: string[];
+  try {
+    files = readdirSync(outDir);
+  } catch {
+    return done;
+  }
+  for (const file of files) {
+    if (!/^google-reviews-runlog-.*\.jsonl$/u.test(file)) continue;
+    let content: string;
+    try {
+      content = readFileSync(resolve(outDir, file), 'utf8');
+    } catch {
+      continue;
+    }
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed.length === 0) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(trimmed);
+      } catch {
+        continue;
+      }
+      if (parsed === null || typeof parsed !== 'object') continue;
+      const row = parsed as Record<string, unknown>;
+      const slug = row['slug'];
+      const outcome = row['outcome'];
+      if (typeof slug !== 'string') continue;
+      if (outcome === 'ok' || outcome === 'skip') done.add(slug);
+    }
+  }
+  return done;
 }
 
 function countryNameFor(code: string | null): string {
@@ -113,9 +179,11 @@ async function pickHotels(cfg: SupabaseRestConfig, args: CliArgs): Promise<Hotel
       limit: 1,
     });
   }
+  const filters = ['is_published=eq.true'];
+  if (args.withPlaceId) filters.push('google_place_id=not.is.null');
   return selectHotels<HotelRow>(cfg, {
     columns: HOTEL_COLUMNS,
-    filters: ['is_published=eq.true'],
+    filters,
     order: 'slug.asc',
   });
 }
@@ -191,12 +259,25 @@ async function main(): Promise<void> {
   console.log(`Google reviews sync — args: ${JSON.stringify(args)}`);
   console.log(`Runlog: ${runlogPath}\n`);
 
-  const hotels = await pickHotels(supa, args);
+  let hotels = await pickHotels(supa, args);
+  const selectedCount = hotels.length;
+
+  if (args.resume) {
+    const done = loadProcessedSlugs(resolve(__dirname, '../../out'));
+    const before = hotels.length;
+    hotels = hotels.filter((h) => !done.has(h.slug));
+    console.log(`Resume: ${done.size} slug(s) already done; skipping ${before - hotels.length}.`);
+  }
+
+  if (args.limit !== null && hotels.length > args.limit) {
+    hotels = hotels.slice(0, args.limit);
+  }
+
   if (hotels.length === 0) {
-    console.log('No hotels matched. Done.');
+    console.log('No hotels left to process. Done.');
     return;
   }
-  console.log(`Selected ${hotels.length} hotel(s).\n`);
+  console.log(`Selected ${selectedCount} hotel(s); processing ${hotels.length} this wave.\n`);
 
   let okCount = 0;
   let skipCount = 0;
