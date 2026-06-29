@@ -49,15 +49,56 @@ const RUNLOG_PATH = path.resolve(CACHE_ROOT, '_chain-batch-runlog.jsonl');
 
 interface ChainSpec {
   readonly slug: string;
-  /** Case-insensitive regex matched against `hotels.name`. */
-  readonly nameRegex: RegExp;
+  /**
+   * Case-insensitive regex matched against `hotels.name`. Optional: brand
+   * collections whose membership is NOT in the hotel name (e.g. Relais &
+   * Châteaux — carried by `luxury_tier`/`affiliations`) supply `match` instead.
+   */
+  readonly nameRegex?: RegExp;
+  /**
+   * Precise eligibility predicate, overrides `nameRegex` when present. Used for
+   * label/membership collections (tier or affiliation, not name heuristics).
+   */
+  readonly match?: (h: HotelCatalogRow) => boolean;
   readonly titleFr: string;
   readonly titleEn: string;
   readonly targetLength: number;
   readonly keywordsFr: readonly string[];
 }
 
+/** True when the hotel carries Relais & Châteaux membership (tier or affiliation). */
+function isRelaisChateaux(h: HotelCatalogRow): boolean {
+  if (h.luxury_tier === 'relais_chateaux') return true;
+  const affs = h.affiliations ?? [];
+  return affs.some(
+    (a) =>
+      (a.source ?? '').includes('relais') ||
+      (a.facet_slug ?? '').includes('relais') ||
+      (a.display_name ?? '').toLowerCase().includes('relais'),
+  );
+}
+
 export const CHAIN_SPECS_WAVE2: readonly ChainSpec[] = [
+  // ── 2026-06-29 — global Relais & Châteaux flagship (PO ask) ─────────────
+  // Membership-based (luxury_tier='relais_chateaux' or R&C affiliation), NOT a
+  // name regex — R&C is an association, not a brand prefix. Complements the
+  // ~30 per-country `top-relais-chateaux-<pays>` rankings with a single global
+  // head term ("meilleurs Relais & Châteaux"). 474 R&C in the catalogue → a
+  // 40-entry worldwide selection.
+  {
+    slug: 'top-relais-chateaux-monde',
+    match: isRelaisChateaux,
+    titleFr: 'Top Relais & Châteaux — les plus belles maisons de la collection mondiale',
+    titleEn: 'Top Relais & Châteaux — the finest houses of the worldwide collection',
+    targetLength: 40,
+    keywordsFr: [
+      'Relais & Châteaux — association fondée en 1954, maisons indépendantes d’exception',
+      'philosophie des 5C : Caractère, Courtoisie, Calme, Charme, Cuisine',
+      'châteaux, demeures de charme et tables gastronomiques étoilées Michelin',
+      'adresses signature : France (berceau), Italie, Espagne, Japon, États-Unis',
+      'clientèle en quête d’art de vivre, gastronomie, lunes de miel et séjours intimistes',
+    ],
+  },
   {
     slug: 'top-ritz-carlton-hotels-monde',
     nameRegex: /ritz.?carlton/iu,
@@ -378,7 +419,9 @@ async function processChain(
   const tag = `[${index + 1}/${total} ${spec.slug}]`;
   const t0 = Date.now();
 
-  const eligible = catalog.filter((h) => spec.nameRegex.test(h.name));
+  const matcher: (h: HotelCatalogRow) => boolean =
+    spec.match ?? ((h) => (spec.nameRegex ? spec.nameRegex.test(h.name) : false));
+  const eligible = catalog.filter(matcher);
   if (eligible.length < 3) {
     console.log(`${tag} ⤬ skipped: only ${eligible.length} eligible (need ≥ 3).`);
     await appendRunLog({

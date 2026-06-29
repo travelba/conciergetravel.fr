@@ -39,16 +39,21 @@ import { renderRanking, type RenderedRankingSeed } from './templates.js';
 // ─── Tunables ────────────────────────────────────────────────────────────
 
 const MIN_ELIGIBLE = 3;
+// 2026-06-29 — PO densification of high-vivier scopes (audit
+// rankings-hotel-completeness-2026-06-29 §8 rec.2). Targets are an editorial
+// CAP, not a quota: `targetLengthFor` returns min(base, eligibleCount), so a
+// thin city stays at its real eligible count and only fort-vivier scopes
+// (Dubaï 58, Italie 173, Espagne 124, Japon 70, Maroc 42, Rome 24…) grow.
 const TARGET_LENGTH_BY_LIEU_SCOPE: Readonly<Record<LieuDef['scope'], number>> = {
   france: 12,
-  region: 10,
-  cluster: 10,
-  ville: 8,
-  arrondissement: 6,
-  station: 8,
-  departement: 8,
-  monde: 10,
-  pays: 10,
+  region: 12,
+  cluster: 12,
+  ville: 12,
+  arrondissement: 8,
+  station: 10,
+  departement: 10,
+  monde: 12,
+  pays: 12,
 };
 
 // ─── Eligibility predicates ──────────────────────────────────────────────
@@ -1453,6 +1458,13 @@ const COVERAGE_WAVE_DESTINATIONS: readonly {
     titleEn: 'The best hotels in Val Thorens',
     scope: 'station',
     label: 'Val Thorens',
+  },
+  {
+    lieuSlug: 'tignes',
+    titleFr: 'Les meilleurs hôtels de Tignes',
+    titleEn: 'The best hotels in Tignes',
+    scope: 'station',
+    label: 'Tignes',
   },
   {
     lieuSlug: 'hyeres',

@@ -689,8 +689,38 @@ intercepted suggest URL, and dumps `aria-expanded` + listbox count. If it
 reports `expanded=true listboxCount=1` the feature works and the suite
 failure is environmental. Delete the debug spec once diagnosed.
 
+## Service-role REST writes silently no-op (mislabeled key + RLS)
+
+`apps/web/.env.local` carries a **publishable** key (`sb_publishable_…`, len ~72)
+under the var name `SUPABASE_SERVICE_ROLE_KEY` — i.e. the var name lies. The
+**real** service-role JWT (`eyJ…`, len ~247) lives in the **root** `.env.local`
+and `apps/admin/.env.local`. A REST write (PATCH/POST to PostgREST) authenticated
+with the publishable key is treated as the `anon` role → **RLS silently affects
+0 rows and returns HTTP 200/204** (no error thrown). A whole batch can report
+`migrated=20, pushed=41` while the DB never changed.
+
+2026-06-29: the hotel-dedupe `--apply` first ran with the publishable key (env
+loaders read `apps/web/.env.local` FIRST, and dotenv keeps the first value seen)
+→ 55 unpublish + 71 entry migrations all no-op'd; `is_published` stayed `true`,
+the published count never moved. Only a post-write **verification curl** caught it.
+
+Rules:
+
+- **For any REST write script, load the ROOT `.env.local` FIRST** (it has the JWT),
+  or assert the key shape before writing:
+  ```ts
+  if (!KEY.startsWith('eyJ'))
+    throw new Error('not a service-role JWT — writes will no-op under RLS');
+  ```
+- `push-ranking-v2.ts` already loads only the root `.env.local` (safe); the
+  catalogue/dedupe scripts load `apps/web/.env.local` first — swap the order.
+- **Always verify a write actually landed** with a follow-up read (count or a
+  spot-check row), never trust the script's own success counter. A 200/204 from
+  PostgREST means "request valid", not "rows changed".
+
 ## Anti-patterns
 
+- ❌ Trusting a service-role REST write counter without a verification read — the publishable key mislabeled as `SUPABASE_SERVICE_ROLE_KEY` in `apps/web/.env.local` makes RLS silently no-op every write at HTTP 200.
 - ❌ Trusting a green/red Playwright result without checking `PLAYWRIGHT_BASE_URL` — a stale value silently points the browser at a different (dev) server while Playwright dutifully builds an unused production one.
 - ❌ Leaving `next dev` servers running across sessions — they share `apps/web/.next` and corrupt any concurrent `next build` / `next start`.
 - ❌ Deleting `.next` while a `next dev` watcher is alive (it instantly regenerates `.next/dev`, re-polluting the build).
