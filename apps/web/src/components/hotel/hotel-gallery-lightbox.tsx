@@ -37,7 +37,12 @@ const GALLERY_CATEGORY_FILTERS: readonly GalleryCategoryFilter[] = [
   'view',
 ];
 
-const EAGER_IMAGE_COUNT = 5;
+// Only the single above-the-fold LCP image should be preloaded. The mosaic
+// hero tile is already hard-coded `priority: true`; this guard governs the
+// *extra* eager tiles, so `1` means "hero only" — every other tile lazy-loads.
+// Preloading several large hero-grade images competes with the LCP for early
+// bandwidth and regresses LCP (perf audit 2026-06-28; performance-engineering).
+const EAGER_IMAGE_COUNT = 1;
 
 function imageMatchesFilter(image: GalleryLightboxImage, filter: GalleryCategoryFilter): boolean {
   if (filter === 'all') return true;
