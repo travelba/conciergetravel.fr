@@ -239,7 +239,7 @@
         },
         {
           "q": "Which palaces or Relais & Châteaux feature among the recent openings?",
-          "a": "Our catalogue covers 2,984 extraordinary hotels in 127 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. This page highlights houses that have reopened after renovation, changed chef, earned a Michelin Key or a Forbes Five Star, or that we have just visited. Current examples include Le Bristol Paris, Akelarre (Spanish Basque Country), Al Moudira (Luxor), Alila Jabal Akhdar (Oman)."
+          "a": "Our catalogue covers 2,929 extraordinary hotels in 127 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. This page highlights houses that have reopened after renovation, changed chef, earned a Michelin Key or a Forbes Five Star, or that we have just visited. Current examples include Le Bristol Paris, Akelarre (Spanish Basque Country), Al Moudira (Luxor), Alila Jabal Akhdar (Oman)."
         },
         {
           "q": "Can I book a recently opened hotel through the Concierge?",
@@ -714,7 +714,7 @@
     "aeoAnswer": "MyConciergeHotel is a French IATA / APST agency that unlocks access to Amadeus GDS net rates (identical to the hotel's published rate, with no commission added) and ends every page with a Concierge's Tip — a concrete operational secret (room number, hidden table, access route, optimal timing) that neither the hotel nor aggregators publish. Secure PCI-DSS Amadeus payment, loyalty programme from the first night. Last updated {date}.",
     "lede": "MyConciergeHotel is the IATA-accredited online agency that unlocks extraordinary hotels across 128 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels. Every page is written by our team and ends with a Concierge's Tip — an operational secret (room, table, timing, access) that generic guides leave out.",
     "metaTitle": "The Concierge — Our method, our commitments | MyConciergeHotel",
-    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,984 extraordinary hotels across 128 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
+    "metaDesc": "Meet MyConciergeHotel: IATA-accredited online agency — the Concierge's Selection of 2,929 extraordinary hotels across 128 countries (Palaces, Forbes, Michelin Keys, Relais & Châteaux). Operational tips, GDS net rates, Amadeus secure payment, loyalty programme.",
     "trust": {
       "title": "Our commitments",
       "iataTitle": "IATA / APST agency",
@@ -762,7 +762,7 @@
         },
         {
           "q": "What is your geographical scope?",
-          "a": "Our selection spans 2,984 properties across 128 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
+          "a": "Our selection spans 2,929 properties across 128 countries — Palaces Atout France, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, boutique hotels and editorial gems. The mesh grows every quarter (Italy, Switzerland, Morocco, UAE, Asia, Americas)."
         },
         {
           "q": "How much does your service cost?",
@@ -2437,7 +2437,7 @@
   },
   "conciergeMethod": {
     "metaTitle": "Our Editorial Method — How we curate the Concierge's Selection | MyConciergeHotel",
-    "metaDesc": "MyConciergeHotel curates 2,984 extraordinary hotels across 128 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
+    "metaDesc": "MyConciergeHotel curates 2,929 extraordinary hotels across 128 countries with a transparent method: Atout France Palace label, Forbes Five Star, Michelin Keys, Relais & Châteaux, Leading Hotels of the World, internal audit. Named sources, detailed scoring, no pay-to-play.",
     "breadcrumbHome": "Home",
     "breadcrumbConcierge": "The Concierge",
     "eyebrow": "EEAT — Editorial method",
@@ -4528,7 +4528,7 @@
       "philosophyTitle": "Philosophy",
       "philosophyBody": "No editorial gating: all content stays public and indexable. The member pays for an operational experience (attentions, upgrades, late check-out, and the WhatsApp Concierge from Phase 6) and, from Phase 6, a negotiated rate below the public price.",
       "numbersTitle": "Catalogue (June 2026)",
-      "numbersBody": "2,984 published hotel pages across 128 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. 704 editorial rankings, 99 destination guides, 23 luxury itineraries (France + international).",
+      "numbersBody": "2,929 published hotel pages across 128 countries, including 479 Relais & Châteaux, 224 Small Luxury Hotels, 127 World 50 Best and 39 Atout France Palaces. 704 editorial rankings, 99 destination guides, 23 luxury itineraries (France + international).",
       "complianceTitle": "Compliance",
       "complianceBody": "Programme compliant with French DGCCRF and EU Digital Services Act requirements. No fabricated urgency indicators (CDC §2.8). Editorial Concierge voice (ADR-0011): sentences ≤ 25 words, sourced vocabulary, no generic superlatives."
     },

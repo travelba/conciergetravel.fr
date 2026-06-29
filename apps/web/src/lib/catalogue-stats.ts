@@ -46,13 +46,19 @@
  *                itineraries 23 published. Counts are the raw `is_published`
  *                figures (the 2026-06-24 indexable-pinning convention is
  *                superseded by the explicit PO re-count).
+ *   2026-06-29 — 2929 / 128 / 479 (post deduplication wave — 55 twin fiches
+ *                unpublished + 301-redirected to their canonical slug, see
+ *                `apps/web/src/lib/seo/hotel-dedupe-redirects.ts`). Live DB
+ *                re-count via PostgREST: hotels 2929, rankings 855 published
+ *                (consumed dynamically, not pinned). Countries unchanged
+ *                (dedupe removed twins, no country lost).
  */
-export const CATALOGUE_PUBLISHED = 2984;
+export const CATALOGUE_PUBLISHED = 2929;
 export const CATALOGUE_COUNTRIES = 128;
 export const CATALOGUE_RELAIS_CHATEAUX = 479;
 export const CATALOGUE_SMALL_LUXURY = 224;
 export const CATALOGUE_WORLD_50_BEST = 127;
-export const CATALOGUE_LAST_UPDATED = '2026-06-26';
+export const CATALOGUE_LAST_UPDATED = '2026-06-29';
 
 /**
  * Locale-aware thousands formatting for the catalogue counts surfaced in
