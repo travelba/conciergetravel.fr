@@ -110,3 +110,44 @@ hotel `hotels/translate-sections-en.ts` pattern (faithful FR→EN-GB, numbers /
 proper nouns preserved, `hasLeak()` gate, per-section `safeParse`, `--slug` /
 `--all`). Tracked as a follow-up; left untouched here to respect the country
 scope of this task.
+
+## Follow-up CLOSED — guide-section EN parity backfill (2026-06-29)
+
+The handoff above is resolved. Built the recommended tool
+[`scripts/editorial-pilot/src/guides/translate-sections-en.ts`](../../scripts/editorial-pilot/src/guides/translate-sections-en.ts)
+(npm: `guides:sections:en` / `:dry` / `:all`) — a faithful FR→EN-GB rewrite of
+the missing `title_en`/`body_en` per `editorial_guides.sections` entry, keyed by
+`key`, preserving `type` + FR bodies + section order. It mirrors the proven
+hotel translator: shared `hasLeak()` gate with **sentence-level salvage**,
+per-section `safeParse` (one bad section never sinks the batch),
+`SECTIONS_PER_CALL = 4` to avoid 16k-token truncation, Concierge-voice +
+≤ 25-word-sentence prompt (EDITORIAL_VOICE.md). Typechecks clean.
+
+**Grounding:** a faithful translation of FR prose already DataForSEO-grounded at
+generation (`generate-guide-v2.ts`, 2026-06-26) introduces no new claim and
+answers no new intent, so it inherits the FR grounding — no fresh DFS round-trip
+(runlog records `grounding=inherited(translation)`), same contract as the hotel
+and rankings-table translators.
+
+Run (`--all --scope=city --concurrency=4`):
+
+| Slug         | EN sections filled | Slug      | EN sections filled |
+| ------------ | ------------------ | --------- | ------------------ |
+| riviera-maya | 5                  | mykonos   | 2                  |
+| amalfi-coast | 3                  | phuket    | 2                  |
+| lake-como    | 3                  | tokyo     | 2                  |
+| bali         | 2                  | new-york  | 1                  |
+| algarve      | 2                  | santorin  | 1                  |
+|              |                    | marrakech | 1                  |
+
+**11/11 guides, 24 sections translated, 0 leak-dropped.** Post-run DB scan:
+**0 published guides (any scope) with a section missing `body_en`/`title_en`** —
+full guide-section EN parity across the catalogue.
+
+Acceptance (prod curl, `/en`): `riviera-maya`, `santorin`, `tokyo` all 200 with
+the newly-translated English prose rendering live (not FR fallback), Article +
+FAQPage JSON-LD present, 0 leak markers. The remaining 8 surface their new EN on
+the next ISR revalidation (≤ 3600 s TTL). Pre-existing observation (NOT caused by
+this text-only change, identical on FR + EN): `/destination/amalfi-coast` serves
+a thin 7-`<h2>` render with no guide JSON-LD — a routing/ISR characteristic of
+that one slug, flagged for a separate front-end pass (out of this task's scope).
