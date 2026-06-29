@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server';
 import { buildSitemapIndexXml } from '@mch/seo';
 
 import { env } from '@/lib/env';
+import { resolveSitemapLastmods } from '@/server/sitemap/sitemap-lastmods';
 
-export const dynamic = 'force-static';
+// ISR — recomputes the per-sub-sitemap `<lastmod>` hourly. NOT
+// `force-static`: that would freeze the lastmods at build time. We read
+// the origin from validated env (never `request.url`), so dynamic
+// rendering can't bake a localhost origin into the deployed file.
 export const revalidate = 3600;
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
@@ -13,23 +17,27 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
  * Sitemap index (skill: seo-technical). Sub-sitemaps are emitted by
  * `/sitemaps/{hotels,rooms,hubs,guides,rankings,itineraries,places}.xml`.
  *
- * IMPORTANT: This route is `force-static`. Reading `new URL(request.url).origin`
- * here would bake the build-time origin (typically `http://localhost:3000`)
- * into the deployed file. We instead read the canonical site URL from
- * validated env so the deployed sitemap always points at the production
- * domain. Sub-sitemap routes follow the same pattern.
+ * GSC audit 2026-06-29 §5.3 — the index previously stamped all seven
+ * sub-sitemaps with the same `new Date()` generation timestamp, which
+ * Google treats as an unreliable signal and ignores for recrawl
+ * prioritisation. Each entry now carries the real `MAX(updated_at)` of
+ * the published content it lists (`resolveSitemapLastmods`), with a
+ * per-entry fallback to `now` if an aggregate fails.
+ *
+ * The origin is read from validated env (never `new URL(request.url)`)
+ * so the deployed file always points at the production domain.
  */
-export function GET(): NextResponse {
+export async function GET(): Promise<NextResponse> {
   const origin = (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
-  const now = new Date().toISOString();
+  const lastmods = await resolveSitemapLastmods();
   const xml = buildSitemapIndexXml([
-    { loc: `${origin}/sitemaps/hotels.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/rooms.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/hubs.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/guides.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/rankings.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/itineraries.xml`, lastmod: now },
-    { loc: `${origin}/sitemaps/places.xml`, lastmod: now },
+    { loc: `${origin}/sitemaps/hotels.xml`, lastmod: lastmods.hotels },
+    { loc: `${origin}/sitemaps/rooms.xml`, lastmod: lastmods.rooms },
+    { loc: `${origin}/sitemaps/hubs.xml`, lastmod: lastmods.hubs },
+    { loc: `${origin}/sitemaps/guides.xml`, lastmod: lastmods.guides },
+    { loc: `${origin}/sitemaps/rankings.xml`, lastmod: lastmods.rankings },
+    { loc: `${origin}/sitemaps/itineraries.xml`, lastmod: lastmods.itineraries },
+    { loc: `${origin}/sitemaps/places.xml`, lastmod: lastmods.places },
   ]);
   return new NextResponse(xml, {
     headers: {
