@@ -86,6 +86,17 @@ describe('isEditoriallyRelevantPaa', () => {
     'Quelle star habite à Gordes ?',
     'Où séjourne Brad Pitt à Paris ?',
     'How much do hotel staff earn in Dubai?',
+    // EN celebrity "what/which hotel did <Name> stay" shape (2026-06-29).
+    'Which hotel did Kim Kardashian stay in Paris?',
+    'What hotel did Meghan Markle stay in London?',
+    'What hotel does Taylor Swift stay in in London?',
+    'What hotel did Kate Middleton stay in the night before her wedding?',
+    // Wealth-class gossip without a capitalised name.
+    'Where do rich people stay in Paris?',
+    'Where do the wealthy stay in Dubai?',
+    // Travel-etiquette trivia.
+    'What is the 5 minute rule in Japan?',
+    'What is the 15-5 rule?',
   ];
   const EDITORIAL = [
     'Combien coûte une nuit au Ritz Paris ?',
@@ -96,6 +107,11 @@ describe('isEditoriallyRelevantPaa', () => {
     "Y a-t-il un parking gratuit à l'hôtel ?",
     'Le wifi est-il gratuit dans les chambres ?',
     "Où se situe l'hôtel par rapport à la plage ?",
+    // Must stay counted: legit lodging questions that look superficially close.
+    'What hotels should I stay at if visiting London for the first time?',
+    'What is the most prestigious hotel in Paris?',
+    'Where to avoid staying in Tokyo?',
+    'Which area is best to stay in Rome?',
   ];
 
   it.each(NOISE)('excludes off-topic PAA noise: %s', (q) => {

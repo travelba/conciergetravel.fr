@@ -38,6 +38,8 @@
  *   --refresh-grounding      bypass the DFS disk cache for this run
  *   --concurrency=<N>        parallel slugs (default 2, HARD max 2 — shared OpenAI quota)
  *   --dry-run                generate + print, do NOT PATCH
+ *   --recompute-only         re-score the CURRENT EN FAQ against EN PAA (no LLM, no PATCH) —
+ *                            reports the true dfs_paa_coverage % of already-patched rows
  *
  * Examples:
  *   pnpm tsx src/rankings/enrich-ranking-faq-en-grounded.ts --slugs=hotel-de-luxe-rome --dry-run
@@ -84,6 +86,7 @@ interface CliArgs {
   readonly refreshGrounding: boolean;
   readonly concurrency: number;
   readonly dryRun: boolean;
+  readonly recomputeOnly: boolean;
 }
 
 function parseArgs(argv: readonly string[]): CliArgs {
@@ -135,6 +138,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
     refreshGrounding: map.get('refresh-grounding') === true,
     concurrency: typeof concRaw === 'string' ? Math.min(2, Math.max(1, Number(concRaw) || 2)) : 2,
     dryRun: map.get('dry-run') === true,
+    recomputeOnly: map.get('recompute-only') === true,
   };
 }
 
@@ -399,6 +403,24 @@ async function processSlug(
       `[${slug}]   ℹ grounding=${grounding.grounded ? 'on' : 'off'} dfs_paa_coverage=n/a (no EN PAA) — skipping (existing EN FAQ kept).`,
     );
     return { ...base(slug, 'skipped'), faqCount: existing.length, note: 'no-en-paa' };
+  }
+
+  // Read-only mode: score the CURRENT EN FAQ against EN PAA (no LLM, no PATCH).
+  if (args.recomputeOnly) {
+    const cov = evaluatePaaCoverage(
+      existing.map((f) => `${f.question_en} ${f.answer_en}`),
+      grounding.peopleAlsoAsk,
+    );
+    console.log(
+      `[${slug}]   dfs_paa_coverage=${cov.coveragePct}% (${cov.matched}/${cov.total} EN PAA covered, ${paaCount} raw)`,
+    );
+    return {
+      ...base(slug, 'skipped'),
+      paa: paaCount,
+      faqCount: existing.length,
+      coveragePct: cov.coveragePct,
+      note: 'recompute-only',
+    };
   }
 
   const maxAdded = Math.max(0, FAQ_MAX - existing.length);
