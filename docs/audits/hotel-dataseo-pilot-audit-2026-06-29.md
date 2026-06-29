@@ -549,3 +549,176 @@ Delta actionnable pour la vague 1 :
 4. Ecrire un patch de contenu fiche par fiche, en commencant par les corrections
    non ambigues : `25hours` title casse, `bulgari-roma` question italienne,
    EEAT faible `hotel-de-russie`, photos categories faibles sur Ritz / George V.
+
+## 11. Plan complet DataSEO — mode local API-ready
+
+Ce plan remplace le mode "audit pilote" des que le poste local dispose des API :
+DataForSEO, Supabase, OpenAI/Perplexity, Tavily, Cloudinary et Vercel. Le
+principe reste strict : **aucune fiche n'est reecrite sans grounding DataSEO et
+aucun signal DataSEO n'ecrase une hard rule projet**.
+
+### 11.1 Preflight local obligatoire
+
+Avant toute vague :
+
+1. Se placer sur la branche de travail :
+   - `git checkout cursor/dataseo-hotel-audit-7688`
+   - `git pull origin cursor/dataseo-hotel-audit-7688`
+2. Charger les variables en local, sans les commiter :
+   - `DATAFORSEO_ENABLED=1`
+   - `DATAFORSEO_USERNAME`
+   - `DATAFORSEO_PASSWORD`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `OPENAI_API_KEY` / provider LLM utilise par les runners
+3. Verifier l'acces DataSEO sur une fiche test :
+   - `pnpm --filter @mch/editorial-pilot exec tsx src/grounding/probe-dfs.ts`
+   - `pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=le-meurice --refresh`
+4. Verifier que le cache ecrit dans `data/dfs-cache/` et non dans le repo
+   applicatif. Le cache peut etre conserve localement pour eviter les doubles
+   couts, mais il ne doit pas contenir de secret.
+5. Verifier les gates de base :
+   - `pnpm --filter @mch/editorial-pilot test -- scaffolding-gate`
+   - `pnpm --filter @mch/editorial-pilot test -- faq-perplexity-gates`
+
+### 11.2 Extraction de base par vague
+
+Chaque vague commence par un export Supabase, avant DataSEO :
+
+| Donnee | Pourquoi |
+| --- | --- |
+| `meta_title_fr/en`, `meta_desc_fr/en` | verifier longueur, unicite, requete cible |
+| `factual_summary_fr/en` | verifier envelope 110-165 et ideal 130-150 |
+| `faq_content`, `faq_content_kit`, `concierge_questions` | mesurer couverture PAA et canoniques |
+| `geo_qa` | verifier si les 3 reponses suivent les vraies PAA |
+| `long_description_sections` | verifier H2, sections spa/restaurant/quartier |
+| `external_sources` | EEAT, chef, architecte, label, Michelin, Forbes |
+| `gallery_images` | categories, alt, requetes photo, ImageObject |
+| `google_rating`, `google_reviews_count` | signaux confiance + AggregateRating /5 |
+| `updated_at` | fraicheur et ordre de revalidation |
+
+Sortie attendue : un fichier par vague dans `docs/audits/` ou
+`scripts/editorial-pilot/runs/` avec la liste des slugs, les scores, et les
+champs a toucher.
+
+### 11.3 Requetes DataSEO par fiche
+
+Pour chaque fiche, interroger au minimum ces familles de seeds :
+
+| Famille | Exemples | Usage |
+| --- | --- | --- |
+| Marque | `<hotel>`, `<hotel> <ville>` | title, meta, FAQ marque |
+| Destination luxe | `hotel luxe <ville>`, `luxury hotels <city>` | maillage classement / destination |
+| Intention booking-safe | `<hotel> prix`, `<hotel> room rate` | reponse sans prix invente |
+| F&B | `<hotel> restaurant`, `<hotel> chef`, `<hotel> afternoon tea` | FAQ, H2, highlights |
+| Spa / bien-etre | `<hotel> spa`, `<hotel> piscine` | FAQ, photos, H2 |
+| Acces / quartier | `<hotel> airport`, `<hotel> near <poi>` | `geo_qa`, POI, FAQ |
+| Images | `<hotel> photos`, `<hotel> rooms photos` | priorisation photo / alt |
+| Reputation | `<hotel> reviews`, `<hotel> Michelin`, `<hotel> Forbes` | EEAT + JSON-LD |
+
+Endpoints a utiliser via le package `packages/integrations/src/dataforseo/` :
+
+1. `keywords_data/google_ads/search_volume/live` pour les volumes.
+2. `dataforseo_labs/google/related_keywords/live` pour les clusters.
+3. `dataforseo_labs/google/search_intent/live` pour l'intention.
+4. `serp/google/organic/live/advanced` pour PAA, related searches et concurrents.
+5. `ai_keyword_volume` seulement si le compte DataSEO expose le module.
+
+### 11.4 Filtrage editorial obligatoire
+
+Les PAA sont une source de demande, pas un brief a recopier. Chaque PAA doit
+etre classee :
+
+| Classe | Action |
+| --- | --- |
+| `keep_faq` | question utile pour `faq_content_kit` ou FAQ visible |
+| `keep_geo` | question courte et locale pour `geo_qa` |
+| `keep_section` | sous-intention a traiter en H2 ou paragraphe |
+| `keep_linking` | maillage vers classement, destination, guide ou POI |
+| `reject_noise` | celebrity, gossip, salaire, recrutement, biographie, people |
+| `reject_phase6` | prix exact, disponibilite, stock, offre, paiement |
+| `reject_unknown` | fait non source ou juridiquement risqué |
+
+Regle dure : si DataSEO renvoie zero PAA utile, on **ne genere pas** de `geo_qa`
+LLM-only. On renforce seulement title/meta, provenance, photos et maillage.
+
+### 11.5 Ordre d'intervention par fiche
+
+1. **Corriger les erreurs non ambigues** : langue incorrecte, title casse,
+   longueur hors bande, source manquante, claim interdit.
+2. **Re-ground FAQ kit** avec `run-faq-perplexity-batch.ts --grounded`.
+3. **Recalculer `dfs_paa_coverage`** avec `evaluatePaaCoverage`.
+4. **Regenerer `geo_qa`** uniquement si PAA utile.
+5. **Reviser title/meta/factual_summary** seulement si le signal DataSEO
+   change la requete principale ou l'intention.
+6. **Renforcer sections longues** si une sous-intention forte manque :
+   restaurant, spa, chambre signature, quartier, acces.
+7. **Completer EEAT** avant d'ajouter un fait nouveau : chef, architecte,
+   classement, label, ouverture, prix culturel.
+8. **Prioriser photos** quand DataSEO montre une demande photo et que la fiche
+   a moins de 10 categories ou moins de 30 photos.
+9. **Verifier JSON-LD / agentique** : FAQPage, ImageObject, AggregateRating /5,
+   `hotel-sources`, `hotel-photos`, `llms-full`.
+10. **Walk user-visible** avant commit pour toute retouche visible.
+
+### 11.6 Vagues de production
+
+| Vague | Slugs / surface | Objectif |
+| --- | --- | --- |
+| 1A | les 12 slugs du lot 1 | finir DataSEO pending + corrections non ambigues |
+| 1B | top 50 marque + capitale | Paris, Londres, New York, Dubai, Rome, Venise, Tokyo |
+| 2 | fiches avec `external_sources < 2` | EEAT et source gaps avant rewrite |
+| 3 | fiches avec photo gap | moins de 30 photos ou moins de 10 categories |
+| 4 | fiches avec factual/meta hors ideal | SEO bands + PAA coverage |
+| 5 | long-tail sans PAA utile | sobriete : infos pratiques, sources, maillage |
+| 6 | rankings / guides lies | maillage destination et anti-cannibalisation |
+
+Chaque vague doit produire :
+
+- un runlog avec `grounding=on/off`, locale DataSEO, nombre de PAA utiles,
+  `dfs_paa_coverage`, skips et cout approximatif ;
+- une table `before/after` par fiche ;
+- un fichier rollback ou snapshot DB redige sans secret ni PII, stocke dans un
+  chemin ignore comme `scripts/editorial-pilot/runs/` quand une ecriture a lieu ;
+- une liste "a ne pas traiter" quand DataSEO est trop faible ou bruite.
+
+### 11.7 Definition of Done locale
+
+Une fiche sort de la vague seulement si :
+
+- DataSEO FR + EN a ete execute ou explicitement marque `no_paa_useful` ;
+- les PAA utiles sont couvertes par FAQ, `geo_qa`, section ou maillage ;
+- les PAA rejetees sont listees avec raison ;
+- `dfs_paa_coverage` est trace ;
+- `hasLeak()` passe sur toutes les sorties LLM ;
+- les titres et metas restent dans les bandes projet ;
+- la voix Concierge respecte `EDITORIAL_VOICE.md` ;
+- aucune info Phase 6 n'est inventee : prix exact, disponibilite, offre,
+  `priceValidUntil`, urgence, paiement ;
+- EEAT couvre les faits nouveaux ;
+- FR et EN restent coherents ;
+- le rendu est marche depuis `/hotel/<slug>` et `/en/hotel/<slug>` si visible.
+
+### 11.8 Commandes de vague 1A
+
+Ordre recommande en local :
+
+```bash
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=hotel-ritz-paris --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=four-seasons-hotel-george-v --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=claridge-s-londres --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=the-plaza-hotel --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=burj-al-arab --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=hotel-de-russie-rocco-forte-collection --refresh
+pnpm --filter @mch/editorial-pilot exec tsx src/grounding/print-hotel-grounding.ts --slug=bulgari-roma --refresh
+```
+
+Puis, seulement apres lecture humaine des PAA :
+
+```bash
+pnpm --filter @mch/editorial-pilot faq:perplexity:batch -- --slugs=hotel-ritz-paris,four-seasons-hotel-george-v,claridge-s-londres,the-plaza-hotel,burj-al-arab,hotel-de-russie-rocco-forte-collection,bulgari-roma --grounded
+pnpm --filter @mch/editorial-pilot exec tsx src/hotels/run-hotel-geo-qa.ts --slug=<slug> --dry-run
+```
+
+`--dry-run` est obligatoire sur `geo_qa` avant ecriture, car la surface est
+visible et ne doit jamais inventer une question quand DataSEO est silencieux.
