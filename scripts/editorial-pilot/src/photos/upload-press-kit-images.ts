@@ -98,13 +98,25 @@ function parseArgs(argv: readonly string[]): CliArgs {
       (f) => f.startsWith('press-kit-discovery-') && f.endsWith('.json'),
     );
     if (slugs.length > 0) {
-      // Latest file per slug.
+      // Latest file per slug — EXACT slug match only.
+      //
+      // `f.startsWith('press-kit-discovery-${s}-')` is a loose prefix match
+      // that wrongly matches sibling slugs: target `armancette` would match
+      // `press-kit-discovery-armancette-hotel-chalets-and-spa-<ts>.json` and,
+      // because the file content carries `report.slug`, patch the WRONG hotel
+      // (observed 2026-06-29). Extract the slug by stripping the trailing ISO
+      // timestamp and require strict equality.
+      const TS_SUFFIX = /-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z\.json$/;
+      const slugFromFile = (f: string): string | null => {
+        if (!TS_SUFFIX.test(f)) return null;
+        return f.replace(/^press-kit-discovery-/, '').replace(TS_SUFFIX, '');
+      };
+      const requested = new Set(slugs);
       const bySlug = new Map<string, string>();
       for (const f of all.sort()) {
-        for (const s of slugs) {
-          if (f.startsWith(`press-kit-discovery-${s}-`)) {
-            bySlug.set(s, f); // last one wins (sort asc → latest timestamp)
-          }
+        const fileSlug = slugFromFile(f);
+        if (fileSlug !== null && requested.has(fileSlug)) {
+          bySlug.set(fileSlug, f); // last one wins (sort asc → latest timestamp)
         }
       }
       discoveryFiles = [...bySlug.values()].map((f) => resolve(dir, f));
