@@ -319,7 +319,7 @@ type RankingFamily = 'chain-collection' | 'curated-award' | 'geo-best';
  * renders both ways.
  */
 type GeoHeadKind = 'luxe' | 'meilleurs';
-function geoHeadKind(slug: string): GeoHeadKind | null {
+export function geoHeadKind(slug: string): GeoHeadKind | null {
   if (/^hotel-de-luxe-/u.test(slug)) return 'luxe';
   if (/^meilleurs-hotels-/u.test(slug)) return 'meilleurs';
   return null;
@@ -344,7 +344,7 @@ function familyForSlug(slug: string): RankingFamily | null {
   return null;
 }
 
-interface RankingIndexEntry {
+export interface RankingIndexEntry {
   readonly id: string;
   readonly slug: string;
   readonly titleFr: string;
@@ -446,7 +446,7 @@ const loadRankingScoreIndex = (): Promise<readonly RankingIndexEntry[]> =>
     tags: ['related-rankings:index'],
   })();
 
-interface CurrentRankingSignals {
+export interface CurrentRankingSignals {
   readonly slug: string;
   readonly lieuSlug: string | null;
   readonly themes: readonly string[];
@@ -455,7 +455,7 @@ interface CurrentRankingSignals {
   readonly kind: string;
 }
 
-function scoreCandidate(current: CurrentRankingSignals, cand: RankingIndexEntry): number {
+export function scoreCandidate(current: CurrentRankingSignals, cand: RankingIndexEntry): number {
   let score = 0;
   if (current.lieuSlug !== null && cand.lieuSlug === current.lieuSlug) {
     score += 4;
@@ -463,9 +463,26 @@ function scoreCandidate(current: CurrentRankingSignals, cand: RankingIndexEntry)
     // candidate target the SAME lieu but the COMPLEMENTARY intent (one
     // `meilleurs-hotels-*`, the other `hotel-de-luxe-*`), boost hard so the
     // sibling always lands in the top-`limit` lateral block both ways.
+    //
+    // CRITICAL: the pin must only fire between the two PURE geographic heads
+    // of the lieu, never a theme/occasion combo. `geoHeadKind` keys off the
+    // slug prefix alone, so `meilleurs-hotels-campagne-<lieu>` /
+    // `meilleurs-hotels-ski-<lieu>` also match `^meilleurs-hotels-` and would
+    // otherwise tie the true `meilleurs-hotels-<lieu>` head out of the
+    // top-`limit` block on the title tie-break (observed on Nice: campagne /
+    // montagne / ski all scored 14 and pushed the real sibling to 4th).
+    // Gating on empty `themes` on BOTH sides restores the reciprocal link.
     const curHead = geoHeadKind(current.slug);
     const candHead = geoHeadKind(cand.slug);
-    if (curHead !== null && candHead !== null && curHead !== candHead) score += 10;
+    if (
+      curHead !== null &&
+      candHead !== null &&
+      curHead !== candHead &&
+      current.themes.length === 0 &&
+      cand.themes.length === 0
+    ) {
+      score += 10;
+    }
   }
   for (const th of current.themes) if (cand.themes.includes(th)) score += 2;
   for (const ty of current.types) if (cand.types.includes(ty)) score += 1;
