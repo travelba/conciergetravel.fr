@@ -1,12 +1,36 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildEnCitySeeds,
+  GROUNDING_LOCALE_EN_US,
+  GROUNDING_LOCALE_FR,
   groundKeywords,
   renderGroundingForPrompt,
   type KeywordGrounding,
 } from './keyword-grounding.js';
 
 const FR = { locationName: 'France', languageCode: 'fr' } as const;
+
+describe('EN-locale grounding helpers', () => {
+  it('exposes a US-English locale distinct from France/fr', () => {
+    expect(GROUNDING_LOCALE_EN_US.locationName).toBe('United States');
+    expect(GROUNDING_LOCALE_EN_US.languageCode).toBe('en');
+    expect(GROUNDING_LOCALE_FR.languageCode).toBe('fr');
+  });
+
+  it('builds the high-volume EN city seeds (luxury + best)', () => {
+    expect(buildEnCitySeeds('Rome')).toEqual(['luxury hotels Rome', 'best hotels in Rome']);
+    expect(buildEnCitySeeds('  Los   Angeles ')).toEqual([
+      'luxury hotels Los Angeles',
+      'best hotels in Los Angeles',
+    ]);
+  });
+
+  it('returns [] for an empty city (degrade-safe)', () => {
+    expect(buildEnCitySeeds('   ')).toEqual([]);
+    expect(buildEnCitySeeds('')).toEqual([]);
+  });
+});
 
 describe('groundKeywords degrade path', () => {
   it('returns empty ungrounded result when cfg is null (DFS off)', async () => {

@@ -43,6 +43,52 @@ export interface GroundingLocale {
   readonly languageCode: string;
 }
 
+/**
+ * Canonical grounding locales. The disk cache keys on `(languageCode,
+ * locationName, seeds)` (see `cacheKey`), so EN and FR grounding for the same
+ * entity NEVER collide on disk — they live in separate cache files.
+ *
+ * ⚠ **EN-target content must ground against an EN-locale PAA, not the FR
+ * seed.** A `hotel-de-luxe-{city}` / `meilleurs-hotels-{city}` head serves an
+ * `/en` page targeting `luxury hotels {city}` / `best hotels {city}`. Grounding
+ * those EN surfaces with the FR seed (`hôtel de luxe {ville}`) in `France/fr`
+ * returns **zero People-Also-Ask** for foreign cities (Rome, Los Angeles,
+ * Singapore, Hong Kong, Tokyo…) — Google's FR SERP carries no PAA for an
+ * English city query — so `dfs_paa_coverage` came back `n/a` and the EN FAQ was
+ * never verified against real EN demand. The EN-locale seed in `United
+ * States/en` (the largest anglophone market; `United Kingdom/en` is an
+ * acceptable alternative) returns the real EN PAA + volumes. `United States/en`
+ * is a valid DataForSEO `(location, language)` pair (unlike forcing `en` on a
+ * non-English location such as `Italy/en`, which 40501s — see the
+ * `keyword-grounding-dataforseo` skill).
+ */
+export const GROUNDING_LOCALE_FR: GroundingLocale = {
+  locationName: 'France',
+  languageCode: 'fr',
+};
+export const GROUNDING_LOCALE_EN_US: GroundingLocale = {
+  locationName: 'United States',
+  languageCode: 'en',
+};
+export const GROUNDING_LOCALE_EN_GB: GroundingLocale = {
+  locationName: 'United Kingdom',
+  languageCode: 'en',
+};
+
+/**
+ * Build the EN-locale search seeds for a city-scoped editorial head. These are
+ * the high-volume anglophone demand patterns confirmed by the 2026-06-29 EN SEO
+ * audit (`luxury hotels {city}` > `best hotels in {city}` in both volume and
+ * low difficulty). The two seeds feed `groundKeywords` so the EN FAQ/titles
+ * track what anglophones actually type, NOT the FR seed. Returns `[]` for an
+ * empty city so the caller degrades cleanly.
+ */
+export function buildEnCitySeeds(cityEn: string): string[] {
+  const c = cityEn.replace(/\s+/gu, ' ').trim();
+  if (c.length === 0) return [];
+  return [`luxury hotels ${c}`, `best hotels in ${c}`];
+}
+
 export interface GroundingKeyword {
   readonly keyword: string;
   readonly searchVolume: number | null;
