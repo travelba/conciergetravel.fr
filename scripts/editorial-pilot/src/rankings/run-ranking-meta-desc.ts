@@ -230,6 +230,11 @@ async function main(): Promise<void> {
   console.log(
     `[ranking-meta-desc] mode dryRun=${args.dryRun} concurrency=${args.concurrency} limit=${args.limit ?? '∞'} includeAll=${args.includeAll} includeDrafts=${args.includeDrafts}`,
   );
+  console.log(
+    `[ranking-meta-desc] slugCount=${args.slugs?.length ?? (args.slug === undefined ? 0 : 1)} firstSlug=${
+      args.slug ?? args.slugs?.[0] ?? 'none'
+    }`,
+  );
 
   const listOpts: {
     onlyPublished: boolean;

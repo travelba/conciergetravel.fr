@@ -65,35 +65,46 @@ export async function listRankings(
   cfg: SupabaseRestConfig,
   opts: ListRankingsOptions,
 ): Promise<RankingRow[]> {
-  const params = new URLSearchParams();
-  params.set('select', RANKING_SELECT_COLUMNS);
-  params.set('order', opts.order ?? 'updated_at.desc');
+  if (opts.slug === undefined && opts.slugs !== undefined && opts.slugs.length > 0) {
+    const batches = await Promise.all(
+      opts.slugs.map((slug) => {
+        const nextOpts: ListRankingsOptions = {
+          limit: 1,
+          slug,
+          ...(opts.onlyPublished !== undefined ? { onlyPublished: opts.onlyPublished } : {}),
+          ...(opts.requireSections !== undefined ? { requireSections: opts.requireSections } : {}),
+          ...(opts.order !== undefined ? { order: opts.order } : {}),
+        };
+        return listRankings(cfg, nextOpts);
+      }),
+    );
+    return batches.flat();
+  }
 
-  const filterParts: string[] = [];
+  const endpoint = new URL('/rest/v1/editorial_rankings', cfg.url);
+  endpoint.searchParams.set('select', RANKING_SELECT_COLUMNS);
+  endpoint.searchParams.set('order', opts.order ?? 'updated_at.desc');
 
   if (opts.onlyPublished !== false) {
-    filterParts.push('is_published=eq.true');
+    endpoint.searchParams.set('is_published', 'eq.true');
   }
 
   if (opts.requireSections !== false) {
-    filterParts.push('editorial_sections=not.is.null');
+    endpoint.searchParams.set('editorial_sections', 'not.is.null');
   }
 
   if (opts.slug !== undefined) {
-    filterParts.push(`slug=eq.${encodeURIComponent(opts.slug)}`);
+    endpoint.searchParams.set('slug', `eq.${opts.slug}`);
   } else if (opts.slugs !== undefined && opts.slugs.length > 0) {
-    const list = opts.slugs.map((s) => encodeURIComponent(s)).join(',');
-    filterParts.push(`slug=in.(${list})`);
+    const list = opts.slugs.map((s) => `"${s.replace(/"/gu, '')}"`).join(',');
+    endpoint.searchParams.set('slug', `in.(${list})`);
   }
 
   if (opts.limit !== undefined) {
-    params.set('limit', String(opts.limit));
+    endpoint.searchParams.set('limit', String(opts.limit));
   }
 
-  const qs = `${params.toString()}${filterParts.length > 0 ? `&${filterParts.join('&')}` : ''}`;
-  const url = `${cfg.url}/rest/v1/editorial_rankings?${qs}`;
-
-  const res = await fetch(url, {
+  const res = await fetch(endpoint, {
     headers: {
       apikey: cfg.serviceRoleKey,
       Authorization: `Bearer ${cfg.serviceRoleKey}`,

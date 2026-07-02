@@ -1354,6 +1354,40 @@ try/catch = isolation. You need both. See `keyword-grounding-dataforseo`
 **Reference impl:** `scripts/editorial-pilot/src/rankings/enrich-ranking-justifications.ts`
 (`withTimeout`, `LLM_TIMEOUT_MS`, hardened `runWithConcurrency` with `onError`).
 
+## Rule 21 — Deterministic claim rewriting: mask proper nouns first, then check for doubled words
+
+Empirical (WP-C1 Palace-claim remediation, 2026-07-02). When a deterministic
+regex pass rewrites a false marketing claim ("palace" on a non-Atout-France
+hotel) across prose fields, two failure modes surfaced that each cost an
+iteration:
+
+1. **Proper nouns carry the banned word.** "Taj Lake Palace", "El Palace
+   Hotel", "Prince's Palace", "Trianon Palace Versailles, A Waldorf Astoria
+   Hotel" all contain `palace` legitimately. Both the **rewriter** and the
+   **audit gate** must mask the hotel's own name before matching — and the
+   mask must cover the name's variants: article-less (`^(?:Le |La |L['’]|The
+|El )` stripped), apostrophe-less (`Prince's Palace` → `Prince Palace`,
+   as FAQ prose often drops the possessive), and **comma-split segments**
+   (`Trianon Palace Versailles` out of the full legal name — prose almost
+   never uses the full "…, A Waldorf Astoria Hotel" form). Sort variants
+   longest-first before masking. Reference impl:
+   `scripts/editorial-pilot/src/hotels/patch-dataseo-p0-hotels.ts`
+   (`rewritePalaceClaims` MASK loop) and
+   `…/grounding/audit-hotel-dataseo-wave.ts` (`hasPalaceClaimOutsideName`).
+
+2. **Cascading rules leave doubled words.** Two independent downgrades can
+   hit overlapping spans: "This **palace hotel**" — rule A (`This palace` →
+   `This hotel`) fires first and leaves "This hotel hotel". After any
+   multi-rule rewrite pass, run a doubled-word sweep (`\bhotel hotel\b`,
+   `\bhôtel hôtel\b`) AND grep the dry-run diffs for `\b(\w+) \1\b` before
+   `--apply`. Same trap with strip-rules whose replacement re-introduces the
+   word that follows the match ("c'est **son** statut de palace … de **son**
+   engagement" — replacing with `'son '` doubles it; replace with `''`).
+
+The dry-run → inspect-actual-diffs → apply loop is what caught both. A
+reason-tag per pattern (`palace_claim:<regex-prefix>`) makes the diff
+inspection targeted instead of eyeballing full texts.
+
 ## Anti-patterns
 
 - ❌ Asking one prompt for "sections + tables + FAQ + sources + glossary + callouts" → token starvation → truncation.
@@ -1379,6 +1413,8 @@ try/catch = isolation. You need both. See `keyword-grounding-dataforseo`
 - ❌ Combining a length plafond, a sentence-length cap, a banlist, and a "must extend with new factual content" instruction on factually dense rows (Palaces, R&C, 5★) → constraints become co-non-satisfiable → all attempts fail. Hand-write the target on the densest 5 rows before shipping; if you can't, relax ONE constraint (usually the length plafond) (Rule 18b).
 - ❌ Burning 2-4 LLM correction passes on a pure LENGTH overshoot (`factual_summary` a few chars over max, one sentence > 25 mots) → tokens wasted on a problem a regex solves deterministically. Pre-clamp summaries before the Zod parse and split over-length sentences at natural boundaries (Rule 19a/19b).
 - ❌ Letting a deterministic length-salvage step also rewrite/substitute words, OR accepting the salvaged copy without re-running the full gate → it silently overrides the banned-lexicon/voice linter verdict and ships brand-voice regressions. Salvage must touch rhythm only, and the salvaged row must clear `safeParse` + the editorial envelope or be rejected (Rule 19c).
+- ❌ Regex-rewriting a banned marketing word (palace, luxe…) without masking the hotel's own commercial name first (incl. article-less / apostrophe-less / comma-split variants) → corrupts "Taj Lake Palace" into "Taj Lake Hotel" or flags it forever in the audit (Rule 21).
+- ❌ Applying a multi-rule deterministic rewrite without a doubled-word sweep on the output → "This palace hotel" becomes "This hotel hotel" and ships to prod (Rule 21).
 - ❌ Calling an LLM / Tavily / `fetch` inside a batch loop WITHOUT a `Promise.race` timeout → one hung provider socket freezes the entire run for hours (2026-06-23: ~8 h dead on a single `callLlm`). `Promise.allSettled` does not rescue an _unsettled_ promise — only a timeout does. Bound every call AND isolate failures with `allSettled` + per-item try/catch (Rule 20).
 
 ## References

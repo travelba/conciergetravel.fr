@@ -30,9 +30,11 @@ interface Args {
   readonly rankingCandidates: number;
   readonly concurrency: number;
   readonly refresh: boolean;
+  readonly exactSlugs: boolean;
   readonly skipUnified: boolean;
   readonly confirmLarge: boolean;
   readonly hotelSlugs: readonly string[];
+  readonly rankingSlugs: readonly string[];
 }
 
 interface CommandResult {
@@ -67,7 +69,8 @@ function parseArgs(): Args {
   const smoke = readFlag(argv, 'smoke');
   const sharedLimit = readNumber(argv, 'limit', smoke ? 5 : 100);
   const sharedCandidates = readNumber(argv, 'candidates', smoke ? 20 : 180);
-  const slugsRaw = readString(argv, 'hotel-slugs') ?? readString(argv, 'slugs');
+  const hotelSlugsRaw = readString(argv, 'hotel-slugs') ?? readString(argv, 'slugs');
+  const rankingSlugsRaw = readString(argv, 'ranking-slugs');
   return {
     scope: readScope(argv),
     hotelLimit: readNumber(argv, 'hotel-limit', sharedLimit),
@@ -80,12 +83,20 @@ function parseArgs(): Args {
     rankingCandidates: readNumber(argv, 'ranking-candidates', sharedCandidates),
     concurrency: readNumber(argv, 'concurrency', smoke ? 1 : 2),
     refresh: readFlag(argv, 'refresh'),
+    exactSlugs: readFlag(argv, 'exact-slugs'),
     skipUnified: readFlag(argv, 'no-unified'),
     confirmLarge: readFlag(argv, 'confirm-large') || smoke,
     hotelSlugs:
-      slugsRaw === null
+      hotelSlugsRaw === null
         ? []
-        : slugsRaw
+        : hotelSlugsRaw
+            .split(',')
+            .map((slug) => slug.trim())
+            .filter((slug) => slug.length > 0),
+    rankingSlugs:
+      rankingSlugsRaw === null
+        ? []
+        : rankingSlugsRaw
             .split(',')
             .map((slug) => slug.trim())
             .filter((slug) => slug.length > 0),
@@ -173,6 +184,7 @@ function hotelAuditArgs(args: Args): readonly string[] {
     `--concurrency=${args.concurrency}`,
   ];
   if (args.refresh) out.push('--refresh');
+  if (args.exactSlugs) out.push('--exact-slugs');
   if (args.hotelSlugs.length > 0) out.push(`--slugs=${args.hotelSlugs.join(',')}`);
   return out;
 }
@@ -184,6 +196,8 @@ function rankingAuditArgs(args: Args): readonly string[] {
     `--concurrency=${args.concurrency}`,
   ];
   if (args.refresh) out.push('--refresh');
+  if (args.exactSlugs) out.push('--exact-slugs');
+  if (args.rankingSlugs.length > 0) out.push(`--slugs=${args.rankingSlugs.join(',')}`);
   return out;
 }
 

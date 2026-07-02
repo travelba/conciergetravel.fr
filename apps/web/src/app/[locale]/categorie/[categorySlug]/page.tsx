@@ -88,43 +88,43 @@ const CATEGORY_AEO: Readonly<
 > = {
   'palaces-paris': {
     aeoFr:
-      'Paris compte douze Palaces distingués par Atout France — Bristol, Crillon, George V, Meurice, Plaza Athénée, Ritz, Royal Monceau, Shangri-La, Peninsula, Park Hyatt, Mandarin Oriental, Lutetia. MyConciergeHotel les référence tous au tarif net Amadeus, sans intermédiaire commissionné.',
+      "Paris compte treize Palaces distingués par Atout France (Collection 2026) — Bristol, Crillon, George V, Meurice, Plaza Athénée, La Réserve, Royal Monceau, Shangri-La, Peninsula, Mandarin Oriental Lutetia, et les nouveaux promus Cheval Blanc Paris, Bvlgari et Fouquet's. MyConciergeHotel les référence tous avec une fiche éditoriale vérifiée.",
     aeoEn:
-      'Paris counts twelve Palaces certified by Atout France — Bristol, Crillon, George V, Meurice, Plaza Athénée, Ritz, Royal Monceau, Shangri-La, Peninsula, Park Hyatt, Mandarin Oriental, Lutetia. MyConciergeHotel lists them all at Amadeus net rates, with no commission intermediary.',
+      "Paris counts thirteen Palaces certified by Atout France (2026 Collection) — Bristol, Crillon, George V, Meurice, Plaza Athénée, La Réserve, Royal Monceau, Shangri-La, Peninsula, Mandarin Oriental Lutetia, plus newly promoted Cheval Blanc Paris, Bvlgari and Fouquet's. MyConciergeHotel lists them all with a verified editorial page.",
     faqFr: [
       {
         q: 'Quelle est la différence entre un Palace et un hôtel 5 étoiles à Paris ?',
-        a: "Le statut Palace est une distinction Atout France attribuée à un nombre limité d'hôtels 5 étoiles répondant à des critères architecturaux, historiques et de service exceptionnels. Paris compte douze Palaces sur des dizaines de 5 étoiles. La distinction est révisée tous les cinq ans.",
+        a: "Le statut Palace est une distinction Atout France attribuée à un nombre limité d'hôtels 5 étoiles répondant à des critères architecturaux, historiques et de service exceptionnels. Paris compte treize Palaces sur des dizaines de 5 étoiles. La distinction est révisée tous les trois ans — la Collection 2026 a été dévoilée le 2 juin 2026.",
       },
       {
         q: 'Quel quartier choisir pour un séjour Palace à Paris ?',
-        a: "Le Triangle d'or (8e arrondissement) concentre Bristol, George V, Plaza Athénée. Place Vendôme et Tuileries (1er) accueillent Ritz, Meurice, Park Hyatt. Saint-Germain (6e) abrite Lutetia. Les Champs-Élysées proches : Royal Monceau, Peninsula. Chaque quartier offre une ambiance distincte — notre conciergerie vous oriente selon vos priorités.",
+        a: "Le Triangle d'or (8e arrondissement) concentre Bristol, George V, Plaza Athénée, La Réserve et le Fouquet's. Tuileries et Pont-Neuf (1er) accueillent Meurice et Cheval Blanc Paris. Saint-Germain (6e) abrite le Lutetia. Côté Trocadéro (16e) : Shangri-La et Peninsula. Chaque quartier offre une ambiance distincte — notre conciergerie vous oriente selon vos priorités.",
       },
       {
         q: 'Les Palaces parisiens proposent-ils des chambres communicantes pour les familles ?',
         a: "La plupart des Palaces parisiens disposent de configurations familiales — suites parentales avec chambre d'enfants attenante, ou chambres communicantes. La conciergerie sécurise le bon couplage à la réservation. Plaza Athénée, Bristol et Crillon disposent de programmes enfants dédiés (Kids Club, menus, activités).",
       },
       {
-        q: "Quels Palaces parisiens disposent d'une étoile Michelin ?",
-        a: "Le Bristol (Epicure, ***), Plaza Athénée (Alain Ducasse, ***), George V (Le Cinq, ***), Meurice (Alain Ducasse au Meurice, **), Crillon (L'Écrin, *), Ritz (L'Espadon, *), Mandarin Oriental (Sur Mesure par Thierry Marx, **) cumulent étoiles et tables prestigieuses. Notre conciergerie réserve les tables.",
+        q: 'Quels Palaces parisiens disposent de tables étoilées Michelin ?',
+        a: 'Au Guide Michelin 2026, quatre Palaces parisiens abritent une table trois étoiles : Le Bristol (Épicure, Arnaud Faye), George V (Le Cinq, Christian Le Squer), Cheval Blanc Paris (Plénitude, Arnaud Donckele) et La Réserve (Le Gabriel, Jérôme Banctel). Le Plaza Athénée compte une étoile avec Jean Imbert. Notre conciergerie réserve les tables.',
       },
     ],
     faqEn: [
       {
         q: "What's the difference between a Palace and a 5-star hotel in Paris?",
-        a: 'The Palace status is an Atout France distinction granted to a limited number of 5-star hotels meeting exceptional architectural, historical and service criteria. Paris counts twelve Palaces against dozens of 5-stars. The distinction is reviewed every five years.',
+        a: 'The Palace status is an Atout France distinction granted to a limited number of 5-star hotels meeting exceptional architectural, historical and service criteria. Paris counts thirteen Palaces against dozens of 5-stars. The distinction is reviewed every three years — the 2026 Collection was unveiled on 2 June 2026.',
       },
       {
         q: 'Which Paris district to choose for a Palace stay?',
-        a: 'The Golden Triangle (8th arrondissement) concentrates Bristol, George V, Plaza Athénée. Place Vendôme and Tuileries (1st) host Ritz, Meurice, Park Hyatt. Saint-Germain (6th) houses Lutetia. Near the Champs-Élysées: Royal Monceau, Peninsula. Each district offers a distinct atmosphere — our concierge guides you by priority.',
+        a: "The Golden Triangle (8th arrondissement) concentrates Bristol, George V, Plaza Athénée, La Réserve and Fouquet's. Tuileries and Pont-Neuf (1st) host Le Meurice and Cheval Blanc Paris. Saint-Germain (6th) houses the Lutetia. Towards Trocadéro (16th): Shangri-La and Peninsula. Each district offers a distinct atmosphere — our concierge guides you by priority.",
       },
       {
         q: 'Do Paris Palaces offer connecting rooms for families?',
         a: "Most Paris Palaces offer family configurations — parent suites with adjoining children's rooms, or connecting rooms. The concierge desk secures the right pairing at booking. Plaza Athénée, Bristol and Crillon run dedicated children's programs (Kids Club, menus, activities).",
       },
       {
-        q: 'Which Paris Palaces hold Michelin stars?',
-        a: "Le Bristol (Epicure, ***), Plaza Athénée (Alain Ducasse, ***), George V (Le Cinq, ***), Meurice (Alain Ducasse au Meurice, **), Crillon (L'Écrin, *), Ritz (L'Espadon, *), Mandarin Oriental (Sur Mesure by Thierry Marx, **) accumulate stars and prestigious tables. Our concierge books the tables.",
+        q: 'Which Paris Palaces hold Michelin-starred tables?',
+        a: 'In the 2026 Michelin Guide, four Paris Palaces house a three-star table: Le Bristol (Épicure, Arnaud Faye), George V (Le Cinq, Christian Le Squer), Cheval Blanc Paris (Plénitude, Arnaud Donckele) and La Réserve (Le Gabriel, Jérôme Banctel). Plaza Athénée holds one star with Jean Imbert. Our concierge books the tables.',
       },
     ],
   },
@@ -256,43 +256,43 @@ const CATEGORY_AEO: Readonly<
   },
   'palaces-france': {
     aeoFr:
-      "Atout France distingue actuellement 31 Palaces sur l'ensemble du territoire français (révision quinquennale). MyConciergeHotel référence chacun avec sa fiche éditoriale dédiée, ses chambres, sa table étoilée, son spa, ses tarifs nets Amadeus. Sélection vérifiée, sans intermédiaire commissionné.",
+      "Atout France distingue 33 Palaces sur l'ensemble du territoire français (Collection 2026, dévoilée le 2 juin 2026, révisée tous les trois ans). MyConciergeHotel référence chacun avec sa fiche éditoriale dédiée, ses chambres, sa table étoilée, son spa. Sélection vérifiée par le Concierge.",
     aeoEn:
-      'Atout France currently distinguishes 31 Palaces across the French territory (five-year review). MyConciergeHotel lists each with its dedicated editorial page, rooms, starred table, spa and Amadeus net rates. Verified selection, no commission intermediary.',
+      'Atout France distinguishes 33 Palaces across the French territory (2026 Collection, unveiled 2 June 2026, reviewed every three years). MyConciergeHotel lists each with its dedicated editorial page, rooms, starred table and spa. A selection verified by the Concierge.',
     faqFr: [
       {
         q: 'Combien de Palaces existe-t-il en France ?',
-        a: "Atout France distingue actuellement 31 Palaces. Le statut Palace est une distinction officielle attribuée depuis 2010 à un nombre limité d'hôtels 5 étoiles répondant à des critères architecturaux, historiques et de service exceptionnels. La liste est révisée tous les cinq ans (dernière révision 2024).",
+        a: "Atout France distingue 33 Palaces (Collection 2026). Le statut Palace est une distinction officielle attribuée depuis 2010 à un nombre limité d'hôtels 5 étoiles répondant à des critères architecturaux, historiques et de service exceptionnels. La liste est désormais révisée tous les trois ans — la Collection 2026 a été dévoilée le 2 juin 2026.",
       },
       {
         q: "Quels sont les critères pour qu'un hôtel devienne Palace ?",
-        a: "Atout France évalue : qualité architecturale et historique, services 24/7, gastronomie étoilée ou de référence, spa de haut niveau, personnel polyglotte, équipements suite (Suite Présidentielle obligatoire), localisation prestigieuse. La distinction est révocable et révisée tous les cinq ans pour maintenir le niveau d'excellence.",
+        a: "Atout France évalue : qualité architecturale et historique, services 24/7, gastronomie étoilée ou de référence, spa de haut niveau, personnel polyglotte, équipements suite (Suite Présidentielle obligatoire), localisation prestigieuse. La distinction est révocable et révisée tous les trois ans pour maintenir le niveau d'excellence.",
       },
       {
         q: 'Quelle est la différence entre Palace et 5 étoiles ?',
         a: "Le 5 étoiles est un classement officiel basé sur des critères mesurables (équipements, surfaces, services). Le Palace est une distinction supplémentaire attribuée à une sous-catégorie d'hôtels 5 étoiles répondant à des critères d'excellence absolue. Tous les Palaces sont 5 étoiles, mais peu de 5 étoiles deviennent Palace.",
       },
       {
-        q: 'Les tarifs des Palaces français sont-ils plus avantageux via MyConciergeHotel ?',
-        a: 'Notre licence IATA nous donne accès aux tarifs nets Amadeus GDS, identiques à ceux du site officiel de chaque Palace mais sans intermédiaire commissionné. Aucun supplément. Les avantages fidélité (LHW, Virtuoso, Amex Fine Hotels) sont conservés lorsque le client communique son numéro de membre.',
+        q: 'Comment réserver un Palace français via MyConciergeHotel ?',
+        a: 'Chaque fiche Palace se termine par un Conseil du Concierge et un accès direct à notre conciergerie. Nous préparons votre séjour — chambre à privilégier, table étoilée, spa, transferts — et transmettons vos demandes à l\u2019hôtel. Les avantages fidélité (LHW, Virtuoso, Amex Fine Hotels) sont conservés lorsque le client communique son numéro de membre.',
       },
     ],
     faqEn: [
       {
         q: 'How many Palaces exist in France?',
-        a: 'Atout France currently distinguishes 31 Palaces. The Palace status is an official distinction granted since 2010 to a limited number of 5-star hotels meeting exceptional architectural, historical and service criteria. The list is reviewed every five years (last review 2024).',
+        a: 'Atout France distinguishes 33 Palaces (2026 Collection). The Palace status is an official distinction granted since 2010 to a limited number of 5-star hotels meeting exceptional architectural, historical and service criteria. The list is now reviewed every three years — the 2026 Collection was unveiled on 2 June 2026.',
       },
       {
         q: 'What are the criteria for a hotel to become a Palace?',
-        a: 'Atout France evaluates: architectural and historical quality, 24/7 services, starred or reference gastronomy, high-end spa, multilingual staff, suite equipment (mandatory Presidential Suite), prestigious location. The distinction is revocable and reviewed every five years to maintain excellence.',
+        a: 'Atout France evaluates: architectural and historical quality, 24/7 services, starred or reference gastronomy, high-end spa, multilingual staff, suite equipment (mandatory Presidential Suite), prestigious location. The distinction is revocable and reviewed every three years to maintain excellence.',
       },
       {
         q: "What's the difference between Palace and 5-star?",
         a: '5-star is an official classification based on measurable criteria (equipment, surfaces, services). Palace is an additional distinction granted to a sub-category of 5-star hotels meeting absolute excellence criteria. Every Palace is a 5-star, but few 5-stars become a Palace.',
       },
       {
-        q: 'Are French Palace rates more advantageous via MyConciergeHotel?',
-        a: "Our IATA licence gives us access to Amadeus GDS net rates, identical to each Palace's official site but without commission intermediary. No surcharge. Loyalty benefits (LHW, Virtuoso, Amex Fine Hotels) are preserved when the guest provides their membership number.",
+        q: 'How do I book a French Palace via MyConciergeHotel?',
+        a: "Every Palace page ends with a Concierge's Tip and direct access to our concierge desk. We prepare your stay — the room to favour, the starred table, the spa, transfers — and pass your requests to the hotel. Loyalty benefits (LHW, Virtuoso, Amex Fine Hotels) are preserved when the guest provides their membership number.",
       },
     ],
   },

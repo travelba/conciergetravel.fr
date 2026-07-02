@@ -117,6 +117,7 @@ interface Args {
   readonly candidateLimit: number;
   readonly concurrency: number;
   readonly refresh: boolean;
+  readonly exactSlugs: boolean;
   readonly slugs: readonly string[];
 }
 
@@ -199,6 +200,7 @@ function parseArgs(): Args {
     candidateLimit: readNumber('candidates', DEFAULT_CANDIDATES),
     concurrency: readNumber('concurrency', DEFAULT_CONCURRENCY),
     refresh: argv.includes('--refresh'),
+    exactSlugs: argv.includes('--exact-slugs'),
     slugs:
       slugsRaw === undefined
         ? []
@@ -335,15 +337,36 @@ function selectionScore(row: HotelAuditRow): SelectionScore {
     score += 12;
     reasons.push('faq_language_leak');
   }
-  if (
-    row.is_palace !== true &&
-    /\bpalace\b/iu.test(`${row.meta_title_fr ?? ''} ${row.meta_desc_fr ?? ''}`)
-  ) {
+  if (row.is_palace !== true && hasPalaceClaimOutsideName(row)) {
     score += 6;
     reasons.push('palace_claim_to_verify');
   }
 
   return { score, reasons, quality: q };
+}
+
+/**
+ * "Palace" inside the hotel's own commercial name (El Palace Hotel, Taj Lake
+ * Palace, Trianon Palace Versailles…) is not a claim — mask the name (and its
+ * article-less / apostrophe-less variants) before testing meta title + desc.
+ */
+function hasPalaceClaimOutsideName(row: HotelAuditRow): boolean {
+  let haystack = `${row.meta_title_fr ?? ''} ${row.meta_desc_fr ?? ''}`;
+  // Comma-split covers short commercial forms ("Trianon Palace Versailles"
+  // out of "Trianon Palace Versailles, A Waldorf Astoria Hotel").
+  const base = [row.name, row.name_en ?? '']
+    .flatMap((n) => [n, ...n.split(',').map((s) => s.trim())])
+    .filter((n) => n.length >= 4);
+  const variants = [
+    ...base,
+    ...base.map((n) => n.replace(/^(?:Le |La |L['’]|The |El )/u, '')),
+    ...base.map((n) => n.replace(/['’]s /gu, ' ')),
+  ].filter((n, i, arr) => n.length >= 4 && /palace/iu.test(n) && arr.indexOf(n) === i);
+  for (const variant of variants) {
+    const escaped = variant.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+    haystack = haystack.replace(new RegExp(escaped, 'giu'), ' ');
+  }
+  return /\bpalace\b/iu.test(haystack);
 }
 
 function truncateText(value: string | null, max: number): string | null {
@@ -459,14 +482,8 @@ function buildChangePlan(
       'Exclure des FAQ/geo_qa les PAA bruitées : people, fortune, salaires, booking Phase 6.',
     );
   }
-  if (
-    row.is_palace !== true &&
-    /\bpalace\b/iu.test(`${row.meta_title_fr ?? ''} ${row.meta_desc_fr ?? ''}`)
-  ) {
+  if (row.is_palace !== true && hasPalaceClaimOutsideName(row)) {
     remove.push('Retirer ou qualifier le terme "Palace" des surfaces publiques si non officiel.');
-  }
-  if (modify.length === 0 && create.length === 0 && remove.length === 0) {
-    modify.push('Fiche stable : garder en observation, pas de rewrite prioritaire.');
   }
   return { modify, create, remove };
 }
@@ -724,10 +741,15 @@ async function main(): Promise<void> {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/u, '');
   const explicit = args.slugs.length > 0 ? args.slugs : EXPLICIT_WAVE_1A_SLUGS;
   const [candidateRows, explicitRows] = await Promise.all([
-    fetchHotels(supabaseUrl, env.SUPABASE_SERVICE_ROLE_KEY, args.candidateLimit),
+    args.exactSlugs && args.slugs.length > 0
+      ? Promise.resolve<HotelAuditRow[]>([])
+      : fetchHotels(supabaseUrl, env.SUPABASE_SERVICE_ROLE_KEY, args.candidateLimit),
     fetchExplicitHotels(supabaseUrl, env.SUPABASE_SERVICE_ROLE_KEY, explicit),
   ]);
-  const selected = selectWave([...explicitRows, ...candidateRows], args.limit);
+  const selected =
+    args.exactSlugs && args.slugs.length > 0
+      ? explicitRows.map((row) => ({ row, score: selectionScore(row) }))
+      : selectWave([...explicitRows, ...candidateRows], args.limit);
   console.log(`[audit-dataseo] selected=${selected.length} candidates=${candidateRows.length}`);
   const items = await mapConcurrent(selected, args.concurrency, (item, index) =>
     auditOne(item, index, selected.length, args.refresh),

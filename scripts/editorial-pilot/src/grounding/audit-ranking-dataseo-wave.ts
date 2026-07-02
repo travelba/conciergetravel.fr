@@ -67,6 +67,8 @@ interface Args {
   readonly candidateLimit: number;
   readonly concurrency: number;
   readonly refresh: boolean;
+  readonly exactSlugs: boolean;
+  readonly slugs: readonly string[];
 }
 
 interface RankingQuality {
@@ -131,11 +133,20 @@ function parseArgs(): Args {
     const parsed = Number.parseInt(raw, 10);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
   };
+  const slugsRaw = argv.find((a) => a.startsWith('--slugs='))?.slice('--slugs='.length);
   return {
     limit: readNumber('limit', DEFAULT_LIMIT),
     candidateLimit: readNumber('candidates', DEFAULT_CANDIDATES),
     concurrency: readNumber('concurrency', DEFAULT_CONCURRENCY),
     refresh: argv.includes('--refresh'),
+    exactSlugs: argv.includes('--exact-slugs'),
+    slugs:
+      slugsRaw === undefined
+        ? []
+        : slugsRaw
+            .split(',')
+            .map((slug) => slug.trim())
+            .filter((slug) => slug.length > 0),
   };
 }
 
@@ -296,13 +307,14 @@ function buildChanges(
   ) {
     remove.push('Retirer angle prix/promo incompatible avec positionnement luxe.');
   }
-  if (modify.length === 0 && create.length === 0 && remove.length === 0) {
-    modify.push('Classement stable : garder en observation.');
-  }
   return { modify, create, remove };
 }
 
-async function fetchRankings(url: string, key: string, limit: number): Promise<RankingRow[]> {
+async function fetchRankings(
+  url: string,
+  key: string,
+  options: { readonly limit: number; readonly slugs: readonly string[] },
+): Promise<RankingRow[]> {
   const columns = [
     'id',
     'slug',
@@ -332,7 +344,11 @@ async function fetchRankings(url: string, key: string, limit: number): Promise<R
   endpoint.searchParams.set('select', columns);
   endpoint.searchParams.set('is_published', 'eq.true');
   endpoint.searchParams.set('order', 'updated_at.desc.nullslast,slug.asc');
-  endpoint.searchParams.set('limit', String(limit));
+  if (options.slugs.length > 0) {
+    const encoded = options.slugs.map((slug) => `"${slug.replace(/"/gu, '')}"`).join(',');
+    endpoint.searchParams.set('slug', `in.(${encoded})`);
+  }
+  endpoint.searchParams.set('limit', String(Math.max(options.limit, options.slugs.length)));
   const res = await fetch(endpoint, {
     headers: {
       apikey: key,
@@ -503,9 +519,15 @@ async function main(): Promise<void> {
   const rows = await fetchRankings(
     env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/u, ''),
     env.SUPABASE_SERVICE_ROLE_KEY,
-    args.candidateLimit,
+    {
+      limit: args.exactSlugs && args.slugs.length > 0 ? args.slugs.length : args.candidateLimit,
+      slugs: args.slugs,
+    },
   );
-  const selected = selectRankings(rows, args.limit);
+  const selected = selectRankings(
+    rows,
+    args.exactSlugs && args.slugs.length > 0 ? rows.length : args.limit,
+  );
   console.log(`[audit-ranking-dataseo] selected=${selected.length} candidates=${rows.length}`);
   const items = await mapConcurrent(selected, args.concurrency, (item, index) =>
     auditOne(item, index, selected.length, args.refresh),

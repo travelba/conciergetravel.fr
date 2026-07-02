@@ -235,6 +235,7 @@
     "dataseo:audit:smoke": "tsx src/grounding/run-dataseo-actions-audit.ts --smoke",
     "dataseo:audit:hotels": "tsx src/grounding/run-dataseo-actions-audit.ts --scope=hotels",
     "dataseo:audit:rankings": "tsx src/grounding/run-dataseo-actions-audit.ts --scope=rankings",
+    "dataseo:p0:hotels": "tsx src/hotels/patch-dataseo-p0-hotels.ts",
     "serp:track": "tsx src/grounding/track-serp-positions.ts",
     "serp:track:no-overview": "tsx src/grounding/track-serp-positions.ts --no-overview",
     "typecheck": "tsc --noEmit",

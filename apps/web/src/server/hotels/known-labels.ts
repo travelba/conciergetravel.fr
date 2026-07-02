@@ -115,9 +115,9 @@ export const KNOWN_LABELS: readonly KnownLabel[] = [
     kind: 'label',
     label: 'Palace — distinction Atout France',
     descriptorFr:
-      'distinction ministérielle française créée en 2010 par Atout France — 31 Palaces actuellement, classification au-dessus des 5★ basée sur architecture, service et histoire',
+      'distinction ministérielle française créée en 2010 par Atout France — 33 Palaces (Collection 2026), classification au-dessus des 5★ basée sur architecture, service et histoire',
     descriptorEn:
-      'French ministerial distinction created in 2010 by Atout France — 31 current Palaces, classification above 5★ based on architecture, service and history',
+      'French ministerial distinction created in 2010 by Atout France — 33 Palaces (2026 Collection), classification above 5★ based on architecture, service and history',
     issuerFr: 'Atout France (ministère délégué chargé du Tourisme)',
     issuerEn: 'Atout France (French Ministry for Tourism)',
     officialUrl: 'https://www.atout-france.fr',
