@@ -388,7 +388,15 @@ desktop+mobile obligatoire, la home est la vitrine.
 > `scripts/editorial-pilot/src/hotels/patch-dataseo-p0-hotels.ts` — le
 > lire, le finaliser, ne pas repartir de zéro.
 
-## WP-C1 — Claims Palace : vérité Atout France juin 2026
+## WP-C1 — Claims Palace : vérité Atout France juin 2026 — ✅ FAIT 2026-07-02
+
+> Statut : DONE (commit `b79f0c8f`). 18 fiches dé-tierées
+> (`palace_atout_france` → vraie affiliation), affiliations strippées,
+> claims textuels réécrits (23 rows) via `patch-dataseo-p0-hotels.ts`
+> (masking du nom commercial + sweep mots doublés — skill
+> `llm-output-robustness` Rule 21). Statique : `/categorie/palaces-paris`
+> (13 exacts Collection 2026), `/categorie/palaces-france` (33, révision
+> 3 ans), `known-labels.ts`. Rollback : `runs/dataseo-p0-hotels-patch-apply-*.json`.
 
 **Priorité** : P0 · **Effort** : 1 j
 
@@ -425,7 +433,18 @@ sont Palaces.** Révision tous les **3 ans** (pas 5).
 `claims` vide ; walk `/en/categorie/palaces-paris` (liste = 13 exacts) ;
 snapshot rollback conservé dans `scripts/editorial-pilot/runs/`.
 
-## WP-C2 — Meta titles cassés + FAQ langue mélangée + PAA bruitées
+## WP-C2 — Meta titles cassés + FAQ langue mélangée + PAA bruitées — ✅ FAIT 2026-07-02
+
+> Statut : DONE. Meta : 0 hors bande / 0 pipe sur les 25 slugs (déjà
+> réglé par C1). FAQ langue : 27 `question_fr` IT/EN retraduites à la
+> main (déterministe, `FAQ_QUESTION_FR_FIX` dans
+> `patch-dataseo-p0-hotels.ts`) sur `faq_content` + `faq_content_kit`
+> (bulgari-roma, jumeirah×2, taj-lake-palace). PAA bruitées : 9 items
+> supprimés (owner/CEO/kiss/married/fortunes — gate canonique
+> `isEditoriallyRelevantPaa` + `EXTRA_QUESTION_NOISE`) + 2 PAA hors-sujet
+> droppées (réponse auto-déclarée non pertinente). Re-scan 4 surfaces ×
+> 25 slugs = lang 0 / noise 0 ; FAQ ≥ 13 partout ; prod walké
+> (bulgari-roma, jumeirah-mina-a-salam, taj-lake-palace fr+en).
 
 **Priorité** : P0 · **Effort** : 1 j · **Après C1** (mêmes rows).
 

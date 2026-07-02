@@ -24,6 +24,7 @@ import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
 import { hasLeak, splitSentences } from '../enrichment/scaffolding-gate';
+import { isEditoriallyRelevantPaa } from './faq-perplexity-gates';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -384,8 +385,13 @@ function stripPalaceAffiliation(value: unknown): { value: unknown; removed: numb
   return { value: kept, removed: value.length - kept.length };
 }
 
-// ─── WP-C2 — noisy PAA removal (unchanged) ───────────────────────────────────
+// ─── WP-C2 — noisy PAA removal ───────────────────────────────────────────────
 
+/**
+ * Whole-item sweep for celebrity names that may live in the ANSWER text.
+ * Question-level noise is delegated to the canonical `isEditoriallyRelevantPaa`
+ * gate (faq-perplexity-gates.ts) so the patcher and the audit agree.
+ */
 const NOISE_PATTERNS = [
   /\bnet worth\b/iu,
   /\bfortune\b/iu,
@@ -404,7 +410,46 @@ const NOISE_PATTERNS = [
   /\bqui poss[eè]de\b/iu,
 ];
 
+/**
+ * Question-shape noise the canonical gate does not cover yet (playbook WP-C2
+ * families: célébrités, fortunes, salaires, recrutement + etiquette trivia).
+ * Observed live on the wave-1 fiches (2026-07-02 scan).
+ */
+const EXTRA_QUESTION_NOISE: readonly RegExp[] = [
+  // Public-affection etiquette trivia ("Can I kiss my girlfriend in Dubai?")
+  /\bcan i kiss\b/iu,
+  /\bkiss(?:ing)?\b[^?]*\b(?:girlfriend|boyfriend|partner)\b/iu,
+  // Celebrity weddings ("Who got married in Taj Lake Palace?")
+  /\bwho got married\b/iu,
+  /\bqui s[’']est mari[ée]/iu,
+  // Wealth-class gossip the canonical gate misses (plural / FR genitive)
+  /\bgrandes? fortunes?\b/iu,
+  // Ownership trivia — canonical gate covers "(proprietaire|owner) (de|of)"
+  // but not the FR contracted genitive nor Italian.
+  /\bpropri[ée]taire (?:du|des)\b/iu,
+  /\bproprietario (?:del|della|di)\b/iu,
+  // Corporate-leadership trivia
+  /\bwho is the ceo\b/iu,
+  /\bqui est le (?:pdg|ceo)\b/iu,
+];
+
+function questionTexts(value: unknown): string[] {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return [];
+  const record = value as Record<string, unknown>;
+  return ['question_fr', 'question_en', 'question', 'q']
+    .map((key) => record[key])
+    .filter((q): q is string => typeof q === 'string' && q.length > 0);
+}
+
 function isNoisyPublicItem(value: unknown): boolean {
+  const questions = questionTexts(value);
+  if (
+    questions.some(
+      (q) => !isEditoriallyRelevantPaa(q) || EXTRA_QUESTION_NOISE.some((re) => re.test(q)),
+    )
+  ) {
+    return true;
+  }
   const text = textOf(value);
   return NOISE_PATTERNS.some((pattern) => pattern.test(text));
 }
@@ -413,6 +458,146 @@ function filterNoisyArray(value: unknown): { readonly value: unknown; readonly r
   if (!Array.isArray(value)) return { value, removed: 0 };
   const filtered = value.filter((item) => !isNoisyPublicItem(item));
   return { value: filtered, removed: value.length - filtered.length };
+}
+
+// ─── WP-C2 — FAQ wrong-locale question fix (deterministic, no LLM) ───────────
+
+/**
+ * The FAQ promote pipeline occasionally copied the raw PAA (EN/IT) into
+ * `question_fr` while the answers were correctly written in both locales.
+ * Playbook WP-C2 §3 mandates a deterministic patch — these are hand-authored
+ * FR questions for the exact rows flagged `faq_language_leak` by the audit.
+ * Keyed by current `question_fr` value; applied across all 4 JSON surfaces
+ * (kit included, so a future promote does not reintroduce the leak).
+ */
+interface FaqQuestionFix {
+  readonly fr?: string;
+  readonly en?: string;
+}
+
+/** `null` = drop the whole item (off-topic PAA whose answer self-declares irrelevance). */
+const FAQ_QUESTION_FR_FIX: Readonly<
+  Record<string, Readonly<Record<string, FaqQuestionFix | null>>>
+> = {
+  'bulgari-roma': {
+    'Dove si trova Bulgari a Roma?': { fr: 'Où se trouve le Bulgari à Rome ?' },
+    'Quanto costa una cena al Bulgari Hotel Roma?': {
+      fr: 'Combien coûte un dîner au Bulgari Hotel Roma ?',
+    },
+    'Dove si trova il ristorante Bulgari a Roma?': {
+      fr: 'Où se trouve le restaurant du Bulgari à Rome ?',
+    },
+    'Quanto costa un aperitivo al Bulgari Hotel Roma?': {
+      fr: 'Combien coûte un apéritif au Bulgari Hotel Roma ?',
+    },
+    'Quanto costa una notte al Bulgari Hotel Roma?': {
+      fr: 'Combien coûte une nuit au Bulgari Hotel Roma ?',
+    },
+    'Quanto costa fare colazione da Bulgari a Roma?': {
+      fr: 'Combien coûte le petit-déjeuner au Bulgari à Rome ?',
+    },
+    'Dove si trova Bulgari in Italia?': { fr: 'Où se trouve le Bulgari en Italie ?' },
+  },
+  'jumeirah-dar-al-masyaf': {
+    'What is Jumeirah Dar Al Masyaf known for?': {
+      fr: 'Qu’est-ce qui fait la réputation du Jumeirah Dar Al Masyaf ?',
+    },
+    'How many rooms are there in Jumeirah Dar al Masyaf?': {
+      fr: 'Combien de chambres compte le Jumeirah Dar Al Masyaf ?',
+    },
+    'What is the only 7 star hotel in Dubai?': {
+      fr: 'Quel est le seul hôtel « 7 étoiles » de Dubaï ?',
+    },
+    // Answer self-declares "cette information n'est pas liée à Jumeirah Dar Al Masyaf".
+    'Which is the largest hotel in Dubai?': null,
+    'What is the dress code at Dar Al Masyaf?': {
+      fr: 'Quel est le code vestimentaire au Dar Al Masyaf ?',
+    },
+    'How many stars are there in Jumeirah Dar al Masyaf?': {
+      fr: 'Combien d’étoiles possède le Jumeirah Dar Al Masyaf ?',
+    },
+    'Can I wear jeans to Grand Mosque?': { fr: 'Peut-on visiter la Grande Mosquée en jean ?' },
+  },
+  'jumeirah-mina-a-salam': {
+    'Where is Jumeirah Mina a salam?': { fr: 'Où se situe le Jumeirah Mina A’Salam ?' },
+    'How many rooms does Mina a Salam have?': {
+      fr: 'Combien de chambres compte le Mina A’Salam ?',
+    },
+    'What is the Jumeirah Mina a Salam about?': {
+      fr: 'Qu’est-ce qui distingue le Jumeirah Mina A’Salam ?',
+    },
+    'What does mina al salam mean?': { fr: 'Que signifie « Mina A’Salam » ?' },
+    'What is the only 7 star hotel in Dubai?': {
+      fr: 'Quel est le seul hôtel « 7 étoiles » de Dubaï ?',
+    },
+    'When did Mina Al Salam open?': { fr: 'Quand le Mina A’Salam a-t-il ouvert ?' },
+  },
+  'taj-lake-palace': {
+    'Is it worth staying in Taj Lake Palace, Udaipur?': {
+      fr: 'Un séjour au Taj Lake Palace d’Udaipur vaut-il la peine ?',
+    },
+    'Is Taj Lake Palace 7 star?': { fr: 'Le Taj Lake Palace est-il un hôtel « 7 étoiles » ?' },
+    'What is the cost of Taj Lake Palace?': { fr: 'Quels sont les tarifs du Taj Lake Palace ?' },
+    'What is the cost of dinner at Taj Lake Palace, Udaipur?': {
+      fr: 'Combien coûte un dîner au Taj Lake Palace ?',
+    },
+    'Which is better Taj Lake Palace or Leela palace?': {
+      fr: 'Que choisir entre le Taj Lake Palace et le Leela Palace ?',
+    },
+    // Nonsense scraped PAA with a non-answer ("no official ranking exists").
+    'Which is the no. 1 strongest hotel in the world?': null,
+    'Can visitors go inside the Taj Lake Palace in Udaipur?': {
+      fr: 'Peut-on visiter le Taj Lake Palace sans y séjourner ?',
+    },
+    // Question was about the Taj Mahal monument; the answer is about the hotel's
+    // dinner dress code — realign BOTH locales on the answer.
+    'Can I wear jeans to the Taj Mahal?': {
+      fr: 'Peut-on porter un jean pour dîner au Taj Lake Palace ?',
+      en: 'Can I wear jeans for dinner at Taj Lake Palace?',
+    },
+    'How much does it cost for one dinner at Taj Udaipur?': {
+      fr: 'Quel budget prévoir pour dîner au Taj Lake Palace ?',
+    },
+  },
+};
+
+function fixFaqQuestionLocale(
+  slug: string,
+  value: unknown,
+): { readonly value: unknown; readonly fixed: number; readonly dropped: number } {
+  const fixes = FAQ_QUESTION_FR_FIX[slug];
+  if (fixes === undefined || !Array.isArray(value)) return { value, fixed: 0, dropped: 0 };
+  let fixed = 0;
+  let dropped = 0;
+  const next: unknown[] = [];
+  for (const item of value) {
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+      next.push(item);
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    const current = record.question_fr;
+    if (typeof current !== 'string') {
+      next.push(item);
+      continue;
+    }
+    const fix = fixes[current.trim()];
+    if (fix === undefined) {
+      next.push(item);
+      continue;
+    }
+    if (fix === null) {
+      dropped += 1;
+      continue;
+    }
+    fixed += 1;
+    next.push({
+      ...record,
+      ...(fix.fr === undefined ? {} : { question_fr: fix.fr }),
+      ...(fix.en === undefined ? {} : { question_en: fix.en }),
+    });
+  }
+  return { value: next, fixed, dropped };
 }
 
 // ─── plan builder ────────────────────────────────────────────────────────────
@@ -489,10 +674,14 @@ function buildPlan(row: HotelRow): PatchPlan {
   for (const field of jsonFields) {
     const current = row[field];
     if (current === null) continue;
-    const filtered = filterNoisyArray(current);
-    let nextValue = filtered.value;
     const reasons: string[] = [];
+    // Noise removal runs FIRST — a removed item must not consume a locale fix.
+    const filtered = filterNoisyArray(current);
     if (filtered.removed > 0) reasons.push(`remove_noisy_items:${filtered.removed}`);
+    const localeFixed = fixFaqQuestionLocale(row.slug, filtered.value);
+    let nextValue = localeFixed.value;
+    if (localeFixed.fixed > 0) reasons.push(`fix_question_fr_locale:${localeFixed.fixed}`);
+    if (localeFixed.dropped > 0) reasons.push(`drop_offtopic_items:${localeFixed.dropped}`);
 
     if (!isOfficialPalace) {
       const rewritten = rewriteJsonClaims(row, nextValue);
