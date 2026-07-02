@@ -49,6 +49,15 @@ function siteOrigin(): string {
 const GROUP_CARD_CAP = 6;
 
 /**
+ * Only the top-N countries by inventory get rich card sections; the
+ * long tail (100+ countries) renders as a compact anchor row (heading
+ * + count + annuaire link, no cards). The `#country-<code>` anchor is
+ * preserved for EVERY country — the mega-menu and `/destination`
+ * deep-link to them (`/hotels#country-it`, …).
+ */
+const FEATURED_COUNTRY_SECTIONS = 15;
+
+/**
  * Cap on the `ItemList` JSON-LD entries. Google's carousel rich result
  * reads the first handful of items; 2 219 URLs added ~500 KB of inert
  * JSON to every response. The list keeps `numberOfItems` implicit via
@@ -560,8 +569,38 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
             <p className="text-muted mt-2 text-sm">{t.count(foreign.length)}</p>
           </header>
 
-          {countriesOrdered.map((g) => {
+          {countriesOrdered.map((g, countryIndex) => {
             const anchor = `country-${g.code.toLowerCase()}`;
+            const directorySlug = countrySlugByCode.get(g.code);
+            // Long-tail countries: compact anchor row instead of a card
+            // grid — the anchor target stays (mega-menu deep-links) and
+            // the annuaire link carries the exhaustive list.
+            if (countryIndex >= FEATURED_COUNTRY_SECTIONS) {
+              return (
+                <section
+                  key={g.code}
+                  id={anchor}
+                  aria-labelledby={`${anchor}-title`}
+                  className="border-border mb-4 flex scroll-mt-24 flex-wrap items-baseline justify-between gap-3 border-b pb-4"
+                >
+                  <h3 id={`${anchor}-title`} className="text-fg font-serif text-lg">
+                    {g.label}
+                    <span className="text-muted ml-2 text-sm font-normal">
+                      {t.count(g.hotels.length)}
+                    </span>
+                  </h3>
+                  {directorySlug !== undefined ? (
+                    <Link
+                      href={{ pathname: '/hotels/[pays]', params: { pays: directorySlug } }}
+                      prefetch={false}
+                      className="whitespace-nowrap text-xs font-medium text-amber-700 underline-offset-2 hover:underline"
+                    >
+                      {t.seeDirectory} →
+                    </Link>
+                  ) : null}
+                </section>
+              );
+            }
             return (
               <section
                 key={g.code}
@@ -574,18 +613,15 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                     {g.label}
                   </h3>
                   <span className="flex items-baseline gap-3">
-                    {(() => {
-                      const slug = countrySlugByCode.get(g.code);
-                      return slug !== undefined ? (
-                        <Link
-                          href={{ pathname: '/hotels/[pays]', params: { pays: slug } }}
-                          prefetch={false}
-                          className="whitespace-nowrap text-xs font-medium text-amber-700 underline-offset-2 hover:underline"
-                        >
-                          {t.seeDirectory} →
-                        </Link>
-                      ) : null;
-                    })()}
+                    {directorySlug !== undefined ? (
+                      <Link
+                        href={{ pathname: '/hotels/[pays]', params: { pays: directorySlug } }}
+                        prefetch={false}
+                        className="whitespace-nowrap text-xs font-medium text-amber-700 underline-offset-2 hover:underline"
+                      >
+                        {t.seeDirectory} →
+                      </Link>
+                    ) : null}
                     <span className="text-muted text-sm">{t.count(g.hotels.length)}</span>
                   </span>
                 </header>
@@ -622,20 +658,17 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                     );
                   })}
                 </ul>
-                {(() => {
-                  const slug = countrySlugByCode.get(g.code);
-                  return g.hotels.length > GROUP_CARD_CAP && slug !== undefined ? (
-                    <p className="mt-4">
-                      <Link
-                        href={{ pathname: '/hotels/[pays]', params: { pays: slug } }}
-                        prefetch={false}
-                        className="text-sm font-medium text-amber-700 underline-offset-2 hover:underline"
-                      >
-                        {t.seeAllInDirectory(g.hotels.length)} →
-                      </Link>
-                    </p>
-                  ) : null;
-                })()}
+                {g.hotels.length > GROUP_CARD_CAP && directorySlug !== undefined ? (
+                  <p className="mt-4">
+                    <Link
+                      href={{ pathname: '/hotels/[pays]', params: { pays: directorySlug } }}
+                      prefetch={false}
+                      className="text-sm font-medium text-amber-700 underline-offset-2 hover:underline"
+                    >
+                      {t.seeAllInDirectory(g.hotels.length)} →
+                    </Link>
+                  </p>
+                ) : null}
               </section>
             );
           })}
