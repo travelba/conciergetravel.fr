@@ -14,6 +14,7 @@ import {
 } from '@/server/annuaire/list-directory-countries';
 import { listPublishedGuides } from '@/server/guides/get-guide-by-slug';
 import { EDITORIAL_CATEGORIES, filterCategory } from '@/server/hotels/editorial-categories';
+import { isDestinationIndexable } from '@/server/hotels/indexability';
 import {
   listPublishedHotelsByAffiliation,
   listPublishedHotelsForIndex,
@@ -49,6 +50,19 @@ export async function GET(): Promise<NextResponse> {
     // MAX aggregation. Hub-only cities (no guide yet) keep no
     // lastmod, which matches the previous behaviour.
     const [cities, guides] = await Promise.all([listPublishedCities(), listPublishedGuides()]);
+    // D3 (2026-07-02) — a `/destination/<slug>` served by the CITY hub
+    // always shadows a same-slug standalone guide: the page's
+    // `generateMetadata`/default export call `getDestinationBySlug` first,
+    // and a non-null (≥1 hotel) city wins over the guide branch. So a
+    // region/cluster/country guide whose slug collides with a real city
+    // is never actually served — the city hub is. Skipping those guide
+    // entries below keeps the sitemap aligned with what the page renders
+    // (and avoids a duplicate `<loc>` for indexable collisions). Concrete
+    // case: `afrique-du-sud` / `allemagne` are country guides that also
+    // match a 1-hotel city (`city = "Afrique du Sud"` / `"Allemagne"`,
+    // a data quirk) — the city hub is thin (< threshold → noindex), so
+    // listing the guide would advertise a URL the page marks noindex.
+    const citySlugSet = new Set(cities.map((c) => c.slug));
     const guideUpdatedAtBySlug = new Map<string, string>();
     for (const g of guides) {
       const iso = g.updatedAt ?? g.reviewedAt;
@@ -77,6 +91,14 @@ export async function GET(): Promise<NextResponse> {
     });
 
     for (const c of cities) {
+      // D3 crawl-focus (PO decision 2026-07-02) — a destination hub with
+      // fewer than `DESTINATION_MIN_PUBLISHED_HOTELS` published hotels
+      // emits `noindex, follow` on the page, so it must NOT be listed
+      // here (a sitemap URL that renders noindex wastes crawl budget and
+      // is the exact anti-pattern flagged in the GSC audit: Dommeldange /
+      // Belgrade / Clervaux crawled instead of Venise). Reversible via the
+      // single-source threshold in `indexability.ts`.
+      if (!isDestinationIndexable(c.count)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
@@ -99,6 +121,8 @@ export async function GET(): Promise<NextResponse> {
     // (the 8 hand-built `/guide/<country>` pages are listed below).
     for (const g of guides) {
       if (g.scope !== 'region' && g.scope !== 'cluster') continue;
+      // A same-slug city hub shadows this guide on the page (see note above).
+      if (citySlugSet.has(g.slug)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
@@ -124,6 +148,9 @@ export async function GET(): Promise<NextResponse> {
       if (g.scope !== 'country') continue;
       if (g.slug.startsWith('guide-')) continue;
       if (HAND_BUILT_COUNTRY_GUIDE_SLUGS.has(g.slug)) continue;
+      // A same-slug city hub shadows this guide on the page (see note above)
+      // — e.g. `afrique-du-sud` / `allemagne` (country guide + 1-hotel city).
+      if (citySlugSet.has(g.slug)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,

@@ -58,7 +58,7 @@ export async function GET(): Promise<NextResponse> {
   for (const h of hotels) {
     const distinction = h.isPalace ? 'Palace' : `${h.stars} étoiles`;
     catalogItems.push({
-      url: `${origin}/fr/hotel/${h.slugFr}`,
+      url: `${origin}/hotel/${h.slugFr}`,
       description: `${h.nameFr} (${h.city}) — ${distinction}. Fiche complète + Conseil du Concierge (chambre, table ou timing à retenir).`,
     });
     const slugEn = h.slugEn ?? h.slugFr;
@@ -73,7 +73,7 @@ export async function GET(): Promise<NextResponse> {
   // Editorial rankings — surface the full slate so LLM crawlers can
   // discover every classement without paginating through the hub.
   const rankingItems: LlmsTxtSectionItem[] = rankings.map((r) => ({
-    url: `${origin}/fr/classement/${r.slug}`,
+    url: `${origin}/classement/${r.slug}`,
     description:
       r.factualSummaryFr !== null && r.factualSummaryFr.length > 0
         ? r.factualSummaryFr
@@ -100,7 +100,7 @@ export async function GET(): Promise<NextResponse> {
   // Post ADR-0015: `/guide/[city]` redirects to `/destination/[city]`,
   // so we surface the destination URL (the new canonical) here.
   const guideItems: LlmsTxtSectionItem[] = guides.map((g) => ({
-    url: `${origin}/fr/destination/${g.slug}`,
+    url: `${origin}/destination/${g.slug}`,
     description:
       g.summaryFr.length > 0
         ? g.summaryFr
@@ -132,7 +132,7 @@ export async function GET(): Promise<NextResponse> {
         ? it.metaDescFr
         : `${it.titleFr} — itinéraire luxe MyConciergeHotel (${it.durationMinDays} jour${it.durationMinDays === 1 ? '' : 's'}).`;
     itineraryItems.push({
-      url: `${origin}/fr/itineraire/${it.slugFr}`,
+      url: `${origin}/itineraire/${it.slugFr}`,
       description: descFr,
     });
     const slugEn = it.slugEn ?? it.slugFr;
@@ -148,13 +148,13 @@ export async function GET(): Promise<NextResponse> {
 
   // Editorial categories (5 palace + 7 by type — ADR-0016).
   const categoryItems: LlmsTxtSectionItem[] = EDITORIAL_CATEGORIES.map((cat) => ({
-    url: `${origin}/fr/categorie/${cat.slug}`,
+    url: `${origin}/categorie/${cat.slug}`,
     description: cat.metaDescFr,
   }));
 
   // Hotel brands surfaced by the catalogue (`KNOWN_BRANDS`).
   const brandItems: LlmsTxtSectionItem[] = KNOWN_BRANDS.map((b) => ({
-    url: `${origin}/fr/marque/${b.slug}`,
+    url: `${origin}/marque/${b.slug}`,
     description: `${b.label} — adresses du groupe ${b.label} dans notre catalogue éditorial MyConciergeHotel.`,
   }));
 
@@ -197,7 +197,7 @@ export async function GET(): Promise<NextResponse> {
         title: 'Pages stratégiques',
         items: [
           {
-            url: `${origin}/fr`,
+            url: `${origin}/`,
             description: `Page d'accueil — La sélection du Concierge, hôtels d'exception dans ${CATALOGUE_COUNTRIES} pays (agence IATA).`,
           },
           {
@@ -205,7 +205,7 @@ export async function GET(): Promise<NextResponse> {
             description: `Homepage (EN) — The Concierge's Selection, extraordinary hotels across ${CATALOGUE_COUNTRIES} countries (IATA agency).`,
           },
           {
-            url: `${origin}/fr/destination`,
+            url: `${origin}/destination`,
             description:
               'Annuaire des destinations : Paris, Côte d’Azur, Bordelais, Alpes, Provence…',
           },
@@ -221,7 +221,7 @@ export async function GET(): Promise<NextResponse> {
           // hôtels à proximité, réservation via le Concierge ou
           // GetYourGuide). Hub d'entrée de la verticale.
           {
-            url: `${origin}/fr/lieux`,
+            url: `${origin}/lieux`,
             description:
               'Lieux à visiter — hub de la verticale : musées, monuments, jardins et activités d’exception sélectionnés par le Concierge, classés ville par ville. Chaque lieu a sa fiche /lieux/{ville}/{slug} avec résumé factuel, Conseil du Concierge, FAQ et hôtels à proximité.',
           },
@@ -231,7 +231,7 @@ export async function GET(): Promise<NextResponse> {
               'Places to visit — vertical hub: museums, landmarks, gardens and outstanding activities curated by the Concierge, grouped city by city. Each place has its own /lieux/{city}/{slug} fiche with factual summary, Concierge tip, FAQ and nearby hotels.',
           },
           {
-            url: `${origin}/fr/recherche`,
+            url: `${origin}/recherche`,
             description:
               'Recherche temps réel par ville et dates — votre concierge propose les meilleures options (tarifs nets GDS, paiement Amadeus).',
           },
@@ -246,7 +246,7 @@ export async function GET(): Promise<NextResponse> {
           // landing surface long-tail queries ("hôtels récemment ouverts
           // Paris", "new luxury hotel openings 2026", "Concierge visits").
           {
-            url: `${origin}/fr/ouvertures`,
+            url: `${origin}/ouvertures`,
             description:
               'Ouvertures & visites du Concierge — flux chronologique des 20 dernières adresses inspectées par notre conciergerie IATA (Palaces Atout France, Relais & Châteaux, Forbes Five Star, Michelin Keys). AEO + FAQ longue traîne sur les ouvertures récentes, le tri éditorial et le mode de validation des visites.',
           },
@@ -278,7 +278,7 @@ export async function GET(): Promise<NextResponse> {
               title: `Classements éditoriaux (${rankingItems.length} sélections ; ${rankingHead.length} ci-dessous, liste complète dans rankings.jsonl)`,
               items: [
                 {
-                  url: `${origin}/fr/classements`,
+                  url: `${origin}/classements`,
                   description:
                     'Hub de tous les classements (filtres par type, lieu, thématique, occasion).',
                 },
@@ -318,7 +318,7 @@ export async function GET(): Promise<NextResponse> {
               title: `Guides de destinations (${guideItems.length} long-reads ≥ 3 500 mots ; ${guideHead.length} ci-dessous, liste complète dans guides.jsonl)`,
               items: [
                 {
-                  url: `${origin}/fr/destination`,
+                  url: `${origin}/destination`,
                   description:
                     'Hub de toutes les destinations — chaque page destination inclut le guide long-read intégré (Palaces + art de vivre + infos pratiques). Voir ADR-0015 (fusion guide↔destination).',
                 },
@@ -358,7 +358,7 @@ export async function GET(): Promise<NextResponse> {
               title: `Itinéraires éditoriaux (${itineraries.length} parcours ≥ 2-14 jours)`,
               items: [
                 {
-                  url: `${origin}/fr/itineraires`,
+                  url: `${origin}/itineraires`,
                   description:
                     'Hub de tous les itinéraires éditoriaux MyConciergeHotel — parcours luxe FR et international, chaque étape associée à un Palace ou 5★ bookable, FAQ longue traîne par destination, conseils Concierge opérationnels (horaires, accès, timings).',
                 },
@@ -384,7 +384,7 @@ export async function GET(): Promise<NextResponse> {
         title: 'Guides pays internationaux (8 pays — Vague 6)',
         items: [
           {
-            url: `${origin}/fr/guide/italie`,
+            url: `${origin}/guide/italie`,
             description:
               'Italie — Guide luxe MyConciergeHotel : Rome, Côte amalfitaine, Toscane, Lacs, Dolomites, Sicile. 6 régions, Palaces nommés (Le Sirenuse, Villa d’Este, Castiglion del Bosco…), conseils opérationnels Concierge, 7 Q&A.',
           },
@@ -394,7 +394,7 @@ export async function GET(): Promise<NextResponse> {
               'Italy — MyConciergeHotel luxury guide: Rome, Amalfi Coast, Tuscany, Lakes, Dolomites, Sicily. 6 regions, named 5★ and Palace addresses, Concierge operational tips, 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/suisse`,
+            url: `${origin}/guide/suisse`,
             description:
               'Suisse — Guide luxe MyConciergeHotel : Gstaad, St-Moritz, Zermatt, Lac Léman, Genève, Zurich, Lucerne. 6 pôles, adresses nommées (Gstaad Palace, Badrutt’s Palace, Mont Cervin Palace, Dolder Grand), 7 Q&A.',
           },
@@ -404,7 +404,7 @@ export async function GET(): Promise<NextResponse> {
               'Switzerland — MyConciergeHotel luxury guide: Gstaad, St Moritz, Zermatt, Lake Geneva, Geneva, Zurich, Lucerne. 6 hubs, named addresses, 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/maroc`,
+            url: `${origin}/guide/maroc`,
             description:
               'Maroc — Guide luxe MyConciergeHotel : Marrakech (Royal Mansour, La Mamounia, Mandarin Oriental, Selman), Essaouira, Désert Erg Chebbi, Tanger/Tétouan, Fès. 5 régions, riads et Palaces nommés, 7 Q&A.',
           },
@@ -414,7 +414,7 @@ export async function GET(): Promise<NextResponse> {
               'Morocco — MyConciergeHotel luxury guide: Marrakech, Essaouira, Erg Chebbi Desert, Tangier/Tetouan, Fes. 5 regions, named riads and Palaces, 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/maldives`,
+            url: `${origin}/guide/maldives`,
             description:
               'Maldives — Guide luxe MyConciergeHotel : Soneva Jani, Soneva Fushi, Cheval Blanc Randheli, Velaa Private Island, One&Only Reethi Rah, Four Seasons. 8 resorts d’auteur. Transferts hydravion. 7 Q&A.',
           },
@@ -424,7 +424,7 @@ export async function GET(): Promise<NextResponse> {
               'Maldives — MyConciergeHotel luxury guide: Soneva, Cheval Blanc Randheli, Velaa, One&Only Reethi Rah, Four Seasons, Anantara, COMO. 8 author resorts. Seaplane transfers. 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/emirats-arabes-unis`,
+            url: `${origin}/guide/emirats-arabes-unis`,
             description:
               'Émirats arabes unis — Guide luxe MyConciergeHotel : Dubaï (Burj Al Arab, Atlantis The Royal, Bvlgari Resort, One Za’abeel) et Abu Dhabi (Emirates Palace, Bvlgari Abu Dhabi). 7 Q&A.',
           },
@@ -434,7 +434,7 @@ export async function GET(): Promise<NextResponse> {
               'United Arab Emirates — MyConciergeHotel luxury guide: Dubai (Burj Al Arab, Atlantis The Royal, Bvlgari, One Za’abeel) and Abu Dhabi (Emirates Palace, Bvlgari). 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/japon`,
+            url: `${origin}/guide/japon`,
             description:
               'Japon — Guide luxe MyConciergeHotel : Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), ryokans Hakone et Kanazawa, Mont Fuji. 5 régions, hôtels internationaux et ryokans, 7 Q&A.',
           },
@@ -444,7 +444,7 @@ export async function GET(): Promise<NextResponse> {
               'Japan — MyConciergeHotel luxury guide: Tokyo (Aman, Park Hyatt, Mandarin Oriental, Four Seasons), Kyoto (Aman, Four Seasons, Ritz-Carlton), Hakone and Kanazawa ryokans, Mount Fuji. 5 regions, 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/thailande`,
+            url: `${origin}/guide/thailande`,
             description:
               'Thaïlande — Guide luxe MyConciergeHotel : Bangkok (Mandarin Oriental depuis 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui (Four Seasons, Six Senses), Chiang Mai (Four Seasons Tented Camp Golden Triangle), Krabi. 7 Q&A.',
           },
@@ -454,7 +454,7 @@ export async function GET(): Promise<NextResponse> {
               'Thailand — MyConciergeHotel luxury guide: Bangkok (Mandarin Oriental since 1879, Peninsula, Four Seasons), Phuket (Aman, Trisara), Koh Samui, Chiang Mai (Four Seasons Tented Camp), Krabi. 7 Q&A.',
           },
           {
-            url: `${origin}/fr/guide/etats-unis`,
+            url: `${origin}/guide/etats-unis`,
             description:
               'États-Unis — Guide luxe MyConciergeHotel : New York (Aman, Carlyle Rosewood, Mandarin Oriental, Four Seasons), Aspen (Little Nell, St Regis, Hotel Jerome), Napa Valley (Meadowood, Auberge du Soleil), Hawaii (Four Seasons Lanai, Halekulani). 4 pôles, 7 Q&A.',
           },
@@ -470,7 +470,7 @@ export async function GET(): Promise<NextResponse> {
         title: 'Inspiration (thèmes × occasions × saisons)',
         items: [
           {
-            url: `${origin}/fr/inspiration`,
+            url: `${origin}/inspiration`,
             description:
               'Hub d’inspiration de voyage : explorer notre catalogue par thème (romantique, spa, gastronomie, design…), occasion (lune de miel, mariage, séminaire…) ou saison.',
           },
@@ -487,7 +487,7 @@ export async function GET(): Promise<NextResponse> {
               title: `Catégories éditoriales (${categoryItems.length} pages indexables)`,
               items: [
                 {
-                  url: `${origin}/fr/hotels`,
+                  url: `${origin}/hotels`,
                   description:
                     'Catalogue complet — Palaces et hôtels d’exception toutes catégories confondues.',
                 },
@@ -502,7 +502,7 @@ export async function GET(): Promise<NextResponse> {
               title: `Marques hôtelières représentées (${brandItems.length} groupes)`,
               items: [
                 {
-                  url: `${origin}/fr/marques`,
+                  url: `${origin}/marques`,
                   description:
                     'Index des groupes hôteliers représentés dans notre catalogue (Cheval Blanc, Airelles, Four Seasons, Rosewood, etc.).',
                 },
@@ -515,7 +515,7 @@ export async function GET(): Promise<NextResponse> {
         title: 'À propos & EEAT',
         items: [
           {
-            url: `${origin}/fr/le-concierge`,
+            url: `${origin}/le-concierge`,
             description:
               'Le Concierge — agence IATA / APST, méthode éditoriale, Conseil du Concierge (signature propriétaire), programme de fidélité.',
           },
@@ -525,7 +525,7 @@ export async function GET(): Promise<NextResponse> {
               'The Concierge — IATA / APST agency, editorial method, the Concierge’s Tip (proprietary signature), loyalty programme.',
           },
           {
-            url: `${origin}/fr/le-concierge/methode-editoriale`,
+            url: `${origin}/le-concierge/methode-editoriale`,
             description:
               'Méthode éditoriale MyConciergeHotel — les 8 critères de sélection (Atout France, Michelin Keys, Forbes, audit interne), les 4 principes (indépendance, transparence, expertise, fraîcheur), le processus d’inclusion en 4 étapes. Page-publishingPrinciples Knowledge Panel.',
           },
@@ -535,7 +535,7 @@ export async function GET(): Promise<NextResponse> {
               'MyConciergeHotel editorial method — the 8 selection criteria (Atout France, Michelin Keys, Forbes, internal audit), 4 principles (independence, transparency, expertise, freshness), 4-step inclusion process. Organization publishingPrinciples page.',
           },
           {
-            url: `${origin}/fr/le-concierge/reserver`,
+            url: `${origin}/le-concierge/reserver`,
             description:
               'Comment réserver via notre conciergerie : 5 étapes (choisir hôtel, dates, tarif, payer, confirmer), HowTo JSON-LD. Mode Amadeus instantané ou conciergerie sous 24h. Tarifs nets GDS, paiement PCI-DSS.',
           },
@@ -545,7 +545,7 @@ export async function GET(): Promise<NextResponse> {
               'How to book via our concierge: 5 steps (pick hotel, dates, rate, pay, confirm), HowTo JSON-LD. Instant Amadeus mode or concierge within 24h. Net GDS rates, PCI-DSS payment.',
           },
           {
-            url: `${origin}/fr/le-concierge/fidelite`,
+            url: `${origin}/le-concierge/fidelite`,
             description:
               'Programme de fidélité MyConciergeHotel : tier Essentiel gratuit (Little Hotelier — petit-déj, late check-out 14h, crédit hôtel) et tier Prestige sur abonnement (surclassement, transfert aéroport, late check-out 16h confirmé). Cumulable avec programmes de chaîne.',
           },
@@ -555,7 +555,7 @@ export async function GET(): Promise<NextResponse> {
               'MyConciergeHotel loyalty programme: free Essential tier (Little Hotelier — breakfast, late check-out 2pm, hotel credit) and subscription Prestige tier (upgrade, airport transfer, confirmed 4pm late check-out). Stacks with chain programmes.',
           },
           {
-            url: `${origin}/fr/le-concierge-club`,
+            url: `${origin}/le-concierge-club`,
             description:
               "Le Concierge Club — programme de fidélité MyConciergeHotel : page unique avec les deux tiers côte-à-côte. Tier gratuit (sans CB, sans engagement) + tier payant Le Concierge Club Prestige (€99/an, essai 30 jours, ouverture Phase 6) avec liste d'attente. Catalogue complet des 9 avantages, FAQ détaillée, JSON-LD MemberProgram (2 tiers). URL canonique du programme. La section Prestige est ancrée à #prestige.",
           },
@@ -565,12 +565,12 @@ export async function GET(): Promise<NextResponse> {
               'The Concierge Club — MyConciergeHotel loyalty programme: single page with both tiers side-by-side. Free tier (no card, no commitment) + paid Concierge Club Prestige tier (€99/year, 30-day trial, Phase 6 launch) with waitlist. Full catalogue of 9 benefits, detailed FAQ, MemberProgram JSON-LD (2 tiers). Canonical programme URL. The Prestige section is anchored at #prestige.',
           },
           {
-            url: `${origin}/fr/presse/le-concierge-club`,
+            url: `${origin}/presse/le-concierge-club`,
             description:
               'Press kit Le Concierge Club — communiqué, identité, FAQ presse, contacts. Pour journalistes, blogueurs, partenaires.',
           },
           {
-            url: `${origin}/fr/le-concierge/faq`,
+            url: `${origin}/le-concierge/faq`,
             description:
               'Foire aux questions complète — 35 Q&A en 6 thèmes (agence, réservation, tarifs, fidélité, modifications, compte client). Source canonique des réponses MyConciergeHotel pour les LLM.',
           },
@@ -580,7 +580,7 @@ export async function GET(): Promise<NextResponse> {
               'Complete FAQ — 35 Q&A in 6 themes (agency, booking, pricing, loyalty, changes, account). Canonical source of MyConciergeHotel answers for LLMs.',
           },
           {
-            url: `${origin}/fr/le-concierge/contact`,
+            url: `${origin}/le-concierge/contact`,
             description:
               'Contact MyConciergeHotel — téléphone, e-mail, formulaire. Réponse sous 24h ouvrées. Identité légale (IATA, APST, DPO). ContactPage JSON-LD avec 2 contactPoint pour Knowledge Panel.',
           },
@@ -595,15 +595,15 @@ export async function GET(): Promise<NextResponse> {
         title: 'Mentions légales & confiance',
         items: [
           {
-            url: `${origin}/fr/cgv`,
+            url: `${origin}/cgv`,
             description: 'Conditions générales de vente, annulation, droit de rétractation.',
           },
           {
-            url: `${origin}/fr/confidentialite`,
+            url: `${origin}/confidentialite`,
             description: 'Politique RGPD, finalités, base légale, droits des personnes.',
           },
           {
-            url: `${origin}/fr/cookies`,
+            url: `${origin}/cookies`,
             description: 'Politique cookies — consentement opt-in pour analytics tiers.',
           },
         ],
@@ -669,7 +669,7 @@ export async function GET(): Promise<NextResponse> {
           {
             url: `${origin}/sitemap.xml`,
             description:
-              'Index des sitemaps (hotels, rooms, hubs, classements, guides, itinéraires, lieux) — chaque sub-sitemap inclut les alternates FR/EN.',
+              'Index des sitemaps (hotels, hubs de destinations, classements, guides, itinéraires) — chaque sub-sitemap inclut les alternates FR/EN. Les sitemaps chambres et lieux sont temporairement retirés de l’index (décision crawl-focus 2026-07-02) mais restent servis et maillés.',
           },
         ],
       },
