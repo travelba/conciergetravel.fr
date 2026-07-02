@@ -16,9 +16,9 @@
  * It deliberately does not regenerate prose, EEAT, photos or factual summaries.
  * Every run writes a JSON report + full row backup under runs/ (rollback).
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
@@ -128,11 +128,16 @@ const HotelRowSchema = z.object({
   geo_qa: z.unknown().nullable(),
 });
 
-type HotelRow = z.infer<typeof HotelRowSchema>;
+export type HotelRow = z.infer<typeof HotelRowSchema>;
 
 interface Args {
   readonly apply: boolean;
   readonly slugs: readonly string[];
+  /** When set, load candidate slugs from a palace-claims-inventory JSON. */
+  readonly inventory: string | null;
+  /** Slice the resolved slug list — supports 20-30/lot cadence. */
+  readonly offset: number;
+  readonly limit: number | null;
 }
 
 interface FieldChange {
@@ -150,17 +155,75 @@ interface PatchPlan {
 
 function parseArgs(): Args {
   const argv = process.argv.slice(2);
-  const slugsRaw = argv.find((arg) => arg.startsWith('--slugs='))?.slice('--slugs='.length);
+  const readString = (name: string): string | undefined =>
+    argv.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+  const slugsRaw = readString('slugs');
+  const inventoryRaw = argv.includes('--inventory') ? (readString('inventory') ?? 'latest') : null;
+  const offsetRaw = readString('offset');
+  const limitRaw = readString('limit');
+  const offset = offsetRaw === undefined ? 0 : Math.max(0, Number.parseInt(offsetRaw, 10) || 0);
+  const limitParsed = limitRaw === undefined ? null : Number.parseInt(limitRaw, 10);
   return {
     apply: argv.includes('--apply'),
     slugs:
       slugsRaw === undefined
-        ? DEFAULT_SLUGS
+        ? []
         : slugsRaw
             .split(',')
             .map((slug) => slug.trim())
             .filter((slug) => slug.length > 0),
+    inventory: inventoryRaw,
+    offset,
+    limit:
+      limitParsed !== null && Number.isFinite(limitParsed) && limitParsed > 0 ? limitParsed : null,
   };
+}
+
+const InventorySchema = z.object({
+  findings: z.array(
+    z.object({
+      slug: z.string(),
+      official: z.boolean().optional(),
+      isPalaceFlag: z.boolean().nullable().optional(),
+    }),
+  ),
+});
+
+/** Resolve the inventory file path (explicit path, or latest in runs/). */
+async function resolveInventoryPath(spec: string): Promise<string> {
+  if (spec !== 'latest') return resolve(process.cwd(), spec);
+  const entries = (await readdir(RUNS_DIR))
+    .filter((f) => /^palace-claims-inventory-.*\.json$/u.test(f))
+    .sort();
+  const latest = entries.at(-1);
+  if (latest === undefined) {
+    throw new Error(
+      `[patch-dataseo-p0-hotels] no palace-claims-inventory-*.json found in ${RUNS_DIR}`,
+    );
+  }
+  return resolve(RUNS_DIR, latest);
+}
+
+/** Load non-official-Palace finding slugs from the inventory (dedup, ordered). */
+async function loadInventorySlugs(spec: string): Promise<readonly string[]> {
+  const path = await resolveInventoryPath(spec);
+  const parsed = InventorySchema.parse(JSON.parse(await readFile(path, 'utf8')));
+  const seen = new Set<string>();
+  const slugs: string[] = [];
+  for (const f of parsed.findings) {
+    if (f.official === true || f.isPalaceFlag === true) continue;
+    if (seen.has(f.slug)) continue;
+    seen.add(f.slug);
+    slugs.push(f.slug);
+  }
+  console.log(`[patch-dataseo-p0-hotels] inventory=${path} findings_slugs=${slugs.length}`);
+  return slugs;
+}
+
+function chunk<T>(items: readonly T[], size: number): readonly (readonly T[])[] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
 }
 
 function textOf(value: unknown): string {
@@ -216,6 +279,27 @@ const MASK = '\u0000NAME\u0000';
  * descriptor downgrades.
  */
 const CLAIM_REWRITES: readonly (readonly [RegExp, string])[] = [
+  // FR/EN — false "Palace par/selon Atout France" self-claims on non-official
+  // fiches. Atout France awards BOTH the star rating and the ministerial
+  // "Palace" distinction, but only to French establishments listed in the
+  // Collection (33 hotels). A non-listed hotel claiming the label is false.
+  // These MUST run before the generic `classé palace` strip below, otherwise
+  // "classé Palace" is removed first and orphans " par Atout France,".
+  // The comma-appositive strips preserve the surrounding sentence; the
+  // standalone-sentence strips drop the whole false statement.
+  [/,\s*class[ée]e?s? palace par atout france\s*,/giu, ''],
+  [/,\s*classified as a palace by atout france\s*,/giu, ''],
+  [/,\s*(?:reconnu|distingu[ée])e?s? palace par atout france\s*,/giu, ''],
+  [
+    /\b(?:le|son) (?:classement|statut|label) palace (?:par|selon|d['’])\s*atout france[^.!?]*[.!?]\s*/giu,
+    '',
+  ],
+  [
+    /\b(?:its|the) palace (?:classification|status|distinction|ranking) (?:by|according to|from)\s*atout france[^.!?]*[.!?]\s*/giu,
+    '',
+  ],
+  [/,?\s*class[ée]e?s? palace par atout france\b/giu, ''],
+  [/,?\s*classified as a palace by atout france\b/giu, ''],
   // FR — claim-fragment strips (keep the true 5-star part of the sentence)
   [/\s*et (?:le|la|l['’])\s*distingue Palace\b/giu, ''],
   [/\s*et (?:l['’]|la |le )?inscrit parmi les Palaces\b/giu, ''],
@@ -294,7 +378,7 @@ interface ClaimRewrite {
  * an Atout France classification is dropped entirely (Atout France only
  * classifies French establishments).
  */
-function rewritePalaceClaims(row: HotelRow, raw: string): ClaimRewrite {
+export function rewritePalaceClaims(row: HotelRow, raw: string): ClaimRewrite {
   const reasons = new Set<string>();
   const base = [row.name, row.name.replace(/^(?:Le |La |L['’]|The |El )/u, '')];
   // Apostrophe-less variant covers loose FAQ phrasings ("Prince Palace hotel"
@@ -322,19 +406,38 @@ function rewritePalaceClaims(row: HotelRow, raw: string): ClaimRewrite {
     }
   }
 
-  // Safety net: a non-French hotel cannot carry ANY Atout France claim.
-  // Sentence-drop runs per paragraph so `\n\n` breaks survive.
-  if (row.country_code !== null && row.country_code !== 'FR' && /atout france/iu.test(text)) {
-    reasons.add('drop_atout_france_sentence_non_fr');
-    text = text
+  // Safety net for residual false Atout France claims (isOfficialPalace already
+  // short-circuits above, so every fiche reaching here is a non-Palace hotel).
+  //   - Non-French hotel → it holds NO Atout France classification whatsoever
+  //     (neither stars nor the Palace label) → drop every sentence mentioning
+  //     Atout France.
+  //   - French non-Palace hotel → "5 étoiles … Atout France" is a LEGIT star
+  //     reference, but a "Palace … Atout France" sentence is a false Palace
+  //     claim → drop only sentences that still pair "palace" with Atout France
+  //     (targeted strips above already handle the common appositive shapes).
+  // Sentence-drop runs per paragraph so `\n\n` breaks survive. An empty result
+  // is reverted — nuking a whole short field (a meta/factual) is worse than a
+  // residual claim flagged for manual review.
+  if (/atout france/iu.test(text)) {
+    const isNonFrench = row.country_code !== null && row.country_code !== 'FR';
+    const dropSentence = (s: string): boolean =>
+      /atout france/iu.test(s) && (isNonFrench || /\bpalaces?\b/iu.test(s));
+    const before = text;
+    const dropped = before
       .split(/\n{2,}/u)
       .map((paragraph) =>
         splitSentences(paragraph)
-          .filter((s) => !/atout france/iu.test(s))
+          .filter((s) => !dropSentence(s))
           .join(' '),
       )
       .filter((paragraph) => paragraph.length > 0)
       .join('\n\n');
+    if (dropped.trim().length > 0 && dropped !== before) {
+      reasons.add(
+        isNonFrench ? 'drop_atout_france_sentence_non_fr' : 'drop_palace_atout_france_sentence_fr',
+      );
+      text = dropped;
+    }
   }
 
   text = text.replace(new RegExp(`${MASK}(\\d+)${MASK}`, 'gu'), (_m, i: string) => {
@@ -762,6 +865,23 @@ async function fetchRows(url: string, key: string, slugs: readonly string[]): Pr
   return z.array(HotelRowSchema).parse(await res.json());
 }
 
+/**
+ * Fetch rows in slug chunks. Heavy JSON columns (faq_content, geo_qa,
+ * long descriptions) make a single `in.()` over hundreds of slugs time out
+ * (~500 is the documented ceiling). 50/chunk stays comfortably under it.
+ */
+async function fetchRowsChunked(
+  url: string,
+  key: string,
+  slugs: readonly string[],
+): Promise<HotelRow[]> {
+  const out: HotelRow[] = [];
+  for (const part of chunk(slugs, 50)) {
+    out.push(...(await fetchRows(url, key, part)));
+  }
+  return out;
+}
+
 async function patchRow(url: string, key: string, plan: PatchPlan): Promise<void> {
   const body: Record<string, unknown> = {};
   for (const change of plan.changes) {
@@ -803,11 +923,28 @@ async function verifyRow(url: string, key: string, plan: PatchPlan): Promise<boo
   return JSON.stringify(persisted) === JSON.stringify(probe.after);
 }
 
+async function resolveSlugs(args: Args): Promise<readonly string[]> {
+  let base: readonly string[];
+  if (args.inventory !== null) {
+    base = await loadInventorySlugs(args.inventory);
+  } else if (args.slugs.length > 0) {
+    base = args.slugs;
+  } else {
+    base = DEFAULT_SLUGS;
+  }
+  const end = args.limit === null ? undefined : args.offset + args.limit;
+  return base.slice(args.offset, end);
+}
+
 async function main(): Promise<void> {
   const args = parseArgs();
   const env = SupabaseEnvSchema.parse(process.env);
   const url = env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/u, '');
-  const rows = await fetchRows(url, env.SUPABASE_SERVICE_ROLE_KEY, args.slugs);
+  const slugs = await resolveSlugs(args);
+  console.log(
+    `[patch-dataseo-p0-hotels] resolved slugs=${slugs.length} (offset=${args.offset} limit=${args.limit ?? 'all'})`,
+  );
+  const rows = await fetchRowsChunked(url, env.SUPABASE_SERVICE_ROLE_KEY, slugs);
   const plans = rows.map(buildPlan);
   const generatedAt = new Date().toISOString();
   const stamp = generatedAt.replace(/[:.]/gu, '-');
@@ -822,7 +959,7 @@ async function main(): Promise<void> {
       {
         generatedAt,
         apply: args.apply,
-        requestedSlugs: args.slugs,
+        requestedSlugs: slugs,
         plans: plans.map((plan) => ({
           slug: plan.row.slug,
           changes: plan.changes,
@@ -873,7 +1010,13 @@ async function main(): Promise<void> {
   console.log(`[patch-dataseo-p0-hotels] applied=${changed.length} verified=${verified}`);
 }
 
-main().catch((err: unknown) => {
-  console.error('[patch-dataseo-p0-hotels] FATAL', err);
-  process.exit(1);
-});
+// Only auto-run as a CLI entry point — importing this module (unit tests)
+// must not trigger a DB round-trip.
+const isEntryPoint =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isEntryPoint) {
+  main().catch((err: unknown) => {
+    console.error('[patch-dataseo-p0-hotels] FATAL', err);
+    process.exit(1);
+  });
+}
