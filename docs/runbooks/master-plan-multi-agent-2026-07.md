@@ -13,14 +13,14 @@ comme colonne vertébrale) + `docs/audits/dataseo-action-plan-2026-06-29.md`
 
 ## 0. Diagnostic en 6 chiffres (preuves du 2026-07-02)
 
-| Fait                                       | Mesure                                        | Source                                          |
-| ------------------------------------------ | --------------------------------------------- | ----------------------------------------------- |
-| Mots-clés classés Google FR                | **1** (pos. 21-30, ~0,7 visite/mois)          | DataForSEO Labs live 02/07                      |
-| Idem yonder.fr                             | **14 727** kw, 616 en P1, ~418 k visites/mois | idem                                            |
-| Pages avec impressions GSC                 | **191 / 8 202 (2,3 %)**                       | `gsc-indexation-2026-06-29.md`                  |
-| Top 20 sur le panier de 12 requêtes cibles | **0 / 12**                                    | `serp-baseline-2026-06-24.md`                   |
-| Intros EN de classements réelles           | **68 / 863 (8 %)**                            | `rankings-enriched-content-audit-2026-06-29.md` |
-| Fiches conformes CDC photos (≥30, 10 cat.) | **~0,2 %**                                    | grand audit fiches 29/06                        |
+| Fait                                       | Mesure                                                            | Source                                  |
+| ------------------------------------------ | ----------------------------------------------------------------- | --------------------------------------- |
+| Mots-clés classés Google FR                | **1** (pos. 21-30, ~0,7 visite/mois)                              | DataForSEO Labs live 02/07              |
+| Idem yonder.fr                             | **14 727** kw, 616 en P1, ~418 k visites/mois                     | idem                                    |
+| Pages avec impressions GSC                 | **191 / 8 202 (2,3 %)**                                           | `gsc-indexation-2026-06-29.md`          |
+| Top 20 sur le panier de 12 requêtes cibles | **0 / 12**                                                        | `serp-baseline-2026-06-24.md`           |
+| Intros EN de classements réelles           | ~~68/863~~ **863/863 (backfill fin juin, vérifié DB 02/07 soir)** | vérification SQL live (amendement WS-D) |
+| Fiches conformes CDC photos (≥30, 10 cat.) | **~0,2 %**                                                        | grand audit fiches 29/06                |
 
 Ce que Google indexe en priorité aujourd'hui : `/destination/dommeldange`
 (1 hôtel), Belgrade, Clervaux, Holualoa — pendant que `le-meurice` est
@@ -42,18 +42,18 @@ yonder). Les 4 goulots, dans l'ordre : (1) autorité ≈ 0, (2) crawl gaspillé
 
 ## 1. Objectifs & KPIs (M+1 / M+3)
 
-| KPI                                                  | Baseline 02/07           | Cible M+1             | Cible M+3                        |
-| ---------------------------------------------------- | ------------------------ | --------------------- | -------------------------------- |
-| Mots-clés classés FR (DataForSEO Labs)               | 1                        | ≥ 50                  | ≥ 500                            |
-| Pages avec impressions GSC                           | 191 (2,3 %)              | > 800 (10 %)          | > 2 500 (30 %)                   |
-| Panier 12 requêtes cibles en top 20                  | 0/12                     | 0-1/12 (D4 reporté)   | 4-6/12 (si D4 rouvert début M+2) |
-| Backlinks référents (domaines)                       | ~0                       | 0-2 (D4 reporté)      | ≥ 15 (si D4 rouvert début M+2)   |
-| TTFB fiche hôtel (cache HIT)                         | 3-4,5 s (MISS permanent) | < 800 ms              | < 500 ms                         |
-| Intros EN classements réelles                        | 68/863                   | 100 % têtes (top 100) | 100 %                            |
-| Claims Palace non sourcés                            | > 0 en prod              | 0                     | 0                                |
-| Fiches top-100 marque à ≥ 20 photos / ≥ 6 catégories | ~0                       | 50                    | 100                              |
-| CTA réservation mort (bouton disabled)               | majorité catalogue       | **0**                 | 0                                |
-| Demandes concierge / mois (funnel email)             | non mesuré               | mesuré + baseline     | ×2 vs M+1                        |
+| KPI                                                  | Baseline 02/07           | Cible M+1           | Cible M+3                        |
+| ---------------------------------------------------- | ------------------------ | ------------------- | -------------------------------- |
+| Mots-clés classés FR (DataForSEO Labs)               | 1                        | ≥ 50                | ≥ 500                            |
+| Pages avec impressions GSC                           | 191 (2,3 %)              | > 800 (10 %)        | > 2 500 (30 %)                   |
+| Panier 12 requêtes cibles en top 20                  | 0/12                     | 0-1/12 (D4 reporté) | 4-6/12 (si D4 rouvert début M+2) |
+| Backlinks référents (domaines)                       | ~0                       | 0-2 (D4 reporté)    | ≥ 15 (si D4 rouvert début M+2)   |
+| TTFB fiche hôtel (cache HIT)                         | 3-4,5 s (MISS permanent) | < 800 ms            | < 500 ms                         |
+| Intros EN classements réelles                        | 863/863 (vérifié 02/07)  | QA native 30 têtes  | QA 100 %                         |
+| Claims Palace non sourcés                            | > 0 en prod              | 0                   | 0                                |
+| Fiches top-100 marque à ≥ 20 photos / ≥ 6 catégories | ~0                       | 50                  | 100                              |
+| CTA réservation mort (bouton disabled)               | majorité catalogue       | **0**               | 0                                |
+| Demandes concierge / mois (funnel email)             | non mesuré               | mesuré + baseline   | ×2 vs M+1                        |
 
 Mesure hebdomadaire obligatoire (WS-I) : le run `track-serp-positions.ts`
 
@@ -347,26 +347,33 @@ slugs de tes lots uniquement.
 
 ### WS-D — Parité EN + matrice lexicale luxe (J2-J21, 1-2 agents)
 
+> **AMENDEMENT 2026-07-02 22:55 (vérification DB post-baseline W27)** :
+> la parité EN des classements a été **comblée fin juin** (backfill
+> 23-29/06 non répercuté dans les audits) : 0 intro EN < 500 chars,
+> 817/863 ≥ 2 000 chars, 7 579/7 579 justifications EN ≥ 200 chars,
+> échantillons de qualité native. **D1 rétrécit à une passe de contrôle
+> qualité + i18n (~1-2 j)** ; le gros du WS bascule sur D2 (matrice
+> lexicale + orphelins), qui devient la mission principale.
+
 **Pourquoi** : l'EN fait déjà plus d'impressions que le FR avec un CTR de
-0,18 % — 795/863 intros EN sont des stubs d'une phrase. Et le volume est
-sur « hôtel de luxe {ville} » / « luxury hotels {city} » (10-30× le
-phrasé « meilleurs hôtels »), sous-couvert.
+0,18 %. Et le volume est sur « hôtel de luxe {ville} » / « luxury hotels
+{city} » (10-30× le phrasé « meilleurs hôtels »), sous-couvert.
 
 **Sous-missions (séquencées, un seul agent écrit dans editorial_rankings
 à la fois)** :
 
-**D1 — EN natif sur les classements têtes (J2-J10)**
+**D1 (réduit) — contrôle qualité EN + i18n (J2-J4)**
 
-1. i18n des chaînes hardcodées des pages classements d'abord
+1. i18n des chaînes hardcodées des pages classements
    (déterministe : `classement/[slug]` L544/743, `classements` L369,
    `[axe]/[valeur]` L355).
-2. Prioriser les **100 classements têtes** par volume DataForSEO
-   (Londres, Rome, Dubaï, NYC, Venise, Paris + villes yonder) :
-   `intro_en` réelle (LLM EN natif voix Concierge, PAS de traduction
-   littérale), puis justifications EN (274 stubs), puis sections EN
-   (272 rows), par lots de 50, chunké 4 sections/call (leçon 7th wave),
-   gate `hasLeak()` + `dfs_paa_coverage` logué.
-3. Ensuite le reste du corpus (695 restants) en tâche de fond.
+2. Audit qualité sur échantillon (30 classements têtes) : l'intro EN
+   est-elle native (pas de calque FR, pas de leak, terminologie
+   correcte) ? Ne régénérer QUE les échecs détectés, par lots de 20,
+   gate `hasLeak()` + `dfs_paa_coverage`.
+3. Question slug EN (`/en/classement/meilleurs-hotels-rome` garde le
+   slug FR) : instruire une reco chiffrée (volume « best hotels rome »
+   vs coût redirects) pour décision PO — ne rien migrer sans décision.
 
 **D2 — Matrice lexicale luxe (J8-J21)**
 
