@@ -125,6 +125,31 @@ profiled with a warm data cache — if warm TTFB doesn't drop, the cost is CPU,
 and the levers above apply. `scripts/perf/ttfb-probe.mjs` separates TTFB from
 download time for exactly this diagnosis.
 
+### `unstable_cache` write failures are SILENT — verify every new cache
+
+Case study (2026-07-02, same session): the catalogue scan in
+`server/destinations/cities.ts` was wrapped in `unstable_cache` with
+descriptions capped to shrink the payload… and the warm TTFB did not move
+(home / hub / destination stuck at 2.5-5 s). The entry serialised to
+**3.07 MB > the 2 MB per-entry Data Cache limit**: every write failed, the
+function result was still returned, and the only signal was a server-log
+line — `Failed to set Next.js data cache …, items over 2MB can not be
+cached`. Nothing throws, nothing surfaces in the response.
+
+Fix pattern: **shard the cache key** so each entry stays under 2 MB — here,
+one `unstable_cache` entry per 1000-row page (`unstable_cache` folds the
+`page` argument into the key), reassembled by a thin uncached loop. Result:
+home 2 550 ms → 114 ms, `/destination/paris` → 113 ms.
+
+Mandatory verification for ANY new `unstable_cache` around a catalogue-scale
+payload:
+
+1. Hit the route twice and check the server log for the `items over 2MB`
+   warning (local `next start` enforces the same limit as Vercel).
+2. Confirm the warm TTFB actually dropped (`scripts/perf/ttfb-probe.mjs`).
+3. Pair with the throw-on-error contract (raw fetch throws, outer wrapper
+   catches → `[]`) so a transient outage is never persisted for a full TTL.
+
 ## Anti-patterns to refuse
 
 - `<img>` without dimensions.

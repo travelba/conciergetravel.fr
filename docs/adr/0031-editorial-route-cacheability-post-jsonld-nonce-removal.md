@@ -165,11 +165,22 @@ Mechanics confirmed:
   work, not render work. The catalogue-wide Supabase scan behind
   `getDestinationBySlug` / `listPublishedCities` / the annuaire / the header
   nav (`server/destinations/cities.ts`) is now wrapped in
-  `unstable_cache(..., { revalidate: 3600, tags: ['hotels-catalogue'] })`, with
-  descriptions capped at 220 chars pre-cache so the entry stays under the 2 MB
-  Data Cache limit. Same pattern as the pre-existing `editorial-link-map`
-  cache. Remaining hot readers (guides, rankings entries, places) can adopt
-  the same wrapper incrementally — each is a pure additive change.
+  `unstable_cache(..., { revalidate: 3600, tags: ['hotels-catalogue'] })`.
+  ⚠ **Cached per 1000-row page, not as one catalogue entry**: the first
+  attempt cached the whole catalogue in a single entry (descriptions already
+  capped) and it serialised to **3.07 MB > the 2 MB Data Cache limit** — every
+  write failed with a log-only warning ("Failed to set Next.js data cache …,
+  items over 2MB can not be cached") and the full scan silently kept running
+  per-request (home/hub/destination stuck at 2.5-5 s warm). Splitting the
+  cache to one entry per page (~1.3 MB each, `page` folded into the key)
+  fixed it: home 2 550 ms → **114 ms**, `/destination` hub 5 700 ms →
+  **163 ms**, `/destination/paris` 5 000 ms → **113 ms** (local, warm).
+  The same wrapper was extended in the same session to
+  `listPublishedRankings` (7+ sequential round-trips incl. the entries count
+  scan — tag `rankings-catalogue`), `getGuideBySlug` + `listPublishedGuides`
+  (tag `editorial-guides`) and `listPublishedPlacesForCity` (tag
+  `places-catalogue`), each with the throw-on-error contract so a transient
+  outage is never persisted for a TTL window.
 - **Future path to HTML caching** (out of scope, requires its own ADR + β-gate
   security review): migrate `script-src` away from per-request nonces, e.g.
   Cache Components/PPR with build-time hashes once Next 16's story covers the
@@ -189,21 +200,35 @@ per page render instead of one per section), (2) lazy per-entry regex
 construction, (3) a lowercase `String.includes` pre-filter that skips the
 ~99 % of the corpus absent from a paragraph before any regex work.
 
-Measured after the fix (local `next start`, warm data cache):
+Measured after the full fix set — EnrichedText CPU + per-page catalogue cache
+
+- rankings/guides/places caches (local `next start`, warm data cache):
 
 | Route                                  | Before                         | After                |
 | -------------------------------------- | ------------------------------ | -------------------- |
-| `/destination/paris` (guide long-read) | 20 700-30 000 ms               | **3 200 ms**         |
+| `/` (home)                             | 2 752 ms (prod baseline)       | **114 ms**           |
+| `/destination` (hub)                   | 2 600-5 900 ms                 | **163 ms**           |
+| `/destination/paris` (guide long-read) | 20 700-30 000 ms               | **113 ms**           |
+| `/destination/biarritz` (guide-less)   | 4 000-5 500 ms                 | **97 ms**            |
 | `/classement/meilleurs-palaces-paris`  | 10 623 ms (prod baseline)      | **620 ms**           |
-| `/hotel/le-meurice`                    | 3 000-4 464 ms (prod baseline) | **1 250 ms**         |
-| `/lieux`                               | —                              | 30-70 ms             |
+| `/classements` (index)                 | —                              | 85-190 ms            |
+| `/hotel/le-meurice`                    | 3 000-4 464 ms (prod baseline) | **1 300 ms**         |
+| `/lieux` · `/lieux/paris`              | —                              | 30-105 ms            |
 | `/mentions-legales` (now dynamic)      | n/a (static, broken JS)        | 25-75 ms, JS working |
 
-Residual ~2.5-3 s on `/`, `/destination` (hub) and guide-less destinations is
-uncached single-query I/O from the local box to Supabase eu-west — expected to
-shrink on Vercel (same region) and addressable incrementally with the same
-`unstable_cache` pattern. `/hotels` TTFB is now 30 ms but the response body is
-**10.4 MB** (2 219 hotels inlined) — flagged to the front lane for pagination.
+Residual: the hotel fiche (~1.3 s warm) still runs its per-slug single-row
+fetches uncached (big payload rows — acceptable, and Vercel-region latency to
+Supabase eu-west is far lower than from the local box). `/hotels` TTFB is
+30 ms but the response body is **10.4 MB** (2 219 hotels inlined) — flagged
+to the front lane for pagination.
+
+**Hard-won lesson (capitalised in `performance-engineering`)**: an
+`unstable_cache` write failure is a _silent_ perf regression — the function
+result is still returned, the only signal is a server-log line
+`Failed to set Next.js data cache … items over 2MB can not be cached`. Any
+cache added around a catalogue-scale payload MUST be verified by (a) watching
+the server log on a warm hit and (b) measuring that the warm TTFB actually
+dropped. Size the entries (per-page/per-slug keys), not just the fields.
 
 ## Migration plan (the scoped spike — what was actually run)
 

@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 
 import { z } from 'zod';
@@ -279,12 +280,32 @@ export interface PublishedRankingCard {
   readonly updatedAt: string | null;
 }
 
-// `cache()`-wrapped (like `getRankingBySlug`/`getRankingEntries`): on
-// `/classements/[axe]/[valeur]` this full catalogue scan is invoked from
-// `generateMetadata` (axe resolution), the page body, and the related-axes
-// block — 2-3× per request on a `force-dynamic` route. Request-scoped
-// memoisation dedupes them to a single scan without touching the logic.
-export const listPublishedRankings = cache(_listPublishedRankings);
+// Two cache layers (ADR-0031 data-cache lever):
+//   1. `unstable_cache` (1 h TTL, tag `rankings-catalogue`) — the scan is
+//      7+ sequential PostgREST round-trips (1-N pages of rankings + a
+//      full `editorial_ranking_entries` count scan of ~6 pages). It backs
+//      the home strip, `/classements`, the axes hub, sitemaps and the
+//      agent corpus; per-render execution was the single biggest I/O cost
+//      on the home page. Publish hooks can `revalidateTag('rankings-catalogue')`.
+//   2. `cache()` (request-scoped) — `/classements/[axe]/[valeur]` invokes
+//      it from `generateMetadata`, the page body and the related-axes
+//      block; memoisation dedupes to one Data Cache lookup per request.
+const listPublishedRankingsCached = unstable_cache(_listPublishedRankings, ['published-rankings'], {
+  revalidate: 3600,
+  tags: ['rankings-catalogue'],
+});
+
+export const listPublishedRankings = cache(async (): Promise<readonly PublishedRankingCard[]> => {
+  try {
+    return await listPublishedRankingsCached();
+  } catch (e) {
+    console.error(
+      '[listPublishedRankings] cached read failed:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
+});
 
 // Supabase REST caps every `.select()` at `db_max_rows` (1 000 in our
 // project) when no `.range()` is supplied. The published-ranking
@@ -298,95 +319,89 @@ export const listPublishedRankings = cache(_listPublishedRankings);
 const RANKINGS_PAGE_SIZE = 1000;
 const RANKINGS_MAX_PAGES = 12;
 
+// Throws on any Supabase failure (instead of returning a partial or empty
+// catalogue) so `unstable_cache` never persists a truncated result for a
+// full TTL window — a transient outage must cost one failed request, not
+// one hour of missing rankings on the home / hubs / sitemaps. The cached
+// wrapper below converts the throw back into the graceful `[]` fallback.
 async function _listPublishedRankings(): Promise<readonly PublishedRankingCard[]> {
-  try {
-    const supabase = getSupabaseAdminClient();
-    const data: Array<Record<string, unknown>> = [];
-    for (let page = 0; page < RANKINGS_MAX_PAGES; page += 1) {
-      const from = page * RANKINGS_PAGE_SIZE;
-      const { data: pageData, error } = await supabase
-        .from('editorial_rankings')
-        .select(
-          'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
-        )
-        .eq('is_published', true)
-        .order('kind', { ascending: true })
-        .order('title_fr', { ascending: true })
-        .order('id', { ascending: true })
-        .range(from, from + RANKINGS_PAGE_SIZE - 1);
-      if (error !== null || !Array.isArray(pageData)) {
-        // Surface the failure but keep whatever pages already loaded —
-        // a partial index beats an empty hub on a transient error.
-        if (error !== null) {
-          console.error('[listPublishedRankings] page query failed:', {
-            page,
-            message: error.message,
-          });
-        }
-        break;
-      }
-      for (const row of pageData) data.push(row as Record<string, unknown>);
-      if (pageData.length < RANKINGS_PAGE_SIZE) break;
+  const supabase = getSupabaseAdminClient();
+  const data: Array<Record<string, unknown>> = [];
+  for (let page = 0; page < RANKINGS_MAX_PAGES; page += 1) {
+    const from = page * RANKINGS_PAGE_SIZE;
+    const { data: pageData, error } = await supabase
+      .from('editorial_rankings')
+      .select(
+        'id, slug, title_fr, title_en, kind, hero_image, factual_summary_fr, factual_summary_en, axes, updated_at',
+      )
+      .eq('is_published', true)
+      .order('kind', { ascending: true })
+      .order('title_fr', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + RANKINGS_PAGE_SIZE - 1);
+    if (error !== null || !Array.isArray(pageData)) {
+      console.error('[listPublishedRankings] page query failed:', {
+        page,
+        message: error?.message ?? 'non-array data',
+      });
+      throw new Error(`rankings page ${page} failed: ${error?.message ?? 'non-array data'}`);
     }
-    const counts = new Map<string, number>();
-    {
-      // Count entries per ranking by scanning the WHOLE entries table,
-      // not by filtering on the published ids. With ~688 published
-      // rankings, a `.in('ranking_id', ids)` filter builds a ~25 KB
-      // PostgREST URL that trips the server URL-length cap (414) — the
-      // request fails and, when the error is swallowed, every card shows
-      // "0 hôtels". The catalogue holds ~5.5k entries (6 pages of 1000),
-      // so a full scan is cheap and URL-safe. The `counts` map is only
-      // read for published ids (`counts.get(r.id) ?? 0`), so counting
-      // entries of non-published rankings is harmless (never rendered).
-      // Supabase REST caps each `.select()` at 1000 rows by default, so
-      // we paginate with `.range()` until a batch is shorter than the
-      // page size.
-      const PAGE_SIZE = 1000;
-      let from = 0;
-      // Hard ceiling so a runaway query can never hammer the DB —
-      // 20k entries = ~4× the current catalogue, well above any
-      // realistic 24-month growth.
-      const SAFETY_CEILING = 20000;
-      while (from < SAFETY_CEILING) {
-        const { data: entries, error: entriesErr } = await supabase
-          .from('editorial_ranking_entries')
-          .select('ranking_id')
-          .range(from, from + PAGE_SIZE - 1);
-        if (entriesErr !== null) {
-          // Surface the failure instead of silently under-counting to 0.
-          console.error('[listPublishedRankings] entry count query failed:', entriesErr.message);
-          break;
-        }
-        if (entries === null || entries.length === 0) break;
-        for (const e of entries) {
-          const k = e.ranking_id as string;
-          counts.set(k, (counts.get(k) ?? 0) + 1);
-        }
-        if (entries.length < PAGE_SIZE) break;
-        from += PAGE_SIZE;
-      }
-    }
-    return data.map((r) => {
-      const axesParsed = AxesSchema.safeParse(r['axes'] ?? {});
-      return {
-        slug: r['slug'] as string,
-        titleFr: r['title_fr'] as string,
-        titleEn: (r['title_en'] as string | null) ?? null,
-        kind: r['kind'] as 'best_of' | 'awarded' | 'thematic' | 'geographic',
-        entryCount: counts.get(r['id'] as string) ?? 0,
-        heroImage: (r['hero_image'] as string | null) ?? null,
-        factualSummaryFr: (r['factual_summary_fr'] as string | null) ?? null,
-        factualSummaryEn: (r['factual_summary_en'] as string | null) ?? null,
-        axes: axesParsed.success ? axesParsed.data : { types: [], themes: [], occasions: [] },
-        updatedAt: (r['updated_at'] as string | null) ?? null,
-      };
-    });
-  } catch (e) {
-    console.error(
-      '[listPublishedRankings] failed:',
-      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
-    );
-    return [];
+    for (const row of pageData) data.push(row as Record<string, unknown>);
+    if (pageData.length < RANKINGS_PAGE_SIZE) break;
   }
+  const counts = new Map<string, number>();
+  {
+    // Count entries per ranking by scanning the WHOLE entries table,
+    // not by filtering on the published ids. With ~688 published
+    // rankings, a `.in('ranking_id', ids)` filter builds a ~25 KB
+    // PostgREST URL that trips the server URL-length cap (414) — the
+    // request fails and, when the error is swallowed, every card shows
+    // "0 hôtels". The catalogue holds ~5.5k entries (6 pages of 1000),
+    // so a full scan is cheap and URL-safe. The `counts` map is only
+    // read for published ids (`counts.get(r.id) ?? 0`), so counting
+    // entries of non-published rankings is harmless (never rendered).
+    // Supabase REST caps each `.select()` at 1000 rows by default, so
+    // we paginate with `.range()` until a batch is shorter than the
+    // page size.
+    const PAGE_SIZE = 1000;
+    let from = 0;
+    // Hard ceiling so a runaway query can never hammer the DB —
+    // 20k entries = ~4× the current catalogue, well above any
+    // realistic 24-month growth.
+    const SAFETY_CEILING = 20000;
+    while (from < SAFETY_CEILING) {
+      const { data: entries, error: entriesErr } = await supabase
+        .from('editorial_ranking_entries')
+        .select('ranking_id')
+        .range(from, from + PAGE_SIZE - 1);
+      if (entriesErr !== null) {
+        // Throw instead of silently under-counting to 0 — a cached
+        // "0 hôtels" on every card for an hour is worse than one miss.
+        console.error('[listPublishedRankings] entry count query failed:', entriesErr.message);
+        throw new Error(`entry count scan failed: ${entriesErr.message}`);
+      }
+      if (entries === null || entries.length === 0) break;
+      for (const e of entries) {
+        const k = e.ranking_id as string;
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+      if (entries.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+  }
+  return data.map((r) => {
+    const axesParsed = AxesSchema.safeParse(r['axes'] ?? {});
+    return {
+      slug: r['slug'] as string,
+      titleFr: r['title_fr'] as string,
+      titleEn: (r['title_en'] as string | null) ?? null,
+      kind: r['kind'] as 'best_of' | 'awarded' | 'thematic' | 'geographic',
+      entryCount: counts.get(r['id'] as string) ?? 0,
+      heroImage: (r['hero_image'] as string | null) ?? null,
+      factualSummaryFr: (r['factual_summary_fr'] as string | null) ?? null,
+      factualSummaryEn: (r['factual_summary_en'] as string | null) ?? null,
+      axes: axesParsed.success ? axesParsed.data : { types: [], themes: [], occasions: [] },
+      updatedAt: (r['updated_at'] as string | null) ?? null,
+    };
+  });
 }

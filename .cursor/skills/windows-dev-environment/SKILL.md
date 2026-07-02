@@ -718,6 +718,32 @@ Rules:
   spot-check row), never trust the script's own success counter. A 200/204 from
   PostgREST means "request valid", not "rows changed".
 
+## Rule 14 — Browser walk-throughs without Chrome: Playwright CLI screenshot fallback
+
+The playwright MCP (`browser_navigate` & co) requires the **Chrome stable
+channel** at `C:\Users\…\Google\Chrome\Application\chrome.exe`. On this box
+Chrome is not installed and `npx playwright install chrome` **fails without
+admin rights** ("insufficient privileges"). Past sessions fell back to
+curl-only walks, losing all visual evidence.
+
+The working fallback (verified 2026-07-02, no admin needed):
+
+```powershell
+npx --yes playwright@latest install chromium   # user-space download, works
+npx --yes playwright@latest screenshot --browser=chromium `
+  --viewport-size="1440,900" --wait-for-timeout=8000 `
+  "https://myconciergehotel.com/" "$env:TEMP\shot-desktop.png"
+# mobile: --viewport-size="390,844" (do NOT combine --device with --viewport-size — they conflict)
+```
+
+- Gives real desktop + mobile screenshots for the user-acceptance rule
+  even though the MCP is unusable.
+- Limitations: no clicks/DOM interaction (use curl + regex on the SSR HTML
+  for link/JSON-LD assertions, screenshots for visual proof).
+- `npx playwright install chromium` (bare, without `--yes playwright@latest`)
+  fails with "playwright n'est pas reconnu" — the package must be fetched
+  by npx first.
+
 ## Anti-patterns
 
 - ❌ Trusting a service-role REST write counter without a verification read — the publishable key mislabeled as `SUPABASE_SERVICE_ROLE_KEY` in `apps/web/.env.local` makes RLS silently no-op every write at HTTP 200.

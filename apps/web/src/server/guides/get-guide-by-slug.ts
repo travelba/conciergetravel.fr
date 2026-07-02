@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
+
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -160,12 +162,13 @@ const GUIDE_COLUMNS =
   'tables, glossary, external_sources, editorial_callouts, toc_anchors';
 
 /**
- * Fetches a single published destination guide by slug. Returns `null`
- * if the row is missing, unpublished or fails schema validation —
- * never throws (the caller renders `notFound()` instead).
+ * Uncached single-row fetch behind {@link getGuideBySlug}. Throws on a
+ * Supabase transport/query error so `unstable_cache` never persists a
+ * spurious `null` (which would 404 a live guide for a full TTL window).
+ * A genuinely missing/unpublished row returns `null` — that IS worth
+ * caching (stable notFound).
  */
-export async function getGuideBySlug(slug: string): Promise<GuideRow | null> {
-  if (typeof slug !== 'string' || slug.length === 0) return null;
+async function _getGuideBySlugRaw(slug: string): Promise<GuideRow | null> {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('editorial_guides')
@@ -173,7 +176,8 @@ export async function getGuideBySlug(slug: string): Promise<GuideRow | null> {
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle();
-  if (error !== null || data === null) return null;
+  if (error !== null) throw new Error(`guide "${slug}" query failed: ${error.message}`);
+  if (data === null) return null;
   const parsed = GuideRowSchema.safeParse(data);
   if (!parsed.success) {
     console.warn(
@@ -184,6 +188,36 @@ export async function getGuideBySlug(slug: string): Promise<GuideRow | null> {
     return null;
   }
   return parsed.data;
+}
+
+// Data Cache layer (ADR-0031): a guide row is the heaviest single-row
+// payload of the site (12-14 sections + FAQ + tables + glossary, hundreds
+// of KB over the wire from PostgREST) and `/destination/[citySlug]`
+// re-fetches it on every render of a force-dynamic route. Per-slug key
+// (unstable_cache folds args into the key), 1 h TTL, invalidated with
+// `revalidateTag('editorial-guides')` (same tag as the country-guide
+// slugs cache in list-destination-countries.ts).
+const getGuideBySlugCached = unstable_cache(_getGuideBySlugRaw, ['guide-by-slug'], {
+  revalidate: 3600,
+  tags: ['editorial-guides'],
+});
+
+/**
+ * Fetches a single published destination guide by slug. Returns `null`
+ * if the row is missing, unpublished or fails schema validation —
+ * never throws (the caller renders `notFound()` instead).
+ */
+export async function getGuideBySlug(slug: string): Promise<GuideRow | null> {
+  if (typeof slug !== 'string' || slug.length === 0) return null;
+  try {
+    return await getGuideBySlugCached(slug);
+  } catch (e) {
+    console.error(
+      '[get-guide-by-slug] cached read failed:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return null;
+  }
 }
 
 /** Lightweight summary card for index pages. */
@@ -205,7 +239,9 @@ export interface PublishedGuideCard {
   readonly updatedAt: string | null;
 }
 
-export async function listPublishedGuides(): Promise<readonly PublishedGuideCard[]> {
+// Throws on error so `unstable_cache` never persists an empty guide index
+// for a full TTL window (same contract as the other cached catalogues).
+async function _listPublishedGuidesRaw(): Promise<readonly PublishedGuideCard[]> {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('editorial_guides')
@@ -214,7 +250,8 @@ export async function listPublishedGuides(): Promise<readonly PublishedGuideCard
     )
     .eq('is_published', true)
     .order('name_fr', { ascending: true });
-  if (error !== null || data === null) return [];
+  if (error !== null) throw new Error(`guides index query failed: ${error.message}`);
+  if (data === null) return [];
   const rowSchema = z.object({
     slug: z.string(),
     name_fr: z.string(),
@@ -244,4 +281,25 @@ export async function listPublishedGuides(): Promise<readonly PublishedGuideCard
     }
   }
   return cards;
+}
+
+// 99-row summary index behind `/destination` (hub), the sitemaps and the
+// region-guide sections — one PostgREST query per render before this
+// cache. 1 h TTL, shares the `editorial-guides` tag with the per-slug
+// cache above so a publish hook invalidates both at once.
+const listPublishedGuidesCached = unstable_cache(_listPublishedGuidesRaw, ['published-guides'], {
+  revalidate: 3600,
+  tags: ['editorial-guides'],
+});
+
+export async function listPublishedGuides(): Promise<readonly PublishedGuideCard[]> {
+  try {
+    return await listPublishedGuidesCached();
+  } catch (e) {
+    console.error(
+      '[get-guide-by-slug] listPublishedGuides cached read failed:',
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    );
+    return [];
+  }
 }

@@ -68,34 +68,55 @@ const MAX_PAGES = 12;
  * ever cross it. Ordering is stable (priority asc, name asc) so the
  * in-memory pagination never skips or duplicates a row across pages.
  */
+async function _listPublishedPlacesForCityRaw(
+  citySlug: string,
+  bucket?: 'visit' | 'do',
+): Promise<readonly PlaceListItem[]> {
+  const supabase = getSupabaseAdminClient();
+  const out: PlaceListItem[] = [];
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const from = page * PAGE_SIZE;
+    let q = supabase
+      .from('places')
+      .select(LIST_COLUMNS)
+      .eq('city_key', citySlug)
+      .eq('is_published', true);
+    if (bucket !== undefined) q = q.eq('bucket', bucket);
+    const { data, error } = await q
+      .order('priority', { ascending: true })
+      .order('name', { ascending: true })
+      .order('slug', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    // Throw (not partial-return) so `unstable_cache` never persists a
+    // truncated city list for a full TTL window.
+    if (error || !Array.isArray(data)) {
+      throw new Error(`places page ${page} for "${citySlug}" failed: ${error?.message ?? '?'}`);
+    }
+    for (const raw of data) {
+      const parsed = PlaceListRowSchema.safeParse(raw);
+      if (parsed.success) out.push(parsed.data);
+    }
+    if (data.length < PAGE_SIZE) break;
+  }
+  return out;
+}
+
+// Data Cache per (citySlug, bucket) — the `/lieux/[citySlug]` pages and the
+// destination pages' POI maillage re-scan the same city on every render of
+// a force-dynamic route (Paris alone = 779 rows). Args are folded into the
+// cache key by `unstable_cache`.
+const listPublishedPlacesForCityCached = unstable_cache(
+  _listPublishedPlacesForCityRaw,
+  ['places-for-city'],
+  { revalidate: 3600, tags: ['places-catalogue'] },
+);
+
 export async function listPublishedPlacesForCity(
   citySlug: string,
   bucket?: 'visit' | 'do',
 ): Promise<readonly PlaceListItem[]> {
   try {
-    const supabase = getSupabaseAdminClient();
-    const out: PlaceListItem[] = [];
-    for (let page = 0; page < MAX_PAGES; page += 1) {
-      const from = page * PAGE_SIZE;
-      let q = supabase
-        .from('places')
-        .select(LIST_COLUMNS)
-        .eq('city_key', citySlug)
-        .eq('is_published', true);
-      if (bucket !== undefined) q = q.eq('bucket', bucket);
-      const { data, error } = await q
-        .order('priority', { ascending: true })
-        .order('name', { ascending: true })
-        .order('slug', { ascending: true })
-        .range(from, from + PAGE_SIZE - 1);
-      if (error || !Array.isArray(data)) break;
-      for (const raw of data) {
-        const parsed = PlaceListRowSchema.safeParse(raw);
-        if (parsed.success) out.push(parsed.data);
-      }
-      if (data.length < PAGE_SIZE) break;
-    }
-    return out;
+    return await listPublishedPlacesForCityCached(citySlug, bucket);
   } catch {
     return [];
   }

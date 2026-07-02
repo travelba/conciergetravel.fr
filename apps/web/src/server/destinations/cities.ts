@@ -119,77 +119,82 @@ const MAX_PAGES = 8;
  * Data Cache. Nothing downstream reads more than 180 chars of a
  * description (`pickDescription` → 180-char excerpt here,
  * `toRenderable` in `/hotels/page.tsx` → 160-char excerpt), while the
- * raw columns run 600-1600 chars each. Truncating keeps the whole
- * 2200-row catalogue comfortably under the Vercel Data Cache 2 MB
- * per-entry limit; without it the payload would exceed it and the
- * cache write would silently fail on every render.
+ * raw columns run 600-1600 chars each. Truncation + the PER-PAGE cache
+ * granularity below keep every Data Cache entry under the 2 MB limit —
+ * the first attempt cached the whole catalogue in ONE entry and hit
+ * 3 075 825 bytes: the write failed ("items over 2MB can not be
+ * cached") on every render, so the full scan silently kept running
+ * per-request. Always watch the server log for that message when
+ * touching this payload.
  */
-const DESCRIPTION_CACHE_CAP = 220;
+const DESCRIPTION_CACHE_CAP = 180;
 
 function capDescription(value: string | null): string | null {
   if (value === null || value.length <= DESCRIPTION_CACHE_CAP) return value;
   return value.slice(0, DESCRIPTION_CACHE_CAP);
 }
 
+interface HotelGroupPage {
+  readonly rows: readonly HotelGroupRow[];
+  /** True when this page was shorter than PAGE_SIZE — no further page exists. */
+  readonly isLast: boolean;
+}
+
 /**
- * Uncached catalogue scan. THROWS on any Supabase error or non-array
+ * Uncached single-page scan. THROWS on any Supabase error or non-array
  * response (instead of returning a partial/empty array) so that
- * `unstable_cache` never persists a truncated catalogue for a full
- * TTL window — a transient outage must cost one failed request, not
- * one hour of empty navigation site-wide. The outer `fetchAllPublished`
+ * `unstable_cache` never persists a truncated page for a full TTL
+ * window — a transient outage must cost one failed request, not one
+ * hour of empty navigation site-wide. The outer `fetchAllPublished`
  * converts the throw back into the historical `[]` graceful fallback.
  */
-async function _fetchAllPublishedRaw(): Promise<readonly HotelGroupRow[]> {
+async function _fetchPublishedPageRaw(page: number): Promise<HotelGroupPage> {
   const supabase = getSupabaseAdminClient();
-  const out: HotelGroupRow[] = [];
+  const from = page * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  const { data, error } = await supabase
+    .from('hotels')
+    .select(HOTELS_FOR_GROUPING_COLUMNS)
+    .eq('is_published', true)
+    .order('priority', { ascending: true })
+    .order('name', { ascending: true })
+    .range(from, to);
+  if (error) {
+    console.error('[destinations.cities] Supabase returned error:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      page,
+    });
+    throw new Error(`Supabase error on page ${page}: ${error.message}`);
+  }
+  if (!Array.isArray(data)) {
+    console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
+    throw new Error('Supabase returned non-array data');
+  }
+  const rows: HotelGroupRow[] = [];
   let parseFailures = 0;
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const from = page * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    const { data, error } = await supabase
-      .from('hotels')
-      .select(HOTELS_FOR_GROUPING_COLUMNS)
-      .eq('is_published', true)
-      .order('priority', { ascending: true })
-      .order('name', { ascending: true })
-      .range(from, to);
-    if (error) {
-      console.error('[destinations.cities] Supabase returned error:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        page,
+  for (const raw of data) {
+    const parsed = HotelGroupRowSchema.safeParse(raw);
+    if (parsed.success) {
+      rows.push({
+        ...parsed.data,
+        description_fr: capDescription(parsed.data.description_fr),
+        description_en: capDescription(parsed.data.description_en),
       });
-      throw new Error(`Supabase error on page ${page}: ${error.message}`);
+    } else {
+      parseFailures += 1;
     }
-    if (!Array.isArray(data)) {
-      console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
-      throw new Error('Supabase returned non-array data');
-    }
-    for (const raw of data) {
-      const parsed = HotelGroupRowSchema.safeParse(raw);
-      if (parsed.success) {
-        out.push({
-          ...parsed.data,
-          description_fr: capDescription(parsed.data.description_fr),
-          description_en: capDescription(parsed.data.description_en),
-        });
-      } else {
-        parseFailures += 1;
-      }
-    }
-    // Last page reached when the response was smaller than PAGE_SIZE.
-    if (data.length < PAGE_SIZE) break;
   }
   if (parseFailures > 0) {
     console.error('[destinations.cities] Schema validation failures:', {
-      totalRows: out.length + parseFailures,
-      parsed: out.length,
+      page,
+      parsed: rows.length,
       failures: parseFailures,
     });
   }
-  return out;
+  return { rows, isLast: data.length < PAGE_SIZE };
 }
 
 /**
@@ -200,13 +205,31 @@ async function _fetchAllPublishedRaw(): Promise<readonly HotelGroupRow[]> {
  * catalogue scan (up to 3 sequential 1000-row PostgREST round-trips)
  * runs at most once per hour per region instead of once per render.
  *
+ * ⚠ Cached PER PAGE, not as one catalogue entry: the Data Cache rejects
+ * entries over 2 MB and the whole catalogue serialises to ~3.07 MB —
+ * a single-entry cache "worked" silently while every write failed
+ * ("Failed to set Next.js data cache …, items over 2MB") and the full
+ * scan kept running per-request. Each 1000-row page is ~1.3 MB.
+ * `unstable_cache` folds the `page` argument into the cache key.
+ *
  * Invalidation: time-based 1 h TTL + `revalidateTag('hotels-catalogue')`
  * from any publish/unpublish hook that needs it sooner.
  */
-const fetchAllPublishedCached = unstable_cache(_fetchAllPublishedRaw, ['hotels-for-grouping'], {
-  revalidate: 3600,
-  tags: ['hotels-catalogue'],
-});
+const fetchPublishedPageCached = unstable_cache(
+  _fetchPublishedPageRaw,
+  ['hotels-for-grouping-page'],
+  { revalidate: 3600, tags: ['hotels-catalogue'] },
+);
+
+async function fetchAllPublishedCached(): Promise<readonly HotelGroupRow[]> {
+  const out: HotelGroupRow[] = [];
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const { rows, isLast } = await fetchPublishedPageCached(page);
+    out.push(...rows);
+    if (isLast) break;
+  }
+  return out;
+}
 
 // `cache()`-wrapped: the whole published catalogue is consumed by
 // `getDestinationBySlug` (called in `generateMetadata` AND the page body),
