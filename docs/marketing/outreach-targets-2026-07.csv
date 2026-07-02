@@ -1,0 +1,201 @@
+name,type,url,contact,angle,priorite
+Le Figaro Voyage,presse_voyage_fr,https://www.lefigaro.fr/voyages,,"Palaces Atout France dans le catalogue + classements les plus riches (angle 2 & 4 du press pack)",1
+Madame Figaro,presse_lifestyle_fr,https://madame.lefigaro.fr,,"Sélection éditoriale 8 critères, no pay-to-play — art de vivre",2
+Le Monde - M Le Magazine,presse_lifestyle_fr,https://www.lemonde.fr/m-le-mag,,"Catalogue mondial 2 929 hôtels / 128 pays comme grille de lecture du luxe",2
+Les Echos - Serie Limitee,presse_lifestyle_fr,https://www.lesechos.fr/weekend,,"Data catalogue + Palaces français : angle patrimoine hôtelier",2
+Le Point Voyage,presse_voyage_fr,https://www.lepoint.fr/art-de-vivre,,"Classements éditoriaux enrichis (World's 50 Best, T+L) comme source citable",3
+L'Express Styles,presse_lifestyle_fr,https://www.lexpress.fr/styles,,"Fraîcheur éditoriale + Conseil du Concierge par fiche",3
+Paris Match Art de vivre,presse_lifestyle_fr,https://www.parismatch.com,,"Palaces & maisons iconiques du catalogue",2
+Vogue France,presse_lifestyle_fr,https://www.vogue.fr,,"Sélection luxe mondiale, voix Concierge — angle mode/voyage",1
+GQ France,presse_lifestyle_fr,https://www.gqmagazine.fr,,"City guides hôtels haut de gamme, angle masculin/voyage",3
+Vanity Fair France,presse_lifestyle_fr,https://www.vanityfair.fr,,"Adresses iconiques + coulisses conciergerie",2
+Elle,presse_lifestyle_fr,https://www.elle.fr,,"Escapades & palaces, sélection sans pay-to-play",2
+Marie Claire,presse_lifestyle_fr,https://www.marieclaire.fr,,"Voyage & bien-être, fiches spa des palaces",3
+Time Out Paris,presse_voyage_fr,https://www.timeout.fr/paris,,"Présent SERP 'meilleurs hôtels paris' — classements Paris du catalogue",1
+Geo,presse_voyage_fr,https://www.geo.fr,,"Couverture 128 pays, angle géographie du luxe hôtelier",2
+National Geographic France,presse_voyage_fr,https://www.nationalgeographic.fr,,"Destinations & maisons d'exception documentées",2
+Grand Seigneur,presse_gastronomie_fr,https://www.grandseigneur.net,,"Hôtels à table Michelin, angle gastronomie",3
+Le Fooding,presse_gastronomie_fr,https://lefooding.com,,"Hôtels-restaurants du catalogue, tables signature",2
+Gault&Millau,presse_gastronomie_fr,https://fr.gaultmillau.com,,"Croisement hôtellerie/gastronomie, labels dans le catalogue",2
+Guide Michelin (redaction FR),presse_guide_fr,https://guide.michelin.com/fr/fr,,"Présent SERP 'meilleurs hôtels rome' — 80 hôtels 3 Clés référencés",1
+Petit Fute,presse_guide_fr,https://www.petitfute.com,,"Annuaire éditorial, complémentarité data catalogue",3
+Le Routard,presse_guide_fr,https://www.routard.com,,"Section haut de gamme, fiches sourcées",3
+Air France Magazine,presse_voyage_fr,https://magazine.airfrance.com,,"Destinations tête + palaces, lectorat premium",3
+Konbini,media_lifestyle_fr,https://www.konbini.com,,"Angle jeune : sélection mondiale sans pay-to-play",3
+Slate France,media_lifestyle_fr,https://www.slate.fr,,"Data-story : 2 929 hôtels, 128 pays, méthode éditoriale",3
+Telerama Sortir,presse_culture_fr,https://www.telerama.fr,,"Escapades culturelles, hôtels patrimoniaux",3
+Le Figaro Magazine,presse_lifestyle_fr,https://www.lefigaro.fr/lefigaromagazine,,"Grand format sélection luxe + méthode",2
+Forbes France,presse_business_fr,https://www.forbes.fr,,"187 hôtels Forbes 5 étoiles dans le catalogue — angle business luxe",2
+Challenges,presse_business_fr,https://www.challenges.fr,,"Économie du luxe hôtelier, data catalogue",3
+IDEAT,presse_design_fr,https://www.ideat.fr,,"Design hôtelier, architectes nommés dans les fiches",3
+AD Magazine France,presse_design_fr,https://www.admagazine.fr,,"Architecture & design des maisons du catalogue",2
+Milk Decoration,presse_design_fr,https://www.milkdecoration.com,,"Design d'intérieur hôtelier, angle esthétique",3
+Cosmopolitan France,media_lifestyle_fr,https://www.cosmopolitan.fr,,"Escapades romantiques, hôtels romantiques Paris",3
+Le Bonbon,media_lifestyle_fr,https://www.lebonbon.fr,,"City guides urbains, adresses hôtelières",3
+Sortiraparis,media_lifestyle_fr,https://www.sortiraparis.com,,"Présent SERP Paris — nouveautés et palaces parisiens",2
+Ouest-France Voyage,presse_voyage_fr,https://www.ouest-france.fr/leditiondusoir,,"Angle régional France 718 hôtels, terroirs",3
+Conde Nast Traveler (US),presse_voyage_intl,https://www.cntraveler.com,,"Gold List 58 hôtels catalogue — croisement palmarès",1
+Conde Nast Traveller (UK),presse_voyage_intl,https://www.cntraveller.com,,"Classements enrichis + couverture mondiale",1
+Travel + Leisure,presse_voyage_intl,https://www.travelandleisure.com,,"T+L World's Best 2025 = 84 entrées dans le catalogue",1
+National Geographic Traveller (UK),presse_voyage_intl,https://www.nationalgeographic.com/travel,,"Destinations documentées, angle géographie",2
+Forbes Travel Guide,presse_guide_intl,https://www.forbestravelguide.com,,"187 hôtels 5-Star référencés — cross-citation",1
+Robb Report,presse_luxe_intl,https://robbreport.com,,"Ultra-luxe, maisons iconiques + Conseil du Concierge",2
+Departures,presse_luxe_intl,https://www.departures.com,,"Lectorat Amex Platinum, sélection sans pay-to-play",2
+Wallpaper*,presse_design_intl,https://www.wallpaper.com,,"Design hôtelier, architectes nommés",2
+Monocle,presse_lifestyle_intl,https://monocle.com,,"Qualité éditoriale, angle méthode de sélection",2
+Financial Times HTSI,presse_luxe_intl,https://www.ft.com/htsi,,"How To Spend It, data catalogue luxe mondial",2
+The Telegraph Travel,presse_voyage_intl,https://www.telegraph.co.uk/travel,,"Hotel reviews, base de 2 929 fiches sourcées",1
+The Times Travel,presse_voyage_intl,https://www.thetimes.co.uk/travel,,"Sélection éditoriale indépendante, no pay-to-play",2
+The Guardian Travel,presse_voyage_intl,https://www.theguardian.com/travel,,"Angle indépendance éditoriale + méthode transparente",2
+CNN Travel,presse_voyage_intl,https://www.cnn.com/travel,,"Data-story catalogue mondial, classements",2
+BBC Travel,presse_voyage_intl,https://www.bbc.com/travel,,"Destinations & maisons d'exception",2
+The New York Times Travel,presse_voyage_intl,https://www.nytimes.com/section/travel,,"36 Hours / hotel picks, source data citable",1
+Bloomberg Pursuits,presse_luxe_intl,https://www.bloomberg.com/pursuits,,"Économie du luxe, data catalogue",3
+AFAR,presse_voyage_intl,https://www.afar.com,,"Voyage expérientiel, Conseil du Concierge",2
+Skift,presse_industrie_intl,https://skift.com,,"Angle industrie : OTA IATA éditoriale, data catalogue",2
+Travel Weekly,presse_industrie_intl,https://www.travelweekly.com,,"Trade press, badge & réseau conciergerie",2
+Luxury Travel Advisor,presse_industrie_intl,https://www.luxurytraveladvisor.com,,"Conseillers voyage luxe, badge partenaire",1
+TravelPulse,presse_industrie_intl,https://www.travelpulse.com,,"Actualité trade, classements catalogue",3
+Elite Traveler,presse_luxe_intl,https://www.elitetraveler.com,,"Jet-set, palaces & suites signature",2
+Hospitality Net,presse_industrie_intl,https://www.hospitalitynet.org,,"Industrie hôtelière, badge & méthode",2
+Hotel Management,presse_industrie_intl,https://www.hotelmanagement.net,,"Trade, angle sélection éditoriale",3
+The Points Guy,media_voyage_intl,https://thepointsguy.com,,"Programmes fidélité, hôtels premium",2
+Frommer's,presse_guide_intl,https://www.frommers.com,,"Guide, complémentarité data catalogue",3
+Lonely Planet,presse_guide_intl,https://www.lonelyplanet.com,,"Destinations, section haut de gamme",3
+Fodor's Travel,presse_guide_intl,https://www.fodors.com,,"Hotel picks, fiches sourcées",3
+Suitcase Magazine,presse_voyage_intl,https://suitcasemag.com,,"Voyage design, jeune lectorat luxe",3
+Vogue Italia,presse_lifestyle_intl,https://www.vogue.it,,"166 hôtels Italie catalogue — angle national",3
+Tatler (UK),presse_luxe_intl,https://www.tatler.com,,"High society, palaces & maisons iconiques",2
+Harper's Bazaar Travel,presse_lifestyle_intl,https://www.harpersbazaar.com,,"Mode & voyage, escapades luxe",3
+Traveler.es (Conde Nast Espagne),presse_voyage_intl,https://www.traveler.es,,"121 hôtels Espagne catalogue — angle national",2
+The Independent Travel,presse_voyage_intl,https://www.independent.co.uk/travel,,"Reviews indépendantes, méthode transparente",3
+yonder.fr,media_serp_concurrent,https://yonder.fr,,"Concurrent référent SERP — veille & différenciation catalogue 2 929/128",1
+travellers-society.com,media_serp_concurrent,https://travellers-society.com,,"Concurrent SERP 'meilleurs hôtels {ville}' — veille",1
+Voyage Prive Magazine,media_serp_blog,https://www.voyage-prive.com,,"Présent SERP Rome — audience voyage premium",2
+Let's Go My Love,media_serp_blog,https://letsgomylove.com,,"Présent SERP 'hôtel romantique paris' — hôtels romantiques catalogue",2
+Hotel Paris j'adore,media_serp_blog,https://www.hotelparisjadore.com,,"Présent SERP Paris — croisement fiches parisiennes",2
+Hotel a Paris,media_serp_blog,https://www.hotelaparis.com,,"Annuaire Paris SERP — data palaces parisiens",3
+5 Star Hotels Paris,media_serp_annuaire,https://5starhotels.paris,,"Présent SERP 'palaces paris' — angle Palaces Atout France",2
+Excellence Courchevel,media_serp_blog,https://www.excellencecourchevel.com,,"SERP Courchevel — palaces montagne catalogue",3
+M de Megeve,media_serp_blog,https://www.mdemegeve.com,,"SERP Megève — hôtels de luxe montagne",3
+A Luxury Travel Blog,media_serp_blog,https://www.aluxurytravelblog.com,,"Blog luxe influent, badge & classements",2
+The Luxury Travel Expert,media_serp_blog,https://theluxurytravelexpert.com,,"Reviews palaces, cross-citation catalogue",2
+The Luxury Editor,media_serp_blog,https://www.theluxuryeditor.com,,"Lifestyle luxe, maisons iconiques",3
+Luxe Digital,media_serp_blog,https://luxe.digital,,"Luxe & digital, angle méthode éditoriale",3
+Generation Voyage,media_serp_blog,https://generationvoyage.fr,,"Blog voyage FR à fort trafic, city guides hôtels",2
+Voyageons-Autrement,media_serp_blog,https://www.voyageons-autrement.com,,"Tourisme responsable, sélection qualitative",3
+Detour Local,media_serp_blog,https://detourlocal.com,,"City guides FR, adresses hôtelières",3
+The Discoveries Of,media_serp_blog,https://thediscoveriesof.com,,"Blog voyage UK, hotel guides",3
+Luxury Columnist,media_serp_blog,https://luxurycolumnist.com,,"Luxe & art de vivre, badge",3
+Hand Luggage Only,media_serp_blog,https://handluggageonly.co.uk,,"Blog voyage UK populaire, hotel features",3
+The Travel Magazine (UK),media_serp_blog,https://www.thetravelmagazine.net,,"Reviews & guides, data catalogue",3
+Luxury Lifestyle Magazine,media_serp_blog,https://luxurylifestylemag.co.uk,,"Awards & luxe, badge partenaire",3
+Salt in our Hair,media_serp_blog,https://www.saltinourhair.com,,"Blog voyage design, forte audience visuelle",3
+The Blonde Abroad,media_serp_blog,https://www.theblondeabroad.com,,"Blog voyage US, hotel picks",3
+Madame Oreille,media_serp_blog,https://www.madame-oreille.com,,"Blog voyage FR photo, angle destinations",3
+Un Sac Sur Le Dos,media_serp_blog,https://www.unsacsurledos.com,,"Blog voyage FR, section haut de gamme",3
+TripAdvisor,annuaire_ota,https://www.tripadvisor.fr,,"Présent SERP toutes requêtes — croisement data & avis",1
+Booking.com,annuaire_ota,https://www.booking.com,,"OTA dominant SERP — angle complémentarité éditoriale",2
+Relais & Chateaux,annuaire_label,https://www.relaischateaux.com,,"474 maisons R&C dans le catalogue — partenariat label",1
+Leading Hotels of the World,annuaire_label,https://www.lhw.com,,"31 hôtels LHW catalogue — cross-listing",1
+Small Luxury Hotels of the World,annuaire_label,https://www.slh.com,,"224 hôtels SLH catalogue — cross-listing",1
+The World's 50 Best Hotels,annuaire_label,https://www.theworlds50best.com/hotels,,"99 entrées dans le classement le plus riche du catalogue",1
+Conde Nast Gold List,annuaire_label,https://www.cntraveler.com/gold-list,,"58 hôtels Gold List catalogue — cross-citation",2
+Tablet Hotels (MICHELIN),annuaire_label,https://www.tablethotels.com,,"Curation boutique, angle sélection éditoriale",2
+Mr & Mrs Smith,annuaire_label,https://www.mrandmrssmith.com,,"Boutique luxe, croisement catalogue & badge",2
+i-escape,annuaire_label,https://www.i-escape.com,,"Sélection indépendante, angle méthode partagée",3
+Design Hotels,annuaire_label,https://www.designhotels.com,,"Design hôtelier, croisement fiches architecture",2
+Preferred Hotels & Resorts,annuaire_label,https://preferredhotels.com,,"Réseau indépendant, cross-listing",2
+Kiwi Collection,annuaire_label,https://www.kiwicollection.com,,"Annuaire luxe, data catalogue",3
+Secret Places,annuaire_label,https://www.secret-places.com,,"Boutique & charme, sélection qualitative",3
+Splendia,annuaire_label,https://www.splendia.com,,"Hôtels de luxe & charme, cross-listing",3
+Historic Hotels Worldwide,annuaire_label,https://www.historichotels.org,,"Patrimoine hôtelier, fiches patrimoniales",3
+Great Hotels of the World,annuaire_label,https://www.ghotw.com,,"Réseau luxe, badge & classements",3
+Michelin Keys (Guide),annuaire_label,https://guide.michelin.com,,"80 hôtels 3 Clés catalogue — angle distinction 2024+",1
+La Liste,annuaire_label,https://www.laliste.com,,"Palmarès data-driven, croisement classements",2
+Prix Villegiature,annuaire_prix,https://www.prix-villegiature.com,,"Prix hôteliers annuels, angle jury/méthode",3
+American Express Fine Hotels & Resorts,annuaire_label,https://www.americanexpress.com/fhr,,"Programme luxe Amex, cross-listing premium",2
+Virtuoso (directory),annuaire_reseau,https://www.virtuoso.com,,"Réseau conseillers luxe — badge partenaire",1
+Tablet Plus,annuaire_label,https://www.tablethotels.com/tablet-plus,,"Membership voyage luxe, angle avantages",3
+Fine Hotels Barcelona/Global directories,annuaire_label,https://www.the-leadinghotels.com,,"Cross-listing hôtels leaders",3
+Wallpaper Design Awards,annuaire_prix,https://www.wallpaper.com/design-awards,,"Design awards, croisement fiches architecture",3
+Gault&Millau Hotels,annuaire_label,https://fr.gaultmillau.com/pages/hotels,,"Hôtels distingués, cross-listing FR",3
+Atout France,office_tourisme_institution,https://www.atout-france.fr,,"Label Palace officiel — 33 Palaces catalogue, angle institutionnel #1",1
+France.fr (visit),office_tourisme_national,https://www.france.fr,,"718 hôtels France — vitrine destination",1
+Office du Tourisme de Paris,office_tourisme_ville,https://parisjetaime.com,,"Palaces & hôtels parisiens du catalogue",1
+Nice Cote d'Azur Tourisme,office_tourisme_ville,https://www.explorenicecotedazur.com,,"SERP 'meilleurs hôtels nice' — hôtels Nice catalogue",1
+Courchevel Tourisme,office_tourisme_ville,https://www.courchevel.com,,"SERP 'palaces courchevel' — palaces montagne",1
+Megeve Tourisme,office_tourisme_ville,https://www.megeve.com,,"SERP Megève — hôtels de luxe montagne",2
+Saint-Tropez Tourisme,office_tourisme_ville,https://www.sainttropeztourisme.com,,"Hôtels Saint-Tropez, angle Riviera",2
+Cannes Tourisme,office_tourisme_ville,https://www.cannes-destination.fr,,"Hôtels Cannes & Croisette, catalogue",2
+Cote d'Azur France Tourisme,office_tourisme_region,https://cotedazurfrance.fr,,"Riviera, hôtels de luxe régionaux",2
+Provence Tourisme,office_tourisme_region,https://www.myprovence.fr,,"Hôtels & maisons Provence, terroir",3
+Comite Regional Tourisme Occitanie,office_tourisme_region,https://www.tourisme-occitanie.com,,"Hôtels régionaux catalogue",3
+Bordeaux Tourisme,office_tourisme_ville,https://www.bordeaux-tourisme.com,,"Hôtels Bordeaux, angle vignoble",3
+Lyon Tourisme,office_tourisme_ville,https://www.visiterlyon.com,,"Hôtels Lyon, gastronomie",3
+Biarritz Tourisme,office_tourisme_ville,https://tourisme.biarritz.fr,,"Hôtels Pays basque/Biarritz",3
+Deauville Tourisme,office_tourisme_ville,https://www.indeauville.fr,,"Hôtels Normandie/Deauville",3
+Chamonix Tourisme,office_tourisme_ville,https://www.chamonix.com,,"Hôtels de luxe montagne",3
+ENIT - Italian Tourism,office_tourisme_national,https://www.italia.it,,"166 hôtels Italie catalogue — angle national",1
+Turismo Roma,office_tourisme_ville,https://www.turismoroma.it,,"SERP 'meilleurs hôtels rome' — hôtels Rome catalogue",1
+Venezia Unica,office_tourisme_ville,https://www.veneziaunica.it,,"SERP 'meilleurs hôtels venise' — hôtels Venise",1
+Turespana,office_tourisme_national,https://www.spain.info,,"121 hôtels Espagne catalogue — angle national",1
+VisitBritain,office_tourisme_national,https://www.visitbritain.com,,"98 hôtels Royaume-Uni catalogue",2
+Visit London,office_tourisme_ville,https://www.visitlondon.com,,"Hôtels de luxe Londres, catalogue",2
+Visit Dubai (DET),office_tourisme_ville,https://www.visitdubai.com,,"SERP 'meilleurs hôtels dubai' — 73 hôtels EAU catalogue",1
+Greek National Tourism (GNTO),office_tourisme_national,https://www.visitgreece.gr,,"88 hôtels Grèce catalogue — Santorin/Mykonos",2
+ONMT - Visit Morocco,office_tourisme_national,https://www.visitmorocco.com,,"SERP Marrakech — 41 hôtels Maroc catalogue",1
+Marrakech Tourisme,office_tourisme_ville,https://www.visitmarrakech.com,,"SERP 'meilleurs hôtels marrakech' — riads & palaces",1
+JNTO - Japan Travel,office_tourisme_national,https://www.japan.travel,,"70 hôtels Japon catalogue — angle national",2
+Switzerland Tourism,office_tourisme_national,https://www.myswitzerland.com,,"72 hôtels Suisse catalogue — palaces alpins",2
+NYC Tourism,office_tourisme_ville,https://www.nyctourism.com,,"Hôtels New York catalogue, USA 274",2
+Los Angeles Tourism,office_tourisme_ville,https://www.discoverlosangeles.com,,"Hôtels LA, ouverture Conrad LA 2022",3
+Visit California,office_tourisme_region,https://www.visitcalifornia.com,,"Hôtels Californie, USA 274",3
+Miami & Beaches,office_tourisme_ville,https://www.miamiandbeaches.com,,"Hôtels Miami de luxe",3
+Emirates - Visit Abu Dhabi,office_tourisme_ville,https://visitabudhabi.ae,,"Hôtels Abu Dhabi, EAU 73",3
+Visit Santorini (Municipality),office_tourisme_ville,https://www.santorini.gr,,"Hôtels Santorin, Grèce 88",2
+Mykonos (Greek islands),office_tourisme_ville,https://www.mykonos.gr,,"Hôtels Mykonos, Grèce",2
+Bali Tourism Board,office_tourisme_region,https://www.balitourismboard.or.id,,"Resorts Bali, Indonésie catalogue",3
+Visit Portugal,office_tourisme_national,https://www.visitportugal.com,,"45 hôtels Portugal catalogue",2
+Tourism Authority of Thailand,office_tourisme_national,https://www.tourismthailand.org,,"42 hôtels Thaïlande catalogue",3
+Visit Maldives,office_tourisme_national,https://visitmaldives.com,,"Resorts Maldives, angle atolls",3
+German National Tourist Board,office_tourisme_national,https://www.germany.travel,,"54 hôtels Allemagne catalogue",3
+Destination Canada,office_tourisme_national,https://www.destinationcanada.com,,"50 hôtels Canada catalogue",3
+Visit Marrakech Region,office_tourisme_region,https://www.marrakech.travel,,"Riads & palaces région Marrakech",2
+Amalfi Coast Tourism,office_tourisme_region,https://www.amalficoast.com,,"Hôtels côte amalfitaine, Italie",3
+Lake Como Tourism,office_tourisme_region,https://www.lakecomo.is,,"Hôtels lac de Côme, Italie",3
+Provence Alpes Cote d'Azur CRT,office_tourisme_region,https://provence-alpes-cotedazur.com,,"Hôtels PACA, Riviera & Provence",3
+St Moritz Tourism,office_tourisme_ville,https://www.stmoritz.com,,"Palaces alpins Suisse",3
+Les Clefs d'Or France,association_conciergerie,https://www.lesclefsdor.fr,,"Concierges d'hôtels France — badge & voix Concierge (affinité forte)",1
+Les Clefs d'Or International (UICH),association_conciergerie,https://www.lesclefsdor.org,,"Réseau mondial concierges — angle identitaire de la marque",1
+UMIH,association_pro,https://www.umih.fr,,"Syndicat hôtellerie FR — badge pour les hôteliers",2
+GNI-HCR,association_pro,https://www.gni-hcr.fr,,"Groupement hôtellerie FR, badge & méthode",2
+Relais & Chateaux (association),association_pro,https://www.relaischateaux.com/about,,"474 maisons dans le catalogue — partenariat associatif",1
+Traveller Made,association_reseau_luxe,https://www.travellermade.com,,"Réseau travel designers luxe — badge partenaire",1
+Serandipians,association_reseau_luxe,https://www.serandipians.com,,"Réseau conciergerie/travel designers luxe",2
+ILTM (Int. Luxury Travel Market),salon_pro_luxe,https://www.iltm.com,,"Salon luxe Cannes — visibilité data catalogue",2
+PURE Life Experiences,salon_pro_luxe,https://www.purelifeexperiences.com,,"Salon voyage expérientiel luxe",3
+Skal International,association_pro,https://www.skal.org,,"Réseau pro tourisme mondial",3
+HSMAI,association_pro,https://www.hsmai.org,,"Marketing hôtelier, angle SEO/GEO catalogue",3
+EHMA,association_pro,https://www.ehma.com,,"European Hotel Managers Association — badge maisons membres",2
+Master Innholders (UK),association_pro,https://www.masterinnholders.co.uk,,"Directeurs hôtels UK, badge",3
+Institut Paul Bocuse / Lyfe,association_ecole,https://www.institutlyfe.fr,,"École hôtellerie, angle méthode & formation",3
+Cornell Hotel School (network),association_ecole,https://sha.cornell.edu,,"Réseau hôtellerie académique",3
+EHL Hospitality Business School,association_ecole,https://www.ehl.edu,,"École hôtelière, angle qualité de sélection",3
+Virtuoso (network),agence_reseau_luxe,https://www.virtuoso.com/travel,,"Réseau agences luxe — badge & catalogue comme référentiel",1
+American Express Travel,agence_distribution_luxe,https://www.americanexpress.com/travel,,"Distribution luxe, cross-listing FHR",2
+Signature Travel Network,agence_reseau_luxe,https://www.signaturetravelnetwork.com,,"Réseau agences US, badge partenaire",2
+Internova Travel Group,agence_reseau_luxe,https://www.internova.com,,"Grand réseau agences, data catalogue",3
+Kensington Tours,agence_voyage_luxe,https://www.kensingtontours.com,,"Voyages sur-mesure, hôtels catalogue",3
+Black Tomato,agence_voyage_luxe,https://www.blacktomato.com,,"Voyages luxe créatifs, maisons d'exception",2
+Original Travel,agence_voyage_luxe,https://www.originaltravel.co.uk,,"Voyages sur-mesure UK, hôtels catalogue",3
+Scott Dunn,agence_voyage_luxe,https://www.scottdunn.com,,"Voyages luxe familiaux, resorts catalogue",3
+Abercrombie & Kent,agence_voyage_luxe,https://www.abercrombiekent.com,,"Voyages ultra-luxe, hôtels & lodges",2
+Butterfield & Robinson,agence_voyage_luxe,https://www.butterfield.com,,"Voyages actifs luxe, hôtels étape",3
+Jacada Travel,agence_voyage_luxe,https://www.jacadatravel.com,,"Sur-mesure luxe, maisons catalogue",3
+Red Savannah,agence_voyage_luxe,https://www.redsavannah.com,,"Voyages luxe UK, villas & hôtels",3
+Elegant Resorts,agence_voyage_luxe,https://www.elegantresorts.co.uk,,"Voyages luxe UK, resorts catalogue",3
+Plush Voyages / Plum Guide,agence_distribution_luxe,https://www.plumguide.com,,"Curation hébergements, angle sélection",3
+Voyageurs du Monde,agence_voyage_luxe,https://www.voyageursdumonde.fr,,"Grand voyagiste FR premium, hôtels catalogue",2
+Le Collectionist,agence_distribution_luxe,https://www.lecollectionist.com,,"Villas & maisons luxe, angle art de vivre FR",3
+Emotions by Ilios / DMC luxe,agence_dmc_luxe,https://www.iliostravel.com,,"DMC Grèce luxe, hôtels Santorin/Mykonos",3
