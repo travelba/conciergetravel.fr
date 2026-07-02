@@ -323,6 +323,16 @@ Key points:
   predicate _before_ the `.limit`? Geographic (`city`/`department`/`region`) and
   bounding-box (`nearby`) clusters in `get-related-hotels.ts` already comply;
   only `sameBrand` had the bug.
+- **Second incident (2026-07-02)** — same shape on `/categorie/[categorySlug]`:
+  the page called `listPublishedHotelsForIndex()` with the **default 200-row
+  limit** (ordered `priority, name` over 107 P0 + 243 P1 published), so **no P2
+  row ever reached the in-memory `filterCategory` predicate**. The Fouquet's
+  Barrière (P2, Palace) was invisible on `/categorie/palaces-paris` while the
+  hand-written AEO copy claimed "MyConciergeHotel les référence tous". Fixed by
+  raising the call-site limit to 2500 (`CATEGORY_INDEX_LIMIT`) like `/marque`
+  already does. Rule of thumb: **any page that filters the catalogue in memory
+  must fetch the whole catalogue** — a default-limit read + in-memory predicate
+  is the same bug as `sameBrand`, just hidden behind a helper's default arg.
 
 ### ISR contract
 
