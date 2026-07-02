@@ -8,7 +8,10 @@ import { isRoutingLocale } from '@/i18n/routing';
 import { LegalSection, LegalShell } from '../_components/legal-shell';
 import { buildLegalMetadata } from '../_components/legal-metadata';
 
-export const dynamic = 'force-static';
+// Dynamic (ADR-0031): force-static + nonce CSP = every script blocked
+// (no valid nonce in cached HTML) — the "manage cookies" consent controls
+// on THIS page were dead in prod. Correctness wins over SSG.
+export const dynamic = 'force-dynamic';
 
 const LAST_UPDATED = '2026-05-01';
 

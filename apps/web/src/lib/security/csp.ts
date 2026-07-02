@@ -168,12 +168,13 @@ export const NONCE_HEADER = 'x-nonce';
  *     fallback (Next.js `<Script>` strategy + framework-managed nonce).
  *
  * For JSON-LD specifically (`type="application/ld+json"`), the script
- * content is treated as inert data by browsers. Without a nonce the
- * tag is still blocked by `strict-dynamic` script-src — that is why
- * the hotel detail page intentionally keeps `force-dynamic` even after
- * the ADR-0013 island refactor, until we either (a) drop nonce on
- * `type=application/ld+json` via CSP exception, or (b) bake a build-
- * time hash into the policy.
+ * content is inert data: browsers never execute it, so `script-src`
+ * (nonce or not) does NOT apply and crawlers read it from the DOM
+ * regardless (verified in prod — ADR-0031 spike). What DOES keep every
+ * HTML route `force-dynamic` is Next.js' own bootstrap: under
+ * `'strict-dynamic'`, statically-cached HTML ships framework scripts
+ * without a valid nonce and the browser blocks ALL of them (dead
+ * hydration). See ADR-0031 §Spike results.
  *
  * Skill: security-engineering §CSP, nextjs-app-router.
  */

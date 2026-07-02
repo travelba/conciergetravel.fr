@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -158,46 +159,64 @@ export interface PlaceCitySummary {
 }
 
 /**
+ * Uncached scan behind {@link listPlaceCities}. Throws on any Supabase
+ * error so `unstable_cache` never persists a truncated aggregate for a
+ * full TTL window (same contract as `destinations/cities.ts`).
+ */
+async function _listPlaceCitiesRaw(): Promise<readonly PlaceCitySummary[]> {
+  const supabase = getSupabaseAdminClient();
+  const byCity = new Map<string, { name: string; visit: number; doCount: number }>();
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const from = page * PAGE_SIZE;
+    const { data, error } = await supabase
+      .from('places')
+      .select('city_key, city, bucket')
+      .eq('is_published', true)
+      .order('slug', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error(`Supabase error on page ${page}: ${error.message}`);
+    if (!Array.isArray(data)) throw new Error('Supabase returned non-array data');
+    for (const raw of data) {
+      const row = raw as { city_key?: unknown; city?: unknown; bucket?: unknown };
+      if (typeof row.city_key !== 'string' || row.city_key.length === 0) continue;
+      const entry = byCity.get(row.city_key) ?? {
+        name: typeof row.city === 'string' && row.city.length > 0 ? row.city : row.city_key,
+        visit: 0,
+        doCount: 0,
+      };
+      if (row.bucket === 'do') entry.doCount += 1;
+      else entry.visit += 1;
+      byCity.set(row.city_key, entry);
+    }
+    if (data.length < PAGE_SIZE) break;
+  }
+  return [...byCity.entries()]
+    .map(([citySlug, v]) => ({
+      citySlug,
+      cityName: v.name,
+      total: v.visit + v.doCount,
+      visit: v.visit,
+      doCount: v.doCount,
+    }))
+    .sort((a, b) => b.total - a.total || a.cityName.localeCompare(b.cityName));
+}
+
+// Shared Data Cache (ADR-0031): the `/lieux` hub route stays force-dynamic
+// (CSP nonce contract) so the aggregation is cached at the data layer —
+// once per hour per region instead of once per render.
+const listPlaceCitiesCached = unstable_cache(_listPlaceCitiesRaw, ['place-cities'], {
+  revalidate: 3600,
+  tags: ['places-catalogue'],
+});
+
+/**
  * Distinct published cities with per-bucket counts — powers the `/lieux`
  * hub index. Aggregated in memory (the published-places volume is small),
  * degrades to `[]` without Supabase env.
  */
 export async function listPlaceCities(): Promise<readonly PlaceCitySummary[]> {
   try {
-    const supabase = getSupabaseAdminClient();
-    const byCity = new Map<string, { name: string; visit: number; doCount: number }>();
-    for (let page = 0; page < MAX_PAGES; page += 1) {
-      const from = page * PAGE_SIZE;
-      const { data, error } = await supabase
-        .from('places')
-        .select('city_key, city, bucket')
-        .eq('is_published', true)
-        .order('slug', { ascending: true })
-        .range(from, from + PAGE_SIZE - 1);
-      if (error || !Array.isArray(data)) break;
-      for (const raw of data) {
-        const row = raw as { city_key?: unknown; city?: unknown; bucket?: unknown };
-        if (typeof row.city_key !== 'string' || row.city_key.length === 0) continue;
-        const entry = byCity.get(row.city_key) ?? {
-          name: typeof row.city === 'string' && row.city.length > 0 ? row.city : row.city_key,
-          visit: 0,
-          doCount: 0,
-        };
-        if (row.bucket === 'do') entry.doCount += 1;
-        else entry.visit += 1;
-        byCity.set(row.city_key, entry);
-      }
-      if (data.length < PAGE_SIZE) break;
-    }
-    return [...byCity.entries()]
-      .map(([citySlug, v]) => ({
-        citySlug,
-        cityName: v.name,
-        total: v.visit + v.doCount,
-        visit: v.visit,
-        doCount: v.doCount,
-      }))
-      .sort((a, b) => b.total - a.total || a.cityName.localeCompare(b.cityName));
+    return await listPlaceCitiesCached();
   } catch {
     return [];
   }

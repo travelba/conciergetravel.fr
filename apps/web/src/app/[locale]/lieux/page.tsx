@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { JsonLd } from '@mch/seo';
@@ -13,8 +12,13 @@ import { buildHreflangAlternates, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
 import { listPlaceCities } from '@/server/places/list-places';
 
-// JSON-LD via headers() nonce read forces dynamic — align with the place
-// fiche / city ranking precedent.
+// Dynamic on purpose (ADR-0031 decision) — under the nonce + strict-dynamic
+// CSP, statically-cached HTML ships script tags without a valid nonce and the
+// browser blocks ALL JS (verified in prod on the force-static legal pages:
+// 58 CSP violations, zero hydration). The per-page headers() nonce read was
+// removed (dead code — JSON-LD needs no nonce since 2026-06-09); the layout's
+// nonce read keeps the route dynamic site-wide. Perf comes from the cached
+// data layer (unstable_cache), not from HTML caching.
 export const dynamic = 'force-dynamic';
 
 const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
@@ -58,7 +62,6 @@ export default async function PlacesHubPage({ params }: { params: Promise<{ loca
   const t = await getTranslations({ locale, namespace: 'lieux' });
   const cities = await listPlaceCities();
   const origin = siteOrigin();
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   const canonical = `${origin}${getPathname({ locale, href: { pathname: '/lieux' } })}`;
 
@@ -92,7 +95,7 @@ export default async function PlacesHubPage({ params }: { params: Promise<{ loca
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       {jsonLdNodes.map((node, i) => (
-        <JsonLdScript key={i} data={node} nonce={nonce} />
+        <JsonLdScript key={i} data={node} />
       ))}
 
       <nav aria-label="Breadcrumb" className="text-muted-foreground text-sm">

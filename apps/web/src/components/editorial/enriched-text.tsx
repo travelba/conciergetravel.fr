@@ -50,41 +50,71 @@ interface MatchRange {
 }
 
 /**
- * Pre-compiled link-map entry. The corpus grew from ~200 to ~3000+
- * entries (B4 — full-catalogue auto-link map), so the regex compile +
- * entry sort MUST happen once per render, not once per paragraph.
- * `findMatches` previously rebuilt both for every paragraph, making the
- * cost O(entries × paragraphs × compile); hoisting them makes it
- * O(entries) compiles + O(entries × paragraphs) cheap `.exec` calls.
+ * Pre-compiled link-map entry. The corpus grew from ~200 to ~5000+
+ * entries (B4 — full-catalogue auto-link map), so the entry list is
+ * compiled once per link-map INSTANCE (WeakMap cache below) instead of
+ * once per `<EnrichedText>` render — a guide page mounts the component
+ * for every section body, and re-deriving 5000 entries per section was
+ * a large share of the 20 s server render the 2026-07-02 audit measured
+ * on `/destination/paris`.
+ *
+ * The word-boundary regex is compiled LAZILY (`pattern` starts `null`):
+ * `findMatches` pre-filters with a cheap lowercase `String.includes`
+ * before touching the regex, so in practice only the handful of entries
+ * actually present in a paragraph ever pay the `new RegExp` cost — not
+ * all 5000.
  */
 interface CompiledEntry {
   readonly name: string;
   readonly lower: string;
-  readonly pattern: RegExp;
   readonly href: EditorialLink;
+  pattern: RegExp | null;
 }
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 }
 
+/** Unicode-aware word-boundary pattern, compiled on first use per entry. */
+function entryPattern(entry: CompiledEntry): RegExp {
+  if (entry.pattern === null) {
+    entry.pattern = new RegExp(
+      `(?<=^|[^\\p{L}\\p{N}])${escapeRegex(entry.name)}(?=[^\\p{L}\\p{N}]|$)`,
+      'iu',
+    );
+  }
+  return entry.pattern;
+}
+
 /**
- * Compiles the link map once per render: drops sub-3-char names, sorts by
- * descending name length so longer strings match first ("Plaza Athénée"
- * before "Plaza"), and pre-builds each Unicode-aware word-boundary regex.
+ * Compiles the link map once per link-map instance: drops sub-3-char
+ * names and sorts by descending name length so longer strings match
+ * first ("Plaza Athénée" before "Plaza"). Regexes are NOT built here —
+ * see `entryPattern`.
+ *
+ * Keyed by the Map's identity: `buildEditorialLinkMap` produces one Map
+ * per page render, shared by every `<EnrichedText>` on that page, so the
+ * WeakMap collapses N per-section compilations into one and lets the
+ * whole entry list be GC'd with the request.
  */
+const compiledCache = new WeakMap<EditorialLinkMap, readonly CompiledEntry[]>();
+
 function compileEntries(linkMap: EditorialLinkMap): readonly CompiledEntry[] {
+  const cached = compiledCache.get(linkMap);
+  if (cached !== undefined) return cached;
   const compiled: CompiledEntry[] = [];
   for (const [name, href] of linkMap) {
     if (name.length < 3) continue;
     compiled.push({
       name,
       lower: name.toLowerCase(),
-      pattern: new RegExp(`(?<=^|[^\\p{L}\\p{N}])${escapeRegex(name)}(?=[^\\p{L}\\p{N}]|$)`, 'iu'),
       href,
+      pattern: null,
     });
   }
-  return compiled.sort((a, b) => b.name.length - a.name.length);
+  compiled.sort((a, b) => b.name.length - a.name.length);
+  compiledCache.set(linkMap, compiled);
+  return compiled;
 }
 
 /**
@@ -97,12 +127,18 @@ function compileEntries(linkMap: EditorialLinkMap): readonly CompiledEntry[] {
 function findMatches(paragraph: string, entries: readonly CompiledEntry[]): MatchRange[] {
   const results: MatchRange[] = [];
   const used = new Set<string>();
+  const paragraphLower = paragraph.toLowerCase();
 
   for (const entry of entries) {
     if (used.has(entry.lower)) continue;
+    // Cheap pre-filter: a case-insensitive regex can only match when the
+    // lowercased needle occurs as a substring. Skipping early avoids both
+    // the lazy regex compile and the `.exec` scan for the ~99 % of the
+    // 5000-entry corpus that is absent from any given paragraph.
+    if (!paragraphLower.includes(entry.lower)) continue;
     // Non-global regex: `.exec` always scans from index 0, so reusing the
     // pre-compiled instance across paragraphs is safe (no lastIndex state).
-    const m = entry.pattern.exec(paragraph);
+    const m = entryPattern(entry).exec(paragraph);
     if (m === null) continue;
     const start = m.index;
     const end = start + entry.name.length;

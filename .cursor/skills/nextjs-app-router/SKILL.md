@@ -93,25 +93,43 @@ export const cachedGuides = unstable_cache(fetchGuides, ['guides-v1'], { revalid
 
 Cross-ref: see also [`redis-caching/SKILL.md`](../redis-caching/SKILL.md) §Serialization — Upstash Redis SDK has the same JSON-only constraint for the same reason.
 
-### JSON-LD pages MUST be `force-dynamic` (CSP nonce contract)
+### EVERY HTML route MUST be dynamic (CSP nonce × cached HTML — ADR-0031)
 
-Any page emitting `<JsonLdScript>` (= every editorial, hotel, hub, home,
-guide, classement, marque, categorie page) MUST be `force-dynamic`,
-because the script's CSP nonce is per-request:
+The historical rationale ("the JSON-LD script needs a per-request nonce")
+is obsolete — `JsonLdScript` ignores the nonce since 2026-06-09 (JSON-LD is
+inert data; `script-src` never gated it). The **real** and stronger reason
+was proven by the ADR-0031 spike (2026-07-02):
+
+> Under `script-src 'self' 'nonce-{n}' 'strict-dynamic'`, Next stamps the
+> nonce on its OWN scripts (inline `self.__next_f.push` bootstrap + external
+> `/_next/static` chunks) **only during a dynamic render**. Statically-cached
+> HTML (force-static, ISR `revalidate`, CDN `s-maxage`) ships script tags with
+> NO nonce, and `'strict-dynamic'` makes the browser ignore `'self'` — so
+> **every script on the page is blocked**. The page paints but hydration,
+> consent, menus and analytics are all dead.
+
+Prod evidence: the 4 `(legal)` `force-static` pages served 58 CSP violations
+and zero JS for weeks (`scripts/perf/spike-csp-static-check.mjs`). They were
+flipped back to `force-dynamic` on 2026-07-02.
 
 ```ts
-export const dynamic = 'force-dynamic'; // CSP nonce + Supabase admin fetches.
+export const dynamic = 'force-dynamic'; // CSP nonce contract — ADR-0031.
 ```
 
-Re-introducing `revalidate = N` on such a page silently caches HTML
-with `nonce=""` — the browser then refuses to execute the JSON-LD and
-Google sees zero structured data. This regression was paid twice
-(PR #56 hotel detail, PR #57 home). Reference:
-`apps/web/src/components/seo/json-ld.tsx` (doc block) and
-`structured-data-schema-org` §CSP-nonce-contract.
+Hard rules that follow:
 
-The Vercel CDN edge cache still mitigates the cost of `force-dynamic`
-for editorial routes whose underlying data only changes on publish.
+- **Never** add `force-static` or `export const revalidate` to a route that
+  renders HTML, as long as the CSP carries a per-request nonce. Route
+  handlers that emit non-HTML (robots.txt, llms.txt, sitemaps) are exempt —
+  they ship no scripts.
+- **Do not remove** the `headers()` nonce read in `[locale]/layout.tsx` "to
+  unlock ISR" — it is the deliberate site-wide dynamic anchor (the nonce
+  VALUE is dead, the dynamic side effect is load-bearing).
+- The perf lever for editorial routes is the **Data Cache**
+  (`unstable_cache` on the catalogue readers — `server/destinations/cities.ts`,
+  `server/places/list-places.ts`, `server/editorial/build-link-map.ts`), plus
+  render-CPU hygiene, NOT HTML caching. See ADR-0031 §Spike results for the
+  measured numbers (destination 21 s → 3.2 s without touching rendering mode).
 
 ### Metadata
 

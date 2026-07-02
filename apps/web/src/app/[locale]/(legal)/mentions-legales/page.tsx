@@ -7,8 +7,12 @@ import { isRoutingLocale } from '@/i18n/routing';
 import { LegalSection, LegalShell } from '../_components/legal-shell';
 import { buildLegalMetadata } from '../_components/legal-metadata';
 
-// Legal pages rarely change and have no per-request state — SSG.
-export const dynamic = 'force-static';
+// Dynamic like every other route (ADR-0031): under the nonce +
+// `strict-dynamic` CSP, a force-static page ships script tags without a
+// valid nonce and the browser blocks ALL its JavaScript (verified in prod:
+// 58 CSP violations, dead hydration — header menus, consent banner and
+// analytics never mounted on this page). Cheap to render; correctness wins.
+export const dynamic = 'force-dynamic';
 
 const LAST_UPDATED = '2026-05-01';
 
