@@ -241,6 +241,24 @@ export default async function ConciergeHoteliersPage({
         <p className="text-muted mt-3 max-w-prose text-sm md:text-base">{t('noPayToPlay.body')}</p>
       </section>
 
+      {/* Badge partenaire — self-serve authority lever (WS-A). Surfaced
+          here so already-listed hoteliers reach the embed page in 1 click. */}
+      <section
+        aria-labelledby="badge-cta-title"
+        className="border-border bg-muted/5 mb-14 rounded-lg border p-6 md:p-8"
+      >
+        <h2 id="badge-cta-title" className="text-fg font-serif text-xl sm:text-2xl">
+          {t('badgeCta.title')}
+        </h2>
+        <p className="text-muted mt-3 max-w-prose text-sm md:text-base">{t('badgeCta.body')}</p>
+        <Link
+          href="/le-concierge/badge"
+          className="text-fg mt-4 inline-block text-sm font-medium underline underline-offset-4"
+        >
+          {t('badgeCta.cta')} →
+        </Link>
+      </section>
+
       {/* Contact */}
       <section
         aria-labelledby="contact-title"

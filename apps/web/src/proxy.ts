@@ -105,7 +105,12 @@ export const config = {
   // `/og/default.jpg`, the 1200x630 home/site-wide fallback) — same trap:
   // without it next-intl rewrites `/og/default.jpg` to `/fr/og/default.jpg`
   // which 404s, leaving every social/LLM share preview with a broken image.
+  // `badge` covers the partner-badge SVGs in `public/badge/*`
+  // (`mch-selected-badge-{light,dark}.svg`) embedded by hoteliers on their
+  // own domains — same trap: without it next-intl rewrites
+  // `/badge/mch-selected-badge-light.svg` to `/fr/badge/...svg` which 404s,
+  // breaking every externally-embedded badge image.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.*|apple-touch-icon.*|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit|og).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.*|apple-touch-icon.*|robots.txt|sitemap.xml|sitemaps|llms.txt|llms-full.txt|.well-known|manifest.webmanifest|monitoring|logos|kit|og|badge).*)',
   ],
 };

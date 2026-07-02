@@ -635,6 +635,9 @@ export function MobileNav(): ReactElement {
                     <Link href="/le-concierge/pour-les-hoteliers" className={subLinkClass}>
                       {t('primaryNav.conciergeHotelier')}
                     </Link>
+                    <Link href="/le-concierge/badge" className={subLinkClass}>
+                      {t('primaryNav.conciergeBadge')}
+                    </Link>
                     <Link href="/le-concierge/mice-et-seminaires" className={subLinkClass}>
                       {t('primaryNav.conciergeMice')}
                     </Link>

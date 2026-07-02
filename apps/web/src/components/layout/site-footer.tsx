@@ -384,6 +384,11 @@ export async function SiteFooter(): Promise<ReactElement> {
                 </Link>
               </li>
               <li>
+                <Link href="/le-concierge/badge" className="text-fg hover:underline">
+                  {t('links.badge')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/le-concierge/mice-et-seminaires" className="text-fg hover:underline">
                   {t('links.mice')}
                 </Link>
