@@ -501,6 +501,7 @@
       "conciergeOpenings": "Ouvertures et visites récentes",
       "conciergeJournal": "Journal du Concierge",
       "conciergeHotelier": "Pour les hôteliers",
+      "conciergeBadge": "Le badge partenaire",
       "conciergeMice": "MICE / Séminaires",
       "conciergeContact": "Nous contacter",
       "conciergePress": "Presse & partenaires",
@@ -1980,6 +1981,11 @@
       "responseSLA": "Accusé de réception sous 48h ouvrées, pré-évaluation sous 5 jours ouvrés.",
       "altCanal": "Pour les demandes presse, voir /le-concierge/presse-et-partenaires. Pour les demandes événementiel/MICE, voir /le-concierge/mice-et-seminaires."
     },
+    "badgeCta": {
+      "title": "Déjà référencé ? Affichez le badge",
+      "body": "Les hôtels de notre catalogue peuvent afficher le badge « Sélectionné par MyConciergeHotel » sur leur site, avec un lien suivi vers leur fiche. Snippet HTML et conditions d'usage sur la page dédiée.",
+      "cta": "Découvrir le badge partenaire"
+    },
     "faqTitle": "Hôteliers — questions fréquentes",
     "faq": [
       {
@@ -2005,6 +2011,99 @@
       {
         "q": "Êtes-vous compatibles avec notre channel manager existant ?",
         "a": "Oui — toute distribution passe par Amadeus GDS standard (codes A, B, C selon votre paramétrage hôtel). Si vous êtes sur Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, la connectivité est immédiate — votre channel manager pousse l'inventaire vers Amadeus, nous le récupérons."
+      }
+    ]
+  },
+  "conciergeBadge": {
+    "metaTitle": "Le badge « Sélectionné par MyConciergeHotel » — hôtels partenaires",
+    "metaDesc": "Hôtels de notre catalogue : affichez le badge « Sélectionné par MyConciergeHotel » sur votre site avec un lien suivi vers votre fiche. Sélection éditoriale, sans pay-to-play. Snippet HTML et conditions d'usage.",
+    "breadcrumbHome": "Accueil",
+    "breadcrumbConcierge": "Le Concierge",
+    "eyebrow": "Badge partenaire",
+    "title": "Le badge « Sélectionné par MyConciergeHotel »",
+    "lede": "Un sceau sobre, réservé aux hôtels de notre catalogue. Il atteste d'une sélection éditoriale indépendante et renvoie, en lien suivi, vers votre fiche sur myconciergehotel.com.",
+    "lastReviewed": "2026-07-02",
+    "aeoQuestion": "Qu'est-ce que le badge « Sélectionné par MyConciergeHotel » ?",
+    "aeoAnswer": "C'est un sceau que les hôtels de notre catalogue affichent sur leur site. Il signale une sélection éditoriale, indépendante et sans contrepartie financière, et renvoie en lien suivi vers la fiche de l'hôtel sur myconciergehotel.com. Réservé aux {hotels} hôtels référencés dans {countries} pays. Mise à jour {date}.",
+    "audience": {
+      "title": "À qui s'adresse ce badge",
+      "body": "Le badge est réservé aux {hotels} hôtels référencés dans notre catalogue éditorial, répartis dans {countries} pays. Si votre établissement figure sur myconciergehotel.com, vous pouvez l'afficher librement. Vous n'êtes pas encore référencé ? Écrivez à notre cellule partenariats depuis la page Pour les hôteliers."
+    },
+    "certifies": {
+      "title": "Ce que le badge certifie",
+      "lede": "Le badge n'est pas un logo commercial. Il engage notre signature éditoriale.",
+      "items": [
+        {
+          "title": "Une sélection sur 8 critères",
+          "body": "Atout France, Michelin Keys, étoiles Michelin, Forbes, collections d'auteur, avis vérifiés, audit terrain et signature éditoriale. Le détail figure sur notre méthode éditoriale."
+        },
+        {
+          "title": "Aucun pay-to-play",
+          "body": "Personne n'achète sa place ni son classement. Notre revenu vient des commissions agence IATA standard, identiques d'un hôtel à l'autre."
+        },
+        {
+          "title": "Un audit signé",
+          "body": "Chaque fiche repose sur une visite terrain et un texte rédigé par notre équipe, jamais un copier-coller d'agrégateur."
+        },
+        {
+          "title": "Un lien éditorial suivi",
+          "body": "Le badge pointe vers votre fiche sur myconciergehotel.com — un lien réel, sans attribut nofollow."
+        }
+      ]
+    },
+    "embed": {
+      "title": "Comment l'intégrer à votre site",
+      "lede": "Copiez le code ci-dessous, puis remplacez le slug par celui de votre fiche. Deux variantes existent : claire pour les fonds clairs, sombre pour les en-têtes foncés.",
+      "previewLightLabel": "Variante claire",
+      "previewDarkLabel": "Variante sombre",
+      "snippetLabel": "Code à copier",
+      "copy": "Copier le code",
+      "copied": "Copié",
+      "placeholderTitle": "Le slug à remplacer",
+      "placeholderNote": "Remplacez VOTRE-SLUG-HOTEL par l'identifiant de votre fiche. Vous le trouvez à la fin de son adresse : myconciergehotel.com/hotel/VOTRE-SLUG-HOTEL.",
+      "exampleNote": "Exemple : la fiche du Meurice est myconciergehotel.com/hotel/le-meurice — le slug est donc le-meurice.",
+      "darkVariantNote": "Pour la variante sombre, remplacez mch-selected-badge-light.svg par mch-selected-badge-dark.svg.",
+      "dofollowNote": "Gardez le lien suivi : n'ajoutez pas rel=\"nofollow\". C'est ce lien éditorial qui fait la valeur du badge.",
+      "altReminder": "Conservez l'attribut alt tel quel — il décrit le badge pour l'accessibilité et les moteurs de recherche."
+    },
+    "terms": {
+      "title": "Conditions d'usage",
+      "items": [
+        "Le badge est réservé aux hôtels actuellement référencés dans notre catalogue.",
+        "Le lien doit pointer vers votre fiche officielle sur myconciergehotel.com, jamais vers un tiers.",
+        "N'altérez ni les couleurs, ni le texte, ni les proportions du badge.",
+        "Le badge reste notre propriété éditoriale ; retirez-le si votre fiche est dépubliée.",
+        "Aucune contrepartie n'est demandée ni acceptée pour l'affichage du badge."
+      ]
+    },
+    "related": {
+      "title": "Pour aller plus loin",
+      "methodTitle": "Notre méthode éditoriale",
+      "methodLede": "Les 8 critères de sélection et nos principes d'indépendance.",
+      "hoteliersTitle": "Pour les hôteliers",
+      "hoteliersLede": "Rejoindre le catalogue : critères, processus et contacts."
+    },
+    "faqTitle": "Le badge — questions fréquentes",
+    "faq": [
+      {
+        "q": "Le badge est-il payant ?",
+        "a": "Non. Il est gratuit et réservé aux hôtels de notre catalogue. Aucune contrepartie n'est demandée ni acceptée pour l'afficher."
+      },
+      {
+        "q": "Puis-je l'utiliser si je ne suis pas référencé ?",
+        "a": "Non. Le badge atteste d'une sélection éditoriale réelle. Si vous n'êtes pas encore référencé, écrivez à notre cellule partenariats depuis la page Pour les hôteliers."
+      },
+      {
+        "q": "Le lien est-il suivi (dofollow) ?",
+        "a": "Oui. Le snippet ne contient aucun attribut rel=\"nofollow\" : le lien vers votre fiche est un lien éditorial réel."
+      },
+      {
+        "q": "Puis-je modifier le badge ?",
+        "a": "Non. Les couleurs, le texte et les proportions doivent rester intacts. Deux variantes officielles (claire et sombre) sont fournies pour s'adapter à votre site."
+      },
+      {
+        "q": "Où placer le badge ?",
+        "a": "Là où vos visiteurs consultent vos distinctions : pied de page, page presse ou page « à propos ». Évitez les zones publicitaires."
       }
     ]
   },
@@ -2790,6 +2889,7 @@
       "loyalty": "Programme de fidélité",
       "support": "Aide & contact",
       "hoteliers": "Pour les hôteliers",
+      "badge": "Le badge partenaire",
       "mice": "MICE / Séminaires",
       "press": "Presse",
       "concierge": "À propos (Le Concierge)",

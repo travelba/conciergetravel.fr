@@ -501,6 +501,7 @@
       "conciergeOpenings": "Recent openings and visits",
       "conciergeJournal": "Concierge Journal",
       "conciergeHotelier": "For hoteliers",
+      "conciergeBadge": "The partner badge",
       "conciergeMice": "MICE / Events",
       "conciergeContact": "Contact us",
       "conciergePress": "Press & partners",
@@ -1980,6 +1981,11 @@
       "responseSLA": "Receipt acknowledgement within 48 business hours, pre-evaluation within 5 business days.",
       "altCanal": "For press requests, see /le-concierge/presse-et-partenaires. For event/MICE requests, see /le-concierge/mice-and-events."
     },
+    "badgeCta": {
+      "title": "Already listed? Display the badge",
+      "body": "Hotels in our catalogue can display the \u201cSelected by MyConciergeHotel\u201d badge on their site, with a followed link back to their page. HTML snippet and terms of use on the dedicated page.",
+      "cta": "Discover the partner badge"
+    },
     "faqTitle": "Hoteliers — frequently asked questions",
     "faq": [
       {
@@ -2005,6 +2011,99 @@
       {
         "q": "Are you compatible with our existing channel manager?",
         "a": "Yes — all distribution goes through Amadeus GDS standard (A, B, C codes per your hotel setup). If you're on Synxis, SiteMinder, D-EDGE, TravelClick, Little Hotelier, connectivity is immediate — your channel manager pushes inventory to Amadeus, we pick it up."
+      }
+    ]
+  },
+  "conciergeBadge": {
+    "metaTitle": "The \u201cSelected by MyConciergeHotel\u201d badge — partner hotels",
+    "metaDesc": "Hotels in our catalogue: display the \u201cSelected by MyConciergeHotel\u201d badge on your site with a followed link back to your page. Editorial selection, no pay-to-play. HTML snippet and terms of use.",
+    "breadcrumbHome": "Home",
+    "breadcrumbConcierge": "The Concierge",
+    "eyebrow": "Partner badge",
+    "title": "The \u201cSelected by MyConciergeHotel\u201d badge",
+    "lede": "A sober seal, reserved for hotels in our catalogue. It attests to an independent editorial selection and links, as a followed link, back to your page on myconciergehotel.com.",
+    "lastReviewed": "2026-07-02",
+    "aeoQuestion": "What is the \u201cSelected by MyConciergeHotel\u201d badge?",
+    "aeoAnswer": "It is a seal that hotels in our catalogue display on their site. It signals an editorial selection, independent and with no financial consideration, and links as a followed link to the hotel's page on myconciergehotel.com. Reserved for the {hotels} hotels listed across {countries} countries. Updated {date}.",
+    "audience": {
+      "title": "Who the badge is for",
+      "body": "The badge is reserved for the {hotels} hotels listed in our editorial catalogue, across {countries} countries. If your property appears on myconciergehotel.com, you may display it freely. Not listed yet? Write to our partnerships cell from the For hoteliers page."
+    },
+    "certifies": {
+      "title": "What the badge certifies",
+      "lede": "The badge is not a commercial logo. It carries our editorial signature.",
+      "items": [
+        {
+          "title": "A selection on 8 criteria",
+          "body": "Atout France, Michelin Keys, Michelin stars, Forbes, author collections, verified reviews, field audit and editorial signature. The detail is on our editorial method."
+        },
+        {
+          "title": "No pay-to-play",
+          "body": "No one buys their place or their ranking. Our revenue comes from standard IATA agency commissions, identical from one hotel to the next."
+        },
+        {
+          "title": "A signed audit",
+          "body": "Every page rests on a field visit and a text written by our team, never a copy-paste from an aggregator."
+        },
+        {
+          "title": "A followed editorial link",
+          "body": "The badge points to your page on myconciergehotel.com — a real link, with no nofollow attribute."
+        }
+      ]
+    },
+    "embed": {
+      "title": "How to add it to your site",
+      "lede": "Copy the code below, then replace the slug with the one for your page. Two variants exist: light for light backgrounds, dark for dark headers.",
+      "previewLightLabel": "Light variant",
+      "previewDarkLabel": "Dark variant",
+      "snippetLabel": "Code to copy",
+      "copy": "Copy code",
+      "copied": "Copied",
+      "placeholderTitle": "The slug to replace",
+      "placeholderNote": "Replace YOUR-HOTEL-SLUG with your page identifier. You will find it at the end of its address: myconciergehotel.com/hotel/YOUR-HOTEL-SLUG.",
+      "exampleNote": "Example: Le Meurice's page is myconciergehotel.com/hotel/le-meurice — so the slug is le-meurice.",
+      "darkVariantNote": "For the dark variant, replace mch-selected-badge-light.svg with mch-selected-badge-dark.svg.",
+      "dofollowNote": "Keep the link followed: do not add rel=\"nofollow\". This editorial link is what gives the badge its value.",
+      "altReminder": "Keep the alt attribute as is — it describes the badge for accessibility and search engines."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "items": [
+        "The badge is reserved for hotels currently listed in our catalogue.",
+        "The link must point to your official page on myconciergehotel.com, never to a third party.",
+        "Do not alter the badge's colours, text or proportions.",
+        "The badge remains our editorial property; remove it if your page is unpublished.",
+        "No consideration is requested or accepted for displaying the badge."
+      ]
+    },
+    "related": {
+      "title": "Go further",
+      "methodTitle": "Our editorial method",
+      "methodLede": "The 8 selection criteria and our independence principles.",
+      "hoteliersTitle": "For hoteliers",
+      "hoteliersLede": "Join the catalogue: criteria, process and contacts."
+    },
+    "faqTitle": "The badge — frequently asked questions",
+    "faq": [
+      {
+        "q": "Is the badge paid?",
+        "a": "No. It is free and reserved for hotels in our catalogue. No consideration is requested or accepted to display it."
+      },
+      {
+        "q": "Can I use it if I am not listed?",
+        "a": "No. The badge attests to a real editorial selection. If you are not listed yet, write to our partnerships cell from the For hoteliers page."
+      },
+      {
+        "q": "Is the link followed (dofollow)?",
+        "a": "Yes. The snippet contains no rel=\"nofollow\" attribute: the link to your page is a real editorial link."
+      },
+      {
+        "q": "Can I modify the badge?",
+        "a": "No. The colours, text and proportions must remain intact. Two official variants (light and dark) are provided to suit your site."
+      },
+      {
+        "q": "Where should I place the badge?",
+        "a": "Where your visitors read your distinctions: footer, press page or \u201cabout\u201d page. Avoid advertising areas."
       }
     ]
   },
@@ -2790,6 +2889,7 @@
       "loyalty": "Loyalty programme",
       "support": "Help & contact",
       "hoteliers": "For hoteliers",
+      "badge": "The partner badge",
       "mice": "MICE / Events",
       "press": "Press",
       "concierge": "About (The Concierge)",
