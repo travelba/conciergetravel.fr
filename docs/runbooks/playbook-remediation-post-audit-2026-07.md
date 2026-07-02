@@ -304,7 +304,31 @@ boundary i18n ; typecheck vert.
 
 ---
 
-## WP-B5 — Paginer `/hotels` (10,4 Mo → < 500 Ko)
+## WP-B5 — Paginer `/hotels` (10,4 Mo → < 500 Ko) — ✅ FAIT 2026-07-02 (variante)
+
+**Statut** : livré en 2 commits (`6faafdac` + `782d786e`) avec une
+variante moins destructive que la décision initiale, pour préserver les
+ancres `#country-<code>` que le méga-menu (`nav-data.ts
+INTL_NAV_SLUG_TO_ISO`) et `/destination` ciblent en dur :
+
+- **Cartes plafonnées à 6 par groupe** (régions France + pays), avec un
+  lien « Voir les N adresses dans l'annuaire » vers `/hotels/[pays]`
+  (ADR-0026) quand le groupe est tronqué. Les rows arrivant
+  priority-ordered, les flagships P0 restent en tête.
+- **Long tail compactée** : seuls les 15 premiers pays gardent une
+  grille de cartes ; les ~110 autres deviennent une ligne compacte
+  (titre + compte + « Annuaire complet → ») qui CONSERVE l'ancre.
+- **ItemList JSON-LD plafonné à 60 entrées** (était 2 929 URLs ≈ 500 Ko
+  de JSON inerte).
+
+**Résultat mesuré** : 10 360 Ko → **1 303 Ko** (-87 %) ; note : le
+plancher incompressible de l'app est ~475 Ko (page légale nue — bundle
+JS + RSC), donc le payload spécifique page est ~830 Ko pour 254
+sections/ancres + ~170 cartes + FAQ. L'objectif « < 500 Ko » absolu
+n'est atteignable qu'en supprimant les ancres pays (cassant le
+méga-menu) — refusé. Aucune fiche orpheline : tout hôtel reste lié
+depuis l'annuaire ville + sitemaps ; chaque hôtel joignable en ≤ 3
+clics (`/hotels` → annuaire pays → fiche).
 
 **Priorité** : P0 · **Effort** : 1 j
 
