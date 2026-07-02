@@ -132,9 +132,9 @@ export const EDITORIAL_CATEGORIES: readonly EditorialCategory[] = [
     metaTitleFr: 'Palaces parisiens — Sélection MyConciergeHotel',
     metaTitleEn: 'Parisian Palaces — MyConciergeHotel selection',
     metaDescFr:
-      'Découvrez la sélection MyConciergeHotel des Palaces parisiens distingués par Atout France : Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
+      'Découvrez la sélection MyConciergeHotel des 13 Palaces parisiens distingués par Atout France (Collection 2026) : Plaza Athénée, Le Bristol, Le Meurice, Crillon, Cheval Blanc, George V…',
     metaDescEn:
-      'Discover the MyConciergeHotel selection of Parisian Palaces distinguished by Atout France: Plaza Athénée, Le Bristol, Le Meurice, Ritz, Crillon, Cheval Blanc, George V…',
+      'Discover the MyConciergeHotel selection of the 13 Parisian Palaces distinguished by Atout France (2026 Collection): Plaza Athénée, Le Bristol, Le Meurice, Crillon, Cheval Blanc, George V…',
     subtitleFr: (n) =>
       `${n} adresses parisiennes distinguées par la mention Palace d'Atout France — la conciergerie MyConciergeHotel vous accompagne pour réserver l'expérience à 360°.`,
     subtitleEn: (n) =>

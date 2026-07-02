@@ -33,9 +33,19 @@ export const dynamic = 'force-dynamic';
  * does not index thin pages and the site's overall quality signal is
  * preserved").
  */
+/**
+ * Full-catalogue fetch limit. The default 200-row window of
+ * `listPublishedHotelsForIndex` is ordered `(priority, name)` — with
+ * 107 P0 + 243 P1 published hotels, no P2 row ever enters the window,
+ * so any P2 hotel matching a category predicate silently vanished from
+ * the page (2026-07-02: the Fouquet's Barrière Palace was missing from
+ * `/categorie/palaces-paris` while the AEO copy claimed all 13).
+ */
+const CATEGORY_INDEX_LIMIT = 2500;
+
 async function categoryHasNoHotels(category: ReturnType<typeof findCategory>): Promise<boolean> {
   if (category === null) return true;
-  const allHotels = await listPublishedHotelsForIndex();
+  const allHotels = await listPublishedHotelsForIndex(CATEGORY_INDEX_LIMIT);
   return filterCategory(allHotels, category).length === 0;
 }
 
@@ -451,7 +461,7 @@ export default async function CategoryPage({
   setRequestLocale(locale);
   const t = T[locale];
 
-  const allHotels = await listPublishedHotelsForIndex();
+  const allHotels = await listPublishedHotelsForIndex(CATEGORY_INDEX_LIMIT);
   const hotels = filterCategory(allHotels, category);
   // Empty state: render `noindex` (set in `generateMetadata`) instead of
   // `notFound()`. The page advertises that no hotel matches yet and
