@@ -293,6 +293,31 @@ Without `on_conflict=slug` the entire chunk of 50 was lost. Adding
 `scripts/editorial-pilot/src/global-sources/scaffold-relais-chateaux.ts`
 for the reference implementation.
 
+### Trap — `apps/web/.env.local` carries an ANON key named `SUPABASE_SERVICE_ROLE_KEY` (2026-07-02)
+
+On this dev box the two `.env.local` files disagree: the **repo root**
+`.env.local` holds the real service-role JWT (`eyJ…`), while
+**`apps/web/.env.local`** holds a new-style `sb_publishable_…` key
+(anon-equivalent) under the same `SUPABASE_SERVICE_ROLE_KEY` name. A
+write script that loads only `apps/web/.env.local` **appears to work**:
+RLS lets the read through (`hotel_rooms` is public-select), and the
+PATCH/DELETE return **2xx with zero rows affected** — PostgREST does
+not error when RLS filters every target row. The room-duplicates merge
+"succeeded" twice with no effect before the key was inspected.
+
+Two mandatory guards for any PostgREST write script:
+
+1. **Assert the key shape before writing**: a service-role key is a
+   3-part JWT whose payload decodes to `role: "service_role"`. Refuse
+   to run writes with an `sb_publishable_…` prefix.
+2. **`Prefer: return=representation` + assert affected-row count.**
+   `return=minimal` turns an RLS-swallowed write into a false success;
+   asserting `json.length === expected` makes it fail loudly.
+
+Reference implementation:
+`scripts/editorial-pilot/src/hotels/merge-duplicate-rooms.mjs` (env
+fallback root → apps/web + key-shape guard + representation asserts).
+
 ## Supabase REST silently caps `.select()` at 1000 rows
 
 Every Supabase REST query (`supabase-js`, `createServerClient`,
