@@ -36,6 +36,27 @@ function siteOrigin(): string {
   return (env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_SITE_URL).replace(/\/$/, '');
 }
 
+/**
+ * Max rich cards rendered per region/country group. The page used to
+ * inline ALL 2 219 hotels (10.4 MB of HTML + RSC payload — audit
+ * 2026-07-02): unusable on mobile and a crawl-budget sink. The
+ * exhaustive per-country list is the annuaire (`/hotels/[pays]`,
+ * ADR-0026) — this hub shows the head of each group (rows arrive
+ * priority-ordered, so the P0 flagships surface) and links to the
+ * annuaire for the rest. No fiche is orphaned: every hotel stays
+ * linked from its annuaire city page + the sitemaps.
+ */
+const GROUP_CARD_CAP = 6;
+
+/**
+ * Cap on the `ItemList` JSON-LD entries. Google's carousel rich result
+ * reads the first handful of items; 2 219 URLs added ~500 KB of inert
+ * JSON to every response. The list keeps `numberOfItems` implicit via
+ * the visible counts; the head of the priority-ordered catalogue is
+ * what matters for the rich result.
+ */
+const ITEMLIST_JSONLD_CAP = 60;
+
 const T = {
   fr: {
     eyebrow: 'Catalogue éditorial',
@@ -52,6 +73,7 @@ const T = {
     count: (n: number) => (n === 1 ? '1 adresse' : `${n} adresses`),
     seeFiche: 'Voir la fiche',
     seeDirectory: 'Annuaire complet',
+    seeAllInDirectory: (n: number) => `Voir les ${n} adresses dans l\u2019annuaire`,
     directoryHint:
       'Besoin de la liste exhaustive d\u2019une ville ou d\u2019un pays ? Parcourez l\u2019annuaire par pays ci-dessous — chaque pays ouvre la liste complète, ville par ville.',
     metaTitle: 'Hôtels d\u2019exception dans le monde — Sélection du Concierge',
@@ -106,6 +128,7 @@ const T = {
     count: (n: number) => (n === 1 ? '1 address' : `${n} addresses`),
     seeFiche: 'View the page',
     seeDirectory: 'Full directory',
+    seeAllInDirectory: (n: number) => `See all ${n} addresses in the directory`,
     directoryHint:
       'Need the exhaustive list for a city or a country? Browse the directory by country below — each country opens the complete list, city by city.',
     metaTitle: 'Extraordinary hotels worldwide — The Concierge\u2019s Selection',
@@ -250,13 +273,14 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
   }
   const brandsWithEntries = KNOWN_BRANDS.filter((b) => (brandCounts.get(b.slug)?.count ?? 0) >= 2);
 
-  // ── ItemList JSON-LD (full catalog) ──────────────────────────────────
-  // Rich `Hotel` ListItem variant for the first 30 entries — surfaces
-  // starRating + the Palace marker in the carousel rich result.
+  // ── ItemList JSON-LD (head of the priority-ordered catalogue) ────────
+  // Rich `Hotel` ListItem variant — surfaces starRating + the Palace
+  // marker in the carousel rich result. Capped (see ITEMLIST_JSONLD_CAP):
+  // the full-catalogue variant added ~500 KB of inert JSON per response.
   const itemListJsonLd = JsonLd.withSchemaOrgContext(
     JsonLd.itemListJsonLd({
       name: title,
-      items: rows.map((h) => {
+      items: rows.slice(0, ITEMLIST_JSONLD_CAP).map((h) => {
         const stars = h.stars;
         const isValidStarRating = (n: number): n is 1 | 2 | 3 | 4 | 5 =>
           n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
@@ -479,7 +503,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
           </header>
 
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {g.hotels.map((row) => {
+            {g.hotels.slice(0, GROUP_CARD_CAP).map((row) => {
               const h = toRenderable(row, locale);
               return (
                 <li key={h.key}>
@@ -508,6 +532,17 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
               );
             })}
           </ul>
+          {g.hotels.length > GROUP_CARD_CAP && franceDirectorySlug !== null ? (
+            <p className="mt-4">
+              <Link
+                href={{ pathname: '/hotels/[pays]', params: { pays: franceDirectorySlug } }}
+                prefetch={false}
+                className="text-sm font-medium text-amber-700 underline-offset-2 hover:underline"
+              >
+                {t.seeAllInDirectory(g.hotels.length)} →
+              </Link>
+            </p>
+          ) : null}
         </section>
       ))}
 
@@ -556,7 +591,7 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                 </header>
 
                 <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {g.hotels.map((row) => {
+                  {g.hotels.slice(0, GROUP_CARD_CAP).map((row) => {
                     const h = toRenderable(row, locale);
                     return (
                       <li key={h.key}>
@@ -587,6 +622,20 @@ export default async function HotelsIndexPage({ params }: { params: Promise<{ lo
                     );
                   })}
                 </ul>
+                {(() => {
+                  const slug = countrySlugByCode.get(g.code);
+                  return g.hotels.length > GROUP_CARD_CAP && slug !== undefined ? (
+                    <p className="mt-4">
+                      <Link
+                        href={{ pathname: '/hotels/[pays]', params: { pays: slug } }}
+                        prefetch={false}
+                        className="text-sm font-medium text-amber-700 underline-offset-2 hover:underline"
+                      >
+                        {t.seeAllInDirectory(g.hotels.length)} →
+                      </Link>
+                    </p>
+                  ) : null;
+                })()}
               </section>
             );
           })}
