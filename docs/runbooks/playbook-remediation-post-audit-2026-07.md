@@ -532,6 +532,15 @@ TTFB chaud local après fix : home **114 ms**, hub `/destination` **163 ms**,
 **85-190 ms**. Reliquat : fiche hôtel ~1,3 s (fetch per-slug non caché,
 acceptable) + paginer `/hotels` (HTML 10,4 Mo — lane B).
 
+**Prod vérifié post-déploiement (2026-07-02, commit `825d2f92`, TTFB
+chaud, x-vercel-cache=MISS by design)** : home **357 ms** (baseline
+2 752), `/destination` **453 ms** (12 034), `/destination/paris`
+**540 ms** (12 233), classement **455 ms** (10 623), fiche Le Meurice
+**749 ms** (3 000-4 464), `/lieux/paris` **281 ms**, mentions-légales
+**237 ms** (JS vivant). Cible WP-E3 (< 800 ms classement/fiche,
+< 3,5 s destination) **atteinte partout**. Contenu FR + EN vérifié
+(guide Paris 14 h2 + Meurice sur les deux locales, 0 carte "0 hôtels").
+
 ## WP-E3 — ✅ Script livré : `scripts/perf/measure-ttfb.ps1` (+ `ttfb-probe.mjs`)
 
 20 URLs × 3 hits → CSV `scripts/perf/runs/ttfb-<date>.csv` + médiane des
