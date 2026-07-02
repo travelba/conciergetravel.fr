@@ -1,8 +1,12 @@
 # ADR-0031 — Editorial route cacheability after JSON-LD nonce removal
 
-- Status: **Proposed** (migration plan — requires PO + security sign-off before any flip)
-- Date: 2026-06-28
-- Deciders: TBD — PO (travelba) arbitrage + security review (β-gate of ADR-0027)
+- Status: **Accepted — Option C+ (2026-07-02)**. Spike executed; Option A
+  (ISR HTML) **rejected on evidence**; decision = keep `force-dynamic`
+  site-wide, repair the already-broken `force-static` routes, and move the
+  perf lever to the shared Data Cache (`unstable_cache`). See §Spike results.
+- Date: 2026-06-28 (proposed) · 2026-07-02 (decided)
+- Deciders: senior agent (spike + decision), PO informed via audit remediation
+  lane E (playbook 2026-07)
 - Supersedes: —
 - Superseded by: —
 - Related: ADR-0027 (CSP model — CSP-α retained, **governs this question**),
@@ -119,7 +123,89 @@ allow-listing.
 Remove the no-op `headers()` reads for hygiene (they mislead the next reader and
 the skill doc) but stay dynamic. Zero caching gain; pure clarity. Lowest risk.
 
-## Migration plan (the scoped spike — what to actually run next)
+## Spike results (2026-07-02) — the open question is ANSWERED
+
+Ground truth captured on production (`scripts/perf/spike-csp-static-check.mjs`,
+Playwright Chromium, 2026-07-02):
+
+| Route               | Rendering                                             | HTML nonce                                                | CSP violations | `self.__next_f` executed |
+| ------------------- | ----------------------------------------------------- | --------------------------------------------------------- | -------------- | ------------------------ |
+| `/mentions-legales` | `force-static`, `x-vercel-cache: HIT` (age 247 591 s) | **none** (0 of 59 script tags)                            | **58**         | **false** — zero JS ran  |
+| `/lieux`            | `force-dynamic`, MISS                                 | fresh, on 55/58 script tags, matches the CSP header nonce | 0              | true                     |
+
+Mechanics confirmed:
+
+1. Next.js **does** stamp the per-request nonce on every script tag (inline
+   `self.__next_f.push` bootstrap AND external `/_next/static` chunks) when the
+   route renders dynamically. The proxy's response-header CSP is picked up.
+2. When the route is static, the prerendered HTML carries **no nonce at all**,
+   while `proxy.ts` still attaches a fresh-nonce CSP header on every response.
+   Under `'strict-dynamic'` the host allowlist (`'self'`) is **ignored**, so the
+   browser blocks **every** script — inline bootstrap and external chunks alike.
+   The page paints (SSR HTML) but hydration, the consent banner, the header
+   menus and analytics are all dead. The four `(legal)` `force-static` pages had
+   been shipping in this broken state in production.
+3. Therefore **any HTML-cached response (SSG, ISR, CDN `s-maxage`) is
+   structurally incompatible with the current per-request-nonce CSP**: the
+   cached markup can never match the fresh header nonce, and no variant of
+   "remove the `headers()` read" changes that. Option A is dead, not because of
+   the JSON-LD (which indeed needs no nonce) but because of Next's own scripts.
+
+### Decision — Option C+ (Accepted)
+
+- **Keep `force-dynamic` on every HTML route.** The `headers()` nonce read in
+  `[locale]/layout.tsx` is retained and re-documented as the deliberate
+  site-wide dynamic anchor (the nonce _value_ is dead; the dynamic _side
+  effect_ is load-bearing).
+- **Repair the broken static routes**: the 4 `(legal)` pages flip
+  `force-static` → `force-dynamic` (they were the only HTML routes serving
+  nonce-less cached markup). `robots.txt` / `llms*.txt` / sitemaps stay static —
+  they ship no scripts.
+- **Move the perf lever to the Data Cache**: the TTFB pain (3-12 s) is data
+  work, not render work. The catalogue-wide Supabase scan behind
+  `getDestinationBySlug` / `listPublishedCities` / the annuaire / the header
+  nav (`server/destinations/cities.ts`) is now wrapped in
+  `unstable_cache(..., { revalidate: 3600, tags: ['hotels-catalogue'] })`, with
+  descriptions capped at 220 chars pre-cache so the entry stays under the 2 MB
+  Data Cache limit. Same pattern as the pre-existing `editorial-link-map`
+  cache. Remaining hot readers (guides, rankings entries, places) can adopt
+  the same wrapper incrementally — each is a pure additive change.
+- **Future path to HTML caching** (out of scope, requires its own ADR + β-gate
+  security review): migrate `script-src` away from per-request nonces, e.g.
+  Cache Components/PPR with build-time hashes once Next 16's story covers the
+  RSC inline bootstrap. Until then, no route may go static/ISR while the CSP
+  carries `'nonce-…' 'strict-dynamic'`.
+
+### Bonus finding — the 12-21 s destination pages were CPU, not I/O
+
+Local `next start` profiling during the POC showed `/destination/paris` at a
+constant **21 s TTFB** even with the new data cache warm, while guide-less
+destinations sat at 3-4 s. The delta was the guide long-read render:
+`<EnrichedText>` compiled the full ~5 000-entry auto-link map into Unicode
+lookbehind regexes **per component render** (one per section body) and ran
+every regex against every paragraph — O(entries × paragraphs) `.exec` scans.
+Fix (same commit): (1) per-link-map `WeakMap` compile cache (one compilation
+per page render instead of one per section), (2) lazy per-entry regex
+construction, (3) a lowercase `String.includes` pre-filter that skips the
+~99 % of the corpus absent from a paragraph before any regex work.
+
+Measured after the fix (local `next start`, warm data cache):
+
+| Route                                  | Before                         | After                |
+| -------------------------------------- | ------------------------------ | -------------------- |
+| `/destination/paris` (guide long-read) | 20 700-30 000 ms               | **3 200 ms**         |
+| `/classement/meilleurs-palaces-paris`  | 10 623 ms (prod baseline)      | **620 ms**           |
+| `/hotel/le-meurice`                    | 3 000-4 464 ms (prod baseline) | **1 250 ms**         |
+| `/lieux`                               | —                              | 30-70 ms             |
+| `/mentions-legales` (now dynamic)      | n/a (static, broken JS)        | 25-75 ms, JS working |
+
+Residual ~2.5-3 s on `/`, `/destination` (hub) and guide-less destinations is
+uncached single-query I/O from the local box to Supabase eu-west — expected to
+shrink on Vercel (same region) and addressable incrementally with the same
+`unstable_cache` pattern. `/hotels` TTFB is now 30 ms but the response body is
+**10.4 MB** (2 219 hotels inlined) — flagged to the front lane for pagination.
+
+## Migration plan (the scoped spike — what was actually run)
 
 1. **Build + capture ground truth.** `SKIP_ENV_VALIDATION=true
 NEXT_PUBLIC_SKIP_ENV_VALIDATION=true pnpm build`, serve, and capture the raw

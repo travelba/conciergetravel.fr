@@ -94,9 +94,16 @@ export default async function LocaleLayout({
   // Site-wide brand Organization (OTA) JSON-LD — the single source of truth
   // for the MyConciergeHotel entity, present on every page so search engines
   // and LLMs can resolve the brand from any URL (it carries a stable `@id`).
-  // The CSP nonce is read here at the layout boundary (NOT inside a leaf RSC —
-  // see `components/seo/json-ld.tsx`); on the few `force-static` routes
-  // `headers()` yields no nonce, which is acceptable (low-priority legal pages).
+  //
+  // ⚠ This `headers()` read is deliberately LOAD-BEARING (ADR-0031): it is
+  // the site-wide dynamic-rendering anchor. Under the per-request nonce +
+  // `strict-dynamic` CSP, any statically-cached HTML ships script tags whose
+  // nonce cannot match the fresh response header, so the browser blocks ALL
+  // JavaScript (prod evidence in the ADR: 58 violations, dead hydration on
+  // the ex-force-static legal pages). Do NOT remove this read to "unlock
+  // ISR" — HTML caching requires migrating the CSP first. The nonce VALUE
+  // itself is no longer consumed (JsonLdScript ignores it since 2026-06-09);
+  // only the dynamic side effect matters.
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (

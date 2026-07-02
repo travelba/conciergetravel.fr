@@ -99,12 +99,38 @@ Lessons:
 
 - Use `export const runtime = 'edge'` for lightweight route handlers (auth callbacks, robots, llms.txt) — but NOT for handlers calling Supabase Auth admin or Sentry server SDK.
 
+### Server-render CPU: text-processing components scale with corpus × content
+
+Case study (2026-07-02, ADR-0031 §Bonus finding): `/destination/paris` held a
+constant **21 s TTFB** with all data caches warm. Root cause was not I/O but
+`<EnrichedText>` (the editorial auto-linker): it compiled the full ~5 000-entry
+link map into Unicode lookbehind regexes **per component render** (one render
+per guide section) and ran **every** regex against **every** paragraph —
+O(entries × paragraphs) `.exec` scans, tens of seconds of pure CPU per request.
+The fix cut it to 3.2 s without touching rendering mode:
+
+1. **Cache the compiled corpus by input identity** — a
+   `WeakMap<EditorialLinkMap, CompiledEntry[]>` gives one compilation per page
+   render (the page builds one Map shared by all sections) and frees with the
+   request.
+2. **Lazy-build expensive artefacts** — the regex per entry is only constructed
+   the first time the entry survives the pre-filter.
+3. **Pre-filter with a cheap operation** — `paragraphLower.includes(entry.lower)`
+   rejects ~99 % of the corpus before any regex work. A case-insensitive regex
+   can only match when the lowercased needle occurs as a substring.
+
+Rule: any server component that scans a large dictionary against long-form
+content (auto-linkers, glossaries, leak gates rendered inline) must be
+profiled with a warm data cache — if warm TTFB doesn't drop, the cost is CPU,
+and the levers above apply. `scripts/perf/ttfb-probe.mjs` separates TTFB from
+download time for exactly this diagnosis.
+
 ## Anti-patterns to refuse
 
 - `<img>` without dimensions.
 - Importing a date/i18n library that adds 200kb of locales (use date-fns selective imports or Intl native).
 - Loading Google Tag Manager or analytics on the booking tunnel.
-- Marking marketing pages as `force-dynamic`.
+- Flipping an HTML route to `force-static` / `revalidate` to "fix" TTFB — under the per-request-nonce CSP this ships unhydratable HTML (every script blocked; ADR-0031). All HTML routes stay dynamic; optimise the data layer + render CPU instead.
 - `'use client'` on entire pages because of one interactive button.
 - Inline styles built dynamically from props (CSS-in-JS at runtime) on hot paths — use Tailwind classes / static CSS.
 - A client-island loading placeholder shorter than its resolved content (header/auth/locale islands) — match heights or keep the island ≤ the row's tallest stable child (see §Client-island placeholder height mismatch).

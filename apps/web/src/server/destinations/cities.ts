@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 
 import { z } from 'zod';
@@ -113,70 +114,114 @@ const PRIORITY_RANK: Record<HotelGroupRow['priority'], number> = { P0: 0, P1: 1,
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 8;
 
-// `cache()`-wrapped: the whole published catalogue (up to 8×1000 rows) is
-// scanned by both `getDestinationBySlug` (called in `generateMetadata` AND
-// the page body of `destination/[citySlug]`) and `listPublishedCities` on a
-// `force-dynamic` route. Request-scoped memoisation collapses those repeated
-// scans to one per request without changing the logic.
-const fetchAllPublished = cache(_fetchAllPublished);
+/**
+ * Cap applied to `description_fr/en` before the rows enter the shared
+ * Data Cache. Nothing downstream reads more than 180 chars of a
+ * description (`pickDescription` → 180-char excerpt here,
+ * `toRenderable` in `/hotels/page.tsx` → 160-char excerpt), while the
+ * raw columns run 600-1600 chars each. Truncating keeps the whole
+ * 2200-row catalogue comfortably under the Vercel Data Cache 2 MB
+ * per-entry limit; without it the payload would exceed it and the
+ * cache write would silently fail on every render.
+ */
+const DESCRIPTION_CACHE_CAP = 220;
 
-async function _fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
+function capDescription(value: string | null): string | null {
+  if (value === null || value.length <= DESCRIPTION_CACHE_CAP) return value;
+  return value.slice(0, DESCRIPTION_CACHE_CAP);
+}
+
+/**
+ * Uncached catalogue scan. THROWS on any Supabase error or non-array
+ * response (instead of returning a partial/empty array) so that
+ * `unstable_cache` never persists a truncated catalogue for a full
+ * TTL window — a transient outage must cost one failed request, not
+ * one hour of empty navigation site-wide. The outer `fetchAllPublished`
+ * converts the throw back into the historical `[]` graceful fallback.
+ */
+async function _fetchAllPublishedRaw(): Promise<readonly HotelGroupRow[]> {
+  const supabase = getSupabaseAdminClient();
+  const out: HotelGroupRow[] = [];
+  let parseFailures = 0;
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('hotels')
+      .select(HOTELS_FOR_GROUPING_COLUMNS)
+      .eq('is_published', true)
+      .order('priority', { ascending: true })
+      .order('name', { ascending: true })
+      .range(from, to);
+    if (error) {
+      console.error('[destinations.cities] Supabase returned error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        page,
+      });
+      throw new Error(`Supabase error on page ${page}: ${error.message}`);
+    }
+    if (!Array.isArray(data)) {
+      console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
+      throw new Error('Supabase returned non-array data');
+    }
+    for (const raw of data) {
+      const parsed = HotelGroupRowSchema.safeParse(raw);
+      if (parsed.success) {
+        out.push({
+          ...parsed.data,
+          description_fr: capDescription(parsed.data.description_fr),
+          description_en: capDescription(parsed.data.description_en),
+        });
+      } else {
+        parseFailures += 1;
+      }
+    }
+    // Last page reached when the response was smaller than PAGE_SIZE.
+    if (data.length < PAGE_SIZE) break;
+  }
+  if (parseFailures > 0) {
+    console.error('[destinations.cities] Schema validation failures:', {
+      totalRows: out.length + parseFailures,
+      parsed: out.length,
+      failures: parseFailures,
+    });
+  }
+  return out;
+}
+
+/**
+ * Shared Data Cache layer (ADR-0031 decision). The editorial routes must
+ * stay `force-dynamic` (the nonce + `strict-dynamic` CSP makes cached
+ * HTML unhydratable — see the ADR's spike evidence), so the TTFB win
+ * comes from caching the DATA instead of the page: the 2200-row
+ * catalogue scan (up to 3 sequential 1000-row PostgREST round-trips)
+ * runs at most once per hour per region instead of once per render.
+ *
+ * Invalidation: time-based 1 h TTL + `revalidateTag('hotels-catalogue')`
+ * from any publish/unpublish hook that needs it sooner.
+ */
+const fetchAllPublishedCached = unstable_cache(_fetchAllPublishedRaw, ['hotels-for-grouping'], {
+  revalidate: 3600,
+  tags: ['hotels-catalogue'],
+});
+
+// `cache()`-wrapped: the whole published catalogue is consumed by
+// `getDestinationBySlug` (called in `generateMetadata` AND the page body),
+// `listPublishedCities`, the annuaire and the header nav on the same
+// render. Request-scoped memoisation collapses those repeated reads to a
+// single Data Cache lookup per request.
+const fetchAllPublished = cache(async (): Promise<readonly HotelGroupRow[]> => {
   // Both env-construction (build without secrets) and the network call may
   // throw; the destination pages tolerate an empty catalog so we coerce all
   // failure modes to `[]` here rather than scattering try/catch at every
-  // call site.
-  //
-  // Failures are surfaced via `console.error` in every environment (including
-  // production) — silent empty arrays previously hid Vercel preview env
-  // misconfigurations for hours. PII never reaches this code path; the
-  // logged error contains nothing user-related.
+  // call site. Failures are surfaced via `console.error` in every
+  // environment — silent empty arrays previously hid Vercel preview env
+  // misconfigurations for hours. No PII reaches this code path.
   try {
-    const supabase = getSupabaseAdminClient();
-    const out: HotelGroupRow[] = [];
-    let parseFailures = 0;
-    for (let page = 0; page < MAX_PAGES; page += 1) {
-      const from = page * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from('hotels')
-        .select(HOTELS_FOR_GROUPING_COLUMNS)
-        .eq('is_published', true)
-        .order('priority', { ascending: true })
-        .order('name', { ascending: true })
-        .range(from, to);
-      if (error) {
-        console.error('[destinations.cities] Supabase returned error:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          page,
-        });
-        return out;
-      }
-      if (!Array.isArray(data)) {
-        console.error('[destinations.cities] Supabase returned non-array data:', typeof data);
-        return out;
-      }
-      for (const raw of data) {
-        const parsed = HotelGroupRowSchema.safeParse(raw);
-        if (parsed.success) {
-          out.push(parsed.data);
-        } else {
-          parseFailures += 1;
-        }
-      }
-      // Last page reached when the response was smaller than PAGE_SIZE.
-      if (data.length < PAGE_SIZE) break;
-    }
-    if (parseFailures > 0) {
-      console.error('[destinations.cities] Schema validation failures:', {
-        totalRows: out.length + parseFailures,
-        parsed: out.length,
-        failures: parseFailures,
-      });
-    }
-    return out;
+    return await fetchAllPublishedCached();
   } catch (e) {
     console.error(
       '[destinations.cities] fetchAllPublished threw:',
@@ -184,7 +229,7 @@ async function _fetchAllPublished(): Promise<readonly HotelGroupRow[]> {
     );
     return [];
   }
-}
+});
 
 export interface CitySummary {
   readonly slug: string;

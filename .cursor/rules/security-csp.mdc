@@ -8,10 +8,11 @@ alwaysApply: true
 
 ## Content Security Policy
 
-- CSP is built by `apps/web/src/lib/security/csp.ts` and applied in `middleware.ts`.
+- CSP is built by `apps/web/src/lib/security/csp.ts` and applied in `proxy.ts` (Next 16 rename of `middleware.ts`).
 - `script-src` uses a **per-request nonce** + `'strict-dynamic'`. Never add `'unsafe-inline'` or `'unsafe-eval'` to `script-src`.
-- The nonce is exposed via the `x-nonce` request header (`NONCE_HEADER`). Server Components read it through `headers()`.
-- Every `<script>` that emits JSON or executes JS must carry the nonce — use `JsonLdScript` for structured data.
+- The nonce is exposed via the `x-nonce` request header (`NONCE_HEADER`). Next stamps it on its own scripts automatically during **dynamic** renders.
+- **Every HTML route must render dynamically** (ADR-0031): statically-cached HTML (force-static / ISR / s-maxage) ships scripts without a valid nonce and `'strict-dynamic'` blocks ALL of them — dead hydration. Non-HTML route handlers (robots, llms.txt, sitemaps) may stay static.
+- JSON-LD (`type="application/ld+json"`) is inert data — `script-src` does not apply, no nonce needed. Use `JsonLdScript` for structured data (it deliberately drops the nonce; see its doc block).
 - New third-party origin → update the whitelist in `csp.ts` and add a regression test in `csp.test.ts`.
 
 ## Secrets & env

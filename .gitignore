@@ -105,6 +105,9 @@ scripts/editorial-pilot/runs/
 # Overnight pipeline runtime artifacts (logs + queue files) — repo root
 /runs/
 
+# Perf measurement outputs (CSV + walk screenshots) — reproducible via measure-ttfb.ps1
+scripts/perf/runs/
+
 # Editorial pilot — overnight audit dumps + test outputs (reproducible)
 scripts/editorial-pilot/audit-buckets.json
 scripts/editorial-pilot/audit-guides-en-gaps.json
