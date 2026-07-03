@@ -14,6 +14,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { getCityDirectory } from '@/server/annuaire/get-city-directory';
 import { toDirectoryMapPoints } from '@/server/annuaire/directory-shared';
+import { isDestinationIndexable } from '@/server/hotels/indexability';
 import { env } from '@/lib/env';
 
 /**
@@ -60,6 +61,15 @@ export async function generateMetadata({
       },
     });
 
+  // D3 crawl-focus extended to the annuaire (PO decision 2026-07-03) — a
+  // city directory grouping fewer than `DESTINATION_MIN_PUBLISHED_HOTELS`
+  // published hotels is `noindex, follow`: the page stays served (exhaustive
+  // list + internal links preserved) but is dropped from the index and from
+  // `hubs.xml` so the crawl budget concentrates on head cities. Same
+  // single-source threshold as `/destination/[citySlug]`
+  // (`server/hotels/indexability.ts`), same reversibility.
+  const thin = !isDestinationIndexable(directory.totalCount);
+
   return {
     title,
     description,
@@ -67,6 +77,7 @@ export async function generateMetadata({
       canonical: buildCanonicalPath(locale),
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
+    ...(thin ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website',
       title,

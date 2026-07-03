@@ -28,6 +28,12 @@ export async function listDirectoryCountries(
 export interface DirectoryCityPath {
   readonly paysSlug: string;
   readonly villeSlug: string;
+  /**
+   * Published hotels in this (country, city) pair — same count the city
+   * page derives at request time (`getCityDirectory().totalCount`), so
+   * the D3 sitemap gate and the page's `noindex` flag can never diverge.
+   */
+  readonly hotelCount: number;
 }
 
 /**
@@ -35,7 +41,8 @@ export interface DirectoryCityPath {
  * projected as annuaire path segments. Country slug is the canonical
  * per-code slug (aggregated labels, FR-anchored — see `country-slugs`),
  * city slug uses the same `citySlug()` the routes derive at request
- * time, so the emitted URLs always resolve. Deduped by `pays/ville`.
+ * time, so the emitted URLs always resolve. Deduped by `pays/ville`,
+ * each path carrying its published-hotel count for the D3 gate.
  */
 export async function listDirectoryCityPaths(): Promise<readonly DirectoryCityPath[]> {
   const rows = await listPublishedHotelsForGrouping();
@@ -44,17 +51,19 @@ export async function listDirectoryCityPaths(): Promise<readonly DirectoryCityPa
     buildCountryDirectoryList(rows, 'fr').map((c) => [c.code, c.slug] as const),
   );
 
-  const seen = new Set<string>();
-  const out: DirectoryCityPath[] = [];
+  const byKey = new Map<string, { paysSlug: string; villeSlug: string; hotelCount: number }>();
   for (const r of rows) {
     const paysSlug = slugByCode.get(r.country_code);
     if (paysSlug === undefined) continue;
     const villeSlug = citySlug(r.city);
     if (villeSlug.length === 0) continue;
     const key = `${paysSlug}/${villeSlug}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({ paysSlug, villeSlug });
+    const existing = byKey.get(key);
+    if (existing === undefined) {
+      byKey.set(key, { paysSlug, villeSlug, hotelCount: 1 });
+    } else {
+      existing.hotelCount += 1;
+    }
   }
-  return out;
+  return [...byKey.values()];
 }
