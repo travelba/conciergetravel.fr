@@ -126,13 +126,9 @@ export default async function ConciergeBadgePage({
   const faqItems = t.raw('faq') as FaqItem[];
 
   // ─── Embed snippet (documented slug placeholder, followed link) ──────────
-  const placeholderSlug = locale === 'en' ? 'YOUR-HOTEL-SLUG' : 'VOTRE-SLUG-HOTEL';
-  const badgeAlt =
-    locale === 'en' ? 'Selected by MyConciergeHotel' : 'Sélectionné par MyConciergeHotel';
-  const dofollowComment =
-    locale === 'en'
-      ? 'Selected by MyConciergeHotel — followed link (do not add rel="nofollow")'
-      : 'Sélectionné par MyConciergeHotel — lien suivi (ne pas ajouter rel="nofollow")';
+  const placeholderSlug = t('embed.placeholderSlug');
+  const badgeAlt = t('embed.badgeAlt');
+  const dofollowComment = t('embed.dofollowComment');
   const embedSnippet = [
     `<!-- ${dofollowComment} -->`,
     `<a href="${CANONICAL_ORIGIN}/hotel/${placeholderSlug}" title="${badgeAlt}">`,

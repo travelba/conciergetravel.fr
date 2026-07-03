@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="360" height="112" viewBox="0 0 360 112" role="img" aria-label="Selected by MyConciergeHotel  Sélectionné par MyConciergeHotel">
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="112" viewBox="0 0 360 112" role="img" aria-label="Selected by MyConciergeHotel â€” SÃ©lectionnÃ© par MyConciergeHotel">
   <title>Selected by MyConciergeHotel</title>
-  <desc>Badge de sélection éditoriale MyConciergeHotel  variante claire (fond crème).</desc>
-  <!-- Sober editorial luxe  cream paper base, single muted taupe accent (brand DA crème/taupe). -->
+  <desc>Badge de sÃ©lection Ã©ditoriale MyConciergeHotel â€” variante claire (fond crÃ¨me).</desc>
+  <!-- Sober editorial luxe â€” cream paper base, single muted taupe accent (brand DA crÃ¨me/taupe). -->
   <rect x="1" y="1" width="358" height="110" rx="8" fill="#f6f1e7" stroke="#8c7b5a" stroke-width="1.5"/>
   <!-- Seal -->
   <g transform="translate(56 56)">
@@ -12,8 +12,8 @@
   </g>
   <!-- Lockup -->
   <g fill="#3a352d">
-    <text x="106" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="9" letter-spacing="2.4" fill="#685b42">SÉLECTIONNÉ · SELECTED</text>
+    <text x="106" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="9" letter-spacing="2.4" fill="#685b42">SÃ‰LECTIONNÃ‰ Â· SELECTED</text>
     <text x="105" y="66" font-family="Georgia, 'Times New Roman', serif" font-size="23" letter-spacing="0.2">MyConciergeHotel</text>
-    <text x="106" y="88" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" letter-spacing="1.8" fill="#685b42">LA SÉLECTION DU CONCIERGE</text>
+    <text x="106" y="88" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" letter-spacing="1.8" fill="#685b42">LA SÃ‰LECTION DU CONCIERGE</text>
   </g>
 </svg>
