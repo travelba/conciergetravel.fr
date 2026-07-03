@@ -115,6 +115,11 @@ const OFFICIAL_PALACE_TWIN_SLUGS: ReadonlySet<string> = new Set([
   'fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris (new 2026)
   'hotel-fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris
   'le-fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris
+  // Added 2026-07-03 (Bugbot review of ws/c2-p0-sweeps + normalized-name hunt):
+  'hotel-royal', // twin of hotel-royal-evian (canonical per fix-is-palace-flag.ts)
+  'hotel-le-royal-evian', // twin of hotel-royal-evian
+  'hotel-barriere-les-neiges-courchevel', // rebranded winter 2025-26 → fouquets-courchevel (Palace kept)
+  'l-apogee', // twin of lapogee-courchevel
 ]);
 
 const SupabaseEnvSchema = z.object({

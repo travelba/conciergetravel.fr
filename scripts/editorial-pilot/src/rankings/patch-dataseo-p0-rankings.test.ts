@@ -158,6 +158,8 @@ describe('buildRankingPlan', () => {
     const plan = buildRankingPlan({ ...base, faq: tenFaq });
     expect('faq' in plan.patch).toBe(false);
     expect(plan.notes.some((n) => n.startsWith('faq_floor_skipped_9<10'))).toBe(true);
+    // Nothing was written → nothing must be reported as dropped.
+    expect(plan.droppedFaq).toHaveLength(0);
   });
   it('applies the drop when the ranking stays at or above the 10-FAQ floor', () => {
     const elevenFaq = [
@@ -180,6 +182,7 @@ describe('buildRankingPlan', () => {
     });
     expect('faq' in plan.patch).toBe(false);
     expect(plan.notes).toContain('faq_all_dropped_kept_as_is');
+    expect(plan.droppedFaq).toHaveLength(0); // no write, no reported drop
   });
   it('flags meta_needs_manual when the promo strip falls under-band instead of silently skipping', () => {
     // Stripping the Phase-6 clause leaves < 140 chars → no write, loud note.

@@ -90,15 +90,21 @@ describe('buildPlan — official-Palace twin guard (Collection 2026)', () => {
     'Palace 5 étoiles situé Paris, place de la Concorde, avec spa Rosewood et cour intérieure classée.';
 
   it('never strips Palace claims from a duplicate row of an official 2026 Palace', () => {
-    const plan = buildPlan(
-      row({
-        slug: 'hotel-de-crillon',
-        name: 'Hôtel de Crillon',
-        is_palace: false, // the duplicate row lacks the flag — the slug guard covers it
-        factual_summary_fr: trueClaimFr,
-      }),
-    );
-    expect(plan.changes.filter((c) => c.reason.includes('palace'))).toHaveLength(0);
+    for (const [slug, name] of [
+      ['hotel-de-crillon', 'Hôtel de Crillon'],
+      ['hotel-royal', 'Hôtel Royal'], // Évian twin — Bugbot review 2026-07-03
+      ['hotel-barriere-les-neiges-courchevel', 'Hôtel Barrière Les Neiges Courchevel'],
+    ] as const) {
+      const plan = buildPlan(
+        row({
+          slug,
+          name,
+          is_palace: false, // the duplicate row lacks the flag — the slug guard covers it
+          factual_summary_fr: trueClaimFr,
+        }),
+      );
+      expect(plan.changes.filter((c) => c.reason.includes('palace'))).toHaveLength(0);
+    }
   });
 
   it('still strips the same claim from a genuinely non-Palace hotel', () => {

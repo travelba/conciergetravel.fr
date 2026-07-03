@@ -204,13 +204,17 @@ export function buildRankingPlan(row: RankingRow): RankingPlan {
         // Hard floor — a drop must never leave a published ranking under 10
         // FAQ items. The row is skipped (reported as floorSkipped) and goes
         // to the manual backlog: backfill FAQ first, then re-run.
+        // Nothing is written, so nothing was "dropped" — clearing the list
+        // keeps counts.droppedFaqItems and the ✂ logs write-accurate.
         notes.push(`faq_floor_skipped_${kept.length}<${FAQ_FLOOR}`);
+        droppedFaq.length = 0;
       } else {
         patch.faq = kept;
         reasons.add('drop_noisy_or_phase6_faq');
       }
     } else if (kept.length === 0 && row.faq.length > 0) {
       notes.push('faq_all_dropped_kept_as_is'); // never empty the column
+      droppedFaq.length = 0; // same write-accuracy rule as the floor skip
     }
   }
 
