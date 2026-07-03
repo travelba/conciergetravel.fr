@@ -38,6 +38,8 @@ loadDotenv({ path: resolve(REPO_ROOT, '.env') });
 
 const META_MAX = 170;
 const META_MIN = 140;
+/** Published rankings must keep >= 10 FAQ items (mirror of the hotels CDC floor). */
+const FAQ_FLOOR = 10;
 
 // ─── Phase-6 live-booking / pricing detection ────────────────────────────────
 // Frozen until Phase 6 — the mission names exactly four angles to remove:
@@ -198,11 +200,21 @@ export function buildRankingPlan(row: RankingRow): RankingPlan {
       return true;
     });
     if (kept.length !== row.faq.length && kept.length > 0) {
-      patch.faq = kept;
-      reasons.add('drop_noisy_or_phase6_faq');
-      if (kept.length < 10) notes.push(`faq_below_10_after_drop_${kept.length}`);
+      if (kept.length < FAQ_FLOOR) {
+        // Hard floor — a drop must never leave a published ranking under 10
+        // FAQ items. The row is skipped (reported as floorSkipped) and goes
+        // to the manual backlog: backfill FAQ first, then re-run.
+        // Nothing is written, so nothing was "dropped" — clearing the list
+        // keeps counts.droppedFaqItems and the ✂ logs write-accurate.
+        notes.push(`faq_floor_skipped_${kept.length}<${FAQ_FLOOR}`);
+        droppedFaq.length = 0;
+      } else {
+        patch.faq = kept;
+        reasons.add('drop_noisy_or_phase6_faq');
+      }
     } else if (kept.length === 0 && row.faq.length > 0) {
       notes.push('faq_all_dropped_kept_as_is'); // never empty the column
+      droppedFaq.length = 0; // same write-accuracy rule as the floor skip
     }
   }
 
@@ -344,6 +356,7 @@ async function main(): Promise<void> {
     meta_desc_en: 0,
     droppedFaqItems: 0,
     metaNeedsManual: 0,
+    faqFloorSkipped: 0,
   };
   for (const p of planned) {
     if ('faq' in p.patch) counts.faq += 1;
@@ -353,6 +366,9 @@ async function main(): Promise<void> {
   }
   counts.metaNeedsManual = allPlans.filter((p) =>
     p.notes.some((n) => n.includes('meta_needs_manual')),
+  ).length;
+  counts.faqFloorSkipped = allPlans.filter((p) =>
+    p.notes.some((n) => n.startsWith('faq_floor_skipped')),
   ).length;
 
   console.log(
@@ -404,6 +420,9 @@ async function main(): Promise<void> {
             meta_desc_fr: p.row.meta_desc_fr,
             meta_desc_en: p.row.meta_desc_en,
             faqLen: p.row.faq?.length ?? 0,
+            // Full pre-patch faq (only when this plan rewrites it) so the run
+            // file is a genuine rollback backup at sweep scale.
+            ...(Array.isArray(p.patch.faq) ? { faq: p.row.faq } : {}),
           },
           after: {
             meta_desc_fr: p.patch.meta_desc_fr ?? p.row.meta_desc_fr,
