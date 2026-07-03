@@ -60,9 +60,15 @@ const PHOTO_RICH_GALLERY_THRESHOLD = 5;
  * `hubs.xml`.
  *
  * Single source of truth — consumed by:
- *   - `apps/web/src/app/sitemaps/hubs.xml/route.ts`  (sitemap inclusion)
+ *   - `apps/web/src/app/sitemaps/hubs.xml/route.ts`  (sitemap inclusion:
+ *     destination hubs + annuaire country/city directories)
+ *   - `apps/web/src/app/sitemaps/guides.xml/route.ts` (city-guide inclusion)
  *   - `apps/web/src/app/[locale]/destination/[citySlug]/page.tsx`
  *                                                    (`generateMetadata` robots)
+ *   - `apps/web/src/app/[locale]/hotels/[pays]/page.tsx` +
+ *     `apps/web/src/app/[locale]/hotels/[pays]/[ville]/page.tsx`
+ *     (annuaire — D3 extended per PO decision 2026-07-03: 40/128 countries
+ *     and the long-tail city directories group < 3 published hotels)
  *
  * Reversible: change the constant, redeploy — the sitemap and the meta
  * robots follow automatically. Raise it to prune harder, drop it to 1 to

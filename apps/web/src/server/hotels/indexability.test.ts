@@ -222,3 +222,40 @@ describe('indexability TS ↔ RPC 0078 non-divergence', () => {
     expect(rpcSql).toContain("jsonb_typeof(h.concierge_advice) = 'object'");
   });
 });
+
+/**
+ * D3 sitemap ↔ meta coherence guard (the #1 merge criterion — the D3
+ * review was blocked on guides.xml missing this). Every surface that
+ * emits or gates a `/destination/*` or `/hotels/*` (annuaire) URL must
+ * consume the SAME `isDestinationIndexable` predicate; a surface that
+ * drops the import silently re-advertises noindex URLs (or noindexes a
+ * page the sitemap still lists). Source-level check, same spirit as the
+ * RPC non-divergence guard above.
+ */
+describe('D3 predicate consumed by every destination/annuaire surface', () => {
+  const surfaces = [
+    // [surface, must call the predicate]
+    '../../app/sitemaps/hubs.xml/route.ts',
+    '../../app/sitemaps/guides.xml/route.ts',
+    '../../app/[locale]/destination/[citySlug]/page.tsx',
+    '../../app/[locale]/hotels/[pays]/page.tsx',
+    '../../app/[locale]/hotels/[pays]/[ville]/page.tsx',
+  ] as const;
+
+  for (const rel of surfaces) {
+    it(`${rel.replace(/^\.\.\/\.\.\//, '')} imports and calls isDestinationIndexable`, () => {
+      const src = readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
+      expect(src).toContain("from '@/server/hotels/indexability'");
+      expect(src).toMatch(/isDestinationIndexable\(/);
+    });
+  }
+
+  it('hubs.xml gates the annuaire country AND city loops (not just destinations)', () => {
+    const src = readFileSync(
+      fileURLToPath(new URL('../../app/sitemaps/hubs.xml/route.ts', import.meta.url)),
+      'utf8',
+    );
+    expect(src).toMatch(/isDestinationIndexable\(country\.hotelCount\)/);
+    expect(src).toMatch(/isDestinationIndexable\(path\.hotelCount\)/);
+  });
+});

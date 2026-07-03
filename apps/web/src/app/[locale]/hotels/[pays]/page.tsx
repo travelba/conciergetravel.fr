@@ -14,6 +14,7 @@ import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, hreflangKey, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { getCountryDirectory } from '@/server/annuaire/get-country-directory';
 import { toDirectoryMapPoints } from '@/server/annuaire/directory-shared';
+import { isDestinationIndexable } from '@/server/hotels/indexability';
 import { env } from '@/lib/env';
 
 /**
@@ -55,6 +56,14 @@ export async function generateMetadata({
       href: { pathname: '/hotels/[pays]', params: { pays: directory.slug } },
     });
 
+  // D3 crawl-focus extended to the annuaire (PO decision 2026-07-03).
+  // 40 of the 128 published countries group only 1-2 hotels (CV, ME, TN,
+  // Monaco…) — same thin-page anti-pattern as the city level, so the same
+  // single-source threshold applies (`DESTINATION_MIN_PUBLISHED_HOTELS`).
+  // The page stays served; `hubs.xml` applies the identical predicate so
+  // the sitemap can never advertise a noindex country.
+  const thin = !isDestinationIndexable(directory.totalCount);
+
   return {
     title,
     description,
@@ -62,6 +71,7 @@ export async function generateMetadata({
       canonical: buildCanonicalPath(locale),
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
+    ...(thin ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website',
       title,

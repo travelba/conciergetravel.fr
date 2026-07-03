@@ -185,6 +185,12 @@ export async function GET(): Promise<NextResponse> {
     ]);
 
     for (const country of directoryCountries) {
+      // D3 extended to the annuaire (PO decision 2026-07-03) — a country
+      // directory below `DESTINATION_MIN_PUBLISHED_HOTELS` published hotels
+      // renders `noindex, follow` (40/128 countries group only 1-2 hotels),
+      // so the sitemap must apply the SAME predicate as the page's
+      // `generateMetadata`. Reversible via the single-source threshold.
+      if (!isDestinationIndexable(country.hotelCount)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
@@ -199,6 +205,11 @@ export async function GET(): Promise<NextResponse> {
     }
 
     for (const path of directoryCityPaths) {
+      // D3 extended to the annuaire (PO decision 2026-07-03) — a city
+      // directory below the threshold renders `noindex, follow`, so it must
+      // not be advertised here (same rule as the `/destination` hubs above;
+      // `hotelCount` is derived from the same published rows the page reads).
+      if (!isDestinationIndexable(path.hotelCount)) continue;
       const hrefForLocale = (l: Locale): string =>
         `${origin}${getPathname({
           locale: l,
