@@ -60,10 +60,14 @@ const PHASE6_PATTERNS: readonly RegExp[] = [
   /\bremboursement\b/iu,
   /\brefund\b/iu,
   /non[-\s]?refundable/iu,
-  // promo angle
+  // promo angle — a bare "promotion(s)" over-matches ordinary editorial
+  // wording (e.g. "la promotion du patrimoine"), so the generic noun only
+  // trips when a booking/price token co-occurs in the same question.
   /\bcode\s+promo\b/iu,
   /\bpromo\s+code\b/iu,
-  /\bpromotion(?:s|nel|nelle|nels)?\b/iu,
+  /\b(?:offres?|tarifs?|codes?)\s+promotionnel(?:s|les?)?\b/iu,
+  /\bpromotions?\b[^.?!]*(?:\bcodes?\b|\br[ée]ductions?\b|\br[ée]serv\w*|\btarifs?\b|\bprix\b|\brates?\b|\bprices?\b|\bdiscounts?\b|\bbook\w*|-\s?\d{1,2}\s?%)/iu,
+  /(?:\bcodes?\b|\br[ée]ductions?\b|\br[ée]serv\w*|\btarifs?\b|\bprix\b|\brates?\b|\bprices?\b|\bdiscounts?\b|\bbook\w*|-\s?\d{1,2}\s?%)[^.?!]*\bpromotions?\b/iu,
   /\bdiscount\b/iu,
   /\bcoupon\b/iu,
   // live-price angle
@@ -209,9 +213,14 @@ export function buildRankingPlan(row: RankingRow): RankingPlan {
     if (changed && !hasLeak(revised) && revised.length >= META_MIN) {
       patch[field] = revised;
       reasons.add(`revise_${field}`);
+    } else if (changed) {
+      // A Phase-6 clause WAS detected but the deterministic revision can't
+      // ship (falls under-band or trips the leak gate) — the promo text is
+      // still live. Surface it loudly instead of silently skipping.
+      notes.push(`${field}_meta_needs_manual_${revised.length}`);
     } else if (value.length < META_MIN) {
       notes.push(`${field}_short_${value.length}`);
-    } else if (value.length > META_MAX && !changed) {
+    } else if (value.length > META_MAX) {
       notes.push(`${field}_overband_unresolved_${value.length}`);
     }
   }
@@ -329,13 +338,22 @@ async function main(): Promise<void> {
     (p) => Object.keys(p.patch).length === 0 && p.notes.length > 0,
   );
 
-  const counts = { faq: 0, meta_desc_fr: 0, meta_desc_en: 0, droppedFaqItems: 0 };
+  const counts = {
+    faq: 0,
+    meta_desc_fr: 0,
+    meta_desc_en: 0,
+    droppedFaqItems: 0,
+    metaNeedsManual: 0,
+  };
   for (const p of planned) {
     if ('faq' in p.patch) counts.faq += 1;
     if ('meta_desc_fr' in p.patch) counts.meta_desc_fr += 1;
     if ('meta_desc_en' in p.patch) counts.meta_desc_en += 1;
     counts.droppedFaqItems += p.droppedFaq.length;
   }
+  counts.metaNeedsManual = allPlans.filter((p) =>
+    p.notes.some((n) => n.includes('meta_needs_manual')),
+  ).length;
 
   console.log(
     `[patch-dataseo-p0-rankings] published=${rows.length} planned=${planned.length} apply=${args.apply}`,
@@ -355,6 +373,16 @@ async function main(): Promise<void> {
     );
     for (const p of noteworthy.slice(0, 20))
       console.log(`    ! ${p.row.slug} — ${p.notes.join(', ')}`);
+  }
+  const needsManual = allPlans.filter((p) => p.notes.some((n) => n.includes('meta_needs_manual')));
+  if (needsManual.length > 0) {
+    console.log(
+      `\n  ⚠ ${needsManual.length} ranking(s) META_NEEDS_MANUAL — Phase-6 clause detected but the deterministic strip is unshippable (promo text still live):`,
+    );
+    for (const p of needsManual)
+      console.log(
+        `    ⚠ ${p.row.slug} — ${p.notes.filter((n) => n.includes('meta_needs_manual')).join(', ')}`,
+      );
   }
 
   const generatedAt = new Date().toISOString();
@@ -383,7 +411,9 @@ async function main(): Promise<void> {
             faqLen: Array.isArray(p.patch.faq) ? p.patch.faq.length : (p.row.faq?.length ?? 0),
           },
         })),
-        notes: noteworthy.map((p) => ({ slug: p.row.slug, notes: p.notes })),
+        notes: allPlans
+          .filter((p) => p.notes.length > 0)
+          .map((p) => ({ slug: p.row.slug, notes: p.notes })),
       },
       null,
       2,
@@ -395,13 +425,26 @@ async function main(): Promise<void> {
 
   let applied = 0;
   let verified = 0;
+  const verifyFailures: string[] = [];
   for (const plan of planned) {
     await patchRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan);
-    applied += 1;
-    if (await verifyRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan)) verified += 1;
-    else console.error(`  VERIFY FAILED ${plan.row.slug}`);
+    if (await verifyRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan)) {
+      applied += 1;
+      verified += 1;
+    } else {
+      verifyFailures.push(plan.row.slug);
+      console.error(`  VERIFY FAILED ${plan.row.slug}`);
+    }
   }
-  console.log(`[patch-dataseo-p0-rankings] applied=${applied} verified=${verified}`);
+  console.log(
+    `[patch-dataseo-p0-rankings] applied=${applied} verified=${verified} verifyFailed=${verifyFailures.length}`,
+  );
+  if (verifyFailures.length > 0) {
+    console.error(
+      `[patch-dataseo-p0-rankings] post-PATCH verification failed for: ${verifyFailures.join(', ')}`,
+    );
+    process.exitCode = 1;
+  }
 }
 
 const isEntryPoint =

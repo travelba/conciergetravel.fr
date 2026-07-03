@@ -47,6 +47,31 @@ describe('shouldDropFaq', () => {
       false,
     );
   });
+  it('keeps ordinary editorial "promotion" wording (no booking co-occurrence)', () => {
+    expect(
+      shouldDropFaq({
+        question_fr: 'Comment ces hôtels participent-ils à la promotion du patrimoine local ?',
+      }).drop,
+    ).toBe(false);
+    expect(
+      shouldDropFaq({
+        question_en: 'How do these hotels contribute to the promotion of local craftsmanship?',
+      }).drop,
+    ).toBe(false);
+  });
+  it('still drops real promo-angle questions (code/réduction/tarif co-occurrence)', () => {
+    expect(
+      shouldDropFaq({ question_fr: 'Existe-t-il des promotions ou réductions sur ces hôtels ?' })
+        .reason,
+    ).toBe('phase6');
+    expect(
+      shouldDropFaq({ question_en: 'Are there promotions or discounted rates available?' }).reason,
+    ).toBe('phase6');
+    expect(
+      shouldDropFaq({ question_fr: 'Peut-on réserver avec un tarif promotionnel de -25 % ?' })
+        .reason,
+    ).toBe('phase6');
+  });
   it('keeps seasonality + methodology questions (answers ignored)', () => {
     // "réserver un hôtel" (generic) must NOT trip the booking-how-to pattern.
     expect(
@@ -126,5 +151,15 @@ describe('buildRankingPlan', () => {
     });
     expect('faq' in plan.patch).toBe(false);
     expect(plan.notes).toContain('faq_all_dropped_kept_as_is');
+  });
+  it('flags meta_needs_manual when the promo strip falls under-band instead of silently skipping', () => {
+    // Stripping the Phase-6 clause leaves < 140 chars → no write, loud note.
+    const plan = buildRankingPlan({
+      ...base,
+      meta_desc_fr:
+        'Les meilleurs hôtels spa de Nice sélectionnés par notre Concierge. Réservez au meilleur prix garanti dès maintenant sur notre site officiel partenaire.',
+    });
+    expect('meta_desc_fr' in plan.patch).toBe(false);
+    expect(plan.notes.some((n) => n.startsWith('meta_desc_fr_meta_needs_manual'))).toBe(true);
   });
 });

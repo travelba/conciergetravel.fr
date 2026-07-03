@@ -60,7 +60,11 @@ const FOREIGN_MARKERS: readonly { readonly lang: 'es' | 'it'; readonly re: RegEx
   { lang: 'it', re: /\bmatrimoniale\b/iu },
   { lang: 'it', re: /\bcon vista\b/iu },
   { lang: 'it', re: /\bbagno\b/iu },
-  { lang: 'it', re: /\bcamera\b/iu },
+  // NOTE: bare "camera" is legitimate English ("security camera") — only the
+  // unambiguous compound is a marker; real Italian names trip letto/doppia/
+  // matrimoniale anyway. Mirrors patch-rooms-foreign-lang.ts.
+  { lang: 'it', re: /\bcamer[ae]\s+da\s+letto\b/iu },
+  { lang: 'it', re: /\bdoppia\b/iu },
   { lang: 'it', re: /\bletti\b/iu },
 ];
 

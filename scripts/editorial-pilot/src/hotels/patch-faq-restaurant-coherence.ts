@@ -9,11 +9,15 @@
  *
  * Detection is intentionally narrow: only FLAT singular assertions (not the
  * consistent "at least one restaurant", not "one main restaurant" naming a
- * flagship, not "one restaurant as well as …") and only when the venue count
- * is >= 2. Everything else is left untouched.
+ * flagship, not "one restaurant as well as …") and only when the RESTAURANT
+ * venue count is >= 2 — bars/lounges/terraces in `venues[]` never count, and
+ * an untyped ambiguous venue is not counted (least-destructive default).
+ * Everything else is left untouched.
  *
- * PostgREST only. Dry-run by default; --apply writes + per-row verifies +
- * snapshots a rollback backup under runs/. Never empties a FAQ column.
+ * PostgREST only. Dry-run by default; --apply writes + per-row verifies
+ * (verify failures exit non-zero) + snapshots the full pre-patch column
+ * values under runs/ as a genuine rollback backup. Never empties a FAQ
+ * column, never takes faq_content below the CDC floor of 10 items.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -42,17 +46,41 @@ export function assertsSingleRestaurant(answer: string): boolean {
   return SINGULAR_RE.test(answer);
 }
 
-export function venueCount(info: unknown): number {
+const RESTAURANT_TYPE_RE = /restaurant/iu;
+// Conservative name heuristic, used ONLY when a venue carries no type field.
+const RESTAURANT_NAME_RE = /\brestaurant\b|\bristorante\b|\btrattoria\b|\bbrasserie\b/iu;
+
+/**
+ * Count venues that are actually RESTAURANTS — not bars, lounges or terraces.
+ * `restaurant_info.venues[]` lists every F&B outlet, so using its raw length
+ * would falsely flag a hotel with 1 restaurant + 2 bars whose "single
+ * restaurant" FAQ is CORRECT. A venue counts when its `type_en`/`type_fr`/
+ * `type` matches "restaurant", or — when it has no type at all — when its
+ * name conservatively says so. Untyped, unnamed-as-restaurant venues (e.g. a
+ * cooking school) are NOT counted: the least-destructive default is to
+ * under-count and leave the row unflagged.
+ */
+export function restaurantVenueCount(info: unknown): number {
   if (info === null || typeof info !== 'object') return 0;
-  const rec = info as { count?: unknown; venues?: unknown };
-  if (Array.isArray(rec.venues)) return rec.venues.length;
-  if (typeof rec.count === 'number') return rec.count;
-  return 0;
+  const rec = info as { venues?: unknown };
+  if (!Array.isArray(rec.venues)) return 0; // no venue detail → ambiguous → never flag
+  let count = 0;
+  for (const venue of rec.venues) {
+    if (venue === null || typeof venue !== 'object') continue;
+    const v = venue as { type_en?: unknown; type_fr?: unknown; type?: unknown; name?: unknown };
+    const types = [v.type_en, v.type_fr, v.type].filter((t): t is string => typeof t === 'string');
+    if (types.length > 0) {
+      if (types.some((t) => RESTAURANT_TYPE_RE.test(t))) count += 1;
+      continue; // typed as Bar/Lounge/… → definitively not a restaurant
+    }
+    if (typeof v.name === 'string' && RESTAURANT_NAME_RE.test(v.name)) count += 1;
+  }
+  return count;
 }
 
-/** A Dining Q&A that contradicts a multi-venue restaurant_info. */
-export function isContradictoryDiningItem(item: unknown, venues: number): boolean {
-  if (venues < 2 || item === null || typeof item !== 'object') return false;
+/** A Dining Q&A that contradicts a multi-RESTAURANT restaurant_info. */
+export function isContradictoryDiningItem(item: unknown, restaurants: number): boolean {
+  if (restaurants < 2 || item === null || typeof item !== 'object') return false;
   const it = item as { answer_en?: unknown; answer_fr?: unknown };
   const en = typeof it.answer_en === 'string' ? it.answer_en : '';
   const fr = typeof it.answer_fr === 'string' ? it.answer_fr : '';
@@ -78,24 +106,31 @@ const RowSchema = z.object({
 });
 type Row = z.infer<typeof RowSchema>;
 
+/** CDC §2 hard rule — published fiches must keep >= 10 faq_content items. */
+const FAQ_CONTENT_FLOOR = 10;
+
 interface Plan {
   readonly row: Row;
   readonly patch: Record<string, unknown[]>;
   readonly dropped: { readonly field: FaqField; readonly answer: string }[];
+  /** Fields where a drop was detected but blocked by a safety floor. */
+  readonly skipped: { readonly field: FaqField; readonly reason: string }[];
 }
 
 export function buildPlan(row: Row): Plan {
-  const venues = venueCount(row.restaurant_info);
+  const venues = restaurantVenueCount(row.restaurant_info);
   const patch: Record<string, unknown[]> = {};
   const dropped: { field: FaqField; answer: string }[] = [];
-  if (venues < 2) return { row, patch, dropped };
+  const skipped: { field: FaqField; reason: string }[] = [];
+  if (venues < 2) return { row, patch, dropped, skipped };
   for (const field of FAQ_FIELDS) {
     const arr = row[field];
     if (!Array.isArray(arr)) continue;
+    const fieldDropped: { field: FaqField; answer: string }[] = [];
     const kept = arr.filter((it) => {
       if (isContradictoryDiningItem(it, venues)) {
         const a = it as { answer_en?: unknown; answer_fr?: unknown };
-        dropped.push({
+        fieldDropped.push({
           field,
           answer: String((typeof a.answer_en === 'string' ? a.answer_en : a.answer_fr) ?? '').slice(
             0,
@@ -106,9 +141,19 @@ export function buildPlan(row: Row): Plan {
       }
       return true;
     });
-    if (kept.length !== arr.length && kept.length > 0) patch[field] = kept;
+    if (kept.length === arr.length) continue;
+    if (kept.length === 0) {
+      skipped.push({ field, reason: 'would_empty_field' });
+      continue;
+    }
+    if (field === 'faq_content' && kept.length < FAQ_CONTENT_FLOOR) {
+      skipped.push({ field, reason: `would_break_cdc_floor_${kept.length}<${FAQ_CONTENT_FLOOR}` });
+      continue;
+    }
+    patch[field] = kept;
+    dropped.push(...fieldDropped);
   }
-  return { row, patch, dropped };
+  return { row, patch, dropped, skipped };
 }
 
 async function fetchCandidates(url: string, key: string): Promise<Row[]> {
@@ -173,14 +218,26 @@ async function main(): Promise<void> {
   const env = EnvSchema.parse(process.env);
   const url = env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/u, '');
   const rows = await fetchCandidates(url, env.SUPABASE_SERVICE_ROLE_KEY);
-  const planned = rows.map(buildPlan).filter((p) => Object.keys(p.patch).length > 0);
+  const allPlans = rows.map(buildPlan);
+  const planned = allPlans.filter((p) => Object.keys(p.patch).length > 0);
+  const floorSkipped = allPlans.filter(
+    (p) => Object.keys(p.patch).length === 0 && p.skipped.length > 0,
+  );
 
   console.log(
-    `[patch-faq-restaurant-coherence] candidates=${rows.length} planned=${planned.length} apply=${apply}`,
+    `[patch-faq-restaurant-coherence] candidates=${rows.length} planned=${planned.length} floorSkipped=${floorSkipped.length} apply=${apply}`,
   );
   for (const p of planned) {
-    console.log(`  · ${p.row.slug} (venues=${venueCount(p.row.restaurant_info)})`);
+    console.log(`  · ${p.row.slug} (restaurants=${restaurantVenueCount(p.row.restaurant_info)})`);
     for (const d of p.dropped) console.log(`      ✂ [${d.field}] ${d.answer}`);
+    for (const s of p.skipped) console.log(`      ! skipped [${s.field}] ${s.reason}`);
+  }
+  for (const p of floorSkipped) {
+    console.log(
+      `  ! ${p.row.slug} — contradiction found but blocked: ${p.skipped
+        .map((s) => `${s.field}:${s.reason}`)
+        .join(', ')}`,
+    );
   }
 
   const generatedAt = new Date().toISOString();
@@ -194,7 +251,22 @@ async function main(): Promise<void> {
       {
         generatedAt,
         apply,
-        planned: planned.map((p) => ({ id: p.row.id, slug: p.row.slug, dropped: p.dropped })),
+        planned: planned.map((p) => ({
+          id: p.row.id,
+          slug: p.row.slug,
+          dropped: p.dropped,
+          skipped: p.skipped,
+          // Full pre-patch value of every column this plan rewrites, so the
+          // run file is a genuine rollback backup (PATCH hotels?id=eq.<id>
+          // with `before` restores the row verbatim).
+          before: Object.fromEntries(Object.keys(p.patch).map((f) => [f, p.row[f as FaqField]])),
+          after: p.patch,
+        })),
+        floorSkipped: floorSkipped.map((p) => ({
+          id: p.row.id,
+          slug: p.row.slug,
+          skipped: p.skipped,
+        })),
       },
       null,
       2,
@@ -205,13 +277,26 @@ async function main(): Promise<void> {
   if (!apply) return;
   let applied = 0;
   let verified = 0;
+  const verifyFailures: string[] = [];
   for (const plan of planned) {
     await patchRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan);
-    applied += 1;
-    if (await verifyRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan)) verified += 1;
-    else console.error(`  VERIFY FAILED ${plan.row.slug}`);
+    if (await verifyRow(url, env.SUPABASE_SERVICE_ROLE_KEY, plan)) {
+      applied += 1;
+      verified += 1;
+    } else {
+      verifyFailures.push(plan.row.slug);
+      console.error(`  VERIFY FAILED ${plan.row.slug}`);
+    }
   }
-  console.log(`[patch-faq-restaurant-coherence] applied=${applied} verified=${verified}`);
+  console.log(
+    `[patch-faq-restaurant-coherence] applied=${applied} verified=${verified} verifyFailed=${verifyFailures.length}`,
+  );
+  if (verifyFailures.length > 0) {
+    console.error(
+      `[patch-faq-restaurant-coherence] post-PATCH verification failed for: ${verifyFailures.join(', ')}`,
+    );
+    process.exitCode = 1;
+  }
 }
 
 const isEntryPoint =

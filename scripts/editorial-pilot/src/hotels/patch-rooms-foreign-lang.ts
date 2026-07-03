@@ -49,9 +49,10 @@ const FOREIGN_MARKERS: readonly RegExp[] = [
   /\bedificio\b/iu,
   /\bdise[ñn]o\b/iu,
   /\bdosel\b/iu,
-  // Italian
-  /\bcamera\b/iu,
-  /\bcamere\b/iu,
+  // Italian — NOTE: bare `camera`/`camere` are NOT markers ("security camera"
+  // is legitimate English). Only the unambiguous compounds are, plus the
+  // co-occurrence check in hasForeignMarker below.
+  /\bcamer[ae]\s+da\s+letto\b/iu,
   /\bletto\b/iu,
   /\bletti\b/iu,
   /\bmatrimoniale\b/iu,
@@ -66,8 +67,19 @@ const FOREIGN_MARKERS: readonly RegExp[] = [
   /\blivelli\b/iu,
 ];
 
+// `camera`/`camere` are Italian room nouns AND legitimate English ("security
+// camera", "CCTV camera"). Treat them as Italian ONLY when another Italian
+// token co-occurs in the same text (letto, matrimoniale, doppia, vista…).
+const ITALIAN_CONTEXT_RE =
+  /\blett[oi]\b|\bmatrimoniale\b|\bdoppia\b|\bsingol[aei]\b|\btripla\b|\bquadrupla\b|\bcon vista\b|\bvista (?:mare|oceano|città|giardino|piscina)\b|\bterrazza\b|\bbalcone\b|\blivelli\b|\bcamer[ae]\s+da\s+letto\b/iu;
+
+export function isItalianContext(text: string): boolean {
+  return ITALIAN_CONTEXT_RE.test(text);
+}
+
 export function hasForeignMarker(text: string): boolean {
-  return FOREIGN_MARKERS.some((re) => re.test(text));
+  if (FOREIGN_MARKERS.some((re) => re.test(text))) return true;
+  return /\bcamer[ae]\b/iu.test(text) && isItalianContext(text);
 }
 
 // ─── Glossary (ordered: longest / most specific first) ───────────────────────
@@ -75,6 +87,8 @@ interface Rule {
   readonly re: RegExp;
   readonly fr: string;
   readonly en: string;
+  /** Apply only when the ORIGINAL text carries unambiguous Italian tokens. */
+  readonly italianContextOnly?: boolean;
 }
 
 /** Build a case-insensitive, unicode, global regex for a literal phrase. */
@@ -268,8 +282,10 @@ const RULES: readonly Rule[] = [
   // ── Room-type nouns / qualifiers ──
   { re: phrase('habitación'), fr: 'Chambre', en: 'Room' },
   { re: phrase('habitacion'), fr: 'Chambre', en: 'Room' },
-  { re: phrase('camere'), fr: 'Chambres', en: 'Rooms' },
-  { re: phrase('camera'), fr: 'Chambre', en: 'Room' },
+  // "camera"/"camere" are also legitimate English ("security camera") —
+  // rewrite them only when the source text is unambiguously Italian.
+  { re: phrase('camere'), fr: 'Chambres', en: 'Rooms', italianContextOnly: true },
+  { re: phrase('camera'), fr: 'Chambre', en: 'Room', italianContextOnly: true },
   { re: phrase('quadrupla'), fr: 'Quadruple', en: 'Quadruple' },
   { re: phrase('tripla'), fr: 'Triple', en: 'Triple' },
   { re: phrase('matrimoniale'), fr: 'Double', en: 'Double' },
@@ -293,8 +309,10 @@ const RULES: readonly Rule[] = [
 type Locale = 'fr' | 'en';
 
 export function translateRoomText(input: string, locale: Locale): string {
+  const italian = isItalianContext(input);
   let out = input;
   for (const rule of RULES) {
+    if (rule.italianContextOnly === true && !italian) continue;
     out = out.replace(rule.re, locale === 'fr' ? rule.fr : rule.en);
   }
   // Tidy separators + whitespace introduced by replacements.

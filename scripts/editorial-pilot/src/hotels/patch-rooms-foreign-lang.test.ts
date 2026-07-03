@@ -21,6 +21,16 @@ describe('hasForeignMarker', () => {
     expect(hasForeignMarker('Individual Private Suites')).toBe(false);
     expect(hasForeignMarker('Room with a king-size bed and partial views')).toBe(false);
   });
+  it('does not flag English "camera" without Italian context', () => {
+    expect(hasForeignMarker('Suite with a security camera at the private entrance')).toBe(false);
+    expect(hasForeignMarker('In-room camera-free privacy guarantee')).toBe(false);
+    expect(hasForeignMarker('Villa with CCTV camera surveillance')).toBe(false);
+  });
+  it('still flags "camera" when Italian tokens co-occur', () => {
+    expect(hasForeignMarker('Camera Matrimoniale Deluxe')).toBe(true);
+    expect(hasForeignMarker('Camera con letto king-size')).toBe(true);
+    expect(hasForeignMarker('Camera Doppia con balcone')).toBe(true);
+  });
 });
 
 describe('translateRoomText — Spanish', () => {
@@ -66,6 +76,13 @@ describe('translateRoomText — Italian', () => {
     const out = translateRoomText('Camera Deluxe Doppia con Letti Singoli', 'fr');
     expect(hasForeignMarker(out)).toBe(false);
     expect(out).toContain('Chambre');
+  });
+  it('never rewrites English "camera" outside Italian context', () => {
+    const en = 'Suite with a king-size bed and a security camera at the entrance';
+    expect(translateRoomText(en, 'en')).toBe(en);
+    expect(translateRoomText('Villa with CCTV camera surveillance', 'fr')).toBe(
+      'Villa with CCTV camera surveillance',
+    );
   });
 });
 
