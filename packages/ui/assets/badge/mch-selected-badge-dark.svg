@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="112" viewBox="0 0 360 112" role="img" aria-label="Selected by MyConciergeHotel — Sélectionné par MyConciergeHotel">
+  <title>Selected by MyConciergeHotel</title>
+  <desc>Badge de sélection éditoriale MyConciergeHotel — variante sombre (fond taupe-charbon), pour en-têtes foncés.</desc>
+  <!-- Dark lockup for hosts with dark headers — charcoal base, cream ink, taupe accent. -->
+  <rect x="1" y="1" width="358" height="110" rx="8" fill="#3a352d" stroke="#8c7b5a" stroke-width="1.5"/>
+  <!-- Seal -->
+  <g transform="translate(56 56)">
+    <circle r="37" fill="none" stroke="#b3a37c" stroke-width="1.25"/>
+    <circle r="31" fill="none" stroke="#685b42" stroke-width="0.75"/>
+    <path d="M0 -25 L2.9 -8.6 L19.5 -8.6 L6.3 1.7 L11.2 18 L0 8 L-11.2 18 L-6.3 1.7 L-19.5 -8.6 L-2.9 -8.6 Z" fill="#b3a37c"/>
+    <text x="0" y="24" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-style="italic" fill="#cabf9d">MC</text>
+  </g>
+  <!-- Lockup -->
+  <g fill="#f6f1e7">
+    <text x="106" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="9" letter-spacing="2.4" fill="#cabf9d">SÉLECTIONNÉ · SELECTED</text>
+    <text x="105" y="66" font-family="Georgia, 'Times New Roman', serif" font-size="23" letter-spacing="0.2">MyConciergeHotel</text>
+    <text x="106" y="88" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" letter-spacing="1.8" fill="#cabf9d">LA SÉLECTION DU CONCIERGE</text>
+  </g>
+</svg>

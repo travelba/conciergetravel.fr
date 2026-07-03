@@ -319,6 +319,13 @@ export const routing = defineRouting({
       fr: '/le-concierge/pour-les-hoteliers',
       en: '/le-concierge/for-hoteliers',
     },
+    // Badge « Sélectionné par MyConciergeHotel » — self-serve authority
+    // lever (WS-A). Slug identical per locale: "badge" reads natively in
+    // both FR and EN, and hoteliers link to it directly from their fiche.
+    '/le-concierge/badge': {
+      fr: '/le-concierge/badge',
+      en: '/le-concierge/badge',
+    },
     '/le-concierge/mice-et-seminaires': {
       fr: '/le-concierge/mice-et-seminaires',
       en: '/le-concierge/mice-and-events',
