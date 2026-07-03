@@ -133,16 +133,45 @@ describe('buildRankingPlan', () => {
     const plan = buildRankingPlan({
       ...base,
       faq: [
-        {
-          question_fr: 'Quels sont les meilleurs hôtels spa à Nice ?',
+        ...Array.from({ length: 10 }, (_, i) => ({
+          question_fr: `Quels sont les meilleurs hôtels spa numéro ${i} à Nice ?`,
           answer_fr: 'Le classement ci-dessous.',
-        },
+        })),
         { question_fr: 'Quelle star habite à Nice ?', answer_fr: 'Bruit.' },
       ],
     });
     expect(Array.isArray(plan.patch.faq)).toBe(true);
-    expect((plan.patch.faq as unknown[]).length).toBe(1);
+    expect((plan.patch.faq as unknown[]).length).toBe(10);
     expect(plan.droppedFaq).toHaveLength(1);
+  });
+  it('floor-skips a drop that would leave the ranking under 10 FAQ items', () => {
+    const tenFaq = [
+      {
+        question_fr: 'Les conditions d’annulation sont-elles flexibles ?',
+        answer_fr: 'Oui.',
+      },
+      ...Array.from({ length: 9 }, (_, i) => ({
+        question_fr: `Quels sont les meilleurs hôtels numéro ${i} ?`,
+        answer_fr: 'Le classement.',
+      })),
+    ];
+    const plan = buildRankingPlan({ ...base, faq: tenFaq });
+    expect('faq' in plan.patch).toBe(false);
+    expect(plan.notes.some((n) => n.startsWith('faq_floor_skipped_9<10'))).toBe(true);
+  });
+  it('applies the drop when the ranking stays at or above the 10-FAQ floor', () => {
+    const elevenFaq = [
+      {
+        question_fr: 'Les conditions d’annulation sont-elles flexibles ?',
+        answer_fr: 'Oui.',
+      },
+      ...Array.from({ length: 10 }, (_, i) => ({
+        question_fr: `Quels sont les meilleurs hôtels numéro ${i} ?`,
+        answer_fr: 'Le classement.',
+      })),
+    ];
+    const plan = buildRankingPlan({ ...base, faq: elevenFaq });
+    expect((plan.patch.faq as unknown[]).length).toBe(10);
   });
   it('does not empty faq when every item is noise', () => {
     const plan = buildRankingPlan({

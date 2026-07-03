@@ -98,6 +98,25 @@ const TIER_REMAP: Readonly<Record<string, string>> = {
   'the-plaza-hotel': 'fairmont',
 };
 
+/**
+ * Duplicate DB rows of OFFICIAL Atout France 2026 Palaces under a different
+ * slug with `is_palace=false` (verified against the official Collection 2026
+ * — Le Figaro / Atout France, 2026-06-02 — during the 2026-07-03 sweep).
+ * Their Palace claims are FACTUALLY TRUE and must never be stripped; the
+ * canonical row for each carries `is_palace=true`.
+ */
+const OFFICIAL_PALACE_TWIN_SLUGS: ReadonlySet<string> = new Set([
+  'hotel-de-crillon', // twin of hotel-de-crillon-a-rosewood-hotel
+  'four-seasons-georges-v', // twin of four-seasons-hotel-george-v
+  'bvlgari-hotel-paris', // twin of bulgari-hotel-paris (new 2026)
+  'mandarin-oriental-lutetia', // twin of hotel-lutetia (renewed 2026)
+  'chateau-de-la-messardiere', // twin of les-airelles-saint-tropez
+  'cheval-blanc-st-barth-isle-de-france', // twin of cheval-blanc-st-barth
+  'fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris (new 2026)
+  'hotel-fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris
+  'le-fouquet-s-paris', // twin of hotel-barriere-le-fouquet-s-paris
+]);
+
 const SupabaseEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z
@@ -147,7 +166,7 @@ interface FieldChange {
   readonly reason: string;
 }
 
-interface PatchPlan {
+export interface PatchPlan {
   readonly row: HotelRow;
   readonly changes: readonly FieldChange[];
   readonly notes: readonly string[];
@@ -716,10 +735,10 @@ const PROSE_FIELDS = [
   'meta_desc_en',
 ] as const;
 
-function buildPlan(row: HotelRow): PatchPlan {
+export function buildPlan(row: HotelRow): PatchPlan {
   const changes: FieldChange[] = [];
   const notes: string[] = [];
-  const isOfficialPalace = row.is_palace === true;
+  const isOfficialPalace = row.is_palace === true || OFFICIAL_PALACE_TWIN_SLUGS.has(row.slug);
 
   // WP-C1 — tier + affiliations (only when the row is NOT an official Palace)
   if (!isOfficialPalace) {
@@ -870,7 +889,7 @@ async function fetchRows(url: string, key: string, slugs: readonly string[]): Pr
  * long descriptions) make a single `in.()` over hundreds of slugs time out
  * (~500 is the documented ceiling). 50/chunk stays comfortably under it.
  */
-async function fetchRowsChunked(
+export async function fetchRowsChunked(
   url: string,
   key: string,
   slugs: readonly string[],
