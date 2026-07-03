@@ -48,6 +48,41 @@ const FAQ_MIN_ITEMS = 10;
 /** Hero + N gallery photos = a credible mini-fiche even without a long body. */
 const PHOTO_RICH_GALLERY_THRESHOLD = 5;
 
+/**
+ * D3 — crawl-focus threshold (PO decision 2026-07-02, "coupe complète").
+ *
+ * A `/destination/<city>` hub is only worth a crawl slot when it groups
+ * at least this many published hotels. Google was spending crawl budget
+ * on 1-hotel long-tail destinations (Dommeldange, Belgrade, Clervaux…)
+ * while head pages (Venise, Paris) stayed "Discovered, not indexed".
+ * Below the threshold the page STILL renders (honest thin/empty state,
+ * already in place) but emits `noindex, follow` and is dropped from
+ * `hubs.xml`.
+ *
+ * Single source of truth — consumed by:
+ *   - `apps/web/src/app/sitemaps/hubs.xml/route.ts`  (sitemap inclusion)
+ *   - `apps/web/src/app/[locale]/destination/[citySlug]/page.tsx`
+ *                                                    (`generateMetadata` robots)
+ *
+ * Reversible: change the constant, redeploy — the sitemap and the meta
+ * robots follow automatically. Raise it to prune harder, drop it to 1 to
+ * revert to the pre-D3 "index every destination" behaviour. Re-introduce
+ * the pruned destinations wholesale by setting this to `1`.
+ *
+ * Skill: seo-technical §Indexability.
+ */
+export const DESTINATION_MIN_PUBLISHED_HOTELS = 3;
+
+/**
+ * True when a destination hub has enough published hotels to earn an
+ * index slot (and a sitemap entry). Mirror of the `>= threshold` rule so
+ * the sitemap and the page's `noindex` flag can never diverge — they both
+ * import this predicate.
+ */
+export function isDestinationIndexable(publishedHotelCount: number): boolean {
+  return publishedHotelCount >= DESTINATION_MIN_PUBLISHED_HOTELS;
+}
+
 export function isHotelIndexable(row: IndexabilityRow): boolean {
   const hasHero = typeof row.hero_image === 'string' && row.hero_image.length > 0;
   const sections = Array.isArray(row.long_description_sections)

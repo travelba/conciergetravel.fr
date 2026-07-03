@@ -27,6 +27,7 @@ import { env } from '@/lib/env';
 import { isHandBuiltCountrySlug } from '@/lib/destinations/hand-built-country-guides';
 import { countrySlug } from '@/server/annuaire/country-slugs';
 import { getDestinationBySlug, listPublishedCities } from '@/server/destinations/cities';
+import { isDestinationIndexable } from '@/server/hotels/indexability';
 import { buildEditorialLinkMap } from '@/server/editorial/build-link-map';
 import { getGuideBySlug } from '@/server/guides/get-guide-by-slug';
 import { findItinerariesForCity } from '@/server/itineraries/find-itineraries-for-context';
@@ -230,6 +231,15 @@ export async function generateMetadata({
     });
   const canonical = buildCanonicalPath(locale);
 
+  // D3 crawl-focus (PO decision 2026-07-02, "coupe complète") — a
+  // destination hub grouping fewer than `DESTINATION_MIN_PUBLISHED_HOTELS`
+  // published hotels is `noindex, follow`: the page stays served (the
+  // single-hotel thin state is honest and keeps internal links) but is
+  // dropped from the index + `hubs.xml` so the crawl budget concentrates
+  // on head destinations. Threshold + predicate are the single source of
+  // truth in `server/hotels/indexability.ts` (also gates the sitemap).
+  const thin = !isDestinationIndexable(destination.hotels.length);
+
   return {
     title,
     description,
@@ -237,6 +247,7 @@ export async function generateMetadata({
       canonical,
       languages: buildHreflangAlternates(buildCanonicalPath),
     },
+    ...(thin ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website',
       title,

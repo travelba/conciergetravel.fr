@@ -45,12 +45,25 @@ export function GET() {
     'Allow: /',
     'Disallow: /api/',
     'Disallow: /admin/',
-    'Disallow: /fr/reservation/',
-    'Disallow: /en/reservation/',
-    'Disallow: /fr/compte/',
-    'Disallow: /en/compte/',
-    'Disallow: /fr/auth/',
+    // `localePrefix: 'as-needed'` (i18n/routing.ts) serves the DEFAULT
+    // locale (FR) with NO prefix, so the real private URLs are
+    // `/compte/*`, `/reservation/*`, `/auth/*` — the previous rules only
+    // disallowed the `/fr/*` forms (which just 307-redirect), leaving the
+    // canonical FR account/booking/auth areas crawlable. EN keeps its
+    // `/en/` prefix AND localised slugs (`/en/account`, `/en/booking`).
+    // Prefix-less FR (canonical):
+    'Disallow: /compte/',
+    'Disallow: /reservation/',
+    'Disallow: /auth/',
+    // EN (prefixed + localised slugs):
+    'Disallow: /en/account/',
+    'Disallow: /en/booking/',
     'Disallow: /en/auth/',
+    // Redirecting `/fr/*` forms kept defensively (a crawler may still hit
+    // a legacy prefixed link before the 307 resolves).
+    'Disallow: /fr/compte/',
+    'Disallow: /fr/reservation/',
+    'Disallow: /fr/auth/',
     'Disallow: /monitoring',
     '',
     'User-agent: Google-Extended',

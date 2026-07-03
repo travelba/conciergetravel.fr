@@ -24,6 +24,17 @@ const FALLBACK_SITE_URL = 'https://myconciergehotel.com';
  * the published content it lists (`resolveSitemapLastmods`), with a
  * per-entry fallback to `now` if an aggregate fails.
  *
+ * D3 crawl-focus (PO decision 2026-07-02, "coupe complète") —
+ * `rooms.xml` and `places.xml` are DELISTED from the index. The room
+ * sub-pages (~thousands) and the 1 158 `/lieux/*` pages stay served and
+ * internally meshed, but they are removed from the crawl-priority
+ * surface while site authority is ~0: submitting them alongside the
+ * ~600-800 head URLs diluted the crawl budget (8 202 URLs submitted,
+ * 2.3 % with impressions). REVERSIBLE — re-add the two `{ loc, lastmod }`
+ * entries below (the sub-sitemap routes are untouched and keep working)
+ * once authority exists to justify the wider surface. See
+ * docs/audits/gsc-submission-list-2026-07.md.
+ *
  * The origin is read from validated env (never `new URL(request.url)`)
  * so the deployed file always points at the production domain.
  */
@@ -32,12 +43,12 @@ export async function GET(): Promise<NextResponse> {
   const lastmods = await resolveSitemapLastmods();
   const xml = buildSitemapIndexXml([
     { loc: `${origin}/sitemaps/hotels.xml`, lastmod: lastmods.hotels },
-    { loc: `${origin}/sitemaps/rooms.xml`, lastmod: lastmods.rooms },
+    // rooms.xml — delisted 2026-07-02 (D3). Route still serves; re-add here to restore.
     { loc: `${origin}/sitemaps/hubs.xml`, lastmod: lastmods.hubs },
     { loc: `${origin}/sitemaps/guides.xml`, lastmod: lastmods.guides },
     { loc: `${origin}/sitemaps/rankings.xml`, lastmod: lastmods.rankings },
     { loc: `${origin}/sitemaps/itineraries.xml`, lastmod: lastmods.itineraries },
-    { loc: `${origin}/sitemaps/places.xml`, lastmod: lastmods.places },
+    // places.xml — delisted 2026-07-02 (D3). Route still serves; re-add here to restore.
   ]);
   return new NextResponse(xml, {
     headers: {
