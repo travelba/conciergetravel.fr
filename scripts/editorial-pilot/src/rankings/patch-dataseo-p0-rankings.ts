@@ -86,10 +86,10 @@ function isPhase6(text: string): boolean {
  * noise or a Phase-6 booking/pricing angle. Answers are intentionally ignored.
  */
 export function shouldDropFaq(item: {
-  readonly question_fr?: string | null;
-  readonly question_en?: string | null;
-  readonly answer_fr?: string | null;
-  readonly answer_en?: string | null;
+  readonly question_fr?: string | null | undefined;
+  readonly question_en?: string | null | undefined;
+  readonly answer_fr?: string | null | undefined;
+  readonly answer_en?: string | null | undefined;
 }): { readonly drop: boolean; readonly reason: string | null } {
   const qFr = item.question_fr ?? '';
   const qEn = item.question_en ?? '';
