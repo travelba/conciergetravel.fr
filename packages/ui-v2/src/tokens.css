@@ -1,0 +1,149 @@
+/**
+ * @mch/ui-v2 design tokens — MCH brand (cream / taupe / gold) with Booking-like
+ * density: tighter gutters, compact type scale, smaller radii, utility-first spacing.
+ *
+ * Import in apps/web-v2 via `@mch/ui-v2/tokens.css`.
+ */
+:root {
+  /* =========================================================================
+   * Brand palette (aligned with packages/ui tokens — DA crème/taupe)
+   * ======================================================================= */
+  --color-charcoal: #3a352d;
+  --color-off-white: #f6f1e7;
+  --color-gold: #8c7b5a;
+  --color-sage: #8c9681;
+  --color-primary-heritage: #3a352d;
+
+  --color-gold-50: #f6f3ec;
+  --color-gold-100: #ece6d8;
+  --color-gold-200: #ddd2ba;
+  --color-gold-300: #cabf9d;
+  --color-gold-400: #b3a37c;
+  --color-gold-500: var(--color-gold);
+  --color-gold-600: #7d6e50;
+  --color-gold-700: #685b42;
+  --color-gold-800: #524736;
+  --color-gold-900: #3d362a;
+
+  --color-ring: var(--color-gold-600);
+
+  --color-bg: var(--color-off-white);
+  --color-fg: var(--color-charcoal);
+  --color-accent-gold: #6f5f3c;
+  --color-accent-fg: var(--color-charcoal);
+
+  --color-success: #2f7a3d;
+  --color-warning: #b07d2e;
+  --color-danger: #ba1a1a;
+
+  /* Booking-like action blue — reserved for primary CTAs in v2 utility row */
+  --color-action: #0071c2;
+  --color-action-hover: #005999;
+  --color-action-on: #ffffff;
+
+  /* =========================================================================
+   * Surfaces — warm cream, high contrast cards on dense layouts
+   * ======================================================================= */
+  --color-surface: #f6f1e7;
+  --color-surface-bright: #fffefb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #efe8da;
+  --color-surface-container: #efe8da;
+  --color-surface-container-high: #e8e0d0;
+  --color-surface-container-highest: #e1d8c4;
+  --color-surface-dim: #ddd3bd;
+  --color-surface-tint: #6f675b;
+  --color-surface-variant: #e8e0d0;
+
+  --color-on-surface: #2b2722;
+  --color-on-surface-variant: #6f675b;
+  --color-inverse-surface: #3a352d;
+  --color-inverse-on-surface: #f6f1e7;
+
+  --color-outline: #6f675b;
+  --color-outline-variant: #d8cfbc;
+
+  --color-muted: var(--color-on-surface-variant);
+  --color-border: var(--color-outline-variant);
+
+  /* =========================================================================
+   * Typography — same families, Booking-like compact scale
+   * ======================================================================= */
+  --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+
+  /* =========================================================================
+   * Layout — Booking density (tighter than editorial v1)
+   * ======================================================================= */
+  --space-touch-target: 44px;
+  --space-gutter: 16px;
+  --space-gutter-lg: 24px;
+  --space-margin-mobile: 16px;
+  --space-margin-desktop: 48px;
+  --space-section-gap: 64px;
+  --space-section: 4rem;
+  --space-section-mobile: 2.5rem;
+
+  --space-stack-xs: 0.25rem;
+  --space-stack-sm: 0.5rem;
+  --space-stack-md: 0.75rem;
+  --space-stack-lg: 1rem;
+  --space-stack-xl: 1.5rem;
+
+  --max-content: 1140px;
+  --max-prose: 68ch;
+  --max-editorial: 74rem;
+
+  /* Component-specific */
+  --search-bar-height: 52px;
+  --header-utilities-height: 36px;
+  --header-tabs-height: 56px;
+  --filter-sidebar-width: 260px;
+  --hotel-card-min-height: 180px;
+  --sticky-booking-width: 360px;
+  --photo-mosaic-height: 400px;
+
+  /* =========================================================================
+   * Shape — squarer Booking corners (2–4px default)
+   * ======================================================================= */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* =========================================================================
+   * Elevation — lighter, tighter shadows for dense cards
+   * ======================================================================= */
+  --shadow-xs: 0 1px 2px rgba(22, 20, 15, 0.06);
+  --shadow-card: 0 1px 3px rgba(22, 20, 15, 0.08), 0 4px 12px rgba(22, 20, 15, 0.06);
+  --shadow-card-hover: 0 2px 6px rgba(22, 20, 15, 0.1), 0 8px 20px rgba(22, 20, 15, 0.08);
+  --shadow-overlay: 0 8px 24px rgba(22, 20, 15, 0.14);
+  --shadow-sticky: 0 -2px 8px rgba(22, 20, 15, 0.08);
+
+  /* =========================================================================
+   * Motion
+   * ======================================================================= */
+  --motion-fast: 100ms;
+  --motion-base: 200ms;
+  --motion-slow: 400ms;
+  --ease-standard: ease;
+  --ease-editorial: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Dark mode deferred — brand mandates cream light base (CDC Q34). */
+}

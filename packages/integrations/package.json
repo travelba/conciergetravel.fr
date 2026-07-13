@@ -11,6 +11,7 @@
     "./little-emperors": "./src/little-emperors/index.ts",
     "./giata": "./src/giata/index.ts",
     "./supplier": "./src/supplier/index.ts",
+    "./booking-aggregation": "./src/booking-aggregation/index.ts",
     "./little-hotelier": "./src/little-hotelier/index.ts",
     "./makcorps": "./src/makcorps/index.ts",
     "./apify": "./src/apify/index.ts",
@@ -24,7 +25,8 @@
     "./algolia-admin": "./src/algolia-admin/index.ts",
     "./algolia-hotel-catalog": "./src/algolia-admin/hotel-catalog-public.ts",
     "./redis": "./src/redis/index.ts",
-    "./http": "./src/http/index.ts"
+    "./http": "./src/http/index.ts",
+    "./whatsapp": "./src/whatsapp/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

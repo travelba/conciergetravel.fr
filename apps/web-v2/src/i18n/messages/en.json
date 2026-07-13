@@ -1,0 +1,140 @@
+{
+  "header": {
+    "tabs": {
+      "stays": "Stays",
+      "rankings": "Rankings",
+      "hotels": "Hotels",
+      "member": "Member program"
+    },
+    "account": "My account",
+    "help": "Help",
+    "currency": "EUR",
+    "locale": "EN"
+  },
+  "footer": {
+    "tagline": "The Concierge selection",
+    "discover": "Discover",
+    "account": "Account",
+    "legal": "Information"
+  },
+  "home": {
+    "title": "Exceptional hotels, curated by the Concierge",
+    "subtitle": "Palaces, Relais & Châteaux, insider addresses — worldwide.",
+    "searchDestination": "Where are you going?",
+    "searchDates": "Flexible dates",
+    "searchGuests": "2 adults · 1 room",
+    "searchCta": "Search",
+    "destinationsTitle": "Popular destinations",
+    "destinationsSubtitle": "Addresses our guests are booking right now."
+  },
+  "search": {
+    "title": "Results",
+    "resultsCount": "{count} properties",
+    "sortLabel": "Sort by: Concierge recommendations",
+    "filtersTitle": "Filter"
+  },
+  "hotel": {
+    "conciergeTip": "Concierge tip",
+    "aboutTitle": "About this property",
+    "editorialTitle": "The Concierge story",
+    "faqTitle": "Frequently asked questions",
+    "roomsTitle": "Available rooms",
+    "memberBenefits": "Member benefits on request",
+    "bookCta": "Request a quote"
+  },
+  "account": {
+    "title": "My account",
+    "subtitle": "Manage trips, favourites, and Concierge benefits.",
+    "backToHub": "Back to account",
+    "signInPrompt": "Sign in to access your trips and member benefits.",
+    "trips": "My trips",
+    "favorites": "Favourites",
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "security": "Security",
+    "privacy": "Privacy",
+    "member": "Member program",
+    "tripsPage": {
+      "title": "My trips",
+      "subtitle": "Find your quotes and upcoming bookings.",
+      "placeholder": "No trips yet. Your quote requests will appear here after sign-in."
+    },
+    "favoritesPage": {
+      "title": "Favourites",
+      "subtitle": "Your saved address lists.",
+      "placeholder": "No favourites yet. Tap the heart on a hotel card or detail page."
+    },
+    "profilePage": {
+      "title": "Profile",
+      "subtitle": "Personal details and travelling companions.",
+      "placeholder": "Complete your profile after sign-in to speed up quote requests."
+    },
+    "preferencesPage": {
+      "title": "Preferences",
+      "subtitle": "Email and WhatsApp notifications.",
+      "placeholder": "Notification preferences will be available after sign-in."
+    },
+    "securityPage": {
+      "title": "Security",
+      "subtitle": "Password and authentication.",
+      "placeholder": "Manage your password and account security via Supabase Auth."
+    },
+    "privacyPage": {
+      "title": "Privacy",
+      "subtitle": "Data export and account deletion.",
+      "placeholder": "Exercise your GDPR rights: export, rectify, or delete your account."
+    }
+  },
+  "memberProgram": {
+    "title": "Member program",
+    "subtitle": "Three tiers to travel with the Concierge.",
+    "club": "Club",
+    "prestige": "Prestige",
+    "elite": "Elite"
+  },
+  "ranking": {
+    "title": "Ranking",
+    "entriesTitle": "Our selection"
+  },
+  "rankingAxis": {
+    "backToRankings": "Back to rankings",
+    "title": "Rankings — {axe} · {valeur}",
+    "subtitle": "Editorial selection by matrix axis.",
+    "placeholder": "This ranking hub will be powered by v2 editorial read-models."
+  },
+  "hotels": {
+    "directoryTitle": "Hotel directory",
+    "countryTitle": "Hotels in {country}",
+    "cityTitle": "Hotels in {city}"
+  },
+  "destination": {
+    "hubTitle": "Destinations",
+    "hubSubtitle": "City guides and hotel hubs.",
+    "backToHub": "Back to destinations",
+    "cityTitle": "{city} guide",
+    "citySubtitle": "Concierge selection and published addresses.",
+    "hotelCount": "{count} hotels",
+    "placeholder": "The long-read guide for this destination will connect to editorial read-models.",
+    "browseHotels": "Browse hotels in {city}"
+  },
+  "lieux": {
+    "title": "Places to visit",
+    "subtitle": "Points of interest and hotel ↔ place links.",
+    "placeholder": "The places catalogue will be powered by `public.places`."
+  },
+  "itineraires": {
+    "title": "Itineraries",
+    "subtitle": "Multi-stop journeys orchestrated by the Concierge.",
+    "placeholder": "Editorial itineraries will be listed here from `public.itineraries`."
+  },
+  "taxonomy": {
+    "backToCatalogue": "Back to directory",
+    "categoryTitle": "Category — {label}",
+    "categorySubtitle": "Hotels filtered by editorial theme.",
+    "brandTitle": "Brand — {label}",
+    "brandSubtitle": "Selection by hotel chain or brand.",
+    "labelTitle": "Label — {label}",
+    "labelSubtitle": "Palaces, Relais & Châteaux, Forbes, Michelin…",
+    "placeholder": "This taxonomy hub will be powered by Algolia v2 facets."
+  }
+}

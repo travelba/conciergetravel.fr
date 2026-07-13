@@ -18,7 +18,8 @@
     "./pois": "./src/pois/index.ts",
     "./places": "./src/places/index.ts",
     "./contact": "./src/contact/index.ts",
-    "./url": "./src/url/index.ts"
+    "./url": "./src/url/index.ts",
+    "./whatsapp": "./src/whatsapp/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
