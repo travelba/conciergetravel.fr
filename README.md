@@ -84,6 +84,10 @@ URLs locales :
 
 ## Documentation
 
+> **Point d'entrée du projet depuis le 2026-08-02 : [`docs/cadrage-2026-08/`](docs/cadrage-2026-08/)** — recadrage A→E,
+> inventaire garder/supprimer de l'existant, architecture cible, briefs Cursor, gouvernance et KPI.
+> Il prime sur les plans maîtres antérieurs (les ADR et les hard rules d'`AGENTS.md` §4 gardent leur autorité).
+
 - [`docs/00-conception-et-phasage.md`](docs/00-conception-et-phasage.md) — phasage CDC, cartographie docs ↔ phases, MVP vs post-MVP, reprise conception
 - [`docs/01-architecture.md`](docs/01-architecture.md) — couches, monorepo, rendu hybride
 - [`docs/02-data-model.md`](docs/02-data-model.md) — schéma Supabase + RLS
