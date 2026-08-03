@@ -8,7 +8,7 @@
 MyConciergeHotel.com is **La sélection du Concierge** — an **IATA-accredited online travel agency** curating
 extraordinary hotels worldwide: Palaces (Atout France label), Relais & Châteaux, Forbes Five Star,
 Michelin Keys, Leading Hotels of the World, boutique hotels and editorial gems. The catalogue today
-covers **2 219 published hotels across 127 countries** (live count 2026-06-12 — refresh via `lib/catalogue-stats.ts`). Every hotel page closes with a **Concierge's Tip** —
+covers **2 929 published hotels across 128 countries** (live DB re-count 2026-07-02 — pinned in `lib/catalogue-stats.ts`; the older 2 219 / 127 figures are stale, see [`docs/cdc-etat-2026-08.md`](docs/cdc-etat-2026-08.md) §5). Every hotel page closes with a **Concierge's Tip** —
 the operational secret guidebooks never share. See [ADR-0021 — Pivot scope mondial](docs/adr/0021-pivot-scope-mondial.md).
 The product is split into:
 
@@ -1051,7 +1051,7 @@ Phase 6**. They describe the target architecture, not the next sprint.
 
 ## 5. Operational essentials
 
-- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue refreshed 2026-06-01: 2219 hotels (all published, 127 countries — 435 Relais & Châteaux), 549 rankings published (562 total — 13 zero-inventory slugs intentionally unpublished after the matrix re-scan), 99 editorial guides (all published), 20 itineraries (all published). Migrations applied via the Supabase MCP (`apply_migration`).
+- **Database**: live Supabase project ID `fsmfozxgujskluxakeoq` (region eu-west). Populated catalogue re-counted 2026-07-02: **2929 hotels published** (2985 rows, 128 countries — 479 Relais & Châteaux), **863 rankings published** (876 total), editorial guides and itineraries to be re-counted. The 2026-06-01 snapshot (2219 hotels / 549 rankings / 99 guides / 20 itineraries) is **stale** — see [`docs/cdc-etat-2026-08.md`](docs/cdc-etat-2026-08.md) §5 before quoting any count, and re-count in DB when in doubt. Migrations applied via the Supabase MCP (`apply_migration`).
 - **Vercel**: previews per PR, production = `main`. Sentry source maps uploaded on prod builds only (`SENTRY_AUTH_TOKEN`).
 - **CI**: GitHub Actions runs lint → typecheck → unit → build → e2e. Husky `pre-commit` runs `lint-staged`, `pre-push` runs `tsc --noEmit`.
 - **MCP servers** wired up locally (status as of 2026-05-25):

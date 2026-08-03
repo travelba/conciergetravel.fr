@@ -2,6 +2,8 @@
 
 > Point d’entrée pour **reprendre la conception** : lier le cahier des charges (CDC), les livrables documentaires sous `docs/`, les contextes métier et les décisions d’architecture (ADR).
 
+> ⚠️ **Lire d’abord [`cdc-etat-2026-08.md`](cdc-etat-2026-08.md).** Ce document-ci décrit le phasage **tel que commandé** par le CDC v3.0 §13. Plusieurs sections du contrat ont depuis été suspendues ou recadrées par ADR et par décisions PO (booking gelé, PREMIUM différé, ISR rejeté, surface indexable réduite, ligne d’arrivée **L1**). L’état consolidé recense ces amendements et les chiffres qui font foi.
+
 ## Références contractuelles
 
 | Référence        | Rôle                                                                                                             |
