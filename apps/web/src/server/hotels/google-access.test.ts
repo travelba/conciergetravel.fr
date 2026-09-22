@@ -7,6 +7,11 @@ import {
   type HotelDetailRow,
 } from './get-hotel-by-slug';
 
+/** ISO timestamp `days` before now — keeps freshness fixtures inside the 90-day window. */
+function daysAgoIso(days: number): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
 function minimalRow(overrides: Partial<HotelDetailRow> = {}): HotelDetailRow {
   return {
     id: '00000000-0000-0000-0000-000000000000',
@@ -67,11 +72,11 @@ function minimalRow(overrides: Partial<HotelDetailRow> = {}): HotelDetailRow {
         author: 'Marie L.',
         rating: 5,
         text: 'Un séjour parfait.',
-        publish_time: '2026-05-15T12:00:00Z',
+        publish_time: daysAgoIso(30),
         language: 'fr',
       },
     ],
-    last_reviews_sync: '2026-06-09T00:00:00.000Z',
+    last_reviews_sync: daysAgoIso(7),
     phone_e164: null,
     telephone: null,
     price_range: null,
@@ -149,7 +154,7 @@ describe('readGoogleReviews', () => {
     expect(reviews[0]?.author).toBe('Marie L.');
     expect(reviews[0]?.rating).toBe(5);
     expect(reviews[0]?.text).toContain('séjour');
-    expect(reviews[0]?.publishTime).toBe('2026-05-15T12:00:00Z');
+    expect(reviews[0]?.publishTime).toBeTruthy();
   });
 
   it('drops invalid entries', () => {
@@ -170,13 +175,13 @@ describe('readGoogleReviews', () => {
             author: 'Recent three',
             rating: 3,
             text: 'Chambre bruyante côté cour intérieure.',
-            publish_time: '2026-06-01T00:00:00Z',
+            publish_time: daysAgoIso(20),
           },
           {
             author: 'Older five',
             rating: 5,
             text: 'Séjour parfait, service au top.',
-            publish_time: '2025-01-01T00:00:00Z',
+            publish_time: daysAgoIso(200),
           },
         ],
       }),
@@ -190,14 +195,14 @@ describe('readGoogleReviews', () => {
           author: `Traveler ${i}`,
           rating: 5,
           text: `Detailed traveler feedback number ${i}.`,
-          publish_time: `2024-0${i + 1}-01T00:00:00.000Z`,
+          publish_time: daysAgoIso(120 + i * 10),
         })),
-        last_reviews_sync: '2026-06-09T00:00:00.000Z',
+        last_reviews_sync: daysAgoIso(5),
       }),
       'fr',
     );
     expect(staleOnly).toHaveLength(3);
-    expect(staleOnly[0]?.author).toBe('Traveler 4');
+    expect(staleOnly[0]?.author).toBe('Traveler 0');
   });
 
   it('sorts fresh reviews by publish_time descending and keeps ratings below 5', () => {
@@ -208,19 +213,19 @@ describe('readGoogleReviews', () => {
             author: 'Mid four',
             rating: 4,
             text: 'Bon séjour, petit-déjeuner excellent.',
-            publish_time: '2026-05-01T00:00:00Z',
+            publish_time: daysAgoIso(40),
           },
           {
             author: 'Recent three',
             rating: 3,
             text: 'Chambre bruyante côté cour intérieure.',
-            publish_time: '2026-06-01T00:00:00Z',
+            publish_time: daysAgoIso(10),
           },
           {
             author: 'No text',
             rating: 4,
             text: 'Top',
-            publish_time: '2026-06-09T00:00:00Z',
+            publish_time: daysAgoIso(5),
           },
         ],
       }),

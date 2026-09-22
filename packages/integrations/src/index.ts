@@ -15,3 +15,4 @@ export * as GooglePlaces from './google-places';
 export * as Brevo from './brevo';
 export * as AlgoliaAdmin from './algolia-admin';
 export * as RedisCache from './redis';
+export * as WhatsApp from './whatsapp';

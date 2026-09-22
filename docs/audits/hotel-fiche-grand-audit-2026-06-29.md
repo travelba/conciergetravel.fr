@@ -213,8 +213,8 @@ respecté. ✅
 ### 12. hreflang / i18n
 
 - **name_en : 2984 / 2984 (100 %)**, **slug_en : 2984 / 2984 (100 %)**,
-  meta_title FR+EN : 2983 / 2984. Intégrité hreflang FR↔EN = saine au niveau
-  identité. (Les gaps de parité de _contenu_ EN sont en §6/§7, pas ici.)
+  meta*title FR+EN : 2983 / 2984. Intégrité hreflang FR↔EN = saine au niveau
+  identité. (Les gaps de parité de \_contenu* EN sont en §6/§7, pas ici.)
 
 ### 13. JSON-LD (vérif prod `curl`)
 

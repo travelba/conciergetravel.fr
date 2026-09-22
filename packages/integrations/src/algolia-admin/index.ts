@@ -7,6 +7,11 @@ export { DEFAULT_CITIES_INDEX_SETTINGS } from './city-index-settings';
 export type { AlgoliaIndexingError } from './errors';
 export { DEFAULT_HOTELS_INDEX_SETTINGS } from './hotel-index-settings';
 export {
+  DEFAULT_HOTELS_V2_INDEX_SETTINGS,
+  hotelsV2IndexName,
+  type HotelsV2IndexSettings,
+} from './hotel-index-settings-v2';
+export {
   AlgoliaIndexingService,
   createAlgoliaIndexingService,
   type AlgoliaIndexingConfig,

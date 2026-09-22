@@ -1,0 +1,76 @@
+---
+description: Freezes apps/web (v1) during the v2 refonte — only critical fixes allowed. Applies to all changes under apps/web unless explicitly exempted. Decision Q16 (2026-07-03).
+globs: "apps/web/**/*.{ts,tsx,js,jsx,css,md}"
+alwaysApply: true
+---
+
+# v2 migration freeze — `apps/web` (Q16)
+
+> **Décision PO (2026-07-03, Q16)** : pendant la construction de la refonte
+> Booking-like, le site v1 (`apps/web`) est **gelé**. Toute évolution produit
+> et refonte UX se font dans **`apps/web-v2`**. La base Supabase, les pipelines
+> éditoriaux et les packages partagés continuent normalement (Q17, Q44).
+
+## Règle dure
+
+| Zone | Statut Phase 0 → bascule |
+| --- | --- |
+| `apps/web/**` | **GELÉ** — correctifs critiques uniquement |
+| `apps/web-v2/**` | **ACTIF** — refonte Booking-like |
+| `packages/ui-v2/**` | **ACTIF** |
+| `packages/domain`, `integrations`, `seo`, `db` | **ACTIF** — partagés |
+| `scripts/editorial-pilot/**` | **ACTIF** (Q17) |
+| `public.*` Supabase | **ACTIF** — pas de duplication |
+| `v2.*` Supabase schema | **ACTIF** — ADR-0033 |
+
+## Correctifs critiques autorisés (whitelist)
+
+Un changement dans `apps/web` est autorisé **sans dérogation PO** si et seulement si :
+
+1. **Production down ou dégradation majeure** — 500 sur routes indexables,
+   CSP bloquant l'hydratation, fuite PII, faille sécurité exploitable.
+2. **Régression SEO urgente** — canonical/hreflang/sitemap cassés en prod (pas
+   d'amélioration SEO — correction de casse uniquement).
+3. **Conformité légale** — mention obligatoire DGCCRF/RGPD imposée par autorité.
+4. **Hotfix revert** — annuler un déploiement v1 défectueux (< 15 min rollback).
+
+Chaque hotfix doit :
+
+- Être le **diff minimal** (pas de refactor opportuniste).
+- Mentionner `Freeze-Exception: critical` dans le corps du commit.
+- Ne pas ajouter de feature, route, ou bloc UI visible non critique.
+
+## Interdit dans `apps/web` pendant le gel
+
+- Nouvelles routes publiques ou refonte de templates (home, SRP, fiche, compte).
+- Nouveaux composants UI booking / parité Booking.
+- Migration vers le programme membre v2 (`/programme-membre` vit dans v2).
+- Dépendances majeures (upgrade Next, Tailwind) sans ADR + PO.
+- « Petit fix » qui améliore le parcours — **porter dans v2** à la place.
+
+## Où implémenter à la place
+
+| Besoin | Cible |
+| --- | --- |
+| Parité Booking UX | `apps/web-v2` + skill [`booking-parity-ux`](../skills/booking-parity-ux/SKILL.md) |
+| Read-models SQL | `v2.*` schema — [ADR-0033](../../docs/adr/0033-v2-sql-schema-isolation.md) |
+| Note /10 UI | v2 — [ADR-0032](../../docs/adr/0032-v2-booking-parity-ui-rating.md) |
+| Contenu éditorial | Pipelines existants → `public.hotels` |
+| 301 Concierge Club | `apps/web-v2/next.config.ts` redirects |
+
+## Revue PR
+
+Rejeter toute PR touchant `apps/web` si :
+
+- Le label/commit ne contient pas `Freeze-Exception: critical`, **et**
+- Le changement n'est pas classé 1–4 ci-dessus.
+
+Les PR « prep for v2 » qui modifient v1 par confort → **refuser**, dupliquer
+dans v2.
+
+## Références
+
+- CDC v2 Q16/Q44 : [`docs/cdc/cahier-des-charges-v2-booking-like.md`](../../docs/cdc/cahier-des-charges-v2-booking-like.md)
+- URL mapping : [`docs/v2/url-mapping-v1-v2.md`](../../docs/v2/url-mapping-v1-v2.md)
+- Matrice parité : [`docs/v2/benchmark-booking-parity-matrix.md`](../../docs/v2/benchmark-booking-parity-matrix.md)
+- Skill parité : [`booking-parity-ux`](../skills/booking-parity-ux/SKILL.md)

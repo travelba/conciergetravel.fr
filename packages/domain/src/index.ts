@@ -6,3 +6,4 @@ export * as Pricing from './pricing';
 export * as Editorial from './editorial';
 export * as PriceComparison from './price-comparison';
 export * as Consent from './consent';
+export * as WhatsApp from './whatsapp';

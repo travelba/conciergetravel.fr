@@ -16,3 +16,5 @@ export * from './idempotency';
 export * from './offer';
 export * from './state';
 export * from './pick-winning-rate';
+export * from './supplier-offer';
+export * from './aggregate-offers';

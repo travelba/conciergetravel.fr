@@ -38,6 +38,8 @@
       "@mch/integrations/*": ["./packages/integrations/src/*"],
       "@mch/ui": ["./packages/ui/src/index.ts"],
       "@mch/ui/*": ["./packages/ui/src/*"],
+      "@mch/ui-v2": ["./packages/ui-v2/src/index.ts"],
+      "@mch/ui-v2/*": ["./packages/ui-v2/src/*"],
       "@mch/seo": ["./packages/seo/src/index.ts"],
       "@mch/seo/*": ["./packages/seo/src/*"],
       "@mch/emails": ["./packages/emails/src/index.ts"],

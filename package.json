@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:web": "turbo run dev --filter=@mch/web",
+    "dev:web-v2": "turbo run dev --filter=@mch/web-v2",
     "dev:admin": "turbo run dev --filter=@mch/admin",
     "db:migrate": "pnpm --filter @mch/db migrate",
     "db:seed:dev": "pnpm --filter @mch/db seed:dev",

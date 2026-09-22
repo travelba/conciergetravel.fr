@@ -216,6 +216,7 @@
     "seed:elena-pilot": "tsx src/booking/seed-elena-pilot-hotels.ts",
     "shop:rates": "tsx src/booking/shop-rates-probe.ts",
     "giata:sync": "tsx src/booking/sync-giata-hotel.ts",
+    "giata:backfill": "tsx src/booking/backfill-giata-mapping.ts",
     "scan:option-b": "tsx src/booking/scan-option-b-cohort.ts",
     "scan:triple-supplier": "tsx src/booking/scan-triple-supplier-match.ts",
     "scan:triple-crosswalk": "tsx src/booking/scan-triple-giata-crosswalk.ts",

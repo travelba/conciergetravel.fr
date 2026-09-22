@@ -1,0 +1,140 @@
+{
+  "header": {
+    "tabs": {
+      "stays": "Séjours",
+      "rankings": "Classements",
+      "hotels": "Hôtels",
+      "member": "Programme membre"
+    },
+    "account": "Mon compte",
+    "help": "Aide",
+    "currency": "EUR",
+    "locale": "FR"
+  },
+  "footer": {
+    "tagline": "La sélection du Concierge",
+    "discover": "Découvrir",
+    "account": "Compte",
+    "legal": "Informations"
+  },
+  "home": {
+    "title": "Hôtels d'exception, sélectionnés par le Concierge",
+    "subtitle": "Palaces, Relais & Châteaux, adresses confidentielles — partout dans le monde.",
+    "searchDestination": "Où allez-vous ?",
+    "searchDates": "Dates flexibles",
+    "searchGuests": "2 adultes · 1 chambre",
+    "searchCta": "Rechercher",
+    "destinationsTitle": "Destinations prisées",
+    "destinationsSubtitle": "Les adresses que nos clients réservent en ce moment."
+  },
+  "search": {
+    "title": "Résultats",
+    "resultsCount": "{count} établissements",
+    "sortLabel": "Trier par : recommandations du Concierge",
+    "filtersTitle": "Filtrer"
+  },
+  "hotel": {
+    "conciergeTip": "Conseil du Concierge",
+    "aboutTitle": "À propos de l'établissement",
+    "editorialTitle": "Le récit du Concierge",
+    "faqTitle": "Questions fréquentes",
+    "roomsTitle": "Chambres disponibles",
+    "memberBenefits": "Avantages membres sur demande",
+    "bookCta": "Demander un devis"
+  },
+  "account": {
+    "title": "Mon compte",
+    "subtitle": "Gérez vos séjours, favoris et avantages Concierge.",
+    "backToHub": "Retour au compte",
+    "signInPrompt": "Connectez-vous pour accéder à vos séjours et avantages membres.",
+    "trips": "Mes séjours",
+    "favorites": "Favoris",
+    "profile": "Profil",
+    "preferences": "Préférences",
+    "security": "Sécurité",
+    "privacy": "Confidentialité",
+    "member": "Programme membre",
+    "tripsPage": {
+      "title": "Mes séjours",
+      "subtitle": "Retrouvez vos devis et futures réservations.",
+      "placeholder": "Aucun séjour enregistré pour le moment. Vos demandes de devis apparaîtront ici après connexion."
+    },
+    "favoritesPage": {
+      "title": "Favoris",
+      "subtitle": "Vos listes d'adresses sauvegardées.",
+      "placeholder": "Aucun favori pour le moment. Ajoutez un cœur depuis une fiche hôtel ou la page de résultats."
+    },
+    "profilePage": {
+      "title": "Profil",
+      "subtitle": "Informations personnelles et voyageurs accompagnants.",
+      "placeholder": "Complétez votre profil après connexion pour accélérer vos demandes de devis."
+    },
+    "preferencesPage": {
+      "title": "Préférences",
+      "subtitle": "Notifications e-mail et WhatsApp.",
+      "placeholder": "Les préférences de notification seront disponibles après connexion."
+    },
+    "securityPage": {
+      "title": "Sécurité",
+      "subtitle": "Mot de passe et authentification.",
+      "placeholder": "Gérez votre mot de passe et la sécurité de votre compte via Supabase Auth."
+    },
+    "privacyPage": {
+      "title": "Confidentialité",
+      "subtitle": "Export et suppression de vos données.",
+      "placeholder": "Exercez vos droits RGPD : export, rectification ou suppression de compte."
+    }
+  },
+  "memberProgram": {
+    "title": "Programme membre",
+    "subtitle": "Trois niveaux pour voyager avec le Concierge.",
+    "club": "Club",
+    "prestige": "Prestige",
+    "elite": "Elite"
+  },
+  "ranking": {
+    "title": "Classement",
+    "entriesTitle": "Notre sélection"
+  },
+  "rankingAxis": {
+    "backToRankings": "Retour aux classements",
+    "title": "Classements — {axe} · {valeur}",
+    "subtitle": "Sélection éditoriale par axe de la matrice MCH.",
+    "placeholder": "Ce hub de classements sera alimenté par les read-models éditoriaux v2."
+  },
+  "hotels": {
+    "directoryTitle": "Annuaire des hôtels",
+    "countryTitle": "Hôtels en {country}",
+    "cityTitle": "Hôtels à {city}"
+  },
+  "destination": {
+    "hubTitle": "Destinations",
+    "hubSubtitle": "Guides et hubs hôteliers par ville.",
+    "backToHub": "Retour aux destinations",
+    "cityTitle": "Guide {city}",
+    "citySubtitle": "Sélection du Concierge et annuaire des adresses publiées.",
+    "hotelCount": "{count} hôtels",
+    "placeholder": "Le guide long-read de cette destination sera branché sur les read-models éditoriaux.",
+    "browseHotels": "Voir les hôtels à {city}"
+  },
+  "lieux": {
+    "title": "Lieux à visiter",
+    "subtitle": "Points d'intérêt et maillage hôtel ↔ lieu.",
+    "placeholder": "Le catalogue des lieux à visiter sera alimenté par `public.places`."
+  },
+  "itineraires": {
+    "title": "Itinéraires",
+    "subtitle": "Parcours multi-étapes orchestrés par le Concierge.",
+    "placeholder": "Les itinéraires éditoriaux seront listés ici depuis `public.itineraries`."
+  },
+  "taxonomy": {
+    "backToCatalogue": "Retour à l'annuaire",
+    "categoryTitle": "Catégorie — {label}",
+    "categorySubtitle": "Hôtels filtrés par thème éditorial.",
+    "brandTitle": "Marque — {label}",
+    "brandSubtitle": "Sélection par chaîne ou marque hôtelière.",
+    "labelTitle": "Label — {label}",
+    "labelSubtitle": "Palaces, Relais & Châteaux, Forbes, Michelin…",
+    "placeholder": "Ce hub taxonomique sera alimenté par les facettes Algolia v2."
+  }
+}

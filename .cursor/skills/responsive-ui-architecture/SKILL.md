@@ -216,6 +216,7 @@ for the editorial sections — the visual peek + tab focus is enough.
 ## References
 
 - CDC v3.0 §9 (mobile-first), §10 (visual identity), §10.2 (trust signals).
+- CDC v2 + Booking parity : [`booking-parity-ux`](../booking-parity-ux/SKILL.md) — v2 templates, 375px-first gate.
 - `accessibility` — APG menu / disclosure patterns, focus-visible rules
   consumed by the CSS-only dropdown.
 - `nextjs-app-router` — Server Component / Client Component boundary that

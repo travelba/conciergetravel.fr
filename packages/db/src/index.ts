@@ -4,4 +4,5 @@
  * Migrations live under ./migrations/*.sql, executed via scripts/migrate.ts.
  */
 export * from './schema/index';
+export * from './v2/index';
 export { createSupabaseAdminClient, type SupabaseAdminClient } from './client';

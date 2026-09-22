@@ -268,6 +268,7 @@ matching on-page rating (or on a different scale) is a Google policy violation.
 - CDC v3.0 §6.4.
 - Excel "Schema JSON-LD" sheet.
 - Google Search Central — Structured Data docs.
+- **v2 rating /5 JSON-LD vs /10 UI** — [ADR-0032](../../docs/adr/0032-v2-booking-parity-ui-rating.md), [`booking-parity-ux`](../booking-parity-ux/SKILL.md) Rule 6.
 - `seo-technical`, `geo-llm-optimization`, `content-modeling` skills.
 - **`editorial-long-read-rendering`** — JSON-LD block composition for guides/rankings.
 - **`security-engineering`** — full CSP policy details and middleware setup.

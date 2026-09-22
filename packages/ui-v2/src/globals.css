@@ -1,0 +1,101 @@
+/**
+ * Global stylesheet for @mch/ui-v2 — Booking-like density on MCH brand tokens.
+ */
+@import './tokens.css' layer(base);
+
+@import 'tailwindcss';
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentcolor);
+  }
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: var(--leading-tight);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 3vw + 0.75rem, 2.25rem);
+  }
+
+  h2 {
+    font-size: clamp(1.375rem, 2vw + 0.5rem, 1.75rem);
+  }
+
+  h3 {
+    font-size: clamp(1.125rem, 1.5vw + 0.25rem, 1.375rem);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .ui-v2-container {
+    width: 100%;
+    max-width: var(--max-content);
+    margin-inline: auto;
+    padding-inline: var(--space-margin-mobile);
+  }
+
+  @media (min-width: 1024px) {
+    .ui-v2-container {
+      padding-inline: var(--space-margin-desktop);
+    }
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
