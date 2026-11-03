@@ -1,11 +1,11 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { mergeRoomGalleryImages } from '@/lib/hotel/sort-room-display-images';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   enrichAirellesRoomDetail,
   isAirellesHotelSlug,
@@ -327,6 +327,23 @@ export function isRoomSubpageIndexable(room: HotelRoomDetailRow): boolean {
  * room by `(hotel_id, slug)`. Returns `null` for invalid slugs, missing
  * hotels, missing rooms, or RLS-rejected rows.
  */
+async function readRoomDetail(hotelId: string, roomSlug: string): Promise<unknown | null> {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('hotel_rooms')
+    .select(ROOM_DETAIL_COLUMNS)
+    .eq('hotel_id', hotelId)
+    .eq('slug', roomSlug)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+const readRoomDetailCached = unstable_cache(readRoomDetail, ['hotel-room-detail'], {
+  revalidate: 3600,
+  tags: ['hotel-rooms'],
+});
+
 export async function getRoomBySlug(
   hotelSlug: string,
   roomSlug: string,
@@ -344,15 +361,8 @@ export async function getRoomBySlug(
   if (!hotel) return null;
 
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
-      .from('hotel_rooms')
-      .select(ROOM_DETAIL_COLUMNS)
-      .eq('hotel_id', hotel.row.id)
-      .eq('slug', roomSlug)
-      .maybeSingle();
-
-    if (error || data === null) return null;
+    const data = await readRoomDetailCached(hotel.row.id, roomSlug);
+    if (data === null) return null;
 
     const parsed = HotelRoomDetailDbRowSchema.safeParse(data);
     if (!parsed.success) {
