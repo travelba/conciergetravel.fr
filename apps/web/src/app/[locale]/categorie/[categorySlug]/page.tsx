@@ -20,7 +20,7 @@ import {
   filterCategory,
   findCategory,
 } from '@/server/hotels/editorial-categories';
-import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
+import { listPublishedHotelsForIndex } from '@/server/hotels/published-index';
 
 export const dynamic = 'force-dynamic';
 
