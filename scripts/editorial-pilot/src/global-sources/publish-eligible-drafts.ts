@@ -250,7 +250,7 @@ async function main(): Promise<void> {
   const env = loadPostgrestEnv();
   console.log(
     `[publish] dryRun=${args.dryRun} tiers=${args.tiers.join(',') || 'ALL'} ` +
-      `slug=${args.slug ?? 'none'} limit=${args.limit ?? '\u221e'}` ,
+      `slug=${args.slug ?? 'none'} limit=${args.limit ?? '\u221e'}`,
   );
 
   const rows = await fetchDraftRows(env, args);
