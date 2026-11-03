@@ -15,7 +15,7 @@ import { getPathname } from '@/i18n/navigation';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { pickByLocale, pickLocalizedText } from '@/i18n/supported-locale';
 import { env } from '@/lib/env';
-import { listPublishedHotelsByAffiliation } from '@/server/hotels/get-hotel-by-slug';
+import { listPublishedHotelsByAffiliation } from '@/server/hotels/published-index';
 import { findKnownLabel, KNOWN_LABELS, type KnownLabel } from '@/server/hotels/known-labels';
 import { findRankingsForLabel } from '@/server/rankings/find-related-rankings';
 
