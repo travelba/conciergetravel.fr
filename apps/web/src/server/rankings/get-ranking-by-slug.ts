@@ -256,7 +256,9 @@ async function _getRankingEntries(rankingId: string): Promise<readonly RankingEn
   if (hotelIds.length === 0) return [];
   const { data: hotels, error: hotelsErr } = await supabase
     .from('hotels')
-    .select('id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, latitude, longitude')
+    .select(
+      'id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, latitude, longitude',
+    )
     .in('id', hotelIds);
   if (hotelsErr !== null || hotels === null) {
     throw new Error(hotelsErr?.message ?? 'ranking hotels unreadable');

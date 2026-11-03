@@ -6,10 +6,7 @@ import { parseAffiliationsLenient } from '@mch/db';
 import { z } from 'zod';
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
-import {
-  isValidSlug,
-  type PublishedHotelIndexCard,
-} from '@/server/hotels/get-hotel-by-slug';
+import { isValidSlug, type PublishedHotelIndexCard } from '@/server/hotels/get-hotel-by-slug';
 
 const stringOrEmpty = z
   .string()
@@ -65,7 +62,8 @@ function cardsFromIndexRows(data: readonly unknown[]): PublishedHotelIndexCard[]
     for (const a of affs) {
       if (typeof a.facet_slug !== 'string' || a.facet_slug.length === 0) continue;
       if (a.kind === 'brand' && !brandSlugs.includes(a.facet_slug)) brandSlugs.push(a.facet_slug);
-      else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug)) labelSlugs.push(a.facet_slug);
+      else if (a.kind === 'label' && !labelSlugs.includes(a.facet_slug))
+        labelSlugs.push(a.facet_slug);
       else if (a.kind === 'ranking' && !rankingSlugs.includes(a.facet_slug))
         rankingSlugs.push(a.facet_slug);
     }
