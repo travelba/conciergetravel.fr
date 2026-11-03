@@ -27,3 +27,21 @@ import {
 import { enrichAirellesRooms, isAirellesHotelSlug } from '@/server/hotels/enrich-airelles-rooms';
 
 export type { SupportedLocale };
+
+const BookingModeSchema = z.enum(['amadeus', 'little', 'travelport', 'email', 'display_only']);
+const PrioritySchema = z.enum(['P0', 'P1', 'P2']);
+
+const stringOrEmpty = z
+  .string()
+  .nullish()
+  .transform((v) => (typeof v === 'string' ? v : null));
+
+const numberOrNull = z
+  .union([z.number(), z.string()])
+  .nullish()
+  .transform((v) => {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  });
