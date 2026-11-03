@@ -284,6 +284,14 @@ async function main(): Promise<void> {
       pass.map((p) => p.slug),
     );
     console.log('[publish] done.');
+    const site = process.env['NEXT_PUBLIC_SITE_URL'];
+    const secret = process.env['CRON_SECRET'];
+    if (site && secret) {
+      await fetch(`${site.replace(/\/$/, '')}/api/internal/revalidate-catalogue`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${secret}` },
+      }).catch(() => undefined);
+    }
   } else if (args.dryRun) {
     console.log('[publish] DRY RUN \u2014 no DB writes.');
   } else {
