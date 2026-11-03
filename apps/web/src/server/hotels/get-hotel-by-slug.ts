@@ -190,6 +190,8 @@ export const HotelDetailRowSchema = z.object({
   updated_at: stringOrEmpty,
 });
 
+export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
+
 const HOTEL_COLUMNS =
   'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, faq_content_kit, concierge_questions, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, google_place_id, google_reviews, last_reviews_sync, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
 
