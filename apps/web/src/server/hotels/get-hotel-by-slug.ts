@@ -190,7 +190,45 @@ export const HotelDetailRowSchema = z.object({
   updated_at: stringOrEmpty,
 });
 
-export type HotelDetailRow = z.infer<typeof HotelDetailRowSchema>;
-
 const HOTEL_COLUMNS =
   'id, slug, slug_en, name, name_en, stars, is_palace, region, department, city, district, address, postal_code, latitude, longitude, description_fr, description_en, factual_summary_fr, factual_summary_en, highlights, amenities, faq_content, faq_content_kit, concierge_questions, restaurant_info, spa_info, points_of_interest, transports, upcoming_events, policies, awards, affiliations, signature_experiences, concierge_advice, concierge_pick, concierge_hook, geo_qa, instagram, featured_reviews, hero_image, gallery_images, long_description_sections, number_of_rooms, number_of_suites, meta_title_fr, meta_title_en, meta_desc_fr, meta_desc_en, booking_mode, amadeus_hotel_id, priority, google_rating, google_reviews_count, google_place_id, google_reviews, last_reviews_sync, phone_e164, telephone, price_range, price_from, aggregate_rating_value, aggregate_rating_count, aggregate_rating_source, opened_at, last_renovated_at, virtual_tour_url, mice_info, hero_video, wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, booking_com_hotel_id, expedia_property_id, hotels_com_hotel_id, agoda_hotel_id, official_url, email_reservations, commons_category, external_sameas, external_sources, country_code, country_label_fr, country_label_en, luxury_tier, is_published, updated_at';
+
+/**
+ * E.164 phone-number format: leading `+`, country code, 4-15 digits, no
+ * separators. Mirrors the DB `hotels_phone_e164_ck` constraint.
+ */
+const E164_PHONE_REGEX = /^\+[1-9][0-9]{3,14}$/;
+
+/**
+ * Returns the row's phone number if it parses as a valid E.164, otherwise
+ * `null`. We deliberately drop loose / partial entries (e.g. `+33 1 58 12`
+ * with spaces — those should be re-typed as `+33158122888` before they
+ * surface in JSON-LD or click-to-call URLs). The CHECK constraint at the
+ * DB level enforces the same shape, this guard is the runtime safety
+ * net for legacy rows pre-migration `0020`.
+ */
+export function readPhoneE164(row: HotelDetailRow): string | null {
+  if (row.phone_e164 === null) return null;
+  const trimmed = row.phone_e164.trim();
+  if (trimmed.length === 0) return null;
+  return E164_PHONE_REGEX.test(trimmed) ? trimmed : null;
+}
+
+/**
+ * Loose postal-code validation — accepts French 5-digit codes plus DOM-TOM
+ * (97xxx / 98xxx) and the typical EU shapes for future international
+ * properties. Editorial mistakes (whitespace, accents) are normalized.
+ */
+const POSTAL_CODE_REGEX = /^[A-Z0-9][A-Z0-9 -]{2,9}[A-Z0-9]$/i;
+
+/**
+ * Returns the row's postal code if it parses, otherwise `null`. Whitespace
+ * is trimmed so editorial entries copy/pasted with trailing spaces still
+ * pass.
+ */
+export function readPostalCode(row: HotelDetailRow): string | null {
+  if (row.postal_code === null) return null;
+  const trimmed = row.postal_code.trim();
+  if (trimmed.length === 0) return null;
+  return POSTAL_CODE_REGEX.test(trimmed) ? trimmed : null;
+}
