@@ -153,7 +153,7 @@ async function _fetchPublishedPageRaw(page: number): Promise<HotelGroupPage> {
   const from = page * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
   const { data, error } = await supabase
-    .from('hotels')
+    .from('hotels_published_list')
     .select(HOTELS_FOR_GROUPING_COLUMNS)
     .eq('is_published', true)
     .order('priority', { ascending: true })
