@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const gate = await gateAgentRequest(req);
   if (!gate.ok) return gate.response;
 
-  const hotels = await listPublishedHotelsForIndex().catch(() => []);
+  const hotels = await listPublishedHotelsForIndex(2500).catch(() => []);
   const counts = new Map<string, number>();
   for (const h of hotels) {
     const brand = detectBrand(h.nameFr);
