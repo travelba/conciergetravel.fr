@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+const DAY = 24 * 60 * 60 * 1000;
+const daysAgo = (days: number) => new Date(Date.now() - days * DAY).toISOString();
+const FRESH_REVIEW = daysAgo(20);
+const FRESH_SYNC = daysAgo(5);
+const RECENT = daysAgo(12);
+const MID = daysAgo(40);
+const OLD = daysAgo(400);
+
 import {
   buildGoogleMapsPlaceUrl,
   readGoogleAccess,
@@ -67,11 +75,11 @@ function minimalRow(overrides: Partial<HotelDetailRow> = {}): HotelDetailRow {
         author: 'Marie L.',
         rating: 5,
         text: 'Un séjour parfait.',
-        publish_time: '2026-05-15T12:00:00Z',
+        publish_time: FRESH_REVIEW,
         language: 'fr',
       },
     ],
-    last_reviews_sync: '2026-06-09T00:00:00.000Z',
+    last_reviews_sync: FRESH_SYNC,
     phone_e164: null,
     telephone: null,
     price_range: null,
@@ -149,7 +157,7 @@ describe('readGoogleReviews', () => {
     expect(reviews[0]?.author).toBe('Marie L.');
     expect(reviews[0]?.rating).toBe(5);
     expect(reviews[0]?.text).toContain('séjour');
-    expect(reviews[0]?.publishTime).toBe('2026-05-15T12:00:00Z');
+    expect(reviews[0]?.publishTime).toBe(FRESH_REVIEW);
   });
 
   it('drops invalid entries', () => {
@@ -170,13 +178,13 @@ describe('readGoogleReviews', () => {
             author: 'Recent three',
             rating: 3,
             text: 'Chambre bruyante côté cour intérieure.',
-            publish_time: '2026-06-01T00:00:00Z',
+            publish_time: RECENT,
           },
           {
             author: 'Older five',
             rating: 5,
             text: 'Séjour parfait, service au top.',
-            publish_time: '2025-01-01T00:00:00Z',
+            publish_time: OLD,
           },
         ],
       }),
@@ -192,7 +200,7 @@ describe('readGoogleReviews', () => {
           text: `Detailed traveler feedback number ${i}.`,
           publish_time: `2024-0${i + 1}-01T00:00:00.000Z`,
         })),
-        last_reviews_sync: '2026-06-09T00:00:00.000Z',
+        last_reviews_sync: FRESH_SYNC,
       }),
       'fr',
     );
@@ -208,19 +216,19 @@ describe('readGoogleReviews', () => {
             author: 'Mid four',
             rating: 4,
             text: 'Bon séjour, petit-déjeuner excellent.',
-            publish_time: '2026-05-01T00:00:00Z',
+            publish_time: MID,
           },
           {
             author: 'Recent three',
             rating: 3,
             text: 'Chambre bruyante côté cour intérieure.',
-            publish_time: '2026-06-01T00:00:00Z',
+            publish_time: RECENT,
           },
           {
             author: 'No text',
             rating: 4,
             text: 'Top',
-            publish_time: '2026-06-09T00:00:00Z',
+            publish_time: FRESH_SYNC,
           },
         ],
       }),
