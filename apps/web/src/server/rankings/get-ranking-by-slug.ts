@@ -201,7 +201,7 @@ const RANKING_COLUMNS =
 // page render share a single fetch per request — the page is
 // `force-dynamic`, so without this the row + entries would be queried
 // twice. Mirrors the `get-hotel-by-slug.ts` precedent.
-export const getRankingBySlug = cache(async (slug: string): Promise<RankingRow | null> => {
+async function readRankingBySlug(slug: string): Promise<RankingRow | null> {
   if (typeof slug !== 'string' || slug.length === 0) return null;
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
@@ -210,32 +210,57 @@ export const getRankingBySlug = cache(async (slug: string): Promise<RankingRow |
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle();
-  if (error !== null || data === null) return null;
+  if (error !== null) throw new Error(error.message);
+  if (data === null) return null;
   const parsed = RankingRowSchema.safeParse(data);
   if (!parsed.success) return null;
   return parsed.data;
+}
+
+const readRankingBySlugCached = unstable_cache(readRankingBySlug, ['ranking-by-slug'], {
+  revalidate: 3600,
+  tags: ['rankings-catalogue'],
 });
 
-export const getRankingEntries = cache(_getRankingEntries);
+export const getRankingBySlug = cache(async (slug: string): Promise<RankingRow | null> => {
+  try {
+    return await readRankingBySlugCached(slug);
+  } catch (e) {
+    console.error('[getRankingBySlug] failed:', e instanceof Error ? e.message : String(e));
+    return null;
+  }
+});
+
+export const getRankingEntries = cache(async (rankingId: string) => {
+  try {
+    return await readRankingEntriesCached(rankingId);
+  } catch (e) {
+    console.error('[getRankingEntries] failed:', e instanceof Error ? e.message : String(e));
+    return [];
+  }
+});
 
 async function _getRankingEntries(rankingId: string): Promise<readonly RankingEntry[]> {
   const supabase = getSupabaseAdminClient();
-  // Two-step query: entries → hotels (RLS keeps the join read-only).
+  // Two-step query: entries → hotels. List columns only: the ranking page
+  // renders the justification, not the hotel description.
   const { data: entries, error: entriesErr } = await supabase
     .from('editorial_ranking_entries')
     .select('hotel_id, rank, justification_fr, justification_en, badge_fr, badge_en')
     .eq('ranking_id', rankingId)
     .order('rank', { ascending: true });
-  if (entriesErr !== null || entries === null) return [];
+  if (entriesErr !== null || entries === null) {
+    throw new Error(entriesErr?.message ?? 'ranking entries unreadable');
+  }
   const hotelIds = entries.map((e) => e.hotel_id as string);
   if (hotelIds.length === 0) return [];
   const { data: hotels, error: hotelsErr } = await supabase
     .from('hotels')
-    .select(
-      'id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, description_fr, description_en, latitude, longitude',
-    )
+    .select('id, slug, slug_en, name, name_en, stars, is_palace, city, region, hero_image, latitude, longitude')
     .in('id', hotelIds);
-  if (hotelsErr !== null || hotels === null) return [];
+  if (hotelsErr !== null || hotels === null) {
+    throw new Error(hotelsErr?.message ?? 'ranking hotels unreadable');
+  }
   const byId = new Map<string, (typeof hotels)[0]>();
   for (const h of hotels) byId.set(h.id as string, h);
   const out: RankingEntry[] = [];
@@ -257,8 +282,8 @@ async function _getRankingEntries(rankingId: string): Promise<readonly RankingEn
       hotel_city: h.city,
       hotel_region: h.region,
       hotel_hero_image: h.hero_image,
-      hotel_description_fr: h.description_fr,
-      hotel_description_en: h.description_en,
+      hotel_description_fr: null,
+      hotel_description_en: null,
       hotel_latitude: h.latitude,
       hotel_longitude: h.longitude,
     });
@@ -279,6 +304,11 @@ export interface PublishedRankingCard {
   readonly axes: RankingAxesPayload;
   readonly updatedAt: string | null;
 }
+
+const readRankingEntriesCached = unstable_cache(_getRankingEntries, ['ranking-entries'], {
+  revalidate: 3600,
+  tags: ['rankings-catalogue'],
+});
 
 // Two cache layers (ADR-0031 data-cache lever):
 //   1. `unstable_cache` (1 h TTL, tag `rankings-catalogue`) — the scan is
