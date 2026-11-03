@@ -27,6 +27,7 @@ function minimalRow(overrides: Partial<HotelDetailRow> = {}): HotelDetailRow {
     region: 'Provence',
     department: null,
     city: 'Gordes',
+    district: null,
     address: '1 Rue Test',
     postal_code: '84220',
     latitude: 43.9,
