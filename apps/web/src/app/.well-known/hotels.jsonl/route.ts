@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache';
+
 import { env } from '@/lib/env';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
@@ -85,7 +87,7 @@ const HOTEL_COLUMNS =
   'id, slug, slug_en, name, name_en, stars, is_palace, city, region, ' +
   'country_code, country_label_fr, country_label_en, ' +
   'latitude, longitude, address, postal_code, hero_image, ' +
-  'factual_summary_fr, factual_summary_en, description_fr, description_en, ' +
+  'factual_summary_fr, factual_summary_en, ' +
   'booking_mode, updated_at, ' +
   'wikidata_id, wikipedia_url_fr, wikipedia_url_en, tripadvisor_location_id, ' +
   'booking_com_hotel_id, official_url';
@@ -97,37 +99,43 @@ const HOTEL_COLUMNS =
 // JSONL is the *complete* machine-readable catalogue, not a head slice.
 const PAGE_SIZE = 1000;
 
+const loadCatalogRows = unstable_cache(
+  async (): Promise<unknown[]> => {
+    const supabase = getSupabaseAdminClient();
+    const rows: unknown[] = [];
+    for (let offset = 0; ; offset += PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('hotels')
+        .select(HOTEL_COLUMNS)
+        .eq('is_published', true)
+        .order('is_palace', { ascending: false })
+        .order('stars', { ascending: false })
+        .order('name', { ascending: true })
+        .order('id', { ascending: true })
+        .range(offset, offset + PAGE_SIZE - 1);
+      if (error !== null || data === null) {
+        if (offset === 0) throw new Error(error?.message ?? 'hotel catalog unreadable');
+        break;
+      }
+      rows.push(...data);
+      if (data.length < PAGE_SIZE) break;
+    }
+    return rows;
+  },
+  ['hotels-jsonl-rows'],
+  { revalidate: 3600, tags: ['hotels-catalogue'] },
+);
+
 export async function GET(): Promise<Response> {
   const origin = siteOrigin();
-  const supabase = getSupabaseAdminClient();
-
-  const rows: unknown[] = [];
-  for (let offset = 0; ; offset += PAGE_SIZE) {
-    const { data, error } = await supabase
-      .from('hotels')
-      .select(HOTEL_COLUMNS)
-      .eq('is_published', true)
-      .order('is_palace', { ascending: false })
-      .order('stars', { ascending: false })
-      .order('name', { ascending: true })
-      .order('id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error !== null || data === null) {
-      // First page failing is a hard error; a later page failing means
-      // we already have a usable (if partial) corpus — serve it rather
-      // than 500 the whole catalogue.
-      if (offset === 0) {
-        return new Response('Error reading hotel catalog\n', {
-          status: 500,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        });
-      }
-      break;
-    }
-
-    rows.push(...data);
-    if (data.length < PAGE_SIZE) break;
+  let rows: unknown[];
+  try {
+    rows = await loadCatalogRows();
+  } catch {
+    return new Response('Error reading hotel catalog\n', {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
   }
 
   const lines: string[] = [];
