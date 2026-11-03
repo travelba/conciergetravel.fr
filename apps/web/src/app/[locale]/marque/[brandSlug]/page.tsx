@@ -24,7 +24,7 @@ import { env } from '@/lib/env';
 import {
   listPublishedHotelsByAffiliation,
   listPublishedHotelsForIndex,
-} from '@/server/hotels/get-hotel-by-slug';
+} from '@/server/hotels/published-index';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 import { findRankingsForBrand } from '@/server/rankings/find-related-rankings';
 

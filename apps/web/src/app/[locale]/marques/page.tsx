@@ -13,7 +13,7 @@ import { Link, getPathname } from '@/i18n/navigation';
 import { isRoutingLocale, type Locale } from '@/i18n/routing';
 import { buildHreflangAlternates, intlLocaleTag, ogLocale } from '@/i18n/runtime';
 import { env } from '@/lib/env';
-import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
+import { listPublishedHotelsForIndex } from '@/server/hotels/published-index';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 
 /**

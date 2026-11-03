@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { unstable_cache } from 'next/cache';
+
 import { cache } from 'react';
 
 import { z } from 'zod';
@@ -94,32 +96,34 @@ const PLACE_COLUMNS =
  * EN alias (so `/en/lieux/paris/<slug_en>` resolves). Returns `null`
  * for unpublished / unknown rows.
  */
+async function readPlace(citySlug: string, placeSlug: string, column: 'slug' | 'slug_en') {
+  const supabase = getSupabaseAdminClient();
+  const res = await supabase
+    .from('places')
+    .select(PLACE_COLUMNS)
+    .eq('city_key', citySlug)
+    .eq(column, placeSlug)
+    .eq('is_published', true)
+    .maybeSingle();
+  if (res.error) throw new Error(res.error.message);
+  return res.data;
+}
+
+const readPlaceCached = unstable_cache(readPlace, ['place-by-slug'], {
+  revalidate: 3600,
+  tags: ['places-catalogue'],
+});
+
 export const getPlaceBySlug = cache(
   async (citySlug: string, placeSlug: string): Promise<PlaceDetail | null> => {
     try {
-      const supabase = getSupabaseAdminClient();
-      let res = await supabase
-        .from('places')
-        .select(PLACE_COLUMNS)
-        .eq('city_key', citySlug)
-        .eq('slug', placeSlug)
-        .eq('is_published', true)
-        .maybeSingle();
-
-      if (!res.data) {
-        res = await supabase
-          .from('places')
-          .select(PLACE_COLUMNS)
-          .eq('city_key', citySlug)
-          .eq('slug_en', placeSlug)
-          .eq('is_published', true)
-          .maybeSingle();
-      }
-
-      if (res.error || !res.data) return null;
-      const parsed = PlaceRowSchema.safeParse(res.data);
+      let data = await readPlaceCached(citySlug, placeSlug, 'slug');
+      if (!data) data = await readPlaceCached(citySlug, placeSlug, 'slug_en');
+      if (!data) return null;
+      const parsed = PlaceRowSchema.safeParse(data);
       return parsed.success ? parsed.data : null;
-    } catch {
+    } catch (e) {
+      console.error('[getPlaceBySlug] failed:', e instanceof Error ? e.message : String(e));
       return null;
     }
   },

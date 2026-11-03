@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 
-import { listPublishedHotelsForIndex } from '@/server/hotels/get-hotel-by-slug';
+import { listPublishedHotelsForIndex } from '@/server/hotels/published-index';
 import { detectBrand, KNOWN_BRANDS } from '@/server/hotels/get-related-hotels';
 import { agentJson, gateAgentRequest } from '@/server/agent/respond';
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const gate = await gateAgentRequest(req);
   if (!gate.ok) return gate.response;
 
-  const hotels = await listPublishedHotelsForIndex().catch(() => []);
+  const hotels = await listPublishedHotelsForIndex(2500).catch(() => []);
   const counts = new Map<string, number>();
   for (const h of hotels) {
     const brand = detectBrand(h.nameFr);
